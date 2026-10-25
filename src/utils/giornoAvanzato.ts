@@ -3,7 +3,8 @@
 // ============================================================
 //
 // Il server lo decide (`avanzaSeFasciaCompleta`, decisione A1 del 2026-10-25) e lo dice nella risposta del gesto che l'ha fatto scattare: la
-// spunta (Diario, Home, Guida) oppure la decisione che ha chiuso l'ultima proposta aperta. Qui la partita dello store si allinea — e con
+// spunta (Diario, Home, Guida), la decisione che ha chiuso l'ultima proposta aperta, o qualunque gesto del registro che l'abbia chiusa da sola
+// (acquisto, annullo, pesca: `allineaDopoGesto`, chiamata dal registro `gestiPartita`). Qui la partita dello store si allinea — e con
 // lei «Oggi», mappe, negozi e la richiesta del meteo del giorno nuovo (`MeteoAlCambioGiorno`) — e un avviso spiega che cosa è successo.
 // Se nel giorno (o nella sera) restano decisioni aperte, l'avviso lo dice e porta al giorno per chiuderle.
 // ============================================================
@@ -45,13 +46,16 @@ export function puntoPartitaNelloStore(partitaId: number): PuntoPartita | null {
 }
 
 /**
- * Dopo una decisione sulle proposte, in ogni caso (risposta nuova o ricevuta ripetuta): se la risposta porta l'avanzamento lo applica; se non lo porta
- * (la risposta di un replay, dopo una risposta persa, è la sola ricevuta salvata, senza l'esito) rilegge la partita dal server e, se data o fascia
- * sono cambiate rispetto a prima del gesto, allinea lo store e lo dice. Così il client resta allineato qualunque strada abbia fatto la risposta.
- * Una rilettura fallita non rovescia la decisione, già registrata: l'avviso lo dice e lo store si allinea alla prossima lettura.
+ * Dopo ogni gesto riuscito su una partita (registro `gestiPartita`: acquisti, annulli, rimozioni, decisioni, spunte con acquisti o pesche, pesca):
+ * qualunque gesto può aver fatto avanzare la partita (alla sera, al giorno dopo), da sé o chiudendo da solo l'ultima decisione aperta (A1).
+ * Se la risposta porta l'avanzamento lo applica; se non lo porta e `rileggi` è vero (la risposta di un recupero, dopo una risposta persa, è la sola
+ * ricevuta salvata, senza l'esito; le decisioni rileggono sempre) rilegge la partita dal server e, se data o fascia sono cambiate rispetto a prima
+ * del gesto, allinea lo store e lo dice. Così il client resta allineato qualunque strada abbia fatto la risposta.
+ * Una rilettura fallita non rovescia il gesto, già registrato: l'avviso lo dice e lo store si allinea alla prossima lettura.
  */
-export async function allineaDopoDecisione(partitaId: number, esito: AvanzamentoGiornataDto, prima: PuntoPartita | null): Promise<void> {
+export async function allineaDopoGesto(partitaId: number, esito: AvanzamentoGiornataDto, prima: PuntoPartita | null, rileggi: boolean): Promise<void> {
   if (esito.giornoAvanzato || esito.fasciaAvanzata) { seGiornoAvanzato(esito); return; }
+  if (!rileggi) return;
   try {
     await usePartitaStore.getState().carica();
     // `carica` non lancia: un fallimento si legge nell'errore dello store
@@ -62,6 +66,6 @@ export async function allineaDopoDecisione(partitaId: number, esito: Avanzamento
       ? `La partita è passata ${dataGiocoConArticolo(dopo.dataGioco, 'a')}: la giornata era completa.`
       : `La partita è passata alla sera${dopo.dataGioco ? ` ${dataGiocoConArticolo(dopo.dataGioco, 'di')}` : ''}: le attività di giorno erano complete.`, 6000);
   } catch {
-    notifica('warning', 'Decisione registrata, ma non è stato possibile rileggere la partita: ricarica la pagina per vedere la data e la fascia aggiornate.', 8000);
+    notifica('warning', 'Operazione registrata, ma non è stato possibile rileggere la partita: ricarica la pagina per vedere la data e la fascia aggiornate.', 8000);
   }
 }

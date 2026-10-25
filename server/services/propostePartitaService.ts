@@ -3,7 +3,7 @@ import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { avanzaDopoChiusuraAutomatica, avanzaDopoDecisioni, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
+import { avanzaDopoChiusuraAutomatica, avanzaUnaVoltaAllaFine, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
 import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
@@ -391,6 +391,9 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
       if(ricevuta.operazioneId!==r.operazioneId||ricevuta.partitaId!==partita||ricevuta.decisione!==r.decisione.tipo||jsonCanonico(ricevuta.proposte)!==jsonCanonico(riferimenti(r.decisione))||!Array.isArray(ricevuta.movimenti)||typeof ricevuta.decisaIl!=='string'||ricevuta.movimenti.some((x)=>!x||typeof x!=='object'||!['dote','yen','punti-pesca'].includes(String((x as Record<string,unknown>).tipo))||!Number.isInteger((x as Record<string,unknown>).prima)||!Number.isInteger((x as Record<string,unknown>).delta)||!Number.isInteger((x as Record<string,unknown>).dopo)||Number((x as Record<string,unknown>).prima)+Number((x as Record<string,unknown>).delta)!==Number((x as Record<string,unknown>).dopo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta della decisione non coincide con la propria identità o catena.');
       return ricevuta as unknown as RicevutaDecisioneProposteDto;
     }
+    // decisione A1 (2026-10-25): l'avanzamento si valuta una volta sola, alla fine, dopo tutte le riconciliazioni (le chiusure automatiche delle cause
+    // riconciliate qui sotto si raccolgono e si valutano insieme alle proposte decise: niente avanzamento a metà con una decisione nuova che sta per aprirsi)
+    const {valore:esitoDecisione,avanzamento:esplicito}=avanzaUnaVoltaAllaFine(partita,()=>{
     const p=prepara(partita,richiesta);
     if(p.revisioneProposteAttesa!==r.revisioneProposteAttesa)throw httpErrors.conflict('proposte-cambiate','Il gruppo, la causa o i valori sono cambiati: rileggi l’anteprima.');
     const adesso=nowIso();
@@ -426,10 +429,12 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     prepared('INSERT INTO utente.proposta_operazione(partita_id,operazione_id,payload_json,ricevuta_json,created_at) VALUES(?,?,?,?,?)').run(partita,r.operazioneId,payload,jsonCanonico(ricevuta),adesso);
     for(const c of cause.values())riconciliaBeneficiCausa(partita,c);
     prepared('UPDATE utente.partita SET updated_at=? WHERE id=?').run(adesso,partita);
+    return {valore:ricevuta,decise};
+    });
     // decisione A1 (2026-10-25): chiusa l'ultima decisione aperta di una fascia/giornata già spuntata per intero, la partita avanza (alla sera o al
     // giorno dopo) nella stessa transazione, e la risposta lo dice. L'avanzamento non entra nella ricevuta salvata: una ripetizione del gesto la rende com'era (il client, che non trova l'esito, rilegge la partita e si allinea da solo: `giornoAvanzato.ts`).
-    // (chiusure automatiche comprese: la riconciliazione qui sopra può aver già fatto avanzare la partita, e allora l'esito è quello ricordato dalla richiesta)
-    const esplicito=avanzaDopoDecisioni(partita,decise),registrato=prelevaAvanzamentoValido(partita),avanzamento=esplicito??registrato;
-    return avanzamento?{...ricevuta,...avanzamento}:ricevuta;
+    // (l'esito ricordato dalla richiesta si preleva comunque, così non resta nel contesto: c'è solo se un percorso non raccolto ha già fatto avanzare la partita)
+    const registrato=prelevaAvanzamentoValido(partita),avanzamento=esplicito??registrato;
+    return avanzamento?{...esitoDecisione,...avanzamento}:esitoDecisione;
   })();
 }

@@ -8,7 +8,8 @@
 //   3. se una decisione resta aperta, l'avanzamento scatta quando si chiude l'ultima (`avanzaDopoDecisioni`, chiamata da `decidiProposte`
 //      nella stessa transazione), e la risposta lo dice (`fasciaAvanzata` / `giornoAvanzato`);
 //      Vale anche per le decisioni che si chiudono da sole (`avanzaDopoChiusuraAutomatica`, da `propostePartitaService`): l'esito si ricorda nel contesto
-//      della richiesta e la risposta della rotta lo porta (`prelevaAvanzamentoValido`, `responseShape`);
+//      della richiesta e la risposta della rotta lo porta (`prelevaAvanzamentoValido`, `responseShape`); dentro `decidiProposte`, che riconcilia più
+//      cause, le chiusure automatiche si raccolgono e l'avanzamento si valuta una volta sola, alla fine (`avanzaUnaVoltaAllaFine`);
 //   4. togliere una spunta NON riporta indietro né la fascia né il giorno: chi chiama lo invoca solo a una spunta nuova o a una decisione chiusa;
 //   5. la regola è la stessa per ogni strada che spunta una voce: Diario, Home e Guida (domande, cruciverba) passano tutte da `spuntaEAvanza`.
 //
@@ -74,6 +75,9 @@ export function avanzaSeFasciaCompleta(partitaId: number, data: string): Avanzam
 /** Una proposta appena decisa, quanto basta per risalire alla sua voce (e quindi al suo giorno). */
 export interface PropostaDecisa { voce_uid: string | null; causa_tipo: string; causa_chiave: string }
 
+/** Per partita: le chiusure automatiche raccolte mentre è in corso un'operazione `avanzaUnaVoltaAllaFine` (transazioni sincrone: niente si intreccia). */
+const chiusureDifferite = new Map<number, PropostaDecisa[]>();
+
 /**
  * Dopo che una decisione si è chiusa DA SOLA (la causa non la richiede più, la dote è rivendicata da un acquisto, la configurazione è cambiata:
  * `propostePartitaService`): stessa regola di una decisione dell'utente, nella stessa transazione di chi ha provocato la chiusura. Chi ha
@@ -81,8 +85,32 @@ export interface PropostaDecisa { voce_uid: string | null; causa_tipo: string; c
  * (`prelevaAvanzamentoValido`, applicato anche dal middleware `responseShape`), così il client si allinea come dopo una spunta.
  */
 export function avanzaDopoChiusuraAutomatica(partitaId: number, decise: readonly PropostaDecisa[]): void {
+  // dentro un'operazione che riconcilia più cause (`avanzaUnaVoltaAllaFine`) la chiusura si raccoglie e si valuta alla fine, con le altre
+  const raccolte = chiusureDifferite.get(partitaId);
+  if (raccolte) { raccolte.push(...decise); return; }
   const esito = avanzaDopoDecisioni(partitaId, decise);
   if (esito) registraAvanzamentoRichiesta(partitaId, esito);
+}
+
+/**
+ * Un'operazione che decide proposte e poi riconcilia più cause in sequenza (`decidiProposte`): ogni riconciliazione può chiudere da sola una
+ * decisione, e l'avanzamento valutato a metà sarebbe prematuro (la causa A chiude l'ultima decisione aperta, la causa B subito dopo ne apre una
+ * nuova: la partita sarebbe già avanzata, irreversibilmente, con una decisione aperta). Qui le chiusure automatiche si raccolgono e l'avanzamento
+ * si valuta UNA volta, alla fine, dopo tutte le riconciliazioni, insieme alle proposte decise dall'operazione (`fn` le restituisce in `decise`).
+ * Va chiamata dentro la transazione dell'operazione. Annidata per la stessa partita, consegna tutto a quella esterna, che valuta lei.
+ */
+export function avanzaUnaVoltaAllaFine<T>(partitaId: number, fn: () => { valore: T; decise: readonly PropostaDecisa[] }): { valore: T; avanzamento: AvanzamentoGiornataDto | null } {
+  const esterna = chiusureDifferite.get(partitaId);
+  if (esterna) {
+    const { valore, decise } = fn();
+    esterna.push(...decise);
+    return { valore, avanzamento: null };
+  }
+  const chiuse: PropostaDecisa[] = [];
+  chiusureDifferite.set(partitaId, chiuse);
+  let risultato: { valore: T; decise: readonly PropostaDecisa[] };
+  try { risultato = fn(); } finally { chiusureDifferite.delete(partitaId); }
+  return { valore: risultato.valore, avanzamento: avanzaDopoDecisioni(partitaId, [...risultato.decise, ...chiuse]) };
 }
 
 /**
