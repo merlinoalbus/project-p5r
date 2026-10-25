@@ -252,7 +252,7 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
   if (!e || !prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(partita,voce)) return false;
   // la Fortuna vale per il giorno della spunta: su una spunta già fatta non c'è niente da applicare dopo
   const tipoEffetto = leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo;
-  if (tipoEffetto === 'fortuna' || tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona') return false;
+  if (tipoEffetto === 'fortuna' || tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco') return false;
   const rivendicato=(prepared("SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND tipo='acquisto'").all(voce) as Array<{dati_json:string}>).filter((r)=>{
     const acquisto=normalizzaEffettoVoce(leggiJsonRegistro(r.dati_json,'raccordo canonico'));
     if(!acquisto||acquisto.tipo!=='acquisto')throw httpErrors.conflict('raccordo-canonico-incoerente','La configurazione di acquisto non è riconoscibile.');
@@ -352,11 +352,13 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
   const proposte=righe.map(dto), virtuali=new Map<string,MovimentoPropostoDto>();
   for(const p of proposte) {
     if(r.decisione.tipo==='applica') {
-      if(p.tipo==='yen')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
+      // BON-12: gli yen di un consumo restano un promemoria a mano. L13 (ondata 3, decisione 1): gli yen dichiarati da un effetto «yen» di una
+      // voce si applicano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`)
+      if(p.tipo==='yen'&&p.causa.tipo!=='voce')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;
-      if(v.dopo<0||v.dopo>(p.tipo==='punti-pesca'?999_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
+      if(v.dopo<0||v.dopo>(p.tipo==='punti-pesca'?999_999_999:p.tipo==='yen'?9_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
       virtuali.set(k,v);
     } else if(r.decisione.tipo==='applica-effetto') {
       if(p.tipo!=='effetto-voce'||!p.applicabile)throw httpErrors.conflict('effetto-non-applicabile','Il raccordo della spunta non è più applicabile.');

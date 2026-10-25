@@ -285,9 +285,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/richieste': {
     sommario: 'Stato di una Richiesta dei Memento',
-    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico.',
-    risposta: '`RichiestaDto` con lo stato nella partita',
-    errori: [PARTITA, [404, 'richiesta-non-trovata']],
+    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico. L13: «accettata» solo se lo stato calcolato è disponibile (409 `richiesta-non-disponibile` con il motivo: bloccata, scaduta o già completata); «completata» resta sempre possibile.',
+    risposta: '`RichiestaDto` con lo stato nella partita e `statoPartita` ricalcolato',
+    errori: [PARTITA, [404, 'richiesta-non-trovata'], [409, 'richiesta-non-disponibile']],
   },
   'PUT /api/partite/:id/timbri': {
     sommario: 'Timbri raccolti in un\'area di un dedalo dei Memento',

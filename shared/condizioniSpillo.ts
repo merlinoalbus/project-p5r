@@ -133,6 +133,9 @@ export type RequisitoSpillo =
   /** Un Ladro Fantasma è in squadra: lo dice la partita (Partita → Denaro e squadra). */
   | { tipo: 'squadra'; membro: string }
   | { tipo: 'richiesta'; richiesta: string }
+  /** L13 (decisioni 1 e 17): lo sblocco di una Richiesta o di un'attività ricevuto nella partita, da un effetto «sblocco» di una voce del
+   *  Diario spuntata (`utente.sblocco_partita`). Finché nessuna voce della guida lo dà, non blocca (vedi il valutatore). */
+  | { tipo: 'sblocco'; bersaglio: 'richiesta' | 'attivita'; chiave: string }
   | { tipo: 'lettura'; categoria: 'libro' | 'film'; chiave: string }
   | { tipo: 'articolo'; articolo: string }
   /** Un'attività della guida svolta almeno tante volte (Partita → Progressi). */
@@ -327,6 +330,9 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
     case 'squadra': return `${nomi.squadra?.[r.membro] ?? nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
+    case 'sblocco': return r.bersaglio === 'richiesta'
+      ? `sblocco ricevuto: Richiesta «${nomi.richieste?.[r.chiave] ?? r.chiave}» (da una voce del Diario)`
+      : `sblocco ricevuto: ${nomi.attivita?.[r.chiave] ?? r.chiave} (da una voce del Diario)`;
     case 'lettura': return (r.categoria === 'libro' ? 'Libro letto: ' : 'Film visto: ') + (nomi.letture?.[r.chiave] ?? r.chiave);
     case 'articolo': return 'Articolo ottenuto: ' + (nomi.articoli?.[r.articolo] ?? r.articolo);
     case 'attivita': return `${nomi.attivita?.[r.attivita] ?? r.attivita}: svolta almeno ${r.volte === 1 ? 'una volta' : `${r.volte} volte`}`;
@@ -417,6 +423,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
     case 'squadra': { const membro = chiavePulita(o.membro, 60); return membro ? { tipo: 'squadra', membro } : null; }
     case 'richiesta': { const richiesta = testoPulito(o.richiesta, 200); return richiesta ? { tipo: 'richiesta', richiesta } : null; }
+    case 'sblocco': { const chiave = chiavePulita(o.chiave, 120); return chiave && (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave } : null; }
     case 'lettura': { const chiave = testoPulito(o.chiave, 200); return chiave && (o.categoria === 'libro' || o.categoria === 'film') ? { tipo: 'lettura', categoria: o.categoria, chiave } : null; }
     case 'articolo': { const articolo = testoPulito(o.articolo, 200); return articolo ? { tipo: 'articolo', articolo } : null; }
     case 'attivita': { const attivita = chiavePulita(o.attivita, 120); const volte = intero(o.volte, 1, 999); return attivita && volte ? { tipo: 'attivita', attivita, volte } : null; }

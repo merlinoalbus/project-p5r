@@ -31,7 +31,7 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
-import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, riepilogoArticoli, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -68,17 +68,19 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
 /** Proiezione di compatibilità dei soli tre tipi legacy (dote, lettura, turno) della fonte unica `voce_effetto`: la fonte completa resta
  *  nel DTO (`effettiVoce`). `produce_json` non si legge più (un solo punto di modifica: l'editor degli effetti). */
 function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
-  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto) ? [] : [e.effetto]);
+  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna'||e.effetto.tipo==='yen'||eEffettoDiStato(e.effetto) ? [] : [e.effetto]);
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
   const nomiFrase = nomiFraseEffetto();
-  return fonte.effetti.map(({ effetto: e }) => {
+  // L13 (decisione 6): con più articoli, o copie, una riga che somma copie e prezzo; le frasi dei singoli restano
+  const riepilogo = riepilogoArticoli(fonte.effetti.map((x) => x.effetto), (k) => articoloConNome(k)?.prezzo ?? null);
+  return [...fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
-      const a = articoloConNome(e.articolo);
-      return a ? `Acquisto: ${a.nome}${a.prezzo ? ` · ¥${a.prezzo.toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : fraseEffettoConNomi(e, nomiFrase);
+      const a = articoloConNome(e.articolo), q = e.quantita ?? 1;
+      return a ? `Acquisto: ${a.nome}${q > 1 ? ` ×${q}` : ''}${a.prezzo ? ` · ¥${(a.prezzo * q).toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : fraseEffettoConNomi(e, nomiFrase);
     }
     // R12-01/1: tutti gli altri effetti che citano un oggetto per chiave (evento di storia, Persona, domanda, cruciverba, invito, Richiesta), pesca e Fortuna: la frase con i nomi, la stessa dell'editor
     if (eEffettoConNomi(e)) return fraseEffettoConNomi(e, nomiFrase);
@@ -93,7 +95,7 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
       if (paga?.paga_yen) return `${testo} · paga ¥${paga.paga_yen.toLocaleString('it-IT')}${paga.paga_massima && paga.paga_massima > paga.paga_yen ? ` (fino a ¥${paga.paga_massima.toLocaleString('it-IT')})` : ''}: cambiali tu a mano`;
     }
     return testo;
-  });
+  }), ...(riepilogo ? [`In tutto: ${riepilogo}`] : [])];
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {

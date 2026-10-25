@@ -3,7 +3,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { eEffettoDiStato, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, eEffettoDiStato, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -65,11 +65,19 @@ export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
     return {voceUid:uid,stato:'legacy-da-correggere',effetti:[],rawLegacy:t?.raw_json??'[]',motivo:e.message,revisione:improntaDato({uid,errore:e.code,raw:t?.raw_json??null})};
   }
 }
-const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona):e.attivita;
-function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
+const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona)
+  :e.tipo==='yen'?'yen':e.tipo==='oggetto'?e.oggetto:e.tipo==='trofeo'?e.trofeo:e.tipo==='sblocco'?chiaveSblocco(e.bersaglio,e.chiave):e.attivita;
+/** L13: il beneficio in yen di un effetto «yen» (come la Dote: la ricevuta lo dichiara, la proposta «Applica» lo porta nel saldo). */
+const beneficioYen=(e:Extract<EffettoVoce,{tipo:'yen'}>,storica:boolean)=>({tipo:'yen' as const,chiave:'yen',delta:e.importo,motivo:e.importo>0?'Yen della voce: applicali quando li ricevi nel gioco.':'Yen spesi nella voce: applicali quando li spendi nel gioco.',storica});
+function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna'||e.tipo==='yen')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
 function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
   for(const e of effetti){if(!/^[0-9a-f]{32}$/.test(e.uid)||ids.has(e.uid))throw httpErrors.badRequest('identita-effetto-non-valida','Gli UID degli effetti devono essere distinti.');ids.add(e.uid);}
+  // L13 (decisione 2): gli yen che un altro dato porta già (il prezzo di un articolo o di una consumazione, la quota della pesca, le
+  // ricompense di una Richiesta completata) li muove quel dato: un effetto «yen» accanto a loro li conterebbe due volte
+  const conPrezzo=effetti.find((e)=>['articolo','acquisto','pesca','richiesta'].includes(e.effetto.tipo));
+  if(conPrezzo&&effetti.some((e)=>e.effetto.tipo==='yen'))throw httpErrors.conflict('yen-gia-strutturati',`Gli yen di questa voce li porta già l’effetto «${conPrezzo.effetto.tipo==='richiesta'?'Richiesta completata':conPrezzo.effetto.tipo==='pesca'?'pesca':'acquisto'}»: togli l’effetto Yen, non si contano due volte.`);
+  if(effetti.filter((e)=>e.effetto.tipo==='yen').length>1)throw httpErrors.badRequest('yen-ripetuti','Una voce ha al più un effetto Yen: scrivi l’importo complessivo.');
   for(const e of effetti)if(e.effetto.tipo==='acquisto')for(const id of e.effetto.sostituisceDoti){
     const sostituito=effetti.find((x)=>x.uid===id);
     if(!sostituito||sostituito.effetto.tipo!=='dote'||rivendicati.has(id))throw httpErrors.badRequest('sostituzione-non-valida','Ogni sostituzione deve indicare una Dote presente, rivendicata da un solo acquisto.');rivendicati.add(id);
@@ -134,7 +142,7 @@ export function copiaEffettiVoce(daUid:string,aUid:string):void {
 
 function ricevutaDto(r:RigaRicevuta):ReceiptEffettoVoceDto {
   const prima=r.prima_json===null?null:leggiJsonRegistro(r.prima_json,'prima dell’effetto'),ricevuta=leggiJsonRegistro<Record<string,unknown>>(r.ricevuta_json,'effetto applicato');
-  if(r.formato!==1||!['dote','lettura','turno','acquisto','pesca','contesto'].includes(r.tipo)||!ricevuta||typeof ricevuta!=='object'||Array.isArray(ricevuta)||!Array.isArray(ricevuta.benefici)||ricevuta.voceUid!==r.voce_uid||ricevuta.effettoUid!==r.effetto_uid)throw httpErrors.conflict('ricevuta-effetto-incoerente','La ricevuta non coincide con l’identità dell’effetto.');
+  if(r.formato!==1||!['dote','lettura','turno','acquisto','pesca','yen','contesto'].includes(r.tipo)||!ricevuta||typeof ricevuta!=='object'||Array.isArray(ricevuta)||!Array.isArray(ricevuta.benefici)||ricevuta.voceUid!==r.voce_uid||ricevuta.effettoUid!==r.effetto_uid)throw httpErrors.conflict('ricevuta-effetto-incoerente','La ricevuta non coincide con l’identità dell’effetto.');
   for(const b of ricevuta.benefici)verificaBeneficio(b);
   if(r.tipo!=='contesto'){
     const configurazione=prima&&typeof prima==='object'&&!Array.isArray(prima)?normalizzaEffettoVoce((prima as {effetto?:unknown}).effetto):null;
@@ -314,12 +322,14 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   for(const e of consumi){const richiesta=richieste.find((r)=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisioneAcquistiAttesa:_prima,...nuovo}=richiesta;const token=anteprimaRegistrazioneAcquisto(p,nuovo,opz.porteAcquisti).revisioneAcquistiAttesa;receiptNuovi.push(registraConsumo(p,uid,e,{...nuovo,revisioneAcquistiAttesa:token},opz.porteAcquisti,true,{generazione}));}
   for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisionePescaAttesa:_prima,...input}=r;receiptNuovi.push(registraPesca(p,uid,e,{...input,revisionePescaAttesa:anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa},generazione,true));}
   const sostituite=new Set([...consumi.flatMap((e)=>e.effetto.tipo==='acquisto'?e.effetto.sostituisceDoti:[]),...pesche.flatMap(e=>e.effetto.tipo==='pesca'?[...e.effetto.sostituisceDoti,...e.effetto.sostituisceTurni]:[])]);
-  const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
+  const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&e.effetto.tipo!=='yen'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
   // L13: le scelte d'esito (turni delle attività con esiti, Doti a valori possibili) si verificano tutte insieme, prima degli effetti legacy e nella
   // transazione della spunta: una scelta mancante o rifiutata annulla anche consumi e pesca già registrati qui sopra (niente resta a metà)
   const v=voce(uid),risolte=risolviScelteSpunta(p,{data:v.data,fascia:v.fascia},legacy,opz.scelteEsito);
   const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto),legacy.map((e)=>risolte.get(e.uid))),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
   for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));}
+  // L13: gli yen della voce: una ricevuta col beneficio, da cui nasce la proposta «Applica» (gli yen non si muovono da soli); togliendo la spunta la ricevuta si annulla e la proposta si chiude
+  for(const e of stato.effetti)if(e.effetto.tipo==='yen')receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:[beneficioYen(e.effetto,false)],gestitaDaSpunta:true,spunta},true));
   if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length)){
     const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{})};
     receiptNuovi.push(registraRicevuta(p,uid,{uid:createHash('sha256').update(`contesto-voce\0${uid}`).digest('hex').slice(0,32),ordine:stato.effetti.length,effetto:null},{benefici:beneficiLegacy(contesto,false),legacy:contesto,gestitaDaSpunta:true,contesto:true,spunta},true));
@@ -341,7 +351,7 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   if(proposta.dati.sostituzione===true&&(!attiva||attiva.id!==proposta.dati.ricevutaPrecedente))throw httpErrors.conflict('sostituzione-non-provata','La versione precedente non ha una ricevuta attribuibile: riconcilia prima, nessuna aggiunta viene inventata.');
   if(attiva&&jsonCanonico((attiva.prima as {effetto?:unknown}|null)?.effetto)!==jsonCanonico(proposta.dati.versionePrecedente))throw httpErrors.conflict('versione-precedente-diversa','La proposta non descrive la versione effettivamente applicata.');
   if(attiva&&proposta.dati.sostituzione!==true)throw httpErrors.conflict('effetto-gia-applicato','La versione possiede già una ricevuta attiva.');
-  const nuovaRicevuta=nuovoUid(),vecchioLegacy=attiva&&attiva.tipo!=='acquisto'&&attiva.tipo!=='pesca'?verificaRisorseRicevuta(p,attiva):null;
+  const nuovaRicevuta=nuovoUid(),vecchioLegacy=attiva&&attiva.tipo!=='acquisto'&&attiva.tipo!=='pesca'&&attiva.tipo!=='yen'?verificaRisorseRicevuta(p,attiva):null;
   const assorbimenti=e.effetto.tipo==='acquisto'&&acquisto?preparaAssorbimentiDote(p,uid,e,acquisto,tutte):[];
   const assorbimentiPesca=e.effetto.tipo==='pesca'&&pesca?preparaAssorbimentiPesca(p,uid,e,pesca,tutte):[];
   if(e.effetto.tipo==='pesca'&&(!pesca||!tokenPesca||anteprimaPesca(p,'registra-sessione',pesca).revisionePescaAttesa!==tokenPesca))throw httpErrors.conflict('pesca-cambiata','Rivedi la visita e il suo contesto prima del raccordo.');
@@ -373,6 +383,8 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     leggiRicevuteEffettiVoce(p,uid);return;
   }
   if(e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto))throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
+  // L13: un effetto Yen aggiunto a una voce già spuntata: la sua ricevuta (beneficio da dichiarare), poi la proposta «Applica» come per la Dote
+  if(e.effetto.tipo==='yen'){registraRicevuta(p,uid,e,{benefici:[beneficioYen(e.effetto,true)],gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});return;}
   const legacy=porte.applicaLegacy(p,[e.effetto],[sceltaStorica]);
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
 }
@@ -388,7 +400,7 @@ export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|n
   let legacyDaAnnullare=legacy===null?null:leggiRicevutaEffettiAzione(jsonCanonico(legacy));
   if(giaAnnullata)legacyDaAnnullare=null;
   const togliUna=<T>(elenco:T[]|undefined,valore:T):T[]=>{const out=[...(elenco??[])],i=out.findIndex((x)=>jsonCanonico(x)===jsonCanonico(valore));if(i<0)throw httpErrors.conflict('porzione-storica-non-presente','Una porzione già sostituita non coincide con il RAW della spunta: nessun doppio annullo.');out.splice(i,1);return out;};
-  for(const r of tutte)if(!giaAnnullata&&(r.sostituitaDa||r.assorbitaDa)&&r.ricevuta.gestitaDaSpunta===true&&stessaGenerazione(r.ricevuta.spunta)){
+  for(const r of tutte)if(!giaAnnullata&&r.tipo!=='yen'&&(r.sostituitaDa||r.assorbitaDa)&&r.ricevuta.gestitaDaSpunta===true&&stessaGenerazione(r.ricevuta.spunta)){
     const segmento=leggiRicevutaEffettiAzione(jsonCanonico(r.ricevuta.legacy));
     if(!segmento||!legacyDaAnnullare)throw httpErrors.conflict('porzione-storica-assente','La sostituzione non è conciliabile con la ricevuta storica.');
     for(const d of segmento.doti)legacyDaAnnullare={...legacyDaAnnullare,doti:togliUna(legacyDaAnnullare.doti,d)};
@@ -402,7 +414,8 @@ export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|n
     const segmento=leggiRicevutaEffettiAzione(jsonCanonico(r.ricevuta.legacy)),salvate=r.ricevuta.risorse as {turni?:unknown}|undefined,correnti=risorseLegacy(p,segmento) as {turni:unknown};
     if(!salvate||!risorseCompatibiliPesca(p,{turni:salvate.turni},{turni:correnti.turni}))throw httpErrors.conflict('turno-cambiato','Il turno posseduto non coincide più con la propria fotografia: nessun turno successivo viene rimosso.');
   }
-  const extra=ricevute.filter((r)=>r.ricevuta.gestitaDaSpunta===false).map((r)=>leggiRicevutaEffettiAzione(jsonCanonico(r.ricevuta.legacy)));
+  // L13: le ricevute degli yen non hanno una porzione legacy (solo il beneficio): l'annullo le chiude più sotto, con la riconciliazione
+  const extra=ricevute.filter((r)=>r.ricevuta.gestitaDaSpunta===false&&r.tipo!=='yen').map((r)=>leggiRicevutaEffettiAzione(jsonCanonico(r.ricevuta.legacy)));
   const turniRaccordatiExtra=tutte.filter(r=>r.tipo==='turno'&&r.assorbitaDa&&r.ricevuta.gestitaDaSpunta===false&&tutte.some(x=>x.id===r.assorbitaDa&&x.tipo==='pesca')).map(r=>({r,marker:createHash('sha256').update(`annullo-turno-originario\0${r.id}`).digest('hex').slice(0,32)})).filter(x=>!prepared('SELECT 1 FROM utente.effetto_applicato WHERE partita_id=? AND id=?').get(p,x.marker));
   for(const x of turniRaccordatiExtra){verificaRisorseRicevuta(p,x.r);extra.push(verificaPorzionePesca(x.r));}
   // Valida tutto prima della prima mutazione. L'annullo legge i receipt, mai la configurazione attuale.

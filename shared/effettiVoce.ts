@@ -16,7 +16,23 @@ export type EffettoLegacyVoce =
 /** L'acquisto non porta più la Fortuna (R10-10/2): è lo stato della partita, letto quando si registra il consumo. */
 export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
-} | EffettoFortunaVoce | EffettoDiStatoVoce;
+} | EffettoFortunaVoce | EffettoDiStatoVoce | EffettoYenVoce;
+/**
+ * L13 (ondata 3, decisione 1): gli yen che la voce dà o toglie (`importo` con il segno: positivo = ricevuti, negativo = spesi). Come le
+ * Doti, la spunta non li muove da sola: nasce la proposta «Applica» sulla voce (`utente.da_applicare` di tipo `yen`), e applicandola il
+ * saldo cambia con il suo movimento (`utente.movimento_yen`). Decisione 2: mai insieme a un dato che porta già il suo prezzo (articolo,
+ * consumazione, pesca, Richiesta completata): il server rifiuta la lista.
+ */
+export interface EffettoYenVoce { tipo: 'yen'; importo: number }
+/** Il tetto degli yen di un effetto (lo stesso del denaro del gruppo, `bodyYen`). */
+export const YEN_MASSIMI_EFFETTO = 9_999_999;
+/** Quante copie di un oggetto o di un articolo dà un effetto, al massimo (decisione 6: facoltativa, 1 se non indicata). */
+export const QUANTITA_MASSIMA_EFFETTO = 999;
+/** L13 (decisione 17): che cosa sblocca l'effetto «sblocco»: una Richiesta dei Mementos o un'attività (un lavoro dopo la candidatura). */
+export type BersaglioSblocco = 'richiesta' | 'attivita';
+export const BERSAGLI_SBLOCCO: ReadonlyArray<{ chiave: BersaglioSblocco; nome: string }> = [
+  { chiave: 'richiesta', nome: 'Richiesta dei Mementos' }, { chiave: 'attivita', nome: 'Attività o lavoro' },
+];
 /**
  * R10-01: gli effetti che segnano uno stato della partita citando il loro oggetto per chiave: un evento di storia, una domanda in
  * classe (o un esame), un cruciverba, una Richiesta completata. La spunta li segna, togliere la spunta riporta lo stato di prima.
@@ -26,13 +42,23 @@ export type EffettoDiStatoVoce =
   | { tipo: 'domanda'; domanda: number }
   | { tipo: 'cruciverba'; data: string }
   | { tipo: 'richiesta'; richiesta: string }
-  /** Un articolo di un negozio segnato come comprato (qualunque offerta tranne l'Aojiru, che ha i suoi consumi). */
-  | { tipo: 'articolo'; articolo: string }
+  /** Un articolo di un negozio segnato come comprato (qualunque offerta tranne l'Aojiru, che ha i suoi consumi). L13 (decisione 6): `quantita`
+   *  facoltativa (assente = 1), quante copie si comprano insieme: il riepilogo della voce somma copie e prezzo; l'articolo resta «comprato». */
+  | { tipo: 'articolo'; articolo: string; quantita?: number }
   /** L'invito di un Confidente avvenuto (R10-11i): `invito` è la chiave di `confidente_invito` («makoto/07-30»); si registra solo con le condizioni vere. */
   | { tipo: 'invito'; invito: string }
   /** Una Persona registrata nel compendio della partita (R10-11/3, voci della Stanza di Velluto): `persona` è l'id della Persona; la spunta la registra con `registraPersona`. */
-  | { tipo: 'persona'; persona: number };
-export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito';
+  | { tipo: 'persona'; persona: number }
+  /** L13 (decisione 1): un oggetto del catalogo ricevuto (`catalogo_oggetto.chiave`), `quantita` copie: va nel registro degli oggetti ottenuti
+   *  della partita (`utente.oggetto_ottenuto_partita`), una riga per effetto spuntato; togliere la spunta la toglie. */
+  | { tipo: 'oggetto'; oggetto: string; quantita: number }
+  /** L13 (decisione 1): un trofeo ottenuto (`trofeo.chiave`), con lo stesso setter della pagina dei trofei (`impostaTrofeo`). */
+  | { tipo: 'trofeo'; trofeo: string }
+  /** L13 (decisioni 1 e 17): lo sblocco di una Richiesta o di un'attività (`utente.sblocco_partita`): la condizione «sblocco ricevuto» lo legge. */
+  | { tipo: 'sblocco'; bersaglio: BersaglioSblocco; chiave: string };
+export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito' || e.tipo === 'oggetto' || e.tipo === 'trofeo' || e.tipo === 'sblocco';
+/** La chiave con cui un effetto «sblocco» si registra e la condizione lo cerca: «richiesta:chiave», «attivita:chiave». */
+export const chiaveSblocco = (bersaglio: BersaglioSblocco, chiave: string): string => `${bersaglio}:${chiave}`;
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
 export interface EffettoFortunaVoce { tipo: 'fortuna'; dote: DoteChiave }
 export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoVoce; origine: 'seed' | 'regola' | 'utente' }
@@ -72,7 +98,9 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo'], invito: ['tipo','invito'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
+  const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
+  const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
   if (o.tipo === 'dote') {
     if (!eDote(o.dote) || !nota(o.note)) return null;
@@ -86,7 +114,17 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   if (o.tipo === 'domanda') return Number.isSafeInteger(o.domanda) && (o.domanda as number) >= 1 ? { tipo: 'domanda', domanda: o.domanda as number } : null;
   if (o.tipo === 'cruciverba') return typeof o.data === 'string' && /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.data) ? { tipo: 'cruciverba', data: o.data } : null;
   if (o.tipo === 'invito') return typeof o.invito === 'string' && /^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.invito.trim()) ? { tipo: 'invito', invito: o.invito.trim() } : null;
-  if (o.tipo === 'articolo') return typeof o.articolo === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,119}$/i.test(o.articolo.trim()) ? { tipo: 'articolo', articolo: o.articolo.trim() } : null;
+  if (o.tipo === 'articolo') {
+    if (typeof o.articolo !== 'string' || !/^[a-z0-9][a-z0-9._:/-]{0,119}$/i.test(o.articolo.trim())) return null;
+    // la quantità 1 è quella sottintesa: non si scrive (una sola forma canonica per lo stesso effetto)
+    if (o.quantita === undefined || o.quantita === 1) return { tipo: 'articolo', articolo: o.articolo.trim() };
+    const q = quantita(o.quantita);
+    return q ? { tipo: 'articolo', articolo: o.articolo.trim(), quantita: q } : null;
+  }
+  if (o.tipo === 'yen') return Number.isSafeInteger(o.importo) && o.importo !== 0 && Math.abs(o.importo as number) <= YEN_MASSIMI_EFFETTO ? { tipo: 'yen', importo: o.importo as number } : null;
+  if (o.tipo === 'oggetto') { const q = quantita(o.quantita); return chiaveOk(o.oggetto, 199) && q ? { tipo: 'oggetto', oggetto: o.oggetto.trim(), quantita: q } : null; }
+  if (o.tipo === 'trofeo') return chiaveOk(o.trofeo) ? { tipo: 'trofeo', trofeo: o.trofeo.trim() } : null;
+  if (o.tipo === 'sblocco') return (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') && chiaveOk(o.chiave) ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave: o.chiave.trim() } : null;
   if (o.tipo === 'richiesta') return typeof o.richiesta === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.richiesta.trim()) ? { tipo: 'richiesta', richiesta: o.richiesta.trim() } : null;
   if (o.tipo === 'pesca') {
     const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every(x => typeof x === 'string' && /^[0-9a-f]{32}$/.test(x)) && new Set(v).size === v.length;
@@ -137,11 +175,29 @@ export interface NomiFraseEffetto {
   articolo: (chiave: string) => { nome: string; prezzo: number | null } | undefined;
   invito: (chiave: string) => { confidenteNome: string; data: string | null } | undefined;
   persona: (id: number) => string | undefined;
+  /** L13: oggetti del catalogo, trofei, Richieste e attività da sbloccare (facoltativi: senza, la frase resta generica). */
+  oggetto?: (chiave: string) => string | undefined;
+  trofeo?: (chiave: string) => string | undefined;
+  attivita?: (chiave: string) => string | undefined;
 }
 
-/** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca e Fortuna. */
-export type EffettoConNomiVoce = EffettoDiStatoVoce | EffettoFortunaVoce | EffettoPescaVoce;
-export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce => eEffettoDiStato(e) || e.tipo === 'pesca' || e.tipo === 'fortuna';
+/** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca, Fortuna e yen. */
+export type EffettoConNomiVoce = EffettoDiStatoVoce | EffettoFortunaVoce | EffettoPescaVoce | EffettoYenVoce;
+export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce => eEffettoDiStato(e) || e.tipo === 'pesca' || e.tipo === 'fortuna' || e.tipo === 'yen';
+const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/** «×3» solo se le copie sono più d'una. */
+const copie = (q: number | undefined): string => (q && q > 1 ? ` ×${q}` : '');
+/**
+ * Decisione 6: il riepilogo degli articoli di una voce somma copie e prezzo (stesso articolo in più effetti, o con la quantità): «3 articoli
+ * comprati · ¥1.500 in tutto» (null se la voce non ne ha). I prezzi restano un promemoria: gli yen si cambiano dalla proposta o a mano.
+ */
+export function riepilogoArticoli(effetti: readonly EffettoVoce[], prezzo: (chiave: string) => number | null | undefined): string | null {
+  const articoli = effetti.filter((e): e is Extract<EffettoVoce, { tipo: 'articolo' }> => e.tipo === 'articolo');
+  if (articoli.length < 2 && !articoli.some((a) => (a.quantita ?? 1) > 1)) return null;
+  let copieTot = 0, totale = 0, ignoti = 0;
+  for (const a of articoli) { const q = a.quantita ?? 1; copieTot += q; const p = prezzo(a.articolo); if (typeof p === 'number') totale += p * q; else ignoti += q; }
+  return `${copieTot} ${copieTot === 1 ? 'articolo comprato' : 'articoli comprati'} · ${yen(totale)} in tutto${ignoti ? ` (${ignoti} senza prezzo)` : ''}`;
+}
 
 const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 
@@ -158,7 +214,14 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto):
     case 'domanda': { const d = n.domanda(e.domanda); return d ? `Domanda risposta: ${breve(d)}` : 'Domanda risposta'; }
     case 'cruciverba': return `Cruciverba del ${dataLeggibile(e.data)} risolto`;
     case 'richiesta': return `Richiesta «${n.richiesta(e.richiesta) ?? 'Richiesta'}» completata`;
-    case 'articolo': { const a = n.articolo(e.articolo); return a ? `Articolo comprato: ${a.nome}${a.prezzo !== null ? ` · ¥${a.prezzo.toLocaleString('it-IT')}` : ''}` : 'Articolo comprato'; }
+    case 'articolo': { const a = n.articolo(e.articolo), q = e.quantita ?? 1; return a ? `Articolo comprato: ${a.nome}${copie(q)}${a.prezzo !== null ? ` · ${yen(a.prezzo * q)}${q > 1 ? ` (${yen(a.prezzo)} l’uno)` : ''}` : ''}` : `Articolo comprato${copie(q)}`; }
+    case 'yen': return e.importo > 0 ? `Yen ricevuti: ${yen(e.importo)} (da applicare con «Applica» sulla voce)` : `Yen spesi: ${yen(e.importo)} (da applicare con «Applica» sulla voce)`;
+    case 'oggetto': { const o = n.oggetto?.(e.oggetto); return `Oggetto ricevuto: ${o ?? 'oggetto del catalogo'}${copie(e.quantita)}`; }
+    case 'trofeo': { const t = n.trofeo?.(e.trofeo); return t ? `Trofeo ottenuto: ${t}` : 'Trofeo ottenuto'; }
+    case 'sblocco': {
+      const nome = e.bersaglio === 'richiesta' ? n.richiesta(e.chiave) : n.attivita?.(e.chiave);
+      return e.bersaglio === 'richiesta' ? `Sblocca la Richiesta «${nome ?? 'Richiesta'}»` : `Sblocca l’attività «${nome ?? 'attività'}»`;
+    }
     case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
     case 'persona': { const p = n.persona(e.persona); return p ? `Persona registrata nel compendio: ${p}` : 'Persona registrata nel compendio'; }
   }

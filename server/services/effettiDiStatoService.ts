@@ -15,7 +15,8 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
-import type { EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
+import { impostaTrofeo } from './completamentoService.js';
 import { impostaEventoStoria } from './semaforiService.js';
 import { impostaDomandaFatta } from './domandeService.js';
 import { impostaCruciverba } from './cruciverbaService.js';
@@ -47,11 +48,24 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
   }
   if (e.tipo === 'invito' && !prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(e.invito)) throw httpErrors.notFound('invito-non-trovato', `L'invito '${e.invito}' non esiste.`);
   if (e.tipo === 'richiesta' && !prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(e.richiesta)) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${e.richiesta}' non esiste.`);
+  if (e.tipo === 'oggetto' && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(e.oggetto)) throw httpErrors.notFound('oggetto-non-trovato', `L'oggetto '${e.oggetto}' non è nel catalogo.`);
+  if (e.tipo === 'trofeo' && !prepared('SELECT 1 FROM trofeo WHERE chiave = ?').get(e.trofeo)) throw httpErrors.notFound('trofeo-non-trovato', `Il trofeo '${e.trofeo}' non esiste.`);
+  if (e.tipo === 'sblocco' && !prepared(`SELECT 1 FROM ${e.bersaglio === 'richiesta' ? 'richiesta' : 'attivita'} WHERE chiave = ?`).get(e.chiave)) throw httpErrors.notFound('sblocco-bersaglio-non-trovato', `${e.bersaglio === 'richiesta' ? 'La Richiesta' : 'L’attività'} '${e.chiave}' non esiste.`);
 }
 
-const chiaveDi = (e: EffettoDiStatoVoce): string => e.tipo === 'storia' ? e.evento : e.tipo === 'domanda' ? String(e.domanda) : e.tipo === 'cruciverba' ? e.data : e.tipo === 'articolo' ? e.articolo : e.tipo === 'invito' ? e.invito : e.tipo === 'persona' ? String(e.persona) : e.richiesta;
+const chiaveDi = (e: EffettoDiStatoVoce): string => e.tipo === 'storia' ? e.evento : e.tipo === 'domanda' ? String(e.domanda) : e.tipo === 'cruciverba' ? e.data : e.tipo === 'articolo' ? e.articolo : e.tipo === 'invito' ? e.invito : e.tipo === 'persona' ? String(e.persona)
+  : e.tipo === 'oggetto' ? e.oggetto : e.tipo === 'trofeo' ? e.trofeo : e.tipo === 'sblocco' ? chiaveSblocco(e.bersaglio, e.chiave) : e.richiesta;
+
+/** L13: l'oggetto ricevuto non è uno stato sì/no ma un registro che somma: la riga è della voce e dell'effetto, e se ne va con la loro spunta. */
+function scriviOggetto(p: number, voceUid: string, effettoUid: string, e: Extract<EffettoDiStatoVoce, { tipo: 'oggetto' }>): void {
+  prepared('INSERT INTO utente.oggetto_ottenuto_partita (partita_id, voce_uid, effetto_uid, catalogo_chiave, quantita, creato_il) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id, voce_uid, effetto_uid) DO UPDATE SET catalogo_chiave = excluded.catalogo_chiave, quantita = excluded.quantita')
+    .run(p, voceUid, effettoUid, e.oggetto, e.quantita, new Date().toISOString());
+}
 
 function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
+  if (e.tipo === 'oggetto') return { gia: false };
+  if (e.tipo === 'trofeo') return { gia: !!prepared('SELECT 1 FROM trofeo_partita WHERE partita_id = ? AND trofeo_chiave = ?').get(p, e.trofeo) };
+  if (e.tipo === 'sblocco') return { gia: !!prepared('SELECT 1 FROM utente.sblocco_partita WHERE partita_id = ? AND bersaglio_tipo = ? AND bersaglio_chiave = ?').get(p, e.bersaglio, e.chiave) };
   // la Persona: «già» = registrata nel compendio; `stato` = 'riga' se c'era una riga di compendio non registrata (bonus, skill: si conserva), altrimenti null
   if (e.tipo === 'persona') {
     const r = prepared('SELECT registrata FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').get(p, e.persona) as { registrata: number } | undefined;
@@ -70,6 +84,12 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
 function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null): void {
   // l'invito: la stessa regola del gesto diretto («Invito avvenuto»): solo con le condizioni vere (409 `invito-non-possibile`), una volta sola; si toglie solo se l'ha scritto la voce
   if (e.tipo === 'invito') { if (segna) registraInvito(p, e.invito, voceUid); else annullaInvito(p, e.invito, voceUid); }
+  else if (e.tipo === 'trofeo') impostaTrofeo(p, e.trofeo, segna);
+  else if (e.tipo === 'sblocco') {
+    if (segna) prepared('INSERT OR IGNORE INTO utente.sblocco_partita (partita_id, bersaglio_tipo, bersaglio_chiave, voce_uid, creato_il) VALUES (?, ?, ?, ?, ?)').run(p, e.bersaglio, e.chiave, voceUid, new Date().toISOString());
+    else prepared('DELETE FROM utente.sblocco_partita WHERE partita_id = ? AND bersaglio_tipo = ? AND bersaglio_chiave = ?').run(p, e.bersaglio, e.chiave);
+  }
+  else if (e.tipo === 'oggetto') throw new Error('L’oggetto ricevuto non è uno stato sì/no: si scrive con scriviOggetto.');
   // la Persona: la stessa registrazione del compendio (`registraPersona`, l'unica scrittura); togliendo la spunta, la riga nata dalla spunta si toglie,
   // una che c'era già (non registrata) torna non registrata senza perdere ciò che portava
   else if (e.tipo === 'persona') {
@@ -102,6 +122,7 @@ export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array
       prepared('INSERT INTO utente.effetto_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, prima_json, applicato_il) VALUES (?, ?, ?, ?, ?, ?, ?)')
         .run(p, voceUid, uid, e.tipo, chiaveDi(e), JSON.stringify(prima), new Date().toISOString());
     }
+    if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); continue; }
     if (prima.gia) continue;
     try { scrivi(p, e, true, null, voceUid); }
     catch (err) {
@@ -119,12 +140,19 @@ export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array
 const EVENTO_DELLO_STATO: Record<string, { tipo: string; campo: string } | undefined> = {
   domanda: { tipo: 'domanda-risposta', campo: 'domandaId' }, cruciverba: { tipo: 'cruciverba', campo: 'data' },
   articolo: { tipo: 'acquisto', campo: 'articolo' }, richiesta: { tipo: 'richiesta-completata', campo: 'richiesta' },
+  trofeo: { tipo: 'trofeo', campo: 'trofeo' },
 };
 
 /** Togliere la spunta: ogni effetto di stato che la spunta aveva segnato torna com'era; ciò che c'era già resta. */
 export function annullaEffettiDiStato(p: number, voceUid: string): void {
   const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as Array<{ effetto_uid: string; tipo: string; chiave: string; prima_json: string }>;
   for (const r of righe) {
+    // L13: l'oggetto ricevuto è della voce e dell'effetto, non uno stato condiviso: si toglie la sua riga e basta (le altre voci tengono le loro)
+    if (r.tipo === 'oggetto') {
+      prepared('DELETE FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
+      prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
+      continue;
+    }
     const prima = JSON.parse(r.prima_json) as StatoPrima;
     // Lo stato lo rivendicano tutte le voci spuntate con lo stesso effetto (le righe esistono solo per le spunte attive): si revoca solo
     // se nessun'altra lo rivendica. Se un'altra lo rivendica, il «prima» originale (non ancora segnato) passa a lei, così lo revoca
@@ -138,13 +166,17 @@ export function annullaEffettiDiStato(p: number, voceUid: string): void {
         const erede = prepared('SELECT voce_uid FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND NOT (voce_uid = ? AND effetto_uid = ?) ORDER BY applicato_il, voce_uid LIMIT 1').get(p, r.tipo, r.chiave, voceUid, r.effetto_uid) as { voce_uid: string } | undefined;
         // l'invito lo tiene la riga `invito_partita`: la voce che lo ha scritto passa il legame, perché lo possa togliere l'ultima
         if (erede && r.tipo === 'invito') prepared('UPDATE utente.invito_partita SET voce_uid = ? WHERE partita_id = ? AND invito_chiave = ? AND voce_uid = ?').run(erede.voce_uid, p, r.chiave, voceUid);
+        if (erede && r.tipo === 'sblocco') prepared("UPDATE utente.sblocco_partita SET voce_uid = ? WHERE partita_id = ? AND bersaglio_tipo || ':' || bersaglio_chiave = ? AND voce_uid = ?").run(erede.voce_uid, p, r.chiave, voceUid);
         const evento = EVENTO_DELLO_STATO[r.tipo];
         if (erede && evento) prepared(`UPDATE utente.evento_partita SET voce_uid = ? WHERE partita_id = ? AND voce_uid = ? AND tipo = ? AND json_extract(dati_json, '$.${evento.campo}') = ?`)
           .run(erede.voce_uid, p, voceUid, evento.tipo, r.tipo === 'domanda' ? Number(r.chiave) : r.chiave);
       }
     } else if (!prima.gia) {
       const e: EffettoDiStatoVoce = r.tipo === 'storia' ? { tipo: 'storia', evento: r.chiave } : r.tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(r.chiave) }
-        : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : r.tipo === 'persona' ? { tipo: 'persona', persona: Number(r.chiave) } : { tipo: 'richiesta', richiesta: r.chiave };
+        : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : r.tipo === 'persona' ? { tipo: 'persona', persona: Number(r.chiave) }
+          : r.tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: r.chiave }
+          : r.tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: r.chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: r.chiave.slice(r.chiave.indexOf(':') + 1) }
+          : { tipo: 'richiesta', richiesta: r.chiave };
       // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
       try { scrivi(p, e, false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
     }

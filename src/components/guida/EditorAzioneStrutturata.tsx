@@ -22,13 +22,13 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { FilaScelta } from './FilaScelta';
 import { SceltaQuale } from './SceltaQuale';
-import { DotiProprieTurno, NotePossibiliDote } from './CampiEffettoVoce';
+import { CampoQuantita, DotiProprieTurno, NotePossibiliDote } from './CampiEffettoVoce';
 import { opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
 import { NOME_QUALE } from '../../utils/elencoQuale';
 import { nomeDote } from '../../../shared/doti';
-import type { EffettoVoce } from '../../../shared/effettiVoce';
+import { riepilogoArticoli, type EffettoVoce } from '../../../shared/effettiVoce';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { cambiaCollegamento, contestoDa, eAltroGenere, fraseEffetto, impostaPrincipale, indicePrincipale, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 
@@ -197,8 +197,14 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
         corpo = rif ? (
           <>
             {frase(eff?.tipo === 'articolo' ? fraseEffetto(eff, nomi) : `Acquisto${nome ? ` da ${nome}` : ''}: scegli l’articolo per segnarlo come comprato, oppure lascia solo il promemoria.`)}
-            <Selettore etichetta="Articolo comprato" vuoto="Nessun articolo" valore={eff?.tipo === 'articolo' ? eff.articolo : ''} opzioni={opzioniArticoli(elenchi.effetti, rif.chiave)}
-              onCambia={(v) => scrivi(v ? { tipo: 'articolo', articolo: v } : null)} />
+            <div className="flex flex-wrap items-end gap-2">
+              <Selettore className="min-w-[12rem] flex-1" etichetta="Articolo comprato" vuoto="Nessun articolo" valore={eff?.tipo === 'articolo' ? eff.articolo : ''} opzioni={opzioniArticoli(elenchi.effetti, rif.chiave)}
+                onCambia={(v) => scrivi(v ? (eff?.tipo === 'articolo' && eff.quantita ? { tipo: 'articolo', articolo: v, quantita: eff.quantita } : { tipo: 'articolo', articolo: v }) : null)} />
+              {/* L13 (decisione 6): le copie dello stesso articolo comprate insieme («Fai il pieno»: le scrive chi gioca) */}
+              {eff?.tipo === 'articolo' && <CampoQuantita valore={eff.quantita ?? 1} onCambia={(q) => scrivi(q > 1 ? { tipo: 'articolo', articolo: eff.articolo, quantita: q } : { tipo: 'articolo', articolo: eff.articolo })} />}
+            </div>
+            {/* il riepilogo somma TUTTI gli articoli della voce, anche quelli fra gli effetti aggiuntivi (un acquisto non resta fuori dal conto) */}
+            {(() => { const t = riepilogoArticoli((righe ?? []).map((r) => r.effetto), (k) => nomi.articoli.get(k)?.prezzo ?? null); return t ? <p className="m-0 testo-13"><strong>In tutto:</strong> {t}</p> : null; })()}
             <span className="testo-12 text-text-muted">Gli yen del prezzo restano un promemoria da cambiare a mano.</span>
           </>
         ) : mancaQuale('il negozio');

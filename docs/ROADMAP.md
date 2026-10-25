@@ -1420,6 +1420,17 @@ Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per o
 | e | Partite salvate: nessuna ricevuta riscritta, turni esistenti invariati; la 234 legge lo schema `utente` solo per saltare le voci citate | fatto |
 | f | «Cosmo Tower Burger» nel paragrafo «Sblocco (dalla guida)» della Big Bang Burger (migrazione 234); centro battute invariato (scelta 1 dell'utente) | fatto nel codice |
 
+### Ondata 3 — Richieste con sblocco e scadenza, quattro effetti nuovi, candidatura ai lavori (25 ottobre) — fatto nel codice, da provare dall'utente
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Richieste: «Quando si sblocca» con il vocabolario unico delle condizioni (`richiesta.condizioni_json`) e la condizione nuova «Sblocco ricevuto» (`sblocco`: Richiesta o attività, data da una voce spuntata; finché nessuna voce della guida la dà non blocca); scadenza come data di gioco con proroga condizionata (`scadenza_data`, `proroga_data`, `proroga_condizioni_json`); stato calcolato nella partita (`statoPartita`: Bloccata con il motivo / Disponibile / Accettata / Completata / Scaduta, giorni alla scadenza); «Accetta» solo se Disponibile (409 `richiesta-non-disponibile`); modulo a cinque sezioni (Richiesta, Sblocco e scadenza, Dove, Bersaglio con l'Ombra del compendio, Ricompense dal catalogo con le copie, yen e PE come numeri) | fatto nel codice |
+| b | Migrazione 235 (conservativa sul testo atteso, audit `audit-235-richieste-e-candidature`): 28 «Disponibile dal» su 33 in condizioni (5 testi elencati e non toccati), 27 scadenze su 33 (6 con il bersaglio che si sposta nel Dedalo di Da'at, elencate), 22 proroghe al 1° febbraio con il terzo semestre; il rango del Confidente ripetuto nel testo passa nelle condizioni; 6.500 yen e 485 PE di «Un ex piuttosto appiccicoso» in numeri | fatto nel codice |
+| c | Quattro effetti nuovi delle voci (decisione 1): **yen** (ricevuti o spesi: proposta «Applica» sulla voce come le Doti, applicata con `movimento_yen`; mai insieme ad acquisto, articolo, pesca o Richiesta, decisione 2), **oggetto ricevuto** con le copie (registro `utente.oggetto_ottenuto_partita`, migrazione utente 046), **trofeo** (`trofeo_partita`, setter della pagina dei trofei), **sblocco** di una Richiesta o di un'attività (`utente.sblocco_partita`); editor negli effetti aggiuntivi, ricevuta alla spunta, annullo togliendo la spunta | fatto nel codice |
+| d | Quantità facoltativa dell'articolo comprato (decisione 6), con il riepilogo «In tutto» che somma copie e prezzo di tutti gli articoli della voce (riquadro «Spuntando succede» e Diario); l'Aojiru resta una consumazione per effetto | fatto nel codice |
+| e | Candidatura ai lavori (decisione 17): «Sblocco ricevuto» nelle condizioni di Fioraio Rafflesia e Ore no Beko, Ore no Beko dal 05-06 (era 06-05); Triple Seven corretto dall'utente, non toccato (condizione da aggiungere dal suo editor). Nessuna voce del Diario convertita e nessuna partita riscritta: i lavori restano disponibili finché le tre voci della candidatura non avranno l'effetto «sblocco» (approvazione riga per riga) | fatto nel codice |
+| f | Stato visibile al giocatore anche nel rilascio: pagina Richieste (stato, motivo, scadenza vicina), Attività (la condizione dice chi la sblocca), Home (riga «Richieste: N da fare · M in scadenza») | fatto nel codice |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

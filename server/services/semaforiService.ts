@@ -64,6 +64,8 @@ export interface StatoPartitaSemafori {
   personeConAbilitaId?: Set<string>;
   /** L6: gli inviti dei Confidenti registrati nella partita (`utente.invito_partita`): le condizioni `invito`. */
   invitiRegistrati?: Set<string>;
+  /** L13: gli sblocchi ricevuti nella partita da una voce spuntata (`utente.sblocco_partita`), come «richiesta:chiave» o «attivita:chiave». */
+  sblocchiRicevuti?: Set<string>;
   /** Eventi manuali e aperture dichiarate nelle visite del Diario: i requisiti `evento` leggono il loro insieme. */
   eventi: Set<string>;
   /** Non più letto (R6-01b: niente conferme a mano); `requisito_partita` è stata tolta (utente 44). */
@@ -90,6 +92,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // L6: gli inviti registrati (la tabella nasce con la migrazione utente 025: su uno schema di prima nessun invito)
   const conInviti = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'invito_partita'").get();
   const invitiRegistrati = new Set(conInviti ? (prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave) : []);
+  // L13: gli sblocchi (la tabella nasce con la migrazione utente 046: su uno schema di prima nessuno sblocco)
+  const sblocchiRicevuti = new Set(sblocchiDellaPartita(partitaId));
   // Chi e' in squadra: i Ladri con l'interruttore «In squadra» acceso (`in_squadra = 1`), e chi e' fuori quelli con
   // l'interruttore spento. **L'interruttore, non la presenza della riga.** Prima bastava avere segnato un livello (la riga
   // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
@@ -102,7 +106,13 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, fattiPesca };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca };
+}
+
+/** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
+export function sblocchiDellaPartita(partitaId: number): string[] {
+  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sblocco_partita'").get()) return [];
+  return (prepared("SELECT bersaglio_tipo || ':' || bersaglio_chiave AS k FROM utente.sblocco_partita WHERE partita_id = ?").all(partitaId) as Array<{ k: string }>).map((r) => r.k);
 }
 
 // L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano

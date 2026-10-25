@@ -38,6 +38,10 @@ function effettoNuovo(t: Tipo): EffettoVoce {
     case 'articolo': return { tipo: 'articolo', articolo: '' };
     case 'invito': return { tipo: 'invito', invito: '' };
     case 'persona': return { tipo: 'persona', persona: 0 };
+    case 'yen': return { tipo: 'yen', importo: 0 };
+    case 'oggetto': return { tipo: 'oggetto', oggetto: '', quantita: 1 };
+    case 'trofeo': return { tipo: 'trofeo', trofeo: '' };
+    case 'sblocco': return { tipo: 'sblocco', bersaglio: 'richiesta', chiave: '' };
   }
 }
 
@@ -45,6 +49,9 @@ const MENU: ReadonlyArray<{ tipo: Tipo; nome: string; categoria: string }> = [
   { tipo: 'fortuna', nome: 'Fortuna di Chihaya', categoria: 'dote' }, { tipo: 'invito', nome: 'Invito avvenuto', categoria: 'confidente' }, { tipo: 'persona', nome: 'Persona registrata', categoria: 'velluto' },
   { tipo: 'cruciverba', nome: 'Cruciverba', categoria: 'esame' }, { tipo: 'dote', nome: 'Dote in più', categoria: 'dote' }, { tipo: 'lettura', nome: 'Lettura in più', categoria: 'libro' },
   { tipo: 'turno', nome: 'Turno in più', categoria: 'lavoro' },
+  // L13 (ondata 3, decisioni 1 e 17)
+  { tipo: 'yen', nome: 'Yen', categoria: 'acquisto' }, { tipo: 'oggetto', nome: 'Oggetto ricevuto', categoria: 'acquisto' },
+  { tipo: 'trofeo', nome: 'Trofeo ottenuto', categoria: 'trama' }, { tipo: 'sblocco', nome: 'Sblocco', categoria: 'richiesta' },
 ];
 const AVANZATE: ReadonlyArray<{ tipo: Tipo; nome: string; categoria: string }> = [
   { tipo: 'acquisto', nome: 'Aojiru', categoria: 'acquisto' }, { tipo: 'pesca', nome: 'Pesca a Ichigaya', categoria: 'attivita' },
@@ -96,7 +103,7 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
   return (
     <section className="flex flex-col gap-2" aria-label="Effetti aggiuntivi">
       <PulsanteVisivo className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={22} />} aria-expanded={aperto} onClick={() => setAperto((a) => !a)}
-        titolo={<>Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}<FrecciaApertura aperto={aperto} /></>} dettaglio="Fortuna, invito, Persona, cruciverba…" />
+        titolo={<>Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}<FrecciaApertura aperto={aperto} /></>} dettaglio="Fortuna, invito, yen, oggetti, sblocchi…" />
       {aperto && (
         <div className="flex flex-col gap-2">
           {aggiuntivi.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto aggiuntivo.</p>}

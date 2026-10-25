@@ -1443,6 +1443,9 @@ export interface ElenchiEffettiVoceDto {
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
   persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
+  /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
+  oggetti?: Array<{ chiave: string; nome: string; categoria: string }>;
+  trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
@@ -2298,6 +2301,31 @@ export interface RichiestaDto {
   note: string;
   fonte: string;
   stato: StatoRichiesta | null;
+  /** L13 (ondata 3): «Quando si sblocca», con il vocabolario unico delle condizioni (testo generato per mostrarle). */
+  condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
+  /** La scadenza come data di gioco (MM-GG) e la proroga, valida solo con le sue condizioni; null = non indicata (resta il testo `scadenza`). */
+  scadenzaData: string | null;
+  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }> } | null;
+  /** Il bersaglio come Ombra del compendio: livello e affinità si leggono da lì (null = i campi propri di `bersaglio`). */
+  ombra: { chiave: string; nome: string; livello: number | null } | null;
+  /** Ricompense in yen e in PE (gli oggetti sono `oggettiRicompensa`, i testi rimasti `ricompense`). */
+  yen: number | null;
+  esperienza: number | null;
+  /** Solo con una partita: lo stato calcolato (Bloccata con il motivo, Disponibile, Accettata, Completata, Scaduta). */
+  statoPartita?: StatoCalcolatoRichiestaDto;
+}
+
+/** L13: lo stato di una Richiesta nella partita, calcolato da condizioni, scadenza e stato segnato (il client mostra, non valuta). */
+export interface StatoCalcolatoRichiestaDto {
+  stato: 'bloccata' | 'disponibile' | 'accettata' | 'completata' | 'scaduta';
+  /** Che cosa manca (bloccata), oppure perché è scaduta o da verificare. */
+  motivi: string[];
+  /** La scadenza che vale oggi (con la proroga se le sue condizioni sono vere), MM-GG. */
+  scadenzaEffettiva: string | null;
+  /** Giorni di gioco alla scadenza effettiva (0 = oggi), solo se nota e non passata. */
+  giorniAllaScadenza: number | null;
+  /** Vero se si può accettare adesso (solo da disponibile). */
+  accettabile: boolean;
 }
 
 export interface JoseDto {

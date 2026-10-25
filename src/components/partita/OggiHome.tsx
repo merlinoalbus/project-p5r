@@ -19,12 +19,28 @@ import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import { PageState } from '../shared/PageState';
 import { FilaScorrevole } from '../shared/FilaScorrevole';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { useCarica } from '../../hooks/useCarica';
+import { getRichieste } from '../../services/api';
 import { IconaAzione } from '../shared/IconaAzione';
 import { OggiGuida } from './OggiGuida';
 import { OggiMappa } from './OggiMappa';
 import { ScuolaOggi } from './ScuolaOggi';
 import type { PartitaDto } from '../../types';
+
+/**
+ * L13: quante Richieste si possono fare adesso nella partita (stato calcolato dal server: disponibili e accettate) e quante di queste
+ * scadono entro una settimana; un tocco porta alla pagina delle Richieste. Niente se non ce n'è nessuna (non occupa posto).
+ */
+function RichiesteOggi({ partitaId, giorno }: { partitaId: number; giorno: string | null }) {
+  const dati = useCarica(() => getRichieste(partitaId), [partitaId, giorno]);
+  const elenco = dati.dati?.richieste ?? [];
+  const aperte = elenco.filter((r) => r.statoPartita?.stato === 'disponibile' || r.statoPartita?.stato === 'accettata');
+  const inScadenza = aperte.filter((r) => r.statoPartita?.giorniAllaScadenza !== null && (r.statoPartita?.giorniAllaScadenza ?? 99) <= 7).length;
+  if (!aperte.length) return null;
+  return <CollegamentoVisivo tono={inScadenza ? 'secondario' : 'fantasma'} compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} to="/guida/richieste"
+    titolo={`Richieste: ${aperte.length} da fare${inScadenza ? ` · ${inScadenza} in scadenza` : ''}`} />;
+}
 
 interface Props {
   partita: PartitaDto;
@@ -83,6 +99,8 @@ export function OggiHome({ partita, testa }: Props) {
           <FilaScorrevole className="items-center gap-x-3 gap-y-1 shrink-0">
             <h2 className="m-0 font-display testo-20 uppercase">Oggi</h2>
             {guidaPronta && oggi.giorno && <ScuolaOggi partita={partita} giorno={oggi.giorno.giorno} soloDelGiorno />}
+            {/* L13 (ondata 3): le Richieste da fare adesso (disponibili, accettate in scadenza), sulla stessa riga: l'intestazione non cresce */}
+            <RichiesteOggi partitaId={partita.id} giorno={partita.dataGioco ?? null} />
           </FilaScorrevole>
           {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza; altrove la guida cresce con la pagina */}
           <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>

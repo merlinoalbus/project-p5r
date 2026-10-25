@@ -13,19 +13,62 @@ import { verificaPartita } from './verificaPartita.js';
 import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import { conCestino } from './cestinoService.js';
-import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
+import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../../shared/types.js';
+import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibilitaService.js';
+import { valutaInsieme } from './condizioni/valutatore.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { slug } from '../../shared/slug.js';
 import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { dettaglioNegozio } from './negoziService.js';
 
-interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null }
+interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
+  condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; ombra_livello: number | null; yen: number | null; esperienza: number | null }
 
-const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine, ad.nome AS area_dedalo_nome FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave LEFT JOIN area_dedalo ad ON ad.chiave = r.area_dedalo_chiave';
+const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine, ad.nome AS area_dedalo_nome, o.nome AS ombra_nome, o.livello AS ombra_livello FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave LEFT JOIN area_dedalo ad ON ad.chiave = r.area_dedalo_chiave LEFT JOIN ombra o ON o.chiave = r.ombra_chiave';
+
+/** Il numero del giorno nel calendario di gioco (1 aprile = 0), per contare i giorni alla scadenza. */
+function giornoDellAnno(d: string): number {
+  const [m, g] = d.split('-').map(Number);
+  let n = 0;
+  for (const mese of MESI_GIOCO) { if (Number(mese.numero) === m) break; n += GIORNI_NEL_MESE[mese.numero] ?? 0; }
+  return n + g - 1;
+}
+
+/**
+ * L13 (ondata 3): lo stato della Richiesta nella partita, calcolato (il client lo mostra, non lo valuta). Completata e accettata vengono
+ * dallo stato segnato; poi la scadenza: passata la data (e la proroga, se c'è e le sue condizioni sono vere), è scaduta, salvo che sia già
+ * completata; altrimenti le condizioni di sblocco: un rosso la blocca con quel che manca, il resto la lascia disponibile (un grigio si dice
+ * fra i motivi, da verificare nel gioco).
+ */
+function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>): StatoCalcolatoRichiestaDto {
+  const oggi = st.dataGioco;
+  const proroga = r.proroga_data ? leggiCondizioniSalvate(r.proroga_condizioni_json) : [];
+  const prorogaVale = !!r.proroga_data && valutaInsieme(proroga.map((c) => condizioneConTesto(c, nomi)), st).stato === 'disponibile';
+  const scadenzaEffettiva = r.scadenza_data ? (prorogaVale ? r.proroga_data : r.scadenza_data) : null;
+  const passata = !!oggi && !!scadenzaEffettiva && ordineGioco(oggi) > ordineGioco(scadenzaEffettiva);
+  const giorni = oggi && scadenzaEffettiva && !passata ? giornoDellAnno(scadenzaEffettiva) - giornoDellAnno(oggi) : null;
+  const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false };
+  if (segnato === 'completata') return { ...base, stato: 'completata', motivi: [] };
+  if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta il ${dataLeggibile(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga al ${dataLeggibile(r.proroga_data)} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
+  if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: [] };
+  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
+  const v = valutaInsieme(condizioni, st);
+  if (v.stato === 'bloccato') return { ...base, stato: 'bloccata', motivi: v.requisiti.filter((q) => q.stato === 'rosso' && q.bloccante !== false).map((q) => q.dettaglio) };
+  return { ...base, stato: 'disponibile', accettabile: true, motivi: v.requisiti.filter((q) => q.stato === 'grigio' && q.bloccante !== false).map((q) => `Da verificare nel gioco: ${q.dettaglio}`) };
+}
 
 /** Una Richiesta come DTO: bersaglio e ricompense dai JSON, Confidente collegato (con il nome, o la chiave se manca),
- *  dedalo e stato nella partita (null se non è segnata). */
-function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave])): RichiestaDto {
+ *  dedalo e stato nella partita (null se non è segnata); con lo stato della partita, anche lo stato calcolato. */
+function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave]), st: StatoDisponibilita | null = null): RichiestaDto {
+  const nomi = nomiCondizioniMemo();
   return {
+    condizioni: leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi)),
+    scadenzaData: r.scadenza_data,
+    proroga: r.proroga_data ? { data: r.proroga_data, condizioni: leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)) } : null,
+    ombra: r.ombra_chiave && r.ombra_nome ? { chiave: r.ombra_chiave, nome: r.ombra_nome, livello: r.ombra_livello } : null,
+    yen: r.yen, esperienza: r.esperienza,
+    ...(st ? { statoPartita: statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi) } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio: JSON.parse(r.bersaglio_json) as RichiestaDto['bersaglio'], ricompense: JSON.parse(r.ricompense_json) as string[],
     oggettiRicompensa: premi.get(r.chiave) ?? [],
@@ -49,7 +92,8 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
   // prima per dedalo (le richieste senza dedalo in coda), poi per area del dedalo (le da collocare in coda) e per ordine della guida
   const righe = prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, (ad.ordine IS NULL), ad.ordine, r.ordine`).all() as RigaRichiesta[];
   const premi: Map<string, RicompensaOggettoDto[]> = ricompensePerFonte('richiesta', righe.map((r) => r.chiave));
-  const lista = righe.map((r) => dto(r, stati, premi));
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const lista = righe.map((r) => dto(r, stati, premi, st));
   const dedali: RichiesteDto['dedali'] = [];
   for (const r of lista) {
     if (!r.areaChiave || !r.areaNome || r.areaOrdine === null) continue;
@@ -82,6 +126,12 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
   const adesso = nowIso();
   getDb().transaction(() => {
     const prima = (prepared('SELECT stato FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta } | undefined)?.stato ?? null;
+    // L13: «Accetta» solo da disponibile (bloccata o scaduta: 409 col motivo). Completarla resta sempre possibile (la spunta di una voce
+    // o chi gioca la segna fatta: un dato di sblocco sbagliato non deve impedire di registrare quel che è successo nel gioco)
+    if (stato === 'accettata' && prima !== 'accettata') {
+      const s = statoCalcolato(r, prima, statoDisponibilitaPartita(partitaId), nomiCondizioniMemo());
+      if (!s.accettabile) throw httpErrors.conflict('richiesta-non-disponibile', `La Richiesta «${r.nome}» non si può accettare: ${s.stato === 'scaduta' ? 'è scaduta' : s.stato === 'completata' ? 'è già completata' : 'è bloccata'}${s.motivi.length ? ` (${s.motivi.join('; ')})` : ''}.`);
+    }
     if (stato === null) prepared('DELETE FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').run(partitaId, chiave);
     else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at').run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
@@ -90,7 +140,8 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return dto(r, new Map(stato === null ? [] : [[chiave, stato]]));
+  // con lo stato calcolato dopo il cambio (la pagina sostituisce la carta con questa)
+  return dto(r, new Map(stato === null ? [] : [[chiave, stato]]), undefined, statoDisponibilitaPartita(partitaId));
 }
 
 /**
@@ -126,6 +177,53 @@ export interface DatiRichiesta {
   dedalo?: string | null; areaDedalo?: string | null; piano?: string;
   bersaglio?: RichiestaDto['bersaglio'];
   ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
+  /** L13 (ondata 3): sblocco, scadenza con proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
+  condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[] } | null;
+  ombra?: string | null; yen?: number | null; esperienza?: number | null; oggetti?: Array<{ chiave: string; quantita: number }>;
+}
+
+/** Le condizioni scritte dal modulo, valide e con i riferimenti esistenti (il vocabolario unico: stessa verifica degli altri editor). */
+function condizioniValide(x: unknown[] | undefined): string | null | undefined {
+  if (x === undefined) return undefined;
+  const c = normalizzaCondizioniSpillo(x);
+  if (c.length !== x.length) throw httpErrors.badRequest('condizioni-non-valide', 'Una condizione di sblocco non è riconoscibile.');
+  return c.length ? JSON.stringify(c) : null;
+}
+/** I campi L13 della Richiesta, validati: chi non li manda li lascia com'erano. */
+function campiStrutturati(dati: DatiRichiesta): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const c = condizioniValide(dati.condizioni);
+  if (c !== undefined) out.condizioni_json = c;
+  if (dati.scadenzaData !== undefined) {
+    if (dati.scadenzaData !== null && !dataValida(dati.scadenzaData)) throw httpErrors.badRequest('scadenza-non-valida', 'La scadenza non è una data di gioco.');
+    out.scadenza_data = dati.scadenzaData;
+  }
+  if (dati.proroga !== undefined) {
+    if (dati.proroga !== null && (!dataValida(dati.proroga.data) || !(dati.scadenzaData ?? null))) throw httpErrors.badRequest('proroga-non-valida', 'La proroga è una data di gioco e vale solo con una scadenza.');
+    out.proroga_data = dati.proroga?.data ?? null;
+    out.proroga_condizioni_json = dati.proroga ? condizioniValide(dati.proroga.condizioni) ?? null : null;
+  }
+  if (dati.ombra !== undefined) {
+    if (dati.ombra !== null && !prepared('SELECT 1 FROM ombra WHERE chiave = ?').get(dati.ombra)) throw httpErrors.notFound('ombra-non-trovata', `L'Ombra '${dati.ombra}' non è nel compendio.`);
+    out.ombra_chiave = dati.ombra;
+  }
+  if (dati.yen !== undefined) out.yen = dati.yen;
+  if (dati.esperienza !== undefined) out.esperienza = dati.esperienza;
+  return out;
+}
+/** Gli oggetti della ricompensa (`ricompensa_oggetto`, fonte «richiesta»): l'elenco del modulo sostituisce quello di prima. */
+function scriviOggetti(chiave: string, oggetti: DatiRichiesta['oggetti']): void {
+  if (oggetti === undefined) return;
+  for (const o of oggetti) if (!prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(o.chiave)) throw httpErrors.notFound('oggetto-non-trovato', `L'oggetto '${o.chiave}' non è nel catalogo.`);
+  if (new Set(oggetti.map((o) => o.chiave)).size !== oggetti.length) throw httpErrors.badRequest('oggetti-ripetuti', 'Lo stesso oggetto compare due volte: indica le copie.');
+  prepared("DELETE FROM ricompensa_oggetto WHERE fonte_tipo = 'richiesta' AND fonte_chiave = ?").run(chiave);
+  for (const [i, o] of oggetti.entries()) prepared("INSERT INTO ricompensa_oggetto (fonte_tipo, fonte_chiave, catalogo_chiave, quantita, ordine) VALUES ('richiesta', ?, ?, ?, ?)").run(chiave, o.chiave, o.quantita, i);
+}
+function aggiornaCampiStrutturati(chiave: string, dati: DatiRichiesta): void {
+  const campi = campiStrutturati(dati);
+  const nomi = Object.keys(campi);
+  if (nomi.length) prepared(`UPDATE richiesta SET ${nomi.map((n) => `${n} = ?`).join(', ')} WHERE chiave = ?`).run(...nomi.map((n) => campi[n]), chiave);
+  scriviOggetti(chiave, dati.oggetti);
 }
 
 /** La riga di una Richiesta (404 se non c'è). */
@@ -186,10 +284,13 @@ export function creaRichiesta(dati: DatiRichiesta & { nome: string; bersaglio: R
   const base = (slug(dati.nome) || 'richiesta').slice(0, 190).replace(/-+$/, '') || 'richiesta';
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
+  getDb().transaction(() => {
   prepared(`INSERT INTO richiesta (chiave, ordine, nome, committente, disponibile_dal, scadenza, area, area_chiave, area_dedalo_chiave, piano, bersaglio_json, ricompense_json, confidente_chiave, confidente_rango, note, fonte)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente')`).run(
     chiave, ordineInFondo(), dati.nome.trim(), dati.committente ?? '', dati.disponibileDal ?? '', dati.scadenza ?? '', dove.nomeDedalo, dove.dedalo, dove.area, dati.piano ?? '',
     JSON.stringify(dati.bersaglio), JSON.stringify(dati.ricompense ?? []), dati.confidente ?? null, dati.confidente ? dati.confidenteRango ?? null : null, dati.note ?? '');
+  aggiornaCampiStrutturati(chiave, dati);
+  })();
   return dto(rigaRichiesta(chiave), new Map());
 }
 
@@ -213,6 +314,7 @@ export function aggiornaRichiesta(chiave: string, dati: DatiRichiesta): Richiest
       ricompense_json = ?, confidente_chiave = ?, confidente_rango = ?, note = ?, ordine = ? WHERE chiave = ?`).run(
       nome, dati.committente ?? r.committente, dati.disponibileDal ?? r.disponibile_dal, dati.scadenza ?? r.scadenza, dove.dedalo === r.area_chiave ? r.area : dove.nomeDedalo, dove.dedalo, dove.area, dati.piano ?? r.piano,
       dati.bersaglio ? JSON.stringify(dati.bersaglio) : r.bersaglio_json, dati.ricompense ? JSON.stringify(dati.ricompense) : r.ricompense_json, confidente, rango, dati.note ?? r.note, ordine, chiave);
+    aggiornaCampiStrutturati(chiave, dati);
     if (nome !== r.nome) {
       // le voci della giornata che la indicano mostrano il nome salvato in `riferimento_testo` (`giornataService`): il nome nuovo.
       // L6 (R6-04): condizioni e requisiti la citano per chiave, e il testo che mostrano si genera dal nome: rinominarla non li tocca

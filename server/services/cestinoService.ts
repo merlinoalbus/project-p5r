@@ -151,6 +151,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   fortuna_partita: ['stato della Fortuna nelle partite', 'stati della Fortuna nelle partite'], effetto_stato_voce: ['stato segnato da una voce nelle partite', 'stati segnati dalle voci nelle partite'],
   esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
   confidente_invito: ['invito del Confidente', 'inviti dei Confidenti'],
+  oggetto_ottenuto_partita: ['oggetto ricevuto nelle partite', 'oggetti ricevuti nelle partite'], sblocco_partita: ['sblocco ricevuto nelle partite', 'sblocchi ricevuti nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */

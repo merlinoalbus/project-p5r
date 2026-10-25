@@ -17,6 +17,9 @@ import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { CARATTERI } from '../../shared/caratteriVoce.js';
 import { idParam } from './comuni.js';
 
+/** Una data del calendario di gioco, «MM-GG». */
+const dataGioco = z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+
 const TIPI_PUNTO = ['sicura', 'porta', 'meccanismo', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'storia', 'trama', 'altro'] as const;
 
 /** Un dettaglio di una voce: testo, numero, elenco di testi o tabella (righe di campi testuali), entro i tetti. */
@@ -146,6 +149,14 @@ export const bodyRichiesta = z.object({
   piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(), ricompense: elencoVoci.optional(),
   confidente: z.string().min(1).max(200).nullable().optional(), confidenteRango: z.number().int().min(1).max(R.rango).nullable().optional(),
   note: z.string().trim().max(R.note).optional(),
+  // L13 (ondata 3): sblocco con il vocabolario unico (la forma la verifica `normalizzaCondizioniSpillo`), scadenza e proroga come date di
+  // gioco, Ombra del compendio, yen e PE, oggetti del catalogo con le copie
+  condizioni: z.array(z.unknown()).max(20).optional(),
+  scadenzaData: dataGioco.nullable().optional(),
+  proroga: z.object({ data: dataGioco, condizioni: z.array(z.unknown()).max(20) }).strict().nullable().optional(),
+  ombra: z.string().min(1).max(200).nullable().optional(),
+  yen: z.number().int().min(1).max(9_999_999).nullable().optional(), esperienza: z.number().int().min(1).max(999_999).nullable().optional(),
+  oggetti: z.array(z.object({ chiave: z.string().min(1).max(200), quantita: z.number().int().min(1).max(999) }).strict()).max(30).optional(),
 });
 /** Una Richiesta nuova: nome e bersaglio obbligatori. */
 export const bodyNuovaRichiesta = bodyRichiesta.extend({ nome: z.string().trim().min(1).max(R.nome), bersaglio });

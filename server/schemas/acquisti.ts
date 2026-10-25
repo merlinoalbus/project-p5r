@@ -38,9 +38,15 @@ export const bodyAnteprimaDecisioneProposte = z.object({operazioneId:uid,decisio
 export const bodyDecisioneProposte = bodyAnteprimaDecisioneProposte.extend({revisioneProposteAttesa:revisione}).strict();
 const doteNote = z.object({dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)])}).strict();
 export const effettoVoce = z.discriminatedUnion('tipo',[
-  z.object({tipo:z.literal('dote'),dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)])}).strict(),
+  // L13: `possibili` (Dote a valori scelti alla spunta) ed `esito` (turno con esito atteso) dell'ondata 2: la forma completa la verifica `normalizzaEffettoVoce`
+  z.object({tipo:z.literal('dote'),dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)]),possibili:z.array(z.union([z.literal(1),z.literal(2),z.literal(3)])).min(2).max(3).optional()}).strict(),
   z.object({tipo:z.literal('lettura'),categoria:z.enum(['libro','film','videogioco']),chiave,almeno:z.number().int().positive().nullable()}).strict(),
-  z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional()}).strict(),
+  z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional(),esito:z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional()}).strict(),
+  // L13 (ondata 3): yen, oggetto ricevuto, trofeo, sblocco; quantità facoltativa dell'articolo
+  z.object({tipo:z.literal('yen'),importo:z.number().int().min(-9_999_999).max(9_999_999).refine((n)=>n!==0,'L’importo non può essere zero.')}).strict(),
+  z.object({tipo:z.literal('oggetto'),oggetto:z.string().min(1).max(200),quantita:z.number().int().min(1).max(999)}).strict(),
+  z.object({tipo:z.literal('trofeo'),trofeo:chiave}).strict(),
+  z.object({tipo:z.literal('sblocco'),bersaglio:z.enum(['richiesta','attivita']),chiave}).strict(),
   z.object({tipo:z.literal('acquisto'),articolo:chiave,variante:dote.nullable(),fortuna:z.boolean().nullable().optional(),sostituisceDoti:z.array(uid).max(20).refine((x)=>new Set(x).size===x.length,'Gli effetti sostituiti devono essere distinti.')}).strict(),
   z.object({tipo:z.literal('pesca'),regola:z.literal(REGOLA_PESCA),attivita:z.literal(ATTIVITA_PESCA),sostituisceTurni:z.array(uid).max(20),sostituisceDoti:z.array(uid).max(20)}).strict(),
   z.object({tipo:z.literal('fortuna'),dote}).strict(),
@@ -49,7 +55,7 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('domanda'),domanda:z.number().int().positive()}).strict(),
   z.object({tipo:z.literal('cruciverba'),data:z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)}).strict(),
   z.object({tipo:z.literal('richiesta'),richiesta:chiave}).strict(),
-  z.object({tipo:z.literal('articolo'),articolo:chiave}).strict(),
+  z.object({tipo:z.literal('articolo'),articolo:chiave,quantita:z.number().int().min(1).max(999).optional()}).strict(),
   z.object({tipo:z.literal('invito'),invito:z.string().regex(/^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)}).strict(),
 ]);
 export const bodySalvaEffettiVoce = z.object({revisioneEffettiAttesa:revisione,effetti:z.array(z.object({uid:uid.nullable(),effetto:effettoVoce}).strict()).max(100)}).strict();
