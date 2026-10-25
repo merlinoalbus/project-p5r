@@ -15,6 +15,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 import { getRequestLogger, getRequestId } from './requestContext.js';
 import { segnaRispostaFormata } from './responseShape.js';
+import { eGiocoInSolaLettura } from '../db/dbService.js';
 
 interface RispostaErrore {
   status: number;
@@ -62,6 +63,11 @@ function inviaErrore(res: Response, status: number, corpo: unknown): void {
   res.status(status).json(corpo);
 }
 
+/** Vero per un errore di better-sqlite3 con codice `SQLITE_READONLY` o una sua variante (`SQLITE_READONLY_DIRECTORY`, `_DBMOVED`…). */
+export function eErroreSolaLettura(err: unknown): boolean {
+  return err instanceof Error && typeof (err as Error & { code?: unknown }).code === 'string' && (err as Error & { code: string }).code.startsWith('SQLITE_READONLY');
+}
+
 /** Converte gli errori applicativi nell'envelope HTTP comune. */
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   const log = getRequestLogger();
@@ -85,6 +91,18 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     log.warn({ path: req.path, method: req.method, status: rispostaExpress.status, code: rispostaExpress.code, tipo: causa.type, causa: causa.message }, 'richiesta rifiutata');
     inviaErrore(res, rispostaExpress.status, {
       error: { code: rispostaExpress.code, message: rispostaExpress.message },
+      ...(requestId ? { requestId } : {}),
+    });
+    return;
+  }
+
+  // L12, istanza di rilascio: una scrittura su `gioco.db` respinta da SQLite (SQLITE_READONLY) è il terzo livello di difesa che fa il
+  // suo lavoro, ma anche il segno di una rotta che non doveva arrivare fin lì: 403 per chi chiama, errore nel log per chi gestisce.
+  // Solo se questo processo ha aperto `gioco.db` in sola lettura: altrove lo stesso errore (disco pieno o in sola lettura) è un 500.
+  if (eGiocoInSolaLettura() && eErroreSolaLettura(err)) {
+    log.error({ err, path: req.path, method: req.method }, 'scrittura respinta: i contenuti di gioco sono in sola lettura');
+    inviaErrore(res, 403, {
+      error: { code: 'contenuti-in-sola-lettura', message: 'I contenuti di gioco sono in sola lettura: questa operazione non è consentita.' },
       ...(requestId ? { requestId } : {}),
     });
     return;

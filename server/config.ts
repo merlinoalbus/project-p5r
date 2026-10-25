@@ -17,6 +17,16 @@ export const config = {
   dataDir: path.resolve(process.env.DATA_DIR || './data'),
   logLevel: process.env.LOG_LEVEL || 'info',
 
+  /**
+   * Dove vive `gioco.db` (e la cartella dei caratteri). Senza `EDIZIONE_DIR` coincide con `dataDir`: la preparazione non cambia.
+   * L'istanza di rilascio (L12) la punta al volume dell'edizione, montato in sola lettura, separato da quello delle partite.
+   */
+  edizioneDir: path.resolve(process.env.EDIZIONE_DIR || process.env.DATA_DIR || './data'),
+  /** Dove vive `partite.db`. Senza `PARTITE_DIR` coincide con `dataDir`; in rilascio è il volume scrivibile delle partite. */
+  partiteDir: path.resolve(process.env.PARTITE_DIR || process.env.DATA_DIR || './data'),
+  /** Dove l'istanza di rilascio tiene le copie di `partite.db` (un volume a parte: se si perde il volume delle partite restano). */
+  backupDir: path.resolve(process.env.BACKUP_DIR || path.join(process.env.DATA_DIR || './data', 'backups')),
+
   /** Nome del file SQLite dei dati di gioco dentro `dataDir` (compendio, guida, catalogo, mappe). */
   dbFileName: 'gioco.db',
   /** Nome del file SQLite delle partite (schema «utente», attaccato alla stessa connessione). */

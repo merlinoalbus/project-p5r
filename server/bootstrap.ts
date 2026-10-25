@@ -31,6 +31,11 @@ import { ROUTER_DI_AREA } from './routes/index.js';
 import { documentoOpenApi, operazioniSenzaProva } from './openapi/documento.js';
 import { CARTELLA_SWAGGER_UI, paginaDocumentazione } from './openapi/pagina.js';
 import { capacitaDi, MODALITA_PREDEFINITA, type Modalita } from '../shared/capacita.js';
+import { routerDelGiocatore, verificaElencoGiocatore } from './rilascio/rotteGiocatore.js';
+import { logger } from './utils/logger.js';
+
+/** Il corpo massimo di una richiesta nell'istanza di rilascio (L12): 256 kB. */
+const LIMITE_CORPO_RILASCIO = '256kb';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
@@ -38,10 +43,10 @@ z.config(z.locales.it());
 /** Le opzioni di `createApp`. */
 export interface OpzioniApp {
   /**
-   * La modalità dell'istanza (L12, passo 1): `preparazione` (predefinita, tutte le funzioni di oggi) o `rilascio` (pubblica, sola
-   * lettura). Per ora la modalità è soltanto ESPOSTA da `/api/config`, con le sue capacità; l'elenco delle rotte ammesse nel rilascio
-   * lo applica il passo 5 (`server/rilascio/rotteGiocatore.ts`). Chi la fissa è il punto d'avvio (`server/index.ts` → preparazione,
-   * `server/rilascio.ts` → rilascio), mai una variabile d'ambiente.
+   * La modalità dell'istanza (L12): `preparazione` (predefinita, tutte le funzioni di oggi) o `rilascio` (pubblica, sola lettura).
+   * `/api/config` la espone con le sue capacità; in `rilascio` si montano SOLO le rotte dell'elenco del giocatore
+   * (`server/rilascio/rotteGiocatore.ts`, verificato qui), il corpo massimo è 256 kB e la documentazione delle API non c'è. Chi la
+   * fissa è il punto d'avvio (`server/index.ts` → preparazione, `server/rilascio.ts` → rilascio), mai una variabile d'ambiente.
    */
   modalita?: Modalita;
   /**
@@ -84,10 +89,16 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
   // L12: l'identità PRIMA di leggere qualunque corpo (un anonimo non fa caricare nemmeno i 512 MB dell'importazione): solo con
   // Cloudflare Access configurato. Senza (preparazione) ogni richiesta ha il proprietario unico, come sempre.
   if (identita) app.use('/api', creaMiddlewareIdentita(identita));
-  // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale. L'esportazione completa pesa 103 MB
-  // (O3-1 di L3, decisione del PM del 2026-10-20): 512 MB la coprono con margine; vale per questa sola rotta.
-  app.post('/api/mappe/importa', express.json({ limit: '512mb' }));
-  app.use(express.json({ limit: '5mb' }));
+  const rilascio = modalita === 'rilascio';
+  if (rilascio) {
+    // L12: nessun pacchetto da importare, nessun file nel corpo; l'avanzamento di una partita sta in pochi kB.
+    app.use(express.json({ limit: LIMITE_CORPO_RILASCIO }));
+  } else {
+    // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale. L'esportazione completa pesa 103 MB
+    // (O3-1 di L3, decisione del PM del 2026-10-20): 512 MB la coprono con margine; vale per questa sola rotta.
+    app.post('/api/mappe/importa', express.json({ limit: '512mb' }));
+    app.use(express.json({ limit: '5mb' }));
+  }
 
   // ---- Appartenenza delle partite (L12) ----
   // Una partita citata nel percorso, nella query o nel corpo deve essere del proprietario della richiesta (404 altrimenti). Un
@@ -95,9 +106,18 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
   app.use('/api', controlloAppartenenzaPartite(identita !== null));
 
   // ---- Router di area ----
-  // l'indice della ricerca si svuota dopo ogni scrittura riuscita sui dati di gioco (prima dei router: vede ogni risposta)
-  app.use('/api', indiceRicercaDopoScritture);
-  for (const [prefisso, router] of ROUTER_DI_AREA) app.use(prefisso, router);
+  if (rilascio) {
+    // L12 (§3 del progetto): si montano solo le rotte dell'elenco del giocatore; il resto non esiste e cade nel 404 JSON. Prima si
+    // controlla che l'elenco corrisponda alle rotte vere: se no, l'avvio si ferma (`server/rilascio.ts` lo tratta come fatale).
+    verificaElencoGiocatore();
+    const { router, ammesse, escluse } = routerDelGiocatore();
+    for (const [prefisso, r] of router) app.use(prefisso, r);
+    logger.info({ ammesse, escluse }, 'istanza di rilascio: rotte montate dall\'elenco del giocatore');
+  } else {
+    // l'indice della ricerca si svuota dopo ogni scrittura riuscita sui dati di gioco (prima dei router: vede ogni risposta)
+    app.use('/api', indiceRicercaDopoScritture);
+    for (const [prefisso, router] of ROUTER_DI_AREA) app.use(prefisso, router);
+  }
 
   // ---- Health ----
   // 503 quando il database non risponde: l'HEALTHCHECK di Docker guarda solo il codice HTTP.
@@ -134,15 +154,18 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
   // Il documento si costruisce alla prima richiesta, quando tutte le rotte sono montate, e poi resta: le rotte non
   // cambiano finché il processo vive. Si manda con `res.send`, fuori dalla busta `{ data }`: è il formato che i
   // client OpenAPI si aspettano.
-  let documento: string | null = null;
-  app.get('/api/openapi.json', (_req, res) => {
-    documento ??= JSON.stringify(documentoOpenApi(app));
-    res.type('application/json').send(documento);
-  });
-  app.get('/api/docs', (_req, res) => {
-    res.type('html').send(paginaDocumentazione(operazioniSenzaProva(app)));
-  });
-  app.use('/api/docs', express.static(CARTELLA_SWAGGER_UI, { index: false, maxAge: '1d' }));
+  // In rilascio non c'è (capacità `documentazioneApi` chiusa): descriverebbe rotte che l'istanza non ha.
+  if (capacitaDi(modalita).documentazioneApi) {
+    let documento: string | null = null;
+    app.get('/api/openapi.json', (_req, res) => {
+      documento ??= JSON.stringify(documentoOpenApi(app));
+      res.type('application/json').send(documento);
+    });
+    app.get('/api/docs', (_req, res) => {
+      res.type('html').send(paginaDocumentazione(operazioniSenzaProva(app)));
+    });
+    app.use('/api/docs', express.static(CARTELLA_SWAGGER_UI, { index: false, maxAge: '1d' }));
+  }
 
   // ---- 404 JSON per ogni /api/* non gestita ----
   app.use('/api', (req, _res, next) => {

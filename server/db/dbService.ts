@@ -34,14 +34,31 @@ export type AppDatabase = Database.Database;
 
 let db: AppDatabase | null = null;
 
-/** Percorso assoluto del file SQLite dei dati di gioco. */
-export function resolveDbPath(): string {
-  return path.join(config.dataDir, config.dbFileName);
+/** Le opzioni di `initDb`. */
+export interface OpzioniDb {
+  /**
+   * L12 (istanza di rilascio): `gioco.db` è un'edizione chiusa. Si apre solo se esiste (mai creato), senza WAL e senza riscrivere
+   * nulla; chi apre deve poi chiamare `verificaSolaLettura` (`server/rilascio/solaLettura.ts`), che prova davvero la scrittura.
+   * L'attacco di `partite.db` (schema `utente`) resta scrivibile: è l'avanzamento di chi gioca.
+   */
+  soloLettura?: boolean;
 }
 
-/** Percorso assoluto del file SQLite delle partite. */
+/** Vero se questo processo ha aperto `gioco.db` in sola lettura (istanza di rilascio): i servizi che altrimenti scriverebbero su
+ *  `main` (cache delle miniature, uid degli spilli) lo consultano e saltano la scrittura. Si azzera con la chiusura. */
+let giocoInSolaLettura = false;
+export function eGiocoInSolaLettura(): boolean {
+  return giocoInSolaLettura;
+}
+
+/** Percorso assoluto del file SQLite dei dati di gioco (`edizioneDir`, che senza `EDIZIONE_DIR` è `dataDir`). */
+export function resolveDbPath(): string {
+  return path.join(config.edizioneDir, config.dbFileName);
+}
+
+/** Percorso assoluto del file SQLite delle partite (`partiteDir`, che senza `PARTITE_DIR` è `dataDir`). */
 export function resolvePartitePath(): string {
-  return path.join(config.dataDir, config.partiteFileName);
+  return path.join(config.partiteDir, config.partiteFileName);
 }
 
 /** Il file delle partite che accompagna un dato file di gioco (`:memory:` resta in memoria). */
@@ -63,14 +80,23 @@ function rinominaFileLegacy(dbPath: string): void {
  * Apre la connessione SQLite, crea la directory dati quando serve, attacca il file delle partite
  * e applica i pragma operativi. Chiamate successive restituiscono la stessa connessione.
  */
-export function initDb(dbPath: string = resolveDbPath()): AppDatabase {
+export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}): AppDatabase {
   if (db) return db;
-  if (dbPath !== ':memory:') {
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    rinominaFileLegacy(dbPath);
+  const soloLettura = opzioni.soloLettura === true;
+  if (soloLettura) {
+    // Edizione di rilascio: il file c'è già (lo ha prodotto «Prepara edizione») o l'avvio si ferma; niente cartelle da creare, niente
+    // rinomina del vecchio file unico, niente WAL su `main` (su un file in sola lettura non si aprirebbe: resta il giornale classico).
+    if (dbPath === ':memory:' || !fs.existsSync(dbPath)) throw new Error(`edizione di gioco assente (${path.basename(dbPath)}): l'istanza di rilascio non crea né importa dati.`);
+    db = new Database(dbPath, { fileMustExist: true });
+    giocoInSolaLettura = true;
+  } else {
+    if (dbPath !== ':memory:') {
+      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+      rinominaFileLegacy(dbPath);
+    }
+    db = new Database(dbPath);
+    db.pragma('journal_mode = WAL');
   }
-  db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
   db.pragma('synchronous = NORMAL');
   db.pragma('busy_timeout = 5000');
   db.pragma('foreign_keys = ON');
@@ -80,7 +106,15 @@ export function initDb(dbPath: string = resolveDbPath()): AppDatabase {
     db.pragma('mmap_size = 268435456');
   }
   // Il file delle partite: attaccato sempre, così ogni query lo vede e il runner delle migrazioni lo versiona.
-  db.prepare('ATTACH DATABASE ? AS utente').run(percorsoPartiteDi(dbPath));
+  const partitePath = percorsoPartiteDi(dbPath);
+  // in rilascio le partite devono esistere già (le crea `assicuraPartiteIniziali`): un ATTACH le creerebbe vuote, senza schema
+  if (soloLettura && !fs.existsSync(partitePath)) {
+    db.close();
+    db = null;
+    giocoInSolaLettura = false;
+    throw new Error(`file delle partite assente (${path.basename(partitePath)}): va creato dalla copia dell'edizione prima dell'apertura.`);
+  }
+  db.prepare('ATTACH DATABASE ? AS utente').run(partitePath);
   if (dbPath !== ':memory:') db.pragma('utente.journal_mode = WAL');
   stmtCache.clear();
   return db;
@@ -94,7 +128,8 @@ export function getDb(): AppDatabase {
 
 /** Ottimizza e chiude la connessione, svuotando la cache degli statement. */
 export function closeDb(): void {
-  if (db) {
+  // in rilascio `optimize` potrebbe provare a scrivere le statistiche in `main` (sola lettura): non si chiama
+  if (db && !giocoInSolaLettura) {
     try {
       db.pragma('optimize');
     } catch {
@@ -107,6 +142,7 @@ export function closeDb(): void {
     db?.close();
   } finally {
     db = null;
+    giocoInSolaLettura = false;
   }
 }
 
