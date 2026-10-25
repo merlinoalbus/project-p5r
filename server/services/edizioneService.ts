@@ -57,6 +57,7 @@ import { LARGHEZZE_MINIATURA } from '../../shared/miniature.js';
 import { RIFERIMENTI_PARTITE, orfaniPartite, versioneSchemaCodice } from './pacchettoGiocoService.js';
 import { conCartellaDiLavoro, copiaDatabase, timbro } from './impostazioniService.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
+import { svuotaProposteConversione } from '../db/proposteConversioneDb.js';
 import { RaccoltaProblemi, controllaContenuti, haColonna, haTabella, unisciCorrezioniGuida } from './edizioneContenuti.js';
 import type {
   ChiaviRimosseEdizioneDto, CompatibilitaEdizioneDto, EsitoEdizioneDto, FaseEdizione, FileEdizioneDto, JsonMalformatoEdizioneDto, StatoEdizioneDto,
@@ -358,6 +359,13 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     avanza('correzioni');
     correzioniGuida = unisciCorrezioniGuida(lavoro, raccolta);
     if (correzioniGuida.correzioniDopo > 0) avvisi.push(`${correzioniGuida.correzioniDopo} correzioni della guida sono rimaste nella copia perché il loro blocco non si legge: vedi l'elenco dei contenuti.`);
+    // L13 (ondata 4a): le proposte «da completare» sono uno strumento della preparazione; nel rilascio il meccanismo non esiste. Solo sulla copia.
+    if (haTabella(lavoro, 'proposta_conversione_voce')) {
+      const aperte = (lavoro.prepare("SELECT COUNT(*) AS n FROM main.proposta_conversione_voce WHERE stato = 'aperta'").get() as { n: number }).n;
+      // La tabella è append-only (migrazione 237): sulla copia di lavoro si svuota con la funzione dedicata, che toglie e rimette il trigger.
+      svuotaProposteConversione(lavoro);
+      if (aperte > 0) avvisi.push(`${aperte} proposte «da completare» sono ancora aperte nella preparazione: l'edizione esce senza (le voci restano come sono).`);
+    }
 
     avanza('miniature');
     miniature = await preparaMiniature(lavoro);

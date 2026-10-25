@@ -113,6 +113,11 @@ const rotteEditorMappe: RouteObject[] = IN_RILASCIO
   ? []
   : [pagina('guida/mappe/:chiave/modifica', pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage'))];
 
+/** L13 (ondata 4a): l'elenco delle proposte «da completare» esiste solo nella preparazione, come l'editor delle mappe (stesso schema). */
+const rotteDaCompletare: RouteObject[] = IN_RILASCIO
+  ? []
+  : [pagina('guida/da-completare', pigra(() => import('./pages/DaCompletarePage'), 'DaCompletarePage'))];
+
 /** Albero delle route applicative. */
 export const router = createBrowserRouter([
   {
@@ -154,6 +159,7 @@ export const router = createBrowserRouter([
           pagina('guida/mondo/:tipo/:chiave', AccessoMondoPage),
           pagina('guida/mappe/:chiave', MappaPage),
           ...rotteEditorMappe,
+          ...rotteDaCompletare,
           pagina('guida/citta', CittaPage),
           pagina('guida/citta/:chiave', QuartierePage),
           // L2: la pagina di un'Area del mondo (e delle aree della città: `tokyo` come contenitore)

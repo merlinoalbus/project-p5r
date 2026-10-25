@@ -7,29 +7,29 @@
 //   voce   una voce che c'è già (della guida o aggiunta): dal 2026-09-30 sono la stessa cosa, canone della guida
 // Ridisegnata il 2026-10-24 (tavole approvate dall'utente): due soli generi — «Cosa da fare» (si spunta) e «Promemoria» (solo da
 // leggere, senza casella, né tipo né effetti) —; il tipo si sceglie da una griglia di icone e decide il collegamento; «Quale» si sceglie
-// guardando e porta con sé l'effetto della spunta, scritto come frase in «Spuntando succede»; gli effetti rari stanno in «Effetti
-// aggiuntivi», ripiegati in fondo. Su desktop due colonne (a sinistra che cosa è, a destra che cosa succede spuntandola e quando);
-// su tablet e telefono una colonna, nello stesso ordine, e sul telefono è il foglio dal basso di `Modal`. Scorre solo il corpo.
+// guardando e porta con sé l'effetto della spunta. Su desktop due colonne (a sinistra che cosa è, a destra che cosa succede spuntandola e
+// quando); su tablet e telefono una colonna, nello stesso ordine, e sul telefono è il foglio dal basso di `Modal`. Scorre solo il corpo.
+// L13 (ondata 4a): «Spuntando succede» elenca TUTTI gli effetti, allo stesso livello (niente più «Effetti aggiuntivi» ripiegati); la
+// finestra è la `FinestraModifica` comune (piè fisso, conferma prima di chiudere con modifiche non salvate); aperta da «Modifica» di una
+// proposta da completare, parte con la proposta già applicata e salvando la proposta risulta applicata (stessa scrittura della voce).
 // Ogni voce ha anche il suo **posto** nella fascia (richiesta dell'utente: «devo fare un ordinamento esatto»), che si cambia
 // trascinando o con ↑ / ↓. Ogni modifica vale per tutte le partite ed entra nel pacchetto di gioco che si esporta.
 // ============================================================
 
 import { useMemo, useRef, useState } from 'react';
-import { Modal } from '../shared/Modal';
 import { Segmenti } from '../shared/Segmenti';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
-import { aggiornaVoceGiornata, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
+import { FinestraModifica } from '../shared/FinestraModifica';
+import { aggiornaVoceGiornata, applicaPropostaConversione, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_GENERE } from '../../utils/percorso';
 import { SceltaTipoQuale, SpuntandoSuccede } from './EditorAzioneStrutturata';
-import { EffettiAggiuntivi } from './EffettiAggiuntivi';
 import { PostoVoce } from './PostoVoce';
 import type { ElenchiVoce } from '../../utils/opzioniEffetti';
-import { STRUTTURA_VUOTA, campiCompleti, strutturaDi } from '../../utils/azioneStrutturata';
+import { STRUTTURA_VUOTA, campiCompleti, strutturaConProposta, strutturaDi } from '../../utils/azioneStrutturata';
 import { nomiEffettiDa } from '../../utils/effettoAutomatico';
 import type { AzionePercorsoDto, DatiVoceGiornata, FasciaGioco, GenereVoce } from '../../types';
+import type { PropostaConversioneDto } from '../../../shared/proposteConversione';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
@@ -38,7 +38,7 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 export type SoggettoVoce =
   | { tipo: 'nuova'; fascia: FasciaGioco }
-  | { tipo: 'voce'; voce: AzionePercorsoDto };
+  | { tipo: 'voce'; voce: AzionePercorsoDto; proposta?: PropostaConversioneDto };
 
 const GENERI: ReadonlyArray<{ chiave: GenereVoce; nome: string }> = (['azione', 'promemoria'] as const).map((g) => ({ chiave: g, nome: NOME_GENERE[g] }));
 const FASCE: ReadonlyArray<{ chiave: FasciaGioco; nome: string }> = [{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }];
@@ -59,14 +59,15 @@ interface Props {
 }
 
 /**
- * La finestra della voce: genere, testo e note (aree di testo che crescono col contenuto), tipo e «Quale» con l'effetto che portano,
- * fascia, posto esatto fra le altre voci ed effetti aggiuntivi. «Salva»/«Aggiungi» è attivo solo con un testo e, per una cosa da fare,
- * con i collegamenti e gli effetti completi.
+ * La finestra della voce: genere, testo e note (aree di testo che crescono col contenuto), tipo e «Quale», tutti gli effetti della spunta,
+ * fascia e posto esatto fra le altre voci. «Salva»/«Aggiungi» è attivo solo con un testo e, per una cosa da fare, con i collegamenti e gli
+ * effetti completi.
  */
 // L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il modulo non esiste; la condizione è costante di build, `ModuloVoceGiornataReale` esce dal bundle
 export const ModuloVoceGiornata: StrumentoDiModifica<typeof ModuloVoceGiornataReale> = IN_RILASCIO ? NienteInRilascio : ModuloVoceGiornataReale;
 function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
+  const proposta = soggetto.tipo === 'voce' ? soggetto.proposta ?? null : null;
   /** Le altre voci di una fascia, nel loro ordine (senza quella che si modifica). */
   const altreDi = (f: FasciaGioco) => voci.filter((v) => v.fascia === f && v.uid !== voce?.uid);
   /** Il posto di partenza in una fascia: dov'è la voce, se è la sua; altrimenti in fondo. */
@@ -77,13 +78,16 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     }
     return altreDi(f).length;
   };
-  const [campi, setCampi] = useState(() => {
+  /** I campi com'erano all'apertura (con la proposta, se c'è, già applicata): servono a sapere se ci sono modifiche da salvare. */
+  const [iniziali] = useState(() => {
     const fascia = voce?.fascia ?? (soggetto.tipo === 'nuova' ? soggetto.fascia : 'giorno');
+    const salvata = voce ? strutturaDi(voce) : STRUTTURA_VUOTA;
     return {
       genere: (voce?.genere ?? 'azione') as GenereVoce, testo: voce?.azione ?? '', note: voce?.note ?? '', fascia,
-      posizione: postoIniziale(fascia), struttura: voce ? strutturaDi(voce) : STRUTTURA_VUOTA,
+      posizione: postoIniziale(fascia), struttura: proposta ? strutturaConProposta(salvata, proposta) : salvata,
     };
   });
+  const [campi, setCampi] = useState(iniziali);
   const [occupato, setOccupato] = useState(false);
   const scrittura = useRef(false);
   /** Unisce una modifica parziale ai campi del modulo. */
@@ -91,6 +95,10 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   const azione = campi.genere === 'azione';
   const altre = altreDi(campi.fascia);
   const posto = Math.min(campi.posizione, altre.length);
+  // «sporca» = c'è qualcosa che chiudendo si perderebbe: i campi sono cambiati rispetto all'apertura. Con una proposta i campi PARTONO già con la
+  // proposta applicata (`iniziali`), quindi chiudere senza aver toccato nulla non chiede conferma (la proposta resta aperta); «Salva e applica»
+  // salva comunque, perché il salvataggio non dipende da `sporca`.
+  const sporca = JSON.stringify(campi) !== JSON.stringify(iniziali);
 
   const elenchiAzione = useCarica(getElenchiAzione, []);
   const elenchiEffetti = useCarica(getElenchiEffettiVoce, []);
@@ -102,7 +110,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
 
   /**
    * Compone i dati della voce (testo e note ripuliti, note vuote come assenti; tipo, collegamento, rango ed effetti
-   * solo per una cosa da fare), crea o aggiorna la voce, fa ricaricare la giornata, notifica e chiude. Senza testo non fa nulla.
+   * solo per una cosa da fare), crea o aggiorna la voce (o applica la proposta, con gli stessi dati), fa ricaricare la giornata, notifica e
+   * chiude. Senza testo non fa nulla.
    */
   const salva = async () => {
     const testo = campi.testo.trim();
@@ -118,9 +127,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
-      // Aprendo una voce SENZA collegamento con un solo effetto del suo genere, `strutturaDi` ne ricava il collegamento dall'effetto:
-      // salvando, si scrive anche questo. Un collegamento salvato di altro genere (negozio su un lavoro) resta com'è: `uidPrincipale`
-      // serve solo alla finestra per trovare l'effetto principale e non entra mai nei dati. Gli effetti salvati restano intatti.
+      // tipo, collegamento e rango così come li mostra la finestra: L13 (ondata 4a) niente si ricava in silenzio all'apertura, un
+      // collegamento nuovo è solo quello che l'utente ha scelto (in «Quale» o con «Collega»). Gli effetti salvati restano intatti.
       ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
         ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
         ...(produceModificato ? { produce: s.produce } : {}),
@@ -132,12 +140,13 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     setOccupato(true);
     let registrata = false;
     try {
-      if (voce) await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
+      if (voce && proposta) await applicaPropostaConversione(proposta.id, { revisionePropostaAttesa: proposta.revisione, voce: dati }, partitaId ?? undefined);
+      else if (voce) await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
       else await creaVoceGiornata(giorno, dati, partitaId ?? undefined);
       registrata = true;
       segnalaMutazioneEffetti(null);
       await onSalvato();
-      notifica('success', voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
+      notifica('success', proposta ? 'Proposta applicata: voce modificata nella guida, per tutte le partite.' : voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
       onChiudi();
     } catch (err) {
       notifica('error', `${registrata ? 'Voce salvata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Salvataggio non riuscito.'}`);
@@ -167,41 +176,36 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
 
   const colonnaDestra = (
     <div className="voce-colonna">
-      {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} />}
+      {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
       <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
       <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
         onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
-      {azione && elenchi && nomi && <EffettiAggiuntivi valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} />}
     </div>
   );
 
   return (
-    <Modal
-      aperta
-      larga={azione}
+    <FinestraModifica
+      stretta={!azione}
       titolo={voce ? 'Modifica la voce della giornata' : 'Aggiungi alla giornata'}
-      onChiudi={() => { if (!occupato) onChiudi(); }}
-      azioni={(
-        <div className="flex flex-wrap justify-end gap-1.5 w-full">
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onChiudi} />
-          <PulsanteVisivo type="submit" form="modulo-voce-giornata" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={voce ? 'Salva' : 'Aggiungi'}
-            disabled={occupato || !campi.testo.trim() || (azione && !campiCompleti(campi.struttura))} />
-        </div>
-      )}
+      titoloSalva={proposta ? 'Salva e applica' : voce ? 'Salva' : 'Aggiungi'}
+      onChiudi={onChiudi} onSalva={salva} occupato={occupato} sporca={sporca}
+      salvabile={!!campi.testo.trim() && (!azione || campiCompleti(campi.struttura))}
     >
-      <form id="modulo-voce-giornata" className="flex flex-col gap-3" inert={occupato} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+      <div className="flex flex-col gap-3" inert={occupato}>
+        {proposta && (
+          <p className="m-0 rounded-md border border-primary p-2 testo-13 break-words" role="status">
+            <strong>Proposta da completare</strong> ({proposta.certezza === 'certa' ? 'certa' : proposta.certezza === 'probabile' ? 'probabile' : 'da verificare'}): {proposta.motivo} È già applicata qui sotto: rivedila, completa i dati che mancano e salva.
+          </p>
+        )}
         <div className={azione ? 'voce-colonne' : 'flex flex-col gap-3'}>
           {colonnaSinistra}
           {colonnaDestra}
         </div>
         {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
-        <p className="m-0 testo-12 text-text-muted">
-          La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.
-          {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti compaiono come pulsante «Applica» sulla voce, senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
-        </p>
-      </form>
-    </Modal>
+        <p className="m-0 testo-12 text-text-muted">La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.</p>
+      </div>
+    </FinestraModifica>
   );
 }

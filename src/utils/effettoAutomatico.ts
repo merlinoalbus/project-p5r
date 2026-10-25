@@ -3,10 +3,15 @@
 // ============================================================
 //
 // L'utente: «gli effetti della voce dovrebbero essere associati già automaticamente grazie alla selezione di Collegata A e Quale».
-// Il tipo (l'icona) decide a che cosa si collega la voce (`RIFERIMENTO_DI_TIPO`); scelto «Quale», l'effetto principale della spunta
-// nasce da solo. Il FORMATO degli effetti non cambia (`EffettoVoce`, lista con UID): cambia come si sceglie. Le voci già salvate
-// si riaprono con lo stesso criterio: fra gli effetti salvati, il PRIMO che appartiene a tipo e «Quale» della voce è il suo effetto
-// principale (la frase nel riquadro «Spuntando succede»); tutti gli altri sono «effetti aggiuntivi». Nessun effetto si perde.
+// Il tipo (l'icona) decide a che cosa si collega la voce (`RIFERIMENTO_DI_TIPO`); scelto «Quale», l'effetto della spunta che gli
+// corrisponde nasce da solo. Il FORMATO degli effetti non cambia (`EffettoVoce`, lista con UID): cambia come si sceglie.
+//
+// L13 (ondata 4a, richiesta dell'utente sui due acquisti della stessa voce in due punti diversi): niente più effetto «principale» e
+// «aggiuntivi». Gli effetti della voce sono UN elenco, tutti allo stesso livello, e «Spuntando succede» li mostra tutti. Resta solo una
+// regola, dichiarata nell'elenco con «segue Quale»: l'effetto che corrisponde esattamente a tipo e «Quale» (`indiceDelCollegamento`) segue
+// «Quale» quando lo si cambia. All'apertura NIENTE si ricava in silenzio: un collegamento salvato non si riscrive, uno nullo resta nullo, e
+// se gli effetti indicano un collegamento univoco (`collegamentoSuggerito`) la finestra lo PROPONE con un pulsante (prima si scriveva da
+// solo salvando: un dato cambiava senza che l'utente l'avesse toccato).
 // ============================================================
 
 import { RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione';
@@ -40,13 +45,12 @@ export function eDelCollegamento(tipo: TipoAzione, rif: Rif, e: EffettoVoce): bo
     case 'dote': return !!k && e.tipo === 'dote' && e.dote === k;
     case 'richiesta': return !!k && e.tipo === 'richiesta' && e.richiesta === k;
     case 'acquisto': return !!k && e.tipo === 'articolo' && e.articolo.startsWith(`${k}/`);
-    case 'esame': return e.tipo === 'domanda';
-    case 'trama': return e.tipo === 'storia';
+    // esame e trama non hanno un «Quale» da cui l'effetto dipenda (la domanda e l'evento si aggiungono a mano dall'elenco): nessun effetto «segue Quale»
     default: return false;
   }
 }
 
-/** L'effetto è del genere che il tipo produce, qualunque sia l'elemento (per i tipi con un effetto principale legato a «Quale»)? */
+/** L'effetto è del genere che il tipo produce, qualunque sia l'elemento (per i tipi con un effetto legato a «Quale»)? */
 function eDelGenere(tipo: TipoAzione, e: EffettoVoce): boolean {
   switch (tipo) {
     case 'libro': return e.tipo === 'lettura' && e.categoria === 'libro';
@@ -55,9 +59,13 @@ function eDelGenere(tipo: TipoAzione, e: EffettoVoce): boolean {
     case 'lavoro': return e.tipo === 'turno';
     case 'dote': return e.tipo === 'dote';
     case 'richiesta': return e.tipo === 'richiesta';
+    case 'acquisto': return e.tipo === 'articolo' && e.articolo.includes('/');
     default: return false;
   }
 }
+
+/** Il negozio di un articolo: la chiave dell'articolo è «negozio/articolo» (vale per tutti gli articoli del catalogo). */
+export const negozioDiArticolo = (articolo: string): string => articolo.slice(0, Math.max(0, articolo.indexOf('/')));
 
 /** Il collegamento che l'effetto del genere implica (per una voce salvata senza collegamento); null se l'effetto non lo dice. */
 export function riferimentoDaEffetto(tipo: TipoAzione, e: EffettoVoce): Rif {
@@ -68,42 +76,39 @@ export function riferimentoDaEffetto(tipo: TipoAzione, e: EffettoVoce): Rif {
     case 'lavoro': return e.tipo === 'turno' ? { tipo: 'attivita', chiave: e.attivita } : null;
     case 'dote': return e.tipo === 'dote' ? { tipo: 'dote', chiave: e.dote } : null;
     case 'richiesta': return e.tipo === 'richiesta' ? { tipo: 'richiesta', chiave: e.richiesta } : null;
+    case 'acquisto': return e.tipo === 'articolo' && negozioDiArticolo(e.articolo) ? { tipo: 'negozio', chiave: negozioDiArticolo(e.articolo) } : null;
     default: return null;
   }
 }
 
 /**
- * Il collegamento con cui si APRE una voce così com'è salvata: quello salvato, SEMPRE (un dato salvato non si cambia in silenzio, nemmeno
- * un negozio su un lavoro o un'attività su una Dote); solo se è nullo e fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, il
- * collegamento che quell'effetto implica. Vale solo all'apertura (`strutturaDi`): dopo un cambio di tipo il collegamento azzerato resta
- * azzerato, perciò un effetto salvato di un altro tipo non diventa mai «principale» e «Quale» non lo riscrive.
+ * Il collegamento che gli effetti di una voce SENZA collegamento indicano, se è uno solo: tutti gli effetti del genere del tipo portano
+ * allo stesso elemento (la stessa Dote, lo stesso libro; per un acquisto, articoli tutti dello stesso negozio). null se la voce ha già un
+ * collegamento, se nessun effetto lo indica o se ne indicano più d'uno. È una PROPOSTA che la finestra mostra con un pulsante: non si
+ * scrive mai da sola.
  */
-export function riferimentoDiApertura(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): Rif {
-  if (rif) return rif;
-  const candidati = righe.filter((r) => eDelGenere(tipo, r.effetto));
-  return candidati.length === 1 ? (riferimentoDaEffetto(tipo, candidati[0].effetto) ?? rif) : rif;
-}
-
-/**
- * L'UID dell'effetto principale di una voce salvata con un collegamento di ALTRO genere (negozio su un lavoro, attività su una Dote):
- * il collegamento resta com'è, ma se fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, quello è il principale. Solo all'apertura.
- */
-export function uidPrincipaleDiApertura(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): string | null {
-  if (!rif || rif.tipo === RIFERIMENTO_DI_TIPO[tipo]) return null;
-  const candidati = righe.filter((r) => eDelGenere(tipo, r.effetto));
-  return candidati.length === 1 ? candidati[0].uid : null;
+export function collegamentoSuggerito(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): NonNullable<Rif> | null {
+  if (rif) return null;
+  const chiavi = new Map<string, NonNullable<Rif>>();
+  for (const r of righe) {
+    if (!eDelGenere(tipo, r.effetto)) continue;
+    const c = riferimentoDaEffetto(tipo, r.effetto);
+    if (c) chiavi.set(`${c.tipo}:${c.chiave}`, c);
+  }
+  return chiavi.size === 1 ? [...chiavi.values()][0]! : null;
 }
 
 /** Il collegamento salvato è di un genere diverso da quello che il tipo chiede (negozio su un lavoro, film su una Dote)? */
 export const eAltroGenere = (tipo: TipoAzione, rif: Rif): boolean => !!rif && !!RIFERIMENTO_DI_TIPO[tipo] && rif.tipo !== RIFERIMENTO_DI_TIPO[tipo];
 
 /**
- * Il posto, nella lista, dell'effetto principale (-1 se non c'è): prima l'effetto esatto del collegamento corrente; se non c'è e la voce
- * è stata aperta con un collegamento di altro genere (`uidPrincipale`), la riga con quell'UID.
+ * Il posto, nell'elenco, dell'effetto che corrisponde esattamente a tipo e «Quale» della voce (-1 se non c'è): è quello che «segue Quale»
+ * cambiandolo. Un collegamento di altro genere non ne ha nessuno: nessun effetto salvato viene riscritto da «Quale» senza corrispondere.
  */
-export function indicePrincipale(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif, uidPrincipale?: string | null): number {
-  const i = righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
-  return i >= 0 || !uidPrincipale ? i : righe.findIndex((r) => r.uid === uidPrincipale);
+export function indiceDelCollegamento(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif): number {
+  // un acquisto non ha un effetto che segue «Quale»: gli articoli si scelgono negli «Acquisti da questo negozio»
+  if (tipo === 'acquisto') return -1;
+  return righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
 }
 
 /** L'effetto con cui nasce una voce quando si sceglie «Quale»; null se il tipo non ne ha o se l'effetto si sceglie nel riquadro (articolo, domanda, evento). */
@@ -122,18 +127,17 @@ export function effettoIniziale(tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti
 }
 
 /**
- * Il cambio di tipo o di «Quale»: aggiorna il collegamento e fa seguire l'effetto principale. L'effetto principale di prima, se nato in
- * questa finestra (senza UID), si toglie; se già salvato e dello stesso genere si riscrive al suo posto tenendo il suo UID; altrimenti
- * resta fra gli effetti aggiuntivi (mai cancellato in silenzio). Il rango atteso resta solo per un Confidente.
+ * Il cambio di tipo o di «Quale»: aggiorna il collegamento e fa seguire l'effetto che «segue Quale» (`indiceDelCollegamento`). Quello di
+ * prima, se nato in questa finestra (senza UID), si toglie; se già salvato e dello stesso genere si riscrive al suo posto tenendo il suo
+ * UID; altrimenti resta nell'elenco (mai cancellato in silenzio). Un effetto salvato che non corrisponde al collegamento di prima non si
+ * tocca: se serve, quello nuovo si aggiunge accanto e l'elenco li mostra tutti e due. Il rango atteso resta solo per un Confidente.
  */
 export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti): CampiStrutturati {
-  // Cambiando tipo o collegamento l'indicazione d'apertura (`uidPrincipale`) non vale più: il vecchio principale si cerca ancora con essa
-  // qui sotto, ma il nuovo stato non la porta.
-  const base: CampiStrutturati = { ...s, tipo, riferimento: rif, rangoAtteso: tipo === 'confidente' && rif ? s.rangoAtteso : null, uidPrincipale: null };
+  const base: CampiStrutturati = { ...s, tipo, riferimento: rif, rangoAtteso: tipo === 'confidente' && rif ? s.rangoAtteso : null };
   if (!s.effettiVoce) return base;
   let righe = [...s.effettiVoce];
   const nuovo = effettoIniziale(tipo, rif, ctx);
-  const i = indicePrincipale(righe, s.tipo, s.riferimento, s.uidPrincipale);
+  const i = indiceDelCollegamento(righe, s.tipo, s.riferimento);
   let scritto = false;
   // Un effetto già salvato che è proprio quello del nuovo collegamento (stessa Dote, stesso libro…) diventa il principale così com'è:
   // niente effetto nuovo, niente riscrittura, note invariate. Se le chiavi uguali sono più d'una si adotta la prima, le altre restano.
@@ -149,13 +153,20 @@ export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: R
   return { ...base, effettiVoce: righe };
 }
 
-/** Scrive l'effetto principale (lo crea se non c'è); `null` lo toglie. Il posto lo dà `indicePrincipale`. */
-export function impostaPrincipale(s: CampiStrutturati, effetto: EffettoVoce | null): CampiStrutturati {
-  const righe = [...(s.effettiVoce ?? [])];
-  const i = indicePrincipale(righe, s.tipo, s.riferimento, s.uidPrincipale);
-  if (effetto === null) return i < 0 ? s : { ...s, effettiVoce: righe.filter((_, j) => j !== i) };
-  if (i >= 0) righe[i] = { uid: righe[i].uid, effetto }; else righe.push({ uid: null, effetto });
-  return { ...s, effettiVoce: righe };
+/**
+ * L'effetto «compilato dall'utente» che `cambiaCollegamento` toglierebbe cambiando tipo o «Quale»: quello che «segue Quale», nato in questa
+ * finestra (senza UID) e DIVERSO da come nasce da solo (`effettoIniziale` del collegamento di prima), cioè ritoccato a mano o aggiunto a mano.
+ * null se il cambio non toglie niente o toglie solo l'effetto automatico, non ritoccato. La finestra lo usa per avvisare prima di toglierlo.
+ */
+export function effettoCompilatoCheSiPerde(s: CampiStrutturati, tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti): EffettoVoce | null {
+  if (!s.effettiVoce) return null;
+  const i = indiceDelCollegamento(s.effettiVoce, s.tipo, s.riferimento);
+  const riga = i >= 0 ? s.effettiVoce[i] : undefined;
+  if (!riga || riga.uid !== null) return null;
+  // stesso tipo e stesso «Quale» (nessun cambio): niente da togliere
+  if (tipo === s.tipo && rif?.tipo === s.riferimento?.tipo && rif?.chiave === s.riferimento?.chiave) return null;
+  const automatico = effettoIniziale(s.tipo, s.riferimento, ctx);
+  return automatico && JSON.stringify(automatico) === JSON.stringify(riga.effetto) ? null : riga.effetto;
 }
 
 /** I nomi con cui scrivere le frasi degli effetti: tutto per chiave, preso dagli elenchi serviti dall'API. */
@@ -208,9 +219,9 @@ const nomiFrase = (n: NomiEffetti): NomiFraseEffetto => ({
   oggetto: (k) => n.oggetti?.get(k), trofeo: (k) => n.trofei?.get(k), attivita: (k) => n.attivita.get(k),
 });
 
-/** Il nome di una famiglia di effetto, per le schede degli effetti aggiuntivi. */
+/** Il nome di una famiglia di effetto, per le schede dell'elenco degli effetti (e il menu «Aggiungi un effetto»). */
 export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
-  dote: 'Dote in più', lettura: 'Lettura o gioco in più', turno: 'Turno in più', acquisto: 'Aojiru', pesca: 'Pesca a Ichigaya', fortuna: 'Fortuna di Chihaya',
+  dote: 'Dote sociale', lettura: 'Lettura o gioco', turno: 'Turno di un’attività', acquisto: 'Aojiru', pesca: 'Pesca a Ichigaya', fortuna: 'Fortuna di Chihaya',
   storia: 'Evento di storia', domanda: 'Domanda risposta', cruciverba: 'Cruciverba', richiesta: 'Richiesta completata', articolo: 'Articolo comprato',
   invito: 'Invito avvenuto', persona: 'Persona registrata',
   yen: 'Yen', oggetto: 'Oggetto ricevuto', trofeo: 'Trofeo ottenuto', sblocco: 'Sblocco',

@@ -73,8 +73,10 @@ function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
   const nomiFrase = nomiFraseEffetto();
-  // L13 (decisione 6): con più articoli, o copie, una riga che somma copie e prezzo; le frasi dei singoli restano
-  const riepilogo = riepilogoArticoli(fonte.effetti.map((x) => x.effetto), (k) => articoloConNome(k)?.prezzo ?? null);
+  // L13 (decisione 6; ondata 4a): con più articoli, o copie, una riga con tutti gli articoli, le copie e il totale; le frasi dei singoli restano
+  const effetti = fonte.effetti.map((x) => x.effetto);
+  const articoli = effetti.filter((e) => e.tipo === 'articolo');
+  const riepilogo = articoli.length > 1 || articoli.some((a) => a.tipo === 'articolo' && (a.quantita ?? 1) > 1) ? riepilogoArticoli(effetti, articoloConNome) : null;
   return [...fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano

@@ -3,7 +3,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { chiaveSblocco, eEffettoDiStato, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
@@ -108,8 +108,9 @@ function scriviLista(uid:string,effetti:EffettoVoceDto[],raw:string):void {
 }
 export function inizializzaEffettiVoce(uid:string,elenco:EffettoVoce[],origine:EffettoVoceDto['origine']='utente'):void {
   if(!getDb().inTransaction)throw new Error('La creazione degli effetti richiede la transazione della voce.');
-  const v=voce(uid),validi=normalizzaEffettiVoce(elenco);
-  if(validi===null)throw httpErrors.badRequest('effetti-non-validi','La lista completa degli effetti non è riconoscibile.');
+  const v=voce(uid),riconosciuti=normalizzaEffettiVoce(elenco);
+  if(riconosciuti===null)throw httpErrors.badRequest('effetti-non-validi','La lista completa degli effetti non è riconoscibile.');
+  const validi=fondiArticoliUguali(riconosciuti.map((effetto)=>({effetto}))).map((x)=>x.effetto);
   if(v.genere!=='azione'&&validi.length)throw httpErrors.conflict('voce-non-spuntabile','Soltanto un’azione può avere effetti eseguibili.');
   for(const e of validi)verificaNuovoEffetto(e);
   if(prepared('SELECT 1 FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid))throw httpErrors.conflict('effetti-gia-inizializzati','La voce possiede già la propria fonte.');
@@ -120,8 +121,10 @@ export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEf
     const prima=leggiEffettiVoce(uid);if(prima.revisione!==r.revisioneEffettiAttesa)throw httpErrors.conflict('effetti-cambiati','Gli effetti o la fonte sono cambiati: rileggi prima di salvare.');
     if(voce(uid).genere!=='azione'&&r.effetti.length)throw httpErrors.conflict('voce-non-spuntabile','Soltanto un’azione può avere effetti eseguibili.');
     const usati=new Set<string>();
-    const nuovi=r.effetti.map((x,ordine):EffettoVoceDto=>{
-      const effetto=normalizzaEffettoVoce(x.effetto);if(!effetto)throw httpErrors.badRequest('effetto-non-valido','Un effetto della lista non è riconoscibile integralmente.');
+    // L13 (ondata 4a): lo stesso articolo in più effetti è un solo effetto con le copie sommate (la regola della pagina, `fondiArticoliUguali`)
+    const riconosciuti=r.effetti.map((x)=>{const effetto=normalizzaEffettoVoce(x.effetto);if(!effetto)throw httpErrors.badRequest('effetto-non-valido','Un effetto della lista non è riconoscibile integralmente.');return {uid:x.uid,effetto};});
+    const nuovi=fondiArticoliUguali(riconosciuti).map((x,ordine):EffettoVoceDto=>{
+      const effetto=x.effetto;
       const old=x.uid===null?undefined:prima.effetti.find((e)=>e.uid===x.uid);
       if(x.uid!==null&&(!old||usati.has(x.uid)))throw httpErrors.conflict('uid-effetto-diverso','Un UID non appartiene alla fonte corrente oppure è duplicato.');
       if(x.uid)usati.add(x.uid);

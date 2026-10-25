@@ -47,6 +47,8 @@ import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import type { SceltaEsitoSpunta } from '../../../shared/esitiAttivita';
 import { SceltaEsitiVoce } from './SceltaEsito';
+import { FinestraProposteVoce, SegnoDaCompletare } from './ProposteDaCompletare';
+import { useProposteDelGiorno } from '../../hooks/useProposteDaCompletare';
 import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazioneEffetti, useGestiPartita } from '../../services/gestiPartita';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -79,6 +81,8 @@ interface PropsAzione {
   maniglia?: ReactNode;
   rifRiga?: (el: HTMLElement | null) => void;
   classeRiga?: string;
+  /** L13 (ondata 4a, solo preparazione): le proposte «da completare» della voce, con il gesto che le apre. */
+  daCompletare?: { n: number; onApri: () => void };
 }
 
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
@@ -87,7 +91,7 @@ export function Azione(props: PropsAzione) {
   const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
   return <AzioneNelContesto key={contesto} {...props} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga }: PropsAzione) {
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[]; esiti?: SceltaEsitoSpunta[] } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
@@ -156,6 +160,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
+        {!IN_RILASCIO && daCompletare && <span className="flex"><SegnoDaCompletare n={daCompletare.n} voce={a.azione} onApri={daCompletare.onApri} /></span>}
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}
           onCassettoChiuso={partitaId !== null ? () => {
@@ -225,6 +230,10 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   // giorno la scelta non vale più), e la finestra aperta («copia» o «sposta»)
   const [scelta, setScelta] = useState<{ giorno: string; uid: ReadonlySet<string> } | null>(null);
   const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
+  // L13 (ondata 4a, solo preparazione): le proposte «da completare» del giorno, rilette dopo ogni modifica della giornata; la voce di cui sono aperte
+  const [versioneProposte, setVersioneProposte] = useState(0);
+  const proposte = useProposteDelGiorno(g.giorno, versioneProposte);
+  const [proposteDi, setProposteDi] = useState<string | null>(null);
   const scelte = scelta?.giorno === g.giorno ? scelta.uid : null;
   /** Mette o toglie voci dalla scelta. */
   const scegli = (uid: string[], dentro: boolean) => setScelta((s) => {
@@ -246,6 +255,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   /** Dopo una modifica della giornata: la fa ricaricare al genitore e invalida i suggerimenti del giorno. */
   const aggiornata = async () => {
     segnalaMutazioneEffetti(null);
+    setVersioneProposte((n) => n + 1);
     await onGiornataModificata?.();
     // testo, fascia, posto o presenza di una voce cambiano cosa il giorno suggerisce
     useSuggerimentiStore.getState().invalida();
@@ -374,7 +384,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
                 ? <VoceEvento key={v.uid} e={v} gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
                     dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={occupato} /> : undefined} />
                 : <Azione key={`${partitaId}:${v.uid}`} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
-                    gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))} />)}
+                    gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
+                    daCompletare={IN_RILASCIO || !proposte.perVoce.get(v.uid)?.length ? undefined : { n: proposte.perVoce.get(v.uid)!.length, onApri: () => { setMenu(null); setProposteDi(v.uid); } }} />)}
             </ul>
           )}
       </section>
@@ -427,6 +438,15 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       )}
       {partitaId && totali.tutte > 0 && <p className="m-0 testo-12 text-text-muted">{totali.fatte} azioni fatte su {totali.tutte}.</p>}
       {soggetto && <ModuloVoceGiornata soggetto={soggetto} giorno={g.giorno} voci={g.azioni} partitaId={partitaId} onChiudi={() => setSoggetto(null)} onSalvato={aggiornata} />}
+      {!IN_RILASCIO && proposteDi && (() => {
+        const v = g.azioni.find((x) => x.uid === proposteDi);
+        if (!v) return null;
+        return (
+          <FinestraProposteVoce testo={v.azione} giorno={g.giorno} proposte={proposte.perVoce.get(v.uid) ?? []} partitaId={partitaId} onChiudi={() => setProposteDi(null)}
+            onModifica={(p) => { setProposteDi(null); apri({ tipo: 'voce', voce: v, proposta: p }); }}
+            onDecisa={async () => { await aggiornata(); }} />
+        );
+      })()}
       {conferma && (
         <Modal aperta titolo={conferma.titolo} onChiudi={() => setConferma(null)} azioni={(
           <div className="flex flex-wrap justify-end gap-1.5 w-full">

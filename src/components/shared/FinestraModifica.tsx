@@ -41,11 +41,19 @@ interface Props {
   stretta?: boolean;
   /** Un `aria-label` più preciso del titolo per il modulo (lettori di schermo). */
   nomeModulo?: string;
+  /**
+   * L13 (ondata 4a): i dati da modificare non sono ancora arrivati. La finestra è già QUESTA (stesso titolo, stesso piè, «Salva» spento) e
+   * mostra «Un attimo…» al posto del corpo, o l'errore se la lettura non è riuscita: quando i dati arrivano cambia solo il corpo, la
+   * finestra non si smonta e non si rimonta (prima un guscio di caricamento a parte spariva e ne nasceva un'altra, col fuoco perso).
+   */
+  caricamento?: boolean;
+  erroreCaricamento?: string | null;
   children: ReactNode;
 }
 
 /** Una finestra di modifica: titolo, corpo a sezioni che scorre, piè fisso con Elimina / Annulla / Salva. */
-export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, children }: Props) {
+export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, caricamento = false, erroreCaricamento = null, children }: Props) {
+  const inAttesa = caricamento || !!erroreCaricamento;
   /** Chiude, chiedendo conferma se ci sono modifiche non salvate (non durante un salvataggio). */
   const chiudi = async () => {
     if (occupato) return;
@@ -53,19 +61,21 @@ export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Sal
     onChiudi();
   };
   /** Invio in un campo: salva, se si può. */
-  const invia = (e: FormEvent) => { e.preventDefault(); if (salvabile && !occupato) void onSalva(); };
+  const invia = (e: FormEvent) => { e.preventDefault(); if (salvabile && !occupato && !inAttesa) void onSalva(); };
   return (
     <Modal titolo={titolo} aperta larga={!stretta} onChiudi={() => void chiudi()} azioni={(
       <div className="flex w-full flex-wrap items-center gap-2">
         <div className="finestra-modifica__elimina flex flex-wrap items-center gap-2">
-          {onElimina && <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={titoloElimina} disabled={occupato} onClick={onElimina} />}
-          {azioniExtra}
+          {!inAttesa && onElimina && <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={titoloElimina} disabled={occupato} onClick={onElimina} />}
+          {!inAttesa && azioniExtra}
         </div>
         <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={() => void chiudi()} />
-        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={titoloSalva} disabled={occupato || !salvabile} onClick={() => void onSalva()} />
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={titoloSalva} disabled={occupato || !salvabile || inAttesa} onClick={() => void onSalva()} />
       </div>
     )}>
-      <form className="finestra-modifica" aria-label={nomeModulo ?? titolo} onSubmit={invia}>{children}</form>
+      <form className="finestra-modifica" aria-label={nomeModulo ?? titolo} onSubmit={invia}>
+        {erroreCaricamento ? <p role="alert" className="m-0 text-error-testo">{erroreCaricamento}</p> : caricamento ? <p role="status" className="m-0">Un attimo…</p> : children}
+      </form>
     </Modal>
   );
 }

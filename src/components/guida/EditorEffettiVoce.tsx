@@ -2,7 +2,7 @@
 // EditorEffettiVoce — i campi degli effetti che hanno collegamenti fra effetti (pesca, Aojiru) e il caso della fonte non convertibile
 // ============================================================
 //
-// La lista degli effetti aggiuntivi, con le schede, è in `EffettiAggiuntivi`; i campi di ogni effetto, scelti per nome, in
+// L'elenco di tutti gli effetti, con le schede, è in `ElencoEffettiVoce` (L13, ondata 4a); i campi di ogni effetto, scelti per nome, in
 // `CampiEffettoVoce`. Qui restano i due effetti che si raccordano ad altri effetti della voce per UID (l'UID non si mostra mai:
 // si mostra l'effetto) e l'avviso per gli effetti originari che non si convertono.
 // ============================================================
