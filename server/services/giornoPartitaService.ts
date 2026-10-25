@@ -4,7 +4,7 @@
 //
 // Tutte le strade passano da qui: «Segna come giorno corrente» (Oggi, Home e Guida giorno per giorno: `PUT /partite/:id/giorno`),
 // il Calendario e la correzione manuale nel Riepilogo (`PUT /partite/:id` con `dataGioco`) e il cambio automatico alla spunta
-// dell'ultima attività (`avanzaSeGiornoCompleto`). La regola:
+// dell'ultima attività della sera (`avanzaSeFasciaCompleta`, che porta anche da giorno a sera: `passaAllaSeraPartita`). La regola:
 //   1. il giorno deve esistere nel percorso (404 `giorno-non-trovato`); solo la data tolta (`null`) salta il controllo;
 //   2. un giorno nuovo comincia di mattina: la fascia torna a «giorno»; rimarcare lo stesso giorno non cambia nulla;
 //   3. il cambio entra nello storico, nella stessa transazione;
@@ -30,6 +30,27 @@ export interface EsitoCambioGiorno {
   cambiato: boolean;
   da: string | null;
   a: string | null;
+}
+
+/**
+ * Porta la fascia della partita da «giorno» a «sera» senza cambiare il giorno (avanzamento automatico, decisione A1 del 2026-10-25):
+ * l'unico punto che lo fa in automatico. Il passaggio entra nello storico, nella stessa transazione. Restituisce falso se la partita
+ * era già di sera (nessuna modifica, nessun evento).
+ */
+export function passaAllaSeraPartita(partitaId: number, descrizione: DescrizioneCambioGiorno = {}): boolean {
+  verificaPartita(partitaId);
+  return getDb().transaction((): boolean => {
+    const r = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string };
+    if (r.fascia_gioco === 'sera') return false;
+    prepared("UPDATE partita SET fascia_gioco = 'sera', updated_at = ? WHERE id = ?").run(nowIso(), partitaId);
+    registraEvento(
+      partitaId, 'percorso',
+      descrizione.titolo ?? `Si fa sera${r.data_gioco ? ` (${r.data_gioco})` : ''}`,
+      descrizione.dettaglio ?? 'La partita passa dalla fascia «giorno» alla fascia «sera».',
+      { giorno: r.data_gioco, da: 'giorno', a: 'sera' },
+    );
+    return true;
+  })();
 }
 
 /** Cambia il giorno di gioco della partita secondo la regola unica; restituisce se e come è cambiato. */

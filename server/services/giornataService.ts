@@ -163,6 +163,15 @@ function nomeAttualeDelRiferimento(r: RigaVoce, rif: RiferimentoAzioneDto | null
 
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
  *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
+/**
+ * Le decisioni ancora aperte di una voce nella partita: le proposte di punti (`utente.da_applicare` aperte) della voce e quelle del consumo che la
+ * voce ha confermato (ramo `acquisto_provenienza`). È il conteggio del pulsante «Applica» sulla voce (BON-01) e, per lo stesso numero,
+ * la condizione dell'avanzamento automatico di fascia e di giorno (`avanzaSeFasciaCompleta`, decisione A1 del 2026-10-25).
+ */
+export function decisioniApertePerVoce(partitaId: number, voceUid: string): number {
+  return prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(partitaId, voceUid, partitaId, voceUid) as number;
+}
+
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // la fonte unica degli effetti, letta una volta: frase, quiz, oggetti citati e DTO la condividono. F3: una voce con la fonte o le
   // ricevute incoerenti risulta «da correggere» col motivo, da sola: le altre voci del giorno si vedono e funzionano
@@ -188,7 +197,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
   }
   // BON-01: le proposte di punti ancora aperte di questa voce (quelle della voce e quelle del consumo che la voce ha confermato)
-  const daApplicare = ctx.partita === undefined ? 0 : (prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(ctx.partita, r.uid, ctx.partita, r.uid) as number);
+  const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],

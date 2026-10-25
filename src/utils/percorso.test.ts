@@ -15,7 +15,7 @@ describe('descriviEffetti', () => {
         { categoria: 'film', chiave: 'dvd-31', nome: '31', prima: 2, dopo: 2 },
       ],
       turni: [{ attivita: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', ordine: 1, doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3, note: 2 }] }],
-    })).toBe('Fascino +5 (♪♪♪) · Zorro, il fuorilegge 1 → 2 (Gentilezza +7) · 31 già a 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +10 punti');
+    })).toBe('Fascino ♪♪♪ · 5 punti · Zorro, il fuorilegge 1 → 2 (Gentilezza +7) · 31 già a 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +10 punti');
   });
 
   it('l\'incontro con un Confidente: la Dote che ha dato, o «già contato»', () => {
@@ -25,7 +25,7 @@ describe('descriviEffetti', () => {
   });
 
   it('senza letture né turni resta com\'era', () => {
-    expect(descriviEffetti({ doti: [{ chiave: 'perizia', nome: 'Perizia', delta: 2, note: 1 }], confidente: null })).toBe('Perizia +2 (♪)');
+    expect(descriviEffetti({ doti: [{ chiave: 'perizia', nome: 'Perizia', delta: 2, note: 1 }], confidente: null })).toBe('Perizia ♪ · 2 punti');
   });
 });
 

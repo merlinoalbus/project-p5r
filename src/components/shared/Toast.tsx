@@ -4,6 +4,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Link, useInRouterContext } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useNotificationStore, type Notification, type NotificationType } from '../../stores/notificationStore';
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
@@ -103,11 +104,16 @@ export function ToastContainer() {
 
 /** Una notifica della coda, con la × per chiuderla: gli errori e gli avvisi restano finché non si chiudono. */
 function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void }) {
+  // il collegamento è un Link del router: fuori dal router (i test della sola coda) non si mostra
+  const dentroIlRouter = useInRouterContext();
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
     >
       <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
+      {n.collegamento && dentroIlRouter && (
+        <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
+      )}
       <button
         className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
         onClick={() => chiudi(n.id)}

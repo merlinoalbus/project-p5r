@@ -75,4 +75,30 @@ describe('Giorno completato → giorno dopo', () => {
     const esito = await spunta(altre.at(-1)!.uid, true);
     expect(esito.giornoAvanzato).toMatchObject({ da: '04-11', a: '04-12' });
   });
+
+  it('A1 (2026-10-25): l’ultima attività di giorno porta alla sera, quella di sera al giorno dopo; togliere una spunta non riporta indietro', async () => {
+    // il giorno corrente è il 04-12, di giorno: una voce di giorno e una di sera aggiunte, così le due fasce hanno sicuramente un'attività
+    await request(app).put(`/api/partite/${id}`).send({ dataGioco: '04-12', fasciaGioco: 'giorno' });
+    await crea('04-12', { fascia: 'giorno', azione: 'Passeggiata di giorno' });
+    await crea('04-12', { fascia: 'sera', azione: 'Passeggiata di sera' });
+    const g = await giorno('04-12');
+    const diGiorno = g.azioni.filter((x) => x.fascia === 'giorno');
+    const diSera = g.azioni.filter((x) => x.fascia === 'sera');
+    expect(diGiorno.length).toBeGreaterThan(0);
+    expect(diSera.length).toBeGreaterThan(0);
+    // tutte le attività di giorno tranne l'ultima: nessun avanzamento; l'ultima porta alla sera, nello stesso giorno
+    for (const a of diGiorno.slice(0, -1)) expect(await spunta(a.uid, true)).not.toHaveProperty('fasciaAvanzata');
+    expect(await partita()).toMatchObject({ dataGioco: '04-12', fasciaGioco: 'giorno' });
+    const allaSera = await spunta(diGiorno.at(-1)!.uid, true);
+    expect(allaSera.fasciaAvanzata).toMatchObject({ giorno: '04-12', da: 'giorno', a: 'sera', partita: { dataGioco: '04-12', fasciaGioco: 'sera' } });
+    expect(allaSera.giornoAvanzato).toBeUndefined();
+    // togliere e rimettere una spunta di giorno non riporta indietro la fascia né la fa avanzare di nuovo
+    expect((await spunta(diGiorno[0].uid, false)).fasciaAvanzata).toBeUndefined();
+    expect(await partita()).toMatchObject({ dataGioco: '04-12', fasciaGioco: 'sera' });
+    expect((await spunta(diGiorno[0].uid, true)).giornoAvanzato).toBeUndefined();
+    // l'ultima attività di sera porta al giorno dopo, di giorno
+    for (const a of diSera.slice(0, -1)) expect((await spunta(a.uid, true)).giornoAvanzato).toBeUndefined();
+    const alGiornoDopo = await spunta(diSera.at(-1)!.uid, true);
+    expect(alGiornoDopo.giornoAvanzato).toMatchObject({ da: '04-12', a: '04-13', partita: { dataGioco: '04-13', fasciaGioco: 'giorno' } });
+  });
 });

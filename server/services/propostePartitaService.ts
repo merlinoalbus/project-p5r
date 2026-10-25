@@ -3,6 +3,7 @@ import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
+import { avanzaDopoDecisioni } from './avanzamentoGiornataService.js';
 import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
@@ -383,9 +384,10 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
       if(!porte)throw httpErrors.conflict('dominio-non-collegato','Il mutatore canonico non è disponibile.');
       for(const m of p.movimenti){if(m.tipo==='yen')porte.applicaYen(partita,m.delta);else if(m.tipo==='punti-pesca'){if(!porte.applicaPuntiPesca)throw httpErrors.conflict('dominio-non-collegato','Il saldo punti pesca non è collegato.');porte.applicaPuntiPesca(partita,m.delta);}else {if(!eDote(m.chiave))throw httpErrors.conflict('dote-non-valida','Dote non valida.');porte.applicaDote(partita,m.chiave,m.delta);}if(valore(partita,m.tipo,m.chiave)!==m.dopo)throw httpErrors.conflict('delta-non-applicato','Il dominio non ha applicato il delta esatto approvato.');}
     }
-    const cause=new Map<string,Causa>(),cursori=new Map(p.movimenti.map((m)=>[`${m.tipo}\0${m.chiave}`,m.prima]));
+    const cause=new Map<string,Causa>(),cursori=new Map(p.movimenti.map((m)=>[`${m.tipo}\0${m.chiave}`,m.prima])),decise:RigaProposta[]=[];
     for(const item of p.proposte){
       const q=prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND id=? AND uid=?').get(partita,item.id,item.uid) as RigaProposta;
+      decise.push(q);
       if(r.decisione.tipo==='scarta')prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='utente',motivo_chiusura='scartata-dall-utente',decisa_il=? WHERE id=? AND stato='aperta'").run(adesso,q.id);
       else if(r.decisione.tipo==='non-conteggiata'||r.decisione.tipo==='ignota')prepared('UPDATE utente.da_applicare SET verifica=? WHERE id=? AND stato=\'aperta\'').run(r.decisione.tipo,q.id);
       else {
@@ -410,6 +412,9 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     prepared('INSERT INTO utente.proposta_operazione(partita_id,operazione_id,payload_json,ricevuta_json,created_at) VALUES(?,?,?,?,?)').run(partita,r.operazioneId,payload,jsonCanonico(ricevuta),adesso);
     for(const c of cause.values())riconciliaBeneficiCausa(partita,c);
     prepared('UPDATE utente.partita SET updated_at=? WHERE id=?').run(adesso,partita);
-    return ricevuta;
+    // decisione A1 (2026-10-25): chiusa l'ultima decisione aperta di una fascia/giornata già spuntata per intero, la partita avanza (alla sera o al
+    // giorno dopo) nella stessa transazione, e la risposta lo dice. L'avanzamento non entra nella ricevuta salvata: una ripetizione del gesto la rende com'era.
+    const avanzamento=avanzaDopoDecisioni(partita,decise);
+    return avanzamento?{...ricevuta,...avanzamento}:ricevuta;
   })();
 }
