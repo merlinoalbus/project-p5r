@@ -15,7 +15,7 @@ import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { testoAvanzamento } from '../../utils/gestiVoce';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { eOffertaAojiru } from '../../../shared/acquisti';
@@ -275,6 +275,8 @@ function disponibilita(a: { disponibileDal: string | null }): string {
 export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onAcquistiCambiati, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true, nonDisponibili }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
+  // id delle istruzioni da tastiera lette dal lettore di schermo (`aria-describedby` della tela): uno per visore, ce ne può essere più d'uno in pagina
+  const idIstruzioni = useId();
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
   // l'altezza del popup dello spillo, misurata quando è ancorato al punto (vedi `popupSotto`): per spillo, così una nuova selezione rimisura
   const popupRif = useRef<HTMLDivElement | null>(null);
@@ -789,6 +791,40 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const cursore = editor && editor.strumento !== 'seleziona' ? 'cursor-crosshair' : 'cursor-grab';
   const percorsoTesto = mappa.percorso.map((p) => p.nome).join(' › ');
 
+  /** Consultazione da tastiera (WCAG 2.1.1, 2.5.7), solo fuori dall'editor: con la tela a fuoco le frecce spostano la vista, + e − ingrandiscono
+   *  e riducono attorno al centro, 0 o Home tornano alla vista intera; Esc chiude il popup del pin aperto (da dentro il popup, anche se è in un
+   *  portale: gli eventi React risalgono comunque alla tela) e riporta il fuoco sul pin. Tab/Maiusc+Tab fra i pin e Invio/Spazio sono quelli
+   *  nativi dei pulsanti `.spillo-mappa`, con lo stesso `onClick` del tocco. Un tasto già gestito da un controllo interno (la tendina del
+   *  Selettore, un campo) non arriva qui come comando: i comandi di vista agiscono solo se il fuoco è sulla tela stessa. */
+  const suTasto = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (editor || e.defaultPrevented) return;
+    if (e.key === 'Escape') {
+      // l'elenco di un gruppo lo chiude già il suo ascoltatore; una finestra aperta (galleria) ha la sua Esc
+      if (gruppoAperto || document.querySelector('.modal-overlay')) return;
+      if (!selezionato || selezionato.id === popupSoppresso) return;
+      const id = selezionato.id;
+      e.preventDefault();
+      seleziona(null);
+      // il popup sparisce con il fuoco dentro: lo si rimette sul pin da cui era stato aperto (se è ancora sulla mappa)
+      requestAnimationFrame(() => tela.current?.querySelector<HTMLElement>(`[data-spillo-id="${id}"]`)?.focus({ preventScroll: true }));
+      return;
+    }
+    if (e.target !== e.currentTarget || e.ctrlKey || e.metaKey || e.altKey) return;
+    // passo di spostamento: un sesto del lato corto della tela, mai meno di 48 px; la vista va nel verso della freccia
+    const passo = Math.max(48, Math.min(dim.w, dim.h) / 6);
+    const sposta = (dx: number, dy: number) => { e.preventDefault(); setPanEsplicito({ x: pan.x - dx, y: pan.y - dy }); };
+    switch (e.key) {
+      case 'ArrowLeft': sposta(-passo, 0); break;
+      case 'ArrowRight': sposta(passo, 0); break;
+      case 'ArrowUp': sposta(0, -passo); break;
+      case 'ArrowDown': sposta(0, passo); break;
+      case '+': case '=': e.preventDefault(); zoomCentro(1.4); break;
+      case '-': case '_': e.preventDefault(); zoomCentro(1 / 1.4); break;
+      case '0': case 'Home': e.preventDefault(); adatta(); break;
+      default: break;
+    }
+  };
+
   return (
     // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6)
     <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${className ?? ''}`} data-testid="visore-mappa"
@@ -922,8 +958,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           className={`visore-mappa__tela ${cursore} ${trascinando ? 'cursor-grabbing' : ''}`}
           role="application"
           aria-label={`${nomeTipoMappa(mappa)}: ${percorsoTesto}`}
+          // fuori dall'editor la tela prende il fuoco da tastiera (Tab) per spostare e ingrandire la vista; nell'editor resta com'era
+          tabIndex={editor ? undefined : 0}
+          aria-describedby={editor ? undefined : idIstruzioni}
+          onKeyDown={suTasto}
           onPointerDown={suPointerDown} onPointerMove={suPointerMove} onPointerUp={suPointerUp} onPointerCancel={annullaGesto} onDoubleClick={adatta}
         >
+          {!editor && <span id={idIstruzioni} className="sr-only">Frecce per spostare la mappa, più e meno per ingrandire e ridurre, zero o Inizio per la vista intera. Tab per passare da uno spillo all'altro, Invio o Spazio per aprirlo, Esc per chiudere la scheda.{scelta ? '' : " L'elenco degli spilli è nel pannello."}</span>}
           <div className="visore-mappa__livello" style={stileLivello}>
             {src ? (
               // le zone d'origine dei pezzi (102) sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
@@ -972,6 +1013,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
+                  data-spillo-id={s.id}
                   className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''} ${categoriaSpillo(s.tipo) === 'spostamento' ? 'spillo-mappa--spostamento' : ''} ${s.daVerificare && !scelta ? 'spillo-mappa--da-verificare' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non

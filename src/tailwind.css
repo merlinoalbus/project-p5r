@@ -833,6 +833,12 @@
 
   .spillo-mappa { position: absolute; display: flex; flex-direction: column; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; z-index: 5; transform-origin: 0 0; color: #fff; }
   .spillo-mappa--selezionato { z-index: 8; }
+  /* Fuoco da tastiera (consultazione senza mouse): la tela mostra un contorno interno, il pin un anello attorno alla goccia (o alla pastiglia
+     del gruppo); solo `:focus-visible`, così il tocco e il clic non lasciano segni. */
+  .visore-mappa__tela:focus-visible { outline: 3px solid var(--color-primary-testo); outline-offset: -3px; }
+  .spillo-mappa:focus-visible { outline: none; z-index: 9; }
+  .spillo-mappa:focus-visible .spillo-mappa__goccia, .spillo-mappa:focus-visible .spillo-mappa__disegno, .spillo-mappa:focus-visible .spillo-mappa__gruppo { outline: 3px solid var(--color-primary-testo); outline-offset: 3px; }
+  .spillo-mappa:focus-visible .spillo-mappa__etichetta { opacity: 1; }
   /* Col dito la goccia è 38 px, sotto i 44 richiesti; ingrandirla coprirebbe la mappa, che è il
      contenuto. Si allarga quindi la sola area che riceve il tocco, con un rettangolo invisibile
      attorno al disegno: il pin resta quello, il bersaglio arriva a 44. */
