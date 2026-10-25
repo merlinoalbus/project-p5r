@@ -14,6 +14,15 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { gruppiDellaVoce } from '../../utils/percorso';
 
+/** L13 (decisione 18): che cosa fa la spunta con gli yen delle consumazioni e delle visite da osservare; `giaNelSaldo` di `totale` avevano
+ *  il loro denaro già nel saldo da prima che gli yen si muovessero da soli (`AzionePercorsoDto.yenGiaNelSaldo`), e la spunta non lo muove. */
+function fraseYenOsservazioni(giaNelSaldo: number, totale: number): string {
+  const sempre = 'la spunta resta possibile anche se il saldo non basta';
+  if (totale > 0 && giaNelSaldo === totale) return `gli yen di queste osservazioni erano già nel saldo da prima che si muovessero da soli: la spunta non li muove (${sempre}).`;
+  if (giaNelSaldo > 0) return `gli yen delle osservazioni segnate prima che si muovessero da soli erano già nel saldo e non si muovono; per le altre prezzo e quota si scalano da soli dal saldo, mai sotto zero (${sempre}).`;
+  return `il prezzo di una consumazione nuova e la quota di una visita nuova si scalano da soli dal saldo, mai sotto zero (${sempre}).`;
+}
+
 const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
 
 /** Raccoglie tutte le osservazioni senza scrivere; il genitore invia poi un'unica spunta atomica. */
@@ -61,9 +70,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   </>}>
     <div className="flex min-w-0 flex-col gap-3 testo-13">
       <strong>{a.azione}</strong>
-      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; {a.yenFuoriRegistro
-        ? 'gli yen degli effetti segnati prima che si muovessero da soli erano già nel saldo e non si muovono, gli altri si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche se il saldo non basta).'
-        : 'il prezzo di una consumazione nuova e la quota di una visita nuova si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche se il saldo non basta).'}</p>
+      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; {fraseYenOsservazioni(effetti.filter((e) => a.yenGiaNelSaldo?.effetti.includes(e.uid)).length, effetti.length)}</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
       <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" /></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}

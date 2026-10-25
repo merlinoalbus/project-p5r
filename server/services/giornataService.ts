@@ -41,7 +41,7 @@ import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
-import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce } from './yenAutomaticiService.js';
+import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce, type EffettoPerYen } from './yenAutomaticiService.js';
 import { yenDelDato } from './yenDeiDati.js';
 
 export interface RigaVoce {
@@ -108,6 +108,10 @@ function effettoConYen(e: EffettoVoce): boolean {
   if (e.tipo === 'lettura' && e.categoria === 'film') return (yenDelDato('film', e.chiave) ?? 0) > 0;
   if (e.tipo === 'richiesta') return (yenDelDato('richiesta', e.richiesta) ?? 0) > 0;
   return false;
+}
+/** L'effetto come lo legge la nozione degli yen già nel saldo: l'attività del turno e la Richiesta sono le cause vere dei loro yen. */
+function effettoPerYen(uid: string, e: EffettoVoce): EffettoPerYen {
+  return { uid, tipo: e.tipo, chiave: e.tipo === 'turno' ? e.attivita : e.tipo === 'richiesta' ? e.richiesta : null };
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi. */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto, yenGiaNelSaldo: ReadonlySet<string>): string[] {
@@ -244,14 +248,11 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
   // L13 (decisione 18): gli yen che la spunta di questa voce ha mosso da soli nella partita (spese scalate, guadagni entrati), da mostrare sulla voce
   const yenAutomatici = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : yenAutomaticiDellaVoce(ctx.partita, r.uid);
-  // gli effetti con yen nati prima che gli yen si muovessero da soli (spunta di allora ancora in piedi, o tolta e rimessa): il loro denaro era
-  // già nel saldo e la spunta non lo muove. Le frasi e le note della voce lo dicono, invece di promettere un movimento che non c'è
-  const yenGiaNelSaldo = ctx.partita === undefined || !spuntabile ? new Set<string>() : (() => {
-    const fattaIl = ctx.fatte.has(r.uid) ? (prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(ctx.partita, r.uid) as { fatta_at: string } | undefined)?.fatta_at ?? null : null;
-    const conYen = fonte.effetti.filter((x) => effettoConYen(x.effetto)).map((x) => x.uid);
-    return conYen.length ? effettiConYenGiaNelSaldo(ctx.partita, r.uid, fattaIl, conYen) : new Set<string>();
-  })();
-  const yenFuoriRegistro = yenGiaNelSaldo.size > 0;
+  // gli effetti con yen il cui denaro era già nel saldo da prima che gli yen si muovessero da soli (la nozione unica,
+  // `yenAutomaticiService.effettiConYenGiaNelSaldo`: applicati da una spunta di prima senza movimento per la loro causa, o segnati togliendola):
+  // la spunta non li muove. Le frasi e le note della voce lo dicono effetto per effetto, invece di promettere un movimento che non c'è
+  const conYen = ctx.partita === undefined || !spuntabile ? [] : fonte.effetti.filter((x) => effettoConYen(x.effetto));
+  const yenGiaNelSaldo = ctx.partita === undefined || !conYen.length ? new Set<string>() : effettiConYenGiaNelSaldo(ctx.partita, r.uid, conYen.map((x) => effettoPerYen(x.uid, x.effetto)));
   // L13: le scelte che la spunta chiederà (esito del turno, note di una Dote a valori possibili), al giorno della voce; gli effetti rivendicati
   // da un acquisto o da una pesca non si applicano come legacy e quindi non chiedono niente (stessa regola di `applicaEffettiVoce`)
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
@@ -260,7 +261,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
-    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenFuoriRegistro ? { yenFuoriRegistro: true as const } : {}),
+    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: { effetti: [...yenGiaNelSaldo], tutti: yenGiaNelSaldo.size === conYen.length } } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),

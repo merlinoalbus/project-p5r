@@ -11,9 +11,10 @@
 // `yen_automatico_inizio`: una riga, il momento da cui gli yen si muovono da soli in questo file delle partite (il primo movimento già
 // registrato, altrimenti adesso). Ciò che è nato prima di quel momento era già nel saldo.
 // `yen_fuori_registro`: le cause tolte senza un movimento da restituire perché nate prima (`yenAutomaticiService.segnaYenFuoriRegistro`):
-// rimettendo la stessa causa il saldo non cambia. Causa «voce» con chiave `voce:effetto` (un effetto che la voce spuntata prima aveva allora,
-// anche un turno o una Richiesta), «richiesta» (completata prima), «regalo» (oggetto e momento di gioco della consegna di prima con l'acquisto).
-// Quali cause si segnano lo decide `yenAutomaticiService` dal momento della causa. Le righe non si tolgono: sono la storia del saldo.
+// rimettendo la stessa causa il saldo non cambia. Causa «voce» con chiave `voce:effetto` (un effetto i cui yen erano già nel saldo da prima,
+// anche un turno: `yenAutomaticiService.yenDellEffettoGiaNelSaldo`), «richiesta» (completata prima), «regalo» (oggetto e momento di gioco della
+// consegna di prima con l'acquisto). Quali cause si segnano lo decide `yenAutomaticiService`. Le righe non si tolgono: sono la storia del saldo
+// (un segno superato da una versione nuova dell'effetto confermata dopo resta, con il motivo `superato-da-raccordo`).
 //
 // Append-only, idempotente (IF NOT EXISTS, INSERT OR IGNORE), solo schema «utente»: nessuna riga esistente cambia, nessun saldo si riscrive.
 // ============================================================

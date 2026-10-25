@@ -5,7 +5,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { articoloPagatoDalTurno } from './attivitaService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
@@ -430,8 +430,9 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
 /**
  * L13 (decisione 18): toglie dalla coda del gesto (`conYenInOrdine`) il movimento dei turni appena registrati che non devono muovere yen, senza
  * toccare il saldo:
- *   - il turno di un effetto della voce spuntata prima degli yen automatici (fuori registro togliendo la spunta): rispuntando la stessa voce quel
- *     turno era già nel saldo. Un effetto «turno» aggiunto dopo ha un'altra chiave e muove i suoi yen;
+ *   - il turno di un effetto i cui yen erano già nel saldo da prima (segnato fuori registro togliendo la spunta, `yenDellEffettoGiaNelSaldo`):
+ *     rispuntando la stessa voce quel turno non muove yen. Un effetto «turno» aggiunto dopo (con la sua proposta aperta) o raccordato dopo non
+ *     ha il segno (il raccordo lo supera) e muove i suoi yen;
  *   - la sfida che un articolo della stessa voce paga già (decisione 2: gli yen li muove un dato solo; lo stesso acquisto non si conta due volte).
  * Un turno che non è in coda (un movimento già in vigore) non si tocca.
  */
@@ -472,6 +473,10 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   // L13 (decisione 18): gli yen che la versione precedente aveva mosso da soli tornano com'erano e la nuova versione muove i suoi. Per una
   // consumazione o una visita collegata allo stesso fatto già pagato (non nuova) il movimento di prima resta: quel fatto è lo stesso
   const causaYen={tipo:'voce' as const,chiave:`${uid}:${id}`};
+  // la sostituzione confermata adesso porta una versione nuova dell'effetto, nata dopo gli yen automatici: il segno «fuori registro» dello stesso
+  // effetto (lasciato togliendo una spunta di prima) non vale più, e la versione nuova muove i suoi yen ora e a ogni spunta successiva. Il raccordo
+  // della stessa versione non applicata (la voce rimessa dal cestino ripropone i suoi effetti) non è denaro nuovo: il segno resta
+  if(proposta.dati.sostituzione===true)superaYenFuoriRegistro(p,causaYen);
   const sostituisciYen=(nuovo:YenDaMuovere|null,fattoNuovo:boolean):void=>{if(fattoNuovo||e.effetto.tipo==='yen'||(e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'))restituisciYenAutomatico(p,causaYen,'versione-sostituita');muoviYenDellaVoce(p,uid,[nuovo]);};
   if(e.effetto.tipo==='acquisto'){
     for(const a of assorbimenti)if(prepared('UPDATE utente.effetto_applicato SET annullato_il=?,assorbita_da=? WHERE partita_id=? AND id=? AND annullato_il IS NULL AND assorbita_da IS NULL AND sostituita_da IS NULL').run(nowIso(),nuovaRicevuta,p,a.ricevuta.id).changes!==1)throw httpErrors.conflict('sidecar-dote-cambiato','La Dote precedente è cambiata durante il raccordo.');
@@ -494,15 +499,16 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   // L13: un effetto Yen aggiunto (o cambiato) su una voce già spuntata, confermato qui: decisione 18, gli yen entrano o si scalano da soli (mai sotto
   // zero); solo con yen ancora proposti in sospeso per lo stesso effetto la ricevuta dichiara il beneficio e resta la proposta «Applica», com'era
   if(e.effetto.tipo==='yen'){restituisciYenAutomatico(p,causaYen,'versione-sostituita');const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});muoviYenDellaVoce(p,uid,[y.movimento]);return;}
-  // L13 (decisione 18): il turno raccordato muove i suoi yen alla fine (`conYenInOrdine`), tranne quello dell'effetto di una voce di prima
-  // rispuntata e la sfida che un articolo della voce ha già pagato (`scartaYenDeiTurni`)
+  // L13 (decisione 18): il turno raccordato muove i suoi yen alla fine (`conYenInOrdine`), legati alla voce (`conYenDellaVoce`: il chip li mostra,
+  // l'annullo e i testi li ritrovano), tranne la sfida che un articolo della voce ha già pagato (`scartaYenDeiTurni`; il segno di prima dello
+  // stesso effetto è superato qui sopra)
   const effettoLegacy=e.effetto;
-  const legacy=conYenInOrdine(()=>{
+  const legacy=conYenDellaVoce(uid,()=>conYenInOrdine(()=>{
     const l=porte.applicaLegacy(p,[effettoLegacy],[sceltaStorica]);
     const articoliPagati=new Set(leggiEffettiVoce(uid).effetti.flatMap((x)=>x.effetto.tipo==='articolo'&&yenAutomaticoAttivo(p,{tipo:'voce',chiave:`${uid}:${x.uid}`})?[x.effetto.articolo]:[]));
     scartaYenDeiTurni(p,uid,(l?.turni??[]).map((turno)=>({effettoUid:id,turno})),articoliPagati);
     return l;
-  });
+  }));
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
   sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
@@ -541,9 +547,10 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   // Valida tutto prima della prima mutazione. L'annullo legge i receipt, mai la configurazione attuale.
   // L13 (decisione 18): per primi tornano gli yen che gli effetti della voce avevano mosso da soli (le spese restituite com'erano state scalate,
   // poi i guadagni tolti al più fino a zero); quelli dei turni li restituisce il turno tolto qui sotto, quelli di una Richiesta la Richiesta riaperta
-  // Una spunta nata prima degli yen automatici non ha movimenti da restituire (il saldo di allora la contava già): i suoi effetti senza movimento e
-  // la spunta stessa restano fuori registro, così rispuntando la voce il saldo non cambia (prima della restituzione: una riga in coda non conta più)
-  if(spunta)segnaYenDellaSpuntaFuoriRegistro(p,uid,spunta.fatta_at,[...righeEffetti(uid).map((e)=>e.uid),...tutte.map((r)=>r.effettoUid)]);
+  // Gli effetti i cui yen erano già nel saldo da prima (applicati dalla spunta prima degli yen automatici, senza movimento per la loro causa vera:
+  // `yenDellEffettoGiaNelSaldo`) non hanno niente da restituire e restano fuori registro, così rispuntando la voce il saldo non cambia per loro.
+  // Prima della restituzione e prima di chiudere ricevute e proposte aperte: sono loro a dire che cosa la spunta aveva applicato
+  if(spunta)segnaYenDellaSpuntaFuoriRegistro(p,uid,righeEffetti(uid).map((e)=>({uid:e.uid,tipo:e.tipo,chiave:e.chiave})));
   restituisciYenAutomaticiDellaVoce(p,uid,'spunta-tolta');
   if(legacyDaAnnullare)porte.annullaLegacy(p,legacyDaAnnullare);
   for(const r of extra)if(r)porte.annullaLegacy(p,r);

@@ -30,7 +30,7 @@ import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenFuoriRegistro'>>;
+  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenGiaNelSaldo' | 'effettiVoce'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -53,6 +53,11 @@ interface PropsCartellini {
 export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
+  // L13 (decisione 18): «paga ¥X» dei turni i cui yen erano già nel saldo da prima, dalla frase del loro effetto (stesso ordine degli effetti)
+  const pagheGiaNelSaldo = (a.effettiVoce?.effetti ?? []).flatMap((e, i) => {
+    const t = a.yenGiaNelSaldo?.effetti.includes(e.uid) ? a.produceTesto?.[i] : undefined;
+    return t?.includes(' paga ¥') ? [t.slice(t.indexOf('paga ¥'))] : [];
+  });
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
   // R10-27. Nella Home e nella Guida › Giorno per giorno (dove il diario ha il pannello, `useApriPannello`) un clic semplice sull'oggetto
@@ -126,9 +131,9 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
       {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: {a.note}</span>}
-      {/* la paga di un turno di prima degli yen automatici (era già nel saldo): il fatto, senza la promessa di un movimento; la paga mossa dalla
-          spunta la dice il chip del movimento */}
-      {a.fatta && a.yenFuoriRegistro && !a.yenAutomatici?.some((m) => m.causa === 'turno') && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted tabular-nums">{t.slice(t.indexOf('paga ¥'))}</span>)}
+      {/* la paga dei turni i cui yen erano già nel saldo da prima (effetto per effetto, `produceTesto[i]` è l'effetto `i`): il fatto, senza la
+          promessa di un movimento; la paga mossa dalla spunta la dice il chip del movimento */}
+      {a.fatta && pagheGiaNelSaldo.map((t, i) => <span key={`${i}:${t}`} className="testo-12 text-text-muted tabular-nums">{t}</span>)}
       {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}>{descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })}</span>}
       {/* L13 (decisione 18): gli yen che la spunta ha mosso da soli, uno per causa, con l'importo davvero mosso (il saldo non scende sotto zero) */}
       {a.fatta && a.yenAutomatici?.map((m) => (
@@ -136,11 +141,11 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
           {m.motivo} · {fraseMovimentoYen(m)}
         </span>
       ))}
-      {/* gli effetti con yen nati prima degli yen automatici (spunta di allora, o tolta e rimessa): il loro denaro era già nel saldo, e la spunta
-          non lo muove; con altri yen mossi dalla stessa spunta, la frase dice che vale per gli altri */}
-      {a.fatta && a.yenFuoriRegistro && <span className="testo-12 text-text-muted">{a.yenAutomatici?.length
-        ? 'Gli altri yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'
-        : 'Gli yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'}</span>}
+      {/* gli effetti con yen il cui denaro era già nel saldo da prima (applicati da una spunta di prima, o segnati togliendola): la spunta non lo
+          muove. Tutti gli effetti con yen della voce, o solo una parte (gli altri hanno il loro chip, o li muoverà la spunta) */}
+      {a.fatta && a.yenGiaNelSaldo && <span className="testo-12 text-text-muted text-pretty">{a.yenGiaNelSaldo.tutti
+        ? 'Gli yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'
+        : 'Gli yen degli effetti segnati prima che si muovessero da soli erano già nel saldo: la spunta non li muove.'}</span>}
     </span>
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
         si segnano a mano (scelta dell'utente, 2026-09-30); gli yen (decisione 18) si muovono da soli spuntando la voce, e il riepilogo lo dice */}

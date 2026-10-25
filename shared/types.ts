@@ -1358,10 +1358,11 @@ export interface AzionePercorsoDto {
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
    *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
   yenAutomatici?: MovimentoYenAutomaticoDto[];
-  /** L13 (decisione 18): vero se la voce ha effetti con yen (prezzo, paga, costo, ricompensa, yen) nati prima che gli yen si muovessero da
-   *  soli: con la spunta di allora ancora in piedi, o tolta (e magari rimessa). Il loro denaro era già nel saldo e la spunta non lo muove (né
-   *  togliendola né rimettendola); gli effetti aggiunti dopo si muovono come sempre (`yenAutomatici`). Assente altrimenti. */
-  yenFuoriRegistro?: true;
+  /** L13 (decisione 18): gli effetti con yen (prezzo, paga, costo, ricompensa, yen) il cui denaro era già nel saldo da prima che gli yen si
+   *  muovessero da soli (`yenAutomaticiService.effettiConYenGiaNelSaldo`): applicati da una spunta di prima senza un movimento per la loro causa,
+   *  o segnati togliendola. La spunta non li muove (né togliendola né rimettendola); gli altri si muovono come sempre (`yenAutomatici`).
+   *  `effetti`: gli uid (in `effettiVoce`); `tutti`: vero se sono tutti gli effetti con yen della voce. Assente se non ce n'è nessuno. */
+  yenGiaNelSaldo?: { effetti: string[]; tutti: boolean };
   /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
   dialogo?: DialogoVoceDto;
   /** 2026-10-24: con una partita, il rango del Confidente della voce nella partita (le note della voce lo citano se differisce dal rango atteso). */

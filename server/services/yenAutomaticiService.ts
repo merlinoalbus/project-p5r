@@ -28,12 +28,19 @@
 // Le cause nate prima che gli yen si muovessero da soli (utente 049, `yen_automatico_inizio`) erano già nel saldo e non hanno un movimento:
 // togliendole non torna niente. Il segno «fuori registro» (`segnaYenFuoriRegistro`, prima di restituire) vale SOLO per la stessa causa nata
 // prima, ricavata dal suo momento, e rimettendola il saldo non cambia perché nel gioco non è successo niente di nuovo:
-//   - la voce spuntata prima: ogni suo effetto di allora (`voce:effetto`, anche turni e Richieste della voce), così rispuntando la stessa voce
-//     i suoi effetti di allora non muovono yen; un effetto aggiunto dopo ha un'altra chiave e si muove come sempre;
+//   - l'effetto di una voce: la nozione è UNA, `yenDellEffettoGiaNelSaldo`, e si ricava da ciò che è successo a quell'effetto, non dalla data
+//     della spunta né dagli effetti di adesso. L'effetto è «già nel saldo da prima» solo se nessun movimento è in vigore per la sua causa vera
+//     (`voce:effetto`; i turni che ha registrato; la sua Richiesta; le proposte «Applica» di prima ancora in sospeso) E la spunta lo aveva
+//     applicato prima degli yen automatici (la ricevuta dell'effetto o lo stato che ha segnato, nati prima; per le spunte di prima delle ricevute
+//     per effetto, la spunta stessa, salvo una proposta di raccordo aperta, che prova che l'effetto non è stato applicato) o è segnato fuori
+//     registro da una tale spunta tolta. Un effetto con la proposta di raccordo aperta, o raccordato dopo (la sua ricevuta è nata dopo; una
+//     versione nuova confermata supera anche il segno, `superaYenFuoriRegistro`), muove i suoi yen come sempre. La usano l'annullo (il segno),
+//     la spunta (i turni da scartare) e i testi della voce;
 //   - la Richiesta completata prima (il momento del completamento, `richiesta_partita.updated_at`): riaprendola e ricompletandola non entra;
 //     una Richiesta completata dopo senza movimento (per esempio senza yen scritti in quel momento) non si segna, e ricompletandola entra;
 //   - il regalo dato prima con l'acquisto: il segno porta l'oggetto e il momento di gioco della consegna, e vale solo ridandolo nello stesso
-//     momento di gioco (la stessa consegna corretta); un regalo dato in un altro momento è un regalo nuovo e si paga;
+//     momento di gioco (la stessa consegna corretta); un regalo dato in un altro momento è un regalo nuovo e si paga. Senza un momento di gioco
+//     (la partita non ha giorno o fascia) non c'è modo di riconoscere la stessa consegna: niente segno, e il regalo ridato si paga;
 //   - un turno tolto dal contatore non si segna: il + del contatore è sempre un turno nuovo, nato adesso, e muove i suoi yen.
 // ============================================================
 
@@ -77,9 +84,21 @@ export function nataPrimaDegliYenAutomatici(dal: string | null | undefined): boo
   const inizio = inizioRegistro();
   return !!dal && !!inizio && dal < inizio;
 }
+/** Il motivo del segno superato da un raccordo confermato dopo gli yen automatici: la riga resta (è la storia del saldo) ma non vale più. */
+const MOTIVO_SEGNO_SUPERATO = 'superato-da-raccordo';
 /** Vero se la causa è «fuori registro»: tolta quando il suo denaro era già nel saldo senza un movimento, rimettendola non si muove niente. */
 export const yenFuoriRegistro = (p: number, c: CausaYen): boolean =>
-  !!prepared('SELECT 1 FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ?').get(p, c.tipo, c.chiave);
+  !!prepared('SELECT 1 FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ? AND motivo <> ?').get(p, c.tipo, c.chiave, MOTIVO_SEGNO_SUPERATO);
+/**
+ * La versione nuova di un effetto confermata adesso (la proposta «Applica» di una sostituzione sulla spunta in piedi) è nata dopo gli yen
+ * automatici: il segno «fuori registro» dello stesso effetto, lasciato togliendo una spunta di prima, non vale più, e l'effetto muove i suoi yen
+ * ora e a ogni spunta successiva. La riga resta, con il motivo che lo dice. Il raccordo della stessa versione non lo supera (`applicaEffettoStorico`).
+ */
+export function superaYenFuoriRegistro(p: number, causa: CausaYen): void {
+  richiedeTransazione('Il segno degli yen superato dal raccordo');
+  prepared('UPDATE utente.yen_fuori_registro SET motivo = ? WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ? AND motivo <> ?')
+    .run(MOTIVO_SEGNO_SUPERATO, p, causa.tipo, causa.chiave, MOTIVO_SEGNO_SUPERATO);
+}
 
 /**
  * La causa che si sta togliendo non ha un movimento in vigore (né in coda) perché il suo denaro era già nel saldo (nata prima degli yen
@@ -93,28 +112,96 @@ export function segnaYenFuoriRegistro(p: number, causa: CausaYen, motivo: string
     .run(p, causa.tipo, causa.chiave, motivo, nowIso());
 }
 
-/**
- * Togliendo la spunta di una voce spuntata prima degli yen automatici: ogni effetto che la voce aveva allora, senza un movimento in vigore,
- * resta fuori registro (`voce:effetto`), anche i turni e le Richieste della voce. Rispuntando la stessa voce quegli effetti non muovono yen
- * (gli articoli, gli yen, la consumazione e la pesca da `muoviYenAutomatico`; i turni da `scartaYenInCoda` nella spunta; la Richiesta dal suo
- * segno di Richiesta completata prima). Un effetto aggiunto dopo ha un'altra chiave e si muove come sempre; uno confermato dopo (un raccordo,
- * con il suo movimento) si restituisce e, rispuntando, si muove di nuovo.
- */
-export function segnaYenDellaSpuntaFuoriRegistro(p: number, voceUid: string, fattaIl: string, effetti: readonly string[]): void {
-  if (!nataPrimaDegliYenAutomatici(fattaIl)) return;
-  for (const e of new Set(effetti)) segnaYenFuoriRegistro(p, { tipo: 'voce', chiave: `${voceUid}:${e}` }, 'spunta-di-prima-tolta');
+/** Un effetto della voce, per gli yen: l'uid, il tipo e la chiave dell'elemento (l'attività del turno, la Richiesta; null se non serve). */
+export interface EffettoPerYen { uid: string; tipo: string; chiave: string | null }
+/** La causa dei movimenti di un effetto della voce. */
+const causaDellEffetto = (voceUid: string, effettoUid: string): CausaYen => ({ tipo: 'voce', chiave: `${voceUid}:${effettoUid}` });
+/** Il JSON di un registro (ricevuta, spunta): illeggibile, gli yen della voce non si possono ricavare e niente si muove alla cieca. */
+function leggiRegistroYen(json: string, cosa: string): unknown {
+  try { return JSON.parse(json) as unknown; }
+  catch { throw httpErrors.conflict('registro-yen-illeggibile', `${cosa} non è leggibile: gli yen della voce non si possono ricavare.`); }
+}
+/** I turni di una porzione degli effetti (la ricevuta legacy o la fotografia della spunta), con attività e ordine validi. */
+function turniDellaPorzione(x: unknown): Array<{ attivita: string; ordine: number }> {
+  const turni = x && typeof x === 'object' ? (x as { turni?: unknown }).turni : undefined;
+  if (!Array.isArray(turni)) return [];
+  return turni.flatMap((t) => {
+    const v = t as { attivita?: unknown; ordine?: unknown } | null;
+    return v && typeof v.attivita === 'string' && typeof v.ordine === 'number' && Number.isSafeInteger(v.ordine) ? [{ attivita: v.attivita, ordine: v.ordine }] : [];
+  });
 }
 /**
- * Gli effetti della voce i cui yen erano già nel saldo da prima degli yen automatici: senza un movimento in vigore, e nati con una spunta di
- * prima (`fattaIl`, ancora in piedi) o segnati fuori registro togliendola. Vale anche per la voce non spuntata: rispuntandola quegli effetti
- * non muoveranno yen. Per i testi della voce, perché non promettano un movimento che non ci sarà.
+ * I turni (`attività:ordine`) che l'effetto «turno» ha registrato, cioè le cause vere dei suoi yen: quelli della sua ricevuta in vigore; senza
+ * una ricevuta per effetto (le spunte di prima delle ricevute), quelli della stessa attività nella fotografia della spunta; e i movimenti in
+ * vigore dei turni di quell'attività legati alla voce (la spunta e i raccordi li legano con `voce_uid`).
  */
-export function effettiConYenGiaNelSaldo(p: number, voceUid: string, fattaIl: string | null, effetti: readonly string[]): Set<string> {
-  const diPrima = nataPrimaDegliYenAutomatici(fattaIl);
-  return new Set(effetti.filter((e) => {
-    const causa: CausaYen = { tipo: 'voce', chiave: `${voceUid}:${e}` };
-    return !attiva(p, causa) && (diPrima || yenFuoriRegistro(p, causa));
-  }));
+function turniDellEffetto(p: number, voceUid: string, e: EffettoPerYen): string[] {
+  const chiavi = new Set<string>();
+  const ricevuta = prepared('SELECT ricevuta_json FROM utente.effetto_applicato WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND annullato_il IS NULL').get(p, voceUid, e.uid) as { ricevuta_json: string } | undefined;
+  if (ricevuta) {
+    const r = leggiRegistroYen(ricevuta.ricevuta_json, 'La ricevuta dell’effetto');
+    for (const t of turniDellaPorzione(r && typeof r === 'object' ? (r as { legacy?: unknown }).legacy : undefined)) chiavi.add(`${t.attivita}:${t.ordine}`);
+  } else {
+    const spunta = prepared('SELECT effetti_json FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(p, voceUid) as { effetti_json: string | null } | undefined;
+    if (spunta?.effetti_json) for (const t of turniDellaPorzione(leggiRegistroYen(spunta.effetti_json, 'La fotografia della spunta'))) if (t.attivita === e.chiave) chiavi.add(`${t.attivita}:${t.ordine}`);
+  }
+  for (const { causa_chiave } of prepared("SELECT causa_chiave FROM utente.yen_automatico WHERE partita_id = ? AND causa_tipo = 'turno' AND voce_uid = ? AND annullato_il IS NULL").all(p, voceUid) as Array<{ causa_chiave: string }>) {
+    if (e.chiave !== null && causa_chiave.startsWith(`${e.chiave}:`)) chiavi.add(causa_chiave);
+  }
+  return [...chiavi];
+}
+/**
+ * Vero se la spunta in piedi aveva applicato l'effetto prima degli yen automatici: la sua ricevuta in vigore è nata prima (una ricevuta nata
+ * dopo è una spunta rifatta o un raccordo confermato dopo), o lo stato che ha segnato (l'articolo comprato, la Richiesta, …) è nato prima.
+ * Le spunte di prima delle ricevute per effetto non hanno né l'una né l'altro: lì vale la spunta stessa, nata prima, salvo una proposta di
+ * raccordo ancora aperta per l'effetto, che prova che la spunta non l'aveva applicato (un effetto aggiunto o cambiato dopo, da confermare).
+ */
+function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid: string, inizio: string): boolean {
+  const primaDi = (quando: string): boolean => quando < inizio;
+  const ricevuta = prepared('SELECT applicato_il FROM utente.effetto_applicato WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND annullato_il IS NULL').get(p, voceUid, effettoUid) as { applicato_il: string } | undefined;
+  if (ricevuta) return primaDi(ricevuta.applicato_il);
+  const stato = prepared('SELECT applicato_il FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, effettoUid) as { applicato_il: string } | undefined;
+  if (stato) return primaDi(stato.applicato_il);
+  const spunta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(p, voceUid) as { fatta_at: string } | undefined;
+  if (!spunta || !primaDi(spunta.fatta_at)) return false;
+  return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${voceUid}:${effettoUid}`);
+}
+/**
+ * LA nozione (decisione 18): gli yen dell'effetto della voce erano già nel saldo da prima che si muovessero da soli, e la spunta non li muove.
+ * Si ricava da ciò che è successo all'effetto, mai dalla sola data della spunta né dagli effetti di adesso:
+ *   - nessun movimento in vigore (o in coda nel gesto) per la sua causa vera: `voce:effetto`, i turni che ha registrato, e nessuna proposta
+ *     «Applica» di prima ancora in sospeso (quella causa resta al suo registro);
+ *   - e la spunta in piedi l'aveva applicato prima degli yen automatici (`applicatoPrimaDegliYenAutomatici`), o l'effetto è segnato fuori
+ *     registro da una tale spunta tolta (un raccordo confermato dopo supera il segno).
+ * L'effetto «Richiesta» ha come causa vera la sua Richiesta: vale ciò che ne dice la Richiesta (`statoYenRichiesta`, completata prima o segnata
+ * togliendola), così la voce e la pagina delle Richieste dicono la stessa cosa.
+ */
+function yenDellEffettoGiaNelSaldo(p: number, voceUid: string, e: EffettoPerYen, inizio: string): boolean {
+  if (e.tipo === 'richiesta') return e.chiave !== null && !yenPropostiInSospeso(p, 'richiesta', e.chiave) && statoYenRichiesta(p, e.chiave) === 'fuori-registro';
+  const causa = causaDellEffetto(voceUid, e.uid);
+  if (yenAutomaticoAttivo(p, causa) || yenPropostiInSospeso(p, 'voce', causa.chiave)) return false;
+  if (e.tipo === 'turno' && turniDellEffetto(p, voceUid, e).some((k) => yenAutomaticoAttivo(p, { tipo: 'turno', chiave: k }))) return false;
+  return applicatoPrimaDegliYenAutomatici(p, voceUid, e.uid, inizio) || yenFuoriRegistro(p, causa);
+}
+/**
+ * Gli effetti della voce i cui yen erano già nel saldo da prima degli yen automatici (`yenDellEffettoGiaNelSaldo`). Per i testi della voce,
+ * spuntata o no, perché non promettano un movimento che non ci sarà (né dicano «già nel saldo» di yen che la spunta muoverà).
+ */
+export function effettiConYenGiaNelSaldo(p: number, voceUid: string, effetti: readonly EffettoPerYen[]): Set<string> {
+  const inizio = inizioRegistro();
+  if (!inizio) return new Set();
+  return new Set(effetti.filter((e) => yenDellEffettoGiaNelSaldo(p, voceUid, e, inizio)).map((e) => e.uid));
+}
+/**
+ * Togliendo la spunta di una voce (prima della restituzione e prima di chiudere ricevute e proposte): ogni effetto i cui yen erano già nel saldo
+ * da prima (`yenDellEffettoGiaNelSaldo`) resta fuori registro (`voce:effetto`), così rispuntando la stessa voce non muove yen (gli articoli,
+ * gli yen, la consumazione, la pesca e il film da `muoviYenAutomatico`; i turni da `scartaYenInCoda` nella spunta). L'effetto «Richiesta» ha il
+ * segno della sua Richiesta (`riallineaYenRichiesta`). Un effetto con la proposta aperta, raccordato dopo o con un movimento non si segna:
+ * togliendo la spunta i suoi yen tornano, e rispuntando si muovono di nuovo.
+ */
+export function segnaYenDellaSpuntaFuoriRegistro(p: number, voceUid: string, effetti: readonly EffettoPerYen[]): void {
+  richiedeTransazione('Il segno degli yen della spunta di prima');
+  for (const uid of effettiConYenGiaNelSaldo(p, voceUid, effetti.filter((e) => e.tipo !== 'richiesta'))) segnaYenFuoriRegistro(p, causaDellEffetto(voceUid, uid), 'spunta-di-prima-tolta');
 }
 
 /**
@@ -179,6 +266,18 @@ export function conYenInOrdine<T>(fn: () => T): T {
   } finally { coda = null; }
 }
 
+/** La voce a cui legare i movimenti fatti dentro `conYenDellaVoce` (il raccordo di un effetto), quando non c'è la spunta corrente. */
+let voceForzata: string | null = null;
+/**
+ * Esegue `fn` legando alla voce i movimenti che fa (`voce_uid`): il raccordo di un effetto su una spunta già fatta registra un turno fuori dalla
+ * spunta, e il suo movimento resta così della voce (lo mostra il chip, lo trova l'annullo, lo legge `yenDellEffettoGiaNelSaldo`).
+ */
+export function conYenDellaVoce<T>(voceUid: string, fn: () => T): T {
+  const prima = voceForzata;
+  voceForzata = voceUid;
+  try { return fn(); } finally { voceForzata = prima; }
+}
+
 /** Esegue `fn` con ogni restituzione registrata con `motivo` (la voce messa nel cestino: il suo ripristino rimette quei movimenti). */
 export function conMotivoDiRestituzione<T>(motivo: string, fn: () => T): T {
   const prima = motivoForzato;
@@ -201,7 +300,7 @@ export function yenPropostiInSospeso(p: number, causaTipo: 'voce' | 'richiesta',
  * Muove da solo il saldo della partita di `richiesto` yen (negativo = spesa) per la causa: mai sotto zero né oltre il tetto, e il gesto non si
  * ferma mai per il saldo. Registra l'importo chiesto e quello mosso. Zero non registra niente. Una causa ha al più un movimento in vigore.
  */
-export function muoviYenAutomatico(p: number, causa: CausaYen, importo: number, motivo: string, voceUid: string | null = voceDellaSpuntaCorrente()): MovimentoYenAutomaticoDto | null {
+export function muoviYenAutomatico(p: number, causa: CausaYen, importo: number, motivo: string, voceUid: string | null = voceDellaSpuntaCorrente() ?? voceForzata): MovimentoYenAutomaticoDto | null {
   richiedeTransazione('Il movimento automatico degli yen');
   if (!Number.isSafeInteger(importo)) throw httpErrors.conflict('yen-automatico-non-valido', 'L’importo da muovere non è un intero valido.');
   // oltre il tetto del saldo un importo non cambia niente in più (il saldo va comunque a zero o al massimo): si registra entro il tetto
@@ -381,8 +480,12 @@ export function statoYenRichiesta(p: number, chiave: string): 'entrati' | 'fuori
  * corretta, il cui prezzo era già nel saldo; in un altro momento è un regalo nuovo e si paga.
  */
 const chiaveRegaloDiPrima = (confidente: string, catalogo: string, data: string | null, fascia: string | null): string => JSON.stringify([confidente, catalogo, data, fascia]);
-/** Segna la consegna di prima tolta (da chiamare togliendola, solo se era nata prima degli yen automatici e aveva segnato l'acquisto). */
+/** Vero se il momento di gioco è noto (giorno e fascia): senza, la stessa consegna non si riconosce e il segno non vale. */
+const momentoNoto = (data: string | null, fascia: string | null): boolean => !!data && !!fascia;
+/** Segna la consegna di prima tolta (da chiamare togliendola, solo se era nata prima degli yen automatici e aveva segnato l'acquisto). Senza il
+ *  momento di gioco della consegna non si segna: ridare lo stesso oggetto non si potrebbe distinguere da un regalo nuovo, che si paga. */
 export function segnaRegaloDiPrimaTolto(p: number, confidente: string, catalogo: string, data: string | null, fascia: string | null): void {
+  if (!momentoNoto(data, fascia)) return;
   segnaYenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, data, fascia) }, 'regalo-di-prima-tolto');
 }
 /** Il momento di gioco attuale della partita, quello che il regalo registra nella consegna. */
@@ -393,11 +496,12 @@ const momentoDellaPartita = (p: number): { data: string | null; fascia: string |
 /** Vero se regalando adesso l'oggetto al Confidente il prezzo non si scala: è la consegna di prima, tolta, ridata nello stesso momento di gioco. */
 export function regaloYenGiaNelSaldo(p: number, confidente: string, catalogo: string): boolean {
   const m = momentoDellaPartita(p);
-  return yenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, m.data, m.fascia) });
+  return momentoNoto(m.data, m.fascia) && yenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, m.data, m.fascia) });
 }
 /** Per ogni Confidente, gli oggetti che regalati adesso non scalano il prezzo (`regaloYenGiaNelSaldo`), per la frase della finestra «Regala». */
 export function regaliConYenGiaNelSaldo(p: number): Map<string, string[]> {
   const m = momentoDellaPartita(p), out = new Map<string, string[]>();
+  if (!momentoNoto(m.data, m.fascia)) return out;
   for (const { causa_chiave } of prepared("SELECT causa_chiave FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = 'regalo'").all(p) as Array<{ causa_chiave: string }>) {
     let k: unknown;
     try { k = JSON.parse(causa_chiave); } catch { continue; }
