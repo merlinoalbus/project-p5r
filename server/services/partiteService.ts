@@ -13,7 +13,7 @@ import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { cambiaGiornoPartita } from './giornoPartitaService.js';
 import { fortunaSu } from './fortunaService.js';
-import { moltiplicaFortuna } from '../../shared/fortuna.js';
+import { puntiDaNote } from '../../shared/doti.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
@@ -172,20 +172,9 @@ export function eliminaPartita(id: number): void {
 
 // ---- Doti sociali ----
 
-/** Punti per scalino: 1 nota = 2, 2 note = 3, 3 note = 5, quarto scalino (libri a resa maggiorata) = 7. */
-const PUNTI_SCALINO = [2, 3, 5, 7] as const;
-
-/**
- * Punti per numero di note. Il libro a resa maggiorata porta le 3 note al quarto scalino (7); «Anima da cineasta» (Royal) alza
- * di UNO scalino i punti di film e DVD (2→3, 3→5, 5→7); la Fortuna della Dote (stato della partita, `fortunaService`) moltiplica
- * per 1,5 per difetto, dopo il cinema (2→3, 3→4, 5→7, 7→10).
- */
-export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false, cinema = false): number {
-  let scalino = note === 3 && libro ? 4 : note;
-  if (cinema) scalino = Math.min(4, scalino + 1);
-  const base = PUNTI_SCALINO[scalino - 1];
-  return fortuna ? moltiplicaFortuna(base) : base;
-}
+// I punti per numero di note sono la regola unica di `shared/doti.ts` (`puntiDaNote`), la stessa che la scheda Doti usa per l'anteprima dei
+// pulsanti; qui si riesporta perché i servizi (attività, domande, cruciverba, incontri, effetti delle azioni) la importano da questo modulo.
+export { puntiDaNote };
 
 /** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
 function ranghiDote(chiave: string): RangoDoteDto[] {

@@ -14,6 +14,9 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
+import { seGiornoAvanzato } from '../utils/giornoAvanzato';
+import { useSuggerimentiStore } from '../stores/suggerimentiStore';
+import { DaApplicare } from '../components/partita/DaApplicare';
 import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
@@ -43,10 +46,13 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
     if (!partitaId) return;
     setOccupato(true);
     try {
-      const esito = await impostaCruciverba(partitaId, c.giorno, fatto);
+      const { giornoAvanzato, ...esito } = await impostaCruciverba(partitaId, c.giorno, fatto);
       onCambiato(esito);
-      // la nota di Conoscenza del cruciverba si segna a mano nelle Doti: l'avviso la ricorda
+      // la nota di Conoscenza del cruciverba si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta
+      // è la sua (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
       avvisaDotiDaSegnare(esito.daSegnare, 'Cruciverba risolto');
+      if (c.voceUid) useSuggerimentiStore.getState().invalida();
+      seGiornoAvanzato({ giornoAvanzato });
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
@@ -67,6 +73,8 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
         {mostra || c.fatto ? <span><strong>Risposta:</strong> {c.risposta}{c.rispostaEn && c.rispostaEn !== c.risposta ? <span className="text-text-muted"> ({c.rispostaEn})</span> : null}</span> : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Mostra la risposta" onClick={() => setMostra(true)} />}
         {c.chiave && <span className="ml-auto"><CorreggiElemento tipo="cruciverba" chiave={c.chiave} onSalvato={onCorretto} /></span>}
       </div>
+      {/* La voce del Diario che segna questo cruciverba: la Conoscenza si applica da qui con lo stesso pulsante «Applica» della voce */}
+      {partitaId && c.fatto && c.voceUid && <DaApplicare partitaId={partitaId} voceUid={c.voceUid} onCambiato={() => useSuggerimentiStore.getState().invalida()} />}
     </li>
   );
 }

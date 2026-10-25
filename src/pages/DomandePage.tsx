@@ -17,6 +17,9 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
+import { seGiornoAvanzato } from '../utils/giornoAvanzato';
+import { useSuggerimentiStore } from '../stores/suggerimentiStore';
+import { DaApplicare } from '../components/partita/DaApplicare';
 import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
@@ -56,10 +59,13 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     if (!partitaId) return;
     setOccupato(true);
     try {
-      const esito = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
+      const { giornoAvanzato, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
       onCambiata(esito);
-      // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda
+      // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta è la sua
+      // (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
       avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata');
+      if (d.voceUid) useSuggerimentiStore.getState().invalida();
+      seGiornoAvanzato({ giornoAvanzato });
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {
@@ -88,6 +94,8 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           {d.risposte.map((r, i) => <li key={i}>{r.domanda && <span className="text-text-secondary">{r.domanda} → </span>}<span className="text-primary-testo font-semibold">{d.risposte.length > 1 && !r.domanda ? `${i + 1}. ` : !r.domanda ? '→ ' : ''}{r.testo}</span></li>)}
         </ol>
         {d.note && <div className="testo-12 text-text-muted">{d.note}</div>}
+        {/* La voce del Diario che segna questa domanda: la Conoscenza si applica da qui con lo stesso pulsante «Applica» della voce */}
+        {partitaId && d.fatta && d.voceUid && <DaApplicare partitaId={partitaId} voceUid={d.voceUid} onCambiato={() => useSuggerimentiStore.getState().invalida()} />}
         {d.chiave && <div className="mt-0.5"><CorreggiElemento tipo="domanda" chiave={d.chiave} onSalvato={onCorretta} /></div>}
       </div>
     </li>

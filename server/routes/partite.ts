@@ -18,7 +18,6 @@ import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } f
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { capienzaScorta } from '../services/capienzaScortaService.js';
-import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
@@ -26,7 +25,6 @@ import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
 import { bodySessioneVideogioco } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
-import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto, disponibilitaAcquistoCorrente } from '../services/negoziService.js';
 import { leggiAcquistiPartita, anteprimaRegistrazioneAcquisto, registraAcquisto, anteprimaAnnullaProvenienza, annullaProvenienzaAcquisto, anteprimaRimozionePresenzaLegacy, rimuoviPresenzaLegacy } from '../services/acquistiService.js';
 import { leggiPropostePartita, anteprimaDecisioneProposte, decidiProposte } from '../services/propostePartitaService.js';
@@ -41,8 +39,9 @@ import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
 import { idParam } from '../schemas/comuni.js';
-import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
-import { spuntaVoce, applicaEffettoStoricoDiario } from '../services/giornataService.js';
+import { impostaGiornoCorrente, spuntaEAvanza } from '../services/percorsoService.js';
+import { applicaEffettoStoricoDiario } from '../services/giornataService.js';
+import { segnaCruciverbaDallaGuida, segnaDomandaDallaGuida } from '../services/spuntaDellaGuidaService.js';
 import { annullaInvito, registraInvito } from '../services/inviti.js';
 import { impostaFortuna, leggiFortuna } from '../services/fortunaService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
@@ -196,11 +195,9 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
   const b = req.body as z.infer<typeof bodyAzionePercorso>;
-  const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(Number(req.params.id), b.uid);
-  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche:b.pesche });
-  // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
-  const giornoAvanzato = b.fatta && !giaFatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
-  res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);
+  // la spunta e, se era l'ultima attività del giorno corrente, il passaggio al giorno dopo (togliere la spunta non torna indietro)
+  // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
+  res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche: b.pesche }));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
@@ -223,7 +220,7 @@ router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {
   const b = req.body as { data: string; fatto: boolean };
-  res.json(impostaCruciverba(Number(req.params.id), b.data, b.fatto));
+  res.json(segnaCruciverbaDallaGuida(Number(req.params.id), b.data, b.fatto));
 });
 router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }), (req, res) => {
   const b = req.body as { tipo: 'libro' | 'film' | 'videogioco'; chiave: string; fatto?: boolean; avanzamento?: number };
@@ -250,7 +247,7 @@ router.put('/:id/punti', validate({ params: paramsPartita, body: bodyStatoPunto 
 });
 router.put('/:id/domande/:domandaId', validate({ params: paramsPartitaDomanda, body: bodyDomandaFatta }), (req, res) => {
   const b = req.body as { fatta: boolean; conoscenza?: boolean };
-  res.json(impostaDomandaFatta(Number(req.params.id), Number(req.params.domandaId), b.fatta, b.conoscenza === true));
+  res.json(segnaDomandaDallaGuida(Number(req.params.id), Number(req.params.domandaId), b.fatta, b.conoscenza === true));
 });
 
 // ---- Piazzamento agli esami (L9 R9-08): vale per il moltiplicatore dei sette Confidenti fino all'esame successivo ----

@@ -10,11 +10,12 @@ import { nomeDote, puntiDaNote } from './partiteService.js';
 import { fortunaSu } from './fortunaService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
+import { vociCollegate } from './vociDiStato.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
 /** Un cruciverba come DTO: il giorno è la data della riga, ed è fatto se quella data è fra quelle risolte. */
-const dto = (r: Riga, fatti: Set<string>): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fatto: fatti.has(r.data) });
+const dto = (r: Riga, fatti: Set<string>, voceUid?: string): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fatto: fatti.has(r.data), ...(voceUid ? { voceUid } : {}) });
 
 /** Le date dei cruciverba risolti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function fattiPartita(partitaId: number | undefined): Set<string> {
@@ -26,7 +27,9 @@ function fattiPartita(partitaId: number | undefined): Set<string> {
 /** Tutti i cruciverba in ordine di calendario; con partita, quelli già risolti. */
 export function cruciverba(partitaId?: number): CruciverbaTuttiDto {
   const fatti = fattiPartita(partitaId);
-  const lista = (prepared('SELECT * FROM cruciverba ORDER BY ordine').all() as Riga[]).map((r) => dto(r, fatti));
+  // la voce del Diario che segna il cruciverba (se una sola): la pagina ne mostra il «Applica» della Conoscenza (R12-01/5)
+  const voci = vociCollegate('cruciverba');
+  const lista = (prepared('SELECT * FROM cruciverba ORDER BY ordine').all() as Riga[]).map((r) => dto(r, fatti, voci.get(r.data)?.voceUid));
   const dataGioco = partitaId === undefined ? null : ((prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null);
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   // il primo cruciverba non risolto dal giorno della partita in poi: è quello da segnare
@@ -34,8 +37,11 @@ export function cruciverba(partitaId?: number): CruciverbaTuttiDto {
   return { cruciverba: lista, dataGioco, prossimo, risolti: lista.filter((c) => c.fatto).length, totale: lista.length };
 }
 
-/** Segna (o toglie) un cruciverba risolto nella partita; evento alla prima spunta. */
-export function impostaCruciverba(partitaId: number, data: string, fatto: boolean): CruciverbaDto {
+/**
+ * Scrive lo stato «risolto» del cruciverba nella partita (la tabella `cruciverba_partita`, l'unica verità) e registra l'evento alla prima
+ * spunta; restituisce la riga com'è dopo la scrittura e se è stato risolto ora (`nuovo`).
+ */
+export function scriviCruciverba(partitaId: number, data: string, fatto: boolean): { riga: CruciverbaDto; nuovo: boolean } {
   verificaPartita(partitaId);
   const r = prepared('SELECT * FROM cruciverba WHERE data = ?').get(data) as Riga | undefined;
   if (!r) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba il ${data}.`);
@@ -51,6 +57,12 @@ export function impostaCruciverba(partitaId: number, data: string, fatto: boolea
     if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà Conoscenza +1 nota (da segnare nelle Doti).`, { data });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  const esito = dto(r, new Set(fatto ? [data] : []));
+  return { riga: dto(r, new Set(fatto ? [data] : []), vociCollegate('cruciverba').get(data)?.voceUid), nuovo };
+}
+
+/** Segna (o toglie) un cruciverba risolto nella partita; evento alla prima spunta. È il gesto «basso»: la pagina della Guida passa da
+ *  `segnaCruciverbaDallaGuida` (spuntaDellaGuidaService), che lo usa solo dove non c'è una voce del Diario che segna lo stesso cruciverba. */
+export function impostaCruciverba(partitaId: number, data: string, fatto: boolean): CruciverbaDto {
+  const { riga: esito, nuovo } = scriviCruciverba(partitaId, data, fatto);
   return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
 }

@@ -5,14 +5,15 @@
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
 // (7 con libri a resa maggiorata); «Anima da cineasta» (Royal) alza di uno scalino film e DVD;
 // la Fortuna di Chihaya (stato della partita: la Dote scelta, per il resto del giorno) moltiplica ×1,5 (per difetto), per ultima.
-// La conversione la fa il backend (`note`, `libro`, `cinema`; la Fortuna la legge dallo stato della partita).
+// La conversione la fa il backend (`note`, `libro`, `cinema`; la Fortuna la legge dallo stato della partita) con la stessa regola
+// condivisa (`puntiDaNote` di shared/doti.ts) che qui dà l'anteprima sui pulsanti.
 // La stella (Fase 11.2) mostra l'avanzamento continuo di ogni dote: ranghi completati
 // più la quota verso il prossimo; toccare un vertice porta alla scheda della dote.
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
 import { aggiornaDote, getDoti, getFortuna, impostaFortuna } from '../../services/api';
-import { moltiplicaFortuna } from '../../../shared/fortuna';
+import { puntiDaNote } from '../../../shared/doti';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -29,16 +30,6 @@ import { ModificaGuida } from '../guida/ModificaGuida';
 
 interface Props {
   partitaId: number;
-}
-
-const PUNTI_SCALINO = [2, 3, 5, 7] as const;
-
-/** Stessa regola del server (`puntiDaNote`): scalini 2/3/5/7, «Anima da cineasta» +1 scalino, poi ×1,5 per difetto. */
-function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean, cinema = false): number {
-  let scalino = note === 3 && libro ? 4 : note;
-  if (cinema) scalino = Math.min(4, scalino + 1);
-  const base = PUNTI_SCALINO[scalino - 1];
-  return fortuna ? moltiplicaFortuna(base) : base;
 }
 
 /** Stella delle Doti con schede compatte: incremento a note, rango attuale e distanza dal rango successivo. */
@@ -155,10 +146,10 @@ export function DotiSociali({ partitaId }: Props) {
                           className="btn btn-primary btn-nota min-w-[64px] lg:min-w-[54px] lg:px-2"
                           aria-disabled={occupata === d.chiave || undefined}
                           onClick={() => void modifica(d.chiave, { note: n, libro, cinema })}
-                          aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
+                          aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
                         >
                           <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                          <span className="testo-13 opacity-90">+{puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
+                          <span className="testo-13 opacity-90">+{puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
                         </button>
                       ))}
                       <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || d.punti === 0 || undefined} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>

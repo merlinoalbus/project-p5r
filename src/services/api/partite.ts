@@ -11,6 +11,13 @@ import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 
+/**
+ * Le scritture la cui risposta dice che cosa la richiesta ha CAMBIATO (le Doti da segnare, il giorno avanzato) non si ripetono da sole:
+ * il PUT è idempotente sullo stato, ma una ripetizione dopo una risposta persa troverebbe lo stato già scritto e risponderebbe «nessun
+ * cambiamento», e l'esito (la nota di Conoscenza, il passaggio al giorno dopo) andrebbe perso senza che l'utente se ne accorga.
+ */
+const senzaRipetizione = { maxRetries: 0 } as const;
+
 /** Campi modificabili di una partita. */
 export interface DatiPartita {
   nome?: string;
@@ -102,7 +109,7 @@ export const getSuggerimenti = (id: number): Promise<SuggerimentiOggiDto> => api
 export const impostaAcquisto = (id: number, articolo: string, fatto: boolean, sede?: string | null): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto, ...(sede ? { sede } : {}) });
 
 /** Cruciverba risolto (o riaperto) nella partita. */
-export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto });
+export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto }, senzaRipetizione);
 
 /** Sessione e round dello stesso titolo condividono l'ordine delle richieste anche fra viste diverse. */
 const codeVideogioco = new Map<string, Promise<unknown>>();
@@ -116,13 +123,13 @@ function serializzaVideogioco<T>(id: number, chiave: string, scrivi: () => Promi
   return prossimo;
 }
 /** Registra l'avanzamento di un videogioco nella partita (stessa rotta delle letture, tipo «videogioco»). */
-export const impostaProgressoVideogioco =(id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento }));
+export const impostaProgressoVideogioco =(id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento }, senzaRipetizione));
 /** Dichiara una sessione anche senza round vinti; non cambia il progresso. */
 export const impostaSessioneVideogioco = (id: number, chiave: string, dichiarata: boolean): Promise<VideogiocoDto> => serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/sessione-videogioco`, { chiave, dichiarata }));
 /** Registra quante sessioni di un libro sono state completate. */
-export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento });
+export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento }, senzaRipetizione);
 /** Registra sessioni DVD o visioni al cinema; queste ultime possono superare uno. */
-export const impostaProgressoFilm = (id: number, chiave: string, avanzamento: number): Promise<FilmDto> => apiPut(`/partite/${id}/letture`, { tipo: 'film', chiave, avanzamento });
+export const impostaProgressoFilm = (id: number, chiave: string, avanzamento: number): Promise<FilmDto> => apiPut(`/partite/${id}/letture`, { tipo: 'film', chiave, avanzamento }, senzaRipetizione);
 
 /** Stato di una Richiesta dei Mementos nella partita (null = riaperta). */
 export const impostaStatoRichiesta = (id: number, richiesta: string, stato: StatoRichiesta | null): Promise<RichiestaDto> => apiPut(`/partite/${id}/richieste`, { richiesta, stato });
@@ -139,7 +146,7 @@ export const getDivergenze = (id: number, dungeon?: string): Promise<DivergenzaD
 export const togliFattoAlPin = (id: number, spilloUid: string): Promise<void> => apiDelete(`/partite/${id}/divergenze/${encodeURIComponent(spilloUid)}`);
 
 /** Domanda in classe segnata come fatta (con eventuale nota di Conoscenza). */
-export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolean, conoscenza: boolean): Promise<DomandeDto> => apiPut(`/partite/${id}/domande/${domandaId}`, { fatta, conoscenza });
+export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolean, conoscenza: boolean): Promise<DomandeDto> => apiPut(`/partite/${id}/domande/${domandaId}`, { fatta, conoscenza }, senzaRipetizione);
 
 /** Regalo consegnato (o no) a un Confidente nella partita. */
 export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
