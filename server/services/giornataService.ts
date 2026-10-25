@@ -20,7 +20,7 @@ import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce, revocaEventi
 import { confidenti } from './partiteService.js';
 import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
-import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
+import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
@@ -31,7 +31,8 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
-import { descriviEffettoVoce, eEffettoDiStato, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riallineaVoceNelRegistro, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
@@ -70,17 +71,19 @@ function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
+  const nomiFrase = nomiFraseEffetto();
   return fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
-      const a = prepared("SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?").get(e.articolo) as { nome: string; prezzo: number | null } | undefined;
-      return a ? `Acquisto: ${a.nome}${a.prezzo ? ` · ¥${a.prezzo.toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : descriviEffettoVoce(e);
+      const a = articoloConNome(e.articolo);
+      return a ? `Acquisto: ${a.nome}${a.prezzo ? ` · ¥${a.prezzo.toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : fraseEffettoConNomi(e, nomiFrase);
     }
-    if (e.tipo === 'pesca' || e.tipo === 'fortuna' || eEffettoDiStato(e)) return descriviEffettoVoce(e);
+    // R12-01/1: tutti gli altri effetti che citano un oggetto per chiave (evento di storia, Persona, domanda, cruciverba, invito, Richiesta), pesca e Fortuna: la frase con i nomi, la stessa dell'editor
+    if (eEffettoConNomi(e)) return fraseEffettoConNomi(e, nomiFrase);
     if (e.tipo === 'acquisto') {
-      const nome = (prepared("SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?").get(e.articolo) as { nome: string } | undefined)?.nome;
-      return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);
+      const nome = articoloConNome(e.articolo)?.nome ?? e.articolo;
+      return `Acquisto: ${nome}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
     }
     const testo = testoEffetti([e], nomi)[0]!;
     // R10-06: la paga del turno è un promemoria (gli yen si cambiano a mano), mai una proposta

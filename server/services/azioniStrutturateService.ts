@@ -18,6 +18,7 @@ import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
+import type { NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
 
@@ -153,6 +154,28 @@ export function nomiEffetti(): NomiEffettiAzione {
     film: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('film')})`),
     videogiochi: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita', "WHERE l.tipo = 'videogioco'")})`),
     attivita: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita')})`),
+  };
+}
+
+/** Il nome dell'articolo come lo vede l'utente: quello del catalogo (la colonna `nome` dell'articolo può essere vuota), altrimenti la chiave. */
+const SQL_ARTICOLO = "SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?";
+export const articoloConNome = (chiave: string): { nome: string; prezzo: number | null } | undefined => prepared(SQL_ARTICOLO).get(chiave) as { nome: string; prezzo: number | null } | undefined;
+
+/**
+ * R12-01/1: i nomi per scrivere le frasi degli effetti che citano il loro oggetto per chiave o per id (domanda, Richiesta, articolo,
+ * invito, Persona). Una ricerca per volta sulla riga che serve: le stesse fonti degli elenchi `elenchiEffettiVoce` che la pagina usa
+ * negli editor, così la frase è la stessa in ogni vista (`fraseEffettoConNomi`).
+ */
+export function nomiFraseEffetto(): NomiFraseEffetto {
+  return {
+    domanda: (id) => (prepared('SELECT domanda FROM domanda WHERE id = ?').pluck().get(id) as string | undefined) ?? undefined,
+    richiesta: (chiave) => (prepared('SELECT nome FROM richiesta WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
+    articolo: articoloConNome,
+    invito: (chiave) => {
+      const r = prepared('SELECT c.nome AS confidenteNome, i.data FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave WHERE i.chiave = ?').get(chiave) as { confidenteNome: string; data: string | null } | undefined;
+      return r ?? undefined;
+    },
+    persona: (id) => (prepared('SELECT nome FROM persona WHERE id = ?').pluck().get(id) as string | undefined) ?? undefined,
   };
 }
 

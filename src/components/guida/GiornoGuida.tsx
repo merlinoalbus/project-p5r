@@ -45,7 +45,6 @@ import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
 import { DaApplicare } from '../partita/DaApplicare';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
-import { descriviEffettoVoce } from '../../../shared/effettiVoce';
 import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazioneEffetti, useGestiPartita } from '../../services/gestiPartita';
 
 /** La fascia opposta: giorno ↔ sera. */
@@ -160,7 +159,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {pendente && <p role="status" className="m-0 text-warning">Operazione da verificare nel registro dei gesti: questa voce non viene rispuntata.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
         {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
-        {a.effettiVoce?.effetti.filter((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna').map((e) => <span key={e.uid}>{descriviEffettoVoce(e.effetto)}</span>)}
+        {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1) */}
+        {a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}>{a.produceTesto[i]}</span> : null)}
         {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
