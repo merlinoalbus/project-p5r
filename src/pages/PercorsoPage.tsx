@@ -23,6 +23,9 @@ import { EditorGiorno } from '../components/guida/EditorGiorno';
 import { GestiPartita } from '../components/partita/GestiPartita';
 import { ProviderPannelloScheda } from '../components/scheda/PannelloScheda';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Guida giorno per giorno: carica l'indice dei giorni per la partita attiva e il giorno preso
  * dall'URL (altrimenti il giorno corrente della partita, altrimenti il primo dell'indice). Offre
@@ -87,11 +90,11 @@ export function PercorsoPage() {
             <Selettore compatto etichetta="Giorno" valore={g.giorno} opzioni={giorniDelMese.map((x) => ({ chiave: x.giorno, nome: `${dataGiocoTesto(x.giorno)} (${x.giornoSettimana})`, dettaglio: x.azioni ? `${x.fatte}/${x.azioni}` : undefined }))} onCambia={(k) => vai(k)} />
             <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => vai(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
             {indice.dati.dataCorrente && indice.dati.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => vai(indice.dati?.dataCorrente ?? null)} />}
-            <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setEditorGiornoAperto(true)} />
+            {!IN_RILASCIO && <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setEditorGiornoAperto(true)} />}
             {partitaId && g.dataCorrente !== g.giorno && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Segna come giorno corrente" className="ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()} />}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
-          {editorGiornoAperto && <EditorGiorno key={g.giorno} data={g.giorno} onChiudi={() => setEditorGiornoAperto(false)} onSalvato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />}
+          {!IN_RILASCIO && editorGiornoAperto && <EditorGiorno key={g.giorno} data={g.giorno} onChiudi={() => setEditorGiornoAperto(false)} onSalvato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />}
           <GestiPartita contestoChiave={`${partitaId}:${data}`} onCambiato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />
           <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} onAllerteModificate={async () => { await giorno.ricarica(); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>

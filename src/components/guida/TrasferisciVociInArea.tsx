@@ -17,6 +17,10 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface AreaDelPalazzo { chiave: string; nome: string; ordine: number }
 
@@ -44,7 +48,9 @@ const nomeArea = (a: AreaDelPalazzo) => `${a.ordine + 1}. ${a.nome}`;
 const conPassi = (n: number) => (n > 0 ? (n === 1 ? ', con 1 passo di Enigma' : `, con ${n} passi di Enigma`) : '');
 
 /** La finestra: riepilogo, area d'arrivo e comando. Parte dall'area dopo quella di partenza (o dalla prima delle altre). */
-export function TrasferisciVociInArea({ modo, voci, area, aree, passi, onChiudi, onFatto }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il trasferimento non esiste; la condizione è costante di build, `TrasferisciVociInAreaReale` esce dal bundle
+export const TrasferisciVociInArea: StrumentoDiModifica<typeof TrasferisciVociInAreaReale> = IN_RILASCIO ? NienteInRilascio : TrasferisciVociInAreaReale;
+function TrasferisciVociInAreaReale({ modo, voci, area, aree, passi, onChiudi, onFatto }: Props) {
   const altre = [...aree].filter((a) => a.chiave !== area.chiave).sort((x, y) => x.ordine - y.ordine);
   const [destinazione, setDestinazione] = useState(() => (altre.find((a) => a.ordine > area.ordine) ?? altre[0])?.chiave ?? '');
   const [occupato, setOccupato] = useState(false);

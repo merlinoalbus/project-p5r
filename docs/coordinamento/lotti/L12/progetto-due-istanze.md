@@ -74,6 +74,18 @@ sotto `/api/partite/:id/cestino` in entrambe le istanze.
 `useCapacita` e `<SoloPreparazione>` sulla stessa fonte; chiusi la rotta dell'editor delle mappe, i componenti di modifica (circa 45 file) e
 le Impostazioni dei contenuti; restano le partite dell'utente, la grafica locale e il cestino personale.
 
+**Come si esclude il codice (passo 8, provato sulla build).** Il bundler di Vite 8 (Rolldown) decide quali moduli e quali chiamate all'API
+restano *prima* di piegare le costanti, e non propaga una costante letta da un altro modulo: `useCapacita`, `SoloPreparazione` e un
+`IN_RILASCIO` importato da `utils/modalita.ts` NON tolgono niente dal bundle (i percorsi di scrittura restavano tutti). Funziona invece una
+condizione costante nello stesso modulo, `const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio'`, con ternario, `&&` o `||` (non
+con un `if` che ritorna prima). Perciò: i componenti di modifica sono esportati come `IN_RILASCIO ? NienteInRilascio : XReale` (pagine
+invariate, componente vuoto nel rilascio), i comandi sparsi nelle pagine hanno `{!IN_RILASCIO && …}`, la rotta dell'editor delle mappe non
+si registra, le Impostazioni mostrano solo partite, grafica e informazioni. `scripts/verifica-bundle-rilascio.ts` (in `ci.yml`) legge il
+`dist` di rilascio e fallisce se trova percorsi di scrittura o etichette degli editor; con `--confronta` verifica che l'elenco sia ancora
+valido. Nuovo modulo di modifica ⇒ stessa condizione nel modulo ⇒ eventuale stringa nell'elenco. **Aperto per il passo 3:** il cestino
+personale (partite, registrazioni d'acquisto, pesca) nelle Impostazioni di rilascio torna quando esisterà `/api/partite/:id/cestino`; ora la
+sezione `Cestino` è chiusa nel rilascio perché chiama `/api/impostazioni/cestino`.
+
 ## 8. Passi
 | # | Passo | Stima |
 |---|---|---|

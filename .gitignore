@@ -16,6 +16,9 @@ data/font/
 node_modules
 dist
 dist-ssr
+# bundle di prova del frontend (controllo statico di rilascio, L12 passo 8)
+dist-rilascio
+dist-preparazione
 *.local
 coverage/
 

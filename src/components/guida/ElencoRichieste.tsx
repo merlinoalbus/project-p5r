@@ -17,6 +17,9 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { Selettore } from '../shared/Selettore';
 import type { RichiestaDelDedaloDto, StatoRichiesta } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** La chiave che nel selettore dell'area di una Richiesta vale «nessuna area». */
 export const DA_COLLOCARE = '';
 
@@ -46,7 +49,9 @@ interface Props {
 }
 
 /** L'elenco: per ogni Richiesta il nome, il comando a tre stati (con una partita) e, in «Modifica la guida», correzione e area. */
-export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modifica, onRichiesta, onModifica, onRicarica }: Props) {
+export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modifica: modificaRichiesta, onRichiesta, onModifica, onRicarica }: Props) {
+  // L12 (passo 8): nel rilascio (sola lettura) le Richieste non si correggono né si spostano di area; lo stato (partita) si cambia come sempre
+  const modifica = !IN_RILASCIO && modificaRichiesta;
   const [occupata, setOccupata] = useState<string | null>(null);
   const opzioniArea = [{ chiave: DA_COLLOCARE, nome: '— da collocare —' }, ...aree.map((a) => ({ chiave: a.chiave, nome: a.nome }))];
   /** Esegue un'operazione su una Richiesta tenendola occupata; l'errore va in notifica. */

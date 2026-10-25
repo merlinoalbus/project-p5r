@@ -6,12 +6,18 @@ import { notifica } from '../../stores/notificationStore';
 import { SceltaCatalogoOggetto } from './SceltaCatalogoOggetto';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 type Props = { contenuto: readonly RicompensaOggettoDto[]; onCambiato: () => Promise<void>; disabilitato?: boolean }
   & ({ voce: string; fonte?: never } | { voce?: never; fonte: { tipo: 'ricompensa'; chiave: string } });
 
 /** Il punto di modifica del legame; non riscrive dettagli.contenuto e non segna raccolte. */
-export function ContenutoDellaVoce({ voce, fonte, contenuto, onCambiato, disabilitato }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) i legami della voce non si modificano; la condizione è costante di build, `ContenutoDellaVoceReale` esce dal bundle
+export const ContenutoDellaVoce: StrumentoDiModifica<typeof ContenutoDellaVoceReale> = IN_RILASCIO ? NienteInRilascio : ContenutoDellaVoceReale;
+function ContenutoDellaVoceReale({ voce, fonte, contenuto, onCambiato, disabilitato }: Props) {
   const target = fonte ?? { tipo: 'voce' as const, chiave: voce ?? '' };
   const [aperto, setAperto] = useState(false);
   const [scelto, setScelto] = useState<RiferimentoOggettoDto | null>(null);

@@ -18,6 +18,10 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma, CHIUDI_SENZA_SALVARE, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Una scelta in modifica: i punti restano testo finché si scrive («» = nessuno). */
 interface SceltaBozza { testo: string; punti: string; puntiTesto: string; romantica: boolean; avviso: string }
@@ -27,7 +31,9 @@ const puntiValidi = (p: string): boolean => p.trim() === '' || (Number.isFinite(
 const perServer = (s: SceltaBozza) => ({ testo: s.testo.trim(), punti: s.punti.trim() === '' ? null : Number(s.punti), puntiTesto: s.puntiTesto.trim() === '' ? null : s.puntiTesto, romantica: s.romantica, avviso: s.avviso.trim() === '' ? null : s.avviso });
 
 /** La matita del dialogo e, dopo una modifica fatta da qui, il chip «Modificato». */
-export function ModificaDialogo({ chiave, nome, dialogo, onSalvato }: { chiave: string; nome: string; dialogo: DialogoConfidenteDto; onSalvato: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) la modifica non esiste; la condizione è costante di build, `ModificaDialogoReale` esce dal bundle
+export const ModificaDialogo: StrumentoDiModifica<typeof ModificaDialogoReale> = IN_RILASCIO ? NienteInRilascio : ModificaDialogoReale;
+function ModificaDialogoReale({ chiave, nome, dialogo, onSalvato }: { chiave: string; nome: string; dialogo: DialogoConfidenteDto; onSalvato: () => void | Promise<void> }) {
   const [aperta, setAperta] = useState(false);
   /** Vero dopo una modifica salvata da qui (il server lo dice nella risposta); falso = non lo so, non «non modificato». */
   const [modificato, setModificato] = useState(false);

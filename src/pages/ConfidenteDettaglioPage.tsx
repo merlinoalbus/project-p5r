@@ -39,6 +39,9 @@ import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Scheda di un Confidente presa dalla chiave nell'URL: carica il dettaglio dal catalogo e, se c'è
  * una partita attiva, lo stato dei Confidenti nella partita per ricavarne rango, semafori dei
@@ -80,7 +83,8 @@ export function ConfidenteDettaglioPage() {
   // Lo stesso parametro apre «Correggi» dalla Partita e governa la finestra anche durante la navigazione.
   // Una copia in useState resterebbe aperta dopo un collegamento al Confidente senza il parametro.
   const rangoChiesto = Number(params.get('requisiti'));
-  const rangoDaModificare = Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= 10 ? rangoChiesto : null;
+  // L12 (passo 8): nel rilascio (sola lettura) i requisiti, le informazioni e la disponibilità del Confidente non si correggono: nessun editor, neanche da indirizzo
+  const rangoDaModificare = !IN_RILASCIO && Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= 10 ? rangoChiesto : null;
   const setRangoDaModificare = (rango: number | null) => {
     const p = new URLSearchParams(params);
     if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
@@ -89,7 +93,7 @@ export function ConfidenteDettaglioPage() {
   // R9-01 (F4): l'editor della disponibilità strutturata; `versioneDisponibilita` rilegge la scheda dopo un salvataggio
   const [disponibilitaAperta, setDisponibilitaAperta] = useState(false);
   const [versioneDisponibilita, setVersioneDisponibilita] = useState(0);
-  const informazioniAperte = params.get('informazioni') === '1';
+  const informazioniAperte = !IN_RILASCIO && params.get('informazioni') === '1';
   const setInformazioniAperte = (aperta: boolean) => {
     const p = new URLSearchParams(params);
     if (aperta) p.set('informazioni', '1'); else p.delete('informazioni');
@@ -148,11 +152,11 @@ export function ConfidenteDettaglioPage() {
               {/* il cassetto del Confidente nella Partita, già aperto su di lui: lì si segnano punti e rango */}
               {mio && <CollegamentoVisivo tono="primario" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Aggiorna il rango"
                 to={`/partita?scheda=confidenti&confidente=${encodeURIComponent(c.chiave)}`} />}
-              <MenuModifica cosa={`il Confidente «${c.nome}»`}>
+              {!IN_RILASCIO && <MenuModifica cosa={`il Confidente «${c.nome}»`}>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Informazioni del Confidente"
                   aria-label="Modifica informazioni del Confidente" onClick={() => setInformazioniAperte(true)} />
                 <ModificaGuida tipo="confidente" chiave={c.chiave} cosa={`il Confidente «${c.nome}»`} etichetta="Testi della guida" onSalvato={() => void ricarica()} />
-              </MenuModifica>
+              </MenuModifica>}
             </>} />
           <section className="card flex flex-col gap-2" aria-label="Disponibilità del Confidente">
               <div className="flex flex-wrap gap-2">
@@ -175,7 +179,7 @@ export function ConfidenteDettaglioPage() {
             <section className="card flex flex-col gap-2 border-primary">
               <TitoloSezione>Prossimo passo: rango {prossimo}</TitoloSezione>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
-                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />
+                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={IN_RILASCIO || nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />
               )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
@@ -188,13 +192,13 @@ export function ConfidenteDettaglioPage() {
           {mio && mio.semafori.length > 1 && (
             <section className="card flex flex-col gap-3">
               <TitoloSezione>Requisiti dei ranghi successivi</TitoloSezione>
-              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />)}
+              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={IN_RILASCIO || nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />)}
             </section>
           )}
           <section id="requisiti" className="card flex scroll-mt-20 flex-col gap-2">
             <TitoloSezione>Requisiti del Confidente</TitoloSezione>
             {requisiti.errore && <p className="m-0 flex flex-wrap items-center gap-2 testo-13" role="alert">{requisiti.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void requisiti.ricarica()} /></p>}
-            <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica requisiti" onClick={() => setRangoDaModificare(1)} />
+            {!IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica requisiti" onClick={() => setRangoDaModificare(1)} />}
           </section>
           <RanghiConfidente chiave={c.chiave} nome={c.nome} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <InvitiConfidente filtro={{ confidente: c.chiave }} nomeConfidente={c.nome} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
@@ -255,7 +259,7 @@ export function ConfidenteDettaglioPage() {
                     {g.effetto && <span className="chip">{g.effetto}</span>}
                     <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
                     {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
-                    {g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+                    {!IN_RILASCIO && g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                     <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
                     <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
                   </li>
@@ -269,7 +273,7 @@ export function ConfidenteDettaglioPage() {
                   {c.regaliSconsigliati.map((s) => (
                     <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 testo-13 text-text-muted">
                       <span className="min-w-0 break-words">{s.nome}</span>
-                      {s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+                      {!IN_RILASCIO && s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                       <ModificaGuida tipo="regalo" chiave={`${chiave}:${s.ordine}`} cosa={`il regalo sconsigliato «${s.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
                     </li>
                   ))}
@@ -299,9 +303,9 @@ export function ConfidenteDettaglioPage() {
         onChiudi={() => setRangoDaModificare(null)} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica(), requisiti.ricarica()]); }} />}
     </PageState>
     {/* con le informazioni illeggibili la scheda non si mostra: l'editor che le corregge resta raggiungibile da qui */}
-    {c && erroreInformativo && <PulsanteVisivo tono="secondario" compatto className="mt-3" icona={<IconaAzione chiave="modifica" dimensione={20} />}
+    {!IN_RILASCIO && c && erroreInformativo && <PulsanteVisivo tono="secondario" compatto className="mt-3" icona={<IconaAzione chiave="modifica" dimensione={20} />}
       titolo="Modifica informazioni del Confidente" onClick={() => setInformazioniAperte(true)} />}
-    {disponibilitaAperta && c && <EditorDisponibilitaStrutturata key={`struttura:${chiave}`} chiave={chiave} nome={c.nome} onChiudi={() => setDisponibilitaAperta(false)} onSalvato={async () => { setVersioneDisponibilita((v) => v + 1); await ricarica(); }} />}
+    {!IN_RILASCIO && disponibilitaAperta && c && <EditorDisponibilitaStrutturata key={`struttura:${chiave}`} chiave={chiave} nome={c.nome} onChiudi={() => setDisponibilitaAperta(false)} onSalvato={async () => { setVersioneDisponibilita((v) => v + 1); await ricarica(); }} />}
     {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica} />}
     </>
   );

@@ -23,6 +23,10 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const R = LIMITI_GUIDA.richiesta;
 /** Nel selettore del dedalo e dell'area, la voce «nessuno». */
@@ -69,7 +73,9 @@ interface Props {
 }
 
 /** Il modulo di una Richiesta in una finestra: carica l'elenco (Richiesta e collocazioni) e i Confidenti, poi i campi. */
-export function ModuloRichiesta({ chiave, iniziale = {}, onChiudi, onCambiata }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloRichiestaReale` esce dal bundle
+export const ModuloRichiesta: StrumentoDiModifica<typeof ModuloRichiestaReale> = IN_RILASCIO ? NienteInRilascio : ModuloRichiestaReale;
+function ModuloRichiestaReale({ chiave, iniziale = {}, onChiudi, onCambiata }: Props) {
   const dati = useCarica(() => getRichieste(), []);
   const confidenti = useCarica(() => getConfidenti(), []);
   const richiesta = chiave ? dati.dati?.richieste.find((r) => r.chiave === chiave) ?? null : null;

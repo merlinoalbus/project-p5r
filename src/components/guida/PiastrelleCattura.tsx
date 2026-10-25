@@ -14,6 +14,9 @@ import { AssetImg } from '../shared/AssetImg';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Una voce da catturare: la Persona del compendio, il nome da mostrare e, se viene da un'Ombra, la sua chiave e se l'incontro espone il gesto. */
 export interface PiastrellaCatturabile {
   /** Identità stabile (chiave React): la voce della guida o l'Ombra. */
@@ -60,7 +63,7 @@ export function PiastrelleCattura({ voci, partitaId, catturate, occupata = null,
         const gesto = v.catturabile !== false;
         const disattiva = !partitaId || !v.persona || catturate === null || occupata === v.persona.id || (!gesto && !presa);
         const titolo = !partitaId ? 'Attiva una partita per segnare le catture'
-          : !v.persona ? 'Scegli la Persona del compendio («Modifica la guida») per segnarla'
+          : !v.persona ? (IN_RILASCIO ? 'Questa Persona non è collegata al compendio: non si può segnare' : 'Scegli la Persona del compendio («Modifica la guida») per segnarla')
           : !gesto && !presa ? 'Non si cattura dall’incontro: la Persona si registra dal compendio o per fusione'
           : presa ? 'Nel compendio della partita: tocca per toglierla' : 'Tocca quando l’hai catturata: entra nel compendio della partita';
         return (

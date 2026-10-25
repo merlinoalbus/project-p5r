@@ -17,11 +17,17 @@ import { dataGiocoTesto } from '../../utils/dateGioco';
 import { METEO_GIORNO, type GiornoModificabileDto, type MeteoGiorno } from '../../../shared/giorno';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const OPZIONI_METEO = METEO_GIORNO.map((m) => ({ chiave: m, nome: m }));
 
 /** La finestra per correggere il giorno `data` ('MM-GG'); `onSalvato` rilegge la pagina. */
-export function EditorGiorno({ data, onChiudi, onSalvato }: { data: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) l'editor del giorno non esiste; la condizione è costante di build, `EditorGiornoReale` esce dal bundle
+export const EditorGiorno: StrumentoDiModifica<typeof EditorGiornoReale> = IN_RILASCIO ? NienteInRilascio : EditorGiornoReale;
+function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const d = useCarica(() => getGiornoModificabile(data), [data]);
   return (
     <Modal titolo={`Giorno ${dataGiocoTesto(data)}`} aperta onChiudi={onChiudi} larga>

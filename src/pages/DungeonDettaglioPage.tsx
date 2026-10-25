@@ -81,6 +81,9 @@ import { Modal } from '../components/shared/Modal';
 import { NEL_CESTINO } from '../utils/cestino';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** La versione mostrata non ha pin, un'altra sì (come nella pagina dell'Area): quale, e l'avviso; null altrimenti. */
 function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null): { chiave: string; nome: string; testo: string } | null {
   const mostrata = versioni.find((v) => v.chiave === scelta);
@@ -506,7 +509,8 @@ export function DungeonDettaglioPage() {
   const contenitorePalazzo = { tipo: 'dungeon' as const, chiave };
   const infiltrazioniPalazzo = (d?.aree ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }));
   /** Salva l'ordine nuovo delle aree del Palazzo; vero se è andato. */
-  const riordinaAreePalazzo = async (ordine: string[]): Promise<boolean> => {
+  // L12 (passo 8): nel rilascio (sola lettura) le aree non si riordinano: la funzione non scrive (e `riordinaAree` esce dal bundle)
+  const riordinaAreePalazzo = IN_RILASCIO ? async (): Promise<boolean> => false : async (ordine: string[]): Promise<boolean> => {
     try { await riordinaAree(contenitorePalazzo, ordine); notifica('success', 'Ordine delle aree salvato.'); await rileggiTutto(); return true; }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Ordine non salvato.'); return false; }
   };
@@ -717,9 +721,9 @@ export function DungeonDettaglioPage() {
         {area.descrizione && <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-lg shrink-0" icona={<IconaAzione chiave="dettagli" dimensione={20} />}
           titolo={descrizioneAperta === area.chiave ? 'Nascondi la descrizione' : 'Descrizione'} title="Descrizione dell’infiltrazione" aria-expanded={descrizioneAperta === area.chiave}
           onClick={() => setDescrizioneAperta((x) => (x === area.chiave ? null : area.chiave))} />}
-        {menuModifica('btn-visivo--icona-lg')}
+        {!IN_RILASCIO && menuModifica('btn-visivo--icona-lg')}
       </div>
-      {moduloInfiltrazione()}
+      {!IN_RILASCIO && moduloInfiltrazione()}
       {descrizioneAperta === area.chiave && area.descrizione && <p className="m-0 testo-13 text-text-secondary whitespace-pre-wrap">{area.descrizione}</p>}
     </>;
   };
@@ -805,7 +809,7 @@ export function DungeonDettaglioPage() {
                     <TitoloScheda>{d.nome}</TitoloScheda>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida»; nei Palazzi
                         sta nel menu «Modifica ⋯» (lotto B) e il modulo si apre sotto l'intestazione */}
-                    {memento && modifica && correzioneScheda()}
+                    {!IN_RILASCIO && memento && modifica && correzioneScheda()}
                   </div>
                   {/* Da 1024 px sovrano e arcana prendono quel che resta della riga del nome, ognuno su una riga coi puntini (testo intero nel
                       suggerimento): in Madarame e Okumura il sovrano è una frase e andava a capo (intestazione da 170 a 197 px), l'arcana di
@@ -882,7 +886,7 @@ export function DungeonDettaglioPage() {
             </div>
           </header>}
           {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯» */}
-          {!memento && correggendoPalazzo && <div className="shrink-0">{correzioneScheda(() => setCorreggendoPalazzo(false))}</div>}
+          {!IN_RILASCIO && !memento && correggendoPalazzo && <div className="shrink-0">{correzioneScheda(() => setCorreggendoPalazzo(false))}</div>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
@@ -966,10 +970,10 @@ export function DungeonDettaglioPage() {
                   {(collegamento || d.aree.length <= 1) && <span className="testo-12 text-text-muted">infiltrazione {area.ordine + 1} di {d.aree.length}</span>}
                   {/* lotto B (punto 6): «Modifica testo», «+ Infiltrazione», «Modifica aree» e le azioni dell'area in un solo menu, accanto
                       al selettore: la prima schermata del telefono mostra la mappa e non quattro comandi di modifica */}
-                  {!collegamento && menuModifica()}
+                  {!IN_RILASCIO && !collegamento && menuModifica()}
                 </div>
                 {/* il modulo del testo si apre sotto la riga; `key`: cambiando infiltrazione si rimonta (rilievo della revisione) */}
-                {!collegamento && moduloInfiltrazione()}
+                {!IN_RILASCIO && !collegamento && moduloInfiltrazione()}
                 {/* Collegando i pin resta solo la riga del titolo (2026-10-18: «è inutile tutto ad eccezione del titolo»). */}
                 {/* «Aree toccate» (§4.2): le aree che l'infiltrazione percorre, in ordine; toccarne una la apre. «Modifica aree» cambia i legami. */}
                 {!collegamento && (
@@ -1008,7 +1012,7 @@ export function DungeonDettaglioPage() {
                 </>}
                 </>}
                 {/* Arrivando dalla proposta di una voce del diario (UX3-1, §4.4): la riga che lo dice, con «Conferma» e «Chiudi» */}
-                {daVoce && !collegamento && <PropostaDallaVoce key={daVoce} uid={daVoce} partitaId={partitaId} onChiudi={togliDaVoce}
+                {!IN_RILASCIO && daVoce && !collegamento && <PropostaDallaVoce key={daVoce} uid={daVoce} partitaId={partitaId} onChiudi={togliDaVoce}
                   onConfermata={async () => { togliDaVoce(); await dati.ricarica(); }} />}
                 {/* L'area aperta: nome, versioni, azioni, poi il visore della versione scelta (§4.2 punto 3). */}
                 {areaFisica && !collegamento && !(largo && versioniArea.length > 1 && planimetriaScelta) && (
@@ -1069,7 +1073,7 @@ export function DungeonDettaglioPage() {
                 {!mappaMostrata && !collegamento && (
                   <div className="flex flex-col items-start gap-2 rounded-md bg-white/[0.04] px-3 py-2 testo-12" role="status">
                     <p className="m-0 text-text-muted">{areaFisica ? `${areaFisica.nome} non ha ancora planimetrie: aggiungine una.` : 'Quest’infiltrazione non tocca ancora aree.'}</p>
-                    {!areaFisica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega aree" onClick={() => setLegami(area.chiave)} />}
+                    {!IN_RILASCIO && !areaFisica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega aree" onClick={() => setLegami(area.chiave)} />}
                   </div>
                 )}
               </section>
@@ -1147,7 +1151,7 @@ export function DungeonDettaglioPage() {
                 // la versione spostata si apre nell'area d'arrivo (anche quando quella di partenza è rimasta vuota ed è andata nel cestino)
                 onVersioneSpostata={(arrivo) => apriArea(arrivo.slug, area && (arrivo.infiltrazioni ?? []).some((x) => x.chiave === area.chiave) ? area.chiave : null)} />
             )}
-            {areaFisica && (
+            {!IN_RILASCIO && areaFisica && (
               <Modal titolo={`Eliminare ${areaFisica.nome}?`} aperta={finestra === 'elimina-area'} onChiudi={() => setFinestra(null)}
                 azioni={<>
                   <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
@@ -1159,11 +1163,11 @@ export function DungeonDettaglioPage() {
                 </div>
               </Modal>
             )}
-            {legami && d.aree.find((a) => a.chiave === legami) && (
+            {!IN_RILASCIO && legami && d.aree.find((a) => a.chiave === legami) && (
               <FinestraLegamiInfiltrazione infiltrazione={d.aree.find((a) => a.chiave === legami)!} aree={areePalazzo} partitaId={partitaId}
                 onChiudi={() => setLegami(null)} onSalvata={rileggiTutto} />
             )}
-            {finestra === 'nuova-infiltrazione' && (
+            {!IN_RILASCIO && finestra === 'nuova-infiltrazione' && (
               <Modal titolo="Nuova infiltrazione" aperta onChiudi={() => setFinestra(null)}>
                 {/* di partenza subito dopo l'infiltrazione aperta, come proponeva la scheda della planimetria di prima */}
                 <ModuloNuovaArea aree={infiltrazioniPalazzo} areePalazzo={areePalazzo.map((a) => ({ slug: a.slug, nome: a.nome }))} occupato={occupato} dopoIniziale={area.chiave}

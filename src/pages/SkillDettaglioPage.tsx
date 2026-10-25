@@ -15,6 +15,9 @@ import { MenuModifica } from '../components/shared/MenuModifica';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Scheda skill. */
 export function SkillDettaglioPage() {
   const { id } = useParams();
@@ -32,7 +35,7 @@ export function SkillDettaglioPage() {
               <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
               <span className="chip">{s.costo.testo}</span>
             </>}
-            azioni={<MenuModifica cosa={`la skill «${s.nomeIt}»`}>
+            azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`la skill «${s.nomeIt}»`}>
               <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} etichetta="Testi della skill" onSalvato={() => void ricarica()} />
               {/* la resa italiana dell'effetto è condivisa da tutte le skill con lo stesso testo: si modifica solo dalle Traduzioni */}
               <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Traduzione dell’effetto"

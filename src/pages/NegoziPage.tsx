@@ -25,6 +25,9 @@ import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/Pulsant
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Pagina dei negozi: carica l'elenco per la partita attiva (ricaricando al cambio di giorno, fascia
  * o meteo) e legge il filtro degli articoli dai parametri dell'URL. Senza ricerca raggruppa i
@@ -91,10 +94,10 @@ export function NegoziPage() {
       {negozi.dati && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo' : 'articoli'}: armi, protezioni, accessori, oggetti, regali, cibo, libri, film e videogiochi con prezzi e requisiti. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
-          <div className="flex flex-wrap justify-start gap-1.5 sm:justify-end sm:-mt-2">
+          {!IN_RILASCIO && <div className="flex flex-wrap justify-start gap-1.5 sm:justify-end sm:-mt-2">
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
             <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Nascosti dalla guida" to="/impostazioni#nascosti" />
-          </div>
+          </div>}
           {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
           <FiltriArticoli filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
           {selezioneVisibile && <DoveSiTrova

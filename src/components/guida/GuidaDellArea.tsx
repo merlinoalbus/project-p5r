@@ -39,6 +39,9 @@ import { Modal } from '../shared/Modal';
 import { enigmiCheSiRiaprono, inCorso, righeRiapertura, testoAvanzamento, testoVociDelGesto } from '../../utils/gestiVoce';
 import { CARATTERI, NOME_CARATTERE, carattereDaTipo, type CarattereVoce } from '../../../shared/caratteriVoce';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
 /** Il nome di una planimetria senza il Palazzo, con la versione se il nome non la dice già («Museo 1P · Livello 1»: due versioni di
@@ -212,7 +215,8 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   const [vistaAperta, setVistaAperta] = useState<string | null>(null);
   const apri = (chiave: string | null, pl: string | null) => { setSelezionato(chiave); setVistaAperta(pl); };
   /** Spostare più voci insieme (2026-10-14): nei Palazzi con più aree, se l'area ha voci; nei dedali no (lì si cambia l'area del dedalo). */
-  const spostaInsieme = !areaDedalo && !!areePalazzo && areePalazzo.length > 1 && vociDellArea.length > 0;
+  // L12 (passo 8): nel rilascio (sola lettura) le voci della guida non si copiano, spostano, aggiungono, correggono né si collegano ai pin
+  const spostaInsieme = !IN_RILASCIO && !areaDedalo && !!areePalazzo && areePalazzo.length > 1 && vociDellArea.length > 0;
   const tutteScelte = !!scelte && puntiVisibili.length > 0 && puntiVisibili.every((p) => scelte.has(p.chiave));
   // La voce da portare in vista dopo un «Ottenuto»/«Esaurito»: si scorre al primo disegno in cui c'è, già aperta, e poi basta.
   const daMostrare = useRef<string | null>(null);
@@ -267,7 +271,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     finally { setOccupato(false); }
   };
   /** Collega il pin alla voce o, se è già collegato, lo scollega; poi rilegge la scheda e notifica. */
-  const scegliPin = async (p: PuntoInteresseDto, spilloId: number, nome: string) => {
+  const scegliPin: (p: PuntoInteresseDto, spilloId: number, nome: string) => Promise<void> = IN_RILASCIO ? async () => undefined : async (p, spilloId, nome) => {
     const collegato = p.pin.some((x) => x.id === spilloId);
     setOccupato(true);
     try {
@@ -410,7 +414,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                   <li key={x.id} className="flex items-center gap-2 testo-12">
                     <IconaAzione chiave="posizione" dimensione={16} />
                     <span className="min-w-0 flex-1">{x.nome} <span className="text-text-muted">· {nomeSenzaPalazzo(x.mappaNome)}</span></span>
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Scollega" aria-label={`Scollega ${x.nome} da ${p.nome}`} disabled={occupato} onClick={() => void scegliPin(p, x.id, x.nome)} />
+                    {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Scollega" aria-label={`Scollega ${x.nome} da ${p.nome}`} disabled={occupato} onClick={() => void scegliPin(p, x.id, x.nome)} />}
                   </li>
                 ))}
               </ul>
@@ -429,7 +433,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                     if (righe.length > 0) setRiapertura({ voce: p, righe }); else void cambiaStato(p, null);
                   }} />}
               </div>}
-            <div className="flex flex-wrap items-center gap-1.5">
+            {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5">
               {/* nei dedali niente pin da collegare: i piani si generano a caso (2026-10-11) */}
               {/* i pin si scelgono sulla mappa della pagina (2026-10-18), anche in un'area senza planimetria propria: la pagina mostra quella
                   del collegamento, scelta fra le planimetrie del Palazzo */}
@@ -506,7 +510,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                   <EditorDettagli valore={b.dettagli} onCambia={(v) => cambia({ dettagli: v })} nascosti={p.tipo === 'persona' && !!p.persona ? AFFINITA_DELLA_PERSONA : []} />
                 </>}
               </CorrezioneGuida>
-            </div>
+            </div>}
             {scelta && (
               <p className="scelta-pin m-0 testo-12" role="status" aria-label={`Scelta dei pin per ${p.nome}`}>
                 Tocca i pin sulla mappa del Palazzo per collegarli o scollegarli; quelli grigi sono già raccolti o non ancora disponibili · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong>
@@ -522,7 +526,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
               {/* (UX3-14) i passi di quest'elenco: quelli della sua planimetria */}
               {passi.filter((x) => sta(x, pl) && voceVisibile(x)).map((x) => riga(x, passi, pl))}
             </ul>
-            {nuovoPunto?.contenitore === p.chiave && nuovoPunto.dove === pl && moduloNuovaVoce(nuovoPunto)}
+            {!IN_RILASCIO && nuovoPunto?.contenitore === p.chiave && nuovoPunto.dove === pl && moduloNuovaVoce(nuovoPunto)}
           </div>
         )}
       </li>
@@ -595,7 +599,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
           </section>
         )}
         <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={scelte ? `Voci di ${nomeArea} da scegliere` : `Voci della guida di ${nomeArea}`}>
-          {area.punti.length === 0 && <li className="py-2 testo-13 text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : daCatturare.length > 0 ? 'Nessun’altra voce: le Persona da catturare sono qui sopra.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
+          {area.punti.length === 0 && <li className="py-2 testo-13 text-text-muted">{areaDedalo ? `Quest’area non ha ancora voci${IN_RILASCIO ? '.' : ': aggiungile qui sotto.'}` : daCatturare.length > 0 ? 'Nessun’altra voce: le Persona da catturare sono qui sopra.' : `La guida non ha voci per quest’infiltrazione${IN_RILASCIO ? '.' : ': aggiungile qui sotto.'}`}</li>}
           {area.punti.length > 0 && puntiQui.length === 0 && <li className="py-2 testo-13 text-text-muted">Nessuna voce su questa planimetria: le voci dell’infiltrazione stanno nelle altre planimetrie, qui sotto.</li>}
           {puntiQui.length > 0 && puntiVisibili.length === 0 && <li className="py-2 testo-13 text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
           {/* nella scelta le voci sono righe da spuntare (i passi seguono il loro Enigma e non si scelgono): niente scheda né gesti */}
@@ -623,7 +627,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             onChiudi={() => setTrasferimento(null)} onFatto={async () => { setScelta(null); await onRicarica(); }} />
         )}
         {/* La guida non ha trascritto tutto: quel che manca si aggiunge qui, dove lo si è cercato; poi si sposta dove va. */}
-        {scelte ? null : nuovoPunto && !nuovoPunto.contenitore
+        {IN_RILASCIO || scelte ? null : nuovoPunto && !nuovoPunto.contenitore
           ? moduloNuovaVoce(nuovoPunto)
           : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" aria-label={areaDedalo ? `Aggiungi una voce di Trama in ${nomeArea}` : undefined} onClick={() => setNuovoPunto({ nome: '', tipo: areaDedalo ? 'trama' : 'altro', contenitore: null, dove: qui })} />}
         {/* (UX3-14) le voci delle altre planimetrie dell'infiltrazione, raggruppate per planimetria, chiuse: la gestione completa resta qui,

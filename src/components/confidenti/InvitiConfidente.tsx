@@ -12,6 +12,9 @@ import { EditorInvito } from './EditorInvito';
 import { conferma } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Gli stessi inviti e lo stesso gesto nelle pagine del Confidente, del quartiere e del luogo. Gli inviti si creano, si cambiano, si ripristinano e si
  *  tolgono solo dalla pagina del Confidente (R9-07c: è l'unico posto in cui si modificano), cioè quando il filtro nomina il Confidente. */
 export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtro: Omit<NonNullable<Parameters<typeof getInviti>[0]>, 'partita'>; nomeConfidente?: string; onCambiato: () => Promise<void> }) {
@@ -20,7 +23,8 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
   const [occupato, setOccupato] = useState<string | null>(null);
   /** L'editor aperto: un invito esistente, o `null` per uno nuovo; `undefined` = chiuso. */
   const [editor, setEditor] = useState<InvitoDto | null | undefined>(undefined);
-  const modificabile = filtro.confidente !== undefined;
+  // L12 (passo 8): nel rilascio (sola lettura) gli inviti si leggono e si registrano come avvenuti (partita), ma non si aggiungono, modificano o tolgono
+  const modificabile = !IN_RILASCIO && filtro.confidente !== undefined;
   const registra = async (chiave: string, avvenuto: boolean) => {
     if (!attiva || occupato) return;
     setOccupato(chiave);
@@ -60,8 +64,8 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
             <Link className="touch inline-flex items-center" to={`/confidenti/${encodeURIComponent(invito.confidente)}`}>{invito.confidenteNome}</Link>
             {invito.data && <span>{dataLeggibile(invito.data)}</span>}
             <span>Apre: {invito.apre.casa ? <Link to={invito.apre.casa} className="touch inline-flex items-center">{invito.apre.nome}</Link> : invito.apre.nome}</span>
-            {invito.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-            {invito.daUtente && <span className="chip" title="Invito creato da te: non è nella guida">Creato da te</span>}
+            {!IN_RILASCIO && invito.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+            {!IN_RILASCIO && invito.daUtente && <span className="chip" title="Invito creato da te: non è nella guida">Creato da te</span>}
             {modificabile && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica l’invito del ${invito.data ? dataLeggibile(invito.data) : 'Confidente'}`} disabled={occupato !== null} onClick={() => setEditor(invito)} />}
             {modificabile && invito.daUtente && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli l’invito del ${invito.data ? dataLeggibile(invito.data) : 'Confidente'}`} disabled={occupato !== null} onClick={() => void togli(invito)} />}
           </div>

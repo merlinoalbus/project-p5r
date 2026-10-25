@@ -19,6 +19,10 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** I tipi che una voce di un Palazzo può avere (Trama è solo dei Memento, come dice il server). */
 const TIPI_VOCE = (Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][]).filter((t) => t !== 'trama');
@@ -40,7 +44,9 @@ interface Props {
 }
 
 /** Sezione richiudibile «Schede da sistemare (N)»: per ogni scheda nome, infiltrazione, testo e i due gesti; niente se non ce ne sono. */
-export function SchedeDaSistemare({ schede, aree, onSistemata, completato = false }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) le schede da sistemare non esistono; la condizione è costante di build, `SchedeDaSistemareReale` esce dal bundle
+export const SchedeDaSistemare: StrumentoDiModifica<typeof SchedeDaSistemareReale> = IN_RILASCIO ? NienteInRilascio : SchedeDaSistemareReale;
+function SchedeDaSistemareReale({ schede, aree, onSistemata, completato = false }: Props) {
   /** Il gesto in corso: la scheda, quale gesto e la scelta fatta nella finestra (il tipo della voce nuova o la voce da collegare). */
   const [gesto, setGesto] = useState<{ scheda: SchedaDaSistemareDto; cosa: 'crea' | 'collega'; valore: string } | null>(null);
   const [occupato, setOccupato] = useState(false);

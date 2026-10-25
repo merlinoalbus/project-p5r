@@ -18,6 +18,10 @@ import { notifica } from '../../stores/notificationStore';
 import type { MappaDaCollocareDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Dove si può collocare una planimetria: un quartiere o un Palazzo, con la chiave pubblica della sua mappa e, se già note, le sue aree. */
 export interface ContenitoreColloca {
@@ -33,7 +37,9 @@ const NUOVA = '__nuova__';
 const idContenitore = (c: Pick<ContenitoreColloca, 'tipo' | 'chiave'>): string => `${c.tipo}:${c.chiave}`;
 
 /** La finestra «Colloca» di una planimetria senza Area. */
-export function FinestraCollocaPlanimetria({ mappa, contenitori, onChiudi, onCollocata }: {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraCollocaPlanimetriaReale` esce dal bundle
+export const FinestraCollocaPlanimetria: StrumentoDiModifica<typeof FinestraCollocaPlanimetriaReale> = IN_RILASCIO ? NienteInRilascio : FinestraCollocaPlanimetriaReale;
+function FinestraCollocaPlanimetriaReale({ mappa, contenitori, onChiudi, onCollocata }: {
   mappa: MappaDaCollocareDto; contenitori: ContenitoreColloca[]; onChiudi: () => void; onCollocata: () => Promise<void>;
 }) {
   const [scelto, setScelto] = useState(() => {

@@ -23,6 +23,9 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { Spinner } from '../shared/PageState';
 import { FinestraDaVerificare, type DivergenzaDaVerificare } from '../guida/FinestraDaVerificare';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   chiave: string;
   puntoIniziale?: {x:number;y:number;zoom:number}|null;
@@ -98,7 +101,9 @@ export function MappaIncorporata(props: Props) {
  * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
  * e, se `conEditor`, «Modifica planimetria». Senza `onNaviga` la navigazione fra livelli apre la pagina
  * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, popupIniziale, nonDisponibili, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire, infiltrazione = null }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, popupIniziale, nonDisponibili, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor: conEditorRichiesto = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire, infiltrazione = null }: Props) {
+  // L12 (passo 8): l'editor delle mappe non esiste nel rilascio (sola lettura): niente collegamenti «Modifica planimetria» / «Carica l'immagine»
+  const conEditor = !IN_RILASCIO && conEditorRichiesto;
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;

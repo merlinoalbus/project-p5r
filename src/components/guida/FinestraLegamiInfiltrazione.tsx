@@ -14,6 +14,10 @@ import { notifica } from '../../stores/notificationStore';
 import type { AreaDungeonDto, AreaRiassuntoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   infiltrazione: AreaDungeonDto;
@@ -26,7 +30,9 @@ interface Props {
 }
 
 /** La finestra: le aree toccate in ordine (↑/↓, togli) e quelle che si possono aggiungere. */
-export function FinestraLegamiInfiltrazione({ infiltrazione: i, aree, partitaId, onChiudi, onSalvata }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraLegamiInfiltrazioneReale` esce dal bundle
+export const FinestraLegamiInfiltrazione: StrumentoDiModifica<typeof FinestraLegamiInfiltrazioneReale> = IN_RILASCIO ? NienteInRilascio : FinestraLegamiInfiltrazioneReale;
+function FinestraLegamiInfiltrazioneReale({ infiltrazione: i, aree, partitaId, onChiudi, onSalvata }: Props) {
   const legate = i.areePalazzo ?? [];
   const [scelte, setScelte] = useState<string[]>(() => legate.map((a) => a.slug));
   const [occupato, setOccupato] = useState(false);

@@ -23,6 +23,9 @@ import { NoteStoricheOfferta } from '../catalogo/NoteStoricheOfferta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   articoli: ArticoloDto[];
   partitaId: number | null;
@@ -73,7 +76,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
           onCambiato(articolo); await onContenutoCambiato?.();
         }}
         acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />}
-      {onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
+      {!IN_RILASCIO && onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
     </div>
     <details className="catalogo-prodotto__dettagli">
       <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>

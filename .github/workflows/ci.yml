@@ -1,5 +1,5 @@
 # ============================================================
-# CI — gate di verifica (typecheck + lint + audit; i test non girano a ogni push: richiesta dell'utente del 2026-10-18)
+# CI — gate di verifica (typecheck + lint + controllo del bundle di rilascio + audit; i test non girano a ogni push: richiesta dell'utente del 2026-10-18)
 # ============================================================
 # Il gate gira sulle PULL REQUEST e, come workflow riusabile (`workflow_call`), prima della pubblicazione delle immagini
 # (docker-publish.yml, al push su main): un solo gate, scritto una volta, con l'audit anche lì. Prima la pubblicazione ne
@@ -35,6 +35,21 @@ jobs:
       - name: Lint
         run: npm run lint
 
+
+      # L12 (passo 8): il frontend dell'istanza pubblica di rilascio (sola lettura) non deve contenere gli editor né le chiamate all'API
+      # che scrivono i contenuti. Si costruiscono i due bundle (rilascio e preparazione) e `scripts/verifica-bundle-rilascio.ts` legge
+      # il `dist` di rilascio: fallisce se trova una delle stringhe vietate (percorsi di scrittura e etichette degli editor), e col
+      # confronto con la preparazione se una voce dell'elenco è diventata obsoleta. È un controllo statico di build, non un test.
+      - name: Build frontend di rilascio (VITE_MODALITA=rilascio)
+        run: npx vite build --outDir dist-rilascio
+        env:
+          VITE_MODALITA: rilascio
+
+      - name: Build frontend di preparazione (per il confronto)
+        run: npx vite build --outDir dist-preparazione
+
+      - name: Controllo statico del bundle di rilascio (stringhe vietate)
+        run: npx tsx scripts/verifica-bundle-rilascio.ts dist-rilascio --confronta dist-preparazione
 
       - name: Audit dipendenze runtime (high+ bloccante)
         run: npm audit --omit=dev --audit-level=high

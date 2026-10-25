@@ -44,6 +44,10 @@ import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
 import { haCasaPropria, paginaPerAggiungere } from '../utils/aree';
 import type { DatiAggiornaCopiaPezzo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../components/shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 
 /** Un numero col nome accordato: «1 copia», «3 copie». */
@@ -69,7 +73,11 @@ function scriviAppunti(a: AppuntiSpillo | null): void {
 }
 
 /** Pagina dell'editor: risolve la chiave dell'URL nella mappa vera (tramite `RisolviMappa`) e monta l'editor su quella, rimontandolo da capo quando la chiave risolta cambia. */
-export function EditorMappaPage() {
+// L12 (passo 8): l'editor delle mappe esiste solo nella preparazione. Il router non registra la rotta nel rilascio (e il bundler non emette il
+// chunk); questa condizione è la seconda difesa: anche se un domani un altro modulo importasse la pagina, nel rilascio sarebbe un componente
+// vuoto (nessuno strumento, nessuna chiamata all'API di scrittura).
+export const EditorMappaPage: StrumentoDiModifica<typeof EditorMappaPageReale> = IN_RILASCIO ? NienteInRilascio : EditorMappaPageReale;
+function EditorMappaPageReale() {
   const { chiave = '' } = useParams<{ chiave: string }>();
   return <RisolviMappa chiave={chiave}>{k => <EditorMappaRisolta key={k} chiave={k} />}</RisolviMappa>;
 }

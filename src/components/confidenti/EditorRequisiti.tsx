@@ -9,6 +9,10 @@ import { PageState } from '../shared/PageState';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 type Rango = RequisitiConfidenteDto['ranghi'][number];
 
@@ -44,7 +48,9 @@ function RequisitiRango({ confidente, rango, condizioni, onCambia, occupato, onO
 }
 
 /** L'unico punto di modifica dei requisiti è la pagina del Confidente. */
-export function EditorRequisiti({ confidente, rangoIniziale, onChiudi, onSalvato }: { confidente: { chiave: string; nome: string }; rangoIniziale?: number; onChiudi: () => void; onSalvato: () => Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) l'editor non esiste; la condizione è costante di build, `EditorRequisitiReale` esce dal bundle
+export const EditorRequisiti: StrumentoDiModifica<typeof EditorRequisitiReale> = IN_RILASCIO ? NienteInRilascio : EditorRequisitiReale;
+function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }: { confidente: { chiave: string; nome: string }; rangoIniziale?: number; onChiudi: () => void; onSalvato: () => Promise<void> }) {
   const dati = useCarica(() => getRequisitiConfidente(confidente.chiave), [confidente.chiave]);
   const [rangoAperto, setRangoAperto] = useState<number | null>(rangoIniziale ?? 1);
   const [occupato, setOccupato] = useState(false);

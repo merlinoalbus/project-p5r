@@ -21,10 +21,14 @@ import { notifica } from '../../stores/notificationStore';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaRiassuntoDto, MappaDaCollocareDto, QuartiereRiassuntoDto } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Le due sezioni: «Aree della città» (se ce ne sono) e «Planimetrie da collocare» (se ce ne sono), richiudibile. */
 export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto[] }) {
   const aree = useCarica(getAreeCitta, []);
-  const sciolte = useCarica(getDaCollocare, []);
+  // L12 (passo 8): le planimetrie da collocare sono una lettura diagnostica dell'editor, solo della preparazione: nel rilascio nessuna richiesta
+  const sciolte = useCarica(IN_RILASCIO ? async (): Promise<MappaDaCollocareDto[]> => [] : getDaCollocare, []);
   const [daRimuovere, setDaRimuovere] = useState<AreaRiassuntoDto | null>(null);
   const [riepilogo, setRiepilogo] = useState<string | null>(null);
   const [daCollocare, setDaCollocare] = useState<MappaDaCollocareDto | null>(null);
@@ -65,11 +69,11 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
               <span className="flex min-w-[10rem] flex-1 flex-col gap-0.5">
                 <span className="flex flex-wrap items-center gap-1.5">
                   <Link to={a.casa} className="touch inline-flex items-center font-semibold">{a.nome}</Link>
-                  {a.daVerificare && <span className="chip chip--attivo testo-12">Da verificare</span>}
+                  {!IN_RILASCIO && a.daVerificare && <span className="chip chip--attivo testo-12">Da verificare</span>}
                 </span>
                 <span className="testo-12 text-text-muted">{a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`} · {a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`}</span>
               </span>
-              {a.daVerificare && <span className="ml-auto flex flex-wrap gap-1.5">
+              {!IN_RILASCIO && a.daVerificare && <span className="ml-auto flex flex-wrap gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Tieni" disabled={occupato} onClick={() => void tieni(a)} />
                 <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" disabled={occupato} onClick={() => { setRiepilogo(null); setDaRimuovere(a); }} />
               </span>}
@@ -78,7 +82,7 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
         </ul>
       </section>}
 
-      {(sciolte.dati?.length ?? 0) > 0 && <details className="card flex flex-col gap-2" aria-label="Planimetrie da collocare">
+      {!IN_RILASCIO && (sciolte.dati?.length ?? 0) > 0 && <details className="card flex flex-col gap-2" aria-label="Planimetrie da collocare">
         <summary className="touch cursor-pointer font-semibold">Planimetrie da collocare ({sciolte.dati!.length})</summary>
         <ul className="m-0 mt-2 flex list-none flex-col gap-2 p-0">
           {sciolte.dati!.map((m) => (
@@ -94,7 +98,7 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
         </ul>
       </details>}
 
-      <Modal titolo={daRimuovere ? `Rimuovere ${daRimuovere.nome}?` : ''} aperta={!!daRimuovere} onChiudi={() => setDaRimuovere(null)}
+      {!IN_RILASCIO && <Modal titolo={daRimuovere ? `Rimuovere ${daRimuovere.nome}?` : ''} aperta={!!daRimuovere} onChiudi={() => setDaRimuovere(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setDaRimuovere(null)}>Annulla</button>
           <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi" disabled={occupato} onClick={() => void rimuovi()} />
@@ -104,8 +108,8 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
           {riepilogo && <p className="m-0 text-warning" role="alert">{riepilogo}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
         </div>
-      </Modal>
-      {daCollocare && <FinestraCollocaPlanimetria mappa={daCollocare} contenitori={quartieri.map((q) => ({ tipo: 'quartiere' as const, chiave: q.chiave, nome: q.nome, mappa: q.mappaChiave }))} onChiudi={() => setDaCollocare(null)}
+      </Modal>}
+      {!IN_RILASCIO && daCollocare && <FinestraCollocaPlanimetria mappa={daCollocare} contenitori={quartieri.map((q) => ({ tipo: 'quartiere' as const, chiave: q.chiave, nome: q.nome, mappa: q.mappaChiave }))} onChiudi={() => setDaCollocare(null)}
         onCollocata={async () => { setDaCollocare(null); await sciolte.ricarica(); }} />}
     </>
   );

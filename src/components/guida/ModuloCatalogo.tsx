@@ -22,6 +22,10 @@ import { NOME_TIPO_CATALOGO, tipoCatalogoDi, type TipoModulo } from '../../utils
 import { MODULI, type Dati } from './moduli';
 import { jsonDi, jsonSenzaPerdite } from './moduli/base';
 import type { ElementoCatalogoDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   /** Il tipo del catalogo, o «videogioco» (un'attività con il tipo fissato). */
@@ -40,7 +44,9 @@ interface Props {
  * dal JSON salvato), la spunta «Confermato» e i comandi del guscio: «Salva» (attivo solo con dati e condizioni validi),
  * «Ripristina i valori della guida» per le righe corrette, «Elimina» (nel cestino per luoghi e negozi, L5) e «Nascondi» per quelle della guida.
  */
-export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloCatalogoReale` esce dal bundle
+export const ModuloCatalogo: StrumentoDiModifica<typeof ModuloCatalogoReale> = IN_RILASCIO ? NienteInRilascio : ModuloCatalogoReale;
+function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   const tipo = tipoCatalogoDi(tipoModulo);
   const modulo = MODULI[tipoModulo];
   const nuovo = !elemento;

@@ -37,6 +37,9 @@ import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 
 /** Come si impara una skill: «Innata», «Liv. N», oppure — per le forme del gruppo — con il risveglio, i ranghi del Confidente o la 3ª forma. */
 function etichettaApprendimento(s: SkillAppresaDto): string {
@@ -155,7 +158,7 @@ export function PersonaDettaglioPage() {
               <LivelloBadge livello={p.livello} grande />
               {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="h-12 w-12 object-contain drop-shadow" fallback={null} />}
             </>}
-            azioni={<MenuModifica cosa={`la Persona «${p.nomeIt}»`}>
+            azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`la Persona «${p.nomeIt}»`}>
               <ModificaGuida tipo="persona" chiave={String(p.id)} cosa={`la Persona «${p.nomeIt}»`} etichetta="Testi della Persona" campiSpeciali={campiPersona(p.delParty)} onSalvato={() => void ricarica()} />
               {p.dlc && p.dlcSet && <ModificaGuida tipo="dlc-set" chiave={String(p.dlcSet)} cosa={`il set DLC ${p.dlcSet}`} etichetta={`Set DLC ${p.dlcSet}`} onSalvato={() => void ricarica()} />}
               {p.rara && <ModificaGuida tipo="tesoro" chiave={String(p.id)} cosa={`il Demone del Tesoro «${p.nomeIt}»`} etichetta="Demone del Tesoro" onSalvato={() => void ricarica()} />}

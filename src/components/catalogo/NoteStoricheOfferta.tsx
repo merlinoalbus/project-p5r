@@ -8,6 +8,9 @@ import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato (migrazione 139), che si
  *  modifica da qui e torna al valore della guida con «Ripristina»; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. */
 export function NoteStoricheOfferta({ note, onLegamiCambiati }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void> }) {
@@ -51,14 +54,14 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
   const vuota = !testo.trim() || !fonte.trim();
   return <div className="min-w-0">
     <p className="m-0 whitespace-pre-line break-words"><strong>Nota storica della fonte. </strong>{attuale.testo}</p>
-    <p className="m-0 break-words text-text-secondary">Fonte: {attuale.fonte} · versione {attuale.versione}{attuale.modificata ? ' · modificata' : ''}</p>
-    <div className="mt-1 flex flex-wrap gap-2">
+    <p className="m-0 break-words text-text-secondary">Fonte: {attuale.fonte} · versione {attuale.versione}{!IN_RILASCIO && attuale.modificata ? ' · modificata' : ''}</p>
+    {!IN_RILASCIO && <div className="mt-1 flex flex-wrap gap-2">
       <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={() => apri('modifica')} />
       {attuale.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => apri('ripristina')} />}
       {onLegamiCambiati && <ModificaGuida tipo="nota-storica-legami" chiave={attuale.id} cosa="dove compare la nota storica" etichetta="Dove compare" campiSpeciali={CAMPI_LEGAMI}
         onSalvato={() => void onLegamiCambiati()} />}
-    </div>
-    {aperta && <Modal aperta titolo={aperta === 'ripristina' ? 'Ripristina la nota storica' : 'Modifica la nota storica'} onChiudi={() => { if (!occupato) setAperta(null); }} azioni={<>
+    </div>}
+    {!IN_RILASCIO && aperta && <Modal aperta titolo={aperta === 'ripristina' ? 'Ripristina la nota storica' : 'Modifica la nota storica'} onChiudi={() => { if (!occupato) setAperta(null); }} azioni={<>
       <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAperta(null)}>Annulla</button>
       <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={aperta === 'ripristina' ? 'riapri' : 'registra'} dimensione={22} />} titolo={aperta === 'ripristina' ? 'Ripristina' : 'Salva'} disabled={occupato || (aperta === 'modifica' && vuota)} onClick={() => void esegui()} />
     </>}>

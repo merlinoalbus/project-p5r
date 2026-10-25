@@ -19,6 +19,10 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { AzionePercorsoDto, FasciaGioco, VociTrasferiteDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   /** «copia» o «sposta». */
@@ -37,7 +41,9 @@ interface Props {
 const quanteVoci = (n: number) => (n === 1 ? '1 voce' : `${n} voci`);
 
 /** La finestra: giorno (mese e giorno), fascia, il riepilogo e il comando. */
-export function TrasferisciVoci({ modo, voci, giorno, partitaId, onChiudi, onFatto }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il trasferimento non esiste; la condizione è costante di build, `TrasferisciVociReale` esce dal bundle
+export const TrasferisciVoci: StrumentoDiModifica<typeof TrasferisciVociReale> = IN_RILASCIO ? NienteInRilascio : TrasferisciVociReale;
+function TrasferisciVociReale({ modo, voci, giorno, partitaId, onChiudi, onFatto }: Props) {
   const indice = useCarica(() => getPercorsoIndice(partitaId ?? undefined), [partitaId]);
   const [destinazione, setDestinazione] = useState(giorno);
   const [fascia, setFascia] = useState<FasciaGioco>(voci.every((v) => v.fascia === 'sera') ? 'sera' : 'giorno');

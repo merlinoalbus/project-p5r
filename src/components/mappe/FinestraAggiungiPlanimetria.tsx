@@ -15,6 +15,10 @@ import { erroreImmagine } from '../../utils/aree';
 import type { AreaDettaglioDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   area: AreaDettaglioDto;
@@ -25,7 +29,9 @@ interface Props {
 }
 
 /** La finestra: immagine obbligatoria, etichetta facoltativa, casella «diventa la predefinita». */
-export function FinestraAggiungiPlanimetria({ area, aperta, onChiudi, onAggiunta }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraAggiungiPlanimetriaReale` esce dal bundle
+export const FinestraAggiungiPlanimetria: StrumentoDiModifica<typeof FinestraAggiungiPlanimetriaReale> = IN_RILASCIO ? NienteInRilascio : FinestraAggiungiPlanimetriaReale;
+function FinestraAggiungiPlanimetriaReale({ area, aperta, onChiudi, onAggiunta }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [etichetta, setEtichetta] = useState('');
   const [predefinita, setPredefinita] = useState(false);

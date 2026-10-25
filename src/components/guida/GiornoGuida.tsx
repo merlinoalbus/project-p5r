@@ -47,6 +47,9 @@ import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazioneEffetti, useGestiPartita } from '../../services/gestiPartita';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
 /** La fascia come complemento di tempo, per i testi («di giorno», «di sera»). */
@@ -287,7 +290,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const riordino = useRiordinoCollegato(
     (['giorno', 'sera'] as const).map((f) => ({ nome: f, ids: g.azioni.filter((a) => a.fascia === f).map((a) => a.uid) })),
     occupato ? 'Un momento: sto salvando l’ultima modifica' : null,
-    (uid, lista, posizione) => {
+    // nel rilascio (sola lettura, voci del diario comprese) il riordino non esiste: nessuna maniglia (sotto) e nessuna scrittura
+    IN_RILASCIO ? () => undefined : (uid, lista, posizione) => {
       const f: FasciaGioco = lista === 'sera' ? 'sera' : 'giorno';
       const v = g.azioni.find((a) => a.uid === uid);
       if (!v) return undefined;
@@ -334,7 +338,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           {scelte
             ? voci.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
                 aria-label={`${tutteScelte ? 'Togli dalla scelta' : 'Scegli'} tutte le voci ${nomeFascia(f)}`} onClick={() => scegli(voci.map((v) => v.uid), !tutteScelte)} />
-            : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => apri({ tipo: 'nuova', fascia: f })} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
+            : !IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => apri({ tipo: 'nuova', fascia: f })} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
         </div>
         {/* nella scelta le voci sono righe da spuntare per copiarle o spostarle: niente spunta di partita né gesti, per non confonderle */}
         {scelte && voci.length > 0 && (
@@ -353,14 +357,14 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           </ul>
         )}
         {scelte ? (voci.length === 0 && <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
-          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno: con «Aggiungi» metti una cosa da fare o un evento.</p>
+          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un evento.'}</p>
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
-                ? <VoceEvento key={v.uid} e={v} gesti={gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} {...rigaRiordino(f, voci, v)}
+                ? <VoceEvento key={v.uid} e={v} gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
                     dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={occupato} /> : undefined} />
                 : <Azione key={`${partitaId}:${v.uid}`} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
-                    gesti={gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...rigaRiordino(f, voci, v)} />)}
+                    gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))} />)}
             </ul>
           )}
       </section>
@@ -375,7 +379,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           <span className="chip">{g.fase}</span>
           {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
           {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
-          <TagAllerte allerte={g.allerte} modifica={onAllerteModificate ? { data: g.giorno, onSalvato: () => void onAllerteModificate() } : undefined} />
+          <TagAllerte allerte={g.allerte} modifica={!IN_RILASCIO && onAllerteModificate ? { data: g.giorno, onSalvato: () => void onAllerteModificate() } : undefined} />
           {partitaId && (consigliate > 0 || bloccate > 0) && (
             <span className="testo-12 text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
           )}
@@ -388,7 +392,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       </section>
       {/* copiare o spostare voci in un altro giorno (2026-10-12): fuori dalla scelta un comando solo; nella scelta la barra, che resta
           in vista scorrendo, col conto e i comandi */}
-      {!scelte && g.azioni.length > 0 && (
+      {!IN_RILASCIO && !scelte && g.azioni.length > 0 && (
         <PulsanteVisivo tono="fantasma" compatto className="self-end" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
           aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={occupato} onClick={() => { setMenu(null); setScelta({ giorno: g.giorno, uid: new Set() }); }} />
       )}

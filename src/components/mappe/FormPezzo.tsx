@@ -25,6 +25,10 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Modal } from '../shared/Modal';
 import { notifica } from '../../stores/notificationStore';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const ROTAZIONI: RotazionePezzo[] = [0, 90, 180, 270];
 
@@ -50,7 +54,9 @@ interface Props {
 const condizioniNude = (c: CopiaPezzoDto): RequisitoSpillo[] => condizioniSenzaTesto(c.condizioni);
 
 /** Il modulo della copia selezionata: si salva tutto insieme con «Salva copia»; le eliminazioni chiedono conferma. */
-export function FormPezzo({ pezzo: p, copia: c, indice, immagine, elenchi, occupato, onSalva, onAggiungiCopia, onEliminaCopia, onEliminaPezzo, onChiudi }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `FormPezzoReale` esce dal bundle
+export const FormPezzo: StrumentoDiModifica<typeof FormPezzoReale> = IN_RILASCIO ? NienteInRilascio : FormPezzoReale;
+function FormPezzoReale({ pezzo: p, copia: c, indice, immagine, elenchi, occupato, onSalva, onAggiungiCopia, onEliminaCopia, onEliminaPezzo, onChiudi }: Props) {
   const [nome, setNome] = useState(p.nome);
   const [etichetta, setEtichetta] = useState(c.etichetta);
   const [x, setX] = useState(c.posizione.x);

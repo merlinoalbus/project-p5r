@@ -57,7 +57,12 @@ function condizioniDiSblocco(sblocco: SbloccoDto | undefined): RequisitoSpillo[]
     : [sblocco.condizioneSalvata];
 }
 
-function EditorSbloccoQuartiere({ chiave, nome, sblocco, onChiudi, onSalvato }: { chiave: string; nome: string; sblocco?: SbloccoDto; onChiudi: () => void; onSalvato: () => void }) {
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+// L12 (passo 8): nel rilascio (sola lettura) lo sblocco del quartiere non si modifica; `EditorSbloccoQuartiereReale` esce dal bundle (costante di build)
+const EditorSbloccoQuartiere: StrumentoDiModifica<typeof EditorSbloccoQuartiereReale> = IN_RILASCIO ? NienteInRilascio : EditorSbloccoQuartiereReale;
+function EditorSbloccoQuartiereReale({ chiave, nome, sblocco, onChiudi, onSalvato }: { chiave: string; nome: string; sblocco?: SbloccoDto; onChiudi: () => void; onSalvato: () => void }) {
   const [condizioni, setCondizioni] = useState(() => condizioniDiSblocco(sblocco));
   const [salvando, setSalvando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
@@ -84,6 +89,7 @@ function EditorSbloccoQuartiere({ chiave, nome, sblocco, onChiudi, onSalvato }: 
   </Modal>;
 }
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { NienteInRilascio, type StrumentoDiModifica } from '../components/shared/SoloPreparazione';
 
 /**
  * La carta di un luogo del quartiere, con l'ancora `#luogo-…` per arrivarci da fuori: nome, tipo
@@ -205,7 +211,7 @@ export function QuartierePage() {
             chip={<span className="testo-12 text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>}
             azioni={<>
               {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
-              <MenuModifica cosa={`il quartiere «${q.nome}»`}>
+              {!IN_RILASCIO && <MenuModifica cosa={`il quartiere «${q.nome}»`}>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
                 {/* la stessa finestra modifica lo sblocco e, se è stato cambiato, lo rimette com'era */}
@@ -213,7 +219,7 @@ export function QuartierePage() {
                   dettaglio={q.sbloccoCondizione.modificato ? 'modificato · ripristina' : undefined} aria-label="Modifica sblocco" onClick={() => setFinestra('sblocco')} />}
                 {/* L11 · B11 (R11-15/6): nome e descrizione del quartiere, con «Ripristina» ai valori della guida */}
                 <ModificaGuida tipo="quartiere" chiave={q.chiave} cosa={`il quartiere «${q.nome}»`} etichetta="Testi della guida" onSalvato={() => void dati.ricarica()} />
-              </MenuModifica>
+              </MenuModifica>}
             </>} />
           {(q.sbloccoCondizione?.testo || q.descrizione) && <section className="card flex flex-col gap-2" aria-label="Disponibilità del quartiere">
               {q.sbloccoCondizione?.testo && <p className="m-0 break-words testo-13"><strong className="text-text-secondary">Si apre:</strong> {q.sbloccoCondizione.testo}{q.sbloccoCondizione.modificato ? <span className="testo-12 text-text-muted"> (sblocco modificato)</span> : null}</p>}
@@ -229,17 +235,17 @@ export function QuartierePage() {
                 centrata (o sullo spillo dell'indirizzo); l'ingresso serve a chi arriva dalla metro, e ha la sua finestra. */}
             <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Illustrazione di ${q.nome}`}>
               {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} versione={`0-${revisione}`} classeVisore="visore-alto-quanto-immagine h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
-              <div className="flex flex-wrap items-center gap-2 testo-12 text-text-muted">
+              {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-2 testo-12 text-text-muted">
                 {q.illustrazione.immagineUrl || q.illustrazione.asset
                   ? <span>Pin e immagine si modificano dall’editor.</span>
                   : <span>Nessuna illustrazione per {q.nome}: carica una tua immagine dall’editor (resta nella tua istanza).</span>}
-              </div>
+              </div>}
             </section>
 
             <div className="flex flex-col gap-4">
             <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} onPinSegnato={mostraPin} />
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
-              <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>
+              {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>}
               {tipi.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
                   <button type="button" className={`chip touch ${tipo === '' ? 'chip--attivo' : ''}`} onClick={() => setTipo('')} aria-pressed={tipo === ''}>Tutti ({q.luoghi.length})</button>
@@ -270,10 +276,10 @@ export function QuartierePage() {
             </div>
           </div>
 
-          {finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
+          {!IN_RILASCIO && finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
           {colloca && <FinestraColloca luogo={colloca.luogo} proposta={colloca.proposta} aree={q.aree.map((a) => ({ slug: a.slug, nome: a.nome }))} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
           {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={(area) => { void dati.ricarica().then(() => { if (area.passaggio) mostraPin(area.passaggio.spillo); }); }} />}
-          {finestra === 'sblocco' && <EditorSbloccoQuartiere chiave={q.chiave} nome={q.nome} sblocco={q.sbloccoCondizione} onChiudi={() => setFinestra(null)} onSalvato={() => void dati.ricarica()} />}
+          {!IN_RILASCIO && finestra === 'sblocco' && <EditorSbloccoQuartiere chiave={q.chiave} nome={q.nome} sblocco={q.sbloccoCondizione} onChiudi={() => setFinestra(null)} onSalvato={() => void dati.ricarica()} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
           {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga

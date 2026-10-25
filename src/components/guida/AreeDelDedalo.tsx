@@ -45,6 +45,9 @@ import { contiDelDedalo } from '../../utils/dedali';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 type Dedalo = AreaDungeonDto & { dedalo: NonNullable<AreaDungeonDto['dedalo']> };
 
 interface Props {
@@ -80,7 +83,9 @@ function etichettaArea(a: AreaDedaloDto): string {
 }
 
 /** Il dedalo: scheda in cima, schede delle aree, l'area aperta coi suoi quattro elementi e, in «Modifica la guida», gli attrezzi. */
-export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, partitaId, modifica, onModifica, cambiaStato, onPuntoAggiornato, onTimbri, onRichiesta, catturate, onCattura, onRicarica }: Props) {
+export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, partitaId, modifica: modificaRichiesta, onModifica, cambiaStato, onPuntoAggiornato, onTimbri, onRichiesta, catturate, onCattura, onRicarica }: Props) {
+  // L12 (passo 8): nel rilascio (sola lettura) «Modifica la guida» non esiste: l'interruttore non si mostra e la modalità resta «Gioca»
+  const modifica = !IN_RILASCIO && modificaRichiesta;
   const { aree, daCollocare, obiettivi, completato } = dedalo.dedalo;
   const [params, setParams] = useSearchParams();
   const [menu, setMenu] = useState(false);
@@ -108,7 +113,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
   const conto = (c: { fatti: number; totale: number }) => (partitaId ? `${c.fatti}/${c.totale}` : `${c.totale}`);
 
   /** L'interruttore «Gioca» / «Modifica la guida». */
-  const interruttore = (
+  const interruttore = IN_RILASCIO ? null : (
     <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-border" role="group" aria-label="Modalità della pagina">
       <button type="button" className={`touch px-3 testo-12 ${!modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={!modifica} onClick={() => onModifica(false)}>Gioca</button>
       <button type="button" className={`touch border-l border-border px-3 testo-12 ${modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={modifica} onClick={() => onModifica(true)}>Modifica la guida</button>
@@ -187,7 +192,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
           </FilaScorrevole>
         </div>
       )}
-      {aree.length === 0 && <p className="m-0 testo-12 text-text-muted" role="status">Questo dedalo non ha ancora aree{modifica ? ': aggiungine una qui sotto.' : ': si aggiungono in «Modifica la guida».'}</p>}
+      {aree.length === 0 && <p className="m-0 testo-12 text-text-muted" role="status">Questo dedalo non ha ancora aree{modifica ? ': aggiungine una qui sotto.' : IN_RILASCIO ? '.' : ': si aggiungono in «Modifica la guida».'}</p>}
 
       {/* ---- L'area aperta ---- */}
       {area && (
@@ -247,7 +252,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
       {dedalo.archivio && <ArchivioDelPalazzo archivio={dedalo.archivio} onSalvato={onRicarica} />}
 
       {/* ---- Gli attrezzi del dedalo, in «Modifica la guida» ---- */}
-      {!modifica && daCollocare.length > 0 && <p className="m-0 testo-12 text-text-muted">{daCollocare.length === 1 ? '1 Richiesta del dedalo non sta' : `${daCollocare.length} Richieste del dedalo non stanno`} in nessuna area e non {daCollocare.length === 1 ? 'conta' : 'contano'}: si colloca in «Modifica la guida».</p>}
+      {!modifica && daCollocare.length > 0 && <p className="m-0 testo-12 text-text-muted">{daCollocare.length === 1 ? '1 Richiesta del dedalo non sta' : `${daCollocare.length} Richieste del dedalo non stanno`} in nessuna area e non {daCollocare.length === 1 ? 'conta' : 'contano'}{IN_RILASCIO ? '.' : ': si colloca in «Modifica la guida».'}</p>}
       {modifica && (
         <section className="flex flex-col gap-2.5 rounded-lg border border-dashed border-border-light p-2.5" aria-label={`Attrezzi di ${dedalo.nome}`}>
           {daCollocare.length > 0 && (
