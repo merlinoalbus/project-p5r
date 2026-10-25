@@ -24,6 +24,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questo hook, fuori dal pannello, è quello di react-router-dom
 import { useSearchParams } from '../components/scheda/routerScheda';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
+import { segnalaMutazioneEffetti } from '../services/gestiPartita';
 import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 import { useCarica } from '../hooks/useCarica';
 import { useSchede } from '../hooks/useSchede';
@@ -99,7 +100,8 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
     if (stato === 'accettata' && r.statoPartita?.stato === 'da-verificare'
       && !(await conferma({ titolo: `Accettare «${r.nome}»?`, testo: `Lo sblocco o la scadenza non sono ancora dati verificati: ${r.statoPartita.motivi.join(' ')} Controlla nel gioco che sia davvero disponibile.`, etichetta: 'Accetta' }))) return;
     setOccupato(true);
-    try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
+    // dopo il cambio di stato il server può aver creato o chiuso la proposta degli yen (decisione 3): «Applica» si rilegge subito
+    try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); segnalaMutazioneEffetti(partitaId); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
     <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
