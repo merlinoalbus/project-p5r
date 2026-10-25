@@ -13,13 +13,57 @@ import { randomUUID } from 'node:crypto';
 import type { Logger } from 'pino';
 import { logger as rootLogger, withRequestId } from '../utils/logger.js';
 
+/**
+ * Il proprietario delle partite quando l'identità non è verificata (L12, passo 3): tutte le partite esistenti prima della migrazione
+ * utente 045 hanno questo valore, e in preparazione (senza Cloudflare Access) ogni richiesta lo porta. Stesso valore del DEFAULT
+ * della colonna `partita.proprietario`.
+ */
+export const PROPRIETARIO_UNICO = 'proprietario-unico';
+
 /** Dati che seguono una singola richiesta lungo la catena asincrona. */
 export interface RequestContext {
   requestId: string;
   logger: Logger;
+  /** Chi possiede le partite viste da questa richiesta: `sub` del token di Cloudflare Access, oppure `PROPRIETARIO_UNICO`. */
+  proprietario: string;
+  /** L'email del token (solo per le partite create da un utente riconosciuto); `null` con il proprietario unico. */
+  proprietarioEmail: string | null;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
+
+/**
+ * Il proprietario della richiesta corrente. Fuori da una richiesta (avvio, migrazioni, test dei servizi) è `PROPRIETARIO_UNICO`:
+ * i servizi delle partite funzionano identici a prima.
+ */
+export function getProprietario(): string {
+  return storage.getStore()?.proprietario ?? PROPRIETARIO_UNICO;
+}
+
+/** L'email associata al proprietario della richiesta corrente, se l'identità è stata verificata. */
+export function getProprietarioEmail(): string | null {
+  return storage.getStore()?.proprietarioEmail ?? null;
+}
+
+/** Il middleware d'identità fissa il proprietario della richiesta in corso (una volta, prima di ogni rotta). */
+export function impostaProprietario(proprietario: string, email: string | null): void {
+  const ctx = storage.getStore();
+  if (!ctx) return;
+  ctx.proprietario = proprietario;
+  ctx.proprietarioEmail = email;
+}
+
+/**
+ * Esegue `fn` come se la richiesta fosse di `proprietario` (test di appartenenza e strumenti di sola lettura fuori richiesta). Il
+ * contesto ereditato (requestId, logger) si conserva; senza contesto se ne crea uno minimo.
+ */
+export function comeProprietario<T>(proprietario: string, email: string | null, fn: () => T): T {
+  const attuale = storage.getStore();
+  const ctx: RequestContext = attuale
+    ? { ...attuale, proprietario, proprietarioEmail: email }
+    : { requestId: 'fuori-richiesta', logger: rootLogger, proprietario, proprietarioEmail: email };
+  return storage.run(ctx, fn);
+}
 
 /** Child logger della richiesta corrente, o logger radice fuori richiesta. */
 export function getRequestLogger(): Logger {
@@ -45,6 +89,8 @@ export function requestContextMiddleware(req: Request, res: Response, next: Next
   const ctx: RequestContext = {
     requestId,
     logger: withRequestId(requestId),
+    proprietario: PROPRIETARIO_UNICO,
+    proprietarioEmail: null,
   };
 
   // Access log: una riga per risposta (warn per i 5xx). I preflight OPTIONS

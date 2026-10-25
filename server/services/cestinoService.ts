@@ -35,6 +35,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { ARCHIVI_LEGACY_IMMUTABILI, verificaArchivioLegacy, verificaCestinoLegacy } from '../db/acquistiLegacy.js';
 import { httpErrors } from '../utils/httpError.js';
+import { getProprietario } from '../middleware/requestContext.js';
 import { colonnaTolta, colonneCompatibili, tabellaTolta } from '../db/fontiTolte.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { modelloAvanzamento, riallineaStati } from './mappe/statiGuida.js';
@@ -306,8 +307,9 @@ function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino | ElementoCe
   if ('partitaId' in elemento) {
     if (gioco.length) throw httpErrors.conflict('cestino-privato-schema', 'Una rimozione personale ha coinvolto dati di gioco: transazione annullata.');
     if (!partite.length) return;
-    db.prepare('INSERT INTO utente.cestino_partite(uid,registro_json,eliminato_il,tipo,chiave,nome,contesto,partita_id,riepilogo_json,formato) VALUES (?,?,?,?,?,?,?,?,?,1)')
-      .run(uid, JSON.stringify(partite), adesso, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', elemento.partitaId, JSON.stringify(riepilogo(db, 'utente', partite)));
+    // L12: il cestino personale è di chi ha eliminato (il proprietario della richiesta; in preparazione l'unico)
+    db.prepare('INSERT INTO utente.cestino_partite(uid,registro_json,eliminato_il,tipo,chiave,nome,contesto,partita_id,riepilogo_json,formato,proprietario) VALUES (?,?,?,?,?,?,?,?,?,1,?)')
+      .run(uid, JSON.stringify(partite), adesso, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', elemento.partitaId, JSON.stringify(riepilogo(db, 'utente', partite)), getProprietario());
     return;
   }
   db.prepare('INSERT INTO main.cestino (uid, tipo, chiave, nome, contesto, riepilogo_json, registro_json, con_partite, vicini_json, eliminato_il) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -369,9 +371,15 @@ function verificaMetadatiPrivati(r: RigaCestinoPrivato): void {
     throw httpErrors.conflict('cestino-privato-illeggibile', 'I metadati del cestino personale non sono riconoscibili: dati conservati.');
   }
 }
-export function elencoCestinoUnificato(): VoceCestinoUnificatoDto[] {
-  const righe: VoceCestinoUnificatoDto[] = elencoCestino().map(r => ({ ...r, riferimento: { schema: 'main' as const, id: r.id } }));
-  for (const r of getDb().prepare('SELECT * FROM utente.cestino_partite WHERE tipo IS NOT NULL').iterate() as Iterable<RigaCestinoPrivato>) {
+/**
+ * Le voci del cestino PERSONALE del proprietario della richiesta (L12): solo le sue, e con `partitaId` solo quelle di quella partita.
+ * Le voci di una partita eliminata (tipo `partita`) hanno il suo id anche se la riga non c'è più: si trovano con lo stesso filtro.
+ */
+function vociCestinoPrivate(partitaId?: number): VoceCestinoUnificatoDto[] {
+  const righe: VoceCestinoUnificatoDto[] = [];
+  const filtro = partitaId === undefined ? '' : ' AND partita_id = ?';
+  const parametri: unknown[] = partitaId === undefined ? [getProprietario()] : [getProprietario(), partitaId];
+  for (const r of getDb().prepare(`SELECT * FROM utente.cestino_partite WHERE tipo IS NOT NULL AND proprietario = ?${filtro}`).iterate(...parametri) as Iterable<RigaCestinoPrivato>) {
     verificaMetadatiPrivati(r);
     let conti: unknown;
     try { conti = JSON.parse(r.riepilogo_json) as unknown; } catch { conti = null; }
@@ -382,7 +390,22 @@ export function elencoCestinoUnificato(): VoceCestinoUnificatoDto[] {
     righe.push({ id: null, riferimento: { schema: 'utente', uid: r.uid }, tipo: r.tipo, chiave: r.chiave, nome: r.nome,
       contesto: r.contesto ?? '', eliminatoIl: r.eliminato_il, contenuto, partite: 'presente', byte: Buffer.byteLength(r.registro_json, 'utf8') });
   }
+  return righe;
+}
+
+/** Il cestino della preparazione: voci di gioco e voci personali del proprietario, dalla più recente. */
+export function elencoCestinoUnificato(): VoceCestinoUnificatoDto[] {
+  const righe: VoceCestinoUnificatoDto[] = elencoCestino().map(r => ({ ...r, riferimento: { schema: 'main' as const, id: r.id } }));
+  righe.push(...vociCestinoPrivate());
   return righe.sort((a, b) => b.eliminatoIl.localeCompare(a.eliminatoIl));
+}
+
+/**
+ * Il cestino PERSONALE del proprietario (L12, rotte `/api/partite/…/cestino`): solo le sue voci, mai quelle di gioco (che in
+ * rilascio non esistono), dalla più recente. Con `partitaId` solo le voci di quella partita.
+ */
+export function elencoCestinoPersonale(partitaId?: number): VoceCestinoUnificatoDto[] {
+  return vociCestinoPrivate(partitaId).sort((a, b) => b.eliminatoIl.localeCompare(a.eliminatoIl));
 }
 
 // ---- Rimettere ----
@@ -429,10 +452,11 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
 }
 
 /** L'identità dei cestini personali è l'UID del file utente, mai un ID del file di gioco. */
-export function ripristinaCestinoPrivato(uid: string): EsitoRipristinoCestinoDto {
+export function ripristinaCestinoPrivato(uid: string, partitaId?: number): EsitoRipristinoCestinoDto {
   const db = getDb();
-  const r = db.prepare('SELECT * FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL').get(uid) as RigaCestinoPrivato | undefined;
-  if (!r) throw httpErrors.notFound('cestino-non-trovato', 'L’elemento personale non è più nel cestino.');
+  // L12: solo una voce del proprietario della richiesta (e, se indicata, di quella partita); un'altra voce è «non più nel cestino»
+  const r = db.prepare('SELECT * FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL AND proprietario=?').get(uid, getProprietario()) as RigaCestinoPrivato | undefined;
+  if (!r || (partitaId !== undefined && r.partita_id !== partitaId)) throw httpErrors.notFound('cestino-non-trovato', 'L’elemento personale non è più nel cestino.');
   verificaMetadatiPrivati(r);
   return ripristinaRegistro({ id: null, uid: r.uid, tipo: r.tipo, chiave: r.chiave, nome: r.nome,
     registro_json: '[]', con_partite: 1, vicini_json: null, partitaId: r.partita_id }, r);
@@ -517,7 +541,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       if (presente) throw httpErrors.conflict('cestino-chiave-personale-occupata',
         'L’identità personale da ripristinare è già presente: nessuna fusione o sovrascrittura è stata eseguita.');
     }
-    const attivaPrima = r.tipo === 'partita' ? db.prepare('SELECT id FROM utente.partita WHERE attiva=1').get() as { id: number } | undefined : undefined;
+    // la partita rimessa non toglie l'attiva a nessuno: se il suo proprietario ne ha già una, torna non attiva (l'attiva è una per proprietario)
+    const attivaPrima = r.tipo === 'partita' ? db.prepare('SELECT id FROM utente.partita WHERE attiva=1 AND proprietario=?').get(getProprietario()) as { id: number } | undefined : undefined;
     const contestoAcquisti = r.tipo === 'pin' ? null : preparaRipristinoAcquisti({ tipoCestino: r.tipo, partitaIds: [...partitaIds], acquistoIds: [...acquistoIds] });
     for (const p of passi) {
       // La storia dei delta avvenuti dopo l'eliminazione vince. Il dominio ricalcola
@@ -764,17 +789,26 @@ export function svuotaCestino(): { eliminati: number } {
   })();
 }
 
-export function eliminaCestinoPrivato(uid: string): void {
-  if (!getDb().prepare('DELETE FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL').run(uid).changes) {
+export function eliminaCestinoPrivato(uid: string, partitaId?: number): void {
+  const filtro = partitaId === undefined ? '' : ' AND partita_id=?';
+  const parametri: unknown[] = partitaId === undefined ? [uid, getProprietario()] : [uid, getProprietario(), partitaId];
+  if (!getDb().prepare(`DELETE FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL AND proprietario=?${filtro}`).run(...parametri).changes) {
     throw httpErrors.notFound('cestino-non-trovato', 'L’elemento personale non è più nel cestino.');
   }
 }
+
+/** Svuota il cestino personale del proprietario (o solo quello di una partita); restituisce quante voci ha tolto. Non tocca il cestino di gioco. */
+export function svuotaCestinoPersonale(partitaId?: number): { eliminati: number } {
+  const filtro = partitaId === undefined ? '' : ' AND partita_id=?';
+  const parametri: unknown[] = partitaId === undefined ? [getProprietario()] : [getProprietario(), partitaId];
+  return { eliminati: getDb().prepare(`DELETE FROM utente.cestino_partite WHERE tipo IS NOT NULL AND proprietario=?${filtro}`).run(...parametri).changes };
+}
+
 export function svuotaCestinoUnificato(): { eliminati: number } {
   const db = getDb();
   return db.transaction(() => {
-    const privati = (db.prepare('SELECT COUNT(*) AS n FROM utente.cestino_partite WHERE tipo IS NOT NULL').get() as { n: number }).n;
     const legacy = svuotaCestino();
-    db.prepare('DELETE FROM utente.cestino_partite WHERE tipo IS NOT NULL').run();
-    return { eliminati: legacy.eliminati + privati };
+    const privati = svuotaCestinoPersonale();
+    return { eliminati: legacy.eliminati + privati.eliminati };
   })();
 }

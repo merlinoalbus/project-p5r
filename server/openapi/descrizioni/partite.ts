@@ -10,6 +10,46 @@ const PARTITA = [404, 'partita-non-trovata'] as const;
 
 /** Le descrizioni delle rotte montate da `server/routes/partite.ts` sotto `/api/partite`. */
 export const DESCRIZIONI_PARTITE: DescrizioniArea = {
+  'GET /api/partite/cestino': {
+    sommario: 'Il cestino personale del giocatore: partite, fonti di acquisto, pesca e Persone della scorta eliminate',
+    descrizione: 'Solo le voci del proprietario della richiesta (L12: in rilascio il `sub` di Cloudflare Access, in preparazione il proprietario unico), dalla più recente; comprende le partite eliminate, che non hanno più un id sotto cui cercarle. Non porta le voci del cestino di gioco (aree, voci della guida, planimetrie), che stanno in `/api/impostazioni/cestino` della sola preparazione.',
+    risposta: '`VoceCestinoUnificatoDto[]` (riferimento `{ schema: "utente", uid }`)',
+  },
+  'DELETE /api/partite/cestino': {
+    sommario: 'Svuota il cestino personale del giocatore',
+    descrizione: 'Toglie per sempre tutte le voci personali del proprietario della richiesta; quelle degli altri utenti e il cestino di gioco non si toccano.',
+    risposta: '`{ eliminati }`',
+  },
+  'POST /api/partite/cestino/:uid/ripristina': {
+    sommario: 'Rimette una voce del cestino personale (anche una partita eliminata)',
+    descrizione: 'Identità = UID della voce (32 cifre esadecimali). Una voce di un altro utente è «non più nel cestino» (404), come una voce che non esiste. Ripristino atomico: un registro incoerente o un\'identità già presente causano rollback con 409.',
+    risposta: '`EsitoRipristinoCestinoDto`', senzaCorpo: true, errori: [[404, 'cestino-non-trovato'], [409, 'cestino-non-ripristinabile']],
+  },
+  'DELETE /api/partite/cestino/:uid': {
+    sommario: 'Toglie per sempre una voce del cestino personale',
+    descrizione: 'Solo la fotografia della voce: nessun dato di gioco né di altre partite cambia.',
+    risposta: 'Nessun contenuto (204)', errori: [[404, 'cestino-non-trovato']],
+  },
+  'GET /api/partite/:id/cestino': {
+    sommario: 'Il cestino personale di una partita',
+    descrizione: 'Le voci personali (fonti di acquisto, pesca, Persone della scorta) eliminate da quella partita, dalla più recente. Come `/api/partite/cestino` ma limitato alla partita.',
+    risposta: '`VoceCestinoUnificatoDto[]`', errori: [PARTITA],
+  },
+  'DELETE /api/partite/:id/cestino': {
+    sommario: 'Svuota il cestino personale di una partita',
+    descrizione: 'Toglie per sempre le voci personali di quella partita; le altre partite dello stesso utente non si toccano.',
+    risposta: '`{ eliminati }`', errori: [PARTITA],
+  },
+  'POST /api/partite/:id/cestino/:uid/ripristina': {
+    sommario: 'Rimette una voce del cestino personale di una partita',
+    descrizione: 'Come `POST /api/partite/cestino/:uid/ripristina`, ma la voce deve essere di quella partita (altrimenti 404 `cestino-non-trovato`).',
+    risposta: '`EsitoRipristinoCestinoDto`', senzaCorpo: true, errori: [PARTITA, [404, 'cestino-non-trovato'], [409, 'cestino-non-ripristinabile']],
+  },
+  'DELETE /api/partite/:id/cestino/:uid': {
+    sommario: 'Toglie per sempre una voce del cestino personale di una partita',
+    descrizione: 'Solo la fotografia della voce di quella partita.',
+    risposta: 'Nessun contenuto (204)', errori: [PARTITA, [404, 'cestino-non-trovato']],
+  },
   'GET /api/partite/:id/acquisti': {
     sommario: 'Presenze storiche e consumazioni confermate della partita',
     descrizione: 'Lettura unica di presenza legacy, fatti UUID, provenienze, spesa e rotazione registrata. Dalla migrazione utente030 la spesa delle presenze usa la valutazione durevole della generazione, mai il prezzo corrente del catalogo. Provenienza e contributo di continuità sono distinti dal prezzo realmente pagato. Una presenza non diventa una consumazione; i fatti senza fonti sono inattivi. Orfani e lacune restano espliciti. Nessuna mutazione o inferenza dal calendario.',
@@ -69,7 +109,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   'POST /api/partite': {
     sommario: 'Crea una partita',
     descrizione: 'Crea la partita in una transazione. Diventa l\'attiva (togliendo il segno alle altre) se è la prima o se il corpo chiede `attiva: true`. I campi assenti prendono i valori predefiniti: protagonista al livello 1, giorno corrente il primo del percorso della guida, fascia «giorno», difficoltà normale, nessun DLC. Nascono anche le righe delle Doti sociali a zero e dei Confidenti non sbloccati, e l\'evento `partita-creata` nello storico.',
-    risposta: '`PartitaDto` della partita creata',
+    risposta: '`PartitaDto` della partita creata', errori: [[409, 'limite-partite']],
   },
   'PUT /api/partite/:id': {
     sommario: 'Aggiorna i dati di una partita',

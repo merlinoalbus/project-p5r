@@ -10,7 +10,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -28,7 +28,7 @@ import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraSe
 import { impostaAcquisto, disponibilitaAcquistoCorrente } from '../services/negoziService.js';
 import { leggiAcquistiPartita, anteprimaRegistrazioneAcquisto, registraAcquisto, anteprimaAnnullaProvenienza, annullaProvenienzaAcquisto, anteprimaRimozionePresenzaLegacy, rimuoviPresenzaLegacy } from '../services/acquistiService.js';
 import { leggiPropostePartita, anteprimaDecisioneProposte, decidiProposte } from '../services/propostePartitaService.js';
-import { conCestinoPrivato } from '../services/cestinoService.js';
+import { conCestinoPrivato, elencoCestinoPersonale, eliminaCestinoPrivato, ripristinaCestinoPrivato, svuotaCestinoPersonale } from '../services/cestinoService.js';
 import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProvenienza, bodyAnnullaProvenienza, bodyAnteprimaRimozioneLegacy, bodyRimozioneLegacy, bodyAnteprimaDecisioneProposte, bodyDecisioneProposte } from '../schemas/acquisti.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
@@ -100,6 +100,43 @@ router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, bod
     applicaEffettoStorico: applicaEffettoStoricoDiario,
     applicaPuntiPesca: applicaDeltaPuntiPesca,
   }));
+});
+
+// ---- Il cestino personale (L12, passo 3) ----
+// Le voci eliminate dal giocatore (partite, fonti di acquisto, pesca, Persone della scorta) sono SUE: ogni funzione filtra per il
+// proprietario della richiesta. Due famiglie di rotte sullo stesso servizio:
+//   - `/cestino…`: tutte le voci del proprietario, comprese le partite eliminate (che non hanno più un id sotto cui cercarle);
+//   - `/:id/cestino…`: le sole voci di quella partita (l'id passa dal controllo centrale di appartenenza).
+// Le rotte di `/api/impostazioni/cestino/partite/:uid` della preparazione restano com'erano (stesso servizio, stesso filtro): il
+// frontend della preparazione le usa ancora, e la loro migrazione non è necessaria al rilascio, che non monta `/api/impostazioni`.
+// Vengono PRIMA di `/:id`: «cestino» non è l'id di una partita.
+router.get('/cestino', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(elencoCestinoPersonale());
+});
+router.delete('/cestino', (_req, res) => {
+  res.json(svuotaCestinoPersonale());
+});
+router.post('/cestino/:uid/ripristina', validate({ params: paramsCestinoPersonale }), (req, res) => {
+  res.json(ripristinaCestinoPrivato(String(req.params.uid)));
+});
+router.delete('/cestino/:uid', validate({ params: paramsCestinoPersonale }), (req, res) => {
+  eliminaCestinoPrivato(String(req.params.uid));
+  res.status(204).end();
+});
+router.get('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(elencoCestinoPersonale(Number(req.params.id)));
+});
+router.delete('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
+  res.json(svuotaCestinoPersonale(Number(req.params.id)));
+});
+router.post('/:id/cestino/:uid/ripristina', validate({ params: paramsPartitaCestino }), (req, res) => {
+  res.json(ripristinaCestinoPrivato(String(req.params.uid), Number(req.params.id)));
+});
+router.delete('/:id/cestino/:uid', validate({ params: paramsPartitaCestino }), (req, res) => {
+  eliminaCestinoPrivato(String(req.params.uid), Number(req.params.id));
+  res.status(204).end();
 });
 
 // ---- Partite ----
