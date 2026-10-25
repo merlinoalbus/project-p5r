@@ -1,6 +1,5 @@
 import { ATTIVITA_PESCA, EVENTI_PESCA, nomeEventoPesca, type AcquistoEscaPescaDto, type BeneficioPescaDto, type EventoPesca, type FattoPescaDto, type FonteFattoPescaDto, type IntervalloBeneficioPesca, type MomentoPesca, type OsservazionePescaDto, type SessionePescaDto, type StatoPescaDto, type ValoreFattoPesca } from '../../shared/pesca.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
-import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { profiliPesca } from './profiliPescaService.js';
 import { prepared } from '../db/dbService.js';
 import { schemaDefinizioneRegolaPesca, schemaMomentoPesca, schemaOsservazionePesca } from '../schemas/pesca.js';
@@ -88,8 +87,9 @@ export function targetBeneficiPesca(p:number,causa:string):TargetBeneficioPesca[
     // Il prezzo/base applicabile è fotografato nel gesto, mai sostituito da una modifica futura della guida.
     const dati=identitaSessione(s).regola;
     const attiva=fontiPesca(p).some(f=>f.sessione_id===s.id);
-    // il ×1,5 della Fortuna è il lettore unico (`moltiplicaFortuna`): `bonusFortuna` della regola resta nel dato ma non si legge più
-    const base=dati.beneficioPerizia.puntiBase,max=moltiplicaFortuna(base);
+    // Con la Fortuna confermata la Perizia dà la base più i punti interni aggiuntivi della regola fotografata nel gesto (`bonusFortuna`, modificabile
+    // nell'editor della regola): è l'unico dato letto. Il valore di fabbrica (2 + 1) coincide con il ×1,5 per difetto di `moltiplicaFortuna`.
+    const base=dati.beneficioPerizia.puntiBase,max=base+dati.beneficioPerizia.bonusFortuna;
     const perizia:IntervalloBeneficioPesca=o.perizia.esito==='non-ricevuta'?{minimo:0,massimo:0}:o.perizia.esito==='ignota'?{minimo:0,massimo:max}:{minimo:o.fortuna.attiva===true?max:base,massimo:o.fortuna.attiva===false?base:max};
     // BON-12: la quota della visita non è più una proposta di yen: gli yen si cambiano a mano, qui resta solo il promemoria nel motivo
     const quota=dati.quote[s.fascia];

@@ -70,7 +70,7 @@ export function PiastrelleCattura({ voci, partitaId, catturate, occupata = null,
               aria-label={`${nome}${v.persona && v.persona.nomeIt !== nome ? ` (${v.persona.nomeIt})` : ''}: ${presa ? 'catturata' : gesto ? 'da catturare' : 'non si cattura dall’incontro'}`}
               title={titolo}
               onClick={() => v.persona && onTocca(v, !presa)}>
-              <AnteprimaPersona nome={v.persona?.nome ?? v.etichetta} etichetta={nome} dimensione={56} contieni className="rounded" />
+              <AnteprimaPersona nome={v.persona?.nome ?? v.etichetta} etichetta={v.persona?.nomeIt ?? nome} dimensione={56} contieni className="rounded" />
               {presa && <SegnoCatturata />}
               <span className="w-full break-words testo-12 font-semibold leading-tight">{nome}</span>
             </button>

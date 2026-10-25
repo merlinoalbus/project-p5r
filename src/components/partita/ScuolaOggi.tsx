@@ -11,6 +11,7 @@
 
 import { useMemo, useState } from 'react';
 import { useCarica } from '../../hooks/useCarica';
+import { useRileggiAlCambio } from '../../hooks/useRileggiAlCambio';
 import { getCruciverba, getDomande } from '../../services/api';
 import { Modal } from '../shared/Modal';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -32,13 +33,20 @@ interface Props {
   partita: PartitaDto;
   /** Giorno di gioco (MM-GG) di cui mostrare le scorciatoie: quello della scheda «Oggi»; assente o `null` = la data di gioco della partita. */
   giorno?: string | null;
+  /** Solo i pulsanti del giorno, senza i due collegamenti alle pagine della Guida e senza la riga «nessuna domanda»: è la forma
+   *  della Home (R12-01/6), dove la guida ha già i suoi rimandi e ogni riga tolta è guida che si vede. Senza, la forma della Partita. */
+  soloDelGiorno?: boolean;
 }
 
 /** Collegamenti fissi alle pagine della Guida e pulsanti del giorno: domande in classe, domande d'esame, cruciverba. */
-export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
+export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Props) {
   const [aperta, setAperta] = useState<Finestra | null>(null);
   const domande = useCarica(() => getDomande(partita.id), [partita.id]);
   const cruciverba = useCarica(() => getCruciverba(partita.id), [partita.id]);
+  // lo stato «fatto» di una domanda o del cruciverba cambia con la partita (una spunta dal Diario, dalla Guida o il cambio di giorno
+  // mentre questa riga è in vista): si rileggono senza azzerare, così i pulsanti non spariscono e non restano al valore del primo caricamento
+  useRileggiAlCambio(domande.ricarica, partita);
+  useRileggiAlCambio(cruciverba.ricarica, partita);
   const giorno = giornoVisto ?? partita.dataGioco;
   // cambiando giorno la finestra aperta si chiude (senza rimontare il componente, che rileggerebbe gli elenchi)
   const [giornoPrima, setGiornoPrima] = useState(giorno);
@@ -83,15 +91,18 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
       <CollegamentoVisivo to="/guida/cruciverba" tono="fantasma" compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio="tutti" aria-label="Cruciverba: tutti i giorni nella Guida" />
     </div>
   );
-  if (!giorno) return collegamenti;
+  if (!giorno) return soloDelGiorno ? null : collegamenti;
   const niente = inClasse.length === 0 && dEsame.length === 0 && !cruciOggi;
   const dataTesto = dataGiocoTesto(giorno);
   // «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno si scrive la data
   const quando = giorno === partita.dataGioco ? 'Oggi' : `Il ${dataTesto}`;
 
+  // nella Home, senza domande né cruciverba quel giorno non c'è nulla da mostrare e nulla occupa la riga
+  if (soloDelGiorno && niente && !domande.caricamento && !cruciverba.caricamento) return null;
+
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      {collegamenti}
+      {!soloDelGiorno && collegamenti}
       <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola del ${dataTesto}`}>
         {inClasse.length > 0 && (
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} ${giorno === partita.dataGioco ? 'oggi' : 'quel giorno'}`} onClick={() => setAperta('classe')} aria-label={`Domande in classe del ${dataTesto}: ${inClasse.length}`} />
@@ -102,7 +113,7 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
         {cruciOggi && (
           <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
         )}
-        {niente && !domande.caricamento && !cruciverba.caricamento && (
+        {!soloDelGiorno && niente && !domande.caricamento && !cruciverba.caricamento && (
           <span className="testo-12 text-text-muted">{quando} nessuna domanda in classe né cruciverba.</span>
         )}
       </div>

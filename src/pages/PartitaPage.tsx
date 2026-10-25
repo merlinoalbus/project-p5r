@@ -7,7 +7,6 @@ import { useSearchParams } from 'react-router-dom';
 import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { useMedia } from '../hooks/useMedia';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -57,8 +56,7 @@ export function PartitaPage() {
   const { attiva, caricamento, caricata, errore, carica } = usePartitaStore(useShallow((s) => ({ attiva: s.attiva, caricamento: s.caricamento, caricata: s.caricata, errore: s.errore, carica: s.carica })));
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
-  // da 768 px le piastrelle delle schede sono basse, con icona e nome affiancati (`.fila-schede-partita`): l'icona scende a 22 px
-  const schedeInRiga = useMedia('(min-width: 768px)');
+  // le piastrelle delle schede sono basse a ogni larghezza, con icona (22 px) e nome affiancati (`.fila-schede-partita`)
   const richiesta = params.get('scheda');
   const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
   // finestra dei dati della partita: aperta anche dal vecchio indirizzo della scheda «Riepilogo»
@@ -68,7 +66,7 @@ export function PartitaPage() {
   const giornoScuola = (scheda === 'oggi' ? giornoOggi : null) ?? attiva?.dataGioco ?? null;
 
   return (
-    <PageState isLoading={caricamento && !caricata} error={errore} onRetry={() => void carica()}>
+    <PageState isLoading={caricamento && !caricata} error={attiva ? null : errore} onRetry={() => void carica()}>
       {!attiva ? (
         <EmptyState
           title="Nessuna partita attiva"
@@ -76,10 +74,10 @@ export function PartitaPage() {
           action={<PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea partita" onClick={() => setNuova(true)} />}
         />
       ) : (
-        <div className={`flex flex-col gap-2 md:gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
+        <div className={`flex flex-col gap-0 max-sm:-mt-3 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
           {/* i dati della partita stanno nella riga del titolo (a destra, o sotto sul telefono): con le schede su una riga sola
               l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
-          <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga className="pt-0" azioni={
+          <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga azioniAccanto className="intestazione--partita pt-0" azioni={
             <FilaScorrevole className="fila-scorrevole--sempre fila-dati-partita items-center min-w-0" role="group" aria-label="Dati e scorciatoie della partita">
               {/* per primo: sul telefono e sul tablet la fila scorre, e in fondo «Modifica» restava fuori schermo */}
               <PulsanteVisivo id="modifica-dati-partita" tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica"
@@ -102,7 +100,7 @@ export function PartitaPage() {
               // si riconosce da lontano — 28 px — e l'etichetta sta sotto, piu' piccola. Resta
               // scritta: un'icona sola non dice «Piani salvati» a nessuno la prima volta.
               <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k} title={s.l}>
-                <IconaScheda chiave={s.k} dimensione={schedeInRiga ? 22 : 28} />
+                <IconaScheda chiave={s.k} dimensione={22} />
                 <span>{s.l}</span>
               </button>
             ))}

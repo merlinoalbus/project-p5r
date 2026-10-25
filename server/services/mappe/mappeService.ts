@@ -35,7 +35,7 @@ import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
 import { eVoceDiCattura, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
-import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
+import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, togliStatiDeiPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
@@ -909,10 +909,8 @@ export function eliminaMappa(chiave: string, opz: { conferma?: boolean; dallArea
     eliminaImmagineDellaMappa(chiave);
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
     // gli spilli cadono in cascata con la mappa; i loro «raccolto» stanno in un altro file e si puliscono qui
-    if (colonnaSpillo('uid')) prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
-    // L4: e le loro divergenze «da verificare»
-    if (colonnaSpillo('uid') && conDivergenze(getDb())) prepared("DELETE FROM divergenza_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
-    if (colonnaSpillo('uid') && conStatoPerInfiltrazione(getDb())) prepared("DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid IN (SELECT uid FROM spillo WHERE mappa_chiave = ? AND uid IS NOT NULL)").run(chiave);
+    // (e le loro divergenze «da verificare» e lo stato per infiltrazione: un'unica funzione per tutti i servizi)
+    if (colonnaSpillo('uid')) togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE mappa_chiave = ? AND uid IS NOT NULL', [chiave]);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
     // §8.11: le voci dei pin della mappa li perdono, e il loro stato si ricalcola dai pin che restano
     riallineaStati(getDb(), mPrima, nowIso());
@@ -1321,9 +1319,7 @@ export function eliminaSpillo(id: number, dati?: RichiestaRimozionePin): void {
       eliminaImmaginiDeiPin('s.id = ?', id);
       if (db.prepare('DELETE FROM main.spillo WHERE id=? AND uid IS ?').run(id, r.uid).changes !== 1) throw httpErrors.conflict('rimozione-pin-conflitto', 'L’identità del pin non coincide più: transazione annullata.');
       // Stati nel file delle partite: il vincolo main non li può eliminare.
-      if (r.uid) db.prepare('DELETE FROM utente.spillo_partita WHERE spillo_uid=?').run(r.uid);
-      if (r.uid && conDivergenze(db)) db.prepare('DELETE FROM utente.divergenza_partita WHERE spillo_uid=?').run(r.uid);
-      if (r.uid && conStatoPerInfiltrazione(db)) db.prepare('DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid=?').run(r.uid);
+      if (r.uid) togliStatiDeiPin(db, 'SELECT ?', [r.uid]);
       if (mPrima.pin.has(id)) riallineaStati(db, mPrima, nowIso());
     };
     if (aggregata) opera();

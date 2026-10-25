@@ -5,8 +5,8 @@
 // Una riga per partita: la Dote scelta e il giorno di gioco in cui si è accesa. Vale solo quel giorno. Si spegne davvero quando il
 // giorno cambia: `cambiaGiornoPartita` (la regola unica del cambio giorno) chiama `chiudiFortunaPerCambioGiorno`, che toglie la riga e
 // lascia un evento; tornare poi a quel giorno non la riaccende. Per sicurezza `leggiFortuna` considera accesa solo una riga del
-// giorno corrente. La leggono, con lo stesso ×1,5 per difetto (`moltiplicaFortuna`), le Doti, le voci del Diario, l'Aojiru e la
-// pesca. Si accende dall'interruttore delle Doti o da una voce del Diario con l'effetto «fortuna»; ogni cambio lascia un evento.
+// giorno corrente. La leggono, con lo stesso ×1,5 per difetto (`moltiplicaFortuna`), le Doti, le voci del Diario e l'Aojiru; la pesca
+// legge solo lo stato (accesa o no) e per la Perizia applica la propria regola (base + `bonusFortuna`, `pescaLetture`). Si accende dall'interruttore delle Doti o da una voce del Diario con l'effetto «fortuna»; ogni cambio lascia un evento.
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';

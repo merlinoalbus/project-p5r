@@ -1343,7 +1343,7 @@ ErrorBoundary.
 ## Revisione UX/UI del 25 ottobre 2026 — lotto C: navigazione, densità, rifinitura, testi dei dati
 
 Richiesta dell'utente: «Carattere display per la 1 poi procedi con il lotto C» (titoli dei pulsanti nel carattere display, vedi
-DECISIONI). Quattro agenti implementatori (C1 navigazione e fuoco; C2 densità e pagine; C3 titoli, schede, annunci; migrazione 231)
+DECISIONI). Quattro agenti implementatori (C1 navigazione e fuoco; C2 densità e pagine; C3 titoli, schede, annunci; migrazione dei testi, ora 232)
 più l'indagine sui testi grezzi (C4) e la parte CSS (C5) del PM; verifiche avversariali distinte.
 
 | Voce | Contenuto | Stato |
@@ -1352,16 +1352,16 @@ più l'indagine sui testi grezzi (C4) e la parte CSS (C5) del PM; verifiche avve
 | C2 | Oggetti a righe compatte e filtri nel pannello (primo oggetto a 390 px: y 643→401); Negozi con i filtri nel pannello (y 1110→495); Compendio a righe su telefono (~3,7→5,2 Persona per schermata); risultato della Fusione prima degli ingressi (y 855→493); «Cosa produce»; Home al 125% senza tagli; una sola «×» nei campi di ricerca; data della Partita in italiano; `.prosa-misurata` (72ch); `TesseraKpi`, `CatalogoDaCompletare`; niente link annidati in Negozi; schede di Oggetti col pattern ARIA completo | fatto |
 | C3 | 52 h2 in `TitoloSezione` (8 lasciati con motivo); hook `useSchede` (pattern tab completo) in 9 pagine; regioni `status` e `alert` separate per le notifiche, un solo annuncio al cambio di rango; frecce sulle file che scorrono | fatto |
 | C4 | Indagine sui testi grezzi visibili: tutti dai dati di gioco | fatto |
-| C5 | Migrazione 231 (elenco chiuso con guardie, rivista due volte dal revisore distinto e corretta sul posto; prove su copie: idempotente, altre tabelle identiche, `docs/coordinamento/prova-migrazione-231.md`); fonte della nota storica facoltativa (servizio, rotta, scheda); scheda «Riepilogo» tolta dalla Partita, modulo dei dati in `FinestraModificaPartita` (Partita e Impostazioni); «Fonte: G-018» tolto dalla scheda del Quartiere; niente chip «Non esplicitato» nei Palazzi; chip «Skill» nel Compendio; `--color-oro` al posto di `#f5c542` (18), fallback dell'avviso corretto, token delle mappe, `--color-error-testo`, `z-(--z-popover)` nella barra in basso; 162 regole CSS in `@layer components` (stili calcolati identici su 26 pagine × 3 larghezze); breakpoint documentati e `max-width` in una sola forma | fatto |
+| C5 | Migrazione 232 (elenco chiuso con guardie, rivista due volte dal revisore distinto e corretta sul posto; prove su copie: idempotente, altre tabelle identiche, `docs/coordinamento/prova-migrazione-232.md`); fonte della nota storica facoltativa (servizio, rotta, scheda); scheda «Riepilogo» tolta dalla Partita, modulo dei dati in `FinestraModificaPartita` (Partita e Impostazioni); «Fonte: G-018» tolto dalla scheda del Quartiere; niente chip «Non esplicitato» nei Palazzi; chip «Skill» nel Compendio; `--color-oro` al posto di `#f5c542` (18), fallback dell'avviso corretto, token delle mappe, `--color-error-testo`, `z-(--z-popover)` nella barra in basso; 162 regole CSS in `@layer components` (stili calcolati identici su 26 pagine × 3 larghezze); breakpoint documentati e `max-width` in una sola forma | fatto |
 
 Non fatto per scelta: divisione di `VisoreMappa.tsx` e `DungeonDettaglioPage.tsx` (rischio di regressione senza test).
 
-Verifiche distinte: codice APPROVATO (dopo un giro di correzioni), interfaccia APPROVATO (dopo due giri), migrazione 231 APPROVATO
+Verifiche distinte: codice APPROVATO (dopo un giro di correzioni), interfaccia APPROVATO (dopo due giri), migrazione dei testi (ora 232) APPROVATO
 (dopo quattro giri e un controllo mirato; 657 voci). Aperti, minori: a metà scorrimento le frecce delle file possono coprire 30–44 px di
 una scheda (limite delle frecce sovrapposte); in Oggetti su telefono il contorno del fuoco circonda solo il nome; la pagina 404 non ha
 h1; nella Fusione, scelta una Persona dalla ricerca, il fuoco va sul documento (preesistente); `<button>` con un link dentro in
 Attività e link con un pulsante dentro nel Compendio (preesistenti); «Ripristina» delle traduzioni legge il pacchetto iniziale e
-rimette tre nomi senza accento; lo storico `testo_precedente_json` non è toccato dalla 231.
+rimette tre nomi senza accento; lo storico `testo_precedente_json` non è toccato dalla 232.
 
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 

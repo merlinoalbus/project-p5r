@@ -1,5 +1,5 @@
 // ============================================================
-// testiGrezzi231 — l'elenco CHIUSO delle correzioni della migrazione 231 (lotto C della revisione UX/UI)
+// testiGrezzi232 — l'elenco CHIUSO delle correzioni della migrazione 232 (lotto C della revisione UX/UI)
 // ============================================================
 //
 // Generato leggendo i dati di gioco a schema 230 (la copia di avvio del 25/10 07:26) con uno script in sola lettura nello scratch, poi

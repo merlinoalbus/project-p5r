@@ -39,7 +39,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   // 19-22 px, e si vedevano solo aprendo il pannello sulla radice di un Palazzo, che è una vista
   // che la passata di misura non campionava (rilievo del validatore, 2026-09-13).
   // I passi di un Enigma (095) arrivano dal server subito sotto di lui, con `contenitore`: qui rientrano, come nella scheda del Palazzo.
-  return <PageState isLoading={contenuti.caricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
+  return <PageState isLoading={contenuti.inPrimoCaricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
     {!!contenuti.dati?.aree.length && <section className="card flex flex-col gap-3" aria-label="Contenuti della guida">
       <TitoloSezione>Contenuti della guida</TitoloSezione>
       {/* L3 (§4.1): nei Palazzi la scheda si apre sull'infiltrazione chiesta (`?infiltrazione=`); i Memento restano col loro `?area=`.

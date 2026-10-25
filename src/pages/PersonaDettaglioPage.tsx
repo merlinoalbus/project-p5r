@@ -110,7 +110,7 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
 export function PersonaDettaglioPage() {
   const { id } = useParams();
   const personaId = Number(id);
-  const { dati: p, caricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId]);
+  const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId]);
   useDocumentTitle(p ? p.nomeIt : 'Persona');
   const attiva = usePartitaStore((s) => s.attiva);
   const [livello, setLivello] = useState<number | null>(null);
@@ -144,7 +144,7 @@ export function PersonaDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Persona', ripiego: '/compendio' }}>
+    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Persona', ripiego: '/compendio' }}>
       {p && (
         <div className="flex flex-col gap-4">
           {/* Lotto B: l'intestazione comune delle schede, prima dell'immagine (sul telefono il nome stava sotto l'arte, al 71% della

@@ -61,7 +61,7 @@ export function EditorRequisiti({ confidente, rangoIniziale, onChiudi, onSalvato
   };
   return <Modal titolo={`Requisiti di ${confidente.nome}`} aperta onChiudi={chiudi} larga>
     <p className="mt-0 testo-13 text-text-secondary">Le modifiche valgono per tutte le partite. Salva un rango alla volta; «Ripristina» recupera le condizioni della guida.</p>
-    <PageState isLoading={dati.caricamento} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={dati.inPrimoCaricamento} error={dati.errore} onRetry={() => void dati.ricarica()}>
       <div className="flex flex-col gap-2">{dati.dati?.ranghi.map((r) => <section key={r.rango} className="rounded border border-border">
         <button type="button" className="touch flex w-full flex-wrap items-center gap-2 p-3 text-left" disabled={occupato} aria-expanded={rangoAperto === r.rango} onClick={() => setRangoAperto((aperto) => aperto === r.rango ? null : r.rango)}>
           <strong>Rango {r.rango}</strong><span className="min-w-0 testo-13 text-text-secondary">{r.requisiti.map((c) => c.descrizione).join(' · ') || 'Nessuna condizione'}</span>{modificata(r.rango) ? <span className="chip">Non salvato</span> : r.modificato && <span className="chip">Modificato</span>}

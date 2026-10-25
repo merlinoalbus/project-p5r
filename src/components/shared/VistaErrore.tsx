@@ -72,8 +72,9 @@ export function VistaErrore({ titolo, spiegazione, dettaglio, azioni, livello = 
 }
 
 /** «Riprova»: ripete il caricamento o ridisegna ciò che è caduto. */
-export function AzioneRiprova({ onClick, tono = 'primario' }: { onClick: () => void; tono?: TonoPulsante }) {
-  return <PulsanteVisivo tono={tono} compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={onClick} />;
+export function AzioneRiprova({ onClick, tono = 'primario', inCorso = false }: { onClick: () => void; tono?: TonoPulsante; inCorso?: boolean }) {
+  // `inCorso`: la ripetizione è già partita, il pulsante resta ma non si può ripremere finché non finisce
+  return <PulsanteVisivo tono={tono} compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={onClick} disabled={inCorso} />;
 }
 
 /** «Torna indietro»: alla pagina di prima. */

@@ -1,9 +1,9 @@
 // ============================================================
-// 231 — i testi visibili senza codici interni, riferimenti a file del progetto, dominio grezzo e apostrofi al posto degli accenti (lotto C)
+// 232 — i testi visibili senza codici interni, riferimenti a file del progetto, dominio grezzo e apostrofi al posto degli accenti (lotto C)
 // ============================================================
 //
 // Decisioni dell'utente del 25/10 (lotto C della revisione UX/UI, indagine C4, poi i rilievi del revisore): togliere dai DATI ciò che
-// nei testi mostrati non è per chi gioca. Cinque famiglie (il dettaglio è in testa a `testiGrezzi231.ts`):
+// nei testi mostrati non è per chi gioca. Cinque famiglie (il dettaglio è in testa a `testiGrezzi232.ts`):
 //   - i codici del registro del progetto «G-NNN» nelle colonne che l'app mostra; i segmenti «Prima di G-036 (…): …» delle note di
 //     disponibilità si tolgono interi. Le colonne di provenienza (`fonte`, `fonte_condizioni_json`, `confidente_rango.fonte`,
 //     `relazioni[].fonte` delle varianti, `requisitoConoscenza.fonte` dei premi…) restano intatte: sono la tracciabilità del progetto;
@@ -14,7 +14,7 @@
 //   - gli accenti: l'apostrofo al posto della vocale accentata e gli accenti mancanti senza apostrofo, decisi parola per parola.
 //     «po'», «Fa'», «Da'at», le contrazioni inglesi, gli apostrofi usati come virgolette e i verbi («abilita il…», «eredita l'…») restano.
 //
-// L'elenco è CHIUSO ed esplicito (`testiGrezzi231.ts`): tabella, chiave della riga, colonna, (per i JSON) percorso, testo di prima e
+// L'elenco è CHIUSO ed esplicito (`testiGrezzi232.ts`): tabella, chiave della riga, colonna, (per i JSON) percorso, testo di prima e
 // testo di dopo, costruito leggendo i dati a schema 230. Qui non si calcola nessun testo. Guardie, voce per voce:
 //   - la riga c'è e il testo di adesso è IDENTICO a quello di prima (un testo cambiato dall'utente, o già corretto, si salta);
 //   - nelle colonne JSON si cambia il solo valore al percorso, e solo se il documento è nella forma canonica (`JSON.stringify`);
@@ -30,14 +30,14 @@
 //     Non coperta: «Ripristina» delle traduzioni legge il pacchetto del repository (`pacchetto/gioco.db`), non una copia nei dati.
 // Nessun'altra riga, colonna o tabella cambia: alla fine ogni tabella toccata è confrontata riga per riga con la sua fotografia di
 // prima (solo le colonne delle voci applicate, e `seed_json` dove allineato, possono essere diverse). Ogni anomalia lancia e il runner
-// annulla la transazione. I testi di prima restano in `testiGrezzi231.ts` e nella copia di avvio dei dati. Solo `main`.
+// annulla la transazione. I testi di prima restano in `testiGrezzi232.ts` e nella copia di avvio dei dati. Solo `main`.
 // ============================================================
 
 import type { AppDatabase } from '../dbService.js';
 import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { colonneDi, esisteTabella } from './pulizieL11.js';
-import { CORREZIONI_231, type CorrezioneTesto231 } from './testiGrezzi231.js';
+import { CORREZIONI_231, type CorrezioneTesto231 } from './testiGrezzi232.js';
 
 /** Lo storico dell'editor delle informazioni di un Confidente (`disponibilitaConfidentiService`). */
 const STORICO_INFORMAZIONI = 'confidente-disponibilita-editor-v1:';
@@ -133,7 +133,7 @@ function allinea(copia: unknown, campo: Campo, c: CorrezioneTesto231): unknown {
   return f;
 }
 
-const errore = (motivo: string): never => { throw new Error(`231: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`232: ${motivo}; nessuna modifica applicata.`); };
 const id = (c: CorrezioneTesto231) => `${c.tabella}.${c.colonna}${c.percorso ? JSON.stringify(c.percorso) : ''} ${JSON.stringify(c.chiave)}`;
 
 type Riga = Record<string, unknown>;
@@ -167,8 +167,8 @@ function canonico(testo: unknown): unknown {
   try { const v = JSON.parse(testo) as unknown; return JSON.stringify(v) === testo ? v : null; } catch { return null; }
 }
 
-export const migration231: Migration = {
-  id: 231, name: 'testi_visibili_puliti',
+export const migration232: Migration = {
+  id: 232, name: 'testi_visibili_puliti',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
 
@@ -276,6 +276,6 @@ export const migration231: Migration = {
     for (const [t, foto] of prima) confronta(t, foto);
     if (datiGuidaPrima && !tabelle.includes('dati_guida')) confronta('dati_guida', datiGuidaPrima);
 
-    logger.info({ migrazione: 'lotto-C-231', applicate, copieAllineate, saltate: saltate.length, dettaglioSaltate: saltate.slice(0, 20) }, 'testi visibili ripuliti: codici interni, rimandi a file, dominio e accenti');
+    logger.info({ migrazione: 'lotto-C-232', applicate, copieAllineate, saltate: saltate.length, dettaglioSaltate: saltate.slice(0, 20) }, 'testi visibili ripuliti: codici interni, rimandi a file, dominio e accenti');
   },
 };

@@ -7,6 +7,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
+import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
 import { aggiornaPartita, getPersone, getPossedute, getRegoleFusione, getVelluto } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -41,14 +42,16 @@ export function FusionePage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [params, setParams] = useSearchParams();
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), []);
   const persone = useCarica(() => getPersone(), []);
   const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
   const perId = useMemo(() => new Map((persone.dati ?? []).map((p) => [p.id, p])), [persone.dati]);
   /** La Persona completa del compendio con quell'id, per i chip; se il compendio non l'ha (o non è ancora arrivato) resta il riferimento ridotto. */
   const completa = (x: { id: number; nome: string; nomeIt: string }) => perId.get(x.id) ?? x;
-  const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id, attiva?.allarmeAttivo, attiva?.updatedAt]);
+  const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id]);
+  // allarme e aggiornamenti della partita fanno rileggere la Stanza di Velluto senza azzerarla
+  useRileggiAlCambio(velluto.ricarica, attiva ? [attiva.allarmeAttivo, attiva.updatedAt] : null);
   /** Segna acceso o spento l'allarme delle fusioni nella partita attiva, aggiorna lo store locale (che fa rileggere la Stanza di Velluto) e notifica l'esito. */
   const cambiaAllarme = async (allarmeAttivo: boolean) => {
     if (!attiva) return;
@@ -106,7 +109,7 @@ export function FusionePage() {
         ))}
       </FilaScorrevole>
 
-      <PageState isLoading={caricamento || persone.caricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
+      <PageState isLoading={inPrimoCaricamento || persone.inPrimoCaricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
         {persone.dati && vista === 'calcolatore' && (
           <Calcolatore persone={persone.dati} partitaId={attiva?.id ?? null} inScorta={inScorta} inizialeA={idParam('a')} inizialeB={idParam('b')} scorta={scorta.dati ?? undefined} onScortaCambiata={() => void scorta.ricarica()} />
         )}

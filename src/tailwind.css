@@ -288,9 +288,18 @@
   }
   .piastrella-scheda > svg { flex-shrink: 0; }
   /* le schede della Partita da 768 px: piastrelle basse con icona e nome affiancati, su una riga sola che scorre (intestazione ≤ 30%) */
+  /* a ogni larghezza: icona e nome affiancati, 44 px di altezza, senza margine sotto (anche sul telefono: la fila scorre già) */
+  .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: var(--testo-12); white-space: nowrap; }
+  .fila-scorrevole.fila-schede-partita { padding-bottom: 0; height: 44px; }
+  /* telefono: titolo e dati della partita sulla stessa riga (la fila dei dati scorre), nessun padding della testata */
+  .intestazione.intestazione--partita { padding: 0; gap: 0; }
+  /* una riga sola: il nome della partita non va a capo (la riga intera scorre se serve) e i dati non hanno margine sotto */
+  .intestazione--partita .titolo-tasselli { flex-wrap: nowrap; }
+  .fila-scorrevole.fila-dati-partita { padding-bottom: 0; }
   @media (min-width: 768px) {
-    .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: var(--testo-12); white-space: nowrap; }
-    .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; }
+    .intestazione.intestazione--partita { padding: 4px 0 2px; gap: 8px; }
+    .intestazione--partita .titolo-tasselli { flex-wrap: wrap; }
+    .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; height: auto; }
     /* i dati e le scorciatoie della partita accanto al titolo: niente margine sotto (la barra sottile basta a dire che scorre) */
     .fila-scorrevole.fila-scorrevole--sempre.fila-dati-partita { padding-bottom: 0; }
   }
@@ -1005,7 +1014,8 @@
   .riga-persona__scelta:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   .riga-persona__testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
   .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: var(--testo-14); letter-spacing: .03em; }
-  .riga-persona__arcano { font-size: var(--testo-12); color: var(--color-text-muted); }
+  /* l'icona dell'arcano davanti al nome, come nella riga dei Confidenti */
+  .riga-persona__arcano { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: var(--testo-12); color: var(--color-text-muted); }
   .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 2px; }
   .riga-persona__registrata { display: inline-flex; color: var(--color-primary-testo); flex-shrink: 0; }
   .riga-persona__livello { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 34px; line-height: 1; }
@@ -2094,6 +2104,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-casella { width:28px; height:28px; flex-shrink:0; cursor:pointer; accent-color:var(--color-primary); }
 .progressi-scopo { border-left:3px solid var(--color-primary); padding-left:10px; font-size:var(--testo-13); color:var(--color-text-secondary); }
 /* il riepilogo fa anche da schede: quattro tessere sempre in una fila (sul telefono compatte, vedi in fondo al blocco) */
+.progressi-struttura { display:flex; flex-direction:column; gap:12px; }
 .progressi-riepilogo { display:grid; gap:8px; grid-template-columns:repeat(4, minmax(0, 1fr)); }
 .progressi-tessera { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; min-height:44px; padding:10px 12px; text-align:left; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; cursor:pointer; }
 .progressi-tessera:hover { border-color:var(--color-text-secondary); }
@@ -2108,20 +2119,28 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    il dettaglio resta ai lettori di schermo dentro la tessera e si legge per intero, una volta, nella riga
    `.progressi-dettaglio-attivo` sotto la fila (tessera attiva). */
 @media (max-width: 639px) {
+  .progressi-struttura { gap:2px; }
   .progressi-riepilogo { gap:6px; }
-  .progressi-tessera { position:relative; align-items:stretch; gap:2px; padding:6px 4px; min-height:0; }
+  .progressi-tessera { position:relative; align-items:stretch; justify-content:center; gap:2px; padding:3px 4px; min-height:44px; }
   .progressi-tessera__nome { font-size:var(--testo-12); line-height:1.2; letter-spacing:0.03em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; line-clamp:1; overflow:hidden; }
   .progressi-tessera__valore { font-size:var(--testo-18); line-height:1.1; white-space:nowrap; }
   .progressi-tessera__dettaglio { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
   .progressi-scopo { line-height:1.3; }
   .progressi-dettaglio-attivo { margin:0; font-size:var(--testo-12); line-height:1.3; color:var(--color-text-secondary); }
 }
-/* tablet (640-1023 px), DOPO le regole di base: nome e valore sulla stessa riga, dettaglio sotto (al massimo due righe) */
-@media (min-width: 640px) and (max-width: 1023px) {
+/* tablet e desktop (da 640 px), DOPO le regole di base: nome e valore sulla stessa riga, dettaglio sotto (al massimo due righe) */
+@media (min-width: 640px) {
+  .progressi-struttura { gap:8px; }
   .progressi-tessera { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:6px; row-gap:0; padding:8px 10px; min-height:0; }
   .progressi-tessera__nome { font-size:var(--testo-12); letter-spacing:0.03em; }
   .progressi-tessera__valore { font-size:var(--testo-24); line-height:1.1; white-space:nowrap; }
   .progressi-tessera__dettaglio { grid-column:1 / -1; line-height:1.3; }
+}
+/* desktop (da 1024 px), DOPO il blocco precedente: le quattro tessere diventano una colonna a sinistra del contenuto,
+   così sopra il contenuto resta solo la testata della Partita (intestazione ≤ 30% anche a 1280×689 e 1366×657) */
+@media (min-width: 1024px) {
+  .progressi-struttura { display:grid; grid-template-columns:210px minmax(0, 1fr); gap:16px; align-items:start; }
+  .progressi-riepilogo { grid-template-columns:minmax(0, 1fr); gap:6px; }
 }
 /* Attività: elenco raggruppato per tipo, due colonne bilanciate da 1280 px */
 .progressi-attivita { column-gap:24px; }

@@ -184,6 +184,19 @@ export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
     && !!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'spillo_partita_infiltrazione'").get();
 }
 
+/**
+ * L'unico punto che toglie dal file delle partite gli stati dei pin eliminati: «raccolto» (`spillo_partita`), divergenze «da
+ * verificare» (`divergenza_partita`) e stato per infiltrazione dei pin condivisi (`spillo_partita_infiltrazione`). Sono tabelle
+ * di `partite.db`: il vincolo di `gioco.db` non le elimina in cascata, e l'uid di un pin è l'impronta della sua identità (se si
+ * ricrea un elemento identico, uno stato rimasto orfano ricomparirebbe). `uidDaTogliere` è una sottoselezione di uid
+ * («SELECT uid FROM main.spillo WHERE … AND uid IS NOT NULL», o «SELECT ?» se l'uid è già noto) da valutare PRIMA di cancellare i pin.
+ */
+export function togliStatiDeiPin(db: AppDatabase, uidDaTogliere: string, parametri: ReadonlyArray<string | number>): void {
+  db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  if (conDivergenze(db)) db.prepare(`DELETE FROM utente.divergenza_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  if (conStatoPerInfiltrazione(db)) db.prepare(`DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+}
+
 /** Legge gli stati di una partita nel modello e calcola lo stato di ogni voce e gli oggetti fatti. */
 export function statiDellaPartita(db: AppDatabase, m: ModelloAvanzamento, partita: number): StatiDellaPartita {
   const segnate = new Map((db.prepare('SELECT punto_chiave, stato FROM punto_partita WHERE partita_id = ?').all(partita) as Array<{ punto_chiave: string; stato: StatoPunto }>).map((r) => [r.punto_chiave, r.stato]));

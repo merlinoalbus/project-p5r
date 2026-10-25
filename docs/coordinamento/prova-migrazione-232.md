@@ -1,13 +1,20 @@
-# Prova della migrazione 231 (lotto C, testi visibili) — 25 ottobre
+> **Rinumerata 232 (2026-10-25):** nel frattempo `main` aveva ricevuto la 231 `curry_leblanc_dote`; questa migrazione, identica, è la 232 e gira dopo di quella.
+> Le prove qui sotto sono state fatte quando aveva id 231 (etichette `C231b`, «→ 231»). Dopo la rinumerazione la catena reale è stata
+> riprovata su due copie usa e getta (pacchetto 93 → 232 e copia locale 230 → 232) con il runner vero: la 231 curry si applica
+> (`curry-leblanc` passa a «svolta» con Coraggio ♪1, audit `audit-231-curry-leblanc`), poi la 232 (fonte di `homunculus-prezzi-fonte`
+> vuota); rieseguire 231 e 232 in una transazione non cambia `dati_guida`. La 232 tocca di `curry-leblanc` solo `dettagli`, la 231 solo
+> `effetti_json` e `tracciamento`. I dati di sviluppo del container sono stati riportati alla copia 230 e il backend li ha portati a 232.
+
+# Prova della migrazione 232 (lotto C, testi visibili) — 25 ottobre
 
 Prima stesura dell'agente C4b. È stata rifatta due volte dopo la revisione avversariale (due esiti «approvato con rilievi»: R1–R6, poi
-N1–N6) e le decisioni nuove dell'utente. La 231 non è pubblicata: si corregge sul posto, senza una 232.
-File: `server/db/migrations/231_testi_visibili_puliti.ts` ed elenco chiuso `server/db/migrations/testiGrezzi231.ts`.
+N1–N6) e le decisioni nuove dell'utente. La 232 non è pubblicata: si corregge sul posto, senza una 232.
+File: `server/db/migrations/232_testi_visibili_puliti.ts` ed elenco chiuso `server/db/migrations/testiGrezzi232.ts`.
 
 ## Correzione del resoconto precedente (R1)
 
 Il resoconto diceva che `data/gioco.db` era rimasto intatto: **non è vero**. Il backend locale girava in `tsx watch` e alle 07:26 ha
-applicato da solo la 231 vecchia ai dati di `data/` (copia di avvio `data/backups/project-p5r-2026-10-25T07-26-14-869Z.db`). Il PM ha poi
+applicato da solo la 232 vecchia ai dati di `data/` (copia di avvio `data/backups/project-p5r-2026-10-25T07-26-14-869Z.db`). Il PM ha poi
 riportato `data/` a 230 da quella copia e ha fermato il backend. Per questa seconda prova `data/` è stato solo letto: `data/gioco.db`
 ha la stessa impronta della copia di avvio (`e89cb3a5…`, `partite.db` `d8c31830…`) prima e dopo, e nessun servizio è stato avviato.
 
@@ -109,7 +116,7 @@ In B i conteggi dopo la catena sono gli stessi di A.
 
 ## Limiti e punti aperti
 
-- **N5. «Ripristina» delle traduzioni** legge `pacchetto/gioco.db` del repository (a 93), non una copia nei dati: la 231 non lo copre. Dopo un «Ripristina» del glossario possono tornare i testi senza accento (`traduzione.testo` ed `extra_json.definizione`). È un limite noto.
+- **N5. «Ripristina» delle traduzioni** legge `pacchetto/gioco.db` del repository (a 93), non una copia nei dati: la 232 non lo copre. Dopo un «Ripristina» del glossario possono tornare i testi senza accento (`traduzione.testo` ed `extra_json.definizione`). È un limite noto.
 - **Accenti che le parole non rivelano.** Sono corretti quelli riconoscibili dalla parola (-ità, giorni, più/può/già/così/perché/ciò…) e le frasi decise a mano. Restano possibili «e/è», «da/dà», «si/sì» ambigui in testi lunghi. Restano anche le elisioni senza apostrofo («l attivita», «dall inizio», «un abilità»), che non sono accenti.
 - **Chiavi non toccate:** le colonne `chiave`, `fonte_chiave` e simili restano senza accento (per esempio `libro/eredita-dellimpiccato`). Il nome «Tazza nera (traduzione non ufficiale allgamestaff)» resta: non ha accenti mancanti e non contiene il dominio.
 - **Storico del Diario:** `voce_giornata.testo_precedente_json` resta com'è.

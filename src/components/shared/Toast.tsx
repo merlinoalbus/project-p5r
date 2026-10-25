@@ -5,15 +5,10 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
-import { useNotificationStore, type NotificationType } from '../../stores/notificationStore';
+import { useNotificationStore, type Notification, type NotificationType } from '../../stores/notificationStore';
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
-
-const TOAST_BORDER: Record<NotificationType, string> = {
-  success: 'border-l-success',
-  error: 'border-l-error',
-  warning: 'border-l-warning',
-  info: 'border-l-info',
-};
+import { PulsanteVisivo } from './PulsanteVisivo';
+import { IconaAzione } from './IconaAzione';
 
 /** Il tipo detto a parole, davanti al messaggio, per chi non vede il colore del bordo. */
 const TIPO_TESTO: Record<NotificationType, string> = {
@@ -21,6 +16,13 @@ const TIPO_TESTO: Record<NotificationType, string> = {
   error: 'Errore',
   warning: 'Attenzione',
   info: 'Avviso',
+};
+
+const TOAST_BORDER: Record<NotificationType, string> = {
+  success: 'border-l-success',
+  error: 'border-l-error',
+  warning: 'border-l-warning',
+  info: 'border-l-info',
 };
 
 /** Rende e anima la coda globale delle notifiche temporanee.
@@ -31,7 +33,7 @@ const TIPO_TESTO: Record<NotificationType, string> = {
  * ancorato che scende nella sua zona. In basso coprirebbe i pulsanti («Riapri» subito dopo «Ottenuto»), in alto la barra della
  * mappa: dove va copre solo la mappa, per qualche secondo. */
 export function ToastContainer() {
-  const { notifications, removeNotification } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification })));
+  const { notifications, removeNotification, chiudiPersistenti } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification, chiudiPersistenti: s.chiudiPersistenti })));
   const coda = useRef<HTMLDivElement | null>(null);
   const [posto, setPosto] = useState<PostoCoda>({ bottom: null, aSinistra: false });
   const visibile = notifications.length > 0;
@@ -69,41 +71,50 @@ export function ToastContainer() {
   }, [visibile]);
 
   const stile = { ...(posto.bottom !== null ? { bottom: posto.bottom } : {}), ...(posto.aSinistra ? { left: MARGINE, right: 'auto' } : {}) };
-  // Lotto C (2026-10-25): le regioni live sono due, sorelle e sempre nel DOM (una regione che nasce insieme al suo testo spesso non
-  // viene letta): `status` per le notifiche normali, che si annunciano a fine lettura, e `alert` per gli errori, che interrompono.
-  // Prima l'`alert` dell'errore stava annidato nella regione `status`, e i lettori di schermo lo leggevano due volte o male. Le
-  // regioni hanno solo il testo, col tipo davanti («Errore: …», il colore del bordo da solo non lo dice); la coda visiva resta una
-  // sola, nell'ordine d'arrivo, fuori dalle regioni. Le notifiche `silenziose` stanno solo nella coda: chi le crea annuncia lui.
-  const annunci = notifications.filter((n) => !n.silenziosa);
+  // Due regioni live **distinte e sempre nel DOM**, anche a coda vuota (una regione che nasce insieme al suo testo spesso non
+  // viene letta), mai una dentro l'altra: `status` (cortese) per conferme e informazioni, `alert` (assertiva) per errori e avvisi.
+  // Prima l'`alert` stava dentro lo `status` e poteva essere annunciato due volte o per niente.
+  // le «silenziose» (lotto C) stanno solo nella coda visiva, fuori dalle regioni: chi le crea annuncia da sé lo stesso fatto
+  const silenziose = notifications.filter((n) => n.silenziosa);
+  const comuni = notifications.filter((n) => n.type !== 'error' && !n.silenziosa);
+  const errori = notifications.filter((n) => n.type === 'error' && !n.silenziosa);
+  // errori e avvisi non si chiudono da soli: con più di uno a schermo un solo gesto li chiude tutti
+  const persistenti = notifications.filter((n) => (n.duration ?? 0) <= 0).length;
   return createPortal(
     <div>
-      <div className="sr-only" role="status" aria-live="polite" aria-atomic="false">
-        {annunci.filter((n) => n.type !== 'error').map((n) => <p key={n.id}>{`${TIPO_TESTO[n.type]}: ${n.message}`}</p>)}
-      </div>
-      <div className="sr-only" role="alert" aria-live="assertive" aria-atomic="false">
-        {annunci.filter((n) => n.type === 'error').map((n) => <p key={n.id}>{`${TIPO_TESTO[n.type]}: ${n.message}`}</p>)}
-      </div>
-      {visibile && (
-        <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col gap-2 z-[9999]" style={stile}>
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] border-l-[3px] ${TOAST_BORDER[n.type]}`}
-            >
-              <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
-              <button
-                type="button"
-                className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
-                onClick={() => removeNotification(n.id)}
-                aria-label="Chiudi notifica"
-              >
-                ×
-              </button>
-            </div>
-          ))}
+      {/* tanti errori ancora aperti non devono uscire dallo schermo: la coda scorre dentro se stessa (più bassa sul telefono, dove lo schermo è poco) */}
+      <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col z-[9999] max-h-[45vh] md:max-h-[70vh] overflow-y-auto overscroll-contain" style={stile}>
+        {silenziose.length > 0 && <div className="flex flex-col gap-2 mb-2">{silenziose.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}</div>}
+        <div role="status" aria-live="polite" className="flex flex-col gap-2">
+          {comuni.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
         </div>
-      )}
+        <div role="alert" className={`flex flex-col gap-2${errori.length > 0 && comuni.length > 0 ? ' mt-2' : ''}`}>
+          {errori.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
+        </div>
+        {persistenti > 1 && (
+          <PulsanteVisivo tono="secondario" compatto className="self-end mt-2 shrink-0" icona={<IconaAzione chiave="chiudi" dimensione={20} />}
+            titolo={`Chiudi tutti (${persistenti})`} onClick={chiudiPersistenti} />
+        )}
+      </div>
     </div>,
     document.body,
+  );
+}
+
+/** Una notifica della coda, con la × per chiuderla: gli errori e gli avvisi restano finché non si chiudono. */
+function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void }) {
+  return (
+    <div
+      className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
+    >
+      <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
+      <button
+        className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
+        onClick={() => chiudi(n.id)}
+        aria-label="Chiudi notifica"
+      >
+        ×
+      </button>
+    </div>
   );
 }

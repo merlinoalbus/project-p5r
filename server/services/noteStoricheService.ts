@@ -17,7 +17,7 @@ import type { NotaStoricaOfferta } from '../../shared/types.js';
 
 interface RigaNota { chiave: string; testo: string; fonte: string; versione: number; seed_json: string }
 
-// la fonte può essere vuota (lotto C, migrazione 231: una nota la cui «fonte» era solo un riferimento di lavoro); il testo no
+// la fonte può essere vuota (lotto C, migrazione 232: una nota la cui «fonte» era solo un riferimento di lavoro); il testo no
 const guida = z.object({ versione: z.number().int(), testo: z.string().min(1), fonte: z.string() });
 
 /** Il valore della guida (la copia in `seed_json`), o null se la copia non è leggibile. */

@@ -112,8 +112,9 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
-      // Aprendo una voce senza collegamento (o di altro genere) con un solo effetto del suo genere, `strutturaDi` ne ricava il collegamento
-      // dall'effetto: salvando, si scrive anche questo collegamento ricavato. Gli effetti salvati restano intatti (stessi UID e valori).
+      // Aprendo una voce SENZA collegamento con un solo effetto del suo genere, `strutturaDi` ne ricava il collegamento dall'effetto:
+      // salvando, si scrive anche questo. Un collegamento salvato di altro genere (negozio su un lavoro) resta com'è: `uidPrincipale`
+      // serve solo alla finestra per trovare l'effetto principale e non entra mai nei dati. Gli effetti salvati restano intatti.
       ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
         ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
         ...(produceModificato ? { produce: s.produce } : {}),

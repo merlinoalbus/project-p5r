@@ -21,7 +21,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 export function SkillPage() {
   useDocumentTitle('Skill');
   const glossario = useGlossarioStore((s) => s.glossario);
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getSkills(), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkills(), []);
   const [q, setQ] = useState('');
   const [elemento, setElemento] = useState('');
 
@@ -59,7 +59,7 @@ export function SkillPage() {
         ))}
       </FilaScorrevole>
 
-      <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna skill corrisponde alla ricerca" />
         ) : (

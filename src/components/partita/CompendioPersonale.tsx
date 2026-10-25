@@ -47,7 +47,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   };
 
   return (
-    <PageState isLoading={tutte.caricamento || registrate.caricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
+    <PageState isLoading={tutte.inPrimoCaricamento || registrate.inPrimoCaricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
       <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3">
         <TesseraKpi className="shrink-0" etichettaSopra segno="completati" etichetta="Completamento" valore={`${totale ? Math.round((fatte / totale) * 100) : 0}%`} nota={`${fatte} di ${totale}`} />
         <div className="flex-1 min-w-[min(100%,180px)] flex"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" /></div>

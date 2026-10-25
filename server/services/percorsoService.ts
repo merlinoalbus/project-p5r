@@ -6,13 +6,14 @@
 // `voce_giornata` e le gestisce `giornataService`; qui la scheda del giorno, l'indice dei giorni e il giorno corrente.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { cambiaGiornoPartita } from './giornoPartitaService.js';
-import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
-import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
+import { conteggiGiornate, righeDelGiorno, spuntaVoce, spuntePartita, vociDelGiorno } from './giornataService.js';
+import type { OpzioniSpunta } from './effettiAzioneService.js';
 import { allerteDelGiorno, meteoDelGiorno, testoMeteo } from './meteoService.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
 
@@ -86,6 +87,21 @@ export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoA
   // la regola unica del cambio giorno (R10-16), con la sua descrizione nello storico
   cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata del ${data} completata`, dettaglio: `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.` });
   return { da: data, a: succ.data, partita: leggiPartita(partitaId) };
+}
+
+/**
+ * La spunta di una voce e l'eventuale passaggio al giorno dopo, in UN'unica transazione: o succedono tutte e due o nessuna. Prima la rotta
+ * leggeva «era già fatta», spuntava e poi faceva avanzare il giorno in passi separati: se l'avanzamento falliva la spunta restava salvata e
+ * il giorno non avanzava più (una nuova spunta la trovava «già fatta»). Il passaggio scatta solo alla spunta nuova (togliere una spunta o
+ * ripetere quella già data non fa avanzare niente). È l'unica porta di tutte le spunte del Diario, dalla rotta come dalla Guida.
+ */
+export function spuntaEAvanza(partitaId: number, uid: string, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
+  return getDb().transaction(() => {
+    const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid);
+    const azione = spuntaVoce(partitaId, uid, fatta, opz);
+    const giornoAvanzato = fatta && !giaFatta ? avanzaSeGiornoCompleto(partitaId, azione.giorno) : null;
+    return giornoAvanzato ? { ...azione, giornoAvanzato } : azione;
+  })();
 }
 
 /** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */

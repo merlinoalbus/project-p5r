@@ -28,7 +28,7 @@ const NOMI_CATEGORIA: Record<string, string> = {
 /** Glossario italiano ↔ inglese dei termini di gioco, con ricerca e filtro per categoria. */
 export function GlossarioPage() {
   useDocumentTitle('Glossario');
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getTermini(), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getTermini(), []);
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
 
@@ -63,7 +63,7 @@ export function GlossarioPage() {
           ))}
         </div>
       </div>
-      <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         {dati && dati.length === 0 ? (
           <EmptyState title="Glossario non ancora disponibile" hint="I termini vengono caricati con il dataset: questa versione non ne contiene." />
         ) : filtrati.length === 0 ? (

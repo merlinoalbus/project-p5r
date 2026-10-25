@@ -63,7 +63,7 @@ interface Props {
 /** Il blocco ripiegato degli effetti aggiuntivi. */
 export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
   const righe = valore.effettiVoce ?? [];
-  const principale = indicePrincipale(righe, valore.tipo, valore.riferimento);
+  const principale = indicePrincipale(righe, valore.tipo, valore.riferimento, valore.uidPrincipale);
   const aggiuntivi = righe.map((r, i) => ({ r, i })).filter(({ i }) => i !== principale);
   const [aperto, setAperto] = useState(false);
   const [menu, setMenu] = useState(false);

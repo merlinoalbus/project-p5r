@@ -22,12 +22,16 @@ export function altezzaPerForma(forma: FormaRiquadro | undefined, larghezza: num
  * `persona/<slug>`, `arcani/<chiave>` (carta) e `arcani/icona/<chiave>` (icona), `confidenti/<chiave>-fedele` (ritratto fedele
  * al gioco, mostrato di default) con `confidenti/<chiave>` (versione stilizzata, riserva e alternativa al passaggio del mouse).
  */
-export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, forma: FormaImmagine, dimensione: number): [string | null, string | null] {
+export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, forma: FormaImmagine, dimensione: number, nomeIt?: string): [string | null, string | null, string?] {
   const s = slug(chiave);
   switch (ambito) {
     // le Persona dei Ladri Fantasma (Arsène, Zorro, Mercurius, Diego…) hanno la figura in `persona-gruppo/`, la stessa che mostra la pagina
-    // Personaggi: è la riserva quando `persona/` non ce l'ha (prima il Compendio le lasciava senza immagine)
-    case 'persona': return [`persona/${s}`, `persona-gruppo/${s}`];
+    // Personaggi: è la riserva quando `persona/` non ce l'ha (prima il Compendio le lasciava senza immagine).
+    // In `persona-gruppo/` la chiave è lo slug del nome ITALIANO (Mercurius → `mercurio`): se differisce dallo slug del nome canonico è la terza chiave
+    case 'persona': {
+      const sIt = nomeIt ? slug(nomeIt) : s;
+      return sIt && sIt !== s ? [`persona/${s}`, `persona-gruppo/${s}`, `persona-gruppo/${sIt}`] : [`persona/${s}`, `persona-gruppo/${s}`];
+    }
     // Carta intera per la forma "carta" o i riquadri grandi; icona piccola altrimenti (con l'altra come riserva).
     case 'arcana': return forma === 'carta' || dimensione >= 96 ? [`arcani/${s}`, `arcani/icona/${s}`] : [`arcani/icona/${s}`, `arcani/${s}`];
     case 'confidente': return [`confidenti/${s}-fedele`, `confidenti/${s}`];

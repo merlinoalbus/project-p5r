@@ -15,6 +15,8 @@ import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { Spinner } from '../components/shared/PageState';
+import { AzioneRiprova, VistaErrore } from '../components/shared/VistaErrore';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { TesseraKpi } from '../components/shared/TesseraKpi';
 import { StellaCinque } from '../components/shared/StellaCinque';
@@ -132,11 +134,25 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
 export function HomePage() {
   useDocumentTitle('Home');
   const attiva = usePartitaStore((s) => s.attiva);
+  const caricata = usePartitaStore((s) => s.caricata);
+  const errore = usePartitaStore((s) => s.errore);
+  const caricamento = usePartitaStore((s) => s.caricamento);
+  const carica = usePartitaStore((s) => s.carica);
   return (
     <div className="home flex flex-col gap-3">
       <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" compatta />
       {attiva ? (
         <HomeConPartita key={attiva.id} partita={attiva} />
+      ) : errore ? (
+        // R12-01/4: l'elenco non è arrivato: non si dice «nessuna partita» (e non si invita a crearne una seconda). La schermata resta
+        // anche mentre «Riprova» rilegge (lo store tiene l'errore fino all'esito) e il pulsante è disabilitato finché la lettura è in corso
+        <VistaErrore
+          titolo="Partite non caricate"
+          spiegazione={`Non riesco a leggere le tue partite: ${errore}. Non significa che non ne hai: riprova.`}
+          azioni={<AzioneRiprova inCorso={caricamento} onClick={() => { if (!caricamento) void carica(); }} />}
+        />
+      ) : !caricata ? (
+        <div className="flex items-center justify-center min-h-[40vh]"><Spinner size={32} /></div>
       ) : (
         <>
           <div className="card testo-13 text-text-secondary">

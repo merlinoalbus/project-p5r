@@ -19,7 +19,7 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { palazzoDellaMappa, radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
-import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
+import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, togliStatiDeiPin, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
 import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
@@ -750,7 +750,7 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
     prepared('DELETE FROM punto_interesse WHERE area_chiave = ?').run(chiaveArea);
     // gli spilli della guida (senza mappa) vincolano l'area con RESTRICT: vanno via prima di lei
     if (colonnaSpilloGuida()) {
-      prepared('DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL)').run(chiaveArea);
+      togliStatiDeiPin(getDb(), 'SELECT uid FROM main.spillo WHERE area_guida_chiave = ? AND uid IS NOT NULL', [chiaveArea]);
       eliminaImmaginiDeiPin('s.area_guida_chiave = ?', chiaveArea);
       prepared('DELETE FROM spillo WHERE area_guida_chiave = ?').run(chiaveArea);
     }
@@ -1437,7 +1437,7 @@ function staccaPunto(puntoChiave: string): void {
   const mPrima = modelloAvanzamento(getDb());
   prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
   if (tabellaUtente('divergenza_partita')) prepared('DELETE FROM divergenza_partita WHERE voce_chiave = ?').run(puntoChiave);
-  prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
+  togliStatiDeiPin(getDb(), "SELECT uid FROM main.spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL", [puntoChiave]);
   prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
   // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano (dedali)
   const tutti = prepared('SELECT s.id, s.uid FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = ?').all(puntoChiave) as Array<{ id: number; uid: string | null }>;

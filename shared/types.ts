@@ -1053,6 +1053,8 @@ export interface DomandaDto {
   fonte: string;
   /** Segnata come fatta nella partita (false senza partita). */
   fatta: boolean;
+  /** La voce del Diario che segna questa domanda (una sola, con effetto «domanda»): la spunta dalla Guida passa dal suo stesso gesto, e la Conoscenza si applica da lì. Assente se non c'è. */
+  voceUid?: string;
 }
 
 export interface EsameDto {
@@ -1075,8 +1077,10 @@ export interface DoteDaSegnareDto {
 }
 
 export interface DomandeDto {
-  /** Solo nella risposta di una spunta: la nota di Conoscenza della risposta giusta, da segnare nelle Doti. */
+  /** Solo nella risposta di una spunta: la nota di Conoscenza della risposta giusta, da segnare nelle Doti (assente quando la spunta è passata dalla voce del Diario: lì la Conoscenza è un «Applica»). */
   daSegnare?: DoteDaSegnareDto[];
+  /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
+  giornoAvanzato?: GiornoAvanzatoDto;
   domande: DomandaDto[];
   esami: EsameDto[];
   premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
@@ -1425,7 +1429,7 @@ export interface ElenchiEffettiVoceDto {
   cruciverba: Array<{ data: string; indizio: string }>;
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
-  persone: Array<{ id: number; nome: string; arcana: string; livello: number }>;
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
@@ -1659,6 +1663,10 @@ export interface CruciverbaDto {
   rispostaEn: string | null;
   /** Risolto nella partita. */
   fatto: boolean;
+  /** La voce del Diario che segna questo cruciverba (una sola, con effetto «cruciverba»): la spunta dalla Guida passa dal suo stesso gesto, e la Conoscenza si applica da lì. Assente se non c'è. */
+  voceUid?: string;
+  /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
+  giornoAvanzato?: GiornoAvanzatoDto;
 }
 
 export interface CruciverbaTuttiDto {

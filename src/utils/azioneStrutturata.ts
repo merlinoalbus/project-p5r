@@ -7,7 +7,7 @@ import type { AzionePercorsoDto } from '../types';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce';
 import { eAttivitaPesca } from '../../shared/pesca';
-import { riferimentoDiApertura } from './effettoAutomatico';
+import { riferimentoDiApertura, uidPrincipaleDiApertura } from './effettoAutomatico';
 
 /** I campi strutturati di un'azione; il collegamento può essere a metà (tipo scelto, elemento no) finché si modifica. */
 export interface CampiStrutturati {
@@ -17,6 +17,8 @@ export interface CampiStrutturati {
   produce: EffettoAzione[];
   fonteEffetti?: StatoEffettiVoceDto;
   effettiVoce?: RichiestaSalvaEffettiVoce['effetti'];
+  /** Solo all'apertura: l'UID dell'effetto principale di una voce con un collegamento salvato di altro genere (che non si tocca). Mai nel salvataggio. */
+  uidPrincipale?: string | null;
 }
 
 export const STRUTTURA_VUOTA: CampiStrutturati = { tipo: 'altro', riferimento: null, rangoAtteso: null, produce: [], effettiVoce: [] };
@@ -25,11 +27,17 @@ export const STRUTTURA_VUOTA: CampiStrutturati = { tipo: 'altro', riferimento: n
 export function strutturaDi(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'rangoAtteso' | 'produce' | 'effettiVoce'>): CampiStrutturati {
   const effetti = a.effettiVoce?.stato === 'convertita' ? a.effettiVoce.effetti.map(({ uid, effetto }) => ({ uid, effetto })) : undefined;
   let riferimento: CampiStrutturati['riferimento'] = a.riferimento ? { tipo: a.riferimento.tipo, chiave: a.riferimento.chiave } : null;
-  // Voce salvata senza collegamento del suo genere (nullo, o di altro genere come un negozio su un lavoro) ma con UN SOLO effetto del
-  // genere del tipo: il collegamento si ricava da quell'effetto, così «Quale» lo mostra scelto e cambiarlo riscrive quell'effetto
-  // (stesso UID) invece di aggiungerne un secondo. Solo all'apertura: dopo un cambio di tipo il ripiego non si applica.
-  if (effetti) riferimento = riferimentoDiApertura(a.tipo, riferimento, effetti);
+  let uidPrincipale: string | null = null;
+  if (effetti) {
+    // Voce salvata SENZA collegamento ma con UN SOLO effetto del genere del tipo: il collegamento si ricava da quell'effetto, così
+    // «Quale» lo mostra scelto e cambiarlo riscrive quell'effetto (stesso UID) invece di aggiungerne un secondo.
+    // Un collegamento salvato di altro genere (negozio su un lavoro, attività su una Dote) NON si tocca: l'effetto principale si trova
+    // lo stesso, con l'UID. Solo all'apertura: dopo un cambio di tipo o di collegamento nessuno dei due ripieghi si applica.
+    riferimento = riferimentoDiApertura(a.tipo, riferimento, effetti);
+    uidPrincipale = uidPrincipaleDiApertura(a.tipo, riferimento, effetti);
+  }
   return { tipo: a.tipo, riferimento, rangoAtteso: a.rangoAtteso, produce: a.produce ?? [],
+    ...(uidPrincipale ? { uidPrincipale } : {}),
     ...(a.effettiVoce ? { fonteEffetti: a.effettiVoce, ...(effetti ? { effettiVoce: effetti } : {}) } : {}) };
 }
 

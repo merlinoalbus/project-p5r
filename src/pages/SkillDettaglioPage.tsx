@@ -19,11 +19,11 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 export function SkillDettaglioPage() {
   const { id } = useParams();
   const skillId = Number(id);
-  const { dati: s, caricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId]);
+  const { dati: s, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId]);
   useDocumentTitle(s ? s.nomeIt : 'Skill');
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Skill', ripiego: '/skill' }}>
+    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Skill', ripiego: '/skill' }}>
       {s && (
         <div className="flex flex-col gap-4">
           <IntestazioneScheda ripiego="/skill" titolo={s.nomeIt}

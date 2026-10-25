@@ -18,6 +18,7 @@ import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
+import type { NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
 
@@ -156,6 +157,28 @@ export function nomiEffetti(): NomiEffettiAzione {
   };
 }
 
+/** Il nome dell'articolo come lo vede l'utente: quello del catalogo (la colonna `nome` dell'articolo può essere vuota), altrimenti la chiave. */
+const SQL_ARTICOLO = "SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?";
+export const articoloConNome = (chiave: string): { nome: string; prezzo: number | null } | undefined => prepared(SQL_ARTICOLO).get(chiave) as { nome: string; prezzo: number | null } | undefined;
+
+/**
+ * R12-01/1: i nomi per scrivere le frasi degli effetti che citano il loro oggetto per chiave o per id (domanda, Richiesta, articolo,
+ * invito, Persona). Una ricerca per volta sulla riga che serve: le stesse fonti degli elenchi `elenchiEffettiVoce` che la pagina usa
+ * negli editor, così la frase è la stessa in ogni vista (`fraseEffettoConNomi`).
+ */
+export function nomiFraseEffetto(): NomiFraseEffetto {
+  return {
+    domanda: (id) => (prepared('SELECT domanda FROM domanda WHERE id = ?').pluck().get(id) as string | undefined) ?? undefined,
+    richiesta: (chiave) => (prepared('SELECT nome FROM richiesta WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
+    articolo: articoloConNome,
+    invito: (chiave) => {
+      const r = prepared('SELECT c.nome AS confidenteNome, i.data FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave WHERE i.chiave = ?').get(chiave) as { confidenteNome: string; data: string | null } | undefined;
+      return r ?? undefined;
+    },
+    persona: (id) => (prepared('SELECT nome FROM persona WHERE id = ?').pluck().get(id) as string | undefined) ?? undefined,
+  };
+}
+
 /** La frase di ogni effetto, nello stesso ordine, con i nomi presi da `nomi`. */
 export function testoEffetti(produce: EffettoAzione[], nomi: NomiEffettiAzione): string[] {
   return produce.map((e) => descriviEffettoAzione(e, nomi));
@@ -194,6 +217,6 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),
     cruciverba: prepared('SELECT data, indizio FROM cruciverba ORDER BY ordine').all() as ElenchiEffettiVoceDto['cruciverba'],
     inviti: prepared(`SELECT i.chiave, i.confidente_chiave AS confidente, c.nome AS confidenteNome, i.data, i.nota FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave ORDER BY c.ordine, i.data`).all() as ElenchiEffettiVoceDto['inviti'],
-    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, arcana: t('arcana', p.arcana) })),
+    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana) })),
   };
 }

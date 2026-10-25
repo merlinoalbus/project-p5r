@@ -47,11 +47,13 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const [alternativaFissa, setAlternativaFissa] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
   const formaAsset: FormaImmagine = forma === 'orizzontale' ? 'quadrata' : forma;
-  const [primaria, riserva] = chiaviAssetPredefinito(ambito, chiave, formaAsset, dimensione);
+  // per le Persona `etichetta` è il nome italiano: dà la chiave italiana di `persona-gruppo/` (Mercurius → mercurio)
+  const [primaria, riserva, riservaIt] = chiaviAssetPredefinito(ambito, chiave, formaAsset, dimensione, ambito === 'persona' ? etichetta : undefined);
   const urlPrimario = useAsset(primaria);
   const urlRiserva = useAsset(riserva);
-  const urlPredefinito = urlPrimario ?? urlRiserva;
-  const nomePredefinito = urlPrimario ? primaria : urlRiserva ? riserva : null;
+  const urlRiservaIt = useAsset(riservaIt);
+  const urlPredefinito = urlPrimario ?? urlRiserva ?? urlRiservaIt;
+  const nomePredefinito = urlPrimario ? primaria : urlRiserva ? riserva : urlRiservaIt ? (riservaIt ?? null) : null;
   // Versione alternativa (stilizzata) di Confidenti e personaggi: l'asset senza `-fedele`, mostrato al
   // passaggio del mouse sia sopra il ritratto fedele sia sopra l'immagine caricata dall'utente
   const urlAlternativa = (ambito === 'confidente' || ambito === 'personaggio') && urlRiserva && (urlPrimario || presente) ? urlRiserva : null;

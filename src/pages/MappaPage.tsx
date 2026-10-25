@@ -112,7 +112,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
       {contenute.length > 0 && <p className="m-0 testo-13 text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
     </IntestazioneScheda>
-    <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
+    <PageState isLoading={albero.inPrimoCaricamento} error={albero.errore} onRetry={albero.ricarica}>
       {contenute.length > 0
         ? <GriglieDelLuogo contenute={contenute} nome={nome} />
         : <p className="m-0 testo-13 text-text-muted" role="status">{mappa.tipo === 'dedalo' ? 'I Memento non hanno planimetrie: i piani si generano a ogni discesa, e i dedali stanno nella loro scheda.' : 'Qui non c’è ancora nessuna planimetria. Puoi aggiungerne una dall’editor.'}</p>}

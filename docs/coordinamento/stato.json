@@ -42109,6 +42109,126 @@
           "R11-24",
           "R11-04"
         ]
+      },
+      {
+        "id": "R12-01/1",
+        "lotto": "L12",
+        "titolo": "«Il gioco dà» con i nomi, mai chiavi grezze",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: fraseEffettoConNomi in shared/effettiVoce.ts, nomi risolti dal server (azioniStrutturateService.nomiFraseEffetto); descriviEffettoVoce tolta. Commit 17661efd. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Ogni testo che descrive un effetto all'utente (Diario, giornata della guida, preparazione acquisti) usa i nomi di eventi, Persona, domande, inviti, Richieste e articoli, da una sola funzione; nessuna chiave o id interno visibile.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/2",
+        "lotto": "L12",
+        "titolo": "Nessun esito perso per un nuovo invio automatico",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: niente ripetizione automatica sulle PUT con esito di transizione (domande, cruciverba, letture, attività); spuntaEAvanza unisce spunta e avanzamento del giorno in una transazione. Commit ed9f00ed. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Le scritture che restituiscono un esito legato al primo cambio (Doti da segnare di domande, cruciverba e turni; giorno avanzato dalla spunta) non perdono l'esito se la richiesta viene ripetuta.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/3",
+        "lotto": "L12",
+        "titolo": "Le pagine non spariscono dopo un salvataggio o una rilettura fallita",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: useCarica conserva i dati su rilettura fallita e ignora risposte superate, useRileggiAlCambio al posto delle dipendenze su attiva, partitaStore senza risposte vecchie. Commit 61d93050, 6561c2fb. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Un salvataggio nella scheda del Confidente non sostituisce la pagina con lo spinner; una rilettura silenziosa fallita lascia i dati visibili e lo segnala; un aggiornamento della partita non azzera le pagine che non dipendono da quel dato; una risposta vecchia non sovrascrive un dato più recente.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/4",
+        "lotto": "L12",
+        "titolo": "Elenco delle partite non caricato: errore visibile, non «nessuna partita»",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: schermata d'errore con Riprova sulla Home (anche durante il nuovo tentativo) e striscia AvvisoPartiteNonCaricate nelle altre pagine e con partita attiva. Commit 61d93050, 6561c2fb. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Se l'elenco delle partite non si carica, la Home e le pagine lo dicono con un modo per riprovare; non propongono di creare una partita.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/5",
+        "lotto": "L12",
+        "titolo": "Domanda in classe e cruciverba: un solo stato fra Guida e Diario",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: con una sola voce del Diario che cita l'oggetto la spunta dalla Guida è la spunta della voce (vociDiStato, spuntaDellaGuidaService), con «Applica» della Conoscenza e conferma prima di togliere la spunta; senza voce o con voci ambigue resta il gesto di prima. Commit ed9f00ed, 6561c2fb. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Segnare la domanda o il cruciverba dalla Guida o dal Diario dà lo stesso stato e lo stesso promemoria della Conoscenza.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/6",
+        "lotto": "L12",
+        "titolo": "Oggi mostra la risposta della domanda e dell'esame del giorno",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: ScuolaOggi nella Home (pulsanti con finestra per domande, esame e cruciverba del giorno, fila scorrevole sul telefono, riletti al cambio di stato). Commit 162da616, 6561c2fb. Validazione ECC: APPROVE; misura a 375/768/1280 da fare in produzione.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "La schermata Oggi della Home mostra la risposta giusta della domanda in classe o dell'esame previsti per il giorno della partita.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/7",
+        "lotto": "L12",
+        "titolo": "Le attività che danno Doti generano il promemoria",
+        "stato": "da-fare",
+        "esitoRiscontro": "2026-10-25, parziale: curry del Leblanc con la sua Dote (migrazione 231, conservativa). Bagno pubblico, centro battute, Big Bang Burger restano in prosa per scelta documentata nella 185 (fonti discordi); il contatore delle attività dà l'avviso ma non «Applica» (cambio di modello da decidere). Commit ed9f00ed.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Ogni attività che nel gioco dà Doti (curry del Leblanc compreso) produce alla spunta il promemoria con «Applica», come le altre.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/8",
+        "lotto": "L12",
+        "titolo": "I punti interni aggiuntivi della Fortuna entrano nel calcolo",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: la Perizia della pesca con Fortuna è base + bonusFortuna della regola fotografata (pescaLetture.ts); decisione in DECISIONI.md. Da controllare al congelamento le regole salvate con base diversa da 2. Commit 7e176631, 6561c2fb.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Il campo «Fortuna: punti interni aggiuntivi» della regola di pesca, modificabile e mostrato, è usato dal calcolo.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/9",
+        "lotto": "L12",
+        "titolo": "Gli errori restano visibili finché l'utente li legge",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: errori e avvisi persistenti finché chiusi, al massimo 5, «Chiudi tutti», altezza contenuta sul telefono; conferme ripetute rinnovano il timer. Commit 61d93050, 6561c2fb. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "I messaggi d'errore non spariscono dopo pochi secondi: restano finché l'utente li chiude.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/10",
+        "lotto": "L12",
+        "titolo": "Nessuna migrazione senza copia di sicurezza",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: la copia di avvio è obbligatoria quando ci sono migrazioni in attesa (anche con gioco.db nuovo e partite.db con avanzamento) e un fallimento ferma l'avvio; un database più nuovo del codice ferma l'avvio. Commit 7e176631. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Se la copia di avvio fallisce le migrazioni non partono; la copia si fa anche quando gioco.db è nuovo ma partite.db ha avanzamento; un database più nuovo del codice ferma l'avvio con un messaggio chiaro.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/11",
+        "lotto": "L12",
+        "titolo": "Una sola regola dei punti delle Doti",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: PUNTI_SCALINO e puntiDaNote in shared/doti.ts, usati da partiteService e DotiSociali. Commit ed9f00ed. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "L'anteprima dei punti nella scheda Doti e il calcolo del server usano la stessa funzione condivisa.",
+        "padre": "R12-01"
+      },
+      {
+        "id": "R12-01/12",
+        "lotto": "L12",
+        "titolo": "Pin eliminati: stati di partita puliti in un solo punto",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: togliStatiDeiPin in statiGuida.ts usata da dungeonService e mappeService, compresa eliminaArea del Palazzo. Le righe orfane già presenti nei file delle partite non sono toccate (servirebbe un conteggio e il sì dell'utente). Commit 7e176631. Validazione ECC: APPROVE.",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Eliminare un'area, una planimetria o un pin toglie gli stati di partita collegati con un'unica funzione, anche nell'eliminazione dell'area del Palazzo.",
+        "padre": "R12-01"
       }
     ],
     "requisitiCopertura": [
@@ -45613,6 +45733,42 @@
         "fonte": "lotti/L11/requisiti.md:88",
         "criterio": "Ricerca globale, albero delle Mappe, moduli «Modifica» aggiunti: nessuno scorrimento orizzontale a 1280, 768, 375; bersagli ≥44 px; su telefono la ricerca è a tutto schermo; scroll annidati dell'albero con confine evidente e overscroll contenuto.",
         "tipo": "L"
+      },
+      {
+        "id": "R12-01",
+        "lotto": "L12",
+        "titolo": "Fase 1: esperienza di gioco affidabile e protezione del lavoro di preparazione",
+        "stato": "da-fare",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "I difetti visibili a chi gioca individuati dall'analisi ECC del 2026-10-25 sono corretti e il lavoro di preparazione non può andare perso per una migrazione eseguita senza copia di sicurezza.",
+        "tipo": "F"
+      },
+      {
+        "id": "R12-02",
+        "lotto": "L12",
+        "titolo": "Fase 2: istanza pubblica di rilascio separata da quella di preparazione",
+        "stato": "da-fare",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Due istanze: preparazione privata con tutte le funzioni; rilascio pubblico con gioco.db in sola lettura garantita dal database, senza funzioni di modifica, configurazione, importazione o deposito, con partite separate per utente riconosciuto da Cloudflare Access, sul dominio indicato dall'utente.",
+        "tipo": "F"
+      },
+      {
+        "id": "R12-03",
+        "lotto": "L12",
+        "titolo": "Fase 3: telefono, prestazioni e accessibilità",
+        "stato": "da-fare",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Miniature delle immagini, Compendio reattivo, cache versionata dei dati di gioco, manifesto web, blocco dello standby, Guida nella barra in basso, ricerca di Ombre e domande; Selettore accessibile, contrasti AA, fuoco visibile, nessun testo di gioco troncato senza modo di leggerlo.",
+        "tipo": "UX"
+      },
+      {
+        "id": "R12-04",
+        "lotto": "L12",
+        "titolo": "Fase 4: congelamento dei contenuti per il rilascio",
+        "stato": "da-fare",
+        "fonte": "lotti/L12/requisiti.md",
+        "criterio": "Controllo completo dei contenuti corretto dall'utente; correzioni dei blocchi JSON scritte nei blocchi; «Ripristina» e fotografie fuori dalla versione di rilascio; miniature generate una volta; struttura delle partite definitiva; nessuna migrazione nel prodotto di rilascio.",
+        "tipo": "F"
       }
     ]
   }

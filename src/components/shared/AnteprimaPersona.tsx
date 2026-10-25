@@ -25,10 +25,12 @@ interface Props {
 export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className, contieni }: Props) {
   const [caricata, setCaricata] = useState<boolean | null>(null);
   // le Persona dei Ladri Fantasma (Arsène, Zorro, Mercurius, Diego…) stanno in `persona-gruppo/`: riserva dopo `persona/`, come nei Personaggi
-  const [primaria, riserva] = chiaviAssetPredefinito('persona', nome, 'quadrata', dimensione);
+  // `etichetta` è il nome italiano (dalla traduzione): serve per la chiave italiana di `persona-gruppo/` (Mercurius → mercurio)
+  const [primaria, riserva, riservaIt] = chiaviAssetPredefinito('persona', nome, 'quadrata', dimensione, etichetta);
   const assetPrimario = useAsset(primaria);
   const assetRiserva = useAsset(riserva);
-  const asset = assetPrimario ?? assetRiserva;
+  const assetRiservaIt = useAsset(riservaIt);
+  const asset = assetPrimario ?? assetRiserva ?? assetRiservaIt;
   useEffect(() => {
     let annullato = false;
     void chiaviPresenti('persona').then((set) => { if (!annullato) setCaricata(set.has(nome)); });
