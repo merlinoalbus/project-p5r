@@ -1,6 +1,11 @@
 // ============================================================
-// collegamentoVociEsiti — il PIANO per collegare una voce del Diario agli esiti della sua attività (L13, ondata 2; NON applicato ai dati)
+// collegamentoVociEsiti — il PIANO per collegare una voce del Diario agli esiti della sua attività (L13, ondata 2)
 // ============================================================
+//
+// Applicato alle 9 voci di `CANDIDATI_COLLEGAMENTO_ESITI` dalla migrazione 234 (scelta dell'utente del 2026-10-25, «sistema il
+// collegamento del 3.»), con la stessa regola e con l'esito atteso deciso così: esito scritto chiaramente nel testo o nelle note → esito
+// preselezionato; non chiaro → da scegliere alla spunta; bagno pubblico → automatico. La migrazione salta le voci spuntate o citate
+// nelle partite. Questa funzione resta il piano in sola lettura per le voci future.
 //
 // Istruzione dell'ondata 2 (2026-10-25): le voci già validate dall'utente (fino al 05-31) non si convertono; per le altre voci di Big Bang
 // Burger, centro battute e bagno pubblico si prepara SOLO la funzione di collegamento: la conversione arriva dopo l'approvazione
@@ -20,10 +25,10 @@ import { leggiEffettiVoce } from './motoreDiario.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce.js';
 
-/** Le voci dopo il 05-31 da proporre all'utente, con l'esito atteso letto dal testo della voce (da confermare voce per voce). */
+/** Le voci dopo il 05-31 collegate dalla migrazione 234, con l'esito atteso deciso dalla regola dell'utente (null = da scegliere o automatico). */
 export const CANDIDATI_COLLEGAMENTO_ESITI: ReadonlyArray<{ voce: string; giorno: string; attivita: string; esitoAtteso: string | null; nota: string }> = [
-  { voce: '0f629a255e9feeca0d339f8f92f9e9b0', giorno: '06-04', attivita: 'sfida-big-bang-burger', esitoAtteso: 'gravity-vinta', nota: '«affrontare la sfida del Gravity Burger»: oggi Coraggio ♪♪ fisso, che per i dati è la Gravity persa' },
-  { voce: '3e5106dec8bfe998093d39a88dbc301b', giorno: '06-07', attivita: 'sfida-big-bang-burger', esitoAtteso: null, nota: '«accettare la sfida (500 yen)», sfida non indicata: oggi Coraggio ♪♪ fisso' },
+  { voce: '0f629a255e9feeca0d339f8f92f9e9b0', giorno: '06-04', attivita: 'sfida-big-bang-burger', esitoAtteso: null, nota: '«affrontare la sfida del Gravity Burger»: vinta o persa non è scritto (Coraggio ♪♪ fisso): da scegliere alla spunta' },
+  { voce: '3e5106dec8bfe998093d39a88dbc301b', giorno: '06-07', attivita: 'sfida-big-bang-burger', esitoAtteso: 'gravity-persa', nota: '«Non si vince, ma si ottiene Coraggio +2»: persa, e ♪♪ alla sconfitta è solo la Gravity' },
   { voce: 'fb0ac49af6e48c2172f4250626e1c521', giorno: '08-14', attivita: 'sfida-big-bang-burger', esitoAtteso: 'gravity-vinta', nota: '«completarla con 2.000 yen»: oggi ♪♪ alle quattro Doti fisse (la vittoria della Gravity)' },
   { voce: '3c0edc3d0692f34375c5db5c718248d0', giorno: '08-15', attivita: 'sfida-big-bang-burger', esitoAtteso: 'cosmo-tower-vinta', nota: '«consumare il panino (2.500 yen)», «Distintivo del capitano»: oggi nessun effetto' },
   { voce: '29c27bf247246474df1dfca749d0daad', giorno: '06-09', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ fisso; l’esito si ricava dal giorno' },
