@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { GiornoGuida } from './GiornoGuida';
 import { scegliVoce, selettore } from '../../../test/selettore';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
+import type { EffettoVoce, StatoEffettiVoceDto } from '../../../shared/effettiVoce';
 
 const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
@@ -16,7 +17,10 @@ const api = vi.hoisted(() => ({
   getElenchiAzione: vi.fn(), getPercorsoIndice: vi.fn(), trasferisciVociGiornata: vi.fn(),
   // L13 (ondata 4a): le proposte «da completare» del giorno (nessuna, in queste prove)
   getProposteConversione: vi.fn().mockResolvedValue([]),
+  // la finestra della voce carica anche gli elenchi per gli effetti (articoli, domande, oggetti…)
+  getElenchiEffettiVoce: vi.fn(),
 }));
+const ELENCHI_EFFETTI = { articoli: [], domande: [], cruciverba: [], inviti: [], persone: [], oggetti: [], trofei: [] };
 const ELENCHI = {
   confidenti: [{ chiave: 'takemi', nome: 'Tae Takemi', dettaglio: 'Morte' }], dungeon: [{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }], richieste: [],
   libri: [{ chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge' }], film: [], videogiochi: [],
@@ -35,6 +39,11 @@ const voce = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'uid' | 'a
 });
 
 const ZORRO = voce({ uid: uid(1), azione: 'Biblioteca: prendere Zorro', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2, cinema: false }], confidente: null } });
+/** La fonte unica degli effetti di una voce, com'è servita dal server: gli effetti dati, nell'ordine, con un UID ciascuno e la revisione `r1`. */
+const fonteEffetti = (voceUid: string, effetti: EffettoVoce[]): StatoEffettiVoceDto => ({
+  voceUid, stato: 'convertita', rawLegacy: '[]', motivo: null, revisione: 'r1',
+  effetti: effetti.map((effetto, ordine) => ({ uid: uid(100 + ordine), ordine, effetto, origine: 'utente' as const })),
+});
 const PANE = voce({ uid: uid(2), azione: 'Comprare i Bionutrienti' });
 const PALAZZO = voce({ uid: uid(3), azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali' });
 const CONSEGNA = voce({ uid: uid(4), azione: 'Consegna del Palazzo', fascia: 'sera', genere: 'promemoria' });
@@ -65,6 +74,8 @@ describe('GiornoGuida — la giornata canone', () => {
     for (const f of Object.values(api)) f.mockReset();
     api.getImmagini.mockResolvedValue([]);
     api.getElenchiAzione.mockResolvedValue(ELENCHI);
+    api.getElenchiEffettiVoce.mockResolvedValue(ELENCHI_EFFETTI);
+    api.getProposteConversione.mockResolvedValue([]);
     notifica.mockReset();
   });
 
@@ -211,48 +222,49 @@ describe('GiornoGuida — la giornata canone', () => {
 
   it('modifica tipo, collegamento, rango ed effetti (la Guida si modifica al 100%)', async () => {
     api.aggiornaVoceGiornata.mockResolvedValue({});
-    const rafflesia = voce({ uid: uid(9), azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'] });
+    // L13 (ondata 4a): la finestra elenca TUTTI gli effetti della voce (fonte unica `effettiVoce`); tipo e «Quale» sono tessere, non tendine
+    const rafflesia = voce({
+      uid: uid(9), azione: 'Sbloccare il lavoro da fioraio Rafflesia', tipo: 'lavoro', riferimento: { tipo: 'attivita', chiave: 'lavoro-rafflesia' },
+      produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }], produceTesto: ['Turno: Fioraio Rafflesia'],
+      effettiVoce: fonteEffetti(uid(9), [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]),
+    });
     disegna({ ...base, azioni: [rafflesia] });
     expect(screen.getByText('Il gioco dà: Turno: Fioraio Rafflesia')).toBeInTheDocument();
     apriMenu('Sbloccare il lavoro');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
-    await waitFor(() => expect(within(finestra).getByRole('combobox', { name: 'Tipo' })).toBeInTheDocument());
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli l\'effetto 1' }));
-    expect(within(finestra).getByText('Nessun effetto: la spunta segna solo che l\'hai fatto.')).toBeInTheDocument();
-    /** Nella finestra di modifica apre il menu a tendina `combo` e clicca l'opzione il cui nome comincia con `testo`. */
-    const scegli = (combo: string, testo: string) => {
-      fireEvent.click(within(finestra).getByRole('combobox', { name: combo }));
-      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('option', { name: new RegExp(`^${testo}`) }));
-    };
-    scegli('Tipo', 'Confidente');
-    scegli('Collegata a', 'Confidente');
-    // a collegamento incompleto non si salva
-    expect(within(finestra).getByRole('button', { name: 'Salva' })).toBeDisabled();
-    scegli('Quale', 'Tae Takemi');
-    scegli('Rango atteso', 'Rango 2');
+    const tipi = await waitFor(() => within(finestra).getByRole('radiogroup', { name: 'Tipo della voce' }));
+    // l'effetto del turno è una scheda dell'elenco; «Togli» lo toglie (nessuno lo cita come sostituito)
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli: Turno di un’attività' }));
+    expect(within(finestra).getByText('Nessun effetto: la spunta registra solo che l’hai fatta.')).toBeInTheDocument();
+    fireEvent.click(within(tipi).getByRole('radio', { name: 'Confidente' }));
+    // a collegamento incompleto non si salva: «Quale» (il Confidente) si sceglie fra le tessere
+    const quale = await waitFor(() => within(finestra).getByRole('radiogroup', { name: 'Quale: confidente' }));
+    fireEvent.click(within(quale).getByRole('radio', { name: /^Tae Takemi/ }));
+    fireEvent.click(await waitFor(() => within(finestra).getByRole('radio', { name: 'Rango 2' })));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
-    scegli('Dote', 'Coraggio');
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Dote sociale' }));
+    scegliVoce('Dote', /^Coraggio/, finestra);
     fireEvent.click(within(finestra).getByRole('radio', { name: '♪' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(9), {
       genere: 'azione', azione: 'Sbloccare il lavoro da fioraio Rafflesia', note: null, fascia: 'giorno', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2,
-      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }],
+      effettiVoce: { effetti: [{ uid: null, effetto: { tipo: 'dote', dote: 'coraggio', note: 1 } }], revisioneEffettiAttesa: 'r1' },
     }, 3));
   });
 
   it('un turno si sceglie solo fra le attività contate per volte; una lettura va completata prima di salvare', async () => {
-    disegna({ ...base, azioni: [voce({ uid: uid(9), azione: 'Qualcosa' })] });
+    disegna({ ...base, azioni: [voce({ uid: uid(9), azione: 'Qualcosa', effettiVoce: fonteEffetti(uid(9), []) })] });
     apriMenu('Qualcosa');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' })).toBeInTheDocument());
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
-    fireEvent.click(within(finestra).getByRole('combobox', { name: 'Effetto 1' }));
-    fireEvent.click(within(within(finestra).getByRole('listbox', { name: 'Effetto 1' })).getByRole('option', { name: /^Turno/ }));
+    fireEvent.click(within(finestra).getByRole('button', { name: 'Turno di un’attività' }));
+    // un turno senza attività non è completo: non si salva
     expect(within(finestra).getByRole('button', { name: 'Salva' })).toBeDisabled();
-    fireEvent.click(within(finestra).getByRole('combobox', { name: 'Attività (contata per volte)' }));
-    const elenco = within(within(finestra).getByRole('listbox', { name: 'Attività (contata per volte)' }));
+    fireEvent.click(selettore('Attività (contata per volte)', finestra));
+    const elenco = within(screen.getByRole('listbox', { name: 'Attività (contata per volte)' }));
     expect(elenco.getByRole('option', { name: /^Fioraio Rafflesia/ })).toBeInTheDocument();
     expect(elenco.queryByRole('option', { name: /^Studio al Leblanc/ })).toBeNull();
   });

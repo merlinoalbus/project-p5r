@@ -1,5 +1,5 @@
 // ============================================================
-// AcquistiNegozioVoce — «Acquisti da questo negozio»: gli articoli comprati in una voce d'acquisto, con le copie e il totale (L13, ondata 4a)
+// AcquistiNegozioVoce — «Acquisti da questo negozio» (con il nome del negozio come dettaglio): gli articoli comprati in una voce d'acquisto, con le copie e il totale (L13, ondata 4a)
 // ============================================================
 //
 // Richiesta dell'utente: «come faccio a comprare più oggetti in una voce di acquisto da 1 negozio?». In una voce di tipo Acquisto collegata a
@@ -10,7 +10,7 @@
 // Un articolo di un altro negozio resta nell'elenco degli effetti, dove si vede e si toglie.
 // ============================================================
 
-import { riepilogoArticoli, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
+import { fondiArticoliUguali, riepilogoArticoli, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -43,7 +43,8 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
   const posti = righe.map((r, i) => (eArticoloDelNegozio(r, negozio) ? i : -1)).filter((i) => i >= 0);
   const opzioni = opzioniArticoli(elenchi.effetti, negozio);
   const imposta = (effettiVoce: RigaEffetto[]) => onCambia({ ...valore, effettiVoce });
-  const cambia = (i: number, e: Articolo) => imposta(righe.map((r, j) => (j === i ? { ...r, effetto: e } : r)));
+  /** Cambia l'articolo o le copie di una riga; se l'articolo scelto c'è già in un'altra riga le due si fondono (copie sommate), come in «Aggiungi articolo»: mai due righe dello stesso articolo. */
+  const cambia = (i: number, e: Articolo) => imposta(fondiArticoliUguali(righe.map((r, j) => (j === i ? { ...r, effetto: e } : r))));
   /** Scambia l'articolo al posto `k` dell'elenco con quello prima (-1) o dopo (+1): l'ordine in cui la spunta li segna. */
   const sposta = (k: number, verso: -1 | 1) => {
     const a = posti[k]!, b = posti[k + verso];
@@ -66,7 +67,10 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
 
   return (
     <section className="flex flex-col gap-2" aria-labelledby="acquisti-negozio-titolo">
-      <h4 id="acquisti-negozio-titolo" className="m-0 testo-13 font-semibold">Acquisti da {nomeNegozio ?? 'questo negozio'}</h4>
+      <div className="flex min-w-0 flex-col">
+        <h4 id="acquisti-negozio-titolo" className="m-0 testo-13 font-semibold">Acquisti da questo negozio</h4>
+        {nomeNegozio && <span className="testo-12 break-words text-text-muted">{nomeNegozio}</span>}
+      </div>
       {posti.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun articolo: la voce resta un promemoria dell’acquisto. Aggiungi gli articoli per segnarli comprati alla spunta.</p>}
       {posti.length > 0 && (
         <ol className="m-0 flex list-none flex-col gap-2 p-0" aria-label={`Articoli comprati da ${nomeNegozio ?? 'questo negozio'}`}>

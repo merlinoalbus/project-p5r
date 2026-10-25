@@ -32,7 +32,8 @@ import { EffettiNonConvertibili } from './EditorEffettiVoce';
 import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
 import { NOME_QUALE } from '../../utils/elencoQuale';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
-import { cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, indiceDelCollegamento, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
+import { NOME_FAMIGLIA_EFFETTO, cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, effettoCompilatoCheSiPerde, fraseEffetto, indiceDelCollegamento, nomiEffettiDa, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   valore: CampiStrutturati;
@@ -91,12 +92,26 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   // è dichiarata prima del salvataggio. «Quale» elenca il genere del tipo e nessuna tessera risulta scelta.
   const altro = eAltroGenere(valore.tipo, rif);
   const suggerito = valore.effettiVoce ? collegamentoSuggerito(valore.tipo, rif, valore.effettiVoce) : null;
+  const nomiFrasi = useMemo(() => nomiEffettiDa(elenchi.azione, elenchi.effetti), [elenchi.azione, elenchi.effetti]);
+  /**
+   * Cambia tipo o «Quale». Se il cambio toglierebbe un effetto che l'utente ha compilato in questa finestra (ritoccato o aggiunto a mano, non
+   * quello che nasce da solo), prima lo dice e chiede conferma: niente si perde in silenzio.
+   */
+  const applica = async (tipo: TipoAzione, nuovoRif: CampiStrutturati['riferimento']) => {
+    const perso = effettoCompilatoCheSiPerde(valore, tipo, nuovoRif, ctx);
+    if (perso && !(await conferma({
+      titolo: 'Togliere l’effetto che hai compilato?',
+      testo: `Cambiando ${tipo !== valore.tipo ? 'il tipo' : '«Quale»'} l’effetto «${NOME_FAMIGLIA_EFFETTO[perso.tipo]}: ${fraseEffetto(perso, nomiFrasi)}», che hai compilato in questa finestra, verrà tolto dall’elenco.`,
+      etichetta: 'Togli e cambia',
+    }))) return;
+    onCambia(cambiaCollegamento(valore, tipo, nuovoRif, ctx));
+  };
   return (
     <div className="flex flex-col gap-3 min-w-0">
       <div className="flex flex-col gap-1.5">
         <span className="testo-13 text-text-secondary">Tipo — è l’icona della voce</span>
         <SelettoreIcone etichetta="Tipo della voce" compatto valore={valore.tipo} opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: t.chiave }))}
-          onCambia={(t) => { if (t !== valore.tipo) onCambia(cambiaCollegamento(valore, t as TipoAzione, null, ctx)); }} />
+          onCambia={(t) => { if (t !== valore.tipo) void applica(t as TipoAzione, null); }} />
       </div>
       {altro && rif && (
         <p className="m-0 testo-13 break-words" role="status">
@@ -112,7 +127,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
       )}
       {tq && (
         <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
-          onCambia={(chiave) => onCambia(cambiaCollegamento(valore, valore.tipo, chiave ? { tipo: tq, chiave } : null, ctx))} />
+          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} />
       )}
     </div>
   );

@@ -24,6 +24,20 @@ import { NOME_FAMIGLIA_EFFETTO, fraseEffetto, indiceDelCollegamento, type NomiEf
 
 type Tipo = EffettoVoce['tipo'];
 
+/**
+ * I codici degli effetti nuovi (ancora senza UID), legati all'oggetto della riga: le righe non toccate restano lo stesso oggetto fra una
+ * modifica e l'altra (anche quando a cambiare la lista è un'altra parte della finestra), e la riga nuova modificata qui eredita il codice.
+ */
+const CODICI = new WeakMap<RigaEffetto, string>();
+let prossimoCodice = 0;
+/** L'identità stabile di una riga: l'UID, o il codice dato alla prima vista di una riga nuova. */
+const idRiga = (r: RigaEffetto): string => {
+  if (r.uid) return r.uid;
+  let c = CODICI.get(r);
+  if (!c) { prossimoCodice += 1; c = `nuovo-${prossimoCodice}`; CODICI.set(r, c); }
+  return c;
+};
+
 /** Gli yen che film, attività e Richieste portano già, dagli elenchi dell'editor (il server li calcola con `yenDeiDati`). */
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
@@ -48,25 +62,35 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
   const collegato = indiceDelCollegamento(righe, valore.tipo, valore.riferimento);
   const visibili = righe.map((r, i) => ({ r, i })).filter(({ r }) => !altrove?.(r));
   const [menu, setMenu] = useState(false);
-  /** Indice (nella lista completa) della scheda aperta in modifica: una sola alla volta. */
-  const [inModifica, setInModifica] = useState<number | null>(null);
+  /**
+   * La scheda aperta in modifica (una sola alla volta), per IDENTITÀ e non per posto: l'UID dell'effetto, o per un effetto nuovo (ancora senza UID)
+   * il codice che gli diamo qui (`idRiga`). Togliere un articolo dagli «Acquisti da questo negozio», o spostarlo, cambia i posti nella lista
+   * completa senza che questo elenco lo sappia: con il posto, la scheda aperta cambiava da sola.
+   */
+  const [inModifica, setInModifica] = useState<string | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
 
   const imposta = (effettiVoce: RigaEffetto[]) => { setErrore(null); onCambia({ ...valore, effettiVoce }); };
-  const cambia = (i: number, effetto: EffettoVoce) => imposta(righe.map((r, j) => (j === i ? { ...r, effetto } : r)));
+  const cambia = (i: number, effetto: EffettoVoce) => imposta(righe.map((r, j) => {
+    if (j !== i) return r;
+    const nuova = { ...r, effetto };
+    if (!r.uid) CODICI.set(nuova, idRiga(r)); // la riga nuova modificata resta la stessa scheda
+    return nuova;
+  }));
   const togli = (i: number) => {
     const uid = righe[i]?.uid;
     if (uid && righe.some((r) => (r.effetto.tipo === 'acquisto' && r.effetto.sostituisceDoti.includes(uid)) || (r.effetto.tipo === 'pesca' && [...r.effetto.sostituisceTurni, ...r.effetto.sostituisceDoti].includes(uid)))) {
       setErrore('Questo effetto è indicato come sostituito da un acquisto Aojiru o da una sessione di pesca. Rivedi prima quel collegamento.');
       return;
     }
-    setInModifica((m) => (m === null ? null : m === i ? null : m > i ? m - 1 : m));
+    setInModifica((m) => (m !== null && righe[i] && m === idRiga(righe[i]) ? null : m));
     imposta(righe.filter((_, j) => j !== i));
   };
   const aggiungi = (t: Tipo) => {
     setMenu(false);
-    setInModifica(righe.length);
-    imposta([...righe, { uid: null, effetto: effettoNuovo(t) }]);
+    const nuova: RigaEffetto = { uid: null, effetto: effettoNuovo(t) };
+    setInModifica(idRiga(nuova));
+    imposta([...righe, nuova]);
   };
 
   // L13 (decisione 2): un effetto «yen» accanto a un dato che porta già i suoi yen si segnala SUBITO, con la stessa regola del server
@@ -79,10 +103,11 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
         <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Effetti della spunta">
           {visibili.map(({ r, i }) => {
             const completo = effettoCompleto(r.effetto);
-            const editing = inModifica === i || !completo;
+            const id = idRiga(r);
+            const editing = inModifica === id || !completo;
             const nome = NOME_FAMIGLIA_EFFETTO[r.effetto.tipo];
             return (
-              <li key={r.uid ?? `nuovo-${i}`} className="flex min-w-0 flex-col gap-2 rounded-md border border-border bg-bg-tertiary p-2">
+              <li key={id}className="flex min-w-0 flex-col gap-2 rounded-md border border-border bg-bg-tertiary p-2">
                 <div className="flex min-w-0 flex-wrap items-start gap-2">
                   <IconaCategoria categoria={CATEGORIA_EFFETTO[r.effetto.tipo]} dimensione={32} />
                   <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
@@ -94,7 +119,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
                   </div>
                   <span className="flex shrink-0 gap-1">
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}
-                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${nome}`} disabled={!completo} onClick={() => setInModifica(inModifica === i ? null : i)} />
+                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${nome}`} disabled={!completo} onClick={() => setInModifica(inModifica === id ? null : id)} />
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nome}`} onClick={() => togli(i)} />
                   </span>
                 </div>

@@ -95,8 +95,10 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   const azione = campi.genere === 'azione';
   const altre = altreDi(campi.fascia);
   const posto = Math.min(campi.posizione, altre.length);
-  // con una proposta la voce cambia anche senza toccare nulla: si salva per applicarla
-  const sporca = !!proposta || JSON.stringify(campi) !== JSON.stringify(iniziali);
+  // «sporca» = c'è qualcosa che chiudendo si perderebbe: i campi sono cambiati rispetto all'apertura. Con una proposta i campi PARTONO già con la
+  // proposta applicata (`iniziali`), quindi chiudere senza aver toccato nulla non chiede conferma (la proposta resta aperta); «Salva e applica»
+  // salva comunque, perché il salvataggio non dipende da `sporca`.
+  const sporca = JSON.stringify(campi) !== JSON.stringify(iniziali);
 
   const elenchiAzione = useCarica(getElenchiAzione, []);
   const elenchiEffetti = useCarica(getElenchiEffettiVoce, []);

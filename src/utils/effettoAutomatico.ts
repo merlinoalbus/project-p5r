@@ -45,8 +45,7 @@ export function eDelCollegamento(tipo: TipoAzione, rif: Rif, e: EffettoVoce): bo
     case 'dote': return !!k && e.tipo === 'dote' && e.dote === k;
     case 'richiesta': return !!k && e.tipo === 'richiesta' && e.richiesta === k;
     case 'acquisto': return !!k && e.tipo === 'articolo' && e.articolo.startsWith(`${k}/`);
-    case 'esame': return e.tipo === 'domanda';
-    case 'trama': return e.tipo === 'storia';
+    // esame e trama non hanno un «Quale» da cui l'effetto dipenda (la domanda e l'evento si aggiungono a mano dall'elenco): nessun effetto «segue Quale»
     default: return false;
   }
 }
@@ -152,6 +151,22 @@ export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: R
   }
   if (nuovo && !scritto) righe.push({ uid: null, effetto: nuovo });
   return { ...base, effettiVoce: righe };
+}
+
+/**
+ * L'effetto «compilato dall'utente» che `cambiaCollegamento` toglierebbe cambiando tipo o «Quale»: quello che «segue Quale», nato in questa
+ * finestra (senza UID) e DIVERSO da come nasce da solo (`effettoIniziale` del collegamento di prima), cioè ritoccato a mano o aggiunto a mano.
+ * null se il cambio non toglie niente o toglie solo l'effetto automatico, non ritoccato. La finestra lo usa per avvisare prima di toglierlo.
+ */
+export function effettoCompilatoCheSiPerde(s: CampiStrutturati, tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti): EffettoVoce | null {
+  if (!s.effettiVoce) return null;
+  const i = indiceDelCollegamento(s.effettiVoce, s.tipo, s.riferimento);
+  const riga = i >= 0 ? s.effettiVoce[i] : undefined;
+  if (!riga || riga.uid !== null) return null;
+  // stesso tipo e stesso «Quale» (nessun cambio): niente da togliere
+  if (tipo === s.tipo && rif?.tipo === s.riferimento?.tipo && rif?.chiave === s.riferimento?.chiave) return null;
+  const automatico = effettoIniziale(s.tipo, s.riferimento, ctx);
+  return automatico && JSON.stringify(automatico) === JSON.stringify(riga.effetto) ? null : riga.effetto;
 }
 
 /** I nomi con cui scrivere le frasi degli effetti: tutto per chiave, preso dagli elenchi serviti dall'API. */

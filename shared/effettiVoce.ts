@@ -222,19 +222,44 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
 /**
  * L13 (ondata 4a, richiesta dell'utente): TUTTI gli articoli comprati della voce con le copie e il totale, «Arginade ×2 · Acqua della
  * rinascita ×1 · ¥900». Lo stesso articolo in più effetti si conta una volta sola, con le copie sommate, al posto del primo; un articolo
- * senza prezzo resta nell'elenco e il totale lo dice («2 senza prezzo»). null se la voce non compra articoli.
+ * senza prezzo resta nell'elenco e il totale lo dice («2 senza prezzo»); se NESSUN articolo ha il prezzo il totale si omette. null se la voce non compra articoli.
  */
 export function riepilogoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): string | null {
   const copie = new Map<string, number>();
   for (const e of effetti) if (e.tipo === 'articolo') copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
   if (copie.size === 0) return null;
-  let totale = 0, ignoti = 0;
+  let totale = 0, ignoti = 0, conPrezzo = 0;
   const righe = [...copie].map(([chiave, q]) => {
     const a = articolo(chiave);
-    if (typeof a?.prezzo === 'number') totale += a.prezzo * q; else ignoti += q;
+    if (typeof a?.prezzo === 'number') { totale += a.prezzo * q; conPrezzo += q; } else ignoti += q;
     return `${a?.nome ?? 'Articolo'} ×${q}`;
   });
+  // nessun articolo con il prezzo: il totale sarebbe «¥0», un dato falso; si elencano solo gli articoli
+  if (conPrezzo === 0) return righe.join(' · ');
   return `${righe.join(' · ')} · ${yen(totale)}${ignoti ? ` (${ignoti} senza prezzo)` : ''}`;
+}
+
+/**
+ * L13 (ondata 4a): lo stesso articolo in più effetti diventa UN effetto con le copie sommate (al massimo `QUANTITA_MASSIMA_EFFETTO`), al
+ * posto del primo (la sua identità resta; gli altri escono dalla lista). Una sola regola: la usano l'elenco degli acquisti della pagina
+ * (scegliere un articolo già presente) e il salvataggio degli effetti del server (che normalizza anche le liste che arrivano già doppie).
+ * Gli effetti che non sono articoli restano dove sono; la lista senza doppioni si restituisce com'è (stessi oggetti).
+ */
+export function fondiArticoliUguali<T extends { effetto: EffettoVoce }>(lista: readonly T[]): T[] {
+  const primo = new Map<string, number>();
+  const fuori = new Set<number>();
+  const risultato: T[] = [...lista];
+  lista.forEach((r, i) => {
+    const e = r.effetto;
+    if (e.tipo !== 'articolo') return;
+    const gia = primo.get(e.articolo);
+    if (gia === undefined) { primo.set(e.articolo, i); return; }
+    const base = risultato[gia]!.effetto as Extract<EffettoVoce, { tipo: 'articolo' }>;
+    const somma = Math.min(QUANTITA_MASSIMA_EFFETTO, (base.quantita ?? 1) + (e.quantita ?? 1));
+    risultato[gia] = { ...risultato[gia]!, effetto: somma > 1 ? { tipo: 'articolo', articolo: base.articolo, quantita: somma } : { tipo: 'articolo', articolo: base.articolo } };
+    fuori.add(i);
+  });
+  return fuori.size === 0 ? risultato : risultato.filter((_, i) => !fuori.has(i));
 }
 
 const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
