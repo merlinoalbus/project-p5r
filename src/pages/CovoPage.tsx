@@ -139,10 +139,10 @@ export function CovoPage() {
 
           {/* Una ricerca sola per tutte e due le colonne: quel che si cerca è «dove salta fuori
               questa cosa», e la risposta può stare fra le sfide come fra i premi. */}
-          <label className="flex flex-col gap-1">
-            <span className="sr-only">Cerca fra sfide e premi</span>
-            <input type="search" className="form-input" placeholder="Cerca fra sfide e premi…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
-          </label>
+          {/* il nome del campo è `aria-label`: il testo «solo per lettori di schermo» da 1×1 px era testo tagliato in ogni misura (L13) */}
+          <div className="flex flex-col gap-1">
+            <input type="search" className="form-input" placeholder="Cerca fra sfide e premi…" aria-label="Cerca fra sfide e premi" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
+          </div>
 
           {/* Due colonne dal tablet in orizzontale in su (1024): sotto, i requisiti sono paragrafi
               lunghi e affiancarli darebbe due colonne strette invece di due elenchi leggibili. */}

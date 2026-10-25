@@ -50,17 +50,20 @@ function Numero({ valore, etichetta, segno }: { valore: number | string; etichet
 function Scheda({ g, partitaId, onSalvata, onCorretto, onPosizione }: { g: VideogiocoDto; partitaId: number | null; onSalvata: (g: VideogiocoDto) => void; onCorretto: () => void; onPosizione: () => void }) {
   return (
     <li className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${g.fatto ? 'border-success/50' : ''}`}>
-      <div className="flex items-start gap-3">
+      {/* `flex-wrap` e base minima del testo: il cartellino «Non ancora» con il collegamento «Segna in Progressi» occupa ~217 px senza poter
+          stringersi e lasciava al nome della sede 2 px (una lettera per riga, tagliata dalla scheda, 14 casi a 375, 768 e 1280 px);
+          ora, se accanto non c'è posto per almeno 9 rem di testo, i cartellini vanno sotto, allineati a destra */}
+      <div className="flex flex-wrap items-start gap-3">
         {/* L'illustrazione del gioco (`attivita/<chiave>`, la stessa della pagina delle attività); finché non c'è, l'icona dei
             videogiochi. Prima c'era sempre l'icona: le sette illustrazioni consegnate non si sarebbero viste da nessuna parte. */}
         <AssetImg nome={`attivita/${g.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain" style={{ width: 56, height: 56 }}
           fallback={<span className="shrink-0"><IconaCategoria categoria="minigiochi" dimensione={44} /></span>} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-[1_1_9rem]">
           <h3 className="m-0 text-lg leading-tight">{g.catalogo ? <Link className="touch inline-flex items-center" to={g.catalogo.casa}>{g.nome}</Link> : g.nome}</h3>
           <p className="m-0 text-xs text-text-secondary">{g.sedeNome ?? g.luogo}</p>
           {g.orariSedeTesto && <p className="m-0 text-xs text-text-secondary">Orari della sede: {g.orariSedeTesto}</p>}
         </div>
-        <span className="flex flex-col items-end gap-1">
+        <span className="ml-auto flex max-w-full flex-col items-end gap-1">
           <span className={`chip ${g.fatto ? 'chip--attivo' : ''}`}>{g.fatto ? 'Completato' : g.iniziato ? 'In corso' : 'Da giocare'}</span>
           <ChipDisponibilita disponibilita={g.disponibilita ?? undefined} compatto />
         </span>
