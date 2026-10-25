@@ -23,7 +23,7 @@
 // ============================================================
 
 import type { Sharp, SharpOptions } from 'sharp';
-import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
+import { eGiocoInSolaLettura, getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { logger } from '../utils/logger.js';
 import { GENERAZIONE_MINIATURE, LARGHEZZE_MINIATURA, versioneImmagine, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import { caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
@@ -104,6 +104,9 @@ export async function miniaturaDi(s: SorgenteMiniatura, l: LarghezzaMiniatura, d
   const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(s.id, l, versione) as
     { mime: string; contenuto: Buffer } | undefined;
   if (inCache) return { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagMiniatura(s, l), esito: 'cache' };
+  // L12, istanza di rilascio: `gioco.db` è chiuso e la cache non si scrive. L'edizione porta già tutte le miniature (le genera
+  // «Prepara edizione»); se una manca si serve l'originale, senza generare né scrivere.
+  if (eGiocoInSolaLettura()) return originale(s, l);
   const chiave = `${s.id}|${versione}|${l}`;
   const gia = inCorso.get(chiave);
   if (gia) return gia;

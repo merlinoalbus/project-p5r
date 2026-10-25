@@ -20,9 +20,10 @@ export const MAX_BYTE_FONT = 4 * 1024 * 1024;
 
 const MIME_PER_FORMATO: Record<FormatoFont, string> = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' };
 
-/** La cartella dei font dell'istanza (`DATA_DIR/font`). */
+/** La cartella dei font dell'istanza (`DATA_DIR/font`; in rilascio sta nel volume dell'edizione, `EDIZIONE_DIR/font`, che senza
+ *  la variabile è la stessa cartella). */
 function dirFont(): string {
-  return path.join(config.dataDir, 'font');
+  return path.join(config.edizioneDir, 'font');
 }
 
 /** Riconosce il formato dal contenuto (firma dei primi 4 byte), indipendentemente dal Content-Type dichiarato. */

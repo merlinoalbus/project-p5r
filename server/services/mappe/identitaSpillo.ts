@@ -12,7 +12,7 @@
 // ============================================================
 
 import { createHash } from 'node:crypto';
-import type { AppDatabase } from '../../db/dbService.js';
+import { eGiocoInSolaLettura, type AppDatabase } from '../../db/dbService.js';
 
 export interface IdentitaSpillo { mappa_chiave: string | null; area_guida_chiave?: string | null; tipo: string; nome: string; x: number; y: number; riferimento_tipo: string | null; riferimento_chiave: string | null }
 
@@ -36,6 +36,9 @@ export { uidValido } from '../../../shared/spilli.js';
  * (066/067) sia dopo ogni inserimento dell'applicazione. Se la colonna non esiste ancora non fa nulla.
  */
 export function assegnaUidMancanti(db: AppDatabase): number {
+  // L12, istanza di rilascio: `gioco.db` è chiuso e l'edizione ha zero spilli senza uid (lo verifica «Prepara edizione»): la
+  // chiamata, che la rotta di un segno sullo spillo fa a ogni richiesta, non scrive e non lancia.
+  if (eGiocoInSolaLettura()) return 0;
   const colonne = (db.prepare('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name);
   if (!colonne.includes('uid')) return 0;
   const area = colonne.includes('area_guida_chiave') ? 'area_guida_chiave' : 'NULL AS area_guida_chiave';

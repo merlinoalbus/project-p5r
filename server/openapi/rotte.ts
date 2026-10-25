@@ -24,14 +24,14 @@ export interface RottaMontata {
 }
 
 /** La parte di un layer di Express che serve qui (Express non esporta il tipo della pila). */
-interface LayerRotta {
+export interface LayerRotta {
   route?: { path: string; methods: Record<string, boolean>; stack: Array<{ handle: (...args: never[]) => unknown; method?: string }> };
 }
 
-const METODI = ['get', 'post', 'put', 'patch', 'delete'] as const;
+export const METODI = ['get', 'post', 'put', 'patch', 'delete'] as const;
 
-/** Le rotte di una pila di layer, con il prefisso dato davanti al percorso. */
-function rotteDellaPila(pila: LayerRotta[], prefisso: string, area: string | null): RottaMontata[] {
+/** Le rotte di una pila di layer, con il prefisso dato davanti al percorso (esportata: l'istanza di rilascio filtra i router con la stessa chiave). */
+export function rotteDellaPila(pila: LayerRotta[], prefisso: string, area: string | null): RottaMontata[] {
   const out: RottaMontata[] = [];
   for (const layer of pila) {
     if (!layer.route) continue;
