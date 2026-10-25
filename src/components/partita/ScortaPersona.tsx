@@ -500,7 +500,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-3">
           <label className="form-label">Livello
-            <input type="number" min={1} max={99} className="form-input mt-1" value={livello} onFocus={(e) => e.target.select()} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
+            <input type="number" min={1} max={99} className="form-input" value={livello} onFocus={(e) => e.target.select()} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
           </label>
           <label className="flex items-center gap-2 testo-13 touch">
             <input type="checkbox" checked={inSquadra} onChange={(e) => setInSquadra(e.target.checked)} /> In squadra (non in deposito)
@@ -549,7 +549,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
             didascalia={`Stima al livello ${livello} ${origine === 'osservate' && osservate ? `dai valori reali registrati al livello ${osservate.livello}` : `dalla base di livello ${posseduta.livelloBase}`} (+3 punti per livello) più i bonus: i bonus restano quando la Persona sale di livello.`}
           />
           <label className="form-label">Note
-            <textarea className="form-input mt-1 min-h-[80px]" value={note} onChange={(e) => setNote(e.target.value)} />
+            <textarea className="form-input min-h-[80px]" value={note} onChange={(e) => setNote(e.target.value)} />
           </label>
         </div>
         <div className="flex flex-col gap-2">

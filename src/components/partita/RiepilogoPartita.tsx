@@ -4,6 +4,8 @@
 
 import { useState } from 'react';
 import { Selettore } from '../shared/Selettore';
+import { SelettoreData } from '../shared/SelettoreData';
+import { Campo, CampoTesto } from '../shared/Campo';
 import { Link } from 'react-router-dom';
 import { StoricoPartita } from './StoricoPartita';
 import { aggiornaPartita } from '../../services/api';
@@ -72,25 +74,22 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
       <form className="card flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
         <label className="form-label">Nome della partita
-          <input className="form-input mt-1" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={80} />
+          <input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={80} />
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <label className="form-label">Livello del protagonista
-            <input type="number" min={1} max={99} className="form-input mt-1" value={livello} onChange={(e) => setLivello(Number(e.target.value))} />
+            <input type="number" min={1} max={99} className="form-input" value={livello} onChange={(e) => setLivello(Number(e.target.value))} />
           </label>
-          <label className="form-label">Data di gioco (MM-GG)
-            <input className="form-input mt-1" value={dataGioco} onChange={(e) => setDataGioco(e.target.value)} placeholder="es. 04-11" pattern="\d{2}-\d{2}" />
-          </label>
-          <div className="form-label">
-            <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
-          </div>
+          {/* L13: la data di gioco si sceglie (mese e giorno), non si digita; si salva come «MM-GG» o `null` («nessuna») come prima */}
+          <Campo etichetta="Data di gioco" senzaGruppo>
+            <SelettoreData etichetta="Data di gioco" facoltativa valore={dataGioco} onCambia={setDataGioco} />
+          </Campo>
+          <Selettore etichettaSopra etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
         </div>
         <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +
         </label>
-        <label className="form-label">Note
-          <textarea className="form-input mt-1 min-h-[100px]" value={note} onChange={(e) => setNote(e.target.value)} />
-        </label>
+        <CampoTesto etichetta="Note" tipo="lungo" righe={4} valore={note} onCambia={setNote} massimo={2000} />
         <div className="flex justify-end">
           <PulsanteVisivo type="submit" tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" aria-disabled={occupato || undefined} />
         </div>

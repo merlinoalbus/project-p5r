@@ -81,18 +81,18 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
           {a.sopraProtagonista && <p className="m-0 text-warning">Il risultato supera il livello del protagonista: in gioco serve il «Trattamento speciale» delle Gemelle (a pagamento).</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="form-label">Livello di partenza osservato
-              <input type="number" min={a.livelloBase} max={99} className="form-input mt-1" value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value) || a.livelloBase)} aria-label="Livello di partenza" />
+              <input type="number" min={a.livelloBase} max={99} className="form-input" value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value) || a.livelloBase)} aria-label="Livello di partenza" />
               <span className="block testo-12 text-text-muted mt-1">
                 Base {a.livelloBase}{a.bonusLivelli.max > 0 ? ` + bonus Confidente ${a.bonusLivelli.min === a.bonusLivelli.max ? `+${a.bonusLivelli.min}` : `+${a.bonusLivelli.min}…+${a.bonusLivelli.max}`} (Matto rango ${a.bonusLivelli.rangoMatto}, ${a.risultato.arcanaNome} rango ${a.bonusLivelli.rangoArcano}; stima)` : ' · nessun bonus del Confidente (rango 0)'}.
                 {a.puntiAllarme > 0 && ` Con l'Allarme il gioco aggiunge +${a.puntiAllarme} punti statistica casuali: registrali dopo nella scheda della Persona.`}
               </span>
             </label>
             <div className="form-label">
-              <Selettore etichetta="Tratto" valore={trattoScelto === null ? '' : String(trattoScelto)} opzioni={a.tratti.map((t) => ({ chiave: String(t.id), nome: t.nomeIt, dettaglio: t.da === null ? 'proprio del risultato' : undefined }))} onCambia={(k) => setTratto(k ? Number(k) : null)} />
+              <Selettore etichettaSopra etichetta="Tratto" valore={trattoScelto === null ? '' : String(trattoScelto)} opzioni={a.tratti.map((t) => ({ chiave: String(t.id), nome: t.nomeIt, dettaglio: t.da === null ? 'proprio del risultato' : undefined }))} onCambia={(k) => setTratto(k ? Number(k) : null)} />
             </div>
           </div>
           <div>
-            <div className="form-label">Skill da ereditare ({skill.length}/{a.slotScelti}{a.allarme ? ', tutti gli slot con l\'Allarme' : ', una la assegna il gioco'})</div>
+            <div className="form-label mb-1.5">Skill da ereditare ({skill.length}/{a.slotScelti}{a.allarme ? ', tutti gli slot con l\'Allarme' : ', una la assegna il gioco'})</div>
             {ereditabili.length === 0 && <p className="m-0 text-text-muted">Nessuna skill ereditabile da questi ingredienti.</p>}
             <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5 mt-1" aria-label="Skill ereditabili">
               {ereditabili.map((c) => (
@@ -114,7 +114,7 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
             <p className="m-0 testo-12 text-text-muted mt-1">Skill innate al livello scelto: {a.skillInnate.map((s) => s.nomeIt).join(', ') || '—'} (le ereditate hanno la precedenza, massimo 8 in tutto).</p>
           </div>
           <label className="form-label">Note
-            <input className="form-input mt-1" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
+            <input className="form-input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
           </label>
           <div className="flex justify-end gap-2">
             <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>

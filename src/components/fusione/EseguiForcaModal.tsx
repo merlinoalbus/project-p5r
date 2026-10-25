@@ -75,11 +75,11 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
         {!incidente && (
           <>
             <label className="form-label">Livello raggiunto da {ricevente.nomeIt}
-              <input type="number" min={ricevente.livello} max={99} className="form-input mt-1" value={nuovoLivello} onChange={(e) => setNuovoLivello(Math.min(99, Math.max(ricevente.livello, Number(e.target.value) || ricevente.livello)))} aria-label="Livello raggiunto" />
+              <input type="number" min={ricevente.livello} max={99} className="form-input" value={nuovoLivello} onChange={(e) => setNuovoLivello(Math.min(99, Math.max(ricevente.livello, Number(e.target.value) || ricevente.livello)))} aria-label="Livello raggiunto" />
               <span className="block testo-12 text-text-muted mt-1">Ogni livello vale +3 punti statistica (ripartizione casuale): se vuoi registrarla, indica i punti qui sotto.</span>
             </label>
             <div>
-              <div className="form-label">Skill trasferite dal sacrificio ({trasferite.length}/{maxTrasferite})</div>
+              <div className="form-label mb-1.5">Skill trasferite dal sacrificio ({trasferite.length}/{maxTrasferite})</div>
               <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5 mt-1" aria-label="Skill del sacrificio">
                 {sacrificio.skill.map((s) => (
                   <li key={s.id}>
@@ -91,7 +91,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
           </>
         )}
         <div>
-          <div className="form-label">Punti statistica {incidente ? 'garantiti' : 'osservati'} (totale {totalePunti})</div>
+          <div className="form-label mb-1.5">Punti statistica {incidente ? 'garantiti' : 'osservati'} (totale {totalePunti})</div>
           <div className="grid grid-cols-5 gap-2 mt-1">
             {CHIAVI_STATISTICHE.map((k) => (
               <label key={k} className="testo-12 flex flex-col gap-1">{NOMI_STATISTICHE[k]}
@@ -102,7 +102,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
         </div>
         {daDimenticare > 0 && (
           <div>
-            <div className="form-label text-warning">Scegli {daDimenticare} skill da dimenticare (massimo 8)</div>
+            <div className="form-label mb-1.5 text-warning">Scegli {daDimenticare} skill da dimenticare (massimo 8)</div>
             <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5 mt-1" aria-label="Skill del ricevente">
               {ricevente.skill.map((s) => (
                 <li key={s.id}><button type="button" className={`chip touch ${rimosse.includes(s.id) ? 'chip--attivo' : ''}`} aria-pressed={rimosse.includes(s.id)} onClick={() => setRimosse((r) => (r.includes(s.id) ? r.filter((x) => x !== s.id) : [...r, s.id]))}>{s.nomeIt}</button></li>
