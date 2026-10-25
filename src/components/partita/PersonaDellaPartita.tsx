@@ -108,7 +108,7 @@ export function PersonaDellaPartita({ partitaId }: Props) {
 
   return (
     <PageState
-      isLoading={tutte.caricamento || possedute.caricamento || compendio.caricamento}
+      isLoading={tutte.inPrimoCaricamento || possedute.inPrimoCaricamento || compendio.inPrimoCaricamento}
       error={tutte.errore ?? possedute.errore ?? compendio.errore}
       onRetry={() => { void tutte.ricarica(); void possedute.ricarica(); void compendio.ricarica(); }}
     >

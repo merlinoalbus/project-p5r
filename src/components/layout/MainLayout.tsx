@@ -14,6 +14,7 @@ import { Topbar } from './Topbar';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { AvvisoNuovaVersione } from './AvvisoNuovaVersione';
+import { AvvisoPartiteNonCaricate } from './AvvisoPartiteNonCaricate';
 import { ToastContainer } from '../shared/Toast';
 import { HostConferma } from '../shared/DialogoConferma';
 import { Spinner } from '../shared/PageState';
@@ -76,6 +77,8 @@ export function MainLayout() {
       <Topbar />
       {/* UI-ASSET-01: una sola riga, solo quando sul server c'è un'app più nuova (mai un ricaricamento da sola) */}
       <AvvisoNuovaVersione />
+      {/* R12-01/4: l'elenco delle partite non caricato si dichiara con «Riprova» (la Home ha già la sua schermata d'errore) */}
+      {location.pathname !== '/' && <AvvisoPartiteNonCaricate />}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col">

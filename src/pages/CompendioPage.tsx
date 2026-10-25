@@ -55,7 +55,7 @@ export function CompendioPage() {
   const glossario = useGlossarioStore((s) => s.glossario);
   const vista = usePreferenzeStore((s) => s.vistaPersona);
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), []);
   const [params, setParams] = useSearchParams();
 
   const q = params.get('q') ?? '';
@@ -224,7 +224,7 @@ export function CompendioPage() {
         )}
       </div>
 
-      <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (

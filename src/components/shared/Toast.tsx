@@ -5,7 +5,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
-import { useNotificationStore, type NotificationType } from '../../stores/notificationStore';
+import { useNotificationStore, type Notification, type NotificationType } from '../../stores/notificationStore';
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
 
 const TOAST_BORDER: Record<NotificationType, string> = {
@@ -61,31 +61,41 @@ export function ToastContainer() {
   }, [visibile]);
 
   const stile = { ...(posto.bottom !== null ? { bottom: posto.bottom } : {}), ...(posto.aSinistra ? { left: MARGINE, right: 'auto' } : {}) };
-  // L'involucro `status` resta sempre nel DOM, anche a coda vuota: una regione live che nasce insieme al suo testo spesso non viene
-  // letta. Le notifiche entrano lì e si annunciano a fine lettura; gli errori hanno in più `role="alert"` e interrompono.
+  // Due regioni live **distinte e sempre nel DOM**, anche a coda vuota (una regione che nasce insieme al suo testo spesso non
+  // viene letta), mai una dentro l'altra: `status` (cortese) per conferme e informazioni, `alert` (assertiva) per errori e avvisi.
+  // Prima l'`alert` stava dentro lo `status` e poteva essere annunciato due volte o per niente.
+  const comuni = notifications.filter((n) => n.type !== 'error');
+  const errori = notifications.filter((n) => n.type === 'error');
   return createPortal(
-    <div role="status" aria-live="polite">
-      {visibile && (
-        <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col gap-2 z-[9999]" style={stile}>
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              role={n.type === 'error' ? 'alert' : undefined}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] border-l-[3px] ${TOAST_BORDER[n.type]}`}
-            >
-              <span className="flex-1 testo-14">{n.message}</span>
-              <button
-                className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
-                onClick={() => removeNotification(n.id)}
-                aria-label="Chiudi notifica"
-              >
-                ×
-              </button>
-            </div>
-          ))}
+    <div>
+      {/* tanti errori ancora aperti non devono uscire dallo schermo: la coda scorre dentro se stessa */}
+      <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col z-[9999] max-h-[70vh] overflow-y-auto overscroll-contain" style={stile}>
+        <div role="status" aria-live="polite" className="flex flex-col gap-2">
+          {comuni.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
         </div>
-      )}
+        <div role="alert" className={`flex flex-col gap-2${errori.length > 0 && comuni.length > 0 ? ' mt-2' : ''}`}>
+          {errori.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
+        </div>
+      </div>
     </div>,
     document.body,
+  );
+}
+
+/** Una notifica della coda, con la × per chiuderla: gli errori e gli avvisi restano finché non si chiudono. */
+function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void }) {
+  return (
+    <div
+      className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
+    >
+      <span className="flex-1 testo-14">{n.message}</span>
+      <button
+        className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
+        onClick={() => chiudi(n.id)}
+        aria-label="Chiudi notifica"
+      >
+        ×
+      </button>
+    </div>
   );
 }

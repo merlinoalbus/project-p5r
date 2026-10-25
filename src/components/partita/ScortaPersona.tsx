@@ -31,7 +31,7 @@ interface Props {
 
 /** Scorta della partita con modifica di livello, statistiche potenziate e skill conosciute. */
 export function ScortaPersona({ partitaId }: Props) {
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getPossedute(partitaId), [partitaId]);
+  const { dati, inPrimoCaricamento, errore, ricarica, imposta } = useCarica(() => getPossedute(partitaId), [partitaId]);
   const [aggiunta, setAggiunta] = useState(false);
   const [modifica, setModifica] = useState<PersonaPossedutaDto | null>(null);
   /** La Persona aperta nel cassetto (per id: si legge sempre dall'elenco corrente, così livello e stato restano aggiornati). */
@@ -119,7 +119,7 @@ export function ScortaPersona({ partitaId }: Props) {
   };
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
       {/* capienza in testa: quanti posti sono occupati e quando salgono (dal rango di Igor) */}
       <IntestazioneCapienza quante={dati?.length ?? 0} capienza={capienza.dati ?? null} />
       {dati && dati.length === 0 && (
