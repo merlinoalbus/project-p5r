@@ -27,4 +27,11 @@ verificati sulle copie in sola lettura dei dati reali.
     (29 settembre) non esiste una voce TV: decide l'utente. Nel periodo validato (68 e 69) lo spostamento si applica solo con il sì
     riga per riga.
 
+17. **Candidatura a un lavoro = sblocco del lavoro** (risposta dell'utente: «approvo»). La voce del Cercalavoro (18 aprile Triple Seven,
+    26 aprile Rafflesia, 6 maggio Ore no Beko) è collegata all'attività del lavoro, non al negozio, e ha un solo effetto «sblocca il
+    lavoro»: nessun turno, nessuna Dote. Il lavoro è disponibile solo dopo la spunta della candidatura; togliendola torna non disponibile.
+    I turni restano voci a parte. Il turno registrato per errore nella partita 2 (26 aprile, Rafflesia) non si riscrive: va elencato a parte.
+    La data di disponibilità di Ore no Beko (oggi 06-05) si allinea alla candidatura del 05-06, inversione giorno/mese segnalata dal PM e
+    approvata con la proposta. Le tre voci sono nel periodo validato: entrano negli elenchi da approvare riga per riga.
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
