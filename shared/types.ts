@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
 import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
 import type { CategoriaOggetto } from './catalogo.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
@@ -1360,6 +1361,10 @@ export interface AzionePercorsoDto {
   dialogoPartita?: DialogoVoceDto;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
+  /** 2026-10-25 (richiesta dell'utente: «formattarlo in modo adeguato, per tutti gli acquisti»): che cosa dà la voce, raggruppato per tipo
+   *  («Acquisti · negozio» con una riga per articolo e il totale, «Doti sociali», «Turni»…), dagli stessi effetti di `produceTesto`
+   *  (`shared/riepilogoEffetti.ts`). Vuoto per un promemoria; assente vale come vuoto. */
+  produceRiepilogo?: GruppoRiepilogoEffettiDto[];
   /** L13: con una partita e la voce da spuntare, le scelte che la spunta chiede (l'esito del turno di un'attività che dichiara esiti, le note di
    *  una Dote a valori possibili), con gli esiti disponibili al giorno della voce. Assente se non ce ne sono. */
   scelteEsito?: SceltaEsitoVoceDto[];

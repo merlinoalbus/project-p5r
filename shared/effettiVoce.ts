@@ -225,18 +225,34 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
  * senza prezzo resta nell'elenco e il totale lo dice («2 senza prezzo»); se NESSUN articolo ha il prezzo il totale si omette. null se la voce non compra articoli.
  */
 export function riepilogoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): string | null {
+  const c = contoArticoli(effetti, articolo);
+  if (!c) return null;
+  const righe = c.righe.map((r) => `${r.nome} ×${r.copie}`);
+  // nessun articolo con il prezzo: il totale sarebbe «¥0», un dato falso; si elencano solo gli articoli
+  if (c.totale === null) return righe.join(' · ');
+  return `${righe.join(' · ')} · ${yen(c.totale)}${c.senzaPrezzo ? ` (${c.senzaPrezzo} senza prezzo)` : ''}`;
+}
+
+/** Un articolo del conto della voce: le copie sommate e il prezzo di tutte le copie (null senza prezzo). */
+export interface RigaContoArticoli { chiave: string; nome: string; copie: number; prezzoUnitario: number | null; prezzo: number | null }
+/**
+ * Il conto degli articoli comprati della voce, come dato e non come frase (richiesta dell'utente del 2026-10-25: «formattarlo in modo
+ * adeguato, per tutti gli acquisti»): una riga per articolo (stesso articolo in più effetti = una riga, copie sommate, al posto del primo),
+ * il totale in yen (null se nessun articolo ha il prezzo: «¥0» sarebbe falso) e quante copie non hanno prezzo. null senza articoli.
+ * È l'unico conto: lo usano la frase `riepilogoArticoli`, il riepilogo per gruppi della voce e il modulo della voce.
+ */
+export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): { righe: RigaContoArticoli[]; totale: number | null; senzaPrezzo: number } | null {
   const copie = new Map<string, number>();
   for (const e of effetti) if (e.tipo === 'articolo') copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
   if (copie.size === 0) return null;
-  let totale = 0, ignoti = 0, conPrezzo = 0;
-  const righe = [...copie].map(([chiave, q]) => {
+  let totale = 0, senzaPrezzo = 0, conPrezzo = 0;
+  const righe = [...copie].map(([chiave, q]): RigaContoArticoli => {
     const a = articolo(chiave);
-    if (typeof a?.prezzo === 'number') { totale += a.prezzo * q; conPrezzo += q; } else ignoti += q;
-    return `${a?.nome ?? 'Articolo'} ×${q}`;
+    const unitario = typeof a?.prezzo === 'number' ? a.prezzo : null;
+    if (unitario !== null) { totale += unitario * q; conPrezzo += q; } else senzaPrezzo += q;
+    return { chiave, nome: a?.nome ?? 'Articolo', copie: q, prezzoUnitario: unitario, prezzo: unitario === null ? null : unitario * q };
   });
-  // nessun articolo con il prezzo: il totale sarebbe «¥0», un dato falso; si elencano solo gli articoli
-  if (conPrezzo === 0) return righe.join(' · ');
-  return `${righe.join(' · ')} · ${yen(totale)}${ignoti ? ` (${ignoti} senza prezzo)` : ''}`;
+  return { righe, totale: conPrezzo === 0 ? null : totale, senzaPrezzo };
 }
 
 /**

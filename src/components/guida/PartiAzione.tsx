@@ -12,7 +12,8 @@ import { useState, type MouseEvent } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, noteDellaGuidaCoincideConEffetto } from '../../utils/percorso';
+import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto } from '../../utils/percorso';
+import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
 import { useApriPannello } from '../scheda/contestoScheda';
@@ -28,7 +29,7 @@ import { PulsanteGuidaQuiz } from './GuidaQuiz';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce'>>;
+  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -80,7 +81,13 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
     apriPannello(indirizzo, e.currentTarget);
     return true;
   };
+  // 2026-10-25 (la voce del distributore accanto al Bagno Pubblico mostrava due chip «Distributore del bagno pubblico»): quando il pin della
+  // mappa è lo stesso posto del collegamento, il chip della mappa dice soltanto «Sulla mappa» (il suo ruolo); il collegamento porta il nome e
+  // apre la scheda. Ruoli diversi, un solo nome
+  const postoMappa = a.mappa?.posto && !stessoNomeDiPosto(a.mappa.posto, link?.etichetta ?? a.riferimentoTesto) ? a.mappa.posto : null;
+  const gruppi = a.fatta ? [] : gruppiDellaVoce(a);
   return (
+    <>
     <span className="flex flex-wrap items-center gap-1.5">
       {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)}
         onClick={(e) => { if (!apriSopra(e, o.casa)) ricordaVoce(e); }} className="chip touch no-underline">{o.nome}</Link>)}
@@ -97,8 +104,9 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch testo-12" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
-          {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» solo se il posto non ha un nome */}
-          <IconaSpillo tipo="passaggio" dimensione={14} />{a.mappa.posto ?? 'Sulla mappa'}
+          {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» se il posto non ha un nome o se è
+              lo stesso del collegamento accanto (un nome solo, 2026-10-25) */}
+          <IconaSpillo tipo="passaggio" dimensione={14} />{postoMappa ?? 'Sulla mappa'}
         </button>
       )}
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
@@ -117,11 +125,13 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
       {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: {a.note}</span>}
-      {/* le Doti che il gioco dà si segnano a mano (scelta dell'utente, 2026-09-30): la riga le dice, la spunta non le tocca */}
-      {!a.fatta && a.produceTesto?.length > 0 && <span className="testo-12 text-text-muted" title="Che cosa dà il gioco: le Doti le segni tu nella scheda Doti, letture e turni li segna la spunta. Si cambia da «Modifica»">Il gioco dà: {a.produceTesto.join(' · ')}</span>}
       {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
       {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
     </span>
+    {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
+        si segnano a mano (scelta dell'utente, 2026-09-30), gli yen degli acquisti si tolgono a mano; ogni gruppo lo dice una volta sola */}
+    <RiepilogoEffettiVoce gruppi={gruppi} />
+    </>
   );
 }
 

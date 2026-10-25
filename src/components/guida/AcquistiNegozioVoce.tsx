@@ -5,12 +5,12 @@
 // Richiesta dell'utente: «come faccio a comprare più oggetti in una voce di acquisto da 1 negozio?». In una voce di tipo Acquisto collegata a
 // un negozio, un solo elenco: una riga per articolo (l'articolo, scelto fra quelli DEL negozio, e le copie), con Su / Giù e «Togli»; sotto,
 // «Aggiungi articolo» propone solo gli articoli del negozio (scegliere uno già in elenco ne aggiunge una copia, senza una seconda riga); in
-// fondo il totale con tutti gli articoli, «Arginade ×2 · Acqua della rinascita ×1 · ¥900». Gli articoli restano effetti «articolo» della
+// fondo il totale, «Totale ¥900» (dal 2026-10-25: gli articoli e le copie sono già le righe dell'elenco). Gli articoli restano effetti «articolo» della
 // voce (lo stesso formato di sempre, nessun dato nuovo): questo elenco ne è la vista per il negozio, e l'elenco degli effetti non li ripete.
 // Un articolo di un altro negozio resta nell'elenco degli effetti, dove si vede e si toglie.
 // ============================================================
 
-import { fondiArticoliUguali, riepilogoArticoli, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
+import { contoArticoli, fondiArticoliUguali, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -63,7 +63,9 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
     }
     imposta([...righe, { uid: null, effetto: articolo(chiave, 1) }]);
   };
-  const totale = riepilogoArticoli(posti.map((i) => righe[i]!.effetto), (k) => nomi.articoli.get(k));
+  // 2026-10-25 (richiesta dell'utente: «formattarlo in modo adeguato, per tutti gli acquisti»): il totale è un dato (`contoArticoli`, lo stesso
+  // conto del riepilogo «Il gioco dà» della voce) e si scrive «Totale ¥N»; gli articoli con copie e prezzo sono già le righe qui sopra
+  const conto = contoArticoli(posti.map((i) => righe[i]!.effetto), (k) => nomi.articoli.get(k));
 
   return (
     <section className="flex flex-col gap-2" aria-labelledby="acquisti-negozio-titolo">
@@ -98,8 +100,13 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
         <Selettore etichettaSopra etichetta="Aggiungi articolo" valore="" vuoto={opzioni.length ? 'Scegli un articolo del negozio' : 'Il negozio non ha articoli nel catalogo'} opzioni={opzioni}
           disabilitato={opzioni.length === 0} onCambia={aggiungi} />
       )}
-      {totale && <p className="m-0 testo-13 break-words"><strong>In tutto:</strong> {totale}</p>}
-      <span className="testo-12 text-text-muted">Il totale è un promemoria: gli yen li cambi tu dalla scheda del denaro (la spunta segna gli articoli comprati).</span>
+      {conto && conto.totale !== null && (
+        <p className="m-0 flex flex-wrap items-baseline justify-between gap-x-3 border-t border-border pt-1 testo-13">
+          <strong>Totale</strong>
+          <strong className="tabular-nums">{yen(conto.totale)}{conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}</strong>
+        </p>
+      )}
+      <span className="testo-12 text-text-muted">Il totale è un promemoria: gli yen li togli tu a mano dalla scheda del denaro (la spunta segna gli articoli comprati).</span>
     </section>
   );
 }

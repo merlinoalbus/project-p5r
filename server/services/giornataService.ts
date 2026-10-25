@@ -31,7 +31,8 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
-import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, riepilogoArticoli, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -70,14 +71,29 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
 function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
   return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna'||e.effetto.tipo==='yen'||eEffettoDiStato(e.effetto) ? [] : [e.effetto]);
 }
-/** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
-function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
+/** La paga di un turno dell'attività, se ne ha una: un promemoria (gli yen si cambiano a mano), mai una proposta (R10-06). */
+function pagaDelTurno(attivita: string): { yen: number; massima: number | null } | undefined {
+  const paga = prepared('SELECT paga_yen, paga_massima FROM attivita WHERE chiave = ?').get(attivita) as { paga_yen: number | null; paga_massima: number | null } | undefined;
+  return paga?.paga_yen ? { yen: paga.paga_yen, massima: paga.paga_massima } : undefined;
+}
+/** Il nome di un negozio dalla sua chiave (anche nascosto: la voce che lo cita ne tiene il nome). */
+const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined;
+
+/**
+ * Che cosa dà la voce, da UN punto con gli stessi nomi: la frase di ogni effetto, nell'ordine degli effetti (`produceTesto[i]` è l'effetto
+ * `i`), e il riepilogo per gruppi che la pagina mostra («Il gioco dà», richiesta dell'utente del 2026-10-25: «formattarlo in modo adeguato,
+ * per tutti gli acquisti»). Il totale degli articoli sta nel riepilogo (gruppo «Acquisti · negozio»), non più in una riga «In tutto» in coda.
+ */
+function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
   const nomiFrase = nomiFraseEffetto();
-  // L13 (decisione 6; ondata 4a): con più articoli, o copie, una riga con tutti gli articoli, le copie e il totale; le frasi dei singoli restano
-  const effetti = fonte.effetti.map((x) => x.effetto);
-  const articoli = effetti.filter((e) => e.tipo === 'articolo');
-  const riepilogo = articoli.length > 1 || articoli.some((a) => a.tipo === 'articolo' && (a.quantita ?? 1) > 1) ? riepilogoArticoli(effetti, articoloConNome) : null;
-  return [...fonte.effetti.map(({ effetto: e }) => {
+  return {
+    testo: testoEffettiDellaFonte(fonte, nomi, nomiFrase),
+    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno }),
+  };
+}
+/** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi. */
+function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto): string[] {
+  return fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
@@ -93,11 +109,15 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
     const testo = testoEffetti([e], nomi)[0]!;
     // R10-06: la paga del turno è un promemoria (gli yen si cambiano a mano), mai una proposta
     if (e.tipo === 'turno') {
-      const paga = prepared('SELECT paga_yen, paga_massima FROM attivita WHERE chiave = ?').get(e.attivita) as { paga_yen: number | null; paga_massima: number | null } | undefined;
-      if (paga?.paga_yen) return `${testo} · paga ¥${paga.paga_yen.toLocaleString('it-IT')}${paga.paga_massima && paga.paga_massima > paga.paga_yen ? ` (fino a ¥${paga.paga_massima.toLocaleString('it-IT')})` : ''}: cambiali tu a mano`;
+      const paga = pagaDelTurno(e.attivita);
+      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')})` : ''}: cambiali tu a mano`;
     }
     return testo;
-  }), ...(riepilogo ? [`In tutto: ${riepilogo}`] : [])];
+  });
+}
+/** I due campi del DTO da `cosaDaLaFonte`: le frasi e il riepilogo (vuoti per un promemoria, che non si spunta). */
+function campiCosaDa(c: { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } | null): { produceTesto: string[]; produceRiepilogo: GruppoRiepilogoEffettiDto[] } {
+  return { produceTesto: c?.testo ?? [], produceRiepilogo: c?.riepilogo ?? [] };
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
@@ -210,7 +230,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
+    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
