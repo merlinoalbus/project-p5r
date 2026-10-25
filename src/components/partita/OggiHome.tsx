@@ -21,6 +21,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { OggiGuida } from './OggiGuida';
 import { OggiMappa } from './OggiMappa';
+import { ScuolaOggi } from './ScuolaOggi';
 import type { PartitaDto } from '../../types';
 
 interface Props {
@@ -69,7 +70,12 @@ export function OggiHome({ partita, testa }: Props) {
 
       {!(aSchede && schedaMappa && guidaPronta) && (
         <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
-          <h2 className="m-0 font-display testo-20 uppercase shrink-0">Oggi</h2>
+          {/* R12-01/6: la domanda in classe, l'esame e il cruciverba del giorno guardato con la risposta, a un tocco dalla Home; stessa fonte
+              della Partita e della Guida (`ScuolaOggi`, nessuna copia). Sulla stessa riga del titolo: l'altezza della pagina non cresce. */}
+          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap shrink-0">
+            <h2 className="m-0 font-display testo-20 uppercase">Oggi</h2>
+            {guidaPronta && oggi.giorno && <ScuolaOggi partita={partita} giorno={oggi.giorno.giorno} soloDelGiorno />}
+          </div>
           {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza; altrove la guida cresce con la pagina */}
           <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>
             <PageState isLoading={oggi.caricamento} error={oggi.errore} onRetry={() => void oggi.ricarica()}>
