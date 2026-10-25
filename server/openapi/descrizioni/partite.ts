@@ -227,8 +227,8 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/cruciverba': {
     sommario: 'Segna un cruciverba di Leblanc risolto',
-    descrizione: 'Segna (o toglie) il cruciverba del giorno indicato come risolto. Alla prima spunta l\'evento `cruciverba` va nello storico e la risposta dice in `daSegnare` la nota di Conoscenza che il gioco dà: le Doti si segnano a mano e qui non si toccano, né risolvendo né togliendo la spunta.',
-    risposta: '`CruciverbaDto`; alla prima spunta con `daSegnare` (elenco di `DoteDaSegnareDto`)',
+    descrizione: 'Segna (o toglie) il cruciverba del giorno indicato come risolto. Alla prima spunta l\'evento `cruciverba` va nello storico e la risposta dice in `daSegnare` la nota di Conoscenza che il gioco dà: le Doti si segnano a mano e qui non si toccano, né risolvendo né togliendo la spunta. Se UNA voce del Diario segna lo stesso cruciverba (`voceUid` nella riga) la spunta passa dal gesto di quella voce: la voce risulta fatta, la Conoscenza è il suo «Applica» (niente `daSegnare`) e, se era l\'ultima attività del giorno, la risposta porta `giornoAvanzato`.',
+    risposta: '`CruciverbaDto`; alla prima spunta senza voce collegata con `daSegnare` (elenco di `DoteDaSegnareDto`), con la voce collegata eventualmente `giornoAvanzato`',
     errori: [PARTITA, [404, 'cruciverba-non-trovato']],
   },
   'PUT /api/partite/:id/letture': {
@@ -269,8 +269,8 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/domande/:domandaId': {
     sommario: 'Segna una domanda in classe o d\'esame come risposta',
-    descrizione: 'Segna (o toglie) la domanda come fatta nella partita. Alla prima spunta l\'evento `domanda-risposta` va nello storico; con `conoscenza: true` la risposta vale una nota di Conoscenza, che la risposta dice in `daSegnare`: le Doti si segnano a mano e qui non si toccano.',
-    risposta: '`DomandeDto` con tutte le domande e le prossime; alla prima spunta con `conoscenza` anche `daSegnare` (elenco di `DoteDaSegnareDto`)',
+    descrizione: 'Segna (o toglie) la domanda come fatta nella partita. Alla prima spunta l\'evento `domanda-risposta` va nello storico; con `conoscenza: true` la risposta vale una nota di Conoscenza, che la risposta dice in `daSegnare`: le Doti si segnano a mano e qui non si toccano. Se UNA voce del Diario segna la stessa domanda (`voceUid` nella domanda) la spunta passa dal gesto di quella voce: la voce risulta fatta, la Conoscenza è il suo «Applica» (niente `daSegnare`) e, se era l\'ultima attività del giorno, la risposta porta `giornoAvanzato`.',
+    risposta: '`DomandeDto` con tutte le domande e le prossime; alla prima spunta con `conoscenza` e senza voce collegata anche `daSegnare` (elenco di `DoteDaSegnareDto`), con la voce collegata eventualmente `giornoAvanzato`',
     errori: [PARTITA, [404, 'domanda-non-trovata']],
   },
 

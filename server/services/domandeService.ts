@@ -12,6 +12,7 @@ import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { righePerEsame } from './esamiCollegamento.js';
+import { vociCollegate } from './vociDiStato.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
@@ -26,8 +27,8 @@ export function indiceGiornoScolastico(data: string): number {
 }
 
 /** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
-function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>): DomandaDto {
-  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
+function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>, voceUid?: string): DomandaDto {
+  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id), ...(voceUid ? { voceUid } : {}) };
 }
 
 /** Gli esami in ordine, con giorni e domande composti dalle righe riassuntive di `domanda` (R9-18: la fonte unica); `ordine` corre su tutto l'esame. */
@@ -60,7 +61,9 @@ export function domande(partitaId?: number): DomandeDto {
   // ordine di calendario scolastico (aprile → marzo) e, a pari data, ordine del seed: le voci aggiunte in coda al seed (quiz TV) restano al loro giorno
   const righe = (prepared('SELECT * FROM domanda ORDER BY ordine').all() as RigaDomanda[]).sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
   const premiDomande = ricompensePerFonte('domanda', righe.flatMap((r) => r.chiave ? [r.chiave] : []));
-  const tutte = righe.map((r) => domandaDto(r, fatte, r.chiave ? premiDomande.get(r.chiave) ?? [] : []));
+  // la voce del Diario che segna la domanda (se una sola): la pagina ne mostra il «Applica» della Conoscenza (R12-01/5)
+  const voci = vociCollegate('domanda');
+  const tutte = righe.map((r) => domandaDto(r, fatte, r.chiave ? premiDomande.get(r.chiave) ?? [] : [], voci.get(String(r.id))?.voceUid));
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   // le domande non fatte della **prima** data da oggi in poi (una o due): il prossimo appuntamento
   const daFare = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi);
@@ -69,9 +72,11 @@ export function domande(partitaId?: number): DomandeDto {
   return { domande: tutte, esami: esami(), premi: premi ? (JSON.parse(premi.json) as DomandeDto['premi']) : null, dataGioco, prossime, fatte: fatte.size, totale: tutte.length };
 }
 
-/** Segna una domanda come fatta (o no) e registra l'evento. Con `conoscenza` la risposta vale una nota di Conoscenza: la
- *  risposta la dice (`daSegnare`), ma le Doti si segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano. */
-export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
+/**
+ * Scrive lo stato «fatta» della domanda nella partita (la tabella `domanda_partita`, l'unica verità) e registra l'evento alla prima
+ * volta; dice se la domanda è stata segnata ora (`nuova`). Non costruisce l'elenco delle domande: lo fa chi chiama, una volta.
+ */
+export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): { nuova: boolean } {
   verificaPartita(partitaId);
   const d = prepared('SELECT * FROM domanda WHERE id = ?').get(domandaId) as RigaDomanda | undefined;
   if (!d) throw httpErrors.notFound('domanda-non-trovata', `La domanda ${domandaId} non esiste.`);
@@ -89,6 +94,15 @@ export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta:
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
+  return { nuova };
+}
+
+/** Segna una domanda come fatta (o no) e registra l'evento. Con `conoscenza` la risposta vale una nota di Conoscenza: la
+ *  risposta la dice (`daSegnare`), ma le Doti si segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano.
+ *  È il gesto «basso»: la pagina della Guida passa da `segnaDomandaDallaGuida` (spuntaDellaGuidaService), che lo usa solo dove
+ *  non c'è una voce del Diario che segna la stessa domanda. */
+export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
+  const { nuova } = scriviDomandaFatta(partitaId, domandaId, fatta, conoscenza);
   const esito = domande(partitaId);
   return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
 }
