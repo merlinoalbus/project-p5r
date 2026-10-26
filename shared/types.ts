@@ -1330,6 +1330,10 @@ export interface DialogoVoceDto {
   scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
 }
 
+/** Una cosa che la spunta di una voce ha applicato ed è ancora in vigore: `testo` in parole, coi nomi («Persona registrata nel compendio:
+ *  Pixie», «Paga del turno: … · Entrati ¥3.000 nel saldo»), `applicatoIl` il momento (ISO). `id` è stabile fra una lettura e l'altra. */
+export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
+
 export interface AzionePercorsoDto {
   /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
@@ -1359,6 +1363,12 @@ export interface AzionePercorsoDto {
   effettiVoce?: StatoEffettiVoceDto;
   /** Ricevute del nuovo formato, separate dalla fotografia legacy della spunta. */
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
+  /** 2026-10-26 (richiesta dell'utente: «mi serve sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck
+   *  della casella. ma una volta annullata l'informazione non mi è più utile»): ciò che la spunta della voce ha applicato nella partita ed è
+   *  ancora in vigore, cioè quello che togliere la spunta annulla, già in parole e con il momento. Lo scrive il server
+   *  (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen mossi; ricevute annullate e puramente tecniche no.
+   *  `ricevuteEffetti` resta intero (lo usano le verifiche dei gesti). Assente se la voce non è spuntata o non ha applicato niente. */
+  applicatoDallaSpunta?: ApplicatoDallaSpuntaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),

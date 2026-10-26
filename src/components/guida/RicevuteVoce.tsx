@@ -1,33 +1,29 @@
 // ============================================================
-// RicevuteVoce — le ricevute degli effetti della spunta di una voce del Diario, dietro un pulsantino (richiesta dell'utente del 2026-10-25)
+// RicevuteVoce — ciò che la spunta di una voce del Diario ha applicato, dietro un pulsantino (richieste dell'utente del 2026-10-25 e 26)
 // ============================================================
 //
-// «Ricevute degli effetti della spunta (magari andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili e
-// apribile... e occupando spazio e creando confusione nel testo...». Prima erano un `<details>` sempre presente sotto il testo della voce;
-// ora sono un pulsante a sola icona (44 px, nome accessibile e suggerimento col numero delle ricevute) nella colonna dei comandi della
-// voce, accanto al menu, e l'elenco si apre nella finestra dell'app (`Modal`: foglio dal basso sul telefono, fuoco dentro, Esc o X per
-// chiudere). Senza ricevute il pulsante non c'è. Il contenuto è quello di prima: tipo, data e ora, attiva o annullata. Solo lettura.
+// 2026-10-25: «Ricevute degli effetti della spunta (magari andrebbero visualizzati con un pulsantino e non restando la sotto sempre
+// visibili…)». Un pulsante a sola icona (44 px, nome accessibile e suggerimento col numero) nella colonna dei comandi della voce, accanto al
+// menu; l'elenco si apre nella finestra dell'app (`Modal`: foglio dal basso sul telefono, fuoco dentro, Esc o X per chiudere). Solo lettura.
 //
-// Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino (non gli appunti, che
-// nell'app sono i piani e le domande) e il numero delle ricevute sta in un distintivo sull'icona. Il nome accessibile porta il testo della
-// voce, come il menu «⋯» accanto (`PulsanteMenuVoce`), così in un giorno con più voci i pulsanti non si chiamano tutti uguali; il
-// suggerimento resta corto. La finestra dice di quale voce sono le ricevute, perché sul telefono la copre.
+// 2026-10-26: la finestra mostrava «Incontro e contesto della spunta26/10/2026, 02:49:09annullata» e l'utente: «a che serve? … mi serve
+// sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck della casella. ma una volta annullata
+// l'informazione non mi è più utile... perchè salvarla?». Le ricevute restano nel database (il server le usa per annullare e ripristinare),
+// ma qui si vede solo `applicatoDallaSpunta`: ciò che la spunta ha messo nella partita ed è ancora in vigore, in parole e col momento
+// (Persona registrata, trofeo, sblocco, oggetto, Doti, turni, incontro, consumazione, pesca, Fortuna, yen mossi con l'importo reale).
+// Le annullate e quelle tecniche no; il pulsante c'è solo se c'è qualcosa, e il numero conta solo quello. Ogni riga ha la frase sopra e
+// la data e l'ora sotto, separate (prima uscivano attaccate); lo stato «attiva» non si scrive più: sono tutte in vigore.
 //
-// 2026-10-26 (revisione UX): il titolo della finestra conteneva tutto il testo della voce (fino a 579 caratteri) e sul telefono
-// l'intestazione superava il 30% dello schermo. Ora il titolo è «Ricevute della spunta» con i primi 60 caratteri della voce («…» se
-// troncata); il testo intero, solo quando il titolo lo tronca, è il primo paragrafo del corpo, che scorre, e descrive la finestra
-// per i lettori di schermo (`aria-describedby`).
+// Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino e il numero sta in un
+// distintivo. Il nome accessibile porta il testo della voce, come il menu «⋯» accanto (`PulsanteMenuVoce`). Il titolo della finestra è
+// «Ricevute della spunta» con i primi 60 caratteri della voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il
+// primo paragrafo del corpo e descrive la finestra per i lettori di schermo (`aria-describedby`).
 // ============================================================
 
 import { useId, useState } from 'react';
-import type { ReceiptEffettoVoceDto } from '../../../shared/effettiVoce';
+import type { ApplicatoDallaSpuntaDto } from '../../types';
 import { Modal } from '../shared/Modal';
 import { IconaAzione } from '../shared/IconaAzione';
-
-/** Il tipo della ricevuta, a parole (le stesse dell'elenco di prima). */
-const tipoRicevuta = (tipo: ReceiptEffettoVoceDto['tipo']): string =>
-  tipo === 'acquisto' ? 'Consumazione' : tipo === 'pesca' ? 'Sessione di pesca' : tipo === 'contesto' ? 'Incontro e contesto della spunta'
-    : tipo === 'dote' ? 'Dote' : tipo === 'lettura' ? 'Lettura o gioco' : 'Turno';
 
 /** Quanti caratteri della voce entrano nel titolo della finestra e nel nome del pulsante. */
 const CARATTERI_DELLA_VOCE = 60;
@@ -41,32 +37,41 @@ function inizioDellaVoce(voce: string): { testo: string; troncata: boolean } {
   return { testo: `${caratteri.slice(0, CARATTERI_DELLA_VOCE).join('').trimEnd()}…`, troncata: true };
 }
 
-/** Il pulsante delle ricevute della voce (`voce`: il suo testo) e la loro finestra; niente senza ricevute. */
-export function RicevuteVoce({ ricevute, voce }: { ricevute: readonly ReceiptEffettoVoceDto[] | undefined; voce: string }) {
+/** «26/10/2026, 02:49»: giorno e ora, senza i secondi (non dicono niente a chi gioca). */
+const MOMENTO = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function momento(iso: string): string | null {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : MOMENTO.format(d);
+}
+
+/** Il pulsante di ciò che la spunta della voce (`voce`: il suo testo) ha applicato, e la sua finestra; niente se non ha applicato niente. */
+export function RicevuteVoce({ applicato, voce }: { applicato: readonly ApplicatoDallaSpuntaDto[] | undefined; voce: string }) {
   const [aperta, setAperta] = useState(false);
   const idVoce = useId();
-  if (!ricevute?.length) return null;
-  const n = ricevute.length;
+  if (!applicato?.length) return null;
+  const n = applicato.length;
   const breve = `Ricevute della spunta (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
     <>
-      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Ricevute degli effetti della spunta (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
+      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Ricevute della spunta (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
         <IconaAzione chiave="ricevute" dimensione={20} />
-        <span className="conteggio-pulsante" aria-hidden="true">{n}</span>
+        <span className="conteggio-pulsante tabular-nums" aria-hidden="true">{n}</span>
       </button>
       {aperta && (
         <Modal titolo={inizio.testo ? `Ricevute della spunta: ${inizio.testo}` : 'Ricevute della spunta'} aperta onChiudi={() => setAperta(false)}
           idDescrizione={inizio.troncata ? idVoce : undefined}>
           {inizio.troncata && <p id={idVoce} className="m-0 mb-3 testo-13 text-text-secondary break-words">{voce}</p>}
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 testo-13">
-            {ricevute.map((r) => (
-              <li key={r.id} className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-                <span className="min-w-0 break-words">{tipoRicevuta(r.tipo)}</span>
-                <span className="text-text-secondary tabular-nums">{new Date(r.applicatoIl).toLocaleString('it-IT')}</span>
-                <span className={r.annullatoIl ? 'text-text-muted' : 'text-text-secondary'}>{r.annullatoIl ? 'annullata' : 'attiva'}</span>
-              </li>
-            ))}
+          <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+            {applicato.map((x) => {
+              const quando = momento(x.applicatoIl);
+              return (
+                <li key={x.id} className="flex min-w-0 flex-col gap-0.5 py-2 first:pt-0 last:pb-0">
+                  <span className="min-w-0 break-words text-pretty">{x.testo}</span>
+                  {quando && <time dateTime={x.applicatoIl} className="testo-12 text-text-secondary tabular-nums">{quando}</time>}
+                </li>
+              );
+            })}
           </ul>
         </Modal>
       )}
