@@ -21,6 +21,7 @@ import { confidenti } from './partiteService.js';
 import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
+import { statoGiaVero } from './effettiDiStatoService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
@@ -230,6 +231,27 @@ export function decisioniApertePerVoce(partitaId: number, voceUid: string): numb
   return prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(partitaId, voceUid, partitaId, voceUid) as number;
 }
 
+/**
+ * L13 (decisione 19): lo stato di ogni effetto di stato della voce spuntata nella partita, letto dai suoi due punti (nessuna copia): la riga del
+ * «prima» (`effetto_stato_voce`, scritta dalla spunta, dal salvataggio o dall'approvazione) e la proposta aperta dell'elenco del passato. Senza
+ * nessuna delle due, «già vero» se lo stato c'è (la stessa lettura della spunta), altrimenti «non applicato».
+ */
+function statiEffettiDellaVoce(p: number, fonte: StatoEffettiVoceDto): NonNullable<AzionePercorsoDto['statiEffetti']> {
+  const nomi = nomiFraseEffetto();
+  return fonte.effetti.flatMap(({ uid, effetto: e }): NonNullable<AzionePercorsoDto['statiEffetti']> => {
+    if (!eEffettoDiStato(e)) return [];
+    const testo = fraseEffettoConNomi(e, nomi);
+    const riga = prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, fonte.voceUid, uid) as { prima_json: string } | undefined;
+    if (riga) {
+      let gia: boolean;
+      try { gia = (JSON.parse(riga.prima_json) as { gia?: unknown } | null)?.gia === true; } catch { gia = false; }
+      return [{ effettoUid: uid, esito: gia ? 'gia-presente' as const : 'segnato' as const, testo }];
+    }
+    if (prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${fonte.voceUid}:${uid}`)) return [{ effettoUid: uid, esito: 'da-approvare' as const, testo }];
+    return [{ effettoUid: uid, esito: statoGiaVero(p, e) ? 'gia-presente' as const : 'non-applicato' as const, testo }];
+  });
+}
+
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // la fonte unica degli effetti, letta una volta: frase, quiz, oggetti citati e DTO la condividono. F3: una voce con la fonte o le
   // ricevute incoerenti risulta «da correggere» col motivo, da sola: le altre voci del giorno si vedono e funzionano
@@ -268,8 +290,9 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
+  const statiEffetti = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : statiEffettiDellaVoce(ctx.partita, fonte);
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(statiEffetti.length ? { statiEffetti } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo) : null),

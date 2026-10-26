@@ -27,6 +27,7 @@ import { LettureEGiochi } from '../components/partita/LettureEGiochi';
 import { ProgressiPartita } from '../components/partita/ProgressiPartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
+import { DaApprovareStati } from '../components/partita/DaApprovareStati';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
@@ -87,6 +88,8 @@ export function PartitaPage() {
               {attiva.dataGioco && <span className="chip">{dataGiocoTesto(attiva.dataGioco)}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
+              {/* L13 (decisione 19): gli effetti delle voci già spuntate mai applicati, da approvare; c'è solo se ce ne sono */}
+              <DaApprovareStati key={attiva.id} partitaId={attiva.id} />
               {/* le scorciatoie della scuola seguono il giorno guardato nella scheda «Oggi» (scelta dell'utente, 2026-10-11); la chiave
                   resta sulla data di gioco: scorrere i giorni filtra gli elenchi già caricati, non li rilegge */}
               <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} giorno={giornoScuola} />

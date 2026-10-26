@@ -323,7 +323,13 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
 }
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
-export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string): ArticoloDto {
+/**
+ * `opz.senzaDisponibilita` (L13, decisione 19): solo per l'effetto «articolo» di una voce GIÀ spuntata, applicato al salvataggio della guida o
+ * approvato dall'elenco della partita (`effettiDiStatoService.applicaUnEffettoDiStato`): la voce spuntata attesta l'acquisto nel suo giorno, e la
+ * disponibilità di adesso (per esempio il panino che si vende solo il venerdì) non lo contraddice. La spunta normale e la pagina del negozio
+ * restano con il controllo.
+ */
+export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string, opz: { senzaDisponibilita?: boolean } = {}): ArticoloDto {
   verificaPartita(partitaId);
   const listini = lettureListiniCondivisi();
   const canonica = articoloDelListino(articoloChiave, listini);
@@ -344,7 +350,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       fatto ? 'Per Aojiru registra una consumazione o collega una fonte: una nuova spunta non ne dichiara quantità o variante.'
         : 'Rimuovi la sola presenza storica dal riepilogo con anteprima e conferma. Le consumazioni restano distinte.', { articolo: articoloChiave });
   }
-  if (fatto && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
+  if (fatto && !opz.senzaDisponibilita && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);

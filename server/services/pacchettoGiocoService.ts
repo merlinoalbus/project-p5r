@@ -33,6 +33,7 @@ import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { proponiStatiMancanti } from './statiMancantiService.js';
 import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
@@ -437,6 +438,9 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     condizioniConvertite = convertiCondizioniDatabaseImportato(getDb());
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb(), 'rigido'); // un errore qui riporta alla copia di sicurezza (solo all'avvio le regole sono tolleranti)
+    // L13 (decisione 19): gli effetti di stato del gioco nuovo sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite
+    // (mai applicati da soli); rigido come le regole: un errore riporta alla copia di sicurezza
+    proponiStatiMancanti();
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
     getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
     // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)

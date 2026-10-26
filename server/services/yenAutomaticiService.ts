@@ -167,7 +167,9 @@ function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid
   if (stato) return primaDi(stato.applicato_il);
   const spunta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(p, voceUid) as { fatta_at: string } | undefined;
   if (!spunta || !primaDi(spunta.fatta_at) || aggiuntiDopo().has(effettoUid)) return false;
-  return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${voceUid}:${effettoUid}`);
+  // L13 (decisione 19): la proposta dell'elenco del passato (`dati.passato`, un effetto di stato aggiunto prima e mai applicato) non prova che
+  // l'effetto sia nuovo nel gioco: la spunta è di prima, e il suo denaro c'era già nel saldo come per gli altri effetti della stessa spunta
+  return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta' AND COALESCE(json_extract(dati_json, '$.passato'), 0) <> 1").get(p, `${voceUid}:${effettoUid}`);
 }
 /** Gli uid degli effetti di una porzione del registro delle operazioni: la lista degli effetti, o un oggetto che la contiene in `effetti` (lo
  *  stato della fonte, la decisione su un candidato, il registro delle migrazioni). Null se la forma non è riconoscibile. */

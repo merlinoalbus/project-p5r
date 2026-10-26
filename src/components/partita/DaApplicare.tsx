@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import type { AnteprimaDecisioneProposteDto, DecisioneProposte, PropostaPartitaDto } from '../../../shared/propostePartita';
+import { delPassato, type AnteprimaDecisioneProposteDto, type DecisioneProposte, type PropostaPartitaDto } from '../../../shared/propostePartita';
 import { normalizzaEffettoVoce } from '../../../shared/effettiVoce';
 import { nomeDote } from '../../../shared/doti';
 import { anteprimaDecisioneProposte, getDaApplicare, getDoti } from '../../services/api';
@@ -19,7 +19,10 @@ const riferimento = (p: PropostaPartitaDto) => ({ id: p.id, uid: p.uid });
 const testoErrore = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 const unita = (u: PropostaPartitaDto['unita']) => u === 'punti-interni' ? 'punti interni' : u === 'yen' ? 'yen' : u === 'punti-pesca' ? 'punti pesca' : 'azione';
 const valore = (p: PropostaPartitaDto) => `${p.delta > 0 ? '+' : ''}${p.delta.toLocaleString('it-IT')} ${unita(p.unita)}`;
-const nome = (p: PropostaPartitaDto) => p.dote ? nomeDote(p.dote) : p.tipo === 'yen' ? 'Denaro' : p.tipo === 'punti-pesca' ? 'Punti pesca' : 'Effetto della voce';
+const nome = (p: PropostaPartitaDto) => p.dote ? nomeDote(p.dote) : p.tipo === 'yen' ? 'Denaro' : p.tipo === 'punti-pesca' ? 'Punti pesca'
+  : delPassato(p) && typeof p.dati.descrizione === 'string' ? p.dati.descrizione : 'Effetto della voce';
+/** Gli yen che l'approvazione di un articolo del passato scalerà (0: erano già nel saldo); null se non è un articolo del passato. */
+const yenPrevisti = (p: PropostaPartitaDto): number | null => delPassato(p) && typeof p.dati.yenPrevisti === 'number' ? p.dati.yenPrevisti : null;
 /** Il titolo della proposta: il giorno e il testo della voce da cui nasce («18 aprile · Hai bevuto un Aojiru»). */
 const titolo = (p: PropostaPartitaDto) => [typeof p.dati.giorno === 'string' ? dataLeggibile(p.dati.giorno) : null, p.voceTesto ?? null].filter(Boolean).join(' · ') || 'Voce del Diario';
 const dicituraDecisione: Record<DecisioneProposte['tipo'], string> = {
@@ -32,12 +35,13 @@ const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v
  * I punti di una voce spuntata che non sono ancora nella partita, con il pulsante «Applica» sulla voce (BON-01): nessun pannello a
  * parte. Nessun saldo cambia senza una decisione esplicita (D6). Senza proposte aperte né decise per la voce non mostra niente.
  */
-/** Le proposte di una voce del Diario (`voceUid`) o, L13 (decisione 3), gli yen di una Richiesta completata (`richiesta`, sulla sua carta). */
-type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined } | { richiesta: string; voceUid?: undefined });
+/** Le proposte di una voce del Diario (`voceUid`) o, L13 (decisione 3), gli yen di una Richiesta completata (`richiesta`, sulla sua carta), o,
+ *  L13 (decisione 19), l'elenco del passato della partita (`passati`: gli effetti di stato mai applicati di tutte le voci spuntate, per giorno). */
+type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined; passati?: undefined } | { richiesta: string; voceUid?: undefined; passati?: undefined } | { passati: true; voceUid?: undefined; richiesta?: undefined });
 export function DaApplicare(props: PropsDaApplicare) {
-  return <DaApplicareNelContesto key={`${props.partitaId}:${props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
+  return <DaApplicareNelContesto key={`${props.partitaId}:${props.passati ? 'passati' : props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
 }
-function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: PropsDaApplicare) {
+function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCambiato }: PropsDaApplicare) {
   const gesti = useGestiPartita();
   const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
@@ -52,7 +56,10 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: P
   const blocco = useRef(false);
   const vivo = useRef(true);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
-  const dellaVoce = (elenco.dati ?? []).filter((p) => (richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
+  // l'elenco del passato: solo le proposte aperte (quelle decise escono dall'elenco), in ordine di giorno e di voce
+  const dellaVoce = passati
+    ? (elenco.dati ?? []).filter((p) => delPassato(p) && p.stato === 'aperta').sort((a, b) => String(a.dati.giorno ?? '').localeCompare(String(b.dati.giorno ?? '')) || (a.voceTesto ?? '').localeCompare(b.voceTesto ?? '') || a.id - b.id)
+    : (elenco.dati ?? []).filter((p) => (richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
   const aperte = dellaVoce.filter((p) => p.stato === 'aperta');
   /** Annulla il non ancora contato e applica: chi preme «Applica» dice implicitamente che i punti non sono ancora nel saldo. */
   const applica = async (p: PropostaPartitaDto) => {
@@ -119,20 +126,25 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: P
   const uidVoce = consumo && typeof consumo.dati.voceUid === 'string' ? consumo.dati.voceUid : null;
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
-  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
+  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
     {!!aperte.length && <>
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p) => {
+      <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p, i) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
-        return <li key={p.uid} className="flex min-w-0 flex-col gap-1 testo-13">
+        // nell'elenco del passato il giorno e la voce fanno da intestazione del gruppo (una volta per voce)
+        const gruppo = passati && (i === 0 || titolo(aperte[i - 1]!) !== titolo(p)) ? titolo(p) : null;
+        const previsti = yenPrevisti(p);
+        return <li key={p.uid} className={`flex min-w-0 flex-col gap-1 testo-13 ${gruppo && i > 0 ? 'mt-2 border-t border-border pt-2' : ''}`}>
+          {gruppo && <span className="font-display testo-13 uppercase tracking-wide text-primary-testo break-words text-pretty">{gruppo}</span>}
           {(() => {
             // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
             const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
             return <span className="testo-14"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
           })()}
-          <span>{p.motivo}</span>
+          <span className="text-pretty">{p.motivo}</span>
+          {previsti !== null && <span className="testo-12 text-text-secondary tabular-nums">{previsti > 0 ? `Approvandolo si scalano ¥${previsti.toLocaleString('it-IT')} dal saldo (mai sotto zero).` : 'Gli yen non cambiano: il prezzo era già nel saldo.'}</span>}
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Costo del consumo: ¥{p.promemoriaYen.toLocaleString('it-IT')}</span>}
           {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {
@@ -144,7 +156,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: P
             return <>
               {!!altri.length && <ul className="m-0 pl-4 text-warning">{altri.map((i) => <li key={i}>{i}</li>)}</ul>}
               <div className="flex flex-wrap gap-1.5">
-                {p.tipo === 'effetto-voce' ? <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : 'Completa l’effetto'} disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
+                {p.tipo === 'effetto-voce' ? <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : delPassato(p) ? 'Applica alla partita' : 'Completa l’effetto'} disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
                   if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
                   else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
                 }} /> : <>
@@ -180,10 +192,12 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: P
     </>}>
       {anteprima && <div className="flex flex-col gap-2 testo-13">
         <strong>{dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>
-        <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{titolo(p)} · {nome(p)} {valore(p)}</li>)}</ul>
+        <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{titolo(p)} · {nome(p)}{p.tipo === 'effetto-voce' ? '' : ` ${valore(p)}`}</li>)}</ul>
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.acquisto && <RiepilogoConsumoPreparato consumo={anteprima.richiesta.decisione.acquisto} />}
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.pesca && <RiepilogoSessionePreparata richiesta={anteprima.richiesta.decisione.pesca} sessioneFotografata={anteprima.fotografiaSessionePesca} />}
-        {anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}><strong>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')}</strong> ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti'})</li>)}</ul> : <p className="m-0">Non cambia nessun punteggio.</p>}
+        {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.proposte.some((p) => (yenPrevisti(p) ?? 0) > 0) ? <p className="m-0 tabular-nums">Denaro: si scalano ¥{anteprima.proposte.reduce((s, p) => s + (yenPrevisti(p) ?? 0), 0).toLocaleString('it-IT')} dal saldo (mai sotto zero).</p>
+          : anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.proposte.some((p) => yenPrevisti(p) === 0) ? <p className="m-0">Gli yen non cambiano: il prezzo era già nel saldo.</p>
+          : anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}><strong>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')}</strong> ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti'})</li>)}</ul> : <p className="m-0">Non cambia nessun punteggio.</p>}
         {anteprima.richiesta.decisione.tipo === 'gia-conteggiata' && <p className="m-0">Segno che {anteprima.richiesta.decisione.quantita} punti sono già nel tuo saldo: non ne aggiungo altri.</p>}
         {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
         {incerto && <p role="alert" className="m-0 text-warning">Non è sicuro che sia andata a buon fine. «Riprova» ripete la stessa operazione una volta sola: se era già riuscita, non si duplica.</p>}

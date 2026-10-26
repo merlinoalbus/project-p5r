@@ -189,10 +189,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       </div>
       {/* la colonna dei comandi della voce: il menu e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari andrebbero
           visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono */}
-      {((gesti && onMenu) || !!a.ricevuteEffetti?.length) && (
+      {((gesti && onMenu) || !!a.ricevuteEffetti?.length || !!a.statiEffetti?.length) && (
         <span className="flex shrink-0 flex-col self-start">
           {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
-          <RicevuteVoce ricevute={a.ricevuteEffetti} voce={a.azione} />
+          <RicevuteVoce ricevute={a.ricevuteEffetti} stati={a.statiEffetti} voce={a.azione} />
         </span>
       )}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}
