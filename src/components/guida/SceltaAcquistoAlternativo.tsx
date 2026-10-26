@@ -11,7 +11,7 @@
 
 import { useId } from 'react';
 import type { SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
-import { formatoYen } from '../../../shared/effettiVoce';
+import { formatoYen, REGOLA_ALTERNATIVE } from '../../../shared/effettiVoce';
 import { testoContenuto } from '../../../shared/riepilogoEffetti';
 
 type Scelta = Extract<SceltaEsitoVoceDto, { tipo: 'alternativa' }>;
@@ -30,7 +30,8 @@ export function SceltaAcquistoAlternativo({ s, scelto, occupato, onScegli }: Pro
   const titolo = `${s.negozioNome ?? 'Acquisto'}: quale hai comprato?`;
   return (
     <span className="flex w-full flex-col gap-1.5" role="group" aria-labelledby={`${prefisso}-titolo`}>
-      <span id={`${prefisso}-titolo`} className="text-text-secondary text-pretty">{titolo} Uno solo, o nessuno.</span>
+      {/* la regola detta in un modo solo, come il riepilogo e l'editor della voce (`REGOLA_ALTERNATIVE`, rilievo L3 della revisione UX) */}
+      <span id={`${prefisso}-titolo`} className="text-text-secondary text-pretty">{titolo} {REGOLA_ALTERNATIVE}.</span>
       <span className="grid w-full grid-cols-1 gap-1.5 min-[641px]:grid-cols-2">
         {s.opzioni.map((o) => {
           const idMotivo = `${prefisso}-motivo-${o.effettoUid}`;

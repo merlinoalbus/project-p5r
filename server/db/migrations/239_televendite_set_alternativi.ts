@@ -20,7 +20,10 @@
 //       (`nascosto=1`): una voce o una partita che li cita li risolve ancora. La nota del negozio dice i fatti in italiano. (4b) Il NOME
 //       del negozio, «Home Shopping in TV», diventa «Canale di televendite», come lo chiama sempre la guida italiana (pagine «Soluzione
 //       settimana 2, 4, 5, 21, 23, 30, 33») e come il testo delle voci (rilievo della revisione UX: «Uno a scelta · Home Shopping in TV» e
-//       «Home Shopping in TV: quale hai comprato?» erano inglese nell'interfaccia nuova); solo se è ancora il nome di seed.
+//       «Home Shopping in TV: quale hai comprato?» erano inglese nell'interfaccia nuova); solo se è ancora il nome di seed. (4c) I vecchi
+//       articoli nascosti e i loro oggetti fittizi `altro/…` di seed prendono il nome italiano dei due set, «Set A o Set B» (es. «Set sveglia
+//       primaverile o Set Condiv. primaverile»), e l'effetto in italiano: le voci del periodo validato li citano ancora finché l'utente non
+//       decide, e mostravano l'inglese contestato. Solo righe di seed con il nome inglese di seed; nessuna voce né partita cambia.
 //   (5) **Voci del Diario** (16 voci d'acquisto delle televendite): una proposta «da completare» per voce (`proposta_conversione_voce`,
 //       lotto «L13-televendite») con i due set come effetti «articolo», il collegamento al negozio e, da togliere, gli effetti che citano il
 //       vecchio articolo. Si APPLICA, con la funzione della pagina «Da completare» (`applicaPropostaConversione`), solo fuori dal periodo
@@ -64,7 +67,7 @@ const DOMENICHE: DomenicaTv[] = [
     b: { slug: 'set-condiv-primaverile', nome: 'Set Condiv. primaverile', prezzo: 5980, contenuto: [['consumabile/sakura-mochi', 5], ['consumabile/pacco-di-frutta-primav', 1], ['consumabile/festa-in-lattina', 1]] } },
   { data: '05-01', settimana: 4, vecchio: 'military-ration-set-muscle-workout-set',
     a: { slug: 'set-della-razione-militare', nome: 'Set della razione militare', prezzo: 1980, contenuto: [['consumabile/porzione-di-torimeshi', 3], ['consumabile/razione-militare', 2], ['consumabile/razione-di-polpette', 2]] },
-    b: { slug: 'set-dellallenamento', nome: 'Set dell’allenamento', prezzo: 4980, contenuto: [['consumabile/frullato-proteico', 2], ['consumabile/frullato-iperproteico', 2]] } },
+    b: { slug: 'set-dellallenamento', nome: 'Set dell\'allenamento', prezzo: 4980, contenuto: [['consumabile/frullato-proteico', 2], ['consumabile/frullato-iperproteico', 2]] } },
   { data: '05-08', settimana: 4, vecchio: 'relaxation-set-bio-nutrients-set',
     a: { slug: 'set-rilassante', nome: 'Set rilassante', prezzo: 4600, contenuto: [['consumabile/olio-del-recupero', 1], ['consumabile/gel-rilassante', 3], ['consumabile/capsula-dallerta', 3]] },
     b: { slug: 'set-bionutrienti', nome: 'Set Bionutrienti', prezzo: 2680, contenuto: [['materiale/megafertilizzante', 1], ['regalo/energia-del-giardino', 5]] } },
@@ -73,7 +76,7 @@ const DOMENICHE: DomenicaTv[] = [
     b: { slug: 'dono-cure-cosmetiche', nome: 'Dono cure cosmetiche', prezzo: 14800, contenuto: [['regalo/diffusore-di-aromi', 1], ['regalo/multivitaminico', 1]] } },
   { data: '05-22', settimana: 6, vecchio: 'muscle-plus-set-outdoors-kit',
     a: { slug: 'set-muscoli-plus', nome: 'Set Muscoli Plus', prezzo: 4980, contenuto: [['consumabile/muscoli-dacciaio-s', 2], ['consumabile/scorza-dura-s', 2], ['consumabile/pie-veloce-s', 2]] },
-    b: { slug: 'kit-di-avventure-allaperto', nome: 'Kit di avventure all’aperto', prezzo: 7980, contenuto: [['consumabile/fiamma-ossidrica', 3], ['consumabile/ghiaccio-secco', 3], ['consumabile/bobina-magnetica', 3]] } },
+    b: { slug: 'kit-di-avventure-allaperto', nome: 'Kit di avventure all\'aperto', prezzo: 7980, contenuto: [['consumabile/fiamma-ossidrica', 3], ['consumabile/ghiaccio-secco', 3], ['consumabile/bobina-magnetica', 3]] } },
   { data: '05-29', settimana: 7, vecchio: 'japanese-gift-set-folding-screen-set',
     a: { slug: 'set-regalo-giapponese', nome: 'Set regalo giapponese', prezzo: 3980, contenuto: [['regalo/ventaglio-sakura', 1], ['regalo/portachiavi-katana', 1], ['regalo/flan-al-te-matcha', 1]] },
     b: { slug: 'set-paravento-giapponese', nome: 'Set Paravento giapponese', prezzo: 4980, contenuto: [['accessorio/strang-antielettr', 1], ['accessorio/strang-antivento', 1]] } },
@@ -128,9 +131,9 @@ const OGGETTI_NUOVI: Array<{ chiave: string; categoria: 'accessorio' | 'consumab
   { chiave: 'accessorio/strang-antivento', categoria: 'accessorio', sottocategoria: null, nome: 'Strang. antivento', effetto: 'Schiva vento: aumenta l’elusione dalle abilità di Vento', descrizione: 'Televendite: «Set Paravento giapponese» (29 maggio)', pagina: 'accessori' },
   { chiave: 'accessorio/collana-lanterna', categoria: 'accessorio', sottocategoria: null, nome: 'Collana lanterna', effetto: 'Amplifica fuoco: potenzia le abilità di Fuoco del 50% (cumulabile)', descrizione: 'Televendite: «Set zucca stregata» (2 ottobre)', pagina: 'accessori' },
   { chiave: 'accessorio/cravatta-rinvigorente', categoria: 'accessorio', sottocategoria: null, nome: 'Cravatta rinvigorente', effetto: 'Guarigione ist.: riduce a 1 turno il tempo per guarire dalle alterazioni negative', descrizione: 'Televendite: «Borsa fortunata lavoratore» (15 gennaio)', pagina: 'accessori' },
-  { chiave: 'consumabile/fiamma-ossidrica', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Fiamma ossidrica', effetto: 'Infligge 50 danni da fuoco a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all’aperto» (22 maggio); negoziazione (Moloch)', pagina: 'oggetti' },
-  { chiave: 'consumabile/ghiaccio-secco', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Ghiaccio secco', effetto: 'Infligge 50 danni da ghiaccio a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all’aperto» (22 maggio); negoziazione (Belphegor, Re Frost)', pagina: 'oggetti' },
-  { chiave: 'consumabile/bobina-magnetica', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Bobina magnetica', effetto: 'Infligge 50 danni elettrici a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all’aperto» (22 maggio)', pagina: 'oggetti' },
+  { chiave: 'consumabile/fiamma-ossidrica', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Fiamma ossidrica', effetto: 'Infligge 50 danni da fuoco a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all\'aperto» (22 maggio); negoziazione (Moloch)', pagina: 'oggetti' },
+  { chiave: 'consumabile/ghiaccio-secco', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Ghiaccio secco', effetto: 'Infligge 50 danni da ghiaccio a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all\'aperto» (22 maggio); negoziazione (Belphegor, Re Frost)', pagina: 'oggetti' },
+  { chiave: 'consumabile/bobina-magnetica', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Bobina magnetica', effetto: 'Infligge 50 danni elettrici a tutti i nemici', descrizione: 'Televendite: «Kit di avventure all\'aperto» (22 maggio)', pagina: 'oggetti' },
   { chiave: 'consumabile/bambola-di-paglia', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Bambola di paglia', effetto: 'Chance media che questa abilità maledetta uccida un nemico', descrizione: 'Forzieri: Palazzo di Madarame (Stanza della mostra SP); tesori dei Dedali di Qimranut, Aiyatsbus e Chemdah; televendite: «Set di strumenti maledetti» (26 giugno); negoziazione', pagina: 'oggetti' },
   { chiave: 'consumabile/lama-a-vuoto', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Lama a vuoto', effetto: 'Infligge 50 danni da vento a tutti i nemici', descrizione: 'Televendite: «Set eroico» (7 agosto); negoziazione (Jatayu, Garuda, Hastur)', pagina: 'oggetti' },
   { chiave: 'consumabile/ruota-psicocinetica', categoria: 'consumabile', sottocategoria: 'battaglia', nome: 'Ruota psicocinetica', effetto: 'Infligge 50 danni psicocinetici a tutti i nemici', descrizione: 'Televendite: «Set eroico» (7 agosto); negoziazione (Kaiwan)', pagina: 'oggetti' },
@@ -155,6 +158,36 @@ const NOTA_VECCHIA = 'Televendita che offre due set alternativi (A o B) in ciasc
 const NOME_NEGOZIO_VECCHIO = 'Home Shopping in TV';
 const NOME_NEGOZIO = 'Canale di televendite';
 const NOTA_NUOVA = 'Televendita al televisore del Leblanc, in onda la domenica: in ogni data due set alternativi (A e B), se ne compra uno solo, o nessuno, e solo quel giorno. La consegna arriva a domicilio dopo qualche giorno.';
+
+/** (4c) Il nome inglese di seed di ogni vecchio articolo (e del suo oggetto fittizio `altro/…`), per slug: si sostituisce solo se è ancora
+ *  questo. L'effetto di seed si ricava dal nome: «Set A <prezzo A> yen oppure Set B <nome inglese del Set B> a <prezzo B> yen». */
+const NOMI_INGLESI_VECCHI: Record<string, string> = {
+  'spring-awake-set-share-of-spring-set': 'Spring Awake Set / Share of Spring Set',
+  'military-ration-set-muscle-workout-set': 'Military Ration Set / Muscle Workout Set',
+  'relaxation-set-bio-nutrients-set': 'Relaxation Set / Bio Nutrients Set',
+  'allergy-relief-pack-cosmetic-cure-gift': 'Allergy Relief Pack / Cosmetic Cure Gift',
+  'muscle-plus-set-outdoors-kit': 'Muscle Plus Set / Outdoors Kit',
+  'japanese-gift-set-folding-screen-set': 'Japanese Gift Set / Folding Screen Set',
+  'supportive-gift-set-busy-revival-set': 'Supportive Gift Set / Busy Revival Set',
+  'dark-power-set-cursed-tools-set': 'Dark Power Set / Cursed Tools Set',
+  'body-building-set-calm-mind-set': 'Body Building Set / Calm Mind Set',
+  'phantom-thief-set-heroic-set': 'Phantom Thief Set / Heroic Set',
+  'drink-set-floral-gift-set': 'Drink Set / Floral Gift Set',
+  'phantom-thief-set-2-phantom-thief-fun-set': 'Phantom Thief Set 2 / Phantom Thief Fun Set',
+  'pumpkin-ghost-set-haunted-repel-set': 'Pumpkin Ghost Set / Haunted Repel Set',
+  'sturdy-ointment-set-inner-muscle-set': 'Sturdy Ointment Set / Inner Muscle Set',
+  'instant-spray-set-meditative-set': 'Instant Spray Set / Meditative Set',
+  'ishiyaki-potato-set-limited-sweets-set': 'Ishiyaki Potato Set / Limited Sweets Set',
+  'super-detox-set-fancy-magatama-set': 'Super Detox Set / Fancy Magatama Set',
+  'lucky-worker-bag-lucky-muscle-bag': 'Lucky Worker Bag / Lucky Muscle Bag',
+  'talisman-set-sweet-delight-set': 'Talisman Set / Sweet Delight Set',
+  'energetic-set-delicious-revival-set': 'Energetic Set / Delicious Revival Set',
+};
+/** (4c) Il nome italiano del vecchio articolo unico: i due set della guida, in alternativa. */
+const nomeItalianoVecchio = (d: DomenicaTv): string => `${d.a.nome} o ${d.b.nome}`;
+/** (4c) L'effetto italiano del vecchio articolo unico, al posto della prosa mista della fonte non italiana. */
+const effettoItalianoVecchio = (d: DomenicaTv): string =>
+  `Set A «${d.a.nome}» a ${formatoYen(d.a.prezzo)} oppure Set B «${d.b.nome}» a ${formatoYen(d.b.prezzo)}: oggi sono due articoli distinti del ${d.data}.`;
 
 const chiaveArticolo = (slug: string): string => `${NEGOZIO}/${slug}`;
 /** Le condizioni di un set: la domenica, quel giorno solo, e mai insieme all'altro set dello stesso giorno. */
@@ -253,6 +286,29 @@ export const migration239: Migration = {
     // (4b) il nome della guida italiana; un nome cambiato dall'utente (o un negozio non di seed) non si tocca
     const nomeNegozioCambiato = db.prepare("UPDATE main.negozio SET nome = ?, updated_at = ? WHERE chiave = ? AND nome = ? AND origine = 'seed'")
       .run(NOME_NEGOZIO, adesso, NEGOZIO, NOME_NEGOZIO_VECCHIO).changes === 1;
+    // (4c) i vecchi articoli nascosti e i loro oggetti fittizi `altro/…` prendono il nome italiano dei due set («Set sveglia primaverile o Set
+    // Condiv. primaverile») e un effetto in italiano (rilievo M1 della revisione UX): le 6 voci del periodo validato li citano ancora finché
+    // l'utente non decide, e il nome visibile (`COALESCE(c.nome, a.nome)`) era l'inglese contestato. Si toccano solo le righe di seed con il
+    // nome inglese di seed; l'effetto solo se è ancora la prosa di seed. Nessuna voce né partita cambia: la chiave resta la stessa.
+    const nomiVecchiCorretti: Array<{ tabella: 'articolo' | 'catalogo_oggetto'; chiave: string; da: string; a: string; effettoCorretto: boolean }> = [];
+    for (const d of DOMENICHE) {
+      const chiave = chiaveArticolo(d.vecchio);
+      if (!mappa.some((m) => m.vecchio === chiave && m.vecchioPresente)) continue;
+      const inglese = NOMI_INGLESI_VECCHI[d.vecchio] ?? errore(`manca il nome inglese di seed di ${chiave}`);
+      const ingleseB = inglese.split(' / ')[1] ?? errore(`il nome inglese di ${chiave} non ha i due set`);
+      const effettoSeed = `Set A ${d.a.prezzo} yen oppure Set B ${ingleseB} a ${d.b.prezzo} yen`;
+      const nome = nomeItalianoVecchio(d), effetto = effettoItalianoVecchio(d);
+      const fittizio = db.prepare('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck().get(chiave) as string | null;
+      const righe: Array<['articolo' | 'catalogo_oggetto', string]> = [['articolo', chiave]];
+      if (fittizio && fittizio.startsWith('altro/') && !fittiziCondivisi.includes(fittizio)) righe.push(['catalogo_oggetto', fittizio]);
+      for (const [tabella, k] of righe) {
+        const prima = db.prepare(`SELECT effetto FROM main.${tabella} WHERE chiave = ? AND nome = ? AND origine = 'seed'`).pluck().get(k, inglese) as string | null | undefined;
+        if (prima === undefined) continue;
+        const effettoCorretto = prima === effettoSeed;
+        if (db.prepare(`UPDATE main.${tabella} SET nome = ?, effetto = ?, updated_at = ? WHERE chiave = ? AND nome = ? AND origine = 'seed'`)
+          .run(nome, effettoCorretto ? effetto : prima, adesso, k, inglese).changes === 1) nomiVecchiCorretti.push({ tabella, chiave: k, da: inglese, a: nome, effettoCorretto });
+      }
+    }
     // gli articoli, le condizioni e i nomi sono cambiati: le letture in memoria dei servizi (la mappa delle alternative, che vive un secondo, e
     // i nomi delle condizioni) si svuotano, così le proposte applicate qui sotto e le prime letture dopo l'avvio vedono i set nuovi in
     // alternativa (prova sulle copie: una lettura fatta da una migrazione precedente nello stesso secondo li lasciava piatti)
@@ -290,7 +346,7 @@ export const migration239: Migration = {
       const stessoCollegamento = db.prepare(`SELECT id FROM main.proposta_conversione_voce WHERE voce_uid = ? AND lotto <> ? AND stato = 'aperta'
         AND riferimento_tipo = 'negozio' AND riferimento_chiave = ? ORDER BY id`).pluck().all(uid, LOTTO, NEGOZIO) as string[];
       const motivo = `Decisione 4 (L13): le televendite del ${data} sono due articoli alternativi, «${d.a.nome}» (${formatoYen(d.a.prezzo)}) e «${d.b.nome}» (${formatoYen(d.b.prezzo)}): alla spunta se ne sceglie uno, o nessuno.`
-        + (togli.length ? ' Toglie il vecchio articolo unico in inglese.' : '')
+        + (togli.length ? ` Toglie il vecchio articolo unico «${nomeItalianoVecchio(d)}», che non è più nell'elenco.` : '')
         + (stessoCollegamento.length ? ` Comprende il collegamento al negozio già proposto da ${stessoCollegamento.map((x) => `«${x}»`).join(' e ')}: applicata questa, quella si può scartare.` : '')
         + (citataDa.length ? ' La voce è già spuntata in una partita: dopo l’applicazione togli e rimetti la spunta per scegliere il set.' : '');
       inserisciProposta.run(id, uid, LOTTO, NEGOZIO, JSON.stringify(effetti), JSON.stringify(togli), motivo, adesso);
@@ -324,6 +380,13 @@ export const migration239: Migration = {
       if (non.length !== 1 || non[0]!.tipo !== 'articolo' || non[0]!.articolo !== altro || !db.prepare('SELECT 1 FROM main.articolo WHERE chiave = ?').get(altro)) errore(`l'alternativa di ${chiave} non punta a ${altro}`);
       if (!db.prepare("SELECT 1 FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ?").get(chiave)) errore(`il set ${chiave} è senza contenuto`);
     }
+    // nessun vecchio articolo di seed (né il suo oggetto fittizio di seed) resta con il nome inglese
+    for (const [slug, inglese] of Object.entries(NOMI_INGLESI_VECCHI)) {
+      const inIngleseArticolo = db.prepare("SELECT 1 FROM main.articolo WHERE chiave = ? AND nome = ? AND origine = 'seed'").get(chiaveArticolo(slug), inglese);
+      const inIngleseOggetto = db.prepare(`SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ? AND nome = ? AND origine = 'seed' AND chiave NOT IN (SELECT value FROM json_each(?))`)
+        .get(`altro/${slug}`, inglese, JSON.stringify(fittiziCondivisi));
+      if (inIngleseArticolo || inIngleseOggetto) errore(`«${inglese}» è rimasto in inglese`);
+    }
     const visibili = db.prepare('SELECT COUNT(*) FROM main.articolo WHERE negozio_chiave = ? AND nascosto = 0').pluck().get(NEGOZIO) as number;
     if (visibili !== DOMENICHE.length * 2) errore(`il negozio ha ${visibili} articoli visibili invece di ${DOMENICHE.length * 2}`);
 
@@ -333,9 +396,10 @@ export const migration239: Migration = {
       conteggi: {
         domeniche: DOMENICHE.length, articoliCreati, articoliGiaPresenti, righeContenutoCreate: righeContenuto, oggettiCreati: oggettiCreati.length, oggettiGiaPresenti: oggettiGiaPresenti.length,
         vecchiArticoliNascosti: articoliNascosti, oggettiFittiziNascosti: oggettiNascosti, notaNegozioCambiata: notaCambiata, nomeNegozioCambiato, articoliVisibiliDelNegozio: visibili, nomiCorretti: nomiCorretti.length,
+        nomiItalianiAiVecchi: nomiVecchiCorretti.length,
         vociConIlVecchioArticolo: vociConVecchio.length, vociApplicate: voci.filter((v) => v.esito === 'applicata').length, vociDaDecidere: voci.filter((v) => v.esito !== 'applicata').length,
       },
-      oggettiCreati, oggettiGiaPresenti, nomiCorretti, fittiziCondivisi, mappa, vociConVecchio, nellePartite, voci, stessaConnessione,
+      oggettiCreati, oggettiGiaPresenti, nomiCorretti, nomiVecchiCorretti, fittiziCondivisi, mappa, vociConVecchio, nellePartite, voci, stessaConnessione,
       segnalazioni: [
         'Domeniche senza una voce d’acquisto nel Diario: 06-26, 08-07, 09-25, 01-29 (gli articoli ci sono; la voce la decide l’utente).',
         'Che il gioco permetta un solo set per domenica, o nessuno, lo dicono la nota del negozio e la guida in modo indiretto (settimane 21 e 25): da confermare con l’utente. Se una domenica permettesse tutti e due, basta togliere le due condizioni «non» di quel giorno.',

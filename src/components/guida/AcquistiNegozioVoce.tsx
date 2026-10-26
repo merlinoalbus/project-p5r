@@ -10,14 +10,14 @@
 // Un articolo di un altro negozio resta nell'elenco degli effetti, dove si vede e si toglie.
 //
 // L13 (decisione 4, 2026-10-26: «tv shopping con due prodotti da scegliere gestito malissimo... non posso effettivamente scegliere»): gli
-// articoli che il catalogo dichiara alternativi fra loro (Set A o Set B: «non insieme a») stanno in un riquadro a parte, «Alla spunta ne
-// scegli uno, o nessuno», con il selettore dell'articolo, le copie, il prezzo e il contenuto, senza totale (sommarli sarebbe un acquisto che il
+// articoli che il catalogo dichiara alternativi fra loro (Set A o Set B: «non insieme a») stanno in un riquadro a parte, «Uno a scelta, o
+// nessuno, alla spunta» (`REGOLA_ALTERNATIVE`), con il selettore dell'articolo, le copie, il prezzo e il contenuto, senza totale (sommarli sarebbe un acquisto che il
 // gioco non permette); Su e Giù spostano dentro il proprio elenco, nell'ordine in cui si vede. Un articolo
 // che ha un'alternativa non ancora nella voce offre «Aggiungi l'alternativa». «Aggiungi articolo» mette per primi gli articoli del giorno
 // della voce. Nella voce non si dichiara niente: le alternative le dice il catalogo, la scelta si fa alla spunta.
 // ============================================================
 
-import { contoArticoli, fondiArticoliUguali, formatoYen, gruppiAlternativi, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
+import { contoArticoli, fondiArticoliUguali, formatoYen, gruppiAlternativi, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, type EffettoVoce } from '../../../shared/effettiVoce';
 import { elencoNomi, testoContenuto } from '../../../shared/riepilogoEffetti';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -161,7 +161,8 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
         const lista = postiDeiGruppi[g]!;
         return (
           <section key={membri.join('|')} aria-labelledby={idTitolo} className="flex flex-col gap-1.5 rounded-md border border-dashed border-border p-2">
-            <h5 id={idTitolo} className="m-0 testo-13 font-semibold text-pretty">Alla spunta ne scegli uno, o nessuno</h5>
+            {/* la regola detta in un modo solo, come il riepilogo e la scelta alla spunta (`REGOLA_ALTERNATIVE`, rilievo L3 della revisione UX) */}
+            <h5 id={idTitolo} className="m-0 testo-13 font-semibold text-balance">{REGOLA_ALTERNATIVE}, alla spunta</h5>
             <ol className="m-0 flex list-none flex-col gap-2 p-0">
               {lista.map((i) => riga(i, lista, true))}
             </ol>

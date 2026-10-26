@@ -2320,10 +2320,15 @@ tecniche, nessuna decisione presa al posto dell'utente):
   il registro delle operazioni sugli effetti. «Il gioco dà» li mostra da scegliere, togliendo e rimettendo la spunta, e non dice mai
   «nessuno» per un acquisto che non è mai stato chiesto.
 - **Periodo validato (04-01…05-31):** le 6 voci delle televendite restano proposte «L13-televendite» da applicare solo con il sì dell'utente,
-  riga per riga. Il vecchio articolo inglese resta nascosto ma citato da quelle voci finché l'utente non decide. In alternativa
+  riga per riga. Il vecchio articolo unico resta nascosto ma citato da quelle voci finché l'utente non decide; dal quarto giro ha il nome
+  italiano dei due set, «Set A o Set B» (es. «Set sveglia primaverile o Set Condiv. primaverile»), e così il suo oggetto fittizio `altro/…`:
+  è un dato di gioco di seed corretto dalla 239, non una conversione della voce. In alternativa
   l'utente stesso, nell'editor della voce, può usare «Sostituisci con «Set A» e «Set B»» sulla riga del vecchio articolo: è un suo gesto
   esplicito, salvato con la voce (dopo, la proposta della voce non si applica più e si scarta).
 - **Il negozio si chiama «Canale di televendite»**, come nella guida italiana e nel testo delle voci (era «Home Shopping in TV»).
+- **La regola si scrive in un modo solo, «Uno a scelta, o nessuno»** (`REGOLA_ALTERNATIVE` in `shared/effettiVoce.ts`): titolo del gruppo di
+  «Il gioco dà», riquadro dell'editor («…, alla spunta»), nota del campo «Articolo» e scelta alla spunta. Con un acquisto fra le scelte della
+  spunta il pulsante dice «Spunta con questi acquisti» (o «con queste scelte» se ci sono anche esiti o note); senza acquisti resta «esiti».
 - **Un formato solo per gli yen nella voce, «¥1.680»** (`formatoYen` in `shared/effettiVoce.ts`): in `it-IT` i numeri di quattro cifre
   restano senza separatore se non lo si chiede. Il resto dell'app (`formattaYen`, «8.227 ¥») non cambia in questo lotto.
 - **Restano all'utente:**

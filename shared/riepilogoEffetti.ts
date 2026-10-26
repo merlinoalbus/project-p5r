@@ -18,7 +18,7 @@
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
-import { contoArticoli, formatoYen, gruppiAlternativi, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
+import { contoArticoli, formatoYen, gruppiAlternativi, REGOLA_ALTERNATIVE, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
 
 /** Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga).
  *  `contenuto` (L13, decisione 4): che cosa contiene un set, in una riga («Cerotto alla caffeina · Gocce per occhioni ×10»), se il catalogo lo dice. */
@@ -217,7 +217,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
               return;
             }
             const chiaveScelta = `scelta:${neg}:${k}`;
-            const g = gruppo(chiaveScelta, nome ? `Uno a scelta · ${nome}` : 'Uno a scelta');
+            // la regola detta in un modo solo, come nell'editor e alla spunta (`REGOLA_ALTERNATIVE`, rilievo L3 della revisione UX)
+            const g = gruppo(chiaveScelta, nome ? `${REGOLA_ALTERNATIVE} · ${nome}` : REGOLA_ALTERNATIVE);
             // a voce spuntata, articoli aggiunti alla voce DOPO la spunta: la spunta non ha chiesto quale si è comprato. Dire «nessuno» sarebbe
             // falso (rilievo della revisione): restano tutti, con che cosa fare per scegliere
             const aggiuntiDopo = opz.comprati !== undefined && membri.some((m) => opz.daScegliere?.has(m));

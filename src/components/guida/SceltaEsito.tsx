@@ -108,12 +108,18 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
     setValori((x) => ({ ...x, [uid]: v }));
   };
   const complete = scelte.every((s) => valori[s.effettoUid] !== undefined);
+  // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
+  // acquisti con esiti o note: «scelte»; senza acquisti resta «esiti», come prima
+  const acquisti = scelte.filter((s) => s.tipo === 'alternativa').length;
+  const parola = acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
+    : acquisti === scelte.length ? { gruppo: 'Acquisti da scegliere per la spunta', pulsante: 'Spunta con questi acquisti' }
+      : { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' };
   const conferma = () => {
     if (!complete) return;
     onConferma(costruisci(valori));
   };
   return (
-    <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label="Esiti da scegliere per la spunta">
+    <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label={parola.gruppo}>
       {scelte.map((s) => {
         const v = valori[s.effettoUid];
         if (s.tipo === 'dote') return (
@@ -139,7 +145,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         );
       })}
       <span className="flex flex-wrap gap-1.5">
-        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Spunta con questi esiti" disabled={occupato || !complete} onClick={conferma} />}
+        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={occupato || !complete} onClick={conferma} />}
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
       </span>
     </span>

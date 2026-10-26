@@ -225,7 +225,7 @@ La voce del Diario (`voce_giornata`) è l'unico gesto che produce effetti sulla 
   - gli effetti non scelti restano fuori da `applicaEffettiDiStato` e dagli yen automatici;
   - solo per il set scelto la disponibilità si valuta al giorno della voce (`statoAlMomento`).
 - **Letture:**
-  - `shared/riepilogoEffetti.ts`: gruppo «Uno a scelta · negozio», senza totale e con la nota degli yen di quello che si sceglie; a voce fatta mostra il set comprato, «Nessuno dei due comprato», o le alternative da scegliere se sono state aggiunte dopo la spunta;
+  - `shared/riepilogoEffetti.ts`: gruppo «Uno a scelta, o nessuno · negozio» (la regola è `REGOLA_ALTERNATIVE` di `shared/effettiVoce.ts`, la stessa dell'editor e della spunta), senza totale e con la nota degli yen di quello che si sceglie; a voce fatta mostra il set comprato, «Nessuno dei due comprato», o le alternative da scegliere se sono state aggiunte dopo la spunta;
   - `SceltaAcquistoAlternativo.tsx`: la scelta alla spunta;
   - `AcquistiNegozioVoce.tsx`: il riquadro nell'editor della voce.
 

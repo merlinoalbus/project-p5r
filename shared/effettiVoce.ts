@@ -265,6 +265,13 @@ export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave
 }
 
 /**
+ * L13 (decisione 4): la regola degli articoli in alternativa, scritta in un modo solo (rilievo L3 della revisione UX: era «Uno a scelta»,
+ * «Alla spunta ne scegli uno, o nessuno» e «Uno solo, o nessuno»). La usano il titolo del riepilogo «Il gioco dà», il riquadro dell'editor,
+ * la nota del campo «Articolo» e la scelta alla spunta.
+ */
+export const REGOLA_ALTERNATIVE = 'Uno a scelta, o nessuno';
+
+/**
  * L13 (decisione 4 dell'utente: «Televendite: due articoli distinti per Set A e Set B, ciascuno con prezzo e contenuto propri»): gli articoli
  * di una voce che sono alternative fra loro. Due articoli sono alternativi se uno dei due dichiara nel catalogo «non insieme all'altro»
  * (`articoliIncompatibili` delle sue condizioni: basta da una parte); un gruppo è l'insieme degli articoli della voce legati così, anche a catena
