@@ -11,7 +11,7 @@ import { uguali } from '../../shared/percorsoGuida.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
-import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
+import { catalogoOggettiDisponibile, effettiDegliOggetti, effettoDellaFonte, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
 import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
@@ -66,6 +66,8 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
     return { articolo, posto: articolo ? postoDellArticolo(articolo) : null, negozi, postiNegozi };
   };
   const prodotti = ricompensePerFonte('ricetta'); const materiali = materialiDelleRicette();
+  // Ondata 5, lotto F (migrazione 279): l'effetto di una ricetta è quello del suo prodotto, nel catalogo
+  const effettiProdotti = effettiDegliOggetti([...prodotti.values()].flat().map((p) => p.chiave));
   return { ...dati,
     scambi: [], listiniScambi: riferimentiListiniScambi(),
     consumabili: dati.consumabili.flatMap((v) => {
@@ -80,6 +82,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
       return [{ ...v, ...identita(o), ...legami(o), nomeEn: o.nomeOriginale, uso: o.effetto, tipo: o.categoria === 'materiale' ? 'materiale' as const : 'chiave' as const }];
     }),
     fabbricazione: { ...dati.fabbricazione, ricette: dati.fabbricazione.ricette.map((r) => ({ ...r,
+      effetto: effettoDellaFonte(r.effetto, prodotti.get(r.attrezzo) ?? [], effettiProdotti),
       prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [] })) },
     abiti: { ...dati.abiti, elenco: dati.abiti.elenco.flatMap((v) => {
       const o = catalogo.get(fonteNodoGuida('abiti', v)); if (!o || o.nascosto) return [];

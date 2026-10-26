@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, normalizzaNomeOggetto, type GruppoOggetto } from '../../../shared/catalogo';
+import { descriviVoceEffetto, leggiVociEffetto } from '../../../shared/effettiCatalogo';
+import type { CatalogoOggettoDto } from '../../types';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { formattaYen } from '../../utils/letture';
@@ -18,7 +20,30 @@ import { TestoNote } from '../shared/TestoNote';
 import { noteInSimboli, testoNoteAParole } from '../../../shared/note';
 
 const GRUPPI = Object.entries(GRUPPI_OGGETTO) as Array<[GruppoOggetto, string]>;
-const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
+
+/** Ondata 5, lotto F: un libro, un film o un videogioco dice che cosa dà con le voci della sua lettura (`statistiche.effetti`, lette dalla
+ *  scheda della lettura), non con un testo dell'effetto: la cella le mostra invece di «Non dichiarato». */
+function effettiDellaLettura(o: CatalogoOggettoDto): string {
+  const effetti = o.statistiche?.effetti;
+  return Array.isArray(effetti) ? leggiVociEffetto(JSON.stringify(effetti)).map((v) => descriviVoceEffetto(v)).join(' · ') : '';
+}
+
+/** La cella «Effetto»: il testo dell'effetto, le statistiche di armi e protezioni (`statistiche.testo`, migrazione 275) o le voci della
+ *  lettura; «Non dichiarato» solo se non c'è nessuno dei tre. Il `title` dice le note a parole («1 nota»), la cella le mostra come ♪. */
+function CellaEffetto({ o }: { o: CatalogoOggettoDto }) {
+  const lettura = o.effetto ? '' : effettiDellaLettura(o);
+  const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo : '';
+  return (
+    <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : lettura ? testoNoteAParole(lettura) : undefined}>
+      {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
+      {statistiche && <span className="block testo-12 text-text-secondary">{statistiche}</span>}
+      {lettura && <span className="block">{lettura}</span>}
+      {!o.effetto && !statistiche && !lettura && 'Non dichiarato'}
+    </td>
+  );
+}
+
+const ORDINI =[{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
 
 /** Un elenco per tutte le identità; i gruppi sono filtri, non cataloghi separati. */
 export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: GruppoOggetto | '' }) {
@@ -121,13 +146,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
             {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="tabella-oggetti__altro block testo-12 text-text-secondary">{o.statistiche.per}</span>}
           </td>
           <td className="tabella-oggetti__categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
-          {/* Ondata 5, lotto F: le statistiche di armi e protezioni stanno in `statistiche.testo` (migrazione 275): si mostrano sotto
-              l'effetto, e «Non dichiarato» solo se non c'è né l'uno né le altre */}
-          <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : undefined}>
-            {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
-            {typeof o.statistiche?.testo === 'string' && o.statistiche.testo && <span className="block testo-12 text-text-secondary">{o.statistiche.testo}</span>}
-            {!o.effetto && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && 'Non dichiarato'}
-          </td>
+          <CellaEffetto o={o} />
           <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" role="img" aria-label="Nessuna offerta in yen">—</span></> : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>

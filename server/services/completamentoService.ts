@@ -8,7 +8,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
-import { ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { effettiDegliOggetti, effettoDellaFonte, ricompensePerFonte } from './catalogoOggettiLetture.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
@@ -34,7 +34,12 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const regali = partitaId === undefined ? null : regaliConsegnati(partitaId);
   const sfide = seed.covo.sfide.map((s) => (s.conteggio?.tipo === 'regali-consegnati' && regali !== null
     ? { ...s, progresso: { fatti: regali, obiettivo: s.conteggio.obiettivo, raggiunta: regali >= s.conteggio.obiettivo } } : s));
-  const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
+  // Ondata 5, lotto F (migrazione 279): il premio che è un oggetto del catalogo ne legge l'effetto dal catalogo, il suo punto unico
+  const effetti = effettiDegliOggetti([...premi.values()].flat().map((o) => o.chiave));
+  const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => {
+    const oggetti = premi.get(p.nome) ?? [];
+    return { ...p, effetto: effettoDellaFonte(p.effetto, oggetti, effetti) || null, oggettiRicompensa: oggetti };
+  }) };
   return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
 }
 

@@ -49,6 +49,24 @@ function usi(db: AppDatabase, chiave: string): string[] {
   return trovati;
 }
 
+/**
+ * Nasconde un'offerta della guida come la nasconde l'app (`nascosto = 1`, fotografia in `seed_json` se non c'è), solo se è ancora visibile,
+ * della guida e nessun dato la usa; altrimenti resta e l'esito lo dice. La usa anche la 278 (offerta doppia dei Braccialetti tematici).
+ */
+export function nascondiOffertaDellaGuida(db: AppDatabase, chiave: string, migrazione: number): { esito: string; nascoste: number; usi: string[] } {
+  const r = db.prepare('SELECT * FROM main.articolo WHERE chiave = ?').get(chiave) as Record<string, unknown> | undefined;
+  const trovati = r ? usi(db, chiave) : [];
+  if (!r) return { esito: 'offerta assente', nascoste: 0, usi: trovati };
+  if (r.nascosto === 1) return { esito: 'già nascosta', nascoste: 0, usi: trovati };
+  if (r.origine !== 'seed') return { esito: 'offerta corretta dall’utente: non toccata', nascoste: 0, usi: trovati };
+  if (trovati.length) return { esito: `offerta usata dai dati (${trovati.join('; ')}): resta visibile`, nascoste: 0, usi: trovati };
+  const foto = JSON.stringify(Object.fromEntries(CAMPI_FOTO.filter((c) => haColonna(db, 'articolo', c)).map((c) => [c, r[c] ?? null])));
+  const nascoste = db.prepare("UPDATE main.articolo SET nascosto = 1, seed_json = COALESCE(seed_json, ?), updated_at = ? WHERE chiave = ? AND nascosto = 0 AND origine = 'seed'")
+    .run(foto, new Date().toISOString(), chiave).changes;
+  if (nascoste !== 1) throw new Error(`${migrazione}: l’offerta ${chiave} non si nasconde; nessuna modifica applicata.`);
+  return { esito: 'nascosta', nascoste, usi: trovati };
+}
+
 export const migration277: Migration = {
   id: 277,
   name: 'collana_cremisi_di_37_gradi',
@@ -56,21 +74,7 @@ export const migration277: Migration = {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
     if (!esisteTabella(db, 'articolo')) { logger.warn({ migrazione: 277 }, 'articoli assenti: niente da fare'); return; }
     const diarioPrima = improntaDiario(db);
-    const r = db.prepare('SELECT * FROM main.articolo WHERE chiave = ?').get(OFFERTA) as Record<string, unknown> | undefined;
-    let esito: string;
-    let nascoste = 0;
-    const trovati = r ? usi(db, OFFERTA) : [];
-    if (!r) esito = 'offerta assente';
-    else if (r.nascosto === 1) esito = 'già nascosta';
-    else if (r.origine !== 'seed') esito = 'offerta corretta dall’utente: non toccata';
-    else if (trovati.length) esito = `offerta usata dai dati (${trovati.join('; ')}): resta visibile`;
-    else {
-      const foto = JSON.stringify(Object.fromEntries(CAMPI_FOTO.filter((c) => haColonna(db, 'articolo', c)).map((c) => [c, r[c] ?? null])));
-      nascoste = db.prepare("UPDATE main.articolo SET nascosto = 1, seed_json = COALESCE(seed_json, ?), updated_at = ? WHERE chiave = ? AND nascosto = 0 AND origine = 'seed'")
-        .run(foto, new Date().toISOString(), OFFERTA).changes;
-      if (nascoste !== 1) errore('l’offerta non si nasconde');
-      esito = 'nascosta';
-    }
+    const { esito, nascoste, usi: trovati } = nascondiOffertaDellaGuida(db, OFFERTA, 277);
     if (improntaDiario(db) !== diarioPrima) errore('le voci del Diario sono cambiate');
     if (nascoste) invalidaCacheDiGioco();
     scriviAuditTesti(db, AUDIT, 277, { fonti: [FONTE_ACCESSORI], offerta: OFFERTA, esito, usi: trovati }, nascoste);

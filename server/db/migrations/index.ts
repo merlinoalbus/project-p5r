@@ -286,6 +286,8 @@ import { migration274 } from './274_premi_della_sfida_big_bang_burger.js';
 import { migration275 } from './275_statistiche_dell_equipaggiamento.js';
 import { migration276 } from './276_nomi_delle_abilita_negli_effetti.js';
 import { migration277 } from './277_collana_cremisi_di_37_gradi.js';
+import { migration278 } from './278_accessori_e_offerte_senza_effetto.js';
+import { migration279 } from './279_copie_in_prosa_degli_effetti.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -305,5 +307,5 @@ export const migrations: Migration[] = [
   migration250, migration251, migration252, migration253,
   migration255, migration256, migration257, migration258,
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
-  migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277,
+  migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
 ];

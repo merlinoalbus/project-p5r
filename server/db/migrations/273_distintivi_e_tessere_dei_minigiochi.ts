@@ -45,10 +45,11 @@ const BBB = (sfida: string) => `Premio della sfida «${sfida}» del Big Bang Bur
 const TESSERA = (gioco: string) => `Si ottiene completando il videogioco ${gioco}`;
 const COLLEZIONE = (distintivo: string) => `Oggetto da collezione per appassionati: al Super Baron di Akihabara si scambia con il ${distintivo}`;
 
+// i nomi originali (inglesi) non sono nella guida italiana, l'unica fonte di queste schede: restano vuoti (rilievo della revisione del lotto F)
 const DISTINTIVI: readonly SchedaNuova[] = [
-  { chiave: 'accessorio/distintivo-numero-due', categoria: 'accessorio', nome: 'Distintivo numero due', nomeOriginale: '2nd Mate Badge', effetto: 'HP massimi +10 percento', descrizione: BBB('Comet Burger'), fonte: FONTE_ACCESSORI },
-  { chiave: 'accessorio/distintivo-numero-uno', categoria: 'accessorio', nome: 'Distintivo numero uno', nomeOriginale: '1st Mate Badge', effetto: 'HP massimi +20 percento', descrizione: BBB('Gravity Burger'), fonte: FONTE_ACCESSORI },
-  { chiave: 'accessorio/distintivo-del-capitano', categoria: 'accessorio', nome: 'Distintivo del capitano', nomeOriginale: 'Captain Badge', effetto: 'HP massimi +30 percento', descrizione: BBB('Cosmic Tower Burger'), fonte: FONTE_ACCESSORI },
+  { chiave: 'accessorio/distintivo-numero-due', categoria: 'accessorio', nome: 'Distintivo numero due', nomeOriginale: null, effetto: 'HP massimi +10 percento', descrizione: BBB('Comet Burger'), fonte: FONTE_ACCESSORI },
+  { chiave: 'accessorio/distintivo-numero-uno', categoria: 'accessorio', nome: 'Distintivo numero uno', nomeOriginale: null, effetto: 'HP massimi +20 percento', descrizione: BBB('Gravity Burger'), fonte: FONTE_ACCESSORI },
+  { chiave: 'accessorio/distintivo-del-capitano', categoria: 'accessorio', nome: 'Distintivo del capitano', nomeOriginale: null, effetto: 'HP massimi +30 percento', descrizione: BBB('Cosmic Tower Burger'), fonte: FONTE_ACCESSORI },
   { chiave: 'accessorio/distintivo-di-forneus', categoria: 'accessorio', nome: 'Distintivo di Forneus', nomeOriginale: null, effetto: 'Potenzia abilità di Ghiaccio del 50 percento (cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },
   { chiave: 'accessorio/distintivo-del-treno', categoria: 'accessorio', nome: 'Distintivo del treno', nomeOriginale: null, effetto: 'Potenzia abilità di Elettricità del 50 percento (cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },
   { chiave: 'accessorio/distintivo-dei-pugni', categoria: 'accessorio', nome: 'Distintivo dei pugni', nomeOriginale: null, effetto: 'Aumenta molto l’elusione dalle abilità di Fuoco (non cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },

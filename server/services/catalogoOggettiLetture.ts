@@ -236,6 +236,24 @@ export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>): Map<
   return out;
 }
 
+/**
+ * Ondata 5, lotto F (decisione 21): il testo dell'effetto degli oggetti, dal suo punto unico (`catalogo_oggetto.effetto`), per le pagine che
+ * mostrano un oggetto collegato senza un testo proprio (ricette della fabbricazione, premi del Covo: migrazione 279). Chiave → effetto.
+ */
+export function effettiDegliOggetti(chiavi: Iterable<string>): Map<string, string> {
+  const elenco = [...new Set(chiavi)];
+  if (!elenco.length || !catalogoOggettiDisponibile()) return new Map();
+  const righe = prepared('SELECT chiave,effetto FROM catalogo_oggetto WHERE chiave IN (SELECT value FROM json_each(?))').all(JSON.stringify(elenco)) as Array<{ chiave: string; effetto: string }>;
+  return new Map(righe.map((r) => [r.chiave, r.effetto]));
+}
+
+/** L'effetto da mostrare per una fonte (ricetta, premio): il testo proprio se c'è (ricetta senza prodotto unico, correzione dell'utente),
+ *  altrimenti quello dell'unico oggetto collegato; vuoto se non c'è né l'uno né l'altro. */
+export function effettoDellaFonte(proprio: string | null | undefined, collegati: ReadonlyArray<{ chiave: string }>, effetti: ReadonlyMap<string, string>): string {
+  if (proprio?.trim()) return proprio;
+  return collegati.length === 1 ? effetti.get(collegati[0].chiave) ?? '' : '';
+}
+
 /** Materiali per le ricette esistenti: la chiave della ricetta non viene rinominata insieme al prodotto. */
 export function materialiDelleRicette(): Map<string, ContenutoOggettoDto[]> {
   const out = new Map<string, ContenutoOggettoDto[]>();

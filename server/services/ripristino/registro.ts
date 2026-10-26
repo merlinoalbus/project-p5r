@@ -179,8 +179,9 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [L('introduzione', 'Introduzione'), L('sblocco', 'Come si sblocca', { nullable: true }), E('regole', 'Regole'), FONTE],
   },
   ricetta: {
+    // Ondata 5, lotto F (decisione 21, migrazione 279): l'effetto della ricetta è quello del prodotto e si corregge sull'oggetto del catalogo
     modalita: 'blocco', blocco: 'oggetti-guida', etichetta: 'Ricetta', radice: ['fabbricazione', 'ricette'], sel: 'attrezzo', campoTitolo: 'attrezzo',
-    campi: [L('effetto', 'Effetto'), L('sblocco', 'Come si sblocca', { nullable: true }), FONTE, VERIFICATO],
+    campi: [L('sblocco', 'Come si sblocca', { nullable: true }), FONTE, VERIFICATO],
   },
   armi: {
     modalita: 'blocco', blocco: 'oggetti-guida', etichetta: 'Personalizzazione delle armi', radice: ['personalizzazioneArmi'], chiaveFissa: 'armi',
