@@ -81,6 +81,8 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
   const elenchi = useCarica(async () => { const e = await getElenchiRegole(); return { articoli: e.articoli ?? [], trofei: e.trofei ?? [] }; }, []);
   const nomeTrofeo = (chiave: string): string => elenchi.dati?.trofei.find((t) => t.chiave === chiave)?.nome ?? 'Trofeo non più nell’elenco';
   const elenco = esiti?.esiti ?? [];
+  // «nessuna Dote» si dice solo se qualche esito ne dà (l'estrazione della lotteria non ne dà: la frase non informerebbe)
+  const conDoti = elenco.some((e) => e.doti.length > 0);
   const valido = esiti === null || normalizzaEsitiAttivita(esiti) !== null;
   const cambiaEsito = (i: number, e: Partial<EsitoAttivita>) => esiti && onCambia({ ...esiti, esiti: elenco.map((x, j) => (j === i ? { ...x, ...e } : x)) });
   // il trofeo è facoltativo: «nessuno» toglie il campo (gli esiti senza trofeo restano come prima)
@@ -124,7 +126,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong> · <TestoNote testo={fraseDotiEsito(e.doti)} />{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
                   onClick={() => { const resto = elenco.filter((_, j) => j !== i); onCambia(resto.length ? { ...esiti!, esiti: resto } : null); }} />

@@ -70,7 +70,8 @@ const NOTA_ESTIVO_S = {
 const ESITO_VINTO = { chiave: 'vinto', nome: 'Vinto', gruppo: null, articolo: null, condizioni: [], doti: [], premi: null, trofeo: TROFEO };
 const ESITO_RICOMPRA = { chiave: 'non-vinto-ricompra', nome: 'Non vinto, ricompri il Lotto R', gruppo: null, articolo: LOTTO_R, condizioni: [], doti: [], premi: null };
 const ESITO_NON_VINTO = { chiave: 'non-vinto', nome: 'Non vinto', gruppo: null, articolo: null, condizioni: [], doti: [], premi: null };
-const DETTAGLI_ESTRAZIONE = 'Si controlla il biglietto la settimana dopo l’acquisto, al chiosco della lotteria: alla spunta si sceglie «Vinto» (si segna il trofeo «Soldi facili»), «Non vinto, ricompri il Lotto R» (si riprova: il prezzo del biglietto si scala da solo) o «Non vinto» senza ricomprare. La guida non dà le date delle estrazioni né gli importi delle vincite: gli yen vinti si segnano a mano.';
+// gli esiti li elenca già la scheda dell'attività (sezione «Esiti»): qui solo ciò che non dicono (quando si controlla, gli yen a mano)
+const DETTAGLI_ESTRAZIONE = 'Si controlla il biglietto la settimana dopo l’acquisto, al chiosco della lotteria. La guida non dà le date delle estrazioni né gli importi delle vincite: gli yen vinti si segnano a mano.';
 /** Che cosa offre il luogo del chiosco (senza prezzi: vivono nelle offerte). */
 const COSA_OFFRE = 'Biglietti della lotteria e verifica delle estrazioni.';
 const LUOGO_PRIMA = 'Banco della lotteria di Shibuya';
