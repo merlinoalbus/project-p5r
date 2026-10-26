@@ -8,8 +8,8 @@
 // diceva a che punto si è.
 //
 // Che cosa fa: alla sfida «Benefattore» aggiunge il dato strutturato `conteggio: { tipo: 'regali-consegnati', obiettivo: 10 }`, che
-// `completamentoService` legge con la partita (i regali consegnati di persona in `utente.regalo_partita`: la Cartolina spedita non è un dono
-// consegnato a un ritrovo). Il testo del requisito non cambia, né le correzioni dell'utente (stanno in `correzione_dati_guida`). Una sfida
+// `completamentoService` legge con la partita (tutti i regali di `utente.regalo_partita`, Cartolina spedita compresa: la guida non ne esclude
+// nessuno). Il testo del requisito non cambia, né le correzioni dell'utente (stanno in `correzione_dati_guida`). Una sfida
 // che ha già il conteggio non si tocca; senza la sfida non si inventa niente (audit «ferma»). Audit in `dati_guida.audit-258-benefattore`.
 // ============================================================
 

@@ -8,8 +8,8 @@
 // sotto zero, e togliendo il regalo torna. La logica è nel server (`POST /partite/:id/regali`): qui si scelgono solo i dati.
 //
 // Ondata 5 (decisione 21 dell'utente; censimento RG-09, RG-10, RG-17, RG-18, D2, D3):
-//   - si sceglie fra tutti gli oggetti regalo, raggruppati per reazione: quelli dell'elenco del Confidente (+3/+2/+1) e gli altri, che valgono
-//     +1 («ogni regalo garantisce almeno 1 punto»);
+//   - si sceglie fra tutti gli oggetti regalo, raggruppati per reazione: i graditi del Confidente (+3, +2) e tutti gli altri, che valgono +1
+//     («ogni regalo garantisce almeno 1 punto»; le righe dell'elenco a +1 stanno con loro: revisione dei lotti D e D2);
 //   - lo stesso oggetto si può ridare: la consegna di prima si ricorda, non si blocca;
 //   - le copie possedute (comprate, ricevute o dentro un set) si usano prima di ricomprare: con una copia l'acquisto non è proposto di
 //     partenza; senza, «Segna anche comprato» crea la copia che il regalo usa;
@@ -23,7 +23,7 @@ import { regalaOggetto } from '../../services/api/partite';
 import { getCatalogoOggetti, getOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaPunti, formattaPunti, formattaYen } from '../../utils/punti';
-import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, testoReazione } from '../../../shared/regali';
+import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, eGradito, testoReazione } from '../../../shared/regali';
 import type { ReazioneRegalo } from '../../../shared/puntiConfidenti';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
@@ -58,10 +58,11 @@ function etichettaOfferta(o: OffertaOggettoDto): string {
   return `${dove}${o.prezzo !== null ? ` · ${o.prezzo === 0 ? 'Gratis' : formattaYen(o.prezzo)}` : ''}`;
 }
 
-/** Il gruppo dell'oggetto nel selettore: l'elenco del Confidente per reazione, poi gli altri regali, poi la Cartolina da spedire. */
+/** Il gruppo dell'oggetto nel selettore: i graditi del Confidente per reazione (+3, +2), poi tutti gli altri regali a +1 (anche le righe
+ *  dell'elenco a +1, che valgono quanto ogni altro regalo: revisione dei lotti D e D2), poi la Cartolina da spedire. */
 function gruppo(chiave: string, inElenco: ReazioneRegalo | undefined, nomeConfidente: string): string {
-  if (chiave === CARTOLINA) return 'Da spedire · +1';
-  return inElenco !== undefined ? `Graditi a ${nomeConfidente} · ${testoReazione(inElenco)}` : `Altri regali · ${testoReazione(REAZIONE_FUORI_ELENCO)}`;
+  if (chiave === CARTOLINA) return `Da spedire · ${testoReazione(REAZIONE_CARTOLINA)}`;
+  return inElenco !== undefined && eGradito(inElenco) ? `Graditi a ${nomeConfidente} · ${testoReazione(inElenco)}` : `Altri regali · ${testoReazione(REAZIONE_FUORI_ELENCO)}`;
 }
 
 /** «Regala a …»: scelta dell'oggetto fra tutti i regali, reazione e punti previsti, copia posseduta o acquisto da segnare insieme. */
@@ -81,7 +82,8 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
     const nomi = new Map<string, string>();
     for (const o of catalogo.dati ?? []) nomi.set(o.chiave, o.nome);
     for (const g of elenco ?? []) if (g.catalogo && !nomi.has(g.catalogo.chiave)) nomi.set(g.catalogo.chiave, g.catalogo.nome);
-    const ordine = (k: string) => (k === CARTOLINA ? -1 : reazioni.get(k) ?? 0);
+    // l'ordine segue i gruppi: i graditi dalla reazione più alta, poi gli altri a +1 (in elenco o no, insieme per nome), poi la Cartolina
+    const ordine = (k: string) => { const r = reazioni.get(k); return k === CARTOLINA ? -1 : r !== undefined && eGradito(r) ? r : 0; };
     return [...nomi].filter(([k]) => !ammessi || ammessi.includes(k))
       .sort(([a, na], [b, nb]) => ordine(b) - ordine(a) || na.localeCompare(nb, 'it'))
       .map(([k, nome]) => ({ chiave: k, nome, gruppo: gruppo(k, reazioni.get(k), nomeConfidente) }));
@@ -97,6 +99,8 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
   const cartolina = chiave === CARTOLINA;
   const reazione: ReazioneRegalo = cartolina ? REAZIONE_CARTOLINA : reazioni.get(chiave) ?? REAZIONE_FUORI_ELENCO;
   const giaRegalato = chiave !== '' && (sc?.regaliFattiCatalogo ?? []).includes(chiave);
+  /** Quante volte è già stato dato a questo Confidente (dalle consegne della partita), per dirlo solo quando sono più di una. */
+  const volte = chiave === '' ? 0 : (sc?.consegne ?? []).filter((x) => x.catalogo === chiave).length;
   const copie = oggetto.dati?.partita?.copie;
   const conCopia = (copie?.disponibili ?? 0) > 0;
   const offerte = oggetto.dati?.inVendita ?? [];
@@ -130,7 +134,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
   };
   const erroreElenco = dettaglio.errore ?? catalogo.errore;
 
-  return <Modal aperta titolo={`Regala a ${nomeConfidente}`} onChiudi={() => { if (!occupato) onChiudi(); }}
+  return <Modal aperta titolo={cartolina ? `Spedisci la Cartolina a ${nomeConfidente}` : `Regala a ${nomeConfidente}`} onChiudi={() => { if (!occupato) onChiudi(); }}
     azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
       <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="regalo" dimensione={22} />} titolo={occupato ? 'Registrazione…' : cartolina ? 'Spedisci' : 'Regala'} disabled={occupato || !valido} onClick={() => void regala()} /></>}>
     <div className="flex min-w-0 flex-col gap-3">
@@ -147,7 +151,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
         </p>
       )}
       {cartolina && <p className="m-0 testo-12 text-text-muted text-pretty">{cartolinaAlMassimo ? `${nomeConfidente} è al rango massimo: la Cartolina non si spedisce.` : `${AVVISO_CARTOLINA} Con la pioggia non si spedisce.`}</p>}
-      {giaRegalato && !nonIncontrato && <p className="m-0 testo-12 text-text-muted">Già regalato a {nomeConfidente} in questa partita: si può ridare.</p>}
+      {giaRegalato && !nonIncontrato && <p className="m-0 testo-12 text-text-muted tabular-nums">{cartolina ? 'Già spedita' : 'Già regalato'} a {nomeConfidente} in questa partita{volte > 1 ? ` (${volte} volte)` : ''}: si può {cartolina ? 'rispedire' : 'ridare'}.</p>}
       {chiave !== '' && oggetto.errore && <p role="alert" className="m-0 testo-13">{oggetto.errore}</p>}
       {valido && conCopia && copie && (
         <p className="m-0 testo-12 text-text-muted tabular-nums">{copie.disponibili === 1 ? 'Hai una copia di questo oggetto: il regalo usa quella.' : `Hai ${copie.disponibili} copie di questo oggetto: il regalo ne usa una.`}</p>

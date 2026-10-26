@@ -27,9 +27,25 @@ export const AVVISO_CARTOLINA = 'Si spedisce dalla cassetta rossa di Yongen-Jaya
 /** Come si scrive la reazione: «+3», «+2», «+1». */
 export const testoReazione = (r: ReazioneRegalo): string => `+${r}`;
 
+/**
+ * Revisione dei lotti D e D2: una riga dell'elenco del Confidente a +1 vale quanto ogni altro regalo (le ex «sconsigliate», decisione 21 e
+ * RG-07: la guida non ha sconsigliati e dice che ogni regalo dà almeno 1 punto). Presentarla fra i «graditi» direbbe il falso, e un'etichetta
+ * «gradito +1» non informa: si mostra come gradito solo ciò che vale più di +1 (o una reazione non indicata, che non si presume).
+ */
+export const eGradito = (r: ReazioneRegalo | null): boolean => r === null || r > REAZIONE_FUORI_ELENCO;
+/** Una riga dell'elenco del Confidente si mostra fra i «graditi» se vale più di +1, se porta una nota, o se è una vecchia riga senza oggetto del
+ *  catalogo (la spunta per nome, che non ha altro posto). Lo stesso criterio per la scheda del Confidente e per il riepilogo nel cassetto. */
+export const fraIGraditi = (g: { catalogo?: unknown; reazione: ReazioneRegalo | null; nota?: string | null }): boolean => !g.catalogo || eGradito(g.reazione) || !!g.nota;
+
 /** Vero se la reazione è un valore valido (1, 2 o 3). */
 export const eReazione = (v: unknown): v is ReazioneRegalo => v === 1 || v === 2 || v === 3;
 
 /** Il modo del regalo: consegnato a un ritrovo o spedito (la Cartolina). */
 export type ModoRegalo = 'consegna' | 'cartolina';
 export const modoDelRegalo = (catalogo: string): ModoRegalo => (catalogo === CARTOLINA ? 'cartolina' : 'consegna');
+/** L'inizio della frase dell'esito: «Cartolina spedita a …» o «Regalo consegnato a …» (la Cartolina non si consegna). */
+export const esitoDelRegalo = (modo: ModoRegalo | undefined, nomeConfidente: string): string =>
+  `${modo === 'cartolina' ? 'Cartolina spedita' : 'Regalo consegnato'} a ${nomeConfidente}`;
+/** Il verbo della consegna tolta: «Spedizione della Cartolina annullata» o «Consegna di «…» annullata». */
+export const annulloDelRegalo = (modo: ModoRegalo, nome: string): string =>
+  modo === 'cartolina' ? 'Spedizione della Cartolina annullata' : `Consegna di «${nome}» annullata`;

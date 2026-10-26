@@ -31,6 +31,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { SceltaRegalo } from '../catalogo/SceltaRegalo';
+import { esitoDelRegalo } from '../../../shared/regali';
 import { RigaConfidente } from './RigaConfidente';
 import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
@@ -390,7 +391,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
             // poi resta disponibile l'azione di prima; se il rango è cambiato i punti di prima non valgono più e la pila riparte
             const consegna = esito.consegna;
             setUltimo((u) => ({ ...u, [c.chiave]: esito.confidente.rango !== c.rango || !consegna ? [] : [...(u[c.chiave] ?? []), { punti: esito.punti, regalo: consegna.catalogo, consegna: consegna.id }] }));
-            notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+            notifica('success', `${esitoDelRegalo(consegna?.modo, c.nome)}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
             if (esito.confidente.puntiNecessari !== null && esito.confidente.puntiNecessari > 0 && esito.confidente.mancanti === 0 && (c.mancanti ?? 1) > 0) {
               notifica('success', `${c.nome}: punti sufficienti per il rango ${esito.confidente.rango + 1}! Passa del tempo insieme per salire di rango.`);
             }

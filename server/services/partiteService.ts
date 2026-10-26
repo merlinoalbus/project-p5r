@@ -25,7 +25,7 @@ import { conCestinoPrivato } from './cestinoService.js';
 import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
+  CompendioPartitaDto, ConfidentePartitaDto, ConsegnaRegaloDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
   FasciaGioco,
 } from '../../shared/types.js';
@@ -324,15 +324,19 @@ export function confidentiRegalabili(): string[] {
 }
 
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
-function regaliFatti(partitaId: number, chiave?: string): Map<string, { nomi: string[]; catalogo: string[] }> {
-  const perConfidente = new Map<string, { nomi: string[]; catalogo: string[] }>();
+function regaliFatti(partitaId: number, chiave?: string): Map<string, RegaliDelConfidente> {
+  const perConfidente = new Map<string, RegaliDelConfidente>();
   for (const r of regaliDellaPartita(partitaId, chiave)) {
-    const l = perConfidente.get(r.confidente) ?? { nomi: [], catalogo: [] };
+    const l = perConfidente.get(r.confidente) ?? { nomi: [], catalogo: [], consegne: [] };
     l.nomi.push(r.nome); if (r.catalogo && !l.catalogo.includes(r.catalogo)) l.catalogo.push(r.catalogo);
+    // ondata 5 (revisione): ogni consegna, per elencarle e annullarle una per una anche dopo aver ricaricato la pagina
+    l.consegne.push({ id: r.id, catalogo: r.catalogo, nome: r.nome, modo: r.modo, dataGioco: r.dataGioco, fasciaGioco: r.fasciaGioco });
     perConfidente.set(r.confidente, l);
   }
   return perConfidente;
 }
+/** I regali consegnati a un Confidente: i nomi storici, le chiavi del catalogo (una volta) e le consegne, dalla più vecchia. */
+interface RegaliDelConfidente { nomi: string[]; catalogo: string[]; consegne: ConsegnaRegaloDto[] }
 
 /**
  * I DTO delle righe date. Lo stato della partita per i semafori (`statoDisponibilitaPartita`) si calcola una volta e vale per tutte le
@@ -340,7 +344,7 @@ function regaliFatti(partitaId: number, chiave?: string): Map<string, { nomi: st
  * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
  * semafori vecchi.
  */
-function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, { nomi: string[]; catalogo: string[] }>): ConfidentePartitaDto[] {
+function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, RegaliDelConfidente>): ConfidentePartitaDto[] {
   // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
@@ -359,7 +363,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       personaArcanoInScorta: c.in_scorta === 1,
       // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
       contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
-      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], regalabile: regalabili.has(c.chiave),
+      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], consegne: regali.get(c.chiave)?.consegne ?? [], regalabile: regalabili.has(c.chiave),
       ...(regaliGiaNelSaldo.has(c.chiave) ? { regaliYenGiaNelSaldo: regaliGiaNelSaldo.get(c.chiave) } : {}),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),

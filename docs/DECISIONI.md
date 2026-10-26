@@ -2337,3 +2337,21 @@ tecniche, nessuna decisione presa al posto dell'utente):
 - **Restano all'utente:**
   - se il gioco permette un solo set per domenica, oppure nessuno;
   - se servono le voci delle domeniche 06-26, 08-07, 09-25 e 01-29.
+
+## 2026-10-26 — L13, decisione 21 (ondata 5, lotti D e D2): regali con reazione, ripetibili, con le copie
+
+Decisione dell'utente (`docs/coordinamento/lotti/L13/decisioni-2026-10-25.md`, punto 21): «Gli effetti degli oggetti ai fini di questa app
+non è necessario gestirli se non come informazione testuale. Non sono d'accordo nel rimandare attività a fasi successive»; le altre
+raccomandazioni del progetto si applicano (reazione strutturata con i punti attuali finché non verificati, regalo ripetibile con consumo di
+copie e oggetti dei set posseduti, sconsigliati a +1, righe senza fonte italiana con la fonte dichiarata, Cartolina e Benefattore nell'ondata).
+Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente):
+
+- **La consegna è una riga con il suo `id`** (utente 052): `regalo_partita` cambia chiave, da (partita, Confidente, nome) a `id`, perché lo
+  stesso oggetto si può ridare. Ogni consegna ha la sua causa degli yen, la copia che ha usato, la riga del registro che ha scritto e il modo.
+- **Una riga dell'elenco a +1 vale quanto ogni altro regalo**: resta un dato (decisione 14, RG-07) ma non si presenta come «gradita»; si
+  mostra fra i graditi solo con una nota, e nella preparazione resta correggibile in «Altre righe dell'elenco».
+- **Ogni consegna si vede e si annulla** dalla scheda del Confidente e da quella dell'oggetto, anche fuori elenco e la Cartolina; la scheda
+  dell'oggetto lo dà a chiunque lo possa ricevere adesso. Il regalo senza oggetto (+50 di ripiego) non esiste più, neanche dall'API.
+- **Benefattore conta tutti i regali**, Cartolina compresa: la guida dice «almeno 10 regali totali» e non ne esclude nessuno.
+- **Il segno «prezzo già nel saldo»** di una consegna di prima degli yen automatici vale per una consegna sola: la usa la prima consegna ridata
+  nello stesso momento, e torna valido se la si toglie.

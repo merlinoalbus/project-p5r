@@ -79,7 +79,8 @@ describe('ConfidentiPartita', () => {
     expect(chip).toHaveAttribute('aria-pressed', 'true');
     // anteprime con bonus: 7,5 / 15 / 22,5; regalo 75; uscita 15
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (7,5 punti)')).toBeInTheDocument();
-    expect(screen.getByLabelText('Ryuji Sakamoto: regalo gradito (75 punti)')).toBeInTheDocument();
+    // ondata 5: il pulsante di ripiego non c'è più; «Regala» apre la finestra dell'oggetto (Ryuji riceve regali)
+    expect(screen.getByLabelText('Ryuji Sakamoto: regala un oggetto (75 punti)')).toBeInTheDocument();
 
     await act(async () => { screen.getByLabelText('Ryuji Sakamoto: risposta da 2 note (15 punti)').click(); });
     expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'ryuji', { noteRisposta: 2, bonusArcano: true, invito: false } satisfies ModificaConfidente);

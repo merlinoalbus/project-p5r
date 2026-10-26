@@ -8,7 +8,7 @@
 import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { nomiAltriOggetto } from './catalogoOggettiLetture.js';
-import { causaYenRegalo, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaRegaloDiPrimaTolto, type CausaYen } from './yenAutomaticiService.js';
+import { causaYenRegalo, liberaRegaloDiPrima, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaRegaloDiPrimaTolto, type CausaYen } from './yenAutomaticiService.js';
 import type { ModoRegalo } from '../../shared/regali.js';
 
 /** La consegna di prima degli yen automatici che aveva segnato anche l'acquisto: l'oggetto e il momento di gioco della consegna. */
@@ -54,6 +54,9 @@ function togliRiga(partita: number, r: RigaConsegna): void {
   const diPrima = consegnaDiPrima(r);
   prepared('DELETE FROM regalo_partita WHERE rowid = ? AND partita_id = ?').run(r.rid, partita);
   if (diPrima) segnaRegaloDiPrimaTolto(partita, r.confidente_chiave, diPrima.catalogo, diPrima.data, diPrima.fascia);
+  // ondata 5 (revisione): la consegna che aveva usato il segno di quella di prima (ridata nello stesso momento senza scalare il prezzo) lo
+  // rende: il prezzo è ancora nel saldo, e ridando lo stesso oggetto in quel momento di nuovo non si scala
+  if (r.id !== null) liberaRegaloDiPrima(partita, r.id);
   restituisciYenAutomatico(partita, causaDellaConsegna(r), 'regalo-tolto');
 }
 
@@ -65,6 +68,9 @@ export interface RegaloDellaPartita {
   /** La consegna ha usato una copia posseduta (utente 052). */
   copiaConsumata: boolean;
   modo: ModoRegalo;
+  /** Il momento di gioco della consegna (colonne della 035; null se non registrato). */
+  dataGioco: string | null;
+  fasciaGioco: string | null;
 }
 
 /** Compatibilità durante la preparazione di M7 e con un file delle partite ancora precedente alla 026. */
@@ -98,11 +104,13 @@ export function regaliDellaPartita(partita: number, confidente?: string): Regalo
   const conChiavi = chiaviDisponibili();
   const c = colonne();
   const righe = prepared(`SELECT ${c.has('id') ? 'id' : 'NULL AS id'}, confidente_chiave, regalo, ${conChiavi ? 'catalogo_chiave' : 'NULL AS catalogo_chiave'},
-      ${c.has('copia_consumata') ? 'copia_consumata' : '0 AS copia_consumata'}, ${c.has('modo') ? 'modo' : "'consegna' AS modo"}
+      ${c.has('copia_consumata') ? 'copia_consumata' : '0 AS copia_consumata'}, ${c.has('modo') ? 'modo' : "'consegna' AS modo"},
+      ${c.has('data_gioco') ? 'data_gioco' : 'NULL AS data_gioco'}, ${c.has('fascia_gioco') ? 'fascia_gioco' : 'NULL AS fascia_gioco'}
     FROM regalo_partita WHERE partita_id = ?${confidente === undefined ? '' : ' AND confidente_chiave = ?'} ORDER BY fatto_at, rowid`)
-    .all(partita, ...(confidente === undefined ? [] : [confidente])) as Array<{ id: number | null; confidente_chiave: string; regalo: string; catalogo_chiave: string | null; copia_consumata: number; modo: string }>;
+    .all(partita, ...(confidente === undefined ? [] : [confidente])) as Array<{ id: number | null; confidente_chiave: string; regalo: string; catalogo_chiave: string | null; copia_consumata: number; modo: string;
+      data_gioco: string | null; fascia_gioco: string | null }>;
   return righe.map((r) => ({ id: r.id, confidente: r.confidente_chiave, nome: r.regalo, catalogo: r.catalogo_chiave, copiaConsumata: r.copia_consumata === 1,
-    modo: r.modo === 'cartolina' ? 'cartolina' : 'consegna' }));
+    modo: r.modo === 'cartolina' ? 'cartolina' : 'consegna', dataGioco: r.data_gioco, fasciaGioco: r.fascia_gioco }));
 }
 
 /** Ondata 5: i dati di una consegna nuova dell'azione «Regala». */

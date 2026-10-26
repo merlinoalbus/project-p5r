@@ -18,6 +18,9 @@ import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { copieDellOggetto } from './copieOggetti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
+import { CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO } from '../../shared/regali.js';
+import { confidentiRegalabili, ranghiConfidenti } from './partiteService.js';
+import { reazioneInElenco } from './regaloAzioneService.js';
 
 export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
@@ -103,7 +106,8 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   if (partita !== undefined) verificaPartita(partita);
   const riga = rigaOggetto(chiave); const oggetto = dtoOggetto(riga);
   const inVendita = offerteDellOggetto(chiave, partita);
-  const regalati = new Set(partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave).map((r) => r.confidente));
+  const consegneOggetto = partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave);
+  const regalati = new Set(consegneOggetto.map((r) => r.confidente));
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
   // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
   const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
@@ -140,5 +144,31 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,
     partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false,
       // ondata 5 (D2): le copie possedute, regalate e rimaste, per la finestra «Regala» (si regala una copia che c'è, senza ricomprarla)
-      copie: copieDellOggetto(partita, chiave) } };
+      copie: copieDellOggetto(partita, chiave),
+      // revisione dei lotti D e D2: ogni consegna di questo oggetto (anche fuori elenco e la Cartolina) si vede e si annulla dalla scheda, e
+      // l'oggetto si dà a chiunque lo possa ricevere adesso, non solo a chi lo ha nell'elenco
+      ...consegneEDestinatari(partita, chiave, oggetto.categoria, regalo, consegneOggetto) } };
+}
+
+/**
+ * Le consegne dell'oggetto nella partita (con il nome del Confidente) e i Confidenti a cui si può dare adesso, con le stesse regole del server
+ * (`regaloAzioneService.regala`): ricevono regali (`confidente.regalabile`), sono già stati incontrati (rango 1 o più), l'oggetto è un regalo o
+ * è nel loro elenco, e la Cartolina non va a chi è al rango massimo. La reazione è quella dell'elenco, +1 fuori elenco; la Cartolina +1.
+ */
+function consegneEDestinatari(partita: number, chiave: string, categoria: string, regalo: Array<{ confidente: string; reazione: ReazioneRegalo | null }>,
+  consegne: ReturnType<typeof regaliDellaPartita>): NonNullable<Pick<NonNullable<OggettoDettaglioDto['partita']>, 'consegne' | 'destinatari'>> {
+  const nomi = new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome]));
+  const ranghi = ranghiConfidenti(partita);
+  const inElenco = new Set(regalo.map((r) => r.confidente));
+  const regalabili = new Set(confidentiRegalabili());
+  const cartolina = chiave === CARTOLINA;
+  // nell'ordine del gioco (quello dei ranghi); la reazione la calcola la stessa funzione dell'azione, così la scheda dice ciò che il regalo darà
+  const destinatari = [...ranghi].filter(([c, rango]) => regalabili.has(c) && (categoria === 'regalo' || inElenco.has(c)) && rango >= 1 && !(cartolina && rango >= 10))
+    .map(([c, rango]) => ({ confidente: c, nome: nomi.get(c) ?? c, rango,
+      reazione: cartolina ? REAZIONE_CARTOLINA : reazioneInElenco(c, chiave) ?? REAZIONE_FUORI_ELENCO }));
+  return {
+    consegne: consegne.map((r) => ({ id: r.id, catalogo: r.catalogo, nome: r.nome, modo: r.modo, dataGioco: r.dataGioco, fasciaGioco: r.fasciaGioco,
+      confidente: r.confidente, nomeConfidente: nomi.get(r.confidente) ?? r.confidente })),
+    destinatari,
+  };
 }

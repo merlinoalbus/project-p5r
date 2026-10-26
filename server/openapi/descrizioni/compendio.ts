@@ -117,7 +117,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave': {
     sommario: 'Scheda completa di un Confidente',
-    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), regali consigliati (con `ordine` e `modificato`) e sconsigliati (`regaliSconsigliati`: `ordine`, `nome`, `modificato`; l’indirizzo per correggerli è `<confidente>:<ordine>` su `/api/correzioni/regalo`), disponibilità, note e fonti. I regali collegati leggono nome dal catalogo, prezzo minimo/massimo e dove dai listini visibili, comprese le sedi aggiuntive. `nomeStorico` e `nota` conservano le indicazioni precedenti; senza offerte il costo resta indicazione della guida (`listinoCollegato: false`), non un prezzo di vendita corrente. Dati di gioco, senza stato di partita né disponibilità commerciale presunta.',
+    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), i regali dell’elenco (`regali`, con `ordine`, `modificato` e, dall’ondata 5, la `reazione` +3/+2/+1, dalla più alta; l’indirizzo per correggerli è `<confidente>:<ordine>` su `/api/correzioni/regalo`; non ci sono più regali «sconsigliati»: ogni altro oggetto regalo vale +1) e se il Confidente riceve regali (`regalabile`), disponibilità, note e fonti. I regali collegati leggono nome dal catalogo, prezzo minimo/massimo e dove dai listini visibili, comprese le sedi aggiuntive: con un listino `dove` e `costo` sono soltanto quelli delle offerte; senza offerte il testo della guida resta l’indicazione (`listinoCollegato: false`), non un prezzo di vendita corrente. `nomeStorico` e `nota` conservano le indicazioni precedenti. Dati di gioco, senza stato di partita né disponibilità commerciale presunta.',
     risposta: '`ConfidenteDettaglioDto`; dopo M7 aggiunge oggettiRicompensa per chiave, con quantità, nota delle condizioni e casa. Sono doni ricevuti dal Confidente, separati dai regali graditi da consegnare; nessun ottenimento o rango viene registrato dalla lettura.',
     errori: [[404, 'confidente-non-trovato']],
   },
@@ -281,7 +281,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/completamento': {
     sommario: 'Trofei e sezioni di completamento della guida',
-    descrizione: 'Trofei in ordine con le sezioni di consultazione (finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, differenze di Royal, gestione del tempo). Con `?partita=` ogni trofeo dice se è ottenuto e `ottenuti` li conta; senza, sono tutti non ottenuti.',
+    descrizione: 'Trofei in ordine con le sezioni di consultazione (finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, differenze di Royal, gestione del tempo). Con `?partita=` ogni trofeo dice se è ottenuto e `ottenuti` li conta; senza, sono tutti non ottenuti. Ondata 5 (migrazione 258): una sfida del Covo che l\'app sa contare ha `conteggio` (la sfida «Benefattore»: i regali, obiettivo 10) e, con `?partita=`, `progresso` (`fatti`, `obiettivo`, `raggiunta`): contano tutti i regali della partita, Cartolina spedita compresa.',
     risposta: '`CompletamentoDto`; dopo M7 le righe del Covo possono aggiungere oggettiRicompensa per chiave. Arredi e gallerie non diventano oggetti di inventario. I due premi finali mantengono requisiti e ritiro in nota, senza presumerli ottenuti.',
     errori: [[404, 'completamento-non-disponibile'], PARTITA_NON_TROVATA],
   },

@@ -38,11 +38,11 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
 }
 
-/** I regali consegnati di persona nella partita (la Cartolina spedita non è un dono consegnato a un ritrovo: utente 052, `modo`). */
+/** I regali della partita, tutti: la guida dice «almeno 10 regali totali ai Confidenti» e non esclude nessun regalo, quindi conta anche la
+ *  Cartolina spedita (revisione dei lotti D e D2: escluderla era una regola senza fonte). */
 function regaliConsegnati(partitaId: number): number {
-  const colonne = (prepared('PRAGMA utente.table_info(regalo_partita)').all() as Array<{ name: string }>).map((c) => c.name);
-  if (!colonne.length) return 0;
-  return prepared(`SELECT COUNT(*) FROM regalo_partita WHERE partita_id = ?${colonne.includes('modo') ? " AND modo = 'consegna'" : ''}`).pluck().get(partitaId) as number;
+  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'regalo_partita'").get()) return 0;
+  return prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ?').pluck().get(partitaId) as number;
 }
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */

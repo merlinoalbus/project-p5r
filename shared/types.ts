@@ -731,6 +731,9 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** L13 (decisione 18): gli oggetti del catalogo che, regalati adesso con l'acquisto, non scalano il prezzo: una consegna data prima che gli yen
    *  si muovessero da soli, tolta e ridata nello stesso momento di gioco (il suo prezzo era già nel saldo). Assente se nessuno. */
   regaliYenGiaNelSaldo?: string[];
+  /** Ondata 5 (revisione dei lotti D e D2): tutte le consegne della partita a questo Confidente, dalla più vecchia, anche quelle fuori elenco e
+   *  la Cartolina spedita: la scheda del Confidente le elenca e annulla quella precisa (`id`). */
+  consegne?: ConsegnaRegaloDto[];
   /** Ondata 5 (RG-11): il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae): solo allora c'è «Regala».
    *  Si regala un qualunque oggetto regalo del catalogo, con la reazione della guida (+1 se non è nell'elenco del Confidente). */
   regalabile: boolean;
@@ -3638,7 +3641,27 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   lettura: { tipo: 'libro'; voce: LibroDto; letturaRapida: boolean } | { tipo: 'film'; voce: FilmDto } | { tipo: 'videogioco'; voce: VideogiocoDto } | null;
   /** Nella partita. `copie` (ondata 5, decisione 21: «regalo ripetibile con consumo di copie e oggetti dei set posseduti»): le copie
    *  possedute (comprate, ricevute da una voce del Diario o dentro un set comprato), quelle già regalate e quelle che restano. */
-  partita: { acquistato: boolean; regalato: boolean; letto: boolean; copie?: CopieOggettoDto } | null;
+  partita: {
+    acquistato: boolean; regalato: boolean; letto: boolean; copie?: CopieOggettoDto;
+    /** Ondata 5 (revisione dei lotti D e D2): le consegne di questo oggetto nella partita, a qualunque Confidente (anche fuori elenco, anche la
+     *  Cartolina spedita), dalla più vecchia: la scheda le elenca e annulla quella precisa. */
+    consegne?: Array<ConsegnaRegaloDto & { confidente: string; nomeConfidente: string }>;
+    /** I Confidenti a cui l'oggetto si può dare adesso (ricevono regali, già incontrati; la Cartolina non a chi è al rango massimo), con la
+     *  reazione (+1 fuori elenco). Vuoto se l'oggetto non è un regalo. */
+    destinatari?: Array<{ confidente: string; nome: string; reazione: ReazioneRegalo; rango: number }>;
+  } | null;
+}
+
+/** Ondata 5: una consegna di un regalo nella partita (una riga di `regalo_partita`). `id` è null su un file delle partite di prima della 052;
+ *  `catalogo` è null per un regalo segnato per nome senza oggetto del catalogo. */
+export interface ConsegnaRegaloDto {
+  id: number | null;
+  catalogo: string | null;
+  /** Il nome storico della consegna (resta quello anche se l'oggetto si rinomina). */
+  nome: string;
+  modo: 'consegna' | 'cartolina';
+  dataGioco: string | null;
+  fasciaGioco: string | null;
 }
 
 /** Ondata 5: le copie di un oggetto nella partita, per i regali. `disponibili` non scende mai sotto zero. */

@@ -10,7 +10,7 @@
 
 import { useDettaglioConfidente } from './useDettaglioConfidente';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
-import { testoReazione } from '../../../shared/regali';
+import { fraIGraditi, testoReazione } from '../../../shared/regali';
 
 /** Quanti regali mostrare in breve prima del «+ altri». */
 const REGALI_VISIBILI = 4;
@@ -26,7 +26,8 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
   const { dati } = useDettaglioConfidente(c.chiave);
   if (!dati) return null;
   const abilita = c.rango < 10 ? dati.abilita.filter((a) => a.rango === c.rango + 1) : [];
-  const ordinati = [...dati.regali].sort((a, b) => Number(consegnato(c, a)) - Number(consegnato(c, b)));
+  // revisione dei lotti D e D2: le righe a +1 valgono quanto ogni altro regalo e non sono «graditi» (stesso criterio della scheda del Confidente)
+  const ordinati = dati.regali.filter(fraIGraditi).sort((a, b) => Number(consegnato(c, a)) - Number(consegnato(c, b)));
   const visibili = ordinati.slice(0, REGALI_VISIBILI);
   const altri = ordinati.length - visibili.length;
   if (abilita.length === 0 && ordinati.length === 0) return null;
@@ -48,7 +49,7 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
               const fatto = consegnato(c, g);
               return (
                 <li key={`${g.ordine}-${i}`} className={`chip ${fatto ? 'line-through opacity-60' : ''}`} title={fatto ? 'Già consegnato in questa partita' : undefined}>
-                  {g.nome}{g.reazione !== null ? <span className="tabular-nums"> · {testoReazione(g.reazione)}</span> : null}{fatto && <span className="sr-only"> (già consegnato)</span>}
+                  {g.nome}{g.reazione !== null ? <span className="tabular-nums"> · <span className="sr-only">reazione </span>{testoReazione(g.reazione)}</span> : null}{fatto && <span className="sr-only"> (già consegnato)</span>}
                 </li>
               );
             })}

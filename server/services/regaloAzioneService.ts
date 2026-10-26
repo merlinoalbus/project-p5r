@@ -35,7 +35,7 @@ import { aggiornaConfidente, confidente as confidenteDellaPartita } from './part
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { consegnaDaAnnullare, inserisciConsegna, togliConsegna } from './regaliPartita.js';
 import { annullaRigaDelRegistro, impostaAcquisto } from './negoziService.js';
-import { muoviYenAutomatico, regaloYenGiaNelSaldo } from './yenAutomaticiService.js';
+import { muoviYenAutomatico, usaRegaloDiPrima } from './yenAutomaticiService.js';
 import { copieDellOggetto } from './copieOggetti.js';
 import { meteoOra } from './meteoService.js';
 import { REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, eReazione, modoDelRegalo, testoReazione } from '../../shared/regali.js';
@@ -129,8 +129,9 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     if (articolo) {
       const prezzo = (prepared('SELECT prezzo FROM articolo WHERE chiave = ?').get(articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
       // la consegna di prima degli yen automatici, tolta e ridata nello stesso momento di gioco, è la stessa consegna corretta: il suo prezzo
-      // era già nel saldo e non si scala (`regaloYenGiaNelSaldo`); in un altro momento è un regalo nuovo e si paga
-      if (prezzo != null && prezzo > 0 && !regaloYenGiaNelSaldo(partitaId, confidente, catalogo)) muoviYenAutomatico(partitaId, causa, -prezzo, `Regalo comprato: ${oggetto.nome}`);
+      // era già nel saldo e non si scala; in un altro momento è un regalo nuovo e si paga. Revisione dell'ondata 5: il segno si consuma
+      // (`usaRegaloDiPrima`), perché lo stesso oggetto si può ridare: una seconda copia nello stesso momento si paga; togliendo questa consegna torna
+      if (prezzo != null && prezzo > 0 && !usaRegaloDiPrima(partitaId, confidente, catalogo, id)) muoviYenAutomatico(partitaId, causa, -prezzo, `Regalo comprato: ${oggetto.nome}`);
     }
     const quando = momento.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
     const comeDato = modo === 'cartolina' ? 'Cartolina spedita a' : 'Regalo a';

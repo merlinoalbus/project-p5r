@@ -202,13 +202,17 @@ describe('API', () => {
     const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, rango: 3 });
     // Ryuji al rango 3 ha bisogno di 30 punti per il rango 4
     expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro', punti: 0, puntiNecessari: 30, mancanti: 30 });
-    // Note della risposta: 2 note = 10 punti base; con Persona dell'arcano ×1,5 → 15; regalo 50 × 1,5 × 1,2 (esame top 10) = 90
+    // Note della risposta: 2 note = 10 punti base; con Persona dell'arcano ×1,5 → 15
     const dueNote = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 2 });
     expect(dueNote.body.data).toMatchObject({ punti: 10, mancanti: 20, personaArcanoInScorta: false });
     const conArcano = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 1, bonusArcano: true });
     expect(conArcano.body.data).toMatchObject({ punti: 17.5, mancanti: 12.5 });
-    const regalo = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ regalo: true, bonusArcano: true, esame: 'top10' });
-    expect(regalo.body.data).toMatchObject({ punti: 107.5, mancanti: 0 });
+    // ondata 5 (revisione dei lotti D e D2): il regalo senza oggetto non c'è più, è l'azione «Regala» (POST /regali): 400 `usa-regala`, punti fermi
+    const regalo = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ regalo: true, bonusArcano: true });
+    expect(regalo.status).toBe(400);
+    expect(regalo.body.error.code).toBe('usa-regala');
+    const aMano = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: 90 });
+    expect(aMano.body.data).toMatchObject({ punti: 107.5, mancanti: 0 });
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 1, regalo: true })).status).toBe(400);
     const corretto = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: -100 });
     expect(corretto.body.data).toMatchObject({ punti: 7.5, mancanti: 22.5 });

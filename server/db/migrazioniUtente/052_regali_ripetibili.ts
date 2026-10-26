@@ -13,8 +13,8 @@
 //     segnato anche l'acquisto (`acquisto_articolo`) avevano usato la copia comprata per loro: 1; le altre 0 (non si data niente alla cieca);
 //   - `registro_id`: la riga del registro degli acquisti (utente 051) che la consegna ha creato segnando l'acquisto, per toglierla esatta
 //     annullando il regalo; null per le consegne di prima;
-//   - `modo`: «consegna» (a un ritrovo) o «cartolina» (spedita dalla cassetta di Yongen-Jaya, guida dei regali): la sfida «Benefattore» conta
-//     solo le consegne. Le righe di prima sono consegne;
+//   - `modo`: «consegna» (a un ritrovo) o «cartolina» (spedita dalla cassetta di Yongen-Jaya, guida dei regali). Le righe di prima sono
+//     consegne;
 //   - `causa_yen`: la causa del movimento automatico degli yen di questa consegna (decisione 18). Per le righe di prima è quella di sempre,
 //     «Confidente:nome storico»; null vale quella (una riga rimessa dal Cestino senza la colonna). Le consegne nuove ne hanno una propria con
 //     il loro `id`, così due regali dello stesso oggetto non si restituiscono a vicenda.
