@@ -147,7 +147,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       ))}
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
-      {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: <TestoNote testo={a.note} daParole /></span>}
+      {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: <TestoNote testo={a.note} daParole="guida" /></span>}
       {/* la paga dei turni i cui yen erano già nel saldo da prima (effetto per effetto, `produceTesto[i]` è l'effetto `i`): il fatto, senza la
           promessa di un movimento; la paga mossa dalla spunta la dice il chip del movimento */}
       {a.fatta && pagheGiaNelSaldo.map((t, i) => <span key={`${i}:${t}`} className="testo-12 text-text-muted tabular-nums">{t}</span>)}

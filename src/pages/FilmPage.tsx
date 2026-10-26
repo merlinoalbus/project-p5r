@@ -141,7 +141,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
         {!film.negozi?.length && film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{formattaYen(film.prezzo)}</dd></>}
       </dl>
       {film.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{film.notaPrezzo}</p>}
-      {film.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={film.dettagli} daParole /></p>}
+      {film.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={film.dettagli} daParole="conteggi" /></p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(film.chiave); setPosizioneSelezionata(0); }} aria-label={`Mostra posizione di ${titolo}`} />

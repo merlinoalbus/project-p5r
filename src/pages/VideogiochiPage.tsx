@@ -79,7 +79,7 @@ function Scheda({ g, partitaId, onSalvata, onCorretto, onPosizione }: { g: Video
         {g.negozi.length === 0 && g.costo !== null && g.costo > 0 && <><dt className="text-text-muted">Costo</dt><dd className="m-0">{formattaYen(g.costo)}</dd></>}
       </dl>
       {g.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{g.notaPrezzo}</p>}
-      {g.dettagli && <p className="m-0 whitespace-pre-line text-xs text-text-secondary"><TestoNote testo={g.dettagli} daParole /></p>}
+      {g.dettagli && <p className="m-0 whitespace-pre-line text-xs text-text-secondary"><TestoNote testo={g.dettagli} daParole="conteggi" /></p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />}
           titolo="Mostra posizione" onClick={onPosizione} aria-label={`Mostra posizione di ${g.nome}`} />

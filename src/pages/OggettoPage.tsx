@@ -104,8 +104,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           <section className="card order-3 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="descrizione-oggetto">
             <TitoloSezione id="descrizione-oggetto">Che cosa fa</TitoloSezione>
             {o.nomeOriginale && <p className="m-0 testo-13 text-text-secondary">Nome originale: {o.nomeOriginale}</p>}
-            {o.effetto && <p className="m-0 whitespace-pre-line testo-13"><TestoNote testo={o.effetto} daParole /></p>}
-            {o.descrizione && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={o.descrizione} daParole /></p>}
+            {o.effetto && <p className="m-0 whitespace-pre-line testo-13"><TestoNote testo={o.effetto} daParole="conteggi" /></p>}
+            {o.descrizione && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={o.descrizione} daParole="conteggi" /></p>}
             <NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={() => dati.ricarica()} />
             {!o.effetto && !o.descrizione && <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>}
             {o.statistiche && <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 testo-13">{Object.entries(o.statistiche).filter(([k, v]) => k !== 'effetti' && v !== null && (typeof v === 'number' || typeof v === 'string')).map(([k, v]) =>

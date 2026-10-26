@@ -18,6 +18,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { FilaScelta } from './FilaScelta';
 import { CampiEffettoVoce } from './CampiEffettoVoce';
 import { IconaCategoria } from './IconaCategoria';
@@ -139,7 +140,7 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
                   <span className="flex min-w-0 items-start gap-2">
                     <IconaCategoria categoria={CATEGORIA_EFFETTO[b.tipo]} dimensione={24} />
                     <span className="min-w-0 flex-1 testo-13 break-words">
-                      {effettoCompleto(b) && !manca.length ? fraseEffetto(b, nomi) : `${NOME_FAMIGLIA_EFFETTO[b.tipo]}: da completare`}
+                      {effettoCompleto(b) && !manca.length ? <TestoNote testo={fraseEffetto(b, nomi)} /> : `${NOME_FAMIGLIA_EFFETTO[b.tipo]}: da completare`}
                       {pe.giaPresente && <span className="text-text-muted"> (c’è già sulla voce: non si aggiunge due volte)</span>}
                     </span>
                   </span>
@@ -176,7 +177,7 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
         <div className="flex flex-col gap-1">
           <span className="testo-13 text-text-secondary">Toglie</span>
           <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5 testo-13">
-            {p.togli.map((t) => <li key={t.uid} className="break-words">{t.effetto ? fraseEffetto(t.effetto, nomi) : 'Un effetto che non è più sulla voce'}</li>)}
+            {p.togli.map((t) => <li key={t.uid} className="break-words">{t.effetto ? <TestoNote testo={fraseEffetto(t.effetto, nomi)} /> : 'Un effetto che non è più sulla voce'}</li>)}
           </ul>
         </div>
       )}

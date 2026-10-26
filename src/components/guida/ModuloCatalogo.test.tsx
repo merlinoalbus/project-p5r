@@ -190,7 +190,7 @@ it('dichiara che cosa alza un’attività come elenco di effetti, con la Dote e 
   fireEvent.click(tessera('Quando', 'Di sera'));
   fireEvent.click(screen.getByRole('button', { name: /Aggiungi un effetto/ }));
   scegliVoce('Quale Dote', 'Coraggio');
-  scegliVoce('Quante note (♪)', '3 note');
+  scegliVoce('Quante note', '3 note');
   expect(screen.getByText(/Effetto 1:/)).toHaveTextContent(/coraggio ♪♪♪/i);
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('attivita', expect.objectContaining({

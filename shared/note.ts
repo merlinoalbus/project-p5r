@@ -77,20 +77,27 @@ export function testoNoteAParole(testo: string): string {
 const CONTEGGIO_A_PAROLE = /(?<![\d.,])(?:\+\s?)?[1-4](?!\d)(?:(?:\s*[/,–-]\s*|\s+[oe]\s+)(?:\+\s?)?[1-4](?!\d))*\s+not[ae]\b/giu;
 
 /**
- * Il nome di una Dote seguito da «+N» senza unità («Conoscenza +1 nota, Fascino +1» delle domande in classe): «+1» dopo una Dote è un
- * numero di note. Non prende «Perizia +2 punti», «+1 rango», «+10%».
+ * Il nome di una Dote seguito da «+N» senza unità («Conoscenza +1 nota, Fascino +1» delle domande in classe, «Perizia +2» delle voci
+ * della guida): nei testi della GUIDA «+N» dopo una Dote è un numero di note (la convenzione «+N = N note», la stessa con cui
+ * `server/db/conversioneEffettiAzione.ts` ne ha ricavato gli effetti). Non prende «Perizia +2 punti», «+1 rango», «+10%». Fuori dalla
+ * guida non vale: nelle ricevute che il server scrive nello storico «Fascino +3 (♪♪) da segnare nelle Doti», «Incontro con X:
+ * Coraggio +2» il numero sono punti (`d.delta`), e scriverlo come note direbbe il falso.
  */
 const DOTE_PIU = new RegExp(`\\b(${DOTI_SOCIALI.map((d) => d.nome).join('|')}) \\+([1-4])(?!\\d)(?!\\s*(?:punt|rang|%))`, 'gu');
 
 /**
- * Le note che un testo libero scrive a parole («Conoscenza +1 nota», «Fino a 3 note», «1 nota base per sessione; fino a 3 note»,
- * «+1/+2/+3 note», «1, 2 o 3 note») mostrate come simboli («Conoscenza ♪», «Fino a ♪♪♪», «♪/♪♪/♪♪♪», «♪, ♪♪ o ♪♪♪»). Solo per la
- * vista: il testo salvato non cambia (nessuna migrazione). Si usa sui campi che parlano delle Doti (ricompense delle domande, dettagli
- * di attività, libri, film e videogiochi, eventi dello storico), dove un numero di note è sempre un numero di note della Dote; il
- * risultato si mostra con `TestoNote`, che dice le file di ♪ a parole ai lettori di schermo.
+ * Le note che un testo libero scrive a parole («Fino a 3 note», «1 nota base per sessione; fino a 3 note», «+1/+2/+3 note», «1, 2 o 3
+ * note», «Conoscenza +1 nota») mostrate come simboli («Fino a ♪♪♪», «♪/♪♪/♪♪♪», «♪, ♪♪ o ♪♪♪», «Conoscenza ♪»). Solo per la vista: il
+ * testo salvato non cambia (nessuna migrazione). Il risultato si mostra con `TestoNote`, che dice le file di ♪ a parole ai lettori di
+ * schermo.
+ *
+ * Due ampiezze, perché lo stesso «+N» non vuol dire ovunque la stessa cosa:
+ * - di base solo i conteggi con la parola «nota»/«note»: valgono in ogni campo che parla delle Doti (dettagli di attività, libri, film e
+ *   videogiochi, oggetti, eventi dello storico);
+ * - `guida: true` anche «Dote +N» senza unità (`DOTE_PIU`): solo per i testi della guida che la usano per le note (note delle voci del
+ *   Diario, ricompense delle domande, premi degli esami).
  */
-export function noteInSimboli(testo: string): string {
-  return testo
-    .replace(CONTEGGIO_A_PAROLE, (m) => m.replace(/\s+not[ae]$/iu, '').replace(/\+\s?/gu, '').replace(/[1-4]/gu, (d) => simboliNote(Number(d))))
-    .replace(DOTE_PIU, (_, dote: string, n: string) => `${dote} ${simboliNote(Number(n))}`);
+export function noteInSimboli(testo: string, opz: { guida?: boolean } = {}): string {
+  const conteggi = testo.replace(CONTEGGIO_A_PAROLE, (m) => m.replace(/\s+not[ae]$/iu, '').replace(/\+\s?/gu, '').replace(/[1-4]/gu, (d) => simboliNote(Number(d))));
+  return opz.guida ? conteggi.replace(DOTE_PIU, (_, dote: string, n: string) => `${dote} ${simboliNote(Number(n))}`) : conteggi;
 }

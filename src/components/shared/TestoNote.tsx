@@ -25,11 +25,13 @@ export function Note({ n }: { n: number }) {
 
 /**
  * Un testo con le sue file di ♪ rese accessibili; senza simboli, il testo così com'è. `daParole`: il testo è libero (scritto nella guida
- * o registrato prima dei simboli) e i suoi conteggi a parole («+1 nota», «fino a 3 note») si mostrano prima come simboli
- * (`noteInSimboli`, solo vista); va usato soltanto sui campi che parlano delle Doti.
+ * o registrato prima dei simboli) e le sue note a parole si mostrano prima come simboli (`noteInSimboli`, solo vista); va usato soltanto
+ * sui campi che parlano delle Doti. `'conteggi'`: solo i conteggi con la parola «nota»/«note» («+1 nota», «fino a 3 note»), per i
+ * campi dove un «Dote +N» può essere in punti (storico, oggetti, attività, letture). `'guida'`: anche «Dote +N» senza unità, per i
+ * testi della guida che con «+N» intendono le note (note delle voci, ricompense delle domande, premi degli esami).
  */
-export function TestoNote({ testo: dato, daParole = false }: { testo: string; daParole?: boolean }) {
-  const testo = daParole ? noteInSimboli(dato) : dato;
+export function TestoNote({ testo: dato, daParole }: { testo: string; daParole?: 'conteggi' | 'guida' }) {
+  const testo = daParole ? noteInSimboli(dato, { guida: daParole === 'guida' }) : dato;
   const pezzi = pezziTestoNote(testo);
   if (pezzi.length === 1 && 'testo' in pezzi[0]) return <>{testo}</>;
   return <>{pezzi.map((p, i) => ('testo' in p ? <Fragment key={i}>{p.testo}</Fragment> : <SimboliNote key={i} simboli={p.simboli} parole={p.parole} />))}</>;

@@ -147,8 +147,9 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
               <time dateTime={e.createdAt} className="max-sm:flex-1 sm:shrink-0 sm:w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
               {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
               <div className="max-sm:order-last max-sm:basis-full flex-1 min-w-0">
-                <div className="font-semibold break-words"><TestoNote testo={e.titolo} daParole /></div>
-                {e.dettaglio && <div className="text-text-secondary"><TestoNote testo={e.dettaglio} daParole /></div>}
+                {/* «conteggi»: lo storico vecchio «+1 nota» diventa «♪», ma «Fascino +3 (♪♪) da segnare nelle Doti» resta: lì +3 sono punti */}
+                <div className="font-semibold break-words"><TestoNote testo={e.titolo} daParole="conteggi" /></div>
+                {e.dettaglio && <div className="text-text-secondary"><TestoNote testo={e.dettaglio} daParole="conteggi" /></div>}
                 <div className="testo-12 text-text-muted">
                   {e.tipoNome}
                   {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary-testo">{e.personaNomeIt}</Link></>}

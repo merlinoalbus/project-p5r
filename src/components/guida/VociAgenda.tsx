@@ -41,7 +41,7 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazio
         <span>{e.azione}</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="chip testo-12 chip--attivo">{NOME_TIPO_EVENTO[e.genere]}</span>
-          {e.note && <span className="testo-12 text-text-secondary"><TestoNote testo={e.note} daParole /></span>}
+          {e.note && <span className="testo-12 text-text-secondary"><TestoNote testo={e.note} daParole="guida" /></span>}
         </span>
         {dichiarazioni}
       </div>

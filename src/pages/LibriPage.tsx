@@ -134,7 +134,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
         {libro.negozi.length === 0 && libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : formattaYen(libro.prezzo)}</dd></>}
       </dl>
       {libro.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{libro.notaPrezzo}</p>}
-      {libro.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={libro.dettagli} daParole /></p>}
+      {libro.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={libro.dettagli} daParole="conteggi" /></p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(libro.chiave); setFonteSelezionata(0); }} />

@@ -81,7 +81,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
       </div>}
       {valore?.famiglia === 'dote' && <div className="grid gap-2 sm:grid-cols-2">
         {scelta('Quale Dote', valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote }))}
-        <Selettore etichetta="Quante note (♪)" valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={NOTE_OGGETTO} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
+        <Selettore etichetta="Quante note"valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={NOTE_OGGETTO} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
       </div>}
       {/* A chi è gradito: i Confidenti come interruttori (i nomi sono quelli che la frase mostra). Un
           nome salvato che non è più fra i Confidenti resta acceso e si può spegnere. */}
