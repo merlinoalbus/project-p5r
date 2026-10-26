@@ -46,6 +46,8 @@ import { alternativeDellaVoceFatta, contenutoArticoli, effettiInAlternativa, inc
 import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce, type EffettoPerYen } from './yenAutomaticiService.js';
 import { applicatoDallaSpunta } from './applicatoDallaSpunta.js';
 import { yenDelDato } from './yenDeiDati.js';
+import { fasciaDellaVoce } from './prezziArticoli.js';
+import type { FasciaPrezzo } from '../../shared/catalogo.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -90,11 +92,13 @@ const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT no
  * `i`), e il riepilogo per gruppi che la pagina mostra («Il gioco dà», richiesta dell'utente del 2026-10-25: «formattarlo in modo adeguato,
  * per tutti gli acquisti»). Il totale degli articoli sta nel riepilogo (gruppo «Acquisti · negozio»), non più in una riga «In tutto» in coda.
  */
-function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenGiaNelSaldo: ReadonlySet<string> = new Set(), fatta?: { comprati: ReadonlySet<string>; daScegliere: ReadonlySet<string> }): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
+function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenGiaNelSaldo: ReadonlySet<string> = new Set(), fatta?: { comprati: ReadonlySet<string>; daScegliere: ReadonlySet<string> }, fascia?: FasciaPrezzo | null): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
   // L13 (decisione 4): gli articoli in alternativa (Set A o Set B) e che cosa contengono; a voce fatta (`fatta.comprati`, gli articoli che la
   // spunta ha segnato) fra le alternative resta solo quella comprata, salvo quelle aggiunte dopo la spunta (`fatta.daScegliere`), da scegliere
   const contenuti = contenutoArticoli(fonte.effetti.flatMap(({ effetto: e }) => (e.tipo === 'articolo' ? [e.articolo] : [])));
-  const nomiRiepilogo: NomiRiepilogoEffetti = { ...nomiDelRiepilogo(nomi), incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) };
+  // Ondata 5 (lotto E, decisione 5): il prezzo di un articolo è quello della fascia della voce, lo stesso che la spunta scala
+  // (`motoreDiario.yenDellEffetto`): di sera le sfide della Big Bang Burger costano 500 ¥
+  const nomiRiepilogo: NomiRiepilogoEffetti = { ...nomiDelRiepilogo(nomi, fascia), incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) };
   // L13 (decisione 18): gli effetti i cui yen erano già nel saldo da prima (per posizione, come gli effetti del riepilogo)
   const vecchi = new Set(fonte.effetti.flatMap((x, i) => (yenGiaNelSaldo.has(x.uid) ? [i] : [])));
   return {
@@ -121,8 +125,8 @@ function quesitoDellaDomanda(id: number): QuesitoRiepilogoEffetti | undefined {
   return { domanda: r.domanda, tipo: r.tipo, risposte };
 }
 /** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
-function nomiDelRiepilogo(nomi: NomiEffettiAzione): NomiRiepilogoEffetti {
-  return { frase: nomiFraseEffetto(), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
+function nomiDelRiepilogo(nomi: NomiEffettiAzione, fascia?: FasciaPrezzo | null): NomiRiepilogoEffetti {
+  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
@@ -153,7 +157,7 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo (decisione 18: spuntando la voce si scala da solo dal saldo, `motoreDiario.yenDellEffetto`)
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
-      const a = articoloConNome(e.articolo), q = e.quantita ?? 1;
+      const a = nomiFrase.articolo(e.articolo), q = e.quantita ?? 1;
       return a ? `Acquisto: ${a.nome}${q > 1 ? ` ×${q}` : ''}${a.prezzo ? ` · ¥${(a.prezzo * q).toLocaleString('it-IT')}` : ''}` : fraseEffettoConNomi(e, nomiFrase);
     }
     // R12-01/1: tutti gli altri effetti che citano un oggetto per chiave (evento di storia, Persona, domanda, cruciverba, invito, Richiesta), pesca e Fortuna: la frase con i nomi, la stessa dell'editor
@@ -263,7 +267,8 @@ export function decisioniApertePerVoce(partitaId: number, voceUid: string): numb
  * `effettiInAlternativa`: senza riga non sono stati scelti, e il riepilogo della voce li dice comprati o da scegliere).
  */
 function statiNonApplicatiDellaVoce(p: number, fonte: StatoEffettiVoceDto): NonNullable<AzionePercorsoDto['statiNonApplicati']> {
-  const nomi = nomiFraseEffetto();
+  // Ondata 5 (lotto E): il prezzo dell'articolo nella frase è quello della fascia della voce, lo stesso che la spunta scala
+  const nomi = nomiFraseEffetto(fasciaDellaVoce(fonte.voceUid));
   const inAlternativa = effettiInAlternativa(fonte.effetti);
   return fonte.effetti.flatMap(({ uid, effetto: e }): NonNullable<AzionePercorsoDto['statiNonApplicati']> => {
     if (!eEffettoDiStato(e) || inAlternativa.has(uid)) return [];
@@ -326,7 +331,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
-    ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined) : null),
+    ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined, fasciaDi(r)) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa

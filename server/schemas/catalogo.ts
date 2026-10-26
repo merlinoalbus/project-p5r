@@ -12,7 +12,7 @@ import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shar
 import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 import { LIMITI_QUIZ, normalizzaQuiz } from '../../shared/quizAttivita.js';
-import { LIMITI_COSTO_OGGETTO } from '../../shared/catalogo.js';
+import { LIMITI_COSTO_OGGETTO, normalizzaPrezzoPerFascia } from '../../shared/catalogo.js';
 import { normalizzaEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { normalizzaRifornimento } from '../../shared/rifornimento.js';
 
@@ -52,6 +52,9 @@ const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify
 const testo = (max: number) => z.string().trim().max(max);
 export const costoScambio = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('fiori'), importo: z.number().int().min(0).max(LIMITI_COSTO_OGGETTO.fiori) }).strict(),
+  // Ondata 5 (lotto E): le monete del Casinò (Palazzo di Niijima) e i punti negozio (Vestiti usati)
+  z.object({ tipo: z.literal('monete'), importo: z.number().int().min(0).max(LIMITI_COSTO_OGGETTO.importo) }).strict(),
+  z.object({ tipo: z.literal('punti'), importo: z.number().int().min(0).max(LIMITI_COSTO_OGGETTO.importo) }).strict(),
   z.object({ tipo: z.literal('oggetti'), oggetti: z.array(z.object({ chiave: testo(600).min(1), quantita: z.number().int().min(1).max(LIMITI_COSTO_OGGETTO.quantita) }).strict())
     .min(1).max(LIMITI_COSTO_OGGETTO.componenti).refine((v) => new Set(v.map((o) => o.chiave)).size === v.length, 'Ogni oggetto ceduto va indicato una sola volta.') }).strict(),
 ]);
@@ -113,6 +116,10 @@ export const datiArticolo = z.object({
   oggetto_chiave: testo(200).nullable().optional(),
   catalogo_chiave: z.string().trim().min(1).max(600).nullable().optional(),
   costo_json: costoScambio.nullable().optional().transform((v) => v == null ? v : JSON.stringify(v)),
+  // Ondata 5 (lotto E, decisione 5): il prezzo in yen di una fascia quando è diverso da `prezzo` (`shared/catalogo.ts`). null = nessuno.
+  prezzo_per_fascia_json: z.unknown().superRefine((v, ctx) => {
+    if (v !== null && normalizzaPrezzoPerFascia(v) === null) ctx.addIssue({ code: 'custom', message: 'Prezzo per fascia non valido: un prezzo intero per «giorno» o «sera».' });
+  }).transform((v) => (v === null ? null : JSON.stringify(normalizzaPrezzoPerFascia(v)))).optional(),
   // Restano per l'articolo **generico**, quello che nessun archivio conosce e che nasce dentro il
   // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
   // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:

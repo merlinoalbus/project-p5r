@@ -42,7 +42,8 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
     <span className="flex w-full flex-col gap-1.5">
       {perGruppo(esiti).map((g) => (
         <span key={g.gruppo ?? '-'} className="flex flex-col gap-1" role="group" aria-label={g.gruppo ?? 'Esiti'}>
-          {g.gruppo && <span className="text-text-secondary tabular-nums">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}, ${prezzoGiaNelSaldo ? 'già nel saldo da prima che gli yen si muovessero da soli (non si scala)' : 'si scala da solo dal saldo (mai sotto zero)'}` : ''}</span>}
+          {/* Ondata 5 (lotto E): il prezzo della fascia della voce (o della partita, al contatore), quello che si scala davvero */}
+          {g.gruppo && <span className="text-text-secondary tabular-nums">{g.gruppo}{g.esiti[0]?.articolo?.prezzoNelMomento != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzoNelMomento)}, ${prezzoGiaNelSaldo ? 'già nel saldo da prima che gli yen si muovessero da soli (non si scala)' : 'si scala da solo dal saldo (mai sotto zero)'}` : ''}</span>}
           <span className="flex flex-wrap gap-1.5">
             {g.esiti.map((e) => {
               const idMotivo = `${prefisso}-motivo-${e.chiave}`;

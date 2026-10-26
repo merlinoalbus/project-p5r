@@ -45,7 +45,7 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
   // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
   negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'note'],
-  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
+  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
@@ -298,7 +298,8 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     if (!conCatalogo) { delete d.catalogo_chiave; delete d.costo_json; }
     else if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
     const chiave = 'catalogo_chiave' in d ? d.catalogo_chiave : esistente?.catalogo_chiave;
-    if (d.costo_json != null) d.prezzo = null;
+    // uno scambio non ha prezzo in yen, né in una fascia (Ondata 5, lotto E)
+    if (d.costo_json != null) { d.prezzo = null; d.prezzo_per_fascia_json = null; }
     if (conCatalogo && typeof chiave === 'string') {
       // Questi campi sono solo residui storici: non si copiano né si corregge l'identità dal listino.
       for (const c of ['nome', 'categoria', 'per', 'effetto_json', 'effetto', 'statistiche']) delete d[c];
@@ -610,7 +611,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   // (`giorni_json` e `giorni` del luogo non ci sono più, L11 migrazione 184: i giorni sono gli orari del luogo.)
   const predefinito = (c: string): unknown => c === 'verificato' ? 1 : null;
   // Un'istantanea anteriore a L5/M7 non azzera orari, Area o il legame canonico aggiunti dopo.
-  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo', 'esiti_json', 'rifornimento_json']);
+  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo', 'esiti_json', 'rifornimento_json', 'prezzo_per_fascia_json']);
   const campi = campiDisponibili(tipo).filter((c) => c in originale || !campiSuccessivi.has(c));
   if (tipo === 'articolo' && campi.includes('catalogo_chiave') && typeof originale.catalogo_chiave === 'string'
     && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(originale.catalogo_chiave)) {

@@ -1,6 +1,6 @@
 // Proposte e legami: ogni gesto riguarda una fonte e, se ha più contenuti, soltanto il gruppo scelto.
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { casaOggetto, eCategoriaOggetto } from '../../shared/catalogo.js';
+import { casaOggetto, eCategoriaOggetto, testoCostoAImporto } from '../../shared/catalogo.js';
 import { leggiCondizioniSalvate, descriviRequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { PropostaAbbinamentoDto, TipoPropostaOggetto, OggettiGuidaDto } from '../../shared/types.js';
 import { rettificaPropostaOggetto as modificaSchema, type DatiLegameOggetto, type DatiPropostaOggetto, type RettificaPropostaOggetto as Modifica } from '../schemas/catalogoOggetti.js';
@@ -71,7 +71,8 @@ function testoFonte(tipo: TipoPropostaOggetto, chiave: string, nomi: ReturnType<
   const nome = typeof r.catalogo_nome === 'string' ? r.catalogo_nome : String(r.nome || 'Offerta senza oggetto collegato');
   if (tipo === 'articolo') {
     const costo = costoOggetto(typeof r.costo_json === 'string' ? r.costo_json : null);
-    const prezzo = r.costo_json != null ? costo?.tipo === 'fiori' ? `${costo.importo.toLocaleString('it-IT')} fiori`
+    // fiori, monete del Casinò, punti negozio (Ondata 5, lotto E): l'importo con la sua valuta
+    const prezzo = r.costo_json != null ? costo && costo.tipo !== 'oggetti' ? testoCostoAImporto(costo)
       : costo?.tipo === 'oggetti' ? costo.oggetti.map((o) => `${o.quantita} × ${o.nome ?? 'Oggetto non disponibile'}`).join(', ') : 'Costo di scambio non leggibile'
       : typeof r.prezzo === 'number' ? `${r.prezzo.toLocaleString('it-IT')} ¥` : 'Prezzo non indicato';
     return { nome, testo: [nome, prezzo, ...leggiCondizioniSalvate(typeof r.condizioni_json === 'string' ? r.condizioni_json : null).map((c) => descriviRequisitoSpillo(c, nomi))].join(' · ') };

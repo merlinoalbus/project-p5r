@@ -10,7 +10,7 @@ import { tracciamentoPerTipo } from '../../../../shared/attivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
 import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
 import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
-import { normalizzaCostoScambio } from '../../../../shared/catalogo';
+import { normalizzaCostoScambio, normalizzaPrezzoPerFascia, type PrezzoPerFascia } from '../../../../shared/catalogo';
 import { normalizzaEsitiAttivita } from '../../../../shared/esitiAttivita';
 import { normalizzaRifornimento, type RegolaRifornimento } from '../../../../shared/rifornimento';
 import type { TipoCatalogo } from '../../../types';
@@ -57,6 +57,9 @@ export const articolo: DefinizioneModulo = {
     negozio_chiave: testoDi(e?.dati.negozio_chiave) || negozioChiave || '',
     nome: testoDi(e?.dati.nome), categoria: testoDi(e?.dati.categoria) || 'altro',
     prezzo: numeroDi(e?.dati.prezzo), quantita: numeroDi(e?.dati.quantita), per: (e?.dati.per as string | null) ?? null,
+    // Ondata 5 (lotto E, decisione 5): il prezzo della sera quando è diverso (le sfide della Big Bang Burger); le altre fasce salvate restano
+    prezzo_sera: normalizzaPrezzoPerFascia(e?.dati.prezzo_per_fascia_json ?? null)?.sera ?? null,
+    _prezzoPerFasciaIniziale: normalizzaPrezzoPerFascia(e?.dati.prezzo_per_fascia_json ?? null),
     // Ondata 5 (decisione 21): la regola di rifornimento (null = nessuna regola); `quantita` sono i pezzi per ciclo. Si rimanda solo se
     // modificata (`_rifornimentoModificato`): una regola salvata che il modulo non sa leggere (`_rifornimentoNonLeggibile`) non si
     // cancella salvando un altro campo, come il costo dello scambio
@@ -76,12 +79,20 @@ export const articolo: DefinizioneModulo = {
   // Un collegamento non disponibile resta salvabile senza modificarlo; una nuova offerta sceglie un'identità.
   valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && testoDi(d.nome).trim().length > 0))
     && (d._costoModificato !== true || d.costo_json == null || normalizzaCostoScambio(d.costo_json) !== null)
-    && (d._rifornimentoModificato !== true || d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null),
+    && (d._rifornimentoModificato !== true || d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null)
+    && (numeroDi(d.prezzo_sera) === null || (Number.isSafeInteger(numeroDi(d.prezzo_sera)) && numeroDi(d.prezzo_sera)! >= 0)),
   prepara: (d) => {
     const chiave = testoOnull(d.catalogo_chiave);
     const corpo: Dati = { negozio_chiave: d.negozio_chiave, quantita: numeroDi(d.quantita), nota: testoOnull(d.nota), verificato: d.verificato };
     if (d._rifornimentoModificato === true) corpo.rifornimento_json = (d.rifornimento_json as RegolaRifornimento | null) ?? null;
-    if (d.costo_json == null) corpo.prezzo = numeroDi(d.prezzo);
+    if (d.costo_json == null) {
+      corpo.prezzo = numeroDi(d.prezzo);
+      // il prezzo della sera si rimanda solo se cambiato: le altre fasce già salvate non si perdono
+      const iniziale = (d._prezzoPerFasciaIniziale as PrezzoPerFascia | null) ?? null;
+      const sera = numeroDi(d.prezzo_sera);
+      const nuovo = normalizzaPrezzoPerFascia({ ...(iniziale ?? {}), sera: sera ?? undefined });
+      if ((nuovo?.sera ?? null) !== (iniziale?.sera ?? null)) corpo.prezzo_per_fascia_json = nuovo;
+    }
     if (d._costoModificato === true) {
       const costo = normalizzaCostoScambio(d.costo_json);
       if (d.costo_json != null && !costo) throw new Error('Completa il costo dello scambio prima di salvare.');

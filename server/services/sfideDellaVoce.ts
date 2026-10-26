@@ -9,6 +9,8 @@
 // turno ha già mosso i suoi yen, e la regola si legge da ciò che è in vigore. Qui le letture comuni, perché salvataggio, approvazione e
 // anteprima dell'approvazione dicano la stessa cosa della spunta. Per l'anteprima vale anche la ricompensa di una Richiesta dell'elenco del
 // passato (`ricompensaGiaNelSaldo`: in una spunta di prima degli yen automatici era già nel saldo tenuto a mano, e non si conta di nuovo).
+// Ondata 5 (lotto E, decisione 5): il prezzo di un articolo e della sfida di un turno è quello della fascia della voce
+// (`prezziArticoli.prezzoDellArticolo`: di sera le sfide della Big Bang Burger costano 500 ¥, un dato dell'articolo).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -17,6 +19,7 @@ import { normalizzaEffettoVoce, eEffettoDiStato } from '../../shared/effettiVoce
 import { yenDellaSfidaDelTurno } from './attivitaService.js';
 import { effettiConYenGiaNelSaldo, effettoDiUnaSpuntaDiPrima, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { statoGiaVero } from './effettiDiStatoService.js';
+import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
 
 /** Un turno con la sfida di un articolo, registrato dalla spunta della voce: `effettoUid` dell'effetto «turno» (null per le spunte di prima
  *  delle ricevute per effetto, lette dalla fotografia della spunta). */
@@ -42,11 +45,13 @@ function turniConEsito(x: unknown): Array<{ attivita: string; ordine: number; es
 /** I turni della spunta della voce nella partita che pagano la sfida di un articolo: dalle ricevute in vigore e dalla fotografia della spunta. */
 export function sfideDellaVoce(p: number, voceUid: string): SfidaDellaVoce[] {
   const out = new Map<string, SfidaDellaVoce>();
+  // Ondata 5 (lotto E, decisione 5): la sfida si paga al prezzo della fascia della voce (500 ¥ di sera), come alla spunta
+  const fascia = fasciaDellaVoce(voceUid);
   const aggiungi = (effettoUid: string | null, porzione: unknown): void => {
     for (const t of turniConEsito(porzione)) {
       const chiave = `${t.attivita}:${t.ordine}`;
       if (out.get(chiave)?.effettoUid) continue;
-      const y = yenDellaSfidaDelTurno(t.attivita, t.esito);
+      const y = yenDellaSfidaDelTurno(t.attivita, t.esito, fascia);
       if (y) out.set(chiave, { attivita: t.attivita, ordine: t.ordine, articolo: y.articolo, importo: y.importo, motivo: y.motivo, effettoUid });
     }
   };
@@ -103,7 +108,8 @@ export function yenPrevistiApprovando(p: number, voceUid: string, effettoUid: st
   if (yenFuoriRegistro(p, causa) || effettiConYenGiaNelSaldo(p, voceUid, [{ uid: effettoUid, tipo: 'articolo', chiave: null }]).has(effettoUid)) return 0;
   if (turnoHaPagatoLArticolo(p, voceUid, e.articolo)) return 0;
   if (statoGiaVero(p, e) && !altraVoceHaLArticolo(p, e.articolo, voceUid)) return 0;
-  const prezzo = (prepared('SELECT prezzo FROM main.articolo WHERE chiave = ?').get(e.articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
+  // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce, lo stesso che scala la spunta (`motoreDiario.yenDellEffetto`)
+  const prezzo = prezzoDellArticolo(e.articolo, fasciaDellaVoce(voceUid));
   return prezzo != null && prezzo > 0 ? -prezzo * (e.quantita ?? 1) : 0;
 }
 

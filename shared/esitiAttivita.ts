@@ -19,6 +19,7 @@
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
 import { simboliNote } from './note.js';
 import { normalizzaCondizioniSpillo, type RequisitoSpillo } from './condizioniSpillo.js';
+import type { PrezzoPerFascia } from './catalogo.js';
 
 export interface DoteEsito { dote: DoteChiave; note: 1 | 2 | 3 }
 export interface EsitoAttivita {
@@ -130,7 +131,10 @@ export type SceltaEsitoSpunta =
 export interface EsitoDisponibileDto {
   chiave: string; nome: string; gruppo: string | null; premi: string | null;
   doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }>;
-  articolo: { chiave: string; nome: string; prezzo: number | null } | null;
+  /** Ondata 5 (lotto E): `prezzo` è quello del listino, `prezzoPerFascia` il prezzo di una fascia quando è diverso (le sfide della Big Bang
+   *  Burger costano 500 ¥ di sera), `prezzoNelMomento` quello che si scala nella fascia dello stato (la voce del Diario, o la partita per
+   *  il contatore; senza stato vale `prezzo`). Lo calcola il server con la stessa regola della spunta (`prezzoNellaFascia`). */
+  articolo: { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; prezzoNelMomento: number | null } | null;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */
@@ -147,6 +151,7 @@ export interface EsitiAttivitaDto {
 export interface OpzioneAlternativaDto {
   /** L'UID dell'effetto «articolo» della voce: è la scelta che la spunta manda. */
   effettoUid: string;
+  /** `prezzo`: quello della fascia della voce, lo stesso che la spunta scala (Ondata 5, lotto E). */
   articolo: { chiave: string; nome: string; prezzo: number | null };
   /** Le copie dell'effetto (1 se la voce non le dice). */
   quantita: number;

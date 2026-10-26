@@ -5,11 +5,13 @@
 import type { OpzioneSelettore } from '../components/shared/Selettore';
 import { EVENTI_STORIA } from '../../shared/condizioniSpillo';
 import { formatoYen } from '../../shared/effettiVoce';
-import type { ElenchiAzioneDto, ElenchiEffettiVoceDto } from '../types';
+import { fasceConPrezzoDiverso } from '../../shared/catalogo';
+import type { ElenchiAzioneDto, ElenchiEffettiVoceDto, FasciaGioco } from '../types';
 import { dataGiocoTesto } from './dateGioco';
 
 /** Gli elenchi da cui si sceglie, più il giorno della voce (le domande di quel giorno vengono per prime). */
-export interface ElenchiVoce { azione: ElenchiAzioneDto; effetti: ElenchiEffettiVoceDto; giorno: string }
+/** `fascia` (Ondata 5, lotto E): la fascia della voce che si modifica, quando c'è; i prezzi degli articoli sono allora quelli di quella fascia. */
+export interface ElenchiVoce { azione: ElenchiAzioneDto; effetti: ElenchiEffettiVoceDto; giorno: string; fascia?: FasciaGioco }
 
 export const breve = (t: string, n = 80): string => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 
@@ -37,7 +39,9 @@ export function opzioniDomande(el: ElenchiVoce, corrente: number | null): Opzion
  */
 export const opzioniArticoli = (e: ElenchiEffettiVoceDto, negozio?: string, giorno?: string): OpzioneSelettore[] => {
   const o = e.articoli.filter((a) => !a.nascosto && (!negozio || a.negozio === negozio)).map((a) => {
-    const dettaglio = [a.prezzo !== null ? formatoYen(a.prezzo) : '', a.giorno ? dataGiocoTesto(a.giorno) : ''].filter(Boolean).join(' · ');
+    // Ondata 5 (lotto E): il prezzo di una fascia diverso dal listino accanto («¥1.200 · di sera ¥500»), solo se c'è
+    const fasce = a.prezzo !== null ? fasceConPrezzoDiverso(a.prezzo, a.prezzoPerFascia).map((x) => `${x.fascia === 'sera' ? 'di sera' : 'di giorno'} ${formatoYen(x.prezzo)}`) : [];
+    const dettaglio = [a.prezzo !== null ? formatoYen(a.prezzo) : '', ...fasce, a.giorno ? dataGiocoTesto(a.giorno) : ''].filter(Boolean).join(' · ');
     return { chiave: a.chiave, nome: a.nome, ...(dettaglio ? { dettaglio } : {}), gruppo: giorno && a.giorno === giorno ? 'Di questo giorno' : a.negozioNome };
   });
   // l'ordinamento è stabile: dentro i due gruppi resta l'ordine del catalogo

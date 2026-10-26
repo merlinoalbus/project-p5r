@@ -29,6 +29,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
 import { risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
 import { effettiInAlternativa, risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
+import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
@@ -117,7 +118,9 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
     const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
     const copie=x.quantita??1;
-    return a?.prezzo!=null&&a.prezzo>0?spesa(a.prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
+    // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera)
+    const prezzo=a?prezzoDellArticolo(x.articolo,fasciaDellaVoce(uid)):null;
+    return a&&prezzo!=null&&prezzo>0?spesa(prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
   }
   if(x.tipo==='acquisto'&&ricevuta?.creato){
     const a=prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,String(ricevuta.ricevuta.acquistoId)) as {prezzo_yen:number}|undefined;
@@ -249,7 +252,9 @@ function verificaFamiglie(uid:string,cambi:readonly CambioStato[],prima:readonly
   }
 }
 /** La frase dell'effetto di stato con i nomi (la stessa del «Il gioco dà»), per l'esito del salvataggio e per l'elenco del passato. */
-export const fraseDelloStato=(e:EffettoDiStatoVoce):string=>fraseEffettoConNomi(e,nomiFraseEffetto());
+// Ondata 5 (lotto E): con la voce, il prezzo di un articolo è quello della sua fascia (500 ¥ di sera per le sfide della Big Bang Burger), lo
+// stesso che la spunta scala (`yenDellEffetto`)
+export const fraseDelloStato=(e:EffettoDiStatoVoce,voceUid?:string):string=>fraseEffettoConNomi(e,nomiFraseEffetto(voceUid?fasciaDellaVoce(voceUid):undefined));
 /**
  * L13 (decisione 19, «Subito al salvataggio»): nella partita `p`, che ha la spunta della voce, gli effetti di stato cambiati nella guida valgono
  * subito, con il «prima» registrato come alla spunta (togliendo la spunta si annullano come gli altri):
@@ -292,7 +297,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
           yenDellArticoloSuVoceSpuntata(p,uid,nuovo,vecchioGiaNelSaldo);
         })))();
         const gia=leggiJsonRegistro<{gia?:boolean}|null>(riga.prima_json,'stato prima dell’acquisto')?.gia===true;
-        esito(c.effettoUid,gia?'gia-presente':'segnato',fraseDelloStato(articolo));
+        esito(c.effettoUid,gia?'gia-presente':'segnato',fraseDelloStato(articolo,uid));
         continue;
       }
     }
@@ -318,7 +323,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
         return aveva||c1;
       }))();
       if(!c.nuovo){
-        const frase=vecchio.tipo==='fortuna'?fraseEffettoConNomi(vecchio,nomiFraseEffetto()):fraseDelloStato(vecchio);
+        const frase=vecchio.tipo==='fortuna'?fraseEffettoConNomi(vecchio,nomiFraseEffetto()):fraseDelloStato(vecchio,uid);
         // tolto, oppure rimasto perché modificato dopo la spunta (un esemplare in scorta): in tutti e due i casi lo si dice
         if(tolto)esito(c.effettoUid,'annullato',frase,undefined,avvisiAnnullo);
         else if(avvisiAnnullo.length)esito(c.effettoUid,'resta',frase,undefined,avvisiAnnullo);
@@ -332,7 +337,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
         // altrimenti la nuova versione dice tutto, e gli avvisi, se ci sono, li porta lei
         const scortaTolta=stessa&&vecchio.tipo==='persona'&&!!vecchio.scorta&&!(resta?.tipo==='persona'&&resta.scorta);
         if(!stessa||scortaTolta){
-          esito(c.effettoUid,'annullato',!stessa||vecchio.tipo!=='persona'?fraseDelloStato(vecchio):`Aggiunta alla scorta: ${nomiFraseEffetto().persona(vecchio.persona)??'la Persona'}`,undefined,avvisiAnnullo);
+          esito(c.effettoUid,'annullato',!stessa||vecchio.tipo!=='persona'?fraseDelloStato(vecchio,uid):`Aggiunta alla scorta: ${nomiFraseEffetto().persona(vecchio.persona)??'la Persona'}`,undefined,avvisiAnnullo);
           avvisiAnnullo=[];
         }
       }
@@ -344,7 +349,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       continue;
     }
     if(e.tipo==='articolo'&&inAlternativa.has(c.effettoUid)){
-      esito(c.effettoUid,'non-applicato',fraseDelloStato(e),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnane l’acquisto dalla pagina del negozio');
+      esito(c.effettoUid,'non-applicato',fraseDelloStato(e,uid),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnane l’acquisto dalla pagina del negozio');
       continue;
     }
     // decisione 18, la nozione unica per effetto (letta PRIMA di scrivere la riga nuova): l'articolo che corregge lo stesso effetto (stesso uid:
@@ -361,13 +366,13 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
         return fatto;
       })))();
       // gli avvisi della scrittura (la scorta oltre la capienza) e quelli dell'annullo della versione di prima non ancora detti
-      esito(c.effettoUid,r.esito==='gia-presente'?'gia-presente':'segnato',fraseDelloStato(e),undefined,[...avvisiAnnullo,...r.avvisi]);
+      esito(c.effettoUid,r.esito==='gia-presente'?'gia-presente':'segnato',fraseDelloStato(e,uid),undefined,[...avvisiAnnullo,...r.avvisi]);
     } catch(err) {
       if(!(err instanceof HttpError)||err.status>=500)throw err;
-      creaPropostaEffettoStorico(p,uid,c.effettoUid,undefined,{passato:{descrizione:fraseDelloStato(e),motivo:`Non applicato al salvataggio della voce: ${err.message}`}});
+      creaPropostaEffettoStorico(p,uid,c.effettoUid,undefined,{passato:{descrizione:fraseDelloStato(e,uid),motivo:`Non applicato al salvataggio della voce: ${err.message}`}});
       // «da approvare» solo se la proposta c'è davvero (revisione B2): una con la stessa configurazione già tolta dall'utente dall'elenco non torna
       const inElenco=!!prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").get(p,causa.chiave);
-      esito(c.effettoUid,inElenco?'da-approvare':'non-applicato',fraseDelloStato(e),inElenco?err.message:`${err.message}; non torna nell’elenco della partita, perché l’avevi già tolto`,avvisiAnnullo);
+      esito(c.effettoUid,inElenco?'da-approvare':'non-applicato',fraseDelloStato(e,uid),inElenco?err.message:`${err.message}; non torna nell’elenco della partita, perché l’avevi già tolto`,avvisiAnnullo);
     }
   }
   yenDelleSfideRimaste(p,uid,articoliRestituiti);

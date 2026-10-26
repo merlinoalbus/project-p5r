@@ -1305,7 +1305,7 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
                   : <span className="w-5 shrink-0 text-center">{a.comprato && !ripetibile(a) ? '✓' : ''}</span>}
                 <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !ripetibile(a) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
-                <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
+                <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
                 {a.disponibilita && a.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={a.disponibilita} compatto />}
                 {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
                 {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
@@ -1500,7 +1500,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                       </span>
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">
-                        <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
+                        <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
                         {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
                             del contrario era una contraddizione scritta due volte sulla stessa riga. */}
                         {a.disponibilita && a.disponibilita.stato !== 'disponibile'

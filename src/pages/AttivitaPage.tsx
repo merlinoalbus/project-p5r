@@ -45,6 +45,7 @@ import { eGiornoDelQuiz } from '../../shared/quizAttivita';
 import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
 import { TestoNote } from '../components/shared/TestoNote';
 import { simboliNote } from '../../shared/note';
+import { fasceConPrezzoDiverso } from '../../shared/catalogo';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -53,6 +54,14 @@ type Scheda = (typeof SCHEDE)[number][0];
 function Effetti({ testi }: { testi: string[] }) {
   if (testi.length === 0) return null;
   return <span className="flex flex-wrap gap-1">{testi.map((t, i) => <span key={i} className="chip chip--attivo"><TestoNote testo={t} /></span>)}</span>;
+}
+
+/** Ondata 5 (lotto E, decisione 5): il prezzo dell'articolo della prova come nel listino, con quello di una fascia diversa accanto («¥1.200,
+ *  di sera ¥500»): registrando il turno si scala quello della fascia (della voce, o della partita). */
+function testoPrezzoEsito(a: NonNullable<NonNullable<AttivitaDto['esiti']>['esiti'][number]['articolo']>): string {
+  if (a.prezzo == null) return 'prezzo non indicato';
+  const fasce = fasceConPrezzoDiverso(a.prezzo, a.prezzoPerFascia).map((x) => `${x.fascia === 'sera' ? 'di sera' : 'di giorno'} ${x.prezzo === 0 ? 'gratis' : formattaYen(x.prezzo)}`);
+  return [formattaYen(a.prezzo), ...fasce].join(', ');
 }
 
 /**
@@ -71,7 +80,7 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
         : 'L’esito vale da solo secondo il giorno: spuntando la voce (o premendo +) l’app registra quello giusto.'}</p>
       {gruppi.map((g) => (
         <div key={g.gruppo ?? '-'} className="flex min-w-0 flex-col gap-0.5">
-          {g.gruppo && <span className="font-semibold">{g.gruppo}{g.esiti[0]?.articolo ? ` · ${g.esiti[0].articolo.prezzo != null ? formattaYen(g.esiti[0].articolo.prezzo) : 'prezzo non indicato'}` : ''}</span>}
+          {g.gruppo && <span className="font-semibold">{g.gruppo}{g.esiti[0]?.articolo ? ` · ${testoPrezzoEsito(g.esiti[0].articolo)}` : ''}</span>}
           <ul className="m-0 pl-4">
             {g.esiti.map((e) => (
               <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>

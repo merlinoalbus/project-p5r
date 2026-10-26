@@ -344,7 +344,7 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): N
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
     throw err;
   }
-  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti,
+  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nome, categoria: a.categoria, prezzo: a.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null, disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti,
     // Ondata 5 (decisione 21): regola, scorta della sede del pin e acquisti per chiave, come nella pagina del negozio («Compra», «Annulla»)
     rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}), acquistiRegistrati: a.acquistiRegistrati ?? [] })) };
 }

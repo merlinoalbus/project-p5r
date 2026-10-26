@@ -28,7 +28,7 @@ import { disponibilitaArticoloNelloStato } from './negoziService.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
 import { effettiAggiuntiDopo } from './yenAutomaticiService.js';
 // il nome dell'articolo come lo vede l'utente: la stessa lettura degli elenchi e delle frasi (import ciclico solo di funzioni, mai usate al caricamento)
-import { articoloConNome } from './azioniStrutturateService.js';
+import { articoloConNome, articoloNellaFascia } from './azioniStrutturateService.js';
 
 type SceltaAlternativa = Extract<SceltaEsitoSpunta, { tipo: 'alternativa' }>;
 
@@ -104,7 +104,8 @@ export function scelteAlternativeDellaVoce(effetti: readonly EffettoVoceDto[], s
     const negozio = primo.effetto.articolo.includes('/') ? primo.effetto.articolo.slice(0, primo.effetto.articolo.indexOf('/')) : primo.effetto.articolo;
     const negozioNome = (prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(negozio) as string | undefined) ?? null;
     const opzioni = g.map((e): OpzioneAlternativaDto => {
-      const a = articoloConNome(e.effetto.articolo);
+      // Ondata 5 (lotto E): il prezzo della fascia della voce (lo stato è al suo momento), lo stesso che la spunta scala
+      const a = articoloNellaFascia(e.effetto.articolo, st.fasciaGioco);
       const motivo = motivoNonDisponibile(e.effetto.articolo, st);
       return {
         effettoUid: e.uid, articolo: { chiave: e.effetto.articolo, nome: a?.nome ?? 'Articolo non più nel catalogo', prezzo: a?.prezzo ?? null },

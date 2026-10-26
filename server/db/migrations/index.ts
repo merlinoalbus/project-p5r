@@ -267,6 +267,16 @@ import { migration255 } from './255_reazione_dei_regali.js';
 import { migration256 } from './256_reazioni_dei_regali.js';
 import { migration257 } from './257_copie_dei_regali.js';
 import { migration258 } from './258_benefattore_conteggio.js';
+// Ondata 5, lotto E (prezzi): blocco 260-269
+import { migration260 } from './260_prezzo_per_fascia_degli_articoli.js';
+import { migration261 } from './261_costi_in_monete_e_punti.js';
+import { migration262 } from './262_big_bang_burger_prezzo_di_sera.js';
+import { migration263 } from './263_offerte_mancanti_dei_prezzi_orfani.js';
+import { migration264 } from './264_note_storiche_dei_prezzi_discordanti.js';
+import { migration265 } from './265_prezzi_tolti_dalle_descrizioni.js';
+import { migration266 } from './266_prezzi_copiati_di_libri_e_videogiochi.js';
+import { migration267 } from './267_abbonamento_di_scarlet_nei_dvd.js';
+import { migration268 } from './268_prezzi_copiati_negli_effetti.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -285,4 +295,5 @@ export const migrations: Migration[] = [
   migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165, migration166, migration167, migration168, migration169, migration170, migration171, migration172, migration173, migration174, migration175, migration176, migration177, migration178, migration179, migration180, migration181, migration182, migration183, migration184, migration185, migration186, migration187, migration188, migration189, migration190, migration191, migration192, migration193, migration194, migration195, migration196, migration197, migration198, migration199, migration200, migration201, migration202, migration203, migration204, migration205, migration206, migration207, migration208, migration209, migration210, migration211, migration212, migration213, migration214, migration215, migration216, migration217, migration218, migration219, migration220, migration221, migration222, migration223, migration224, migration225, migration226, migration227, migration228, migration229, migration230, migration231, migration232, migration233, migration234, migration235, migration236, migration237, migration238, migration239, migration240, migration241, migration242, migration243, migration244, migration245, migration246, migration247, migration248, migration249,
   migration250, migration251, migration252, migration253,
   migration255, migration256, migration257, migration258,
+  migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
 ];

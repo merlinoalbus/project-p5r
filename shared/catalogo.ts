@@ -2,10 +2,29 @@
 import { slug } from './slug.js';
 import { eCategoriaArticolo, type CategoriaArticolo } from './articoli.js';
 
-/** Il costo appartiene all'offerta; i nomi degli oggetti ceduti non si salvano nel JSON. */
-export type CostoScambioOggetto = { tipo: 'fiori'; importo: number }
+/** Il costo appartiene all'offerta; i nomi degli oggetti ceduti non si salvano nel JSON.
+ *  Ondata 5 (lotto E, decisione 21): oltre ai fiori di Jose e agli oggetti da cedere, le monete del Casinò (negozio del Palazzo di Niijima)
+ *  e i punti negozio di Vestiti usati, che prima vivevano solo in prosa nella nota dell'offerta. */
+export type CostoScambioOggetto = { tipo: TipoCostoAImporto; importo: number }
   | { tipo: 'oggetti'; oggetti: Array<{ chiave: string; quantita: number }> };
-export const LIMITI_COSTO_OGGETTO = { fiori: 9_999_999, quantita: 999_999, componenti: 40 } as const;
+/** I costi che sono una quantità di una valuta che non è lo yen. */
+export const TIPI_COSTO_A_IMPORTO = ['fiori', 'monete', 'punti'] as const;
+export type TipoCostoAImporto = (typeof TIPI_COSTO_A_IMPORTO)[number];
+/** Il nome della valuta, come si legge accanto all'importo («350 monete», «30 punti»). */
+export const VALUTA_COSTO: Readonly<Record<TipoCostoAImporto, { nome: string; scelta: string }>> = {
+  fiori: { nome: 'fiori', scelta: 'Fiori' },
+  monete: { nome: 'monete', scelta: 'Monete del Casinò' },
+  punti: { nome: 'punti', scelta: 'Punti negozio' },
+};
+export const LIMITI_COSTO_OGGETTO = { fiori: 9_999_999, importo: 9_999_999, quantita: 999_999, componenti: 40 } as const;
+
+export function eCostoAImporto(tipo: unknown): tipo is TipoCostoAImporto {
+  return typeof tipo === 'string' && (TIPI_COSTO_A_IMPORTO as readonly string[]).includes(tipo);
+}
+/** «350 monete», «1.200 monete», «30 punti», «70 fiori». */
+export function testoCostoAImporto(costo: { tipo: TipoCostoAImporto; importo: number }): string {
+  return `${costo.importo.toLocaleString('it-IT')} ${VALUTA_COSTO[costo.tipo].nome}`;
+}
 
 /** Null significa «non leggibile», non prezzo zero. Non aggrega o corregge componenti ambigui. */
 export function normalizzaCostoScambio(valore: unknown): CostoScambioOggetto | null {
@@ -13,7 +32,7 @@ export function normalizzaCostoScambio(valore: unknown): CostoScambioOggetto | n
   if (typeof v === 'string') { try { v = JSON.parse(v) as unknown; } catch { return null; } }
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
   const r = v as Record<string, unknown>;
-  if (r.tipo === 'fiori') return typeof r.importo === 'number' && Number.isSafeInteger(r.importo) && r.importo >= 0 && r.importo <= LIMITI_COSTO_OGGETTO.fiori ? { tipo: 'fiori', importo: r.importo } : null;
+  if (eCostoAImporto(r.tipo)) return typeof r.importo === 'number' && Number.isSafeInteger(r.importo) && r.importo >= 0 && r.importo <= LIMITI_COSTO_OGGETTO.importo ? { tipo: r.tipo, importo: r.importo } : null;
   if (r.tipo !== 'oggetti' || !Array.isArray(r.oggetti) || !r.oggetti.length || r.oggetti.length > LIMITI_COSTO_OGGETTO.componenti) return null;
   const oggetti: Array<{ chiave: string; quantita: number }> = [];
   const chiavi = new Set<string>();
@@ -25,6 +44,46 @@ export function normalizzaCostoScambio(valore: unknown): CostoScambioOggetto | n
     chiavi.add(o.chiave); oggetti.push({ chiave: o.chiave, quantita: o.quantita });
   }
   return { tipo: 'oggetti', oggetti };
+}
+
+/** Le due fasce della giornata in cui un'offerta può avere un prezzo proprio (le voci del Diario hanno solo queste). */
+export type FasciaPrezzo = 'giorno' | 'sera';
+/**
+ * Ondata 5 (lotto E, decisione 5): il prezzo di un'offerta in una fascia, quando è diverso da `articolo.prezzo` (le sfide della Big Bang
+ * Burger costano 500 ¥ di sera). È un dato dell'offerta, in un punto solo (`articolo.prezzo_per_fascia_json`); la fascia che non compare
+ * vale `prezzo`. Un oggetto vuoto non è un prezzo: si normalizza a null.
+ */
+export type PrezzoPerFascia = Partial<Record<FasciaPrezzo, number>>;
+
+/** Null = nessun prezzo per fascia (o un valore non leggibile: allora vale `prezzo`, mai «gratis»). */
+export function normalizzaPrezzoPerFascia(valore: unknown): PrezzoPerFascia | null {
+  let v: unknown = valore;
+  if (typeof v === 'string') { try { v = JSON.parse(v) as unknown; } catch { return null; } }
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const r = v as Record<string, unknown>;
+  if (Object.keys(r).some((k) => k !== 'giorno' && k !== 'sera')) return null;
+  const out: PrezzoPerFascia = {};
+  for (const f of ['giorno', 'sera'] as const) {
+    const p = r[f];
+    if (p === undefined) continue;
+    if (typeof p !== 'number' || !Number.isSafeInteger(p) || p < 0 || p > LIMITI_COSTO_OGGETTO.importo) return null;
+    out[f] = p;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+/** Il prezzo in yen dell'offerta nella fascia: quello della fascia se c'è, altrimenti `prezzo`. Senza fascia nota vale `prezzo`. */
+export function prezzoNellaFascia(prezzo: number | null, perFascia: unknown, fascia: string | null | undefined): number | null {
+  if (fascia !== 'giorno' && fascia !== 'sera') return prezzo;
+  return normalizzaPrezzoPerFascia(perFascia)?.[fascia] ?? prezzo;
+}
+
+/** Le fasce in cui l'offerta costa diversamente da `prezzo`, nell'ordine giorno, sera: solo quelle (ripetere lo stesso importo non
+ *  direbbe niente). È la stessa scelta in ogni vista che mostra il prezzo del listino senza conoscere la fascia. */
+export function fasceConPrezzoDiverso(prezzo: number | null, perFascia: unknown): Array<{ fascia: FasciaPrezzo; prezzo: number }> {
+  const p = normalizzaPrezzoPerFascia(perFascia);
+  if (!p) return [];
+  return (['giorno', 'sera'] as const).flatMap((f) => (p[f] !== undefined && p[f] !== prezzo ? [{ fascia: f, prezzo: p[f]! }] : []));
 }
 
 export const CATEGORIE_OGGETTO = [

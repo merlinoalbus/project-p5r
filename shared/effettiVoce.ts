@@ -1,6 +1,7 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
+import { fasceConPrezzoDiverso, type PrezzoPerFascia } from './catalogo.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
 export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -215,7 +216,9 @@ export function normalizzaEffettiVoce(x: unknown): EffettoVoce[] | null {
 export interface NomiFraseEffetto {
   domanda: (id: number) => string | undefined;
   richiesta: (chiave: string) => string | undefined;
-  articolo: (chiave: string) => { nome: string; prezzo: number | null } | undefined;
+  /** Ondata 5 (lotto E): `prezzo` è quello della fascia della voce quando chi scrive la frase la conosce; altrimenti quello del listino, con
+   *  `prezzoPerFascia` (le sfide della Big Bang Burger costano 500 ¥ di sera) perché la frase dica anche l'altro importo. */
+  articolo: (chiave: string) => { nome: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null } | undefined;
   invito: (chiave: string) => { confidenteNome: string; data: string | null } | undefined;
   persona: (id: number) => string | undefined;
   /** L13: oggetti del catalogo, trofei, Richieste e attività da sbloccare (facoltativi: senza, la frase resta generica). */
@@ -382,7 +385,13 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
     case 'domanda': { const d = n.domanda(e.domanda); return d ? `Domanda risposta: ${breve(d)}` : 'Domanda risposta'; }
     case 'cruciverba': return `Cruciverba del ${dataLeggibile(e.data)} risolto`;
     case 'richiesta': return `Richiesta «${n.richiesta(e.richiesta) ?? 'Richiesta'}» completata`;
-    case 'articolo': { const a = n.articolo(e.articolo), q = e.quantita ?? 1; return a ? `Articolo comprato: ${a.nome}${copie(q)}${a.prezzo !== null ? ` · ${yen(a.prezzo * q)}${q > 1 ? ` (${yen(a.prezzo)} l’uno)` : ''}` : ''}` : `Articolo comprato${copie(q)}`; }
+    case 'articolo': {
+      const a = n.articolo(e.articolo), q = e.quantita ?? 1;
+      if (!a) return `Articolo comprato${copie(q)}`;
+      // senza la fascia della voce, il prezzo di una fascia diversa dal listino si dice accanto («di sera ¥500»), solo se c'è
+      const fasce = a.prezzo !== null ? fasceConPrezzoDiverso(a.prezzo, a.prezzoPerFascia ?? null).map((x) => `${x.fascia === 'sera' ? 'di sera' : 'di giorno'} ${yen(x.prezzo * q)}`) : [];
+      return `Articolo comprato: ${a.nome}${copie(q)}${a.prezzo !== null ? ` · ${yen(a.prezzo * q)}${q > 1 ? ` (${yen(a.prezzo)} l’uno)` : ''}${fasce.length ? `, ${fasce.join(', ')}` : ''}` : ''}`;
+    }
     case 'yen': return e.importo > 0 ? `Yen ricevuti: ${yen(e.importo)} (da applicare con «Applica» sulla voce)` : `Yen spesi: ${yen(e.importo)} (da applicare con «Applica» sulla voce)`;
     case 'oggetto': { const o = n.oggetto?.(e.oggetto); return `Oggetto ricevuto: ${o ?? 'oggetto del catalogo'}${copie(e.quantita)}`; }
     case 'trofeo': { const t = n.trofeo?.(e.trofeo); return t ? `Trofeo ottenuto: ${t}` : 'Trofeo ottenuto'; }
