@@ -285,8 +285,10 @@ const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEn
  * La frase che dice all'utente che cosa succede spuntando, per gli effetti che citano l'oggetto per chiave (storia, domanda,
  * cruciverba, Richiesta, articolo, invito, Persona) e per pesca e Fortuna. È l'UNICA scrittura di queste frasi: la usano il server
  * (il «Il gioco dà» del Diario) e la pagina (editor della voce), ognuno con i propri nomi.
+ * `applicato`: la frase al passato, per ciò che la spunta ha già fatto (la finestra «Applicato dalla spunta», `applicatoDallaSpunta.ts`);
+ * solo lo sblocco ha una forma diversa («Sblocca la Richiesta «X»» → «Richiesta «X» sbloccata»), le altre sono già al passato.
  */
-export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto): string {
+export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, opz: { applicato?: boolean } = {}): string {
   switch (e.tipo) {
     case 'pesca': return 'Sessione di pesca a Ichigaya osservata';
     case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
@@ -300,6 +302,7 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto):
     case 'trofeo': { const t = n.trofeo?.(e.trofeo); return t ? `Trofeo ottenuto: ${t}` : 'Trofeo ottenuto'; }
     case 'sblocco': {
       const nome = e.bersaglio === 'richiesta' ? n.richiesta(e.chiave) : n.attivita?.(e.chiave);
+      if (opz.applicato) return e.bersaglio === 'richiesta' ? `Richiesta «${nome ?? 'Richiesta'}» sbloccata` : `Attività «${nome ?? 'attività'}» sbloccata`;
       return e.bersaglio === 'richiesta' ? `Sblocca la Richiesta «${nome ?? 'Richiesta'}»` : `Sblocca l’attività «${nome ?? 'attività'}»`;
     }
     case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
