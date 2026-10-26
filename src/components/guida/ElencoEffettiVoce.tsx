@@ -43,7 +43,9 @@ const idRiga = (r: RigaEffetto): string => {
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
 
-/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`); gli stati valgono dalla prossima spunta. */
+/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`). L13 (decisione 19): gli effetti di
+ *  stato (articoli, oggetti, eventi, domande, cruciverba, Richieste, inviti, Persona, trofei, sblocchi) si applicano invece subito al salvataggio
+ *  (`riallineaStatiDellaVoce`), e la finestra della voce notifica che cosa è successo in ogni partita. */
 const CON_APPLICA = 'Doti, letture, turni, Aojiru, pesca e yen';
 
 interface Props {
@@ -143,7 +145,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
           )}
         </div>
       )}
-      {fatta && <p className="m-0 testo-12 text-text-secondary">Questa voce è già spuntata: {CON_APPLICA} aggiunti o cambiati compaiono come pulsante «Applica» sulla voce; gli altri effetti (articoli, oggetti, eventi, domande, sblocchi…) valgono dalla prossima spunta. Le ricevute della spunta già fatta non cambiano.</p>}
+      {fatta && <p className="m-0 testo-12 text-text-secondary text-pretty">Questa voce è già spuntata: articoli, oggetti, eventi di storia, domande, cruciverba, Richieste, inviti, Persona, trofei e sblocchi aggiunti, cambiati o tolti si applicano subito alle partite che l’hanno spuntata (togliendo la spunta si annullano come gli altri); {CON_APPLICA} compaiono come pulsante «Applica» sulla voce. La Fortuna vale solo se la partita è ancora a quel giorno.</p>}
     </div>
   );
 }

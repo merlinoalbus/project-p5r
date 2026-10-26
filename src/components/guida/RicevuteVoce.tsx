@@ -21,10 +21,18 @@
 // «Applicato dalla spunta» (prima «Ricevute della spunta»: il contenuto ora è ciò che la spunta ha applicato) con i primi 60 caratteri della
 // voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il primo paragrafo del corpo e descrive la finestra per i
 // lettori di schermo (`aria-describedby`). L'elenco ha `role="list"`: con `list-none` Safari lo toglierebbe ai lettori di schermo.
+//
+// L13 (decisione 19): gli effetti di stato della voce che nella partita NON valgono (`statiNonApplicati`: da approvare nell'elenco della
+// partita, o non applicati) stanno nella stessa finestra in una sezione a parte, «Non applicato nella partita»: non sono «applicati dalla
+// spunta», e togliendola non c'è niente da annullare per loro. Quelli segnati sono già nell'elenco principale; «era già vero» non si dice (non
+// informa). Su ogni riga l'etichetta c'è solo quando aggiunge qualcosa al titolo della sezione: «da approvare nell'elenco della partita».
+// Il numero sul pulsante conta ciò che il titolo nomina: ciò che la spunta ha applicato; senza niente di applicato la finestra si chiama
+// «Non applicato dalla spunta» e il numero conta quelli. Il nome accessibile e il suggerimento dicono tutti e due i numeri.
 // ============================================================
 
 import { useId, useState } from 'react';
 import type { ApplicatoDallaSpuntaDto } from '../../types';
+import type { StatoEffettoDiStatoDto } from '../../../shared/effettiVoce';
 import { Modal } from '../shared/Modal';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -43,6 +51,12 @@ function inizioDellaVoce(voce: string): { testo: string; troncata: boolean } {
   return { testo: `${caratteri.slice(0, CARATTERI_DELLA_VOCE).join('').trimEnd()}…`, troncata: true };
 }
 
+/** Il nome della finestra quando la spunta non ha applicato niente ma qualche effetto di stato della voce non vale nella partita. */
+const TITOLO_SOLO_NON_APPLICATI = 'Non applicato dalla spunta';
+
+/** Il nome della sezione degli effetti di stato che non valgono, sotto ciò che la spunta ha applicato. */
+const NON_APPLICATO_NELLA_PARTITA = 'Non applicato nella partita';
+
 /** «26/10/2026, 02:49»: giorno e ora, senza i secondi (non dicono niente a chi gioca). */
 const MOMENTO = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 function momento(iso: string): string | null {
@@ -50,13 +64,32 @@ function momento(iso: string): string | null {
   return Number.isNaN(d.getTime()) ? null : MOMENTO.format(d);
 }
 
-/** Il pulsante di ciò che la spunta della voce (`voce`: il suo testo) ha applicato, e la sua finestra; niente se non ha applicato niente. */
-export function RicevuteVoce({ applicato, voce }: { applicato: readonly ApplicatoDallaSpuntaDto[] | undefined; voce: string }) {
+/** Gli effetti di stato che non valgono nella partita: la frase e, solo per quelli nell'elenco della partita, dove si approvano. */
+function ElencoNonApplicati({ stati, etichetta }: { stati: readonly StatoEffettoDiStatoDto[]; etichetta?: string }) {
+  return (
+    <ul role="list" aria-label={etichetta} className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+      {stati.map((s) => (
+        <li key={s.effettoUid} className="flex min-w-0 flex-col gap-0.5 py-2 first:pt-0 last:pb-0">
+          <span className="min-w-0 break-words text-pretty">{s.testo}</span>
+          {s.esito === 'da-approvare' && <span className="testo-12 text-warning">da approvare nell’elenco della partita</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Il pulsante di ciò che la spunta della voce (`voce`: il suo testo) ha applicato, e la sua finestra, con a parte gli effetti di stato che nella
+ * partita non valgono (`nonApplicati`); niente se non c'è né l'uno né l'altro.
+ */
+export function RicevuteVoce({ applicato = [], nonApplicati = [], voce }: { applicato: readonly ApplicatoDallaSpuntaDto[] | undefined; nonApplicati?: readonly StatoEffettoDiStatoDto[] | undefined; voce: string }) {
   const [aperta, setAperta] = useState(false);
   const idVoce = useId();
-  if (!applicato?.length) return null;
-  const n = applicato.length;
-  const breve = `${TITOLO} (${n})`;
+  if (!applicato.length && !nonApplicati.length) return null;
+  // il numero conta ciò che il titolo nomina; il nome accessibile e il suggerimento dicono anche l'altro numero, se c'è
+  const titolo = applicato.length ? TITOLO : TITOLO_SOLO_NON_APPLICATI;
+  const n = applicato.length || nonApplicati.length;
+  const breve = applicato.length && nonApplicati.length ? `${TITOLO} (${applicato.length}), non applicato (${nonApplicati.length})` : `${titolo} (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
     <>
@@ -65,11 +98,11 @@ export function RicevuteVoce({ applicato, voce }: { applicato: readonly Applicat
         <span className="conteggio-pulsante tabular-nums" aria-hidden="true">{n}</span>
       </button>
       {aperta && (
-        <Modal titolo={inizio.testo ? `${TITOLO}: ${inizio.testo}` : TITOLO} aperta onChiudi={() => setAperta(false)}
+        <Modal titolo={inizio.testo ? `${titolo}: ${inizio.testo}` : titolo} aperta onChiudi={() => setAperta(false)}
           idDescrizione={inizio.troncata ? idVoce : undefined}>
           {inizio.troncata && <p id={idVoce} className="m-0 mb-3 testo-13 text-text-secondary break-words">{voce}</p>}
           {/* role="list": con `list-none` Safari e VoiceOver (iPad) non annuncerebbero più l'elenco né il numero delle righe */}
-          <ul role="list" className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+          {!!applicato.length && <ul role="list" className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
             {applicato.map((x) => {
               const quando = momento(x.applicatoIl);
               return (
@@ -79,7 +112,14 @@ export function RicevuteVoce({ applicato, voce }: { applicato: readonly Applicat
                 </li>
               );
             })}
-          </ul>
+          </ul>}
+          {/* l'intestazione serve solo a separare da ciò che la spunta ha applicato: senza, lo dice già il titolo della finestra */}
+          {!!nonApplicati.length && (applicato.length
+            ? <section aria-labelledby={`${idVoce}-non`} className="mt-4 border-t border-border-light pt-3">
+              <h3 id={`${idVoce}-non`} className="m-0 mb-2 testo-13 font-semibold text-balance">{NON_APPLICATO_NELLA_PARTITA}</h3>
+              <ElencoNonApplicati stati={nonApplicati} />
+            </section>
+            : <ElencoNonApplicati stati={nonApplicati} etichetta={TITOLO_SOLO_NON_APPLICATI} />)}
         </Modal>
       )}
     </>

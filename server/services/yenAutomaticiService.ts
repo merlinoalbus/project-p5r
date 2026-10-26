@@ -167,7 +167,9 @@ function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid
   if (stato) return primaDi(stato.applicato_il);
   const spunta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(p, voceUid) as { fatta_at: string } | undefined;
   if (!spunta || !primaDi(spunta.fatta_at) || aggiuntiDopo().has(effettoUid)) return false;
-  return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${voceUid}:${effettoUid}`);
+  // L13 (decisione 19): la proposta dell'elenco del passato (`dati.passato`, un effetto di stato aggiunto prima e mai applicato) non prova che
+  // l'effetto sia nuovo nel gioco: la spunta è di prima, e il suo denaro c'era già nel saldo come per gli altri effetti della stessa spunta
+  return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta' AND COALESCE(json_extract(dati_json, '$.passato'), 0) <> 1").get(p, `${voceUid}:${effettoUid}`);
 }
 /** Gli uid degli effetti di una porzione del registro delle operazioni: la lista degli effetti, o un oggetto che la contiene in `effetti` (lo
  *  stato della fonte, la decisione su un candidato, il registro delle migrazioni). Null se la forma non è riconoscibile. */
@@ -230,6 +232,18 @@ export function effettiConYenGiaNelSaldo(p: number, voceUid: string, effetti: re
   let aggiunti: Set<string> | null = null;
   const aggiuntiDopo = (): ReadonlySet<string> => (aggiunti ??= effettiAggiuntiDopo(voceUid, inizio));
   return new Set(effetti.filter((e) => yenDellEffettoGiaNelSaldo(p, voceUid, e, inizio, aggiuntiDopo)).map((e) => e.uid));
+}
+/**
+ * L13 (decisione 19, revisione R-Richiesta): vero se l'effetto della voce apparteneva a una spunta fatta prima degli yen automatici (la stessa
+ * lettura di `applicatoPrimaDegliYenAutomatici`: la spunta di prima, l'effetto non aggiunto dopo, nessuna proposta di raccordo aperta). Serve
+ * all'approvazione dell'elenco del passato per la Richiesta, la cui causa vera è la Richiesta stessa (`yenDellEffettoGiaNelSaldo` ne legge lo
+ * stato, che qui non c'è ancora): la sua ricompensa, in quella spunta, era già nel saldo tenuto a mano.
+ */
+export function effettoDiUnaSpuntaDiPrima(p: number, voceUid: string, effettoUid: string): boolean {
+  const inizio = inizioRegistro();
+  if (!inizio) return false;
+  let aggiunti: Set<string> | null = null;
+  return applicatoPrimaDegliYenAutomatici(p, voceUid, effettoUid, inizio, () => (aggiunti ??= effettiAggiuntiDopo(voceUid, inizio)));
 }
 /**
  * Togliendo la spunta di una voce (prima della restituzione e prima di chiudere ricevute e proposte): ogni effetto i cui yen erano già nel saldo
@@ -303,6 +317,17 @@ export function conYenInOrdine<T>(fn: () => T): T {
     }
     return esito;
   } finally { coda = null; }
+}
+
+/**
+ * L13 (decisione 19): esegue `fn`, una scrittura che può tornare indietro da sola (un savepoint) dentro un gesto in coda (`conYenInOrdine`): se
+ * `fn` fallisce, la coda torna com'era prima di `fn`, così i movimenti (e le restituzioni) di una scrittura annullata non si eseguono alla fine.
+ * Fuori da un gesto in coda non cambia niente: i movimenti erano già nel savepoint che torna indietro.
+ */
+export function conCodaRipristinabile<T>(fn: () => T): T {
+  const copia = coda ? [...coda] : null;
+  try { return fn(); }
+  catch (err) { if (coda && copia) coda.splice(0, coda.length, ...copia); throw err; }
 }
 
 /** La voce a cui legare i movimenti fatti dentro `conYenDellaVoce` (il raccordo di un effetto), quando non c'è la spunta corrente. */

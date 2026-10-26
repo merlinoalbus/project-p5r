@@ -27,6 +27,7 @@ import { LettureEGiochi } from '../components/partita/LettureEGiochi';
 import { ProgressiPartita } from '../components/partita/ProgressiPartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
+import { DaApprovareStati } from '../components/partita/DaApprovareStati';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
@@ -82,6 +83,9 @@ export function PartitaPage() {
               {/* per primo: sul telefono e sul tablet la fila scorre, e in fondo «Modifica» restava fuori schermo */}
               <PulsanteVisivo id="modifica-dati-partita" tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica"
                 aria-label="Modifica i dati della partita" onClick={() => setModifica(true)} />
+              {/* L13 (decisione 19): gli effetti delle voci già spuntate mai applicati, da approvare; c'è solo se ce ne sono. Subito dopo «Modifica»
+                  (revisione R8): sul telefono la fila scorre, e dopo i dati restava fuori schermo */}
+              <DaApprovareStati key={attiva.id} partitaId={attiva.id} />
               <span className="chip">Liv. {attiva.livelloProtagonista}</span>
               {/* la data in forma italiana («9 aprile»), come nel resto dell'app: «04-09» si leggeva «4 settembre» (lotto C) */}
               {attiva.dataGioco && <span className="chip">{dataGiocoTesto(attiva.dataGioco)}</span>}

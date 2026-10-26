@@ -1,17 +1,19 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { avanzaDopoChiusuraAutomatica, avanzaUnaVoltaAllaFine, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
 import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
+import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
+import { statoGiaVero } from './effettiDiStatoService.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
 import { yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { yenPrevistiApprovando } from './sfideDellaVoce.js';
 
 export const nuovoUid = (): string => randomBytes(16).toString('hex');
 export function jsonCanonico(v: unknown): string {
@@ -262,16 +264,33 @@ export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.
  * configurazione cambiata) può essere l'ultima decisione aperta di una giornata già spuntata: a fine operazione, con l'eventuale proposta
  * sostitutiva già inserita, la partita avanza come dopo una decisione dell'utente (A1, 2026-10-25).
  */
-export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):void {
-  if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente))avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
+/**
+ * L13 (decisione 19, «Elenco da approvare»): la proposta di un effetto di STATO mai applicato da una spunta già fatta (aggiunto alla voce prima che
+ * il salvataggio lo applicasse da solo, o non applicabile al salvataggio). `descrizione`: che cosa cambia nella partita, a parole; `motivo`: perché
+ * è in elenco. Solo con `passato` uno stato diventa proposta: la Fortuna mai (vale solo il giorno della spunta).
+ */
+export interface PassatoDiStato { descrizione:string; motivo:string }
+/** `senzaAvanzamento` (L13, decisione 19): il censimento all'avvio e dopo l'importazione, che non è un gesto dell'utente: una proposta che si chiude
+ *  lì non fa avanzare la partita da sola (avanza al prossimo gesto, come sempre). */
+export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato;senzaAvanzamento?:true}={}):void {
+  if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente,opz)&&!opz.senzaAvanzamento)avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
+}
+/** L13 (decisione 19): chiude la proposta del passato di quell'effetto, aperta, se c'è (una per coppia partita/effetto). Dice se l'ha chiusa. */
+export function chiudiPropostePassato(partita:number,voce:string,effetto:string):boolean {
+  return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta' AND json_extract(dati_json,'$.passato')=1").run(nowIso(),partita,`${voce}:${effetto}`).changes>0;
 }
 /** Dice se ha chiuso una proposta aperta. */
-function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):boolean {
+function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato}={}):boolean {
   const e = prepared('SELECT dati_json,ordine FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,effetto) as {dati_json:string;ordine:number}|undefined;
   if (!e || !prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(partita,voce)) return false;
   // la Fortuna vale per il giorno della spunta: su una spunta già fatta non c'è niente da applicare dopo
   const tipoEffetto = leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo;
-  if (tipoEffetto === 'fortuna' || tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco') return false;
+  if (tipoEffetto === 'fortuna') return false;
+  // gli stati: decisione 19, al salvataggio si applicano da soli (`motoreDiario.riallineaStatiDellaVoce`); diventano proposta solo per l'elenco del passato
+  const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco';
+  if (diStato && !opz.passato) return false;
+  if (!diStato && opz.passato) throw new Error('Solo un effetto di stato entra nell’elenco del passato.');
+  if (diStato) return propostaPassato(partita,voce,effetto,e.dati_json,opz.passato!);
   const rivendicato=(prepared("SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND tipo='acquisto'").all(voce) as Array<{dati_json:string}>).filter((r)=>{
     const acquisto=normalizzaEffettoVoce(leggiJsonRegistro(r.dati_json,'raccordo canonico'));
     if(!acquisto||acquisto.tipo!=='acquisto')throw httpErrors.conflict('raccordo-canonico-incoerente','La configurazione di acquisto non è riconoscibile.');
@@ -294,6 +313,26 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
     .run(nuovoUid(),partita,voce,causa,effetto,firma,jsonCanonico({voceUid:voce,effettoUid:effetto,...(prepared('SELECT data AS giorno,fascia FROM main.voce_giornata WHERE uid=?').get(voce) as object),articolo:(leggiJsonRegistro<Record<string,unknown>>(e.dati_json)).articolo,effetto:leggiJsonRegistro(e.dati_json),sostituzione:!!precedente||!!ricevuta,versionePrecedente:ricevuta?leggiJsonRegistro<Record<string,unknown>>(ricevuta.prima_json??'null')?.effetto??null:precedente?.effetto??null,ricevutaPrecedente:ricevuta?.id??null}),nowIso());
   return chiusa;
 }
+/**
+ * L13 (decisione 19): la proposta del passato di un effetto di stato (`dati.passato`), con le stesse guardie delle altre: una aperta con la stessa
+ * configurazione resta (nessun doppione), una scartata dall'utente con la stessa configurazione non torna, una con la configurazione cambiata si
+ * chiude e si rifà. Con la riga dello stato già scritta dalla spunta non c'è niente da proporre. Dice se ha chiuso una proposta aperta.
+ */
+function propostaPassato(partita:number,voce:string,effetto:string,datiJson:string,passato:PassatoDiStato):boolean {
+  const causa=`${voce}:${effetto}`;
+  if(prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(partita,voce,effetto))
+    return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,causa).changes>0;
+  const configurazione=leggiOggettoRegistro(datiJson,'configurazione effetto'),firma=improntaDato(configurazione);
+  const aperta=prepared("SELECT id,revisione_causa FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").get(partita,causa) as {id:number;revisione_causa:string}|undefined;
+  if(aperta?.revisione_causa===firma)return false;
+  const chiusa=!!aperta&&prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='configurazione-cambiata',decisa_il=? WHERE id=?").run(nowIso(),aperta.id).changes>0;
+  if(prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND revisione_causa=? AND chiusa_da='utente' AND stato IN ('scartata','applicata')").get(partita,causa,firma))return chiusa;
+  const v=prepared('SELECT data AS giorno,fascia FROM main.voce_giornata WHERE uid=?').get(voce) as {giorno:string;fascia:string}|undefined;
+  prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,creata_il)
+    VALUES(?,?,?,'voce',?,'effetto-voce',?,'azione',1,?,1,?,?,?)`)
+    .run(nuovoUid(),partita,voce,causa,effetto,firma,jsonCanonico({voceUid:voce,effettoUid:effetto,...(v??{}),effetto:configurazione,passato:true,descrizione:passato.descrizione,sostituzione:false,versionePrecedente:null,ricevutaPrecedente:null}),passato.motivo,nowIso());
+  return chiusa;
+}
 
 function dto(r:RigaProposta):PropostaPartitaDto {
   const causa=causaDi(r), dati=leggiOggettoRegistro(r.dati_json,'proposta');
@@ -311,6 +350,17 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       else if(!prepared('SELECT 1 FROM utente.effetto_applicato WHERE partita_id=? AND id=? AND voce_uid=? AND effetto_uid=? AND annullato_il IS NULL').get(r.partita_id,dati.ricevutaPrecedente,voce,effetto))impedimenti.push('La ricevuta della versione precedente è cambiata.');
     }
     const configurazione=dati.effetto as {tipo?:unknown;sostituisceDoti?:unknown}|undefined;
+    // L13 (decisione 19): l'anteprima dell'approvazione di un effetto dell'elenco del passato che muove yen (l'articolo, la Richiesta con una
+    // ricompensa) dice il movimento sul saldo (`yenPrevisti`, con il segno; 0 = gli yen non cambiano), con le stesse regole dell'approvazione
+    // (`yenPrevistiApprovando`). Un registro degli yen illeggibile non fa fallire l'intero elenco della partita: questa proposta lo dice e non si
+    // applica (l'approvazione si fermerebbe sullo stesso registro)
+    if(dati.passato===true&&r.stato==='aperta'&&e&&effetto&&voce){
+      try{const y=yenPrevistiApprovando(r.partita_id,voce,effetto,dati.effetto);if(y!==null)dati.yenPrevisti=y;}
+      catch(err){if(!(err instanceof HttpError)||err.status>=500)throw err;impedimenti.push(err.message);}
+      // il motivo scritto dal censimento può non valere più (revisione R7): lo stato è stato segnato dopo, a mano o da un'altra voce
+      const stato=normalizzaEffettoVoce(dati.effetto);
+      if(stato&&eEffettoDiStato(stato)&&stato.tipo!=='oggetto'&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
+    }
     if(configurazione?.tipo==='acquisto'&&Array.isArray(configurazione.sostituisceDoti))dati.raccordoDoti=configurazione.sostituisceDoti.map((id:unknown)=>{
       if(typeof id!=='string')throw httpErrors.conflict('raccordo-dote-incoerente','L’identità della Dote da raccordare non è valida.');
       const nodo=prepared('SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,id) as {dati_json:string}|undefined,originale=nodo?leggiOggettoRegistro(nodo.dati_json,'Dote da raccordare'):null;

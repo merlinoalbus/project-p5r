@@ -66,6 +66,31 @@ export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoV
 export interface StatoEffettiVoceDto {
   voceUid: string; stato: 'convertita' | 'legacy-da-correggere'; effetti: EffettoVoceDto[];
   rawLegacy: string; motivo: string | null; revisione: string;
+  /** L13 (decisione 19): solo nella risposta del salvataggio, che cosa è successo nelle partite che hanno già spuntato la voce. */
+  applicazioni?: ApplicazioneStatoPartitaDto[];
+}
+/**
+ * L13 (decisione 19): l'esito, in una partita che ha già spuntato la voce, di un effetto di stato aggiunto, cambiato o tolto nella guida.
+ * `segnato`: vale adesso; `annullato`: la versione tolta è tornata com'era; `gia-presente`: era già vero (togliendo la spunta resta);
+ * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita;
+ * `non-applicato`: il dominio l'ha rifiutato adesso, e non è in elenco perché l'utente ne aveva già tolto la stessa configurazione.
+ * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida`, `da-approvare` e `non-applicato`).
+ * Il salvataggio della voce (finestra della voce, proposta «da completare» applicata, candidato confermato) lo riporta nella risposta
+ * (`AzionePercorsoDto.applicazioniEffetti`, `StatoEffettiVoceDto.applicazioni`), e chi salva lo notifica (`src/utils/applicazioniEffetti.ts`).
+ */
+export interface ApplicazioneStatoPartitaDto {
+  partitaId: number; partitaNome: string; effettoUid: string;
+  esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare' | 'non-applicato';
+  testo: string;
+  motivo?: string;
+}
+/**
+ * L13 (decisione 19): un effetto di stato di una voce spuntata che non vale nella partita, per la finestra della voce (`AzionePercorsoDto.statiNonApplicati`).
+ * `da-approvare`: è nell'elenco della partita; `non-applicato`: non c'è e non è in elenco (tolto dall'elenco con «Non applicare», o un articolo
+ * non disponibile al momento della spunta). Quelli segnati stanno in «Applicato dalla spunta»; quelli che erano già veri non si dicono.
+ */
+export interface StatoEffettoDiStatoDto {
+  effettoUid: string; esito: 'da-approvare' | 'non-applicato'; testo: string;
 }
 export interface RichiestaSalvaEffettiVoce {
   revisioneEffettiAttesa: string;

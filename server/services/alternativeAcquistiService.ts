@@ -71,6 +71,15 @@ function gruppiDellaVoce(effetti: readonly EffettoVoceDto[]): Array<Array<Effett
     .map((membri) => articoli.filter((e) => membri.includes(e.effetto.articolo)));
 }
 
+/**
+ * Gli UID degli effetti «articolo» della voce che stanno in un gruppo di alternative (decisione 4). Per loro la scelta la fa solo la spunta (uno,
+ * o nessuno): gli effetti di stato che si applicano fuori dalla spunta (L13, decisione 19: il salvataggio della guida su una voce già spuntata e
+ * l'elenco del passato della partita) non li segnano mai da soli, e un membro senza la sua riga non «manca» (non è stato scelto).
+ */
+export function effettiInAlternativa(effetti: readonly EffettoVoceDto[]): Set<string> {
+  return new Set(gruppiDellaVoce(effetti).flat().map((e) => e.uid));
+}
+
 /** Il motivo per cui un articolo non si compra in quello stato, in parole (i requisiti rossi, con il loro testo); null se si compra. */
 function motivoNonDisponibile(chiave: string, st: StatoDisponibilita): string | null {
   const d = disponibilitaArticoloNelloStato(chiave, st);

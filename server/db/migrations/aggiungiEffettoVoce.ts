@@ -2,6 +2,8 @@
 // delle 153 e 154 (origine «regola», riga nel registro delle operazioni, impronta della transizione). Copia congelata della logica di
 // `salvaEffettiVoce`: non importa servizi. Non riscrive testo, ordine, giorno, fascia né uid della voce; non crea proposte per le
 // spunte già date (l'effetto vale dalla prossima spunta). Scrive solo in `main`.
+// L13 (decisione 19): un effetto di STATO aggiunto così a una voce già spuntata entra, all'avvio successivo, nell'elenco da approvare della
+// partita (`statiMancantiService.proponiStatiMancanti`): non si applica da solo, lo approva l'utente.
 
 import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../dbService.js';

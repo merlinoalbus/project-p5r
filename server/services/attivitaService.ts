@@ -634,6 +634,16 @@ export function articoloPagatoDalTurno(attivita: string, esito: string): string 
   const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
   return riga ? yenDelTurno(riga, { chiave: esito, nome: '' })?.articolo ?? null : null;
 }
+/**
+ * L13 (decisione 19): gli yen della sfida di un turno già registrato (l'esito con il suo nome), con la stessa regola di `yenDelTurno`. Per la
+ * voce già spuntata il cui articolo, che pagava la sfida al posto del turno, viene tolto o cambiato nella guida: allora la sfida la paga il turno,
+ * come farebbe la spunta (`motoreDiario.riallineaStatiDellaVoce`). Null se il turno non paga un articolo.
+ */
+export function yenDellaSfidaDelTurno(attivita: string, esito: { chiave: string; nome: string }): { importo: number; motivo: string; articolo: string } | null {
+  const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
+  const y = riga ? yenDelTurno(riga, esito) : null;
+  return y?.articolo ? { importo: y.importo, motivo: y.motivo, articolo: y.articolo } : null;
+}
 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
  *  ancora — il contatore può averlo già tolto, e `volte` non deve scendere due volte —, oppure l'ultimo (il contatore):
