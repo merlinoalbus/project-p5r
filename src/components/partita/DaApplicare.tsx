@@ -179,6 +179,8 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
           {/* il motivo del censimento non vale più se lo stato è stato segnato dopo (revisione R7): lo dice il server, letto adesso */}
           <span className="text-pretty">{delPassato(p) && p.dati.oraGiaVero === true ? 'Ora risulta già vero in questa partita (segnato dopo): applicandolo lo stato non cambia, la voce lo ricorda fra i suoi effetti.' : p.motivo}</span>
           {previsti !== null && <span className="testo-12 text-text-secondary tabular-nums">{testoYenPrevisti(previsti, 'Approvandolo ')}</span>}
+          {/* 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso; lo si dice prima di approvare (solo se è così) */}
+          {delPassato(p) && typeof p.dati.avvisoScorta === 'string' && <span className="testo-12 text-warning text-pretty tabular-nums">{p.dati.avvisoScorta}</span>}
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Costo del consumo: ¥{p.promemoriaYen.toLocaleString('it-IT')}</span>}
           {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {

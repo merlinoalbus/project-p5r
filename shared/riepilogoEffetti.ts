@@ -311,7 +311,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       }
       case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;
       case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
-      case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona'); break;
+      // il gruppo si chiama «Compendio»: la riga dice solo il nome; il dettaglio compare solo quando aggiunge qualcosa (anche nella scorta)
+      case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', e.scorta ? `anche nella scorta${e.livello ? `, livello ${e.livello}` : ''}` : undefined); break;
       case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo'); break;
       case 'pesca': riga('pesca', 'Sessione a Ichigaya', 'da osservare alla spunta'); conYen('pesca', i); break;
       case 'fortuna': riga('fortuna', nomeDote(e.dote), 'per il resto del giorno'); break;

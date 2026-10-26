@@ -51,7 +51,8 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('pesca'),regola:z.literal(REGOLA_PESCA),attivita:z.literal(ATTIVITA_PESCA),sostituisceTurni:z.array(uid).max(20),sostituisceDoti:z.array(uid).max(20)}).strict(),
   z.object({tipo:z.literal('fortuna'),dote}).strict(),
   z.object({tipo:z.literal('storia'),evento:chiave}).strict(),
-  z.object({tipo:z.literal('persona'),persona:z.number().int().positive()}).strict(),
+  // 2026-10-26: `scorta` (anche nella scorta) e il suo `livello`; la forma canonica (livello solo con la scorta) la verifica `normalizzaEffettoVoce`
+  z.object({tipo:z.literal('persona'),persona:z.number().int().positive(),scorta:z.literal(true).optional(),livello:z.number().int().min(1).max(99).optional()}).strict(),
   z.object({tipo:z.literal('domanda'),domanda:z.number().int().positive()}).strict(),
   z.object({tipo:z.literal('cruciverba'),data:z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)}).strict(),
   z.object({tipo:z.literal('richiesta'),richiesta:chiave}).strict(),

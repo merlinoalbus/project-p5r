@@ -283,7 +283,9 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),
     cruciverba: prepared('SELECT data, indizio FROM cruciverba ORDER BY ordine').all() as ElenchiEffettiVoceDto['cruciverba'],
     inviti: prepared(`SELECT i.chiave, i.confidente_chiave AS confidente, c.nome AS confidenteNome, i.data, i.nota FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave ORDER BY c.ordine, i.data`).all() as ElenchiEffettiVoceDto['inviti'],
-    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana) })),
+    // le Persona del gruppo non si registrano né entrano in scorta (`assicuraNonDelGruppo`, 409): non si offrono; `rara` per la scelta della scorta
+    persone: (prepared('SELECT id, nome, arcana, livello, rara FROM persona WHERE del_party = 0 ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number; rara: number }>)
+      .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana), livello: p.livello, ...(p.rara === 1 ? { rara: true } : {}) })),
     // L13 (ondata 3): gli oggetti del catalogo visibili e i trofei, scelti per nome negli effetti «oggetto ricevuto» e «trofeo»
     oggetti: prepared('SELECT chiave, nome, categoria FROM catalogo_oggetto WHERE nascosto = 0 ORDER BY nome').all() as NonNullable<ElenchiEffettiVoceDto['oggetti']>,
     trofei: prepared('SELECT chiave, nome, tipo FROM trofeo ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['trofei']>,

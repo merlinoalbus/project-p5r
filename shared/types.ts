@@ -1380,6 +1380,10 @@ export interface AzionePercorsoDto {
   applicazioniEffetti?: ApplicazioneStatoPartitaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
+  /** 2026-10-26 (effetto «Persona registrata» con la scorta): solo nella risposta della spunta, ciò che chi gioca deve sapere. Spuntando, la
+   *  Persona entrata nella scorta oltre la capienza («n/N»: la spunta non si ferma); togliendo la spunta, l'esemplare in scorta rimasto perché
+   *  modificato dopo. Assente se non c'è niente da dire. */
+  avvisiSpunta?: string[];
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
    *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
   yenAutomatici?: MovimentoYenAutomaticoDto[];
@@ -1496,7 +1500,8 @@ export interface ElenchiEffettiVoceDto {
   cruciverba: Array<{ data: string; indizio: string }>;
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
-  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
+  /** Le Persona dell'effetto «Persona registrata»: non quelle del gruppo; `rara` (Demone del Tesoro) non si aggiunge alla scorta da una voce. */
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number; rara?: boolean }>;
   /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
   oggetti?: Array<{ chiave: string; nome: string; categoria: string }>;
   trofei?: Array<{ chiave: string; nome: string; tipo: string }>;

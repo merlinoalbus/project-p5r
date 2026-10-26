@@ -15,7 +15,11 @@ rilievi; punto `j` in `docs/ROADMAP.md`, ramo `copia-incolla-giro3`.
 Giro 4 (giro 3 approvato da due revisori su tre, respinto dal revisore UX): conferma di Copia / Taglia declinata sul numero delle voci e
 a schermo 10 s, fuoco che non si ferma sul giorno mentre i «⋯» sono disattivati (e contorno visibile se ci arriva), barra che non
 lampeggia col doppio clic, «(1 di 2)» sui pulsanti della finestra dei rilievi; la migrazione del registro diventa la 240 (la 239 è delle
-televendite) e il ramo `copia-incolla-giro4` contiene `integrazione-24`. Punto `k` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
+televendite) e il ramo `copia-incolla-giro4` contiene `integrazione-24`. Punto `k` in `docs/ROADMAP.md`.
+Giro 5 (giro 4 respinto dal revisore UX): anche la finestra dei rilievi («Una voce nuova… in fondo alla sua fascia. Prima di incollarla:»,
+«La stessa voce… Prima di spostarla:») e la finestra «Copia in…» / «Sposta in…» sono declinate su una voce sola; il ramo è riunito con
+`integrazione-24` a `f4217c60` (Persona e scorta: `eliminaVoceGiornata` restituisce gli avvisi, la copia degli effetti porta `scorta` e
+`livello` con `normalizzaEffettoVoce`). Punto `l` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
 
 ## AGGIORNAMENTO 26 OTTOBRE 2026 — L13, televendite (decisione 4)
 - **Dove:** ramo di lavoro delle televendite, già unito con `integrazione-24` (che contiene gli yen automatici, decisione 18). Non è su `main`.
