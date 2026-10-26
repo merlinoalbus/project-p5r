@@ -19,7 +19,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { eOffertaAojiru } from '../../../shared/acquisti';
-import { eRifornibile } from '../../../shared/rifornimento';
+import { ePezzoUnico, eRifornibile } from '../../../shared/rifornimento';
 import { ConsumiAojiru } from '../catalogo/ConsumiAojiru';
 import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
 import { annullaRigaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
@@ -1251,8 +1251,9 @@ function inVenditaOggi(d: DisponibilitaDto | undefined): boolean {
   return d.requisiti.some((q) => q.tipo === 'scorta') && d.requisiti.every((q) => q.tipo === 'scorta' || q.stato === 'verde');
 }
 
-/** Si compra più volte (scorta che si rinnova, o l'Aojiru con le sue consumazioni): niente nome barrato. */
-const ripetibile = (a: MerceDelNegozio): boolean => eOffertaAojiru({ chiave: a.chiave }) || eRifornibile(a.rifornimento?.regola ?? null);
+/** Non è un pezzo unico (scorta che si rinnova, un servizio, l'Aojiru con le sue consumazioni, nessuna regola): niente nome barrato. Progetto
+ *  dell'ondata 5, §9: si barra solo l'articolo «mai» (revisione finale, R1). */
+const ripetibile = (a: MerceDelNegozio): boolean => eOffertaAojiru({ chiave: a.chiave }) || !ePezzoUnico(a.rifornimento?.regola);
 
 /** Con la partita, l'articolo che si rifornisce si compra come nella pagina del negozio: «Compra», non una spunta da togliere e rimettere. */
 const conCompra = (a: MerceDelNegozio, partitaId: number | null): partitaId is number =>

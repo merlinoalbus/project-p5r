@@ -13,6 +13,7 @@
 
 import { prepared } from '../db/dbService.js';
 import { prezzoNellaFascia, type FasciaPrezzo } from '../../shared/catalogo.js';
+import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } from '../../shared/scontiNegozi.js';
 
 const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera';
 
@@ -38,9 +39,36 @@ export function fasciaDellaPartita(partitaId: number): FasciaPrezzo | null {
   return eFascia(f) ? f : null;
 }
 
-/** Il prezzo in yen dell'offerta nella fascia (null = offerta assente o prezzo non indicato). Senza fascia nota vale `prezzo`. */
-export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined): number | null {
-  const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json FROM main.articolo WHERE chiave = ?')
-    .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null } | undefined;
-  return r ? prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia) : null;
+/** Vero se il file di gioco ha la colonna dello sconto del negozio (migrazione 254); uno schema di prima non sconta niente. */
+function conSconto(): boolean {
+  return !!prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get();
+}
+
+/** Il rango del Confidente nella partita (null se la partita non lo ha ancora). */
+function rangoNellaPartita(partitaId: number, confidente: string): number | null {
+  const r = prepared('SELECT rango FROM utente.confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number | null } | undefined;
+  return r?.rango ?? null;
+}
+
+/**
+ * Lo sconto del negozio dell'offerta che vale adesso nella partita (chiusura dell'ondata 5: la Clinica di Takemi a metà prezzo dal rango
+ * indicato, `negozio.sconto_json`); null senza partita, senza sconto o con il Confidente sotto il rango.
+ */
+export function scontoNellaPartita(negozio: string | null | undefined, partitaId: number | null | undefined): ScontoNegozio | null {
+  if (!negozio || partitaId === null || partitaId === undefined || !conSconto()) return null;
+  const sconto = normalizzaSconto((prepared('SELECT sconto_json FROM main.negozio WHERE chiave = ?').get(negozio) as { sconto_json: string | null } | undefined)?.sconto_json ?? null);
+  return sconto && scontoAttivo(sconto, rangoNellaPartita(partitaId, sconto.confidente)) ? sconto : null;
+}
+
+/**
+ * Il prezzo in yen dell'offerta nella fascia (null = offerta assente o prezzo non indicato). Senza fascia nota vale `prezzo`. Con la partita
+ * vale anche lo sconto del negozio legato al rango di un Confidente (`scontoNellaPartita`): è l'importo che gli yen automatici scalano.
+ */
+export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined, partitaId?: number | null): number | null {
+  const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?')
+    .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null; negozio_chiave: string | null } | undefined;
+  if (!r) return null;
+  const prezzo = prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia);
+  const sconto = prezzo !== null ? scontoNellaPartita(r.negozio_chiave, partitaId) : null;
+  return prezzo !== null && sconto ? prezzoScontato(prezzo, sconto) : prezzo;
 }

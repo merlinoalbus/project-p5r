@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { annullaRigaAcquisto, getNegozio, impostaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
 import { eOffertaAojiru } from '../../../shared/acquisti';
-import { eRifornibile } from '../../../shared/rifornimento';
+import { ePezzoUnico } from '../../../shared/rifornimento';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_CATEGORIA_ARTICOLO } from '../../utils/negozi';
 import type { ArticoloDto } from '../../types';
@@ -45,9 +45,9 @@ interface Props {
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onContenutoCambiato }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nome;
-  // Ondata 5 (decisione 21): si barra solo ciò che una volta comprato non torna (pezzo unico, o senza regola come prima); ciò che si
-  // rifornisce resta in chiaro, e la scorta del ciclo la dicono «Compra» e la disponibilità
-  const ripetibile = eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo?.chiave }) || eRifornibile(a.rifornimento?.regola ?? null);
+  // Ondata 5 (decisione 21, progetto §9): si barra solo il pezzo unico (regola «mai»), che una volta comprato non torna; ciò che si
+  // rifornisce, i servizi e ciò che non ha una regola restano in chiaro, e la scorta del ciclo la dicono «Compra» e la disponibilità
+  const ripetibile = eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo?.chiave }) || !ePezzoUnico(a.rifornimento?.regola);
   const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile';
   /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
   const cambia = async (articolo: string, fatto: boolean) => {
@@ -78,7 +78,9 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
       {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
-    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></strong></div>
+    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></strong>
+      {/* chiusura dell'ondata 5: con lo sconto del negozio che vale adesso nella partita (Clinica di Takemi), l'importo che si paga */}
+      {a.prezzoScontato && <span className="testo-12 tabular-nums whitespace-normal text-right text-pretty text-text-secondary">Con lo sconto del {a.prezzoScontato.percentuale}%: {a.prezzoScontato.prezzo.toLocaleString('it-IT')} ¥</span>}</div>
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
         Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
         dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}

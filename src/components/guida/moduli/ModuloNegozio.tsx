@@ -17,6 +17,7 @@ import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import type { ProgrammaPunti } from './definizioni';
+import type { ScontoNegozio } from '../../../../shared/scontiNegozi';
 import { CondizioniEditor } from '../CondizioniEditor';
 import type { RequisitoSpillo } from '../../../../shared/condizioniSpillo';
 
@@ -32,6 +33,8 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
   // L5 (R5-12b): gli orari sono del luogo (sede); qui solo l'eccezione del negozio, quando la guida lo distingue
   const eccezione = (dati.eccezione_orari_json as OrariNegozio | null) ?? null;
   const programma = (dati.programma_punti_json as ProgrammaPunti | null) ?? null;
+  // chiusura dell'ondata 5: lo sconto dal rango di un Confidente (la Clinica di Takemi), un dato del negozio; il prezzo resta quello dell'offerta
+  const sconto = (dati.sconto_json as ScontoNegozio | null) ?? null;
   return (
     <div className="flex flex-col gap-3">
       <Griglia>
@@ -78,6 +81,26 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
                 opzioni={[{ chiave: 'manuale', nome: 'Li segno io', dettaglio: 'I punti vengono dalle vendite: non si ricavano dalla spesa' }, { chiave: 'rango-cliente', nome: 'Dal rango cliente', dettaglio: 'L’app li ricava dalla spesa nel negozio' }]}
                 onCambia={(k) => imposta({ programma_punti_json: { ...programma, calcolo: k as ProgrammaPunti['calcolo'] } })} />
             </Blocco>
+          </Griglia>
+        )}
+      </fieldset>
+      <fieldset className="regole-editor flex flex-col gap-2">
+        <legend>Sconto dal rango di un Confidente</legend>
+        <label className="flex items-center gap-2 testo-13 touch">
+          <input type="checkbox" className="h-5 w-5" checked={sconto !== null} disabled={disabilitato}
+            onChange={(e) => imposta({ sconto_json: e.target.checked ? { confidente: testoDi(dati.confidente_chiave), rango: 10, percentuale: 50 } : null })} />
+          Il negozio fa uno sconto quando un Confidente arriva a un rango
+        </label>
+        {sconto && (
+          <Griglia>
+            <Blocco>
+              <Selettore etichetta="Confidente" valore={sconto.confidente} vuoto="Scegli il Confidente" disabilitato={disabilitato || confidenti.caricamento}
+                opzioni={(confidenti.dati ?? []).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))} onCambia={(k) => imposta({ sconto_json: { ...sconto, confidente: k } })} />
+            </Blocco>
+            <label className="editor-mappa__campo">Dal rango<input className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={10} value={sconto.rango} disabled={disabilitato}
+              onChange={(e) => imposta({ sconto_json: { ...sconto, rango: Number(e.target.value) } })} /></label>
+            <label className="editor-mappa__campo">Sconto in percentuale<input className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={99} value={sconto.percentuale} disabled={disabilitato}
+              onChange={(e) => imposta({ sconto_json: { ...sconto, percentuale: Number(e.target.value) } })} /></label>
           </Griglia>
         )}
       </fieldset>

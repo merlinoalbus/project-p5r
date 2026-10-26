@@ -12,6 +12,7 @@ import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../
 import { normalizzaCostoScambio, normalizzaPrezzoPerFascia, type PrezzoPerFascia } from '../../../../shared/catalogo';
 import { normalizzaEsitiAttivita } from '../../../../shared/esitiAttivita';
 import { normalizzaRifornimento, type RegolaRifornimento } from '../../../../shared/rifornimento';
+import { normalizzaSconto, type ScontoNegozio } from '../../../../shared/scontiNegozi';
 import type { TipoCatalogo } from '../../../types';
 import { jsonDi, jsonSenzaPerdite, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
@@ -31,20 +32,26 @@ export const negozio: DefinizioneModulo = {
     // L5 (R5-12b): gli orari sono del luogo; il negozio ha solo la sua eccezione (null = valgono quelli della sede)
     eccezione_orari_json: e?.dati.eccezione_orari_json ? normalizzaOrari(jsonDi(e.dati.eccezione_orari_json, ORARI_SEMPRE)) : null,
     programma_punti_json: jsonDi<ProgrammaPunti | null>(e?.dati.programma_punti_json, null),
+    // chiusura dell'ondata 5 (migrazione 254): lo sconto legato al rango di un Confidente; assente nella riga = nessuno
+    sconto_json: normalizzaSconto(e?.dati.sconto_json ?? null),
     note: testoDi(e?.dati.note),
   }),
   valido: (d) => {
     const p = d.programma_punti_json as ProgrammaPunti | null;
+    const s = d.sconto_json as ScontoNegozio | null;
     const condizioni = d.sblocco_json;
     return Array.isArray(condizioni) && condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)
-      && testoDi(d.nome).trim().length > 0 && (p === null || (p.nome.trim().length > 0 && p.unita.trim().length > 0));
+      && testoDi(d.nome).trim().length > 0 && (p === null || (p.nome.trim().length > 0 && p.unita.trim().length > 0))
+      && (s === null || normalizzaSconto(s) !== null);
   },
   prepara: (d) => {
     const p = d.programma_punti_json as ProgrammaPunti | null;
+    const s = d.sconto_json as ScontoNegozio | null;
     return {
       ...senzaTemporanei(d),
       nome: testoDi(d.nome).trim(), luogo: testoDi(d.luogo).trim(), gestore: testoOnull(d.gestore), note: testoOnull(d.note),
       programma_punti_json: p ? { nome: p.nome.trim(), unita: p.unita.trim(), calcolo: p.calcolo } : null,
+      sconto_json: s ? normalizzaSconto(s) : null,
     };
   },
 };

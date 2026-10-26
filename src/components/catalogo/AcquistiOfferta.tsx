@@ -27,7 +27,8 @@ function RigaAcquisto({ r, nome, prestito, occupato, onAnnullaRiga }: { r: RigaS
 function GruppoChiuso({ titolo, righe, ...riga }: { titolo: string; righe: RigaScorta[]; nome: string; prestito: boolean; occupato: boolean; onAnnullaRiga?: (rigaId: number) => void }) {
   if (!righe.length) return null;
   return <details className="testo-12">
-    <summary className="touch inline-flex cursor-pointer items-center">{titolo} <span className="tabular-nums">&nbsp;({righe.length})</span></summary>
+    {/* revisione finale UX (A2): con `inline-flex` il triangolino nativo non c'è più; la freccia lo rimette e ruota con [open] */}
+    <summary className="touch inline-flex cursor-pointer items-center"><span className="btn-visivo__freccia btn-visivo__freccia--menu ml-0 mr-1" aria-hidden="true">▸</span>{titolo}<span className="tabular-nums">&nbsp;({righe.length})</span></summary>
     <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1">
       {righe.map((r) => <RigaAcquisto key={r.id} r={r} {...riga} />)}
     </ul>

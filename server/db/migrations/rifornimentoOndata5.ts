@@ -101,7 +101,8 @@ export const REGOLE_NEGOZI: Readonly<Record<string, RegolaArticolo>> = {
   'home-shopping-tv': UNICO, 'mercante-sakai': UNICO,
 };
 
-/** Servizi, non merce (Penguin Sniper, Tempio di Kichijoji): nessuna regola e nessuna etichetta. */
+/** Servizi, non merce (Penguin Sniper, Tempio di Kichijoji): la 243 non dà loro la regola della guida; la 259 (chiusura dell'ondata 5,
+ *  rilievo R1) dà la regola dell'utente, senza etichetta, perché un servizio si paga a ogni uso e non è un pezzo unico. */
 export const NEGOZI_SENZA_REGOLA: ReadonlySet<string> = new Set(['penguin-sniper', 'tempio-kichijoji']);
 
 /** Il periodo del Diario validato dall'utente (04-01…05-31): nessuna di queste migrazioni scrive sulle sue voci. */

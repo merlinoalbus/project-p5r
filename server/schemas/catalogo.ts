@@ -84,6 +84,9 @@ export const datiNegozio = z.object({
   eccezione_orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  /** Chiusura dell'ondata 5 (migrazione 254): lo sconto legato al rango di un Confidente (la Clinica di Takemi a metà prezzo); null = nessuno. */
+  sconto_json: z.object({ confidente: z.string().min(1).max(80), rango: z.number().int().min(1).max(10), percentuale: z.number().int().min(1).max(99) }).strict().nullable().optional()
+    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   note: testo(2000).nullable().optional(),
 });
 

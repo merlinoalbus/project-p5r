@@ -306,7 +306,7 @@ export function ConfidenteDettaglioPage() {
                 graditi; restano raggiungibili qui, nella preparazione, per correggerle */}
             {!IN_RILASCIO && altriInElenco.length > 0 && (
               <details className="testo-13">
-                <summary className="touch inline-flex items-center text-text-secondary">Altre righe dell’elenco, a {testoReazione(REAZIONE_FUORI_ELENCO)} come ogni regalo ({altriInElenco.length})</summary>
+                <summary className="touch inline-flex cursor-pointer items-center text-text-secondary"><span className="btn-visivo__freccia btn-visivo__freccia--menu ml-0 mr-1" aria-hidden="true">▸</span>Altre righe dell’elenco, a {testoReazione(REAZIONE_FUORI_ELENCO)} come ogni regalo ({altriInElenco.length})</summary>
                 <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Altre righe dell’elenco dei regali">
                   {altriInElenco.map((g) => rigaRegalo(g))}
                 </ul>

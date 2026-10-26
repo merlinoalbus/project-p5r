@@ -12,7 +12,8 @@
 //   1. accessori della guida in un'altra categoria, con l'effetto vuoto o generico: Bracciale confuso e Pend. disperazione («arma», in vendita al
 //      Palazzo di Niijima), Collana magnetica («regalo», Prossimo Asso: «Regalo od oggetto»), Maschera del ladro («regalo», Discount Rocinante:
 //      vuoto), Cintura eccentrica, Cintura del fastidio, Fermaglio per gatti, Cristallo della boria e Batterie portatili («altro»). Dove la
-//      descrizione ripeteva l'effetto in poche parole diventa il modo di ottenerli secondo [A], come nella 272;
+//      descrizione ripeteva l'effetto in poche parole si svuota: il modo di ottenerli lo dicono la ricompensa collegata e l'offerta (terzo giro,
+//      rilievi 1 e 7: scriverlo nella descrizione era una seconda copia; l'offerta delle Batterie portatili all'Untouchable la crea la 286);
 //   2. accessori di categoria «accessorio» con un testo generico o sbagliato: Cintura di Idaten («Accessorio equipaggiabile»; [A] scrive
 //      «Masukaja», l'abilità Auto-Masuku lancia Masukukaja), Cintura della forza («accessorio: resistenza fisica»), Fascia capel. bianca («+50
 //      HP»; [A]: Ondata vitale, HP massimi +30%, Rs +5), Collare di Ardhanari («a 1 nemico»; [A]: a tutti i nemici), Anello del gelo («a tutti i
@@ -29,11 +30,11 @@
 //      quattro offerte dei braccialetti dello stesso negozio, ciascuna a 12.800 ¥ [A]: si nasconde come la `fasce-colorate` (già nascosta) e
 //      come la 277, solo se nessun dato la usa;
 //   6. le descrizioni che erano solo l'etichetta della categoria: «accessorio» su cinque accessori (Cintura resistente, Pendente del Leblanc,
-//      Specchio del damerino, Intimo del capo: premi di Sojiro per gli esami; Velo invisibile: ricompensa finale del Covo) diventa il modo di
-//      ottenerli secondo [A]; «oggetto chiave» su sei oggetti chiave (Seme tristezza blu, le cinque Lettere di raccomandazione) si svuota.
-// Fuori da qui, con l'esito nell'audit: i regali con l'effetto «Regalo» (il loro effetto è l'affinità, che vive in `confidente_regalo`), gli
-// oggetti chiave senza effetto di battaglia, la Fascia capel. bianca R (la guida le dà «Rs +5» come alla base, le altre varianti R crescono di
-// 3: resta «RS +8», da verificare in gioco) e le identità doppie.
+//      Specchio del damerino, Intimo del capo: premi di Sojiro per gli esami; Velo invisibile: ricompensa finale del Covo) e «oggetto chiave»
+//      su sei oggetti chiave (Seme tristezza blu, le cinque Lettere di raccomandazione) si svuotano: come si ottengono lo dice la ricompensa.
+// Fuori da qui, con l'esito nell'audit: i regali con l'effetto «Regalo» (il loro effetto è l'affinità, che vive in `confidente_regalo`: la
+// 287 toglie l'etichetta), gli oggetti chiave senza effetto di battaglia, la Fascia capel. bianca R (la guida le dà «Rs +5» come alla base:
+// la 284 applica la guida, con il valore di prima in una nota storica) e le identità doppie (284 e 285).
 //
 // Conservativa: ogni testo si scrive con `correggiTestoCatalogo` (solo schede della guida mai corrette dall'utente e solo se il testo è quello
 // atteso); altrimenti resta e l'audit lo dice. Nessuna voce del Diario cambia. Idempotente. Audit `audit-278-accessori-della-guida`, con il
@@ -50,9 +51,12 @@ import { invalidaCacheDiGioco } from '../../services/cacheDiGioco.js';
 const AUDIT = 'audit-278-accessori-della-guida';
 const errore = (motivo: string): never => { throw new Error(`278: ${motivo}; nessuna modifica applicata.`); };
 
-const RICHIESTA = (nome: string) => `Ricompensa della Richiesta «${nome}»`;
-
-/** Le schede da completare o correggere: effetto atteso → effetto della guida; `descrizione` (attesa → nuova) solo dove la guida dice come si ottengono. */
+/**
+ * Le schede da completare o correggere: effetto atteso → effetto della guida; `descrizione` (attesa → nuova) solo dove la descrizione ripeteva
+ * l'effetto o un dato che vive altrove. Chiusura del lotto F (terzo giro, rilievo 1): il modo di ottenere un oggetto che una Richiesta, un esame o
+ * il Covo dà lo dice già la sua ricompensa (`ricompensa_oggetto`, «Ricompensa di …» sulla scheda); il negozio lo dice l'offerta (la 286 crea
+ * quella delle Batterie portatili). Scriverlo anche nella descrizione era una seconda copia: la descrizione si svuota.
+ */
 const SCHEDE: ReadonlyArray<{ chiave: string; prima: string; dopo: string; descrizione?: { prima: string; dopo: string } }> = [
   // 1. accessori della guida in un'altra categoria
   { chiave: 'arma/bracciale-confuso', prima: '', dopo: 'Attiva Pulinpa: probabilità alta di infliggere Confusione a un nemico' },
@@ -60,15 +64,13 @@ const SCHEDE: ReadonlyArray<{ chiave: string; prima: string; dopo: string; descr
   { chiave: 'regalo/collana-magnetica', prima: 'Regalo od oggetto', dopo: 'Attiva Guarigione rapida: dimezza il tempo che serve per guarire dalle alterazioni negative' },
   { chiave: 'regalo/maschera-del-ladro', prima: '', dopo: 'Attiva Annulla Soggiogamento: previene il Soggiogamento' },
   { chiave: 'altro/cintura-eccentrica', prima: '', dopo: 'Attiva Potenzia alterazioni: aumenta la probabilità di infliggere alterazioni negative',
-    descrizione: { prima: 'aumenta le probabilità di infliggere alterazioni negative', dopo: RICHIESTA('Falsità in scena') } },
-  { chiave: 'altro/cintura-del-fastidio', prima: '', dopo: 'Attiva Ambiente benevolo: aumenta la probabilità di infliggere alterazioni negative con pioggia o neve',
-    descrizione: { prima: '', dopo: RICHIESTA('Il senso della vita nella terza età') } },
-  { chiave: 'altro/fermaglio-per-gatti', prima: '', dopo: 'Attiva Sukukaja: aumenta Precisione ed Elusione di un alleato per 3 turni',
-    descrizione: { prima: '', dopo: RICHIESTA('Se scomparissero i gatti') } },
+    descrizione: { prima: 'aumenta le probabilità di infliggere alterazioni negative', dopo: '' } },
+  { chiave: 'altro/cintura-del-fastidio', prima: '', dopo: 'Attiva Ambiente benevolo: aumenta la probabilità di infliggere alterazioni negative con pioggia o neve' },
+  { chiave: 'altro/fermaglio-per-gatti', prima: '', dopo: 'Attiva Sukukaja: aumenta Precisione ed Elusione di un alleato per 3 turni' },
   { chiave: 'altro/cristallo-della-boria', prima: '', dopo: 'Attiva Signore della difesa: Rakukaja all’inizio della battaglia',
     descrizione: { prima: '', dopo: 'Ricompensa per i 3 Semi della Bramosia del Palazzo di Shido' } },
   { chiave: 'altro/batterie-portatili', prima: '', dopo: 'Attiva Potenzia Folgorazione: aumenta la probabilità di infliggere Folgorazione',
-    descrizione: { prima: 'abilità Potenzia Folgorazione', dopo: 'Negozio Softair Untouchable (dall’arco del Palazzo di Madarame) e un forziere del Palazzo di Kaneshiro (Sala d’ingresso)' } },
+    descrizione: { prima: 'abilità Potenzia Folgorazione', dopo: '' } },
   // 2. accessori di categoria «accessorio» con un testo generico o sbagliato
   { chiave: 'accessorio/cintura-di-idaten', prima: 'Accessorio equipaggiabile', dopo: 'Attiva Auto-Masuku: Masukukaja in automatico all’inizio della battaglia' },
   { chiave: 'accessorio/cintura-della-forza', prima: 'accessorio: resistenza fisica', dopo: 'Attiva Resiste att. fisici: aumenta la resistenza agli attacchi fisici e annulla la debolezza relativa' },
@@ -89,17 +91,17 @@ const SCHEDE: ReadonlyArray<{ chiave: string; prima: string; dopo: string; descr
   { chiave: 'cibo/carne-in-scatola-speciale', prima: '', dopo: 'Ripristina 40 HP di tutti gli alleati' },
 ];
 
-const SOJIRO = (esami: string) => `Da Sojiro, dopo un ottimo punteggio negli esami della ${esami}`;
 /**
  * 6. Le descrizioni che erano solo l'etichetta della categoria («accessorio», «oggetto chiave»): un'etichetta si vede solo se ha senso (regola
- * dell'utente). Per i cinque accessori diventa il modo di ottenerli secondo [A]; per gli oggetti chiave senza altro testo si svuota.
+ * dell'utente) e si svuota. Per i quattro premi degli esami di Sojiro e il Velo invisibile del Covo come si ottengono lo dice la ricompensa
+ * collegata (`ricompensa_oggetto`, con la sua nota): scriverlo anche qui sarebbe una seconda copia (terzo giro, rilievo 1).
  */
 const DESCRIZIONI: ReadonlyArray<{ chiave: string; prima: string; dopo: string }> = [
-  { chiave: 'accessorio/cintura-resistente', prima: 'accessorio', dopo: SOJIRO('prima sessione di metà semestre') },
-  { chiave: 'accessorio/pendente-del-leblanc', prima: 'accessorio', dopo: SOJIRO('seconda sessione di metà semestre') },
-  { chiave: 'accessorio/specchio-del-damerino', prima: 'accessorio', dopo: SOJIRO('prima sessione di fine semestre') },
-  { chiave: 'accessorio/intimo-del-capo', prima: 'accessorio', dopo: SOJIRO('seconda sessione di fine semestre') },
-  { chiave: 'accessorio/velo-invisibile', prima: 'accessorio', dopo: 'Scatolone nello scaffale della soffitta del Leblanc, dopo aver ottenuto tutte le ricompense del Covo dei Ladri e parlato con Jose' },
+  { chiave: 'accessorio/cintura-resistente', prima: 'accessorio', dopo: '' },
+  { chiave: 'accessorio/pendente-del-leblanc', prima: 'accessorio', dopo: '' },
+  { chiave: 'accessorio/specchio-del-damerino', prima: 'accessorio', dopo: '' },
+  { chiave: 'accessorio/intimo-del-capo', prima: 'accessorio', dopo: '' },
+  { chiave: 'accessorio/velo-invisibile', prima: 'accessorio', dopo: '' },
   { chiave: 'chiave/seme-tristezza-blu', prima: 'oggetto chiave', dopo: '' },
   { chiave: 'chiave/prima-lettera-di-raccomandazione', prima: 'oggetto chiave', dopo: '' },
   { chiave: 'chiave/seconda-lettera-di-raccomandazione', prima: 'oggetto chiave', dopo: '' },

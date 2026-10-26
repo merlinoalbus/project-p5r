@@ -51,7 +51,7 @@ export function sfideDellaVoce(p: number, voceUid: string): SfidaDellaVoce[] {
     for (const t of turniConEsito(porzione)) {
       const chiave = `${t.attivita}:${t.ordine}`;
       if (out.get(chiave)?.effettoUid) continue;
-      const y = yenDellaSfidaDelTurno(t.attivita, t.esito, fascia);
+      const y = yenDellaSfidaDelTurno(t.attivita, t.esito, fascia, p);
       if (y) out.set(chiave, { attivita: t.attivita, ordine: t.ordine, articolo: y.articolo, importo: y.importo, motivo: y.motivo, effettoUid });
     }
   };

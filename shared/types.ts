@@ -1694,6 +1694,9 @@ export interface NegozioRiassuntoDto {
   sedeNome: string | null;
   /** Il programma punti dichiarato (migrazione 076), se il negozio ne ha uno. */
   programmaPunti: { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' } | null;
+  /** Chiusura dell'ondata 5: lo sconto legato al rango di un Confidente (`negozio.sconto_json`, migrazione 254), con il nome del Confidente;
+   *  null se il negozio non ne ha. */
+  sconto?: { confidente: string; confidenteNome: string; rango: number; percentuale: number } | null;
   articoli: number;
   verificati: number;
   /** Solo con `partita`: la presenza del negozio alla data corrente, dagli orari. */
@@ -1738,6 +1741,9 @@ export interface ArticoloDto {
   prezzo: number | null;
   /** Ondata 5 (lotto E, decisione 5): il prezzo in una fascia quando è diverso da `prezzo` (le sfide della Big Bang Burger di sera); null = nessuno. */
   prezzoPerFascia?: PrezzoPerFascia | null;
+  /** Chiusura dell'ondata 5: con la partita, il prezzo nella fascia corrente con lo sconto del negozio che vale adesso (la Clinica di Takemi
+   *  dal rango indicato): è l'importo che gli yen automatici scalano. Assente senza sconto attivo. */
+  prezzoScontato?: { prezzo: number; percentuale: number } | null;
   effetto: string | null;
   statistiche: string | null;
   /** Quante se ne possono comprare; `null` = nessun limite dichiarato (diverso da zero). */

@@ -28,22 +28,30 @@ function effettiDellaLettura(o: CatalogoOggettoDto): string {
   return Array.isArray(effetti) ? leggiVociEffetto(JSON.stringify(effetti)).map((v) => descriviVoceEffetto(v)).join(' · ') : '';
 }
 
+/** Chiusura dell'ondata 5: un regalo senza un effetto proprio fa ciò che fa ogni regalo, l'affinità con i Confidenti, che vive nelle reazioni
+ *  (`confidente_regalo`, scheda dell'oggetto): la cella lo dice con una frase calcolata dalla categoria, non con l'etichetta «Regalo» che i
+ *  dati ripetevano (migrazione 287) né con «Non dichiarato», che sarebbe falso. */
+const EFFETTO_DEL_REGALO = 'Si regala ai Confidenti';
+
 /** La cella «Effetto»: il testo dell'effetto, le statistiche di armi e protezioni (`statistiche.testo`, migrazione 275) o le voci della
- *  lettura; «Non dichiarato» solo se non c'è nessuno dei tre. Il `title` dice le note a parole («1 nota»), la cella le mostra come ♪. */
+ *  lettura; «Non dichiarato» solo se non c'è nessuno dei tre (e l'oggetto non è un regalo). Il `title` dice le note a parole («1 nota»), la
+ *  cella le mostra come ♪, con il nome accessibile («3 note») anche per le voci della lettura (revisione del lotto F, rilievo 5). */
 function CellaEffetto({ o }: { o: CatalogoOggettoDto }) {
   const lettura = o.effetto ? '' : effettiDellaLettura(o);
   const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo : '';
+  const regalo = !o.effetto && !statistiche && !lettura && o.categoria === 'regalo';
   return (
     <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : lettura ? testoNoteAParole(lettura) : undefined}>
       {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
       {statistiche && <span className="block testo-12 text-text-secondary">{statistiche}</span>}
-      {lettura && <span className="block">{lettura}</span>}
-      {!o.effetto && !statistiche && !lettura && 'Non dichiarato'}
+      {lettura && <span className="block"><TestoNote testo={lettura} /></span>}
+      {regalo && <span className="text-text-secondary">{EFFETTO_DEL_REGALO}</span>}
+      {!o.effetto && !statistiche && !lettura && !regalo && 'Non dichiarato'}
     </td>
   );
 }
 
-const ORDINI =[{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
+const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
 
 /** Un elenco per tutte le identità; i gruppi sono filtri, non cataloghi separati. */
 export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: GruppoOggetto | '' }) {
