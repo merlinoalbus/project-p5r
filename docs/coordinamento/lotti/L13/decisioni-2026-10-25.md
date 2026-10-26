@@ -52,4 +52,16 @@ verificati sulle copie in sola lettura dei dati reali.
     solo set o nessuno: la scelta si fa alla spunta. Le quattro domeniche senza voce d'acquisto (26 giugno, 7 agosto, 25 settembre, 29 gennaio)
     ricevono una voce «Canale di televendite» con i due set a scelta, come le altre (fuori dal periodo validato).
 
+21. **Ondata 5, oggetti e negozi** (26 ottobre; progetto ECC in `scratchpad/ondata5-progetto.md`, risposta dell'utente: «Gli effetti degli
+    oggetti ai fini di questa app non è necessario gestirli se non come informazione testuale. Non sono d'accordo nel rimandare attività a fasi
+    successive»). (a) Gli effetti degli oggetti restano testo informativo: nessuna struttura per famiglie; si tiene un solo punto per il testo
+    dell'effetto (catalogo), si tolgono le copie (articoli, traduzioni, descrizioni) e si correggono i testi sbagliati. (b) Nulla si rimanda:
+    Cartolina e premio «Benefattore» entrano nell'ondata. (c) Le altre raccomandazioni dell'architetto si applicano: unioni delle identità
+    doppie su elenco scritto con cestino reversibile; reazione dei regali strutturata con i punti attuali finché non verificati in gioco;
+    regalo ripetibile con consumo di copie e oggetti dei set posseduti; lotteria con esito «vinto/non vinto» alla spunta e trofeo, yen della
+    vincita a mano; un solo chiosco della lotteria; rigenerazione per tutte le categorie, distributori a 2 pezzi da verificare; in caso di
+    discordanza fra pagine della guida vale il listino dei negozi con nota storica; sconsigliati riconvertiti a +1; righe senza fonte italiana
+    tenute con la fonte dichiarata; prezzi diversi fra distributori lasciati; Braccialetto di 37 Gradi Celsius nascosto. Le voci del periodo
+    validato (04-18, 05-09, 05-18 sera) solo come proposte da approvare riga per riga.
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
