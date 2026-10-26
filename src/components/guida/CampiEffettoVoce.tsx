@@ -73,10 +73,10 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
 }
 
 /** L13: quante copie (1–999; decisione 6: facoltativa, 1 se non indicata). */
-export function CampoQuantita({ valore, onCambia }: { valore: number; onCambia: (q: number) => void }) {
+export function CampoQuantita({ valore, disabilitato, onCambia }: { valore: number; disabilitato?: boolean; onCambia: (q: number) => void }) {
   return (
     <label className="flex flex-col gap-1 testo-13">Copie
-      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={valore}
+      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={valore} disabled={disabilitato}
         onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia(Number.isFinite(n) ? Math.min(QUANTITA_MASSIMA_EFFETTO, Math.max(1, n)) : 1); }} />
     </label>
   );

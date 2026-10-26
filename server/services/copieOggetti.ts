@@ -11,7 +11,8 @@
 //     registro (o in una partita senza data, quindi senza riga) vale una copia;
 //   - dentro un set comprato: lo stesso conto per gli articoli che contengono l'oggetto (`ricompensa_oggetto` di fonte «articolo», per
 //     esempio i set delle televendite), per le copie del contenuto;
-//   - ricevute: le voci del Diario spuntate con l'effetto «oggetto ricevuto» (`oggetto_ottenuto_partita`, utente 046);
+//   - ricevute: le voci del Diario spuntate con l'effetto «oggetto ricevuto» (`oggetto_ottenuto_partita`, utente 046) e i turni con un esito
+//     che dà oggetti (`oggetto_esito_turno`, utente 053: la sfida della Big Bang Burger vinta);
 //   - regalate: le consegne che hanno usato una copia (`regalo_partita.copia_consumata`, utente 052).
 // `disponibili` = possedute − regalate, mai sotto zero (un acquisto annullato a parte dopo il regalo non porta a un numero negativo).
 // ============================================================
@@ -56,6 +57,10 @@ export function copieDellOggetto(partitaId: number, catalogo: string): CopieOgge
   }
   if (tabellaUtente('oggetto_ottenuto_partita')) {
     possedute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
+  }
+  // Ondata 5 (lotto G, utente 053): ricevute dai turni con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
+  if (tabellaUtente('oggetto_esito_turno')) {
+    possedute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
   const regalate = colonnaUtente('regalo_partita', 'copia_consumata')
     ? prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number

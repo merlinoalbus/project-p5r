@@ -2482,8 +2482,10 @@ export interface OggettoOttenutoDto {
   nome: string;
   categoria: string | null;
   quantita: number;
-  /** La voce del Diario spuntata (effetto «oggetto ricevuto») o la Richiesta completata che lo ha dato. */
-  origine: { tipo: 'voce'; voceUid: string; giorno: string | null; testo: string | null } | { tipo: 'richiesta'; chiave: string; nome: string };
+  /** La voce del Diario spuntata (effetto «oggetto ricevuto»), la Richiesta completata o (Ondata 5, lotto G) il turno di un'attività registrato
+   *  con un esito che dà oggetti (la sfida della Big Bang Burger vinta) che lo ha dato. */
+  origine: { tipo: 'voce'; voceUid: string; giorno: string | null; testo: string | null } | { tipo: 'richiesta'; chiave: string; nome: string }
+    | { tipo: 'turno'; attivita: string; attivitaNome: string; ordine: number; esitoNome: string };
 }
 
 /** L13: gli oggetti ottenuti nella partita: le righe per origine e il totale per oggetto (le copie dello stesso oggetto si sommano). */
@@ -3475,6 +3477,8 @@ export interface ElenchiRegoleDto {
   /** L7: allerte effettivamente presenti nel calendario, per la condizione meteo «senza allerta». */
   allerte?: Array<{ chiave: string; nome: string }>;
   articoli: Array<{ chiave: string; nome: string; gruppo: string }>;
+  /** Ondata 5 (lotto G): i trofei, per il trofeo che un esito di un'attività fa ottenere (l'editor degli esiti). */
+  trofei?: Array<{ chiave: string; nome: string }>;
   letture: Array<{ chiave: string; nome: string; categoria: 'libro' | 'film' }>;
   arcani: Array<{ chiave: string; nome: string }>;
   persone: Array<{ chiave: string; nome: string }>;

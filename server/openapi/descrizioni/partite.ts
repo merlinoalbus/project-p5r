@@ -303,7 +303,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'GET /api/partite/:id/oggetti-ottenuti': {
     sommario: 'Gli oggetti del catalogo ottenuti nella partita',
-    descrizione: 'L13: le voci del Diario spuntate con l\'effetto «oggetto ricevuto» (una riga per voce ed effetto, tolta togliendo la spunta) e le Richieste completate con i loro oggetti del catalogo (decisione 3: una volta sola, finché la Richiesta è completata; letti dallo stato completato, non copiati). `righe` con l\'origine di ogni oggetto, `totali` con le copie sommate per oggetto. Sola lettura.',
+    descrizione: 'L13: le voci del Diario spuntate con l\'effetto «oggetto ricevuto» (una riga per voce ed effetto, tolta togliendo la spunta) e le Richieste completate con i loro oggetti del catalogo (decisione 3: una volta sola, finché la Richiesta è completata; letti dallo stato completato, non copiati) e (Ondata 5, lotto G) i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta; una riga per oggetto del turno, tolta togliendo il turno). `righe` con l\'origine di ogni oggetto, `totali` con le copie sommate per oggetto. Sola lettura.',
     risposta: '`OggettiOttenutiDto`',
     errori: [PARTITA],
   },

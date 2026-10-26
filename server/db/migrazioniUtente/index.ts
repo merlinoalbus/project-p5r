@@ -59,5 +59,7 @@ import { utente049 } from './049_yen_fuori_registro.js';
 import { utente050 } from './050_censimento_stati_voce.js';
 import { utente051 } from './051_registro_acquisti.js';
 import { utente052 } from './052_regali_ripetibili.js';
+// Ondata 5, lotto G (lotteria e premi delle sfide): il trofeo e gli oggetti dati da un turno con il suo esito
+import { utente053 } from './053_premi_degli_esiti.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053];

@@ -7,13 +7,14 @@
 // Una Dote a valori possibili (la fabbricazione: ♪♪ o ♪♪♪) chiede le note fra quelle dichiarate, o «nessuna». Gli esiti non ancora possibili
 // (le condizioni dell'esito o dell'articolo della sfida, per esempio il rango) si vedono con il motivo ma non si toccano: il server li rifiuta.
 // Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (L13, decisione 18: registrando il turno si scala da solo dal saldo,
-// mai sotto zero) e i premi in parole.
+// mai sotto zero) e i premi in parole. Ondata 5 (lotto G): anche il trofeo e gli oggetti del catalogo che l'esito dà, e il prezzo dell'esito
+// senza prova (l'estrazione della lotteria: «Non vinto, ricompri il Lotto R»), che nessuna intestazione dice.
 // L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite) chiedono quale si è comprato, o «Nessuno»
 // (`SceltaAcquistoAlternativo`), con le stesse regole: con una sola scelta il tocco spunta, con più scelte si conferma.
 // ============================================================
 
 import { useId, useState } from 'react';
-import { fraseDotiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { fraseDotiEsito, fraseOggettiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
 import { noteAParole, simboliNote, testoNoteAParole } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -22,6 +23,20 @@ import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
 
 /** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
 const dotiTesto = (e: EsitoDisponibileDto): string => fraseDotiEsito(e.doti);
+/** Gli esiti parlano di Doti? Solo allora «nessuna Dote» e «Senza punti» hanno senso (l'estrazione della lotteria non dà Doti: Vinto o Non vinto). */
+const conDoti = (esiti: readonly EsitoDisponibileDto[]): boolean => esiti.some((e) => e.doti.length > 0);
+/** Il prezzo dell'articolo dell'esito, quando non lo dice già l'intestazione della prova (un esito senza gruppo: «Non vinto, ricompri il
+ *  Lotto R» dell'estrazione della lotteria). È quello della fascia che si scala davvero (Ondata 5, lotti E e G). */
+function prezzoEsito(e: EsitoDisponibileDto, prezzoGiaNelSaldo: boolean): string | null {
+  if (e.gruppo || e.articolo?.prezzoNelMomento == null) return null;
+  return `${e.articolo.nome} ${formattaYen(e.articolo.prezzoNelMomento)}, ${prezzoGiaNelSaldo ? 'già nel saldo (non si scala)' : 'si scala da solo dal saldo'}`;
+}
+/** Che cosa dà l'esito oltre al nome, in parole: Doti (se gli esiti ne parlano), prezzo (se l'intestazione non lo dice), trofeo, oggetti, premi.
+ *  Vuoto se niente. */
+function dettaglioEsito(e: EsitoDisponibileDto, doti: boolean, prezzoGiaNelSaldo: boolean): string {
+  return [doti ? dotiTesto(e) : null, prezzoEsito(e, prezzoGiaNelSaldo), e.trofeo ? `trofeo «${e.trofeo.nome}»` : null, fraseOggettiEsito(e.oggetti), e.premi]
+    .filter((x): x is string => !!x).join(' · ');
+}
 
 /** Gli esiti raggruppati per prova (il gruppo), nell'ordine dichiarato. */
 function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: string | null; esiti: EsitoDisponibileDto[] }> {
@@ -38,6 +53,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
   // gli esiti non ancora possibili restano raggiungibili da tastiera (aria-disabled, non disabled): il motivo è scritto nel bottone e
   // collegato con aria-describedby; il tocco non fa nulla (il server li rifiuta comunque)
   const prefisso = useId();
+  const doti = conDoti(esiti);
   return (
     <span className="flex w-full flex-col gap-1.5">
       {perGruppo(esiti).map((g) => (
@@ -47,14 +63,16 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
           <span className="flex flex-wrap gap-1.5">
             {g.esiti.map((e) => {
               const idMotivo = `${prefisso}-motivo-${e.chiave}`;
+              const dettaglio = dettaglioEsito(e, doti, prezzoGiaNelSaldo);
+              const oggetti = fraseOggettiEsito(e.oggetti), prezzo = prezzoEsito(e, prezzoGiaNelSaldo);
               return (
                 <button key={e.chiave} type="button" className={`chip touch flex-col items-start text-left ${scelto === e.chiave ? 'chip--attivo' : ''} ${!e.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
                   aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
                   aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
                   title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
-                  aria-label={`${e.nome}: ${testoNoteAParole(dotiTesto(e))}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
+                  aria-label={`${e.nome}${doti ? `: ${testoNoteAParole(dotiTesto(e))}` : ''}${prezzo ? `; ${prezzo}` : ''}${e.trofeo ? `; segna il trofeo ${e.trofeo.nome}` : ''}${oggetti ? `; ricevi ${oggetti}` : ''}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
                   <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
-                  <span className="testo-12 text-text-secondary">{dotiTesto(e)}{e.premi ? ` · ${e.premi}` : ''}</span>
+                  {dettaglio && <span className="testo-12 text-text-secondary text-pretty">{dettaglio}</span>}
                   {!e.disponibile && <span id={idMotivo} className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
                 </button>
               );
@@ -72,7 +90,8 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla }:
     <span className="flex w-full flex-wrap items-center gap-1.5 testo-12" role="group" aria-label={`Esito del turno: ${nome}`}>
       <span className="w-full text-text-secondary">Che esito hai ottenuto?</span>
       <ElencoEsiti esiti={esiti} scelto={undefined} occupato={occupato} onScegli={(c) => onScegli(c)} />
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" disabled={occupato} onClick={() => onScegli(null)} />
+      {/* «Senza punti» solo se gli esiti danno Doti: per l'estrazione della lotteria la scelta è fra «Vinto» e «Non vinto» */}
+      {conDoti(esiti) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" disabled={occupato} onClick={() => onScegli(null)} />}
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
     </span>
   );
@@ -142,7 +161,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Esito: ${s.attivitaNome}`}>
             <span className="w-full text-text-secondary">{s.attivitaNome}: che esito hai ottenuto?</span>
             <ElencoEsiti esiti={s.esiti} scelto={v?.tipo === 'turno' ? v.esito : undefined} occupato={occupato} onScegli={(c) => imposta(s.effettoUid, { tipo: 'turno', esito: c })} prezzoGiaNelSaldo={s.yenGiaNelSaldo === true} />
-            <button type="button" className={`chip touch ${v?.tipo === 'turno' && v.esito === null ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'turno' && v.esito === null} onClick={() => imposta(s.effettoUid, { tipo: 'turno', esito: null })}>Senza punti</button>
+            {conDoti(s.esiti) && <button type="button" className={`chip touch ${v?.tipo === 'turno' && v.esito === null ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'turno' && v.esito === null} onClick={() => imposta(s.effettoUid, { tipo: 'turno', esito: null })}>Senza punti</button>}
           </span>
         );
       })}
