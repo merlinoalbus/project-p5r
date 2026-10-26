@@ -39,6 +39,7 @@ import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citt
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
+import { compratoNelCiclo } from '../../shared/rifornimento';
 import type { ElementoCatalogoDto, LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
@@ -171,7 +172,7 @@ export function LuogoPage() {
                       </div>}
                       {modulo?.negozio === n.chiave && <ModuloCatalogo tipo="articolo" elemento={modulo.elemento} negozioChiave={n.chiave} onChiudi={() => setModulo(null)} onSalvato={salvato} />}
                       <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={(a) => apriArticolo(n.chiave, a)} onRipristinato={() => void dati.ricarica()}
-                        onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, listini: attuale.listini.map((x) => (x.chiave !== n.chiave ? x : { ...x, articoliElenco: x.articoliElenco.map((y) => (y.chiave === a.chiave ? a : y)), acquistati: x.articoliElenco.filter((y) => (y.chiave === a.chiave ? a.acquistato : y.acquistato)).length })) }))} />
+                        onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, listini: attuale.listini.map((x) => (x.chiave !== n.chiave ? x : { ...x, articoliElenco: x.articoliElenco.map((y) => (y.chiave === a.chiave ? a : y)), acquistati: x.articoliElenco.filter((y) => compratoNelCiclo(y.chiave === a.chiave ? a : y)).length })) }))} />
                     </section>
                   ))}
                 </section>

@@ -121,7 +121,10 @@ export function annullaRegalo(partitaId: number, confidente: string, catalogo: s
     // lo fa `scriviRegaloPartita`, per ogni consegna tolta, qualunque sia la strada
     scriviRegaloPartita(partitaId, confidente, { catalogo }, false);
     if (riga.acquisto_articolo && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, riga.acquisto_articolo)) {
-      impostaAcquisto(partitaId, riga.acquisto_articolo, false);
+      // Ondata 5: se l'acquisto del regalo è già stato annullato a parte e l'oggetto resta comprato soltanto da voci del Diario, non c'è
+      // niente da togliere qui (le copie delle voci si tolgono con le loro spunte): l'annullo del regalo prosegue con punti ed evento
+      try { impostaAcquisto(partitaId, riga.acquisto_articolo, false); }
+      catch (err) { if ((err as { code?: string }).code !== 'acquisto-della-voce') throw err; }
     }
     prepared("DELETE FROM evento_partita WHERE partita_id = ? AND tipo = 'regalo' AND json_extract(dati_json, '$.confidente') = ? AND json_extract(dati_json, '$.catalogo') = ?")
       .run(partitaId, confidente, catalogo);

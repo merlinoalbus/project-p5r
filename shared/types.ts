@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
 import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
@@ -1730,6 +1731,36 @@ export interface ArticoloDto {
   disponibilita?: DisponibilitaDto;
   /** Acquistato/ottenuto nella partita. */
   acquistato: boolean;
+  /** Ondata 5 (decisione 21): la regola di rifornimento dell'articolo a parole; null = nessuna regola (servizi, Aojiru). */
+  rifornimento?: { regola: RegolaRifornimento; testo: string } | null;
+  /** Solo con la partita e con una regola: la scorta del ciclo in corso, calcolata dal registro degli acquisti. */
+  scorta?: ScortaArticoloDto | null;
+}
+
+/** Ondata 5 (decisione 21): la scorta di un articolo nella partita, alla data di gioco (`scorteService.scortaDellArticolo`). */
+export interface ScortaArticoloDto {
+  /** Pezzi per ciclo; null = nessun limite indicato. */
+  quantita: number | null;
+  comprati: number;
+  rimasti: number | null;
+  esaurito: boolean;
+  /** Il giorno «MM-GG» del rifornimento, se esaurito e il ciclo ne ha uno. */
+  torna: string | null;
+  /** Lo stato a parole: «Rimasti 1 di 3», «Esaurito: torna lunedì 25 aprile». */
+  testo: string;
+  /** Il negozio spedisce (Tanaka) e ha in viaggio un ordine di un giorno precedente: nessun nuovo ordine fino all'arrivo (`torna`). */
+  ordineInViaggio?: boolean;
+  /**
+   * Tutti gli acquisti registrati dell'offerta (e delle vecchie chiavi del suo listino condiviso), dal più vecchio; `nelCiclo` = contano nel
+   * ciclo in corso. Quelli della pagina del negozio si annullano uno per uno, qualunque sia il ciclo; quelli di una voce togliendone la spunta.
+   * `articolo`: la chiave con cui l'acquisto è segnato (`negozioNome` quando è una vecchia chiave del listino condiviso); `altraSede`: il
+   * luogo, quando l'acquisto è di un'altra sede dello stesso listino (ogni sede ha la sua scorta: qui non conta); `dopoLaData`: il giorno
+   * dell'acquisto viene dopo la data della partita (la data è tornata indietro) e non conta in nessun ciclo.
+   */
+  righe: Array<{ id: number; articolo: string; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid: string | null; nelCiclo: boolean;
+    dopoLaData: boolean; altraSede?: string; negozioNome?: string }>;
+  /** Le chiavi con il segno «ottenuto» che nessuna riga porta (segnate prima del registro, o senza una data di gioco): si tolgono con `soloPresenza`. */
+  senzaGiorno: string[];
 }
 
 export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
@@ -2954,7 +2985,10 @@ export interface DettaglioSpilloDto {
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
     /** L5: la sezione del negozio nella pagina della sede, o null. */
-    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[] }> } | null;
+    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
+      /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come
+       *  nella pagina del negozio (`ArticoloDto`): la mappa mostra lo stesso dato nello stesso modo («Compra», «rimasti N di Q», «Annulla»). */
+      rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'] }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -3550,6 +3584,9 @@ export interface OffertaOggettoDto {
   noteStoriche?: NotaStoricaOfferta[];
   acquisti?: StatoAcquistiArticoloDto;
   acquistiRegistrati: Array<{ articolo: string; negozioNome: string }>;
+  /** Ondata 5 (decisione 21): la regola di rifornimento dell'offerta e, con la partita, la scorta del ciclo in corso. */
+  rifornimento?: ArticoloDto['rifornimento'];
+  scorta?: ArticoloDto['scorta'];
   articolo: string;
   negozio: string;
   negozioNome: string;

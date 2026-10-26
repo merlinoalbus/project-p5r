@@ -11,7 +11,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -27,7 +27,7 @@ import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
 import { bodySessioneVideogioco } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
-import { impostaAcquisto, disponibilitaAcquistoCorrente } from '../services/negoziService.js';
+import { impostaAcquisto, disponibilitaAcquistoCorrente, annullaRigaDelRegistro } from '../services/negoziService.js';
 import { leggiAcquistiPartita, anteprimaRegistrazioneAcquisto, registraAcquisto, anteprimaAnnullaProvenienza, annullaProvenienzaAcquisto, anteprimaRimozionePresenzaLegacy, rimuoviPresenzaLegacy } from '../services/acquistiService.js';
 import { leggiPropostePartita, anteprimaDecisioneProposte, decidiProposte } from '../services/propostePartitaService.js';
 import { conCestinoPrivato, elencoCestinoPersonale, eliminaCestinoPrivato, ripristinaCestinoPrivato, svuotaCestinoPersonale } from '../services/cestinoService.js';
@@ -253,8 +253,13 @@ router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyM
   res.json({ meteo, partita: leggiPartita(Number(req.params.id)) });
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
-  const b = req.body as { articolo: string; fatto: boolean; sede?: string };
-  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede));
+  const b = req.body as { articolo: string; fatto: boolean; sede?: string; soloPresenza?: true };
+  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede, b.soloPresenza ? { soloPresenza: true } : {}));
+});
+/** Ondata 5 (decisione 21): annulla un solo acquisto della pagina del negozio (una riga del registro), qualunque sia il suo ciclo. */
+router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto, query: queryRigaAcquisto }), (req, res) => {
+  const q = req.query as { sede?: string };
+  res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId), q.sede));
 });
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { OffertaOggettoDto } from '../../types';
-import { impostaAcquisto } from '../../services/api';
+import { annullaRigaAcquisto, impostaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { ancoraNegozio } from '../../utils/citta';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
@@ -17,6 +17,22 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
     setOccupato(true);
     try { await impostaAcquisto(partitaId, articolo, fatto, o.sedeChiave); await onCambiata(); }
     catch (e) { notifica('error', e instanceof Error ? e.message : 'Acquisto non aggiornato.'); }
+    finally { setOccupato(false); }
+  };
+  /** Ondata 5: annulla un solo acquisto del ciclo (una riga del registro della partita). */
+  const annullaRiga = async (rigaId: number) => {
+    if (partitaId === null || occupato) return;
+    setOccupato(true);
+    try { await annullaRigaAcquisto(partitaId, rigaId, o.sedeChiave); await onCambiata(); }
+    catch (e) { notifica('error', e instanceof Error ? e.message : 'Acquisto non annullato.'); }
+    finally { setOccupato(false); }
+  };
+  /** Ondata 5: toglie il segno «ottenuto» senza un giorno registrato (di prima del registro, o senza data di gioco). */
+  const togliSegno = async (articolo: string) => {
+    if (partitaId === null || occupato) return;
+    setOccupato(true);
+    try { await togliSegnoSenzaGiorno(partitaId, articolo, o.sedeChiave); await onCambiata(); }
+    catch (e) { notifica('error', e instanceof Error ? e.message : 'Segno non tolto.'); }
     finally { setOccupato(false); }
   };
   const requisiti = o.disponibilita?.requisiti ?? [];
@@ -38,7 +54,8 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
     {partitaId !== null && <td data-etichetta="Acquisto"><AcquistiOfferta articolo={o.articolo} nome={nome}
       partitaId={partitaId} acquisti={o.acquisti} onRileggi={onCambiata}
       registrati={o.acquistiRegistrati} acquistato={o.acquistato} occupato={occupato}
-      bloccato={o.disponibilita !== null && o.disponibilita.stato !== 'disponibile'} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />
+      bloccato={o.disponibilita !== null && o.disponibilita.stato !== 'disponibile'} onCambia={(chiave, fatto) => void cambia(chiave, fatto)}
+      rifornimento={o.rifornimento} scorta={o.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} onTogliSegno={(k) => void togliSegno(k)} />
       {occupato && <span role="status" className="testo-12 text-text-muted">Salvataggio…</span>}</td>}
   </tr>;
 }

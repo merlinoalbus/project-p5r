@@ -128,7 +128,10 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     const negozio = s.dettaglio.negozio;
     try {
       const a = await impostaAcquisto(partitaId, articoloChiave, fatto, negozio.sedeChiave);
-      aggiorna({ ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } });
+      // Ondata 5: con il segno anche scorta, disponibilità e acquisti della sede, che «Compra» ha appena cambiato
+      aggiorna({ ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? {
+        ...x, comprato: a.acquistato, disponibilita: a.disponibilita ?? x.disponibilita, rifornimento: a.rifornimento ?? null,
+        ...(a.scorta !== undefined ? { scorta: a.scorta } : {}), acquistiRegistrati: a.acquistiRegistrati ?? x.acquistiRegistrati } : x)) } } });
       notifica('success', fatto ? `«${a.nome}» segnato come comprato.` : `«${a.nome}» riaperto.`);
       opz.onCambiato?.();
       // un articolo ottenuto può essere la condizione di un altro pin

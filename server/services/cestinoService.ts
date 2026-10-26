@@ -150,6 +150,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   yen_automatico: ['movimento automatico di denaro', 'movimenti automatici di denaro'],
   yen_fuori_registro: ['causa con gli yen già nel saldo da prima', 'cause con gli yen già nel saldo da prima'], yen_automatico_inizio: ['inizio degli yen automatici', 'inizi degli yen automatici'],
   proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
+  // Ondata 5 (utente 051): il registro degli acquisti con giorno e pezzi
+  registro_acquisti: ['acquisto del registro', 'acquisti del registro'],
   // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
   lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
   giorno_calendario: ['giorno del calendario', 'giorni del calendario'], giorno_percorso: ['giorno del percorso', 'giorni del percorso'],

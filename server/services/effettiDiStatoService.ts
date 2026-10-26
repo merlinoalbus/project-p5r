@@ -35,7 +35,7 @@ import { impostaEventoStoria } from './semaforiService.js';
 import { impostaDomandaFatta } from './domandeService.js';
 import { impostaCruciverba } from './cruciverbaService.js';
 import { impostaStatoRichiesta } from './richiesteService.js';
-import { impostaAcquisto } from './negoziService.js';
+import { impostaAcquisto, registraCopiaDaVoce, togliCopiaDaVoce } from './negoziService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { annullaInvito, registraInvito } from './inviti.js';
 import { aggiungiPosseduta, registraPersona } from './partiteService.js';
@@ -114,8 +114,9 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
 }
 
 /** Segna (nel verso `segna`) lo stato dell'effetto, o lo riporta com'era (`stato` della Richiesta). `opz` vale solo per l'articolo: lo stato
- *  in cui valutarne la disponibilità (`st`) o nessun controllo (`senzaDisponibilita`), vedi `OpzioniStato`. */
-function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null, opz: OpzioniStato = {}): void {
+ *  in cui valutarne la disponibilità (`st`) o nessun controllo (`senzaDisponibilita`), vedi `OpzioniStato`. Ondata 5: con la voce e l'effetto
+ *  (`effettoUid`) l'acquisto entra nel registro come copia di quella voce, e togliendolo se ne va solo quella riga. */
+function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null, opz: OpzioniStato = {}, effettoUid: string | null = null): void {
   // l'invito: la stessa regola del gesto diretto («Invito avvenuto»): solo con le condizioni vere (409 `invito-non-possibile`), una volta sola; si toglie solo se l'ha scritto la voce
   if (e.tipo === 'invito') { if (segna) registraInvito(p, e.invito, voceUid); else annullaInvito(p, e.invito, voceUid); }
   else if (e.tipo === 'trofeo') impostaTrofeo(p, e.trofeo, segna);
@@ -142,7 +143,8 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
   else if (e.tipo === 'cruciverba') impostaCruciverba(p, e.data, segna);
-  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, undefined, { ...(opz.st ? { st: opz.st } : {}), ...(opz.senzaDisponibilita ? { senzaDisponibilita: true } : {}) });
+  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, undefined, { ...(opz.st ? { st: opz.st } : {}), ...(opz.senzaDisponibilita ? { senzaDisponibilita: true } : {}),
+    ...(voceUid && effettoUid ? { voce: { voceUid, effettoUid, ...(e.quantita ? { quantita: e.quantita } : {}) } } : {}) });
   else impostaStatoRichiesta(p, e.richiesta, segna ? 'completata' : (statoRichiesta as 'completata' | null));
 }
 
@@ -231,8 +233,12 @@ function applicaStato(p: number, voceUid: string, uid: string, e: EffettoDiStato
   if (!vecchio) prepared(SQL_NUOVA_RIGA).run(p, voceUid, uid, e.tipo, chiaveDi(e), JSON.stringify(ora), new Date().toISOString());
   const ricordato = vecchio ? primaDellaRiga<StatoPrima>(vecchio.prima_json) ?? ora : ora;
   if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); return 'segnato'; }
-  if (ora.gia) return ricordato.gia ? 'gia-presente' : 'segnato';
-  try { scrivi(p, e, true, null, voceUid, opz); }
+  if (ora.gia) {
+    // Ondata 5 (decisione 21): l'articolo già ottenuto comprato di nuovo da questa voce resta «ottenuto», e la copia entra nel registro
+    if (e.tipo === 'articolo') registraCopiaDaVoce(p, e.articolo, { voceUid, effettoUid: uid, ...(e.quantita ? { quantita: e.quantita } : {}) });
+    return ricordato.gia ? 'gia-presente' : 'segnato';
+  }
+  try { scrivi(p, e, true, null, voceUid, opz, uid); }
   catch (err) {
     // un articolo non ancora disponibile nella partita non ferma la spunta della voce: resta da segnare dal negozio (non un set scelto)
     if (e.tipo === 'articolo' && !opz.scelto && (err as { code?: string }).code === 'articolo-non-disponibile') {
@@ -503,9 +509,11 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
       prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo = 'compendio-registrata'").run(p, voceUid, Number(r.chiave));
     } else if (d.modo === 'torna') {
       // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
-      try { scrivi(p, effettoDaRiga(r.tipo, r.chiave), false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
+      try { scrivi(p, effettoDaRiga(r.tipo, r.chiave), false, prima.stato ?? null, voceUid, {}, r.effetto_uid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
       if (revocaEventi) revocaEventiDelloStato(p, voceUid, r);
     }
+    // Ondata 5: la copia della voce lascia il registro in ogni caso (anche quando lo stato «ottenuto» resta: c'era già o lo tiene un'altra voce)
+    if (r.tipo === 'articolo') togliCopiaDaVoce(p, voceUid, r.effetto_uid);
     prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
   }
   return { avvisi, tornato };

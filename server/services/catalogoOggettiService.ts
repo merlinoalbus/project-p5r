@@ -41,7 +41,9 @@ export function offerteDellOggetto(chiave: string, partita?: number): OffertaOgg
       return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
         prezzo: r.prezzo, costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
         presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
-        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche };
+        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche,
+        // Ondata 5 (decisione 21): la regola di rifornimento e, con la partita, la scorta dell'offerta
+        rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}) };
     });
   });
 }

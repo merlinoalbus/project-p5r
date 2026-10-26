@@ -65,14 +65,20 @@ describe('API negozi e inventario', () => {
     expect(acquistabile).toBeDefined();
     let a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(true);
-    a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto; // idempotente
+    // Ondata 5 (decisione 21): un secondo acquisto è una seconda riga del registro (la guida tace: nessun limite), il segno «ottenuto» è uno solo
+    a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(true);
+    expect(a.scorta?.righe).toHaveLength(2);
     const d = (await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto;
     expect(d.acquistati).toBe(1);
     expect(d.articoliElenco.find((x) => x.chiave === acquistabile.chiave)?.acquistato).toBe(true);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=acquisto`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
     expect(storico.eventi[0].titolo).toContain(acquistabile.nome);
+    // togliere toglie un acquisto alla volta: il segno «ottenuto» se ne va con l'ultimo
+    a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: false })).body.data as ArticoloDto;
+    expect(a.acquistato).toBe(true);
+    expect(a.scorta?.righe).toHaveLength(1);
     a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: false })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: 'x/y', fatto: true })).status).toBe(404);
