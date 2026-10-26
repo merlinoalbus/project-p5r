@@ -32,7 +32,7 @@ import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
-import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
+import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -96,9 +96,27 @@ function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenG
     riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), nomiRiepilogo, { yenGiaNelSaldo: vecchi }),
   };
 }
+/**
+ * La domanda del gioco dal suo id per «Il gioco dà» (2026-10-26: «devono essere visualizzate le domande ma anche le risposte»): il testo,
+ * il tipo e le risposte giuste in ordine, dalla riga della tabella `domanda` (la stessa fonte della pagina «Domande in classe, esami e quiz
+ * in TV» e di «Scuola oggi»). Un JSON delle risposte che non si legge dà la domanda senza risposte, mai un errore della giornata.
+ */
+function quesitoDellaDomanda(id: number): QuesitoRiepilogoEffetti | undefined {
+  const r = prepared('SELECT domanda, tipo, risposte_json FROM domanda WHERE id = ?').get(id) as { domanda: string; tipo: string; risposte_json: string } | undefined;
+  if (!r) return undefined;
+  let grezze: unknown;
+  try { grezze = JSON.parse(r.risposte_json); } catch { grezze = []; }
+  const risposte = (Array.isArray(grezze) ? grezze : []).flatMap((x): QuesitoRiepilogoEffetti['risposte'] => {
+    if (!x || typeof x !== 'object') return [];
+    const { testo, domanda } = x as { testo?: unknown; domanda?: unknown };
+    if (typeof testo !== 'string') return [];
+    return [typeof domanda === 'string' && domanda.trim() ? { testo, domanda } : { testo }];
+  });
+  return { domanda: r.domanda, tipo: r.tipo, risposte };
+}
 /** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
 function nomiDelRiepilogo(nomi: NomiEffettiAzione): NomiRiepilogoEffetti {
-  return { frase: nomiFraseEffetto(), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno };
+  return { frase: nomiFraseEffetto(), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il

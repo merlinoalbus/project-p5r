@@ -134,7 +134,7 @@ const compatto = (s: string): string => s.toLowerCase().replace(/\s+/g, '');
 /**
  * Il testo `note` della guida («Perizia +2») dice la stessa cosa di un effetto Dote della voce («Perizia», 2 note)? Allora la riga lo mostra una volta sola
  * (nell'effetto: «Perizia ♪♪ · 3 punti»), perché «+2» (note) accanto a «+3» (punti) sembrava un secondo valore fra cui scegliere. Altrimenti il testo
- * resta, etichettato «Guida:».
+ * resta, senza etichetta (2026-10-26: «non serve "Guida:" prima del testo contenuto dentro Note»).
  */
 export function noteDellaGuidaCoincideConEffetto(note: string, produce: ReadonlyArray<EffettoAzione>): boolean {
   const n = compatto(note);

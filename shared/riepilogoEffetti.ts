@@ -20,8 +20,17 @@ import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
 import { contoArticoli, type EffettoVoce, type NomiFraseEffetto } from './effettiVoce.js';
 
-/** Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga). */
-export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string }
+/** Una risposta giusta di una domanda del gioco: il testo e, se la riga ne raccoglie più d'una (gli esami), il quesito a cui risponde. */
+export interface RispostaRiepilogoEffettiDto { testo: string; domanda?: string }
+/**
+ * Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga).
+ * 2026-10-26 («Per le domande/quiz/Esami devono essere visualizzate le domande ma anche le risposte»): la riga di una domanda in classe,
+ * di un quiz in TV o di un esame ha per nome la domanda e in `risposte` le risposte giuste, nell'ordine (più passi per le domande a catena,
+ * un quesito per risposta negli esami), lette dalla riga della domanda del gioco (`domanda.risposte_json`).
+ */
+export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string; risposte?: RispostaRiepilogoEffettiDto[] }
+/** Una domanda del gioco come la legge il riepilogo: il testo, il tipo (classe, esame, quiz in TV) e le risposte giuste in ordine. */
+export interface QuesitoRiepilogoEffetti { domanda: string; tipo: string; risposte: RispostaRiepilogoEffettiDto[] }
 /** Un gruppo del riepilogo: l'etichetta, le righe nell'ordine degli effetti, il totale (solo gli acquisti) e una nota che vale per tutto il gruppo. */
 export interface GruppoRiepilogoEffettiDto {
   /** Identità stabile del gruppo nella voce («acquisti:distributore-bagno», «doti», «turni»). */
@@ -41,7 +50,13 @@ export interface NomiRiepilogoEffetti {
   negozio: (chiave: string) => string | undefined;
   /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno). */
   pagaTurno: (attivita: string) => { yen: number; massima: number | null } | undefined;
+  /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
+  quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
 }
+
+/** Il gruppo di una domanda secondo il suo tipo: le domande in classe, i quiz del game show in TV, gli esami (di metà semestre e finali). */
+const gruppoDellaDomanda = (tipo: string | undefined): string =>
+  tipo === 'tv' ? 'domande:tv' : tipo === 'esame-medio' || tipo === 'esame-finale' ? 'domande:esame' : tipo === 'altro' ? 'domande:altro' : 'domande';
 
 const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
 /** Il negozio di un articolo: la parte della chiave prima della barra. */
@@ -63,6 +78,9 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   sblocchi: { titolo: 'Sblocchi' },
   storia: { titolo: 'Eventi di storia' },
   domande: { titolo: 'Domande in classe' },
+  'domande:tv': { titolo: 'Quiz in TV' },
+  'domande:esame': { titolo: 'Esame' },
+  'domande:altro': { titolo: 'Domande' },
   cruciverba: { titolo: 'Cruciverba' },
   inviti: { titolo: 'Inviti' },
   persone: { titolo: 'Compendio' },
@@ -212,7 +230,15 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         break;
       }
       case 'storia': riga('storia', EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento); break;
-      case 'domanda': riga('domande', n.frase.domanda(e.domanda) ?? 'Domanda'); break;
+      case 'domanda': {
+        // la domanda e le sue risposte giuste (2026-10-26), nel gruppo del suo tipo; senza la riga del gioco, il solo nome come prima
+        const q = n.quesito(e.domanda);
+        const r: RigaRiepilogoEffettiDto = { nome: q?.domanda || n.frase.domanda(e.domanda) || 'Domanda' };
+        const risposte = (q?.risposte ?? []).filter((x) => x.testo.trim() !== '');
+        if (risposte.length) r.risposte = risposte;
+        gruppo(gruppoDellaDomanda(q?.tipo)).righe.push(r);
+        break;
+      }
       case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;
       case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona'); break;
