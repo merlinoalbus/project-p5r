@@ -87,7 +87,7 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
 
 /** Il riquadro di un gruppo (libri, film, videogiochi): intestazione con conteggio dei completati e
  * collegamento alla pagina della Guida, le voci da fare, e i completati chiusi dietro un pulsante. */
-function Sezione({ gruppo, voci, occupati, visibile, onCambia }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; visibile: boolean; onCambia: (g: Gruppo, v: Voce, n: number) => void }) {
+function Sezione({ gruppo, voci, occupati, visibile, onCambia, promemoria = [] }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; visibile: boolean; onCambia: (g: Gruppo, v: Voce, n: number) => void; promemoria?: readonly string[] }) {
   const [mostraFatti, setMostraFatti] = useState(false);
   const e = ETICHETTA[gruppo];
   const daFare = voci.filter((v) => !v.fatto);
@@ -101,6 +101,8 @@ function Sezione({ gruppo, voci, occupati, visibile, onCambia }: { gruppo: Grupp
         <span className="chip testo-12">{fatti.length} di {voci.length}</span>
         <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" to={e.percorso} />
       </div>
+      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano il gruppo (Anima da cineasta per i film), solo se ce ne sono */}
+      {promemoria.map((p) => <p key={p} className="m-0 testo-12 text-text-muted text-pretty">Dai libri letti: {p}</p>)}
       {/* da 1024 px la testata sta ferma e scorre solo questo corpo (area interna, barra visibile); sotto scorre la pagina */}
       <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
       {daFare.length === 0
@@ -203,7 +205,8 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
           })}
         </div>
         <div className="flex flex-col gap-3 lg:grid lg:min-h-[240px] lg:flex-1 lg:grid-cols-3">
-          {GRUPPI.map((g) => <Sezione key={g} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)} />)}
+          {GRUPPI.map((g) => <Sezione key={g} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)}
+            promemoria={g === 'film' ? film.dati?.promemoria ?? [] : []} />)}
         </div>
       </div>
     </PageState>

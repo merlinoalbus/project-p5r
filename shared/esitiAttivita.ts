@@ -26,6 +26,12 @@
 // partita e togliendolo se ne vanno (`oggettiDegliEsitiService`, `utente.oggetto_esito_turno`); `premi` resta per ciò che non è un oggetto
 // del catalogo. Anche questo campo è facoltativo: un esito senza oggetti si rilegge identico. `articolo` può essere anche l'acquisto che
 // l'esito comporta («Non vinto, ricompri il Lotto R» dell'estrazione della lotteria: il prezzo si scala registrando il turno, decisione 18).
+// Ondata 5, lotto F-bis (decisione 21, precisazione: «oggetti con effetti che incidono su cose rilevanti per l'app»; decisione 22): un esito può
+// dire gli OGGETTI del catalogo che CONSUMA (`consuma`, chiave e copie: concimare la pianta con i Bionutrienti → 1 «Bionutrienti»; fabbricare un
+// Grimaldello → 1 «Fibbia di latta» e 1 «Gomitolo di seta»). Registrando il turno con quell'esito le copie si tolgono da quelle possedute nella
+// partita (`consumiOggettiService`, `utente.consumo_oggetto_partita`, lo stesso registro dei consumi dell'Isolamento) e togliendolo tornano. Il
+// prezzo dell'oggetto non si paga di nuovo: l'oggetto si era già comprato (per questo il consumo non usa `articolo`). Campo facoltativo: gli
+// esiti scritti prima non lo hanno e restano identici.
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
@@ -54,6 +60,8 @@ export interface EsitoAttivita {
   trofeo?: string;
   /** Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà, ottenuti registrando il turno. Assente = nessuno (mai un elenco vuoto). */
   oggetti?: OggettoEsito[];
+  /** Ondata 5 (lotto F-bis): gli oggetti del catalogo che l'esito consuma, tolti dalle copie possedute registrando il turno. Assente = nessuno. */
+  consuma?: OggettoEsito[];
 }
 export type ModoEsiti = 'scelta' | 'automatico';
 export interface EsitiAttivita { modo: ModoEsiti; esiti: EsitoAttivita[] }
@@ -87,7 +95,7 @@ export function chiaveEsitoDaNome(nome: string): string {
 /** Un esito valido o null: campi sconosciuti, chiavi storte, Doti ripetute o note fuori 1–3 non entrano (un dato storto non diventa punti). */
 function normalizzaEsito(x: unknown): EsitoAttivita | null {
   const o = oggetto(x);
-  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti'].includes(k))) return null;
+  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti', 'consuma'].includes(k))) return null;
   const chiave = typeof o.chiave === 'string' && CHIAVE_ESITO.test(o.chiave) ? o.chiave : null;
   const nome = testo(o.nome, LIMITI_ESITI.nome);
   if (!chiave || !nome) return null;
@@ -113,21 +121,29 @@ function normalizzaEsito(x: unknown): EsitoAttivita | null {
   if (trofeo === null) return null;
   // gli oggetti: assenti, null o un elenco vuoto = nessuno (il campo non si scrive); un oggetto ripetuto, una chiave storta o copie fuori
   // 1–999 rendono l'esito non valido (nessuna copia si inventa né si scarta in silenzio)
-  let oggetti: OggettoEsito[] | undefined;
-  if (o.oggetti != null) {
-    if (!Array.isArray(o.oggetti) || o.oggetti.length > LIMITI_ESITI.oggetti) return null;
-    const elenco: OggettoEsito[] = [];
-    for (const g of o.oggetti) {
-      const v = oggetto(g);
-      if (!v || Object.keys(v).some((k) => k !== 'oggetto' && k !== 'quantita')) return null;
-      const chiaveOggetto = typeof v.oggetto === 'string' ? v.oggetto.trim() : '';
-      if (!CHIAVE_OGGETTO.test(chiaveOggetto) || elenco.some((x) => x.oggetto === chiaveOggetto)) return null;
-      if (typeof v.quantita !== 'number' || !Number.isInteger(v.quantita) || v.quantita < 1 || v.quantita > LIMITI_ESITI.quantita) return null;
-      elenco.push({ oggetto: chiaveOggetto, quantita: v.quantita });
-    }
-    if (elenco.length) oggetti = elenco;
+  const oggetti = elencoOggetti(o.oggetti);
+  if (oggetti === null) return null;
+  // Ondata 5 (lotto F-bis): gli oggetti consumati, con le stesse regole di quelli dati
+  const consuma = elencoOggetti(o.consuma);
+  if (consuma === null) return null;
+  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}), ...(consuma ? { consuma } : {}) };
+}
+
+/** Un elenco di oggetti per chiave e copie (`oggetti` e `consuma` di un esito): undefined se assente, null o vuoto (il campo non si scrive);
+ *  null se non è valido per intero (un oggetto ripetuto, una chiave storta o copie fuori 1–999: nessuna copia si inventa né si scarta in silenzio). */
+function elencoOggetti(x: unknown): OggettoEsito[] | undefined | null {
+  if (x == null) return undefined;
+  if (!Array.isArray(x) || x.length > LIMITI_ESITI.oggetti) return null;
+  const elenco: OggettoEsito[] = [];
+  for (const g of x) {
+    const v = oggetto(g);
+    if (!v || Object.keys(v).some((k) => k !== 'oggetto' && k !== 'quantita')) return null;
+    const chiaveOggetto = typeof v.oggetto === 'string' ? v.oggetto.trim() : '';
+    if (!CHIAVE_OGGETTO.test(chiaveOggetto) || elenco.some((y) => y.oggetto === chiaveOggetto)) return null;
+    if (typeof v.quantita !== 'number' || !Number.isInteger(v.quantita) || v.quantita < 1 || v.quantita > LIMITI_ESITI.quantita) return null;
+    elenco.push({ oggetto: chiaveOggetto, quantita: v.quantita });
   }
-  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}) };
+  return elenco.length ? elenco : undefined;
 }
 
 /** Gli esiti di un'attività o null se il valore non è un elenco valido per intero (niente si scarta in silenzio). */
@@ -161,6 +177,13 @@ export function fraseOggettiEsito(oggetti: ReadonlyArray<{ nome: string; quantit
   return oggetti.length ? oggetti.map((o) => (o.quantita > 1 ? `${o.nome} ×${o.quantita}` : o.nome)).join(', ') : null;
 }
 
+/** Ondata 5 (lotto F-bis): gli oggetti che un esito consuma, con le copie che la partita ha adesso: «usa Bionutrienti (ne hai 2)», «usa
+ *  Gomitolo di seta ×3 (ne hai 1)». Le copie si dicono solo se la partita le conosce (`disponibili` non null); null se non consuma niente. */
+export function fraseConsumaEsito(consuma: ReadonlyArray<{ nome: string; quantita: number; disponibili: number | null }> | undefined): string | null {
+  if (!consuma?.length) return null;
+  return `usa ${consuma.map((o) => `${o.nome}${o.quantita > 1 ? ` ×${o.quantita}` : ''}${o.disponibili !== null ? ` (ne hai ${o.disponibili})` : ''}`).join(', ')}`;
+}
+
 /** Le Doti di un esito con i punti che valgono (senza Fortuna: la Fortuna la conta il server quando registra il turno). */
 export function dotiEsitoConPunti(doti: ReadonlyArray<DoteEsito>): Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }> {
   return doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note, punti: puntiDaNote(d.note) }));
@@ -186,6 +209,9 @@ export interface EsitoDisponibileDto {
   trofeo: { chiave: string; nome: string } | null;
   /** Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà, con il nome (ottenuti registrando il turno); vuoto se nessuno. */
   oggetti: Array<{ chiave: string; nome: string; quantita: number }>;
+  /** Ondata 5 (lotto F-bis): gli oggetti del catalogo che l'esito consuma, con il nome e, con una partita, le copie possedute adesso
+   *  (`disponibili`, null senza partita): registrando il turno si tolgono. Vuoto se nessuno. */
+  consuma: Array<{ chiave: string; nome: string; quantita: number; disponibili: number | null }>;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */
@@ -197,6 +223,9 @@ export interface EsitiAttivitaDto {
   esiti: EsitoDisponibileDto[];
   /** Nel modo automatico, con una partita: l'esito che vale adesso (null se nessuno o più d'uno). */
   automatico: string | null;
+  /** Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri già letti che riguardano questa attività, in parole («L'ABC
+   *  dell'artigianato: moltiplica per 2 gli strumenti creati per sessione»). Sono un promemoria: nessun importo si inventa né si applica. */
+  promemoria: string[];
 }
 /** Un articolo fra quelli in alternativa della voce, come lo vede la scelta alla spunta: prezzo, copie, che cosa contiene e se si può comprare. */
 export interface OpzioneAlternativaDto {
@@ -217,7 +246,9 @@ export interface OpzioneAlternativaDto {
 export type SceltaEsitoVoceDto =
   /** `yenGiaNelSaldo` (L13, decisione 18): l'effetto «turno» è di una voce spuntata prima che gli yen si muovessero da soli, ora rispuntata: il
    *  prezzo della sfida era già nel saldo e non si scala (la scelta lo dice). */
-  | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true }
+  | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true;
+    /** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività (promemoria, `EsitiAttivitaDto.promemoria`); assente se nessuno. */
+    promemoria?: string[] }
   | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3 }
   /** L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite): se ne compra uno, o nessuno. `preselezionato`:
    *  l'UID dell'effetto dell'articolo già comprato nella partita (dal negozio), se ce n'è uno. */

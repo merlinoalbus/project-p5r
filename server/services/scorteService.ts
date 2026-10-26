@@ -115,7 +115,9 @@ export function scortaDellArticolo(a: ArticoloConRegola, st: StatoDisponibilita 
   const principali = sediPrincipali(gruppo);
   const sede = a.negozio_sede ?? null;
   const qui = righe.filter((r) => stessaSede(sedeDellaRiga(r, principali), sede));
-  const letto = regola.tipo === 'restituzione' && a.oggetto_fonte === 'libri' && !!a.oggetto_chiave && st.letture.has(`libro/${a.oggetto_chiave}`);
+  // il prestito torna quando il libro è letto o (Ondata 5, lotto F-bis: il noleggio dei DVD di Scarlet) il DVD è visto per intero
+  const letto = regola.tipo === 'restituzione' && !!a.oggetto_chiave
+    && ((a.oggetto_fonte === 'libri' && st.letture.has(`libro/${a.oggetto_chiave}`)) || (a.oggetto_fonte === 'film' && st.letture.has(`film/${a.oggetto_chiave}`)));
   const spedisce = consegnaDelNegozio(st.partitaId, gruppo);
   const s = statoScorta(regola, a.quantita, qui, st.dataGioco, { letto, ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
   const nelCiclo = new Set(s.nelCiclo.map((i) => qui[i]!.id));

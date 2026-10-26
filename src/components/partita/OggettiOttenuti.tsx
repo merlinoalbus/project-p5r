@@ -5,7 +5,8 @@
 // In Partita → Denaro e squadra, sotto il denaro: è l'inventario di ciò che la partita ha ricevuto. Tre origini, una lettura sola del server
 // (`GET /api/partite/:id/oggetti-ottenuti`): le voci del Diario spuntate con l'effetto «oggetto ricevuto», le Richieste completate (i loro
 // oggetti del catalogo, una volta sola, finché restano completate) e (Ondata 5, lotto G) i turni delle attività registrati con un esito che dà
-// oggetti (la sfida della Big Bang Burger vinta). Per ogni oggetto le copie in tutto e, aprendolo, da dove vengono.
+// oggetti (la sfida della Big Bang Burger vinta); (Ondata 5, lotto F-bis) i doni dei Confidenti già meritati e, accanto, le copie usate
+// (concime, materiali della fabbricazione, incensi). Per ogni oggetto le copie in tutto e, aprendolo, da dove vengono e dove sono state usate.
 // Sola lettura (anche nel rilascio): gli oggetti cambiano spuntando o togliendo la spunta, completando o riaprendo una Richiesta. Si rilegge
 // quando la partita cambia, senza azzerarsi (`useRileggiAlCambio`).
 // ============================================================
@@ -24,6 +25,8 @@ function origine(o: OggettoOttenutoDto): string {
   if (o.origine.tipo === 'richiesta') return `Richiesta completata «${o.origine.nome}»`;
   // Ondata 5 (lotto G): un turno con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
   if (o.origine.tipo === 'turno') return `${o.origine.attivitaNome} · ${o.origine.esitoNome}`;
+  // Ondata 5 (lotto F-bis): il dono di un Confidente meritato con il rango e il giorno
+  if (o.origine.tipo === 'confidente') return `Dono di ${o.origine.nome}`;
   const testo = o.origine.testo ? (o.origine.testo.length > 80 ? `${o.origine.testo.slice(0, 79)}…` : o.origine.testo) : 'voce non più nel Diario';
   return `${o.origine.giorno ? `${dataLeggibile(o.origine.giorno)} · ` : ''}${testo}`;
 }
@@ -44,15 +47,21 @@ export function OggettiOttenuti({ partitaId }: { partitaId: number }) {
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
               {d.totali.map((t) => {
                 const righe = d.righe.filter((r) => r.catalogoChiave === t.catalogoChiave);
+                // Ondata 5 (lotto F-bis): le copie usate (concime, materiali, incenso); il conto si dice solo se ce ne sono
+                const usate = (d.consumi ?? []).filter((c) => c.catalogoChiave === t.catalogoChiave);
+                const consumate = t.consumate ?? 0;
                 return (
                   <li key={t.catalogoChiave} className="min-w-0">
                     <details className="min-w-0 rounded-md bg-white/[0.04] px-2.5">
                       <summary className="touch flex min-w-0 cursor-pointer items-center gap-2 testo-14">
                         <span className="min-w-0 flex-1 break-words"><strong>{t.nome}</strong>{t.categoria ? <span className="testo-12 text-text-muted"> · {t.categoria}</span> : null}</span>
-                        <span className="shrink-0 tabular-nums">×{t.quantita}</span>
+                        <span className="shrink-0 text-right tabular-nums">
+                          ×{t.quantita}{consumate > 0 && <span className="block testo-12 text-text-muted">{consumate} {consumate === 1 ? 'usata' : 'usate'}</span>}
+                        </span>
                       </summary>
                       <ul className="m-0 flex flex-col gap-0.5 pb-2 pl-4 testo-12 text-text-secondary">
-                        {righe.map((r, i) => <li key={`${r.origine.tipo}:${r.origine.tipo === 'voce' ? r.origine.voceUid : r.origine.tipo === 'turno' ? `${r.origine.attivita}:${r.origine.ordine}` : r.origine.chiave}:${i}`}>{origine(r)}{r.quantita > 1 ? ` (×${r.quantita})` : ''}</li>)}
+                        {righe.map((r, i) => <li key={`${r.origine.tipo}:${r.origine.tipo === 'voce' ? r.origine.voceUid : r.origine.tipo === 'turno' ? `${r.origine.attivita}:${r.origine.ordine}` : r.origine.tipo === 'confidente' ? r.origine.confidente : r.origine.chiave}:${i}`}>{origine(r)}{r.quantita > 1 ? ` (×${r.quantita})` : ''}</li>)}
+                        {usate.map((c, i) => <li key={`uso:${i}`} className="text-text-muted">Usata: {c.origine}{c.quantita > 1 ? ` (×${c.quantita})` : ''}</li>)}
                       </ul>
                     </details>
                   </li>

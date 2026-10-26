@@ -182,6 +182,8 @@ export const bodyForca = z.object({
 export const bodyIsolamento = z.object({
   possedutaId: z.number().int().positive(),
   incenso: z.string().max(40).optional(),
+  // Ondata 5 (lotto F-bis): l'incenso del catalogo che si brucia (una copia esce da quelle possedute)
+  oggetto: z.string().min(1).max(120).optional(),
   giorni: z.number().int().min(1).max(9),
   statistiche: z.array(z.enum(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'])).max(3).optional(),
   skillResistenzaId: z.number().int().positive().nullable().optional(),

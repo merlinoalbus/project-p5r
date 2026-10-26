@@ -19,8 +19,10 @@ import { contestoDa, ingredienteDa, personaOErrore, rangoArcana } from './fusion
 import { fondi, ricettaSpeciale, type RicettaFusione } from './fusione/motoreFusione.js';
 import { analisiEredita } from './fusione/eredita.js';
 import { CHIAVI_STATISTICHE, type Statistiche } from '../../shared/statistiche.js';
-import { FORCA_INCIDENTE_BONUS, INCENSI, bonusLivelliFusione, guadagnoIncenso, moltiplicatoreForca, puntiAllarmeFusione, tierResistenza } from '../../shared/bonusVelluto.js';
-import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, PersonaPossedutaDto, SkillRiassuntoDto } from '../../shared/types.js';
+import { registraConsumoIsolamento } from './consumiOggettiService.js';
+import { copieDellOggetto } from './copieOggetti.js';
+import { FORCA_INCIDENTE_BONUS, INCENSI, INCENSI_DEL_CATALOGO, bonusLivelliFusione, guadagnoIncenso, moltiplicatoreForca, puntiAllarmeFusione, tierResistenza } from '../../shared/bonusVelluto.js';
+import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, IncensoIsolamentoDto, PersonaPossedutaDto, SkillRiassuntoDto } from '../../shared/types.js';
 
 interface RigaScorta { id: number; persona_id: number; livello: number; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
 
@@ -253,6 +255,9 @@ export function skillResistenzaIsolamento(personaId: number, livello: number): {
 export interface DatiIsolamento {
   possedutaId: number;
   incenso?: string;
+  /** Ondata 5 (lotto F-bis): l'incenso del catalogo che si brucia (`INCENSI_DEL_CATALOGO`): famiglia e statistiche vengono da lui (le
+   *  `statistiche`, se arrivano, devono essere le sue) e una copia esce da quelle possedute. Senza, vale la famiglia `incenso` com'era. */
+  oggetto?: string;
   giorni: number;
   /** Statistiche interessate dall'incenso (una per quello base, due per i Musk, tre per il Rasta). */
   statistiche?: Array<keyof Statistiche>;
@@ -261,13 +266,46 @@ export interface DatiIsolamento {
   skillRimossaId?: number | null;
 }
 
+/**
+ * Ondata 5 (lotto F-bis): gli incensi del catalogo per l'Isolamento, con la famiglia (punti per applicazione), le statistiche, dove si comprano e a
+ * che prezzo (dalle offerte visibili: yen a Mantra Ganda, fiori da Jose; un tesoro dei Palazzi non ha offerta) e le copie che la partita ha.
+ * Un incenso che il catalogo non ha più non compare. Un dato in un solo punto: il prezzo è quello dell'offerta, mai una copia.
+ */
+export function incensiDellaPartita(partitaId: number): IncensoIsolamentoDto[] {
+  verificaPartita(partitaId);
+  const scheda = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ? AND nascosto = 0').pluck();
+  const offerte = prepared(`SELECT a.prezzo, a.costo_json, n.nome AS negozio FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+    WHERE a.catalogo_chiave = ? AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY a.prezzo IS NULL, a.prezzo, n.ordine`);
+  const out: IncensoIsolamentoDto[] = [];
+  for (const x of INCENSI_DEL_CATALOGO) {
+    const nome = scheda.get(x.oggetto) as string | undefined;
+    const famiglia = INCENSI.find((i) => i.chiave === x.incenso);
+    if (!nome || !famiglia) continue;
+    const prezzi = (offerte.all(x.oggetto) as Array<{ prezzo: number | null; costo_json: string | null; negozio: string }>).map((o) => {
+      let costo: string | null = o.prezzo != null && o.prezzo > 0 ? `${o.prezzo.toLocaleString('it-IT')} ¥` : null;
+      if (!costo && o.costo_json) { try { const c = JSON.parse(o.costo_json) as { tipo?: unknown; importo?: unknown }; if (c.tipo === 'fiori' && typeof c.importo === 'number') costo = `${c.importo} fiori`; } catch { costo = null; } }
+      return costo ? `${costo} · ${o.negozio}` : o.negozio;
+    });
+    out.push({ oggetto: x.oggetto, nome, incenso: famiglia.chiave, punti: famiglia.punti, statistiche: [...x.statistiche], dove: prezzi, disponibili: copieDellOggetto(partitaId, x.oggetto).disponibili });
+  }
+  return out;
+}
+
 /** Registra un ciclo di isolamento: statistiche dall'incenso e skill di resistenza. */
 export function eseguiIsolamento(partitaId: number, dati: DatiIsolamento): EsitoIsolamentoDto {
   const info = partitaInfo(partitaId);
   const p = possedutaOErrore(partitaId, dati.possedutaId);
-  const incenso = dati.incenso ? INCENSI.find((i) => i.chiave === dati.incenso) : undefined;
-  if (dati.incenso && !incenso) throw httpErrors.badRequest('incenso-non-valido', `Incenso «${dati.incenso}» sconosciuto.`);
-  const stat = dati.statistiche ?? [];
+  // Ondata 5 (lotto F-bis): l'incenso del catalogo dice famiglia e statistiche; la famiglia scritta a parte, se c'è, deve essere la sua
+  const delCatalogo = dati.oggetto !== undefined ? INCENSI_DEL_CATALOGO.find((x) => x.oggetto === dati.oggetto) : undefined;
+  if (dati.oggetto !== undefined && (!delCatalogo || !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(dati.oggetto))) throw httpErrors.badRequest('incenso-non-valido', 'L’oggetto scelto non è un incenso del catalogo.');
+  if (delCatalogo && dati.incenso && dati.incenso !== delCatalogo.incenso) throw httpErrors.badRequest('incenso-non-valido', 'L’incenso indicato non è quello dell’oggetto scelto.');
+  const chiaveIncenso = delCatalogo?.incenso ?? dati.incenso;
+  const incenso = chiaveIncenso ? INCENSI.find((i) => i.chiave === chiaveIncenso) : undefined;
+  if (chiaveIncenso && !incenso) throw httpErrors.badRequest('incenso-non-valido', `Incenso «${chiaveIncenso}» sconosciuto.`);
+  if (delCatalogo && dati.statistiche && (dati.statistiche.length !== delCatalogo.statistiche.length || dati.statistiche.some((s) => !delCatalogo.statistiche.includes(s as never)))) {
+    throw httpErrors.badRequest('statistiche-incenso', 'Le statistiche sono quelle dell’incenso scelto: non si cambiano.');
+  }
+  const stat: Array<keyof Statistiche> = delCatalogo ? [...delCatalogo.statistiche] : dati.statistiche ?? [];
   if (incenso && stat.length !== incenso.statistiche) throw httpErrors.badRequest('statistiche-incenso', `L'incenso «${incenso.nome}» agisce su ${incenso.statistiche} ${incenso.statistiche === 1 ? 'statistica' : 'statistiche'}: indicane esattamente ${incenso.statistiche}.`);
   for (const k of stat) if (!(CHIAVI_STATISTICHE as readonly string[]).includes(k)) throw httpErrors.badRequest('statistica-non-valida', `Statistica «${String(k)}» sconosciuta.`);
   const guadagno = incenso ? guadagnoIncenso(incenso, dati.giorni, info.allarme) : { applicazioni: 0, puntiPerStatistica: 0, totale: 0 };
@@ -288,9 +326,12 @@ export function eseguiIsolamento(partitaId: number, dati: DatiIsolamento): Esito
     prepared('DELETE FROM persona_posseduta_skill WHERE posseduta_id = ?').run(p.id);
     finali.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(p.id, i + 1, sid));
     const nomeSkill = skillId !== null ? skillDto(skillId)?.nomeIt ?? null : null;
-    registraEvento(partitaId, 'isolamento', `Isolamento: ${t('persona', p.nome)} per ${dati.giorni} ${dati.giorni === 1 ? 'giorno' : 'giorni'}`,
-      [incenso ? `${incenso.nome}: +${guadagno.puntiPerStatistica} a ${stat.join(', ')}${info.allarme ? ' (Allarme ×2)' : ''}` : 'senza incenso', nomeSkill ? `appresa ${nomeSkill}` : 'nessuna skill di resistenza'].join(' · ') + '.',
-      { possedutaId: p.id, incenso: incenso?.chiave ?? null, giorni: dati.giorni, statistiche: stat, punti: guadagno.puntiPerStatistica, skillId, allarme: info.allarme }, p.persona_id);
+    const nomeOggetto = delCatalogo ? (prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(delCatalogo.oggetto) as string | undefined) ?? delCatalogo.oggetto : null;
+    const eventoId = registraEvento(partitaId, 'isolamento', `Isolamento: ${t('persona', p.nome)} per ${dati.giorni} ${dati.giorni === 1 ? 'giorno' : 'giorni'}`,
+      [incenso ? `${nomeOggetto ?? incenso.nome}: +${guadagno.puntiPerStatistica} a ${stat.join(', ')}${info.allarme ? ' (Allarme ×2)' : ''}` : 'senza incenso', nomeSkill ? `appresa ${nomeSkill}` : 'nessuna skill di resistenza'].join(' · ') + '.',
+      { possedutaId: p.id, incenso: incenso?.chiave ?? null, oggetto: delCatalogo?.oggetto ?? null, giorni: dati.giorni, statistiche: stat, punti: guadagno.puntiPerStatistica, skillId, allarme: info.allarme }, p.persona_id);
+    // Ondata 5 (lotto F-bis): la copia dell'incenso bruciata esce da quelle possedute (registro dei consumi, utente 055)
+    if (delCatalogo) registraConsumoIsolamento(partitaId, delCatalogo.oggetto, eventoId);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, p.persona_id);
     return { persona: possedutaDto(partitaId, p.id), guadagno, skillAppresa: skillId !== null ? skillDto(skillId) : null, elementoDebolezza: suggerita.elemento };

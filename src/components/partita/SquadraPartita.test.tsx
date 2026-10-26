@@ -31,7 +31,7 @@ beforeEach(() => {
   api.getSquadra.mockResolvedValue(squadra);
   api.impostaMembroSquadra.mockResolvedValue(squadra);
   api.impostaYen.mockResolvedValue(squadra);
-  api.getOggettiOttenuti.mockResolvedValue({ righe: [], totali: [] });
+  api.getOggettiOttenuti.mockResolvedValue({ righe: [], totali: [], consumi: [] });
 });
 
 /** Attende le voci d'elenco e restituisce, per cercarci dentro, quella che contiene un elemento con il titolo `nome`; se manca lancia un errore. */

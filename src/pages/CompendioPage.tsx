@@ -62,6 +62,8 @@ const RigaPersonaElenco = memo(function RigaPersonaElenco({ p, evidenziata, onAp
             {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
             {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
             {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
+            {/* Ondata 5 (lotto F-bis, decisione 22): solo l'etichetta, la fusione resta proposta */}
+            {p.richiedeOggetto && <span className="chip" title={`${p.richiedeOggetto.nome}${p.richiedeOggetto.richiesta ? `, dalla Richiesta «${p.richiedeOggetto.richiesta}»` : ''}`}>Richiede l’oggetto</span>}
           </div>
           <div className="mt-1.5">
             <AffinitaGriglia affinita={p.affinita} compatta />

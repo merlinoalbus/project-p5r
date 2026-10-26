@@ -16,7 +16,7 @@ import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
-import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
+import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, incensiDellaPartita, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { capienzaScorta } from '../services/capienzaScortaService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
@@ -423,6 +423,10 @@ router.post('/:id/velluto/forca', validate({ params: paramsPartita, body: bodyFo
 });
 router.post('/:id/velluto/isolamento', validate({ params: paramsPartita, body: bodyIsolamento }), (req, res) => {
   res.json(eseguiIsolamento(Number(req.params.id), req.body as Parameters<typeof eseguiIsolamento>[1]));
+});
+// Ondata 5 (lotto F-bis): gli incensi del catalogo con prezzo dell'offerta e copie possedute
+router.get('/:id/velluto/incensi', validate({ params: paramsPartita }), (req, res) => {
+  res.json(incensiDellaPartita(Number(req.params.id)));
 });
 router.get('/:id/velluto/isolamento/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   verificaPartita(Number(req.params.id)); // seconda difesa: la partita deve essere del proprietario della richiesta

@@ -13,13 +13,19 @@
 //     esempio i set delle televendite), per le copie del contenuto;
 //   - ricevute: le voci del Diario spuntate con l'effetto «oggetto ricevuto» (`oggetto_ottenuto_partita`, utente 046) e i turni con un esito
 //     che dà oggetti (`oggetto_esito_turno`, utente 053: la sfida della Big Bang Burger vinta);
-//   - regalate: le consegne che hanno usato una copia (`regalo_partita.copia_consumata`, utente 052).
-// `disponibili` = possedute − regalate, mai sotto zero (un acquisto annullato a parte dopo il regalo non porta a un numero negativo).
+//   - regalate: le consegne che hanno usato una copia (`regalo_partita.copia_consumata`, utente 052);
+//   - consumate (Ondata 5, lotto F-bis): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
+//     (`consumo_oggetto_partita`, utente 055) e quelle cedute negli scambi (l'acquisto di un'offerta che costa oggetti: Sakai, Gachapon, Super
+//     Baron), lette dall'acquisto e dal costo dell'offerta. Il regalo resta nel suo registro: la consegna è già il consumo, e non si copia.
+//   - Ondata 5 (lotto F-bis): ricevute anche dai doni dei Confidenti che la partita ha già meritato (`doniConfidentiOttenuti`, dal rango e dal
+//     giorno della partita: nessuna copia del dato in un'altra tabella).
+// `disponibili` = possedute − regalate − consumate, mai sotto zero (un acquisto annullato a parte dopo il regalo non porta a un numero negativo).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
 import { articoloDelListino, lettureListiniCondivisi } from './listiniCondivisi.js';
 import type { CopieOggettoDto } from '../../shared/types.js';
+import { doniConfidentiOttenuti } from './doniConfidenti.js';
 
 const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 const colonnaUtente = (tabella: string, colonna: string): boolean => !!prepared('SELECT 1 FROM pragma_table_info(?, \'utente\') WHERE name = ?').get(tabella, colonna);
@@ -46,7 +52,12 @@ export function copieDellOggetto(partitaId: number, catalogo: string): CopieOgge
   const letture = lettureListiniCondivisi();
   const oggettoDi = prepared('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck();
   const nelSet = prepared("SELECT quantita FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ? AND catalogo_chiave = ?").pluck();
+  const costoDi = prepared('SELECT costo_json FROM main.articolo WHERE chiave = ?').pluck();
   let possedute = 0;
+  // Ondata 5 (lotto F-bis, censimento 33): le copie cedute negli scambi (i baratti di Sakai, gli scambi del Gachapon e del Super Baron: l'offerta
+  // costa oggetti, `costo_json` di tipo «oggetti»): ogni acquisto di quell'offerta consuma le copie del costo. Si legge dall'acquisto e dal
+  // costo dell'offerta (un dato in un solo punto), senza una riga in più in un altro registro
+  let cedute = 0;
   for (const [chiave, n] of copiePerArticolo(partitaId)) {
     // una vecchia chiave di un listino condiviso vale l'offerta del listino
     const canonica = articoloDelListino(chiave, letture);
@@ -54,6 +65,15 @@ export function copieDellOggetto(partitaId: number, catalogo: string): CopieOgge
     if (oggetto === catalogo) possedute += n;
     const contenuto = (nelSet.get(canonica, catalogo) ?? (canonica !== chiave ? nelSet.get(chiave, catalogo) : undefined)) as number | null | undefined;
     if (typeof contenuto === 'number' && contenuto > 0) possedute += n * contenuto;
+    const costo = (costoDi.get(canonica) ?? costoDi.get(chiave)) as string | null | undefined;
+    if (costo) {
+      try {
+        const c = JSON.parse(costo) as { tipo?: unknown; oggetti?: unknown };
+        if (c.tipo === 'oggetti' && Array.isArray(c.oggetti)) for (const o of c.oggetti as Array<{ chiave?: unknown; quantita?: unknown }>) {
+          if (o.chiave === catalogo && typeof o.quantita === 'number' && o.quantita > 0) cedute += n * o.quantita;
+        }
+      } catch { /* un costo illeggibile non cede niente: si legge come «nessun costo in oggetti» */ }
+    }
   }
   if (tabellaUtente('oggetto_ottenuto_partita')) {
     possedute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
@@ -62,8 +82,14 @@ export function copieDellOggetto(partitaId: number, catalogo: string): CopieOgge
   if (tabellaUtente('oggetto_esito_turno')) {
     possedute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
+  // Ondata 5 (lotto F-bis): i doni dei Confidenti già meritati (il rango e il giorno della partita lo dicono)
+  possedute += doniConfidentiOttenuti(partitaId).filter((d) => d.catalogo === catalogo).reduce((n, d) => n + d.quantita, 0);
   const regalate = colonnaUtente('regalo_partita', 'copia_consumata')
     ? prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number
     : 0;
-  return { possedute, regalate, disponibili: Math.max(0, possedute - regalate) };
+  // Ondata 5 (lotto F-bis, utente 055): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
+  const consumate = cedute + (tabellaUtente('consumo_oggetto_partita')
+    ? prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.consumo_oggetto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number
+    : 0);
+  return { possedute, regalate, consumate, disponibili: Math.max(0, possedute - regalate - consumate) };
 }

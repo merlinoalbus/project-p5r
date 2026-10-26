@@ -28,6 +28,8 @@ import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { scelteAlternativeDellaVoce } from './alternativeAcquistiService.js';
 import { sqlPrezzoPerFascia } from './prezziArticoli.js';
 import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type PrezzoPerFascia } from '../../shared/catalogo.js';
+import { copieDellOggetto } from './copieOggetti.js';
+import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
@@ -68,6 +70,17 @@ function oggettiEsito(oggetti: EsitoAttivita['oggetti']): EsitoDisponibileDto['o
   return oggetti.map((o) => ({ chiave: o.oggetto, nome: (nome?.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita }));
 }
 
+/** Ondata 5 (lotto F-bis): gli oggetti che l'esito consuma, con il nome del catalogo e, con una partita, le copie possedute adesso (la stessa
+ *  lettura della finestra «Regala»: possedute − regalate − consumate). Le copie non sono una condizione: chi gioca può averle prese in un modo
+ *  che l'app non conosce, e la scelta mostra il numero senza bloccare. */
+function consumaEsito(consuma: EsitoAttivita['consuma'], partitaId: number | undefined): EsitoDisponibileDto['consuma'] {
+  if (!consuma?.length) return [];
+  const conCatalogo = catalogoOggettiDisponibile();
+  const nome = conCatalogo ? prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck() : null;
+  return consuma.map((o) => ({ chiave: o.oggetto, nome: (nome?.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita,
+    disponibili: partitaId !== undefined && conCatalogo ? copieDellOggetto(partitaId, o.oggetto).disponibili : null }));
+}
+
 /** Un esito come lo vede la scelta: le condizioni sono le sue più quelle dell'articolo, valutate sullo stato (senza stato: disponibile). */
 function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): EsitoDisponibileDto {
   const articolo = e.articolo ? articoloEsito(e.articolo) : null;
@@ -82,6 +95,7 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
       : e.articolo ? { chiave: e.articolo, nome: 'Articolo non più nel listino', prezzo: null, prezzoPerFascia: null, prezzoNelMomento: null } : null,
     trofeo: trofeoEsito(e.trofeo),
     oggetti: oggettiEsito(e.oggetti),
+    consuma: consumaEsito(e.consuma, st?.partitaId),
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };
@@ -93,10 +107,18 @@ function automatico(esiti: EsitoDisponibileDto[]): EsitoDisponibileDto | null {
   return validi.length === 1 ? validi[0]! : null;
 }
 
+/** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività, con una partita; vuoti senza. */
+function promemoriaAttivita(attivita: string, st: StatoDisponibilita | null): string[] {
+  if (!st) return [];
+  const tipo = prepared('SELECT tipo FROM attivita WHERE chiave = ?').pluck().get(attivita) as string | undefined;
+  return tipo === undefined ? [] : promemoriaLibriPerAttivita(st.letture, { chiave: attivita, tipo });
+}
+
 /** Gli esiti di un'attività per la scheda e per il contatore, con la disponibilità nello stato dato (null senza partita). */
-export function esitiDto(esiti: EsitiAttivita, st: StatoDisponibilita | null): EsitiAttivitaDto {
+export function esitiDto(esiti: EsitiAttivita, st: StatoDisponibilita | null, attivita?: string): EsitiAttivitaDto {
   const elenco = esiti.esiti.map((e) => esitoDisponibile(e, st));
-  return { modo: esiti.modo, esiti: elenco, automatico: esiti.modo === 'automatico' && st ? automatico(elenco)?.chiave ?? null : null };
+  return { modo: esiti.modo, esiti: elenco, automatico: esiti.modo === 'automatico' && st ? automatico(elenco)?.chiave ?? null : null,
+    promemoria: attivita ? promemoriaAttivita(attivita, st) : [] };
 }
 
 /** Lo stato della partita al momento di una voce: il giorno (e quindi il giorno della settimana) e la fascia della voce. */
@@ -150,8 +172,10 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
     if (e.tipo === 'dote') return { posizione, scelta: { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note } };
     const t = e as Extract<EffettoVoceDto['effetto'], { tipo: 'turno' }>;
     const a = esitiDellAttivita(t.attivita)!;
-    const elenco = esitiDto(a.esiti!, st).esiti;
-    return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato: t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null, esiti: elenco } };
+    const dto = esitiDto(a.esiti!, st, t.attivita);
+    const elenco = dto.esiti;
+    return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato: t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null, esiti: elenco,
+      ...(dto.promemoria.length ? { promemoria: dto.promemoria } : {}) } };
   });
   return [...esiti, ...scelteAlternativeDellaVoce(effetti, stato)].sort((a, b) => a.posizione - b.posizione).map((x) => x.scelta);
 }

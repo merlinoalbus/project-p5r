@@ -263,7 +263,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                                 {!pesca && <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} aria-expanded={esiti?.modo === 'scelta' ? sceltaEsito === a.chiave : undefined} disabled={occupato === a.chiave || a.volte >= 999 || (esiti?.modo === 'automatico' && !esiti.automatico)} onClick={piu}><IconaAzione chiave="piu" dimensione={16} /></button>}
                               </span>
                               {esiti?.modo === 'scelta' && sceltaEsito === a.chiave && (
-                                <SceltaEsitoTurno nome={a.nome} esiti={esiti.esiti} occupato={occupato === a.chiave} onAnnulla={() => setSceltaEsito(null)}
+                                <SceltaEsitoTurno nome={a.nome} esiti={esiti.esiti} promemoria={esiti.promemoria ?? []} occupato={occupato === a.chiave} onAnnulla={() => setSceltaEsito(null)}
                                   onScegli={(esito) => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1, esito)).then(() => setSceltaEsito(null))} />
                               )}
                             </li>

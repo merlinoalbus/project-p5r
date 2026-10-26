@@ -4,10 +4,10 @@
 
 import { useMemo, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
-import { eseguiIsolamento, getPossedute, getSuggerimentoIsolamento } from '../../services/api';
+import { eseguiIsolamento, getIncensiIsolamento, getPossedute, getSuggerimentoIsolamento } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { EseguiForcaModal } from './EseguiForcaModal';
-import { CHIAVI_STATISTICHE, NOMI_STATISTICHE, type ChiaveStatistica } from '../../../shared/statistiche';
+import { NOMI_STATISTICHE, type ChiaveStatistica } from '../../../shared/statistiche';
 import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
@@ -95,31 +95,38 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
   );
 }
 
-/** Isolamento: Persona (scorta), incenso, giorni → punti stimati e resistenza ottenuta. */
+/**
+ * Isolamento: Persona (scorta), incenso, giorni → punti stimati e resistenza ottenuta. Ondata 5 (lotto F-bis): l'incenso è un oggetto del catalogo
+ * (`GET …/velluto/incensi`): le statistiche sono quelle del suo nome, il prezzo è quello dell'offerta (Mantra Ganda in yen, Jose in fiori) e
+ * registrando l'Isolamento una copia esce da quelle possedute; le copie che la partita ha si vedono nella scelta.
+ */
 function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: PersonaPossedutaDto[]; velluto: VellutoDto | null; partitaId: number; onScortaCambiata: () => void }) {
   const [possedutaId, setPossedutaId] = useState<number | null>(null);
-  const [incensoChiave, setIncensoChiave] = useState(INCENSI[0].chiave);
+  const incensi = useCarica(() => getIncensiIsolamento(partitaId), [partitaId]);
+  const [oggettoScelto, setOggettoScelto] = useState<string | null>(null);
   const [giorni, setGiorni] = useState(4);
   const persona = scorta.find((p) => p.id === possedutaId) ?? null;
-  const incenso = INCENSI.find((i) => i.chiave === incensoChiave) ?? INCENSI[0];
+  const elenco = incensi.dati ?? [];
+  const scelto = elenco.find((i) => i.oggetto === oggettoScelto) ?? elenco[0] ?? null;
+  const incenso = scelto ? INCENSI.find((i) => i.chiave === scelto.incenso) ?? null : null;
   const allarme = velluto?.allarmeAttivo ?? false;
   const rangoGemelle = velluto?.gemelle.rango ?? 0;
-  const guadagno = guadagnoIncenso(incenso, giorni, allarme);
-  const [statScelte, setStatScelte] = useState<ChiaveStatistica[]>(['forza']);
+  const guadagno = incenso ? guadagnoIncenso(incenso, giorni, allarme) : { applicazioni: 0, puntiPerStatistica: 0, totale: 0 };
+  const statScelte: ChiaveStatistica[] = scelto ? [...scelto.statistiche] : [];
   const [occupato, setOccupato] = useState(false);
   const suggerimento = useCarica(() => (persona ? getSuggerimentoIsolamento(partitaId, persona.id) : Promise.resolve(null)), [partitaId, persona?.id, persona?.livello]);
   /**
-   * Registra l'isolamento della Persona scelta con l'incenso e i giorni indicati, inviando solo le prime N statistiche
-   * scelte (N = quante ne alza l'incenso); a buon fine notifica i punti guadagnati e l'eventuale skill appresa e fa
-   * ricaricare la scorta, altrimenti notifica l'errore.
+   * Registra l'isolamento della Persona scelta con l'incenso del catalogo e i giorni indicati (le statistiche sono quelle dell'incenso); a buon
+   * fine notifica i punti guadagnati e l'eventuale skill appresa, fa ricaricare la scorta e le copie degli incensi, altrimenti notifica l'errore.
    */
   const registra = async () => {
-    if (!persona) return;
+    if (!persona || !scelto) return;
     setOccupato(true);
     try {
-      const esito = await eseguiIsolamento(partitaId, { possedutaId: persona.id, incenso: incenso.chiave, giorni, statistiche: statScelte.slice(0, incenso.statistiche) });
-      notifica('success', `${persona.nomeIt}: +${esito.guadagno.puntiPerStatistica} a ${statScelte.slice(0, incenso.statistiche).map((k) => NOMI_STATISTICHE[k]).join(', ')}${esito.skillAppresa ? `, appresa ${esito.skillAppresa.nomeIt}` : ''}.`);
+      const esito = await eseguiIsolamento(partitaId, { possedutaId: persona.id, oggetto: scelto.oggetto, giorni });
+      notifica('success', `${persona.nomeIt}: +${esito.guadagno.puntiPerStatistica} a ${statScelte.map((k) => NOMI_STATISTICHE[k]).join(', ')}${esito.skillAppresa ? `, appresa ${esito.skillAppresa.nomeIt}` : ''}; usata una copia di ${scelto.nome}.`);
       onScortaCambiata();
+      void incensi.ricarica();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Registrazione fallita.');
     } finally {
@@ -134,7 +141,9 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
         <div className="form-label">
-          <Selettore etichettaSopra etichetta="Incenso" valore={incensoChiave} opzioni={INCENSI.map((i) => ({ chiave: i.chiave, nome: i.nome, dettaglio: i.prezzo ? `${i.prezzo.toLocaleString('it-IT')} ¥` : 'fiori' }))} onCambia={setIncensoChiave} />
+          <Selettore etichettaSopra etichetta="Incenso" valore={scelto?.oggetto ?? ''} disabilitato={incensi.caricamento && !incensi.dati}
+            opzioni={elenco.map((i) => ({ chiave: i.oggetto, nome: i.nome, dettaglio: [i.dove[0] ?? 'tesoro dei Palazzi', i.disponibili > 0 ? `${i.disponibili} ${i.disponibili === 1 ? 'copia' : 'copie'}` : null].filter(Boolean).join(' · ') }))}
+            onCambia={setOggettoScelto} />
         </div>
         <label className="form-label">Giorni
           <input type="number" min={1} max={ISOLAMENTO_AVVISO.giornoPerdita - 1} className="form-input" value={giorni} onChange={(e) => setGiorni(Math.min(ISOLAMENTO_AVVISO.giornoPerdita - 1, Math.max(1, Number(e.target.value) || 1)))} aria-label="Giorni di isolamento" />
@@ -142,7 +151,14 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       </div>
       <div className="testo-13 flex flex-col gap-1">
         <div>Durata dell'addestramento al rango {rangoGemelle} delle Gemelle: <strong>{giorniIsolamento(rangoGemelle)} giorni</strong>{rangoGemelle < 3 ? ' (una volta sbloccato)' : ''}.</div>
-        <div>Incenso «{incenso.nome}» per {giorni} giorni{allarme ? ' con Allarme' : ''}: <strong>{guadagno.applicazioni}</strong> applicazioni → <strong>+{guadagno.puntiPerStatistica}</strong> per statistica interessata ({incenso.statistiche === 1 ? 'una statistica' : `${incenso.statistiche} statistiche`}, totale +{guadagno.totale}). {incenso.nota}.</div>
+        {incensi.errore && <div role="alert" className="text-error-testo">Gli incensi non si sono caricati: {incensi.errore}</div>}
+        {scelto && incenso && (
+          <div>«{scelto.nome}» per {giorni} giorni{allarme ? ' con Allarme' : ''}: <strong className="tabular-nums">{guadagno.applicazioni}</strong> applicazioni → <strong className="tabular-nums">+{guadagno.puntiPerStatistica}</strong> per statistica interessata ({incenso.statistiche === 1 ? 'una statistica' : `${incenso.statistiche} statistiche`}, totale +{guadagno.totale}).
+            {scelto.dove.length > 0 && <span className="text-text-muted"> Si compra: {scelto.dove.join('; ')}.</span>}
+            {/* le copie si dicono solo se la partita ne ha, o se non ne ha e l'Isolamento ne userebbe una che l'app non conosce */}
+            <span className={scelto.disponibili > 0 ? 'text-text-muted' : 'text-warning'}> {scelto.disponibili > 0 ? `Ne hai ${scelto.disponibili}: registrando ne usi una.` : 'Nella partita non risulta nessuna copia: registrando, l’uso si segna comunque.'}</span>
+          </div>
+        )}
         {persona && (
           <div>
             {persona.nomeIt} (livello {persona.livello}): resistenza ottenuta di tier <strong>{tierResistenza(persona.livello).skill}</strong>
@@ -153,16 +169,15 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
         {persona && suggerimento.dati && (
           <div>Skill di resistenza prevista: <strong>{suggerimento.dati.skill ? suggerimento.dati.skill.nomeIt : 'nessuna nel dataset'}</strong>{suggerimento.dati.elementoNome ? ` (debolezza: ${suggerimento.dati.elementoNome})` : ' (nessuna debolezza)'}.</div>
         )}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="testo-12 text-text-muted">Statistiche interessate ({incenso.statistiche}):</span>
-          {CHIAVI_STATISTICHE.map((k) => (
-            <button key={k} type="button" className={`chip touch ${statScelte.includes(k) ? 'chip--attivo' : ''}`} aria-pressed={statScelte.includes(k)} onClick={() => setStatScelte((sc) => (sc.includes(k) ? sc.filter((x) => x !== k) : sc.length < incenso.statistiche ? [...sc, k] : [...sc.slice(1), k]))}>{NOMI_STATISTICHE[k]}</button>
-          ))}
-        </div>
+        {statScelte.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="testo-12 text-text-muted">Statistiche dell’incenso:</span>
+            {statScelte.map((k) => <span key={k} className="chip">{NOMI_STATISTICHE[k]}</span>)}
+          </div>
+        )}
         {persona && (
           <div className="flex items-center gap-2 flex-wrap">
-            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}</>} disabled={occupato || statScelte.length !== incenso.statistiche || rangoGemelle < 3} onClick={() => void registra()} />
-            {statScelte.length !== incenso.statistiche && <span className="testo-12 text-warning">Scegli esattamente {incenso.statistiche} {incenso.statistiche === 1 ? 'statistica' : 'statistiche'}.</span>}
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}</>} disabled={occupato || !scelto || rangoGemelle < 3} onClick={() => void registra()} />
           </div>
         )}
       </div>

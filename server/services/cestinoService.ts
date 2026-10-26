@@ -155,6 +155,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   // Ondata 5 (utente 053): il trofeo segnato e gli oggetti dati da un turno con il suo esito (la lotteria vinta, la sfida della Big Bang Burger)
   trofeo_esito_turno: ['trofeo segnato da un esito', 'trofei segnati dagli esiti'],
   oggetto_esito_turno: ['oggetto ricevuto da un esito', 'oggetti ricevuti dagli esiti'],
+  // Ondata 5 (utente 055): le copie consumate da un turno con il suo esito o da un Isolamento
+  consumo_oggetto_partita: ['oggetto consumato', 'oggetti consumati'],
   // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
   lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
   giorno_calendario: ['giorno del calendario', 'giorni del calendario'], giorno_percorso: ['giorno del percorso', 'giorni del percorso'],

@@ -293,6 +293,17 @@ import { migration280 } from './280_lotteria_chiosco_e_biglietti.js';
 import { migration281 } from './281_proposte_della_lotteria.js';
 import { migration282 } from './282_vincita_di_sojiro.js';
 import { migration283 } from './283_premi_delle_sfide_come_oggetti.js';
+// Ondata 5, lotto F-bis (oggetti con effetti rilevanti per l'app, decisioni 21 e 22): blocco 300-309
+import { migration300 } from './300_libri_con_effetti_strutturati.js';
+import { migration301 } from './301_concimare_la_pianta.js';
+import { migration302 } from './302_fabbricazione_degli_strumenti.js';
+import { migration303 } from './303_dvd_lettore_e_noleggi_di_scarlet.js';
+import { migration304 } from './304_chihaya_pietra_sacra_e_affinita.js';
+import { migration305 } from './305_diner_e_bistecca_nostalgica.js';
+import { migration306 } from './306_caffe_e_curry_con_i_prodotti.js';
+import { migration307 } from './307_doni_dei_confidenti_raccolti_e_vaschetta.js';
+import { migration308 } from './308_incensi_e_oggetti_delle_fusioni.js';
+import { migration309 } from './309_aojiru_dote_assorbita.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -314,4 +325,5 @@ export const migrations: Migration[] = [
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283,
+  migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
 ];

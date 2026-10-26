@@ -10,6 +10,7 @@
 // Ondata 5 (lotto G): un esito può dire il trofeo che fa ottenere («Vinto» all'estrazione della lotteria → «Soldi facili»): registrando il
 // turno con quell'esito il trofeo si segna da solo, e togliendolo torna com'era. E gli oggetti del catalogo che dà, con le copie (la Comet
 // Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger»): registrando il turno entrano fra quelli ottenuti, togliendolo se ne vanno.
+// Ondata 5 (lotto F-bis): e gli oggetti che CONSUMA (concimare la pianta → 1 «Bionutrienti»): registrando il turno escono dalle copie possedute.
 // ============================================================
 
 import { useState } from 'react';
@@ -33,14 +34,17 @@ const NOTE: Array<{ chiave: string; nome: string }> = SCELTE_NOTE.map((s) => ({ 
 /**
  * Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà (la Comet Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger»), con le
  * copie. Il catalogo si legge una volta sola, solo con l'esito aperto; un oggetto già nell'elenco non si propone di nuovo.
+ * Ondata 5 (lotto F-bis): lo stesso editor per gli oggetti che l'esito CONSUMA (il concime, i materiali della fabbricazione), con il suo titolo.
+ * Il pulsante «Togli» dice quale oggetto toglie (con più oggetti, nomi accessibili distinti).
  */
-function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readonly OggettoEsito[]; disabilitato?: boolean; onCambia: (o: OggettoEsito[]) => void }) {
+function OggettiDellEsito({ oggetti, titolo, disabilitato, onCambia }: { oggetti: readonly OggettoEsito[]; titolo: string; disabilitato?: boolean; onCambia: (o: OggettoEsito[]) => void }) {
   const catalogo = useCarica(() => getCatalogoOggetti(), []);
   const stato = { oggetti: catalogo.dati, caricamento: catalogo.caricamento, errore: catalogo.errore, onRicarica: () => void catalogo.ricarica() };
   const scelti = oggetti.map((o) => o.oggetto);
+  const nome = (chiave: string): string => catalogo.dati?.find((c) => c.chiave === chiave)?.nome ?? 'l’oggetto';
   return (
     <div className="campo campo--largo flex flex-col gap-1.5">
-      <span className="testo-13 text-text-secondary">Oggetti che l’esito dà (entrano fra quelli ottenuti nella partita)</span>
+      <span className="testo-13 text-text-secondary">{titolo}</span>
       {oggetti.map((o, k) => (
         <span key={o.oggetto} className="flex flex-wrap items-end gap-2">
           <span className="min-w-[12rem] flex-1">
@@ -48,7 +52,7 @@ function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readon
               onScegli={(c) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, oggetto: c.chiave } : x)))} />
           </span>
           <CampoQuantita valore={o.quantita} disabilitato={disabilitato} onCambia={(q) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, quantita: Math.min(LIMITI_ESITI.quantita, q) } : x)))} />
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli l’oggetto" disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Togli ${nome(o.oggetto)}`} disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
         </span>
       ))}
       {oggetti.length < LIMITI_ESITI.oggetti && (
@@ -99,6 +103,13 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
     delete resto.oggetti;
     return oggetti.length ? { ...resto, oggetti } : resto;
   }) });
+  // Ondata 5 (lotto F-bis): gli oggetti consumati, facoltativi come quelli dati
+  const cambiaConsuma = (i: number, consuma: OggettoEsito[]) => esiti && onCambia({ ...esiti, esiti: elenco.map((x, j) => {
+    if (j !== i) return x;
+    const resto: EsitoAttivita = { ...x };
+    delete resto.consuma;
+    return consuma.length ? { ...resto, consuma } : resto;
+  }) });
   const aggiungi = () => {
     const nome = `Esito ${elenco.length + 1}`;
     const chiave = chiaveNuova(nome, new Set(elenco.map((e) => e.chiave)));
@@ -126,7 +137,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
                   onClick={() => { const resto = elenco.filter((_, j) => j !== i); onCambia(resto.length ? { ...esiti!, esiti: resto } : null); }} />
@@ -161,7 +172,8 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
                         onClick={() => { const libera = CHIAVI_DOTI.find((c) => !e.doti.some((x) => x.dote === c)); if (libera) cambiaEsito(i, { doti: [...e.doti, { dote: libera, note: 1 }] }); }} />
                     )}
                   </div>
-                  <OggettiDellEsito oggetti={e.oggetti ?? []} disabilitato={disabilitato} onCambia={(o) => cambiaOggetti(i, o)} />
+                  <OggettiDellEsito oggetti={e.oggetti ?? []} titolo="Oggetti che l’esito dà (entrano fra quelli ottenuti nella partita)" disabilitato={disabilitato} onCambia={(o) => cambiaOggetti(i, o)} />
+                  <OggettiDellEsito oggetti={e.consuma ?? []} titolo="Oggetti che l’esito consuma (escono dalle copie possedute; il prezzo non si paga di nuovo)" disabilitato={disabilitato} onCambia={(o) => cambiaConsuma(i, o)} />
                   <CampoTesto etichetta="Altri premi, in parole" tipo="lungo" valore={e.premi ?? ''} massimo={LIMITI_ESITI.premi} aiuto="Solo ciò che non è un oggetto del catalogo: gli oggetti si scelgono qui sopra" disabilitato={disabilitato} onCambia={(v) => cambiaEsito(i, { premi: v.trim() ? v : null })} />
                   <div className="campo campo--largo">
                     <CondizioniEditor condizioni={e.condizioni} massimo={10} disabilitato={disabilitato} onCambia={(c) => cambiaEsito(i, { condizioni: c })} />
