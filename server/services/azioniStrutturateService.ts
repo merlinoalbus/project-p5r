@@ -24,7 +24,7 @@ import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
-import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
+import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, SemaforoRequisitoDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
 
@@ -48,6 +48,18 @@ function correzioneARango(partitaId: number | undefined, confidente: string, ran
   return r ? ` — segnato a mano dalla pagina Confidenti${r.data ? ` il ${r.data}${r.fascia ? ` (${r.fascia})` : ''}` : ''}` : '';
 }
 
+/** I semafori il cui dettaglio non nomina l'oggetto della condizione («Ancora da completare», «Segna l'articolo…»): la frase completa
+ *  ha bisogno anche del testo («Libro letto: …»). Gli altri tipi del valutatore (`condizioni/valutatore.ts`) scrivono un dettaglio che
+ *  basta da solo («Disponibile dal 20 aprile, oggi è il 18 aprile», «Coraggio: rango 1 di 2», «Richiesta «…» non risulta completata»). */
+const DETTAGLIO_SENZA_OGGETTO = new Set(['lettura', 'articolo']);
+
+/** La frase completa di un requisito rosso, senza ripetere la condizione: il dettaglio, preceduto dal testo solo se il dettaglio non
+ *  dice di che cosa parla; il testo se il dettaglio manca. */
+function fraseDelRequisito(r: SemaforoRequisitoDto): string {
+  if (!r.dettaglio) return r.testo;
+  return DETTAGLIO_SENZA_OGGETTO.has(r.tipo) ? `${r.testo} — ${r.dettaglio}` : r.dettaglio;
+}
+
 /** Stato dell'azione nella partita (12.4): per gli incontri con un Confidente valuta i semafori del rango atteso (o del prossimo). */
 export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidentePartitaDto>, partitaId?: number): StatoAzioneDto {
   if (a.tipo !== 'confidente' || a.riferimento?.tipo !== 'confidente') return { tipo: 'neutra', motivo: null };
@@ -66,7 +78,9 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   // un requisito non bloccante (`bloccante === false`: le avvertenze, e il semaforo «Giorno e fascia dell'incontro», che parla di oggi e non della data della voce)
   // può essere rosso senza che la voce sia «Bloccata»: la disponibilità è sempre un avviso (nel Diario l'avviso «Fuori giorno» usa la data della voce)
   const rossi = sem.requisiti.filter((r) => r.stato === 'rosso' && r.bloccante !== false);
-  if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo)).join(' · ') };
+  // 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): testo e dettaglio concatenati ripetevano la data
+  // («dal 20 aprile (Disponibile dal 20 aprile, oggi è il 18 aprile)»). Il chip mostra la condizione breve; la frase completa va a parte
+  if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => r.testo).join(' · '), dettaglio: rossi.map(fraseDelRequisito).join(' · ') };
   if (sem.pronto || sem.requisiti.every((r) => r.stato === 'verde')) return { tipo: 'consigliata', motivo: `requisiti del rango ${sem.rango} soddisfatti` };
   // le avvertenze (`bloccante: false`) non sono «da confermare»: si controllano nel gioco e non fermano niente
   const grigi = sem.requisiti.filter((r) => r.stato === 'grigio' && r.bloccante !== false);

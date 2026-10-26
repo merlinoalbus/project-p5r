@@ -20,6 +20,7 @@ import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
+import { regaliConYenGiaNelSaldo } from './yenAutomaticiService.js';
 import { conCestinoPrivato } from './cestinoService.js';
 import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
@@ -339,6 +340,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   try {
     for (const r of prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo WHERE catalogo_chiave IS NOT NULL AND sconsigliato = 0').all() as Array<{ confidente_chiave: string }>) conRegaliCatalogo.add(r.confidente_chiave);
   } catch { /* catalogo degli oggetti non disponibile */ }
+  // L13 (decisione 18): gli oggetti che regalati adesso non scalano il prezzo (consegna di prima ridata nello stesso momento), letti una volta
+  const regaliGiaNelSaldo = regaliConYenGiaNelSaldo(partitaId);
   return righe.map((c) => {
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {
@@ -349,6 +352,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
       contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
       regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], haRegaliCatalogo: conRegaliCatalogo.has(c.chiave),
+      ...(regaliGiaNelSaldo.has(c.chiave) ? { regaliYenGiaNelSaldo: regaliGiaNelSaldo.get(c.chiave) } : {}),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
     };

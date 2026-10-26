@@ -1,5 +1,14 @@
 # Stato attuale del lavoro — lotto L12 «Verso il rilascio» (aggiornato 2026-10-25)
 
+## AGGIORNAMENTO 26 OTTOBRE 2026 — L13, televendite (decisione 4)
+- **Dove:** ramo di lavoro delle televendite, già unito con `integrazione-24` (che contiene gli yen automatici, decisione 18). Non è su `main`.
+- **Cosa fa:** Set A e Set B sono articoli italiani alternativi (migrazione 239). Alla spunta si sceglie quale set si è comprato, o «Nessuno», e si paga solo quello scelto. Dettaglio in `ROADMAP.md` (sezione «Televendite»), `ARCHITETTURA.md` («Alternative d'acquisto») e `DECISIONI.md` (2026-10-26).
+- **In attesa dell'utente:**
+  - se il gioco permette un solo set per domenica;
+  - le 4 domeniche che non hanno una voce nel Diario;
+  - le 6 proposte del periodo validato, da approvare riga per riga in «Da completare»: finché non le approva, la voce del 24 aprile mostra ancora il vecchio articolo inglese;
+  - le prove nei tre formati.
+
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
 Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle
 due istanze in `lotti/L12/progetto-due-istanze.md`, voci `R12-*` in `stato.json` → `pianoAtomico.voci`. Il repository è pubblico: qui non

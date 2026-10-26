@@ -39,16 +39,17 @@ export function SceltaAcquistoAlternativo({ s, scelto, occupato, onScegli }: Pro
           const attivo = scelto === o.effettoUid;
           return (
             <button key={o.effettoUid} type="button" disabled={occupato}
-              className={`chip touch w-full flex-col items-start gap-0.5 text-left ${attivo ? 'chip--attivo' : ''} ${!o.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`}
+              className={`chip touch w-full flex-col items-start gap-0.5 text-left ${attivo ? 'chip--attivo' : ''} ${!o.disponibile ? 'cursor-not-allowed' : ''}`}
               aria-pressed={attivo} aria-disabled={!o.disponibile ? true : undefined} aria-describedby={!o.disponibile ? idMotivo : undefined}
               aria-label={`${o.articolo.nome}${o.quantita > 1 ? ` ×${o.quantita}` : ''}, ${prezzo}${contenuto ? `; contiene ${contenuto}` : ''}${!o.disponibile ? '; non si può comprare' : ''}`}
               onClick={() => { if (o.disponibile) onScegli(o.effettoUid); }}>
-              <span className="flex w-full flex-wrap items-baseline justify-between gap-x-2">
+              {/* spenta: si attenua ciò che non si può scegliere, mai il motivo, che è l'informazione della scheda e resta a pieno contrasto */}
+              <span className={`flex w-full flex-wrap items-baseline justify-between gap-x-2 ${!o.disponibile ? 'opacity-60' : ''}`}>
                 <span className="font-semibold break-words text-pretty">{o.articolo.nome}{o.quantita > 1 ? ` ×${o.quantita}` : ''}</span>
                 <span className="tabular-nums">{prezzo}</span>
               </span>
-              {contenuto && <span className="testo-12 text-text-secondary break-words text-pretty">{contenuto}</span>}
-              {!o.disponibile && o.motivo && <span id={idMotivo} className="testo-12 text-text-muted break-words">{o.motivo}</span>}
+              {contenuto && <span className={`testo-12 text-text-secondary break-words text-pretty ${!o.disponibile ? 'opacity-60' : ''}`}>{contenuto}</span>}
+              {!o.disponibile && o.motivo && <span id={idMotivo} className="testo-12 text-text-secondary break-words text-pretty">{o.motivo}</span>}
             </button>
           );
         })}

@@ -2297,3 +2297,30 @@ Memento invariati. Motivo: è il gioco (G-026: dopo il furto il Palazzo sparisce
 completa) e tiene funzionante la partita senza segnare voci al posto dell'utente; la decisione «1 B» resta (le 15 voci non si segnano). Nella
 stessa revisione: ogni pin tiene il suo stato e una voce con più pin è fatta quando lo sono tutti (NR4-1, strada (a) del PM; pin condivisi da
 rigenerabili di più infiltrazioni con stato per infiltrazione).
+
+## 2026-10-26 — L13, decisione 4: le televendite come articoli alternativi
+
+Decisione dell'utente (già approvata il 25/10, `docs/coordinamento/lotti/L13/decisioni-2026-10-25.md`): «Televendite: due articoli distinti
+per Set A e Set B, ciascuno con prezzo e contenuto propri». Richiesta sulla voce del 24 aprile: «tv shopping con due prodotti da scegliere
+gestito malissimo... i prodotti per altro sono rimasti in inglese... e non posso effettivamente scegliere». Come si realizza (scelte
+tecniche, nessuna decisione presa al posto dell'utente):
+
+- **Un'alternativa d'acquisto si dichiara nell'articolo**, con la condizione che esisteva già: «non: articolo ottenuto = l'altro set»
+  (`articoliIncompatibili` in `shared/condizioniSpillo.ts`). Basta da una parte; vale in tutte e due le direzioni. Il testo che si legge è
+  «Non insieme a «Set X»». **Conseguenza da sapere:** ogni condizione «non: articolo ottenuto» fra due articoli è letta come alternativa
+  d'acquisto (gruppo «Uno a scelta», scelta alla spunta). Oggi nel catalogo la usano solo le televendite (verificato il 26/10). Una
+  condizione futura del tipo «solo se non hai già comprato X» va scritta in un altro modo, o va deciso con l'utente un tipo di condizione
+  distinto.
+- **Nella voce non si dichiara niente**: gli effetti «articolo» restano piatti. Alla spunta si sceglie quale set si è comprato, oppure
+  «Nessuno». Non esiste una scelta implicita: senza scelta la spunta si ferma (409).
+- **Il set non scelto** non si segna, non ha niente da annullare e non si paga (decisione 18): si scala solo il prezzo di quello scelto.
+- **La disponibilità** del set scelto si valuta al giorno della voce, perché un set si compra solo la sua domenica. Ogni altro articolo resta
+  valutato sullo stato corrente della partita, come prima.
+- **Gli articoli in alternativa aggiunti a una voce già spuntata** (per esempio con una proposta «da completare» applicata dopo) li riconosce
+  il registro delle operazioni sugli effetti. «Il gioco dà» li mostra da scegliere, togliendo e rimettendo la spunta, e non dice mai
+  «nessuno» per un acquisto che non è mai stato chiesto.
+- **Periodo validato (04-01…05-31):** le 6 voci delle televendite restano proposte «L13-televendite» da applicare solo con il sì dell'utente,
+  riga per riga. Il vecchio articolo inglese resta nascosto ma citato da quelle voci finché l'utente non decide.
+- **Restano all'utente:**
+  - se il gioco permette un solo set per domenica, oppure nessuno;
+  - se servono le voci delle domeniche 06-26, 08-07, 09-25 e 01-29.

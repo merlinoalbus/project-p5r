@@ -10,7 +10,8 @@
 // Dati di gioco (`gioco.db`), append-only e conservativa; i dati vengono dalla guida italiana (pagine «Soluzione settimana N», «Accessori» e
 // «Oggetti», lette il 2026-10-26), che prevale:
 //   (1) **Oggetti del catalogo** che i set contengono e il catalogo non aveva (12, dalle pagine «Accessori» e «Oggetti»): `origine='seed'`,
-//       fonte «guida». Uno già presente con la stessa chiave non si tocca.
+//       fonte «guida». Uno già presente con la stessa chiave non si tocca. (1b) Il nome «Flan al te matcha» (oggetto e articolo del Body
+//       Chop, gli unici del catalogo senza l'accento) diventa «Flan al tè matcha», come nella guida, solo se è ancora quello di seed.
 //   (2) **Articoli**: per ognuna delle 20 domeniche, Set A e Set B con nome italiano, prezzo, fonte (la pagina della settimana) e condizioni:
 //       la domenica, quel giorno solo, e «non insieme all'altro set» (`non` + `articolo`: è il modo di dichiarare un'alternativa, valutato
 //       ovunque dal motore della disponibilità). Un articolo già presente non si tocca.
@@ -35,11 +36,15 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella } from './pulizieL11.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../../shared/condizioniSpillo.js';
 import { applicaPropostaConversione, elencaProposteConversione } from '../../services/proposteConversioneService.js';
+import { invalidaCacheDiGioco } from '../../services/cacheDiGioco.js';
 
 const AUDIT = 'audit-239-televendite';
 const LOTTO = 'L13-televendite';
 const NEGOZIO = 'home-shopping-tv';
 const GUIDA = 'https://www.allgamestaff.it/persona-5-royal/';
+/** (1b) Il nome dell'oggetto del Set regalo giapponese come lo scrive la guida italiana, e quello di seed rimasto senza accento. */
+const NOME_FLAN = 'Flan al tè matcha';
+const NOME_FLAN_SENZA_ACCENTO = 'Flan al te matcha';
 const errore = (motivo: string): never => { throw new Error(`239: ${motivo}; nessuna modifica applicata.`); };
 
 /** Il periodo del Diario validato dall'utente (giorni di gioco, estremi compresi): lì nessuna voce si converte senza il suo sì. */
@@ -197,6 +202,13 @@ export const migration239: Migration = {
     const contenuti = [...new Set(DOMENICHE.flatMap((d) => [...d.a.contenuto, ...d.b.contenuto].map(([k]) => k)))];
     const mancanti = contenuti.filter((k) => !db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?').get(k));
     if (mancanti.length) errore(`oggetti dei set assenti dal catalogo: ${mancanti.join(', ')}`);
+    // ---- (1b) il nome italiano della guida per l'oggetto del Set regalo giapponese (rilievo della revisione): «Flan al tè matcha», con
+    // l'accento, come le pagine «Oggetti» e «Soluzione settimana 7» e come il testo della voce. Censimento completo del catalogo: l'oggetto e
+    // l'articolo del Body Chop che lo vende sono gli unici nomi senza accento; si corregge solo il nome di seed rimasto com'era
+    const nomiCorretti: string[] = [];
+    for (const [tabella, chiave] of [['catalogo_oggetto', 'regalo/flan-al-te-matcha'], ['articolo', 'body-chop/flan-al-te-matcha']] as const) {
+      if (db.prepare(`UPDATE main.${tabella} SET nome = ?, updated_at = ? WHERE chiave = ? AND nome = ? AND origine = 'seed'`).run(NOME_FLAN, adesso, chiave, NOME_FLAN_SENZA_ACCENTO).changes === 1) nomiCorretti.push(`${tabella}:${chiave}`);
+    }
 
     // ---- (2) e (3) gli articoli dei set e il loro contenuto
     const inserisciArticolo = db.prepare(`INSERT INTO main.articolo (chiave, negozio_chiave, ordine, nome, categoria, per, prezzo, effetto, statistiche, nota, fonte, verificato, origine, nascosto, updated_at, condizioni_json, catalogo_chiave)
@@ -231,6 +243,10 @@ export const migration239: Migration = {
     const notaCambiata = negozio.note === NOTA_VECCHIA && negozio.origine === 'seed'
       ? db.prepare('UPDATE main.negozio SET note = ?, fonte = ?, updated_at = ? WHERE chiave = ? AND note = ?').run(NOTA_NUOVA, `${GUIDA}soluzione-settimana-2/`, adesso, NEGOZIO, NOTA_VECCHIA).changes === 1
       : false;
+    // gli articoli, le condizioni e i nomi sono cambiati: le letture in memoria dei servizi (la mappa delle alternative, che vive un secondo, e
+    // i nomi delle condizioni) si svuotano, così le proposte applicate qui sotto e le prime letture dopo l'avvio vedono i set nuovi in
+    // alternativa (prova sulle copie: una lettura fatta da una migrazione precedente nello stesso secondo li lasciava piatti)
+    invalidaCacheDiGioco();
 
     // ---- riferimenti ai vecchi articoli: nelle voci del Diario (dati di gioco) e nelle partite (sola lettura, per l'elenco nell'audit)
     const vociConVecchio = db.prepare(`SELECT e.voce_uid AS voce, v.data, e.uid AS effetto, e.chiave FROM main.voce_effetto e JOIN main.voce_giornata v ON v.uid = e.voce_uid
@@ -300,10 +316,10 @@ export const migration239: Migration = {
       il: adesso,
       conteggi: {
         domeniche: DOMENICHE.length, articoliCreati, articoliGiaPresenti, righeContenutoCreate: righeContenuto, oggettiCreati: oggettiCreati.length, oggettiGiaPresenti: oggettiGiaPresenti.length,
-        vecchiArticoliNascosti: articoliNascosti, oggettiFittiziNascosti: oggettiNascosti, notaNegozioCambiata: notaCambiata, articoliVisibiliDelNegozio: visibili,
+        vecchiArticoliNascosti: articoliNascosti, oggettiFittiziNascosti: oggettiNascosti, notaNegozioCambiata: notaCambiata, articoliVisibiliDelNegozio: visibili, nomiCorretti: nomiCorretti.length,
         vociConIlVecchioArticolo: vociConVecchio.length, vociApplicate: voci.filter((v) => v.esito === 'applicata').length, vociDaDecidere: voci.filter((v) => v.esito !== 'applicata').length,
       },
-      oggettiCreati, oggettiGiaPresenti, fittiziCondivisi, mappa, vociConVecchio, nellePartite, voci, stessaConnessione,
+      oggettiCreati, oggettiGiaPresenti, nomiCorretti, fittiziCondivisi, mappa, vociConVecchio, nellePartite, voci, stessaConnessione,
       segnalazioni: [
         'Domeniche senza una voce d’acquisto nel Diario: 06-26, 08-07, 09-25, 01-29 (gli articoli ci sono; la voce la decide l’utente).',
         'Che il gioco permetta un solo set per domenica, o nessuno, lo dicono la nota del negozio e la guida in modo indiretto (settimane 21 e 25): da confermare con l’utente. Se una domenica permettesse tutti e due, basta togliere le due condizioni «non» di quel giorno.',

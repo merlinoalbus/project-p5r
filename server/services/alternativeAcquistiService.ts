@@ -26,6 +26,7 @@ import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { disponibilitaArticoloNelloStato } from './negoziService.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
+import { effettiAggiuntiDopo } from './yenAutomaticiService.js';
 // il nome dell'articolo come lo vede l'utente: la stessa lettura degli elenchi e delle frasi (import ciclico solo di funzioni, mai usate al caricamento)
 import { articoloConNome } from './azioniStrutturateService.js';
 
@@ -143,4 +144,23 @@ export function risolviAlternativeAcquisti(effetti: readonly EffettoVoceDto[], s
 /** Gli articoli che la spunta della voce ha segnato nella partita (le righe di `effetto_stato_voce`): il riepilogo della voce fatta li mostra. */
 export function articoliSegnatiDallaVoce(partitaId: number, voceUid: string): Set<string> {
   return new Set(prepared("SELECT chiave FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND tipo = 'articolo'").pluck().all(partitaId, voceUid) as string[]);
+}
+
+/**
+ * Per il riepilogo di una voce SPUNTATA: gli articoli segnati dalla spunta (`comprati`) e, fra quelli in alternativa, quelli aggiunti alla
+ * voce DOPO la spunta (`daScegliere`), dal registro delle operazioni sugli effetti (`effettiAggiuntiDopo`, la stessa lettura degli yen già nel
+ * saldo, con la data della spunta in piedi). È il caso delle proposte «da completare» applicate a una voce già spuntata: la spunta non ha
+ * potuto chiedere quale set si è comprato, e il riepilogo non deve dire «nessuno» (rilievo della revisione: sarebbe falso). Un registro
+ * illeggibile non ferma la lettura della voce: gli articoli in alternativa non segnati restano «da scegliere» (mai una negazione alla cieca).
+ */
+export function alternativeDellaVoceFatta(partitaId: number, voceUid: string, effetti: readonly EffettoVoceDto[]): { comprati: Set<string>; daScegliere: Set<string> } {
+  const comprati = articoliSegnatiDallaVoce(partitaId, voceUid);
+  const gruppi = gruppiDellaVoce(effetti).filter((g) => !g.some((e) => comprati.has(e.effetto.articolo)));
+  if (!gruppi.length) return { comprati, daScegliere: new Set() };
+  const fatta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').pluck().get(partitaId, voceUid) as string | undefined;
+  if (!fatta) return { comprati, daScegliere: new Set() };
+  let aggiunti: ReadonlySet<string> | null;
+  try { aggiunti = effettiAggiuntiDopo(voceUid, fatta); } catch { aggiunti = null; }
+  const daScegliere = new Set(gruppi.flat().filter((e) => aggiunti === null || aggiunti.has(e.uid)).map((e) => e.effetto.articolo));
+  return { comprati, daScegliere };
 }

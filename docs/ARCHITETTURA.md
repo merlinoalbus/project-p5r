@@ -214,6 +214,21 @@ Sono indirizzi **del frontend** (non rotte API: nessun redirect lato server). Il
 ### Il Diario come motore
 La voce del Diario (`voce_giornata`) è l'unico gesto che produce effetti sulla partita: `server/services/motoreDiario.ts` legge gli effetti dichiarati (`shared/effettiVoce.ts`) e li trasforma in proposte da confermare (`propostePartitaService.ts`, `shared/propostePartita.ts`), acquisti con fonte `diario` (`acquistiService.ts`), Fortuna (`fortunaService.ts`), effetti di stato (`effettiDiStatoService.ts`), punti dei Confidenti per generazione (`puntiCronologici.ts`), inviti registrati dalla voce (`registraInvito` in `inviti.ts`) e visite di pesca (`pescaService.ts`). Ciò che una voce ha applicato si toglie togliendo la voce o la spunta (`annullaEffettiDiStato`, `togliEventiDellaVoce`, `annullaInvito` con `voceUid`). Gli yen restano un promemoria (utente 031).
 
+### Alternative d'acquisto (L13, decisione 4: le televendite)
+- **Modello:** due o più articoli della stessa voce legati da una condizione «non: articolo ottenuto» (`articoliIncompatibili`, `shared/condizioniSpillo.ts`) formano un gruppo di alternative (`gruppiAlternativi`, `shared/effettiVoce.ts`). Se ne compra uno, o nessuno. Le alternative si dichiarano solo nel catalogo: la voce tiene effetti «articolo» piatti. Ogni «non» + articolo è letto come alternativa (vedi `DECISIONI.md`, 2026-10-26).
+- **Server:** `server/services/alternativeAcquistiService.ts`:
+  - `mappaIncompatibili`: tiene la mappa in memoria per un secondo e la svuota con `cacheDiGioco`;
+  - `scelteAlternativeDellaVoce`: la scelta «alternativa» fra le scelte della spunta;
+  - `risolviAlternativeAcquisti`: 409 `alternativa-da-scegliere`, 400 `scelta-alternativa-non-valida`, 409 `articolo-non-disponibile`, sempre prima di ogni scrittura;
+  - `alternativeDellaVoceFatta`: a voce spuntata, gli articoli segnati e quelli aggiunti dopo la spunta, presi dal registro `operazione_effetti_voce` tramite `effettiAggiuntiDopo` di `yenAutomaticiService.ts`.
+- **Spunta** (`motoreDiario.applicaEffettiVoce`):
+  - gli effetti non scelti restano fuori da `applicaEffettiDiStato` e dagli yen automatici;
+  - solo per il set scelto la disponibilità si valuta al giorno della voce (`statoAlMomento`).
+- **Letture:**
+  - `shared/riepilogoEffetti.ts`: gruppo «Uno a scelta · negozio», senza totale e con la nota degli yen di quello che si sceglie; a voce fatta mostra il set comprato, «Nessuno dei due comprato», o le alternative da scegliere se sono state aggiunte dopo la spunta;
+  - `SceltaAcquistoAlternativo.tsx`: la scelta alla spunta;
+  - `AcquistiNegozioVoce.tsx`: il riquadro nell'editor della voce.
+
 ### Correzioni, ripristino e cestino
 - Ogni dato correggibile ha «Modifica» e «Ripristina»: `ripristinoService.ts` (`elencaCorrezioni`, `schedaCorrezione`, `correggi`, `ripristina`) con `TIPI_MODIFICABILI` (`shared/types.ts`). Per le righe il valore della guida è la fotografia `seed_json` presa alla prima correzione; per i blocchi JSON di `dati_guida` il blocco non si riscrive e le correzioni stanno in `correzione_dati_guida`, applicate in lettura (`datiGuidaCorretti`).
 - Il **cestino** (`cestinoService.ts`; tabella `cestino` 104, utente 021 per le partite) registra le eliminazioni con trigger temporanei su ogni tabella dei due file; un registro catturato prima di un drop torna senza la colonna tolta (`colonneCompatibili` in `fontiTolte.ts`).

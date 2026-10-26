@@ -11,7 +11,8 @@
 //
 // L13 (decisione 4, 2026-10-26: «tv shopping con due prodotti da scegliere gestito malissimo... non posso effettivamente scegliere»): gli
 // articoli che il catalogo dichiara alternativi fra loro (Set A o Set B: «non insieme a») stanno in un riquadro a parte, «Alla spunta ne
-// scegli uno, o nessuno», con nome, prezzo e contenuto, senza totale (sommarli sarebbe un acquisto che il gioco non permette). Un articolo
+// scegli uno, o nessuno», con il selettore dell'articolo, le copie, il prezzo e il contenuto, senza totale (sommarli sarebbe un acquisto che il
+// gioco non permette); Su e Giù spostano dentro il proprio elenco, nell'ordine in cui si vede. Un articolo
 // che ha un'alternativa non ancora nella voce offre «Aggiungi l'alternativa». «Aggiungi articolo» mette per primi gli articoli del giorno
 // della voce. Nella voce non si dichiara niente: le alternative le dice il catalogo, la scelta si fa alla spunta.
 // ============================================================
@@ -52,9 +53,11 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
   const imposta = (effettiVoce: RigaEffetto[]) => onCambia({ ...valore, effettiVoce });
   /** Cambia l'articolo o le copie di una riga; se l'articolo scelto c'è già in un'altra riga le due si fondono (copie sommate), come in «Aggiungi articolo»: mai due righe dello stesso articolo. */
   const cambia = (i: number, e: Articolo) => imposta(fondiArticoliUguali(righe.map((r, j) => (j === i ? { ...r, effetto: e } : r))));
-  /** Scambia l'articolo al posto `k` dell'elenco con quello prima (-1) o dopo (+1): l'ordine in cui la spunta li segna. */
-  const sposta = (k: number, verso: -1 | 1) => {
-    const a = posti[k]!, b = posti[k + verso];
+  /** Scambia l'articolo al posto `k` di `lista` (i posti di un elenco COME SI VEDE: gli articoli ordinari, o un riquadro di alternative) con
+   *  quello prima (-1) o dopo (+1) nello stesso elenco: l'ordine in cui la spunta li segna. Mai fra due elenchi diversi, dove lo scambio non
+   *  si vedrebbe (rilievo della revisione UX). */
+  const sposta = (lista: readonly number[], k: number, verso: -1 | 1) => {
+    const a = lista[k]!, b = lista[k + verso];
     if (b === undefined) return;
     const nuove = [...righe];
     [nuove[a], nuove[b]] = [nuove[b]!, nuove[a]!];
@@ -79,10 +82,13 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
   // Gli articoli alternativi non entrano nel totale: se ne compra uno, o nessuno
   const conto = contoArticoli(posti.map((i) => righe[i]!.effetto), (k) => nomi.articoli.get(k), inGruppo);
   const ordinari = posti.filter((i) => !inGruppo.has((righe[i]!.effetto as Articolo).articolo));
+  /** I posti di ogni riquadro di alternative, nell'ordine della voce. */
+  const postiDeiGruppi = gruppi.map((membri) => posti.filter((i) => membri.includes((righe[i]!.effetto as Articolo).articolo)));
 
-  /** Una riga dell'elenco: `k` è la sua posizione fra gli articoli del negozio (per Su e Giù), `alternativa` se sta in un gruppo. */
-  const riga = (i: number, alternativa: boolean) => {
-    const k = posti.indexOf(i);
+  /** Una riga dell'elenco `lista` (gli ordinari o un riquadro di alternative): `k` è la sua posizione lì, per Su, Giù e il numero
+   *  dell'etichetta, che seguono l'ordine mostrato. `alternativa` se sta in un riquadro. */
+  const riga = (i: number, lista: readonly number[], alternativa: boolean) => {
+    const k = lista.indexOf(i);
     const e = righe[i]!.effetto as Articolo;
     const a = nomi.articoli.get(e.articolo);
     const q = e.quantita ?? 1;
@@ -93,19 +99,15 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
     return (
       <li key={righe[i]!.uid ?? `nuovo-${i}`} className="flex min-w-0 flex-col gap-1.5 rounded-md border border-border bg-bg-tertiary p-2">
         <span className="flex min-w-0 flex-wrap items-end gap-2">
-          {alternativa ? (
-            <span className="flex min-h-11 min-w-[12rem] flex-1 flex-col justify-center">
-              <span className="testo-13 font-semibold break-words text-pretty">{nome}</span>
-            </span>
-          ) : (
-            <Selettore etichettaSopra className="min-w-[12rem] flex-1" etichetta={`Articolo ${k + 1}`} valore={e.articolo} opzioni={conCorrente(opzioni, e.articolo, a?.nascosto ? `${nome} (non più nel negozio)` : nome)}
-              onCambia={(v) => { if (v) cambia(i, articolo(v, q)); }} />
-          )}
+          {/* rilievo della revisione UX: anche nel riquadro delle alternative l'articolo si cambia dalla riga (lo stesso selettore), senza togliere
+              e riaggiungere; il numero dice il posto nel riquadro («Alternativa 2») o fra gli articoli ordinari («Articolo 2») */}
+          <Selettore etichettaSopra className="min-w-[12rem] flex-1" etichetta={`${alternativa ? 'Alternativa' : 'Articolo'} ${k + 1}`} valore={e.articolo} opzioni={conCorrente(opzioni, e.articolo, a?.nascosto ? `${nome} (non più nel negozio)` : nome)}
+            onCambia={(v) => { if (v) cambia(i, articolo(v, q)); }} />
           <CampoQuantita valore={q} onCambia={(n) => cambia(i, articolo(e.articolo, n))} />
           <span className="min-h-11 flex items-center testo-13 text-text-secondary tabular-nums" aria-label={`Prezzo: ${a?.prezzo != null ? yen(a.prezzo * q) : 'senza prezzo'}`}>{a?.prezzo != null ? yen(a.prezzo * q) : '—'}</span>
           <span className="flex gap-1">
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${nome}`} disabled={k === 0} onClick={() => sposta(k, -1)} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${nome}`} disabled={k === posti.length - 1} onClick={() => sposta(k, 1)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${nome}`} disabled={k === 0} onClick={() => sposta(lista, k, -1)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${nome}`} disabled={k === lista.length - 1} onClick={() => sposta(lista, k, 1)} />
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nome}`} onClick={() => imposta(righe.filter((_, j) => j !== i))} />
           </span>
         </span>
@@ -132,16 +134,17 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
       {posti.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun articolo: la voce resta un promemoria dell’acquisto. Aggiungi gli articoli per segnarli comprati alla spunta.</p>}
       {ordinari.length > 0 && (
         <ol className="m-0 flex list-none flex-col gap-2 p-0" aria-label={`Articoli comprati da ${nomeNegozio ?? 'questo negozio'}`}>
-          {ordinari.map((i) => riga(i, false))}
+          {ordinari.map((i) => riga(i, ordinari, false))}
         </ol>
       )}
       {gruppi.map((membri, g) => {
         const idTitolo = `acquisti-negozio-scelta-${g}`;
+        const lista = postiDeiGruppi[g]!;
         return (
           <section key={membri.join('|')} aria-labelledby={idTitolo} className="flex flex-col gap-1.5 rounded-md border border-dashed border-border p-2">
             <h5 id={idTitolo} className="m-0 testo-13 font-semibold text-pretty">Alla spunta ne scegli uno, o nessuno</h5>
             <ol className="m-0 flex list-none flex-col gap-2 p-0">
-              {posti.filter((i) => membri.includes((righe[i]!.effetto as Articolo).articolo)).map((i) => riga(i, true))}
+              {lista.map((i) => riga(i, lista, true))}
             </ol>
           </section>
         );

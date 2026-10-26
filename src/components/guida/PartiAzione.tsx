@@ -25,11 +25,13 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
+import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
+import { fraseYenInParteNelSaldo } from '../../../shared/riepilogoEffetti';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce'>>;
+  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenGiaNelSaldo' | 'effettiVoce'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -55,6 +57,13 @@ interface PropsCartellini {
 export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso, infiltrazioni }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
+  // L13 (decisione 18): «paga ¥X» dei turni i cui yen erano già nel saldo da prima, dalla frase del loro effetto (stesso ordine degli effetti)
+  const pagheGiaNelSaldo = (a.effettiVoce?.effetti ?? []).flatMap((e, i) => {
+    const t = a.yenGiaNelSaldo?.effetti.includes(e.uid) ? a.produceTesto?.[i] : undefined;
+    return t?.includes(' paga ¥') ? [t.slice(t.indexOf('paga ¥'))] : [];
+  });
+  // la frase completa del blocco (titolo e nome accessibile del chip): il dettaglio dal server, o la condizione breve se non c'è
+  const fraseBlocco = stato?.tipo === 'bloccata' ? (stato.dettaglio || stato.motivo) : null;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
   // R10-27. Nella Home e nella Guida › Giorno per giorno (dove il diario ha il pannello, `useApriPannello`) un clic semplice sull'oggetto
@@ -117,7 +126,14 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
       {a.quiz?.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro testo-12" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
-      {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata testo-12" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
+      {/* 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): il lucchetto e lo stile dicono già «bloccata»,
+          il chip mostra solo la condizione che manca («dal 20 aprile»); la frase completa («Disponibile dal 20 aprile, oggi è il 18 aprile»)
+          sta nel titolo e nel nome accessibile, come in `ChipDisponibilita` */}
+      {stato?.tipo === 'bloccata' && (
+        <span className="chip chip--icona chip--bloccata testo-12" title={fraseBlocco || 'Bloccata'} role="img" aria-label={fraseBlocco ? `Bloccata: ${fraseBlocco}` : 'Bloccata'}>
+          <IconaAzione chiave="bloccato" dimensione={12} />{stato.motivo || 'Bloccata'}
+        </span>
+      )}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="testo-12 text-text-muted">{stato.motivo}</span>}
       {/* R9-06: il testo salvato della voce non si riscrive; se il nome del Confidente è cambiato, il nome di adesso sta accanto */}
       {a.riferimentoNomeAttuale && <span className="testo-12 text-text-muted" title="Il testo della voce usa il nome di prima">oggi: {a.riferimentoNomeAttuale}</span>}
@@ -130,13 +146,26 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
       {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: {a.note}</span>}
-      {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
-      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
+      {/* la paga dei turni i cui yen erano già nel saldo da prima (effetto per effetto, `produceTesto[i]` è l'effetto `i`): il fatto, senza la
+          promessa di un movimento; la paga mossa dalla spunta la dice il chip del movimento */}
+      {a.fatta && pagheGiaNelSaldo.map((t, i) => <span key={`${i}:${t}`} className="testo-12 text-text-muted tabular-nums">{t}</span>)}
+      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}>{descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })}</span>}
+      {/* L13 (decisione 18): gli yen che la spunta ha mosso da soli, uno per causa, con l'importo davvero mosso (il saldo non scende sotto zero) */}
+      {a.fatta && a.yenAutomatici?.map((m) => (
+        <span key={`${m.causa}:${m.chiave}`} className="chip testo-12 tabular-nums" title="Mossi da soli dalla spunta: togliendola torna quanto era stato mosso">
+          {m.motivo} · {fraseMovimentoYen(m)}
+        </span>
+      ))}
+      {/* gli effetti con yen il cui denaro era già nel saldo da prima (applicati da una spunta di prima, o segnati togliendola): la spunta non lo
+          muove. Tutti gli effetti con yen della voce, o solo una parte, nominata (gli altri hanno il loro chip, o li muoverà la spunta) */}
+      {a.fatta && a.yenGiaNelSaldo && <span className="testo-12 text-text-muted text-pretty">{a.yenGiaNelSaldo.tutti
+        ? 'Gli yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'
+        : fraseYenInParteNelSaldo(a.yenGiaNelSaldo.nomi)}</span>}
     </span>
     {/* dove avviene la voce (le infiltrazioni del Palazzo, accanto al suo cartellino) prima di che cosa dà */}
     {infiltrazioni}
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
-        si segnano a mano (scelta dell'utente, 2026-09-30); gli yen non compaiono come istruzione, solo come prezzi e totale */}
+        si segnano a mano (scelta dell'utente, 2026-09-30); gli yen (decisione 18) si muovono da soli spuntando la voce, e il riepilogo lo dice */}
     <RiepilogoEffettiVoce gruppi={gruppi} />
     </>
   );

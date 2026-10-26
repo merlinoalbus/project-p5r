@@ -49,6 +49,7 @@ import { verificaAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { eventoPescaMarcato } from './pescaStorico.js';
 import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
+import { riallineaYenRichiesta, rimettiYenDellaVoceRipristinata } from './yenAutomaticiService.js';
 import { ripristinaOrdineVoce } from './giornataService.js';
 import { azioneEventoAcquistoV1 } from './storicoService.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../shared/types.js';
@@ -145,6 +146,9 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   acquisto_registrato: ['consumazione registrata', 'consumazioni registrate'], acquisto_provenienza: ['fonte di acquisto', 'fonti di acquisto'],
   acquisto_operazione: ['ricevuta di acquisto', 'ricevute di acquisto'], effetto_applicato: ['ricevuta di un effetto', 'ricevute degli effetti'],
   da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
+  // L13 (decisione 18, utente 048)
+  yen_automatico: ['movimento automatico di denaro', 'movimenti automatici di denaro'],
+  yen_fuori_registro: ['causa con gli yen già nel saldo da prima', 'cause con gli yen già nel saldo da prima'], yen_automatico_inizio: ['inizio degli yen automatici', 'inizi degli yen automatici'],
   proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
   // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
   lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
@@ -466,7 +470,11 @@ export function ripristinaCestinoPrivato(uid: string, partitaId?: number): Esito
     registro_json: '[]', con_partite: 1, vicini_json: null, partitaId: r.partita_id }, r);
 }
 
-const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
+// L13 (decisione 18): anche i movimenti automatici degli yen (`yen_automatico`) sono storia durevole del saldo: un ripristino che non sia di una
+// partita intera non li riapre né li richiude, e non rimette il saldo (`partita.yen`, qui sotto); la Richiesta rimessa li riallinea da sé e la
+// voce rimessa rifà i movimenti che la sua eliminazione aveva chiuso (`rimettiYenDellaVoceRipristinata`), con nuove righe. Anche le cause
+// segnate «già nel saldo da prima» (`yen_fuori_registro`, utente 049) restano: il ripristino non le toglie (rimetterle non è un gesto nuovo)
+const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'yen_automatico', 'yen_fuori_registro','acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
 interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
 function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
   const db = getDb();
@@ -637,7 +645,10 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         if (!ora) { if (!leggi(prima)) salta(p.tabella, 'non-esiste-piu', descrivi(dopo)); continue; }
         // colonna per colonna: torna com'era ciò che l'eliminazione aveva cambiato e nessuno ha toccato dopo; il resto della riga
         // (anche cambiato dopo) resta com'è. Una colonna cambiata dall'eliminazione e poi di nuovo da altro resta, e si dice.
-        const cambiate = colonne.filter((c) => !stesso(prima[c], dopo[c]) && !(r.tipo === 'partita' && p.schema === 'utente' && p.tabella === 'partita' && c === 'attiva'));
+        // L13 (decisione 18): fuori dal ripristino di una partita intera il saldo yen non si rimette: lo hanno mosso i movimenti automatici
+        // (durevoli, non riaperti né richiusi: `DURATURE_ACQUISTI`), e rimetterlo da solo lo staccherebbe dal loro registro
+        const cambiate = colonne.filter((c) => !stesso(prima[c], dopo[c]) && !(r.tipo === 'partita' && p.schema === 'utente' && p.tabella === 'partita' && c === 'attiva')
+          && !(r.tipo !== 'partita' && p.schema === 'utente' && p.tabella === 'partita' && c === 'yen'));
         const daRimettere = cambiate.filter((c) => stesso(ora[c], dopo[c]));
         // Una fusione cambia puntatori nel JSON della guida, non il testo. Un edit successivo
         // di un altro campo non deve impedire il ripristino del solo riferimento interessato.
@@ -752,9 +763,13 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       const confidentiNonRimessi = new Set([...saltate.values()].filter((s) => s.tabella === 'confidente_partita' && s.motivo === 'cambiata-dopo')
         .flatMap((s) => s.esempi.map((e) => e.split(' · ')).filter((x) => x.length >= 2).map(([p, c]) => `${p}|${c}`)));
       riconciliaEffettiDopoRipristino(partita, [...voceUids], confidentiNonRimessi);
+      // L13 (decisione 18): la voce rimessa torna spuntata con i suoi stati; gli yen che la sua eliminazione aveva restituito si muovono di
+      // nuovo dove lo stato è tornato (articolo comprato, turno, Richiesta completata). Gli altri effetti tornano con la proposta di raccordo
+      for (const v of voceUids) rimettiYenDellaVoceRipristinata(partita, v);
       riconciliaPescaDopoRipristino(partita);
-      // L13 (decisione 3): una Richiesta rimessa torna completata dove lo era: i suoi yen si riallineano (proposta «Applica» o niente se già nel saldo)
-      if (r.tipo === 'richiesta') riconciliaBeneficiRichiesta(partita, r.chiave);
+      // L13 (decisione 3): una Richiesta rimessa torna completata dove lo era: i suoi yen si riallineano. Decisione 18: rientrano da soli dove
+      // l'eliminazione li aveva tolti; una proposta «Applica» di prima si riallinea nel suo registro (o niente se già nel saldo)
+      if (r.tipo === 'richiesta') { riallineaYenRichiesta(partita, r.chiave, 'ripristino'); riconciliaBeneficiRichiesta(partita, r.chiave); }
     }
     const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
     if (r.tipo === 'voce-diario') ripristinaOrdineVoce(r.chiave, vicini);
