@@ -63,5 +63,9 @@ verificati sulle copie in sola lettura dei dati reali.
     discordanza fra pagine della guida vale il listino dei negozi con nota storica; sconsigliati riconvertiti a +1; righe senza fonte italiana
     tenute con la fonte dichiarata; prezzi diversi fra distributori lasciati; Braccialetto di 37 Gradi Celsius nascosto. Le voci del periodo
     validato (04-18, 05-09, 05-18 sera) solo come proposte da approvare riga per riga.
+    Precisazione dell'utente: «Ovviamente esula dalla decisione 1 se esistono oggetti con effetti che incidono su cose rilevanti per l'app già
+    censite come effetti diretti o indiretti». Gli oggetti il cui uso incide su ciò che l'app gestisce (Doti sociali, punti dei Confidenti,
+    yen, Fortuna, letture, consumazioni, sblocchi, oggetti ricevuti, tempo/fasce, ecc.) si modellano con i tipi di effetto dell'app; solo gli
+    effetti di battaglia o di cura restano testo.
 
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
