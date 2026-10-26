@@ -57,8 +57,11 @@ export const articolo: DefinizioneModulo = {
     negozio_chiave: testoDi(e?.dati.negozio_chiave) || negozioChiave || '',
     nome: testoDi(e?.dati.nome), categoria: testoDi(e?.dati.categoria) || 'altro',
     prezzo: numeroDi(e?.dati.prezzo), quantita: numeroDi(e?.dati.quantita), per: (e?.dati.per as string | null) ?? null,
-    // Ondata 5 (decisione 21): la regola di rifornimento (null = nessuna regola); `quantita` sono i pezzi per ciclo
+    // Ondata 5 (decisione 21): la regola di rifornimento (null = nessuna regola); `quantita` sono i pezzi per ciclo. Si rimanda solo se
+    // modificata (`_rifornimentoModificato`): una regola salvata che il modulo non sa leggere (`_rifornimentoNonLeggibile`) non si
+    // cancella salvando un altro campo, come il costo dello scambio
     rifornimento_json: normalizzaRifornimento(e?.dati.rifornimento_json ?? null),
+    _rifornimentoNonLeggibile: e?.dati.rifornimento_json != null && normalizzaRifornimento(e.dati.rifornimento_json) === null, _rifornimentoModificato: false,
     oggetto_fonte: (e?.dati.oggetto_fonte as string | null) ?? null, oggetto_chiave: (e?.dati.oggetto_chiave as string | null) ?? null,
     catalogo_chiave: (e?.dati.catalogo_chiave as string | null) ?? null,
     costo_json: e?.dati.costo_json ?? null,
@@ -73,11 +76,11 @@ export const articolo: DefinizioneModulo = {
   // Un collegamento non disponibile resta salvabile senza modificarlo; una nuova offerta sceglie un'identità.
   valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && testoDi(d.nome).trim().length > 0))
     && (d._costoModificato !== true || d.costo_json == null || normalizzaCostoScambio(d.costo_json) !== null)
-    && (d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null),
+    && (d._rifornimentoModificato !== true || d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null),
   prepara: (d) => {
     const chiave = testoOnull(d.catalogo_chiave);
-    const corpo: Dati = { negozio_chiave: d.negozio_chiave, quantita: numeroDi(d.quantita), nota: testoOnull(d.nota), verificato: d.verificato,
-      rifornimento_json: (d.rifornimento_json as RegolaRifornimento | null) ?? null };
+    const corpo: Dati = { negozio_chiave: d.negozio_chiave, quantita: numeroDi(d.quantita), nota: testoOnull(d.nota), verificato: d.verificato };
+    if (d._rifornimentoModificato === true) corpo.rifornimento_json = (d.rifornimento_json as RegolaRifornimento | null) ?? null;
     if (d.costo_json == null) corpo.prezzo = numeroDi(d.prezzo);
     if (d._costoModificato === true) {
       const costo = normalizzaCostoScambio(d.costo_json);

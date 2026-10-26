@@ -126,14 +126,27 @@ export interface StatoScorta {
   torna: string | null;
   /** Gli indici (nell'elenco passato) degli acquisti che contano nel ciclo in corso. */
   nelCiclo: number[];
+  /** Il negozio vende a consegna (Tanaka) e ha in viaggio un ordine di un giorno precedente: fino all'arrivo non ne prende di nuovi. */
+  ordineInViaggio?: boolean;
 }
+
+/**
+ * Le opzioni del conto: `letto` per `restituzione`; `consegnaDelNegozio` per un negozio che spedisce (Tanaka): i giorni di consegna e gli
+ * acquisti degli ALTRI articoli dello stesso negozio, qualunque sia la loro regola (anche i pezzi unici si ordinano e si spediscono).
+ */
+export interface OpzioniStatoScorta { letto?: boolean; consegnaDelNegozio?: { giorni: number; ordini: readonly AcquistoDelCiclo[] } }
 
 /**
  * Il conto della scorta: gli acquisti che cadono nel ciclo in corso (mai quelli con un giorno dopo `oggi`), i pezzi rimasti e il giorno del
  * rifornimento. `letto` vale per `restituzione`: il libro preso in prestito è stato letto, quindi restituito. Senza data della partita (`oggi`
  * null) non c'è un ciclo: niente è esaurito (la disponibilità resta quella delle condizioni).
+ *
+ * Tanaka (guida italiana, Negozi speciali): «Gli oggetti ordinati richiedono però tre giorni per essere consegnati e fino all'arrivo della
+ * spedizione non sarà possibile effettuare nuovi ordini», e una sola copia per oggetto alla volta (`consegna`). L'ordine è di un giorno: gli
+ * articoli comprati lo stesso giorno sono lo stesso ordine (si possono aggiungere fino al cambio di giornata, una copia per articolo); un ordine
+ * di un giorno precedente ancora in viaggio blocca tutto il negozio fino all'arrivo, pezzi unici compresi (`consegnaDelNegozio`).
  */
-export function statoScorta(regola: RegolaRifornimento, quantita: number | null, acquisti: readonly AcquistoDelCiclo[], oggi: string | null, opz: { letto?: boolean } = {}): StatoScorta {
+export function statoScorta(regola: RegolaRifornimento, quantita: number | null, acquisti: readonly AcquistoDelCiclo[], oggi: string | null, opz: OpzioniStatoScorta = {}): StatoScorta {
   const n = numeroGiorno(oggi);
   const vuoto: StatoScorta = { quantita, comprati: 0, rimasti: quantita, esaurito: false, torna: null, nelCiclo: [] };
   if (n === null) return vuoto;
@@ -146,7 +159,7 @@ export function statoScorta(regola: RegolaRifornimento, quantita: number | null,
   else if (regola.tipo === 'consegna') {
     const durata = regola.giorni ?? 1;
     nelCiclo = acquisti.map((_, i) => i).filter((i) => finoAOggi(i) && giorni[i]! + durata > n);
-    if (nelCiclo.length) torna = Math.max(...nelCiclo.map((i) => giorni[i]!)) + durata;
+    if (nelCiclo.length) torna = Math.max(...nelCiclo.map((i) => giorni[i]! + durata));
   } else {
     const ciclo = cicloDelGiorno(regola, n);
     nelCiclo = acquisti.map((_, i) => i).filter((i) => finoAOggi(i) && ciclo.inizio !== null && giorni[i]! >= ciclo.inizio);
@@ -155,9 +168,20 @@ export function statoScorta(regola: RegolaRifornimento, quantita: number | null,
   const comprati = nelCiclo.reduce((s, i) => s + Math.max(1, acquisti[i]!.quantita), 0);
   // la consegna: un ordine alla volta, qualunque sia la quantità dell'articolo
   const limite = regola.tipo === 'consegna' ? 1 : quantita;
-  const rimasti = limite === null ? null : Math.max(0, limite - comprati);
-  const esaurito = rimasti !== null && rimasti <= 0;
-  return { quantita: limite, comprati, rimasti, esaurito, torna: esaurito && torna !== null ? dataDelNumero(torna) : null, nelCiclo };
+  const finito = limite !== null && limite - comprati <= 0;
+  // il negozio che spedisce: gli ordini degli altri articoli di un giorno precedente ancora in viaggio (lo stesso giorno è lo stesso ordine)
+  let arrivoOrdine: number | null = null;
+  const consegna = regola.tipo === 'consegna' ? { giorni: regola.giorni ?? 1, ordini: opz.consegnaDelNegozio?.ordini ?? [] } : opz.consegnaDelNegozio;
+  for (const a of consegna?.ordini ?? []) {
+    const g = numeroGiorno(a.giorno);
+    if (g !== null && g < n && g + consegna!.giorni > n) arrivoOrdine = Math.max(arrivoOrdine ?? 0, g + consegna!.giorni);
+  }
+  const ordineInViaggio = arrivoOrdine !== null;
+  // il pezzo unico già comprato non torna: il suo giorno di ritorno resta vuoto anche con un ordine in viaggio
+  if (ordineInViaggio && !(regola.tipo === 'mai' && finito)) torna = torna === null ? arrivoOrdine : Math.max(torna, arrivoOrdine!);
+  const rimasti = ordineInViaggio ? 0 : limite === null ? null : Math.max(0, limite - comprati);
+  const esaurito = ordineInViaggio || finito;
+  return { quantita: limite, comprati, rimasti, esaurito, torna: esaurito && torna !== null ? dataDelNumero(torna) : null, nelCiclo, ...(ordineInViaggio ? { ordineInViaggio } : {}) };
 }
 
 const pezzi = (q: number): string => (q === 1 ? '1 pezzo' : `${q} pezzi`);
@@ -183,6 +207,8 @@ export function descriviRifornimento(regola: RegolaRifornimento, quantita: numbe
 /** Il requisito della scorta a parole: «Rimasti 1 di 3», «Esaurito: torna lunedì 25 aprile», «Pezzo unico già comprato». */
 export function descriviStatoScorta(regola: RegolaRifornimento, s: StatoScorta): string {
   if (!s.esaurito) return s.rimasti === null ? 'Nessun limite di pezzi' : `Rimasti ${s.rimasti} di ${s.quantita}`;
+  // il negozio che spedisce ha in viaggio un ordine di un altro giorno (e questo articolo non l'ha già comprato)
+  if (s.comprati === 0 && s.ordineInViaggio) return s.torna ? `Un ordine è in consegna: nuovi ordini dal ${dataLeggibile(s.torna)}` : 'Un ordine è in consegna: nuovi ordini all’arrivo';
   if (regola.tipo === 'mai') return 'Pezzo unico già comprato';
   if (regola.tipo === 'restituzione') return 'In prestito: torna alla restituzione';
   if (regola.tipo === 'consegna') return s.torna ? `Ordine in consegna: arriva il ${dataLeggibile(s.torna)}` : 'Ordine in consegna';

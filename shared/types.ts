@@ -1748,8 +1748,15 @@ export interface ScortaArticoloDto {
   torna: string | null;
   /** Lo stato a parole: «Rimasti 1 di 3», «Esaurito: torna lunedì 25 aprile». */
   testo: string;
-  /** Gli acquisti che contano nel ciclo in corso; quelli della pagina del negozio si annullano uno per uno, quelli di una voce togliendone la spunta. */
-  righe: Array<{ id: number; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid: string | null }>;
+  /** Il negozio spedisce (Tanaka) e ha in viaggio un ordine di un giorno precedente: nessun nuovo ordine fino all'arrivo (`torna`). */
+  ordineInViaggio?: boolean;
+  /**
+   * Tutti gli acquisti registrati dell'offerta (e delle vecchie chiavi del suo listino condiviso), dal più vecchio; `nelCiclo` = contano nel
+   * ciclo in corso. Quelli della pagina del negozio si annullano uno per uno, qualunque sia il ciclo; quelli di una voce togliendone la spunta.
+   */
+  righe: Array<{ id: number; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid: string | null; nelCiclo: boolean }>;
+  /** Le chiavi con il segno «ottenuto» che nessuna riga porta (segnate prima del registro, o senza una data di gioco): si tolgono con `soloPresenza`. */
+  senzaGiorno: string[];
 }
 
 export interface NegozioDettaglioDto extends NegozioRiassuntoDto {

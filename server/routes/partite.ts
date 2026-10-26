@@ -253,8 +253,8 @@ router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyM
   res.json({ meteo, partita: leggiPartita(Number(req.params.id)) });
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
-  const b = req.body as { articolo: string; fatto: boolean; sede?: string };
-  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede));
+  const b = req.body as { articolo: string; fatto: boolean; sede?: string; soloPresenza?: true };
+  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede, b.soloPresenza ? { soloPresenza: true } : {}));
 });
 /** Ondata 5 (decisione 21): annulla un solo acquisto della pagina del negozio (una riga del registro), qualunque sia il suo ciclo. */
 router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto }), (req, res) => {

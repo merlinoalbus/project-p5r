@@ -29,7 +29,7 @@ import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listi
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
-import { momentoDellaVoce, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
+import { momentoDellaVoce, presenzeSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
 import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, ScortaArticoloDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
@@ -117,15 +117,20 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
  *
  *  Ondata 5 (decisione 21): con una regola di rifornimento e un limite di pezzi, un requisito in più, la scorta del ciclo in corso («Rimasti 1
  *  di 3», «Esaurito: torna lunedì 25 aprile»), calcolata dal registro degli acquisti (`scorteService`): esaurita, l'articolo è bloccato. */
-function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDellArticolo(r, st)): DisponibilitaDto {
+function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDiOfferta(r, st)): DisponibilitaDto {
   // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
   const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
   const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
   const esito = valutaRequisiti([...negozio, ...regole(r.condizioni_json)], st);
   const requisiti = esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q));
-  const daScorta = requisitoScorta(scorta, requisiti.length);
+  const daScorta = requisitoScorta(scorta, requisiti.length, regolaDi(r));
   if (!daScorta) return { ...esito, requisiti };
   return { stato: daScorta.stato === 'rosso' ? 'bloccato' : esito.stato, requisiti: [...requisiti, daScorta] };
+}
+
+/** Ondata 5: la scorta dell'offerta con le vecchie chiavi del suo listino condiviso (una scorta sola, ogni riga con la chiave del suo segno). */
+function scortaDiOfferta(r: RigaArticolo, st: StatoDisponibilita | undefined): ScortaArticoloDto | null {
+  return scortaDellArticolo(r, st, articoliEquivalenti(r.chiave, lettureListiniCondivisi()));
 }
 /** La riga del negozio, con quel che descrive l'oggetto **letto dall'oggetto**, non copiato.
  *
@@ -170,7 +175,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
   });
   const condizioniArticolo = regole(r.condizioni_json);
   // Ondata 5: la scorta del ciclo in corso (con la partita), letta una volta e passata alla disponibilità
-  const scorta = st ? scortaDellArticolo(r, st) : null;
+  const scorta = st ? scortaDiOfferta(r, st) : null;
   return { ricevuti, condizioni: condizioniArticolo, rifornimento: rifornimentoDellArticolo(r), ...(st ? { scorta } : {}), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
     catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
     nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
@@ -356,6 +361,9 @@ export interface OpzioniAcquisto {
   /** Ondata 5 (decisione 21): l'acquisto è di una voce del Diario e del suo effetto (`effettiDiStatoService`): la riga del registro porta il
    *  giorno e la fascia della voce e i pezzi dell'effetto; togliendo, si toglie solo la riga di quella voce. Senza: la pagina del negozio. */
   voce?: { voceUid: string; effettoUid: string; quantita?: number };
+  /** Ondata 5: con `fatto` falso toglie soltanto il segno «ottenuto» che nessuna riga del registro porta (segnato prima del registro o in una
+   *  partita senza data di gioco: `ScortaArticoloDto.senzaGiorno`), mai un acquisto del registro. */
+  soloPresenza?: boolean;
 }
 
 /** Il giorno e la fascia correnti della partita, o null se la partita non ha ancora una data di gioco. */
@@ -405,6 +413,11 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
         : 'Rimuovi la sola presenza storica dal riepilogo con anteprima e conferma. Le consumazioni restano distinte.', { articolo: articoloChiave });
   }
   if (fatto && !opz.senzaDisponibilita && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
+  // il pezzo unico già ottenuto (con questa chiave) non si compra una seconda volta dalla pagina del negozio: la spunta ripetuta non cambia
+  // niente, come prima del registro (una voce che lo attesta di nuovo passa da `registraCopiaDaVoce`)
+  if (fatto && !opz.voce && regolaDi(r)?.tipo === 'mai' && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave)) {
+    return articoloDto(r, acquistiPartita(partitaId), st, catalogo, ricevuti);
+  }
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);
@@ -412,21 +425,33 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
       nuovaValutazioneLegacy(getDb(), { partita_id: partitaId, articolo_chiave: articoloChiave, updated_at: adesso });
     }
+    // Ogni riga porta la chiave con cui l'acquisto è segnato (`articoloChiave`, la stessa di `acquisto_partita`): il segno «ottenuto» e la
+    // riga che lo porta restano della stessa chiave anche per le vecchie chiavi di un listino condiviso (la scorta le legge insieme).
     if (fatto) {
-      // la riga del registro: il giorno della voce, o quello corrente della partita (senza una data di gioco non si data niente)
+      // la riga del registro: il giorno della voce, o quello corrente della partita (senza una data di gioco non si data niente: il segno
+      // resta senza riga, e l'interfaccia lo mostra con il suo «Annulla», `soloPresenza`)
       const momento = opz.voce ? momentoDellaVoce(opz.voce.voceUid) : momentoCorrente(partitaId);
-      if (momento) scriviRiga(partitaId, r.chiave, { ...momento, quantita: opz.voce?.quantita ?? 1, fonte: opz.voce ? 'voce' : 'negozio',
+      if (momento) scriviRiga(partitaId, articoloChiave, { ...momento, quantita: opz.voce?.quantita ?? 1, fonte: opz.voce ? 'voce' : 'negozio',
         ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : {}), ottenutoQui: !era });
+    } else if (opz.soloPresenza) {
+      // il segno senza giorno: se lo porta una riga non è «senza giorno» (409); se restano acquisti registrati, il segno passa al più vecchio
+      // (l'oggetto resta ottenuto per quegli acquisti); senza acquisti se ne va, con la sua fotografia nel cestino
+      if (era) {
+        if (!presenzeSenzaRiga(partitaId, [articoloChiave]).length) throw httpErrors.conflict('presenza-del-registro', `Il segno «ottenuto» di «${prodotto.nome}» viene da un acquisto registrato: si annulla quell'acquisto.`);
+        const erede = righeDellArticolo(partitaId, articoloChiave)[0];
+        if (erede) prepared('UPDATE utente.registro_acquisti SET ottenuto_qui = 1 WHERE id = ?').run(erede.id);
+        else togliPresenza(partitaId, articoloChiave, prodotto.nome);
+      }
     } else {
       let togliOttenuto: boolean;
       if (opz.voce) {
         const riga = rigaDellaVoce(partitaId, opz.voce.voceUid, opz.voce.effettoUid);
         // senza la sua riga (spunta di prima del registro) il segno se ne va come prima, salvo acquisti registrati dopo
-        togliOttenuto = riga ? togliRiga(partitaId, riga.id).tolgoOttenuto : righeDellArticolo(partitaId, r.chiave).length === 0;
+        togliOttenuto = riga ? togliRiga(partitaId, riga.id).tolgoOttenuto : righeDellArticolo(partitaId, articoloChiave).length === 0;
       } else {
-        const riga = ultimaRigaDelNegozio(partitaId, r.chiave);
+        const riga = ultimaRigaDelNegozio(partitaId, articoloChiave);
         if (riga) togliOttenuto = togliRiga(partitaId, riga.id).tolgoOttenuto;
-        else if (righeDellArticolo(partitaId, r.chiave).length > 0) throw httpErrors.conflict('acquisto-della-voce', `«${prodotto.nome}» risulta comprato da una voce del Diario: si annulla togliendo la spunta della voce.`);
+        else if (righeDellArticolo(partitaId, articoloChiave).length > 0) throw httpErrors.conflict('acquisto-della-voce', `«${prodotto.nome}» risulta comprato da una voce del Diario: si annulla togliendo la spunta della voce.`);
         else togliOttenuto = true;
       }
       if (togliOttenuto && era) togliPresenza(partitaId, articoloChiave, prodotto.nome);
@@ -443,11 +468,14 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
  * chi chiama (`effettiDiStatoService`); nessun controllo di disponibilità (la voce spuntata attesta l'acquisto). Idempotente per voce ed effetto.
  */
 export function registraCopiaDaVoce(partitaId: number, articoloChiave: string, voce: { voceUid: string; effettoUid: string; quantita?: number }): void {
+  // la riga porta la chiave dell'effetto (quella del segno «ottenuto», come `impostaAcquisto` e la migrazione utente 051); la scorta legge
+  // insieme le chiavi dello stesso listino condiviso
   const canonica = articoloDelListino(articoloChiave, lettureListiniCondivisi());
-  if (!prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(canonica)) return;
-  if (eOffertaAojiru({ chiave: canonica, catalogoChiave: (prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(canonica) as { catalogo_chiave: string | null }).catalogo_chiave })) return;
+  const offerta = prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(canonica) as { catalogo_chiave: string | null } | undefined;
+  if (!offerta || !prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(articoloChiave)) return;
+  if (eOffertaAojiru({ chiave: canonica, catalogoChiave: offerta.catalogo_chiave })) return;
   const momento = momentoDellaVoce(voce.voceUid);
-  if (momento) scriviRiga(partitaId, canonica, { ...momento, quantita: voce.quantita ?? 1, fonte: 'voce', voceUid: voce.voceUid, effettoUid: voce.effettoUid, ottenutoQui: false });
+  if (momento) scriviRiga(partitaId, articoloChiave, { ...momento, quantita: voce.quantita ?? 1, fonte: 'voce', voceUid: voce.voceUid, effettoUid: voce.effettoUid, ottenutoQui: false });
 }
 
 /**
@@ -470,7 +498,8 @@ export function annullaRigaDelRegistro(partitaId: number, rigaId: number): Artic
     ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
   if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');
-  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(riga.articolo_chiave) as RigaArticolo | undefined;
+  // la riga può portare una vecchia chiave del listino condiviso: l'offerta restituita è quella del listino (la sua scorta legge entrambe)
+  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloDelListino(riga.articolo_chiave, lettureListiniCondivisi())) as RigaArticolo | undefined;
   getDb().transaction(() => {
     const { tolgoOttenuto } = togliRiga(partitaId, rigaId);
     if (tolgoOttenuto) {

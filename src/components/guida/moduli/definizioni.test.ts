@@ -52,11 +52,19 @@ describe('articolo', () => {
     const corpo = def.articolo.prepara({ ...def.articolo.iniziali(null, 'u'), _aMano: true, nome: 'Bibita', effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' } });
     expect(corpo).toMatchObject({ effetto: 'Ripristina 100 SP di un alleato', oggetto_fonte: null });
   });
-  it('legge e rimanda la regola di rifornimento (Ondata 5); una regola non valida non si salva', () => {
+  it('legge la regola di rifornimento e la rimanda solo se modificata (Ondata 5); una regola modificata non valida non si salva', () => {
     const d = def.articolo.iniziali(riga('articolo', { negozio_chiave: 'u', nome: 'X', quantita: 3, rifornimento_json: '{"tipo":"settimana","giorno":"lunedi","origine":"guida"}' }));
     expect(d.rifornimento_json).toEqual({ tipo: 'settimana', giorno: 'lunedi', origine: 'guida' });
-    expect(def.articolo.prepara(d)).toMatchObject({ quantita: 3, rifornimento_json: { tipo: 'settimana', giorno: 'lunedi', origine: 'guida' } });
-    expect(def.articolo.valido({ ...d, rifornimento_json: { tipo: 'settimana', origine: 'guida' } })).toBe(false);
+    expect(def.articolo.prepara(d)).not.toHaveProperty('rifornimento_json');
+    const modificata = { ...d, rifornimento_json: { tipo: 'mese', origine: 'guida' }, _rifornimentoModificato: true };
+    expect(def.articolo.prepara(modificata)).toMatchObject({ quantita: 3, rifornimento_json: { tipo: 'mese', origine: 'guida' } });
+    expect(def.articolo.valido({ ...modificata, rifornimento_json: { tipo: 'settimana', origine: 'guida' } })).toBe(false);
+  });
+  it('una regola salvata che il modulo non sa leggere non si cancella salvando un altro campo (Ondata 5)', () => {
+    const d = def.articolo.iniziali(riga('articolo', { negozio_chiave: 'u', nome: 'X', quantita: 1, rifornimento_json: '{"tipo":"futuro","origine":"guida"}' }));
+    expect(d.rifornimento_json).toBeNull();
+    expect(d._rifornimentoNonLeggibile).toBe(true);
+    expect(def.articolo.prepara({ ...d, nota: 'Nuova nota' })).not.toHaveProperty('rifornimento_json');
   });
 });
 

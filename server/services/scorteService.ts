@@ -35,25 +35,70 @@ export function regolaDi(a: ArticoloConRegola): RegolaRifornimento | null {
   return normalizzaRifornimento(a.rifornimento_json ?? null);
 }
 
-/** Le righe del registro di un articolo nella partita, dalla più vecchia. */
+/**
+ * Le righe del registro di un articolo nella partita, dalla più vecchia. Ogni riga porta la chiave con cui l'acquisto è stato segnato (la
+ * stessa di `acquisto_partita`, come la migrazione utente 051): il segno «ottenuto» e la riga che lo porta restano così della stessa chiave.
+ */
 export function righeDellArticolo(partitaId: number, articolo: string): RigaRegistro[] {
   if (!conRegistro()) return [];
   return prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? ORDER BY id').all(partitaId, articolo) as RigaRegistro[];
 }
 
+/** Le righe di più chiavi (l'offerta e le vecchie chiavi dello stesso listino condiviso: una scorta sola), dalla più vecchia. */
+function righeDelleChiavi(partitaId: number, chiavi: readonly string[]): RigaRegistro[] {
+  if (!conRegistro() || !chiavi.length) return [];
+  return prepared(`SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave IN (${chiavi.map(() => '?').join(', ')}) ORDER BY id`).all(partitaId, ...chiavi) as RigaRegistro[];
+}
+
+/**
+ * Le chiavi del gruppo con un segno «ottenuto» che nessuna riga del registro porta: segnate prima del registro (utente 051), oppure in una
+ * partita senza data di gioco (nessun giorno da registrare). L'interfaccia le mostra con il loro «Annulla», così restano visibili e
+ * correggibili anche per ciò che si rifornisce.
+ */
+export function presenzeSenzaRiga(partitaId: number, chiavi: readonly string[]): string[] {
+  return chiavi.filter((k) => !!prepared('SELECT 1 FROM utente.acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, k)
+    && !(conRegistro() && prepared('SELECT 1 FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? AND ottenuto_qui = 1').get(partitaId, k)));
+}
+
+/**
+ * Tanaka: il negozio che spedisce (almeno un suo articolo ha la regola `consegna`) e gli acquisti degli ALTRI articoli dello stesso negozio,
+ * qualunque sia la loro regola, perché un ordine in viaggio blocca tutto il negozio fino all'arrivo (guida italiana, Negozi speciali: «fino
+ * all'arrivo della spedizione non sarà possibile effettuare nuovi ordini»). null per i negozi che non spediscono.
+ */
+function consegnaDelNegozio(partitaId: number, chiavi: readonly string[]): { giorni: number; ordini: RigaRegistro[] } | null {
+  if (!conRegistro()) return null;
+  const negozio = prepared('SELECT negozio_chiave FROM main.articolo WHERE chiave = ?').pluck().get(chiavi[0]) as string | undefined;
+  if (!negozio) return null;
+  const giorni = prepared(`SELECT MAX(json_extract(rifornimento_json, '$.giorni')) FROM main.articolo
+    WHERE negozio_chiave = ? AND json_valid(rifornimento_json) AND json_extract(rifornimento_json, '$.tipo') = 'consegna'`).pluck().get(negozio) as number | null;
+  if (typeof giorni !== 'number' || giorni < 1) return null;
+  const ordini = prepared(`SELECT r.* FROM utente.registro_acquisti r JOIN main.articolo a ON a.chiave = r.articolo_chiave
+    WHERE r.partita_id = ? AND a.negozio_chiave = ? AND r.articolo_chiave NOT IN (${chiavi.map(() => '?').join(', ')}) ORDER BY r.id`).all(partitaId, negozio, ...chiavi) as RigaRegistro[];
+  return { giorni, ordini };
+}
+
 /**
  * La scorta di un articolo nella partita (`st.partitaId`), alla data di `st`: null senza partita o senza regola. Il libro della biblioteca
- * (`restituzione`) torna quando il libro preso in prestito risulta letto (`st.letture`: la sua lettura completata).
+ * (`restituzione`) torna quando il libro preso in prestito risulta letto (`st.letture`: la sua lettura completata). `chiavi`: l'offerta e le
+ * vecchie chiavi del suo listino condiviso (una scorta sola); senza, la sola chiave dell'offerta.
+ *
+ * `righe` sono TUTTI gli acquisti registrati (`nelCiclo` = contano nel ciclo in corso): quelli dei cicli passati restano visibili e si
+ * annullano uno per uno; `senzaGiorno` sono le chiavi con il segno «ottenuto» senza una riga che lo porti.
  */
-export function scortaDellArticolo(a: ArticoloConRegola, st: StatoDisponibilita | undefined): ScortaArticoloDto | null {
+export function scortaDellArticolo(a: ArticoloConRegola, st: StatoDisponibilita | undefined, chiavi: readonly string[] = [a.chiave]): ScortaArticoloDto | null {
   const regola = regolaDi(a);
   if (!regola || st?.partitaId === undefined) return null;
-  const righe = righeDellArticolo(st.partitaId, a.chiave);
+  const gruppo = chiavi.includes(a.chiave) ? chiavi : [a.chiave, ...chiavi];
+  const righe = righeDelleChiavi(st.partitaId, gruppo);
   const letto = regola.tipo === 'restituzione' && a.oggetto_fonte === 'libri' && !!a.oggetto_chiave && st.letture.has(`libro/${a.oggetto_chiave}`);
-  const s = statoScorta(regola, a.quantita, righe, st.dataGioco, { letto });
+  const spedisce = consegnaDelNegozio(st.partitaId, gruppo);
+  const s = statoScorta(regola, a.quantita, righe, st.dataGioco, { letto, ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
+  const nelCiclo = new Set(s.nelCiclo);
   return {
     comprati: s.comprati, rimasti: s.rimasti, quantita: s.quantita, esaurito: s.esaurito, torna: s.torna, testo: descriviStatoScorta(regola, s),
-    righe: s.nelCiclo.map((i) => righe[i]!).map((r) => ({ id: r.id, giorno: r.giorno, fascia: r.fascia, quantita: r.quantita, fonte: r.fonte, voceUid: r.voce_uid })),
+    ...(s.ordineInViaggio ? { ordineInViaggio: true } : {}),
+    righe: righe.map((r, i) => ({ id: r.id, giorno: r.giorno, fascia: r.fascia, quantita: r.quantita, fonte: r.fonte, voceUid: r.voce_uid, nelCiclo: nelCiclo.has(i) })),
+    senzaGiorno: presenzeSenzaRiga(st.partitaId, gruppo),
   };
 }
 
@@ -66,9 +111,14 @@ export function rifornimentoDellArticolo(a: ArticoloConRegola): { regola: Regola
 /**
  * Il requisito della scorta per la disponibilità: rosso se esaurita, verde se resta qualcosa di un ciclo a più pezzi («Rimasti 1 di 3»);
  * null se l'articolo non ha un limite di pezzi o se il suo unico pezzo c'è ancora («Rimasti 1 di 1» non dice niente di più di «disponibile»).
+ * Il pezzo unico (`mai`) non ha requisito: già comprato lo dice la riga barrata, e un'etichetta in più non informa (regola dell'utente);
+ * resta «disponibile» come prima del registro, e una seconda spunta non crea una seconda copia (`impostaAcquisto`). Fa eccezione il pezzo
+ * unico non ancora comprato di un negozio che spedisce, mentre un altro ordine è in viaggio: lì il requisito rosso dice quando si riordina.
  */
-export function requisitoScorta(scorta: ScortaArticoloDto | null, indice: number) {
-  if (!scorta || scorta.rimasti === null || (!scorta.esaurito && scorta.quantita === 1)) return null;
+export function requisitoScorta(scorta: ScortaArticoloDto | null, indice: number, regola: RegolaRifornimento | null = null) {
+  if (!scorta) return null;
+  const bloccatoDallOrdine = scorta.ordineInViaggio === true && scorta.comprati === 0;
+  if (!bloccatoDallOrdine && (regola?.tipo === 'mai' || scorta.rimasti === null || (!scorta.esaurito && scorta.quantita === 1))) return null;
   return { indice, tipo: 'scorta', testo: 'Scorta del negozio', stato: scorta.esaurito ? 'rosso' as const : 'verde' as const, dettaglio: scorta.testo, manuale: false, confermato: false };
 }
 

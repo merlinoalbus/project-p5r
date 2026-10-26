@@ -75,6 +75,10 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   {tabella:'pesca_provenienza',colonna:'effetto_uid',entita:'effetto della fonte di pesca',tabellaGioco:'voce_effetto',colonnaGioco:'uid'},
   { tabella: 'acquisto_partita', colonna: 'articolo_chiave', entita: 'articolo', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'acquisto_registrato', colonna: 'articolo_chiave', entita: 'articolo della consumazione (fotografia conservata)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  // Ondata 5 (utente 051): il registro degli acquisti con giorno e pezzi; le righe di una voce citano la voce e il suo effetto
+  { tabella: 'registro_acquisti', colonna: 'articolo_chiave', entita: 'articolo del registro degli acquisti', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  { tabella: 'registro_acquisti', colonna: 'voce_uid', entita: 'voce del registro degli acquisti', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'registro_acquisti', colonna: 'effetto_uid', entita: 'effetto del registro degli acquisti', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
   { tabella: 'acquisto_provenienza', colonna: 'voce_uid', entita: 'voce della fonte di acquisto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'acquisto_provenienza', colonna: 'effetto_uid', entita: 'effetto della fonte di acquisto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
   { tabella: 'effetto_applicato', colonna: 'voce_uid', entita: 'voce della ricevuta (fotografia conservata)', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },

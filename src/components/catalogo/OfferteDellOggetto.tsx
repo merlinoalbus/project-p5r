@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { OffertaOggettoDto } from '../../types';
-import { annullaRigaAcquisto, impostaAcquisto } from '../../services/api';
+import { annullaRigaAcquisto, impostaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { ancoraNegozio } from '../../utils/citta';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
@@ -27,6 +27,14 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
     catch (e) { notifica('error', e instanceof Error ? e.message : 'Acquisto non annullato.'); }
     finally { setOccupato(false); }
   };
+  /** Ondata 5: toglie il segno «ottenuto» senza un giorno registrato (di prima del registro, o senza data di gioco). */
+  const togliSegno = async (articolo: string) => {
+    if (partitaId === null || occupato) return;
+    setOccupato(true);
+    try { await togliSegnoSenzaGiorno(partitaId, articolo, o.sedeChiave); await onCambiata(); }
+    catch (e) { notifica('error', e instanceof Error ? e.message : 'Segno non tolto.'); }
+    finally { setOccupato(false); }
+  };
   const requisiti = o.disponibilita?.requisiti ?? [];
   const casa = o.sedeCasa ? `${o.sedeCasa.split('#')[0]}#${ancoraNegozio(o.negozio)}` : `/guida/negozi/${encodeURIComponent(o.negozio)}`;
   return <tr>
@@ -47,7 +55,7 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
       partitaId={partitaId} acquisti={o.acquisti} onRileggi={onCambiata}
       registrati={o.acquistiRegistrati} acquistato={o.acquistato} occupato={occupato}
       bloccato={o.disponibilita !== null && o.disponibilita.stato !== 'disponibile'} onCambia={(chiave, fatto) => void cambia(chiave, fatto)}
-      rifornimento={o.rifornimento} scorta={o.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} />
+      rifornimento={o.rifornimento} scorta={o.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} onTogliSegno={(k) => void togliSegno(k)} />
       {occupato && <span role="status" className="testo-12 text-text-muted">Salvataggio…</span>}</td>}
   </tr>;
 }

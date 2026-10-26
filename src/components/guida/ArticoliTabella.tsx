@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { annullaRigaAcquisto, getNegozio, impostaAcquisto } from '../../services/api';
+import { annullaRigaAcquisto, getNegozio, impostaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
 import { eOffertaAojiru } from '../../../shared/acquisti';
 import { eRifornibile } from '../../../shared/rifornimento';
 import { notifica } from '../../stores/notificationStore';
@@ -63,6 +63,13 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
     finally { setOccupato(false); }
   };
+  /** Toglie il segno «ottenuto» senza un giorno registrato (di prima del registro, o senza data di gioco) e passa al genitore l'articolo aggiornato. */
+  const togliSegno = async (articolo: string) => {
+    setOccupato(true);
+    try { onCambiato(await togliSegnoSenzaGiorno(partitaId!, articolo, a.sedeChiave)); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
+    finally { setOccupato(false); }
+  };
   return <li className={`catalogo-prodotto${a.acquistato && !ripetibile ? ' catalogo-prodotto--acquistato' : ''}`}>
     <div className="catalogo-prodotto__nome">
       <strong className={a.acquistato && !ripetibile ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
@@ -87,7 +94,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
           onCambiato(articolo); await onContenutoCambiato?.();
         }}
         acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)}
-        rifornimento={a.rifornimento} scorta={a.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} />}
+        rifornimento={a.rifornimento} scorta={a.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} onTogliSegno={(k) => void togliSegno(k)} />}
       {!IN_RILASCIO && onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
     </div>
     <details className="catalogo-prodotto__dettagli">

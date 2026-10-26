@@ -214,7 +214,9 @@ export const paramsPartitaData = z.object({ id: idParam, data: dataGioco });
 const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, ...MeteoPartita[]]).nullable().optional();
 export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
   .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
-export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional() });
+/** Ondata 5: `soloPresenza` (solo con `fatto: false`) toglie il segno «ottenuto» senza un giorno registrato, non un acquisto del registro. */
+export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional(), soloPresenza: z.literal(true).optional() })
+  .refine((b) => !(b.soloPresenza && b.fatto), { message: '`soloPresenza` vale solo per togliere un segno (`fatto: false`).', path: ['soloPresenza'] });
 export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
 export const bodySessioneVideogioco = z.object({ chiave: chiaveLettura, dichiarata: z.boolean() }).strict();

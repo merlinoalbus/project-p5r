@@ -73,7 +73,8 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       <Griglia>
         <Campo nome="quantita" etichetta="Pezzi per ciclo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quanti se ne comprano prima del rifornimento. Vuoto = nessun limite dichiarato" />
         <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null} quantita={typeof dati.quantita === 'number' ? dati.quantita : null}
-          disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r })} />
+          nonLeggibile={dati._rifornimentoNonLeggibile === true && dati._rifornimentoModificato !== true}
+          disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r, _rifornimentoModificato: true })} />
         <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} largo />
       </Griglia>
     </div>
@@ -94,7 +95,7 @@ const OPZIONI_GIORNO = GIORNI_SETTIMANA.map((g) => ({ chiave: g.chiave, nome: g.
  * Ondata 5 (decisione 21): la regola di rifornimento dell'offerta, un punto solo (`articolo.rifornimento_json`): quando torna, da dove viene
  * la regola e se va verificata in gioco. Il giorno della settimana solo per «Ogni settimana», i giorni di consegna solo per l'ordine.
  */
-function EditorRifornimento({ valore, quantita, disabilitato, onCambia }: { valore: RegolaRifornimento | null; quantita: number | null; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
+function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCambia }: { valore: RegolaRifornimento | null; quantita: number | null; nonLeggibile?: boolean; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
   const cambiaTipo = (tipo: string) => {
     if (!tipo) { onCambia(null); return; }
     const t = tipo as TipoRifornimento;
@@ -104,6 +105,7 @@ function EditorRifornimento({ valore, quantita, disabilitato, onCambia }: { valo
   return (
     <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
       <legend>Rifornimento</legend>
+      {nonLeggibile && <p className="m-0 testo-12 text-text-muted text-pretty">La regola salvata non è leggibile da questo modulo: resta com’è finché non ne scegli un’altra.</p>}
       <div className="griglia-campi">
         <Blocco><Selettore etichetta="Torna in negozio" valore={valore?.tipo ?? ''} vuoto="Nessuna regola" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_RIFORNIMENTO} onCambia={cambiaTipo} /></Blocco>
         {valore?.tipo === 'settimana' && <Blocco><Selettore etichetta="Giorno del rifornimento" valore={valore.giorno ?? 'lunedi'} ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_GIORNO}
