@@ -13,6 +13,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
+import { compratoNelCiclo } from '../../shared/rifornimento';
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ListinoNegozio } from '../components/negozi/ListinoNegozio';
@@ -112,7 +113,7 @@ export function NegozioPage() {
             <div className="negozio-merce">
               {/* L5: lo stesso listino della pagina del luogo */}
               <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={apriArticolo} onRipristinato={() => void dati.ricarica()}
-                onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length }))} />
+                onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => compratoNelCiclo(x.chiave === a.chiave ? a : x)).length }))} />
             </div>
           </div>
         </div>

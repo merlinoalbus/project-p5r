@@ -19,7 +19,12 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { eOffertaAojiru } from '../../../shared/acquisti';
+import { eRifornibile } from '../../../shared/rifornimento';
 import { ConsumiAojiru } from '../catalogo/ConsumiAojiru';
+import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
+import { annullaRigaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
+import { notifica } from '../../stores/notificationStore';
+import type { DisponibilitaDto } from '../../types';
 import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
 import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
@@ -1234,10 +1239,51 @@ function sistemaEtichette(t: HTMLElement): void {
 }
 
 type NegozioNelPopup = NonNullable<NonNullable<SpilloDto['dettaglio']>['negozio']>;
+type MerceDelNegozio = NegozioNelPopup['articoli'][number];
 
-/** La merce del negozio **disponibile adesso**, dentro il popup dello spillo di città: nome, prezzo e la casella «comprato» con la partita. */
+/**
+ * Ondata 5: in vendita in questo momento della partita, anche se la scorta del ciclo è finita (o un ordine di Tanaka è in viaggio): tutte
+ * le condizioni sono vere tranne la scorta. Resta in vista con la sua pastiglia («Esaurito: torna lunedì 25 aprile») e i suoi acquisti da
+ * annullare: comprato l'ultimo pezzo, la riga non sparisce sotto il dito e non si confonde con ciò che «non è ancora in vendita».
+ */
+function inVenditaOggi(d: DisponibilitaDto | undefined): boolean {
+  if (d === undefined || d.stato === 'disponibile') return true;
+  return d.requisiti.some((q) => q.tipo === 'scorta') && d.requisiti.every((q) => q.tipo === 'scorta' || q.stato === 'verde');
+}
+
+/** Si compra più volte (scorta che si rinnova, o l'Aojiru con le sue consumazioni): niente nome barrato. */
+const ripetibile = (a: MerceDelNegozio): boolean => eOffertaAojiru({ chiave: a.chiave }) || eRifornibile(a.rifornimento?.regola ?? null);
+
+/** Con la partita, l'articolo che si rifornisce si compra come nella pagina del negozio: «Compra», non una spunta da togliere e rimettere. */
+const conCompra = (a: MerceDelNegozio, partitaId: number | null): partitaId is number =>
+  partitaId !== null && !eOffertaAojiru({ chiave: a.chiave }) && eRifornibile(a.rifornimento?.regola ?? null) && !!a.scorta;
+
+/**
+ * Ondata 5 (decisione 21, rilievo della revisione): l'acquisto di un articolo che si rifornisce, nella mappa con lo stesso componente della
+ * pagina del negozio (`AcquistiOfferta`): «Compra» aggiunge un acquisto nella sede del pin (`onCompra`, il gesto del visore), «rimasti N di
+ * Q», gli acquisti del ciclo e quelli passati, ognuno col suo «Annulla», e il segno «ottenuto» senza giorno. Annullo e segno vanno al server
+ * con la sede del pin e poi il pin si rilegge (`onAcquistiCambiati`), come fanno le consumazioni dell'Aojiru.
+ */
+function AcquistoDellaMerce({ a, partitaId, sede, occupato, onCompra, onAcquistiCambiati }: { a: MerceDelNegozio; partitaId: number; sede: string | null | undefined; occupato: boolean;
+  onCompra: (articolo: string) => void; onAcquistiCambiati?: () => void | Promise<void> }) {
+  const [lavoro, setLavoro] = useState(false);
+  const esegui = async (azione: () => Promise<unknown>) => {
+    setLavoro(true);
+    try { await azione(); await onAcquistiCambiati?.(); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
+    finally { setLavoro(false); }
+  };
+  return <AcquistiOfferta articolo={a.chiave} nome={a.nome} registrati={a.acquistiRegistrati ?? []} acquistato={a.comprato}
+    bloccato={a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile'} occupato={occupato || lavoro}
+    onCambia={(chiave, fatto) => { if (fatto) onCompra(chiave); }} rifornimento={a.rifornimento} scorta={a.scorta}
+    onAnnullaRiga={(id) => void esegui(() => annullaRigaAcquisto(partitaId, id, sede))}
+    onTogliSegno={(k) => void esegui(() => togliSegnoSenzaGiorno(partitaId, k, sede))} />;
+}
+
+/** La merce del negozio **in vendita adesso**, dentro il popup dello spillo di città: nome, prezzo e, con la partita, la casella «comprato»
+ *  del pezzo unico o «Compra» per ciò che si rifornisce (Ondata 5), con la scorta della sede del pin. */
 function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcquistiCambiati }: { negozio: NegozioNelPopup; spillo: SpilloDto; partitaId: number | null; occupato: boolean; onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void>; onAcquistiCambiati?: () => void | Promise<void> }) {
-  const disponibili = negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile');
+  const disponibili = negozio.articoli.filter((a) => inVenditaOggi(a.disponibilita));
   const bloccati = negozio.articoli.length - disponibili.length;
   return (
     <div className="flex flex-col gap-1" role="group" aria-label={`Merce di ${negozio.nome}`}>
@@ -1254,13 +1300,16 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
                 {/* L'etichetta attorno alla casella è il bersaglio: era l'unica casella dell'app a
                     non averla, e restava un quadratino di 20 px (trovata cercando nel codice, non
                     nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
-                {!eOffertaAojiru({ chiave: a.chiave }) && partitaId && onAcquisto
+                {!eOffertaAojiru({ chiave: a.chiave }) && !(conCompra(a, partitaId) && onAcquistiCambiati) && partitaId && onAcquisto
                   ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} /></label>
-                  : <span className="w-5 shrink-0 text-center">{a.comprato ? '✓' : ''}</span>}
-                <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
+                  : <span className="w-5 shrink-0 text-center">{a.comprato && !ripetibile(a) ? '✓' : ''}</span>}
+                <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !ripetibile(a) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
                 <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
+                {a.disponibilita && a.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={a.disponibilita} compatto />}
                 {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
+                {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
+                  onCompra={(k) => void onAcquisto(spillo, k, true)} onAcquistiCambiati={onAcquistiCambiati} /></div>}
               </li>
             ))}
           </ul>
@@ -1364,8 +1413,9 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
   // la vista predefinita è quel che si può comprare oggi, ma «e quello quando arriva?» è una
   // domanda che a una guida si fa. Quando compaiono portano il loro «Non ancora» accanto.
   const [mostraBloccati, setMostraBloccati] = useState(false);
-  const bloccati = negozio ? negozio.articoli.filter((a) => a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile').length : 0;
-  const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile')) : [];
+  // Ondata 5: ciò che è esaurito resta in vista (è in vendita, la scorta tornerà): «non ancora in vendita» è solo ciò che le condizioni bloccano
+  const bloccati = negozio ? negozio.articoli.filter((a) => !inVenditaOggi(a.disponibilita)).length : 0;
+  const articoliVisibili = negozio ? (mostraBloccati ? negozio.articoli : negozio.articoli.filter((a) => inVenditaOggi(a.disponibilita))) : [];
   return (
     <section ref={ref} tabIndex={-1} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${nomePin(s)}`}>
       <div className="flex items-start gap-2">
@@ -1437,12 +1487,15 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
               <ul className="visore-mappa__merce m-0 list-none p-0" aria-label={`Articoli di ${negozio.nome}`}>
                 {articoliVisibili.map((a) => (
                   <li key={a.chiave} className="visore-mappa__merce-riga">
-                    {acquistabile && !eOffertaAojiru({ chiave: a.chiave })
+                    {acquistabile && !eOffertaAojiru({ chiave: a.chiave }) && !(conCompra(a, partitaId) && onAcquistiCambiati)
                       ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
-                      : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
+                      : ripetibile(a)
+                        // ciò che si compra più volte non ha un «comprato» sì/no: lo dicono «Compra» e gli acquisti qui sotto
+                        ? <span className="w-5 shrink-0" aria-hidden="true" />
+                        : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <div className="min-w-0 flex-1">
-                      <span className={`block testo-13 leading-tight ${a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''}`}>
+                      <span className={`block testo-13 leading-tight ${a.comprato && !ripetibile(a) ? 'line-through' : ''}`}>
                         {a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
                       </span>
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
@@ -1455,6 +1508,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                           : <span>{disponibilita(a)}</span>}
                       </span>
                       {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <ConsumiAojiru key={`${partitaId}:${s.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} />}
+                      {acquistabile && conCompra(a, partitaId) && onAcquistiCambiati && <AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
+                        onCompra={(k) => void onAcquisto!(s, k, true)} onAcquistiCambiati={onAcquistiCambiati} />}
                     </div>
                   </li>
                 ))}

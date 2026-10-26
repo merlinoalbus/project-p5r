@@ -221,3 +221,13 @@ export function descriviStatoScorta(regola: RegolaRifornimento, s: StatoScorta):
 
 /** Il ciclo ha senso per l'interfaccia (si compra più volte): tutte le regole tranne il pezzo unico. */
 export const eRifornibile = (regola: RegolaRifornimento | null): regola is RegolaRifornimento => regola !== null && regola.tipo !== 'mai';
+
+/**
+ * «Acquistato» per i filtri e i conteggi dei negozi (censimento dell'ondata 5, §3: «comprato in questo ciclo»): ciò che si rifornisce è
+ * acquistato se nel ciclo in corso della sua sede ne è stato comprato almeno un pezzo, e torna «da acquistare» quando la scorta si rinnova;
+ * il pezzo unico e ciò che non ha una regola restano acquistati una volta ottenuti. Il campo `acquistato` dell'offerta resta «ottenuto
+ * almeno una volta»: lo leggono il segno barrato del pezzo unico, la condizione «articolo», le televendite e i regali.
+ */
+export function compratoNelCiclo(a: { acquistato: boolean; rifornimento?: { regola: RegolaRifornimento } | null; scorta?: { comprati: number } | null }): boolean {
+  return eRifornibile(a.rifornimento?.regola ?? null) && a.scorta ? a.scorta.comprati > 0 : a.acquistato;
+}

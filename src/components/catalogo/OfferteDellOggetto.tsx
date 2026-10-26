@@ -23,7 +23,7 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
   const annullaRiga = async (rigaId: number) => {
     if (partitaId === null || occupato) return;
     setOccupato(true);
-    try { await annullaRigaAcquisto(partitaId, rigaId); await onCambiata(); }
+    try { await annullaRigaAcquisto(partitaId, rigaId, o.sedeChiave); await onCambiata(); }
     catch (e) { notifica('error', e instanceof Error ? e.message : 'Acquisto non annullato.'); }
     finally { setOccupato(false); }
   };

@@ -245,6 +245,8 @@ export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1)
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 /** Ondata 5: una riga del registro degli acquisti della partita (annullo per riga). */
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });
+/** Ondata 5: la sede in cui si guarda l'articolo (listino condiviso), per restituirlo con la sua presenza e la sua scorta. */
+export const queryRigaAcquisto = z.object({ sede: z.string().min(1).max(300).optional() }).strict();
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
 

@@ -59,7 +59,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
   /** Annulla un solo acquisto del ciclo (una riga del registro) e passa al genitore l'articolo aggiornato. */
   const annullaRiga = async (rigaId: number) => {
     setOccupato(true);
-    try { onCambiato(await annullaRigaAcquisto(partitaId!, rigaId)); }
+    try { onCambiato(await annullaRigaAcquisto(partitaId!, rigaId, a.sedeChiave)); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
     finally { setOccupato(false); }
   };

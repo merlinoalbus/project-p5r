@@ -28,6 +28,7 @@ import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
+import { compratoNelCiclo } from '../../shared/rifornimento.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { momentoDellaVoce, presenzeSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
 import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, ScortaArticoloDto } from '../../shared/types.js';
@@ -258,7 +259,8 @@ export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: 
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
   // la guida del quiz dei lavori che si fanno qui (richiesta dell'utente, 2026-10-17: il quiz dei codici a barre al Triple Seven)
   const quiz = n.sede_chiave ? [...attivitaConQuiz()].filter(([, a]) => a.sede === n.sede_chiave).map(([c, a]) => quizVoceDto(c, a, st?.dataGioco ?? null)) : [];
-  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length, quiz,
+  // «acquistati»: ciò che si rifornisce conta se comprato nel ciclo in corso della sede (`compratoNelCiclo`), il resto se ottenuto
+  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter(compratoNelCiclo).length, quiz,
     ...(n.chiave === 'jose' ? { trasformazioni: trasformazioniDiJose(st) } : {}) };
 }
 
@@ -329,7 +331,8 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
       ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : []), a.effetto ?? '', a.negozioNome].some((v) => normalizzaNomeOggetto(v).includes(q)))
       && (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
   }
-  if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? a.acquistato : !a.acquistato));
+  // Ondata 5: ciò che si rifornisce è «acquistato» nel ciclo in corso e torna «da acquistare» con la scorta nuova (`compratoNelCiclo`)
+  if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? compratoNelCiclo(a) : !compratoNelCiclo(a)));
   // «Disponibili» = tutte le condizioni vere. Un «ignoto» — una condizione che la partita non sa
   // verificare — sta con i bloccati: in una guida che dice «questo c'è adesso» un forse vale un no.
   if (partitaId !== undefined && filtro.disponibilita) valutati = valutati.filter((a) => (filtro.disponibilita === 'bloccati' ? a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' : a.disponibilita === undefined || a.disponibilita.stato === 'disponibile'));
@@ -431,8 +434,9 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       // la riga del registro: il giorno della voce, o quello corrente della partita (senza una data di gioco non si data niente: il segno
       // resta senza riga, e l'interfaccia lo mostra con il suo «Annulla», `soloPresenza`)
       const momento = opz.voce ? momentoDellaVoce(opz.voce.voceUid) : momentoCorrente(partitaId);
+      // la pagina del negozio registra la sede in cui si compra (ogni sede del listino ha la sua scorta); una voce del Diario la principale
       if (momento) scriviRiga(partitaId, articoloChiave, { ...momento, quantita: opz.voce?.quantita ?? 1, fonte: opz.voce ? 'voce' : 'negozio',
-        ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : {}), ottenutoQui: !era });
+        ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : { sede: r.negozio_sede ?? null }), ottenutoQui: !era });
     } else if (opz.soloPresenza) {
       // il segno senza giorno: se lo porta una riga non è «senza giorno» (409); se restano acquisti registrati, il segno passa al più vecchio
       // (l'oggetto resta ottenuto per quegli acquisti); senza acquisti se ne va, con la sua fotografia nel cestino
@@ -449,7 +453,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
         // senza la sua riga (spunta di prima del registro) il segno se ne va come prima, salvo acquisti registrati dopo
         togliOttenuto = riga ? togliRiga(partitaId, riga.id).tolgoOttenuto : righeDellArticolo(partitaId, articoloChiave).length === 0;
       } else {
-        const riga = ultimaRigaDelNegozio(partitaId, articoloChiave);
+        const riga = ultimaRigaDelNegozio(partitaId, articoloChiave, r.negozio_sede ?? null);
         if (riga) togliOttenuto = togliRiga(partitaId, riga.id).tolgoOttenuto;
         else if (righeDellArticolo(partitaId, articoloChiave).length > 0) throw httpErrors.conflict('acquisto-della-voce', `«${prodotto.nome}» risulta comprato da una voce del Diario: si annulla togliendo la spunta della voce.`);
         else togliOttenuto = true;
@@ -490,9 +494,10 @@ export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid:
 /**
  * Ondata 5 (annullo per riga): toglie un acquisto della pagina del negozio dal registro, qualunque sia il suo ciclo. Quelli di una voce del
  * Diario si annullano togliendo la spunta della voce (409). Se la riga portava l'ultimo segno «ottenuto», se ne va anche quello, come con la
- * spunta tolta. Restituisce l'articolo aggiornato.
+ * spunta tolta. Restituisce l'articolo aggiornato nella sede in cui lo si sta guardando (`sede`, come `impostaAcquisto`: la principale o una
+ * sede aggiuntiva del listino; una sede che il listino non ha più vale la principale, perché annullare resta sempre possibile).
  */
-export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
+export function annullaRigaDelRegistro(partitaId: number, rigaId: number, sede?: string): ArticoloDto {
   verificaPartita(partitaId);
   const riga = (prepared("SELECT 1 AS c FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()
     ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
@@ -510,6 +515,8 @@ export function annullaRigaDelRegistro(partitaId: number, rigaId: number): Artic
   })();
   if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’acquisto è stato tolto; l’articolo non è più nel listino.');
   const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(r.negozio_chiave) as RigaNegozio;
-  const conLaSede = conSede(r, negozioNellaSede(negozio, undefined, lettureListiniCondivisi()));
+  const listini = lettureListiniCondivisi();
+  const sedeValida = sede && (sede === negozio.sede_chiave || listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede)) ? sede : undefined;
+  const conLaSede = conSede(r, negozioNellaSede(negozio, sedeValida, listini));
   return articoloDto(conLaSede, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), identitaArticoli([conLaSede]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
 }

@@ -139,6 +139,8 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       for (const s of prepared("SELECT id FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = ?").all(chiave) as Array<{ id: number }>) eliminaSpillo(s.id);
       prepared('UPDATE negozio SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('UPDATE attivita SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
+      // Ondata 5: gli acquisti registrati in questa sede restano, della sede principale del loro negozio (nello stesso cestino)
+      if (prepared("SELECT 1 FROM pragma_table_info('registro_acquisti', 'utente') WHERE name = 'sede_chiave'").get()) prepared('UPDATE utente.registro_acquisti SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
       const articoli = negozi.flatMap(k => (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(k) as Array<{ chiave: string }>).map(a => a.chiave));

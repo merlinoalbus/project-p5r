@@ -9,6 +9,7 @@
 // ============================================================
 
 import type { ArticoloDto } from '../types';
+import { compratoNelCiclo } from '../../shared/rifornimento';
 import { piatto } from './testo';
 
 export type StatoAcquisto = 'tutti' | 'acquistati' | 'da-acquistare';
@@ -49,7 +50,8 @@ export function filtraArticoli(articoli: ArticoloDto[], f: FiltroArticoli, conPa
       ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : [])].map(piatto).join(' ').includes(q)) return false;
     if (categorie.size && !categorie.has(a.categoria)) return false;
     if (f.per && a.per !== f.per && a.per !== 'tutti') return false;
-    if (conPartita && f.stato !== 'tutti' && (f.stato === 'acquistati') !== a.acquistato) return false;
+    // Ondata 5: ciò che si rifornisce è «acquistato» nel ciclo in corso e torna «da acquistare» con la scorta nuova (come il server)
+    if (conPartita && f.stato !== 'tutti' && (f.stato === 'acquistati') !== compratoNelCiclo(a)) return false;
     if (conPartita && f.disponibilita !== 'tutti') {
       // «Disponibili» vuol dire che **tutte** le condizioni sono vere: un forse — una condizione
       // che la partita non sa verificare — sta con i bloccati, non con i disponibili.

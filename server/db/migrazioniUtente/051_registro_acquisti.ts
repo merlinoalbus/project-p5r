@@ -7,7 +7,8 @@
 // «articolo», le televendite, i regali e la mappa); questo registro conta le copie: una riga per acquisto, con il giorno e la fascia di gioco,
 // i pezzi e la fonte (la pagina del negozio, oppure la voce del Diario e il suo effetto). `ottenuto_qui` = la riga ha creato il segno
 // «ottenuto» in `acquisto_partita`: togliendo l'ultima riga che lo porta il segno se ne va, come prima; se restano altre righe il segno
-// passa a una di loro (`scorteService.togliRiga`). L'Aojiru ha già il suo registro delle consumazioni e non entra qui.
+// passa a una di loro (`scorteService.togliRiga`). L'Aojiru ha già il suo registro delle consumazioni e non entra qui. `sede_chiave` è il
+// luogo in cui si è comprato (le sedi aggiuntive di un listino condiviso hanno ognuna la sua scorta); NULL = la sede principale.
 //
 // Righe di partenza (nessuna data inventata): solo gli acquisti che una voce del Diario spuntata attesta già (`effetto_stato_voce` di tipo
 // «articolo», con la voce ancora spuntata e l'effetto ancora presente), con il giorno e la fascia della voce e i pezzi del suo effetto. Le
@@ -42,8 +43,13 @@ export const utente051: Migration = {
       effetto_uid     TEXT CHECK (effetto_uid IS NULL OR length(effetto_uid) BETWEEN 1 AND 64),
       ottenuto_qui    INTEGER NOT NULL DEFAULT 0 CHECK (ottenuto_qui IN (0, 1)),
       creato_il       TEXT NOT NULL,
+      sede_chiave     TEXT CHECK (sede_chiave IS NULL OR length(sede_chiave) BETWEEN 1 AND 300),
       CHECK ((fonte = 'voce') = (voce_uid IS NOT NULL AND effetto_uid IS NOT NULL))
     )`);
+    // la sede in cui si è comprato (censimento D2: «ogni distributore ha la sua scorta», anche quando più distributori condividono il
+    // listino): NULL = la sede principale del negozio della chiave. Le copie che avevano già la tabella senza la colonna la ricevono qui.
+    const colonne = db.prepare("SELECT name FROM pragma_table_info('registro_acquisti', 'utente')").pluck().all() as string[];
+    if (!colonne.includes('sede_chiave')) db.exec('ALTER TABLE utente.registro_acquisti ADD COLUMN sede_chiave TEXT CHECK (sede_chiave IS NULL OR length(sede_chiave) BETWEEN 1 AND 300)');
     db.exec("CREATE UNIQUE INDEX IF NOT EXISTS utente.registro_acquisti_voce ON registro_acquisti (partita_id, voce_uid, effetto_uid) WHERE fonte = 'voce'");
     db.exec('CREATE INDEX IF NOT EXISTS utente.registro_acquisti_articolo ON registro_acquisti (partita_id, articolo_chiave)');
 

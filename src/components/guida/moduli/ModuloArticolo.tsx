@@ -23,6 +23,7 @@ import { useNomiPerEffetti } from './nomiPerEffetti';
 import { CostoOfferta } from './CostoOfferta';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
+import { useState } from 'react';
 import { TestoNote } from '../../shared/TestoNote';
 import { CampoTesto } from '../../shared/Campo';
 import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
@@ -92,6 +93,18 @@ const OPZIONI_ORIGINE: Array<{ chiave: RegolaRifornimento['origine']; nome: stri
 const OPZIONI_GIORNO = GIORNI_SETTIMANA.map((g) => ({ chiave: g.chiave, nome: g.nome[0]!.toUpperCase() + g.nome.slice(1) }));
 
 /**
+ * I giorni di consegna dell'ordine (1-60): il campo si può svuotare e riscrivere; la regola cambia solo con un numero valido, e finché il
+ * testo non lo è resta il valore di prima, con l'errore sotto il campo (prima un campo vuoto tornava subito a 1).
+ */
+function GiorniDiConsegna({ giorni, disabilitato, onCambia }: { giorni: number; disabilitato?: boolean; onCambia: (giorni: number) => void }) {
+  const [testo, setTesto] = useState(String(giorni));
+  const n = Number(testo);
+  const valido = /^\d+$/.test(testo) && n >= 1 && n <= 60;
+  return <CampoTesto etichetta="Giorni di consegna" tipo="numero" valore={testo} disabilitato={disabilitato} errore={valido ? undefined : `Da 1 a 60 giorni: resta ${giorni}.`}
+    onCambia={(v) => { setTesto(v); const x = Number(v); if (/^\d+$/.test(v) && x >= 1 && x <= 60) onCambia(x); }} />;
+}
+
+/**
  * Ondata 5 (decisione 21): la regola di rifornimento dell'offerta, un punto solo (`articolo.rifornimento_json`): quando torna, da dove viene
  * la regola e se va verificata in gioco. Il giorno della settimana solo per «Ogni settimana», i giorni di consegna solo per l'ordine.
  */
@@ -110,8 +123,7 @@ function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCa
         <Blocco><Selettore etichetta="Torna in negozio" valore={valore?.tipo ?? ''} vuoto="Nessuna regola" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_RIFORNIMENTO} onCambia={cambiaTipo} /></Blocco>
         {valore?.tipo === 'settimana' && <Blocco><Selettore etichetta="Giorno del rifornimento" valore={valore.giorno ?? 'lunedi'} ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_GIORNO}
           onCambia={(g) => onCambia({ ...valore, giorno: g as GiornoRifornimento })} /></Blocco>}
-        {valore?.tipo === 'consegna' && <CampoTesto etichetta="Giorni di consegna" tipo="numero" valore={String(valore.giorni ?? 3)} disabilitato={disabilitato}
-          onCambia={(v) => onCambia({ ...valore, giorni: Math.min(60, Math.max(1, Number(v) || 1)) })} />}
+        {valore?.tipo === 'consegna' && <GiorniDiConsegna giorni={valore.giorni ?? 3} disabilitato={disabilitato} onCambia={(giorni) => onCambia({ ...valore, giorni })} />}
         {valore && <Blocco><Selettore etichetta="Da dove viene la regola" valore={valore.origine} ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_ORIGINE}
           onCambia={(o) => onCambia({ ...valore, origine: o as RegolaRifornimento['origine'] })} /></Blocco>}
       </div>

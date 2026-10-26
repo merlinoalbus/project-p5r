@@ -10,20 +10,37 @@
 // Le righe le scrivono soltanto `negoziService.impostaAcquisto` (la pagina del negozio, i regali, la spunta di una voce che segna lo stato) e
 // `effettiDiStatoService` (una voce che compra di nuovo un articolo già ottenuto): una riga per acquisto, con giorno, fascia, pezzi e fonte.
 // `ottenuto_qui` dice quale riga ha creato il segno «ottenuto» (`acquisto_partita`): togliendola, il segno passa alla riga più vecchia che
-// resta (`togliRiga`), e se non ne resta nessuna chi chiama toglie anche il segno, come prima.
+// resta (`togliRiga`), e se non ne resta nessuna chi chiama toglie anche il segno, come prima. Ogni riga registra la sede in cui si è comprato
+// (`sede_chiave`, NULL = la principale): la scorta è della sede che si guarda, perché le sedi di un listino condiviso sono distributori diversi.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
-import { descriviRifornimento,descriviStatoScorta, normalizzaRifornimento, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
+import { descriviRifornimento, descriviStatoScorta, normalizzaRifornimento, numeroGiorno, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
 import type { ScortaArticoloDto } from '../../shared/types.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
 
-/** Una riga del registro degli acquisti. */
-export interface RigaRegistro { id: number; partita_id: number; articolo_chiave: string; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voce_uid: string | null; effetto_uid: string | null; ottenuto_qui: number; creato_il: string }
+/** Una riga del registro degli acquisti. `sede_chiave`: il luogo in cui si è comprato; null = la sede principale del negozio della chiave. */
+export interface RigaRegistro { id: number; partita_id: number; articolo_chiave: string; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voce_uid: string | null; effetto_uid: string | null; ottenuto_qui: number; creato_il: string; sede_chiave?: string | null }
 
-/** Quel che serve della riga dell'articolo: la regola, i pezzi per ciclo e, per la biblioteca, il libro. */
-export interface ArticoloConRegola { chiave: string; quantita: number | null; rifornimento_json?: string | null; oggetto_fonte?: string | null; oggetto_chiave?: string | null }
+/** Quel che serve della riga dell'articolo: la regola, i pezzi per ciclo, per la biblioteca il libro e la sede in cui lo si guarda
+ *  (`negozio_sede`, quella effettiva dopo `conSede`: la principale o una sede aggiuntiva del listino condiviso). */
+export interface ArticoloConRegola { chiave: string; quantita: number | null; rifornimento_json?: string | null; oggetto_fonte?: string | null; oggetto_chiave?: string | null; negozio_sede?: string | null }
+
+/** La sede principale del negozio di ogni chiave: la sede delle righe senza `sede_chiave` (le voci del Diario, le righe della 051). */
+function sediPrincipali(chiavi: readonly string[]): Map<string, string | null> {
+  if (!chiavi.length) return new Map();
+  return new Map((prepared(`SELECT a.chiave, n.sede_chiave FROM main.articolo a JOIN main.negozio n ON n.chiave = a.negozio_chiave
+    WHERE a.chiave IN (${chiavi.map(() => '?').join(', ')})`).all(...chiavi) as Array<{ chiave: string; sede_chiave: string | null }>).map((r) => [r.chiave, r.sede_chiave]));
+}
+
+/** La sede di una riga: quella registrata, o la principale del negozio della sua chiave. */
+function sedeDellaRiga(r: RigaRegistro, principali: ReadonlyMap<string, string | null>): string | null {
+  return r.sede_chiave ?? principali.get(r.articolo_chiave) ?? null;
+}
+
+/** Vero se due sedi sono la stessa (null = nessuna sede: televendite, negozi online, Palazzi). */
+const stessaSede = (a: string | null | undefined, b: string | null | undefined): boolean => (a ?? '') === (b ?? '');
 
 /** Il registro esiste (partite.db già migrato alla 051): prima della migrazione nessuna scorta, tutto come prima. */
 function conRegistro(): boolean {
@@ -84,20 +101,39 @@ function consegnaDelNegozio(partitaId: number, chiavi: readonly string[]): { gio
  *
  * `righe` sono TUTTI gli acquisti registrati (`nelCiclo` = contano nel ciclo in corso): quelli dei cicli passati restano visibili e si
  * annullano uno per uno; `senzaGiorno` sono le chiavi con il segno «ottenuto» senza una riga che lo porti.
+ *
+ * La scorta è della sede in cui si guarda l'articolo (`a.negozio_sede`): le sedi aggiuntive di un listino condiviso sono distributori
+ * diversi, ognuno con la sua scorta (censimento D2: «stessa offerta» non vuol dire scorte comuni). Le righe di un'altra sede restano
+ * nell'elenco (`altraSede`, con il nome del luogo) e si annullano, ma non contano qui; quelle con un giorno dopo la data della partita (la
+ * data tornata indietro) portano `dopoLaData` e non contano in nessun ciclo finché la data non le raggiunge.
  */
 export function scortaDellArticolo(a: ArticoloConRegola, st: StatoDisponibilita | undefined, chiavi: readonly string[] = [a.chiave]): ScortaArticoloDto | null {
   const regola = regolaDi(a);
   if (!regola || st?.partitaId === undefined) return null;
   const gruppo = chiavi.includes(a.chiave) ? chiavi : [a.chiave, ...chiavi];
   const righe = righeDelleChiavi(st.partitaId, gruppo);
+  const principali = sediPrincipali(gruppo);
+  const sede = a.negozio_sede ?? null;
+  const qui = righe.filter((r) => stessaSede(sedeDellaRiga(r, principali), sede));
   const letto = regola.tipo === 'restituzione' && a.oggetto_fonte === 'libri' && !!a.oggetto_chiave && st.letture.has(`libro/${a.oggetto_chiave}`);
   const spedisce = consegnaDelNegozio(st.partitaId, gruppo);
-  const s = statoScorta(regola, a.quantita, righe, st.dataGioco, { letto, ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
-  const nelCiclo = new Set(s.nelCiclo);
+  const s = statoScorta(regola, a.quantita, qui, st.dataGioco, { letto, ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
+  const nelCiclo = new Set(s.nelCiclo.map((i) => qui[i]!.id));
+  const oggi = numeroGiorno(st.dataGioco);
+  const nomeLuogo = prepared('SELECT nome FROM main.luogo WHERE chiave = ?').pluck();
+  const nomeNegozio = prepared('SELECT n.nome FROM main.articolo a JOIN main.negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').pluck();
   return {
     comprati: s.comprati, rimasti: s.rimasti, quantita: s.quantita, esaurito: s.esaurito, torna: s.torna, testo: descriviStatoScorta(regola, s),
     ...(s.ordineInViaggio ? { ordineInViaggio: true } : {}),
-    righe: righe.map((r, i) => ({ id: r.id, giorno: r.giorno, fascia: r.fascia, quantita: r.quantita, fonte: r.fonte, voceUid: r.voce_uid, nelCiclo: nelCiclo.has(i) })),
+    righe: righe.map((r) => {
+      const sedeRiga = sedeDellaRiga(r, principali);
+      const giorno = numeroGiorno(r.giorno);
+      return { id: r.id, articolo: r.articolo_chiave, giorno: r.giorno, fascia: r.fascia, quantita: r.quantita, fonte: r.fonte, voceUid: r.voce_uid, nelCiclo: nelCiclo.has(r.id),
+        dopoLaData: oggi !== null && giorno !== null && giorno > oggi,
+        // il nome del luogo dell'altra sede, e del negozio della vecchia chiave di un listino condiviso: si dicono solo quando sono diversi
+        ...(stessaSede(sedeRiga, sede) ? {} : { altraSede: (sedeRiga ? nomeLuogo.get(sedeRiga) as string | undefined : undefined) ?? 'Un’altra sede' }),
+        ...(r.articolo_chiave === a.chiave ? {} : { negozioNome: (nomeNegozio.get(r.articolo_chiave) as string | undefined) ?? 'Offerta precedente' }) };
+    }),
     senzaGiorno: presenzeSenzaRiga(st.partitaId, gruppo),
   };
 }
@@ -122,8 +158,8 @@ export function requisitoScorta(scorta: ScortaArticoloDto | null, indice: number
   return { indice, tipo: 'scorta', testo: 'Scorta del negozio', stato: scorta.esaurito ? 'rosso' as const : 'verde' as const, dettaglio: scorta.testo, manuale: false, confermato: false };
 }
 
-/** I dati di una riga nuova. */
-export interface NuovaRiga { giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid?: string; effettoUid?: string; ottenutoQui: boolean }
+/** I dati di una riga nuova. `sede`: il luogo in cui si compra (la pagina del negozio); senza, la sede principale (le voci del Diario). */
+export interface NuovaRiga { giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid?: string; effettoUid?: string; ottenutoQui: boolean; sede?: string | null }
 
 /**
  * Scrive una riga del registro (dentro la transazione di chi chiama). Per una voce la riga è una sola per voce ed effetto: se c'è già, si
@@ -140,8 +176,17 @@ export function scriviRiga(partitaId: number, articolo: string, r: NuovaRiga): n
       return vecchia.id;
     }
   }
-  return Number(prepared(`INSERT INTO utente.registro_acquisti (partita_id, articolo_chiave, giorno, fascia, quantita, fonte, voce_uid, effetto_uid, ottenuto_qui, creato_il)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, articolo, r.giorno, r.fascia, quantita, r.fonte, r.fonte === 'voce' ? r.voceUid : null, r.fonte === 'voce' ? r.effettoUid : null, r.ottenutoQui ? 1 : 0, adesso).lastInsertRowid);
+  const valori = [partitaId, articolo, r.giorno, r.fascia, quantita, r.fonte, r.fonte === 'voce' ? r.voceUid : null, r.fonte === 'voce' ? r.effettoUid : null, r.ottenutoQui ? 1 : 0, adesso];
+  // un registro creato prima della colonna della sede (la 051 la aggiunge sempre: qui per un file che non l'avesse) vale la sede principale
+  if (!conColonnaSede()) return Number(prepared(`INSERT INTO utente.registro_acquisti (partita_id, articolo_chiave, giorno, fascia, quantita, fonte, voce_uid, effetto_uid, ottenuto_qui, creato_il)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(...valori).lastInsertRowid);
+  return Number(prepared(`INSERT INTO utente.registro_acquisti (partita_id, articolo_chiave, giorno, fascia, quantita, fonte, voce_uid, effetto_uid, ottenuto_qui, creato_il, sede_chiave)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(...valori, r.fonte === 'negozio' ? r.sede ?? null : null).lastInsertRowid);
+}
+
+/** Il registro ha la colonna della sede (utente 051). */
+function conColonnaSede(): boolean {
+  return !!prepared("SELECT 1 FROM pragma_table_info('registro_acquisti', 'utente') WHERE name = 'sede_chiave'").get();
 }
 
 /**
@@ -165,10 +210,17 @@ export function rigaDellaVoce(partitaId: number, voceUid: string, effettoUid: st
   return (prepared("SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND fonte = 'voce'").get(partitaId, voceUid, effettoUid) as RigaRegistro | undefined) ?? null;
 }
 
-/** L'ultima riga della pagina del negozio per l'articolo (la più recente nel calendario di gioco, poi la più nuova). */
-export function ultimaRigaDelNegozio(partitaId: number, articolo: string): RigaRegistro | null {
-  const righe = righeDellArticolo(partitaId, articolo).filter((r) => r.fonte === 'negozio');
-  if (!righe.length) return null;
+/**
+ * L'ultima riga della pagina del negozio per l'articolo (la più recente nel calendario di gioco, poi la più nuova). Con `sede` (definita,
+ * anche null = nessuna sede) si preferiscono le righe di quella sede: togliendo la spunta in un distributore si toglie il suo acquisto, e
+ * solo se lì non ce n'è uno quello di un'altra sede.
+ */
+export function ultimaRigaDelNegozio(partitaId: number, articolo: string, sede?: string | null): RigaRegistro | null {
+  const tutte = righeDellArticolo(partitaId, articolo).filter((r) => r.fonte === 'negozio');
+  if (!tutte.length) return null;
+  const principali = sede === undefined ? null : sediPrincipali([articolo]);
+  const diQui = principali ? tutte.filter((r) => stessaSede(sedeDellaRiga(r, principali), sede)) : [];
+  const righe = diQui.length ? diQui : tutte;
   return righe.reduce((a, b) => (ordineGioco(b.giorno) > ordineGioco(a.giorno) || (ordineGioco(b.giorno) === ordineGioco(a.giorno) && b.id > a.id) ? b : a));
 }
 
