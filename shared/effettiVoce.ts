@@ -185,7 +185,13 @@ export interface NomiFraseEffetto {
 /** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca, Fortuna e yen. */
 export type EffettoConNomiVoce = EffettoDiStatoVoce | EffettoFortunaVoce | EffettoPescaVoce | EffettoYenVoce;
 export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce => eEffettoDiStato(e) || e.tipo === 'pesca' || e.tipo === 'fortuna' || e.tipo === 'yen';
-const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/**
+ * Un importo in yen come lo scrive la guida italiana: «¥1.680», «¥12.800». In `it-IT` i numeri di quattro cifre restano senza separatore
+ * («1680»: raggruppamento minimo di due cifre), e la stessa voce mostrava «¥1680» accanto a «¥12.800» (rilievo della revisione UX, L13):
+ * il separatore si chiede sempre. Uno solo per frasi, riepilogo «Il gioco dà», editor degli acquisti e scelta del set alla spunta.
+ */
+export const formatoYen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT', { useGrouping: 'always' })}`;
+const yen = formatoYen;
 /** «×3» solo se le copie sono più d'una. */
 const copie = (q: number | undefined): string => (q && q > 1 ? ` ×${q}` : '');
 /** I dati che possono portare già i loro yen (decisione 2): il film (prezzo), l'attività o il lavoro (costo o paga), la Richiesta (ricompensa). */

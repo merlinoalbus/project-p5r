@@ -17,7 +17,10 @@
 //       ovunque dal motore della disponibilità). Un articolo già presente non si tocca.
 //   (3) **Contenuto** dei set in `ricompensa_oggetto` (fonte «articolo»: lo stesso dato degli scambi del Gachapon), con le copie.
 //   (4) **Vecchi articoli** (i 20 «Set A / Set B» in inglese) e i loro 20 oggetti fittizi `altro/…`: non si cancellano, diventano nascosti
-//       (`nascosto=1`): una voce o una partita che li cita li risolve ancora. La nota del negozio dice i fatti in italiano.
+//       (`nascosto=1`): una voce o una partita che li cita li risolve ancora. La nota del negozio dice i fatti in italiano. (4b) Il NOME
+//       del negozio, «Home Shopping in TV», diventa «Canale di televendite», come lo chiama sempre la guida italiana (pagine «Soluzione
+//       settimana 2, 4, 5, 21, 23, 30, 33») e come il testo delle voci (rilievo della revisione UX: «Uno a scelta · Home Shopping in TV» e
+//       «Home Shopping in TV: quale hai comprato?» erano inglese nell'interfaccia nuova); solo se è ancora il nome di seed.
 //   (5) **Voci del Diario** (16 voci d'acquisto delle televendite): una proposta «da completare» per voce (`proposta_conversione_voce`,
 //       lotto «L13-televendite») con i due set come effetti «articolo», il collegamento al negozio e, da togliere, gli effetti che citano il
 //       vecchio articolo. Si APPLICA, con la funzione della pagina «Da completare» (`applicaPropostaConversione`), solo fuori dal periodo
@@ -37,6 +40,7 @@ import { esisteTabella } from './pulizieL11.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../../shared/condizioniSpillo.js';
 import { applicaPropostaConversione, elencaProposteConversione } from '../../services/proposteConversioneService.js';
 import { invalidaCacheDiGioco } from '../../services/cacheDiGioco.js';
+import { formatoYen } from '../../../shared/effettiVoce.js';
 
 const AUDIT = 'audit-239-televendite';
 const LOTTO = 'L13-televendite';
@@ -147,6 +151,9 @@ const VOCI: Array<{ uid: string; data: string }> = [
 
 /** La nota del negozio prima della 239 (dalla fonte non italiana): si sostituisce solo se è ancora questa. */
 const NOTA_VECCHIA = 'Televendita che offre due set alternativi (A o B) in ciascuna data; se ne può scegliere solo uno, disponibile solo il giorno stesso. Dati e prezzi da fonte non italiana, nomi dei set non tradotti ufficialmente in italiano; composizione articolo per articolo di ogni set non reperita per intero. Ogni set è disponibile solo nel giorno in cui viene offerto';
+/** (4b) Il nome del negozio di seed, in inglese, e quello della guida italiana. */
+const NOME_NEGOZIO_VECCHIO = 'Home Shopping in TV';
+const NOME_NEGOZIO = 'Canale di televendite';
 const NOTA_NUOVA = 'Televendita al televisore del Leblanc, in onda la domenica: in ogni data due set alternativi (A e B), se ne compra uno solo, o nessuno, e solo quel giorno. La consegna arriva a domicilio dopo qualche giorno.';
 
 const chiaveArticolo = (slug: string): string => `${NEGOZIO}/${slug}`;
@@ -243,6 +250,9 @@ export const migration239: Migration = {
     const notaCambiata = negozio.note === NOTA_VECCHIA && negozio.origine === 'seed'
       ? db.prepare('UPDATE main.negozio SET note = ?, fonte = ?, updated_at = ? WHERE chiave = ? AND note = ?').run(NOTA_NUOVA, `${GUIDA}soluzione-settimana-2/`, adesso, NEGOZIO, NOTA_VECCHIA).changes === 1
       : false;
+    // (4b) il nome della guida italiana; un nome cambiato dall'utente (o un negozio non di seed) non si tocca
+    const nomeNegozioCambiato = db.prepare("UPDATE main.negozio SET nome = ?, updated_at = ? WHERE chiave = ? AND nome = ? AND origine = 'seed'")
+      .run(NOME_NEGOZIO, adesso, NEGOZIO, NOME_NEGOZIO_VECCHIO).changes === 1;
     // gli articoli, le condizioni e i nomi sono cambiati: le letture in memoria dei servizi (la mappa delle alternative, che vive un secondo, e
     // i nomi delle condizioni) si svuotano, così le proposte applicate qui sotto e le prime letture dopo l'avvio vedono i set nuovi in
     // alternativa (prova sulle copie: una lettura fatta da una migrazione precedente nello stesso secondo li lasciava piatti)
@@ -274,8 +284,14 @@ export const migration239: Migration = {
       const citataDa = partite ? partite.filter((t) => db.prepare(`SELECT 1 FROM utente."${t}" WHERE voce_uid = ? LIMIT 1`).get(uid)) : [];
       const togli = vociConVecchio.filter((x) => x.voce === uid).map((x) => x.effetto);
       const effetti = [d.a, d.b].map((s) => ({ effetto: { tipo: 'articolo', articolo: chiaveArticolo(s.slug) }, completa: [], scelte: null }));
-      const motivo = `Decisione 4 (L13): le televendite del ${data} sono due articoli alternativi, «${d.a.nome}» (¥${d.a.prezzo.toLocaleString('it-IT')}) e «${d.b.nome}» (¥${d.b.prezzo.toLocaleString('it-IT')}): alla spunta se ne sceglie uno, o nessuno.`
+      // rilievo della revisione: le voci del 05-08 e del 05-22 hanno già, aperta, la proposta della 238 che le collega allo stesso negozio
+      // (nel periodo validato, quindi non applicata). Il contenuto di una proposta non si modifica (trigger della 236): questa la nomina, così
+      // in «Da completare» si capisce che la comprende e che basta decidere una delle due
+      const stessoCollegamento = db.prepare(`SELECT id FROM main.proposta_conversione_voce WHERE voce_uid = ? AND lotto <> ? AND stato = 'aperta'
+        AND riferimento_tipo = 'negozio' AND riferimento_chiave = ? ORDER BY id`).pluck().all(uid, LOTTO, NEGOZIO) as string[];
+      const motivo = `Decisione 4 (L13): le televendite del ${data} sono due articoli alternativi, «${d.a.nome}» (${formatoYen(d.a.prezzo)}) e «${d.b.nome}» (${formatoYen(d.b.prezzo)}): alla spunta se ne sceglie uno, o nessuno.`
         + (togli.length ? ' Toglie il vecchio articolo unico in inglese.' : '')
+        + (stessoCollegamento.length ? ` Comprende il collegamento al negozio già proposto da ${stessoCollegamento.map((x) => `«${x}»`).join(' e ')}: applicata questa, quella si può scartare.` : '')
         + (citataDa.length ? ' La voce è già spuntata in una partita: dopo l’applicazione togli e rimetti la spunta per scegliere il set.' : '');
       inserisciProposta.run(id, uid, LOTTO, NEGOZIO, JSON.stringify(effetti), JSON.stringify(togli), motivo, adesso);
       const stato = statoDi(id);
@@ -316,7 +332,7 @@ export const migration239: Migration = {
       il: adesso,
       conteggi: {
         domeniche: DOMENICHE.length, articoliCreati, articoliGiaPresenti, righeContenutoCreate: righeContenuto, oggettiCreati: oggettiCreati.length, oggettiGiaPresenti: oggettiGiaPresenti.length,
-        vecchiArticoliNascosti: articoliNascosti, oggettiFittiziNascosti: oggettiNascosti, notaNegozioCambiata: notaCambiata, articoliVisibiliDelNegozio: visibili, nomiCorretti: nomiCorretti.length,
+        vecchiArticoliNascosti: articoliNascosti, oggettiFittiziNascosti: oggettiNascosti, notaNegozioCambiata: notaCambiata, nomeNegozioCambiato, articoliVisibiliDelNegozio: visibili, nomiCorretti: nomiCorretti.length,
         vociConIlVecchioArticolo: vociConVecchio.length, vociApplicate: voci.filter((v) => v.esito === 'applicata').length, vociDaDecidere: voci.filter((v) => v.esito !== 'applicata').length,
       },
       oggettiCreati, oggettiGiaPresenti, nomiCorretti, fittiziCondivisi, mappa, vociConVecchio, nellePartite, voci, stessaConnessione,

@@ -18,7 +18,7 @@
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
-import { contoArticoli, gruppiAlternativi, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
+import { contoArticoli, formatoYen, gruppiAlternativi, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
 
 /** Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga).
  *  `contenuto` (L13, decisione 4): che cosa contiene un set, in una riga («Cerotto alla caffeina · Gocce per occhioni ×10»), se il catalogo lo dice. */
@@ -48,7 +48,8 @@ export interface NomiRiepilogoEffetti {
   contenuto?: (articolo: string) => ReadonlyArray<{ nome: string; quantita: number | null }> | undefined;
 }
 
-const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/** «¥1.680»: lo stesso formato delle frasi, dell'editor e della scelta alla spunta (`formatoYen`). */
+const yen = formatoYen;
 /** Il negozio di un articolo: la parte della chiave prima della barra. */
 const negozioDellArticolo = (chiave: string): string => (chiave.includes('/') ? chiave.slice(0, chiave.indexOf('/')) : chiave);
 
@@ -229,9 +230,10 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
             const righe = contoArticoli(delNegozio.filter((x) => x.tipo === 'articolo' && membri.includes(x.articolo)), n.frase.articolo)?.righe ?? [];
             for (const r of righe) g.righe.push(rigaArticolo(r, n));
             for (const m of membri) inScelta!.set(m, chiaveScelta);
-            g.nota = aggiuntiDopo
-              ? 'Aggiunti alla voce dopo la spunta: per dire quale hai comprato, o nessuno, togli e rimetti la spunta.'
-              : 'Alla spunta ne scegli uno, o nessuno.';
+            // «le etichette di testo devono essere visibili solo se hanno senso» (rilievo della revisione UX): prima della spunta il titolo dice
+            // già «Uno a scelta» e la nota degli yen (`NOTE_YEN.scelta`) dice che con «Nessuno» non si paga; una terza frase sulla stessa regola
+            // non aggiungeva niente. Resta solo l'eccezione degli articoli aggiunti dopo la spunta
+            if (aggiuntiDopo) g.nota = 'Aggiunti alla voce dopo la spunta: per dire quale hai comprato, o nessuno, togli e rimetti la spunta.';
           });
         }
         // decisione 18: il prezzo degli articoli si scala da solo spuntando la voce (la nota del gruppo, alla fine, mai un'istruzione «a mano»).

@@ -17,8 +17,8 @@
 // della voce. Nella voce non si dichiara niente: le alternative le dice il catalogo, la scelta si fa alla spunta.
 // ============================================================
 
-import { contoArticoli, fondiArticoliUguali, gruppiAlternativi, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
-import { testoContenuto } from '../../../shared/riepilogoEffetti';
+import { contoArticoli, fondiArticoliUguali, formatoYen, gruppiAlternativi, QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
+import { elencoNomi, testoContenuto } from '../../../shared/riepilogoEffetti';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -33,7 +33,8 @@ type Articolo = Extract<EffettoVoce, { tipo: 'articolo' }>;
 /** L'articolo con le copie (1 = sottintesa, non si scrive: una sola forma per lo stesso effetto). */
 const articolo = (chiave: string, quantita: number): Articolo => (quantita > 1 ? { tipo: 'articolo', articolo: chiave, quantita } : { tipo: 'articolo', articolo: chiave });
 
-const yen = (n: number) => `¥${n.toLocaleString('it-IT')}`;
+/** «¥1.680», come il riepilogo «Il gioco dà» e la scelta alla spunta della stessa voce (`formatoYen`). */
+const yen = formatoYen;
 
 interface Props {
   valore: CampiStrutturati;
@@ -73,6 +74,9 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
     }
     imposta([...righe, { uid: null, effetto: articolo(chiave, 1) }]);
   };
+  /** Al posto della riga `i` (un articolo tolto dal negozio), gli articoli che lo sostituiscono, una copia ciascuno, nello stesso punto. */
+  const sostituisci = (i: number, nuovi: readonly string[]) =>
+    imposta(righe.flatMap((r, j) => (j === i ? nuovi.map((k) => ({ uid: null, effetto: articolo(k, 1) })) : [r])));
   // L13 (decisione 4): i gruppi di articoli alternativi fra quelli della voce (lo stesso calcolo del riepilogo e della spunta)
   const chiavi = posti.map((i) => (righe[i]!.effetto as Articolo).articolo);
   const gruppi = gruppiAlternativi(chiavi, (k) => nomi.articoli.get(k)?.incompatibili);
@@ -96,6 +100,14 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
     // le alternative dichiarate dal catalogo che la voce non ha ancora: si aggiungono con un tocco
     const mancanti = (a?.incompatibili ?? []).filter((x) => !chiavi.includes(x) && !nomi.articoli.get(x)?.nascosto && nomi.articoli.has(x));
     const nome = a?.nome ?? 'Articolo non più nel negozio';
+    // rilievo della revisione UX (la voce del 24 aprile dello screenshot dell'utente): un articolo tolto dal negozio che si comprava un giorno
+    // solo (il vecchio articolo unico delle televendite) ha come successori gli articoli visibili del negozio di quello stesso giorno (i due
+    // set). La riga li offre con un comando esplicito: li mette al suo posto nell'editor, e niente cambia finché l'utente non salva la voce
+    const giornoVecchio = a?.nascosto ? elenchi.effetti.articoli.find((x) => x.chiave === e.articolo)?.giorno : undefined;
+    const successori = giornoVecchio
+      ? elenchi.effetti.articoli.filter((x) => !x.nascosto && x.negozio === negozio && x.giorno === giornoVecchio && !chiavi.includes(x.chiave)).map((x) => x.chiave)
+      : [];
+    const titoloSostituisci = `Sostituisci con ${elencoNomi(successori.map((x) => nomi.articoli.get(x)?.nome ?? x))}`;
     return (
       <li key={righe[i]!.uid ?? `nuovo-${i}`} className="flex min-w-0 flex-col gap-1.5 rounded-md border border-border bg-bg-tertiary p-2">
         <span className="flex min-w-0 flex-wrap items-end gap-2">
@@ -112,6 +124,13 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
           </span>
         </span>
         {contenuto && <span className="testo-12 text-text-secondary break-words text-pretty">{contenuto}</span>}
+        {successori.length > 0 && (
+          <span className="flex min-w-0">
+            {/* il titolo va a capo da sé (`.btn-visivo__titolo`: `white-space: normal`) e il testo visibile è il nome accessibile */}
+            <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />}
+              titolo={titoloSostituisci} onClick={() => sostituisci(i, successori)} />
+          </span>
+        )}
         {mancanti.map((x) => {
           const alt = nomi.articoli.get(x)!;
           return (

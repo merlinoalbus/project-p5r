@@ -4,6 +4,7 @@
 
 import type { OpzioneSelettore } from '../components/shared/Selettore';
 import { EVENTI_STORIA } from '../../shared/condizioniSpillo';
+import { formatoYen } from '../../shared/effettiVoce';
 import type { ElenchiAzioneDto, ElenchiEffettiVoceDto } from '../types';
 import { dataGiocoTesto } from './dateGioco';
 
@@ -36,7 +37,7 @@ export function opzioniDomande(el: ElenchiVoce, corrente: number | null): Opzion
  */
 export const opzioniArticoli = (e: ElenchiEffettiVoceDto, negozio?: string, giorno?: string): OpzioneSelettore[] => {
   const o = e.articoli.filter((a) => !a.nascosto && (!negozio || a.negozio === negozio)).map((a) => {
-    const dettaglio = [a.prezzo !== null ? `¥${a.prezzo.toLocaleString('it-IT')}` : '', a.giorno ? dataGiocoTesto(a.giorno) : ''].filter(Boolean).join(' · ');
+    const dettaglio = [a.prezzo !== null ? formatoYen(a.prezzo) : '', a.giorno ? dataGiocoTesto(a.giorno) : ''].filter(Boolean).join(' · ');
     return { chiave: a.chiave, nome: a.nome, ...(dettaglio ? { dettaglio } : {}), gruppo: giorno && a.giorno === giorno ? 'Di questo giorno' : a.negozioNome };
   });
   // l'ordinamento è stabile: dentro i due gruppi resta l'ordine del catalogo

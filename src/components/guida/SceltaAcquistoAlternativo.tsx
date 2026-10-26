@@ -11,8 +11,8 @@
 
 import { useId } from 'react';
 import type { SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { formatoYen } from '../../../shared/effettiVoce';
 import { testoContenuto } from '../../../shared/riepilogoEffetti';
-import { formattaYen } from '../../utils/letture';
 
 type Scelta = Extract<SceltaEsitoVoceDto, { tipo: 'alternativa' }>;
 
@@ -35,11 +35,14 @@ export function SceltaAcquistoAlternativo({ s, scelto, occupato, onScegli }: Pro
         {s.opzioni.map((o) => {
           const idMotivo = `${prefisso}-motivo-${o.effettoUid}`;
           const contenuto = testoContenuto(o.contenuto);
-          const prezzo = o.articolo.prezzo === null ? 'senza prezzo' : formattaYen(o.articolo.prezzo * o.quantita);
+          // «¥1.680» come il riepilogo «Il gioco dà» e l'editor della stessa voce (rilievo della revisione UX: qui era «1680 ¥»)
+          const prezzo = o.articolo.prezzo === null ? 'senza prezzo' : formatoYen(o.articolo.prezzo * o.quantita);
           const attivo = scelto === o.effettoUid;
           return (
+            // `self-stretch`: `button.chip` ha `align-self:start` (src/tailwind.css, livello `components`, che le utilità superano); qui le due
+            // schede affiancate (da 641 px) prendono l'altezza della riga, anche con contenuti di lunghezza diversa (rilievo della revisione UX)
             <button key={o.effettoUid} type="button" disabled={occupato}
-              className={`chip touch w-full flex-col items-start gap-0.5 text-left ${attivo ? 'chip--attivo' : ''} ${!o.disponibile ? 'cursor-not-allowed' : ''}`}
+              className={`chip touch w-full self-stretch flex-col items-start justify-start gap-0.5 text-left ${attivo ? 'chip--attivo' : ''} ${!o.disponibile ? 'cursor-not-allowed' : ''}`}
               aria-pressed={attivo} aria-disabled={!o.disponibile ? true : undefined} aria-describedby={!o.disponibile ? idMotivo : undefined}
               aria-label={`${o.articolo.nome}${o.quantita > 1 ? ` ×${o.quantita}` : ''}, ${prezzo}${contenuto ? `; contiene ${contenuto}` : ''}${!o.disponibile ? '; non si può comprare' : ''}`}
               onClick={() => { if (o.disponibile) onScegli(o.effettoUid); }}>

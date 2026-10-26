@@ -2320,7 +2320,12 @@ tecniche, nessuna decisione presa al posto dell'utente):
   il registro delle operazioni sugli effetti. «Il gioco dà» li mostra da scegliere, togliendo e rimettendo la spunta, e non dice mai
   «nessuno» per un acquisto che non è mai stato chiesto.
 - **Periodo validato (04-01…05-31):** le 6 voci delle televendite restano proposte «L13-televendite» da applicare solo con il sì dell'utente,
-  riga per riga. Il vecchio articolo inglese resta nascosto ma citato da quelle voci finché l'utente non decide.
+  riga per riga. Il vecchio articolo inglese resta nascosto ma citato da quelle voci finché l'utente non decide. In alternativa
+  l'utente stesso, nell'editor della voce, può usare «Sostituisci con «Set A» e «Set B»» sulla riga del vecchio articolo: è un suo gesto
+  esplicito, salvato con la voce (dopo, la proposta della voce non si applica più e si scarta).
+- **Il negozio si chiama «Canale di televendite»**, come nella guida italiana e nel testo delle voci (era «Home Shopping in TV»).
+- **Un formato solo per gli yen nella voce, «¥1.680»** (`formatoYen` in `shared/effettiVoce.ts`): in `it-IT` i numeri di quattro cifre
+  restano senza separatore se non lo si chiede. Il resto dell'app (`formattaYen`, «8.227 ¥») non cambia in questo lotto.
 - **Restano all'utente:**
   - se il gioco permette un solo set per domenica, oppure nessuno;
   - se servono le voci delle domeniche 06-26, 08-07, 09-25 e 01-29.

@@ -6,7 +6,7 @@
 - **In attesa dell'utente:**
   - se il gioco permette un solo set per domenica;
   - le 4 domeniche che non hanno una voce nel Diario;
-  - le 6 proposte del periodo validato, da approvare riga per riga in «Da completare»: finché non le approva, la voce del 24 aprile mostra ancora il vecchio articolo inglese;
+  - le 6 proposte del periodo validato, da approvare riga per riga in «Da completare» (oppure, voce per voce, con «Sostituisci con…» nell'editor della voce): finché non decide, la voce del 24 aprile mostra ancora il vecchio articolo inglese. Le proposte del 05-08 e del 05-22 si sovrappongono a quelle della 238 (stesso collegamento al negozio): se ne decide una;
   - le prove nei tre formati.
 
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
