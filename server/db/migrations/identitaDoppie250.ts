@@ -9,6 +9,7 @@
 //     («Bagno di rose (traduzione non ufficiale, EN: Bath of Roses)»), e la scheda dell'oggetto li mostra sotto «Altri nomi». Qui gli alias
 //     sono scritti nell'elenco, uno per uno (solo nomi veri: il nome italiano diverso o quello inglese), e si aggiungono a quelli che la
 //     destinazione aveva già;
+//   - le statistiche dell'equipaggiamento scritte nell'elenco (`statistiche`), quando l'identità tolta le aveva e quella che resta no;
 //   - i ritocchi propri di un'unione (`dopo`), per esempio la categoria del Braccialetto.
 // Ripristinare dal Cestino rimette tutto com'era, ritocchi compresi. Subito dopo, nello stesso punto di salvataggio ma FUORI dal registro
 // del Cestino, le **proposte «da completare» aperte** (`proposta_conversione_voce`) che citano l'identità tolta si sostituiscono: sono
@@ -16,7 +17,8 @@
 // non si riapre), quindi un ripristino dal Cestino non potrebbe rimetterle; la proposta nuova cita la destinazione, che resta comunque.
 //
 // Guardie (un'unione che non le passa resta com'è, scritta nel log e nell'audit, e le altre proseguono):
-//   - le partite (`utente`) non si toccano mai: se una riga delle partite cita l'identità da togliere, l'unione non si fa;
+//   - le partite (`utente`) non si toccano mai: se una riga delle partite cita l'identità da togliere, l'unione non si fa; per le righe
+//     composte dei regali (che si rinominano) conta anche la consegna salvata per nome in `regalo_partita`, senza chiave del catalogo;
 //   - il Diario non si tocca: se una voce (`voce_giornata`, `voce_effetto`) cita l'identità da togliere, l'unione non si fa (vale anche,
 //     a maggior ragione, per il periodo validato 04-01→05-31);
 //   - identità già tolta (seconda esecuzione) o destinazione assente: niente da fare.
@@ -37,6 +39,16 @@ export interface UnioneIdentita {
   alias: readonly string[];
   /** Perché sono lo stesso oggetto (va nell'audit). */
   perche: string;
+  /**
+   * Le statistiche dell'equipaggiamento da conservare sulla scheda che resta, scritte qui una per una dalla pagina della guida (solo se la
+   * scheda che resta non ne ha): senza, la fusione le perderebbe insieme all'identità tolta. Dentro la registrazione del Cestino.
+   */
+  statistiche?: { per: string | null; testo: string | null };
+  /**
+   * Le correzioni del motivo delle proposte «da completare» che citano l'identità tolta: [testo che diventa falso, testo nuovo]. Si applicano
+   * solo se il testo c'è parola per parola; se il motivo cita ancora l'identità tolta, si aggiunge la frase generica dell'unione.
+   */
+  motivi?: ReadonlyArray<readonly [string, string]>;
 }
 
 export interface EsitoUnione {
@@ -44,8 +56,10 @@ export interface EsitoUnione {
   a: string;
   esito: 'unita' | 'gia-unita' | 'ferma';
   motivo?: string;
-  /** Com'era l'identità tolta (nome, categoria, effetto, descrizione): resta anche nel Cestino. */
-  tolta?: { nome: string; categoria: string; effetto: string; descrizione: string };
+  /** Com'era l'identità tolta, tutte le colonne (statistiche, fonte, nomi alternativi compresi): resta anche nel Cestino. */
+  tolta?: Riga;
+  /** Com'erano le statistiche della scheda che resta, se `statistiche` le ha scritte. */
+  statisticheScritte?: { prima: unknown; dopo: { per: string | null; testo: string | null } };
   /** Le proposte «da completare» sostituite (la vecchia scartata, la nuova aperta con la chiave che resta). */
   proposteAggiornate?: Array<{ vecchia: string; nuova: string }>;
 }
@@ -106,17 +120,33 @@ function aliasUniti(nome: string, prima: readonly string[], nuovi: readonly stri
   return [...visti.values()];
 }
 
+/** Vero se il testo cita la chiave intera (non come pezzo di una chiave più lunga, per esempio «…-salvezza» dentro «…-salvezza-2»). */
+export function citaChiave(testo: string, chiave: string): boolean {
+  let da = 0;
+  for (;;) {
+    const i = testo.indexOf(chiave, da);
+    if (i < 0) return false;
+    const prima = i > 0 ? testo[i - 1]! : ' ';
+    const dopo = i + chiave.length < testo.length ? testo[i + chiave.length]! : ' ';
+    if (!/[a-z0-9/-]/i.test(prima) && !/[a-z0-9-]/i.test(dopo)) return true;
+    da = i + 1;
+  }
+}
+
 /**
- * Le proposte «da completare» aperte che citano `da`. Il contenuto di una proposta non si modifica (trigger della 236: «se ne inserisce
- * una nuova»): se ne inserisce una con la chiave `a` (con una sola scelta rimasta, l'oggetto è quello e resta da completare solo la
- * quantità) e la vecchia si chiude come «scartata», con l'esito che dice da quale è sostituita. Fuori dal registro del Cestino: le proposte
- * decise non si riaprono, quindi un ripristino della fusione non le rimette; la proposta nuova cita comunque un oggetto che esiste.
+ * Le proposte «da completare» aperte che citano `da`, negli effetti o nel motivo. Il contenuto di una proposta non si modifica (trigger
+ * della 236: «se ne inserisce una nuova»): se ne inserisce una con la chiave `a` (con una sola scelta rimasta, l'oggetto è quello e resta
+ * da completare solo la quantità) e con il motivo corretto (`correzioni`: il testo che l'unione rende falso, per esempio «il catalogo ha
+ * due oggetti…», l'utente lo legge quando decide), e la vecchia si chiude come «scartata», con l'esito che dice da quale è sostituita.
+ * Fuori dal registro del Cestino: le proposte decise non si riaprono, quindi un ripristino della fusione non le rimette; la proposta nuova
+ * cita comunque un oggetto che esiste.
  */
-function sostituisciProposteConversione(db: AppDatabase, da: string, a: string, nomeA: string): Array<{ vecchia: string; nuova: string }> {
+function sostituisciProposteConversione(db: AppDatabase, da: string, a: string, nomeA: string, correzioni: ReadonlyArray<readonly [string, string]>): Array<{ vecchia: string; nuova: string }> {
   if (!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'proposta_conversione_voce'").get()) return [];
-  const righe = db.prepare("SELECT * FROM main.proposta_conversione_voce WHERE stato = 'aperta' AND instr(effetti_json, ?) > 0")
-    .all(`"${da}"`) as Array<{ id: string; voce_uid: string; lotto: string; tipo_proposto: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null;
-      effetti_json: string; togli_json: string; motivo: string; certezza: string }>;
+  const righe = (db.prepare("SELECT * FROM main.proposta_conversione_voce WHERE stato = 'aperta' AND (instr(effetti_json, ?) > 0 OR instr(motivo, ?) > 0) ORDER BY id")
+    .all(`"${da}"`, da) as Array<{ id: string; voce_uid: string; lotto: string; tipo_proposto: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null;
+      effetti_json: string; togli_json: string; motivo: string; certezza: string }>)
+    .filter((r) => r.effetti_json.includes(`"${da}"`) || citaChiave(r.motivo, da));
   const cambiate: Array<{ vecchia: string; nuova: string }> = [];
   for (const r of righe) {
     const effetti = JSON.parse(r.effetti_json) as unknown;
@@ -137,12 +167,14 @@ function sostituisciProposteConversione(db: AppDatabase, da: string, a: string, 
       }
       return v;
     });
-    if (!cambiato) continue;
+    let motivo = r.motivo;
+    for (const [vecchio, nuovo] of correzioni) if (motivo.includes(vecchio)) motivo = motivo.split(vecchio).join(nuovo);
+    if (citaChiave(motivo, da)) motivo = `${motivo.trimEnd()} Unione delle identità doppie (ondata 5, decisione 21): «${da}» e «${a}» sono ora un solo oggetto, «${nomeA}».`;
+    if (!cambiato && motivo === r.motivo) continue;
     const nuova = `${r.id}-unita`;
     if (nuova.length > 120) throw new Error(`la proposta ${r.id} ha un identificativo troppo lungo per la sostituta`);
     if (db.prepare('SELECT 1 FROM main.proposta_conversione_voce WHERE id = ?').get(nuova)) throw new Error(`la proposta sostituta ${nuova} esiste già`);
     const ora = adesso();
-    const motivo = `${r.motivo} Unione delle identità doppie (ondata 5, decisione 21): «${da}» e «${a}» sono ora un solo oggetto, «${nomeA}».`;
     db.prepare(`INSERT INTO main.proposta_conversione_voce (id, voce_uid, lotto, tipo_proposto, riferimento_tipo, riferimento_chiave, effetti_json, togli_json, motivo, certezza, creata_il)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(nuova, r.voce_uid, r.lotto, r.tipo_proposto, r.riferimento_tipo, r.riferimento_chiave, JSON.stringify(nuovi), r.togli_json, motivo, r.certezza, ora);
@@ -168,23 +200,30 @@ export function unisciIdentita(db: AppDatabase, u: UnioneIdentita, dopo?: (desti
   if (nellePartite.length) return { da: u.da, a: u.a, esito: 'ferma', motivo: `citata dalle partite (${nellePartite.join('; ')}): le partite non si toccano` };
   const nelDiario = vociCheCitano(db, u.da);
   if (nelDiario.length) return { da: u.da, a: u.a, esito: 'ferma', motivo: `citata dal Diario (${nelDiario.join('; ')}): le voci non si toccano` };
-  const tolta = { nome: String(origine.nome), categoria: String(origine.categoria), effetto: String(origine.effetto ?? ''), descrizione: String(origine.descrizione ?? '') };
+  // l'identità tolta com'era, tutte le colonne (la copia di ripristino resta nel Cestino; questa va nell'audit)
+  const tolta: Riga = { ...origine };
   const aliasPrima = nomiAltri(destinazione.nomi_altri_json);
   let proposteAggiornate: Array<{ vecchia: string; nuova: string }> = [];
+  let statisticheScritte: EsitoUnione['statisticheScritte'];
   try {
     // un punto di salvataggio solo: se la sostituzione delle proposte non riesce, anche la fusione si annulla
     db.transaction(() => {
       fondiOggetti144(db, u.da, u.a, () => {
         db.prepare('UPDATE main.catalogo_oggetto SET nomi_altri_json = ?, updated_at = ? WHERE chiave = ?')
           .run(JSON.stringify(aliasUniti(String(destinazione.nome), aliasPrima, u.alias)), adesso(), u.a);
+        // le statistiche dell'equipaggiamento non si perdono con l'identità tolta (solo se la scheda che resta non ne ha)
+        if (u.statistiche && db.prepare('UPDATE main.catalogo_oggetto SET statistiche_json = ?, updated_at = ? WHERE chiave = ? AND statistiche_json IS NULL')
+          .run(JSON.stringify(u.statistiche), adesso(), u.a).changes === 1) {
+          statisticheScritte = { prima: destinazione.statistiche_json ?? null, dopo: u.statistiche };
+        }
         dopo?.(destinazione);
       });
-      proposteAggiornate = sostituisciProposteConversione(db, u.da, u.a, String(destinazione.nome));
+      proposteAggiornate = sostituisciProposteConversione(db, u.da, u.a, String(destinazione.nome), u.motivi ?? []);
     })();
   } catch (e) {
     return { da: u.da, a: u.a, esito: 'ferma', motivo: e instanceof Error ? e.message : String(e) };
   }
-  return { da: u.da, a: u.a, esito: 'unita', tolta, ...(proposteAggiornate.length ? { proposteAggiornate } : {}) };
+  return { da: u.da, a: u.a, esito: 'unita', tolta, ...(statisticheScritte ? { statisticheScritte } : {}), ...(proposteAggiornate.length ? { proposteAggiornate } : {}) };
 }
 
 export interface RigaComposta {
@@ -218,6 +257,13 @@ function altriRiferimentiDiGioco(db: AppDatabase, chiave: string): string[] {
   return trovate;
 }
 
+/** Le consegne delle partite che citano per nome (stesso Confidente, stesso nome) una riga di `confidente_regalo` legata alla scheda. Sola lettura. */
+function consegnePerNome(db: AppDatabase, chiave: string): number {
+  if (!conPartite(db) || !db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'regalo_partita'").get()) return 0;
+  return db.prepare(`SELECT COUNT(*) FROM utente.regalo_partita p JOIN main.confidente_regalo c
+    ON c.confidente_chiave = p.confidente_chiave AND c.nome = p.regalo WHERE c.catalogo_chiave = ?`).pluck().get(chiave) as number;
+}
+
 /**
  * Scioglie una riga composta dei regali: ogni riga di `confidente_regalo` che la cita diventa una riga per oggetto, con gli stessi dati
  * (effetto, sconsigliato, nota, origine); poi l'identità composta si toglie. Tutto in una registrazione del Cestino: il ripristino
@@ -234,6 +280,10 @@ export function sciogliRigaComposta(db: AppDatabase, r: RigaComposta): EsitoComp
   }
   const nellePartite = partiteCheCitano(db, r.chiave);
   if (nellePartite.length) return { chiave: r.chiave, esito: 'ferma', motivo: `citata dalle partite (${nellePartite.join('; ')}): le partite non si toccano` };
+  // `regalo_partita` lega la consegna anche per nome (chiave primaria partita, Confidente, nome del regalo): una consegna salvata con il
+  // nome della riga composta e senza chiave del catalogo non la vede la guardia per chiave, e dopo la rinomina della riga perderebbe il legame
+  const perNome = consegnePerNome(db, r.chiave);
+  if (perNome) return { chiave: r.chiave, esito: 'ferma', motivo: `${perNome} consegne delle partite citano per nome una riga di questa scheda: le partite non si toccano` };
   const altri = altriRiferimentiDiGioco(db, r.chiave);
   if (altri.length) return { chiave: r.chiave, esito: 'ferma', motivo: `citata anche da ${altri.join('; ')}: va sistemata a parte` };
   const righe: NonNullable<EsitoComposta['righe']> = [];

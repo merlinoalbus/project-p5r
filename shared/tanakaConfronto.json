@@ -156,7 +156,7 @@
     {
       "chiave": "tanaka-affari-loschi/crown-of-salvation",
       "nome": "Corona della salvezza",
-      "catalogo": "accessorio/corona-della-salvezza-2",
+      "catalogo": "consumabile/corona-della-salvezza",
       "prezzo": 990000,
       "grado": "caos",
       "rapporto": "Abbinamento proposto"

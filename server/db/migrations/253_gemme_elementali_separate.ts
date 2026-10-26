@@ -12,9 +12,12 @@
 //       dalla copia di ripristino dell'offerta e dalle fotografie delle proposte: si unisce al Magatama infernale, a cui quella offerta è
 //       collegata (fusione reversibile dal Cestino, senza aggiungere «Gemme elementali» come nome alternativo: non è un altro nome del
 //       Magatama infernale);
-//   (2) il Magatama del ghiaccio con due schede: «Magatama ghiaccio» (pagina Oggetti, con l'effetto) e «Magatama del gelo» (listino di
-//       Tanaka nella pagina Negozi speciali, con l'offerta). Vale il nome del listino: resta «Magatama del gelo», con «Magatama ghiaccio»
-//       come nome alternativo; l'effetto e la sottocategoria della pagina Oggetti passano alla scheda che resta, se è vuota.
+//   (2) il Magatama del gelo con due schede: «Magatama ghiaccio» (con l'effetto, 150 danni da ghiaccio) e «Magatama del gelo» (listino di
+//       Tanaka, con l'offerta). «Magatama ghiaccio» non è un nome della guida: la pagina Oggetti chiama «Magatama del gelo» l'oggetto da 150
+//       danni (6.000 ¥ da Tanaka) e «Magatama del ghiaccio» un oggetto diverso, da 50 danni, che si trova solo nei forzieri dei Dedali e non
+//       è nel catalogo, come gli altri Magatama deboli. Resta «Magatama del gelo», SENZA «Magatama ghiaccio» come nome alternativo (la
+//       ricerca porterebbe all'oggetto da 150 danni chi cerca quello da 50); l'effetto e la sottocategoria della scheda tolta passano alla
+//       scheda che resta, se è vuota. Non c'è discordanza fra pagine della guida (il nome tolto non viene da una pagina): niente nota storica.
 // Nessuna partita e nessuna voce del Diario cambia. Idempotente. Audit in `dati_guida.audit-253-gemme-elementali`.
 // ============================================================
 
@@ -46,10 +49,10 @@ export const migration253: Migration = {
     }
     const adesso = new Date().toISOString();
 
-    // (2) il Magatama del gelo: una scheda sola, col nome del listino e l'effetto della pagina Oggetti
+    // (2) il Magatama del gelo: una scheda sola, col nome del listino e della pagina Oggetti e l'effetto della scheda tolta
     const ghiaccio = db.prepare('SELECT effetto, sottocategoria FROM main.catalogo_oggetto WHERE chiave = ?').get(GHIACCIO) as { effetto: string; sottocategoria: string | null } | undefined;
     let effettoCopiato = 0, sottocategoriaCopiata = 0;
-    const gelo = unisciIdentita(db, { da: GHIACCIO, a: GELO, alias: ['Magatama ghiaccio'], perche: 'stesso Magatama (ghiaccio) di Tanaka: «Magatama ghiaccio» nella pagina Oggetti, «Magatama del gelo» nel listino dei Negozi speciali, che prevale' },
+    const gelo = unisciIdentita(db, { da: GHIACCIO, a: GELO, alias: [], perche: 'stesso Magatama del gelo di Tanaka (150 danni da ghiaccio, 6.000 ¥): «Magatama ghiaccio» era il nome della scheda di partenza, non della guida; «Magatama del ghiaccio» (50 danni, forzieri dei Dedali) è un altro oggetto, quindi non diventa un nome alternativo' },
       () => {
         if (!ghiaccio) return;
         if (ghiaccio.effetto.trim()) effettoCopiato = db.prepare("UPDATE main.catalogo_oggetto SET effetto = ?, updated_at = ? WHERE chiave = ? AND trim(effetto) = ''").run(ghiaccio.effetto, adesso, GELO).changes;
