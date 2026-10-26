@@ -55,6 +55,12 @@ export interface DefBlocco {
   /** Titolo calcolato dall'elemento della guida (ha la precedenza su `campoTitolo`). */
   titolo?: (elemento: Record<string, unknown>) => string;
   campi: CampoDef[];
+  /**
+   * I campi che un elemento collegato a un oggetto del catalogo non offre (righe di `ricompensa_oggetto` con `fonte_tipo = fonte` e
+   * `fonte_chiave` = il selettore della guida): quel dato vive sulla scheda dell'oggetto, il suo punto unico (decisione 21). Una correzione di
+   * prima su quei campi resta visibile solo per rimetterla com'era; non se ne scrive una nuova.
+   */
+  soloSenzaOggetto?: { fonte: string; campi: string[] };
   /** Più sezioni sotto lo stesso tipo (Completamento: NG+, differenze, tempo): chiave nell'URL → radice e campi propri. */
   varianti?: Record<string, { etichetta: string; radice: string[]; campi: CampoDef[] }>;
 }
@@ -153,8 +159,11 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [T('nome', 'Nome'), L('requisito', 'Requisito'), N('medaglie', 'Medaglie', { nullable: true })],
   },
   'covo-premio': {
+    // Ondata 5, lotto F (decisione 21, migrazione 279): il premio che è un oggetto del catalogo (Velo invisibile, Lettera dei Reali) ne legge
+    // l'effetto dalla scheda dell'oggetto; i premi che non sono oggetti (decorazioni, Galleria) tengono il loro
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Premio del Covo', radice: ['covo', 'premi'], sel: 'nome',
     campi: [N('costo', 'Costo', { nullable: true }), L('sblocco', 'Come si sblocca', { nullable: true }), L('effetto', 'Effetto', { nullable: true })],
+    soloSenzaOggetto: { fonte: 'covo', campi: ['effetto'] },
   },
   dlc: {
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Contenuto scaricabile', radice: ['dlc'], sel: 'nome',

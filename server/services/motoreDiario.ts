@@ -118,8 +118,10 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
     const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
     const copie=x.quantita??1;
-    // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera)
-    const prezzo=a?prezzoDellArticolo(x.articolo,fasciaDellaVoce(uid)):null;
+    // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera), con lo sconto
+    // del negozio se il Confidente aveva il rango nel momento della voce (chiusura dell'ondata 5: la Clinica di Takemi a metà prezzo; una voce
+    // del passato non si paga con il rango di oggi, `scontoAllaVoce`)
+    const prezzo=a?prezzoDellArticolo(x.articolo,fasciaDellaVoce(uid),p,uid):null;
     return a&&prezzo!=null&&prezzo>0?spesa(prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
   }
   if(x.tipo==='acquisto'&&ricevuta?.creato){

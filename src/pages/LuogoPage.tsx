@@ -40,6 +40,7 @@ import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
 import { compratoNelCiclo } from '../../shared/rifornimento';
+import { testoSconto } from '../../shared/scontiNegozi';
 import type { ElementoCatalogoDto, LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
@@ -163,6 +164,7 @@ export function LuogoPage() {
                         {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
                         {n.quiz.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
                         {n.programmaPunti && <span><strong className="text-text">Programma punti:</strong> {n.programmaPunti.nome} ({n.programmaPunti.unita}{n.programmaPunti.calcolo === 'rango-cliente' ? ', dal rango cliente' : ', si segnano a mano'})</span>}
+                        {n.sconto && <span>{testoSconto(n.sconto, n.sconto.confidenteNome)}</span>}
                       </div>
                       {n.note && <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words testo-13 text-text-secondary" />}
                       <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>

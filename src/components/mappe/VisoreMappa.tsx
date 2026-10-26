@@ -19,7 +19,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { eOffertaAojiru } from '../../../shared/acquisti';
-import { eRifornibile } from '../../../shared/rifornimento';
+import { ePezzoUnico, eRifornibile } from '../../../shared/rifornimento';
 import { ConsumiAojiru } from '../catalogo/ConsumiAojiru';
 import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
 import { annullaRigaAcquisto, togliSegnoSenzaGiorno } from '../../services/api';
@@ -37,6 +37,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
+import { PrezzoScontato, RegolaDelloSconto } from '../catalogo/PrezzoScontato';
 import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
@@ -1251,8 +1252,9 @@ function inVenditaOggi(d: DisponibilitaDto | undefined): boolean {
   return d.requisiti.some((q) => q.tipo === 'scorta') && d.requisiti.every((q) => q.tipo === 'scorta' || q.stato === 'verde');
 }
 
-/** Si compra più volte (scorta che si rinnova, o l'Aojiru con le sue consumazioni): niente nome barrato. */
-const ripetibile = (a: MerceDelNegozio): boolean => eOffertaAojiru({ chiave: a.chiave }) || eRifornibile(a.rifornimento?.regola ?? null);
+/** Non è un pezzo unico (scorta che si rinnova, un servizio, l'Aojiru con le sue consumazioni, nessuna regola): niente nome barrato. Progetto
+ *  dell'ondata 5, §9: si barra solo l'articolo «mai» (revisione finale, R1). */
+const ripetibile = (a: MerceDelNegozio): boolean => eOffertaAojiru({ chiave: a.chiave }) || !ePezzoUnico(a.rifornimento?.regola);
 
 /** Con la partita, l'articolo che si rifornisce si compra come nella pagina del negozio: «Compra», non una spunta da togliere e rimettere. */
 const conCompra = (a: MerceDelNegozio, partitaId: number | null): partitaId is number =>
@@ -1291,6 +1293,7 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
         <span>{negozio.nome} · {disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
         {negozio.disponibilita && negozio.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={negozio.disponibilita} compatto />}
       </div>
+      {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
       {disponibili.length === 0
         ? <p className="m-0 testo-12 text-text-secondary">{bloccati > 0 ? 'Niente in vendita in questo momento della partita.' : 'Nessun articolo registrato.'}</p>
         : (
@@ -1306,6 +1309,8 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
                 <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !ripetibile(a) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
                 <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
+                {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
+                <PrezzoScontato scontato={a.prezzoScontato} className="min-w-0 max-w-full" />
                 {a.disponibilita && a.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={a.disponibilita} compatto />}
                 {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
                 {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
@@ -1465,6 +1470,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
             {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
             <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="testo-12 text-primary-testo">{negozio.nome}</Link>
           </div>
+          {/* seconda revisione della chiusura dell'ondata 5: lo sconto che non vale adesso si dice con la sua regola, come in «Dove si compra» */}
+          {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
           {bloccati > 0 && (
             <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="bloccato" dimensione={20} />} aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}
               titolo={mostraBloccati
@@ -1501,6 +1508,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">
                         <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
+                        {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
+                        <PrezzoScontato scontato={a.prezzoScontato} />
                         {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
                             del contrario era una contraddizione scritta due volte sulla stessa riga. */}
                         {a.disponibilita && a.disponibilita.stato !== 'disponibile'

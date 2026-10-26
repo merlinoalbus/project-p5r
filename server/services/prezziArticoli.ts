@@ -13,6 +13,8 @@
 
 import { prepared } from '../db/dbService.js';
 import { prezzoNellaFascia, type FasciaPrezzo } from '../../shared/catalogo.js';
+import { ordineGioco } from '../../shared/condizioniSpillo.js';
+import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } from '../../shared/scontiNegozi.js';
 
 const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera';
 
@@ -38,9 +40,85 @@ export function fasciaDellaPartita(partitaId: number): FasciaPrezzo | null {
   return eFascia(f) ? f : null;
 }
 
-/** Il prezzo in yen dell'offerta nella fascia (null = offerta assente o prezzo non indicato). Senza fascia nota vale `prezzo`. */
-export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined): number | null {
-  const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json FROM main.articolo WHERE chiave = ?')
-    .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null } | undefined;
-  return r ? prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia) : null;
+/** Vero se il file di gioco ha la colonna dello sconto del negozio (migrazione 254); uno schema di prima non sconta niente. */
+function conSconto(): boolean {
+  return !!prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get();
+}
+
+/** Il rango del Confidente nella partita (null se la partita non lo ha ancora). */
+function rangoNellaPartita(partitaId: number, confidente: string): number | null {
+  const r = prepared('SELECT rango FROM utente.confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, confidente) as { rango: number | null } | undefined;
+  return r?.rango ?? null;
+}
+
+/**
+ * Lo sconto del negozio dell'offerta che vale adesso nella partita (chiusura dell'ondata 5: la Clinica di Takemi a metà prezzo dal rango
+ * indicato, `negozio.sconto_json`); null senza partita, senza sconto o con il Confidente sotto il rango.
+ */
+export function scontoNellaPartita(negozio: string | null | undefined, partitaId: number | null | undefined): ScontoNegozio | null {
+  if (!negozio || partitaId === null || partitaId === undefined || !conSconto()) return null;
+  const sconto = normalizzaSconto((prepared('SELECT sconto_json FROM main.negozio WHERE chiave = ?').get(negozio) as { sconto_json: string | null } | undefined)?.sconto_json ?? null);
+  return sconto && scontoAttivo(sconto, rangoNellaPartita(partitaId, sconto.confidente)) ? sconto : null;
+}
+
+type MomentoVoce = [number, number, number];
+/** Il momento di una voce del Diario nell'anno di gioco (data, fascia, ordine nella giornata); null se la voce non c'è più. */
+function momentoDellaVoce(voceUid: string): MomentoVoce | null {
+  const v = prepared('SELECT data, fascia, ordine FROM main.voce_giornata WHERE uid = ?').get(voceUid) as { data: string; fascia: string; ordine: number } | undefined;
+  return v ? [ordineGioco(v.data), v.fascia === 'sera' ? 1 : 0, v.ordine] : null;
+}
+const primaDi = (a: MomentoVoce, b: MomentoVoce): boolean => a[0] !== b[0] ? a[0] < b[0] : a[1] !== b[1] ? a[1] < b[1] : a[2] < b[2];
+
+const DATA_DI_GIOCO = /^\d{2}-\d{2}$/;
+
+/**
+ * Il primo momento in cui il Confidente ha raggiunto il rango nella partita; null se nessun passaggio registrato ne dice il momento.
+ * La fonte è il registro dei passaggi di rango (`utente.incontro_confidente_partita`, `passaggio = 1`), che li scrive da ogni parte: la voce del
+ * Diario spuntata (`origine` «azione», con il giorno e la fascia della voce), l'azione dell'utente («mia») e la pagina Confidenti («pagina», un
+ * passaggio per ogni rango salito, con il giorno e la fascia della partita: `incontriService.aggiornaConfidenteDallaPagina`). Lo legge già così
+ * lo stato delle azioni (`azioniStrutturateService.correzioneARango`). Dentro la fascia l'ordine viene dalla voce spuntata del Confidente che
+ * porta al rango in quel momento; un passaggio senza voce (segnato dalla pagina) non ha un posto nella fascia e vale dal suo inizio.
+ */
+function primoPassaggioARango(partitaId: number, confidente: string, rango: number): MomentoVoce | null {
+  const passaggi = (prepared(`SELECT data, fascia FROM utente.incontro_confidente_partita
+    WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango >= ?`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string }>)
+    .filter((p) => DATA_DI_GIOCO.test(p.data));
+  if (!passaggi.length) return null;
+  const voci = prepared(`SELECT g.data, g.fascia, MIN(g.ordine) AS ordine FROM main.voce_giornata g JOIN utente.spunta_voce_partita s ON s.voce_uid = g.uid AND s.partita_id = ?
+    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ? GROUP BY g.data, g.fascia`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string; ordine: number }>;
+  const ordineNellaFascia = new Map(voci.map((v) => [`${v.data}|${v.fascia}`, v.ordine]));
+  return passaggi
+    .map((p): MomentoVoce => [ordineGioco(p.data), p.fascia === 'sera' ? 1 : 0, ordineNellaFascia.get(`${p.data}|${p.fascia}`) ?? Number.NEGATIVE_INFINITY])
+    .reduce((a, b) => (primaDi(b, a) ? b : a));
+}
+
+/**
+ * Lo sconto del negozio che valeva nel momento della voce del Diario (revisione della chiusura dell'ondata 5, N1: una voce del passato non si paga
+ * con il rango di oggi). Una voce che viene prima del primo passaggio del Confidente al rango dello sconto (`primoPassaggioARango`, da qualunque
+ * parte sia stato segnato) si paga a prezzo pieno. Solo se nessun passaggio registrato ne dice il momento (un rango che viene da dati di prima del
+ * registro dei passaggi, o segnato con la partita senza data) vale il rango di adesso: è l'unico dato che c'è.
+ */
+export function scontoAllaVoce(negozio: string | null | undefined, partitaId: number | null | undefined, voceUid: string): ScontoNegozio | null {
+  const sconto = scontoNellaPartita(negozio, partitaId);
+  if (!sconto || partitaId === null || partitaId === undefined) return sconto;
+  const voce = momentoDellaVoce(voceUid);
+  if (!voce) return sconto;
+  const primo = primoPassaggioARango(partitaId, sconto.confidente, sconto.rango);
+  if (!primo) return sconto;
+  return primaDi(voce, primo) ? null : sconto;
+}
+
+/**
+ * Il prezzo in yen dell'offerta nella fascia (null = offerta assente o prezzo non indicato). Senza fascia nota vale `prezzo`. Con la partita
+ * vale anche lo sconto del negozio legato al rango di un Confidente: quello di adesso (`scontoNellaPartita`) o, con la voce del Diario che compra,
+ * quello che valeva nel suo momento (`scontoAllaVoce`). È l'importo che gli yen automatici scalano.
+ */
+export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined, partitaId?: number | null, voceUid?: string | null): number | null {
+  const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?')
+    .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null; negozio_chiave: string | null } | undefined;
+  if (!r) return null;
+  const prezzo = prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia);
+  if (prezzo === null) return null;
+  const sconto = voceUid ? scontoAllaVoce(r.negozio_chiave, partitaId, voceUid) : scontoNellaPartita(r.negozio_chiave, partitaId);
+  return sconto ? prezzoScontato(prezzo, sconto) : prezzo;
 }

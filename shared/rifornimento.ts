@@ -223,6 +223,13 @@ export function descriviStatoScorta(regola: RegolaRifornimento, s: StatoScorta):
 export const eRifornibile = (regola: RegolaRifornimento | null): regola is RegolaRifornimento => regola !== null && regola.tipo !== 'mai';
 
 /**
+ * Il pezzo unico: una volta comprato non torna (regola «mai»). Progetto dell'ondata 5, §9: «barra la riga solo per l'articolo "mai"»; un
+ * articolo senza regola (l'Aojiru, con il suo registro, o una riga di prima) non si presenta come pezzo unico già posseduto (revisione finale,
+ * R1: i servizi senza regola risultavano barrati per sempre).
+ */
+export const ePezzoUnico = (regola: RegolaRifornimento | null | undefined): boolean => regola?.tipo === 'mai';
+
+/**
  * «Acquistato» per i filtri e i conteggi dei negozi (censimento dell'ondata 5, §3: «comprato in questo ciclo»): ciò che si rifornisce è
  * acquistato se nel ciclo in corso della sua sede ne è stato comprato almeno un pezzo, e torna «da acquistare» quando la scorta si rinnova;
  * il pezzo unico e ciò che non ha una regola restano acquistati una volta ottenuti. Il campo `acquistato` dell'offerta resta «ottenuto

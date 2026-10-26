@@ -51,7 +51,7 @@ export function sfideDellaVoce(p: number, voceUid: string): SfidaDellaVoce[] {
     for (const t of turniConEsito(porzione)) {
       const chiave = `${t.attivita}:${t.ordine}`;
       if (out.get(chiave)?.effettoUid) continue;
-      const y = yenDellaSfidaDelTurno(t.attivita, t.esito, fascia);
+      const y = yenDellaSfidaDelTurno(t.attivita, t.esito, fascia, p, voceUid);
       if (y) out.set(chiave, { attivita: t.attivita, ordine: t.ordine, articolo: y.articolo, importo: y.importo, motivo: y.motivo, effettoUid });
     }
   };
@@ -108,8 +108,9 @@ export function yenPrevistiApprovando(p: number, voceUid: string, effettoUid: st
   if (yenFuoriRegistro(p, causa) || effettiConYenGiaNelSaldo(p, voceUid, [{ uid: effettoUid, tipo: 'articolo', chiave: null }]).has(effettoUid)) return 0;
   if (turnoHaPagatoLArticolo(p, voceUid, e.articolo)) return 0;
   if (statoGiaVero(p, e) && !altraVoceHaLArticolo(p, e.articolo, voceUid)) return 0;
-  // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce, lo stesso che scala la spunta (`motoreDiario.yenDellEffetto`)
-  const prezzo = prezzoDellArticolo(e.articolo, fasciaDellaVoce(voceUid));
+  // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce, lo stesso che scala la spunta (`motoreDiario.yenDellEffetto`), con lo sconto
+  // del negozio che valeva nel momento della voce (chiusura dell'ondata 5): l'anteprima e l'approvazione dicono lo stesso importo
+  const prezzo = prezzoDellArticolo(e.articolo, fasciaDellaVoce(voceUid), p, voceUid);
   return prezzo != null && prezzo > 0 ? -prezzo * (e.quantita ?? 1) : 0;
 }
 

@@ -293,6 +293,15 @@ import { migration280 } from './280_lotteria_chiosco_e_biglietti.js';
 import { migration281 } from './281_proposte_della_lotteria.js';
 import { migration282 } from './282_vincita_di_sojiro.js';
 import { migration283 } from './283_premi_delle_sfide_come_oggetti.js';
+// Chiusura dell'ondata 5 (correzioni delle verifiche finali): i numeri rimasti liberi nei blocchi dei lotti C, D ed E (254, 259, 269: il runner
+// applica solo gli id oltre l'ultimo applicato, un buco non si potrebbe più riempire) e, di seguito, 284-287
+import { migration254 } from './254_sconto_dei_negozi.js';
+import { migration259 } from './259_rifornimento_dei_servizi.js';
+import { migration269 } from './269_sconto_di_takemi.js';
+import { migration284 } from './284_nomi_e_identita_degli_accessori.js';
+import { migration285 } from './285_identita_doppie_della_chiusura.js';
+import { migration286 } from './286_accessori_mancanti_della_guida.js';
+import { migration287 } from './287_ricompense_e_regali_senza_copie.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -309,9 +318,9 @@ export const migrations: Migration[] = [
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
   migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165, migration166, migration167, migration168, migration169, migration170, migration171, migration172, migration173, migration174, migration175, migration176, migration177, migration178, migration179, migration180, migration181, migration182, migration183, migration184, migration185, migration186, migration187, migration188, migration189, migration190, migration191, migration192, migration193, migration194, migration195, migration196, migration197, migration198, migration199, migration200, migration201, migration202, migration203, migration204, migration205, migration206, migration207, migration208, migration209, migration210, migration211, migration212, migration213, migration214, migration215, migration216, migration217, migration218, migration219, migration220, migration221, migration222, migration223, migration224, migration225, migration226, migration227, migration228, migration229, migration230, migration231, migration232, migration233, migration234, migration235, migration236, migration237, migration238, migration239, migration240, migration241, migration242, migration243, migration244, migration245, migration246, migration247, migration248, migration249,
-  migration250, migration251, migration252, migration253,
-  migration255, migration256, migration257, migration258,
-  migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
+  migration250, migration251, migration252, migration253, migration254,
+  migration255, migration256, migration257, migration258, migration259,
+  migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268, migration269,
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
-  migration280, migration281, migration282, migration283,
+  migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287,
 ];

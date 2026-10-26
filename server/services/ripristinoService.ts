@@ -20,6 +20,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { correzioniOrfane, datiGuida, datiGuidaCorretti } from './datiGuida.js';
+import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { DEFINIZIONI_BLOCCO, LIMITE_NUMERO, LIMITE_TESTO, LIMITE_TESTO_LUNGO, LIMITE_VOCE_ELENCO, LIMITE_VOCI, type CampoDef, type DefBlocco } from './ripristino/registro.js';
 import { DEFINIZIONI_RIGA, type DefRiga, type Valori } from './ripristino/righe.js';
 
@@ -34,8 +35,7 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'ombra-voce': 'Si corregge quale Ombra descrive la voce; le aree dei dedali dove si incontra l’Ombra seguono da sole. Cambiando Ombra cambia anche la Persona che la voce fa catturare, e i luoghi d’incontro dell’Ombra non si spostano con la voce: si correggono a parte.',
   persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Le skill si scrivono «nome @ livello» (0 = innata). Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
   skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto e si modifica solo dalle Traduzioni (Impostazioni). Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
-  regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
-  arcana: 'L’ordine dell’Arcano (la sua posizione nella tabella di fusione) e il suo nome italiano non si correggono da qui: il nome si corregge dalle traduzioni.',
+  regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',  arcana: 'L’ordine dell’Arcano (la sua posizione nella tabella di fusione) e il suo nome italiano non si correggono da qui: il nome si corregge dalle traduzioni.',
   'fusione-arcana': 'Vale per la coppia nella forma in cui sta in tabella (una sola volta, in qualunque ordine si fondano i due Arcani). Il motore di fusione usa subito il risultato nuovo.',
   'fusione-speciale': 'La Persona risultato non si corregge: si scrivono gli ingredienti, nell’ordine della ricetta, con il nome della Persona nel dataset.',
   tesoro: 'Lo spostamento di rango vale per la fusione del Demone con una Persona di quell’Arcano: più alto sposta verso l’alto, meno verso il basso.',
@@ -260,8 +260,16 @@ interface ElementoBlocco {
   /** L'indirizzo dell'elemento con i selettori della guida (non i valori corretti: le correzioni si indicizzano sulla guida). */
   percorsoElemento: string[];
   campi: CampoDef[];
+  /** I campi che l'elemento non offre perché è un oggetto del catalogo (`DefBlocco.soloSenzaOggetto`): solo per rimettere una correzione di prima. */
+  soloRipristino: ReadonlySet<string>;
   corretto: unknown;
   ambiguo: boolean;
+}
+const NESSUNO: ReadonlySet<string> = new Set();
+
+/** I selettori della guida collegati a un oggetto del catalogo per la fonte di `soloSenzaOggetto` (insieme vuoto se il tipo non la dichiara). */
+function selettoriConOggetto(def: DefBlocco): ReadonlySet<string> {
+  return def.soloSenzaOggetto ? new Set(ricompensePerFonte(def.soloSenzaOggetto.fonte).keys()) : NESSUNO;
 }
 
 const eOggetto = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -285,13 +293,13 @@ function elementiBlocco(def: DefBlocco): ElementoBlocco[] | null {
     for (const [chiave, v] of Object.entries(def.varianti)) {
       const el = cammina(base, v.radice);
       if (!eOggetto(el)) continue;
-      uscita.push({ chiave, chiaveBase: chiave, titolo: v.etichetta, percorsoElemento: [...v.radice], campi: v.campi, corretto: cammina(corretto, v.radice), ambiguo: false });
+      uscita.push({ chiave, chiaveBase: chiave, titolo: v.etichetta, percorsoElemento: [...v.radice], campi: v.campi, soloRipristino: NESSUNO, corretto: cammina(corretto, v.radice), ambiguo: false });
     }
     return uscita;
   }
   if (!def.sel) {
     const el = cammina(base, def.radice);
-    if (eOggetto(el)) uscita.push({ chiave: def.chiaveFissa ?? '', chiaveBase: def.chiaveFissa ?? '', titolo: def.etichetta, percorsoElemento: [...def.radice], campi: def.campi, corretto: cammina(corretto, def.radice), ambiguo: false });
+    if (eOggetto(el)) uscita.push({ chiave: def.chiaveFissa ?? '', chiaveBase: def.chiaveFissa ?? '', titolo: def.etichetta, percorsoElemento: [...def.radice], campi: def.campi, soloRipristino: NESSUNO, corretto: cammina(corretto, def.radice), ambiguo: false });
     return uscita;
   }
   const elenco = cammina(base, def.radice);
@@ -299,6 +307,7 @@ function elementiBlocco(def: DefBlocco): ElementoBlocco[] | null {
   if (!Array.isArray(elenco)) return uscita;
   const chiaveCampo = def.chiaveCampo ?? def.sel;
   const conteggio = new Map<string, number>();
+  const conOggetto = selettoriConOggetto(def);
   for (const e of elenco) {
     const s = eOggetto(e) ? comeChiave(e[def.sel]) : null;
     if (s !== null) conteggio.set(s, (conteggio.get(s) ?? 0) + 1);
@@ -311,7 +320,8 @@ function elementiBlocco(def: DefBlocco): ElementoBlocco[] | null {
     const ec = Array.isArray(elencoCorretto) && eOggetto(elencoCorretto[i]) ? elencoCorretto[i] as Record<string, unknown> : e;
     const chiave = comeChiave(ec[chiaveCampo]) ?? chiaveBase;
     const titolo = def.titolo ? def.titolo(ec) : comeChiave(ec[def.campoTitolo ?? 'nome']) ?? chiave;
-    uscita.push({ chiave, chiaveBase, titolo, percorsoElemento: [...def.radice, segmentoSelettore(def.sel!, selettore)], campi: def.campi, corretto: ec, ambiguo: (conteggio.get(selettore) ?? 0) > 1 });
+    const soloRipristino = conOggetto.has(selettore) ? new Set(def.soloSenzaOggetto?.campi ?? []) : NESSUNO;
+    uscita.push({ chiave, chiaveBase, titolo, percorsoElemento: [...def.radice, segmentoSelettore(def.sel!, selettore)], campi: def.campi, soloRipristino, corretto: ec, ambiguo: (conteggio.get(selettore) ?? 0) > 1 });
   });
   return uscita;
 }
@@ -344,6 +354,8 @@ function schedaBlocco(tipo: TipoModificabile, chiave: string): SchedaCorrezioneD
   let aggiornata: string | null = null;
   for (const c of e.campi) {
     const percorso = percorsoCampo(e, c.p);
+    // il campo che vive sulla scheda dell'oggetto si mostra solo se c'è una correzione di prima da rimettere com'era
+    if (e.soloRipristino.has(c.p) && !righe.has(percorso)) continue;
     const segmenti = analizzaPercorso(percorso);
     const g = risolvi(base, segmenti);
     const guida = g.trovato ? comeValore(g.valore) : undefined;
@@ -371,7 +383,13 @@ function correggiBlocco(tipo: TipoModificabile, chiave: string, campi: Record<st
     if (!c) throw httpErrors.badRequest('campo-non-modificabile', `Il campo «${p}» non si può correggere.`, { campo: p });
     const percorso = percorsoCampo(e, p);
     const g = risolvi(base, analizzaPercorso(percorso));
-    if (!g.trovato || comeValore(g.valore) === undefined) throw httpErrors.notFound('elemento-della-guida-non-trovato', `${def.etichetta} «${chiave}»: il campo «${c.e}» non c'è nella guida.`);
+    const inGuida = g.trovato && comeValore(g.valore) !== undefined;
+    // su un campo che vive sulla scheda dell'oggetto si accetta solo il ritorno al valore della guida (toglie la correzione di prima); la 279
+    // ha già tolto l'effetto dai premi che sono oggetti, quindi di norma il campo non c'è nemmeno nella guida
+    if (e.soloRipristino.has(p) && (!inGuida || !uguali(normalizza(c, tipoEffettivo(c, g.valore), grezzo, g.valore), g.valore))) {
+      throw httpErrors.badRequest('campo-dell-oggetto', `${def.etichetta} «${chiave}»: «${c.e}» è un dato dell'oggetto del catalogo e si corregge sulla sua scheda.`, { campo: p });
+    }
+    if (!inGuida) throw httpErrors.notFound('elemento-della-guida-non-trovato', `${def.etichetta} «${chiave}»: il campo «${c.e}» non c'è nella guida.`);
     daScrivere.push({ percorso, guida: g.valore, valore: normalizza(c, tipoEffettivo(c, g.valore), grezzo, g.valore) });
   }
   getDb().transaction(() => {

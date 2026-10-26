@@ -38,6 +38,8 @@ function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readon
   const catalogo = useCarica(() => getCatalogoOggetti(), []);
   const stato = { oggetti: catalogo.dati, caricamento: catalogo.caricamento, errore: catalogo.errore, onRicarica: () => void catalogo.ricarica() };
   const scelti = oggetti.map((o) => o.oggetto);
+  // revisione finale UX (A3): con più oggetti ogni «Togli» dice quale oggetto toglie (il nome del catalogo, o la chiave finché non è letto)
+  const nomeDi = (chiave: string) => catalogo.dati?.find((c) => c.chiave === chiave)?.nome ?? chiave;
   return (
     <div className="campo campo--largo flex flex-col gap-1.5">
       <span className="testo-13 text-text-secondary">Oggetti che l’esito dà (entrano fra quelli ottenuti nella partita)</span>
@@ -48,7 +50,7 @@ function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readon
               onScegli={(c) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, oggetto: c.chiave } : x)))} />
           </span>
           <CampoQuantita valore={o.quantita} disabilitato={disabilitato} onCambia={(q) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, quantita: Math.min(LIMITI_ESITI.quantita, q) } : x)))} />
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli l’oggetto" disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli l’oggetto" aria-label={`Togli l’oggetto ${nomeDi(o.oggetto)}`} disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
         </span>
       ))}
       {oggetti.length < LIMITI_ESITI.oggetti && (

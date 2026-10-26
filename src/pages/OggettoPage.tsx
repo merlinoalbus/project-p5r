@@ -123,7 +123,11 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             <NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={() => dati.ricarica()} />
             {/* Ondata 5, lotto F: un'arma senza altro effetto ha le sue statistiche (separate dall'effetto, migrazione 275), e un libro, un film o
                 un videogioco dice che cosa dà nella sezione della lettura (la copia nella descrizione è tolta, 279): allora l'avviso non serve */}
-            {!o.effetto && !o.descrizione && !o.lettura && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>}
+            {/* chiusura dell'ondata 5: un regalo senza effetto proprio dà l'affinità, che vive nelle reazioni dei Confidenti (sezione «A chi
+                piace»): lo si dice con una frase calcolata dalla categoria, non con l'etichetta «Regalo» che i dati ripetevano né con l'avviso */}
+            {!o.effetto && !o.descrizione && !o.lettura && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && (o.categoria === 'regalo'
+              ? <p className="m-0 testo-13 text-text-secondary text-pretty">Si regala ai Confidenti: chi lo gradisce di più lo dice «A chi piace».</p>
+              : <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>)}
             {o.statistiche && <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 testo-13">{Object.entries(o.statistiche).filter(([k, v]) => k !== 'effetti' && v !== null && (typeof v === 'number' || typeof v === 'string')).map(([k, v]) =>
               <div key={k} className="contents"><dt className="text-text-muted">{k === 'per' ? 'Per chi' : k === 'testo' ? 'Statistiche' : k === 'sessioni' ? 'Sessioni' : k}</dt><dd className="m-0 break-words">{String(v)}</dd></div>)}</dl>}
             {!!o.nomiAltri.length && <details><summary className="touch testo-13">Altri nomi</summary><ul className="m-0 pl-5 testo-13">{o.nomiAltri.map((n) => <li key={n}>{n}</li>)}</ul></details>}

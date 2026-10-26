@@ -23,7 +23,7 @@ import { regalaOggetto } from '../../services/api/partite';
 import { getCatalogoOggetti, getOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaPunti, formattaPunti, formattaYen } from '../../utils/punti';
-import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, eGradito, testoReazione } from '../../../shared/regali';
+import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, fraIGraditi, testoReazione } from '../../../shared/regali';
 import type { ReazioneRegalo } from '../../../shared/puntiConfidenti';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
@@ -58,11 +58,12 @@ function etichettaOfferta(o: OffertaOggettoDto): string {
   return `${dove}${o.prezzo !== null ? ` · ${o.prezzo === 0 ? 'Gratis' : formattaYen(o.prezzo)}` : ''}`;
 }
 
-/** Il gruppo dell'oggetto nel selettore: i graditi del Confidente per reazione (+3, +2), poi tutti gli altri regali a +1 (anche le righe
- *  dell'elenco a +1, che valgono quanto ogni altro regalo: revisione dei lotti D e D2), poi la Cartolina da spedire. */
-function gruppo(chiave: string, inElenco: ReazioneRegalo | undefined, nomeConfidente: string): string {
+/** Il gruppo dell'oggetto nel selettore: i graditi del Confidente per reazione, poi tutti gli altri regali a +1 (anche le righe dell'elenco a
+ *  +1, che valgono quanto ogni altro regalo: revisione dei lotti D e D2), poi la Cartolina da spedire. «Gradito» è lo stesso criterio della
+ *  scheda del Confidente e di «A chi piace» (`fraIGraditi`: più di +1, o una riga con una nota): revisione finale UX, A1. */
+function gruppo(chiave: string, inElenco: ReazioneRegalo | undefined, gradito: boolean, nomeConfidente: string): string {
   if (chiave === CARTOLINA) return `Da spedire · ${testoReazione(REAZIONE_CARTOLINA)}`;
-  return inElenco !== undefined && eGradito(inElenco) ? `Graditi a ${nomeConfidente} · ${testoReazione(inElenco)}` : `Altri regali · ${testoReazione(REAZIONE_FUORI_ELENCO)}`;
+  return inElenco !== undefined && gradito ? `Graditi a ${nomeConfidente} · ${testoReazione(inElenco)}` : `Altri regali · ${testoReazione(REAZIONE_FUORI_ELENCO)}`;
 }
 
 /** «Regala a …»: scelta dell'oggetto fra tutti i regali, reazione e punti previsti, copia posseduta o acquisto da segnare insieme. */
@@ -81,16 +82,19 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
     for (const g of elenco ?? []) if (g.catalogo && g.reazione !== null) m.set(g.catalogo.chiave, Math.max(m.get(g.catalogo.chiave) ?? 0, g.reazione) as ReazioneRegalo);
     return m;
   }, [elenco]);
+  /** Gli oggetti che la scheda del Confidente mostra fra i graditi (`fraIGraditi`): lo stesso raggruppamento nelle due pagine. */
+  const graditi = useMemo(() => new Set((elenco ?? []).filter((g) => g.catalogo && fraIGraditi({ catalogo: g.catalogo.chiave, reazione: g.reazione, nota: g.nota }))
+    .map((g) => g.catalogo!.chiave)), [elenco]);
   const opzioni = useMemo((): OpzioneSelettore[] => {
     const nomi = new Map<string, string>();
     for (const o of catalogo.dati ?? []) nomi.set(o.chiave, o.nome);
     for (const g of elenco ?? []) if (g.catalogo && !nomi.has(g.catalogo.chiave)) nomi.set(g.catalogo.chiave, g.catalogo.nome);
     // l'ordine segue i gruppi: i graditi dalla reazione più alta, poi gli altri a +1 (in elenco o no, insieme per nome), poi la Cartolina
-    const ordine = (k: string) => { const r = reazioni.get(k); return k === CARTOLINA ? -1 : r !== undefined && eGradito(r) ? r : 0; };
+    const ordine = (k: string) => { const r = reazioni.get(k); return k === CARTOLINA ? -1 : r !== undefined && graditi.has(k) ? r : 0; };
     return [...nomi].filter(([k]) => !ammessi || ammessi.includes(k))
       .sort(([a, na], [b, nb]) => ordine(b) - ordine(a) || na.localeCompare(nb, 'it'))
-      .map(([k, nome]) => ({ chiave: k, nome, gruppo: gruppo(k, reazioni.get(k), nomeConfidente) }));
-  }, [catalogo.dati, elenco, reazioni, ammessi, nomeConfidente]);
+      .map(([k, nome]) => ({ chiave: k, nome, gruppo: gruppo(k, reazioni.get(k), graditi.has(k), nomeConfidente) }));
+  }, [catalogo.dati, elenco, reazioni, graditi, ammessi, nomeConfidente]);
 
   const [chiave, setChiave] = useState(oggettoIniziale);
   const [vuoleAcquisto, setVuoleAcquisto] = useState<boolean | null>(null);

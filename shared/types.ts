@@ -1694,6 +1694,9 @@ export interface NegozioRiassuntoDto {
   sedeNome: string | null;
   /** Il programma punti dichiarato (migrazione 076), se il negozio ne ha uno. */
   programmaPunti: { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' } | null;
+  /** Chiusura dell'ondata 5: lo sconto legato al rango di un Confidente (`negozio.sconto_json`, migrazione 254), con il nome del Confidente;
+   *  null se il negozio non ne ha. */
+  sconto?: { confidente: string; confidenteNome: string; rango: number; percentuale: number } | null;
   articoli: number;
   verificati: number;
   /** Solo con `partita`: la presenza del negozio alla data corrente, dagli orari. */
@@ -1738,6 +1741,9 @@ export interface ArticoloDto {
   prezzo: number | null;
   /** Ondata 5 (lotto E, decisione 5): il prezzo in una fascia quando è diverso da `prezzo` (le sfide della Big Bang Burger di sera); null = nessuno. */
   prezzoPerFascia?: PrezzoPerFascia | null;
+  /** Chiusura dell'ondata 5: con la partita, il prezzo nella fascia corrente con lo sconto del negozio che vale adesso (la Clinica di Takemi
+   *  dal rango indicato): è l'importo che gli yen automatici scalano. Assente senza sconto attivo. */
+  prezzoScontato?: { prezzo: number; percentuale: number } | null;
   effetto: string | null;
   statistiche: string | null;
   /** Quante se ne possono comprare; `null` = nessun limite dichiarato (diverso da zero). */
@@ -3009,11 +3015,16 @@ export interface DettaglioSpilloDto {
     /** L5: gli orari del luogo in parole, la presenza, la pagina del luogo e tutti i negozi della sede. */
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
+    /** Seconda revisione della chiusura dell'ondata 5: la regola dello sconto del negozio (`NegozioRiassuntoDto.sconto`), che il pin dice quando
+     *  lo sconto non vale adesso, come «Dove si compra» della scheda dell'oggetto; null se il negozio non ne ha. */
+    sconto?: NegozioRiassuntoDto['sconto'];
     /** L5: la sezione del negozio nella pagina della sede, o null. */
     sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
       /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come
        *  nella pagina del negozio (`ArticoloDto`): la mappa mostra lo stesso dato nello stesso modo («Compra», «rimasti N di Q», «Annulla»). */
-      rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'] }> } | null;
+      rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'];
+      /** Revisione della chiusura dell'ondata 5 (B1): il prezzo con lo sconto del negozio che vale adesso nella partita, come nel listino. */
+      prezzoScontato?: ArticoloDto['prezzoScontato'] }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -3625,6 +3636,10 @@ export interface OffertaOggettoDto {
   prezzo: number | null;
   /** Ondata 5 (lotto E): il prezzo in una fascia quando è diverso da `prezzo`, dall'offerta. */
   prezzoPerFascia?: PrezzoPerFascia | null;
+  /** Revisione della chiusura dell'ondata 5 (B1): con la partita, il prezzo con lo sconto del negozio che vale adesso (l'importo che si scala). */
+  prezzoScontato?: ArticoloDto['prezzoScontato'];
+  /** Revisione della chiusura dell'ondata 5 (B1): lo sconto del negozio legato al rango di un Confidente, il dato del negozio; null se non ne ha. */
+  sconto?: NegozioRiassuntoDto['sconto'];
   costo: CostoOggettoDto | null;
   costoDaVerificare: boolean;
   condizioni: CondizioneSpilloDto[];

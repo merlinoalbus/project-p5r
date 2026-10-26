@@ -28,6 +28,7 @@ import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
+import { testoSconto } from '../../shared/scontiNegozi';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -89,6 +90,7 @@ export function NegozioPage() {
               {/* la guida del quiz dei lavori che si fanno qui (il Triple Seven): in oro se oggi, nella partita, c'è il quiz */}
               {n.quiz.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
               {n.programmaPunti && <span><strong className="text-text">Programma punti:</strong> {n.programmaPunti.nome} ({n.programmaPunti.unita}{n.programmaPunti.calcolo === 'rango-cliente' ? ', dal rango cliente' : ', si segnano a mano'})</span>}
+              {n.sconto && <span>{testoSconto(n.sconto, n.sconto.confidenteNome)}</span>}
             </div>
             <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </IntestazioneScheda>

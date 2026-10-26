@@ -38,6 +38,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna } from './pulizieL11.js';
 import { improntaDiario, notaStoricaTesti, scriviAuditTesti, sostanzaTesto, type NotaStoricaTesti } from './testiOndata5.js';
 import { invalidaCacheDiGioco } from '../../services/cacheDiGioco.js';
+import { segmentoSelettore } from '../../../shared/percorsoGuida.js';
+import { riallineaFotografieProposte } from './chiusuraOndata5.js';
 
 const AUDIT = 'audit-279-copie-in-prosa';
 const errore = (motivo: string): never => { throw new Error(`279: ${motivo}; nessuna modifica applicata.`); };
@@ -55,6 +57,15 @@ function scriviBlocco(db: AppDatabase, chiave: string, valore: unknown): void {
 function correzioni(db: AppDatabase, chiave: string): string[] {
   if (!esisteTabella(db, 'correzione_dati_guida')) return [];
   return db.prepare('SELECT percorso FROM main.correzione_dati_guida WHERE blocco = ?').pluck().all(chiave) as string[];
+}
+/**
+ * Vero se fra le correzioni c'è quella del campo `effetto` dell'elemento scelto con il selettore. L'indirizzo salvato codifica il valore del
+ * selettore (`segmentoSelettore`: «[nome=Velo%20invisibile%20(ricompensa%20finale)]»): si confronta con lo stesso segmento, non con il nome
+ * in chiaro (revisione del lotto F, terzo giro, rilievo 4: un nome con spazi non si trovava mai).
+ */
+function effettoCorretto(corrette: readonly string[], campo: string, valore: string): boolean {
+  const segmento = segmentoSelettore(campo, valore);
+  return corrette.some((p) => p.split('/').includes(segmento) && /(^|\/)effetto$/.test(p));
 }
 /** L'effetto dell'oggetto del catalogo, se è uno solo l'oggetto collegato alla fonte (una ricetta, un premio del Covo). */
 function effettoDellUnicoOggetto(db: AppDatabase, tipo: string, fonte: string): { chiave: string; effetto: string } | null {
@@ -76,7 +87,7 @@ function ricette(db: AppDatabase, esiti: Esito[]): number {
     const testo = typeof r.effetto === 'string' ? r.effetto : '';
     if (!testo) return r;
     const prodotto = effettoDellUnicoOggetto(db, 'ricetta', attrezzo);
-    if (corrette.some((p) => p.includes(attrezzo) && /effetto$/.test(p))) { esiti.push({ dove: 'ricette', chiave: attrezzo, esito: 'effetto corretto dall’utente: non toccato', prima: testo }); return r; }
+    if (effettoCorretto(corrette, 'attrezzo', attrezzo)) { esiti.push({ dove: 'ricette', chiave: attrezzo, esito: 'effetto corretto dall’utente: non toccato', prima: testo }); return r; }
     if (!prodotto) { esiti.push({ dove: 'ricette', chiave: attrezzo, esito: 'senza un prodotto unico collegato: resta', prima: testo }); return r; }
     if (sostanzaTesto(testo) !== sostanzaTesto(prodotto.effetto)) { esiti.push({ dove: 'ricette', chiave: attrezzo, esito: `diverso dall’effetto di ${prodotto.chiave}: resta`, prima: testo, dopo: prodotto.effetto }); return r; }
     cambiate++;
@@ -123,6 +134,20 @@ const COVO_VALUTATI: Readonly<Record<string, { testo: string; nota: NotaStoricaT
   },
 };
 
+/**
+ * Il premio senza il campo `effetto` (terzo giro, rilievo 3): il campo non resta vuoto ma esce dall'elemento della guida, così la finestra
+ * «Modifica» del premio non lo offre più (un campo che la guida non ha non si espone né si corregge: `ripristinoService.schedaBlocco`) e non
+ * nasce una correzione che sulla pagina del Covo vincerebbe sulla scheda dell'oggetto. Le fotografie delle proposte di collegamento ancora da
+ * approvare della ricompensa del premio (`ricompensa`/`covo/<nome>`, campo `effetto`) si riallineano: altrimenti risulterebbero «fonte cambiata»
+ * (revisione del terzo giro, rilievo basso). I premi che non sono un oggetto (decorazioni, statue, galleria) tengono il loro testo, unico punto.
+ */
+function senzaEffetto(db: AppDatabase, p: Record<string, unknown>, testo: string): Record<string, unknown> {
+  const resto = { ...p };
+  delete resto.effetto;
+  riallineaFotografieProposte(db, 'ricompensa', `covo/${String(p.nome ?? '')}`, 'effetto', testo, null);
+  return resto;
+}
+
 /** 3. I premi del Covo con un solo oggetto collegato: l'effetto è quello dell'oggetto. */
 function premiCovo(db: AppDatabase, esiti: Esito[]): number {
   const comp = blocco(db, 'completamento');
@@ -135,7 +160,7 @@ function premiCovo(db: AppDatabase, esiti: Esito[]): number {
     const testo = typeof p.effetto === 'string' ? p.effetto : '';
     const oggetto = testo ? effettoDellUnicoOggetto(db, 'covo', nome) : null;
     if (!oggetto) return p;
-    if (corrette.some((c) => c.includes(nome) && /effetto$/.test(c))) { esiti.push({ dove: 'covo', chiave: nome, esito: 'effetto corretto dall’utente: non toccato', prima: testo }); return p; }
+    if (effettoCorretto(corrette, 'nome', nome)) { esiti.push({ dove: 'covo', chiave: nome, esito: 'effetto corretto dall’utente: non toccato', prima: testo }); return p; }
     if (sostanzaTesto(testo) !== sostanzaTesto(oggetto.effetto)) {
       const valutato = COVO_VALUTATI[nome];
       if (!valutato || valutato.testo !== testo || !valutato.nota.catalogo.includes(oggetto.chiave)) {
@@ -144,11 +169,11 @@ function premiCovo(db: AppDatabase, esiti: Esito[]): number {
       const nota = notaStoricaTesti(db, valutato.nota);
       cambiate++;
       esiti.push({ dove: 'covo', chiave: nome, esito: `diverso dalla scheda, valutato: vale ${oggetto.chiave}, il testo del Covo va nella nota storica ${valutato.nota.chiave} (${nota.esito})`, prima: testo });
-      return { ...p, effetto: null };
+      return senzaEffetto(db, p, testo);
     }
     cambiate++;
     esiti.push({ dove: 'covo', chiave: nome, esito: `copia tolta (vale ${oggetto.chiave})`, prima: testo });
-    return { ...p, effetto: null };
+    return senzaEffetto(db, p, testo);
   });
   if (cambiate) scriviBlocco(db, 'completamento', { ...comp, covo: { ...covo, premi: nuovi } });
   return cambiate;

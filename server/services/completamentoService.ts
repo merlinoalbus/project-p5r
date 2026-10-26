@@ -34,11 +34,12 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const regali = partitaId === undefined ? null : regaliConsegnati(partitaId);
   const sfide = seed.covo.sfide.map((s) => (s.conteggio?.tipo === 'regali-consegnati' && regali !== null
     ? { ...s, progresso: { fatti: regali, obiettivo: s.conteggio.obiettivo, raggiunta: regali >= s.conteggio.obiettivo } } : s));
-  // Ondata 5, lotto F (migrazione 279): il premio che è un oggetto del catalogo ne legge l'effetto dal catalogo, il suo punto unico
+  // Ondata 5, lotto F (migrazione 279): il premio che è un oggetto del catalogo ne legge l'effetto dal catalogo, il suo punto unico; un testo
+  // del premio (una correzione di prima: la finestra «Modifica» non lo offre più, `registro.ts`) non lo sostituisce
   const effetti = effettiDegliOggetti([...premi.values()].flat().map((o) => o.chiave));
   const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => {
     const oggetti = premi.get(p.nome) ?? [];
-    return { ...p, effetto: effettoDellaFonte(p.effetto, oggetti, effetti) || null, oggettiRicompensa: oggetti };
+    return { ...p, effetto: effettoDellaFonte(oggetti.length ? null : p.effetto, oggetti, effetti) || null, oggettiRicompensa: oggetti };
   }) };
   return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
 }

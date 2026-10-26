@@ -48,6 +48,9 @@ export interface PropsSelettore {
    *  una griglia di campi (finestre di modifica, form). Senza la prop resta la forma di sempre (maiuscoletto sopra il valore, dentro il
    *  pulsante), che non allunga le righe fitte, le barre di filtri e le righe di tabella. Il compatto non ha mai l'etichetta visibile e ignora la prop. */
   etichettaSopra?: boolean;
+  /** Il messaggio d'errore del campo (modulo con la verifica dei campi): il pulsante diventa `aria-invalid` e il messaggio, scritto sotto, ne è
+   *  la descrizione accessibile (3.3.1). Senza, nessun cambiamento. */
+  errore?: string | null;
   className?: string;
 }
 
@@ -57,7 +60,7 @@ export interface PropsSelettore {
  * voci (con l'invito a restringere se ce ne sono di più), filtra senza accenti su nome, dettaglio e gruppo, e si
  * chiude scegliendo, con Esc o toccando fuori.
  */
-export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, etichettaSopra, className }: PropsSelettore) {
+export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, etichettaSopra, errore, className }: PropsSelettore) {
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
@@ -85,6 +88,8 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const attiva = filtrate.length === 0 ? -1 : Math.min(evidenziata, filtrate.length - 1);
   const idVoce = (i: number) => `${id}-voce-${i}`;
   const idValore = `${id}-valore`;
+  const idErrore = `${id}-errore`;
+  const descrizione = [nomeConValore ? null : idValore, errore ? idErrore : null].filter(Boolean).join(' ') || undefined;
 
   /** Apre la tendina con il filtro vuoto e la voce scelta evidenziata, decidendo da che lato ancorarla. */
   const apri = () => {
@@ -177,11 +182,12 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
       {/* etichetta sopra il pulsante (stile dei campi); il nome accessibile lo dà già `aria-label` del pulsante. Toccarla porta il fuoco
           sul pulsante, come una vera <label> */}
       {!compatto && etichettaSopra && <span className="campo__etichetta" aria-hidden="true" onClick={() => pulsante.current?.focus()}>{etichetta}</span>}
-      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? testoNoteAParole(scelta.nome) : segnaposto}` : etichetta} aria-describedby={nomeConValore ? undefined : idValore} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? testoNoteAParole(scelta.nome) : segnaposto}>
+      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? testoNoteAParole(scelta.nome) : segnaposto}` : etichetta} aria-describedby={descrizione} aria-invalid={errore ? true : undefined} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? testoNoteAParole(scelta.nome) : segnaposto}>
         {!compatto && !etichettaSopra && <span className="selettore__etichetta">{etichetta}</span>}
         <span id={idValore} className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? <TestoNote testo={scelta.nome} /> : segnaposto}</span>
         <span className="selettore__freccia" aria-hidden="true">▾</span>
       </button>
+      {errore && <p id={idErrore} className="m-0 mt-1 testo-12 text-error-testo">{errore}</p>}
       {aperto && (
         <div className={`selettore__tendina ${aDestra ? 'selettore__tendina--destra' : ''}`} onKeyDown={conRicerca ? tastiera : undefined}>
           {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} aria-activedescendant={attiva >= 0 ? idVoce(attiva) : undefined} autoComplete="off" autoFocus />}

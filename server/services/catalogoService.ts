@@ -35,6 +35,7 @@ import { verificaAttivitaConfidente, verificaCampiAttivitaConfidente } from './v
 import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { verificaDomandaEsame } from './esamiCollegamento.js';
+import { normalizzaSconto } from '../../shared/scontiNegozi.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 // Dalla voce 5 (2026-09-12) il negozio non ha più `sblocco`, `fonte` e `condizioni_json` fra i campi
@@ -44,7 +45,8 @@ import { verificaDomandaEsame } from './esamiCollegamento.js';
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
   // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
-  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'note'],
+  // chiusura dell'ondata 5: `sconto_json`, lo sconto legato al rango di un Confidente (migrazione 254), il suo unico punto
+  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
   // Ondata 5, lotto F (decisione 21): `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta — il testo dell'effetto e le
   // statistiche vivono in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`). Restano scrivibili solo
   // senza il catalogo (pacchetti di prima di M7, `campiDisponibili`), dove la riga è l'unico punto.
@@ -152,6 +154,8 @@ function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: strin
 
 /** Prima di M7 non legge/scrive la colonna nuova, neppure negli snapshot dei gesti esistenti. */
 function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
+  // un file di gioco di prima della 254 non ha lo sconto del negozio: non si legge né si scrive
+  if (tipo === 'negozio' && !prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get()) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
   return tipo === 'articolo' && !catalogoOggettiDisponibile()
     ? [...CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json'), 'effetto_json', 'effetto', 'statistiche'] : CAMPI[tipo];
 }
@@ -201,6 +205,9 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   if (tipo === 'negozio') {
     if (dati.luogo_chiave != null && !esiste('quartiere', dati.luogo_chiave)) throw httpErrors.badRequest('quartiere-sconosciuto', `Il quartiere '${String(dati.luogo_chiave)}' non esiste.`);
     if (dati.confidente_chiave != null && !esiste('confidente', dati.confidente_chiave)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${String(dati.confidente_chiave)}' non esiste.`);
+    // revisione della chiusura dell'ondata 5 (N3): il Confidente dello sconto esiste (con una chiave inesistente lo sconto non varrebbe mai)
+    const sconto = typeof dati.sconto_json === 'string' ? normalizzaSconto(dati.sconto_json) : null;
+    if (sconto && !esiste('confidente', sconto.confidente)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${sconto.confidente}' dello sconto non esiste.`);
     return;
   }
   const padre = PROFILO[tipo].padre;
@@ -621,7 +628,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   // (`giorni_json` e `giorni` del luogo non ci sono più, L11 migrazione 184: i giorni sono gli orari del luogo.)
   const predefinito = (c: string): unknown => c === 'verificato' ? 1 : null;
   // Un'istantanea anteriore a L5/M7 non azzera orari, Area o il legame canonico aggiunti dopo.
-  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo', 'esiti_json', 'rifornimento_json', 'prezzo_per_fascia_json']);
+  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo', 'esiti_json', 'rifornimento_json', 'prezzo_per_fascia_json', 'sconto_json']);
   const campi = campiDisponibili(tipo).filter((c) => c in originale || !campiSuccessivi.has(c));
   if (tipo === 'articolo' && campi.includes('catalogo_chiave') && typeof originale.catalogo_chiave === 'string'
     && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(originale.catalogo_chiave)) {
