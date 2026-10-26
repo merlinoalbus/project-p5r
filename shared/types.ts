@@ -1305,7 +1305,13 @@ export interface SuggerimentiOggiDto {
 
 export interface StatoAzioneDto {
   tipo: 'consigliata' | 'bloccata' | 'neutra';
+  /** La frase breve da mostrare. Per «bloccata» è solo la condizione che manca («dal 20 aprile», «Coraggio Rango 2»), senza la parola
+   *  «Bloccata» (la dicono il lucchetto e lo stile del chip) e senza il dettaglio, che sta in `dettaglio`. */
   motivo: string | null;
+  /** Solo per «bloccata»: la frase completa dello stato della partita («Disponibile dal 20 aprile, oggi è il 18 aprile»), per il nome
+   *  accessibile e il titolo del chip; non ripete la condizione breve. Assente o null: basta `motivo` (2026-10-26, «le etichette di testo
+   *  devono essere visibili solo se hanno senso»: la data era scritta due volte). */
+  dettaglio?: string | null;
 }
 
 /** Che cosa è una voce della giornata: una cosa da fare (`azione`, si spunta) o un promemoria (solo da leggere, senza casella). */

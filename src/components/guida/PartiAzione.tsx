@@ -62,6 +62,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
     const t = a.yenGiaNelSaldo?.effetti.includes(e.uid) ? a.produceTesto?.[i] : undefined;
     return t?.includes(' paga ¥') ? [t.slice(t.indexOf('paga ¥'))] : [];
   });
+  // la frase completa del blocco (titolo e nome accessibile del chip): il dettaglio dal server, o la condizione breve se non c'è
+  const fraseBlocco = stato?.tipo === 'bloccata' ? (stato.dettaglio || stato.motivo) : null;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
   // R10-27. Nella Home e nella Guida › Giorno per giorno (dove il diario ha il pannello, `useApriPannello`) un clic semplice sull'oggetto
@@ -124,7 +126,14 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
       {a.quiz?.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro testo-12" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
-      {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata testo-12" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
+      {/* 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): il lucchetto e lo stile dicono già «bloccata»,
+          il chip mostra solo la condizione che manca («dal 20 aprile»); la frase completa («Disponibile dal 20 aprile, oggi è il 18 aprile»)
+          sta nel titolo e nel nome accessibile, come in `ChipDisponibilita` */}
+      {stato?.tipo === 'bloccata' && (
+        <span className="chip chip--icona chip--bloccata testo-12" title={fraseBlocco || 'Bloccata'} role="img" aria-label={fraseBlocco ? `Bloccata: ${fraseBlocco}` : 'Bloccata'}>
+          <IconaAzione chiave="bloccato" dimensione={12} />{stato.motivo || 'Bloccata'}
+        </span>
+      )}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="testo-12 text-text-muted">{stato.motivo}</span>}
       {/* R9-06: il testo salvato della voce non si riscrive; se il nome del Confidente è cambiato, il nome di adesso sta accanto */}
       {a.riferimentoNomeAttuale && <span className="testo-12 text-text-muted" title="Il testo della voce usa il nome di prima">oggi: {a.riferimentoNomeAttuale}</span>}

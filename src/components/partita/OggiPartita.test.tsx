@@ -20,7 +20,7 @@ const giorno: PercorsoGiornoDto = {
   giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo giorno.', vincoli: [], meteo: 'sereno', avvisi: [], fonte: '', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0, meteoPartita: null, allerte: [],
   azioni: [
     { uid: '00000000000000000000000000000000', giorno: '04-12', genere: 'azione', fascia: 'giorno', azione: 'Parla con Ryuji in cortile', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji', rangoAtteso: 2, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' }, mappa: { chiave: 'citta-shibuya', spilloId: 7 } },
-    { uid: '00000000000000000000000000000001', giorno: '04-12', genere: 'azione', fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null },
+    { uid: '00000000000000000000000000000001', giorno: '04-12', genere: 'azione', fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, produce: [], produceTesto: [], fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio Rango 2', dettaglio: 'Coraggio: rango 1 di 2' }, mappa: null },
   ],
 };
 /** Dettaglio di una mappa seed (città se la chiave è «tokyo», altrimenti quartiere figlio di tokyo) con un solo spillo Confidente «Cortile della Shujin». */
@@ -48,7 +48,11 @@ describe('OggiPartita', () => {
     expect(api.getPercorsoGiorno).toHaveBeenCalledWith('04-12', 4);
     expect(screen.getByText('Oggi nella partita')).toBeInTheDocument();
     expect(screen.getByText('Consigliata · requisiti del rango 2 soddisfatti')).toBeInTheDocument();
-    expect(screen.getByText('Bloccata: Coraggio rango 2 (rango 1 di 2)')).toBeInTheDocument();
+    // il chip mostra solo la condizione (il lucchetto dice «bloccata»); la frase completa sta nel nome accessibile e nel titolo, senza ripetizioni
+    const chipBloccata = screen.getByRole('img', { name: 'Bloccata: Coraggio: rango 1 di 2' });
+    expect(chipBloccata).toHaveTextContent(/^Coraggio Rango 2$/);
+    expect(chipBloccata).toHaveAttribute('title', 'Coraggio: rango 1 di 2');
+    expect(screen.queryByText(/Bloccata:/)).toBeNull();
     expect(screen.getByText('1 consigliate · 1 bloccate')).toBeInTheDocument();
     // Al livello di Tokyo c'e' la mappa **disegnata**, la stessa de «La citta'»: era la
     // planimetria dell'atlante, cioe' una seconda rappresentazione della stessa citta' dentro la
