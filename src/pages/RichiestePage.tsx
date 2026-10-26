@@ -100,7 +100,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
     if (stato === 'accettata' && r.statoPartita?.stato === 'da-verificare'
       && !(await conferma({ titolo: `Accettare «${r.nome}»?`, testo: `Lo sblocco o la scadenza non sono ancora dati verificati: ${r.statoPartita.motivi.join(' ')} Controlla nel gioco che sia davvero disponibile.`, etichetta: 'Accetta' }))) return;
     setOccupato(true);
-    // dopo il cambio di stato il server può aver creato o chiuso la proposta degli yen (decisione 3): «Applica» si rilegge subito
+    // dopo il cambio di stato il server ha mosso da solo gli yen (decisione 18) o, per una proposta nata prima, l'ha chiusa: tutto si rilegge subito
     try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); segnalaMutazioneEffetti(partitaId); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
@@ -150,12 +150,25 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       {r.ombra && <span className="testo-12 text-text-secondary">Ombra del compendio: <strong className="text-text">{r.ombra.nome}</strong>{r.ombra.livello ? ` · livello ${r.ombra.livello}` : ''}</span>}
       {!!r.oggettiRicompensa?.length && <div className="min-w-0 testo-12"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
       {(r.yen || r.esperienza) && <span className="testo-12 text-text-secondary">{[r.yen ? `¥${r.yen.toLocaleString('it-IT')}` : null, r.esperienza ? `${r.esperienza.toLocaleString('it-IT')} PE` : null].filter(Boolean).join(' · ')}</span>}
+      {/* L13 (decisione 18): che cosa fanno davvero gli yen della ricompensa in questa partita (il server lo legge dal registro): con una proposta
+          «Applica» nata prima (`yenDaProposta`) vale quella, qui sotto; entrati da soli completandola; già nel saldo da prima (`fuori-registro`,
+          dal momento del completamento); completata dopo senza che entrassero (`non-entrati`); altrimenti entreranno completandola */}
+      {partitaId && !!r.yen && r.yen > 0 && <span className="testo-12 text-text-muted">{r.statoPartita?.yenDaProposta
+        ? 'La ricompensa in yen di questa Richiesta è legata a una proposta «Applica» nata prima: non entra né esce da sola dal saldo.'
+        : r.statoPartita?.yenRicompensa === 'entrati'
+          ? 'La ricompensa in yen è entrata da sola nel saldo; riaprendo la Richiesta si toglie (al più fino a zero).'
+          : r.statoPartita?.yenRicompensa === 'fuori-registro'
+            ? 'La ricompensa in yen era già nel saldo da prima che gli yen si muovessero da soli: completandola o riaprendola il saldo non cambia.'
+            : r.statoPartita?.yenRicompensa === 'non-entrati'
+              ? 'La ricompensa in yen non è entrata nel saldo quando hai completato la Richiesta (in quel momento non era scritta, o passava da una proposta «Applica»), e correggere i dati dopo non muove il saldo. Se nel gioco l’hai ricevuta, aggiungila nel Denaro del gruppo.'
+              : 'Completandola, la ricompensa in yen entra da sola nel saldo.'}</span>}
       {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
         ? <details className="testo-12 text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
         : <span className="testo-12 text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
 
-      {/* L13 (decisione 3): le ricompense le applica la Richiesta completata. Gli yen: «Applica» qui (anche l'inversa, se la si riapre dopo
-          averli applicati); gli oggetti del catalogo sono fra gli oggetti ottenuti della partita, finché resta completata */}
+      {/* L13 (decisione 3): le ricompense le applica la Richiesta completata. Gli yen (decisione 18) si muovono da soli; qui restano solo le
+          proposte «Applica» nate prima (anche l'inversa, se la si riapre dopo averli applicati); gli oggetti del catalogo sono fra gli oggetti
+          ottenuti della partita, finché resta completata */}
       {partitaId && !!r.yen && r.yen > 0 && <DaApplicare partitaId={partitaId} richiesta={r.chiave} />}
       {partitaId && r.stato === 'completata' && !!r.oggettiRicompensa?.length && (
         <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Fra gli oggetti ottenuti"

@@ -90,7 +90,19 @@ export function CampoYen({ importo, onCambia }: { importo: number; onCambia: (im
         <input className="form-input min-h-11 w-40" type="number" inputMode="numeric" min={1} max={YEN_MASSIMI_EFFETTO} step={1} value={valore || ''}
           onChange={(ev) => { const n = Math.min(YEN_MASSIMI_EFFETTO, Math.max(0, Math.trunc(Number(ev.target.value) || 0))); onCambia(verso === 'spesi' ? -n : n); }} />
       </label>
-      <p className="m-0 testo-12 text-text-secondary">Come le Doti, gli yen non si muovono da soli: spuntando la voce compare «Applica» sulla voce. Non si usa se la voce ha già un acquisto, una pesca o una Richiesta completata (i loro yen li porta quel dato).</p>
+      <p className="m-0 testo-12 text-text-secondary text-pretty">Spuntando la voce gli yen entrano da soli nel saldo o se ne scalano, mai sotto zero: la spunta resta possibile anche se il saldo non basta. Togliendo la spunta torna quanto era stato mosso.</p>
+      <details className="testo-12 text-text-secondary">
+        <summary className="cursor-pointer touch">Quando non si usa</summary>
+        <p className="m-0 text-pretty">Se la voce ha già un dato che porta i suoi yen, li muove quel dato:</p>
+        <ul className="m-0 flex flex-col gap-0.5 pl-5">
+          <li>un acquisto o un articolo comprato;</li>
+          <li>una visita di pesca;</li>
+          <li>una Richiesta completata;</li>
+          <li>il turno di un’attività o di un lavoro con costo, paga o sfida;</li>
+          <li>la visione di un film con il biglietto;</li>
+          <li>il collegamento della voce a un film, un’attività o una Richiesta con i loro yen.</li>
+        </ul>
+      </details>
     </div>
   );
 }

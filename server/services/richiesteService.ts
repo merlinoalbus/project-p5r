@@ -23,6 +23,7 @@ import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggett
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
+import { riallineaYenRichiesta, statoYenRichiesta, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
@@ -110,6 +111,14 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   return { ...base, stato: 'disponibile', accettabile: true, motivi: grigi };
 }
 
+/** Decisione 18: che cosa fanno gli yen della ricompensa nella partita (proposta «Applica» di prima, entrati da soli, già nel saldo da prima,
+ *  non entrati), ricavato dal registro e dal momento del completamento. */
+function yenDellaRicompensa(partitaId: number, chiave: string): Pick<StatoCalcolatoRichiestaDto, 'yenDaProposta' | 'yenRicompensa'> {
+  if (yenPropostiInSospeso(partitaId, 'richiesta', chiave)) return { yenDaProposta: true };
+  const y = statoYenRichiesta(partitaId, chiave);
+  return y ? { yenRicompensa: y } : {};
+}
+
 /** Una Richiesta come DTO: bersaglio (risolto dall'Ombra del compendio, se c'è) e ricompense dai JSON, Confidente collegato (con il nome,
  *  o la chiave se manca), dedalo e stato nella partita (null se non è segnata); con lo stato della partita, anche lo stato calcolato. */
 function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave]), st: StatoDisponibilita | null = null,
@@ -122,7 +131,12 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
     proroga: r.proroga_data ? { data: r.proroga_data, condizioni: leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)) } : null,
     ombra,
     yen: r.yen, esperienza: r.esperienza,
-    ...(st ? { statoPartita: statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi) } : {}),
+    ...(st ? { statoPartita: {
+      ...statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi),
+      // decisione 18: gli yen di una Richiesta con una proposta «Applica» di prima passano ancora da lei (la pagina non dice che entrano da soli);
+      // altrimenti che cosa fanno davvero nella partita (entrati da soli, o già nel saldo da prima), perché la frase della pagina sia sempre vera
+      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave) : {}),
+    } } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],
     oggettiRicompensa: premi.get(r.chiave) ?? [],
@@ -198,7 +212,8 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
   if (!r) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${chiave}' non esiste.`);
   const adesso = nowIso();
   getDb().transaction(() => {
-    const prima = (prepared('SELECT stato FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta } | undefined)?.stato ?? null;
+    const rigaPrima = prepared('SELECT stato, updated_at FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta; updated_at: string } | undefined;
+    const prima = rigaPrima?.stato ?? null;
     // L13: «Accetta» solo da disponibile (bloccata o scaduta: 409 col motivo). Completarla resta sempre possibile (la spunta di una voce
     // o chi gioca la segna fatta: un dato di sblocco sbagliato non deve impedire di registrare quel che è successo nel gioco)
     if (stato === 'accettata' && prima !== 'accettata') {
@@ -206,15 +221,19 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
       if (!s.accettabile) throw httpErrors.conflict('richiesta-non-disponibile', `La Richiesta «${r.nome}» non si può accettare: ${s.stato === 'scaduta' ? 'è scaduta' : s.stato === 'completata' ? 'è già completata' : 'è bloccata'}${s.motivi.length ? ` (${s.motivi.join('; ')})` : ''}.`);
     }
     if (stato === null) prepared('DELETE FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').run(partitaId, chiave);
-    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at').run(partitaId, chiave, stato, adesso);
+    // L13 (decisione 18): `updated_at` è il momento in cui la Richiesta ha preso il suo stato (per gli yen, il momento del completamento,
+    // `yenAutomaticiService.statoYenRichiesta`): segnare di nuovo lo stesso stato non lo sposta
+    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END').run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
       registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${r.area}${r.piano ? ` (${r.piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
     }
-    // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen: la proposta «Applica» (causa «richiesta»), come
-    // gli yen di una voce; togliendo il completamento la proposta aperta si chiude, quella già applicata ha la sua inversa. Gli oggetti: il
-    // registro degli oggetti ottenuti li legge dallo stato completato (`oggettiOttenutiPartita`), una volta sola e senza copie da tenere allineate
-    if ((prima === 'completata') !== (stato === 'completata')) riconciliaBeneficiRichiesta(partitaId, chiave);
+    // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen (decisione 18): entrano da soli nel saldo
+    // completandola e si tolgono (al più fino a zero) riaprendola (`riallineaYenRichiesta`); una proposta «Applica» nata prima resta al suo
+    // registro (aperta: decidibile; applicata: la sua inversa). Gli oggetti: il registro degli oggetti ottenuti li legge dallo stato completato
+    // (`oggettiOttenutiPartita`), una volta sola e senza copie da tenere allineate
+    // riaprendola, il momento del completamento dice se la sua ricompensa era già nel saldo da prima degli yen automatici
+    if ((prima === 'completata') !== (stato === 'completata')) { riallineaYenRichiesta(partitaId, chiave, 'stato', prima === 'completata' ? rigaPrima?.updated_at ?? null : null); riconciliaBeneficiRichiesta(partitaId, chiave); }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   // con lo stato calcolato dopo il cambio (la pagina sostituisce la carta con questa)
@@ -314,7 +333,9 @@ function aggiornaCampiStrutturati(chiave: string, dati: DatiRichiesta): void {
   const yenPrima = (prepared('SELECT yen FROM richiesta WHERE chiave = ?').get(chiave) as { yen: number | null } | undefined)?.yen ?? null;
   if (nomi.length) prepared(`UPDATE richiesta SET ${nomi.map((n) => `${n} = ?`).join(', ')} WHERE chiave = ?`).run(...nomi.map((n) => campi[n]), chiave);
   scriviOggetti(chiave, dati.oggetti);
-  // L13 (decisione 3): gli yen corretti di una Richiesta già completata in qualche partita: la sua proposta si riallinea (la differenza, mai un doppio)
+  // L13 (decisione 3): gli yen corretti di una Richiesta già completata in qualche partita: la sua proposta di prima, se c'è, si riallinea (la
+  // differenza, mai un doppio). Decisione 18: gli yen già entrati da soli restano quelli del completamento (fotografati al gesto, come la quota
+  // della pesca): il nuovo importo vale dal prossimo completamento, nessun saldo cambia in silenzio per una correzione dei dati
   if (dati.yen !== undefined && (dati.yen ?? null) !== yenPrima) {
     for (const p of prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? AND stato = 'completata'").pluck().all(chiave) as number[]) riconciliaBeneficiRichiesta(p, chiave);
   }
@@ -492,18 +513,19 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
  *
  * L13: se ne vanno con lei anche gli sblocchi ricevuti nelle partite (`utente.sblocco_partita`, scritti dalle voci con l'effetto «sblocco»):
  * sono uno stato della Richiesta nella partita come `richiesta_partita`, e il cestino li registra e li rimette col ripristino (gli effetti
- * delle voci che la citano restano, come le condizioni). Gli yen della Richiesta completata si riallineano come togliendo il completamento: la
- * proposta aperta si chiude, quella già applicata ha la sua inversa (dopo il ripristino si riallineano di nuovo, `riconciliaBeneficiRichiesta`).
+ * delle voci che la citano restano, come le condizioni). Gli yen della Richiesta completata si riallineano come togliendo il completamento: quelli
+ * entrati da soli tornano (al più fino a zero), la proposta aperta di prima si chiude, quella già applicata ha la sua inversa (dopo il ripristino si
+ * riallineano di nuovo, `riallineaYenRichiesta` e `riconciliaBeneficiRichiesta`).
  */
 export function eliminaRichiesta(chiave: string): void {
   const r = rigaRichiesta(chiave);
   conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area }, () => {
-    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ?").pluck().all(chiave, chiave) as number[];
+    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ? UNION SELECT partita_id FROM utente.yen_automatico WHERE causa_tipo = 'richiesta' AND causa_chiave = ? AND annullato_il IS NULL").pluck().all(chiave, chiave, chiave) as number[];
     prepared('DELETE FROM richiesta_partita WHERE richiesta_chiave = ?').run(chiave);
     prepared("DELETE FROM utente.sblocco_partita WHERE bersaglio_tipo = 'richiesta' AND bersaglio_chiave = ?").run(chiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared("UPDATE voce_giornata SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared('DELETE FROM richiesta WHERE chiave = ?').run(chiave);
-    for (const p of partite) riconciliaBeneficiRichiesta(p, chiave);
+    for (const p of partite) { riallineaYenRichiesta(p, chiave, 'eliminazione'); riconciliaBeneficiRichiesta(p, chiave); }
   });
 }

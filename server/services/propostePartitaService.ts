@@ -11,6 +11,7 @@ import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
+import { yenPropostiInSospeso } from './yenAutomaticiService.js';
 
 export const nuovoUid = (): string => randomBytes(16).toString('hex');
 export function jsonCanonico(v: unknown): string {
@@ -65,11 +66,14 @@ export const verificaBeneficio = (v: unknown): Beneficio => {
 function targetCausa(partita: number, causa: Causa): Target[] {
   if(causa.tipo==='richiesta'){
     // L13 (decisione 3): gli yen della Richiesta li applica solo la Richiesta completata (`richiesta.yen`): beneficio attivo finché è completata
-    // nella partita; tolto il completamento (o eliminata la Richiesta) il beneficio resta descritto dalle righe di prima, non più attivo
+    // nella partita; tolto il completamento (o eliminata la Richiesta) il beneficio resta descritto dalle righe di prima, non più attivo.
+    // Decisione 18: la Richiesta completata muove i suoi yen da sola (`yenAutomaticiService.riallineaYenRichiesta`): qui il beneficio resta attivo
+    // SOLO per una causa che ha ancora yen proposti in sospeso nel registro delle proposte (una proposta aperta, o yen applicati non tornati a
+    // zero), così quella proposta resta decidibile e quella applicata ritrova la sua causa; altrimenti nessuna proposta «Applica» nuova
     const r=prepared("SELECT r.nome,r.yen FROM main.richiesta r JOIN utente.richiesta_partita p ON p.richiesta_chiave=r.chiave AND p.partita_id=? AND p.stato='completata' WHERE r.chiave=?").get(partita,causa.chiave) as {nome:string;yen:number|null}|undefined;
     const insieme=new Map<string,Target>();
     for(const x of righeCausa(partita,causa)){const b=verificaBeneficio(leggiOggettoRegistro(x.dati_json,'proposta richiesta').beneficio);insieme.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
-    if(r&&Number.isSafeInteger(r.yen)&&(r.yen as number)>0)insieme.set('yen\0yen',{tipo:'yen',chiave:'yen',delta:r.yen as number,motivo:`Yen della Richiesta «${r.nome}» completata: applicali quando li ricevi nel gioco.`,fortunaIgnota:false,storica:false,attiva:true});
+    if(r&&Number.isSafeInteger(r.yen)&&(r.yen as number)>0&&yenPropostiInSospeso(partita,'richiesta',causa.chiave))insieme.set('yen\0yen',{tipo:'yen',chiave:'yen',delta:r.yen as number,motivo:`Yen della Richiesta «${r.nome}» completata: applicali quando li ricevi nel gioco.`,fortunaIgnota:false,storica:false,attiva:true});
     return [...insieme.values()];
   }
   if(causa.tipo==='pesca'){
@@ -84,7 +88,8 @@ function targetCausa(partita: number, causa: Causa): Target[] {
       const d = leggiOggettoRegistro(a.dati_json,'consumo');
       if (d.regola !== 'aojiru' || d.versione !== 1 || !eDote(d.variante) || !(d.fortuna === null || typeof d.fortuna === 'boolean')||a.prezzo_yen!==5000||Object.keys(d).some((k)=>!['regola','versione','variante','fortuna'].includes(k))) throw httpErrors.conflict('consumo-non-valido','I dati della consumazione non sono validi.');
       const attiva = !!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? LIMIT 1').get(partita,causa.chiave);
-      // Gli yen non sono più una proposta (BON-12): si cambiano a mano, la proposta Dote porta il promemoria della spesa.
+      // Gli yen non sono più una proposta (BON-12): la proposta Dote porta il costo della consumazione come dato. L13 (decisione 18): la
+      // consumazione nuova registrata dalla spunta di una voce li scala da sola dal saldo (`motoreDiario.yenDellEffetto`).
       return [
         { tipo:'dote',chiave:d.variante,delta:d.fortuna === true ? moltiplicaFortuna(2) : 2,motivo:d.fortuna === null ? 'Aojiru: sola base certa di 2 punti; bonus Fortuna non attestato.' : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva },
         ...righeCausa(partita,causa).filter((r)=>r.tipo==='yen'&&r.stato==='aperta'&&r.delta_applicato===0&&r.delta_riconosciuto===0).map((r):Target=>({...verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta').beneficio),attiva:false})),
@@ -333,7 +338,7 @@ function dto(r:RigaProposta):PropostaPartitaDto {
   // L13: per gli yen di una Richiesta completata, la frase che la nomina (non c'è una voce)
   const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null)
     :causa.tipo==='richiesta'?`Richiesta «${(prepared('SELECT nome FROM main.richiesta WHERE chiave=?').get(causa.chiave) as {nome:string}|undefined)?.nome??causa.chiave}» completata`:null;
-  // BON-12: la spesa del consumo non è una proposta; la proposta Dote la porta come promemoria (gli yen si cambiano a mano)
+  // BON-12: la spesa del consumo non è una proposta; la proposta Dote la porta come dato (decisione 18: dal Diario si scala da sola)
   const promemoriaYen=r.tipo==='dote'&&causa.tipo==='acquisto'?((prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {prezzo_yen:number}|undefined)?.prezzo_yen??null):null;
   // BON-01: la voce del Diario a cui il pulsante «Applica» si aggancia (quella della proposta, o quella che ha confermato il consumo)
   const voceUid=r.voce_uid??(causa.tipo==='acquisto'?((prepared('SELECT voce_uid FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? AND voce_uid IS NOT NULL ORDER BY rowid LIMIT 1').get(r.partita_id,causa.chiave) as {voce_uid:string}|undefined)?.voce_uid??null):null);
@@ -369,9 +374,9 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
   const proposte=righe.map(dto), virtuali=new Map<string,MovimentoPropostoDto>();
   for(const p of proposte) {
     if(r.decisione.tipo==='applica') {
-      // BON-12: gli yen di un consumo restano un promemoria a mano. L13 (ondata 3, decisione 1): gli yen dichiarati da un effetto «yen» di una
-      // voce si applicano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`); così quelli di una Richiesta
-      // completata (decisione 3), dal pulsante «Applica» sulla sua carta
+      // BON-12: gli yen di un consumo non sono una proposta. L13 (ondata 3, decisione 1): gli yen dichiarati da un effetto «yen» di una voce si
+      // applicavano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`); così quelli di una Richiesta
+      // completata (decisione 3). Dalla decisione 18 si muovono da soli (`yenAutomaticiService`): qui passano solo le proposte nate prima, ancora aperte
       if(p.tipo==='yen'&&p.causa.tipo!=='voce'&&p.causa.tipo!=='richiesta')throw httpErrors.conflict('yen-a-mano','Gli yen non si applicano da qui: non c’è niente da applicare.');
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};

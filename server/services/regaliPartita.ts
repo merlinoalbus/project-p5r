@@ -2,6 +2,32 @@
 import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { nomiAltriOggetto } from './catalogoOggettiLetture.js';
+import { causaYenRegalo, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaRegaloDiPrimaTolto } from './yenAutomaticiService.js';
+
+/** La consegna di prima degli yen automatici che aveva segnato anche l'acquisto: l'oggetto e il momento di gioco della consegna. */
+interface ConsegnaDiPrima { catalogo: string; data: string | null; fascia: string | null }
+/**
+ * L13 (decisione 18): la consegna tolta, per qualunque strada (l'azione «Togli regalo», o il vecchio comando per nome quando il collegamento al
+ * catalogo non c'è più), porta con sé il prezzo che il regalo aveva scalato da solo: torna ciò che era stato scalato. La causa del movimento è il
+ * nome storico della consegna, che non cambia con la fusione o l'eliminazione dell'oggetto. Una consegna di prima degli yen automatici con
+ * l'acquisto non ha movimento (il suo prezzo era già nel saldo): si segna con l'oggetto e il momento di gioco, così ridando lo stesso oggetto nello
+ * stesso momento (la stessa consegna corretta) il saldo non cambia, e in un altro momento il regalo nuovo si paga.
+ */
+function togliYenDelRegalo(partita: number, confidente: string, regalo: string, diPrima: ConsegnaDiPrima | null): void {
+  if (diPrima) segnaRegaloDiPrimaTolto(partita, confidente, diPrima.catalogo, diPrima.data, diPrima.fascia);
+  restituisciYenAutomatico(partita, causaYenRegalo(confidente, regalo), 'regalo-tolto');
+}
+/**
+ * La consegna, se era di prima degli yen automatici e aveva segnato anche l'acquisto dell'articolo (colonne della 035; su un file più vecchio
+ * nessuna consegna lo ricorda): solo allora il suo prezzo era nel saldo di allora (senza acquisto non c'era niente da pagare). Da leggere
+ * prima di toglierla.
+ */
+function consegnaDiPrima(partita: number, confidente: string, regalo: string): ConsegnaDiPrima | null {
+  if (!(prepared('PRAGMA utente.table_info(regalo_partita)').all() as Array<{ name: string }>).some((c) => c.name === 'acquisto_articolo')) return null;
+  const r = prepared('SELECT fatto_at, catalogo_chiave, acquisto_articolo, data_gioco, fascia_gioco FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?')
+    .get(partita, confidente, regalo) as { fatto_at: string; catalogo_chiave: string | null; acquisto_articolo: string | null; data_gioco: string | null; fascia_gioco: string | null } | undefined;
+  return r?.acquisto_articolo && r.catalogo_chiave && nataPrimaDegliYenAutomatici(r.fatto_at) ? { catalogo: r.catalogo_chiave, data: r.data_gioco, fascia: r.fascia_gioco } : null;
+}
 
 export type SceltaRegalo = string | { catalogo: string };
 export interface RegaloDellaPartita { confidente: string; nome: string; catalogo: string | null }
@@ -50,7 +76,10 @@ export function scriviRegaloPartita(partita: number, confidente: string, scelta:
   if (!conChiavi) {
     if (nomeLegacy === null) throw httpErrors.conflict('catalogo-non-disponibile', 'Il catalogo dei regali non è ancora disponibile.');
     if (fatto) prepared('INSERT OR IGNORE INTO regalo_partita (partita_id,confidente_chiave,regalo,fatto_at) VALUES (?,?,?,?)').run(partita, confidente, nomeLegacy, nowIso());
-    else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, nomeLegacy);
+    else {
+      const diPrima = consegnaDiPrima(partita, confidente, nomeLegacy);
+      if (prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, nomeLegacy).changes) togliYenDelRegalo(partita, confidente, nomeLegacy, diPrima);
+    }
     return;
   }
 
@@ -69,7 +98,11 @@ export function scriviRegaloPartita(partita: number, confidente: string, scelta:
   if (!fatto) {
     // Se la guida è cambiata, il vecchio comando per nome può ancora togliere la propria riga storica.
     const daTogliere = nomeLegacy !== null ? righe.filter((r) => equivalenti.includes(r) || r.regalo === nomeLegacy) : equivalenti;
-    for (const r of daTogliere) prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, r.regalo);
+    for (const r of daTogliere) {
+      const diPrima = consegnaDiPrima(partita, confidente, r.regalo);
+      prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, r.regalo);
+      togliYenDelRegalo(partita, confidente, r.regalo, diPrima);
+    }
     return;
   }
   if (equivalenti.length) {

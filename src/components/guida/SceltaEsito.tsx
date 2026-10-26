@@ -6,7 +6,8 @@
 // registra un turno, quale esito si è ottenuto: come la scelta delle note di un Confidente (`SceltaNote`), con «Senza punti» e «Annulla».
 // Una Dote a valori possibili (la fabbricazione: ♪♪ o ♪♪♪) chiede le note fra quelle dichiarate, o «nessuna». Gli esiti non ancora possibili
 // (le condizioni dell'esito o dell'articolo della sfida, per esempio il rango) si vedono con il motivo ma non si toccano: il server li rifiuta.
-// Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (promemoria: gli yen si cambiano a mano) e i premi in parole.
+// Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (L13, decisione 18: registrando il turno si scala da solo dal saldo,
+// mai sotto zero) e i premi in parole.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -29,7 +30,7 @@ function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: strin
 }
 
 /** L'elenco degli esiti come bersagli da toccare (≥ 44 px), con quello scelto in evidenza; i non possibili sono spenti col motivo. */
-function ElencoEsiti({ esiti, scelto, occupato, onScegli }: { esiti: readonly EsitoDisponibileDto[]; scelto: string | null | undefined; occupato: boolean; onScegli: (chiave: string) => void }) {
+function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = false }: { esiti: readonly EsitoDisponibileDto[]; scelto: string | null | undefined; occupato: boolean; onScegli: (chiave: string) => void; prezzoGiaNelSaldo?: boolean }) {
   // gli esiti non ancora possibili restano raggiungibili da tastiera (aria-disabled, non disabled): il motivo è scritto nel bottone e
   // collegato con aria-describedby; il tocco non fa nulla (il server li rifiuta comunque)
   const prefisso = useId();
@@ -37,7 +38,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli }: { esiti: readonly Es
     <span className="flex w-full flex-col gap-1.5">
       {perGruppo(esiti).map((g) => (
         <span key={g.gruppo ?? '-'} className="flex flex-col gap-1" role="group" aria-label={g.gruppo ?? 'Esiti'}>
-          {g.gruppo && <span className="text-text-secondary">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}` : ''}</span>}
+          {g.gruppo && <span className="text-text-secondary tabular-nums">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}, ${prezzoGiaNelSaldo ? 'già nel saldo da prima che gli yen si muovessero da soli (non si scala)' : 'si scala da solo dal saldo (mai sotto zero)'}` : ''}</span>}
           <span className="flex flex-wrap gap-1.5">
             {g.esiti.map((e) => {
               const idMotivo = `${prefisso}-motivo-${e.chiave}`;
@@ -119,7 +120,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         return (
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Esito: ${s.attivitaNome}`}>
             <span className="w-full text-text-secondary">{s.attivitaNome}: che esito hai ottenuto?</span>
-            <ElencoEsiti esiti={s.esiti} scelto={v?.tipo === 'turno' ? v.esito : undefined} occupato={occupato} onScegli={(c) => imposta(s.effettoUid, { tipo: 'turno', esito: c })} />
+            <ElencoEsiti esiti={s.esiti} scelto={v?.tipo === 'turno' ? v.esito : undefined} occupato={occupato} onScegli={(c) => imposta(s.effettoUid, { tipo: 'turno', esito: c })} prezzoGiaNelSaldo={s.yenGiaNelSaldo === true} />
             <button type="button" className={`chip touch ${v?.tipo === 'turno' && v.esito === null ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'turno' && v.esito === null} onClick={() => imposta(s.effettoUid, { tipo: 'turno', esito: null })}>Senza punti</button>
           </span>
         );
