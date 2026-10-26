@@ -310,7 +310,8 @@ export function nomePalazzo(chiave: string, nomi: NomiCondizioni = {}): string {
 export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni = {}): string {
   switch (r.tipo) {
     case 'gruppo': return (r.modo === 'tutte' ? 'Tutte: ' : 'Almeno una: ') + r.condizioni.map(c => descriviRequisitoSpillo(c, nomi)).join(' · ');
-    case 'non': return 'Non: ' + descriviRequisitoSpillo(r.condizione, nomi);
+    // L13 (decisione 4): «non: articolo ottenuto X» è l'alternativa d'acquisto (Set A o Set B delle televendite): si legge come tale
+    case 'non': return r.condizione.tipo === 'articolo' ? `Non insieme a «${nomi.articoli?.[r.condizione.articolo] ?? 'un altro articolo'}»` : 'Non: ' + descriviRequisitoSpillo(r.condizione, nomi);
     case 'data': return `dal ${dataLeggibile(r.dal)}`;
     case 'intervallo': return r.dal === r.al ? `solo il ${dataLeggibile(r.dal)}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
     case 'fascia': return `solo di ${r.fascia}`;
@@ -472,4 +473,15 @@ export function foglieCondizione(r: RequisitoSpillo): RequisitoSpillo[] {
   if (r.tipo === 'gruppo') return r.condizioni.flatMap(foglieCondizione);
   if (r.tipo === 'non') return foglieCondizione(r.condizione);
   return [r];
+}
+
+/**
+ * L13 (decisione 4, televendite): gli articoli con cui questo articolo NON si compra insieme, dalle sue condizioni: ogni «non: articolo
+ * ottenuto X» al primo livello (fra tutte quelle dell'articolo, che valgono tutte insieme). È il solo modo di dichiarare un'alternativa
+ * d'acquisto: il Set A porta «non: Set B» e viceversa, nel catalogo, in un solo punto. Chiavi distinte, nell'ordine delle condizioni.
+ */
+export function articoliIncompatibili(condizioni: readonly RequisitoSpillo[]): string[] {
+  const out: string[] = [];
+  for (const c of condizioni) if (c.tipo === 'non' && c.condizione.tipo === 'articolo' && !out.includes(c.condizione.articolo)) out.push(c.condizione.articolo);
+  return out;
 }

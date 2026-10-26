@@ -47,6 +47,8 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
           <li key={`${i}:${r.nome}`} className="flex min-w-0 flex-col testo-13 min-[641px]:col-span-2 min-[641px]:grid min-[641px]:grid-cols-subgrid min-[641px]:items-baseline">
             <span className={`min-w-0 break-words ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}>{r.nome}</span>
             {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
+            {/* L13 (decisione 4): che cosa contiene un set, in una riga sotto nome e prezzo, su tutta la larghezza; va a capo, mai troncato */}
+            {r.contenuto && <span className="min-w-0 break-words testo-12 text-text-muted text-pretty min-[641px]:col-span-2">{r.contenuto}</span>}
           </li>
         ))}
       </ul>

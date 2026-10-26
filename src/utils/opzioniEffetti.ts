@@ -29,6 +29,16 @@ export function opzioniDomande(el: ElenchiVoce, corrente: number | null): Opzion
   return conCorrente(o, corrente === null || corrente < 1 ? '' : String(corrente), 'Domanda non più nell’elenco');
 }
 
-/** Gli articoli dei negozi con il prezzo; con `negozio`, solo quelli di quel negozio. */
-export const opzioniArticoli = (e: ElenchiEffettiVoceDto, negozio?: string): OpzioneSelettore[] => e.articoli.filter((a) => !negozio || a.negozio === negozio)
-  .map((a) => ({ chiave: a.chiave, nome: a.nome, dettaglio: a.prezzo !== null ? `¥${a.prezzo.toLocaleString('it-IT')}` : undefined, gruppo: a.negozioNome }));
+/**
+ * Gli articoli dei negozi con il prezzo; con `negozio`, solo quelli di quel negozio. Un articolo nascosto nel catalogo non si propone (la voce
+ * che lo cita ancora lo tiene con `conCorrente`). L13: un articolo che si compra un giorno solo (i set delle televendite) porta il giorno nel
+ * dettaglio («¥1.680 · 24 aprile»); con `giorno` (quello della voce) gli articoli di quel giorno vengono per primi, nel gruppo «Di questo giorno».
+ */
+export const opzioniArticoli = (e: ElenchiEffettiVoceDto, negozio?: string, giorno?: string): OpzioneSelettore[] => {
+  const o = e.articoli.filter((a) => !a.nascosto && (!negozio || a.negozio === negozio)).map((a) => {
+    const dettaglio = [a.prezzo !== null ? `¥${a.prezzo.toLocaleString('it-IT')}` : '', a.giorno ? dataGiocoTesto(a.giorno) : ''].filter(Boolean).join(' · ');
+    return { chiave: a.chiave, nome: a.nome, ...(dettaglio ? { dettaglio } : {}), gruppo: giorno && a.giorno === giorno ? 'Di questo giorno' : a.negozioNome };
+  });
+  // l'ordinamento è stabile: dentro i due gruppi resta l'ordine del catalogo
+  return giorno ? o.sort((a, b) => (a.gruppo === b.gruppo ? 0 : a.gruppo === 'Di questo giorno' ? -1 : b.gruppo === 'Di questo giorno' ? 1 : 0)) : o;
+};

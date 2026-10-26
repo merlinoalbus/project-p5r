@@ -7,6 +7,8 @@
 // Una Dote a valori possibili (la fabbricazione: ♪♪ o ♪♪♪) chiede le note fra quelle dichiarate, o «nessuna». Gli esiti non ancora possibili
 // (le condizioni dell'esito o dell'articolo della sfida, per esempio il rango) si vedono con il motivo ma non si toccano: il server li rifiuta.
 // Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (promemoria: gli yen si cambiano a mano) e i premi in parole.
+// L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite) chiedono quale si è comprato, o «Nessuno»
+// (`SceltaAcquistoAlternativo`), con le stesse regole: con una sola scelta il tocco spunta, con più scelte si conferma.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -14,6 +16,7 @@ import type { EsitoDisponibileDto, SceltaEsitoSpunta, SceltaEsitoVoceDto } from 
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/letture';
+import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
 
 /** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪ (2 punti ciascuna)» → qui una per una, «Coraggio ♪ · 2». */
 const dotiTesto = (e: EsitoDisponibileDto): string => e.doti.length ? e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') : 'nessuna Dote';
@@ -72,11 +75,15 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla }:
   );
 }
 
-type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 };
+type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null };
 
-/** La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile) o le note proposte. */
+/** La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile), le note proposte o il set già comprato nella partita. */
 function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore | undefined> {
-  return Object.fromEntries(scelte.map((s) => [s.effettoUid, s.tipo === 'dote' ? { tipo: 'dote', note: s.preselezionato } : s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined]));
+  return Object.fromEntries(scelte.map((s): [string, Valore | undefined] => {
+    if (s.tipo === 'dote') return [s.effettoUid, { tipo: 'dote', note: s.preselezionato }];
+    if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
+    return [s.effettoUid, s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined];
+  }));
 }
 
 /**
@@ -91,7 +98,9 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
   const unica = scelte.length === 1;
   const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
     const x = v[s.effettoUid]!;
-    return x.tipo === 'dote' ? { effettoUid: s.effettoUid, tipo: 'dote', note: x.note } : { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
+    if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
+    if (x.tipo === 'alternativa') return { effettoUid: s.effettoUid, tipo: 'alternativa', scelto: x.scelto };
+    return { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
   });
   const imposta = (uid: string, v: Valore) => {
     if (unica) { onConferma(costruisci({ [uid]: v })); return; }
@@ -115,6 +124,10 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
             ))}
             <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
           </span>
+        );
+        // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) quello comprato, o «Nessuno»
+        if (s.tipo === 'alternativa') return (
+          <SceltaAcquistoAlternativo key={s.effettoUid} s={s} scelto={v?.tipo === 'alternativa' ? v.scelto : undefined} occupato={occupato} onScegli={(uid) => imposta(s.effettoUid, { tipo: 'alternativa', scelto: uid })} />
         );
         return (
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Esito: ${s.attivitaNome}`}>

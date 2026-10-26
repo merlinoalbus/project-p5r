@@ -1443,7 +1443,16 @@ export interface ElenchiAzioneDto {
  */
 export interface ElenchiEffettiVoceDto {
   /** Articoli dei negozi (l'Aojiru ha il suo effetto e non c'è): `chiave` è «negozio/articolo». */
-  articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null }>;
+  articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null;
+    /** L13: l'articolo è nascosto nel catalogo (per esempio il vecchio articolo unico delle televendite): resta per il nome, non si propone. */
+    nascosto?: true;
+    /** L13 (decisione 4): gli articoli con cui non si compra insieme (le sue condizioni «non: articolo ottenuto», in tutte e due le direzioni). */
+    incompatibili?: string[];
+    /** L13: il giorno «MM-GG» in cui solo si compra, se le sue condizioni lo limitano a un giorno (i set delle televendite). */
+    giorno?: string;
+    /** L13 (decisione 4): che cosa contiene (le righe di `ricompensa_oggetto` dell'articolo), se il catalogo lo dice. */
+    contenuto?: Array<{ nome: string; quantita: number | null }>;
+  }>;
   /** Domande in classe, esami e quiz: `id` è il numero che l'effetto «domanda» cita. */
   domande: Array<{ id: number; giorno: string; testo: string; tipo: string }>;
   cruciverba: Array<{ data: string; indizio: string }>;

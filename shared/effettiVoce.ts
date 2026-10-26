@@ -241,9 +241,11 @@ export interface RigaContoArticoli { chiave: string; nome: string; copie: number
  * il totale in yen (null se nessun articolo ha il prezzo: «¥0» sarebbe falso) e quante copie non hanno prezzo. null senza articoli.
  * È l'unico conto: lo usano la frase `riepilogoArticoli`, il riepilogo per gruppi della voce e il modulo della voce.
  */
-export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): { righe: RigaContoArticoli[]; totale: number | null; senzaPrezzo: number } | null {
+export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined, escludi?: ReadonlySet<string>): { righe: RigaContoArticoli[]; totale: number | null; senzaPrezzo: number } | null {
+  // `escludi` (L13, decisione 4): gli articoli in alternativa fra loro (Set A o Set B): uno solo, o nessuno, si compra alla spunta, quindi non
+  // entrano nel conto «tutto insieme»; il riepilogo li mostra a parte («Uno a scelta»)
   const copie = new Map<string, number>();
-  for (const e of effetti) if (e.tipo === 'articolo') copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
+  for (const e of effetti) if (e.tipo === 'articolo' && !escludi?.has(e.articolo)) copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
   if (copie.size === 0) return null;
   let totale = 0, senzaPrezzo = 0, conPrezzo = 0;
   const righe = [...copie].map(([chiave, q]): RigaContoArticoli => {
@@ -253,6 +255,35 @@ export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave
     return { chiave, nome: a?.nome ?? 'Articolo', copie: q, prezzoUnitario: unitario, prezzo: unitario === null ? null : unitario * q };
   });
   return { righe, totale: conPrezzo === 0 ? null : totale, senzaPrezzo };
+}
+
+/**
+ * L13 (decisione 4 dell'utente: «Televendite: due articoli distinti per Set A e Set B, ciascuno con prezzo e contenuto propri»): gli articoli
+ * di una voce che sono alternative fra loro. Due articoli sono alternativi se uno dei due dichiara nel catalogo «non insieme all'altro»
+ * (`articoliIncompatibili` delle sue condizioni: basta da una parte); un gruppo è l'insieme degli articoli della voce legati così, anche a catena
+ * (A–B, B–C). Solo i gruppi di almeno due articoli PRESENTI nella voce: un articolo la cui alternativa non è nella voce si compra come gli altri.
+ * Nella voce non si dichiara niente: lo dice il catalogo. Alla spunta se ne sceglie uno, o nessuno. Gruppi e membri nell'ordine della voce.
+ */
+export function gruppiAlternativi(chiavi: readonly string[], incompatibili: (chiave: string) => readonly string[] | undefined): string[][] {
+  const presenti = [...new Set(chiavi)];
+  const dentro = new Set(presenti);
+  const vicini = new Map<string, Set<string>>(presenti.map((k) => [k, new Set<string>()]));
+  for (const k of presenti) for (const altro of incompatibili(k) ?? []) {
+    if (altro === k || !dentro.has(altro)) continue;
+    vicini.get(k)!.add(altro);
+    vicini.get(altro)!.add(k);
+  }
+  const visto = new Set<string>();
+  const gruppi: string[][] = [];
+  for (const k of presenti) {
+    if (visto.has(k) || vicini.get(k)!.size === 0) continue;
+    const membri = new Set<string>([k]);
+    const coda = [k];
+    while (coda.length) for (const v of vicini.get(coda.shift()!)!) if (!membri.has(v)) { membri.add(v); coda.push(v); }
+    for (const m of membri) visto.add(m);
+    gruppi.push(presenti.filter((x) => membri.has(x)));
+  }
+  return gruppi;
 }
 
 /**

@@ -41,6 +41,7 @@ import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
+import { articoliSegnatiDallaVoce, contenutoArticoli, incompatibiliDi } from './alternativeAcquistiService.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -84,11 +85,14 @@ const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT no
  * `i`), e il riepilogo per gruppi che la pagina mostra («Il gioco dà», richiesta dell'utente del 2026-10-25: «formattarlo in modo adeguato,
  * per tutti gli acquisti»). Il totale degli articoli sta nel riepilogo (gruppo «Acquisti · negozio»), non più in una riga «In tutto» in coda.
  */
-function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
+function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, comprati?: ReadonlySet<string>): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
   const nomiFrase = nomiFraseEffetto();
+  // L13 (decisione 4): gli articoli in alternativa (Set A o Set B) e che cosa contengono; a voce fatta (`comprati`, gli articoli che la spunta
+  // ha segnato) fra le alternative resta solo quella comprata
+  const contenuti = contenutoArticoli(fonte.effetti.flatMap(({ effetto: e }) => (e.tipo === 'articolo' ? [e.articolo] : [])));
   return {
     testo: testoEffettiDellaFonte(fonte, nomi, nomiFrase),
-    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno }),
+    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) }, comprati ? { comprati } : {}),
   };
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi. */
@@ -230,7 +234,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi) : null),
+    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? articoliSegnatiDallaVoce(ctx.partita, r.uid) : undefined) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa

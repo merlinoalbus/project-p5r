@@ -21,7 +21,8 @@ import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from
 import { fontiPesca } from './pescaLetture.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
-import { risolviScelteSpunta, type SceltaRisolta } from './esitiAttivitaService.js';
+import { risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
+import { risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
@@ -327,6 +328,11 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   if(stato.stato!=='convertita')throw httpErrors.conflict('effetti-da-correggere','Il RAW storico non è convertibile: correggi gli effetti prima di una nuova spunta.');
   verificaLista(stato.effetti);
   if(prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))throw httpErrors.conflict('voce-gia-spuntata','Una spunta presente non viene rieseguita.');
+  // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) se ne compra uno, o nessuno: la scelta si verifica PRIMA di ogni
+  // scrittura, al giorno della voce; gli effetti non scelti restano fuori dagli effetti di stato (niente acquisto, niente yen, niente da annullare)
+  const v=voce(uid),momento={data:v.data,fascia:v.fascia};
+  const scelteAlternative=(opz.scelteEsito??[]).filter((s):s is Extract<SceltaEsitoSpunta,{tipo:'alternativa'}>=>s.tipo==='alternativa'),scelteAltre=(opz.scelteEsito??[]).filter((s)=>s.tipo!=='alternativa');
+  const alternative=risolviAlternativeAcquisti(stato.effetti,scelteAlternative,()=>statoAlMomento(p,momento));
   const consumi=stato.effetti.filter((e)=>e.effetto.tipo==='acquisto'),richieste=opz.acquisti??[];
   if(richieste.length!==consumi.length||new Set(richieste.map((r)=>r.fonte.tipo==='diario'?r.fonte.effettoUid:'')).size!==richieste.length||new Set(richieste.map((r)=>r.operazioneId)).size!==richieste.length)throw httpErrors.conflict('dati-acquisti-richiesti','Rivedi ogni consumazione della voce e invia variante osservata, Fortuna, eventuale raccordo e token insieme alla spunta, con operazioni distinte.');
   const receiptNuovi:ReceiptEffettoVoceDto[]=[],generazione=nuovoUid(),pesche=stato.effetti.filter(e=>e.effetto.tipo==='pesca'),richiestePesca=opz.pesche??[];
@@ -340,7 +346,7 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&e.effetto.tipo!=='yen'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
   // L13: le scelte d'esito (turni delle attività con esiti, Doti a valori possibili) si verificano tutte insieme, prima degli effetti legacy e nella
   // transazione della spunta: una scelta mancante o rifiutata annulla anche consumi e pesca già registrati qui sopra (niente resta a metà)
-  const v=voce(uid),risolte=risolviScelteSpunta(p,{data:v.data,fascia:v.fascia},legacy,opz.scelteEsito);
+  const risolte=risolviScelteSpunta(p,momento,legacy,scelteAltre);
   const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto),legacy.map((e)=>risolte.get(e.uid))),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
   for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));}
   // L13: gli yen della voce: una ricevuta col beneficio, da cui nasce la proposta «Applica» (gli yen non si muovono da soli); togliendo la spunta la ricevuta si annulla e la proposta si chiude
@@ -351,8 +357,10 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   }
   // la lettura della buona sorte: la spunta accende la Fortuna sulla Dote dell'effetto (si spegne togliendo la spunta o al cambio di giorno)
   for(const e of stato.effetti)if(e.effetto.tipo==='fortuna')accendiFortunaDaVoce(p,uid,e.effetto.dote);
-  // gli effetti «segna lo stato» (evento di storia, domanda, cruciverba, Richiesta): stessi setter delle pagine, con il «prima» ricordato
-  applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
+  // gli effetti «segna lo stato» (evento di storia, domanda, cruciverba, Richiesta): stessi setter delle pagine, con il «prima» ricordato.
+  // L13: senza gli articoli alternativi non scelti; la disponibilità degli articoli si valuta al giorno della voce (lo stato si rilegge qui,
+  // dopo consumi e turni)
+  applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)&&!alternative.esclusi.has(e.uid)?[{uid:e.uid,effetto:e.effetto}]:[]),{st:stato.effetti.some((e)=>e.effetto.tipo==='articolo')?statoAlMomento(p,momento):undefined,scelti:alternative.scelti});
   return {effettiLegacy,receiptNuovi,proposte:leggiPropostePartita(p)};
 }
 
