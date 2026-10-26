@@ -19,6 +19,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { LARGHEZZA_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
 import { piatto } from '../../utils/testo';
+import { testoNoteAParole } from '../../../shared/note';
+import { TestoNote } from './TestoNote';
 
 export interface OpzioneSelettore { chiave: string; nome: string; dettaglio?: string; gruppo?: string; testoRicerca?: string }
 
@@ -175,9 +177,9 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
       {/* etichetta sopra il pulsante (stile dei campi); il nome accessibile lo dà già `aria-label` del pulsante. Toccarla porta il fuoco
           sul pulsante, come una vera <label> */}
       {!compatto && etichettaSopra && <span className="campo__etichetta" aria-hidden="true" onClick={() => pulsante.current?.focus()}>{etichetta}</span>}
-      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? scelta.nome : segnaposto}` : etichetta} aria-describedby={nomeConValore ? undefined : idValore} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? scelta.nome : segnaposto}>
+      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? testoNoteAParole(scelta.nome) : segnaposto}` : etichetta} aria-describedby={nomeConValore ? undefined : idValore} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? testoNoteAParole(scelta.nome) : segnaposto}>
         {!compatto && !etichettaSopra && <span className="selettore__etichetta">{etichetta}</span>}
-        <span id={idValore} className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? scelta.nome : segnaposto}</span>
+        <span id={idValore} className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? <TestoNote testo={scelta.nome} /> : segnaposto}</span>
         <span className="selettore__freccia" aria-hidden="true">▾</span>
       </button>
       {aperto && (
@@ -194,7 +196,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
                 // La voce è l'`option` stessa (nessun pulsante dentro): ha un id per `aria-activedescendant`, il tocco la sceglie.
                 <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
                   <div className="selettore__pulsante touch">
-                    <span className="min-w-0 flex-1 break-words">{o.nome}</span>
+                    <span className="min-w-0 flex-1 break-words"><TestoNote testo={o.nome} /></span>
                     {o.dettaglio && <span className="text-text-muted testo-12 shrink-0">{o.dettaglio}</span>}
                   </div>
                 </li>,

@@ -14,13 +14,15 @@ import { CampoTesto } from '../shared/Campo';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { CondizioniEditor } from './CondizioniEditor';
 import { useCarica } from '../../hooks/useCarica';
 import { getElenchiRegole } from '../../services/api';
 import { CHIAVI_DOTI, nomeDote, type DoteChiave } from '../../../shared/doti';
+import { SCELTE_NOTE } from '../../../shared/note';
 import { LIMITI_ESITI, MODI_ESITI, chiaveEsitoDaNome, fraseDotiEsito, normalizzaEsitiAttivita, type EsitiAttivita, type EsitoAttivita } from '../../../shared/esitiAttivita';
 
-const NOTE: Array<{ chiave: string; nome: string }> = [{ chiave: '1', nome: '♪ (1 nota)' }, { chiave: '2', nome: '♪♪ (2 note)' }, { chiave: '3', nome: '♪♪♪ (3 note)' }];
+const NOTE: Array<{ chiave: string; nome: string }> = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
 
 /** Una chiave nuova dal nome, distinta da quelle già usate. */
 function chiaveNuova(nome: string, usate: ReadonlySet<string>): string {
@@ -72,7 +74,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong> · {fraseDotiEsito(e.doti)}{e.gruppo ? ` · ${e.gruppo}` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong> · <TestoNote testo={fraseDotiEsito(e.doti)} />{e.gruppo ? ` · ${e.gruppo}` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
                   onClick={() => { const resto = elenco.filter((_, j) => j !== i); onCambia(resto.length ? { ...esiti!, esiti: resto } : null); }} />

@@ -44,7 +44,7 @@ describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
     expect(r.status).toBe(201);
     expect(r.body.data).toMatchObject({
       tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
-      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'], fatta: false, effetti: null,
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio ♪'], fatta: false, effetti: null,
     });
     expect((await crea('04-25', { azione: 'x', riferimento: { tipo: 'confidente', chiave: 'nessuno' } })).body.error.code).toBe('riferimento-inesistente');
     expect((await crea('04-25', { azione: 'x', tipo: 'boh' })).status).toBe(400);

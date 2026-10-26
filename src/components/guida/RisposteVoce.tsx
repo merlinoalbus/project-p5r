@@ -14,6 +14,8 @@ import { useState } from 'react';
 import type { AzionePercorsoDto, DialogoVoceDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
+import { simboliNote } from '../../../shared/note';
 
 /** Le scelte di un evento: la (o le) migliori in evidenza, il valore in note o come lo scrive la guida. */
 function ScelteEvento({ d }: { d: DialogoVoceDto }) {
@@ -22,12 +24,12 @@ function ScelteEvento({ d }: { d: DialogoVoceDto }) {
     <ol className="m-0 p-0 list-none flex flex-col gap-1">
       {d.scelte.map((s) => {
         const top = migliore > 0 && s.note === migliore;
-        const valore = s.note !== null ? '♪'.repeat(s.note) : s.puntiTesto ?? '';
+        const valore = s.note !== null ? simboliNote(s.note) : s.puntiTesto ?? '';
         return (
           <li key={s.ordine} className={`risposta-voce ${top ? 'risposta-voce--migliore' : ''}`} title={s.avviso ?? undefined}>
             <span className="text-text-muted tabular-nums">{s.ordine}.</span>
             <span className={`flex-1 min-w-0 ${s.romantica ? 'text-primary-testo' : ''}`}>{s.testo}{s.romantica ? ' (relazione romantica)' : ''}</span>
-            {valore && <span className={`chip testo-12 ${top ? 'chip--attivo' : ''}`}>{valore}</span>}
+            {valore && <span className={`chip testo-12 ${top ? 'chip--attivo' : ''}`}><TestoNote testo={valore} /></span>}
           </li>
         );
       })}

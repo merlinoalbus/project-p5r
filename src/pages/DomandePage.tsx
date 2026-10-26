@@ -35,6 +35,7 @@ import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { TestoNote } from '../components/shared/TestoNote';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -54,9 +55,9 @@ const ancoraData = (data: string) => `domande-${data}`;
  */
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
-  // Solo dove la guida scrive «Conoscenza +1 nota» (le domande in classe): gli esami «contribuiscono alla
+  // Solo dove la guida scrive «Conoscenza +1 nota» o «Conoscenza ♪» (le domande in classe): gli esami «contribuiscono alla
   // classifica» e i quiz in TV parlano di «aumento», e per quelli non c'è una nota da ricordare.
-  const daConoscenza = /Conoscenza \+/.test(d.ricompensa);
+  const daConoscenza = /Conoscenza (\+|♪)/.test(d.ricompensa);
   /** Segna la domanda fatta o no nella partita, chiedendo la nota di Conoscenza solo quando la si segna fatta e la ricompensa la prevede; passa al genitore l'elenco restituito, ricorda le Doti da segnare o notifica l'errore. */
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
@@ -96,7 +97,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <span className="text-text-muted">{d.chi}</span>
           {d.tipo !== 'classe' && <span className="chip">{NOME_TIPO[d.tipo]}</span>}
           {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
-          {d.ricompensa && <span className="testo-12 text-text-muted">{d.ricompensa}</span>}
+          {d.ricompensa && <span className="testo-12 text-text-muted"><TestoNote testo={d.ricompensa} daParole="guida" /></span>}
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
@@ -192,7 +193,7 @@ export function DomandePage() {
             </ul>
             {d.premi && (
               <div className="testo-12 text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> {Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
+                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> <TestoNote testo={Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')} daParole="guida" /></span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
                 {d.premi.moltiplicatoreConfidenti && <span>{d.premi.moltiplicatoreConfidenti}</span>}
                 {d.premi.requisitoConoscenza && <span>Per il primo posto: {Object.entries(d.premi.requisitoConoscenza).filter(([k]) => k !== 'fonte').map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>}
                 {d.premi.trofeo && <span>{d.premi.trofeo}</span>}

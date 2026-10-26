@@ -20,6 +20,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { dotiEsitoConPunti, leggiEsitiAttivita, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
 import { nomeDote } from '../../shared/doti.js';
+import { simboliPossibili } from '../../shared/note.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -153,7 +154,7 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
         if (opz.storico) throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: le note si scelgono alla spunta. Togli e rimetti la spunta della voce per sceglierle.`);
         throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: scegli quante note hai ottenuto (o «nessuna») prima di spuntare.`);
       }
-      if (s.note !== 0 && !e.possibili.includes(s.note)) throw httpErrors.badRequest('note-non-possibili', `${nomeDote(e.dote)}: le note possibili sono ${e.possibili.join(', ')}.`);
+      if (s.note !== 0 && !e.possibili.includes(s.note)) throw httpErrors.badRequest('note-non-possibili', `${nomeDote(e.dote)}: le note possibili sono ${simboliPossibili(e.possibili)}.`);
       out.set(uid, { tipo: 'dote', note: s.note });
     } else if (e.tipo === 'turno') {
       const a = esitiDellAttivita(e.attivita);

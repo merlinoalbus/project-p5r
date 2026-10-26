@@ -23,6 +23,7 @@ import { useNomiPerEffetti } from './nomiPerEffetti';
 import { CostoOfferta } from './CostoOfferta';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
+import { TestoNote } from '../../shared/TestoNote';
 
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
@@ -42,7 +43,7 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       {collegato && <div className="flex min-w-0 flex-col gap-1 testo-13">
         <Link className="touch inline-flex items-center self-start" to={collegato.casa}>{collegato.nome}</Link>
         <span className="text-text-muted">{CATEGORIA_OGGETTO[collegato.categoria].nome}</span>
-        {collegato.effetto && <p className="m-0 whitespace-pre-wrap">{collegato.effetto}</p>}
+        {collegato.effetto && <p className="m-0 whitespace-pre-wrap"><TestoNote testo={collegato.effetto} daParole="conteggi" /></p>}
       </div>}
       {chiave && !nuovo && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Scollega l’oggetto" className="self-start" disabled={disabilitato} onClick={() => imposta({ catalogo_chiave: null, _aMano: true, oggetto_fonte: null, oggetto_chiave: null })} />}
       <p className="m-0 testo-12 text-text-muted">Nome, categoria ed effetto si modificano nel catalogo dell’oggetto. Qui cambi solo la sua offerta nel negozio.</p>

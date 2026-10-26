@@ -10,6 +10,7 @@ import { GiornoGuida } from './GiornoGuida';
 import { scegliVoce, selettore } from '../../../test/selettore';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 import type { EffettoVoce, StatoEffettiVoceDto } from '../../../shared/effettiVoce';
+import { conNote } from '../../../test/note';
 
 const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
@@ -245,7 +246,7 @@ describe('GiornoGuida — la giornata canone', () => {
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Dote sociale' }));
     scegliVoce('Dote', /^Coraggio/, finestra);
-    fireEvent.click(within(finestra).getByRole('radio', { name: '♪' }));
+    fireEvent.click(within(finestra).getByRole('radio', { name: '1 nota' }));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(9), {
       genere: 'azione', azione: 'Sbloccare il lavoro da fioraio Rafflesia', note: null, fascia: 'giorno', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, rangoAtteso: 2,
@@ -341,14 +342,17 @@ describe('GiornoGuida — la giornata canone', () => {
     api.impostaAzionePercorso.mockResolvedValue(voce({ uid: uid(11), azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
     disegna({ ...base, azioni: [voce({
       uid: uid(11), azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
-      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'], stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' },
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio ♪'], stato: { tipo: 'consigliata', motivo: 'requisiti del rango 2 soddisfatti' },
     })] });
     const giorno = within(sezione('Di giorno'));
     expect(giorno.queryByText('La mia')).toBeNull();
     // il tipo «Confidente» non si scrive accanto al ritratto e al nome del Confidente, che lo dicono già (2026-10-25, `tipoGiaDetto`)
     expect(giorno.queryByText('Confidente')).toBeNull();
     expect(giorno.getByText('Tae Takemi - Morte')).toBeInTheDocument();
-    expect(within(giorno.getByRole('region', { name: 'Il gioco dà' })).getByText('Coraggio, 1 nota')).toBeInTheDocument();
+    // le note come simboli (richiesta dell'utente del 2026-10-26), dette «1 nota» al lettore di schermo
+    const ilGiocoDa = within(giorno.getByRole('region', { name: 'Il gioco dà' }));
+    expect(ilGiocoDa.getByText(conNote('Coraggio ♪'))).toBeInTheDocument();
+    expect(ilGiocoDa.getByRole('img', { name: '1 nota' })).toHaveTextContent('♪');
     expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
     expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi'));

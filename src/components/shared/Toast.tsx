@@ -10,6 +10,7 @@ import { useNotificationStore, type Notification, type NotificationType } from '
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
+import { TestoNote } from './TestoNote';
 
 /** Il tipo detto a parole, davanti al messaggio, per chi non vede il colore del bordo. */
 const TIPO_TESTO: Record<NotificationType, string> = {
@@ -110,7 +111,7 @@ function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
     >
-      <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
+      <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span><TestoNote testo={n.message} /></span>
       {n.collegamento && dentroIlRouter && (
         <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
       )}

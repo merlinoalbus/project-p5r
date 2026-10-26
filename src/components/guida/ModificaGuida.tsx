@@ -24,6 +24,7 @@ import { SceltaCatalogoOggetto } from '../catalogo/SceltaCatalogoOggetto';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { Selettore } from '../shared/Selettore';
 import { Blocco, CampoElenco, Griglia } from './moduli/campi';
 
@@ -276,7 +277,8 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
               </div>
             </div>
           )}
-          {errore && <p role="alert" className="m-0 text-sm text-error-testo">{errore} La finestra resta aperta.</p>}
+          {/* TestoNote: il messaggio del server può portare note come ♪ («Dote e note (da ♪ a ♪♪♪)»), da leggere a parole */}
+          {errore && <p role="alert" className="m-0 text-sm text-error-testo"><TestoNote testo={errore} /> La finestra resta aperta.</p>}
         </div>
       </Modal>
     )}

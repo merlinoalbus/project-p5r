@@ -21,6 +21,7 @@ import { useId } from 'react';
 import type { GruppoRiepilogoEffettiDto, RispostaRiepilogoEffettiDto } from '../../../shared/riepilogoEffetti';
 import { normaNome } from '../../utils/percorso';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 
 interface Props {
   gruppi: readonly GruppoRiepilogoEffettiDto[];
@@ -74,8 +75,8 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
         className="m-0 flex list-none flex-col gap-1 p-0 min-[641px]:grid min-[641px]:grid-cols-[minmax(0,max-content)_minmax(0,max-content)] min-[641px]:gap-x-3 min-[641px]:gap-y-0">
         {g.righe.map((r, i) => (
           <li key={`${i}:${r.nome}`} className="flex min-w-0 flex-col testo-13 min-[641px]:col-span-2 min-[641px]:grid min-[641px]:grid-cols-subgrid min-[641px]:items-baseline">
-            <span className={`min-w-0 break-words ${r.risposte ? 'text-pretty' : ''} ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}>{r.nome}</span>
-            {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
+            <span className={`min-w-0 break-words ${r.risposte ? 'text-pretty' : ''} ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}><TestoNote testo={r.nome} /></span>
+            {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums"><TestoNote testo={r.dettaglio} /></span>}
             {r.risposte && <RisposteGiuste risposte={r.risposte} />}
             {/* L13 (decisione 4): che cosa contiene un set, in una riga sotto nome e prezzo, su tutta la larghezza; va a capo, mai troncato.
                 Da 641 px le colonne sono larghe quanto il contenuto: `w-0 min-w-full` toglie il contenuto dal calcolo della loro larghezza (un
@@ -86,7 +87,7 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
         ))}
       </ul>
       {g.totale && <p className="m-0 border-t border-border pt-0.5 testo-13 font-semibold tabular-nums break-words">{g.totale}</p>}
-      {g.nota && <p className="m-0 testo-12 text-text-muted break-words text-pretty">{g.nota}</p>}
+      {g.nota && <p className="m-0 testo-12 text-text-muted break-words text-pretty"><TestoNote testo={g.nota} /></p>}
     </div>
   );
 }

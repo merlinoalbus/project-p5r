@@ -13,14 +13,15 @@
 // ============================================================
 
 import { useId, useState } from 'react';
-import type { EsitoDisponibileDto, SceltaEsitoSpunta, SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { fraseDotiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { noteAParole, simboliNote, testoNoteAParole } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/letture';
 import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
 
-/** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪ (2 punti ciascuna)» → qui una per una, «Coraggio ♪ · 2». */
-const dotiTesto = (e: EsitoDisponibileDto): string => e.doti.length ? e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') : 'nessuna Dote';
+/** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
+const dotiTesto = (e: EsitoDisponibileDto): string => fraseDotiEsito(e.doti);
 
 /** Gli esiti raggruppati per prova (il gruppo), nell'ordine dichiarato. */
 function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: string | null; esiti: EsitoDisponibileDto[] }> {
@@ -50,7 +51,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
                   aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
                   aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
                   title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
-                  aria-label={`${e.nome}: ${dotiTesto(e)}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
+                  aria-label={`${e.nome}: ${testoNoteAParole(dotiTesto(e))}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
                   <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
                   <span className="testo-12 text-text-secondary">{dotiTesto(e)}{e.premi ? ` · ${e.premi}` : ''}</span>
                   {!e.disponibile && <span id={idMotivo} className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
@@ -127,7 +128,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
             <span className="w-full text-text-secondary">{s.doteNome}: quante note hai ottenuto?</span>
             {s.possibili.map((n) => (
               <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === n}
-                onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>
+                onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
             ))}
             <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
           </span>

@@ -16,6 +16,7 @@
 
 import { RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione';
 import { eDote, nomeDote } from '../../shared/doti';
+import { simboliNote } from '../../shared/note';
 import { fraseEffettoConNomi, type EffettoVoce, type NomiFraseEffetto, type RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
 import type { ElenchiAzioneDto, ElenchiEffettiVoceDto } from '../types';
 import type { CampiStrutturati } from './azioneStrutturata';
@@ -189,7 +190,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto): No
   };
 }
 
-const note = (n: number) => '♪'.repeat(n);
+const note = simboliNote;
 const sessioni = (n: number, film: boolean) => (film ? (n === 1 ? 'visione o serata' : 'visioni o serate') : n === 1 ? 'sessione' : 'sessioni');
 
 /** La frase che dice che cosa succede spuntando: mai chiavi, sempre nomi. */

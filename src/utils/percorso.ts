@@ -5,6 +5,7 @@
 import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE, type EffettoAzione } from '../../shared/effettiAzione';
 import { nomeDote } from '../../shared/doti';
+import { simboliNote } from '../../shared/note';
 import type { GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti';
 import { descriviEffetti } from '../../shared/descriviEffettiSpunta';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
@@ -139,7 +140,7 @@ const compatto = (s: string): string => s.toLowerCase().replace(/\s+/g, '');
  */
 export function noteDellaGuidaCoincideConEffetto(note: string, produce: ReadonlyArray<EffettoAzione>): boolean {
   const n = compatto(note);
-  return produce.some((e) => e.tipo === 'dote' && (n === compatto(`${nomeDote(e.dote)} +${e.note}`) || n === compatto(`${nomeDote(e.dote)} ${'♪'.repeat(e.note)}`)));
+  return produce.some((e) => e.tipo === 'dote' && (n === compatto(`${nomeDote(e.dote)} +${e.note}`) || n === compatto(`${nomeDote(e.dote)} ${simboliNote(e.note)}`)));
 }
 
 /** Testo breve degli effetti della spunta: vive in `shared/descriviEffettiSpunta.ts` (2026-10-26), perché lo usa anche il server per le

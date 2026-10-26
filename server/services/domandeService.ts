@@ -13,6 +13,7 @@ import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { righePerEsame } from './esamiCollegamento.js';
 import { vociCollegate } from './vociDiStato.js';
+import { simboliNote } from '../../shared/note.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
@@ -88,7 +89,7 @@ export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: 
       const info = prepared('INSERT OR IGNORE INTO domanda_partita (partita_id, domanda_id, fatta_at) VALUES (?, ?, ?)').run(partitaId, domandaId, adesso);
       if (info.changes > 0) {
         nuova = true;
-        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ' · il gioco dà Conoscenza +1 nota (da segnare nelle Doti)' : ''}`, { domandaId, conoscenza });
+        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà Conoscenza ${simboliNote(1)} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
       }
     } else {
       prepared('DELETE FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').run(partitaId, domandaId);

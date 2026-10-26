@@ -197,7 +197,7 @@ describe('API — la giornata della guida è canone', () => {
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({
       tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
-      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio, 1 nota'],
+      produce: [{ tipo: 'dote', dote: 'coraggio', note: 1 }], produceTesto: ['Coraggio ♪'],
     });
     const p = await nuovaPartita('Guida al 100%');
     const a = (await request(app).put(`/api/partite/${p}/percorso`).send({ uid: prima.uid, fatta: true })).body.data as AzionePercorsoDto;

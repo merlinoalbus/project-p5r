@@ -6,8 +6,9 @@ import { Selettore } from '../shared/Selettore';
 import { Segmenti } from '../shared/Segmenti';
 import { type DoteNote } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
+import { SCELTE_NOTE } from '../../../shared/note';
 
-const NOTE = [{ chiave: '1', nome: '♪' }, { chiave: '2', nome: '♪♪' }, { chiave: '3', nome: '♪♪♪' }] as const;
+const NOTE = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
 
 /** Selettore della Dote e segmenti delle note (1–3) affiancati; ogni cambio passa al genitore la coppia aggiornata. */
 export function RigaDote({ dote, onCambia, etichetta }: { dote: DoteNote; onCambia: (d: DoteNote) => void; etichetta: string }) {

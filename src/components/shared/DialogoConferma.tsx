@@ -16,6 +16,7 @@ import { useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
+import { TestoNote } from './TestoNote';
 import { useConfermaStore, type OpzioniConferma } from '../../stores/confermaStore';
 
 interface Props extends OpzioniConferma {
@@ -43,7 +44,8 @@ export function DialogoConferma({ aperta, titolo, testo, etichetta, tono = 'peri
         </>
       )}
     >
-      <p id={idTesto} className="m-0 testo-14 leading-normal">{testo}</p>
+      {/* il testo può citare un effetto con le note come ♪ («Coraggio ♪♪»): TestoNote lo mostra uguale e lo fa leggere «2 note» */}
+      <p id={idTesto} className="m-0 testo-14 leading-normal"><TestoNote testo={testo} /></p>
     </Modal>
   );
 }

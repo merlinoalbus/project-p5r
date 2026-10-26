@@ -29,6 +29,7 @@ import { InfoSalitaRango } from './InfoSalitaRango';
 import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
 import { slug } from '../../../shared/slug';
 import { formattaPunti } from '../../utils/punti';
+import { noteAParole, simboliNote } from '../../../shared/note';
 import type { ConfidentePartitaDto } from '../../types';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
@@ -192,8 +193,8 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
               {([1, 2, 3] as const).map((n) => {
                 const valore = anteprima({ noteRisposta: n });
                 return (
-                  <button key={n} type="button" className="btn btn-primary btn-sm touch w-[76px]" disabled={occ} onClick={() => azioni.nota(n)} aria-label={`${c.nome}: risposta da ${n} ${n === 1 ? 'nota' : 'note'} (${formattaPunti(valore)} punti)`}>
-                    <span aria-hidden="true">{'♪'.repeat(n)}</span> <span className="testo-12 opacity-90">+{formattaPunti(valore)}</span>
+                  <button key={n} type="button" className="btn btn-primary btn-sm touch w-[76px]" disabled={occ} onClick={() => azioni.nota(n)} aria-label={`${c.nome}: risposta da ${noteAParole(n)} (${formattaPunti(valore)} punti)`}>
+                    <span aria-hidden="true">{simboliNote(n)}</span> <span className="testo-12 opacity-90">+{formattaPunti(valore)}</span>
                   </button>
                 );
               })}

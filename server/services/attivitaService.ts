@@ -38,6 +38,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
 import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { simboliNote } from '../../shared/note.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -473,7 +474,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     const registrato = richiesto >= totale;
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
-      const dote = doti.length ? ` · Dote: ${doti.map((d) => `${d.dote} (${d.note} ${d.note === 1 ? 'nota' : 'note'})`).join(', ')}` : '';
+      const dote = doti.length ? ` · Dote: ${doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
