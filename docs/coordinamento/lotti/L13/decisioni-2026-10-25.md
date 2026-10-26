@@ -68,4 +68,9 @@ verificati sulle copie in sola lettura dei dati reali.
     yen, Fortuna, letture, consumazioni, sblocchi, oggetti ricevuti, tempo/fasce, ecc.) si modellano con i tipi di effetto dell'app; solo gli
     effetti di battaglia o di cura restano testo.
 
+22. **Oggetti con effetti rilevanti (lotto F-bis)** (26 ottobre; risposte dell'utente). Fabbricazione: «1 ma in modo random si può
+    ottenere bonus +1 oggetto e +1 perizia... va specificato dall'utente... di volta in volta» (Perizia per creazione; il bonus casuale si
+    indica alla spunta). Vendita dei tesori all'Untouchable: yen a mano (decisione 18). Black Frost e Bugs: «Solo etichetta» (il requisito
+    dell'oggetto si mostra, il motore di fusione la propone comunque).
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
