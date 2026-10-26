@@ -30,6 +30,18 @@ export function normalizzaSconto(raw: unknown): ScontoNegozio | null {
   return { confidente: s.confidente, rango: s.rango, percentuale: s.percentuale };
 }
 
+/**
+ * Che cosa manca a uno sconto in compilazione, campo per campo (revisione della chiusura dell'ondata 5, N2): il modulo del negozio lo dice
+ * accanto al campo invece di spegnere «Salva» in silenzio. Nessuna voce = sconto completo (`normalizzaSconto` lo accetta).
+ */
+export function erroriSconto(s: { confidente?: unknown; rango?: unknown; percentuale?: unknown }): Partial<Record<keyof ScontoNegozio, string>> {
+  const errori: Partial<Record<keyof ScontoNegozio, string>> = {};
+  if (typeof s.confidente !== 'string' || !s.confidente.trim()) errori.confidente = 'Scegli il Confidente il cui rango attiva lo sconto.';
+  if (typeof s.rango !== 'number' || !Number.isInteger(s.rango) || s.rango < 1 || s.rango > 10) errori.rango = 'Indica un rango intero da 1 a 10.';
+  if (typeof s.percentuale !== 'number' || !Number.isInteger(s.percentuale) || s.percentuale < 1 || s.percentuale > 99) errori.percentuale = 'Indica una percentuale intera da 1 a 99.';
+  return errori;
+}
+
 /** Vero se con il rango del Confidente nella partita lo sconto vale (rango sconosciuto: no). */
 export const scontoAttivo = (sconto: ScontoNegozio, rango: number | null | undefined): boolean => typeof rango === 'number' && rango >= sconto.rango;
 

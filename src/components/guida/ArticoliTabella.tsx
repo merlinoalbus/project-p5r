@@ -17,6 +17,7 @@ import type { ArticoloDto } from '../../types';
 import { ChipDisponibilita } from './ChipDisponibilita';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
+import { PrezzoScontato } from '../catalogo/PrezzoScontato';
 import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
 import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
@@ -80,7 +81,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     </div>
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></strong>
       {/* chiusura dell'ondata 5: con lo sconto del negozio che vale adesso nella partita (Clinica di Takemi), l'importo che si paga */}
-      {a.prezzoScontato && <span className="testo-12 tabular-nums whitespace-normal text-right text-pretty text-text-secondary">Con lo sconto del {a.prezzoScontato.percentuale}%: {a.prezzoScontato.prezzo.toLocaleString('it-IT')} ¥</span>}</div>
+      <PrezzoScontato scontato={a.prezzoScontato} className="whitespace-normal text-right" /></div>
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
         Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
         dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}

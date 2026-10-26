@@ -7,6 +7,7 @@ import { ancoraNegozio } from '../../utils/citta';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { CostoDellOggetto } from './CostoDellOggetto';
+import { ScontoDellOfferta } from './PrezzoScontato';
 import { AcquistiOfferta } from './AcquistiOfferta';
 import { NoteStoricheOfferta } from './NoteStoricheOfferta';
 
@@ -39,7 +40,9 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
   const casa = o.sedeCasa ? `${o.sedeCasa.split('#')[0]}#${ancoraNegozio(o.negozio)}` : `/guida/negozi/${encodeURIComponent(o.negozio)}`;
   return <tr>
     <td data-etichetta="Negozio"><Link to={casa} className="touch inline-flex items-center">{o.negozioNome}</Link>{o.sedeNome && <span className="block testo-12 text-text-secondary">{o.sedeNome}</span>}</td>
-    <td data-etichetta="Costo"><CostoDellOggetto costo={o.costo} prezzo={o.prezzo} prezzoPerFascia={o.prezzoPerFascia} daVerificare={o.costoDaVerificare} /><NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={onCambiata} /></td>
+    <td data-etichetta="Costo"><CostoDellOggetto costo={o.costo} prezzo={o.prezzo} prezzoPerFascia={o.prezzoPerFascia} daVerificare={o.costoDaVerificare} />
+      {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, o la regola dello sconto del negozio */}
+      {o.costo === null && <ScontoDellOfferta scontato={o.prezzoScontato} sconto={o.sconto} className="block" />}<NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={onCambiata} /></td>
     <td data-etichetta="Oggi"><div className="flex flex-col items-start gap-1">
       <span className="testo-12 text-text-secondary">{o.presenza === null ? 'Attiva una partita per la presenza' : o.presenza.stato === 'disponibile' ? 'Aperto adesso' : 'Presenza: vedi requisiti'}</span>
       {o.disponibileOggi === true && <span className="chip chip--attivo">Disponibile oggi</span>}

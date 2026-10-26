@@ -13,6 +13,7 @@
 
 import { prepared } from '../db/dbService.js';
 import { prezzoNellaFascia, type FasciaPrezzo } from '../../shared/catalogo.js';
+import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } from '../../shared/scontiNegozi.js';
 
 const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera';
@@ -60,15 +61,44 @@ export function scontoNellaPartita(negozio: string | null | undefined, partitaId
   return sconto && scontoAttivo(sconto, rangoNellaPartita(partitaId, sconto.confidente)) ? sconto : null;
 }
 
+type MomentoVoce = [number, number, number];
+/** Il momento di una voce del Diario nell'anno di gioco (data, fascia, ordine nella giornata); null se la voce non c'è più. */
+function momentoDellaVoce(voceUid: string): MomentoVoce | null {
+  const v = prepared('SELECT data, fascia, ordine FROM main.voce_giornata WHERE uid = ?').get(voceUid) as { data: string; fascia: string; ordine: number } | undefined;
+  return v ? [ordineGioco(v.data), v.fascia === 'sera' ? 1 : 0, v.ordine] : null;
+}
+const primaDi = (a: MomentoVoce, b: MomentoVoce): boolean => a[0] !== b[0] ? a[0] < b[0] : a[1] !== b[1] ? a[1] < b[1] : a[2] < b[2];
+
+/**
+ * Lo sconto del negozio che valeva nel momento della voce del Diario (revisione della chiusura dell'ondata 5, N1: una voce del passato non si paga
+ * con il rango di oggi). Il rango si raggiunge nel Diario con la voce spuntata del Confidente che porta al rango dello sconto (`rango_atteso`):
+ * una voce che viene prima della prima di queste spunte si paga a prezzo pieno. Se nessuna voce spuntata della partita porta il Confidente a quel
+ * rango, il rango è stato segnato fuori dal Diario (dalla pagina Confidenti) e il Diario non dice da quando: vale il rango di adesso.
+ */
+export function scontoAllaVoce(negozio: string | null | undefined, partitaId: number | null | undefined, voceUid: string): ScontoNegozio | null {
+  const sconto = scontoNellaPartita(negozio, partitaId);
+  if (!sconto) return null;
+  const voce = momentoDellaVoce(voceUid);
+  if (!voce) return sconto;
+  const raggiunto = (prepared(`SELECT g.data, g.fascia, g.ordine FROM main.voce_giornata g JOIN utente.spunta_voce_partita s ON s.voce_uid = g.uid AND s.partita_id = ?
+    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ?`).all(partitaId, sconto.confidente, sconto.rango) as Array<{ data: string; fascia: string; ordine: number }>)
+    .map((v): MomentoVoce => [ordineGioco(v.data), v.fascia === 'sera' ? 1 : 0, v.ordine]);
+  if (!raggiunto.length) return sconto;
+  const primo = raggiunto.reduce((a, b) => (primaDi(b, a) ? b : a));
+  return primaDi(voce, primo) ? null : sconto;
+}
+
 /**
  * Il prezzo in yen dell'offerta nella fascia (null = offerta assente o prezzo non indicato). Senza fascia nota vale `prezzo`. Con la partita
- * vale anche lo sconto del negozio legato al rango di un Confidente (`scontoNellaPartita`): è l'importo che gli yen automatici scalano.
+ * vale anche lo sconto del negozio legato al rango di un Confidente: quello di adesso (`scontoNellaPartita`) o, con la voce del Diario che compra,
+ * quello che valeva nel suo momento (`scontoAllaVoce`). È l'importo che gli yen automatici scalano.
  */
-export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined, partitaId?: number | null): number | null {
+export function prezzoDellArticolo(articolo: string, fascia: FasciaPrezzo | null | undefined, partitaId?: number | null, voceUid?: string | null): number | null {
   const r = prepared(conPrezzoPerFascia() ? 'SELECT prezzo, prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?' : 'SELECT prezzo, NULL AS prezzo_per_fascia_json, negozio_chiave FROM main.articolo WHERE chiave = ?')
     .get(articolo) as { prezzo: number | null; prezzo_per_fascia_json: string | null; negozio_chiave: string | null } | undefined;
   if (!r) return null;
   const prezzo = prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json, fascia);
-  const sconto = prezzo !== null ? scontoNellaPartita(r.negozio_chiave, partitaId) : null;
-  return prezzo !== null && sconto ? prezzoScontato(prezzo, sconto) : prezzo;
+  if (prezzo === null) return null;
+  const sconto = voceUid ? scontoAllaVoce(r.negozio_chiave, partitaId, voceUid) : scontoNellaPartita(r.negozio_chiave, partitaId);
+  return sconto ? prezzoScontato(prezzo, sconto) : prezzo;
 }

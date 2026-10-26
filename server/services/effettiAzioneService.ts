@@ -128,7 +128,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       if (scelta?.tipo !== 'turno' && esitiDellAttivita(e.attivita)?.esiti) throw httpErrors.conflict('esito-da-scegliere', 'Questa attività dichiara i suoi esiti: scegli l’esito ottenuto prima di registrare il turno.');
       // Ondata 5 (lotto E, decisione 5): il turno si svolge nella fascia della voce, che decide il prezzo della sfida (500 ¥ di sera)
       const fascia = a.voceUid ? fasciaDellaVoce(a.voceUid) : null;
-      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia);
+      // revisione della chiusura dell'ondata 5 (N1): con la voce, lo sconto del negozio che valeva nel suo momento
+      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia, a.voceUid ?? null) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null);
       turni.push(t);
     }
   }

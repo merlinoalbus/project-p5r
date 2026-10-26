@@ -37,6 +37,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
+import { PrezzoScontato } from '../catalogo/PrezzoScontato';
 import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
@@ -1307,6 +1308,8 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
                 <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !ripetibile(a) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
                 <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
+                {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
+                <PrezzoScontato scontato={a.prezzoScontato} className="min-w-0 max-w-full" />
                 {a.disponibilita && a.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={a.disponibilita} compatto />}
                 {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
                 {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
@@ -1502,6 +1505,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">
                         <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
+                        {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
+                        <PrezzoScontato scontato={a.prezzoScontato} />
                         {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
                             del contrario era una contraddizione scritta due volte sulla stessa riga. */}
                         {a.disponibilita && a.disponibilita.stato !== 'disponibile'

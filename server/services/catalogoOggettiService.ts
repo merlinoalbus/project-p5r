@@ -45,7 +45,9 @@ export function offerteDellOggetto(chiave: string, partita?: number): OffertaOgg
       const costo = costoOggetto(r.costo_json);
       return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
         // Ondata 5 (lotto E): il prezzo di una fascia, letto dall'offerta come il prezzo (decisione 5: la sera delle sfide della Big Bang Burger)
-        prezzo: r.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null, costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
+        prezzo: r.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null,
+        // revisione della chiusura dell'ondata 5 (B1): lo sconto del negozio (un dato del negozio) e, con la partita, il prezzo scontato che si scala
+        sconto: n.sconto ?? null, ...(a.prezzoScontato ? { prezzoScontato: a.prezzoScontato } : {}), costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
         presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
         acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche,
         // Ondata 5 (decisione 21): la regola di rifornimento e, con la partita, la scorta dell'offerta

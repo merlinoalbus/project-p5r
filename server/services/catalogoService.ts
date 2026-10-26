@@ -35,6 +35,7 @@ import { verificaAttivitaConfidente, verificaCampiAttivitaConfidente } from './v
 import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { verificaDomandaEsame } from './esamiCollegamento.js';
+import { normalizzaSconto } from '../../shared/scontiNegozi.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 // Dalla voce 5 (2026-09-12) il negozio non ha più `sblocco`, `fonte` e `condizioni_json` fra i campi
@@ -204,6 +205,9 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   if (tipo === 'negozio') {
     if (dati.luogo_chiave != null && !esiste('quartiere', dati.luogo_chiave)) throw httpErrors.badRequest('quartiere-sconosciuto', `Il quartiere '${String(dati.luogo_chiave)}' non esiste.`);
     if (dati.confidente_chiave != null && !esiste('confidente', dati.confidente_chiave)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${String(dati.confidente_chiave)}' non esiste.`);
+    // revisione della chiusura dell'ondata 5 (N3): il Confidente dello sconto esiste (con una chiave inesistente lo sconto non varrebbe mai)
+    const sconto = typeof dati.sconto_json === 'string' ? normalizzaSconto(dati.sconto_json) : null;
+    if (sconto && !esiste('confidente', sconto.confidente)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${sconto.confidente}' dello sconto non esiste.`);
     return;
   }
   const padre = PROFILO[tipo].padre;

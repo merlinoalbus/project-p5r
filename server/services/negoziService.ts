@@ -20,8 +20,9 @@ import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { categoriaDelListino, normalizzaNomeOggetto, normalizzaPrezzoPerFascia, prezzoNellaFascia, testoCostoAImporto } from '../../shared/catalogo.js';
-import { fasciaDellaPartita, prezzoDellArticolo, scontoNellaPartita } from './prezziArticoli.js';
-import { normalizzaSconto } from '../../shared/scontiNegozi.js';
+import { fasciaDellaPartita, fasciaDellaVoce, prezzoDellArticolo, scontoNellaPartita } from './prezziArticoli.js';
+import { normalizzaSconto, prezzoScontato, type ScontoNegozio } from '../../shared/scontiNegozi.js';
+import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -115,12 +116,22 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
   };
 }
 
+/**
+ * Revisione della chiusura dell'ondata 5 (N4): lo sconto di ogni negozio e la fascia della partita letti una volta per listino, non per articolo.
+ * Vale per una sola lettura (un listino, una ricerca): chi la crea la passa a `articoloDto`.
+ */
+export interface LettureSconti { partitaId: number; fascia?: FasciaPrezzo | null; sconti: Map<string, ScontoNegozio | null> }
+const nuoveLettureSconti = (partitaId: number): LettureSconti => ({ partitaId, sconti: new Map() });
+
 /** Il prezzo scontato dell'offerta nella fascia corrente della partita, se lo sconto del suo negozio vale adesso (altrimenti niente). */
-function scontatoNellaPartita(r: Pick<RigaArticolo, 'chiave' | 'negozio_chiave'>, partitaId: number): Pick<ArticoloDto, 'prezzoScontato'> {
-  const sconto = scontoNellaPartita(r.negozio_chiave, partitaId);
+function scontatoNellaPartita(r: Pick<RigaArticolo, 'chiave' | 'negozio_chiave'>, letture: LettureSconti): Pick<ArticoloDto, 'prezzoScontato'> {
+  let sconto = letture.sconti.get(r.negozio_chiave);
+  if (sconto === undefined) { sconto = scontoNellaPartita(r.negozio_chiave, letture.partitaId); letture.sconti.set(r.negozio_chiave, sconto); }
   if (!sconto) return {};
-  const prezzo = prezzoDellArticolo(r.chiave, fasciaDellaPartita(partitaId), partitaId);
-  return prezzo !== null ? { prezzoScontato: { prezzo, percentuale: sconto.percentuale } } : {};
+  if (letture.fascia === undefined) letture.fascia = fasciaDellaPartita(letture.partitaId);
+  // il prezzo della fascia senza partita (nessuna seconda lettura dello sconto), poi lo sconto già letto
+  const prezzo = prezzoDellArticolo(r.chiave, letture.fascia);
+  return prezzo !== null ? { prezzoScontato: { prezzo: prezzoScontato(prezzo, sconto), percentuale: sconto.percentuale } } : {};
 }
 
 /** Chiusura dell'ondata 5: lo sconto del negozio legato al rango di un Confidente (migrazione 254), con il nome del Confidente da dire. */
@@ -184,7 +195,7 @@ function tempisticaDelleCondizioni(condizioni: ReadonlyArray<RequisitoSpillo & {
   return frasi.length ? frasi.join(' · ') : null;
 }
 
-function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, catalogo?: Map<string, CatalogoOggettoDto>, ricevuti: NonNullable<ArticoloDto['ricevuti']> = []): ArticoloDto {
+function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, catalogo?: Map<string, CatalogoOggettoDto>, ricevuti: NonNullable<ArticoloDto['ricevuti']> = [], letture?: LettureSconti): ArticoloDto {
   const oggetto = r.catalogo_chiave ? catalogo?.get(r.catalogo_chiave) : undefined;
   const costo = costoOggetto(r.costo_json ?? null);
   const acquisti = st?.partitaId === undefined ? undefined : acquistiArticolo(st.partitaId, r.chiave, st.acquisti);
@@ -205,7 +216,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     // Ondata 5 (lotto E, decisione 5): il prezzo di una fascia diverso da `prezzo`, un dato dell'offerta; uno scambio non ne ha
     prezzoPerFascia: r.costo_json == null ? normalizzaPrezzoPerFascia(r.prezzo_per_fascia_json ?? null) : null,
     // chiusura dell'ondata 5: con la partita, lo sconto del negozio che vale adesso (Clinica di Takemi dal rango indicato), l'importo che si scala
-    ...(st?.partitaId !== undefined && r.costo_json == null && r.prezzo !== null ? scontatoNellaPartita(r, st.partitaId) : {}),
+    ...(st?.partitaId !== undefined && r.costo_json == null && r.prezzo !== null ? scontatoNellaPartita(r, letture?.partitaId === st.partitaId ? letture : nuoveLettureSconti(st.partitaId)) : {}),
     // Ondata 5, lotto F (decisione 21): effetto e statistiche in un punto solo, l'oggetto del catalogo; la riga conta solo senza un oggetto
     // collegato (senza catalogo, senza `catalogo_chiave` o con un collegamento che non trova la scheda): allora vale quel che ha di suo
     effetto: oggetto ? (oggetto.effetto || null) : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
@@ -280,7 +291,8 @@ export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: 
   const righeArticoli = prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(canonica) as RigaArticolo[];
   const catalogo = identitaArticoli(righeArticoli);
   const ricevuti = ricompensePerFonte('articolo', righeArticoli.map((r) => r.chiave));
-  const articoli = righeArticoli.map((r) => articoloDto(conSede(r, n), acquistati, st, catalogo, ricevuti.get(r.chiave)));
+  const letture = partitaId === undefined ? undefined : nuoveLettureSconti(partitaId);
+  const articoli = righeArticoli.map((r) => articoloDto(conSede(r, n), acquistati, st, catalogo, ricevuti.get(r.chiave), letture));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
   // la guida del quiz dei lavori che si fanno qui (richiesta dell'utente, 2026-10-17: il quiz dei codici a barre al Triple Seven)
   const quiz = n.sede_chiave ? [...attivitaConQuiz()].filter(([, a]) => a.sede === n.sede_chiave).map(([c, a]) => quizVoceDto(c, a, st?.dataGioco ?? null)) : [];
@@ -334,6 +346,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   // «Rango Confidente 3» senza nome è il Confidente del negozio: la ricerca deve valutarlo come la scheda.
   // Stato e disponibilità si filtrano dopo la valutazione: sono fatti della partita, non colonne.
   const sediValutate = new Map<string, RigaNegozio>();
+  const letture = partitaId === undefined ? undefined : nuoveLettureSconti(partitaId);
   let valutati = righe.filter((r) => !listini.articoli.has(r.chiave)).map((r) => {
     const sedi = listini.sedi.filter((s) => s.negozio === r.negozio_chiave);
     if (st && sedi.length > 0 && disponibilitaArticolo(r, st).stato !== 'disponibile') {
@@ -345,10 +358,10 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
           n = negozioNellaSede(principale, sede.luogo, listini); sediValutate.set(k, n);
         }
         const variante = conSede(r, n);
-        if (disponibilitaArticolo(variante, st).stato === 'disponibile') return articoloDto(variante, acquistati, st, catalogo, ricevuti.get(r.chiave));
+        if (disponibilitaArticolo(variante, st).stato === 'disponibile') return articoloDto(variante, acquistati, st, catalogo, ricevuti.get(r.chiave), letture);
       }
     }
-    return articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave));
+    return articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture);
   });
   if (conCatalogo) {
     const q = normalizzaNomeOggetto(filtro.q ?? '');
@@ -487,8 +500,10 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
     }
     // Ondata 5 (lotto E): il prezzo della fascia corrente della partita, e le monete o i punti di uno scambio a importo
     const costoEvento = r.costo_json != null ? costoOggetto(r.costo_json) : null;
-    // chiusura dell'ondata 5: con lo sconto del negozio che vale adesso nella partita (Clinica di Takemi), l'importo pagato davvero
-    const prezzoEvento = r.costo_json == null && r.prezzo !== null ? prezzoDellArticolo(r.chiave, fasciaDellaPartita(partitaId), partitaId)
+    // chiusura dell'ondata 5: con lo sconto del negozio (Clinica di Takemi), l'importo pagato davvero: quello di adesso dalla pagina, quello del
+    // momento della voce dal Diario (lo stesso che scalano gli yen automatici della spunta)
+    const prezzoEvento = r.costo_json == null && r.prezzo !== null
+      ? (opz.voce ? prezzoDellArticolo(r.chiave, fasciaDellaVoce(opz.voce.voceUid), partitaId, opz.voce.voceUid) : prezzoDellArticolo(r.chiave, fasciaDellaPartita(partitaId), partitaId))
       : prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json ?? null, fasciaDellaPartita(partitaId));
     if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? (costoEvento && costoEvento.tipo !== 'oggetti' ? ` · ${testoCostoAImporto(costoEvento)}` : ' · Scambio') : prezzoEvento !== null ? ` · ${prezzoEvento.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);

@@ -3019,7 +3019,9 @@ export interface DettaglioSpilloDto {
     sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
       /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come
        *  nella pagina del negozio (`ArticoloDto`): la mappa mostra lo stesso dato nello stesso modo («Compra», «rimasti N di Q», «Annulla»). */
-      rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'] }> } | null;
+      rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'];
+      /** Revisione della chiusura dell'ondata 5 (B1): il prezzo con lo sconto del negozio che vale adesso nella partita, come nel listino. */
+      prezzoScontato?: ArticoloDto['prezzoScontato'] }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -3631,6 +3633,10 @@ export interface OffertaOggettoDto {
   prezzo: number | null;
   /** Ondata 5 (lotto E): il prezzo in una fascia quando è diverso da `prezzo`, dall'offerta. */
   prezzoPerFascia?: PrezzoPerFascia | null;
+  /** Revisione della chiusura dell'ondata 5 (B1): con la partita, il prezzo con lo sconto del negozio che vale adesso (l'importo che si scala). */
+  prezzoScontato?: ArticoloDto['prezzoScontato'];
+  /** Revisione della chiusura dell'ondata 5 (B1): lo sconto del negozio legato al rango di un Confidente, il dato del negozio; null se non ne ha. */
+  sconto?: NegozioRiassuntoDto['sconto'];
   costo: CostoOggettoDto | null;
   costoDaVerificare: boolean;
   condizioni: CondizioneSpilloDto[];

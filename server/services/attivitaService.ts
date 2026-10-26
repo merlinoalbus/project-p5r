@@ -581,7 +581,9 @@ export interface TurnoRegistrato {
  */
 export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita, interno?:{pescaAutorizzata:true}, esito?: TurnoRegistrato['esito'],
   /** Ondata 5 (lotto E): la fascia in cui si svolge il turno (quella della voce del Diario che lo registra); senza, quella corrente della partita. */
-  fascia?: FasciaPrezzo | null): TurnoRegistrato {
+  fascia?: FasciaPrezzo | null,
+  /** Revisione della chiusura dell'ondata 5 (N1): la voce del Diario che lo registra, per lo sconto del negozio del suo momento (`scontoAllaVoce`). */
+  voceUid?: string | null): TurnoRegistrato {
   const riga = attivitaConTurni(chiave,false,interno?.pescaAutorizzata===true);
   const adesso = nowIso();
   return getDb().transaction(() => {
@@ -611,7 +613,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
     // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
     if (!interno?.pescaAutorizzata) {
-      const y = yenDelTurno(riga, esito ?? undefined, fascia ?? fasciaDellaPartita(partitaId), partitaId), causa = { tipo: 'turno' as const, chiave: `${chiave}:${ordine}` };
+      const y = yenDelTurno(riga, esito ?? undefined, fascia ?? fasciaDellaPartita(partitaId), partitaId, voceUid), causa = { tipo: 'turno' as const, chiave: `${chiave}:${ordine}` };
       restituisciYenAutomatico(partitaId, causa, 'turno-non-piu-presente');
       if (y) muoviYenAutomatico(partitaId, causa, y.importo, y.motivo);
     }
@@ -626,14 +628,15 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
  * (`costo`: freccette, palestra…). Un esito «senza punti» di un'attività con sfide a prezzi diversi non dice quale sfida si è pagata: niente.
  * `articolo`: l'articolo della sfida che il turno paga, perché lo stesso acquisto non si conti due volte (`articoloPagatoDalTurno`).
  */
-function yenDelTurno(riga: Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'>, esito?: { chiave: string; nome: string }, fascia?: FasciaPrezzo | null, partitaId?: number | null): { importo: number; motivo: string; articolo?: string } | null {
+function yenDelTurno(riga: Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'>, esito?: { chiave: string; nome: string }, fascia?: FasciaPrezzo | null, partitaId?: number | null, voceUid?: string | null): { importo: number; motivo: string; articolo?: string } | null {
   if (riga.paga_yen != null && riga.paga_yen > 0) return { importo: riga.paga_yen, motivo: `Paga del turno: ${riga.nome}` };
   const dichiarati = esitiDellAttivita(riga.chiave)?.esiti;
   const articolo = esito ? dichiarati?.esiti.find((e) => e.chiave === esito.chiave)?.articolo ?? null : null;
   if (articolo) {
     // Ondata 5 (lotto E, decisione 5): il prezzo della fascia in cui si svolge il turno (la sera le sfide costano 500 ¥); con la partita anche
-    // lo sconto del negozio legato al rango di un Confidente (chiusura dell'ondata 5), come la spunta della voce
-    const prezzo = prezzoDellArticolo(articolo, fascia, partitaId);
+    // lo sconto del negozio legato al rango di un Confidente (chiusura dell'ondata 5), come la spunta della voce: con la voce che registra il
+    // turno, quello del suo momento (`scontoAllaVoce`)
+    const prezzo = prezzoDellArticolo(articolo, fascia, partitaId, voceUid);
     return prezzo != null && prezzo > 0 ? { importo: -prezzo, motivo: `${riga.nome}: ${esito!.nome}`, articolo } : null;
   }
   if (dichiarati && !esito && dichiarati.esiti.some((e) => e.articolo)) return null;
@@ -652,9 +655,9 @@ export function articoloPagatoDalTurno(attivita: string, esito: string): string 
  * voce già spuntata il cui articolo, che pagava la sfida al posto del turno, viene tolto o cambiato nella guida: allora la sfida la paga il turno,
  * come farebbe la spunta (`motoreDiario.riallineaStatiDellaVoce`). Null se il turno non paga un articolo.
  */
-export function yenDellaSfidaDelTurno(attivita: string, esito: { chiave: string; nome: string }, fascia?: FasciaPrezzo | null, partitaId?: number | null): { importo: number; motivo: string; articolo: string } | null {
+export function yenDellaSfidaDelTurno(attivita: string, esito: { chiave: string; nome: string }, fascia?: FasciaPrezzo | null, partitaId?: number | null, voceUid?: string | null): { importo: number; motivo: string; articolo: string } | null {
   const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
-  const y = riga ? yenDelTurno(riga, esito, fascia, partitaId) : null;
+  const y = riga ? yenDelTurno(riga, esito, fascia, partitaId, voceUid) : null;
   return y?.articolo ? { importo: y.importo, motivo: y.motivo, articolo: y.articolo } : null;
 }
 
