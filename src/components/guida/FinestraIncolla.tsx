@@ -44,7 +44,8 @@ function FinestraIncollaReale({ piano, occupato, onConferma, onChiudi }: Props) 
   const dove = piano.fascia ? `${piano.fascia === 'sera' ? 'di sera' : 'di giorno'}, dopo la voce selezionata` : 'ognuna nella sua fascia, in fondo';
   // i due gesti possono incollarne meno del titolo (una voce si incolla solo senza gli elementi segnalati, o solo con): il numero compare
   // sul pulsante solo quando è diverso, e un gesto che non incollerebbe niente non c'è
-  const conto = (k: number) => (k < n ? ` (${k})` : '');
+  // «(1 di 2)», non «(1)»: un numero da solo accanto al titolo non dice di che cosa (rilievo del revisore UX, giro 3)
+  const conto = (k: number) => (k < n ? ` (${k} di ${n})` : '');
   const nomeConto = (k: number) => (k < n ? `: ${voci(k)} su ${n}` : '');
   const comunque = taglio ? 'Sposta comunque' : 'Incolla comunque';
   return (

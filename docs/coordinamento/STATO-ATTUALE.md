@@ -3,7 +3,7 @@
 ## 26 OTTOBRE 2026 — Appunti del Diario (Copia, Taglia, Incolla con gli appunti di sistema)
 Ramo `lavoro-copia-incolla` (da `integrazione-24`), non unito né pubblicato: selezione delle voci (clic, Ctrl+clic, Maiusc+clic, Esc; menu «⋯» su
 touch), Ctrl+C / Ctrl+X / Ctrl+V con gli appunti di sistema (testo + HTML col blocco versionato, sopravvive a Win+V), piano dei rilievi e
-conferma, registro append-only `operazione_voci_diario` (migrazione 239) con «Annulla». Dettagli in `docs/DECISIONI.md` (2026-10-26) e
+conferma, registro append-only `operazione_voci_diario` (migrazione 240) con «Annulla». Dettagli in `docs/DECISIONI.md` (2026-10-26) e
 `docs/ROADMAP.md`. Servizio provato su copie dei dati; nell'app non osservato (il backend non parte con il Node 22.17 di questa macchina:
 il controllo dell'avvio chiede almeno 22.23.4). Da provare dall'utente: giro Win+V, Firefox/Safari, menu touch, tre formati.
 Giro 2 (dopo la verifica avversariale, respinta): corretti l'ordine dell'annullo di più voci in coda alla fascia, il nome del collegamento

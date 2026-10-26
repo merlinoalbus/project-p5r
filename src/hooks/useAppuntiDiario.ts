@@ -47,6 +47,9 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const PAUSA_PRERECUPERO = 120;
 /** Quanto resta a schermo la notifica con «Annulla» (si ferma col puntatore o il fuoco sopra). */
 const DURATA_ANNULLABILE = 10000;
+/** Quanto resta a schermo la conferma di Copia / Taglia, che dice come incollare (110–130 caratteri: i 4 s predefiniti non bastano a
+ *  leggerla, e sul tocco il conto alla rovescia non si ferma; rilievo del revisore UX, giro 3). */
+const DURATA_COME_INCOLLARE = 10000;
 /** Quanti blocchi pronti si tengono per la giornata a schermo (selezione e menu aperti di recente). */
 const BLOCCHI_TENUTI = 8;
 
@@ -82,11 +85,12 @@ const fuocoPerso = (): boolean => { const a = document.activeElement; return !a 
  * Dopo una ricarica della giornata: se il fuoco si è perso (la riga che lo aveva si è rimontata o è sparita), lo mette su `trova()`.
  * Si guarda per qualche frame, perché la ricarica si disegna subito dopo e i comandi delle righe restano disattivati finché l'operazione
  * non finisce (un pulsante disattivato non prende il fuoco: si riprova); non sposta mai un fuoco che è altrove (l'utente è andato oltre).
+ * `trova(attendi)`: vero finché restano tentativi, perché un posto di riserva (il giorno intero) si scelga solo all'ultimo.
  */
-export function rimettiFuoco(trova: () => HTMLElement | null, frame = 12): void {
+export function rimettiFuoco(trova: (attendi: boolean) => HTMLElement | null, frame = 12): void {
   requestAnimationFrame(() => {
     if (fuocoPerso()) {
-      const el = trova();
+      const el = trova(frame > 0);
       if (el?.isConnected) { el.focus(); if (document.activeElement === el) return; }
     }
     if (frame > 0) rimettiFuoco(trova, frame - 1);
@@ -154,7 +158,7 @@ function annullabileAdesso(): (() => void) | null {
  * («l’incolla di 3 voci»), che da solo direbbe solo «Annulla». `fuoco`: dove va il fuoco dopo l'annullo (il pulsante sparisce, e la
  * giornata si ricarica).
  */
-export function notificaOperazioneAnnullabile(testo: string, operazioneId: string | undefined, dopo: () => void | Promise<void>, cosa = 'questa operazione sulle voci del Diario', fuoco?: () => HTMLElement | null): void {
+export function notificaOperazioneAnnullabile(testo: string, operazioneId: string | undefined, dopo: () => void | Promise<void>, cosa = 'questa operazione sulle voci del Diario', fuoco?: (attendi?: boolean) => HTMLElement | null): void {
   if (!operazioneId) { notifica('success', testo); return; }
   let usato = false;
   const annulla = () => {
@@ -216,8 +220,9 @@ interface Opzioni {
   onModificata: () => Promise<void>;
   /** Esc: chiude il menu della voce, se ce n'è uno aperto (vero se l'ha chiuso: la selezione resta). */
   chiudiMenu?: () => boolean;
-  /** Il posto del fuoco nel giorno: il «⋯» della voce `uid` se c'è, altrimenti un posto stabile del giorno (dopo l'incolla e l'annullo). */
-  fuoco?: (uid: string | null) => HTMLElement | null;
+  /** Il posto del fuoco nel giorno: il «⋯» della voce `uid` se c'è, altrimenti un posto stabile del giorno (dopo l'incolla e l'annullo).
+   *  `attendi`: chi riprova al frame dopo preferisce null a un posto di riserva (vedi `rimettiFuoco`). */
+  fuoco?: (uid: string | null, attendi?: boolean) => HTMLElement | null;
 }
 
 const NESSUNO: AppuntiDelGiorno = {
@@ -275,14 +280,20 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
     store.segnaScritto();
     // come s'incolla, detto nella conferma: col mouse non c'è un comando a schermo (rilievo del revisore), sul tocco c'è nel menu della voce
     const tocco = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
-    const come = tocco ? '«Incolla qui» nel menu ⋯ di una voce le mette dopo di lei' : 'Ctrl+V le mette dopo la voce selezionata (senza selezione, in fondo alla loro fascia)';
+    // declinata sul numero delle voci (rilievo del revisore UX, giro 3: «le mette… alla loro fascia» anche con una voce sola)
+    const come = tocco
+      ? `«Incolla qui» nel menu ⋯ di una voce ${n === 1 ? 'la mette' : 'le mette'} dopo di lei`
+      : n === 1
+        ? 'Ctrl+V la mette dopo la voce selezionata (senza selezione, in fondo alla sua fascia)'
+        : 'Ctrl+V le mette dopo la voce selezionata (senza selezione, ognuna in fondo alla sua fascia)';
+    // è l'istruzione su come incollare: resta a schermo il tempo di leggerla (sul tocco il conto alla rovescia non si ferma)
     if (a.modo === 'taglia') {
       store.imposta({ id: a.taglio!, uid: a.voci.map((v) => v.uid), giorno: ultimi.current.giorno });
       ultimi.current.selezione.svuota();
-      notifica('success', `${quante(n, 'voce tagliata', 'voci tagliate')}: ${come}, anche in un altro giorno.`);
+      notifica('success', `${quante(n, 'voce tagliata', 'voci tagliate')}: ${come}, anche in un altro giorno.`, DURATA_COME_INCOLLARE);
     } else {
       store.svuota();
-      notifica('success', `${quante(n, 'voce copiata', 'voci copiate')} negli appunti: ${come}, anche in un altro giorno.`);
+      notifica('success', `${quante(n, 'voce copiata', 'voci copiate')} negli appunti: ${come}, anche in un altro giorno.`, DURATA_COME_INCOLLARE);
     }
     if (c.troppoPerLaCronologia) notifica('warning', `Le voci negli appunti pesano ${(c.peso / 1048576).toFixed(1)} MB: la cronologia degli appunti di Windows (Win+V) potrebbe non conservarle. Incollale subito, oppure copiane meno alla volta.`);
   }, []);
@@ -329,7 +340,7 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
     if (vivo.current) ultimi.current.selezione.imposta(esito.uid);
     // la riga del gesto («Incolla qui», il «⋯») si rimonta con la ricarica: il fuoco, se era su un comando e si è perso, va sulla prima
     // voce arrivata (con Ctrl+V dopo un clic sulla riga il fuoco non era su niente: resta così)
-    const trova = (uid: string | null) => () => ultimi.current.fuoco?.(uid) ?? null;
+    const trova = (uid: string | null) => (attendi = false) => ultimi.current.fuoco?.(uid, attendi) ?? null;
     if (conFuoco) rimettiFuoco(trova(esito.uid[0] ?? null));
     const n = esito.uid.length;
     const dove = `nel giorno ${dataGiocoTesto(esito.giorno)}`;
@@ -347,7 +358,9 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
     if (occupatoRif.current) return;
     // dopo una delle voci tagliate non si incolla: lo si dice subito, senza chiedere al server
     if (a.modo === 'taglia' && dopoUid && a.voci.some((v) => v.uid === dopoUid)) {
-      notifica('info', 'La voce selezionata è una di quelle tagliate: seleziona la voce dopo cui incollarle, oppure nessuna per metterle in fondo alla loro fascia.');
+      notifica('info', a.voci.length === 1
+        ? 'La voce selezionata è quella tagliata: seleziona la voce dopo cui incollarla, oppure nessuna per metterla in fondo alla sua fascia.'
+        : 'La voce selezionata è una di quelle tagliate: seleziona la voce dopo cui incollarle, oppure nessuna per metterle ognuna in fondo alla sua fascia.');
       return;
     }
     occupatoRif.current = true; setOccupato(true);

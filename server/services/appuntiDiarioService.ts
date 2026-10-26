@@ -9,7 +9,7 @@
 // UN solo percorso di scrittura per copiare e spostare voci: gli appunti del Diario e la finestra «Copia in…» / «Sposta in…»
 // (`trasferisciVoci`) passano di qui, con lo stesso writer dell'ordine (`collocaInFascia`, `compatta`, `ripristinaOrdineVoce`), la stessa
 // copia degli effetti (`motoreDiario.scriviEffettiDaIstantanea`, registrata in `operazione_effetti_voce`) e lo stesso registro delle
-// operazioni (`operazione_voci_diario`, migrazione 239), da cui si annulla.
+// operazioni (`operazione_voci_diario`, migrazione 240), da cui si annulla.
 //
 //   - `esportaAppunti`: l'istantanea delle voci per gli appunti (sola lettura): ogni campo del modulo, gli effetti con i loro valori, le
 //     infiltrazioni, l'origine. Mai spunte, ricevute o yen delle partite.
@@ -380,7 +380,7 @@ function spostaRighe(righe: ReadonlyArray<{ r: RigaVoce; fascia: FasciaGioco }>,
   return righe.map(({ r, fascia }, i) => ({ uid: r.uid, da: origini[i], a: { giorno, fascia } }));
 }
 
-/** Scrive l'operazione nel registro (append-only, migrazione 239). */
+/** Scrive l'operazione nel registro (append-only, migrazione 240). */
 function registraOperazione(id: string, tipo: 'copia' | 'sposta', origine: 'appunti' | 'trasferimento', giorno: string, fascia: FasciaGioco | null, richiesta: unknown, esito: unknown[]): void {
   prepared('INSERT INTO operazione_voci_diario (id, tipo, origine, giorno_dest, fascia_dest, richiesta_json, esito_json, creata_il) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
     .run(id, tipo, origine, giorno, fascia, JSON.stringify(richiesta), JSON.stringify(esito), nowIso());

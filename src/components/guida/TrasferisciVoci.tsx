@@ -39,7 +39,7 @@ interface Props {
   /** Dopo «Annulla» nella notifica: la giornata si rilegge. */
   onRicarica: () => void | Promise<void>;
   /** Dove va il fuoco dopo il gesto e dopo il suo annullo (la barra che ha aperto la finestra sparisce con la selezione): un posto del giorno. */
-  fuoco?: () => HTMLElement | null;
+  fuoco?: (attendi?: boolean) => HTMLElement | null;
 }
 
 /** «1 voce», «3 voci». */

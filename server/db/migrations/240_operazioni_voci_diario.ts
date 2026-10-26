@@ -1,5 +1,6 @@
 // ============================================================
-// Migrazione 239 — il registro delle operazioni sulle voci del Diario: copie e spostamenti (appunti del Diario, 2026-10-26)
+// Migrazione 240 — il registro delle operazioni sulle voci del Diario: copie e spostamenti (appunti del Diario, 2026-10-26)
+// (nata come 239 sul ramo degli appunti, mai pubblicata con quel numero: la 239 pubblicata su main è `239_televendite_set_alternativi`)
 // ============================================================
 //
 // Richiesta dell'utente: copiare, tagliare e incollare voci del Diario con gli appunti di sistema, con «Annulla» nella notifica. Ogni
@@ -19,8 +20,8 @@
 
 import type { Migration } from '../migrationRunner.js';
 
-export const migration239: Migration = {
-  id: 239,
+export const migration240: Migration = {
+  id: 240,
   name: 'operazioni_voci_diario',
   up(db) {
     db.exec(`
