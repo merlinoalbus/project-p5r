@@ -825,8 +825,8 @@ function partiteConEffetti(uid: string): string[] {
     .all(uid, uid, uid, `${uid}:%`) as Array<{ nome: string }>).map((r) => r.nome);
 }
 
-/** Elimina nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. */
-/** Mette la voce nel cestino. Restituisce gli avvisi dell'annullo nelle partite (un esemplare in scorta modificato dopo la spunta, che resta). */
+/** Mette la voce nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. Restituisce gli avvisi
+ *  dell'annullo nelle partite (un esemplare in scorta modificato dopo la spunta, che resta). */
 export function eliminaVoce(uid: string): string[] {
   const r = rigaVoce(uid);
   const sorelle = righeDelGiorno(r.data).filter(v => v.fascia === r.fascia).map(v => v.uid), posto = sorelle.indexOf(uid);

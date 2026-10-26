@@ -130,7 +130,8 @@ export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto:
   return (
     <div className="flex flex-col gap-2">
       <FilaScelta etichetta="Dove va la Persona" valore={e.scorta ? 'scorta' : 'compendio'} opzioni={SCELTE_SCORTA}
-        onCambia={(v) => onCambia(v === 'scorta' ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona })} />
+        // il tasto già acceso non cambia niente: riscrivere l'effetto toglierebbe il livello salvato (anche quello nascosto di una Persona fuori elenco)
+        onCambia={(v) => { if ((v === 'scorta') !== !!e.scorta) onCambia(v === 'scorta' ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona }); }} />
       {e.scorta && (
         <>
           {persona && <label className="flex flex-col gap-1 testo-13">Livello in scorta
@@ -147,7 +148,7 @@ export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto:
                 setTesto(null);
               }} />
           </label>}
-          <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è, anche cambiando qui il livello. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
         </>
       )}
     </div>
