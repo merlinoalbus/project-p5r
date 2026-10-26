@@ -421,7 +421,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/negozi/:chiave': {
     sommario: 'Scheda di un negozio con i suoi articoli',
-    descrizione: 'Il negozio visibile con note e offerte visibili in ordine. Con M7, `catalogo` è il riferimento stabile: nome, categoria, effetto, statistiche e destinatario vengono da quella identità; senza legame valgono i campi della riga. Prezzo e `costo` restano sulla vendita: fiori/oggetti negli scambi, yen altrimenti; un costo illeggibile dà `costoDaVerificare`, non una vendita gratuita. Con `?partita=` arrivano acquisti e disponibilità, conteggio acquistati e guida del quiz dei lavori della sede. Le chiavi degli acquisti restano quelle storiche.',
+    descrizione: 'Il negozio visibile con note e offerte visibili in ordine. Con M7, `catalogo` è il riferimento stabile: nome, categoria, effetto, statistiche e destinatario vengono da quella identità; senza legame valgono nome, categoria e destinatario della riga, mentre effetto e statistiche sono null (Ondata 5, lotto F: il testo dell’effetto vive solo nell’oggetto del catalogo). Prezzo e `costo` restano sulla vendita: fiori/oggetti negli scambi, yen altrimenti; un costo illeggibile dà `costoDaVerificare`, non una vendita gratuita. Con `?partita=` arrivano acquisti e disponibilità, conteggio acquistati e guida del quiz dei lavori della sede. Le chiavi degli acquisti restano quelle storiche.',
     risposta: '`NegozioDettaglioDto`; i baratti composti hanno ricevuti con identità, quantità e note letti in blocco, un solo costo e una sola spunta. Non esiste un oggetto-bundle; le alternative di Mothman restano annotate e non sono dedotte dalla spunta.',
     errori: [[404, 'negozio-non-trovato'], PARTITA_NON_TROVATA],
   },

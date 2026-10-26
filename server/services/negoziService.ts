@@ -186,7 +186,8 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     per: oggetto ? (typeof oggetto.statistiche?.per === 'string' ? oggetto.statistiche.per : null) : r.per, prezzo: r.prezzo,
     // Ondata 5 (lotto E, decisione 5): il prezzo di una fascia diverso da `prezzo`, un dato dell'offerta; uno scambio non ne ha
     prezzoPerFascia: r.costo_json == null ? normalizzaPrezzoPerFascia(r.prezzo_per_fascia_json ?? null) : null,
-    effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
+    // Ondata 5, lotto F (decisione 21): effetto e statistiche in un punto solo, l'oggetto del catalogo; la riga conta solo senza catalogo
+    effetto: catalogo ? (oggetto?.effetto || null) : r.effetto, statistiche: catalogo ? (oggetto ? statisticheDelCatalogo(oggetto) : null) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
     disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta

@@ -38,8 +38,10 @@ describe('B9": effetti validati per famiglia', () => {
     }
   });
 
-  it('un effetto senza i campi della sua famiglia è rifiutato (prima un regalo senza `graditoA` faceva cadere le descrizioni)', () => {
+  it('un effetto senza i campi della sua famiglia è rifiutato; la famiglia «regalo» non c’è più (Ondata 5, lotto F, RG-03)', () => {
     expect(normalizzaEffettoOggetto({ famiglia: 'regalo' })).toBeNull();
+    expect(normalizzaEffettoOggetto({ famiglia: 'regalo', graditoA: ['Ann'] })).toBeNull();
+    expect(normalizzaEffettoOggetto({ famiglia: 'sblocca-luogo' })).toBeNull();
     expect(normalizzaEffettoOggetto({ famiglia: 'ripristina', risorsa: 'hp', misura: 'assoluta', valore: 10 })).toBeNull();
     expect(normalizzaEffettoOggetto({ famiglia: 'statistica', statistica: 'forza', valore: '3' })).toBeNull();
     expect(normalizzaEffettoOggetto({ famiglia: 'cura-stato', stato: 'inventato', bersaglio: 'un-alleato' })).toBeNull();

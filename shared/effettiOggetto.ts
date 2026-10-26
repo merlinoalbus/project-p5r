@@ -107,7 +107,8 @@ export type EffettoOggetto =
   | { famiglia: 'previene-stato'; stato: StatoAlterato }
   | { famiglia: 'statistica'; statistica: StatisticaOggetto; valore: number }
   | { famiglia: 'dote'; dote: string; note: number }
-  | { famiglia: 'regalo'; graditoA: string[] }
+  // Ondata 5, lotto F (RG-03, decisione 13): la famiglia «regalo» con `graditoA` scritto a mano per nome è tolta. A chi piace un regalo
+  // si legge soltanto da `confidente_regalo` (per chiave del Confidente); nessun dato la usava (censimento sulla copia alla 268).
   | { famiglia: 'sblocca-luogo'; luogo: string }
   /** Apre una capacita' dentro un'attivita': il Terzo Occhio alla pesca, i tiri speciali a
    *  biliardo, i trucchi dei videogiochi retro. `dove` e' la chiave dell'attivita', cosi' l'app ci
@@ -159,7 +160,6 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
     case 'previene-stato': return `Previene ${NOME_STATO[e.stato]}`;
     case 'statistica': return `${NOME_STATISTICA[e.statistica]} ${e.valore >= 0 ? '+' : ''}${e.valore}`;
     case 'dote': return `${nomeDote(e.dote)} ${simboliNote(Math.max(1, Math.min(4, e.note)))}`;
-    case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
     case 'sblocca-luogo': return `Sblocca ${nomi.luoghi?.[e.luogo] ?? e.luogo}`;
     case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${nomi.attivita?.[e.dove] ?? e.dove}` : ''}`;
     case 'moltiplica': return `Moltiplica per ${e.fattore} ${NOME_RESA[e.cosa]}`;
@@ -171,7 +171,7 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
 /** La figura di ogni famiglia: le illustrazioni delle categorie (`ui/categoria-<chiave>`) che le somigliano. */
 export const ICONA_FAMIGLIA_EFFETTO: Record<EffettoOggetto['famiglia'], string> = {
   ripristina: 'cura', rianima: 'cura', 'cura-stato': 'stato', 'infliggi-stato': 'battaglia', 'resiste-stato': 'stato', 'previene-stato': 'stato',
-  statistica: 'battaglia', dote: 'dote', regalo: 'regali', 'sblocca-luogo': 'esplorazione', 'sblocca-funzione': 'attivita', moltiplica: 'libri', 'aumenta-punti': 'dote', descrittivo: 'altro',
+  statistica: 'battaglia', dote: 'dote', 'sblocca-luogo': 'esplorazione', 'sblocca-funzione': 'attivita', moltiplica: 'libri', 'aumenta-punti': 'dote', descrittivo: 'altro',
 };
 
 /** Le famiglie offerte nel modulo, con la loro etichetta, nell'ordine in cui il modulo le propone. */
@@ -184,7 +184,6 @@ export const FAMIGLIE_EFFETTO: ReadonlyArray<{ chiave: EffettoOggetto['famiglia'
   { chiave: 'previene-stato', nome: 'Previene uno stato alterato' },
   { chiave: 'statistica', nome: 'Bonus a una statistica' },
   { chiave: 'dote', nome: 'Alza una Dote sociale' },
-  { chiave: 'regalo', nome: 'Regalo per un Confidente' },
   { chiave: 'sblocca-luogo', nome: 'Sblocca un quartiere' },
   { chiave: 'sblocca-funzione', nome: 'Sblocca una capacità in un’attività' },
   { chiave: 'moltiplica', nome: 'Moltiplica una resa' },
@@ -201,9 +200,10 @@ const numero = (v: unknown): v is number => typeof v === 'number' && Number.isFi
 
 /**
  * Un valore qualunque come effetto dichiarato valido, o `null`. Ogni famiglia ha i suoi campi obbligatori, con i loro valori ammessi;
- * il risultato porta solo quelli (niente campi in più). Prima si controllava solo `famiglia`: un `{ famiglia: 'regalo' }` senza
- * `graditoA` entrava nel catalogo e poi `descriviEffetto` cadeva su `e.graditoA.length`, facendo fallire le letture che descrivono
- * gli effetti. È la regola unica: la usano la lettura (`normalizzaVociEffetto`) e la validazione del server.
+ * il risultato porta solo quelli (niente campi in più). Prima si controllava solo `famiglia`: una voce senza i campi della sua
+ * famiglia entrava nel catalogo e poi `descriviEffetto` cadeva leggendoli, facendo fallire le letture che descrivono gli effetti.
+ * Una famiglia che non c'è più (come «regalo», tolta con l'ondata 5) non è valida. È la regola unica: la usano la lettura
+ * (`normalizzaVociEffetto`) e la validazione del server.
  */
 export function normalizzaEffettoOggetto(x: unknown): EffettoOggetto | null {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
@@ -227,8 +227,7 @@ export function normalizzaEffettoOggetto(x: unknown): EffettoOggetto | null {
     // i testi si controllano per tipo, non per lunghezza: l'editor parte da «» (`effettoPredefinito`) e `descriviEffetto` li regge
     case 'dote':
       return typeof e.dote === 'string' && numero(e.note) ? { famiglia: 'dote', dote: e.dote, note: e.note } : null;
-    case 'regalo':
-      return Array.isArray(e.graditoA) && e.graditoA.every((g) => typeof g === 'string') ? { famiglia: 'regalo', graditoA: [...e.graditoA as string[]] } : null;
+    // «regalo» (con `graditoA`) non è più una famiglia (RG-03): cade nel `default` e la voce non è valida
     case 'sblocca-luogo':
       return typeof e.luogo === 'string' ? { famiglia: 'sblocca-luogo', luogo: e.luogo } : null;
     case 'sblocca-funzione':

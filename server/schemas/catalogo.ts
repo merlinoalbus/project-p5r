@@ -120,10 +120,9 @@ export const datiArticolo = z.object({
   prezzo_per_fascia_json: z.unknown().superRefine((v, ctx) => {
     if (v !== null && normalizzaPrezzoPerFascia(v) === null) ctx.addIssue({ code: 'custom', message: 'Prezzo per fascia non valido: un prezzo intero per «giorno» o «sera».' });
   }).transform((v) => (v === null ? null : JSON.stringify(normalizzaPrezzoPerFascia(v)))).optional(),
-  // Restano per l'articolo **generico**, quello che nessun archivio conosce e che nasce dentro il
-  // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
-  // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:
-  // la ricerca per testo ci passa sopra, e chi legge il database senza l'app deve capire lo stesso.
+  // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo.
+  // Con il catalogo questi tre campi si accettano ma non si scrivono (non sono fra le colonne scrivibili dell'offerta,
+  // `catalogoService.CAMPI`); restano solo per un pacchetto senza catalogo, dove la riga è l'unico punto.
   effetto_json: effettoJson,
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),

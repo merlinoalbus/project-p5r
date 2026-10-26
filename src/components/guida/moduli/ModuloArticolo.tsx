@@ -3,8 +3,10 @@
 // ============================================================
 //
 // Prezzo, limite d'acquisto, nota e condizioni sono dell'offerta. Le righe storiche senza
-// identità restano modificabili a mano; le nuove scelgono un oggetto. Una scelta non più
-// disponibile viene segnalata e conservata, mai cancellata durante il caricamento.
+// identità restano modificabili a mano (nome, categoria, per chi); le nuove scelgono un oggetto.
+// Una scelta non più disponibile viene segnalata e conservata, mai cancellata durante il caricamento.
+// Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto
+// del catalogo — l'offerta non ne ha una copia, nemmeno quella senza oggetto collegato.
 // ============================================================
 
 import { Link } from 'react-router-dom';
@@ -14,12 +16,9 @@ import { useCarica } from '../../../hooks/useCarica';
 import { getCatalogoOggetti } from '../../../services/api/catalogoOggetti';
 import { Selettore } from '../../shared/Selettore';
 import { SelettoreIcone } from '../../shared/SelettoreIcone';
-import { EditorEffetto } from '../EditorEffetto';
 import { NOME_CATEGORIA_ARTICOLO, PERSONAGGI } from '../../../utils/negozi';
-import type { EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
-import { useNomiPerEffetti } from './nomiPerEffetti';
 import { CostoOfferta } from './CostoOfferta';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
@@ -39,7 +38,6 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
   const catalogo = { oggetti: elenco.dati, caricamento: elenco.caricamento, errore: elenco.errore, onRicarica: () => void elenco.ricarica() };
   const collegato = elenco.dati?.find((o) => o.chiave === chiave);
   const aMano = !chiave && !nuovo && dati._aMano === true;
-  const nomi = useNomiPerEffetti(aMano);
   return (
     <div className="flex flex-col gap-3">
       <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato}
@@ -58,13 +56,6 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
           <Blocco largo>
             <SelettoreIcone compatto etichetta="Categoria" valore={testoDi(dati.categoria) || 'altro'} opzioni={OPZIONI_CATEGORIA} disabilitato={disabilitato} onCambia={(categoria) => imposta({ categoria })} />
           </Blocco>
-          <Blocco largo>
-            <fieldset className="regole-editor flex flex-col gap-2">
-              <legend>Che cosa fa</legend>
-              <EditorEffetto conNessuno valore={(dati.effetto_json as EffettoOggetto | null) ?? null} onCambia={(e) => imposta({ effetto_json: e })} disabilitato={disabilitato} {...nomi} />
-            </fieldset>
-          </Blocco>
-          <Campo nome="statistiche" etichetta="Statistiche" dati={dati} imposta={imposta} disabilitato={disabilitato} max={400} aiuto="Per esempio: Attacco 120 · Precisione 90" largo />
           <Blocco>
             <Selettore etichetta="Per chi" valore={testoDi(dati.per)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_PER} onCambia={(k) => imposta({ per: k || null })} />
           </Blocco>

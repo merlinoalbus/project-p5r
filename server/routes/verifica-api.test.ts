@@ -102,13 +102,16 @@ describe('verifica API — rotte vere', () => {
   });
 
   it('B9": il catalogo rifiuta un effetto senza i campi della sua famiglia e salva quelli validi normalizzati', async () => {
-    const rotto = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9', effetti_json: [{ effetto: { famiglia: 'regalo' } }] });
+    const rotto = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9', effetti_json: [{ effetto: { famiglia: 'sblocca-luogo' } }] });
     expect(rotto.status).toBe(400);
     expect(rotto.body.error.code).toBe('validation-error');
-    const buono = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9 buono', effetti_json: [{ effetto: { famiglia: 'regalo', graditoA: ['Ann'], estraneo: true } }] });
+    // Ondata 5, lotto F (RG-03): la famiglia «regalo» con `graditoA` non c'è più — anche completa non è un effetto valido
+    const regalo = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9 regalo', effetti_json: [{ effetto: { famiglia: 'regalo', graditoA: ['Ann'] } }] });
+    expect(regalo.status).toBe(400);
+    const buono = await request(app).post('/api/catalogo/libro').send({ nome: 'Libro B9 buono', effetti_json: [{ effetto: { famiglia: 'sblocca-luogo', luogo: 'shibuya', estraneo: true } }] });
     expect(buono.status).toBe(201);
     const salvato = getDb().prepare('SELECT effetti_json FROM libro WHERE chiave = ?').pluck().get(buono.body.data.chiave) as string;
-    expect(JSON.parse(salvato)).toEqual([{ effetto: { famiglia: 'regalo', graditoA: ['Ann'] } }]);
+    expect(JSON.parse(salvato)).toEqual([{ effetto: { famiglia: 'sblocca-luogo', luogo: 'shibuya' } }]);
   });
 
   // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C

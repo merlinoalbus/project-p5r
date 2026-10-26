@@ -351,11 +351,10 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const catalogoEsecuzione = oggettiPerFonte('equipaggiamento', originali.map((o) => String(o.id)));
   const identitaEsecuzione = (nome: string | null) => { const o = nome === null ? undefined : perNome.get(nome); return o ? catalogoEsecuzione.get(String(o.id)) : undefined; };
   const normale = identitaEsecuzione(r.oggetto); const allarme = identitaEsecuzione(r.oggetto_allarme);
+  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (la copia in `traduzione` è tolta dalla 271)
   const descrizioneOggetto = (nome: string | null): string | null => {
     if (nome === null) return null;
-    const c = identitaEsecuzione(nome); if (c) return c.effetto;
-    const o = perNome.get(nome);
-    return o ? t('descrizioneOggetto', o.descrizione) : null;
+    return identitaEsecuzione(nome)?.effetto || null;
   };
   const riferimento = (pid: number | null) => {
     if (pid === null) return null;
@@ -445,7 +444,9 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     const c = catalogo.get(String(o.id));
     return { id: o.id, nome: o.nome, nomeIt: c?.nome ?? tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
       vincolo: o.vincolo, vincoloNome: c ? typeof c.statistiche?.per === 'string' ? c.statistiche.per : null : tOpz('vincoloOggetto', o.vincolo),
-      descrizione: o.descrizione, descrizioneNome: c?.effetto ?? t('descrizioneOggetto', o.descrizione),
+      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'effetto dell'oggetto del catalogo; la copia in `traduzione`
+      // (ambito descrizioneOggetto) è tolta dalla migrazione 271. Senza oggetto del catalogo non c'è una resa: vuoto, mai l'inglese.
+      descrizione: o.descrizione, descrizioneNome: c?.effetto ?? '',
       catalogo: c ? { chiave: c.chiave, nome: c.nome, casa: c.casa } : null, nomiAltri: c?.nomiAltri ?? [] };
   });
   const q = f.q;

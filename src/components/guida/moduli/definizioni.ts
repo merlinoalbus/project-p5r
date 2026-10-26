@@ -5,7 +5,6 @@
 import { ORARI_SEMPRE, normalizzaOrari } from '../../../../shared/orariNegozio';
 import { normalizzaRequisitoSpillo } from '../../../../shared/condizioniSpillo';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effettiCatalogo';
-import { descriviEffetto, type EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
 import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
@@ -70,7 +69,8 @@ export const articolo: DefinizioneModulo = {
     costo_json: e?.dati.costo_json ?? null,
     _costoIniziale: e?.dati.costo_json ?? null, _costoModificato: false,
     _tipoCosto: e?.dati.costo_json == null ? 'yen' : normalizzaCostoScambio(e.dati.costo_json)?.tipo ?? 'non-leggibile',
-    effetto_json: jsonDi<EffettoOggetto | null>(e?.dati.effetto_json, null), statistiche: testoDi(e?.dati.statistiche), nota: testoDi(e?.dati.nota),
+    // Ondata 5, lotto F (decisione 21): effetto e statistiche non sono dell'offerta (si leggono dall'oggetto del catalogo): il modulo non li porta
+    nota: testoDi(e?.dati.nota),
     verificato: verificatoDi(e),
     // Il nome storico resta solo per le offerte esistenti non collegate: non si copia dal catalogo.
     _esistente: !!e, _aMano: !!e && !e.dati.catalogo_chiave,
@@ -102,10 +102,8 @@ export const articolo: DefinizioneModulo = {
     // Non rispedire un legame immutato evita di rifiutare la correzione della nota se l'oggetto è stato nascosto.
     if (chiave !== d._catalogoIniziale) corpo.catalogo_chiave = chiave;
     if (!chiave) {
-      const effetto = (d.effetto_json as EffettoOggetto | null) ?? null;
       Object.assign(corpo, { nome: testoDi(d.nome).trim(), categoria: d.categoria, per: testoOnull(d.per),
-        oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null,
-        effetto_json: effetto, effetto: effetto ? descriviEffetto(effetto) : null, statistiche: testoOnull(d.statistiche) });
+        oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null });
     }
     return corpo;
   },

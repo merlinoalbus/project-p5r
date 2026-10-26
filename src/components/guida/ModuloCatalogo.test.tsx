@@ -43,28 +43,20 @@ describe('ModuloCatalogo', () => {
     notifica.mockReset();
   });
 
-  /** L'effetto di un articolo generico si dichiara con la famiglia a tessere e i suoi parametri; la frase la scrive l'app. */
-  it('l’effetto di un articolo inserito a mano si dichiara con i parametri, e la frase la scrive l’app', async () => {
+  /** Ondata 5, lotto F (decisione 21): l'effetto di un articolo non si scrive nell'offerta — vive solo nell'oggetto del catalogo. */
+  it('un articolo inserito a mano non ha un effetto proprio: niente editor dell’effetto, niente effetto nel corpo', async () => {
     api.creaElementoCatalogo.mockResolvedValue({ ...negozioSeed, tipo: 'articolo', chiave: 'x/y', nome: 'Bibita', origine: 'utente' });
     render(<ModuloCatalogo tipo="articolo" negozioChiave="untouchable" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Non c’è: lo inserisco' }));
     fireEvent.change(screen.getByLabelText(/Nome dell'articolo/), { target: { value: 'Bibita' } });
-
-    fireEvent.click(tessera('Effetto', 'Ripristina HP o SP'));
-    scegliVoce('Che cosa ripristina', 'SP');
-    fireEvent.change(screen.getByLabelText('Quantità'), { target: { value: '100' } });
-    scegliVoce('A chi', 'un alleato');
-    // La frase si vede mentre la si costruisce, e sara' quella salvata.
-    expect(screen.getByText('Ripristina 100 SP di un alleato')).toBeInTheDocument();
+    expect(screen.queryByText('Che cosa fa')).toBeNull();
+    expect(screen.queryByLabelText('Statistiche')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenCalled());
     const [, dati] = api.creaElementoCatalogo.mock.calls[0];
-    expect(dati).toMatchObject({
-      effetto: 'Ripristina 100 SP di un alleato',
-      effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' },
-      categoria: 'altro', verificato: false,
-    });
+    expect(dati).toMatchObject({ categoria: 'altro', verificato: false });
+    for (const c of ['effetto', 'effetto_json', 'statistiche']) expect(dati).not.toHaveProperty(c);
     // i valori temporanei del modulo non partono
     expect(Object.keys(dati as object).some((k) => k.startsWith('_'))).toBe(false);
   });
@@ -85,7 +77,8 @@ describe('ModuloCatalogo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenCalled());
     const [, dati] = api.creaElementoCatalogo.mock.calls[0];
-    expect(dati).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'magnifico-ladro', categoria: 'libro', prezzo: 900, effetto_json: null, statistiche: null });
+    expect(dati).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'magnifico-ladro', categoria: 'libro', prezzo: 900 });
+    for (const c of ['effetto', 'effetto_json', 'statistiche']) expect(dati).not.toHaveProperty(c);
   });
 
   it('crea un articolo agganciato al negozio da cui è stato aperto', async () => {

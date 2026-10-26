@@ -38,19 +38,22 @@ describe('articolo', () => {
   it('con l’oggetto collegato manda il legame e non i campi copiati; i valori temporanei non partono', () => {
     const collegato = { chiave: 'l', fonte: 'libri', categoria: 'libro', nome: 'Libro', nomeIt: null, effetto: 'E', statistiche: 'S', per: null, prezzo: 100 };
     const corpo = def.articolo.prepara({ ...def.articolo.iniziali(null, 'u'), _collegato: collegato, nome: 'Libro', categoria: 'libro', effetto_json: { famiglia: 'descrittivo', testo: 'x' }, statistiche: 'copia' });
-    expect(corpo).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'l', effetto_json: null, effetto: null, statistiche: null });
+    expect(corpo).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'l' });
+    // Ondata 5, lotto F: effetto e statistiche vivono solo nell'oggetto del catalogo, l'offerta non li manda mai
+    for (const c of ['effetto_json', 'effetto', 'statistiche']) expect(corpo).not.toHaveProperty(c);
     expect(Object.keys(corpo).some((k) => k.startsWith('_'))).toBe(false);
   });
   it('un legame salvato che l’archivio non ha più si conserva: non si scollega in silenzio', () => {
     const d = def.articolo.iniziali(riga('articolo', { negozio_chiave: 'u', nome: 'X', oggetto_fonte: 'libri', oggetto_chiave: 'sparito' }));
     expect(def.articolo.valido(d)).toBe(true);
-    expect(def.articolo.prepara(d)).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'sparito', effetto_json: null });
+    expect(def.articolo.prepara(d)).toMatchObject({ oggetto_fonte: 'libri', oggetto_chiave: 'sparito' });
     // scegliendo la via «a mano» il legame cade davvero
     expect(def.articolo.prepara({ ...d, _aMano: true, oggetto_fonte: null, oggetto_chiave: null })).toMatchObject({ oggetto_fonte: null, oggetto_chiave: null });
   });
-  it('a mano manda la dichiarazione e la frase che ne discende', () => {
-    const corpo = def.articolo.prepara({ ...def.articolo.iniziali(null, 'u'), _aMano: true, nome: 'Bibita', effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' } });
-    expect(corpo).toMatchObject({ effetto: 'Ripristina 100 SP di un alleato', oggetto_fonte: null });
+  it('a mano manda nome, categoria e destinatario, mai effetto o statistiche (Ondata 5, lotto F: vivono solo nel catalogo)', () => {
+    const corpo = def.articolo.prepara({ ...def.articolo.iniziali(null, 'u'), _aMano: true, nome: 'Bibita', effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' }, statistiche: 'copia' });
+    expect(corpo).toMatchObject({ nome: 'Bibita', oggetto_fonte: null });
+    for (const c of ['effetto_json', 'effetto', 'statistiche']) expect(corpo).not.toHaveProperty(c);
   });
   it('legge la regola di rifornimento e la rimanda solo se modificata (Ondata 5); una regola modificata non valida non si salva', () => {
     const d = def.articolo.iniziali(riga('articolo', { negozio_chiave: 'u', nome: 'X', quantita: 3, rifornimento_json: '{"tipo":"settimana","giorno":"lunedi","origine":"guida"}' }));

@@ -277,6 +277,12 @@ import { migration265 } from './265_prezzi_tolti_dalle_descrizioni.js';
 import { migration266 } from './266_prezzi_copiati_di_libri_e_videogiochi.js';
 import { migration267 } from './267_abbonamento_di_scarlet_nei_dvd.js';
 import { migration268 } from './268_prezzi_copiati_negli_effetti.js';
+// Ondata 5, lotto F (testi degli effetti, decisione 21): blocco 270-279
+import { migration270 } from './270_effetti_copiati_negli_articoli.js';
+import { migration271 } from './271_traduzioni_copiate_dell_equipaggiamento.js';
+import { migration272 } from './272_testi_degli_effetti_secondo_la_guida.js';
+import { migration273 } from './273_distintivi_e_tessere_dei_minigiochi.js';
+import { migration274 } from './274_premi_della_sfida_big_bang_burger.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -296,4 +302,5 @@ export const migrations: Migration[] = [
   migration250, migration251, migration252, migration253,
   migration255, migration256, migration257, migration258,
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
+  migration270, migration271, migration272, migration273, migration274,
 ];
