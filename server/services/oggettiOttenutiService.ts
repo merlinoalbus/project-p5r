@@ -12,14 +12,21 @@
 //   - Ondata 5 (lotto G): i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta: il distintivo e i
 //     panini), una riga per oggetto del turno (`utente.oggetto_esito_turno`, scritta registrando il turno e tolta togliendolo,
 //     `oggettiDegliEsitiService`).
-// Le copie dello stesso oggetto si sommano nei totali. Sola lettura: nessuna scrittura, anche nel rilascio.
+//   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, regola scritta dalla
+//     migrazione 295): letti dallo stato, come le Richieste, mai copiati.
+// Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`, utente 054:
+// turni con un esito che consuma e incensi dell'Isolamento), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
+// cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
 import { verificaPartita } from './verificaPartita.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
-import type { OggettiOttenutiDto, OggettoOttenutoDto } from '../../shared/types.js';
+import type { OggettiOttenutiDto, OggettoConsumatoDto, OggettoOttenutoDto } from '../../shared/types.js';
+import { doniConfidentiOttenuti } from './doniConfidenti.js';
+import { consumiDellaPartita } from './consumiOggettiService.js';
+import { dettaglioCopie } from './copieOggetti.js';
 
 /** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
 export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
@@ -52,12 +59,40 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
       origine: { tipo: 'richiesta', chiave: o.chiave, nome: o.richiesta_nome } })),
     ...daTurni.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
       origine: { tipo: 'turno', attivita: o.attivita_chiave, attivitaNome: o.attivita_nome ?? o.attivita_chiave, ordine: o.ordine, esitoNome: nomeEsito(o.attivita_chiave, o.esito_chiave) } })),
+    // Ondata 5 (lotto F-bis): i doni dei Confidenti meritati adesso (rango e giorno)
+    ...doniConfidentiOttenuti(partitaId).map((d): OggettoOttenutoDto => {
+      const s = scheda(d.catalogo);
+      return { catalogoChiave: d.catalogo, nome: s.nome, categoria: s.categoria, quantita: d.quantita, origine: { tipo: 'confidente', confidente: d.confidente, nome: nomeConfidente(d.confidente) } };
+    }),
   ];
   const totali = new Map<string, OggettiOttenutiDto['totali'][number]>();
   for (const r of righe) {
     const t = totali.get(r.catalogoChiave);
     if (t) t.quantita += r.quantita;
-    else totali.set(r.catalogoChiave, { catalogoChiave: r.catalogoChiave, nome: r.nome, categoria: r.categoria, quantita: r.quantita });
+    else totali.set(r.catalogoChiave, { catalogoChiave: r.catalogoChiave, nome: r.nome, categoria: r.categoria, quantita: r.quantita, consumate: 0 });
   }
-  return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')) };
+  // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
+  // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
+  const consumi: OggettoConsumatoDto[] = consumiDellaPartita(partitaId).map((c) => ({ id: c.id, catalogoChiave: c.catalogo, quantita: c.quantita, annullabile: c.fonte === 'isolamento',
+    origine: c.fonte === 'isolamento' ? 'Isolamento nella Stanza di Velluto' : `${nomeAttivita(c.attivita!)} · ${nomeEsito(c.attivita!, c.esito!)}` }));
+  for (const c of consumi) {
+    const t = totali.get(c.catalogoChiave);
+    if (t) t.consumate += c.quantita;
+    else { const s = scheda(c.catalogoChiave); totali.set(c.catalogoChiave, { catalogoChiave: c.catalogoChiave, nome: s.nome, categoria: s.categoria, quantita: 0, consumate: c.quantita }); }
+  }
+  // Rilievo della revisione (R2): le cifre di ogni oggetto vengono dalla stessa lettura delle copie della scelta dell'esito e di «Regala»
+  // (`dettaglioCopie`): comprate, regalate, cedute negli scambi e quelle che restano; mai un «×0» accanto a una copia usata che si era comprata
+  for (const t of totali.values()) {
+    const d = dettaglioCopie(partitaId, t.catalogoChiave);
+    t.comprate = d.comprate; t.regalate = d.regalate; t.cedute = d.cedute; t.disponibili = d.disponibili;
+  }
+  return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')), consumi };
 }
+
+/** Nome e categoria di una scheda del catalogo (la chiave, se il catalogo non c'è o l'oggetto non c'è più). */
+function scheda(chiave: string): { nome: string; categoria: string | null } {
+  const r = catalogoOggettiDisponibile() ? prepared('SELECT nome, categoria FROM main.catalogo_oggetto WHERE chiave = ?').get(chiave) as { nome: string; categoria: string } | undefined : undefined;
+  return { nome: r?.nome ?? chiave, categoria: r?.categoria ?? null };
+}
+const nomeConfidente = (chiave: string): string => (prepared('SELECT nome FROM main.confidente WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;
+const nomeAttivita = (chiave: string): string => (prepared('SELECT nome FROM main.attivita WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;

@@ -302,6 +302,18 @@ import { migration284 } from './284_nomi_e_identita_degli_accessori.js';
 import { migration285 } from './285_identita_doppie_della_chiusura.js';
 import { migration286 } from './286_accessori_mancanti_della_guida.js';
 import { migration287 } from './287_ricompense_e_regali_senza_copie.js';
+// Ondata 5, lotto F-bis (oggetti con effetti rilevanti per l'app, decisioni 21 e 22): 288-297, subito dopo la chiusura (nel ramo del lotto
+// erano 300-309; rinumerate all'integrazione perché il registro resti consecutivo: un buco 288-299 non si potrebbe più riempire)
+import { migration288 } from './288_libri_con_effetti_strutturati.js';
+import { migration289 } from './289_concimare_la_pianta.js';
+import { migration290 } from './290_fabbricazione_degli_strumenti.js';
+import { migration291 } from './291_dvd_lettore_e_noleggi_di_scarlet.js';
+import { migration292 } from './292_chihaya_pietra_sacra_e_affinita.js';
+import { migration293 } from './293_diner_e_bistecca_nostalgica.js';
+import { migration294 } from './294_caffe_e_curry_con_i_prodotti.js';
+import { migration295 } from './295_doni_dei_confidenti_raccolti_e_vaschetta.js';
+import { migration296 } from './296_incensi_e_oggetti_delle_fusioni.js';
+import { migration297 } from './297_aojiru_dote_assorbita.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -322,5 +334,6 @@ export const migrations: Migration[] = [
   migration255, migration256, migration257, migration258, migration259,
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268, migration269,
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
-  migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287,
+  migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
+  migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297,
 ];

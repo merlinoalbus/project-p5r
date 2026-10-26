@@ -36,6 +36,7 @@ import { NOME_DOTE } from '../utils/citta';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
 import { TestoNote } from '../components/shared/TestoNote';
+import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 /**
  * Pagina dei libri: carica il catalogo per la partita attiva, mostra i conteggi di lettura,
@@ -70,7 +71,12 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       sessioniFatte: correnti.libri.reduce((n, l) => n + (l.chiave === libro.chiave ? libro.progresso : l.progresso), 0),
     })),
     // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
-    dopoOgniInvio: (libro) => avvisaDotiDaSegnare(libro.daSegnare, libro.nome),
+    dopoOgniInvio: (libro) => {
+      avvisaDotiDaSegnare(libro.daSegnare, libro.nome);
+      // Ondata 5 (lotto F-bis): un libro con effetti che non sono Doti (Lettura rapida, Comprendere il cuore…) cambia il passo e i promemoria
+      // della pagina: si rilegge, perché il segno e i promemoria li calcola il server dai libri letti
+      if (libro.effetti.some((v) => v.effetto.famiglia !== 'dote')) void dati.ricarica();
+    },
     messaggioErrore: 'Aggiornamento del libro fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });
@@ -166,6 +172,8 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
             l’effetto non è retroattivo — e «+» avanza di due per volta.</span>
           </p>
         )}
+        {/* Ondata 5 (lotto F-bis): le capacità dei libri letti che non valgono in un'attività dell'app (Comprendere il cuore, in combattimento) */}
+        <PromemoriaLibri promemoria={d.promemoria} className="prosa-misurata" />
       </>}
       filtri={{ etichetta: 'Filtri libri', contenuto: <>
         <div className="filtri-articoli__riga">

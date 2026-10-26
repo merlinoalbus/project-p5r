@@ -34,6 +34,7 @@ import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaServi
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { esitiDto } from '../services/esitiAttivitaService.js';
+import { promemoriaLibriPerAttivita } from '../services/modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
@@ -61,7 +62,9 @@ function attivitaConteggiabili() {
     .filter((a) => (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta')
     .map((a) => ({ chiave: a.chiave, nome: a.nome, tipo: a.tipo, effettiTurno: effettiDelTurno({ effetti_json: a.effetti_json }),
       // L13: gli esiti dichiarati (mai per le fonti Confidente o pesca, che hanno la loro progressione)
-      esitiDichiarati: a.confidente_chiave || a.pesca_regola_chiave ? null : leggiEsitiAttivita(a.esiti_json) }));
+      esitiDichiarati: a.confidente_chiave || a.pesca_regola_chiave ? null : leggiEsitiAttivita(a.esiti_json),
+      // Ondata 5 (lotto F-bis): una fonte Confidente rimanda alla sua scheda: nessun promemoria dei libri
+      confidente: !!a.confidente_chiave }));
 }
 
 router.get('/elenchi', (_req, res) => {
@@ -137,7 +140,10 @@ function progressi(id: number): ProgressiPartitaDto {
       return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto, membro, membroNome: nomiSquadra.get(membro) ?? membro };
     }),
     // L13: con gli esiti dichiarati il + apre la scelta dell'esito, valutata sullo stato della partita (il giorno corrente)
-    attivita: attivitaConteggiabili().map(({ esitiDichiarati, ...a }) => ({ ...a, volte: svolte.get(a.chiave) ?? 0, esiti: esitiDichiarati ? esitiDto(esitiDichiarati, st) : null })),
+    // Ondata 5 (lotto F-bis): con la chiave dell'attività gli esiti portano i promemoria dei libri letti per la scelta del +; la riga li porta
+    // anche quando l'attività non ha esiti (biliardo, freccette, Fioraio Rafflesia, pesca)
+    attivita: attivitaConteggiabili().map(({ esitiDichiarati, confidente, ...a }) => ({ ...a, volte: svolte.get(a.chiave) ?? 0, esiti: esitiDichiarati ? esitiDto(esitiDichiarati, st, a.chiave) : null,
+      promemoria: confidente ? [] : promemoriaLibriPerAttivita(st.letture, { chiave: a.chiave, tipo: a.tipo }) })),
     puntiNegozio: negozi.filter((n) => n.programma?.calcolo === 'manuale').map((n) => ({ negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, unita: n.programma!.unita, punti: punti.get(n.chiave) ?? 0 })),
     rangoCliente: negozi.filter((n) => n.programma?.calcolo === 'rango-cliente').map((n) => {
       const spesa = st.spesaPerNegozio.get(n.chiave) ?? 0;

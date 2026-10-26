@@ -31,6 +31,7 @@ import { TitoloSezione } from '../shared/TitoloSezione';
 import { SceltaEsitoTurno } from '../guida/SceltaEsito';
 import { TestoNote } from '../shared/TestoNote';
 import { fraseDotiEsito } from '../../../shared/esitiAttivita';
+import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -255,6 +256,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                                   );
                                 })()}
                                 {esiti && esiti.modo === 'scelta' && <span className="block testo-12 text-text-secondary">{`Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
+                                {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività, con o senza esiti; niente se nessuno */}
+                                <PromemoriaLibri promemoria={a.promemoria} compatto />
                               </span>
                               {pesca && <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Registra nella scheda Pesca" onClick={() => scegli('pesca')} />}
                               <span className="condizione-numero shrink-0" role="group" aria-label={`Volte: ${a.nome}`}>
@@ -324,7 +327,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} />
             </>}
 
-            {sezione === 'pesca' && <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} />}
+            {/* Ondata 5 (lotto F-bis): «Lo zen della pesca» letto si ricorda anche dove si registra la visita */}
+            {sezione === 'pesca' && <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} promemoria={p.attivita.find((a) => a.chiave === ATTIVITA_PESCA)?.promemoria} />}
           </div>
         </div>
       )}

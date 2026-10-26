@@ -5,7 +5,7 @@
 import type {
   CapienzaScortaDto, CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { DivergenzaDto, EsitoRegaloDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
+import type { DivergenzaDto, EsitoRegaloDto, IncensoIsolamentoDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -147,6 +147,8 @@ export const getRiepilogoRichieste = (id: number): Promise<RiepilogoRichiesteDto
 
 /** L13: gli oggetti del catalogo ottenuti nella partita (voci con l'effetto «oggetto ricevuto» e Richieste completate). */
 export const getOggettiOttenuti = (id: number): Promise<OggettiOttenutiDto> => apiGet(`/partite/${id}/oggetti-ottenuti`);
+/** Ondata 5 (lotto F-bis): annulla l'uso di un incenso in un Isolamento (la copia torna); risponde con gli oggetti ottenuti aggiornati. */
+export const annullaConsumoIsolamento = (id: number, consumoId: number): Promise<OggettiOttenutiDto> => apiDelete(`/partite/${id}/consumi/${consumoId}`);
 
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera); 400 se la guida non ne dichiara il totale. */
 export const impostaTimbri = (id: number, area: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { area, raccolti });
@@ -241,8 +243,10 @@ export const eseguiForca =(id: number, dati: { riceventeId: number; sacrificioId
   apiPost(`/partite/${id}/velluto/forca`, dati);
 /** Registra un ciclo di isolamento di un esemplare: punti dall'incenso sulle statistiche scelte e skill di resistenza appresa
  *  (con la skill da dimenticare se ne ha già 8). */
-export const eseguiIsolamento =(id: number, dati: { possedutaId: number; incenso?: string; giorni: number; statistiche?: string[]; skillResistenzaId?: number | null; skillRimossaId?: number | null }): Promise<EsitoIsolamentoDto> =>
+export const eseguiIsolamento =(id: number, dati: { possedutaId: number; incenso?: string; oggetto?: string; giorni: number; statistiche?: string[]; skillResistenzaId?: number | null; skillRimossaId?: number | null }): Promise<EsitoIsolamentoDto> =>
   apiPost(`/partite/${id}/velluto/isolamento`, dati);
+/** Ondata 5 (lotto F-bis): gli incensi del catalogo per l'Isolamento, con prezzo dell'offerta e copie possedute nella partita. */
+export const getIncensiIsolamento =(id: number): Promise<IncensoIsolamentoDto[]> => apiGet(`/partite/${id}/velluto/incensi`);
 /** La skill di resistenza che l'isolamento darebbe all'esemplare (elemento, grado e skill, calcolati da debolezza e livello). */
 export const getSuggerimentoIsolamento =(id: number, possedutaId: number): Promise<SuggerimentoIsolamentoDto> => apiGet(`/partite/${id}/velluto/isolamento/${possedutaId}`);
 

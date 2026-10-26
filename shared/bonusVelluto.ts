@@ -178,13 +178,52 @@ export function tierResistenza(livello: number): (typeof TIER_RESISTENZA)[number
   return TIER_RESISTENZA.find((t) => livello >= t.livelloMin && (t.livelloMax === null || livello <= t.livelloMax)) ?? TIER_RESISTENZA[0];
 }
 
-/** Incensi: effetto per applicazione (ogni 2 giorni), prezzo in yen (null = solo scambio con fiori dei Mementos). Nomi in italiano con l'originale inglese (la localizzazione ufficiale italiana degli incensi non è nel glossario). Affidabilità alta. */
-export const INCENSI: ReadonlyArray<{ chiave: string; nome: string; nomeOriginale: string; prezzo: number | null; punti: number; statistiche: number; nota: string }> = [
-  { chiave: 'base', nome: 'Incenso semplice (una statistica)', nomeOriginale: 'Incense', prezzo: 4000, punti: 1, statistiche: 1, nota: 'una versione per ciascuna statistica' },
-  { chiave: 'musk', nome: 'Muschio (due statistiche)', nomeOriginale: 'Musk', prezzo: 8000, punti: 1, statistiche: 2, nota: 'coppie fisse: FR+MA, FR+AG, MA+RS, MA+FO, RS+AG' },
-  { chiave: 'rasta', nome: 'Sandalo rasta (FR, MA, AG)', nomeOriginale: 'Rasta Sandalwood', prezzo: 14000, punti: 1, statistiche: 3, nota: 'dal 1º ottobre' },
-  { chiave: 'ambergris', nome: 'Ambra grigia', nomeOriginale: 'Ambergris', prezzo: null, punti: 2, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos' },
-  { chiave: 'nirvana', nome: 'Nirvana', nomeOriginale: 'Nirvana', prezzo: null, punti: 3, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos, dal 30 ottobre' },
+/** Incensi: la REGOLA di ogni famiglia, effetto per applicazione (ogni 2 giorni) e quante statistiche alza. Nomi in italiano con l'originale
+ *  inglese. Affidabilità alta. Ondata 5 (lotto F-bis): il prezzo non sta più qui (era una copia di quello del listino): lo dicono le offerte di
+ *  Mantra Ganda e di Jose degli oggetti del catalogo (`INCENSI_DEL_CATALOGO`), lette dal server (`incensiDellaPartita`); dove e quando si
+ *  comprano lo dicono le stesse offerte. */
+export const INCENSI: ReadonlyArray<{ chiave: string; nome: string; nomeOriginale: string; punti: number; statistiche: number }> = [
+  { chiave: 'base', nome: 'Incenso semplice (una statistica)', nomeOriginale: 'Incense', punti: 1, statistiche: 1 },
+  { chiave: 'musk', nome: 'Muschio (due statistiche)', nomeOriginale: 'Musk', punti: 1, statistiche: 2 },
+  { chiave: 'rasta', nome: 'Sandalo rasta (FR, MA, AG)', nomeOriginale: 'Rasta Sandalwood', punti: 1, statistiche: 3 },
+  { chiave: 'ambergris', nome: 'Ambra grigia', nomeOriginale: 'Ambergris', punti: 2, statistiche: 1 },
+  { chiave: 'nirvana', nome: 'Nirvana', nomeOriginale: 'Nirvana', punti: 3, statistiche: 1 },
+];
+
+type StatIncenso = 'forza' | 'magia' | 'resistenza' | 'agilita' | 'fortuna';
+/**
+ * Ondata 5 (lotto F-bis, censimento 27: «legare INCENSI al catalogo, prezzo dall'articolo, consumo dal registro»): ogni incenso del catalogo con
+ * la sua famiglia e le statistiche che alza. Le statistiche sono quelle del nome dell'oggetto (Incenso FR = Forza, Muschio MA-RS = Magia e
+ * Resistenza), cioè l'identità dell'oggetto, non un dato copiato da un'altra tabella. Le righe composte del catalogo («Ambra grigia» con tre
+ * statistiche, «Ambra grigia RS/FR», «Nirvana» con tutte) dicono che cosa vende Jose in un Dedalo e non quale statistica alza la copia che si
+ * brucia: non sono qui (si sceglie l'oggetto singolo). «Muschio FR-FO» e «Muschio FR-RS» sono tesori dei Palazzi (non in vendita),
+ * «Incenso Nirvana FO» è la stessa scheda di «Nirvana FO» trovata in un Palazzo.
+ */
+export const INCENSI_DEL_CATALOGO: ReadonlyArray<{ oggetto: string; incenso: string; statistiche: readonly StatIncenso[] }> = [
+  { oggetto: 'materiale/incenso-fr', incenso: 'base', statistiche: ['forza'] },
+  { oggetto: 'materiale/incenso-ma', incenso: 'base', statistiche: ['magia'] },
+  { oggetto: 'materiale/incenso-rs', incenso: 'base', statistiche: ['resistenza'] },
+  { oggetto: 'materiale/incenso-ag', incenso: 'base', statistiche: ['agilita'] },
+  { oggetto: 'materiale/incenso-fo', incenso: 'base', statistiche: ['fortuna'] },
+  { oggetto: 'materiale/muschio-fr-ma', incenso: 'musk', statistiche: ['forza', 'magia'] },
+  { oggetto: 'materiale/muschio-fr-ag', incenso: 'musk', statistiche: ['forza', 'agilita'] },
+  { oggetto: 'materiale/muschio-ma-rs', incenso: 'musk', statistiche: ['magia', 'resistenza'] },
+  { oggetto: 'materiale/muschio-ma-fo', incenso: 'musk', statistiche: ['magia', 'fortuna'] },
+  { oggetto: 'materiale/muschio-rs-ag', incenso: 'musk', statistiche: ['resistenza', 'agilita'] },
+  { oggetto: 'altro/muschio-fr-fo', incenso: 'musk', statistiche: ['forza', 'fortuna'] },
+  { oggetto: 'altro/muschio-fr-rs', incenso: 'musk', statistiche: ['forza', 'resistenza'] },
+  { oggetto: 'materiale/sandalo-rasta', incenso: 'rasta', statistiche: ['forza', 'magia', 'agilita'] },
+  { oggetto: 'consumabile/ambra-grigia-fr', incenso: 'ambergris', statistiche: ['forza'] },
+  { oggetto: 'consumabile/ambra-grigia-ma', incenso: 'ambergris', statistiche: ['magia'] },
+  { oggetto: 'consumabile/ambra-grigia-rs', incenso: 'ambergris', statistiche: ['resistenza'] },
+  { oggetto: 'consumabile/ambra-grigia-ag', incenso: 'ambergris', statistiche: ['agilita'] },
+  { oggetto: 'consumabile/ambra-grigia-fo', incenso: 'ambergris', statistiche: ['fortuna'] },
+  { oggetto: 'consumabile/nirvana-fr', incenso: 'nirvana', statistiche: ['forza'] },
+  { oggetto: 'consumabile/nirvana-ma', incenso: 'nirvana', statistiche: ['magia'] },
+  { oggetto: 'consumabile/nirvana-rs', incenso: 'nirvana', statistiche: ['resistenza'] },
+  { oggetto: 'consumabile/nirvana-ag', incenso: 'nirvana', statistiche: ['agilita'] },
+  { oggetto: 'consumabile/nirvana-fo', incenso: 'nirvana', statistiche: ['fortuna'] },
+  { oggetto: 'altro/incenso-nirvana-fo', incenso: 'nirvana', statistiche: ['fortuna'] },
 ];
 
 /** Giorni per applicazione dell'incenso. */

@@ -11,18 +11,19 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
-import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
+import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, incensiDellaPartita, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { capienzaScorta } from '../services/capienzaScortaService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta, riepilogoRichieste } from '../services/richiesteService.js';
 import { oggettiOttenutiPartita } from '../services/oggettiOttenutiService.js';
+import { annullaConsumoIsolamento } from '../services/consumiOggettiService.js';
 import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
 import { bodySessioneVideogioco } from '../schemas/partite.js';
@@ -291,6 +292,13 @@ router.get('/:id/richieste/riepilogo', validate({ params: paramsPartita }), (req
 router.get('/:id/oggetti-ottenuti', validate({ params: paramsPartita }), (req, res) => {
   res.json(oggettiOttenutiPartita(Number(req.params.id)));
 });
+/** Ondata 5 (lotto F-bis): annulla l'uso di un incenso bruciato in un Isolamento (la copia torna); risponde con gli oggetti ottenuti aggiornati. */
+router.delete('/:id/consumi/:consumoId', validate({ params: paramsPartitaConsumo }), (req, res) => {
+  const id = Number(req.params.id);
+  verificaPartita(id); // seconda difesa: solo le partite del proprietario della richiesta
+  annullaConsumoIsolamento(id, Number(req.params.consumoId));
+  res.json(oggettiOttenutiPartita(id));
+});
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera). */
 router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ area: z.string().min(1).max(200), raccolti: z.number().int().min(0).max(999) }) }), (req, res) => {
   const b = req.body as { area: string; raccolti: number };
@@ -423,6 +431,10 @@ router.post('/:id/velluto/forca', validate({ params: paramsPartita, body: bodyFo
 });
 router.post('/:id/velluto/isolamento', validate({ params: paramsPartita, body: bodyIsolamento }), (req, res) => {
   res.json(eseguiIsolamento(Number(req.params.id), req.body as Parameters<typeof eseguiIsolamento>[1]));
+});
+// Ondata 5 (lotto F-bis): gli incensi del catalogo con prezzo dell'offerta e copie possedute
+router.get('/:id/velluto/incensi', validate({ params: paramsPartita }), (req, res) => {
+  res.json(incensiDellaPartita(Number(req.params.id)));
 });
 router.get('/:id/velluto/isolamento/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   verificaPartita(Number(req.params.id)); // seconda difesa: la partita deve essere del proprietario della richiesta

@@ -16,6 +16,7 @@ import { BeneficiPesca, ProfiliSessionePesca, RiepilogoOsservazionePesca } from 
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const erroreTesto = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -166,10 +167,11 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
   </Modal>;
 }
 
-export function RegistroPesca(props: { partitaId: number; onCambiato?: () => void | Promise<void> }) {
+/** `promemoria` (Ondata 5, lotto F-bis): gli effetti dei libri letti che riguardano la pesca («Lo zen della pesca»), dal contatore delle attività. */
+export function RegistroPesca(props: { partitaId: number; onCambiato?: () => void | Promise<void>; promemoria?: readonly string[] }) {
   return <RegistroPescaNelContesto key={props.partitaId} {...props} />;
 }
-function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number; onCambiato?: () => void | Promise<void> }) {
+function RegistroPescaNelContesto({ partitaId, onCambiato, promemoria }: { partitaId: number; onCambiato?: () => void | Promise<void>; promemoria?: readonly string[] }) {
   const gesti = useGestiPartita();
   const [editor, setEditor] = useState<Editor | null>(null), [pronto, setPronto] = useState<GestoPronto | null>(null);
   const [ultimoStato, setUltimoStato] = useState<StatoPescaDto | null>(null);
@@ -189,6 +191,7 @@ function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number
   return <section id="pesca" className="card flex min-w-0 flex-col gap-3" aria-label="Registro della pesca">
     <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display">Pesca a Ichigaya</TitoloSezione><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi il registro pesca" disabled={registro.caricamento} onClick={() => void registro.ricarica()} /></div>
     <p className="m-0 testo-13">Visite, catture, fatti osservati e spese hanno fonti distinte. I vecchi contatori non provano catture o premi; nessun saldo cambia senza una decisione esplicita.</p>
+    <PromemoriaLibri promemoria={promemoria} />
     <GestiPartita partitaId={partitaId} onCambiato={cambiato} />
     {registro.caricamento && !s && <p role="status">Leggo il registro pesca…</p>}
     {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}</p>}

@@ -41,11 +41,14 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
     {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
     {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
     {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
+    {/* Ondata 5 (lotto F-bis, decisione 22): solo l'etichetta, la fusione resta proposta */}
+    {/* rilievo R5: il nome dell'oggetto si legge sulla piastrella (non solo nel suggerimento): tocco, tastiera e lettori di schermo */}
+    {p.richiedeOggetto && <span className="chip">Richiede «{p.richiedeOggetto.nome}»</span>}
   </>;
   if (riga) {
     return (
       <li className="min-w-0" id={`persona-${p.id}`}>
-        <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text grid grid-cols-[72px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`} onClick={apri}>
+        <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text grid grid-cols-[72px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
           <div className="relative">
             <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={72} forma="quadrata" adatta="copri" /></span>
             {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-8 h-8 object-contain drop-shadow" fallback={null} />}
@@ -73,7 +76,7 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
   }
   return (
     <li className="min-w-0" id={`persona-${p.id}`}>
-      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`} onClick={apri}>
+      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
         <div className="relative flex justify-center">
           <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={150} forma="quadrata" adatta="copri" /></span>
           <LivelloBadge livello={p.livello} className="absolute -left-2 -top-2" />

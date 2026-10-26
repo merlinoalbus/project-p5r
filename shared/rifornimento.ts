@@ -31,7 +31,8 @@ export type OrigineRifornimento = 'guida' | 'fallback-utente';
  *   - `pioggia`: una scorta per ogni giorno di pioggia (che l'articolo ci sia solo con la pioggia lo dicono le sue condizioni);
  *   - `mai`: pezzo unico, una volta comprato non torna;
  *   - `consegna` con `giorni`: un ordine alla volta, il successivo solo dopo la consegna (Tanaka, 3 giorni);
- *   - `restituzione`: il libro della biblioteca torna alla restituzione (quando è stato letto).
+ *   - `restituzione`: il libro della biblioteca torna alla restituzione (quando è stato letto); Ondata 5 (lotto F-bis): anche il DVD
+ *     noleggiato da Scarlet, quando è stato visto per intero.
  * `daVerificare`: la guida non è precisa (i distributori: «raramente» 1 pezzo invece di 2), il dato va verificato in gioco.
  */
 export interface RegolaRifornimento {
@@ -193,7 +194,7 @@ export function descriviRifornimento(regola: RegolaRifornimento, quantita: numbe
   const verifica = regola.daVerificare ? ' (da verificare in gioco)' : '';
   switch (regola.tipo) {
     case 'mai': return `Pezzo unico: una volta comprato non torna${verifica}`;
-    case 'restituzione': return `${quanti}: torna quando il libro preso in prestito viene restituito${verifica}`;
+    case 'restituzione': return `${quanti}: torna alla restituzione, quando il prestito è letto o visto per intero${verifica}`;
     case 'consegna': return `Un ordine alla volta: il successivo dopo la consegna, in ${regola.giorni ?? 1} ${regola.giorni === 1 ? 'giorno' : 'giorni'}${verifica}`;
     case 'pioggia': return `${quanti} per ogni giorno di pioggia${verifica}`;
     case 'settimana': return `${quanti}, rifornimento ogni ${nomeGiorno(regola.giorno)}${verifica}`;

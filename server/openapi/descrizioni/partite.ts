@@ -303,9 +303,15 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'GET /api/partite/:id/oggetti-ottenuti': {
     sommario: 'Gli oggetti del catalogo ottenuti nella partita',
-    descrizione: 'L13: le voci del Diario spuntate con l\'effetto «oggetto ricevuto» (una riga per voce ed effetto, tolta togliendo la spunta) e le Richieste completate con i loro oggetti del catalogo (decisione 3: una volta sola, finché la Richiesta è completata; letti dallo stato completato, non copiati) e (Ondata 5, lotto G) i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta; una riga per oggetto del turno, tolta togliendo il turno). `righe` con l\'origine di ogni oggetto, `totali` con le copie sommate per oggetto. Sola lettura.',
+    descrizione: 'L13: le voci del Diario spuntate con l\'effetto «oggetto ricevuto» (una riga per voce ed effetto, tolta togliendo la spunta) e le Richieste completate con i loro oggetti del catalogo (decisione 3: una volta sola, finché la Richiesta è completata; letti dallo stato completato, non copiati) e (Ondata 5, lotto G) i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta; una riga per oggetto del turno, tolta togliendo il turno). Ondata 5 (lotto F-bis): anche i doni dei Confidenti già meritati (rango e giorno della guida, origine `confidente`) e, in `consumi`, le copie usate dai turni con un esito che consuma e dagli Isolamenti (`totali[].consumate`; `consumi[].annullabile` per l\'uso di un Isolamento, `DELETE …/consumi/:consumoId`). `righe` con l\'origine di ogni oggetto, `totali` con le copie sommate per oggetto e, dalla stessa lettura delle copie della scelta dell\'esito e di «Regala», `comprate`, `regalate`, `cedute` negli scambi e `disponibili`. Sola lettura.',
     risposta: '`OggettiOttenutiDto`',
     errori: [PARTITA],
+  },
+  'DELETE /api/partite/:id/consumi/:consumoId': {
+    sommario: 'Annulla l\'uso di un incenso in un Isolamento',
+    descrizione: 'Ondata 5 (lotto F-bis): toglie una riga del registro dei consumi (`utente.consumo_oggetto_partita`) scritta da un Isolamento: la copia dell\'incenso torna fra quelle possedute. Le statistiche e la skill date dall\'Isolamento restano (come eliminando la sua voce dallo storico): si correggono nella Persona. L\'uso di un turno di un\'attività si toglie togliendo il turno (409 `consumo-di-un-turno`).',
+    risposta: '`OggettiOttenutiDto` aggiornato',
+    errori: [PARTITA, [404, 'consumo-non-trovato'], [409, 'consumo-di-un-turno']],
   },
   'PUT /api/partite/:id/timbri': {
     sommario: 'Timbri raccolti in un\'area di un dedalo dei Memento',
@@ -515,9 +521,15 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'POST /api/partite/:id/velluto/isolamento': {
     sommario: 'Registra un ciclo di isolamento di una Persona',
-    descrizione: 'Somma ai bonus delle statistiche scelte i punti dell\'incenso (tante statistiche quante ne richiede l\'incenso; doppi con l\'Allarme) e fa apprendere la skill di resistenza: quella indicata, o quella calcolata da prima debolezza e livello; `null` = nessuna. Se gli 8 slot sono pieni va indicata la skill da dimenticare (400). L\'evento `isolamento` va nello storico; poi si riverifica l\'obiettivo della Persona.',
+    descrizione: 'Somma ai bonus delle statistiche scelte i punti dell\'incenso (tante statistiche quante ne richiede l\'incenso; doppi con l\'Allarme) e fa apprendere la skill di resistenza: quella indicata, o quella calcolata da prima debolezza e livello; `null` = nessuna. Se gli 8 slot sono pieni va indicata la skill da dimenticare (400). L\'evento `isolamento` va nello storico; poi si riverifica l\'obiettivo della Persona. Ondata 5 (lotto F-bis): con `oggetto` (un incenso del catalogo, `GET …/velluto/incensi`) famiglia e statistiche sono quelle dell\'oggetto (400 `statistiche-incenso` se ne arrivano altre) e una copia esce da quelle possedute (registro dei consumi, `utente.consumo_oggetto_partita`).',
     risposta: '`EsitoIsolamentoDto`',
     errori: [PARTITA, [404, 'posseduta-non-trovata'], [400, 'incenso-non-valido'], [400, 'statistiche-incenso'], [400, 'statistica-non-valida'], [404, 'skill-non-trovata'], [400, 'skill-non-del-ricevente'], [400, 'troppe-skill']],
+  },
+  'GET /api/partite/:id/velluto/incensi': {
+    sommario: 'Gli incensi del catalogo per l\'Isolamento',
+    descrizione: 'Ondata 5 (lotto F-bis): ogni incenso del catalogo con la famiglia (punti per applicazione), le statistiche che alza, dove si compra con il prezzo dell\'offerta (yen a Mantra Ganda, fiori da Jose; vuoto per un tesoro dei Palazzi), in `offerte` le condizioni di ogni offerta e del suo negozio in parole («Gemelle al rango 3», «dal 1 ottobre», un Dedalo aperto) con `acquistabile` valutato nella partita (null se da verificare), e le copie che la partita ha adesso (comprate, ricevute, meno regalate e consumate). Sola lettura.',
+    risposta: '`IncensoIsolamentoDto[]`',
+    errori: [PARTITA],
   },
   'GET /api/partite/:id/velluto/isolamento/:possedutaId': {
     sommario: 'La skill di resistenza che un esemplare imparerebbe in isolamento',

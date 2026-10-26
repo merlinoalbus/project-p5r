@@ -11,8 +11,8 @@ import { PannelloVelluto } from './PannelloVelluto';
 import { ForcaIsolamento } from './ForcaIsolamento';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 
-const { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento } = vi.hoisted(() => ({ getPossedute: vi.fn(), getSuggerimentoIsolamento: vi.fn(), eseguiIsolamento: vi.fn() }));
-vi.mock('../../services/api', (vero) => moduloApi(vero, { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getImmagini: vi.fn().mockResolvedValue([]) }));
+const { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getIncensiIsolamento } = vi.hoisted(() => ({ getPossedute: vi.fn(), getSuggerimentoIsolamento: vi.fn(), eseguiIsolamento: vi.fn(), getIncensiIsolamento: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getIncensiIsolamento, getImmagini: vi.fn().mockResolvedValue([]) }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 const velluto: VellutoDto = {
@@ -68,6 +68,10 @@ describe('PannelloVelluto', () => {
 describe('ForcaIsolamento', () => {
   it('Forca: sacrifici ordinati per moltiplicatore con rango, Tesoro, stesso arcano e penalità; Isolamento: giorni, incenso e tier', async () => {
     getSuggerimentoIsolamento.mockResolvedValue({ elemento: 'fire', elementoNome: 'Fuoco', tier: 'Evade', skill: { id: 5, nome: 'Evade Fire', nomeIt: 'Schiva fuoco' } });
+    // Ondata 5 (lotto F-bis): l'incenso è un oggetto del catalogo, con il prezzo dell'offerta e le copie della partita
+    // (rilievo R3: con le condizioni dell'offerta; con una copia è la scelta di partenza)
+    getIncensiIsolamento.mockResolvedValue([{ oggetto: 'materiale/incenso-fr', nome: 'Incenso FR', incenso: 'base', punti: 1, statistiche: ['forza'], dove: ['4.000 ¥ · Mantra Ganda'],
+      offerte: [{ testo: '4.000 ¥ · Mantra Ganda', condizioniTesto: 'Gemelle al rango 3', acquistabile: true }], disponibili: 1 }]);
     getPossedute.mockResolvedValue([
       posseduta(11, 1, 'Arsène', 'Fool', 'Matto', 20),
       posseduta(12, 2, 'Pixie', 'Lovers', 'Amanti', 30),
@@ -86,7 +90,7 @@ describe('ForcaIsolamento', () => {
     expect(righe[1].textContent).toMatch(/livello superiore/);
     // Isolamento: Gemelle rango 4 → 3 giorni; incenso base 4 giorni → 2 applicazioni +2; Pixie livello 30 → Evade
     expect(screen.getByText(/Durata dell'addestramento/).textContent).toMatch(/3 giorni/);
-    expect(screen.getByText(/applicazioni →/).textContent).toMatch(/2 applicazioni → \+2 per statistica/);
+    expect((await screen.findByText(/applicazioni →/)).textContent).toMatch(/2 applicazioni → \+2 per statistica/);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Persona da isolare: Pixie' })); });
     expect(screen.getByText(/resistenza ottenuta di tier/).textContent).toMatch(/Evade/);
     expect(screen.getByText(/resistenza ottenuta di tier/).textContent).toMatch(/sotto il livello 34/);

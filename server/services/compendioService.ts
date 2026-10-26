@@ -97,6 +97,18 @@ interface RigaPersona {
   forza: number; magia: number; resistenza: number; agilita: number; fortuna: number; aree_mementos_json: string; piani_mementos: string | null;
   descrizione: string; fonte_descrizione: string;
   del_party: number; personaggio: string | null; forma: number | null; forma_di: number | null; deriva_da: number | null; chiave_forma: string | null; forma_condizioni_json: string | null;
+  /** Ondata 5 (lotto F-bis, migrazione 296): l'oggetto chiave che la fusione richiede; la colonna manca negli schemi di prima. */
+  richiede_oggetto?: string | null;
+}
+
+/** Ondata 5 (lotto F-bis, decisione 22): l'oggetto che la Persona richiede per la fusione, con il nome del catalogo e la Richiesta che lo dà
+ *  (`ricompensa_oggetto` di fonte «richiesta»). Solo un'etichetta: nessun filtro del motore di fusione la usa. */
+function oggettoRichiesto(chiave: string | null | undefined): PersonaRiassuntoDto['richiedeOggetto'] {
+  if (!chiave) return null;
+  const nome = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(chiave) as string | undefined;
+  if (!nome) return null;
+  const richiesta = prepared("SELECT r.nome FROM ricompensa_oggetto ro JOIN richiesta r ON r.chiave = ro.fonte_chiave WHERE ro.fonte_tipo = 'richiesta' AND ro.catalogo_chiave = ? ORDER BY r.ordine LIMIT 1").pluck().get(chiave) as string | undefined;
+  return { chiave, nome, richiesta: richiesta ?? null };
 }
 
 interface RigaSkill {
@@ -193,6 +205,7 @@ function personaRiassunto(r: RigaPersona, affinita: Map<string, string> = codici
     id: r.id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello,
     eredita: r.eredita, ereditaNome: tOpz('tipoEredita', r.eredita),
     speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, richiedeConfidenteMax: r.richiede_confidente_max === 1,
+    richiedeOggetto: oggettoRichiesto(r.richiede_oggetto),
     tratto: r.tratto,
     statistiche: { forza: r.forza, magia: r.magia, resistenza: r.resistenza, agilita: r.agilita, fortuna: r.fortuna },
     affinita: affinitaDi(affinita),

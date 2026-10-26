@@ -31,6 +31,7 @@ import { formattaYen, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { TestoNote } from '../components/shared/TestoNote';
+import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
@@ -142,6 +143,8 @@ export function VideogiochiPage() {
           </section>
 
           {partitaId && <NotaPuntiDote cosa="quali giochi hai finito e a che round sei" />}
+          {/* Ondata 5 (lotto F-bis): «Segreti di gioco» letto, come promemoria; niente se nessun libro letto riguarda i videogiochi */}
+          <PromemoriaLibri promemoria={dati.dati.promemoria} />
 
           <div className="filtri-articoli__riga">
             <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca per nome, luogo o effetto…" />

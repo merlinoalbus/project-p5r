@@ -171,6 +171,8 @@ export function PersonaDettaglioPage() {
               {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
               {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}
               {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
+              {/* Ondata 5 (lotto F-bis, decisione 22): solo l'etichetta, con l'oggetto e la Richiesta che lo dà; la fusione resta proposta */}
+              {p.richiedeOggetto && <span className="chip">Richiede l’oggetto «{p.richiedeOggetto.nome}»{p.richiedeOggetto.richiesta ? `, dalla Richiesta «${p.richiedeOggetto.richiesta}»` : ''}</span>}
             </div>
           </IntestazioneScheda>
 

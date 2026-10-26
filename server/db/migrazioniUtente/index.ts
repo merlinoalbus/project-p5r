@@ -61,5 +61,8 @@ import { utente051 } from './051_registro_acquisti.js';
 import { utente052 } from './052_regali_ripetibili.js';
 // Ondata 5, lotto G (lotteria e premi delle sfide): il trofeo e gli oggetti dati da un turno con il suo esito
 import { utente053 } from './053_premi_degli_esiti.js';
+// Ondata 5, lotto F-bis (oggetti con effetti rilevanti per l'app): il registro dei consumi (nel ramo del lotto era la 055, con la 054 creduta
+// riservata; nessun lotto dell'ondata la usa, quindi all'integrazione è la 054: il registro resta consecutivo)
+import { utente054 } from './054_consumi_degli_oggetti.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053, utente054];

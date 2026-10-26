@@ -46,7 +46,8 @@ import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
 import { TestoNote } from '../components/shared/TestoNote';
 import { simboliNote } from '../../shared/note';
 import { fasceConPrezzoDiverso } from '../../shared/catalogo';
-import { fraseOggettiEsito } from '../../shared/esitiAttivita';
+import { fraseConsumaEsito, fraseOggettiEsito } from '../../shared/esitiAttivita';
+import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -75,8 +76,10 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
   for (const e of esiti.esiti) { const g = gruppi.find((x) => x.gruppo === e.gruppo); if (g) g.esiti.push(e); else gruppi.push({ gruppo: e.gruppo, esiti: [e] }); }
   // Ondata 5 (lotto G): le Doti si dicono solo se gli esiti ne danno (l'estrazione della lotteria: «Vinto» segna un trofeo, nessuna Dote)
   const conDoti = esiti.esiti.some((e) => e.doti.length > 0), conTrofeo = esiti.esiti.some((e) => e.trofeo), conOggetti = esiti.esiti.some((e) => e.oggetti.length > 0);
+  // Ondata 5 (lotto F-bis): gli oggetti consumati (il concime, i materiali) escono dalle copie
+  const conConsumi = esiti.esiti.some((e) => (e.consuma ?? []).length > 0);
   const cosaSegna = [conDoti ? 'le sue Doti diventano il promemoria «Applica»' : null, conTrofeo ? 'il trofeo che dà si segna da solo' : null,
-    conOggetti ? 'gli oggetti che dà entrano fra quelli ottenuti' : null].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1');
+    conOggetti ? 'gli oggetti che dà entrano fra quelli ottenuti' : null, conConsumi ? 'gli oggetti che usa escono dalle copie possedute' : null].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1');
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <strong className="text-text">Esiti</strong>
@@ -96,6 +99,7 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
                 {!e.gruppo && e.articolo ? ` · ${e.articolo.nome} ${testoPrezzoEsito(e.articolo)}` : ''}
                 {e.trofeo ? ` · trofeo «${e.trofeo.nome}»` : ''}
                 {fraseOggettiEsito(e.oggetti) ? ` · ${fraseOggettiEsito(e.oggetti)}` : ''}
+                {fraseConsumaEsito(e.consuma) ? ` · ${fraseConsumaEsito(e.consuma)}` : ''}
                 {e.premi ? ` · ${e.premi}` : ''}
                 {e.condizioniTesto ? ` · ${e.disponibile ? '' : 'non ancora: '}${e.condizioniTesto}` : ''}
               </li>
@@ -151,6 +155,9 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}
         {a.quiz && <PulsanteGuidaQuiz voce={{ attivita: a.chiave, nome: a.nome, quiz: a.quiz, oggi: giorno !== null && eGiornoDelQuiz(a.quiz, giorno) }} />}
       </div>
+      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti nella partita che riguardano l'attività, con o senza esiti (biliardo, freccette,
+          fabbricazione…), visibili anche a scheda chiusa; niente se non ce ne sono */}
+      <PromemoriaLibri promemoria={a.promemoria} compatto />
       {aperta && (
         <div className="flex flex-col gap-1">
           {a.dettagli && <div className="flex min-w-0 flex-col gap-1">
