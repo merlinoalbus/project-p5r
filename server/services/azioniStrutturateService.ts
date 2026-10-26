@@ -22,6 +22,7 @@ import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { simboliNote } from '../../shared/note.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, SemaforoRequisitoDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
@@ -141,7 +142,7 @@ export function nomeRiferimento(rif: { tipo: string; chiave: string }, opz: { an
 /** Effetti validi e che puntano a elementi esistenti; 400 con il motivo altrimenti (una voce storta non si butta in silenzio). */
 export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
   const produce = normalizzaEffettiAzione(grezzi);
-  if (produce.length !== grezzi.length) throw httpErrors.badRequest('effetto-non-valido', 'Uno degli effetti non è valido: controlla Dote e note (1–3), la lettura o il turno.');
+  if (produce.length !== grezzi.length) throw httpErrors.badRequest('effetto-non-valido', `Uno degli effetti non è valido: controlla Dote e note (da ${simboliNote(1)} a ${simboliNote(3)}), la lettura o il turno.`);
   for (const e of produce) {
     if (e.tipo === 'lettura') {
       const esiste = e.categoria === 'libro' ? prepared('SELECT 1 FROM libro WHERE chiave = ? AND nascosto = 0').get(e.chiave)

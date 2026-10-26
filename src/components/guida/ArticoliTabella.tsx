@@ -57,7 +57,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     <div className="catalogo-prodotto__nome">
       <strong className={a.acquistato && !ripetibile ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
-      {a.statistiche && <span className="text-text-secondary"><TestoNote testo={a.statistiche} /></span>}
+      {a.statistiche && <span className="text-text-secondary"><TestoNote testo={a.statistiche} daParole /></span>}
       {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
@@ -84,7 +84,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
       <dl>
         {a.nomeOriginale && <><dt>Nome originale</dt><dd>{a.nomeOriginale}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
-        <dt>Effetto</dt><dd>{a.effetto ? <TestoNote testo={a.effetto} /> : 'Non indicato'}</dd>
+        <dt>Effetto</dt><dd>{a.effetto ? <TestoNote testo={a.effetto} daParole /> : 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
         {!!a.noteStoriche?.length && <><dt>Nota storica della fonte</dt><dd><NoteStoricheOfferta note={a.noteStoriche} onLegamiCambiati={onContenutoCambiato} /></dd></>}
       </dl>

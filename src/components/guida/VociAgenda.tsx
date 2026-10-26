@@ -11,6 +11,7 @@ import { IconaCategoria } from './IconaCategoria';
 import type { ReactNode } from 'react';
 import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
 import { NOME_TIPO_EVENTO } from '../../utils/percorso';
+import { TestoNote } from '../shared/TestoNote';
 import type { AzionePercorsoDto, GenereVoce } from '../../types';
 
 /** Categoria del cartiglio: la trama per ciò che succede, gli appunti per una scadenza, il segno generico per un promemoria. */
@@ -40,7 +41,7 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazio
         <span>{e.azione}</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="chip testo-12 chip--attivo">{NOME_TIPO_EVENTO[e.genere]}</span>
-          {e.note && <span className="testo-12 text-text-secondary">{e.note}</span>}
+          {e.note && <span className="testo-12 text-text-secondary"><TestoNote testo={e.note} daParole /></span>}
         </span>
         {dichiarazioni}
       </div>

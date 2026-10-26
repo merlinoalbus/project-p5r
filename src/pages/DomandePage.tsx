@@ -36,7 +36,6 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { TestoNote } from '../components/shared/TestoNote';
-import { ricompensaInSimboli } from '../../shared/note';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -98,7 +97,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <span className="text-text-muted">{d.chi}</span>
           {d.tipo !== 'classe' && <span className="chip">{NOME_TIPO[d.tipo]}</span>}
           {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
-          {d.ricompensa && <span className="testo-12 text-text-muted"><TestoNote testo={ricompensaInSimboli(d.ricompensa)} /></span>}
+          {d.ricompensa && <span className="testo-12 text-text-muted"><TestoNote testo={d.ricompensa} daParole /></span>}
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
@@ -194,7 +193,7 @@ export function DomandePage() {
             </ul>
             {d.premi && (
               <div className="testo-12 text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> {Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
+                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> <TestoNote testo={Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')} daParole /></span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
                 {d.premi.moltiplicatoreConfidenti && <span>{d.premi.moltiplicatoreConfidenti}</span>}
                 {d.premi.requisitoConoscenza && <span>Per il primo posto: {Object.entries(d.premi.requisitoConoscenza).filter(([k]) => k !== 'fonte').map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>}
                 {d.premi.trofeo && <span>{d.premi.trofeo}</span>}

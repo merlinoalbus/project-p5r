@@ -135,7 +135,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         <div className="flex flex-col gap-1">
           {a.dettagli && <div className="flex min-w-0 flex-col gap-1">
             {a.pesca && <strong className="text-xs text-text-secondary">Nota salvata nell’attività; la regola corrente è nella fonte comune qui sotto.</strong>}
-            <p className="m-0 whitespace-pre-line">{a.dettagli}</p>
+            <p className="m-0 whitespace-pre-line"><TestoNote testo={a.dettagli} daParole /></p>
           </div>}
           {a.fonteConfidente && <FonteConfidenteAttivita fonte={a.fonteConfidente} />}
           {a.pesca && <FontePescaAttivita fonte={a.pesca} onCambiata={onCambiata} />}

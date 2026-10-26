@@ -25,6 +25,7 @@ import { formattaPunti } from '../utils/punti';
 import { TrasformazioniDiJose } from '../components/catalogo/TrasformazioniDiJose';
 import { PosizioniDellaLettura } from '../components/catalogo/PosizioniDellaLettura';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { TestoNote } from '../components/shared/TestoNote';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -103,8 +104,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           <section className="card order-3 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="descrizione-oggetto">
             <TitoloSezione id="descrizione-oggetto">Che cosa fa</TitoloSezione>
             {o.nomeOriginale && <p className="m-0 testo-13 text-text-secondary">Nome originale: {o.nomeOriginale}</p>}
-            {o.effetto && <p className="m-0 whitespace-pre-line testo-13">{o.effetto}</p>}
-            {o.descrizione && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary">{o.descrizione}</p>}
+            {o.effetto && <p className="m-0 whitespace-pre-line testo-13"><TestoNote testo={o.effetto} daParole /></p>}
+            {o.descrizione && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary"><TestoNote testo={o.descrizione} daParole /></p>}
             <NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={() => dati.ricarica()} />
             {!o.effetto && !o.descrizione && <p className="m-0 testo-13 text-text-muted">Nessun effetto o descrizione dichiarato.</p>}
             {o.statistiche && <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 testo-13">{Object.entries(o.statistiche).filter(([k, v]) => k !== 'effetti' && v !== null && (typeof v === 'number' || typeof v === 'string')).map(([k, v]) =>

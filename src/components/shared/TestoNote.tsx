@@ -11,7 +11,7 @@
 // ============================================================
 
 import { Fragment } from 'react';
-import { noteAParole, pezziTestoNote, simboliNote } from '../../../shared/note';
+import { noteAParole, noteInSimboli, pezziTestoNote, simboliNote } from '../../../shared/note';
 
 /** Una fila di note: i simboli a vista, le parole come nome per i lettori di schermo. */
 export function SimboliNote({ simboli, parole }: { simboli: string; parole: string }) {
@@ -23,8 +23,13 @@ export function Note({ n }: { n: number }) {
   return <SimboliNote simboli={simboliNote(n)} parole={noteAParole(n)} />;
 }
 
-/** Un testo con le sue file di ♪ rese accessibili; senza simboli, il testo così com'è. */
-export function TestoNote({ testo }: { testo: string }) {
+/**
+ * Un testo con le sue file di ♪ rese accessibili; senza simboli, il testo così com'è. `daParole`: il testo è libero (scritto nella guida
+ * o registrato prima dei simboli) e i suoi conteggi a parole («+1 nota», «fino a 3 note») si mostrano prima come simboli
+ * (`noteInSimboli`, solo vista); va usato soltanto sui campi che parlano delle Doti.
+ */
+export function TestoNote({ testo: dato, daParole = false }: { testo: string; daParole?: boolean }) {
+  const testo = daParole ? noteInSimboli(dato) : dato;
   const pezzi = pezziTestoNote(testo);
   if (pezzi.length === 1 && 'testo' in pezzi[0]) return <>{testo}</>;
   return <>{pezzi.map((p, i) => ('testo' in p ? <Fragment key={i}>{p.testo}</Fragment> : <SimboliNote key={i} simboli={p.simboli} parole={p.parole} />))}</>;

@@ -12,6 +12,8 @@
 // «nessuna ♪»: lo zero non ha simboli da contare, e la parola davanti dice che non ce n'è; a voce resta «nessuna nota».
 // ============================================================
 
+import { DOTI_SOCIALI } from './doti.js';
+
 /** Il simbolo di una nota. */
 export const SIMBOLO_NOTA = '♪';
 
@@ -68,10 +70,27 @@ export function testoNoteAParole(testo: string): string {
 }
 
 /**
- * Le note che un testo libero della guida scrive a parole come ricompensa («Conoscenza +1 nota», «+2 note») mostrate come simboli
- * («Conoscenza ♪», «♪♪»). Solo per la vista: il testo salvato non cambia (nessuna migrazione), e si usa solo sui campi che dicono la
- * ricompensa in Doti (le domande in classe), dove «nota» vuol dire sempre una nota della Dote.
+ * Un conteggio di note scritto a parole: una cifra da 1 a 4 (con o senza «+»), anche in elenco o intervallo («1, 2 o 3», «+1/+2/+3»,
+ * «1–3»), seguita da «nota»/«note». Non prende «10 note» (cifra preceduta da un'altra cifra) né «una nota» (senza cifra: lì «nota»
+ * vuol dire di solito un'annotazione).
  */
-export function ricompensaInSimboli(testo: string): string {
-  return testo.replace(/\+\s?([1-4]) not[ae]\b/giu, (_, n: string) => simboliNote(Number(n)));
+const CONTEGGIO_A_PAROLE = /(?<![\d.,])(?:\+\s?)?[1-4](?!\d)(?:(?:\s*[/,–-]\s*|\s+[oe]\s+)(?:\+\s?)?[1-4](?!\d))*\s+not[ae]\b/giu;
+
+/**
+ * Il nome di una Dote seguito da «+N» senza unità («Conoscenza +1 nota, Fascino +1» delle domande in classe): «+1» dopo una Dote è un
+ * numero di note. Non prende «Perizia +2 punti», «+1 rango», «+10%».
+ */
+const DOTE_PIU = new RegExp(`\\b(${DOTI_SOCIALI.map((d) => d.nome).join('|')}) \\+([1-4])(?!\\d)(?!\\s*(?:punt|rang|%))`, 'gu');
+
+/**
+ * Le note che un testo libero scrive a parole («Conoscenza +1 nota», «Fino a 3 note», «1 nota base per sessione; fino a 3 note»,
+ * «+1/+2/+3 note», «1, 2 o 3 note») mostrate come simboli («Conoscenza ♪», «Fino a ♪♪♪», «♪/♪♪/♪♪♪», «♪, ♪♪ o ♪♪♪»). Solo per la
+ * vista: il testo salvato non cambia (nessuna migrazione). Si usa sui campi che parlano delle Doti (ricompense delle domande, dettagli
+ * di attività, libri, film e videogiochi, eventi dello storico), dove un numero di note è sempre un numero di note della Dote; il
+ * risultato si mostra con `TestoNote`, che dice le file di ♪ a parole ai lettori di schermo.
+ */
+export function noteInSimboli(testo: string): string {
+  return testo
+    .replace(CONTEGGIO_A_PAROLE, (m) => m.replace(/\s+not[ae]$/iu, '').replace(/\+\s?/gu, '').replace(/[1-4]/gu, (d) => simboliNote(Number(d))))
+    .replace(DOTE_PIU, (_, dote: string, n: string) => `${dote} ${simboliNote(Number(n))}`);
 }
