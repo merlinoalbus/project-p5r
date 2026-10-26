@@ -11,7 +11,20 @@ perso nella copia e i rilievi del frontend (selezione fra giorni, Ctrl+V, scritt
 «Oggi», Ctrl+Z, notifica sopra la barra, fuoco, contrasto); punto `i` in `docs/ROADMAP.md`.
 Giro 3 (verifica respinta per UX e accessibilità): Ctrl+Z solo con la notifica a schermo, fuoco dopo «Annulla» e dopo l'incolla, barra della
 scheda «Oggi» sul tablet, come incollare detto nella conferma, segno del taglio, doppio clic, conteggi dei pulsanti della finestra dei
-rilievi; punto `j` in `docs/ROADMAP.md`, ramo `copia-incolla-giro3`. Serve una nuova verifica avversariale.
+rilievi; punto `j` in `docs/ROADMAP.md`, ramo `copia-incolla-giro3`.
+Giro 4 (giro 3 approvato da due revisori su tre, respinto dal revisore UX): conferma di Copia / Taglia declinata sul numero delle voci e
+a schermo 10 s, fuoco che non si ferma sul giorno mentre i «⋯» sono disattivati (e contorno visibile se ci arriva), barra che non
+lampeggia col doppio clic, «(1 di 2)» sui pulsanti della finestra dei rilievi; la migrazione del registro diventa la 240 (la 239 è delle
+televendite) e il ramo `copia-incolla-giro4` contiene `integrazione-24`. Punto `k` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
+
+## AGGIORNAMENTO 26 OTTOBRE 2026 — L13, televendite (decisione 4)
+- **Dove:** ramo di lavoro delle televendite, già unito con `integrazione-24` (che contiene gli yen automatici, decisione 18). Non è su `main`.
+- **Cosa fa:** Set A e Set B sono articoli italiani alternativi (migrazione 239). Alla spunta si sceglie quale set si è comprato, o «Nessuno», e si paga solo quello scelto. Dettaglio in `ROADMAP.md` (sezione «Televendite»), `ARCHITETTURA.md` («Alternative d'acquisto») e `DECISIONI.md` (2026-10-26).
+- **In attesa dell'utente:**
+  - se il gioco permette un solo set per domenica;
+  - le 4 domeniche che non hanno una voce nel Diario;
+  - le 6 proposte del periodo validato, da approvare riga per riga in «Da completare» (oppure, voce per voce, con «Sostituisci con…» nell'editor della voce): finché non decide, la voce del 24 aprile resta sul vecchio articolo unico, che dal quarto giro si chiama in italiano «Set sveglia primaverile o Set Condiv. primaverile» (la spunta non chiede il set e, se la si toglie e rimette, scala ¥1.680, il prezzo del solo Set A). Le proposte del 05-08 e del 05-22 si sovrappongono a quelle della 238 (stesso collegamento al negozio): se ne decide una;
+  - le prove nei tre formati.
 
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
 Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle

@@ -6,7 +6,8 @@
 // preparazione la voce che ne ha mostra un segno discreto «da completare · N»; toccandolo si apre la finestra con le sue proposte. Ogni scheda
 // dice che cosa cambia (tipo, collegamento, effetti aggiunti e tolti, con le frasi di sempre), quanto è certa e perché, e ha tre gesti:
 //   - «Applica»: scrive la voce dal server con la stessa funzione dell'editor; se la proposta chiede di completare un dato (l'elemento fra
-//     quelli indicati, le copie, le note), la scheda lo chiede prima e «Applica» resta spento finché non c'è;
+//     quelli indicati, le copie, le note), la scheda lo chiede prima e «Applica» resta spento finché non c'è; su una voce già spuntata dice
+//     anche che cosa è successo nelle partite (L13, decisione 19: `notificaApplicazioni`, come la finestra della voce);
 //   - «Modifica»: apre la finestra della voce con la proposta già applicata, da rivedere; salvando la proposta risulta applicata;
 //   - «Scarta»: chiede conferma e chiude la proposta, la voce non cambia.
 // Lo stesso componente serve all'elenco «Da completare» (`DaCompletarePage`). Nel rilascio il meccanismo non esiste: la costante di build
@@ -18,6 +19,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { FilaScelta } from './FilaScelta';
 import { CampiEffettoVoce } from './CampiEffettoVoce';
 import { IconaCategoria } from './IconaCategoria';
@@ -25,6 +27,7 @@ import { CATEGORIA_EFFETTO } from '../../utils/effettiDellaVoce';
 import { useElenchiProposte } from '../../hooks/useProposteDaCompletare';
 import { applicaPropostaConversione, scartaPropostaConversione } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { notificaApplicazioni } from '../../utils/applicazioniEffetti';
 import { conferma } from '../../stores/confermaStore';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { dataGiocoTesto } from '../../utils/dateGioco';
@@ -34,13 +37,14 @@ import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE } from '../../../shared/effettiAzione';
 import { QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
 import { conElemento, elementoDi, type CampoDaCompletare, type PropostaConversioneDto } from '../../../shared/proposteConversione';
+import { SCELTE_NOTE } from '../../../shared/note';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const NOME_CERTEZZA: Record<PropostaConversioneDto['certezza'], string> = { certa: 'Certa', probabile: 'Probabile', 'da-verificare': 'Da verificare in gioco' };
 const NOME_STATO: Record<PropostaConversioneDto['stato'], string> = { aperta: 'Da completare', applicata: 'Applicata', scartata: 'Scartata' };
-const NOTE = [{ chiave: '1', nome: '♪' }, { chiave: '2', nome: '♪♪' }, { chiave: '3', nome: '♪♪♪' }];
+const NOTE = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
 
 /** Il segno discreto sulla voce: «da completare · N», un pulsante che apre le sue proposte. */
 export function SegnoDaCompletare({ n, voce, onApri }: { n: number; voce: string; onApri: () => void }) {
@@ -102,17 +106,27 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
     if (campo) setMancanti((m) => m.map((x, j) => (j === i ? x.filter((c) => c !== campo) : x)));
   };
 
-  const esegui = async (op: () => Promise<unknown>, ok: string) => {
+  // `op` restituisce l'esito del salvataggio nelle partite che hanno già spuntato la voce (L13, decisione 19: gli effetti di stato valgono
+  // subito, e gli yen di un articolo si muovono): detto come nella finestra della voce, anche se la rilettura dell'elenco non riesce
+  const esegui = async (op: () => Promise<ReturnType<typeof notificaApplicazioni>>, ok: string) => {
     setOccupato(true);
-    try { await op(); segnalaMutazioneEffetti(null); notifica('success', ok); await onDecisa(); }
-    catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
+    let registrata = false;
+    try {
+      const esito = await op(); registrata = true;
+      segnalaMutazioneEffetti(null); notifica('success', ok);
+      if (esito) notifica(esito.tipo, esito.testo, esito.durata);
+      await onDecisa();
+    }
+    catch (err) {
+      notifica('error', `${registrata ? 'Proposta registrata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Operazione non riuscita.'}`);
+    }
     finally { setOccupato(false); }
   };
-  const applica = () => void esegui(() => applicaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione, ...(daCompletare ? { effetti: bozze } : {}) }, partitaId ?? undefined),
+  const applica = () => void esegui(async () => notificaApplicazioni((await applicaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione, ...(daCompletare ? { effetti: bozze } : {}) }, partitaId ?? undefined)).voce.applicazioniEffetti),
     'Proposta applicata: voce modificata nella guida, per tutte le partite.');
   const scarta = async () => {
     if (!(await conferma({ titolo: 'Scartare la proposta?', testo: 'La voce resta com’è; la proposta resta registrata come scartata e non torna fra quelle da completare.', etichetta: 'Scarta', icona: 'scarta' }))) return;
-    await esegui(() => scartaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione }), 'Proposta scartata: la voce non cambia.');
+    await esegui(async () => { await scartaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione }); return null; }, 'Proposta scartata: la voce non cambia.');
   };
 
   return (
@@ -138,7 +152,7 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
                   <span className="flex min-w-0 items-start gap-2">
                     <IconaCategoria categoria={CATEGORIA_EFFETTO[b.tipo]} dimensione={24} />
                     <span className="min-w-0 flex-1 testo-13 break-words">
-                      {effettoCompleto(b) && !manca.length ? fraseEffetto(b, nomi) : `${NOME_FAMIGLIA_EFFETTO[b.tipo]}: da completare`}
+                      {effettoCompleto(b) && !manca.length ? <TestoNote testo={fraseEffetto(b, nomi)} /> : `${NOME_FAMIGLIA_EFFETTO[b.tipo]}: da completare`}
                       {pe.giaPresente && <span className="text-text-muted"> (c’è già sulla voce: non si aggiunge due volte)</span>}
                     </span>
                   </span>
@@ -175,7 +189,7 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
         <div className="flex flex-col gap-1">
           <span className="testo-13 text-text-secondary">Toglie</span>
           <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5 testo-13">
-            {p.togli.map((t) => <li key={t.uid} className="break-words">{t.effetto ? fraseEffetto(t.effetto, nomi) : 'Un effetto che non è più sulla voce'}</li>)}
+            {p.togli.map((t) => <li key={t.uid} className="break-words">{t.effetto ? <TestoNote testo={fraseEffetto(t.effetto, nomi)} /> : 'Un effetto che non è più sulla voce'}</li>)}
           </ul>
         </div>
       )}

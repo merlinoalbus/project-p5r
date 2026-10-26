@@ -11,6 +11,11 @@
 // ricaricamento (il «prima» sta in `utente.effetto_stato_voce`, non nella pagina). Ciò che c'era già non si disfa: se l'evento era
 // già segnato a mano, togliere la spunta lo lascia segnato. Nessuna Dote cambia da qui (D6): la Conoscenza di una domanda o di un
 // cruciverba resta da applicare dal pulsante sulla voce.
+//
+// L13 (decisione 19): la stessa scrittura vale anche fuori dalla spunta, effetto per effetto (`applicaUnEffettoDiStato`, `annullaEffettoDiStato`):
+// salvando nella guida un effetto di stato su una voce già spuntata (`motoreDiario.riallineaStatiDellaVoce`) e approvando l'elenco del passato
+// della partita (`motoreDiario.applicaStatoDelPassato`). Solo lì l'articolo si segna senza il controllo della disponibilità di adesso
+// (`senzaDisponibilita`): la voce spuntata attesta l'acquisto nel suo giorno.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -27,6 +32,7 @@ import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { annullaInvito, registraInvito } from './inviti.js';
 import { registraPersona } from './partiteService.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
+import type { StatoDisponibilita } from './disponibilitaService.js';
 
 type StatoPrima = { gia: boolean; stato?: string | null };
 
@@ -81,8 +87,9 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
   return { gia: stato === 'completata', stato };
 }
 
-/** Segna (nel verso `segna`) lo stato dell'effetto, o lo riporta com'era (`stato` della Richiesta). */
-function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null): void {
+/** Segna (nel verso `segna`) lo stato dell'effetto, o lo riporta com'era (`stato` della Richiesta). `opz` vale solo per l'articolo: lo stato
+ *  in cui valutarne la disponibilità (`st`) o nessun controllo (`senzaDisponibilita`), vedi `OpzioniStato`. */
+function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null, opz: OpzioniStato = {}): void {
   // l'invito: la stessa regola del gesto diretto («Invito avvenuto»): solo con le condizioni vere (409 `invito-non-possibile`), una volta sola; si toglie solo se l'ha scritto la voce
   if (e.tipo === 'invito') { if (segna) registraInvito(p, e.invito, voceUid); else annullaInvito(p, e.invito, voceUid); }
   else if (e.tipo === 'trofeo') impostaTrofeo(p, e.trofeo, segna);
@@ -109,32 +116,64 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
   else if (e.tipo === 'cruciverba') impostaCruciverba(p, e.data, segna);
-  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna);
+  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, undefined, { ...(opz.st ? { st: opz.st } : {}), ...(opz.senzaDisponibilita ? { senzaDisponibilita: true } : {}) });
   else impostaStatoRichiesta(p, e.richiesta, segna ? 'completata' : (statoRichiesta as 'completata' | null));
 }
 
-/** La spunta: segna ogni effetto di stato della voce, ricordando com'era lo stato (dentro la transazione della spunta). */
-export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array<{ uid: string; effetto: EffettoDiStatoVoce }>): void {
-  for (const { uid, effetto: e } of effetti) {
-    const prima = leggiPrima(p, e);
-    // rispuntando, il «prima» resta quello della prima volta (non diventa «già segnato» per colpa della spunta di prima)
-    const vecchio = prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, uid) as { prima_json: string } | undefined;
-    if (!vecchio) {
-      prepared('INSERT INTO utente.effetto_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, prima_json, applicato_il) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .run(p, voceUid, uid, e.tipo, chiaveDi(e), JSON.stringify(prima), new Date().toISOString());
-    }
-    if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); continue; }
-    if (prima.gia) continue;
-    try { scrivi(p, e, true, null, voceUid); }
-    catch (err) {
-      // un articolo non ancora disponibile nella partita non ferma la spunta della voce: resta da segnare dal negozio
-      if (e.tipo === 'articolo' && (err as { code?: string }).code === 'articolo-non-disponibile') {
-        if (!vecchio) prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, uid);
-        continue;
-      }
-      throw err;
-    }
+/**
+ * Come si valuta la disponibilità di un effetto «articolo» (gli altri effetti di stato le ignorano):
+ *   - `st` e `scelto` (L13, decisione 4): l'articolo è il set scelto alla spunta fra quelli in alternativa, e `st` lo stato al giorno della voce
+ *     in cui valutarlo (un set delle televendite si compra solo la sua domenica). Per lui un «non disponibile» non si ingoia: la scelta è già
+ *     stata verificata, e se qui non vale la spunta si ferma invece di dire «comprato» senza segnarlo;
+ *   - `senzaDisponibilita` (L13, decisione 19): solo per una voce GIÀ spuntata (salvataggio della guida, approvazione dell'elenco della partita),
+ *     nessun controllo: la voce spuntata attesta l'acquisto nel suo giorno.
+ * Senza opzioni: lo stato corrente della partita, e un articolo non disponibile resta da segnare dal negozio (la spunta prosegue).
+ */
+export interface OpzioniStato { st?: StatoDisponibilita; scelto?: boolean; senzaDisponibilita?: boolean }
+
+/**
+ * L13 (decisione 19): lo stato è già vero nella partita (la stessa lettura del «prima» della spunta): l'elenco del passato non propone ciò che
+ * c'è già. L'oggetto ricevuto non è uno stato sì/no: per lui vale solo la riga della voce (`effetto_stato_voce`).
+ */
+export const statoGiaVero = (p: number, e: EffettoDiStatoVoce): boolean => leggiPrima(p, e).gia;
+
+/**
+ * Un effetto di stato della voce: segna lo stato ricordando com'era (dentro la transazione della spunta o del salvataggio). Lo usano la spunta
+ * (`applicaEffettiDiStato`, per ogni effetto) e, L13 (decisione 19), il salvataggio della guida su una voce già spuntata e l'approvazione
+ * dell'elenco della partita. `segnato`: la spunta lo ha scritto adesso; `gia-presente`: c'era già (togliendo la spunta resta); `non-disponibile`:
+ * l'articolo non si vende adesso nella partita e, senza `senzaDisponibilita` e se non è il set scelto (`scelto`, che invece ferma la spunta),
+ * resta da segnare dal negozio (nessuna riga).
+ */
+export function applicaUnEffettoDiStato(p: number, voceUid: string, uid: string, e: EffettoDiStatoVoce, opz: OpzioniStato = {}): 'segnato' | 'gia-presente' | 'non-disponibile' {
+  const prima = leggiPrima(p, e);
+  // rispuntando, il «prima» resta quello della prima volta (non diventa «già segnato» per colpa della spunta di prima)
+  const vecchio = prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, uid) as { prima_json: string } | undefined;
+  if (!vecchio) {
+    prepared('INSERT INTO utente.effetto_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, prima_json, applicato_il) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .run(p, voceUid, uid, e.tipo, chiaveDi(e), JSON.stringify(prima), new Date().toISOString());
   }
+  if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); return 'segnato'; }
+  if (prima.gia) return 'gia-presente';
+  try { scrivi(p, e, true, null, voceUid, opz); }
+  catch (err) {
+    // un articolo non ancora disponibile nella partita non ferma la spunta della voce: resta da segnare dal negozio (non un set scelto)
+    if (e.tipo === 'articolo' && !opz.scelto && (err as { code?: string }).code === 'articolo-non-disponibile') {
+      if (!vecchio) prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, uid);
+      return 'non-disponibile';
+    }
+    throw err;
+  }
+  return 'segnato';
+}
+
+/**
+ * La spunta: segna ogni effetto di stato della voce, ricordando com'era lo stato (dentro la transazione della spunta), con la stessa scrittura
+ * per ogni effetto (`applicaUnEffettoDiStato`). L13 (decisione 4): `opz.scelti` sono gli articoli scelti alla spunta fra quelli in alternativa
+ * e `opz.st` lo stato al giorno della voce, in cui SOLO per loro si valuta la disponibilità (`OpzioniStato.scelto`); ogni altro articolo resta
+ * valutato sullo stato corrente della partita, come prima.
+ */
+export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array<{ uid: string; effetto: EffettoDiStatoVoce }>, opz: { st?: StatoDisponibilita; scelti?: ReadonlySet<string> } = {}): void {
+  for (const { uid, effetto: e } of effetti) applicaUnEffettoDiStato(p, voceUid, uid, e, opz.scelti?.has(uid) ? { ...(opz.st ? { st: opz.st } : {}), scelto: true } : {});
 }
 
 /** Per ogni stato, l'evento dello storico che i setter scrivono segnandolo (tipo e campo dei dati che lo identifica); la storia non ne scrive. */
@@ -144,15 +183,66 @@ const EVENTO_DELLO_STATO: Record<string, { tipo: string; campo: string } | undef
   trofeo: { tipo: 'trofeo', campo: 'trofeo' },
 };
 
+/** L'effetto di stato (non l'oggetto ricevuto, che ha la sua riga) ricostruito dal tipo e dalla chiave con cui la spunta l'ha ricordato. */
+function effettoDallaRiga(tipo: string, chiave: string): Exclude<EffettoDiStatoVoce, { tipo: 'oggetto' }> {
+  return tipo === 'storia' ? { tipo: 'storia', evento: chiave } : tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(chiave) }
+    : tipo === 'cruciverba' ? { tipo: 'cruciverba', data: chiave } : tipo === 'articolo' ? { tipo: 'articolo', articolo: chiave } : tipo === 'invito' ? { tipo: 'invito', invito: chiave } : tipo === 'persona' ? { tipo: 'persona', persona: Number(chiave) }
+      : tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: chiave }
+      : tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: chiave.slice(chiave.indexOf(':') + 1) }
+      : { tipo: 'richiesta', richiesta: chiave };
+}
+
+/**
+ * 2026-10-26 (le ricevute della spunta, `applicatoDallaSpunta.ts`): gli effetti di stato che la spunta della voce ha davvero segnato e che
+ * togliere la spunta riporta com'erano. Non quelli che c'erano già (`prima.gia`: la spunta non li ha toccati e togliendola restano), né quelli
+ * rivendicati anche da un'altra voce spuntata (`annullaEffettiDiStato`: lo stato lo revoca solo l'ultima voce che toglie la spunta, quindi
+ * togliendo questa resta; due effetti della stessa voce sullo stesso stato si annullano insieme e contano come suoi); l'oggetto ricevuto
+ * sempre, con la quantità della sua riga (è della voce e dell'effetto). `quantita` dell'articolo dalla lista attuale della voce
+ * (`quantitaArticolo`): la riga ricorda solo l'articolo. Sola lettura.
+ */
+export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArticolo: (effettoUid: string) => number | undefined): Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string }> {
+  const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json, applicato_il FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? ORDER BY applicato_il, rowid').all(p, voceUid) as Array<{ effetto_uid: string; tipo: string; chiave: string; prima_json: string; applicato_il: string }>;
+  return righe.flatMap((r): Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string }> => {
+    if (r.tipo === 'oggetto') {
+      const o = prepared('SELECT catalogo_chiave, quantita FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, r.effetto_uid) as { catalogo_chiave: string; quantita: number } | undefined;
+      return o ? [{ effettoUid: r.effetto_uid, effetto: { tipo: 'oggetto' as const, oggetto: o.catalogo_chiave, quantita: o.quantita }, applicatoIl: r.applicato_il }] : [];
+    }
+    let prima: StatoPrima;
+    try { prima = JSON.parse(r.prima_json) as StatoPrima; } catch { return []; }
+    if (prima.gia) return [];
+    if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND voce_uid <> ? LIMIT 1').get(p, r.tipo, r.chiave, voceUid)) return [];
+    const e = effettoDallaRiga(r.tipo, r.chiave);
+    const q = e.tipo === 'articolo' ? quantitaArticolo(r.effetto_uid) : undefined;
+    return [{ effettoUid: r.effetto_uid, effetto: e.tipo === 'articolo' && q && q > 1 ? { ...e, quantita: q } : e, applicatoIl: r.applicato_il }];
+  });
+}
+
 /** Togliere la spunta: ogni effetto di stato che la spunta aveva segnato torna com'era; ciò che c'era già resta. */
 export function annullaEffettiDiStato(p: number, voceUid: string): void {
-  const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as Array<{ effetto_uid: string; tipo: string; chiave: string; prima_json: string }>;
-  for (const r of righe) {
+  const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as RigaStatoVoce[];
+  for (const r of righe) annullaRigaDiStato(p, voceUid, r);
+}
+
+interface RigaStatoVoce { effetto_uid: string; tipo: string; chiave: string; prima_json: string }
+
+/**
+ * L13 (decisione 19): annulla UN effetto di stato della voce (togliendolo o cambiandolo nella guida mentre la voce è spuntata), con la stessa
+ * regola di `annullaEffettiDiStato`: torna com'era prima, ciò che c'era già resta. Vero se c'era la sua riga.
+ */
+export function annullaEffettoDiStato(p: number, voceUid: string, effettoUid: string): boolean {
+  const r = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, effettoUid) as RigaStatoVoce | undefined;
+  if (!r) return false;
+  annullaRigaDiStato(p, voceUid, r);
+  return true;
+}
+
+function annullaRigaDiStato(p: number, voceUid: string, r: RigaStatoVoce): void {
+  {
     // L13: l'oggetto ricevuto è della voce e dell'effetto, non uno stato condiviso: si toglie la sua riga e basta (le altre voci tengono le loro)
     if (r.tipo === 'oggetto') {
       prepared('DELETE FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
       prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
-      continue;
+      return;
     }
     const prima = JSON.parse(r.prima_json) as StatoPrima;
     // Lo stato lo rivendicano tutte le voci spuntate con lo stesso effetto (le righe esistono solo per le spunte attive): si revoca solo
@@ -173,11 +263,7 @@ export function annullaEffettiDiStato(p: number, voceUid: string): void {
           .run(erede.voce_uid, p, voceUid, evento.tipo, r.tipo === 'domanda' ? Number(r.chiave) : r.chiave);
       }
     } else if (!prima.gia) {
-      const e: EffettoDiStatoVoce = r.tipo === 'storia' ? { tipo: 'storia', evento: r.chiave } : r.tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(r.chiave) }
-        : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : r.tipo === 'persona' ? { tipo: 'persona', persona: Number(r.chiave) }
-          : r.tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: r.chiave }
-          : r.tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: r.chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: r.chiave.slice(r.chiave.indexOf(':') + 1) }
-          : { tipo: 'richiesta', richiesta: r.chiave };
+      const e = effettoDallaRiga(r.tipo, r.chiave);
       // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
       try { scrivi(p, e, false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
     }

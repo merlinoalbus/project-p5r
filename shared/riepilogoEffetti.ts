@@ -18,10 +18,20 @@
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
-import { contoArticoli, type EffettoVoce, type NomiFraseEffetto } from './effettiVoce.js';
+import { contoArticoli, formatoYen, gruppiAlternativi, REGOLA_ALTERNATIVE, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
 
-/** Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga). */
-export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string }
+/** Una risposta giusta di una domanda del gioco: il testo e, se la riga ne raccoglie più d'una (gli esami), il quesito a cui risponde. */
+export interface RispostaRiepilogoEffettiDto { testo: string; domanda?: string }
+/**
+ * Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga).
+ * 2026-10-26 («Per le domande/quiz/Esami devono essere visualizzate le domande ma anche le risposte»): la riga di una domanda in classe,
+ * di un quiz in TV o di un esame ha per nome la domanda e in `risposte` le risposte giuste, nell'ordine (più passi per le domande a catena,
+ * un quesito per risposta negli esami), lette dalla riga della domanda del gioco (`domanda.risposte_json`).
+ * `contenuto` (L13, decisione 4): che cosa contiene un set, in una riga («Cerotto alla caffeina · Gocce per occhioni ×10»), se il catalogo lo dice.
+ */
+export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string; risposte?: RispostaRiepilogoEffettiDto[]; contenuto?: string }
+/** Una domanda del gioco come la legge il riepilogo: il testo, il tipo (classe, esame, quiz in TV) e le risposte giuste in ordine. */
+export interface QuesitoRiepilogoEffetti { domanda: string; tipo: string; risposte: RispostaRiepilogoEffettiDto[] }
 /** Un gruppo del riepilogo: l'etichetta, le righe nell'ordine degli effetti, il totale (solo gli acquisti) e una nota che vale per tutto il gruppo. */
 export interface GruppoRiepilogoEffettiDto {
   /** Identità stabile del gruppo nella voce («acquisti:distributore-bagno», «doti», «turni»). */
@@ -41,11 +51,35 @@ export interface NomiRiepilogoEffetti {
   negozio: (chiave: string) => string | undefined;
   /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno). */
   pagaTurno: (attivita: string) => { yen: number; massima: number | null } | undefined;
+  /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
+  quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
+  /** L13 (decisione 4): gli articoli con cui un articolo non si compra insieme (le sue condizioni «non: articolo ottenuto»). Senza: nessuna alternativa. */
+  incompatibili?: (articolo: string) => readonly string[] | undefined;
+  /** L13 (decisione 4): che cosa contiene un articolo (un set delle televendite): gli oggetti con le copie. */
+  contenuto?: (articolo: string) => ReadonlyArray<{ nome: string; quantita: number | null }> | undefined;
 }
 
-const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/** Il gruppo di una domanda secondo il suo tipo: le domande in classe, i quiz del game show in TV, gli esami (di metà semestre e finali). */
+const gruppoDellaDomanda = (tipo: string | undefined): string =>
+  tipo === 'tv' ? 'domande:tv' : tipo === 'esame-medio' || tipo === 'esame-finale' ? 'domande:esame' : tipo === 'altro' ? 'domande:altro' : 'domande';
+
+/** «¥1.680»: lo stesso formato delle frasi, dell'editor e della scelta alla spunta (`formatoYen`). */
+const yen = formatoYen;
 /** Il negozio di un articolo: la parte della chiave prima della barra. */
 const negozioDellArticolo = (chiave: string): string => (chiave.includes('/') ? chiave.slice(0, chiave.indexOf('/')) : chiave);
+
+/** L13 (decisione 4): che cosa contiene un set, in una riga: «Cerotto alla caffeina · Gocce per occhioni ×10» (le copie da due in su). null
+ *  se il catalogo non lo dice. È l'unica scrittura: la usano il riepilogo, la scelta alla spunta e l'editor della voce. */
+export function testoContenuto(contenuto: ReadonlyArray<{ nome: string; quantita: number | null }> | null | undefined): string | null {
+  return contenuto?.length ? contenuto.map((o) => `${o.nome}${o.quantita && o.quantita > 1 ? ` ×${o.quantita}` : ''}`).join(' · ') : null;
+}
+
+/** La riga di un articolo: il nome, le copie (da due in su: «×1» non dice niente) con il prezzo, e il contenuto del set se c'è. */
+function rigaArticolo(r: RigaContoArticoli, n: NomiRiepilogoEffetti): RigaRiepilogoEffettiDto {
+  const prezzo = r.prezzo === null ? 'senza prezzo' : r.copie > 1 && r.prezzoUnitario !== null ? `${yen(r.prezzo)} (${yen(r.prezzoUnitario)} l’uno)` : yen(r.prezzo);
+  const contenuto = testoContenuto(n.contenuto?.(r.chiave));
+  return { nome: r.nome, dettaglio: r.copie > 1 ? `×${r.copie} · ${prezzo}` : prezzo, ...(contenuto ? { contenuto } : {}) };
+}
 
 /** Le etichette e le note fisse dei gruppi che non dipendono da un elemento (la parte che non riguarda gli yen: quella è in `NOTE_YEN`). */
 // 2026-10-25 («le etichette di testo devono essere visibili solo se hanno senso»): una nota resta solo se dice un'eccezione. Che la spunta
@@ -63,6 +97,9 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   sblocchi: { titolo: 'Sblocchi' },
   storia: { titolo: 'Eventi di storia' },
   domande: { titolo: 'Domande in classe' },
+  'domande:tv': { titolo: 'Quiz in TV' },
+  'domande:esame': { titolo: 'Esame' },
+  'domande:altro': { titolo: 'Domande' },
   cruciverba: { titolo: 'Cruciverba' },
   inviti: { titolo: 'Inviti' },
   persone: { titolo: 'Compendio' },
@@ -75,6 +112,8 @@ const NOTE_YEN: Record<string, string> = {
   acquisti: 'Spuntando la voce il prezzo si scala da solo dal saldo, mai sotto zero; togliendo la spunta torna. Un articolo già segnato come comprato fuori dal Diario non si paga due volte.',
   aojiru: 'Il prezzo di una consumazione nuova si scala da solo dal saldo, mai sotto zero.',
   letture: 'Il biglietto di un film al cinema si scala da solo dal saldo, mai sotto zero.',
+  // L13 (decisione 4 con la 18): fra gli articoli in alternativa si paga solo quello scelto alla spunta; nessuno, niente da pagare
+  scelta: 'Spuntando la voce il prezzo di quello che scegli si scala da solo dal saldo, mai sotto zero; con «Nessuno» non si paga niente.',
   yen: 'Spuntando la voce entrano nel saldo o se ne scalano da soli, mai sotto zero; togliendo la spunta tornano.',
   richieste: 'La ricompensa in yen di una Richiesta entra da sola nel saldo quando la Richiesta risulta completata.',
   pesca: 'La quota di una visita nuova si scala da sola dal saldo, mai sotto zero.',
@@ -107,6 +146,13 @@ export interface OpzioniRiepilogoEffetti {
   /** L13 (decisione 18): le posizioni (in `effetti`) degli effetti i cui yen erano già nel saldo da prima che si muovessero da soli: la nota del
    *  loro gruppo lo dice, invece di promettere un movimento che la spunta non farà. */
   yenGiaNelSaldo?: ReadonlySet<number>;
+  /** L13 (decisione 4): a voce spuntata, gli articoli che la spunta ha segnato (fra quelli in alternativa resta solo quello scelto, o
+   *  «nessuno»); assente prima della spunta, quando le alternative si mostrano tutte. */
+  comprati?: ReadonlySet<string>;
+  /** L13 (decisione 4): a voce spuntata, gli articoli in alternativa aggiunti alla voce DOPO la spunta (dal registro delle operazioni sugli
+   *  effetti): la spunta non ha potuto chiedere quale si è comprato, quindi il riepilogo non dice «nessuno» (sarebbe falso) ma che resta da
+   *  scegliere, togliendo e rimettendo la spunta. */
+  daScegliere?: ReadonlySet<string>;
 }
 
 /**
@@ -132,6 +178,11 @@ export function nomeEffettoConYen(e: EffettoVoce, n: NomiRiepilogoEffetti): stri
  */
 export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRiepilogoEffetti, opz: OpzioniRiepilogoEffetti = {}): GruppoRiepilogoEffettiDto[] {
   const gruppi = new Map<string, GruppoRiepilogoEffettiDto>();
+  /** I negozi già contati (al loro primo articolo): gli articoli di un negozio stanno tutti nei gruppi di quel momento. Per ogni negozio, il
+   *  gruppo «Uno a scelta» di ogni articolo in alternativa che non sta fra gli acquisti (prima della spunta, o aggiunto dopo la spunta): i suoi
+   *  yen vanno alla nota di quel gruppo, non degli acquisti (decisione 4 con la 18: si paga solo quello scelto); '' per uno non comprato di
+   *  una voce spuntata, che non porta yen. Un articolo assente dalla mappa sta fra gli acquisti. */
+  const negoziContati = new Map<string, Map<string, string>>();
   /** Per ogni gruppo con yen: quanti effetti ne portano e i nomi di quelli già nel saldo da prima. */
   const yenDelGruppo = new Map<string, { effetti: number; giaNelSaldo: string[] }>();
   const giaNelSaldo = (indice: number): boolean => opz.yenGiaNelSaldo?.has(indice) === true;
@@ -159,20 +210,57 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'articolo': {
         // gli articoli di un negozio si contano insieme, una volta sola per negozio (al primo articolo): le righe e il totale vengono da `contoArticoli`
         const neg = negozioDellArticolo(e.articolo), chiave = `acquisti:${neg}`;
-        // decisione 18: il prezzo degli articoli si scala da solo spuntando la voce (la nota del gruppo, alla fine, mai un'istruzione «a mano»)
-        conYen(chiave, i);
-        if (gruppi.has(chiave)) break;
-        const nome = n.negozio(neg);
-        const g = gruppo(chiave, nome ? `Acquisti · ${nome}` : 'Acquisti');
-        const conto = contoArticoli(effetti.filter((x) => x.tipo === 'articolo' && negozioDellArticolo(x.articolo) === neg), n.frase.articolo);
-        if (!conto) break;
-        for (const r of conto.righe) {
-          const prezzo = r.prezzo === null ? 'senza prezzo' : r.copie > 1 && r.prezzoUnitario !== null ? `${yen(r.prezzo)} (${yen(r.prezzoUnitario)} l’uno)` : yen(r.prezzo);
-          // «×1» non dice niente (una copia è il caso normale): le copie compaiono solo da due in su
-          g.righe.push({ nome: r.nome, dettaglio: r.copie > 1 ? `×${r.copie} · ${prezzo}` : prezzo });
+        let inScelta = negoziContati.get(neg);
+        if (!inScelta) {
+          inScelta = new Map<string, string>();
+          negoziContati.set(neg, inScelta);
+          const nome = n.negozio(neg);
+          const delNegozio = effetti.filter((x) => x.tipo === 'articolo' && negozioDellArticolo(x.articolo) === neg);
+          // L13 (decisione 4): gli articoli in alternativa (Set A o Set B) si comprano uno solo, o nessuno. Prima della spunta stanno a parte,
+          // tutti, senza totale («Uno a scelta»): un totale di due set alternativi sarebbe una somma che il gioco non permette; a voce spuntata
+          // quello comprato torna fra gli acquisti (con il totale) e gli altri escono
+          const alternative = n.incompatibili ? gruppiAlternativi(delNegozio.flatMap((x) => (x.tipo === 'articolo' ? [x.articolo] : [])), n.incompatibili) : [];
+          const fuori = new Set(alternative.flat().filter((k) => !opz.comprati?.has(k)));
+          const conto = contoArticoli(delNegozio, n.frase.articolo, fuori);
+          if (conto) {
+            const g = gruppo(chiave, nome ? `Acquisti · ${nome}` : 'Acquisti');
+            for (const r of conto.righe) g.righe.push(rigaArticolo(r, n));
+            const copie = conto.righe.reduce((s, r) => s + r.copie, 0);
+            if (conto.totale !== null && (conto.righe.length > 1 || copie > 1)) g.totale = `Totale ${yen(conto.totale)}${conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}`;
+          }
+          alternative.forEach((membri, k) => {
+            // a voce spuntata con uno comprato: quello sta fra gli acquisti, gli altri escono (senza yen: non si sono pagati)
+            if (opz.comprati && membri.some((m) => opz.comprati!.has(m))) {
+              for (const m of membri) if (!opz.comprati.has(m)) inScelta!.set(m, '');
+              return;
+            }
+            const chiaveScelta = `scelta:${neg}:${k}`;
+            // la regola detta in un modo solo, come nell'editor e alla spunta (`REGOLA_ALTERNATIVE`, rilievo L3 della revisione UX)
+            const g = gruppo(chiaveScelta, nome ? `${REGOLA_ALTERNATIVE} · ${nome}` : REGOLA_ALTERNATIVE);
+            // a voce spuntata, articoli aggiunti alla voce DOPO la spunta: la spunta non ha chiesto quale si è comprato. Dire «nessuno» sarebbe
+            // falso (rilievo della revisione): restano tutti, con che cosa fare per scegliere
+            const aggiuntiDopo = opz.comprati !== undefined && membri.some((m) => opz.daScegliere?.has(m));
+            // spuntata senza comprarne nessuno: lo dice una riga sola (i set non comprati non sono un fatto della partita)
+            if (opz.comprati && !aggiuntiDopo) {
+              g.righe.push({ nome: membri.length === 2 ? 'Nessuno dei due comprato' : 'Nessuno comprato' });
+              for (const m of membri) inScelta!.set(m, '');
+              return;
+            }
+            const righe = contoArticoli(delNegozio.filter((x) => x.tipo === 'articolo' && membri.includes(x.articolo)), n.frase.articolo)?.righe ?? [];
+            for (const r of righe) g.righe.push(rigaArticolo(r, n));
+            for (const m of membri) inScelta!.set(m, chiaveScelta);
+            // «le etichette di testo devono essere visibili solo se hanno senso» (rilievo della revisione UX): prima della spunta il titolo dice
+            // già «Uno a scelta» e la nota degli yen (`NOTE_YEN.scelta`) dice che con «Nessuno» non si paga; una terza frase sulla stessa regola
+            // non aggiungeva niente. Resta solo l'eccezione degli articoli aggiunti dopo la spunta
+            if (aggiuntiDopo) g.nota = 'Aggiunti alla voce dopo la spunta: per dire quale hai comprato, o nessuno, togli e rimetti la spunta.';
+          });
         }
-        const copie = conto.righe.reduce((s, r) => s + r.copie, 0);
-        if (conto.totale !== null && (conto.righe.length > 1 || copie > 1)) g.totale = `Totale ${yen(conto.totale)}${conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}`;
+        // decisione 18: il prezzo degli articoli si scala da solo spuntando la voce (la nota del gruppo, alla fine, mai un'istruzione «a mano»).
+        // Decisione 4: un articolo in alternativa ancora da scegliere porta i suoi yen alla nota del suo gruppo «Uno a scelta»; uno non comprato
+        // di una voce spuntata non ne porta (non si è pagato)
+        const sceltaDi = inScelta.get(e.articolo);
+        if (sceltaDi === undefined) conYen(chiave, i);
+        else if (sceltaDi) conYen(sceltaDi, i);
         break;
       }
       case 'acquisto': riga('aojiru', n.frase.articolo(e.articolo)?.nome ?? 'Aojiru', e.variante ? nomeDote(e.variante) : 'variante da osservare alla spunta'); conYen('aojiru', i); break;
@@ -212,7 +300,15 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         break;
       }
       case 'storia': riga('storia', EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento); break;
-      case 'domanda': riga('domande', n.frase.domanda(e.domanda) ?? 'Domanda'); break;
+      case 'domanda': {
+        // la domanda e le sue risposte giuste (2026-10-26), nel gruppo del suo tipo; senza la riga del gioco, il solo nome come prima
+        const q = n.quesito(e.domanda);
+        const r: RigaRiepilogoEffettiDto = { nome: q?.domanda || n.frase.domanda(e.domanda) || 'Domanda' };
+        const risposte = (q?.risposte ?? []).filter((x) => x.testo.trim() !== '');
+        if (risposte.length) r.risposte = risposte;
+        gruppo(gruppoDellaDomanda(q?.tipo)).righe.push(r);
+        break;
+      }
       case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;
       case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona'); break;
@@ -230,7 +326,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
   for (const [chiave, y] of yenDelGruppo) {
     const g = gruppi.get(chiave);
     if (!g) continue;
-    const normale = chiave === 'turni' ? notaTurni : NOTE_YEN[chiave.startsWith('acquisti:') ? 'acquisti' : chiave];
+    const normale = chiave === 'turni' ? notaTurni : NOTE_YEN[chiave.startsWith('acquisti:') ? 'acquisti' : chiave.startsWith('scelta:') ? 'scelta' : chiave];
     const tutti = y.giaNelSaldo.length === y.effetti;
     const eccezione = chiave === 'yen' ? fraseImportiInParteNelSaldo(y.giaNelSaldo) : fraseYenInParteNelSaldo(y.giaNelSaldo);
     const notaYen = tutti ? (chiave === 'yen' ? YEN_DELLA_VOCE_GIA_NEL_SALDO : YEN_GIA_NEL_SALDO) : [normale, eccezione].filter(Boolean).join(' ');

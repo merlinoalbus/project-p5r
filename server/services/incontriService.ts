@@ -113,6 +113,21 @@ function togliRiga(_partitaId: number, r: RigaIncontro): Array<{ chiave: string;
   return out;
 }
 
+/** 2026-10-26 (la finestra «Applicato dalla spunta», `applicatoDallaSpunta.ts`): che cosa di `inc` toglierebbe adesso `annullaIncontro`,
+ *  con le sue stesse condizioni, senza scrivere niente. `rango`: il rango (e i punti) tornerebbero com'erano, perché il Confidente è ancora
+ *  al rango che la spunta gli aveva dato; `incontro`: l'incontro creato se ne andrebbe, o il segno di passaggio messo su quello che c'era.
+ *  Un passaggio che il rango attuale tiene comunque (alzato dalla pagina) resta, e non conta. */
+export function incontroSiAnnulla(partitaId: number, inc: IncontroConfidenteDto): { rango: boolean; incontro: boolean } {
+  const attuale = rangoAttuale(partitaId, inc.confidente);
+  const rango = !!inc.rango && attuale === inc.rango.a;
+  const dopo = rango ? inc.rango!.da : attuale;
+  if (inc.id !== null) {
+    const r = prepared('SELECT passaggio, verso_rango FROM incontro_confidente_partita WHERE id = ? AND partita_id = ?').get(inc.id, partitaId) as { passaggio: number; verso_rango: number } | undefined;
+    return { rango, incontro: !!r && !(r.passaggio === 1 && dopo >= r.verso_rango) };
+  }
+  return { rango, incontro: inc.marcato !== null && dopo < inc.verso };
+}
+
 /** Disfa ciò che una spunta aveva registrato: l'incontro creato (con le sue Doti) o il segno di passaggio messo su uno che c'era.
  *  Un passaggio al rango R che la partita ha comunque raggiunto (alzato dalla pagina Confidenti mentre la spunta c'era, e lì
  *  «già contato») non si toglie: resta come incontro della pagina, con le sue Doti. */

@@ -8,6 +8,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { FilmPage } from './FilmPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { FilmDto, FilmDvdDto, PartitaDto } from '../types';
+import { conNote } from '../../test/note';
 
 const { getFilm, impostaProgressoFilm } = vi.hoisted(() => ({ getFilm: vi.fn(), impostaProgressoFilm: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getFilm, impostaProgressoFilm }));
@@ -57,7 +58,7 @@ describe('FilmPage', () => {
     render(<MemoryRouter><FilmPage /></MemoryRouter>);
     await screen.findByText('Film di prova');
     expect(screen.getByText('Cinema · dal 24 aprile')).toBeInTheDocument();
-    expect(screen.getByText('Coraggio ♪, dalla seconda volta in poi')).toBeInTheDocument();
+    expect(screen.getByText(conNote('Coraggio ♪, dalla seconda volta in poi'))).toBeInTheDocument();
     expect(screen.queryByText('Iniziale')).toBeNull();
     expect(screen.queryByText('fonte')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una visione a Film di prova' }));

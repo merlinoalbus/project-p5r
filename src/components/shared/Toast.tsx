@@ -10,6 +10,7 @@ import { useNotificationStore, type Notification, type NotificationType } from '
 import { MARGINE, postoDellaCoda, type PostoCoda } from '../../utils/postoCoda';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
+import { TestoNote } from './TestoNote';
 
 /** Il tipo detto a parole, davanti al messaggio, per chi non vede il colore del bordo. */
 const TIPO_TESTO: Record<NotificationType, string> = {
@@ -123,7 +124,7 @@ function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') aggiorna('puntatore', true); }} onPointerLeave={(e) => { if (e.pointerType === 'mouse') aggiorna('puntatore', false); }}
       onFocus={() => aggiorna('fuoco', true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) aggiorna('fuoco', false); }}
     >
-      <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
+      <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span><TestoNote testo={n.message} /></span>
       {n.collegamento && dentroIlRouter && (
         <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
       )}

@@ -331,7 +331,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/percorso/:data': {
     sommario: 'Scheda di un giorno della guida con le sue voci',
-    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera; una voce che registra un turno di un\'attività con un quiz, o che vi è collegata, ne porta la guida in `quiz`, con `oggi` vero nei giorni del quiz), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno; una voce ancora da spuntare porta in `scelteEsito` le scelte che la spunta chiederà (L13: esito del turno di un\'attività con esiti, note di una Dote a valori possibili), valutate al giorno della voce.',
+    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera; una voce che registra un turno di un\'attività con un quiz, o che vi è collegata, ne porta la guida in `quiz`, con `oggi` vero nei giorni del quiz), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno; una voce ancora da spuntare porta in `scelteEsito` le scelte che la spunta chiederà (L13: esito del turno di un\'attività con esiti, note di una Dote a valori possibili e, decisione 4, gli articoli in alternativa della voce, `tipo: "alternativa"`, con il nome del negozio, le opzioni con prezzo, copie, contenuto, disponibilità e motivo, e in `preselezionato` l\'UID dell\'effetto del set già comprato nella partita), valutate al giorno della voce.',
     risposta: '`PercorsoGiornoDto`',
     errori: [[404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -354,7 +354,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/percorso/voci/:uid': {
     sommario: 'Una voce della giornata per uid (sola lettura, L3 UX3-1)',
     descrizione: 'La voce com\'è nel suo giorno (`giorno`, fascia, campi del §3.1: insieme delle infiltrazioni, proposta, `infiltrazioneDaAprire`), con `?partita=` anche il suo stato nella partita. La scheda del Palazzo aperta da una voce (`?daVoce=`) la legge per dire da quale proposta viene.',
-    risposta: '`AzionePercorsoDto`, con effettiVoce (fonte completa/CAS) e ricevuteEffetti separate dal formato legacy',
+    risposta: '`AzionePercorsoDto`, con effettiVoce (fonte completa/CAS) e ricevuteEffetti separate dal formato legacy; per una voce spuntata nella partita, `applicatoDallaSpunta` elenca in parole, col momento, ciò che togliendo la spunta si annulla davvero (ricevute attive, stati segnati, Fortuna, yen mossi; non letture, proposte aperte o scartate, stati tenuti da un\'altra voce); `statiNonApplicati` (decisione 19) gli effetti di stato che nella partita non valgono (da approvare nell\'elenco della partita o non applicati; mai i già veri né gli articoli in alternativa non scelti)',
     errori: [[404, 'voce-non-trovata'], PARTITA_NON_TROVATA],
   },
   'PUT /api/compendio/percorso/voci/:uid': {

@@ -8,6 +8,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { LibriPage } from './LibriPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { LibriDto, LibroDto, PartitaDto } from '../types';
+import { conNote } from '../../test/note';
 
 const { getLibri, impostaProgressoLibro } = vi.hoisted(() => ({ getLibri: vi.fn(), impostaProgressoLibro: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getLibri, impostaProgressoLibro }));
@@ -66,7 +67,7 @@ describe('LibriPage', () => {
     render(<MemoryRouter><LibriPage /></MemoryRouter>);
     expect(await screen.findByText('Libro di prova')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Libreria Taiheido · 700 ¥' })).toHaveAttribute('href', '/guida/negozi/libreria-taiheido');
-    expect(screen.getByText('Conoscenza ♪♪♪')).toBeInTheDocument();
+    expect(screen.getByText(conNote('Conoscenza ♪♪♪'))).toBeInTheDocument();
     expect(screen.queryByText('fonte')).toBeNull();
     // senza partita non c'è il «+», ma la posizione si guarda
     expect(screen.queryByRole('button', { name: /Aggiungi una sessione/ })).toBeNull();

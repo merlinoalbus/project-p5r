@@ -43,6 +43,8 @@ import { FonteConfidenteAttivita } from '../components/confidenti/FonteConfident
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { eGiornoDelQuiz } from '../../shared/quizAttivita';
 import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
+import { TestoNote } from '../components/shared/TestoNote';
+import { simboliNote } from '../../shared/note';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -50,7 +52,7 @@ type Scheda = (typeof SCHEDE)[number][0];
 /** Gli effetti dichiarati come chip: la Dote con le note e, fra parentesi, la condizione. */
 function Effetti({ testi }: { testi: string[] }) {
   if (testi.length === 0) return null;
-  return <span className="flex flex-wrap gap-1">{testi.map((t, i) => <span key={i} className="chip chip--attivo">{t}</span>)}</span>;
+  return <span className="flex flex-wrap gap-1">{testi.map((t, i) => <span key={i} className="chip chip--attivo"><TestoNote testo={t} /></span>)}</span>;
 }
 
 /**
@@ -73,7 +75,7 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
           <ul className="m-0 pl-4">
             {g.esiti.map((e) => (
               <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>
-                {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}: {e.doti.length ? e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'}
+                {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}: <TestoNote testo={e.doti.length ? e.doti.map((d) => `${d.nome} ${simboliNote(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'} />
                 {e.premi ? ` · ${e.premi}` : ''}
                 {e.condizioniTesto ? ` · ${e.disponibile ? '' : 'non ancora: '}${e.condizioniTesto}` : ''}
               </li>
@@ -133,7 +135,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         <div className="flex flex-col gap-1">
           {a.dettagli && <div className="flex min-w-0 flex-col gap-1">
             {a.pesca && <strong className="text-xs text-text-secondary">Nota salvata nell’attività; la regola corrente è nella fonte comune qui sotto.</strong>}
-            <p className="m-0 whitespace-pre-line">{a.dettagli}</p>
+            <p className="m-0 whitespace-pre-line"><TestoNote testo={a.dettagli} daParole="conteggi" /></p>
           </div>}
           {a.fonteConfidente && <FonteConfidenteAttivita fonte={a.fonteConfidente} />}
           {a.pesca && <FontePescaAttivita fonte={a.pesca} onCambiata={onCambiata} />}

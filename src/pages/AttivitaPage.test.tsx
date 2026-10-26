@@ -11,6 +11,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AttivitaPage } from './AttivitaPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { AttivitaDto, AttivitaTutteDto, PartitaDto } from '../types';
+import { conNote } from '../../test/note';
 
 const { getAttivita } = vi.hoisted(() => ({ getAttivita: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getAttivita }));
@@ -42,7 +43,7 @@ describe('AttivitaPage', () => {
     expect(screen.getByRole('link', { name: 'Kichijoji, Penguin Sniper' })).toHaveAttribute('href', '/guida/citta/kichijoji');
     expect(screen.getAllByText('Mini-gioco')).toHaveLength(1);
     expect(screen.getAllByText('Di sera').length).toBeGreaterThan(0);
-    expect(screen.getByText('Perizia ♪')).toBeInTheDocument();
+    expect(screen.getByText(conNote('Perizia ♪'))).toBeInTheDocument();
     expect(screen.queryByText('fonte')).toBeNull();
     expect(screen.queryByText(/Sblocco:/)).toBeNull();
     scegliVoce('Dote', 'Fascino');

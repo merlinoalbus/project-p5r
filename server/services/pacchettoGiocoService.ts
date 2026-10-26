@@ -33,6 +33,7 @@ import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
+import { proponiStatiMancanti } from './statiMancantiService.js';
 import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
@@ -437,6 +438,18 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     condizioniConvertite = convertiCondizioniDatabaseImportato(getDb());
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
     regoleAllAvvio(getDb(), 'rigido'); // un errore qui riporta alla copia di sicurezza (solo all'avvio le regole sono tolleranti)
+    // L13 (decisione 19): gli effetti di stato del gioco nuovo sulle voci già spuntate e mai applicati entrano nell'elenco da approvare delle partite
+    // (mai applicati da soli). È un servizio accessorio, tollerante come all'avvio: il censimento è una transazione sola (o tutto o niente), e un suo
+    // errore non annulla l'importazione; il log lo dice (solo conteggi), e il prossimo avvio lo rifà
+    try {
+      const { partite } = proponiStatiMancanti();
+      const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0);
+      if (daDire.length) logger.info({ partite: daDire }, 'effetti di stato mai applicati dopo l\'importazione: nuove proposte nell\'elenco da approvare');
+      const conErrori = partite.filter((p) => p.errori > 0);
+      if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento dopo l\'importazione: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');
+    } catch (err) {
+      logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento degli effetti di stato mai applicati non riuscito dopo l\'importazione (l\'importazione resta)');
+    }
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
     getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
     // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)

@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { ReactNode } from 'react';
+import { testoNoteAParole } from '../../../shared/note';
 
 export interface VoceFila { chiave: string; nome: string; /** Contenuto al posto del nome (per esempio la cifra del rango); `nome` resta il nome accessibile. */ contenuto?: ReactNode }
 
@@ -19,7 +20,7 @@ export function FilaScelta({ etichetta, valore, opzioni, onCambia, disabilitato 
   return (
     <div role="radiogroup" aria-label={etichetta} className="fila-scelta">
       {opzioni.map((o) => (
-        <button key={o.chiave} type="button" role="radio" aria-checked={valore === o.chiave} aria-label={o.nome} title={o.nome} disabled={disabilitato}
+        <button key={o.chiave} type="button" role="radio" aria-checked={valore === o.chiave} aria-label={testoNoteAParole(o.nome)} title={o.nome} disabled={disabilitato}
           className={`fila-scelta__voce touch ${valore === o.chiave ? 'fila-scelta__voce--attiva' : ''}`} onClick={() => onCambia(o.chiave)}>
           {o.contenuto ?? o.nome}
         </button>

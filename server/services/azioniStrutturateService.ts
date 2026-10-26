@@ -22,6 +22,9 @@ import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
+import { simboliNote } from '../../shared/note.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, SemaforoRequisitoDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
@@ -141,7 +144,7 @@ export function nomeRiferimento(rif: { tipo: string; chiave: string }, opz: { an
 /** Effetti validi e che puntano a elementi esistenti; 400 con il motivo altrimenti (una voce storta non si butta in silenzio). */
 export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
   const produce = normalizzaEffettiAzione(grezzi);
-  if (produce.length !== grezzi.length) throw httpErrors.badRequest('effetto-non-valido', 'Uno degli effetti non è valido: controlla Dote e note (1–3), la lettura o il turno.');
+  if (produce.length !== grezzi.length) throw httpErrors.badRequest('effetto-non-valido', `Uno degli effetti non è valido: controlla Dote e note (da ${simboliNote(1)} a ${simboliNote(3)}), la lettura o il turno.`);
   for (const e of produce) {
     if (e.tipo === 'lettura') {
       const esiste = e.categoria === 'libro' ? prepared('SELECT 1 FROM libro WHERE chiave = ? AND nascosto = 0').get(e.chiave)
@@ -253,13 +256,28 @@ export function elenchiAzione(): ElenchiAzioneDto {
   };
 }
 
+/** Il giorno «MM-GG» in cui solo si compra un articolo: un «intervallo» di un giorno fra le sue condizioni (i set delle televendite); null se no. */
+function giornoUnico(json: string | null): string | null {
+  const g = leggiCondizioniSalvate(json).find((c): c is Extract<RequisitoSpillo, { tipo: 'intervallo' }> => c.tipo === 'intervallo' && c.dal === c.al);
+  return g ? g.dal : null;
+}
+
 /** Gli elenchi per scegliere per nome gli oggetti che gli effetti di una voce citano con una chiave interna: gli stessi che
  *  `verificaEffettoDiStato` accetta (l'Aojiru ha il suo effetto, quindi non è fra gli articoli). Sola lettura. */
 export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
-  const articoli = (prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, a.catalogo_chiave AS catalogoChiave
-    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; catalogoChiave: string | null }>)
+  // L13 (decisione 4): con le alternative (le condizioni «non: articolo ottenuto», in tutte e due le direzioni), il giorno unico in cui si compra
+  // e il contenuto; un articolo nascosto resta per il suo nome (una voce che lo cita ancora lo mostra) ma l'editor non lo propone
+  const incompatibili = mappaIncompatibili();
+  const righe = prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, a.catalogo_chiave AS catalogoChiave, a.nascosto, a.condizioni_json
+    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; catalogoChiave: string | null; nascosto: number; condizioni_json: string | null }>;
+  const contenuti = contenutoArticoli(righe.map((a) => a.chiave));
+  const articoli = righe
     .filter((a) => !eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogoChiave }))
-    .map(({ catalogoChiave: _scartata, ...a }) => a);
+    .map(({ catalogoChiave: _scartata, nascosto, condizioni_json, ...a }) => {
+      const giorno = giornoUnico(condizioni_json);
+      const altri = incompatibili.get(a.chiave), contenuto = contenuti.get(a.chiave);
+      return { ...a, ...(nascosto ? { nascosto: true as const } : {}), ...(altri?.length ? { incompatibili: [...altri] } : {}), ...(giorno ? { giorno } : {}), ...(contenuto?.length ? { contenuto } : {}) };
+    });
   return {
     articoli,
     domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),

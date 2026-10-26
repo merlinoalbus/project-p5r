@@ -29,6 +29,7 @@ import { TagAllerte } from '../shared/TagAllerta';
 import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { Modal } from '../shared/Modal';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { GestiVoce, PulsanteMenuVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
@@ -196,7 +197,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
-        {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}>{a.produceTesto[i]}</span> : null)}
+        {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti)} />}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
@@ -205,11 +206,13 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}
       </div>
       {/* la colonna dei comandi della voce: il menu e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari andrebbero
-          visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono */}
-      {((gesti && onMenu) || !!a.ricevuteEffetti?.length) && (
+          visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono.
+          2026-10-26: solo ciò che la spunta ha applicato ed è in vigore (`applicatoDallaSpunta`), non le ricevute annullate o tecniche; L13
+          (decisione 19), a parte nella stessa finestra, gli effetti di stato che nella partita non valgono (`statiNonApplicati`) */}
+      {((gesti && onMenu) || !!a.applicatoDallaSpunta?.length || !!a.statiNonApplicati?.length) && (
         <span className="flex shrink-0 flex-col self-start">
           {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
-          <RicevuteVoce ricevute={a.ricevuteEffetti} voce={a.azione} />
+          <RicevuteVoce applicato={a.applicatoDallaSpunta} nonApplicati={a.statiNonApplicati} voce={a.azione} />
         </span>
       )}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}

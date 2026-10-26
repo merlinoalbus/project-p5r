@@ -1,36 +1,46 @@
 // ============================================================
-// RicevuteVoce — le ricevute degli effetti della spunta di una voce del Diario, dietro un pulsantino (richiesta dell'utente del 2026-10-25)
+// RicevuteVoce — ciò che la spunta di una voce del Diario ha applicato, dietro un pulsantino (richieste dell'utente del 2026-10-25 e 26)
 // ============================================================
 //
-// «Ricevute degli effetti della spunta (magari andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili e
-// apribile... e occupando spazio e creando confusione nel testo...». Prima erano un `<details>` sempre presente sotto il testo della voce;
-// ora sono un pulsante a sola icona (44 px, nome accessibile e suggerimento col numero delle ricevute) nella colonna dei comandi della
-// voce, accanto al menu, e l'elenco si apre nella finestra dell'app (`Modal`: foglio dal basso sul telefono, fuoco dentro, Esc o X per
-// chiudere). Senza ricevute il pulsante non c'è. Il contenuto è quello di prima: tipo, data e ora, attiva o annullata. Solo lettura.
+// 2026-10-25: «Ricevute degli effetti della spunta (magari andrebbero visualizzati con un pulsantino e non restando la sotto sempre
+// visibili…)». Un pulsante a sola icona (44 px, nome accessibile e suggerimento col numero) nella colonna dei comandi della voce, accanto al
+// menu; l'elenco si apre nella finestra dell'app (`Modal`: foglio dal basso sul telefono, fuoco dentro, Esc o X per chiudere). Solo lettura.
 //
-// Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino (non gli appunti, che
-// nell'app sono i piani e le domande) e il numero delle ricevute sta in un distintivo sull'icona. Il nome accessibile porta il testo della
-// voce, come il menu «⋯» accanto (`PulsanteMenuVoce`), così in un giorno con più voci i pulsanti non si chiamano tutti uguali; il
-// suggerimento resta corto. La finestra dice di quale voce sono le ricevute, perché sul telefono la copre.
+// 2026-10-26: la finestra mostrava «Incontro e contesto della spunta26/10/2026, 02:49:09annullata» e l'utente: «a che serve? … mi serve
+// sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck della casella. ma una volta annullata
+// l'informazione non mi è più utile... perchè salvarla?». Le ricevute restano nel database (il server le usa per annullare e ripristinare),
+// ma qui si vede solo `applicatoDallaSpunta`: ciò che togliendo la spunta si annulla davvero, in parole e col momento (Persona registrata,
+// trofeo, sblocco, oggetto, turni, incontro, punti del Confidente, consumazione, pesca, Fortuna, Doti e yen confermati con «Applica», yen
+// mossi con l'importo reale). Ciò che togliendo la spunta resta non c'è: le letture, le proposte ancora aperte o scartate, gli stati che
+// un'altra voce spuntata tiene comunque, le consumazioni e le pesche tenute anche da un'altra fonte, le ricevute illeggibili.
+// Le annullate, quelle tecniche e quelle che non hanno dato niente no; il pulsante c'è solo se c'è qualcosa, e il numero conta solo quello. Ogni riga ha la frase sopra e
+// la data e l'ora sotto, separate (prima uscivano attaccate); lo stato «attiva» non si scrive più: sono tutte in vigore.
 //
-// 2026-10-26 (revisione UX): il titolo della finestra conteneva tutto il testo della voce (fino a 579 caratteri) e sul telefono
-// l'intestazione superava il 30% dello schermo. Ora il titolo è «Ricevute della spunta» con i primi 60 caratteri della voce («…» se
-// troncata); il testo intero, solo quando il titolo lo tronca, è il primo paragrafo del corpo, che scorre, e descrive la finestra
-// per i lettori di schermo (`aria-describedby`).
+// Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino e il numero sta in un
+// distintivo. Il nome accessibile porta il testo della voce, come il menu «⋯» accanto (`PulsanteMenuVoce`). Il titolo della finestra è
+// «Applicato dalla spunta» (prima «Ricevute della spunta»: il contenuto ora è ciò che la spunta ha applicato) con i primi 60 caratteri della
+// voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il primo paragrafo del corpo e descrive la finestra per i
+// lettori di schermo (`aria-describedby`). L'elenco ha `role="list"`: con `list-none` Safari lo toglierebbe ai lettori di schermo.
+//
+// L13 (decisione 19): gli effetti di stato della voce che nella partita NON valgono (`statiNonApplicati`: da approvare nell'elenco della
+// partita, o non applicati) stanno nella stessa finestra in una sezione a parte, «Non applicato nella partita»: non sono «applicati dalla
+// spunta», e togliendola non c'è niente da annullare per loro. Quelli segnati sono già nell'elenco principale; «era già vero» non si dice (non
+// informa). Su ogni riga l'etichetta c'è solo quando aggiunge qualcosa al titolo della sezione: «da approvare nell'elenco della partita».
+// Il numero sul pulsante conta ciò che il titolo nomina: ciò che la spunta ha applicato; senza niente di applicato la finestra si chiama
+// «Non applicato dalla spunta» e il numero conta quelli. Il nome accessibile e il suggerimento dicono tutti e due i numeri.
 // ============================================================
 
 import { useId, useState } from 'react';
-import type { ReceiptEffettoVoceDto } from '../../../shared/effettiVoce';
+import type { ApplicatoDallaSpuntaDto } from '../../types';
+import type { StatoEffettoDiStatoDto } from '../../../shared/effettiVoce';
 import { Modal } from '../shared/Modal';
 import { IconaAzione } from '../shared/IconaAzione';
 
-/** Il tipo della ricevuta, a parole (le stesse dell'elenco di prima). */
-const tipoRicevuta = (tipo: ReceiptEffettoVoceDto['tipo']): string =>
-  tipo === 'acquisto' ? 'Consumazione' : tipo === 'pesca' ? 'Sessione di pesca' : tipo === 'contesto' ? 'Incontro e contesto della spunta'
-    : tipo === 'dote' ? 'Dote' : tipo === 'lettura' ? 'Lettura o gioco' : 'Turno';
-
 /** Quanti caratteri della voce entrano nel titolo della finestra e nel nome del pulsante. */
 const CARATTERI_DELLA_VOCE = 60;
+
+/** Il nome della finestra e del pulsante: dice che cosa c'è dentro (ciò che la spunta ha applicato), non come lo conserva il server. */
+const TITOLO = 'Applicato dalla spunta';
 
 /** I primi `CARATTERI_DELLA_VOCE` caratteri della voce (per punti di codice, così una lettera composta non si spezza), con «…» se
  *  il testo è più lungo; `troncata` dice se il testo intero va mostrato altrove. */
@@ -41,33 +51,75 @@ function inizioDellaVoce(voce: string): { testo: string; troncata: boolean } {
   return { testo: `${caratteri.slice(0, CARATTERI_DELLA_VOCE).join('').trimEnd()}…`, troncata: true };
 }
 
-/** Il pulsante delle ricevute della voce (`voce`: il suo testo) e la loro finestra; niente senza ricevute. */
-export function RicevuteVoce({ ricevute, voce }: { ricevute: readonly ReceiptEffettoVoceDto[] | undefined; voce: string }) {
+/** Il nome della finestra quando la spunta non ha applicato niente ma qualche effetto di stato della voce non vale nella partita. */
+const TITOLO_SOLO_NON_APPLICATI = 'Non applicato dalla spunta';
+
+/** Il nome della sezione degli effetti di stato che non valgono, sotto ciò che la spunta ha applicato. */
+const NON_APPLICATO_NELLA_PARTITA = 'Non applicato nella partita';
+
+/** «26/10/2026, 02:49»: giorno e ora, senza i secondi (non dicono niente a chi gioca). */
+const MOMENTO = new Intl.DateTimeFormat('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+function momento(iso: string): string | null {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : MOMENTO.format(d);
+}
+
+/** Gli effetti di stato che non valgono nella partita: la frase e, solo per quelli nell'elenco della partita, dove si approvano. */
+function ElencoNonApplicati({ stati, etichetta }: { stati: readonly StatoEffettoDiStatoDto[]; etichetta?: string }) {
+  return (
+    <ul role="list" aria-label={etichetta} className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+      {stati.map((s) => (
+        <li key={s.effettoUid} className="flex min-w-0 flex-col gap-0.5 py-2 first:pt-0 last:pb-0">
+          <span className="min-w-0 break-words text-pretty">{s.testo}</span>
+          {s.esito === 'da-approvare' && <span className="testo-12 text-warning">da approvare nell’elenco della partita</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Il pulsante di ciò che la spunta della voce (`voce`: il suo testo) ha applicato, e la sua finestra, con a parte gli effetti di stato che nella
+ * partita non valgono (`nonApplicati`); niente se non c'è né l'uno né l'altro.
+ */
+export function RicevuteVoce({ applicato = [], nonApplicati = [], voce }: { applicato: readonly ApplicatoDallaSpuntaDto[] | undefined; nonApplicati?: readonly StatoEffettoDiStatoDto[] | undefined; voce: string }) {
   const [aperta, setAperta] = useState(false);
   const idVoce = useId();
-  if (!ricevute?.length) return null;
-  const n = ricevute.length;
-  const breve = `Ricevute della spunta (${n})`;
+  if (!applicato.length && !nonApplicati.length) return null;
+  // il numero conta ciò che il titolo nomina; il nome accessibile e il suggerimento dicono anche l'altro numero, se c'è
+  const titolo = applicato.length ? TITOLO : TITOLO_SOLO_NON_APPLICATI;
+  const n = applicato.length || nonApplicati.length;
+  const breve = applicato.length && nonApplicati.length ? `${TITOLO} (${applicato.length}), non applicato (${nonApplicati.length})` : `${titolo} (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
     <>
-      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Ricevute degli effetti della spunta (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
+      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`${breve}: ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
         <IconaAzione chiave="ricevute" dimensione={20} />
-        <span className="conteggio-pulsante" aria-hidden="true">{n}</span>
+        <span className="conteggio-pulsante tabular-nums" aria-hidden="true">{n}</span>
       </button>
       {aperta && (
-        <Modal titolo={inizio.testo ? `Ricevute della spunta: ${inizio.testo}` : 'Ricevute della spunta'} aperta onChiudi={() => setAperta(false)}
+        <Modal titolo={inizio.testo ? `${titolo}: ${inizio.testo}` : titolo} aperta onChiudi={() => setAperta(false)}
           idDescrizione={inizio.troncata ? idVoce : undefined}>
           {inizio.troncata && <p id={idVoce} className="m-0 mb-3 testo-13 text-text-secondary break-words">{voce}</p>}
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 testo-13">
-            {ricevute.map((r) => (
-              <li key={r.id} className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-                <span className="min-w-0 break-words">{tipoRicevuta(r.tipo)}</span>
-                <span className="text-text-secondary tabular-nums">{new Date(r.applicatoIl).toLocaleString('it-IT')}</span>
-                <span className={r.annullatoIl ? 'text-text-muted' : 'text-text-secondary'}>{r.annullatoIl ? 'annullata' : 'attiva'}</span>
-              </li>
-            ))}
-          </ul>
+          {/* role="list": con `list-none` Safari e VoiceOver (iPad) non annuncerebbero più l'elenco né il numero delle righe */}
+          {!!applicato.length && <ul role="list" className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+            {applicato.map((x) => {
+              const quando = momento(x.applicatoIl);
+              return (
+                <li key={x.id} className="flex min-w-0 flex-col gap-0.5 py-2 first:pt-0 last:pb-0">
+                  <span className="min-w-0 break-words text-pretty">{x.testo}</span>
+                  {quando && <time dateTime={x.applicatoIl} className="testo-12 text-text-secondary tabular-nums">{quando}</time>}
+                </li>
+              );
+            })}
+          </ul>}
+          {/* l'intestazione serve solo a separare da ciò che la spunta ha applicato: senza, lo dice già il titolo della finestra */}
+          {!!nonApplicati.length && (applicato.length
+            ? <section aria-labelledby={`${idVoce}-non`} className="mt-4 border-t border-border-light pt-3">
+              <h3 id={`${idVoce}-non`} className="m-0 mb-2 testo-13 font-semibold text-balance">{NON_APPLICATO_NELLA_PARTITA}</h3>
+              <ElencoNonApplicati stati={nonApplicati} />
+            </section>
+            : <ElencoNonApplicati stati={nonApplicati} etichetta={TITOLO_SOLO_NON_APPLICATI} />)}
         </Modal>
       )}
     </>

@@ -25,6 +25,13 @@ export interface PropostaPartitaDto extends RiferimentoPropostaPartita {
   dote: DoteChiave | null; orfana: boolean; applicabile: boolean; impedimenti: string[];
   creataIl: string; decisaIl: string | null; dati: Record<string, unknown>;
 }
+/**
+ * L13 (decisione 19): la proposta dell'elenco del passato, cioè un effetto di stato di una voce già spuntata mai applicato alla partita
+ * (`statiMancantiService`). `dati.descrizione`: che cosa cambia, a parole; `dati.yenPrevisti` (articoli e Richieste con una ricompensa): il
+ * movimento sul saldo che l'approvazione farà, con il segno (negativo: il prezzo si scala; positivo: la ricompensa entra; 0: nessuno, decisione 18);
+ * `dati.oraGiaVero`: lo stato risulta già vero adesso (segnato dopo il censimento), e il motivo scritto allora non vale più.
+ */
+export const delPassato = (p: Pick<PropostaPartitaDto, 'tipo' | 'dati'>): boolean => p.tipo === 'effetto-voce' && p.dati.passato === true;
 export type DecisioneProposte =
   | { tipo: 'applica' | 'scarta' | 'non-conteggiata' | 'ignota'; proposte: RiferimentoPropostaPartita[] }
   | { tipo: 'gia-conteggiata'; proposta: RiferimentoPropostaPartita; quantita: number }

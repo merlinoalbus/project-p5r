@@ -19,6 +19,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { DataP5 } from '../shared/DataP5';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { CruciverbaDto, DomandaDto, PartitaDto } from '../../types';
+import { TestoNote } from '../shared/TestoNote';
 
 type Finestra = 'classe' | 'esame' | 'cruciverba';
 
@@ -162,7 +163,7 @@ function ElencoDomande({ domande, data }: { domande: DomandaDto[]; data: string 
               <li key={`${r.ordine ?? 0}-${r.testo}`} className="font-display uppercase testo-17 leading-tight text-primary-testo">{r.testo}</li>
             ))}
           </ol>
-          {d.ricompensa && <span className="testo-12 text-text-secondary">{d.ricompensa}</span>}
+          {d.ricompensa && <span className="testo-12 text-text-secondary"><TestoNote testo={d.ricompensa} daParole="guida" /></span>}
         </li>
       ))}
     </ul>

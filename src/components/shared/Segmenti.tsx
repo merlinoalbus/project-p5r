@@ -11,6 +11,7 @@
 // ============================================================
 
 import { useRef } from 'react';
+import { TestoNote } from './TestoNote';
 
 interface Props<T extends string> {
   etichetta: string;
@@ -49,7 +50,7 @@ export function Segmenti<T extends string>({ etichetta, valore, opzioni, onCambi
   return (
     <div role="radiogroup" aria-label={etichetta} className="segmenti">
       {opzioni.map((o, i) => (
-        <button key={o.chiave} ref={(el) => { pulsanti.current[i] = el; }} type="button" role="radio" aria-checked={valore === o.chiave} tabIndex={i === scelta ? 0 : -1} className={`segmenti__voce touch ${valore === o.chiave ? 'segmenti__voce--attiva' : ''}`} onClick={() => onCambia(o.chiave)} onKeyDown={(e) => tastiera(e, i)}>{o.nome}</button>
+        <button key={o.chiave} ref={(el) => { pulsanti.current[i] = el; }} type="button" role="radio" aria-checked={valore === o.chiave} tabIndex={i === scelta ? 0 : -1} className={`segmenti__voce touch ${valore === o.chiave ? 'segmenti__voce--attiva' : ''}`} onClick={() => onCambia(o.chiave)} onKeyDown={(e) => tastiera(e, i)}><TestoNote testo={o.nome} /></button>
       ))}
     </div>
   );

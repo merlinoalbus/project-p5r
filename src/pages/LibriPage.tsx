@@ -35,6 +35,7 @@ import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLet
 import { NOME_DOTE } from '../utils/citta';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
+import { TestoNote } from '../components/shared/TestoNote';
 
 /**
  * Pagina dei libri: carica il catalogo per la partita attiva, mostra i conteggi di lettura,
@@ -127,13 +128,13 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
           {libro.negozi.length === 0 && altrePosizioni.length === 0 && <span>{libro.dove || 'Non indicato'}</span>}
         </dd>
         <dt className="text-text-muted">Che cosa fa</dt>
-        <dd className="m-0">{libro.effettiTesto.length ? libro.effettiTesto.join(' · ') : 'Nessun effetto dichiarato'}</dd>
+        <dd className="m-0">{libro.effettiTesto.length ? <TestoNote testo={libro.effettiTesto.join(' · ')} /> : 'Nessun effetto dichiarato'}</dd>
         {/* Il luogo sbloccato è un riferimento, quindi ci si va. */}
         {(libro.apre?.length ?? 0) > 0 && <><dt className="text-text-muted">Apre</dt><dd className="m-0 flex flex-wrap gap-2">{libro.apre!.map((posto) => posto.casa ? <Link key={`${posto.tipo}:${posto.chiave}`} className="touch inline-flex items-center" to={posto.casa}>{posto.nome}</Link> : <span key={`${posto.tipo}:${posto.chiave}`}>{posto.nome}</span>)}</dd></>}
         {libro.negozi.length === 0 && libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : formattaYen(libro.prezzo)}</dd></>}
       </dl>
       {libro.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{libro.notaPrezzo}</p>}
-      {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}
+      {libro.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={libro.dettagli} daParole="conteggi" /></p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(libro.chiave); setFonteSelezionata(0); }} />

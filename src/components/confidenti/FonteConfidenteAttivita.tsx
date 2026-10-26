@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { FonteConfidenteAttivitaDto } from '../../../shared/types';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
+import { TestoNote } from '../shared/TestoNote';
 
 function Requisito({ testo, descrizione }: { testo: string; descrizione: string }) {
   return <li>
@@ -38,7 +39,7 @@ export function FonteConfidenteAttivita({ fonte }: { fonte: FonteConfidenteAttiv
     </div>}
     {fonte.dotiPerPassaggio.length > 0 && <div>
       <strong>Doti degli incontri</strong>
-      <ul className="m-0 pl-5">{fonte.dotiPerPassaggio.map((r) => <li key={r.rango}>Verso il rango {r.rango}: {r.testo || 'Nessuna Dote dichiarata per questo passaggio.'}</li>)}</ul>
+      <ul className="m-0 pl-5">{fonte.dotiPerPassaggio.map((r) => <li key={r.rango}>Verso il rango {r.rango}: {r.testo ? <TestoNote testo={r.testo} /> : 'Nessuna Dote dichiarata per questo passaggio.'}</li>)}</ul>
     </div>}
     {fonte.avvisi.map((a, i) => <p key={i} className="m-0 whitespace-pre-line text-warning">{a}</p>)}
     {fonte.stato !== 'collegato' && <p role="alert" className="m-0 text-warning">{fonte.stato === 'non-risolto' ? 'Il Confidente collegato non è disponibile.' : 'La fonte presenta un conflitto: consulta gli avvisi e correggi i dati indicati.'}</p>}

@@ -18,8 +18,10 @@
 // ============================================================
 
 import { useId } from 'react';
-import type { GruppoRiepilogoEffettiDto } from '../../../shared/riepilogoEffetti';
+import type { GruppoRiepilogoEffettiDto, RispostaRiepilogoEffettiDto } from '../../../shared/riepilogoEffetti';
 import { normaNome } from '../../utils/percorso';
+import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 
 interface Props {
   gruppi: readonly GruppoRiepilogoEffettiDto[];
@@ -27,6 +29,34 @@ interface Props {
   titolo?: string;
   /** Falso quando il contenitore dice già che cosa contiene il riquadro: il titolo resta solo per i lettori di schermo. */
   titoloVisibile?: boolean;
+}
+
+/**
+ * Le risposte giuste di una domanda in classe, di un quiz in TV o di un esame, sotto la domanda (2026-10-26: «devono essere visualizzate
+ * le domande ma anche le risposte»). La risposta si distingue non solo per il colore: la spunta accanto, il grassetto e il filo a sinistra
+ * del blocco; per un lettore di schermo ogni risposta comincia con «Risposta giusta». Negli esami ogni risposta ha sopra il suo quesito;
+ * una domanda a catena (più risposte senza quesito) è un elenco numerato, nell'ordine in cui si danno. Testi lunghi a capo, mai troncati.
+ */
+function RisposteGiuste({ risposte }: { risposte: readonly RispostaRiepilogoEffettiDto[] }) {
+  const catena = risposte.length > 1 && risposte.every((x) => !x.domanda);
+  const Elenco = risposte.length > 1 ? 'ol' : 'ul';
+  return (
+    <Elenco className="m-0 mt-0.5 flex min-w-0 list-none flex-col gap-1 border-l-2 border-primary p-0 pl-2 min-[641px]:col-span-2">
+      {risposte.map((x, i) => (
+        <li key={`${i}:${x.testo}`} className="flex min-w-0 flex-col">
+          {x.domanda && <span className="min-w-0 break-words text-pretty text-text-secondary">{x.domanda}</span>}
+          <span className="flex min-w-0 items-start gap-1.5">
+            <span aria-hidden="true" className="mt-0.5 shrink-0 text-primary-testo"><IconaAzione chiave="raggiunto" dimensione={14} /></span>
+            <span className="min-w-0 break-words font-semibold text-primary-testo">
+              <span className="sr-only">Risposta giusta{catena ? ` ${i + 1}` : ''}: </span>
+              {catena && <span aria-hidden="true" className="tabular-nums">{i + 1}. </span>}
+              {x.testo}
+            </span>
+          </span>
+        </li>
+      ))}
+    </Elenco>
+  );
 }
 
 /** Un gruppo: etichetta (se aggiunge qualcosa), elenco delle righe, totale e nota. `riquadro` è il nome del riquadro, che fa da nome
@@ -45,13 +75,19 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
         className="m-0 flex list-none flex-col gap-1 p-0 min-[641px]:grid min-[641px]:grid-cols-[minmax(0,max-content)_minmax(0,max-content)] min-[641px]:gap-x-3 min-[641px]:gap-y-0">
         {g.righe.map((r, i) => (
           <li key={`${i}:${r.nome}`} className="flex min-w-0 flex-col testo-13 min-[641px]:col-span-2 min-[641px]:grid min-[641px]:grid-cols-subgrid min-[641px]:items-baseline">
-            <span className={`min-w-0 break-words ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}>{r.nome}</span>
-            {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
+            <span className={`min-w-0 break-words ${r.risposte ? 'text-pretty' : ''} ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}><TestoNote testo={r.nome} /></span>
+            {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums"><TestoNote testo={r.dettaglio} /></span>}
+            {r.risposte && <RisposteGiuste risposte={r.risposte} />}
+            {/* L13 (decisione 4): che cosa contiene un set, in una riga sotto nome e prezzo, su tutta la larghezza; va a capo, mai troncato.
+                Da 641 px le colonne sono larghe quanto il contenuto: `w-0 min-w-full` toglie il contenuto dal calcolo della loro larghezza (un
+                contenuto lungo allargava le due colonne e allontanava il prezzo dal nome, rilievo della revisione UX) e lo stende sulla
+                larghezza che nome e prezzo danno alla riga */}
+            {r.contenuto && <span className="min-w-0 break-words testo-12 text-text-muted text-pretty min-[641px]:col-span-2 min-[641px]:w-0 min-[641px]:min-w-full">{r.contenuto}</span>}
           </li>
         ))}
       </ul>
       {g.totale && <p className="m-0 border-t border-border pt-0.5 testo-13 font-semibold tabular-nums break-words">{g.totale}</p>}
-      {g.nota && <p className="m-0 testo-12 text-text-muted break-words text-pretty">{g.nota}</p>}
+      {g.nota && <p className="m-0 testo-12 text-text-muted break-words text-pretty"><TestoNote testo={g.nota} /></p>}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ConfidenteDettaglioPage } from './ConfidenteDettaglioPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { ConfidenteDettaglioDto, ConfidentePartitaDto, PartitaDto } from '../types';
+import { conNote } from '../../test/note';
 
 const { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro, getRichieste, togliRequisitoRichiesta } = vi.hoisted(() => ({ getConfidenteDettaglio: vi.fn(), getConfidentiPartita: vi.fn(), impostaRegaloFatto: vi.fn(), impostaDotiIncontro: vi.fn(), getRichieste: vi.fn(), togliRequisitoRichiesta: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, impostaDotiIncontro, getRichieste, togliRequisitoRichiesta }));
@@ -20,8 +21,8 @@ const dettaglio: ConfidenteDettaglioDto = {
   chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13,
   abilita: [{ rango: 1, nome: 'Rigenerazione', descrizione: 'Più oggetti curativi.' }, { rango: 3, nome: 'Sterilizzazione', descrizione: '' }],
   dotiIncontro: [
-    { rango: 1, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio, 1 nota' },
-    { rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio, 1 nota' },
+    { rango: 1, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio ♪' },
+    { rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio ♪' },
     { rango: 3, doti: [], testo: '' },
   ],
   dialoghi: [
@@ -72,7 +73,7 @@ describe('ConfidenteDettaglioPage', () => {
     expect(within(sezione).getByText(/Un'uscita che dà solo punti non le ricorda/)).toBeInTheDocument();
     // rango 1 nella partita: il prossimo passaggio è al 2
     expect(within(sezione).getByText('rango 2')).toHaveClass('chip--oro');
-    expect(within(sezione).getAllByText('Coraggio, 1 nota')).toHaveLength(2);
+    expect(within(sezione).getAllByText(conNote('Coraggio ♪'))).toHaveLength(2);
     expect(within(sezione).queryByText('rango 3')).toBeNull();
     fireEvent.click(within(sezione).getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Dote al passaggio di rango: Takemi' });

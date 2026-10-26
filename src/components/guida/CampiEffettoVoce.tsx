@@ -16,7 +16,9 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
-import { BERSAGLI_SBLOCCO, QUANTITA_MASSIMA_EFFETTO, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { noteAParole, simboliNote } from '../../../shared/note';
+import { BERSAGLI_SBLOCCO, gruppiAlternativi, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { elencoNomi } from '../../../shared/riepilogoEffetti';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 
@@ -60,8 +62,8 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
             const dentro = e.possibili!.includes(n);
             // la proposta resta sempre fra le possibili, e le possibili sono almeno due
             const bloccata = n === e.note || (dentro && e.possibili!.length <= 2);
-            return <button key={n} type="button" className={`chip touch ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} disabled={bloccata}
-              onClick={() => onCambia({ ...e, possibili: dentro ? e.possibili!.filter((x) => x !== n) : [...e.possibili!, n].sort() })}>{'♪'.repeat(n)}</button>;
+            return <button key={n} type="button" className={`chip touch ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} disabled={bloccata} aria-label={noteAParole(n)}
+              onClick={() => onCambia({ ...e, possibili: dentro ? e.possibili!.filter((x) => x !== n) : [...e.possibili!, n].sort() })}>{simboliNote(n)}</button>;
           })}
         </span>
       )}
@@ -170,13 +172,25 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       return <Selettore etichetta="Cruciverba" valore={e.data} opzioni={conCorrente(effetti.cruciverba.map((c) => ({ chiave: c.data, nome: dataGiocoTesto(c.data), dettaglio: breve(c.indizio, 50) })), e.data, dataGiocoTesto(e.data))} onCambia={(v) => onCambia({ tipo: 'cruciverba', data: v })} />;
     case 'richiesta':
       return <Selettore etichetta="Richiesta" valore={e.richiesta} opzioni={conCorrente(azione.richieste, e.richiesta, 'Richiesta non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'richiesta', richiesta: v })} />;
-    case 'articolo':
+    case 'articolo': {
+      const articoloDi = (k: string) => effetti.articoli.find((a) => a.chiave === k);
+      const scelto = articoloDi(e.articolo);
+      // rilievo L1 della revisione UX: un articolo nascosto nel catalogo (non più proposto da `opzioniArticoli`) si vede con il suo nome, come
+      // in «Acquisti da questo negozio»; l'etichetta generica solo se il catalogo non lo conosce più
+      const corrente = scelto ? (scelto.nascosto ? `${scelto.nome} (non più nell’elenco)` : scelto.nome) : 'Articolo non più nell’elenco';
+      // rilievo L2: gli articoli della voce alternativi a questo (Set A o Set B, «non insieme a» del catalogo: lo stesso calcolo del riepilogo
+      // e della spunta). La nota si vede solo se l'alternativa è nella voce: solo allora la spunta chiede quale si è comprato
+      const chiaviVoce = righe.flatMap((r) => (r.effetto.tipo === 'articolo' ? [r.effetto.articolo] : []));
+      const alternative = (gruppiAlternativi(chiaviVoce, (k) => articoloDi(k)?.incompatibili).find((g) => g.includes(e.articolo)) ?? [])
+        .filter((k) => k !== e.articolo).flatMap((k) => { const a = articoloDi(k); return a ? [a.nome] : []; });
       return (
         <div className="flex flex-wrap items-end gap-2">
-          <Selettore className="min-w-[12rem] flex-1" etichetta="Articolo del negozio" valore={e.articolo} opzioni={conCorrente(opzioniArticoli(effetti), e.articolo, 'Articolo non più nell’elenco')} onCambia={(v) => onCambia(e.quantita ? { tipo: 'articolo', articolo: v, quantita: e.quantita } : { tipo: 'articolo', articolo: v })} />
+          <Selettore className="min-w-[12rem] flex-1" etichetta="Articolo del negozio" valore={e.articolo} opzioni={conCorrente(opzioniArticoli(effetti), e.articolo, corrente)} onCambia={(v) => onCambia(e.quantita ? { tipo: 'articolo', articolo: v, quantita: e.quantita } : { tipo: 'articolo', articolo: v })} />
           <CampoQuantita valore={e.quantita ?? 1} onCambia={(q) => onCambia(q > 1 ? { tipo: 'articolo', articolo: e.articolo, quantita: q } : { tipo: 'articolo', articolo: e.articolo })} />
+          {alternative.length > 0 && <p className="m-0 w-full testo-12 text-text-secondary break-words text-pretty">In alternativa a {elencoNomi(alternative)}: {REGOLA_ALTERNATIVE.toLowerCase()}, alla spunta.</p>}
         </div>
       );
+    }
     case 'yen':
       return <CampoYen importo={e.importo} onCambia={(importo) => onCambia({ tipo: 'yen', importo })} />;
     case 'oggetto':

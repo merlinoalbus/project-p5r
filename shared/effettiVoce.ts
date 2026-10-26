@@ -66,6 +66,31 @@ export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoV
 export interface StatoEffettiVoceDto {
   voceUid: string; stato: 'convertita' | 'legacy-da-correggere'; effetti: EffettoVoceDto[];
   rawLegacy: string; motivo: string | null; revisione: string;
+  /** L13 (decisione 19): solo nella risposta del salvataggio, che cosa è successo nelle partite che hanno già spuntato la voce. */
+  applicazioni?: ApplicazioneStatoPartitaDto[];
+}
+/**
+ * L13 (decisione 19): l'esito, in una partita che ha già spuntato la voce, di un effetto di stato aggiunto, cambiato o tolto nella guida.
+ * `segnato`: vale adesso; `annullato`: la versione tolta è tornata com'era; `gia-presente`: era già vero (togliendo la spunta resta);
+ * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita;
+ * `non-applicato`: il dominio l'ha rifiutato adesso, e non è in elenco perché l'utente ne aveva già tolto la stessa configurazione.
+ * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida`, `da-approvare` e `non-applicato`).
+ * Il salvataggio della voce (finestra della voce, proposta «da completare» applicata, candidato confermato) lo riporta nella risposta
+ * (`AzionePercorsoDto.applicazioniEffetti`, `StatoEffettiVoceDto.applicazioni`), e chi salva lo notifica (`src/utils/applicazioniEffetti.ts`).
+ */
+export interface ApplicazioneStatoPartitaDto {
+  partitaId: number; partitaNome: string; effettoUid: string;
+  esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare' | 'non-applicato';
+  testo: string;
+  motivo?: string;
+}
+/**
+ * L13 (decisione 19): un effetto di stato di una voce spuntata che non vale nella partita, per la finestra della voce (`AzionePercorsoDto.statiNonApplicati`).
+ * `da-approvare`: è nell'elenco della partita; `non-applicato`: non c'è e non è in elenco (tolto dall'elenco con «Non applicare», o un articolo
+ * non disponibile al momento della spunta). Quelli segnati stanno in «Applicato dalla spunta»; quelli che erano già veri non si dicono.
+ */
+export interface StatoEffettoDiStatoDto {
+  effettoUid: string; esito: 'da-approvare' | 'non-applicato'; testo: string;
 }
 export interface RichiestaSalvaEffettiVoce {
   revisioneEffettiAttesa: string;
@@ -185,7 +210,13 @@ export interface NomiFraseEffetto {
 /** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca, Fortuna e yen. */
 export type EffettoConNomiVoce = EffettoDiStatoVoce | EffettoFortunaVoce | EffettoPescaVoce | EffettoYenVoce;
 export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce => eEffettoDiStato(e) || e.tipo === 'pesca' || e.tipo === 'fortuna' || e.tipo === 'yen';
-const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/**
+ * Un importo in yen come lo scrive la guida italiana: «¥1.680», «¥12.800». In `it-IT` i numeri di quattro cifre restano senza separatore
+ * («1680»: raggruppamento minimo di due cifre), e la stessa voce mostrava «¥1680» accanto a «¥12.800» (rilievo della revisione UX, L13):
+ * il separatore si chiede sempre. Uno solo per frasi, riepilogo «Il gioco dà», editor degli acquisti e scelta del set alla spunta.
+ */
+export const formatoYen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT', { useGrouping: 'always' })}`;
+const yen = formatoYen;
 /** «×3» solo se le copie sono più d'una. */
 const copie = (q: number | undefined): string => (q && q > 1 ? ` ×${q}` : '');
 /** I dati che possono portare già i loro yen (decisione 2): il film (prezzo), l'attività o il lavoro (costo o paga), la Richiesta (ricompensa). */
@@ -242,9 +273,11 @@ export interface RigaContoArticoli { chiave: string; nome: string; copie: number
  * il totale in yen (null se nessun articolo ha il prezzo: «¥0» sarebbe falso) e quante copie non hanno prezzo. null senza articoli.
  * È l'unico conto: lo usano la frase `riepilogoArticoli`, il riepilogo per gruppi della voce e il modulo della voce.
  */
-export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): { righe: RigaContoArticoli[]; totale: number | null; senzaPrezzo: number } | null {
+export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined, escludi?: ReadonlySet<string>): { righe: RigaContoArticoli[]; totale: number | null; senzaPrezzo: number } | null {
+  // `escludi` (L13, decisione 4): gli articoli in alternativa fra loro (Set A o Set B): uno solo, o nessuno, si compra alla spunta, quindi non
+  // entrano nel conto «tutto insieme»; il riepilogo li mostra a parte («Uno a scelta»)
   const copie = new Map<string, number>();
-  for (const e of effetti) if (e.tipo === 'articolo') copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
+  for (const e of effetti) if (e.tipo === 'articolo' && !escludi?.has(e.articolo)) copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
   if (copie.size === 0) return null;
   let totale = 0, senzaPrezzo = 0, conPrezzo = 0;
   const righe = [...copie].map(([chiave, q]): RigaContoArticoli => {
@@ -254,6 +287,42 @@ export function contoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave
     return { chiave, nome: a?.nome ?? 'Articolo', copie: q, prezzoUnitario: unitario, prezzo: unitario === null ? null : unitario * q };
   });
   return { righe, totale: conPrezzo === 0 ? null : totale, senzaPrezzo };
+}
+
+/**
+ * L13 (decisione 4): la regola degli articoli in alternativa, scritta in un modo solo (rilievo L3 della revisione UX: era «Uno a scelta»,
+ * «Alla spunta ne scegli uno, o nessuno» e «Uno solo, o nessuno»). La usano il titolo del riepilogo «Il gioco dà», il riquadro dell'editor,
+ * la nota del campo «Articolo» e la scelta alla spunta.
+ */
+export const REGOLA_ALTERNATIVE = 'Uno a scelta, o nessuno';
+
+/**
+ * L13 (decisione 4 dell'utente: «Televendite: due articoli distinti per Set A e Set B, ciascuno con prezzo e contenuto propri»): gli articoli
+ * di una voce che sono alternative fra loro. Due articoli sono alternativi se uno dei due dichiara nel catalogo «non insieme all'altro»
+ * (`articoliIncompatibili` delle sue condizioni: basta da una parte); un gruppo è l'insieme degli articoli della voce legati così, anche a catena
+ * (A–B, B–C). Solo i gruppi di almeno due articoli PRESENTI nella voce: un articolo la cui alternativa non è nella voce si compra come gli altri.
+ * Nella voce non si dichiara niente: lo dice il catalogo. Alla spunta se ne sceglie uno, o nessuno. Gruppi e membri nell'ordine della voce.
+ */
+export function gruppiAlternativi(chiavi: readonly string[], incompatibili: (chiave: string) => readonly string[] | undefined): string[][] {
+  const presenti = [...new Set(chiavi)];
+  const dentro = new Set(presenti);
+  const vicini = new Map<string, Set<string>>(presenti.map((k) => [k, new Set<string>()]));
+  for (const k of presenti) for (const altro of incompatibili(k) ?? []) {
+    if (altro === k || !dentro.has(altro)) continue;
+    vicini.get(k)!.add(altro);
+    vicini.get(altro)!.add(k);
+  }
+  const visto = new Set<string>();
+  const gruppi: string[][] = [];
+  for (const k of presenti) {
+    if (visto.has(k) || vicini.get(k)!.size === 0) continue;
+    const membri = new Set<string>([k]);
+    const coda = [k];
+    while (coda.length) for (const v of vicini.get(coda.shift()!)!) if (!membri.has(v)) { membri.add(v); coda.push(v); }
+    for (const m of membri) visto.add(m);
+    gruppi.push(presenti.filter((x) => membri.has(x)));
+  }
+  return gruppi;
 }
 
 /**
@@ -285,8 +354,10 @@ const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEn
  * La frase che dice all'utente che cosa succede spuntando, per gli effetti che citano l'oggetto per chiave (storia, domanda,
  * cruciverba, Richiesta, articolo, invito, Persona) e per pesca e Fortuna. È l'UNICA scrittura di queste frasi: la usano il server
  * (il «Il gioco dà» del Diario) e la pagina (editor della voce), ognuno con i propri nomi.
+ * `applicato`: la frase al passato, per ciò che la spunta ha già fatto (la finestra «Applicato dalla spunta», `applicatoDallaSpunta.ts`);
+ * solo lo sblocco ha una forma diversa («Sblocca la Richiesta «X»» → «Richiesta «X» sbloccata»), le altre sono già al passato.
  */
-export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto): string {
+export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, opz: { applicato?: boolean } = {}): string {
   switch (e.tipo) {
     case 'pesca': return 'Sessione di pesca a Ichigaya osservata';
     case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
@@ -300,6 +371,7 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto):
     case 'trofeo': { const t = n.trofeo?.(e.trofeo); return t ? `Trofeo ottenuto: ${t}` : 'Trofeo ottenuto'; }
     case 'sblocco': {
       const nome = e.bersaglio === 'richiesta' ? n.richiesta(e.chiave) : n.attivita?.(e.chiave);
+      if (opz.applicato) return e.bersaglio === 'richiesta' ? `Richiesta «${nome ?? 'Richiesta'}» sbloccata` : `Attività «${nome ?? 'attività'}» sbloccata`;
       return e.bersaglio === 'richiesta' ? `Sblocca la Richiesta «${nome ?? 'Richiesta'}»` : `Sblocca l’attività «${nome ?? 'attività'}»`;
     }
     case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }

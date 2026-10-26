@@ -29,6 +29,8 @@ import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { TitoloSezione } from '../shared/TitoloSezione';
 import { SceltaEsitoTurno } from '../guida/SceltaEsito';
+import { TestoNote } from '../shared/TestoNote';
+import { fraseDotiEsito } from '../../../shared/esitiAttivita';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -240,14 +242,14 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                             <li key={a.chiave} className="progressi-attivita__riga">
                               <span className="min-w-0 flex-[1_1_12rem]">
                                 <span className="block">{a.nome}</span>
-                                {a.effettiTurno?.length > 0 && <span className="block testo-12 text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
+                                {a.effettiTurno?.length > 0 && <span className="block testo-12 text-text-secondary">Ogni turno: <TestoNote testo={a.effettiTurno.join(' · ')} /></span>}
                                 {esiti && esiti.modo === 'automatico' && (() => {
                                   const oggi = esiti.esiti.find((e) => e.chiave === esiti.automatico);
                                   return (
                                     <>
-                                      <span className="block testo-12 text-text-secondary">{`Esito dal giorno: ${esiti.esiti.map((e) => `${e.nome} (${e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})`).join(' · ')}`}</span>
+                                      <span className="block testo-12 text-text-secondary"><TestoNote testo={`Esito dal giorno: ${esiti.esiti.map((e) => `${e.nome} (${fraseDotiEsito(e.doti)})`).join(' · ')}`} /></span>
                                       <span className={`block testo-12 font-semibold ${oggi ? 'text-primary-testo' : 'text-warning'}`}>
-                                        {oggi ? `Oggi vale: ${oggi.nome} (${oggi.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})` : 'Oggi non se ne ricava uno'}
+                                        {oggi ? <TestoNote testo={`Oggi vale: ${oggi.nome} (${fraseDotiEsito(oggi.doti)})`} /> : 'Oggi non se ne ricava uno'}
                                       </span>
                                     </>
                                   );

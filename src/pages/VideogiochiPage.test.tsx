@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { VideogiochiPage } from './VideogiochiPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, VideogiocoDto } from '../types';
+import { conNote } from '../../test/note';
 
 const { getVideogiochi, impostaProgressoVideogioco } = vi.hoisted(() => ({ getVideogiochi: vi.fn(), impostaProgressoVideogioco: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { getVideogiochi, impostaProgressoVideogioco }));
@@ -74,7 +75,7 @@ describe('VideogiochiPage', () => {
     render(<MemoryRouter><VideogiochiPage /></MemoryRouter>);
     await screen.findByText('Tycoon dello spazio');
     expect(screen.getByRole('link', { name: 'Super Baron · 4800 ¥' })).toHaveAttribute('href', '/guida/negozi/super-baron');
-    expect(screen.getByText('Conoscenza ♪')).toBeInTheDocument();
+    expect(screen.getByText(conNote('Conoscenza ♪'))).toBeInTheDocument();
     expect(screen.getByText('Leblanc')).toBeInTheDocument();
     expect(screen.getByText('Si gioca in soffitta.')).toBeInTheDocument();
     expect(screen.queryByText('fonte')).toBeNull();

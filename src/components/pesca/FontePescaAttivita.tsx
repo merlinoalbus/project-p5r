@@ -3,6 +3,7 @@ import type { RegolaPescaDto } from '../../../shared/pesca';
 import { EditorRegolaPesca } from './EditorRegolaPesca';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { Note } from '../shared/TestoNote';
 
 /** Nel rilascio la regola comune della pesca si consulta soltanto: niente correzione (costante di build, come negli altri moduli). */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -15,7 +16,7 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
     <p className="m-0">La visita ha un solo turno. Guardiano e Boss sono due obiettivi: tentare non significa catturare. Rango, tentativi, catture e riscossione si registrano come osservazioni della visita.</p>
     {d && <>
       <p className="m-0">Quota: giorno ¥{d.quote.giorno.toLocaleString('it-IT')}, sera ¥{d.quote.sera.toLocaleString('it-IT')}. Esca speciale: {d.costoEscaPunti.toLocaleString('it-IT')} punti pesca.</p>
-      <p className="m-0">Perizia osservata alla riscossione finale: {d.beneficioPerizia.note} nota, {d.beneficioPerizia.puntiBase} punti interni base; Fortuna confermata aggiunge {d.beneficioPerizia.bonusFortuna}. Con dati ignoti il registro mostra un intervallo e propone soltanto la parte certa.</p>
+      <p className="m-0">Perizia osservata alla riscossione finale: <Note n={d.beneficioPerizia.note} />, {d.beneficioPerizia.puntiBase} punti interni base; Fortuna confermata aggiunge {d.beneficioPerizia.bonusFortuna}. Con dati ignoti il registro mostra un intervallo e propone soltanto la parte certa.</p>
       <ul className="m-0 space-y-1 pl-5">{d.vie.map(v => <li key={v.id}>
         <strong>{v.specie === 'guardiano' ? 'Guardiano' : 'Boss'}</strong>: {v.faseTerzoSemestre ? 'terzo semestre avviato' : 'prima del terzo semestre'}, {v.fascia}, {v.meteo === 'normale' ? 'meteo normale' : 'pioggia o neve'}; {v.guardianoPrecedente === 'si' ? 'Guardiano già catturato prima della visita; ' : v.guardianoPrecedente === 'no' ? 'Guardiano non ancora catturato prima della visita; ' : ''}
         comparsa {v.rangoComparsa === null ? 'senza rango stabilito' : `documentata al rango ${v.rangoComparsa}`}; catturabilità documentata al rango {v.rangoCattura}, {v.tentativo === 'primo' ? 'primo' : 'settimo'} tentativo{v.seiCatture ? ', dopo sei catture nella visita' : ''}.

@@ -11,6 +11,7 @@ import { fortunaSu } from './fortunaService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 import { vociCollegate } from './vociDiStato.js';
+import { simboliNote } from '../../shared/note.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
@@ -54,7 +55,7 @@ export function scriviCruciverba(partitaId: number, data: string, fatto: boolean
     // Il cruciverba di Leblanc dà una nota di Conoscenza: la risposta lo dice (`daSegnare`), ma le Doti si
     // segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano, né risolvendolo né togliendo la spunta.
     nuovo = fatto && !era;
-    if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà Conoscenza +1 nota (da segnare nelle Doti).`, { data });
+    if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà Conoscenza ${simboliNote(1)} (da segnare nelle Doti).`, { data });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return { riga: dto(r, new Set(fatto ? [data] : []), vociCollegate('cruciverba').get(data)?.voceUid), nuovo };

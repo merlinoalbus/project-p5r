@@ -7,7 +7,8 @@ import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaR
 import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
 import type { AvanzamentoGiornataDto, AzionePercorsoDto } from '../../shared/types';
 import { allineaDopoGesto, puntoPartitaNelloStore } from '../utils/giornoAvanzato';
-import type { StatoEffettiVoceDto } from '../../shared/effettiVoce';
+import type { ApplicazioneStatoPartitaDto, StatoEffettiVoceDto } from '../../shared/effettiVoce';
+import { notificaApplicazioni } from '../utils/applicazioniEffetti';
 import type { NuovaSessionePesca, RicevutaOperazionePescaDto } from '../../shared/pesca';
 import { confermaPesca, leggiRicevutaPesca, type OperazioneClientPesca } from './api/pesca';
 import { schemaEffettoGestoPesca, schemaNuovaSessioneGestoPesca, schemaOperazioneGestoPesca, schemaRegistraSessioneGestoPesca, schemaRicevutaGestoPesca } from './schemaGestoPesca';
@@ -71,6 +72,7 @@ const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.
   scelteEsito: z.array(z.discriminatedUnion('tipo', [
     z.object({ effettoUid: uid, tipo: z.literal('turno'), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable() }).strict(),
     z.object({ effettoUid: uid, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
+    z.object({ effettoUid: uid, tipo: z.literal('alternativa'), scelto: uid.nullable() }).strict(),
   ])).min(1).max(50).refine(a => new Set(a.map(s => s.effettoUid)).size === a.length).optional(),
 }).strict().refine(v => ((v.acquisti?.length ?? 0) + (v.pesche?.length ?? 0) > 0) && [...(v.acquisti ?? []), ...(v.pesche ?? [])].every(r => r.fonte.tipo === 'diario' && r.fonte.voceUid === v.uid));
 const bersaglioSchema = z.object({ etichetta: z.string().min(1).max(500), articolo: chiave.optional(), voceUid: uid.optional(), effettoUid: uid.optional(), pesca: z.literal(true).optional(), sessionePesca: uid.optional(), fontePesca: uid.optional() }).strict();
@@ -309,6 +311,18 @@ function separaAvanzamento(x: unknown): { avanzamento: AvanzamentoGiornataDto; r
   const { giornoAvanzato, fasciaAvanzata, ...resto } = x as Record<string, unknown> & AvanzamentoGiornataDto;
   return { avanzamento: { ...(giornoAvanzato ? { giornoAvanzato } : {}), ...(fasciaAvanzata ? { fasciaAvanzata } : {}) }, resto };
 }
+const schemaApplicazioni = z.array(z.object({
+  partitaId: z.number().int(), partitaNome: z.string(), effettoUid: z.string(),
+  esito: z.enum(['segnato', 'annullato', 'gia-presente', 'fortuna-non-valida', 'da-approvare', 'non-applicato']), testo: z.string(), motivo: z.string().optional(),
+}).strict());
+/** L13 (decisione 19): stacca dalla risposta della conferma di un candidato l'esito nelle partite che hanno già spuntato la voce (il resto della
+ *  ricevuta lo valida `validaRicevuta`, che resta stretta). `illeggibile`: c'era, ma non ha la forma attesa (chi chiama lo dice). */
+function separaApplicazioni(x: unknown): { applicazioni: ApplicazioneStatoPartitaDto[] | undefined; illeggibile: boolean; resto: unknown } {
+  if (!x || typeof x !== 'object' || Array.isArray(x) || !('applicazioni' in x)) return { applicazioni: undefined, illeggibile: false, resto: x };
+  const { applicazioni, ...resto } = x as Record<string, unknown>;
+  const v = schemaApplicazioni.safeParse(applicazioni);
+  return { applicazioni: v.success ? v.data : undefined, illeggibile: !v.success, resto };
+}
 const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
 /** Come si chiama il gesto nelle notifiche: solo parole (che cosa si stava facendo), mai identificativi tecnici (numero di partita, operazione). */
 const scopeTesto = (g: GestoPartita) => g.bersaglio.etichetta;
@@ -350,7 +364,10 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
     // L'avanzamento della partita (A1) viaggia accanto alla ricevuta di ogni gesto (una decisione, una spunta, o un acquisto, un annullo, una pesca che
     // ha chiuso da solo l'ultima decisione aperta) ma non ne fa parte: si stacca SEMPRE, prima di validare, così non rende la ricevuta «non canonica»
     // e non si conserva nella scheda (una ripetizione del gesto non deve riapplicare una fotografia vecchia della partita).
-    const { avanzamento, resto } = separaAvanzamento(x);
+    const { avanzamento, resto: senzaAvanzamento } = separaAvanzamento(x);
+    // L13 (decisione 19): la conferma di un candidato su una voce già spuntata porta anche l'esito nelle partite (`applicazioni`): come
+    // l'avanzamento non fa parte della ricevuta (la ripetizione con lo stesso ID rilegge lo stato salvato, senza), si stacca e si notifica
+    const { applicazioni, illeggibile, resto } = p.tipo === 'decisione-effetto-voce' ? separaApplicazioni(senzaAvanzamento) : { applicazioni: undefined, illeggibile: false, resto: senzaAvanzamento };
     risposta = validaRicevuta(resto, g);
     const riuscita = { ...g, stato: 'riuscita' as const, ricevuta: risposta, ricevutaPersistita: true, errore: null, aggiornatoIl: new Date().toISOString() };
     try { cambia(riuscita); }
@@ -360,6 +377,9 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
     }
     segnalaMutazioneEffetti(g.partitaId);
     notifica('success', `${scopeTesto(g)}: ${recupero && p.tipo === 'spunta-acquisti' ? 'ricevute della transazione riscontrate; controlla lo stato attuale della spunta.' : 'operazione riuscita.'}`, 8000);
+    const esito = notificaApplicazioni(applicazioni);
+    if (esito) notifica(esito.tipo, esito.testo, esito.durata);
+    else if (illeggibile) notifica('warning', `${scopeTesto(g)}: l’esito nelle partite che hanno spuntato la voce non è leggibile; controlla la voce in ogni partita.`, 0);
     // Qualunque gesto su una partita può averla fatta avanzare (alla sera, al giorno dopo): con l'esito nella risposta si applica; senza, nel recupero
     // (ricevuta ripetuta dopo una risposta persa) e sempre dopo una decisione, si rilegge la partita e si confronta con quella di prima del gesto.
     // Non fallisce mai: il gesto è già registrato.

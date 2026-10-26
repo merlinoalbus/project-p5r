@@ -322,8 +322,33 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   return { articoli: valutati.slice(0, 300), totale: valutati.length };
 }
 
-/** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
-export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string): ArticoloDto {
+/**
+ * L13 (decisione 4): la disponibilità di un articolo nello stato dato (per la scelta fra i set alternativi di una voce: lo stato al giorno della
+ * voce, `statoAlMomento`), con la stessa regola di `impostaAcquisto` (listino condiviso, presenza del negozio nella sua sede, condizioni
+ * dell'articolo). null se l'articolo non c'è.
+ */
+export function disponibilitaArticoloNelloStato(articoloChiave: string, st: StatoDisponibilita): ReturnType<typeof disponibilitaArticolo> | null {
+  const listini = lettureListiniCondivisi();
+  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloDelListino(articoloChiave, listini)) as RigaArticolo | undefined;
+  if (!riga) return null;
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(riga.negozio_chiave) as RigaNegozio | undefined;
+  return negozio ? disponibilitaArticolo(conSede(riga, negozioNellaSede(negozio, undefined, listini)), st) : null;
+}
+
+/** Le opzioni di `impostaAcquisto` per i gesti che non sono la pagina del negozio (gli effetti di stato di una voce del Diario). */
+export interface OpzioniAcquisto {
+  /** L13 (decisione 4): lo stato in cui valutare la disponibilità, se non è quello di adesso (la spunta di una voce valuta il set scelto fra
+   *  alternative al giorno della voce); senza, quello corrente della partita. */
+  st?: StatoDisponibilita;
+  /** L13 (decisione 19): solo per l'effetto «articolo» di una voce GIÀ spuntata, applicato al salvataggio della guida o approvato dall'elenco
+   *  della partita (`effettiDiStatoService.applicaUnEffettoDiStato`): la voce spuntata attesta l'acquisto nel suo giorno, e la disponibilità
+   *  (per esempio il panino che si vende solo il venerdì) non lo contraddice. La spunta normale e la pagina del negozio restano con il controllo. */
+  senzaDisponibilita?: boolean;
+}
+
+/** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. `opz`: vedi `OpzioniAcquisto` (la pagina del
+ *  negozio non ne passa: disponibilità nello stato corrente della partita). */
+export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string, opz: OpzioniAcquisto = {}): ArticoloDto {
   verificaPartita(partitaId);
   const listini = lettureListiniCondivisi();
   const canonica = articoloDelListino(articoloChiave, listini);
@@ -334,7 +359,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   // Togliere una spunta resta possibile anche da una scheda vecchia, dopo che la sede aggiuntiva è stata rimossa.
   const sedeDaUsare = !fatto && sede && sede !== negozio.sede_chiave && !listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede) ? undefined : sede;
   const r = conSede(riga, negozioNellaSede(negozio, sedeDaUsare, listini));
-  const st = statoDisponibilitaPartita(partitaId);
+  const st = opz.st ?? statoDisponibilitaPartita(partitaId);
   const catalogo = identitaArticoli([r]);
   const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
   const prodotto = articoloDto(r, new Set(), st, catalogo, ricevuti);
@@ -344,7 +369,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       fatto ? 'Per Aojiru registra una consumazione o collega una fonte: una nuova spunta non ne dichiara quantità o variante.'
         : 'Rimuovi la sola presenza storica dal riepilogo con anteprima e conferma. Le consumazioni restano distinte.', { articolo: articoloChiave });
   }
-  if (fatto && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
+  if (fatto && !opz.senzaDisponibilita && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);

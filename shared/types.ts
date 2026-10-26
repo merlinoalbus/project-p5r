@@ -29,7 +29,7 @@ import type { CompletamentoPalazzo } from './completamentoGuida.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 import type { StatoAcquistiArticoloDto } from './acquisti.js';
-import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce } from './effettiVoce.js';
+import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatoEffettoDiStatoDto, ApplicazioneStatoPartitaDto } from './effettiVoce.js';
 
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
  *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
@@ -1330,6 +1330,10 @@ export interface DialogoVoceDto {
   scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
 }
 
+/** Una cosa che la spunta di una voce ha applicato e che togliendola si annulla: `testo` in parole, coi nomi («Persona registrata nel compendio:
+ *  Pixie», «Paga del turno: … · Entrati ¥3.000 nel saldo»), `applicatoIl` il momento (ISO). `id` è stabile fra una lettura e l'altra. */
+export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
+
 export interface AzionePercorsoDto {
   /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
@@ -1359,6 +1363,21 @@ export interface AzionePercorsoDto {
   effettiVoce?: StatoEffettiVoceDto;
   /** Ricevute del nuovo formato, separate dalla fotografia legacy della spunta. */
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
+  /** 2026-10-26 (richiesta dell'utente: «mi serve sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck
+   *  della casella. ma una volta annullata l'informazione non mi è più utile»): ciò che togliendo la spunta della voce si annulla davvero,
+   *  già in parole e con il momento. Lo scrive il server (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen
+   *  mossi; non c'è ciò che togliendo la spunta resta (letture, proposte «Applica» aperte o scartate, stati tenuti da un'altra voce spuntata,
+   *  consumazioni e pesche tenute da un'altra fonte), né le ricevute annullate, illeggibili, tecniche o che non hanno dato niente.
+   *  `ricevuteEffetti` resta intero (lo usano le verifiche dei gesti). Assente se la voce non è spuntata o non ha applicato niente. */
+  applicatoDallaSpunta?: ApplicatoDallaSpuntaDto[];
+  /** L13 (decisione 19): gli effetti di stato della voce spuntata che NON valgono nella partita: «da approvare» (nell'elenco della partita) o
+   *  «non applicato» (tolto dall'elenco con «Non applicare», o un articolo che al momento della spunta non si vendeva). Quelli segnati sono già
+   *  in `applicatoDallaSpunta` (se togliendo la spunta si annullano), quelli che erano già veri non si dicono (non informano), e gli articoli in
+   *  alternativa non scelti non mancano (la spunta ne ha scelto uno, o nessuno). La finestra della voce li mostra a parte. Assente se non ce n'è. */
+  statiNonApplicati?: StatoEffettoDiStatoDto[];
+  /** L13 (decisione 19): solo nella risposta del salvataggio della voce, che cosa hanno fatto gli effetti di stato aggiunti, cambiati o tolti
+   *  nelle partite che hanno già spuntato la voce (la finestra della voce lo notifica). Assente se non è cambiato nessun effetto di stato. */
+  applicazioniEffetti?: ApplicazioneStatoPartitaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
@@ -1462,7 +1481,16 @@ export interface ElenchiAzioneDto {
  */
 export interface ElenchiEffettiVoceDto {
   /** Articoli dei negozi (l'Aojiru ha il suo effetto e non c'è): `chiave` è «negozio/articolo». */
-  articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null }>;
+  articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null;
+    /** L13: l'articolo è nascosto nel catalogo (per esempio il vecchio articolo unico delle televendite): resta per il nome, non si propone. */
+    nascosto?: true;
+    /** L13 (decisione 4): gli articoli con cui non si compra insieme (le sue condizioni «non: articolo ottenuto», in tutte e due le direzioni). */
+    incompatibili?: string[];
+    /** L13: il giorno «MM-GG» in cui solo si compra, se le sue condizioni lo limitano a un giorno (i set delle televendite). */
+    giorno?: string;
+    /** L13 (decisione 4): che cosa contiene (le righe di `ricompensa_oggetto` dell'articolo), se il catalogo lo dice. */
+    contenuto?: Array<{ nome: string; quantita: number | null }>;
+  }>;
   /** Domande in classe, esami e quiz: `id` è il numero che l'effetto «domanda» cita. */
   domande: Array<{ id: number; giorno: string; testo: string; tipo: string }>;
   cruciverba: Array<{ data: string; indizio: string }>;
@@ -3434,7 +3462,7 @@ export interface ProgressiPartitaDto {
     manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }>;
     /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
     daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
-  /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
+  /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[];
     /** L13: gli esiti dichiarati dall'attività con la disponibilità nella partita: il + apre la scelta dell'esito (null se non ne dichiara). */
     esiti: EsitiAttivitaDto | null }>;

@@ -73,6 +73,14 @@ export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: D
   registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ×1,5.` : 'I punti di questa Dote valgono ×1,5 finché non la spegni.'}`, { dote, giorno: oggi, voce: voceUid });
 }
 
+/** 2026-10-26 (le ricevute della spunta): la Fortuna che la spunta di questa voce ha acceso ed è ancora in vigore (la riga è della voce: si
+ *  toglie col cambio di giorno o con un'altra accensione), cioè quella che togliere la spunta spegne. Sola lettura. */
+export function fortunaAccesaDallaVoce(partitaId: number, voceUid: string): { dote: DoteChiave; accesoIl: string } | null {
+  const riga = prepared('SELECT dote, giorno, acceso_il FROM utente.fortuna_partita WHERE partita_id = ? AND da_voce = ?').get(partitaId, voceUid) as { dote: string; giorno: string | null; acceso_il: string } | undefined;
+  // come `leggiFortuna`, per sicurezza: è in vigore solo la riga del giorno di gioco corrente (una scaduta non si dice «per il resto del giorno»)
+  return riga && eDote(riga.dote) && riga.giorno === giornoDellaPartita(partitaId) ? { dote: riga.dote, accesoIl: riga.acceso_il } : null;
+}
+
 /** Togliendo la spunta della voce che l'aveva accesa, la Fortuna torna com'era (accesa su un'altra Dote lo stesso giorno, oppure spenta). */
 export function spegniFortunaDaVoce(partitaId: number, voceUid: string): void {
   const riga = prepared('SELECT dote, prima_json FROM utente.fortuna_partita WHERE partita_id = ? AND da_voce = ?').get(partitaId, voceUid) as { dote: string; prima_json: string | null } | undefined;

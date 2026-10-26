@@ -26,6 +26,7 @@ import { httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
+import { NESSUNA_NOTA, simboliNote } from '../../shared/note.js';
 
 const numeroReceipt = z.number().finite();
 const chiaveReceipt = z.string().min(1);
@@ -180,12 +181,12 @@ function descriviIncontro(i: IncontroConfidenteDto): string {
 
 /** La frase di ciò che la spunta ha fatto, per lo storico. Le Doti sono quelle che il gioco dà, da segnare a mano. */
 export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
-  // L13: «nessuna nota» scelta alla spunta per una Dote a valori possibili si dice, non si propone
-  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: nessuna nota (scelta alla spunta)` : `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''}${d.scelta ? ', scelte alla spunta' : ''})` : ''} da segnare nelle Doti`);
+  // L13: «nessuna ♪» scelta alla spunta per una Dote a valori possibili si dice, non si propone
+  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)` : `${d.nome} +${d.delta}${d.note ? ` (${simboliNote(d.note)}${d.cinema ? ' + Anima da cineasta' : ''}${d.scelta ? ', scelte alla spunta' : ''})` : ''} da segnare nelle Doti`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${l.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
   for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · esito ${t.esito.nome}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
-  if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${e.confidente.noteRisposta} ${e.confidente.noteRisposta === 1 ? 'nota' : 'note'}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
+  if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   return parti.join(', ');
 }

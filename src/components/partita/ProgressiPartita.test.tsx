@@ -7,6 +7,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ProgressiPartita } from './ProgressiPartita';
 import type { ProgressiPartitaDto } from '../../types';
+import { conNote } from '../../../test/note';
 
 const { getProgressiPartita, impostaEventoStoria, impostaAttivitaSvolta, impostaPuntiNegozio } = vi.hoisted(() => ({
   getProgressiPartita: vi.fn(), impostaEventoStoria: vi.fn(), impostaAttivitaSvolta: vi.fn(), impostaPuntiNegozio: vi.fn(),
@@ -24,7 +25,7 @@ const dati: ProgressiPartitaDto = {
   ],
   attivita: [
     { chiave: 'biliardo', nome: 'Biliardo', tipo: 'mini-gioco', volte: 1, effettiTurno: [], esiti: null },
-    { chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', tipo: 'lavoro', volte: 0, effettiTurno: ['1° turno: Gentilezza, 2 note', 'Dal 2° turno: Gentilezza, 2 note'], esiti: null },
+    { chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', tipo: 'lavoro', volte: 0, effettiTurno: ['1° turno: Gentilezza ♪♪', 'Dal 2° turno: Gentilezza ♪♪'], esiti: null },
   ],
   puntiNegozio: [{ negozio: 'vestiti-usati-kichijoji', nome: 'Vestiti usati', programma: 'Punti del negozio', unita: 'punti', punti: 20 }],
   rangoCliente: [{ negozio: 'tanaka-affari-loschi', nome: 'Affari loschi di Tanaka', programma: 'Grado cliente', spesa: 12000, rango: { chiave: 'nero', nome: 'Nero' }, prossimo: { chiave: 'oscuro', nome: 'Oscuro', spesa: 50000 } }],
@@ -70,7 +71,7 @@ it('un lavoro dice che cosa dà ogni turno, e il + ricorda le Doti da segnare a 
   const { notifica } = await import('../../stores/notificationStore');
   render(<MemoryRouter><ProgressiPartita partitaId={1} /></MemoryRouter>);
   const attivita = await screen.findByRole('region', { name: 'Attività svolte' });
-  expect(within(attivita).getByText('1° turno: Gentilezza, 2 note · Dal 2° turno: Gentilezza, 2 note')).toBeInTheDocument();
+  expect(within(attivita).getByText(conNote('Ogni turno: 1° turno: Gentilezza ♪♪ · Dal 2° turno: Gentilezza ♪♪'))).toBeInTheDocument();
   expect(within(attivita).getByText(/ti ricorda le Doti che dà, da segnare tu nella scheda Doti/)).toBeInTheDocument();
   impostaAttivitaSvolta.mockResolvedValue({ ...dati, daSegnare: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }] });
   await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });

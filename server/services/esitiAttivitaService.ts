@@ -20,10 +20,12 @@ import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { dotiEsitoConPunti, leggiEsitiAttivita, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
 import { nomeDote } from '../../shared/doti.js';
+import { simboliPossibili } from '../../shared/note.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
+import { scelteAlternativeDellaVoce } from './alternativeAcquistiService.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
@@ -108,18 +110,25 @@ function richiedeScelta(e: EffettoVoceDto['effetto']): boolean {
   return esitiDellAttivita(e.attivita)?.esiti?.modo === 'scelta';
 }
 
-/** Le scelte che la spunta di una voce chiede, con gli esiti disponibili al giorno della voce (per il Diario). */
+/** Le scelte che la spunta di una voce chiede, con gli esiti disponibili al giorno della voce (per il Diario). L13 (decisione 4): anche
+ *  la scelta fra gli articoli in alternativa (Set A o Set B, o nessuno), al posto del primo effetto del gruppo: tutto nell'ordine degli effetti. */
 export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string; fascia: 'giorno' | 'sera' }, effetti: readonly EffettoVoceDto[]): SceltaEsitoVoceDto[] {
   const da = effetti.filter((e) => richiedeScelta(e.effetto));
-  if (!da.length) return [];
-  const st = statoAlMomento(partitaId, momento);
-  return da.map(({ uid, effetto: e }): SceltaEsitoVoceDto => {
-    if (e.tipo === 'dote') return { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note };
+  const articoli = effetti.filter((e) => e.effetto.tipo === 'articolo');
+  if (!da.length && articoli.length < 2) return [];
+  // lo stato si calcola una volta sola e solo se serve (una voce con più articoli senza alternative non lo chiede)
+  let calcolato: StatoDisponibilita | undefined;
+  const stato = (): StatoDisponibilita => (calcolato ??= statoAlMomento(partitaId, momento));
+  const esiti = da.map(({ uid, effetto: e }): { posizione: number; scelta: SceltaEsitoVoceDto } => {
+    const st = stato();
+    const posizione = effetti.findIndex((x) => x.uid === uid);
+    if (e.tipo === 'dote') return { posizione, scelta: { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note } };
     const t = e as Extract<EffettoVoceDto['effetto'], { tipo: 'turno' }>;
     const a = esitiDellAttivita(t.attivita)!;
     const elenco = esitiDto(a.esiti!, st).esiti;
-    return { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato: t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null, esiti: elenco };
+    return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato: t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null, esiti: elenco } };
   });
+  return [...esiti, ...scelteAlternativeDellaVoce(effetti, stato)].sort((a, b) => a.posizione - b.posizione).map((x) => x.scelta);
 }
 
 /**
@@ -145,7 +154,7 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
         if (opz.storico) throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: le note si scelgono alla spunta. Togli e rimetti la spunta della voce per sceglierle.`);
         throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: scegli quante note hai ottenuto (o «nessuna») prima di spuntare.`);
       }
-      if (s.note !== 0 && !e.possibili.includes(s.note)) throw httpErrors.badRequest('note-non-possibili', `${nomeDote(e.dote)}: le note possibili sono ${e.possibili.join(', ')}.`);
+      if (s.note !== 0 && !e.possibili.includes(s.note)) throw httpErrors.badRequest('note-non-possibili', `${nomeDote(e.dote)}: le note possibili sono ${simboliPossibili(e.possibili)}.`);
       out.set(uid, { tipo: 'dote', note: s.note });
     } else if (e.tipo === 'turno') {
       const a = esitiDellAttivita(e.attivita);

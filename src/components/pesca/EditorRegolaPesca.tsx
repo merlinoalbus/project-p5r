@@ -7,6 +7,7 @@ import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { TestoNote } from '../shared/TestoNote';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -81,7 +82,7 @@ function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: Regol
       <fieldset disabled={disabilitato} className="m-0 min-w-0 space-y-3 border-0 p-0">
         <label className="flex flex-col gap-1">Nome<input className="form-input touch" value={nome} maxLength={200} onChange={e => { cambia(); setNome(e.target.value); }} /></label>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {([['giorno', 'Quota di giorno (yen)'], ['sera', 'Quota di sera (yen)'], ['esca', 'Costo esca speciale (punti pesca)'], ['base', 'Perizia: punti interni base per 1 nota'], ['bonus', 'Fortuna: punti interni aggiuntivi']] as const).map(([k, etichetta]) => <label key={k} className="flex flex-col gap-1">{etichetta}<input type="number" className="form-input touch" min={0} max={1000000} step={1} value={numeri[k]} onChange={e => { cambia(); setNumeri(n => ({ ...n, [k]: e.target.value })); }} /></label>)}
+          {([['giorno', 'Quota di giorno (yen)'], ['sera', 'Quota di sera (yen)'], ['esca', 'Costo esca speciale (punti pesca)'], ['base', 'Perizia: punti interni base per ♪'], ['bonus', 'Fortuna: punti interni aggiuntivi']] as const).map(([k, etichetta]) => <label key={k} className="flex flex-col gap-1"><span><TestoNote testo={etichetta} /></span><input type="number" className="form-input touch" min={0} max={1000000} step={1} value={numeri[k]} onChange={e => { cambia(); setNumeri(n => ({ ...n, [k]: e.target.value })); }} /></label>)}
         </div>
         <label className="flex flex-col gap-1">Fonti della regola (un indirizzo per riga)<textarea className="form-input min-h-24" value={fonti} onChange={e => { cambia(); setFonti(e.target.value); }} /></label>
         {vie.map((v, i) => <fieldset key={i} className="min-w-0 space-y-2 rounded border border-border p-3">

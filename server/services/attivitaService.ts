@@ -38,6 +38,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
 import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { simboliNote } from '../../shared/note.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -473,7 +474,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     const registrato = richiesto >= totale;
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
-      const dote = doti.length ? ` · Dote: ${doti.map((d) => `${d.dote} (${d.note} ${d.note === 1 ? 'nota' : 'note'})`).join(', ')}` : '';
+      const dote = doti.length ? ` · Dote: ${doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
@@ -632,6 +633,16 @@ function yenDelTurno(riga: Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | '
 export function articoloPagatoDalTurno(attivita: string, esito: string): string | null {
   const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
   return riga ? yenDelTurno(riga, { chiave: esito, nome: '' })?.articolo ?? null : null;
+}
+/**
+ * L13 (decisione 19): gli yen della sfida di un turno già registrato (l'esito con il suo nome), con la stessa regola di `yenDelTurno`. Per la
+ * voce già spuntata il cui articolo, che pagava la sfida al posto del turno, viene tolto o cambiato nella guida: allora la sfida la paga il turno,
+ * come farebbe la spunta (`motoreDiario.riallineaStatiDellaVoce`). Null se il turno non paga un articolo.
+ */
+export function yenDellaSfidaDelTurno(attivita: string, esito: { chiave: string; nome: string }): { importo: number; motivo: string; articolo: string } | null {
+  const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
+  const y = riga ? yenDelTurno(riga, esito) : null;
+  return y?.articolo ? { importo: y.importo, motivo: y.motivo, articolo: y.articolo } : null;
 }
 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è

@@ -18,6 +18,7 @@ import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 import { NOME_TIPO_CATALOGO, tipoCatalogoDi, type TipoModulo } from '../../utils/catalogo';
 import { MODULI, type Dati } from './moduli';
 import { jsonDi, jsonSenzaPerdite } from './moduli/base';
@@ -224,7 +225,8 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
             {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
           </div>}
         </>}
-        {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error-testo">{erroreSalvataggio} La finestra resta aperta.</p>}
+        {/* TestoNote: il messaggio del server può portare note come ♪ («Doti da ♪ a ♪♪♪»), da leggere a parole */}
+        {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error-testo"><TestoNote testo={erroreSalvataggio} /> La finestra resta aperta.</p>}
         {!regoleValide && <p role="alert" className="m-0 testo-13 text-error-testo">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {modulo.conVerificato

@@ -8,16 +8,20 @@
 // (le condizioni dell'esito o dell'articolo della sfida, per esempio il rango) si vedono con il motivo ma non si toccano: il server li rifiuta.
 // Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (L13, decisione 18: registrando il turno si scala da solo dal saldo,
 // mai sotto zero) e i premi in parole.
+// L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite) chiedono quale si è comprato, o «Nessuno»
+// (`SceltaAcquistoAlternativo`), con le stesse regole: con una sola scelta il tocco spunta, con più scelte si conferma.
 // ============================================================
 
 import { useId, useState } from 'react';
-import type { EsitoDisponibileDto, SceltaEsitoSpunta, SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { fraseDotiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { noteAParole, simboliNote, testoNoteAParole } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/letture';
+import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
 
-/** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪ (2 punti ciascuna)» → qui una per una, «Coraggio ♪ · 2». */
-const dotiTesto = (e: EsitoDisponibileDto): string => e.doti.length ? e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') : 'nessuna Dote';
+/** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
+const dotiTesto = (e: EsitoDisponibileDto): string => fraseDotiEsito(e.doti);
 
 /** Gli esiti raggruppati per prova (il gruppo), nell'ordine dichiarato. */
 function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: string | null; esiti: EsitoDisponibileDto[] }> {
@@ -47,7 +51,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
                   aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
                   aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
                   title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
-                  aria-label={`${e.nome}: ${dotiTesto(e)}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
+                  aria-label={`${e.nome}: ${testoNoteAParole(dotiTesto(e))}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
                   <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
                   <span className="testo-12 text-text-secondary">{dotiTesto(e)}{e.premi ? ` · ${e.premi}` : ''}</span>
                   {!e.disponibile && <span id={idMotivo} className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
@@ -73,11 +77,15 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla }:
   );
 }
 
-type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 };
+type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null };
 
-/** La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile) o le note proposte. */
+/** La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile), le note proposte o il set già comprato nella partita. */
 function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore | undefined> {
-  return Object.fromEntries(scelte.map((s) => [s.effettoUid, s.tipo === 'dote' ? { tipo: 'dote', note: s.preselezionato } : s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined]));
+  return Object.fromEntries(scelte.map((s): [string, Valore | undefined] => {
+    if (s.tipo === 'dote') return [s.effettoUid, { tipo: 'dote', note: s.preselezionato }];
+    if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
+    return [s.effettoUid, s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined];
+  }));
 }
 
 /**
@@ -92,19 +100,27 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
   const unica = scelte.length === 1;
   const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
     const x = v[s.effettoUid]!;
-    return x.tipo === 'dote' ? { effettoUid: s.effettoUid, tipo: 'dote', note: x.note } : { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
+    if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
+    if (x.tipo === 'alternativa') return { effettoUid: s.effettoUid, tipo: 'alternativa', scelto: x.scelto };
+    return { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
   });
   const imposta = (uid: string, v: Valore) => {
     if (unica) { onConferma(costruisci({ [uid]: v })); return; }
     setValori((x) => ({ ...x, [uid]: v }));
   };
   const complete = scelte.every((s) => valori[s.effettoUid] !== undefined);
+  // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
+  // acquisti con esiti o note: «scelte»; senza acquisti resta «esiti», come prima
+  const acquisti = scelte.filter((s) => s.tipo === 'alternativa').length;
+  const parola = acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
+    : acquisti === scelte.length ? { gruppo: 'Acquisti da scegliere per la spunta', pulsante: 'Spunta con questi acquisti' }
+      : { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' };
   const conferma = () => {
     if (!complete) return;
     onConferma(costruisci(valori));
   };
   return (
-    <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label="Esiti da scegliere per la spunta">
+    <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label={parola.gruppo}>
       {scelte.map((s) => {
         const v = valori[s.effettoUid];
         if (s.tipo === 'dote') return (
@@ -112,10 +128,14 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
             <span className="w-full text-text-secondary">{s.doteNome}: quante note hai ottenuto?</span>
             {s.possibili.map((n) => (
               <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === n}
-                onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>
+                onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
             ))}
             <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
           </span>
+        );
+        // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) quello comprato, o «Nessuno»
+        if (s.tipo === 'alternativa') return (
+          <SceltaAcquistoAlternativo key={s.effettoUid} s={s} scelto={v?.tipo === 'alternativa' ? v.scelto : undefined} occupato={occupato} onScegli={(uid) => imposta(s.effettoUid, { tipo: 'alternativa', scelto: uid })} />
         );
         return (
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Esito: ${s.attivitaNome}`}>
@@ -126,7 +146,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         );
       })}
       <span className="flex flex-wrap gap-1.5">
-        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Spunta con questi esiti" disabled={occupato || !complete} onClick={conferma} />}
+        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={occupato || !complete} onClick={conferma} />}
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
       </span>
     </span>
