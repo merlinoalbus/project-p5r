@@ -18,9 +18,11 @@
 // troncata); il testo intero, solo quando il titolo lo tronca, è il primo paragrafo del corpo, che scorre, e descrive la finestra
 // per i lettori di schermo (`aria-describedby`).
 //
-// L13 (decisione 19): nella stessa finestra, sotto le ricevute, gli effetti di stato della spunta (articoli, Persona, trofei, eventi…) con il loro
-// stato nella partita: «segnato nella partita», «era già vero», «da approvare» (nell'elenco della partita), «non applicato». Il numero sul
-// pulsante conta ricevute ed effetti di stato insieme; senza né le une né gli altri il pulsante non c'è.
+// L13 (decisione 19): nella stessa finestra, sotto le ricevute, gli effetti di stato della voce (articoli, Persona, trofei, eventi…) con il loro
+// stato nella partita: «segnato nella partita», «era già vero», «da approvare» (nell'elenco della partita), «non applicato». Il titolo dice
+// «Effetti di stato nella partita», non «segnati dalla spunta», perché non tutti lo sono. Il server li manda solo se almeno uno non è «era già
+// vero» (con tutti già veri non c'è niente da dire). Il numero sul pulsante conta ricevute ed effetti di stato insieme; senza né le une né gli
+// altri il pulsante non c'è.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -45,6 +47,9 @@ function inizioDellaVoce(voce: string): { testo: string; troncata: boolean } {
   return { testo: `${caratteri.slice(0, CARATTERI_DELLA_VOCE).join('').trimEnd()}…`, troncata: true };
 }
 
+/** Il nome dell'elenco degli effetti di stato: segnati, già veri, da approvare o non applicati, nella partita. */
+const STATI_NELLA_PARTITA = 'Effetti di stato nella partita';
+
 /** Lo stato di un effetto di stato nella partita, a parole. */
 const STATO_EFFETTO: Record<StatoEffettoDiStatoDto['esito'], { testo: string; classe: string }> = {
   segnato: { testo: 'segnato nella partita', classe: 'text-success' },
@@ -60,7 +65,7 @@ export function RicevuteVoce({ ricevute = [], stati = [], voce }: { ricevute: re
   if (!ricevute.length && !stati.length) return null;
   const n = ricevute.length + stati.length;
   // con soli stati (nessuna ricevuta) la finestra si chiama come ciò che mostra
-  const nome = ricevute.length ? 'Ricevute della spunta' : 'Stati segnati dalla spunta';
+  const nome = ricevute.length ? 'Ricevute della spunta' : STATI_NELLA_PARTITA;
   const breve = `${nome} (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
@@ -84,8 +89,8 @@ export function RicevuteVoce({ ricevute = [], stati = [], voce }: { ricevute: re
           </ul>}
           {!!stati.length && <>
             {/* l'intestazione serve solo a separare dalle ricevute: senza ricevute lo dice già il titolo */}
-            {!!ricevute.length && <h3 className="m-0 mb-1.5 mt-3 testo-13 font-semibold">Stati segnati dalla spunta</h3>}
-            <ul className="m-0 flex list-none flex-col gap-1.5 p-0 testo-13" aria-label="Stati segnati dalla spunta">
+            {!!ricevute.length && <h3 className="m-0 mb-1.5 mt-3 testo-13 font-semibold">{STATI_NELLA_PARTITA}</h3>}
+            <ul className="m-0 flex list-none flex-col gap-1.5 p-0 testo-13" aria-label={STATI_NELLA_PARTITA}>
               {stati.map((s) => (
                 <li key={s.effettoUid} className="flex min-w-0 flex-wrap items-baseline gap-x-2">
                   <span className="min-w-0 break-words text-pretty">{s.testo}</span>

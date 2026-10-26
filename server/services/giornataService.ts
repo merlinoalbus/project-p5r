@@ -290,7 +290,11 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
-  const statiEffetti = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : statiEffettiDellaVoce(ctx.partita, fonte);
+  // «le etichette di testo devono essere visibili solo se hanno senso»: con tutti gli stati «era già vero» non c'è niente da dire (la spunta
+  // non ha cambiato niente e togliendola non cambia niente), e la voce non mostra né il pulsantino né l'elenco
+  const tuttiGiaVeri = (s: NonNullable<AzionePercorsoDto['statiEffetti']>) => s.every((x) => x.esito === 'gia-presente');
+  const statiLetti = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : statiEffettiDellaVoce(ctx.partita, fonte);
+  const statiEffetti = tuttiGiaVeri(statiLetti) ? [] : statiLetti;
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(statiEffetti.length ? { statiEffetti } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
@@ -703,11 +707,13 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
   const genere: GenereVoce = d.genere ?? genereDi(r);
   const fascia: FasciaGioco = d.fascia ?? fasciaDi(r);
   const { riferimento } = struttura(d, r);
-  getDb().transaction(() => {
+  // L13 (decisione 19): che cosa hanno fatto gli effetti di stato cambiati nelle partite che hanno già spuntato la voce, per la risposta
+  const applicazioniEffetti = getDb().transaction((): AzionePercorsoDto['applicazioniEffetti'] => {
+    let applicazioni: AzionePercorsoDto['applicazioniEffetti'] = undefined;
     if (d.effettiVoce) {
       if (!d.effettiVoce.revisioneEffettiAttesa) throw httpErrors.conflict('revisione-effetti-richiesta', 'Ricarica la fonte prima di modificare gli effetti.');
       if (genere !== 'azione' && d.effettiVoce.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
-      salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa });
+      applicazioni = salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa }).applicazioni;
     }
     if (genere !== 'azione' && genereDi(r) === 'azione') {
       // un'azione diventa evento: non si spunta più. Con effetti applicati in una partita no (andrebbero persi senza poterli
@@ -736,8 +742,10 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     }
     // R10-11f: se la voce cambia fascia o posto, l'ordine dei suoi eventi nel registro dei punti cambia e i Confidenti toccati si ricalcolano
     riallineaVoceNelRegistro(uid);
+    return applicazioni;
   })();
-  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  const dto = vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  return applicazioniEffetti?.length ? { ...dto, applicazioniEffetti } : dto;
 }
 
 /** Sposta una voce di un passo dentro la sua fascia (-1 su, +1 giù); ai bordi non cambia nulla. */

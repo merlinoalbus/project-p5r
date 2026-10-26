@@ -5,8 +5,10 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, segnaYenFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conCodaRipristinabile, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, segnaYenFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { conVoceDellaSpunta } from './storicoService.js';
+import { avanzaDopoChiusuraAutomatica, type PropostaDecisa } from './avanzamentoGiornataService.js';
+import { altraVoceHaLArticolo, sfideNonPagate, turnoHaPagatoLArticolo } from './sfideDellaVoce.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
 import { articoloPagatoDalTurno } from './attivitaService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
@@ -109,7 +111,7 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const statoVoce=prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid) as {prima_json:string}|undefined;
     if(!statoVoce)return null;
     const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
-    if(giaComprato&&!prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND tipo='articolo' AND chiave=? AND voce_uid<>?").get(p,x.articolo,uid))return null;
+    if(giaComprato&&!altraVoceHaLArticolo(p,x.articolo,uid))return null;
     // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
     const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
     const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
@@ -201,10 +203,15 @@ export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEf
     const id=nuovoUid();
     prepared('INSERT INTO main.operazione_effetti_voce(id,voce_uid,payload_json,prima_json,dopo_json,creata_il) VALUES(?,?,?,?,?,?)').run(id,uid,jsonCanonico(r),jsonCanonico(prima),jsonCanonico(nuovi),nowIso());
     scriviLista(uid,nuovi,prima.rawLegacy);
-    // L13 (decisione 19, «Subito al salvataggio»): gli effetti di stato aggiunti, cambiati o tolti valgono subito nelle partite che hanno la spunta
-    const applicazioni=partite.flatMap((p)=>riallineaStatiDellaVoce(p.partita_id,uid,cambi));
+    // L13 (decisione 19, «Subito al salvataggio»): gli effetti di stato aggiunti, cambiati o tolti valgono subito nelle partite che hanno la spunta.
+    // Gli yen che muovono si eseguono alla fine, prima ciò che rientra e poi ciò che esce (`conYenInOrdine`, come la spunta e il suo annullo)
+    const chiuse=new Map<number,PropostaDecisa[]>();
+    const applicazioni=conYenInOrdine(()=>partite.flatMap((p)=>riallineaStatiDellaVoce(p.partita_id,uid,cambi,(d)=>chiuse.set(p.partita_id,[...(chiuse.get(p.partita_id)??[]),d]))));
     for(const p of partite)for(const e of nuovi){const old=prima.effetti.find((x)=>x.uid===e.uid);if(!old||jsonCanonico(old.effetto)!==jsonCanonico(e.effetto))creaPropostaEffettoStorico(p.partita_id,uid,e.uid,old);}
     for(const p of partite)for(const e of nuovi)if(e.effetto.tipo==='acquisto')for(const id of e.effetto.sostituisceDoti)creaPropostaEffettoStorico(p.partita_id,uid,id);
+    // una proposta chiusa dal riallineamento (lo stato ora è segnato) può essere l'ultima decisione aperta del giorno: la partita avanza come dopo
+    // una decisione dell'utente (A1), valutato alla fine, con le proposte di questo salvataggio già scritte
+    for(const [p,decise] of chiuse)avanzaDopoChiusuraAutomatica(p,decise);
     return {...leggiEffettiVoce(uid),...(applicazioni.length?{applicazioni}:{})};
   })();
 }
@@ -245,22 +252,27 @@ export const fraseDelloStato=(e:EffettoDiStatoVoce):string=>fraseEffettoConNomi(
  * subito, con il «prima» registrato come alla spunta (togliendo la spunta si annullano come gli altri):
  *   - la versione di prima si annulla da sola (`annullaEffettoDiStato`: ciò che c'era già resta) e gli yen che aveva mosso tornano;
  *   - la nuova si applica (`applicaUnEffettoDiStato`, la stessa scrittura della spunta; l'articolo senza il controllo della disponibilità di adesso:
- *     la voce spuntata attesta l'acquisto nel suo giorno). Gli yen dell'articolo seguono la decisione 18: un articolo aggiunto adesso scala il
- *     prezzo; quello che cambia (per esempio le copie) segue la versione di prima: se i suoi yen erano già nel saldo da prima, restano tali;
- *   - la Fortuna vale solo il giorno della spunta: si accende se la partita è ancora a quel giorno, altrimenti non vale più;
+ *     la voce spuntata attesta l'acquisto nel suo giorno). Gli yen dell'articolo li decide `yenDellArticoloSuVoceSpuntata`, con le regole della
+ *     spunta (anche quando l'articolo risultava già comprato: un acquisto ripetuto segnato da un'altra voce si paga);
+ *   - un articolo tolto o cambiato che pagava la sfida di un turno della voce lascia la sfida al turno (`yenDelleSfideRimaste`);
+ *   - la Fortuna vale solo il giorno della spunta: si accende se la partita è ancora a quel giorno, altrimenti non vale più (e l'esito lo dice);
  *   - un effetto che il dominio rifiuta adesso (per esempio un invito senza le sue condizioni) non ferma il salvataggio della guida: la sua
- *     scrittura torna indietro (savepoint) e l'effetto entra nell'elenco da approvare della partita, con il motivo. Ogni altro errore annulla il salvataggio.
+ *     scrittura torna indietro (savepoint, con i movimenti di yen che aveva messo in coda) e l'effetto entra nell'elenco da approvare della
+ *     partita, con il motivo. Ogni altro errore annulla il salvataggio.
+ * Va chiamata dentro `conYenInOrdine`. `chiusa`: una proposta aperta della partita chiusa qui (per l'avanzamento valutato da chi chiama).
  */
-function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[]):ApplicazioneStatoPartitaDto[] {
+function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[],chiusa:(d:PropostaDecisa)=>void):ApplicazioneStatoPartitaDto[] {
   const out:ApplicazioneStatoPartitaDto[]=[];
   const partitaNome=(prepared('SELECT nome FROM utente.partita WHERE id=?').get(p) as {nome:string}|undefined)?.nome??`Partita ${p}`;
   const v=voce(uid),giornoPartita=(prepared('SELECT data_gioco FROM utente.partita WHERE id=?').get(p) as {data_gioco:string|null}|undefined)?.data_gioco??null;
-  const esito=(effettoUid:string,e:ApplicazioneStatoPartitaDto['esito'],testo:string)=>out.push({partitaId:p,partitaNome,effettoUid,esito:e,testo});
+  const esito=(effettoUid:string,e:ApplicazioneStatoPartitaDto['esito'],testo:string,motivo?:string)=>out.push({partitaId:p,partitaNome,effettoUid,esito:e,testo,...(motivo?{motivo}:{})});
+  // gli articoli tolti o cambiati che avevano mosso i loro yen: la sfida di un turno che pagavano torna al turno
+  const articoliRestituiti=new Set<string>();
   for(const c of cambi){
-    const causa={tipo:'voce' as const,chiave:`${uid}:${c.effettoUid}`};
+    const causa={tipo:'voce' as const,chiave:`${uid}:${c.effettoUid}`},decisa={voce_uid:uid,causa_tipo:'voce',causa_chiave:causa.chiave};
     // la nozione unica degli yen già nel saldo, letta sulla versione di prima PRIMA di annullarla (dopo, la sua riga non c'è più)
     const vecchioGiaNelSaldo=c.vecchio?.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:c.effettoUid,tipo:'articolo',chiave:null}]).has(c.effettoUid);
-    chiudiPropostePassato(p,uid,c.effettoUid);
+    if(chiudiPropostePassato(p,uid,c.effettoUid))chiusa(decisa);
     if(c.vecchio){
       const vecchio=c.vecchio;
       // c'era davvero qualcosa da annullare? (un effetto mai applicato, come un invito rifiutato o una Fortuna fuori giorno, non si «toglie»)
@@ -271,36 +283,69 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
           if(c1&&(!c.nuovo||c.nuovo.effetto.tipo!=='fortuna'))spegniFortunaDaVoce(p,uid);
         }
         else c1=annullaEffettoDiStato(p,uid,c.effettoUid);
-        return restituisciYenAutomatico(p,causa,'effetto-tolto')!==null||c1;
+        // dentro `conYenInOrdine` la restituzione va in coda: se c'era un movimento lo dice il registro, letto prima
+        const aveva=yenAutomaticoAttivo(p,causa);
+        restituisciYenAutomatico(p,causa,'effetto-tolto');
+        if(aveva&&vecchio.tipo==='articolo')articoliRestituiti.add(vecchio.articolo);
+        return aveva||c1;
       }))();
-      if(!c.nuovo){if(tolto)esito(c.effettoUid,'annullato',vecchio.tipo==='fortuna'?'Fortuna della voce spenta':`Tolto: ${fraseDelloStato(vecchio)}`);continue;}
+      if(!c.nuovo){if(tolto)esito(c.effettoUid,'annullato',vecchio.tipo==='fortuna'?fraseEffettoConNomi(vecchio,nomiFraseEffetto()):fraseDelloStato(vecchio));continue;}
     }
     const nuovo=c.nuovo!,e=nuovo.effetto;
     if(e.tipo==='fortuna'){
       if(giornoPartita===v.data){accendiFortunaDaVoce(p,uid,e.dote);esito(c.effettoUid,'segnato',fraseEffettoConNomi(e,nomiFraseEffetto()));}
-      else esito(c.effettoUid,'fortuna-non-valida','La Fortuna vale solo il giorno della spunta: in questa partita quel giorno è passato.');
+      else esito(c.effettoUid,'fortuna-non-valida',fraseEffettoConNomi(e,nomiFraseEffetto()),'la Fortuna vale solo il giorno della spunta, e in questa partita quel giorno è passato');
       continue;
     }
+    // decisione 18, la nozione unica per effetto (letta PRIMA di scrivere la riga nuova): l'articolo che corregge lo stesso effetto (stesso uid:
+    // copie, articolo) segue la versione di prima, perché è lo stesso acquisto della stessa spunta, e il saldo di una spunta di prima degli yen
+    // automatici lo conteneva già com'era nel gioco; un effetto nuovo (o che prima non era un articolo) la legge su di sé (`effettiConYenGiaNelSaldo`:
+    // aggiunto adesso scala; la fonte convertita di una spunta di prima no)
+    const giaNelSaldo=e.tipo==='articolo'&&(c.vecchio?.tipo==='articolo'?vecchioGiaNelSaldo:effettiConYenGiaNelSaldo(p,uid,[{uid:c.effettoUid,tipo:'articolo',chiave:null}]).has(c.effettoUid));
     try {
-      const r=getDb().transaction(()=>conVoceDellaSpunta(uid,()=>{
+      const r=getDb().transaction(()=>conCodaRipristinabile(()=>conVoceDellaSpunta(uid,()=>{
         const fatto=applicaUnEffettoDiStato(p,uid,c.effettoUid,e,{senzaDisponibilita:true});
-        if(fatto==='segnato'&&e.tipo==='articolo'){
-          // decisione 18: cambiando un articolo i cui yen erano già nel saldo da prima, la versione nuova resta già nel saldo (niente si scala)
-          if(vecchioGiaNelSaldo)segnaYenFuoriRegistro(p,causa,'stato-di-prima');
-          muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,nuovo)]);
-        }
+        if(e.tipo==='articolo')yenDellArticoloSuVoceSpuntata(p,uid,nuovo,giaNelSaldo);
         // un'eventuale proposta di raccordo aperta della versione di prima non è più dovuta: lo stato è segnato adesso
-        prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,causa.chiave);
+        if(prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,causa.chiave).changes>0)chiusa(decisa);
         return fatto;
-      }))();
-      esito(c.effettoUid,r==='gia-presente'?'gia-presente':'segnato',r==='gia-presente'?`Era già vero nella partita: ${fraseDelloStato(e)}`:fraseDelloStato(e));
+      })))();
+      esito(c.effettoUid,r==='gia-presente'?'gia-presente':'segnato',fraseDelloStato(e));
     } catch(err) {
       if(!(err instanceof HttpError)||err.status>=500)throw err;
       creaPropostaEffettoStorico(p,uid,c.effettoUid,undefined,{passato:{descrizione:fraseDelloStato(e),motivo:`Non applicato al salvataggio della voce: ${err.message}`}});
-      esito(c.effettoUid,'da-approvare',`Da approvare nella partita: ${err.message}`);
+      esito(c.effettoUid,'da-approvare',fraseDelloStato(e),err.message);
     }
   }
+  yenDelleSfideRimaste(p,uid,articoliRestituiti);
   return out;
+}
+/**
+ * L13 (decisioni 2, 18 e 19): gli yen di un articolo appena segnato su una voce GIÀ spuntata (salvataggio della guida, approvazione dell'elenco
+ * del passato), con le regole della spunta (`yenDellEffetto` per ogni esito, anche «era già vero»: un acquisto ripetuto segnato da un'altra voce
+ * spuntata si paga, lo stesso acquisto già comprato no), e in più:
+ *   - la sfida di un turno della voce che compra lo stesso articolo ha già mosso i suoi yen (`turnoHaPagatoLArticolo`): l'articolo non scala
+ *     niente, lo stesso acquisto si paga una volta (alla spunta lo stesso caso lo risolve `scartaYenDeiTurni`, a favore dell'articolo);
+ *   - `giaNelSaldo`: i suoi yen erano già nel saldo da prima degli yen automatici (la nozione unica `effettiConYenGiaNelSaldo`, letta da chi
+ *     chiama prima di scrivere): resta fuori registro, e rispuntando la voce non si scala (`segnaYenFuoriRegistro`).
+ */
+function yenDellArticoloSuVoceSpuntata(p:number,uid:string,e:EffettoVoceDto,giaNelSaldo:boolean):void {
+  if(e.effetto.tipo!=='articolo')return;
+  if(turnoHaPagatoLArticolo(p,uid,e.effetto.articolo))return;
+  if(giaNelSaldo){segnaYenFuoriRegistro(p,{tipo:'voce',chiave:`${uid}:${e.uid}`},'stato-di-prima');return;}
+  muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,e)]);
+}
+/**
+ * L13 (decisione 2): l'articolo tolto o cambiato pagava la sfida di un turno della stessa voce (alla spunta il turno non aveva mosso i suoi yen,
+ * `scartaYenDeiTurni`): se adesso nessun articolo della voce la paga, la paga il turno, come farebbe la spunta rifatta. Solo i turni con il loro
+ * effetto e i cui yen non erano già nel saldo da prima (`sfideNonPagate`). I movimenti restano della voce (togliendo la spunta tornano).
+ */
+function yenDelleSfideRimaste(p:number,uid:string,articoli:ReadonlySet<string>):void {
+  for(const articolo of articoli){
+    const pagatoDaArticolo=leggiEffettiVoce(uid).effetti.some((x)=>x.effetto.tipo==='articolo'&&x.effetto.articolo===articolo&&yenAutomaticoAttivo(p,{tipo:'voce',chiave:`${uid}:${x.uid}`}));
+    if(pagatoDaArticolo)continue;
+    conYenDellaVoce(uid,()=>{for(const s of sfideNonPagate(p,uid,articolo))muoviYenAutomatico(p,{tipo:'turno',chiave:`${s.attivita}:${s.ordine}`},s.importo,s.motivo,uid);});
+  }
 }
 export function copiaEffettiVoce(daUid:string,aUid:string):void {
   if(!getDb().inTransaction)throw new Error('La copia richiede la transazione della voce.');
@@ -624,14 +669,13 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
 function applicaStatoDelPassato(p:number,uid:string,e:EffettoVoceDto&{effetto:EffettoDiStatoVoce},proposta:PropostaPartitaDto):void {
   if(proposta.dati.passato!==true)throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
   if(prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid))throw httpErrors.conflict('effetto-gia-applicato','Questo effetto è già segnato nella partita.');
-  const causa={tipo:'voce' as const,chiave:`${uid}:${e.uid}`};
+  // la nozione unica, letta PRIMA di scrivere la riga dello stato (dopo, la riga nata adesso direbbe «applicato dopo»)
   const giaNelSaldo=e.effetto.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:e.uid,tipo:'articolo',chiave:null}]).has(e.uid);
   conVoceDellaSpunta(uid,()=>{
-    const fatto=applicaUnEffettoDiStato(p,uid,e.uid,e.effetto,{senzaDisponibilita:true});
-    if(fatto==='segnato'&&e.effetto.tipo==='articolo'){
-      if(giaNelSaldo)segnaYenFuoriRegistro(p,causa,'stato-di-prima');
-      muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,e)]);
-    }
+    applicaUnEffettoDiStato(p,uid,e.uid,e.effetto,{senzaDisponibilita:true});
+    // gli yen con le regole della spunta anche se l'articolo risultava già comprato (`yenDellArticoloSuVoceSpuntata`; l'anteprima, con le stesse
+    // regole, è `sfideDellaVoce.yenPrevistiApprovando`)
+    if(e.effetto.tipo==='articolo')yenDellArticoloSuVoceSpuntata(p,uid,e,giaNelSaldo);
   });
 }
 /** Togliere la spunta. L13 (decisione 18): gli yen tornano alla fine, prima le spese restituite e poi i guadagni tolti (`conYenInOrdine`). */
@@ -738,14 +782,18 @@ export function decidiPropostaEffettoVoce(id:string,r:RichiestaDecisioneEffettoV
     if(old){if(old.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','L’ID appartiene a un’altra decisione.');return leggiJsonRegistro<StatoEffettiVoceDto>(old.dopo_json,'ricevuta decisione candidato');}
     const p=preparaDecisione(id,{operazioneId:r.operazioneId,decisione:r.decisione,...(r.effetto===undefined?{}:{effetto:r.effetto})});
     if(p.revisionePropostaAttesa!==r.revisionePropostaAttesa)throw httpErrors.conflict('candidato-cambiato','Il candidato, la voce o le spunte sono cambiati: rivedi.');
+    let applicazioni:ApplicazioneStatoPartitaDto[]|undefined;
     if(r.decisione==='conferma'){
       if(p.effetti.stato!=='convertita')throw httpErrors.conflict('raw-da-correggere','Correggi esplicitamente il RAW prima di aggiungere il nuovo effetto.');
       const effetto=normalizzaEffettoVoce(r.effetto)!;
       if(p.effetti.effetti.some((e)=>jsonCanonico(e.effetto)===jsonCanonico(effetto)))throw httpErrors.conflict('effetto-gia-presente','L’effetto è già presente: nessun doppio viene aggiunto.');
-      salvaEffettiVoce(p.proposta.voceUid,{revisioneEffettiAttesa:p.effetti.revisione,effetti:[...p.effetti.effetti.map((e)=>({uid:e.uid,effetto:e.effetto})),{uid:null,effetto}]});
+      // L13 (decisione 19): l'esito nelle partite che hanno già spuntato la voce torna con la risposta (non nel registro dell'operazione: la
+      // ripetizione con lo stesso ID rilegge lo stato salvato, e quell'esito è già stato detto)
+      applicazioni=salvaEffettiVoce(p.proposta.voceUid,{revisioneEffettiAttesa:p.effetti.revisione,effetti:[...p.effetti.effetti.map((e)=>({uid:e.uid,effetto:e.effetto})),{uid:null,effetto}]}).applicazioni;
     }
     if(prepared("UPDATE main.proposta_effetto_voce SET stato=?,updated_at=? WHERE id=? AND stato='aperta'").run(r.decisione==='conferma'?'confermata':'scartata',nowIso(),id).changes!==1)throw httpErrors.conflict('candidato-cambiato','Il candidato è cambiato.');
     const dopo=leggiEffettiVoce(p.proposta.voceUid);
-    prepared('INSERT INTO main.operazione_effetti_voce(id,voce_uid,payload_json,prima_json,dopo_json,creata_il) VALUES(?,?,?,?,?,?)').run(r.operazioneId,p.proposta.voceUid,payload,jsonCanonico({richiesta:p.richiesta,proposta:p.proposta,effetti:p.effetti}),jsonCanonico(dopo),nowIso());return dopo;
+    prepared('INSERT INTO main.operazione_effetti_voce(id,voce_uid,payload_json,prima_json,dopo_json,creata_il) VALUES(?,?,?,?,?,?)').run(r.operazioneId,p.proposta.voceUid,payload,jsonCanonico({richiesta:p.richiesta,proposta:p.proposta,effetti:p.effetti}),jsonCanonico(dopo),nowIso());
+    return {...dopo,...(applicazioni?.length?{applicazioni}:{})};
   })();
 }

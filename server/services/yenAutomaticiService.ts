@@ -306,6 +306,17 @@ export function conYenInOrdine<T>(fn: () => T): T {
   } finally { coda = null; }
 }
 
+/**
+ * L13 (decisione 19): esegue `fn`, una scrittura che può tornare indietro da sola (un savepoint) dentro un gesto in coda (`conYenInOrdine`): se
+ * `fn` fallisce, la coda torna com'era prima di `fn`, così i movimenti (e le restituzioni) di una scrittura annullata non si eseguono alla fine.
+ * Fuori da un gesto in coda non cambia niente: i movimenti erano già nel savepoint che torna indietro.
+ */
+export function conCodaRipristinabile<T>(fn: () => T): T {
+  const copia = coda ? [...coda] : null;
+  try { return fn(); }
+  catch (err) { if (coda && copia) coda.splice(0, coda.length, ...copia); throw err; }
+}
+
 /** La voce a cui legare i movimenti fatti dentro `conYenDellaVoce` (il raccordo di un effetto), quando non c'è la spunta corrente. */
 let voceForzata: string | null = null;
 /**

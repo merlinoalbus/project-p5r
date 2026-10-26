@@ -10,7 +10,8 @@
 // L'elenco sono le proposte «da applicare» della partita (`utente.da_applicare`, tipo `effetto-voce`, `dati.passato`), scritte dal censimento
 // (`statiMancantiService.proponiStatiMancanti`, a ogni avvio e dopo l'importazione di un gioco.db): mai applicate da sole. Questa tabella è il
 // suo registro: per ogni coppia partita/voce/effetto l'ultimo esito del censimento (`proposta`: entrato nell'elenco; `gia-presente`: lo stato era
-// già vero nella partita, niente da proporre) e quando è stato rilevato. Non decide niente: lo leggono solo il log e chi controlla i dati.
+// già vero nella partita, niente da proporre) e quando è stato rilevato. Il «già vero» è una decisione presa una volta sola: il censimento
+// non ripropone più quella coppia (con lo stesso tipo e la stessa chiave), anche se lo stato cambia dopo nella partita.
 //
 // Solo schema, append-only, idempotente (IF NOT EXISTS): nessuna riga esistente cambia. Essendo nuova, al primo avvio la copia di sicurezza
 // automatica (`runBootBackup`) salva partite.db prima del primo censimento.

@@ -11,7 +11,8 @@ import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
-import { effettiConYenGiaNelSaldo, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { yenPrevistiApprovando } from './sfideDellaVoce.js';
 
 export const nuovoUid = (): string => randomBytes(16).toString('hex');
 export function jsonCanonico(v: unknown): string {
@@ -268,12 +269,14 @@ export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.
  * è in elenco. Solo con `passato` uno stato diventa proposta: la Fortuna mai (vale solo il giorno della spunta).
  */
 export interface PassatoDiStato { descrizione:string; motivo:string }
-export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato}={}):void {
-  if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente,opz))avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
+/** `senzaAvanzamento` (L13, decisione 19): il censimento all'avvio e dopo l'importazione, che non è un gesto dell'utente: una proposta che si chiude
+ *  lì non fa avanzare la partita da sola (avanza al prossimo gesto, come sempre). */
+export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato;senzaAvanzamento?:true}={}):void {
+  if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente,opz)&&!opz.senzaAvanzamento)avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
 }
-/** L13 (decisione 19): la proposta del passato di quell'effetto, aperta, se c'è (una per coppia partita/effetto). */
-export function chiudiPropostePassato(partita:number,voce:string,effetto:string):void {
-  prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta' AND json_extract(dati_json,'$.passato')=1").run(nowIso(),partita,`${voce}:${effetto}`);
+/** L13 (decisione 19): chiude la proposta del passato di quell'effetto, aperta, se c'è (una per coppia partita/effetto). Dice se l'ha chiusa. */
+export function chiudiPropostePassato(partita:number,voce:string,effetto:string):boolean {
+  return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta' AND json_extract(dati_json,'$.passato')=1").run(nowIso(),partita,`${voce}:${effetto}`).changes>0;
 }
 /** Dice se ha chiuso una proposta aperta. */
 function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato}={}):boolean {
@@ -345,14 +348,10 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       if(typeof dati.ricevutaPrecedente!=='string')impedimenti.push('Versione precedente priva di sidecar attribuibile: sostituzione da riconciliare, nessuna aggiunta automatica.');
       else if(!prepared('SELECT 1 FROM utente.effetto_applicato WHERE partita_id=? AND id=? AND voce_uid=? AND effetto_uid=? AND annullato_il IS NULL').get(r.partita_id,dati.ricevutaPrecedente,voce,effetto))impedimenti.push('La ricevuta della versione precedente è cambiata.');
     }
-    const configurazione=dati.effetto as {tipo?:unknown;sostituisceDoti?:unknown;articolo?:unknown;quantita?:unknown}|undefined;
-    // L13 (decisione 19): l'articolo dell'elenco del passato, approvato, scala il suo prezzo solo se i suoi yen non erano già nel saldo (decisione 18,
-    // la nozione unica `effettiConYenGiaNelSaldo`): l'anteprima lo dice prima della conferma (`yenPrevisti`, 0 = gli yen non cambiano)
-    if(dati.passato===true&&r.stato==='aperta'&&configurazione?.tipo==='articolo'&&typeof configurazione.articolo==='string'&&effetto){
-      const prezzo=(prepared('SELECT prezzo FROM main.articolo WHERE chiave=?').get(configurazione.articolo) as {prezzo:number|null}|undefined)?.prezzo??null;
-      const copie=typeof configurazione.quantita==='number'?configurazione.quantita:1;
-      dati.yenPrevisti=prezzo&&prezzo>0&&!effettiConYenGiaNelSaldo(r.partita_id,voce!,[{uid:effetto,tipo:'articolo',chiave:null}]).has(effetto)?prezzo*copie:0;
-    }
+    const configurazione=dati.effetto as {tipo?:unknown;sostituisceDoti?:unknown}|undefined;
+    // L13 (decisione 19): l'anteprima dell'approvazione di un articolo dell'elenco del passato dice gli yen che si scaleranno (`yenPrevisti`, 0 = gli
+    // yen non cambiano), con le stesse regole dell'approvazione (`yenPrevistiApprovando`: già nel saldo, sfida pagata dal turno, già comprato)
+    if(dati.passato===true&&r.stato==='aperta'&&configurazione?.tipo==='articolo'&&effetto&&voce)dati.yenPrevisti=yenPrevistiApprovando(r.partita_id,voce,effetto,dati.effetto);
     if(configurazione?.tipo==='acquisto'&&Array.isArray(configurazione.sostituisceDoti))dati.raccordoDoti=configurazione.sostituisceDoti.map((id:unknown)=>{
       if(typeof id!=='string')throw httpErrors.conflict('raccordo-dote-incoerente','L’identità della Dote da raccordare non è valida.');
       const nodo=prepared('SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,id) as {dati_json:string}|undefined,originale=nodo?leggiOggettoRegistro(nodo.dati_json,'Dote da raccordare'):null;

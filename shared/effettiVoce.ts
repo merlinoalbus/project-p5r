@@ -73,11 +73,14 @@ export interface StatoEffettiVoceDto {
  * L13 (decisione 19): l'esito, in una partita che ha già spuntato la voce, di un effetto di stato aggiunto, cambiato o tolto nella guida.
  * `segnato`: vale adesso; `annullato`: la versione tolta è tornata com'era; `gia-presente`: era già vero (togliendo la spunta resta);
  * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita.
+ * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida` e `da-approvare`).
+ * Il salvataggio dalla finestra della voce lo riporta in `AzionePercorsoDto.applicazioniEffetti`, e la finestra lo notifica.
  */
 export interface ApplicazioneStatoPartitaDto {
   partitaId: number; partitaNome: string; effettoUid: string;
   esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare';
   testo: string;
+  motivo?: string;
 }
 /**
  * L13 (decisione 19): lo stato di un effetto di stato di una voce spuntata nella partita, per le ricevute della voce. `segnato`: la spunta (o il

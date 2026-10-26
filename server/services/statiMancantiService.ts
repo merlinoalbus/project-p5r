@@ -13,9 +13,12 @@
 //   - altrimenti entra nell'elenco della partita: una proposta «da applicare» (`dati.passato`), con le stesse guardie delle altre (una aperta
 //     con la stessa configurazione resta, una scartata dall'utente con «L'ho già segnato a mano» non torna). Si applica solo con «Applica alla
 //     partita» (`motoreDiario.applicaStatoDelPassato`).
-// Il registro (`utente.censimento_stato_voce`, utente 050) tiene l'ultimo esito per coppia. Idempotente: un secondo giro non aggiunge niente.
+// Il registro (`utente.censimento_stato_voce`, utente 050) tiene l'esito per coppia, ed è una decisione presa una volta sola: una coppia trovata
+// «già vera» (con lo stesso effetto: tipo e chiave) non si rivaluta più, così uno stato che l'utente toglie dopo (una Persona consumata in una
+// fusione, un trofeo tolto a mano) non torna nell'elenco a ogni avvio. Idempotente: un secondo giro non aggiunge niente.
 // Gira a ogni avvio (dopo le migrazioni e le regole) e dopo l'importazione di un gioco.db: copre anche le migrazioni di gioco che aggiungono
-// effetti a voci già spuntate. Nel log solo i conteggi per partita (l'id), mai nomi né email.
+// effetti a voci già spuntate. Non è un gesto dell'utente: una proposta che si chiude qui non fa avanzare la partita (`senzaAvanzamento`).
+// Nel log solo i conteggi per partita (l'id), mai nomi né email; gli effetti non riconoscibili si contano (`nonRiconosciuti`), non si saltano in silenzio.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
@@ -37,6 +40,8 @@ export interface CensimentoPartita {
   proposte: number;
   /** Senza riga e non già veri, già nell'elenco o scartati dall'utente: invariati. */
   invariate: number;
+  /** Effetti della voce che non si riconoscono come effetti di stato (la configurazione salvata non è leggibile per intero): non entrano. */
+  nonRiconosciuti: number;
 }
 
 interface RigaCandidato { partita_id: number; voce_uid: string; effetto_uid: string; tipo: string; chiave: string | null; dati_json: string; fatta_at: string; data: string; azione: string }
@@ -59,7 +64,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
       let c = perPartita.get(p);
-      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0 }; perPartita.set(p, c); }
+      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, nonRiconosciuti: 0 }; perPartita.set(p, c); }
       return c;
     };
     const nomi = nomiFraseEffetto(), adesso = nowIso();
@@ -71,14 +76,17 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     };
     for (const r of righe) {
       const e = normalizzaEffettoVoce(leggi(r.dati_json));
-      if (!e || !eEffettoDiStato(e) || e.tipo !== r.tipo) continue;
+      if (!e || !eEffettoDiStato(e) || e.tipo !== r.tipo) { conta(r.partita_id).nonRiconosciuti += 1; continue; }
       const c = conta(r.partita_id);
       c.spunteConStati += 1;
       if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(r.partita_id, r.voce_uid, r.effetto_uid)) { c.conRiga += 1; continue; }
+      // già trovata vera da un censimento di prima, con lo stesso effetto: la decisione è presa, anche se poi lo stato è cambiato nella partita
+      if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
+        .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.giaPresenti += 1; continue; }
       // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
       if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { c.giaPresenti += 1; registra(r, 'gia-presente'); continue; }
       const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
-      creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(e) } });
+      creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(e) }, senzaAvanzamento: true });
       const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
       if (aperteDopo > 0) registra(r, 'proposta');
       if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;
@@ -105,5 +113,7 @@ function motivoDelPassato(e: EffettoDiStatoVoce): string {
                 : e.tipo === 'domanda' ? 'la domanda non risulta risposta'
                   : e.tipo === 'cruciverba' ? 'il cruciverba non risulta risolto'
                     : 'l’evento di storia non risulta segnato';
-  return `La voce era già spuntata quando l’effetto è stato aggiunto, e ${manca} in questa partita.`;
+  // il motivo vale per tutti i casi dell'elenco: un effetto aggiunto dopo la spunta, quando il salvataggio non lo applicava, o un articolo
+  // saltato alla spunta perché in quel momento non risultava in vendita (`applicaUnEffettoDiStato`, «non-disponibile»)
+  return `La spunta della voce non l’ha segnato, e ${manca} in questa partita.`;
 }

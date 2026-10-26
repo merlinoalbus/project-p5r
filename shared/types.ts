@@ -29,7 +29,7 @@ import type { CompletamentoPalazzo } from './completamentoGuida.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 import type { StatoAcquistiArticoloDto } from './acquisti.js';
-import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatoEffettoDiStatoDto } from './effettiVoce.js';
+import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatoEffettoDiStatoDto, ApplicazioneStatoPartitaDto } from './effettiVoce.js';
 
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
  *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
@@ -1362,6 +1362,9 @@ export interface AzionePercorsoDto {
   /** L13 (decisione 19): gli effetti di stato della voce spuntata nella partita, uno per effetto: segnati, già veri, da approvare o non applicati.
    *  Assente se la voce non è spuntata o non ha effetti di stato. */
   statiEffetti?: StatoEffettoDiStatoDto[];
+  /** L13 (decisione 19): solo nella risposta del salvataggio della voce, che cosa hanno fatto gli effetti di stato aggiunti, cambiati o tolti
+   *  nelle partite che hanno già spuntato la voce (la finestra della voce lo notifica). Assente se non è cambiato nessun effetto di stato. */
+  applicazioniEffetti?: ApplicazioneStatoPartitaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
