@@ -49,8 +49,10 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     const prodotti = ricompensePerFonte('ricetta');
     for (const r of datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida')?.fabbricazione.ricette ?? []) {
       const collegati = prodotti.get(r.attrezzo) ?? [];
+      // Ondata 5, lotto F (migrazione 279): l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
+      // testo proprio della ricetta, se c'è (senza un prodotto unico collegato, o corretto dall'utente)
       aggiungi('ricetta', r.attrezzo, { nome: collegati.length ? collegati.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
-        testo: [r.effetto, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: '/guida/oggetti?scheda=fabbricazione' });
+        testo: [r.effetto?.trim() ? r.effetto : null, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: '/guida/oggetti?scheda=fabbricazione' });
     }
   }
   if (richiesti.has('covo')) for (const r of datiGuidaCorretti<CompletamentoDto>('completamento')?.covo.premi ?? []) {

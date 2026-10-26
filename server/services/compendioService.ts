@@ -11,7 +11,7 @@ import { uguali } from '../../shared/percorsoGuida.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
-import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
+import { catalogoOggettiDisponibile, effettiDegliOggetti, effettoDellaFonte, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
 import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
@@ -25,6 +25,15 @@ import type {
 } from '../../shared/types.js';
 
 // ---- Righe DB ----
+
+/**
+ * Il testo di un oggetto dell'equipaggiamento nel compendio (elenco e oggetto dell'esecuzione di una Persona): le statistiche
+ * (`statistiche.testo`, separate dall'effetto dalla migrazione 275) e poi l'effetto, come li dava la vecchia descrizione in un solo testo.
+ */
+function testoOggettoCompendio(o: CatalogoOggettoDto): string {
+  const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo.trim() : '';
+  return [statistiche, o.effetto.trim()].filter(Boolean).join(' / ');
+}
 
 /** L'API storica conserva le sezioni della guida, ma dopo M7 non usa il crosswalk per dare identità agli oggetti. */
 export function oggettiGuida(): Congelato<OggettiGuidaDto> {
@@ -57,6 +66,8 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
     return { articolo, posto: articolo ? postoDellArticolo(articolo) : null, negozi, postiNegozi };
   };
   const prodotti = ricompensePerFonte('ricetta'); const materiali = materialiDelleRicette();
+  // Ondata 5, lotto F (migrazione 279): l'effetto di una ricetta è quello del suo prodotto, nel catalogo
+  const effettiProdotti = effettiDegliOggetti([...prodotti.values()].flat().map((p) => p.chiave));
   return { ...dati,
     scambi: [], listiniScambi: riferimentiListiniScambi(),
     consumabili: dati.consumabili.flatMap((v) => {
@@ -71,6 +82,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
       return [{ ...v, ...identita(o), ...legami(o), nomeEn: o.nomeOriginale, uso: o.effetto, tipo: o.categoria === 'materiale' ? 'materiale' as const : 'chiave' as const }];
     }),
     fabbricazione: { ...dati.fabbricazione, ricette: dati.fabbricazione.ricette.map((r) => ({ ...r,
+      effetto: effettoDellaFonte(r.effetto, prodotti.get(r.attrezzo) ?? [], effettiProdotti),
       prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [] })) },
     abiti: { ...dati.abiti, elenco: dati.abiti.elenco.flatMap((v) => {
       const o = catalogo.get(fonteNodoGuida('abiti', v)); if (!o || o.nascosto) return [];
@@ -351,11 +363,12 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const catalogoEsecuzione = oggettiPerFonte('equipaggiamento', originali.map((o) => String(o.id)));
   const identitaEsecuzione = (nome: string | null) => { const o = nome === null ? undefined : perNome.get(nome); return o ? catalogoEsecuzione.get(String(o.id)) : undefined; };
   const normale = identitaEsecuzione(r.oggetto); const allarme = identitaEsecuzione(r.oggetto_allarme);
+  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (la copia in `traduzione` è tolta dalla 271),
+  // con le statistiche che la 275 ha separato dall'effetto
   const descrizioneOggetto = (nome: string | null): string | null => {
     if (nome === null) return null;
-    const c = identitaEsecuzione(nome); if (c) return c.effetto;
-    const o = perNome.get(nome);
-    return o ? t('descrizioneOggetto', o.descrizione) : null;
+    const o = identitaEsecuzione(nome);
+    return o ? testoOggettoCompendio(o) || null : null;
   };
   const riferimento = (pid: number | null) => {
     if (pid === null) return null;
@@ -445,7 +458,9 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     const c = catalogo.get(String(o.id));
     return { id: o.id, nome: o.nome, nomeIt: c?.nome ?? tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
       vincolo: o.vincolo, vincoloNome: c ? typeof c.statistiche?.per === 'string' ? c.statistiche.per : null : tOpz('vincoloOggetto', o.vincolo),
-      descrizione: o.descrizione, descrizioneNome: c?.effetto ?? t('descrizioneOggetto', o.descrizione),
+      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'oggetto del catalogo (statistiche ed effetto); la copia in `traduzione`
+      // (ambito descrizioneOggetto) è tolta dalla migrazione 271. Senza oggetto del catalogo non c'è una resa: vuoto, mai l'inglese.
+      descrizione: o.descrizione, descrizioneNome: c ? testoOggettoCompendio(c) : '',
       catalogo: c ? { chiave: c.chiave, nome: c.nome, casa: c.casa } : null, nomiAltri: c?.nomiAltri ?? [] };
   });
   const q = f.q;

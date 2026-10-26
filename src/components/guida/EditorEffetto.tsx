@@ -15,8 +15,6 @@ import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { NOME_DOTE } from '../../utils/citta';
 import { BERSAGLI, FUNZIONI, GUADAGNI, MISURE, NOME_BERSAGLIO, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RESE, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import { OPZIONI_FAMIGLIA, effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { simboliNote } from '../../../shared/note';
 
@@ -34,7 +32,7 @@ interface Props extends NomiPerEffetti {
 }
 
 /** I parametri di una famiglia, con la frase che ne discende. */
-export function EditorEffetto({ valore, onCambia, quartieri, attivita, confidenti, erroreNomi, riprovaNomi, conNessuno, etichetta = 'Effetto', disabilitato }: Props) {
+export function EditorEffetto({ valore, onCambia, quartieri, attivita, conNessuno, etichetta = 'Effetto', disabilitato }: Props) {
   const nomiEffetto = {
     luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])),
     attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])),
@@ -83,22 +81,8 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
         {scelta('Quale Dote', valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote }))}
         <Selettore etichetta="Quante note"valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={NOTE_OGGETTO} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
       </div>}
-      {/* A chi è gradito: i Confidenti come interruttori (i nomi sono quelli che la frase mostra). Un
-          nome salvato che non è più fra i Confidenti resta acceso e si può spegnere. */}
-      {valore?.famiglia === 'regalo' && (
-        <div role="group" aria-label="Gradito a" className="orari-editor__gruppo">
-          {[...(confidenti ?? []).map((c) => c.nome), ...valore.graditoA.filter((g) => !(confidenti ?? []).some((c) => c.nome === g))].map((nome) => {
-            const acceso = valore.graditoA.includes(nome);
-            return (
-              <button key={nome} type="button" className={`chip touch orari-editor__chip ${acceso ? 'chip--attivo' : ''}`} aria-pressed={acceso} disabled={disabilitato}
-                onClick={() => onCambia({ ...valore, graditoA: acceso ? valore.graditoA.filter((g) => g !== nome) : [...valore.graditoA, nome] })}>{nome}</button>
-            );
-          })}
-          {erroreNomi
-            ? <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i Confidenti. {riprovaNomi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprovaNomi} />}</span>
-            : (confidenti ?? []).length === 0 && valore.graditoA.length === 0 && <span className="testo-12 text-text-muted">Carico i Confidenti…</span>}
-        </div>
-      )}
+      {/* Ondata 5, lotto F (RG-03): niente più «Gradito a» scritto a mano — a chi piace un regalo si legge da `confidente_regalo`. Un
+          caricamento dei nomi fallito lo dice una volta sola il modulo (`AvvisoNomiPerEffetti`), non ogni editor. */}
       {valore?.famiglia === 'sblocca-luogo' &&
         <Selettore etichetta="Quale quartiere" valore={valore.luogo} disabilitato={disabilitato} vuoto="Scegli il quartiere…" opzioni={(quartieri ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(luogo) => onCambia({ ...valore, luogo })} />}
       {valore?.famiglia === 'sblocca-funzione' && <div className="grid gap-2 sm:grid-cols-2">

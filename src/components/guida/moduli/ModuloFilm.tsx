@@ -13,6 +13,7 @@ import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
+import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 
 const OPZIONI_DOVE = [{ chiave: 'cinema', nome: 'Al cinema', categoria: 'film' }, { chiave: 'dvd', nome: 'In DVD', categoria: 'dvd' }];
 
@@ -31,6 +32,7 @@ export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
   };
   return (
     <div className="flex flex-col gap-3">
+      <AvvisoNomiPerEffetti errore={nomi.erroreNomi} riprova={nomi.riprovaNomi} disabilitato={disabilitato} />
       <Griglia>
         <Campo nome="nome" etichetta="Titolo del film" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
         <Blocco largo>

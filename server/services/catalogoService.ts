@@ -45,7 +45,10 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
   // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
   negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'note'],
-  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
+  // Ondata 5, lotto F (decisione 21): `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta — il testo dell'effetto e le
+  // statistiche vivono in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`). Restano scrivibili solo
+  // senza il catalogo (pacchetti di prima di M7, `campiDisponibili`), dove la riga è l'unico punto.
+  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
@@ -149,7 +152,8 @@ function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: strin
 
 /** Prima di M7 non legge/scrive la colonna nuova, neppure negli snapshot dei gesti esistenti. */
 function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
-  return tipo === 'articolo' && !catalogoOggettiDisponibile() ? CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json') : CAMPI[tipo];
+  return tipo === 'articolo' && !catalogoOggettiDisponibile()
+    ? [...CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json'), 'effetto_json', 'effetto', 'statistiche'] : CAMPI[tipo];
 }
 
 function legameStoricoCambiato(d: Record<string, unknown>, r: Riga | null): boolean {
@@ -295,6 +299,12 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   }
   if (tipo === 'articolo') {
     const conCatalogo = catalogoOggettiDisponibile();
+    // Ondata 5, lotto F (decisione 21): con il catalogo il testo dell'effetto e le statistiche vivono solo nell'oggetto. Un valore mandato
+    // per l'offerta non si accetta in silenzio (prima si scartava con un 200): si rifiuta e si dice dove si scrive. `null` o vuoto passano.
+    if (conCatalogo) {
+      const mandati = (['effetto', 'statistiche', 'effetto_json'] as const).filter((c) => d[c] != null && (typeof d[c] !== 'string' || (d[c] as string).trim() !== ''));
+      if (mandati.length) throw httpErrors.badRequest('effetto-nell-oggetto', `L’effetto e le statistiche si scrivono nell’oggetto del catalogo, non nell’offerta (campi: ${mandati.join(', ')}).`);
+    }
     if (!conCatalogo) { delete d.catalogo_chiave; delete d.costo_json; }
     else if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
     const chiave = 'catalogo_chiave' in d ? d.catalogo_chiave : esistente?.catalogo_chiave;

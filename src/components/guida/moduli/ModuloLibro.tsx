@@ -12,12 +12,14 @@ import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
 import type { PropsModulo } from './base';
 import { Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
+import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 
 /** I campi di un libro: titolo, prezzo, sessioni di lettura, dettagli ed effetti dichiarati (le condizioni le aggiunge il guscio). */
 export function ModuloLibro({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
   return (
     <div className="flex flex-col gap-3">
+      <AvvisoNomiPerEffetti errore={nomi.erroreNomi} riprova={nomi.riprovaNomi} disabilitato={disabilitato} />
       <Griglia>
         <Campo nome="nome" etichetta="Titolo del libro" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
         <Campo nome="sessioni" etichetta="Sessioni di lettura" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quante volte va letto per finirlo" />

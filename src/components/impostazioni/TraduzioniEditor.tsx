@@ -19,7 +19,9 @@ const NOMI_AMBITO: Record<string, string> = {
   arcana: 'Arcani', elementoSkill: 'Elementi delle skill', elementoAffinita: 'Elementi delle affinità', affinita: 'Codici di affinità',
   tipoEredita: 'Tipi di eredità', colonnaEredita: 'Colonne di eredità', statistica: 'Statistiche', tipoOggetto: 'Categorie di oggetti',
   vincoloOggetto: 'Vincoli degli oggetti', areaMementos: 'Dedali dei Memento', doteSociale: 'Doti sociali', notaPersona: 'Note delle Persona',
-  fonteEsclusiva: 'Fonti esclusive', effettoSkill: 'Effetti delle skill', descrizioneOggetto: 'Descrizioni degli oggetti',
+  // Ondata 5, lotto F: la resa di «descrizioneOggetto» è l'effetto dell'oggetto nel catalogo (migrazione 271). L'ambito compare solo se
+  // resta una riga, cioè una correzione dell'utente che la 271 non ha potuto portare nella scheda (anche la scheda corretta da lui)
+  fonteEsclusiva: 'Fonti esclusive', effettoSkill: 'Effetti delle skill', descrizioneOggetto: 'Descrizioni degli oggetti (non più lette: vale l’effetto nel catalogo)',
   negoziazione: 'Titoli di negoziazione', fonteCarta: 'Fonti delle carte abilità',
   skill: 'Nomi delle skill', persona: 'Nomi delle Persona', oggetto: 'Nomi dell’equipaggiamento', termine: 'Termini di gioco',
 };

@@ -34,7 +34,7 @@ interface Props extends NomiPerEffetti {
  * sceglie «nessuno» torna a una Dote predefinita), la spunta «vale dalla seconda volta in poi» solo con `conRipetuto`
  * e le condizioni, a scomparsa (aperte all'inizio se la voce ne ha). Un elenco di condizioni vuoto si salva come assente.
  */
-function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quartieri, attivita, confidenti, erroreNomi, riprovaNomi }: { voce: VoceEffetto; indice: number; onCambia: (v: VoceEffetto) => void; onTogli: () => void } & Pick<Props, 'conRipetuto' | 'disabilitato' | 'quartieri' | 'attivita' | 'confidenti' | 'erroreNomi' | 'riprovaNomi'>) {
+function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quartieri, attivita }: { voce: VoceEffetto; indice: number; onCambia: (v: VoceEffetto) => void; onTogli: () => void } & Pick<Props, 'conRipetuto' | 'disabilitato' | 'quartieri' | 'attivita'>) {
   const [condizioniAperte, setCondizioniAperte] = useState((voce.condizioni?.length ?? 0) > 0);
   const nomi = { luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])), attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])) };
   return (
@@ -43,7 +43,7 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
         <strong className="testo-13">Effetto {indice + 1}: <span className="font-normal text-text-secondary"><TestoNote testo={descriviVoceEffetto(voce, nomi)} /></span></strong>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={onTogli} aria-label={`Togli l'effetto ${indice + 1}`} />
       </div>
-      <EditorEffetto etichetta={`Famiglia dell'effetto ${indice + 1}`} valore={voce.effetto} onCambia={(e) => onCambia({ ...voce, effetto: e ?? effettoPredefinito('dote') })} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi} disabilitato={disabilitato} />
+      <EditorEffetto etichetta={`Famiglia dell'effetto ${indice + 1}`} valore={voce.effetto} onCambia={(e) => onCambia({ ...voce, effetto: e ?? effettoPredefinito('dote') })} quartieri={quartieri} attivita={attivita} disabilitato={disabilitato} />
       <div className="flex flex-wrap items-center gap-3">
         {conRipetuto && (
           <label className="flex items-center gap-2 testo-13 touch">
@@ -62,7 +62,7 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
  * L'elenco degli effetti dichiarati con «Aggiungi un effetto» (nasce come Dote predefinita): ogni voce si modifica o
  * si toglie sul posto e ogni cambio passa al genitore l'elenco intero. `aiuto` sostituisce la spiegazione predefinita.
  */
-export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quartieri, attivita, confidenti, erroreNomi, riprovaNomi, aiuto }: Props) {
+export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quartieri, attivita, aiuto }: Props) {
   // ogni voce ha uno stato suo (le condizioni aperte): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(voci.length);
   return (
@@ -72,7 +72,7 @@ export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quart
       {voci.length === 0 && <p className="m-0 testo-12 text-text-muted" role="status">Nessun effetto dichiarato.</p>}
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {voci.map((v, i) => (
-          <Voce key={chiavi.ids[i]} voce={v} indice={i} conRipetuto={conRipetuto} disabilitato={disabilitato} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi}
+          <Voce key={chiavi.ids[i]} voce={v} indice={i} conRipetuto={conRipetuto} disabilitato={disabilitato} quartieri={quartieri} attivita={attivita}
             onCambia={(nuova) => onCambia(voci.map((x, j) => (j === i ? nuova : x)))} onTogli={() => { chiavi.togli(i); onCambia(voci.filter((_, j) => j !== i)); }} />
         ))}
       </ul>

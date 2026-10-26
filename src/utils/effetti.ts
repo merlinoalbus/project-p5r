@@ -18,7 +18,6 @@ export function effettoPredefinito(f: EffettoOggetto['famiglia']): EffettoOggett
     case 'previene-stato': return { famiglia: 'previene-stato', stato: 'sonno' };
     case 'statistica': return { famiglia: 'statistica', statistica: 'forza', valore: 1 };
     case 'dote': return { famiglia: 'dote', dote: 'conoscenza', note: 1 };
-    case 'regalo': return { famiglia: 'regalo', graditoA: [] };
     case 'sblocca-luogo': return { famiglia: 'sblocca-luogo', luogo: '' };
     case 'sblocca-funzione': return { famiglia: 'sblocca-funzione', funzione: 'terzo-occhio', dove: null };
     case 'moltiplica': return { famiglia: 'moltiplica', cosa: 'lettura', fattore: 2 };
@@ -31,8 +30,9 @@ export function effettoPredefinito(f: EffettoOggetto['famiglia']): EffettoOggett
 export interface NomiPerEffetti {
   quartieri?: Array<{ chiave: string; nome: string }>;
   attivita?: Array<{ chiave: string; nome: string }>;
+  /** Per il modulo dell'attività (il Confidente collegato); gli editor degli effetti non li usano più (lotto F, RG-03). */
   confidenti?: Array<{ chiave: string; nome: string }>;
-  /** Il caricamento dei nomi è fallito: l'editor lo dice e offre di riprovare. */
+  /** Il caricamento dei nomi è fallito (quali elenchi): lo dice una volta il modulo (`AvvisoNomiPerEffetti`), con «Riprova». */
   erroreNomi?: string | null;
   riprovaNomi?: () => void;
 }
