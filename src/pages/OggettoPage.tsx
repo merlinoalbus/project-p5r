@@ -22,6 +22,12 @@ import { notifica } from '../stores/notificationStore';
 import { annullaRegaloOggetto } from '../services/api/partite';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { formattaPunti } from '../utils/punti';
+import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, annulloDelRegalo, esitoDelRegalo, fraIGraditi, testoReazione } from '../../shared/regali';
+import type { ConsegnaRegaloDto } from '../types';
+import { ChipReazione } from '../components/catalogo/ChipReazione';
+import { ElencoConsegne } from '../components/catalogo/ConsegneRegalo';
+import { raggruppaConsegne } from '../utils/consegneRegalo';
+import { Selettore } from '../components/shared/Selettore';
 import { TrasformazioniDiJose } from '../components/catalogo/TrasformazioniDiJose';
 import { PosizioniDellaLettura } from '../components/catalogo/PosizioniDellaLettura';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -50,19 +56,20 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
   const [regaloInCorso, setRegaloInCorso] = useState(false);
   /** R10-18: il Confidente a cui si sta regalando questo oggetto (finestra unica «Regala»). */
   const [regalaA, setRegalaA] = useState<{ chiave: string; nome: string } | null>(null);
-  /** «Regala» apre la finestra unica (punti, consegna, eventuale acquisto); «Togli consegna» annulla ciò che l'azione aveva fatto. */
-  const regala = async (confidente: string, nome: string, fatto: boolean) => {
+  /** «Regala» apre la finestra unica (punti, consegna, eventuale acquisto). */
+  const regala = (confidente: string, nome: string) => {
     if (!o || partitaId === null || regaloInCorso || occupato) return;
-    if (fatto) { setRegalaA({ chiave: confidente, nome }); return; }
+    setRegalaA({ chiave: confidente, nome });
+  };
+  /** Revisione dei lotti D e D2: toglie proprio l'ultima consegna a quel Confidente (`id`), con ciò che l'azione aveva fatto. */
+  const annullaConsegna = async (confidente: string, ultima: ConsegnaRegaloDto) => {
+    if (!o || partitaId === null || regaloInCorso || occupato) return;
     setRegaloInCorso(true);
     try {
-      const esito = await annullaRegaloOggetto(partitaId, confidente, o.chiave);
-      dati.imposta((corrente) => {
-        const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: false } : r);
-        return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: regalo.some((r) => r.regalato) } : null };
-      });
-      notifica('info', `Consegna annullata${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
-      if (esito.acquistato) void dati.ricarica();
+      const esito = await annullaRegaloOggetto(partitaId, confidente, o.chiave, ultima.id ?? undefined);
+      notifica('info', `${annulloDelRegalo(ultima.modo, ultima.nome)}${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
+      // ondata 5: possono restare altre consegne dello stesso oggetto, e le copie cambiano: la scheda si rilegge
+      void dati.ricarica();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Consegna non aggiornata.');
     } finally { setRegaloInCorso(false); }
@@ -81,6 +88,13 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
     finally { setOccupato(false); }
   };
   useDocumentTitle(o?.nome ?? 'Oggetto');
+  // revisione dei lotti D e D2: «A chi piace» elenca solo chi lo gradisce più di ogni altro regalo (le righe a +1 valgono quanto un regalo
+  // qualunque); a tutti gli altri che possono riceverlo adesso si dà dal selettore; le consegne della partita si vedono e si annullano qui
+  // stesso criterio della scheda del Confidente e del cassetto (`fraIGraditi`): più di +1, o una riga con una nota; la riga è di questo oggetto
+  const graditi = (o?.regalo ?? []).filter((r) => fraIGraditi({ catalogo: o?.chiave, reazione: r.reazione, nota: r.nota }));
+  const cartolina = o?.chiave === CARTOLINA;
+  const altriDestinatari = (o?.partita?.destinatari ?? []).filter((d) => !graditi.some((r) => r.confidente === d.confidente));
+  const gruppiConsegne = raggruppaConsegne(o?.partita?.consegne ?? [], (x) => ({ chiave: x.confidente, nome: x.nomeConfidente, casa: `/confidenti/${encodeURIComponent(x.confidente)}` }));
   return <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Oggetto', ripiego: '/guida/oggetti' }}>
     {o && <div className="flex min-w-0 flex-col gap-3">
       {/* Lotto B (punto 6): «Modifica | Elimina» venivano prima di che cosa fa l'oggetto; ora stanno nel menu «Modifica ⋯» dell'intestazione */}
@@ -123,18 +137,30 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
         <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-3">
           <section className="card order-2 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="a-chi-piace">
             <TitoloSezione id="a-chi-piace">A chi piace</TitoloSezione>
-            {o.regalo.length ? <ul className="m-0 list-none divide-y divide-border p-0">{o.regalo.map((r) => <li key={`${r.confidente}:${r.sconsigliato}`} className="flex flex-wrap items-center gap-2 py-1">
+            {graditi.length ? <ul className="m-0 list-none divide-y divide-border p-0">{graditi.map((r) => <li key={r.confidente} className="flex flex-wrap items-center gap-2 py-1">
               <Link to={r.casa} className="touch inline-flex items-center">{r.nome}</Link>
-              {r.gradimento && <span className="testo-13 text-text-secondary">{r.gradimento}</span>}
-              {r.sconsigliato && <span className="chip">Sconsigliato</span>}
-              {r.regalato && <span className="chip chip--attivo">Regalato</span>}
-              {/* l'azione di gioco della scheda: «Regala» è il pulsante primario */}
-              {partitaId !== null && (!r.sconsigliato || r.regalato) && (r.regalato
-                ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Togli consegna" aria-label={`Togli la consegna a ${r.nome}`}
-                    disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, false)} />
-                : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" aria-label={`Regala a ${r.nome}`}
-                    disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, true)} />)}
-            </li>)}</ul> : <p className="m-0 testo-13 text-text-secondary">Nessun regalo gradito collegato.</p>}
+              {r.reazione !== null && <ChipReazione reazione={r.reazione} />}
+              {/* l'azione di gioco della scheda: «Regala» è il pulsante primario; ondata 5: lo stesso oggetto si può ridare. Solo a chi lo può
+                  ricevere adesso (`destinatari`: riceve regali ed è già stato incontrato) */}
+              {partitaId !== null && o.partita?.destinatari?.some((d) => d.confidente === r.confidente) && <PulsanteVisivo tono="primario" compatto className="ml-auto" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" aria-label={`Regala a ${r.nome}`}
+                disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => regala(r.confidente, r.nome)} />}
+              {/* la nota della riga dell'elenco (come nella scheda del Confidente): è ciò che rende gradita una riga a +1 */}
+              {r.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted text-pretty">{r.nota}</span>}
+            </li>)}</ul> : <p className="m-0 testo-13 text-text-secondary text-pretty">{cartolina ? `Vale ${testoReazione(REAZIONE_CARTOLINA)} con chi riceve regali.`
+              : o.categoria === 'regalo' ? `Nessun Confidente lo gradisce in particolare: vale ${testoReazione(REAZIONE_FUORI_ELENCO)} con chi riceve regali.` : 'Nessun regalo gradito collegato.'}</p>}
+            {graditi.length > 0 && o.categoria === 'regalo' && !cartolina && <p className="m-0 testo-12 text-text-muted">Con gli altri Confidenti che ricevono regali vale {testoReazione(REAZIONE_FUORI_ELENCO)}.</p>}
+            {cartolina && <p className="m-0 testo-12 text-text-muted text-pretty">{AVVISO_CARTOLINA} Con la pioggia non si spedisce, e non a chi è al rango massimo.</p>}
+            {/* revisione dei lotti D e D2: si dà a chiunque lo possa ricevere adesso, non solo a chi lo ha nell'elenco (la Cartolina a nessun elenco) */}
+            {partitaId !== null && altriDestinatari.length > 0 && <Selettore etichetta={cartolina ? 'Spedisci a' : graditi.length ? 'Regala a un altro Confidente' : 'Regala a'} valore="" ricerca="auto"
+              disabilitato={regaloInCorso || occupato || dati.caricamento} segnaposto="Scegli il Confidente"
+              // tutti valgono +1 (i graditi hanno la loro riga sopra): la reazione accanto a ogni nome non informerebbe
+              opzioni={altriDestinatari.map((d) => ({ chiave: d.confidente, nome: d.nome }))}
+              onCambia={(k) => { const d = altriDestinatari.find((x) => x.confidente === k); if (d) regala(d.confidente, d.nome); }} />}
+            {partitaId !== null && gruppiConsegne.length > 0 && <>
+              <h3 className="m-0 mt-1 text-base">{cartolina ? 'Spedita in questa partita' : 'Regalato in questa partita'}</h3>
+              <ElencoConsegne gruppi={gruppiConsegne} occupato={regaloInCorso || occupato || dati.caricamento} etichetta={`Consegne di ${o.nome}`}
+                onAnnulla={(g, ultima) => void annullaConsegna(g.chiave, ultima)} />
+            </>}
           </section>
           <section className="card order-5 flex min-w-0 flex-col gap-3 xl:order-none" aria-labelledby="dove-si-trova">
             <TitoloSezione id="dove-si-trova">Dove si trova</TitoloSezione>
@@ -159,14 +185,10 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
       </div>
       {regalaA && partitaId !== null && <SceltaRegalo key={`${regalaA.chiave}:${o.chiave}`} partita={partitaId} confidente={regalaA.chiave} nomeConfidente={regalaA.nome} ammessi={[o.chiave]} oggettoIniziale={o.chiave}
         onChiudi={() => setRegalaA(null)} onFatto={(esito) => {
-          const confidente = regalaA.chiave;
           setRegalaA(null);
-          dati.imposta((corrente) => {
-            const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: true } : r);
-            return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: true } : null };
-          });
-          if (esito.acquistato) void dati.ricarica();
-          notifica('success', `Regalo consegnato a ${regalaA.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+          // ondata 5: la consegna usa una copia (o ne compra una) e si aggiunge alle consegne della partita: la scheda si rilegge
+          void dati.ricarica();
+          notifica('success', `${esitoDelRegalo(esito.consegna?.modo, regalaA.nome)}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
         }} />}
       {azione === 'modifica' && <ModuloOggetto key={o.chiave} oggetto={o} onChiudi={() => setAzione(null)} onSalvato={() => { setAzione(null); void dati.ricarica(); }} />}
       {!IN_RILASCIO && (azione === 'elimina' || azione === 'ripristina') && <Modal aperta titolo={azione === 'elimina' ? `Elimina «${o.nome}»` : `Ripristina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}

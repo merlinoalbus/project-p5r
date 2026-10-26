@@ -169,7 +169,8 @@ export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, f
 /** R10-18: l'azione unica «Regala» — l'oggetto del catalogo (per chiave) dà i punti, registra la consegna e, se richiesto, segna comprato l'articolo. */
 export const regalaOggetto = (id: number, richiesta: RichiestaRegalo): Promise<EsitoRegaloDto> => apiPost(`/partite/${id}/regali`, richiesta);
 /** R10-18: toglie la consegna con ciò che l'azione aveva fatto (punti, acquisto segnato, evento). */
-export const annullaRegaloOggetto = (id: number, confidente: string, catalogo: string): Promise<EsitoRegaloDto> => apiPost(`/partite/${id}/regali/annulla`, { confidente, catalogo });
+export const annullaRegaloOggetto = (id: number, confidente: string, catalogo: string, consegna?: number): Promise<EsitoRegaloDto> =>
+  apiPost(`/partite/${id}/regali/annulla`, { confidente, catalogo, ...(consegna !== undefined ? { id: consegna } : {}) });
 
 /** Il compendio personale della partita: le Persona registrate con la loro istantanea. */
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);

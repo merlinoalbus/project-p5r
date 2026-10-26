@@ -30,12 +30,12 @@ const dettaglio: ConfidenteDettaglioDto = {
     { id: 2, rango: 2, etichetta: '2', note: 'Richiede Coraggio 2.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiTesto: '+3', romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiTesto: '+0', romantica: false, avviso: 'Da evitare' }] },
     { id: 3, rango: 9, etichetta: '9', note: '', scelte: [{ ordine: 1, testo: 'Ti amo', punti: 3, puntiTesto: '+3', romantica: true, avviso: null }] },
   ],
-  regali: [{ ordine: 1, modificato: false, nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', effetto: '+2' }, { ordine: 2, modificato: false, nome: 'Mini cactus', dove: null, costo: null, effetto: '+3' }],
-  regaliSconsigliati: [],
+  regali: [{ ordine: 1, modificato: false, nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', reazione: 2 }, { ordine: 2, modificato: false, nome: 'Mini cactus', dove: null, costo: null, reazione: 3 }],
+  regalabile: true,
   disponibilita: { giorni: ['Lunedì', 'Martedì'], fasce: ['Giorno'], luogo: 'Clinica Takemi', sbloccoData: '18 aprile', sbloccoRequisiti: '', note: 'Anche con pioggia.' },
   noteGenerali: '', fonti: ['https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/'],
 };
-const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, bloccato: null, semafori: [], regaliFatti: ['Castella'], note: '', updatedAt: null };
+const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, bloccato: null, semafori: [], regaliFatti: ['Castella'], regalabile: true, note: '', updatedAt: null };
 
 describe('ConfidenteDettaglioPage', () => {
   it('mostra prossimo rango, abilità sbloccate, scelte migliori/romantiche e regali con spunta per la partita', async () => {

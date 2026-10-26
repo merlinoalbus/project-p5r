@@ -31,6 +31,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { SceltaRegalo } from '../catalogo/SceltaRegalo';
+import { esitoDelRegalo } from '../../../shared/regali';
 import { RigaConfidente } from './RigaConfidente';
 import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
@@ -116,7 +117,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const [bonusForzato, setBonusForzato] = useState<Record<string, boolean>>({});
   // Gli incrementi di ogni Confidente, dal più vecchio al più recente, per «Annulla ultimo»: annulla l'ultimo, poi resta quello di prima.
   // Un regalo consegnato dalla finestra «Regala» porta il suo oggetto: si annulla con la sua consegna (punti compresi).
-  const [ultimo, setUltimo] = useState<Record<string, Array<{ punti: number; regalo?: string }>>>({});
+  const [ultimo, setUltimo] = useState<Record<string, Array<{ punti: number; regalo?: string; consegna?: number }>>>({});
   const cimaDi = (chiave: string) => ultimo[chiave]?.[ultimo[chiave].length - 1];
   // Il Confidente a cui si sta regalando (finestra unica «Regala»).
   const [regaloPer, setRegaloPer] = useState<string | null>(null);
@@ -174,7 +175,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     }
     setOccupato(c.chiave);
     try {
-      const esito = await annullaRegaloOggetto(partitaId, c.chiave, cima.regalo);
+      const esito = await annullaRegaloOggetto(partitaId, c.chiave, cima.regalo, cima.consegna);
       imposta((correnti) => correnti.map((x) => (x.chiave === c.chiave ? esito.confidente : x)));
       // se il rango è cambiato i punti di prima non valgono più: la pila riparte da zero, altrimenti resta l'azione precedente
       if (esito.confidente.rango !== c.rango) setUltimo((u) => ({ ...u, [c.chiave]: [] }));
@@ -227,7 +228,6 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       apriScheda: () => setVista({ chiave: c.chiave, tipo: 'scheda', search: '' }),
       nota: (n) => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, invito }),
       regala: () => setRegaloPer(c.chiave),
-      regalo: () => void salva(c.chiave, { regalo: true, bonusArcano: bonus, invito }),
       uscita: () => void salva(c.chiave, { uscita: true, bonusArcano: bonus, invito }),
       annullaUltimo: () => void annullaUltimo(c),
       sbloccato: () => void salva(c.chiave, { sbloccato: !c.sbloccato }),
@@ -387,11 +387,11 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
           onFatto={(esito) => {
             setRegaloPer(null);
             imposta((correnti) => correnti.map((x) => (x.chiave === c.chiave ? esito.confidente : x)));
-            // «Annulla ultimo» annulla questo regalo con la sua consegna (l'oggetto è quello appena aggiunto ai regali fatti), poi resta
-            // disponibile l'azione di prima; se il rango è cambiato i punti di prima non valgono più e la pila riparte
-            const nuovoOggetto = (esito.confidente.regaliFattiCatalogo ?? []).find((k) => !(c.regaliFattiCatalogo ?? []).includes(k));
-            setUltimo((u) => ({ ...u, [c.chiave]: esito.confidente.rango !== c.rango || !nuovoOggetto ? [] : [...(u[c.chiave] ?? []), { punti: esito.punti, regalo: nuovoOggetto }] }));
-            notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+            // «Annulla ultimo» annulla proprio questa consegna (ondata 5: lo stesso oggetto si può ridare, quindi la consegna si indica per id),
+            // poi resta disponibile l'azione di prima; se il rango è cambiato i punti di prima non valgono più e la pila riparte
+            const consegna = esito.consegna;
+            setUltimo((u) => ({ ...u, [c.chiave]: esito.confidente.rango !== c.rango || !consegna ? [] : [...(u[c.chiave] ?? []), { punti: esito.punti, regalo: consegna.catalogo, consegna: consegna.id }] }));
+            notifica('success', `${esitoDelRegalo(consegna?.modo, c.nome)}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
             if (esito.confidente.puntiNecessari !== null && esito.confidente.puntiNecessari > 0 && esito.confidente.mancanti === 0 && (c.mancanti ?? 1) > 0) {
               notifica('success', `${c.nome}: punti sufficienti per il rango ${esito.confidente.rango + 1}! Passa del tempo insieme per salire di rango.`);
             }

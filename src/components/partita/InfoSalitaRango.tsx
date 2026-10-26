@@ -4,20 +4,23 @@
 //
 // Solo lettura, dal dettaglio del compendio già in memoria (`useDettaglioConfidente`, nessuna API nuova). L'abilità del rango N si ottiene
 // raggiungendo N (la scheda del Confidente segna attive quelle con rango ≤ rango della partita): la prossima è quella del rango + 1.
-// I regali: nome ed effetto, quelli già consegnati in questa partita in coda e sbarrati (stesso criterio della scheda del Confidente).
+// I regali: nome e reazione (+3/+2/+1, ondata 5), nell'ordine dell'elenco. Un oggetto del catalogo già dato resta com'è, nel suo posto: il
+// regalo si può ridare e vale gli stessi punti (decisione 21 (c); revisione dei lotti D e D2). Si sbarra soltanto una vecchia riga senza
+// oggetto, la spunta per nome già segnata: lo stesso criterio della scheda del Confidente.
 // I comandi per regalare stanno nel pannello («Regala»): qui nessun pulsante duplicato, solo il collegamento alla scheda completa.
 // ============================================================
 
 import { useDettaglioConfidente } from './useDettaglioConfidente';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
+import { fraIGraditi, testoReazione } from '../../../shared/regali';
 
 /** Quanti regali mostrare in breve prima del «+ altri». */
 const REGALI_VISIBILI = 4;
 
-/** Se il regalo è già stato consegnato in questa partita (per oggetto del catalogo, altrimenti per nome). */
-function consegnato(c: ConfidentePartitaDto, g: RegaloConfidenteDto): boolean {
-  if (g.catalogo && c.regaliFattiCatalogo !== undefined) return c.regaliFattiCatalogo.includes(g.catalogo.chiave);
-  return c.regaliFatti.includes(g.nomeStorico ?? g.nome);
+/** Se una vecchia riga senza oggetto del catalogo è segnata come consegnata in questa partita (la spunta per nome). Un oggetto del catalogo
+ *  non è mai «già consegnato»: si può ridare (decisione 21 (c)), e le sue consegne stanno nella scheda del Confidente. */
+function spuntaPerNome(c: ConfidentePartitaDto, g: RegaloConfidenteDto): boolean {
+  return !g.catalogo && c.regaliFatti.includes(g.nomeStorico ?? g.nome);
 }
 
 /** Prossima abilità e regali graditi del Confidente; nulla finché il dettaglio non c'è (il caricamento lo mostra la sezione delle risposte). */
@@ -25,7 +28,9 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
   const { dati } = useDettaglioConfidente(c.chiave);
   if (!dati) return null;
   const abilita = c.rango < 10 ? dati.abilita.filter((a) => a.rango === c.rango + 1) : [];
-  const ordinati = [...dati.regali].sort((a, b) => Number(consegnato(c, a)) - Number(consegnato(c, b)));
+  // revisione dei lotti D e D2: le righe a +1 valgono quanto ogni altro regalo e non sono «graditi» (stesso criterio della scheda del Confidente)
+  // in coda va solo la spunta per nome già segnata: un oggetto del catalogo già dato si può ridare e resta al suo posto
+  const ordinati = dati.regali.filter(fraIGraditi).sort((a, b) => Number(spuntaPerNome(c, a)) - Number(spuntaPerNome(c, b)));
   const visibili = ordinati.slice(0, REGALI_VISIBILI);
   const altri = ordinati.length - visibili.length;
   if (abilita.length === 0 && ordinati.length === 0) return null;
@@ -44,10 +49,10 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
           <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Regali graditi</span>
           <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5">
             {visibili.map((g, i) => {
-              const fatto = consegnato(c, g);
+              const fatto = spuntaPerNome(c, g);
               return (
                 <li key={`${g.ordine}-${i}`} className={`chip ${fatto ? 'line-through opacity-60' : ''}`} title={fatto ? 'Già consegnato in questa partita' : undefined}>
-                  {g.nome}{g.effetto ? ` · ${g.effetto}` : ''}{fatto && <span className="sr-only"> (già consegnato)</span>}
+                  {g.nome}{g.reazione !== null ? <span className="tabular-nums"> · <span className="sr-only">reazione </span>{testoReazione(g.reazione)}</span> : null}{fatto && <span className="sr-only"> (già consegnato)</span>}
                 </li>
               );
             })}

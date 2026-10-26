@@ -30,8 +30,19 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const ottenuti = ottenutiPartita(partitaId);
   const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti));
   const premi = ricompensePerFonte('covo');
-  const covo = { ...seed.covo, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
+  // ondata 5 (decisione 21 b, migrazione 258): la sfida che conta i regali dice a che punto è la partita chiesta
+  const regali = partitaId === undefined ? null : regaliConsegnati(partitaId);
+  const sfide = seed.covo.sfide.map((s) => (s.conteggio?.tipo === 'regali-consegnati' && regali !== null
+    ? { ...s, progresso: { fatti: regali, obiettivo: s.conteggio.obiettivo, raggiunta: regali >= s.conteggio.obiettivo } } : s));
+  const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
   return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
+}
+
+/** I regali della partita, tutti: la guida dice «almeno 10 regali totali ai Confidenti» e non esclude nessun regalo, quindi conta anche la
+ *  Cartolina spedita (revisione dei lotti D e D2: escluderla era una regola senza fonte). */
+function regaliConsegnati(partitaId: number): number {
+  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'regalo_partita'").get()) return 0;
+  return prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ?').pluck().get(partitaId) as number;
 }
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */

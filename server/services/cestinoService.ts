@@ -209,6 +209,20 @@ function strutturaTabella(db: AppDatabase, schema: Schema, tabella: string): { c
   return { colonne: info.map((c) => c.name), chiave };
 }
 
+/**
+ * Le chiavi che una tabella aveva prima di essere ricostruita con una chiave nuova, per riconoscere le righe delle fotografie del Cestino fatte
+ * allora. Ondata 5 (utente 052, revisione dei lotti D e D2): `regalo_partita` aveva per chiave (partita, Confidente, nome del regalo) e ora ha
+ * `id`; una fotografia di prima non ha `id`, e la riga si riconosce con la chiave di allora più l'istante della consegna (`fatto_at`, che la 052
+ * copia identico), perché ora lo stesso regalo può avere più consegne.
+ */
+const CHIAVI_DI_PRIMA: Readonly<Record<string, readonly string[]>> = { 'utente.regalo_partita': ['partita_id', 'confidente_chiave', 'regalo', 'fatto_at'] };
+/** La chiave con cui riconoscere la riga della fotografia: quella della tabella, o quella di prima se la fotografia non ha le colonne nuove. */
+function chiaveDellaFotografia(schema: Schema, tabella: string, chiave: string[], riga: Riga): string[] {
+  if (chiave.every((c) => c in riga)) return chiave;
+  const prima = CHIAVI_DI_PRIMA[`${schema}.${tabella}`];
+  return prima && prima.every((c) => c in riga) ? [...prima] : chiave;
+}
+
 // ---- Valori ----
 
 function serializza(v: unknown): Valore {
@@ -443,7 +457,7 @@ function leggiPassiCestino(raw: string, schema: Schema): Passo[] {
     if (o.op === 'D' ? !riga(o.prima) || 'dopo' in o : o.op === 'I' ? !riga(o.dopo) || 'prima' in o : !riga(o.prima) || !riga(o.dopo)) throw errore();
     const s = strutturaTabella(getDb(), schema, o.tabella);
     for (const lato of [o.prima, o.dopo]) if (riga(lato) && s) {
-      for (const chiave of s.chiave) if (!(chiave in lato) || (typeof lato[chiave] === 'number' && !Number.isSafeInteger(lato[chiave]))) throw errore();
+      for (const chiave of chiaveDellaFotografia(schema, o.tabella, s.chiave, lato)) if (!(chiave in lato) || (typeof lato[chiave] === 'number' && !Number.isSafeInteger(lato[chiave]))) throw errore();
     }
   }
   return x as Passo[];
@@ -584,7 +598,9 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         if (radicePin) throw httpErrors.conflict('cestino-pin-registro-incoerente', 'La fotografia integrale del pin non coincide con lo schema corrente: ripristino annullato, cestino conservato.');
         throw httpErrors.conflict('cestino-fotografia-acquisto-incompleta', 'Lo schema e la fotografia integrale personale non coincidono: ripristino annullato, cestino conservato.');
       }
-      const descrivi = (riga: Riga) => s ? s.chiave.map((c) => String(riga[c] ?? '')).join(' · ') : '';
+      // la chiave con cui si riconosce la riga: quella della tabella, o quella di prima per una fotografia di prima della ricostruzione (utente 052)
+      const chiaveRiga = s ? chiaveDellaFotografia(p.schema, p.tabella, s.chiave, riferimento) : [];
+      const descrivi = (riga: Riga) => chiaveRiga.map((c) => String(riga[c] ?? '')).join(' · ');
       if (!s) {
         // R11-06: una tabella dichiarata tolta (o sparita) non è un errore, nemmeno nel blocco di una partita: la riga non torna e il motivo lo dice
         const tolta = tabellaTolta(p.schema, p.tabella);
@@ -601,9 +617,9 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       const sostituite = [...new Set(perse.flatMap((c) => colonnaTolta(p.schema, p.tabella, c)?.sostituitaDa ?? []))].join('; ');
       const segnalaPerse = () => { if (perse.length) salta(p.tabella, 'colonna-rimossa', descrivi(riferimento), perse, sostituite || null); };
       const su = `${p.schema}.${virgolette(p.tabella)}`;
-      const dove = s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ');
+      const dove = chiaveRiga.map((c) => `${virgolette(c)} IS ?`).join(' AND ');
       const leggi = (riga: Riga): Riga | null => {
-        const v = db.prepare(`SELECT ${colonne.map(virgolette).join(', ')} FROM ${su} WHERE ${dove}`).get(...s.chiave.map((c) => deserializza(riga[c] ?? null))) as Record<string, unknown> | undefined;
+        const v = db.prepare(`SELECT ${colonne.map(virgolette).join(', ')} FROM ${su} WHERE ${dove}`).get(...chiaveRiga.map((c) => deserializza(riga[c] ?? null))) as Record<string, unknown> | undefined;
         return v ? Object.fromEntries(colonne.map((c) => [c, serializza(v[c])])) : null;
       };
       const esegui = (sql: string, valori: unknown[], riga: Riga): boolean => {
@@ -664,7 +680,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
           if (esito) {
             const ripristinato = JSON.stringify(esito.valore);
             if (ripristinato !== ora.json) esegui(`UPDATE ${su} SET json = ? WHERE ${dove}`,
-              [ripristinato, ...s.chiave.map((c) => deserializza(dopo[c] ?? null))], dopo);
+              [ripristinato, ...chiaveRiga.map((c) => deserializza(dopo[c] ?? null))], dopo);
             if (esito.conflitti) salta(p.tabella, 'cambiata-dopo', descrivi(dopo));
           }
           jsonGestito = true;
@@ -672,14 +688,14 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         if (cambiate.some((c) => !(jsonGestito && c === 'json') && !stesso(ora[c], dopo[c]) && !stesso(ora[c], prima[c]))) salta(p.tabella, 'cambiata-dopo', descrivi(dopo));
         if (daRimettere.length) {
           esegui(`UPDATE ${su} SET ${daRimettere.map((c) => `${virgolette(c)} = ?`).join(', ')} WHERE ${dove}`,
-            [...daRimettere.map((c) => deserializza(prima[c])), ...s.chiave.map((c) => deserializza(dopo[c] ?? null))], dopo);
+            [...daRimettere.map((c) => deserializza(prima[c])), ...chiaveRiga.map((c) => deserializza(dopo[c] ?? null))], dopo);
         }
       } else {
         const dopo = p.dopo!;
         const ora = leggi(dopo);
         if (!ora) continue;
         if (!uguali(ora, dopo, colonne)) { salta(p.tabella, 'cambiata-dopo', descrivi(dopo)); continue; }
-        esegui(`DELETE FROM ${su} WHERE ${dove}`, s.chiave.map((c) => deserializza(dopo[c] ?? null)), dopo);
+        esegui(`DELETE FROM ${su} WHERE ${dove}`, chiaveRiga.map((c) => deserializza(dopo[c] ?? null)), dopo);
       }
     }
     if (occupate.length) {
@@ -728,8 +744,9 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       for (const v of daVerificare) {
         if (!['articolo', 'regalo_partita', 'dati_guida', 'proposta_abbinamento'].includes(v.tabella)) continue;
         const s = struttura(v.schema, v.tabella); if (!s) continue;
-        const ora = db.prepare(`SELECT * FROM ${v.schema}.${virgolette(v.tabella)} WHERE ${s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ')}`)
-          .get(...s.chiave.map((c) => deserializza(v.riga[c] ?? null))) as Record<string, unknown> | undefined;
+        const k = chiaveDellaFotografia(v.schema, v.tabella, s.chiave, v.riga);
+        const ora = db.prepare(`SELECT * FROM ${v.schema}.${virgolette(v.tabella)} WHERE ${k.map((c) => `${virgolette(c)} IS ?`).join(' AND ')}`)
+          .get(...k.map((c) => deserializza(v.riga[c] ?? null))) as Record<string, unknown> | undefined;
         if (!ora) continue;
         richiedi(ora.catalogo_chiave);
         if (v.tabella === 'articolo') { costo(ora.costo_json); const seed = parse(ora.seed_json); richiedi(seed.catalogo_chiave); costo(seed.costo_json); }

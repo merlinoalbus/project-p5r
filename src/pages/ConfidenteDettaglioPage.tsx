@@ -24,7 +24,7 @@ import { ModificaAbilita } from '../components/confidenti/ModificaAbilita';
 import { ModificaDialogo } from '../components/confidenti/ModificaDialogo';
 import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
 import { DisponibilitaStrutturataScheda, EditorDisponibilitaStrutturata } from '../components/confidenti/DisponibilitaStrutturata';
-import type { RegaloConfidenteDto } from '../types';
+import type { ConsegnaRegaloDto, RegaloConfidenteDto } from '../types';
 import { DialogoRango } from '../components/confidenti/DialogoRango';
 import { CollegamentoVisivo, PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
@@ -35,6 +35,11 @@ import { DotiIncontro } from '../components/partita/DotiIncontro';
 import { sitoDellaFonte } from '../utils/fonti';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
+import { REAZIONE_FUORI_ELENCO, annulloDelRegalo, esitoDelRegalo, fraIGraditi, testoReazione } from '../../shared/regali';
+import { casaOggetto } from '../../shared/catalogo';
+import { ElencoConsegne } from '../components/catalogo/ConsegneRegalo';
+import { raggruppaConsegne } from '../utils/consegneRegalo';
+import { ChipReazione } from '../components/catalogo/ChipReazione';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -113,18 +118,36 @@ export function ConfidenteDettaglioPage() {
     }
   };
 
-  /** Un regalo del catalogo si dà con «Regala» (azione unica: punti, consegna, acquisto) e qui si annulla con ciò che aveva fatto; un regalo
-   *  senza oggetto collegato resta la vecchia spunta per nome. Rilegge lo stato della partita e notifica l'esito (anche l'errore). */
+  /** Revisione dei lotti D e D2: le consegne della partita a questo Confidente, tutte (anche fuori elenco e la Cartolina), per oggetto. */
+  const gruppiConsegne = useMemo(() => raggruppaConsegne(mio?.consegne ?? [], (x) => ({
+    chiave: x.catalogo ?? `nome:${x.nome}`, nome: x.nome, casa: x.catalogo ? casaOggetto(x.catalogo) : null,
+  })), [mio]);
+  /** Toglie l'ultima consegna del gruppo: un oggetto del catalogo con ciò che l'azione «Regala» aveva fatto (proprio quella, per `id`); una
+   *  consegna per nome senza oggetto con la vecchia spunta. Rilegge lo stato della partita e notifica l'esito (anche l'errore). */
+  const annullaConsegna = async (ultima: ConsegnaRegaloDto) => {
+    if (!attiva || regaloInCorso) return;
+    setRegaloInCorso(true);
+    try {
+      if (ultima.catalogo) {
+        const esito = await annullaRegaloOggetto(attiva.id, chiave, ultima.catalogo, ultima.id ?? undefined);
+        await stato.ricarica();
+        notifica('info', `${annulloDelRegalo(ultima.modo, ultima.nome)}${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
+      } else {
+        await impostaRegaloFatto(attiva.id, chiave, ultima.nome, false);
+        await stato.ricarica();
+        notifica('info', `Regalo «${ultima.nome}» segnato come non consegnato.`);
+      }
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    } finally {
+      setRegaloInCorso(false);
+    }
+  };
+  /** Un regalo dell'elenco senza oggetto collegato resta la vecchia spunta per nome (quelli del catalogo si danno con «Regala»). */
   const segnaRegalo = async (g: RegaloConfidenteDto, fatto: boolean) => {
     if (!attiva || regaloInCorso) return;
     setRegaloInCorso(true);
     try {
-      if (g.catalogo) {
-        const esito = await annullaRegaloOggetto(attiva.id, chiave, g.catalogo.chiave);
-        await stato.ricarica();
-        notifica('info', `Consegna di «${g.nome}» annullata${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
-        return;
-      }
       await impostaRegaloFatto(attiva.id, chiave, g.nomeStorico ?? g.nome, fatto);
       await stato.ricarica();
       notifica('info', fatto ? `Regalo «${g.nome}» segnato come consegnato.` : `Regalo «${g.nome}» segnato come non consegnato.`);
@@ -134,6 +157,35 @@ export function ConfidenteDettaglioPage() {
       setRegaloInCorso(false);
     }
   };
+
+  // i graditi: ciò che vale più di +1, una riga con una nota, e le vecchie righe senza oggetto (la spunta per nome); le altre righe a +1 valgono
+  // quanto ogni altro regalo (revisione dei lotti D e D2: presentarle come «gradite» contraddiceva la guida)
+  const graditi = (c?.regali ?? []).filter(fraIGraditi);
+  const altriInElenco = (c?.regali ?? []).filter((g) => !graditi.includes(g));
+  // revisione dei lotti D e D2: «Regala» compare solo quando il regalo si può fare davvero, cioè a un Confidente che riceve regali e che nella
+  // partita è già stato incontrato (si regala durante un ritrovo: rango 1 o più, come vuole il server). Al rango 0 il pulsante aprirebbe una
+  // finestra con tutto disabilitato: al suo posto una riga dice perché
+  const regalabileOra = !!attiva && !!c?.regalabile && !!mio && mio.rango > 0;
+  const nonIncontrato = !!attiva && !!c?.regalabile && !!mio && mio.rango === 0;
+  const rigaRegalo = (g: RegaloConfidenteDto) => (
+    <li key={g.ordine} className="py-1.5 flex flex-wrap items-center gap-2 testo-13">
+      {/* ondata 5: lo stesso oggetto si può ridare; le consegne già date (e il loro annullo) stanno in «Regali dati in questa partita» */}
+      {regalabileOra && g.catalogo && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
+        onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />}
+      {attiva && !g.catalogo && (
+        <label className="flex items-center gap-1.5 touch">
+          <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
+        </label>
+      )}
+      <strong className={!g.catalogo && regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
+      {g.reazione !== null && <ChipReazione reazione={g.reazione} />}
+      {(g.dove || g.costo) && <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>}
+      {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
+      {!IN_RILASCIO && g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+      <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
+      <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
+    </li>
+  );
 
   return (
     <>
@@ -233,53 +285,40 @@ export function ConfidenteDettaglioPage() {
 
           <section className="card flex flex-col gap-2">
             <TitoloSezione>Regali graditi</TitoloSezione>
-            {attiva && c.regali.some((g) => g.catalogo) && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
+            {/* ondata 5 (RG-10, RG-11): si regala un qualunque oggetto regalo, a chi riceve regali */}
+            {regalabileOra && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
               disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }} />}
-            {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
+            {nonIncontrato && <p className="m-0 testo-13 text-text-secondary text-pretty">{c.nome} non è ancora stato incontrato in questa partita: si regala durante un ritrovo.</p>}
+            {regalabileOra && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
               onChiudi={() => setSceltaRegaloPer(null)} onFatto={(esito) => {
                 setSceltaRegaloPer((corrente) => corrente === bersaglioRegalo ? null : corrente);
                 void stato.ricarica();
-                notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+                notifica('success', `${esitoDelRegalo(esito.consegna?.modo, c.nome)}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
               }} />}
-            {c.regali.length === 0 ? <p className="m-0 testo-13 text-text-muted">Questo Confidente non accetta regali.</p> : (
-              <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali">
-                {c.regali.map((g, i) => (
-                  <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 testo-13">
-                    {attiva && g.catalogo && (regaloConsegnato(g)
-                      ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Annulla consegna" disabled={regaloInCorso || stato.caricamento}
-                          onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla la consegna di ${g.nome}`} />
-                      : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
-                          onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />)}
-                    {attiva && !g.catalogo && (
-                      <label className="flex items-center gap-1.5 touch">
-                        <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
-                      </label>
-                    )}
-                    <strong className={regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
-                    {g.effetto && <span className="chip">{g.effetto}</span>}
-                    <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
-                    {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
-                    {!IN_RILASCIO && g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-                    <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
-                    <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
-                  </li>
-                ))}
+            {!c.regalabile ? <p className="m-0 testo-13 text-text-muted">Questo Confidente non accetta regali.</p> : graditi.length === 0 ? null : (
+              <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali graditi">
+                {graditi.map((g) => rigaRegalo(g))}
               </ul>
             )}
-            {c.regaliSconsigliati.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <h3 className="m-0 testo-12 font-semibold text-text-muted">Sconsigliati (non danno punti)</h3>
-                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label="Regali sconsigliati">
-                  {c.regaliSconsigliati.map((s) => (
-                    <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 testo-13 text-text-muted">
-                      <span className="min-w-0 break-words">{s.nome}</span>
-                      {!IN_RILASCIO && s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-                      <ModificaGuida tipo="regalo" chiave={`${chiave}:${s.ordine}`} cosa={`il regalo sconsigliato «${s.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
-                    </li>
-                  ))}
+            {/* ondata 5 (decisione 21): la guida non ha regali sconsigliati; quel che non è fra i graditi vale +1 */}
+            {c.regalabile && <p className="m-0 testo-12 text-text-muted">{graditi.length ? 'Ogni altro' : 'Ogni'} oggetto regalo vale {testoReazione(REAZIONE_FUORI_ELENCO)}.</p>}
+            {/* revisione dei lotti D e D2: le righe dell'elenco a +1 (le ex «sconsigliate») valgono quanto ogni altro regalo e non si mostrano fra i
+                graditi; restano raggiungibili qui, nella preparazione, per correggerle */}
+            {!IN_RILASCIO && altriInElenco.length > 0 && (
+              <details className="testo-13">
+                <summary className="touch inline-flex items-center text-text-secondary">Altre righe dell’elenco, a {testoReazione(REAZIONE_FUORI_ELENCO)} come ogni regalo ({altriInElenco.length})</summary>
+                <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Altre righe dell’elenco dei regali">
+                  {altriInElenco.map((g) => rigaRegalo(g))}
                 </ul>
-              </div>
+              </details>
             )}
+            {/* revisione dei lotti D e D2: ogni consegna della partita si vede e si annulla anche dopo aver lasciato la pagina, fuori elenco e
+                Cartolina comprese, con il numero di volte per un regalo ripetuto */}
+            {attiva && gruppiConsegne.length > 0 && <>
+              <h3 className="m-0 mt-1 text-base">Regali dati in questa partita</h3>
+              <ElencoConsegne gruppi={gruppiConsegne} occupato={regaloInCorso || stato.caricamento} etichetta={`Regali dati a ${c.nome}`}
+                onAnnulla={(_g, ultima) => void annullaConsegna(ultima)} />
+            </>}
           </section>
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">

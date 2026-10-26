@@ -25,7 +25,7 @@ import { conCestinoPrivato } from './cestinoService.js';
 import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
+  CompendioPartitaDto, ConfidentePartitaDto, ConsegnaRegaloDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
   FasciaGioco,
 } from '../../shared/types.js';
@@ -272,7 +272,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  * (`piazzamentoCorrente` della partita, mai il client: il campo `esame` della richiesta non conta più) servono al bonus dell'esame.
  */
 export function puntiConfidente(mod: ModificaConfidente, confidente?: string, piazzamento: PiazzamentoEsame | null = null): number {
-  return puntiDelModulo({ confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito, piazzamento });
+  return puntiDelModulo({ confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, reazioneRegalo: mod.reazioneRegalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito, piazzamento });
 }
 
 /** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`, migrazione 161); 0 altrove. */
@@ -313,16 +313,30 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
   return new Map(righe.map((r) => [r.chiave, r.rango]));
 }
 
+/** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna della 255 quelli con un elenco di regali. */
+export function confidentiRegalabili(): string[] {
+  try {
+    if ((prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile')) {
+      return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
+    }
+    return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
+  } catch { return []; }
+}
+
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
-function regaliFatti(partitaId: number, chiave?: string): Map<string, { nomi: string[]; catalogo: string[] }> {
-  const perConfidente = new Map<string, { nomi: string[]; catalogo: string[] }>();
+function regaliFatti(partitaId: number, chiave?: string): Map<string, RegaliDelConfidente> {
+  const perConfidente = new Map<string, RegaliDelConfidente>();
   for (const r of regaliDellaPartita(partitaId, chiave)) {
-    const l = perConfidente.get(r.confidente) ?? { nomi: [], catalogo: [] };
+    const l = perConfidente.get(r.confidente) ?? { nomi: [], catalogo: [], consegne: [] };
     l.nomi.push(r.nome); if (r.catalogo && !l.catalogo.includes(r.catalogo)) l.catalogo.push(r.catalogo);
+    // ondata 5 (revisione): ogni consegna, per elencarle e annullarle una per una anche dopo aver ricaricato la pagina
+    l.consegne.push({ id: r.id, catalogo: r.catalogo, nome: r.nome, modo: r.modo, dataGioco: r.dataGioco, fasciaGioco: r.fasciaGioco });
     perConfidente.set(r.confidente, l);
   }
   return perConfidente;
 }
+/** I regali consegnati a un Confidente: i nomi storici, le chiavi del catalogo (una volta) e le consegne, dalla più vecchia. */
+interface RegaliDelConfidente { nomi: string[]; catalogo: string[]; consegne: ConsegnaRegaloDto[] }
 
 /**
  * I DTO delle righe date. Lo stato della partita per i semafori (`statoDisponibilitaPartita`) si calcola una volta e vale per tutte le
@@ -330,16 +344,14 @@ function regaliFatti(partitaId: number, chiave?: string): Map<string, { nomi: st
  * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
  * semafori vecchi.
  */
-function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, { nomi: string[]; catalogo: string[] }>): ConfidentePartitaDto[] {
+function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, RegaliDelConfidente>): ConfidentePartitaDto[] {
   // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
   const esame = esameCorrente(partitaId);
-  // i Confidenti con almeno un regalo gradito collegato al catalogo (senza catalogo di oggetti la colonna non c'è: nessuno)
-  const conRegaliCatalogo = new Set<string>();
-  try {
-    for (const r of prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo WHERE catalogo_chiave IS NOT NULL AND sconsigliato = 0').all() as Array<{ confidente_chiave: string }>) conRegaliCatalogo.add(r.confidente_chiave);
-  } catch { /* catalogo degli oggetti non disponibile */ }
+  // ondata 5 (RG-11): i Confidenti che ricevono regali (`confidente.regalabile`, migrazioni 255-256); su un file di gioco più vecchio quelli
+  // con un elenco di regali, come prima
+  const regalabili = new Set<string>(confidentiRegalabili());
   // L13 (decisione 18): gli oggetti che regalati adesso non scalano il prezzo (consegna di prima ridata nello stesso momento), letti una volta
   const regaliGiaNelSaldo = regaliConYenGiaNelSaldo(partitaId);
   return righe.map((c) => {
@@ -351,7 +363,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       personaArcanoInScorta: c.in_scorta === 1,
       // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
       contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
-      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], haRegaliCatalogo: conRegaliCatalogo.has(c.chiave),
+      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], consegne: regali.get(c.chiave)?.consegne ?? [], regalabile: regalabili.has(c.chiave),
       ...(regaliGiaNelSaldo.has(c.chiave) ? { regaliYenGiaNelSaldo: regaliGiaNelSaldo.get(c.chiave) } : {}),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
@@ -416,6 +428,8 @@ const TESTO_ORIGINE_RANGO: Record<OrigineCambioRango['origine'], string> = {
 export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente, origine?: OrigineCambioRango): ConfidentePartitaDto {
   // `confidente` controlla anche che partita e Confidente esistano (404)
   const attuale = confidente(partitaId, chiave);
+  // ondata 5 (RG-11): il regalo esiste solo per chi riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae)
+  if (dati.regalo && !attuale.regalabile) throw httpErrors.conflict('confidente-non-regalabile', `${attuale.nome} non riceve regali.`);
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);

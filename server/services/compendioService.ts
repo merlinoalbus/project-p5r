@@ -17,6 +17,7 @@ import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
+import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -465,12 +466,12 @@ export function impostaDotiIncontro(chiave: string, ranghi: Array<{ rango: numbe
 }
 
 /** Il regalo è corretto? Stessa regola del registro dei ripristini (R9-07/5): la fotografia `seed_json` ha almeno un valore diverso da quello della riga. */
-function regaloModificato(r: { catalogo_chiave: string | null; dove: string | null; costo: string | null; sconsigliato: number; nota: string | null; seed_json: string | null }): boolean {
+function regaloModificato(r: { catalogo_chiave: string | null; dove: string | null; costo: string | null; sconsigliato: number; nota: string | null; seed_json: string | null; reazione: number | null }): boolean {
   if (!r.seed_json) return false;
   let f: Record<string, unknown>;
   try { f = JSON.parse(r.seed_json) as Record<string, unknown>; } catch { return false; }
   if (typeof f.tipo === 'string') return false; // fotografia di prima della 212: non è la forma del registro
-  const attuali: Record<string, unknown> = { catalogo_chiave: r.catalogo_chiave, dove: r.dove, costo: r.costo, sconsigliato: r.sconsigliato === 1, nota: r.nota };
+  const attuali: Record<string, unknown> = { catalogo_chiave: r.catalogo_chiave, dove: r.dove, costo: r.costo, sconsigliato: r.sconsigliato === 1, nota: r.nota, reazione: r.reazione === null ? null : String(r.reazione) };
   return Object.keys(attuali).some((p) => p in f && !uguali(f[p] ?? null, attuali[p] ?? null));
 }
 
@@ -482,7 +483,10 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: (JSON.parse(d.scelte_json) as Array<Record<string, unknown>>).map((s) => ({ ordine: (s.ordine as number | null) ?? null, testo: String(s.testo ?? ''), punti: (s.punti as number | null) ?? null, puntiTesto: (s.puntiTesto as string | null) ?? null, romantica: s.romantica === true, avviso: (s.avviso as string | null) ?? null })) }));
   const conCatalogo = catalogoOggettiDisponibile();
-  const righeRegali = prepared(`SELECT ordine,nome,dove,costo,effetto,sconsigliato,${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`).all(chiave) as Array<{ ordine: number; nome: string; dove: string | null; costo: string | null; effetto: string | null; sconsigliato: number; catalogo_chiave: string | null; nota: string | null; seed_json: string | null }>;
+  // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
+  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`).all(chiave) as Array<{ ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null; nota: string | null; seed_json: string | null }>)
+    .map((g) => ({ ...g, reazione: (g.reazione === 1 || g.reazione === 2 || g.reazione === 3 ? g.reazione : conReazione ? null : g.sconsigliato === 1 ? 1 : 3) as ReazioneRegalo | null }));
   const chiaviRegali = righeRegali.flatMap((g) => g.catalogo_chiave ? [g.catalogo_chiave] : []);
   const oggettiRegali = oggettiConChiavi(chiaviRegali); const offerteRegali = offerteBaseDegliOggetti(chiaviRegali);
   const regali = righeRegali.map((g) => {
@@ -495,16 +499,24 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     const scambi = [...new Set(offerte.flatMap((o) => o.costoDaVerificare ? ['Scambio da correggere nel negozio'] : o.costo?.tipo === 'fiori' ? [`Scambio: ${o.costo.importo} fiori`]
       : o.costo?.tipo === 'oggetti' ? [`Scambio: ${o.costo.oggetti.map((v) => `${v.quantita} × ${v.nome ?? 'oggetto da collegare'}`).join(', ')}`] : []))];
     const costoYen = prezzo === null ? null : prezzo === prezzoMassimo ? `${prezzo.toLocaleString('it-IT')} ¥` : `Da ${prezzo.toLocaleString('it-IT')} a ${prezzoMassimo!.toLocaleString('it-IT')} ¥`;
-    return { ...g, modificato: regaloModificato(g), ...(precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: offerte.length > 0,
-      dove: offerte.length ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
-      costo: offerte.length ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
-      nota: [...new Set([g.nota, offerte.length && (g.dove || g.costo) ? `Indicazioni della guida: ${[g.dove, g.costo].filter(Boolean).join(' · ')}` : null].filter((v): v is string => !!v))].join('\n') || null };
+    // ondata 5 (decisione 12, RG-13): con il listino il luogo e il prezzo sono solo quelli delle offerte; il testo della guida (e il ripristino del
+    // suo costo) vale soltanto per un regalo senza offerte, dove è l'unico punto
+    const conListino = offerte.length > 0;
+    return { ...g, modificato: regaloModificato(g), ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
+      // la sede si dice solo se è un posto diverso dal negozio («High Sense (High Sense)» non informa)
+      dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
+      costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
+      nota: g.nota };
   });
+  const regalabile = (prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((x) => x.name === 'regalabile')
+    ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
   const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
-    regali: regali.filter((g) => g.sconsigliato === 0).map(({ ordine, modificato, nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ ordine, modificato, nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto })),
-    regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => ({ ordine: g.ordine, nome: g.nome, modificato: g.modificato })),
+    // ondata 5: dalla reazione più alta (a parità, l'ordine della guida); niente più «sconsigliati»: ogni regalo vale almeno +1
+    regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }))
+      .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
+    regalabile,
     oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
     disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],

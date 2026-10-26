@@ -16,6 +16,11 @@ import { regaliDellaPartita } from './regaliPartita.js';
 import { fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
+import { copieDellOggetto } from './copieOggetti.js';
+import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
+import { CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO } from '../../shared/regali.js';
+import { confidentiRegalabili, ranghiConfidenti } from './partiteService.js';
+import { reazioneInElenco } from './regaloAzioneService.js';
 
 export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
@@ -101,11 +106,23 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   if (partita !== undefined) verificaPartita(partita);
   const riga = rigaOggetto(chiave); const oggetto = dtoOggetto(riga);
   const inVendita = offerteDellOggetto(chiave, partita);
-  const regalati = new Set(partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave).map((r) => r.confidente));
-  const regalo = (prepared(`SELECT g.confidente_chiave,c.nome,g.effetto,g.sconsigliato FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
-    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.sconsigliato,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; effetto: string | null; sconsigliato: number }>)
-    .filter((r, i, tutti) => tutti.findIndex((a) => a.confidente_chiave === r.confidente_chiave && a.sconsigliato === r.sconsigliato) === i)
-    .map((r) => ({ confidente: r.confidente_chiave, nome: r.nome, gradimento: r.effetto, casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave), sconsigliato: r.sconsigliato === 1 }));
+  const consegneOggetto = partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave);
+  const regalati = new Set(consegneOggetto.map((r) => r.confidente));
+  // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
+  // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
+  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
+  // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
+  const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'},g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
+    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.reazione DESC,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; reazione: number | null; nota: string | null }>;
+  const noteDi = (confidente: string): string | null => {
+    const note = [...new Set(righeRegalo.filter((r) => r.confidente_chiave === confidente).map((r) => r.nota?.trim() ?? '').filter(Boolean))];
+    return note.length ? note.join('\n') : null;
+  };
+  const regalo = righeRegalo
+    .filter((r, i, tutti) => tutti.findIndex((a) => a.confidente_chiave === r.confidente_chiave) === i)
+    .map((r) => ({ confidente: r.confidente_chiave, nome: r.nome, reazione: (r.reazione === 1 || r.reazione === 2 || r.reazione === 3 ? r.reazione : null) as ReazioneRegalo | null,
+      nota: noteDi(r.confidente_chiave), casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave) }));
   const prodottiRicette = ricompensePerFonte('ricetta');
   const ricette = (prepared('SELECT ricetta,quantita FROM ricetta_materiale WHERE catalogo_chiave = ? ORDER BY ricetta').all(chiave) as Array<{ ricetta: string; quantita: number }>)
     .map((r) => {
@@ -132,5 +149,33 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   return { ...oggetto, noteStoriche: noteStoricheDi('catalogo', riga.chiave), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
     trasformazioni: trasformazioniDiJose(partita === undefined ? undefined : statoDisponibilitaPartita(partita), chiave),
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,
-    partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false } };
+    partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false,
+      // ondata 5 (D2): le copie possedute, regalate e rimaste, per la finestra «Regala» (si regala una copia che c'è, senza ricomprarla)
+      copie: copieDellOggetto(partita, chiave),
+      // revisione dei lotti D e D2: ogni consegna di questo oggetto (anche fuori elenco e la Cartolina) si vede e si annulla dalla scheda, e
+      // l'oggetto si dà a chiunque lo possa ricevere adesso, non solo a chi lo ha nell'elenco
+      ...consegneEDestinatari(partita, chiave, oggetto.categoria, regalo, consegneOggetto) } };
+}
+
+/**
+ * Le consegne dell'oggetto nella partita (con il nome del Confidente) e i Confidenti a cui si può dare adesso, con le stesse regole del server
+ * (`regaloAzioneService.regala`): ricevono regali (`confidente.regalabile`), sono già stati incontrati (rango 1 o più), l'oggetto è un regalo o
+ * è nel loro elenco, e la Cartolina non va a chi è al rango massimo. La reazione è quella dell'elenco, +1 fuori elenco; la Cartolina +1.
+ */
+function consegneEDestinatari(partita: number, chiave: string, categoria: string, regalo: Array<{ confidente: string; reazione: ReazioneRegalo | null }>,
+  consegne: ReturnType<typeof regaliDellaPartita>): NonNullable<Pick<NonNullable<OggettoDettaglioDto['partita']>, 'consegne' | 'destinatari'>> {
+  const nomi = new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome]));
+  const ranghi = ranghiConfidenti(partita);
+  const inElenco = new Set(regalo.map((r) => r.confidente));
+  const regalabili = new Set(confidentiRegalabili());
+  const cartolina = chiave === CARTOLINA;
+  // nell'ordine del gioco (quello dei ranghi); la reazione la calcola la stessa funzione dell'azione, così la scheda dice ciò che il regalo darà
+  const destinatari = [...ranghi].filter(([c, rango]) => regalabili.has(c) && (categoria === 'regalo' || inElenco.has(c)) && rango >= 1 && !(cartolina && rango >= 10))
+    .map(([c, rango]) => ({ confidente: c, nome: nomi.get(c) ?? c, rango,
+      reazione: cartolina ? REAZIONE_CARTOLINA : reazioneInElenco(c, chiave) ?? REAZIONE_FUORI_ELENCO }));
+  return {
+    consegne: consegne.map((r) => ({ id: r.id, catalogo: r.catalogo, nome: r.nome, modo: r.modo, dataGioco: r.dataGioco, fasciaGioco: r.fasciaGioco,
+      confidente: r.confidente, nomeConfidente: nomi.get(r.confidente) ?? r.confidente })),
+    destinatari,
+  };
 }

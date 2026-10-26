@@ -263,6 +263,10 @@ import { migration250 } from './250_identita_doppie_unite.js';
 import { migration251 } from './251_regali_righe_composte_sciolte.js';
 import { migration252 } from './252_braccialetto_dargento_regalo.js';
 import { migration253 } from './253_gemme_elementali_separate.js';
+import { migration255 } from './255_reazione_dei_regali.js';
+import { migration256 } from './256_reazioni_dei_regali.js';
+import { migration257 } from './257_copie_dei_regali.js';
+import { migration258 } from './258_benefattore_conteggio.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -280,4 +284,5 @@ export const migrations: Migration[] = [
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
   migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165, migration166, migration167, migration168, migration169, migration170, migration171, migration172, migration173, migration174, migration175, migration176, migration177, migration178, migration179, migration180, migration181, migration182, migration183, migration184, migration185, migration186, migration187, migration188, migration189, migration190, migration191, migration192, migration193, migration194, migration195, migration196, migration197, migration198, migration199, migration200, migration201, migration202, migration203, migration204, migration205, migration206, migration207, migration208, migration209, migration210, migration211, migration212, migration213, migration214, migration215, migration216, migration217, migration218, migration219, migration220, migration221, migration222, migration223, migration224, migration225, migration226, migration227, migration228, migration229, migration230, migration231, migration232, migration233, migration234, migration235, migration236, migration237, migration238, migration239, migration240, migration241, migration242, migration243, migration244, migration245, migration246, migration247, migration248, migration249,
   migration250, migration251, migration252, migration253,
+  migration255, migration256, migration257, migration258,
 ];

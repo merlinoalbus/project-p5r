@@ -193,6 +193,9 @@ router.get('/:id/confidenti', validate({ params: paramsPartita }), (req, res) =>
 });
 // dalla pagina Confidenti: oltre a punti e rango registra gli incontri (la Dote a ogni incontro, una volta per incontro)
 router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, body: bodyConfidente }), (req, res) => {
+  // ondata 5 (revisione dei lotti D e D2): il regalo senza oggetto (+50 di ripiego) non c'è più: ogni regalo è l'azione «Regala», che sa
+  // quale oggetto, con la sua reazione, la copia usata e l'annullo
+  if ((req.body as { regalo?: boolean }).regalo === true) throw httpErrors.badRequest('usa-regala', 'Il regalo si registra con l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
   res.json(aggiornaConfidenteDallaPagina(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
@@ -224,8 +227,8 @@ router.post('/:id/regali', validate({ params: paramsPartita, body: bodyRegala })
   res.status(201).json(regala(Number(req.params.id), req.body as RichiestaRegalo));
 });
 router.post('/:id/regali/annulla', validate({ params: paramsPartita, body: bodyAnnullaRegalo }), (req, res) => {
-  const b = req.body as { confidente: string; catalogo: string };
-  res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo));
+  const b = req.body as { confidente: string; catalogo: string; id?: number };
+  res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo, b.id));
 });
 
 router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {

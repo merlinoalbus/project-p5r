@@ -87,9 +87,15 @@ export function nataPrimaDegliYenAutomatici(dal: string | null | undefined): boo
 }
 /** Il motivo del segno superato da un raccordo confermato dopo gli yen automatici: la riga resta (è la storia del saldo) ma non vale più. */
 const MOTIVO_SEGNO_SUPERATO = 'superato-da-raccordo';
+/** Ondata 5 (revisione dei lotti D e D2): il segno del regalo di prima usato da una consegna nuova (`usaRegaloDiPrima`) porta l'id di quella
+ *  consegna dopo questo prefisso, e finché lei c'è non vale più: lo stesso prezzo non si risparmia due volte. Torna valido quando la si toglie. */
+const PREFISSO_SEGNO_USATO = 'usato-dalla-consegna:';
+/** Il motivo del segno del regalo di prima tolto (`segnaRegaloDiPrimaTolto`), quello a cui torna un segno reso da una consegna tolta. */
+const MOTIVO_REGALO_DI_PRIMA_TOLTO = 'regalo-di-prima-tolto';
 /** Vero se la causa è «fuori registro»: tolta quando il suo denaro era già nel saldo senza un movimento, rimettendola non si muove niente. */
 export const yenFuoriRegistro = (p: number, c: CausaYen): boolean =>
-  !!prepared('SELECT 1 FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ? AND motivo <> ?').get(p, c.tipo, c.chiave, MOTIVO_SEGNO_SUPERATO);
+  !!prepared(`SELECT 1 FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ? AND motivo <> ? AND motivo NOT LIKE '${PREFISSO_SEGNO_USATO}%'`)
+    .get(p, c.tipo, c.chiave, MOTIVO_SEGNO_SUPERATO);
 /**
  * La versione nuova di un effetto confermata adesso (la proposta «Applica» di una sostituzione sulla spunta in piedi) è nata dopo gli yen
  * automatici: il segno «fuori registro» dello stesso effetto, lasciato togliendo una spunta di prima, non vale più, e l'effetto muove i suoi yen
@@ -550,7 +556,7 @@ const momentoNoto = (data: string | null, fascia: string | null): boolean => !!d
  *  momento di gioco della consegna non si segna: ridare lo stesso oggetto non si potrebbe distinguere da un regalo nuovo, che si paga. */
 export function segnaRegaloDiPrimaTolto(p: number, confidente: string, catalogo: string, data: string | null, fascia: string | null): void {
   if (!momentoNoto(data, fascia)) return;
-  segnaYenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, data, fascia) }, 'regalo-di-prima-tolto');
+  segnaYenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, data, fascia) }, MOTIVO_REGALO_DI_PRIMA_TOLTO);
 }
 /** Il momento di gioco attuale della partita, quello che il regalo registra nella consegna. */
 const momentoDellaPartita = (p: number): { data: string | null; fascia: string | null } => {
@@ -562,11 +568,30 @@ export function regaloYenGiaNelSaldo(p: number, confidente: string, catalogo: st
   const m = momentoDellaPartita(p);
   return momentoNoto(m.data, m.fascia) && yenFuoriRegistro(p, { tipo: 'regalo', chiave: chiaveRegaloDiPrima(confidente, catalogo, m.data, m.fascia) });
 }
+/**
+ * Ondata 5 (revisione dei lotti D e D2; il regalo si può ridare): la consegna `consegna` è quella di prima ridata nello stesso momento di gioco e
+ * non scala il prezzo; il segno si consuma, così una seconda copia dello stesso oggetto nello stesso momento si paga. Vero se il segno c'era (e
+ * ora è usato). Dentro la transazione del regalo; togliendo la consegna il segno torna valido (`liberaRegaloDiPrima`).
+ */
+export function usaRegaloDiPrima(p: number, confidente: string, catalogo: string, consegna: number): boolean {
+  richiedeTransazione('Il segno del regalo di prima usato');
+  if (!regaloYenGiaNelSaldo(p, confidente, catalogo)) return false;
+  const m = momentoDellaPartita(p);
+  return prepared("UPDATE utente.yen_fuori_registro SET motivo = ? WHERE partita_id = ? AND causa_tipo = 'regalo' AND causa_chiave = ?")
+    .run(`${PREFISSO_SEGNO_USATO}${consegna}`, p, chiaveRegaloDiPrima(confidente, catalogo, m.data, m.fascia)).changes === 1;
+}
+/** La consegna `consegna` si toglie: il segno del regalo di prima che aveva usato torna valido (il prezzo è ancora nel saldo). */
+export function liberaRegaloDiPrima(p: number, consegna: number): void {
+  prepared("UPDATE utente.yen_fuori_registro SET motivo = ? WHERE partita_id = ? AND causa_tipo = 'regalo' AND motivo = ?")
+    .run(MOTIVO_REGALO_DI_PRIMA_TOLTO, p, `${PREFISSO_SEGNO_USATO}${consegna}`);
+}
 /** Per ogni Confidente, gli oggetti che regalati adesso non scalano il prezzo (`regaloYenGiaNelSaldo`), per la frase della finestra «Regala». */
 export function regaliConYenGiaNelSaldo(p: number): Map<string, string[]> {
   const m = momentoDellaPartita(p), out = new Map<string, string[]>();
   if (!momentoNoto(m.data, m.fascia)) return out;
-  for (const { causa_chiave } of prepared("SELECT causa_chiave FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = 'regalo'").all(p) as Array<{ causa_chiave: string }>) {
+  // solo i segni validi: non quelli già usati da una consegna ridata (né superati), come `yenFuoriRegistro`
+  for (const { causa_chiave } of prepared(`SELECT causa_chiave FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = 'regalo' AND motivo <> ? AND motivo NOT LIKE '${PREFISSO_SEGNO_USATO}%'`)
+    .all(p, MOTIVO_SEGNO_SUPERATO) as Array<{ causa_chiave: string }>) {
     let k: unknown;
     try { k = JSON.parse(causa_chiave); } catch { continue; }
     if (!Array.isArray(k) || k.length !== 4 || typeof k[0] !== 'string' || typeof k[1] !== 'string' || k[2] !== m.data || k[3] !== m.fascia) continue;

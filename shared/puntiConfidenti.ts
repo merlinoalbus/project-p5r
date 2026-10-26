@@ -14,6 +14,12 @@
 export const PUNTI_PER_NOTA = 5;
 /** Punti base di un regalo gradito. */
 export const PUNTI_REGALO = 50;
+/** La reazione del Confidente al regalo, come la colonna «Bonus affinità» della guida dei regali: +3, +2 o +1 (`confidente_regalo.reazione`). */
+export type ReazioneRegalo = 1 | 2 | 3;
+/** Ondata 5 (decisione 21 dell'utente, «reazione dei regali strutturata con i punti attuali finché non verificati in gioco»; D1 del censimento):
+ *  i punti base per reazione. Il valore di +2 e +1 la guida non lo dà: finché non si verifica in gioco valgono tutti i 50 di sempre. Quando si
+ *  saprà, si cambia solo questa tabella. */
+export const PUNTI_REGALO_PER_REAZIONE: Readonly<Record<ReazioneRegalo, number>> = { 3: PUNTI_REGALO, 2: PUNTI_REGALO, 1: PUNTI_REGALO };
 /** Punti base di un'uscita che non fa salire di rango. */
 export const PUNTI_USCITA = 10;
 /** Moltiplicatore con una Persona dello stesso arcano. */
@@ -36,6 +42,8 @@ export interface IngressoPuntiConfidente {
   confidente?: string;
   noteRisposta?: 1 | 2 | 3;
   regalo?: boolean;
+  /** La reazione al regalo (con `regalo`): i punti base della sua riga di `PUNTI_REGALO_PER_REAZIONE`; senza, quelli di +3. */
+  reazioneRegalo?: ReazioneRegalo;
   uscita?: boolean;
   bonusArcano?: boolean;
   /** L'invito accettato subito: ×1,2. */
@@ -49,7 +57,7 @@ const tronca = (n: number): number => Math.floor(n + 1e-9);
 
 /** I punti base: il regalo vale più dell'uscita, l'uscita più delle note di risposta; senza nulla, zero. */
 export function puntiBase(i: IngressoPuntiConfidente): number {
-  return i.regalo ? PUNTI_REGALO : i.uscita ? PUNTI_USCITA : i.noteRisposta !== undefined ? i.noteRisposta * PUNTI_PER_NOTA : 0;
+  return i.regalo ? PUNTI_REGALO_PER_REAZIONE[i.reazioneRegalo ?? 3] : i.uscita ? PUNTI_USCITA : i.noteRisposta !== undefined ? i.noteRisposta * PUNTI_PER_NOTA : 0;
 }
 
 /** Il moltiplicatore dell'esame per quel Confidente: 1 per chi non è fra i sette o senza piazzamento registrato. */
