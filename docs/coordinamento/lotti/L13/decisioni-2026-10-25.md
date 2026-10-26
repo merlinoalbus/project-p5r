@@ -48,4 +48,8 @@ verificati sulle copie in sola lettura dei dati reali.
     registrato: togliendo la spunta si annullano come gli altri. Per le voci spuntate in passato con effetti mai applicati si prepara un elenco
     voce per voce di ciò che manca in ogni partita; si applica solo ciò che l'utente approva.
 
+20. **Televendite** (26 ottobre; risposte dell'utente «Uno solo o nessuno» e «Sì, aggiungile»). Ogni domenica di messa in onda si compra un
+    solo set o nessuno: la scelta si fa alla spunta. Le quattro domeniche senza voce d'acquisto (26 giugno, 7 agosto, 25 settembre, 29 gennaio)
+    ricevono una voce «Canale di televendite» con i due set a scelta, come le altre (fuori dal periodo validato).
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
