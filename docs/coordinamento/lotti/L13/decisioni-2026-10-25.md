@@ -42,4 +42,10 @@ verificati sulle copie in sola lettura dei dati reali.
     ricompense delle Richieste, effetto «Yen ricevuti») entrano da soli. Restano manuali i soldi dei combattimenti e delle vendite di
     oggetti nei Palazzi e nei Memento.
 
+19. **Effetti di stato aggiunti a una voce già spuntata** (26 ottobre; segnalazione dell'utente: «al momento non viene aggiornato il
+    Compendio Personale»; risposte: «Subito al salvataggio» e «Elenco da approvare»). Persona, trofeo, evento di storia, domanda, cruciverba,
+    Richiesta, invito, sblocco (e gli altri effetti di stato) salvati su una voce già spuntata si applicano subito alla partita, con il «prima»
+    registrato: togliendo la spunta si annullano come gli altri. Per le voci spuntate in passato con effetti mai applicati si prepara un elenco
+    voce per voce di ciò che manca in ogni partita; si applica solo ciò che l'utente approva.
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
