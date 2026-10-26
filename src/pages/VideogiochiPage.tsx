@@ -30,6 +30,7 @@ import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/
 import { formattaYen, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { TestoNote } from '../components/shared/TestoNote';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
@@ -73,7 +74,7 @@ function Scheda({ g, partitaId, onSalvata, onCorretto, onPosizione }: { g: Video
 
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
-        <dd className="m-0">{g.effettiTesto.length ? g.effettiTesto.join(' · ') : 'Nessun effetto dichiarato'}</dd>
+        <dd className="m-0">{g.effettiTesto.length ? <TestoNote testo={g.effettiTesto.join(' · ')} /> : 'Nessun effetto dichiarato'}</dd>
         {g.negozi.length > 0 && <><dt className="text-text-muted">In vendita da</dt><dd className="m-0 flex flex-wrap gap-1">{g.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}</dd></>}
         {g.negozi.length === 0 && g.costo !== null && g.costo > 0 && <><dt className="text-text-muted">Costo</dt><dd className="m-0">{formattaYen(g.costo)}</dd></>}
       </dl>

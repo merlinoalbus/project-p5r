@@ -217,7 +217,7 @@ const datiAttivitaBase = z.object({
   esiti_json: z.unknown().superRefine((v, ctx) => {
     if (v === null) return;
     const e = normalizzaEsitiAttivita(v);
-    if (e === null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Gli esiti non sono validi: chiavi distinte, un nome, Doti con 1–3 note, condizioni riconosciute.' });
+    if (e === null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Gli esiti non sono validi: chiavi distinte, un nome, Doti da ♪ a ♪♪♪, condizioni riconosciute.' });
     else if (e.esiti.some((x) => x.condizioni.some((c) => foglieCondizione(c).some((f) => f.tipo === 'spillo' || f.tipo === 'voce-guida')))) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.' });
   })
     .transform((v) => (v === null ? null : JSON.stringify(normalizzaEsitiAttivita(v)))).optional(),

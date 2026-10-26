@@ -17,6 +17,7 @@
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
+import { simboliNote } from './note.js';
 import { normalizzaCondizioniSpillo, type RequisitoSpillo } from './condizioniSpillo.js';
 
 export interface DoteEsito { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -109,7 +110,7 @@ export function leggiEsitiAttivita(json: string | null | undefined): EsitiAttivi
 
 /** La frase delle Doti di un esito: «Coraggio ♪, Conoscenza ♪» oppure «nessuna Dote». */
 export function fraseDotiEsito(doti: ReadonlyArray<DoteEsito>): string {
-  return doti.length ? doti.map((d) => `${nomeDote(d.dote)} ${'♪'.repeat(d.note)}`).join(', ') : 'nessuna Dote';
+  return doti.length ? doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ') : 'nessuna Dote';
 }
 
 /** Le Doti di un esito con i punti che valgono (senza Fortuna: la Fortuna la conta il server quando registra il turno). */

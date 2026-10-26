@@ -24,6 +24,7 @@
 
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
 import { notePossibili } from './effettiVoce.js';
+import { simboliNote, simboliPossibili } from './note.js';
 
 /** I tipi di un'azione della giornata (`AzionePercorsoDto.tipo`), con il nome che l'interfaccia mostra. */
 export const TIPI_AZIONE = [
@@ -135,18 +136,13 @@ export interface NomiEffettiAzione {
   modiEsiti?: Record<string, 'scelta' | 'automatico'>;
 }
 
-/** «1 nota», «2 note». */
-const noteTesto = (n: number): string => `${n} ${n === 1 ? 'nota' : 'note'}`;
-/** «2 o 3 note». */
-const possibiliTesto = (p: ReadonlyArray<number>): string => `${p.slice(0, -1).join(', ')} o ${p[p.length - 1]} note`;
-
 /**
- * Le parti di un effetto, separate: il nome dell'elemento (la Dote, il libro, l'attività) e che cosa ne viene («2 note», «completato»,
+ * Le parti di un effetto, separate: il nome dell'elemento (la Dote, il libro, l'attività) e che cosa ne viene («♪♪», «completato»,
  * le Doti proprie del turno e il suo esito). È l'UNICA scrittura di queste parole: la frase di `descriviEffettoAzione` le compone, il
  * riepilogo per gruppi della voce (`shared/riepilogoEffetti.ts`) le mette in colonna. `dettaglio` vuoto: nessun dettaglio da dire.
  */
 export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {}): { nome: string; dettaglio: string; doti: string; esito: string } {
-  if (e.tipo === 'dote') return { nome: nomeDote(e.dote), dettaglio: e.possibili ? `${possibiliTesto(e.possibili)}: le scegli alla spunta (proposte ${noteTesto(e.note)})` : noteTesto(e.note), doti: '', esito: '' };
+  if (e.tipo === 'dote') return { nome: nomeDote(e.dote), dettaglio: e.possibili ? `${simboliPossibili(e.possibili)}: le scegli alla spunta (proposte ${simboliNote(e.note)})` : simboliNote(e.note), doti: '', esito: '' };
   if (e.tipo === 'lettura') {
     const elenco = e.categoria === 'libro' ? nomi.libri : e.categoria === 'film' ? nomi.film : nomi.videogiochi;
     const nome = elenco?.[e.chiave] ?? e.chiave;
@@ -156,14 +152,14 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
   const modo = nomi.modiEsiti?.[e.attivita];
   const esito = e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}, lo confermi alla spunta`
     : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? 'esito automatico secondo il giorno' : '';
-  const doti = e.doti?.length ? e.doti.map((d) => `${nomeDote(d.dote)}, ${noteTesto(d.note)}`).join('; ') : '';
+  const doti = e.doti?.length ? e.doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join('; ') : '';
   return { nome, dettaglio: [doti, esito].filter(Boolean).join(' · '), doti, esito };
 }
 
-/** La frase di un effetto: «Gentilezza, 2 note», «Zorro, il fuorilegge: completato», «Turno: Fioraio Rafflesia». */
+/** La frase di un effetto: «Gentilezza ♪♪», «Zorro, il fuorilegge: completato», «Turno: Fioraio Rafflesia». */
 export function descriviEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {}): string {
   const p = partiEffettoAzione(e, nomi);
-  if (e.tipo === 'dote') return `${p.nome}, ${p.dettaglio}`;
+  if (e.tipo === 'dote') return `${p.nome} ${p.dettaglio}`;
   if (e.tipo === 'lettura') return `${p.nome}: ${p.dettaglio}`;
   return `Turno: ${p.nome}${p.doti ? ` (${p.doti})` : ''}${p.esito ? ` · ${p.esito}` : ''}`;
 }

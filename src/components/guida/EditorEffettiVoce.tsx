@@ -18,6 +18,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { useGestiPartita } from '../../services/gestiPartita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { Note } from '../shared/TestoNote';
 
 type Acquisto = Extract<EffettoVoce, { tipo: 'acquisto' }>;
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
@@ -28,7 +29,7 @@ export function EditorEffettoPescaVoce({ effetto, righe, onCambia }: { effetto: 
   const doti = righe.filter(r => r.uid !== null && r.effetto.tipo === 'dote' && r.effetto.dote === 'perizia');
   const gruppo = (tipo: 'sostituisceTurni' | 'sostituisceDoti', candidati: Righe, titolo: string) => <fieldset className="m-0 flex min-w-0 flex-col gap-1 border border-border p-2"><legend>{titolo}</legend>
     {!candidati.length && !effetto[tipo].length && <p className="m-0 testo-12">Nessun effetto esistente da raccordare.</p>}
-    {candidati.map(r => <label key={r.uid} className="touch flex min-w-0 items-start gap-2"><input className="h-5 w-5 shrink-0" type="checkbox" checked={effetto[tipo].includes(r.uid!)} onChange={e => onCambia({ ...effetto, [tipo]: e.target.checked ? [...effetto[tipo], r.uid!] : effetto[tipo].filter(id => id !== r.uid) })} /><span className="min-w-0 break-words">{r.effetto.tipo === 'turno' ? 'Turno di pesca già presente' : r.effetto.tipo === 'dote' ? `Perizia · ${r.effetto.note} ${r.effetto.note === 1 ? 'nota' : 'note'}` : ''}</span></label>)}
+    {candidati.map(r => <label key={r.uid} className="touch flex min-w-0 items-start gap-2"><input className="h-5 w-5 shrink-0" type="checkbox" checked={effetto[tipo].includes(r.uid!)} onChange={e => onCambia({ ...effetto, [tipo]: e.target.checked ? [...effetto[tipo], r.uid!] : effetto[tipo].filter(id => id !== r.uid) })} /><span className="min-w-0 break-words">{r.effetto.tipo === 'turno' ? 'Turno di pesca già presente' : r.effetto.tipo === 'dote' ? <>Perizia · <Note n={r.effetto.note} /></> : ''}</span></label>)}
     {effetto[tipo].filter(id => !candidati.some(r => r.uid === id)).map(id => <div key={id} className="flex min-w-0 flex-wrap items-center gap-2 text-warning"><span className="min-w-0 break-words">Un riferimento conservato non è più compatibile con gli altri effetti.</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Togli questo collegamento" onClick={() => onCambia({ ...effetto, [tipo]: effetto[tipo].filter(x => x !== id) })} /></div>)}
   </fieldset>;
   return <div className="flex min-w-0 flex-col gap-2">
@@ -58,7 +59,7 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
     <Selettore etichetta="Variante indicata dalla guida" valore={effetto.variante ?? ''} vuoto="Da osservare nella partita" opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => onCambia({ ...effetto, variante: d ? d as DoteChiave : null })} />
     {!!doti.length && <fieldset className="m-0 flex flex-col gap-1 border border-border p-2"><legend>Doti già presenti che questo acquisto sostituisce</legend>
       <p className="m-0 testo-12">Seleziona solo i premi della stessa consumazione: rimangono conservati, ma il nuovo effetto evita di attribuirli una seconda volta.</p>
-      {doti.map((r) => <label key={r.uid} className="touch flex items-center gap-2"><input className="h-5 w-5" type="checkbox" checked={effetto.sostituisceDoti.includes(r.uid!)} onChange={(e) => onCambia({ ...effetto, sostituisceDoti: e.target.checked ? [...effetto.sostituisceDoti, r.uid!] : effetto.sostituisceDoti.filter((id) => id !== r.uid) })} />{r.effetto.tipo === 'dote' ? `${nomeDote(r.effetto.dote)} · ${r.effetto.note} ${r.effetto.note === 1 ? 'nota' : 'note'}` : ''}</label>)}
+      {doti.map((r) => <label key={r.uid} className="touch flex items-center gap-2"><input className="h-5 w-5" type="checkbox" checked={effetto.sostituisceDoti.includes(r.uid!)} onChange={(e) => onCambia({ ...effetto, sostituisceDoti: e.target.checked ? [...effetto.sostituisceDoti, r.uid!] : effetto.sostituisceDoti.filter((id) => id !== r.uid) })} />{r.effetto.tipo === 'dote' ? <>{nomeDote(r.effetto.dote)} · <Note n={r.effetto.note} /></> : ''}</label>)}
     </fieldset>}
     <p className="m-0 testo-12 text-text-secondary">Domenica, 5.000 yen, nessun tempo. La variante non è dedotta dal nome della voce o dalla data, se la guida non la dice. La Fortuna non si indica qui: la legge dallo stato della partita.</p>
   </div>;

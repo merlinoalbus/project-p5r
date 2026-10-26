@@ -3432,7 +3432,7 @@ export interface ProgressiPartitaDto {
     manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }>;
     /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
     daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
-  /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
+  /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[];
     /** L13: gli esiti dichiarati dall'attività con la disponibilità nella partita: il + apre la scelta dell'esito (null se non ne dichiara). */
     esiti: EsitiAttivitaDto | null }>;

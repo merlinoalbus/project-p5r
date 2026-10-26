@@ -20,6 +20,7 @@ import type { DoteNote } from '../../../shared/effettiAzione';
 import type { ConfidenteDettaglioDto } from '../../types';
 import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { TestoNote } from '../shared/TestoNote';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -100,7 +101,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
           {conDoti.map((r) => (
             <li key={r.rango} className="py-1.5 flex gap-3 items-center testo-13">
               <span className={`chip shrink-0 ${verso === r.rango ? 'chip--oro' : ''}`} title={verso === r.rango ? 'Il prossimo passaggio di rango nella partita è a questo rango' : undefined}>rango {r.rango}</span>
-              <span>{r.testo}</span>
+              <span><TestoNote testo={r.testo} /></span>
             </li>
           ))}
         </ul>

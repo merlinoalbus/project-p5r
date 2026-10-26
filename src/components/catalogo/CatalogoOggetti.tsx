@@ -13,6 +13,7 @@ import { ModuloOggetto } from './ModuloOggetto';
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
 
 const GRUPPI = Object.entries(GRUPPI_OGGETTO) as Array<[GruppoOggetto, string]>;
 const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
@@ -118,7 +119,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
             {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="tabella-oggetti__altro block testo-12 text-text-secondary">{o.statistiche.per}</span>}
           </td>
           <td className="tabella-oggetti__categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
-          <td className="tabella-oggetti__effetto break-words" title={o.effetto || undefined}>{o.effetto || 'Non dichiarato'}</td>
+          <td className="tabella-oggetti__effetto break-words" title={o.effetto || undefined}>{o.effetto ? <TestoNote testo={o.effetto} /> : 'Non dichiarato'}</td>
           <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" role="img" aria-label="Nessuna offerta in yen">—</span></> : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>

@@ -22,6 +22,7 @@
 // ============================================================
 
 import { nomeDote } from './doti.js';
+import { simboliNote } from './note.js';
 import { NOMI_STATISTICHE } from './statistiche.js';
 
 /** Su chi ricade l'effetto. Ricavato dai dati: 89 volte su chi lo usa, 53 su un alleato, 46 su tutti. */
@@ -157,7 +158,7 @@ export function descriviEffetto(e: EffettoOggetto, nomi: NomiEffetto = {}): stri
     case 'resiste-stato': return `Resiste a ${NOME_STATO[e.stato]}`;
     case 'previene-stato': return `Previene ${NOME_STATO[e.stato]}`;
     case 'statistica': return `${NOME_STATISTICA[e.statistica]} ${e.valore >= 0 ? '+' : ''}${e.valore}`;
-    case 'dote': return `${nomeDote(e.dote)} ${'♪'.repeat(Math.max(1, Math.min(4, e.note)))}`;
+    case 'dote': return `${nomeDote(e.dote)} ${simboliNote(Math.max(1, Math.min(4, e.note)))}`;
     case 'regalo': return e.graditoA.length ? `Regalo, gradito a ${e.graditoA.join(', ')}` : 'Regalo';
     case 'sblocca-luogo': return `Sblocca ${nomi.luoghi?.[e.luogo] ?? e.luogo}`;
     case 'sblocca-funzione': return `Sblocca ${NOME_FUNZIONE[e.funzione]}${e.dove ? ` in ${nomi.attivita?.[e.dove] ?? e.dove}` : ''}`;

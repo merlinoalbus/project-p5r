@@ -5,6 +5,7 @@
 import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE, type EffettoAzione } from '../../shared/effettiAzione';
 import { nomeDote } from '../../shared/doti';
+import { NESSUNA_NOTA, simboliNote } from '../../shared/note';
 import type { GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 import { urlMappa } from './navigazioneMappa';
@@ -138,7 +139,7 @@ const compatto = (s: string): string => s.toLowerCase().replace(/\s+/g, '');
  */
 export function noteDellaGuidaCoincideConEffetto(note: string, produce: ReadonlyArray<EffettoAzione>): boolean {
   const n = compatto(note);
-  return produce.some((e) => e.tipo === 'dote' && (n === compatto(`${nomeDote(e.dote)} +${e.note}`) || n === compatto(`${nomeDote(e.dote)} ${'♪'.repeat(e.note)}`)));
+  return produce.some((e) => e.tipo === 'dote' && (n === compatto(`${nomeDote(e.dote)} +${e.note}`) || n === compatto(`${nomeDote(e.dote)} ${simboliNote(e.note)}`)));
 }
 
 /** Testo breve degli effetti della spunta (es. «Perizia +2 · Zorro, il fuorilegge 1 → 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +15 punti»).
@@ -148,8 +149,8 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
   /** Le Doti di un effetto («Coraggio +1, Fascino +2») racchiuse fra `prima` e `dopo`; stringa vuota se non ce ne sono o se `senzaDoti`. */
   const doti = (lista: Array<{ nome: string; delta: number }>, prima: string, dopo: string) => (!opz.senzaDoti && lista.length ? `${prima}${lista.map((d) => `${d.nome} +${d.delta}`).join(', ')}${dopo}` : '');
   // un solo valore, due modi di leggerlo: le note (♪) e i punti che valgono («Perizia ♪♪ · 3 punti»); mai «+2» accanto a «+3», che sembravano due scelte
-  // L13: una Dote a valori possibili con «nessuna nota» scelta alla spunta si dice tale (nessun punto da segnare)
-  const parti = opz.senzaDoti ? [] : e.doti.map((d) => (d.scelta && d.note === 0 ? `${d.nome}: nessuna nota` : d.note ? `${d.nome} ${'♪'.repeat(d.note)} · ${d.delta} punti${d.cinema ? ' + Anima da cineasta' : ''}` : `${d.nome} +${d.delta}`));
+  // L13: una Dote a valori possibili con «nessuna ♪» scelta alla spunta si dice tale (nessun punto da segnare)
+  const parti = opz.senzaDoti ? [] : e.doti.map((d) => (d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA}` : d.note ? `${d.nome} ${simboliNote(d.note)} · ${d.delta} punti${d.cinema ? ' + Anima da cineasta' : ''}` : `${d.nome} +${d.delta}`));
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${doti(l.doti ?? [], ' (', ')')}`);
   // R9-12/2: la paga del turno, «paga ¥X (fino a ¥Y)». L13 (decisione 18): la paga base entra da sola nel saldo con il turno (il chip degli yen
   // mossi della voce dice quanto); la paga più alta, se il gioco l'ha data, non entra da sola, e la frase lo dice SOLO per un turno che ha

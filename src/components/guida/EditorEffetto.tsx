@@ -17,6 +17,11 @@ import { BERSAGLI, FUNZIONI, GUADAGNI, MISURE, NOME_BERSAGLIO, NOME_FUNZIONE, NO
 import { OPZIONI_FAMIGLIA, effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TestoNote } from '../shared/TestoNote';
+import { simboliNote } from '../../../shared/note';
+
+/** Le note di una Dote data da un oggetto: da ♪ a ♪♪♪♪ (il quarto scalino dei libri a resa maggiorata); il Selettore le dice a parole. */
+const NOTE_OGGETTO = [1, 2, 3, 4].map((n) => ({ chiave: String(n), nome: simboliNote(n) }));
 
 interface Props extends NomiPerEffetti {
   valore: EffettoOggetto | null;
@@ -76,7 +81,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
       </div>}
       {valore?.famiglia === 'dote' && <div className="grid gap-2 sm:grid-cols-2">
         {scelta('Quale Dote', valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote }))}
-        <Selettore etichetta="Quante note (♪)" valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={[{ chiave: '1', nome: '♪ (1)' }, { chiave: '2', nome: '♪♪ (2)' }, { chiave: '3', nome: '♪♪♪ (3)' }, { chiave: '4', nome: '♪♪♪♪ (4)' }]} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
+        <Selettore etichetta="Quante note (♪)" valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={NOTE_OGGETTO} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
       </div>}
       {/* A chi è gradito: i Confidenti come interruttori (i nomi sono quelli che la frase mostra). Un
           nome salvato che non è più fra i Confidenti resta acceso e si può spegnere. */}
@@ -108,7 +113,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
         scelta('Dove si guadagna di più', valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove }))}
       {valore?.famiglia === 'descrittivo' &&
         campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} disabled={disabilitato} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
-      {valore && <p className="m-0 testo-12 text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore, nomiEffetto)}</strong></p>}
+      {valore && <p className="m-0 testo-12 text-text-muted" role="status">Verrà mostrato così: <strong><TestoNote testo={descriviEffetto(valore, nomiEffetto)} /></strong></p>}
     </div>
   );
 }

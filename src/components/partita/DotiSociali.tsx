@@ -14,6 +14,7 @@
 import { useState, type ReactNode } from 'react';
 import { aggiornaDote, getDoti, getFortuna, impostaFortuna } from '../../services/api';
 import { puntiDaNote } from '../../../shared/doti';
+import { noteAParole, simboliNote } from '../../../shared/note';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -124,7 +125,7 @@ export function DotiSociali({ partitaId }: Props) {
               <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
               <div className="flex flex-wrap justify-center gap-2">
                 <PulsanteVisivo id={`fortuna-${partitaId}`} disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={!fortuna.dati} aria-disabled={occupata === 'fortuna' || undefined} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ×1,5 (per difetto) per il resto del giorno" />
-                <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
+                <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio={`${simboliNote(3)} = 7 punti`} onClick={() => setLibro((v) => !v)} aria-label={`Libro: ${noteAParole(3)} valgono 7 punti`} title={`Libri a resa maggiorata: ${simboliNote(3)} valgono 7 punti`} />
                 <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title="Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ×1,5 di Chihaya" />
               </div>
             </div>
@@ -153,9 +154,9 @@ export function DotiSociali({ partitaId }: Props) {
                           className="btn btn-primary btn-nota min-w-[64px] lg:min-w-[54px] lg:px-2"
                           aria-disabled={occupata === d.chiave || undefined}
                           onClick={() => void modifica(d.chiave, { note: n, libro, cinema })}
-                          aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
+                          aria-label={`${d.nome}: aggiungi ${noteAParole(n)} (${puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
                         >
-                          <span aria-hidden="true">{'♪'.repeat(n)}</span>
+                          <span aria-hidden="true">{simboliNote(n)}</span>
                           <span className="testo-13 opacity-90">+{puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
                         </button>
                       ))}

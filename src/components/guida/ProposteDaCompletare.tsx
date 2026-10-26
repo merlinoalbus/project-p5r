@@ -34,13 +34,14 @@ import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE } from '../../../shared/effettiAzione';
 import { QUANTITA_MASSIMA_EFFETTO, type EffettoVoce } from '../../../shared/effettiVoce';
 import { conElemento, elementoDi, type CampoDaCompletare, type PropostaConversioneDto } from '../../../shared/proposteConversione';
+import { SCELTE_NOTE } from '../../../shared/note';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const NOME_CERTEZZA: Record<PropostaConversioneDto['certezza'], string> = { certa: 'Certa', probabile: 'Probabile', 'da-verificare': 'Da verificare in gioco' };
 const NOME_STATO: Record<PropostaConversioneDto['stato'], string> = { aperta: 'Da completare', applicata: 'Applicata', scartata: 'Scartata' };
-const NOTE = [{ chiave: '1', nome: '♪' }, { chiave: '2', nome: '♪♪' }, { chiave: '3', nome: '♪♪♪' }];
+const NOTE = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
 
 /** Il segno discreto sulla voce: «da completare · N», un pulsante che apre le sue proposte. */
 export function SegnoDaCompletare({ n, voce, onApri }: { n: number; voce: string; onApri: () => void }) {

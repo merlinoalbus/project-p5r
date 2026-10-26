@@ -29,6 +29,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { piatto } from '../utils/testo';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { Note } from '../components/shared/TestoNote';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
@@ -136,7 +137,7 @@ export function CruciverbaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale una nota di Conoscenza.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />
+          <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale Conoscenza <Note n={1} />.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />
           {prossimo && (
             <div className="card flex flex-wrap items-center justify-between gap-2 border-primary" role="status">
               <span className="testo-13"><strong>Prossimo cruciverba:</strong> {formattaDataGioco(prossimo.giorno)} · {prossimo.indizio}</span>

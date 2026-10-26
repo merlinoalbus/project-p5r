@@ -18,6 +18,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { VoceEffetto } from '../../../shared/effettiCatalogo';
 import { descriviVoceEffetto } from '../../../shared/effettiCatalogo';
+import { TestoNote } from '../shared/TestoNote';
 
 interface Props extends NomiPerEffetti {
   voci: VoceEffetto[];
@@ -39,7 +40,7 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
   return (
     <li className="editor-effetti__voce">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <strong className="testo-13">Effetto {indice + 1}: <span className="font-normal text-text-secondary">{descriviVoceEffetto(voce, nomi)}</span></strong>
+        <strong className="testo-13">Effetto {indice + 1}: <span className="font-normal text-text-secondary"><TestoNote testo={descriviVoceEffetto(voce, nomi)} /></span></strong>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={onTogli} aria-label={`Togli l'effetto ${indice + 1}`} />
       </div>
       <EditorEffetto etichetta={`Famiglia dell'effetto ${indice + 1}`} valore={voce.effetto} onCambia={(e) => onCambia({ ...voce, effetto: e ?? effettoPredefinito('dote') })} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi} disabilitato={disabilitato} />

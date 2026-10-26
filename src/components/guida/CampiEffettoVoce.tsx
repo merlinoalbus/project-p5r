@@ -16,6 +16,7 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
+import { noteAParole, simboliNote } from '../../../shared/note';
 import { BERSAGLI_SBLOCCO, QUANTITA_MASSIMA_EFFETTO, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
@@ -60,8 +61,8 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
             const dentro = e.possibili!.includes(n);
             // la proposta resta sempre fra le possibili, e le possibili sono almeno due
             const bloccata = n === e.note || (dentro && e.possibili!.length <= 2);
-            return <button key={n} type="button" className={`chip touch ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} disabled={bloccata}
-              onClick={() => onCambia({ ...e, possibili: dentro ? e.possibili!.filter((x) => x !== n) : [...e.possibili!, n].sort() })}>{'♪'.repeat(n)}</button>;
+            return <button key={n} type="button" className={`chip touch ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} disabled={bloccata} aria-label={noteAParole(n)}
+              onClick={() => onCambia({ ...e, possibili: dentro ? e.possibili!.filter((x) => x !== n) : [...e.possibili!, n].sort() })}>{simboliNote(n)}</button>;
           })}
         </span>
       )}

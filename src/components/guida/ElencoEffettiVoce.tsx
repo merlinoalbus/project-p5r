@@ -21,6 +21,7 @@ import { CampiEffettoVoce } from './CampiEffettoVoce';
 import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { effettoCompleto, type CampiStrutturati } from '../../utils/azioneStrutturata';
 import { NOME_FAMIGLIA_EFFETTO, fraseEffetto, indiceDelCollegamento, type NomiEffetti, type RigaEffetto } from '../../utils/effettoAutomatico';
+import { TestoNote } from '../shared/TestoNote';
 
 type Tipo = EffettoVoce['tipo'];
 
@@ -115,7 +116,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
                       <span className="font-display testo-13 uppercase tracking-wide text-primary-testo">{nome}</span>
                       {i === collegato && <span className="chip testo-12" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span>}
                     </span>
-                    <span className="testo-13 break-words">{completo ? fraseEffetto(r.effetto, nomi) : 'Da scegliere qui sotto.'}</span>
+                    <span className="testo-13 break-words">{completo ? <TestoNote testo={fraseEffetto(r.effetto, nomi)} /> : 'Da scegliere qui sotto.'}</span>
                   </div>
                   <span className="flex shrink-0 gap-1">
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}

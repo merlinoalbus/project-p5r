@@ -27,6 +27,8 @@ import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
 import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
 import { fraseYenInParteNelSaldo } from '../../../shared/riepilogoEffetti';
+import { noteAParole, simboliNote } from '../../../shared/note';
+import { TestoNote } from '../shared/TestoNote';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
@@ -149,7 +151,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {/* la paga dei turni i cui yen erano già nel saldo da prima (effetto per effetto, `produceTesto[i]` è l'effetto `i`): il fatto, senza la
           promessa di un movimento; la paga mossa dalla spunta la dice il chip del movimento */}
       {a.fatta && pagheGiaNelSaldo.map((t, i) => <span key={`${i}:${t}`} className="testo-12 text-text-muted tabular-nums">{t}</span>)}
-      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}>{descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })}</span>}
+      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}><TestoNote testo={descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })} /></span>}
       {/* L13 (decisione 18): gli yen che la spunta ha mosso da soli, uno per causa, con l'importo davvero mosso (il saldo non scende sotto zero) */}
       {a.fatta && a.yenAutomatici?.map((m) => (
         <span key={`${m.causa}:${m.chiave}`} className="chip testo-12 tabular-nums" title="Mossi da soli dalla spunta: togliendola torna quanto era stato mosso">
@@ -181,19 +183,19 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupat
           <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
           <span className="flex flex-wrap gap-1.5">
             {dialogo.scelte.map((s) => {
-              const valore = s.note !== null ? '♪'.repeat(s.note) : s.puntiTesto && /^\+?0\b|da evitare/.test(s.puntiTesto) ? '0' : s.puntiTesto ?? '';
+              const valore = s.note !== null ? simboliNote(s.note) : s.puntiTesto && /^\+?0\b|da evitare/.test(s.puntiTesto) ? '0' : s.puntiTesto ?? '';
               const toccabile = s.note !== null || s.puntiTesto === null || /^\+?0\b|da evitare/.test(s.puntiTesto);
               const etichetta = `${s.testo}${valore ? ` ${valore}` : ''}`;
               return toccabile
-                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(s.note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${s.note !== null ? `${s.note} ${s.note === 1 ? 'nota' : 'note'}` : 'nessun punto'}`}>{etichetta}</button>
-                : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}>{etichetta}</span>;
+                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(s.note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${s.note !== null ? noteAParole(s.note) : 'nessun punto'}`}>{etichetta}</button>
+                : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}><TestoNote testo={etichetta} /></span>;
             })}
           </span>
         </span>
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
-        <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => onScegli(n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>
+        <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => onScegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
       ))}
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => onScegli(null)} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />

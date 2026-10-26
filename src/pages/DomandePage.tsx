@@ -35,6 +35,8 @@ import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { TestoNote } from '../components/shared/TestoNote';
+import { ricompensaInSimboli } from '../../shared/note';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -54,9 +56,9 @@ const ancoraData = (data: string) => `domande-${data}`;
  */
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
-  // Solo dove la guida scrive «Conoscenza +1 nota» (le domande in classe): gli esami «contribuiscono alla
+  // Solo dove la guida scrive «Conoscenza +1 nota» o «Conoscenza ♪» (le domande in classe): gli esami «contribuiscono alla
   // classifica» e i quiz in TV parlano di «aumento», e per quelli non c'è una nota da ricordare.
-  const daConoscenza = /Conoscenza \+/.test(d.ricompensa);
+  const daConoscenza = /Conoscenza (\+|♪)/.test(d.ricompensa);
   /** Segna la domanda fatta o no nella partita, chiedendo la nota di Conoscenza solo quando la si segna fatta e la ricompensa la prevede; passa al genitore l'elenco restituito, ricorda le Doti da segnare o notifica l'errore. */
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
@@ -96,7 +98,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <span className="text-text-muted">{d.chi}</span>
           {d.tipo !== 'classe' && <span className="chip">{NOME_TIPO[d.tipo]}</span>}
           {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
-          {d.ricompensa && <span className="testo-12 text-text-muted">{d.ricompensa}</span>}
+          {d.ricompensa && <span className="testo-12 text-text-muted"><TestoNote testo={ricompensaInSimboli(d.ricompensa)} /></span>}
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}

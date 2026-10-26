@@ -222,7 +222,7 @@ export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverb
     { nome: 'tipo', etichetta: 'Quando', tipo: 'testo', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', tv: 'Quiz in TV', altro: 'Altro' } },
     { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', vuoto: 'Non indicato', opzioni: { 'Prof. Ushimaru': 'Prof. Ushimaru', 'Prof. Kawakami': 'Prof. Kawakami', 'Prof. Hiruta': 'Prof. Hiruta', 'Prof. Inui': 'Prof. Inui', 'Prof. Chuono': 'Prof. Chuono', 'Prof. Maruki': 'Prof. Maruki', 'Prof. Usami': 'Prof. Usami', 'Game show in TV': 'Game show in TV' } },
     { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo', obbligatorio: true },
-    { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza +1 nota' },
+    { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza ♪' },
     { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
   ],
   cruciverba: [

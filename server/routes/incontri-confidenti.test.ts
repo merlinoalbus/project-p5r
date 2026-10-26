@@ -47,7 +47,7 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
 
   it('la Dote degli incontri è un dato del Confidente per rango (088), e le azioni del passaggio non la danno più da sé', async () => {
     const takemi = (await request(app).get('/api/compendio/confidenti/takemi')).body.data as ConfidenteDettaglioDto;
-    expect(takemi.dotiIncontro.find((r) => r.rango === 2)).toEqual({ rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio, 1 nota' });
+    expect(takemi.dotiIncontro.find((r) => r.rango === 2)).toEqual({ rango: 2, doti: [{ dote: 'coraggio', note: 1 }], testo: 'Coraggio ♪' });
     expect(takemi.dotiIncontro.find((r) => r.rango === 8)?.doti).toEqual([]);
     expect(takemi.dotiIncontro.map((r) => r.rango)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     // l'ultimo incontro di Yoshida vale verso il rango 10: la sua Dote non va persa
@@ -189,7 +189,7 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
     expect((await put({ ranghi: [{ rango: 3, doti: [{ dote: 'boh', note: 1 }] }] })).status).toBe(400);
     expect((await put({ ranghi: [{ rango: 3, doti: [{ dote: 'coraggio', note: 4 }] }] })).status).toBe(400);
     const r = (await put({ ranghi: [{ rango: 3, doti: [{ dote: 'coraggio', note: 2 }, { dote: 'perizia', note: 1 }] }] }).expect(200)).body.data as ConfidenteDettaglioDto;
-    expect(r.dotiIncontro.find((x) => x.rango === 3)).toEqual({ rango: 3, doti: [{ dote: 'coraggio', note: 2 }, { dote: 'perizia', note: 1 }], testo: 'Coraggio, 2 note · Perizia, 1 nota' });
+    expect(r.dotiIncontro.find((x) => x.rango === 3)).toEqual({ rango: 3, doti: [{ dote: 'coraggio', note: 2 }, { dote: 'perizia', note: 1 }], testo: 'Coraggio ♪♪ · Perizia ♪' });
     const p = await nuovaPartita('Takemi modificata', '04-29');
     await pagina(p, { rango: 2 });
     expect((await pagina(p, { rango: 3 })).doteIncontro).toEqual([{ chiave: 'coraggio', nome: 'Coraggio', delta: 3 }, { chiave: 'perizia', nome: 'Perizia', delta: 2 }]);

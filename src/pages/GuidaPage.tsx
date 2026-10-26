@@ -7,6 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { SEZIONI_GUIDA } from '../components/guida/sezioniGuida';
+import { TestoNote } from '../components/shared/TestoNote';
 
 /** Indice della guida: una piastrella per ogni sezione di `SEZIONI_GUIDA`, con l'illustrazione `guida/<chiave>` (o l'icona di riserva se l'asset non c'è), titolo e descrizione, che porta alla sezione. */
 export function GuidaPage() {
@@ -20,7 +21,7 @@ export function GuidaPage() {
             <Link to={s.to} className="card card--cliccabile piastrella piastrella-guida no-underline text-text flex flex-col gap-2 h-full">
               <AssetImg nome={`guida/${s.chiave}`} alt="" decorativa className="piastrella-guida__icona object-contain" fallback={<span className="piastrella-guida__riserva" aria-hidden="true">{s.icona}</span>} />
               <span className="font-display uppercase testo-20 leading-none">{s.titolo}</span>
-              <span className="testo-12 text-text-secondary">{s.descrizione}</span>
+              <span className="testo-12 text-text-secondary"><TestoNote testo={s.descrizione} /></span>
             </Link>
           </li>
         ))}

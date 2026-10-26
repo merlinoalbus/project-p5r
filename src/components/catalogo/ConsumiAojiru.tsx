@@ -27,6 +27,7 @@ import { GestiPartita } from '../partita/GestiPartita';
 import type { ValutazionePresenza } from '../../../shared/valutazioneAcquisto';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { Note } from '../shared/TestoNote';
 
 /** Nel rilascio le rotte `/partite/:id/acquisti/legacy/*` (il vecchio segno «Acquistato») non esistono: l'azione che le chiama non si offre. */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -146,7 +147,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
   if (confermato) return <p role="status" className="m-0 text-success">{esitoConferma}</p>;
   if (pendente) return <div className="flex flex-col gap-2"><p role="status" className="m-0 text-warning">C’è già un’operazione da completare per questa voce: finché non è chiusa non ne invio un’altra.</p><GestiPartita partitaId={partitaId} onCambiato={async () => { if (attiva()) await onRecuperato?.(); }} /></div>;
   return <div className="flex min-w-0 flex-col gap-3 testo-13">
-    <p className="m-0">Domenica · 5.000 yen · non consuma tempo. Dà 2 punti (1 nota) alla Dote del succo, 3 se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
+    <p className="m-0">Domenica · 5.000 yen · non consuma tempo. Dà 2 punti (<Note n={1} />) alla Dote del succo, 3 se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
     {stato?.aojiru && <p className="m-0">{stato.aojiru.varianteAttesa ? `Prossima variante prevista: ${nomeDote(stato.aojiru.varianteAttesa)}.` : 'Variante iniziale da osservare.'}</p>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((s) => <li key={s}>{s}</li>)}</ul>}
     {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void registro.ricarica()} /></p>}
@@ -171,7 +172,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
     {!anteprima && <PulsanteVisivo icona={<IconaAzione chiave="dettagli" dimensione={22} />} titolo="Mostra il riepilogo" className="self-start" disabled={!valido || occupato || !registro.dati} onClick={() => void prepara()} />}
     {anteprima && <div className="flex flex-col gap-2 rounded border border-border p-3">
       <strong>{anteprima.identita.nome} · {dataGiocoTesto(anteprima.nuovo.momento.giorno)}, {fasciaInParole(anteprima.nuovo.momento.fascia)} · {nomeDote(anteprima.effetto.dote)}</strong>
-      <span>{anteprima.effetto.puntiConfermati === null ? 'Il totale dei punti non è certo.' : `${anteprima.effetto.puntiConfermati} punti · ${anteprima.effetto.note} ${anteprima.effetto.note === 1 ? 'nota' : 'note'}.`} Costo: 5.000 yen.</span>
+      <span>{anteprima.effetto.puntiConfermati === null ? 'Il totale dei punti non è certo.' : <>{anteprima.effetto.puntiConfermati} punti{anteprima.effetto.note ? <> · <Note n={anteprima.effetto.note} /></> : null}.</>} Costo: 5.000 yen.</span>
       <span>{anteprima.esitoPrevisto === 'registrata' ? 'È un consumo nuovo.' : anteprima.esitoPrevisto === 'fonte-collegata' ? 'Si collega al consumo scelto; non ne aggiunge un altro.' : 'Questa voce è già collegata: non aggiunge un consumo.'}</span>
       {anteprima.nuovo.scelta.tipo === 'collega' && anteprima.acquisti.registrazioni.filter(r => anteprima.nuovo.scelta.tipo === 'collega' && r.id === anteprima.nuovo.scelta.acquistoId).map(r => <DettagliConsumo key={r.id} acquisto={r} />)}
       <span>{anteprima.nuovo.fonte.tipo === 'manuale' ? 'Inserito a mano' : 'Dal Diario'} · {fortunaInParole(anteprima.nuovo.fortuna)}.</span>

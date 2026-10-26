@@ -1,0 +1,31 @@
+// ============================================================
+// TestoNote — le note delle Doti come simboli (♪, ♪♪, ♪♪♪) per chi guarda, a parole («2 note») per chi ascolta
+// ============================================================
+//
+// Richiesta dell'utente (2026-10-26): «Ovunque dove si tratta di note va messo l'equivalente simbolo /numero di simboli». I simboli e le
+// parole vengono da `shared/note.ts` (l'unico punto che li scrive); qui si mostrano: la fila di ♪ è un'immagine di testo (`role="img"`)
+// il cui nome sono le parole («2 note», «nessuna nota»), così il lettore di schermo non dice il nome del simbolo ripetuto, il testo
+// copiato resta «♪♪» e il contenuto testuale non cambia. Dentro un pulsante o un'opzione senza `aria-label` il nome entra nel loro
+// (per esempio l'opzione «♪♪» si chiama «2 note»). `TestoNote` prende un testo qualunque (frasi del server, riepilogo, storico, avvisi) e
+// tratta allo stesso modo ogni fila di ♪ che contiene; senza simboli è il testo e basta.
+// ============================================================
+
+import { Fragment } from 'react';
+import { noteAParole, pezziTestoNote, simboliNote } from '../../../shared/note';
+
+/** Una fila di note: i simboli a vista, le parole come nome per i lettori di schermo. */
+export function SimboliNote({ simboli, parole }: { simboli: string; parole: string }) {
+  return <span role="img" aria-label={parole} className="whitespace-nowrap">{simboli}</span>;
+}
+
+/** `n` note (1–4): «♪♪» a vista, «2 note» a voce. */
+export function Note({ n }: { n: number }) {
+  return <SimboliNote simboli={simboliNote(n)} parole={noteAParole(n)} />;
+}
+
+/** Un testo con le sue file di ♪ rese accessibili; senza simboli, il testo così com'è. */
+export function TestoNote({ testo }: { testo: string }) {
+  const pezzi = pezziTestoNote(testo);
+  if (pezzi.length === 1 && 'testo' in pezzi[0]) return <>{testo}</>;
+  return <>{pezzi.map((p, i) => ('testo' in p ? <Fragment key={i}>{p.testo}</Fragment> : <SimboliNote key={i} simboli={p.simboli} parole={p.parole} />))}</>;
+}
