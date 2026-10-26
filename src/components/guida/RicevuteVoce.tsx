@@ -17,8 +17,9 @@
 //
 // Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino e il numero sta in un
 // distintivo. Il nome accessibile porta il testo della voce, come il menu «⋯» accanto (`PulsanteMenuVoce`). Il titolo della finestra è
-// «Ricevute della spunta» con i primi 60 caratteri della voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il
-// primo paragrafo del corpo e descrive la finestra per i lettori di schermo (`aria-describedby`).
+// «Applicato dalla spunta» (prima «Ricevute della spunta»: il contenuto ora è ciò che la spunta ha applicato) con i primi 60 caratteri della
+// voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il primo paragrafo del corpo e descrive la finestra per i
+// lettori di schermo (`aria-describedby`). L'elenco ha `role="list"`: con `list-none` Safari lo toglierebbe ai lettori di schermo.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -28,6 +29,9 @@ import { IconaAzione } from '../shared/IconaAzione';
 
 /** Quanti caratteri della voce entrano nel titolo della finestra e nel nome del pulsante. */
 const CARATTERI_DELLA_VOCE = 60;
+
+/** Il nome della finestra e del pulsante: dice che cosa c'è dentro (ciò che la spunta ha applicato), non come lo conserva il server. */
+const TITOLO = 'Applicato dalla spunta';
 
 /** I primi `CARATTERI_DELLA_VOCE` caratteri della voce (per punti di codice, così una lettera composta non si spezza), con «…» se
  *  il testo è più lungo; `troncata` dice se il testo intero va mostrato altrove. */
@@ -51,19 +55,20 @@ export function RicevuteVoce({ applicato, voce }: { applicato: readonly Applicat
   const idVoce = useId();
   if (!applicato?.length) return null;
   const n = applicato.length;
-  const breve = `Ricevute della spunta (${n})`;
+  const breve = `${TITOLO} (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
     <>
-      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Ricevute della spunta (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
+      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`${breve}: ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
         <IconaAzione chiave="ricevute" dimensione={20} />
         <span className="conteggio-pulsante tabular-nums" aria-hidden="true">{n}</span>
       </button>
       {aperta && (
-        <Modal titolo={inizio.testo ? `Ricevute della spunta: ${inizio.testo}` : 'Ricevute della spunta'} aperta onChiudi={() => setAperta(false)}
+        <Modal titolo={inizio.testo ? `${TITOLO}: ${inizio.testo}` : TITOLO} aperta onChiudi={() => setAperta(false)}
           idDescrizione={inizio.troncata ? idVoce : undefined}>
           {inizio.troncata && <p id={idVoce} className="m-0 mb-3 testo-13 text-text-secondary break-words">{voce}</p>}
-          <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
+          {/* role="list": con `list-none` Safari e VoiceOver (iPad) non annuncerebbero più l'elenco né il numero delle righe */}
+          <ul role="list" className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
             {applicato.map((x) => {
               const quando = momento(x.applicatoIl);
               return (

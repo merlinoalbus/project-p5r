@@ -11,24 +11,27 @@
 // in vigore. Non tutte tornano com'erano togliendo la spunta: le Doti si segnano a mano (proposte da confermare con «Applica») e le
 // letture non tornano indietro (`partiteService`, `effettiAzioneService`); il resto sì. Le fonti, ognuna col suo momento:
 //   - le ricevute ATTIVE di `utente.effetto_applicato` (Doti, letture, turni, incontro e punti del Confidente, aperture dei Dedali,
-//     consumazioni, pesca, yen proposti con «Applica»). Le annullate no; le puramente tecniche (il «contesto» senza niente dentro, i segni
-//     di annullo) nemmeno, né ciò che non ha dato niente (la Dote con «nessuna nota», la lettura già al massimo senza Doti, `puntiUtili`);
+//     consumazioni, pesca, yen proposti con «Applica» secondo lo stato della proposta, `fraseYenProposti`). Le annullate no; le puramente
+//     tecniche (il «contesto» senza niente dentro, i segni di annullo) nemmeno, né ciò che non ha dato niente (la Dote con «nessuna nota»,
+//     la lettura già al massimo senza Doti, `puntiUtili`; i punti del Confidente a zero; la proposta di yen scartata o tornata a zero);
 //     gli yen mossi da soli si dicono dal loro movimento, non due volte;
 //   - gli effetti di stato segnati dalla spunta (`utente.effetto_stato_voce`, `effettiDiStatoApplicati`): Persona, trofeo, sblocco,
 //     oggetto, evento di storia, domanda, cruciverba, Richiesta, articolo, invito. Quelli che c'erano già no;
-//   - la Fortuna di Chihaya accesa dalla voce (`fortunaAccesaDallaVoce`);
-//   - gli yen mossi da soli (`yenAutomaticiDellaVoce`, già letti dalla voce), con l'importo davvero mosso (`fraseMovimentoYen`).
+//   - la Fortuna di Chihaya accesa dalla voce e ancora del giorno di gioco (`fortunaAccesaDallaVoce`);
+//   - gli yen mossi da soli (`yenAutomaticiDellaVoce`, già letti dalla voce), con l'importo davvero mosso (`fraseMovimentoYen`); un
+//     movimento a zero (saldo a zero o al massimo) non ha mosso niente e non si dice.
 // Le frasi sono quelle dell'app (`descriviEffetti`, `fraseEffettoConNomi`, `fraseMovimentoYen`): nessuna seconda scrittura delle parole.
 // Sola lettura.
 // ============================================================
 
+import { prepared } from '../db/dbService.js';
 import { HttpError } from '../utils/httpError.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { articoloConNome, nomiFraseEffetto } from './azioniStrutturateService.js';
 import { effettiDiStatoApplicati } from './effettiDiStatoService.js';
 import { fortunaAccesaDallaVoce } from './fortunaService.js';
 import { descriviEffetti } from '../../shared/descriviEffettiSpunta.js';
-import { fraseEffettoConNomi, normalizzaEffettoVoce, type NomiFraseEffetto, type ReceiptEffettoVoceDto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { fraseEffettoConNomi, normalizzaEffettoVoce, type EffettoConNomiVoce, type NomiFraseEffetto, type ReceiptEffettoVoceDto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { fraseMovimentoYen, type MovimentoYenAutomaticoDto } from '../../shared/yenAutomatici.js';
 import type { ApplicatoDallaSpuntaDto, EffettiAzioneDto } from '../../shared/types.js';
 
@@ -46,7 +49,33 @@ function legacyDi(r: ReceiptEffettoVoceDto): EffettiAzioneDto | null | undefined
  *  le aperture. Un incontro «già contato» senza rango non ha messo niente nella partita: è tecnico. */
 function contestoUtile(l: EffettiAzioneDto): EffettiAzioneDto {
   const incontro = l.incontro && (!l.incontro.giaContato || l.incontro.rango) ? l.incontro : undefined;
-  return { doti: [], confidente: l.confidente, ...(incontro ? { incontro } : {}), ...(l.apertureDedali?.length ? { apertureDedali: l.apertureDedali } : {}) };
+  // i punti del Confidente sono una differenza arrotondata: a zero non hanno messo niente nella partita (niente «+0 punti»)
+  const confidente = l.confidente && l.confidente.punti > 0 ? l.confidente : null;
+  return { doti: [], confidente, ...(incontro ? { incontro } : {}), ...(l.apertureDedali?.length ? { apertureDedali: l.apertureDedali } : {}) };
+}
+
+/** Gli yen proposti con «Applica» per un effetto della voce (`utente.da_applicare`, causa `voce:effetto`, tipo `yen`): se ce n'è una aperta,
+ *  oppure quanto le proposte applicate hanno mosso nel saldo (`delta_applicato`) o dichiarato già nel saldo (`delta_riconosciuto`), al netto
+ *  delle inverse. Le stesse somme di `yenPropostiInSospeso`. */
+function propostaYen(p: number, causaChiave: string): { aperta: boolean; mossi: number; riconosciuti: number } {
+  const r = prepared(`SELECT SUM(stato = 'aperta') AS aperte, SUM(CASE WHEN stato = 'applicata' THEN delta_applicato ELSE 0 END) AS mossi,
+    SUM(CASE WHEN stato = 'applicata' THEN delta_riconosciuto ELSE 0 END) AS riconosciuti
+    FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'yen'`).get(p, causaChiave) as { aperte: number | null; mossi: number | null; riconosciuti: number | null };
+  return { aperta: (r.aperte ?? 0) > 0, mossi: r.mossi ?? 0, riconosciuti: r.riconosciuti ?? 0 };
+}
+
+const yenLeggibili = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+
+/** La frase degli yen di una ricevuta rimasta alla proposta «Applica», secondo lo stato della proposta: aperta = la frase dell'effetto
+ *  («da applicare con «Applica» sulla voce», vera finché è aperta); applicata = l'importo davvero mosso (`fraseMovimentoYen`) o dichiarato già
+ *  nel saldo; scartata o tornata a zero = nessuna riga (la spunta non ha messo niente nel saldo). */
+function fraseYenProposti(p: number, r: ReceiptEffettoVoceDto, e: Extract<EffettoConNomiVoce, { tipo: 'yen' }>, nomi: NomiFraseEffetto): string | null {
+  const s = propostaYen(p, `${r.voceUid}:${r.effettoUid}`);
+  if (s.aperta) return fraseEffettoConNomi(e, nomi);
+  const motivo = e.importo > 0 ? 'Yen ricevuti nella voce, confermati con «Applica»' : 'Yen spesi nella voce, confermati con «Applica»';
+  if (s.mossi !== 0) return `${motivo} · ${fraseMovimentoYen({ richiesto: s.mossi, applicato: s.mossi })}`;
+  if (s.riconosciuti !== 0) return `${motivo} · ${yenLeggibili(s.riconosciuti)} già nel saldo`;
+  return null;
 }
 
 /** Ciò che resta di una ricevuta di Doti, letture o turni da dire: via le Doti che non hanno dato niente (la «nessuna nota» scelta alla
@@ -59,7 +88,7 @@ function puntiUtili(l: EffettiAzioneDto): EffettiAzioneDto {
 }
 
 /** La frase di una ricevuta attiva, o null se non dice niente a chi gioca. */
-function fraseRicevuta(r: ReceiptEffettoVoceDto, nomi: NomiFraseEffetto): string | null {
+function fraseRicevuta(p: number, r: ReceiptEffettoVoceDto, nomi: NomiFraseEffetto): string | null {
   if (r.tipo === 'dote' || r.tipo === 'lettura' || r.tipo === 'turno' || r.tipo === 'contesto') {
     const l = legacyDi(r);
     if (l === undefined) return r.tipo === 'contesto' ? null : NOME_TIPO[r.tipo] ?? null;
@@ -74,10 +103,10 @@ function fraseRicevuta(r: ReceiptEffettoVoceDto, nomi: NomiFraseEffetto): string
   }
   if (r.tipo === 'pesca') return r.creato ? 'Sessione di pesca a Ichigaya registrata' : 'Sessione di pesca a Ichigaya già registrata, collegata alla voce';
   if (r.tipo === 'yen') {
-    // gli yen mossi da soli si dicono dal loro movimento, con l'importo reale; qui solo quelli rimasti alla proposta «Applica»
+    // gli yen mossi da soli si dicono dal loro movimento, con l'importo reale; qui solo quelli rimasti alla proposta «Applica», col suo stato
     if (r.ricevuta.yenAutomatici === true) return null;
     const e = normalizzaEffettoVoce((r.prima as { effetto?: unknown } | null)?.effetto);
-    return e?.tipo === 'yen' ? fraseEffettoConNomi(e, nomi) : null;
+    return e?.tipo === 'yen' ? fraseYenProposti(p, r, e, nomi) : null;
   }
   return null;
 }
@@ -93,14 +122,15 @@ export function applicatoDallaSpunta(p: number, voceUid: string, fonte: StatoEff
   const out: ApplicatoDallaSpuntaDto[] = [];
   for (const r of ricevute) {
     if (r.annullatoIl) continue;
-    const testo = fraseRicevuta(r, nomi);
+    const testo = fraseRicevuta(p, r, nomi);
     if (testo) out.push({ id: `ricevuta:${r.id}`, testo, applicatoIl: r.applicatoIl });
   }
   const quantita = (uid: string): number | undefined => { const e = fonte.effetti.find((x) => x.uid === uid)?.effetto; return e?.tipo === 'articolo' ? e.quantita : undefined; };
   for (const s of effettiDiStatoApplicati(p, voceUid, quantita)) out.push({ id: `stato:${s.effettoUid}`, testo: fraseEffettoConNomi(s.effetto, nomiSenzaPrezzo), applicatoIl: s.applicatoIl });
   const fortuna = fortunaAccesaDallaVoce(p, voceUid);
   if (fortuna) out.push({ id: 'fortuna', testo: fraseEffettoConNomi({ tipo: 'fortuna', dote: fortuna.dote }, nomi), applicatoIl: fortuna.accesoIl });
-  for (const m of movimenti) out.push({ id: `yen:${m.causa}:${m.chiave}`, testo: `${m.motivo} · ${fraseMovimentoYen(m)}`, applicatoIl: m.creatoIl });
+  // un movimento a zero (spesa col saldo a zero, guadagno col saldo al massimo) non ha mosso niente: nessuna riga
+  for (const m of movimenti) if (m.applicato !== 0) out.push({ id: `yen:${m.causa}:${m.chiave}`, testo: `${m.motivo} · ${fraseMovimentoYen(m)}`, applicatoIl: m.creatoIl });
   // in ordine di momento; a parità, nell'ordine delle fonti qui sopra (sort stabile)
   return out.sort((a, b) => (a.applicatoIl < b.applicatoIl ? -1 : a.applicatoIl > b.applicatoIl ? 1 : 0));
 }
