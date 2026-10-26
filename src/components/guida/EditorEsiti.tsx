@@ -8,7 +8,8 @@
 // nasce dal nome e non cambia più dopo il primo salvataggio (la ricevuta della spunta e l'effetto `turno` della voce la citano).
 // Il modulo arriva qui solo fuori dal rilascio: `CorreggiElemento` e `AggiungiAlCatalogo` non esistono nella build di rilascio.
 // Ondata 5 (lotto G): un esito può dire il trofeo che fa ottenere («Vinto» all'estrazione della lotteria → «Soldi facili»): registrando il
-// turno con quell'esito il trofeo si segna da solo, e togliendolo torna com'era.
+// turno con quell'esito il trofeo si segna da solo, e togliendolo torna com'era. E gli oggetti del catalogo che dà, con le copie (la Comet
+// Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger»): registrando il turno entrano fra quelli ottenuti, togliendolo se ne vanno.
 // ============================================================
 
 import { useState } from 'react';
@@ -22,9 +23,41 @@ import { useCarica } from '../../hooks/useCarica';
 import { getElenchiRegole } from '../../services/api';
 import { CHIAVI_DOTI, nomeDote, type DoteChiave } from '../../../shared/doti';
 import { SCELTE_NOTE } from '../../../shared/note';
-import { LIMITI_ESITI, MODI_ESITI, chiaveEsitoDaNome, fraseDotiEsito, normalizzaEsitiAttivita, type EsitiAttivita, type EsitoAttivita } from '../../../shared/esitiAttivita';
+import { LIMITI_ESITI, MODI_ESITI, chiaveEsitoDaNome, fraseDotiEsito, normalizzaEsitiAttivita, type EsitiAttivita, type EsitoAttivita, type OggettoEsito } from '../../../shared/esitiAttivita';
+import { SceltaNelCatalogo } from '../catalogo/SceltaCatalogoOggetto';
+import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
+import { CampoQuantita } from './CampiEffettoVoce';
 
 const NOTE: Array<{ chiave: string; nome: string }> = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
+
+/**
+ * Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà (la Comet Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger»), con le
+ * copie. Il catalogo si legge una volta sola, solo con l'esito aperto; un oggetto già nell'elenco non si propone di nuovo.
+ */
+function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readonly OggettoEsito[]; disabilitato?: boolean; onCambia: (o: OggettoEsito[]) => void }) {
+  const catalogo = useCarica(() => getCatalogoOggetti(), []);
+  const stato = { oggetti: catalogo.dati, caricamento: catalogo.caricamento, errore: catalogo.errore, onRicarica: () => void catalogo.ricarica() };
+  const scelti = oggetti.map((o) => o.oggetto);
+  return (
+    <div className="campo campo--largo flex flex-col gap-1.5">
+      <span className="testo-13 text-text-secondary">Oggetti che l’esito dà (entrano fra quelli ottenuti nella partita)</span>
+      {oggetti.map((o, k) => (
+        <span key={o.oggetto} className="flex flex-wrap items-end gap-2">
+          <span className="min-w-[12rem] flex-1">
+            <SceltaNelCatalogo {...stato} etichetta="Oggetto" valore={o.oggetto} escludi={scelti.filter((c) => c !== o.oggetto)} disabilitato={disabilitato}
+              onScegli={(c) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, oggetto: c.chiave } : x)))} />
+          </span>
+          <CampoQuantita valore={o.quantita} onCambia={(q) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, quantita: Math.min(LIMITI_ESITI.quantita, q) } : x)))} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli l’oggetto" disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
+        </span>
+      ))}
+      {oggetti.length < LIMITI_ESITI.oggetti && (
+        <SceltaNelCatalogo {...stato} etichetta={oggetti.length ? 'Aggiungi un altro oggetto' : 'Aggiungi un oggetto'} valore="" escludi={scelti} disabilitato={disabilitato}
+          onScegli={(c) => onCambia([...oggetti, { oggetto: c.chiave, quantita: 1 }])} />
+      )}
+    </div>
+  );
+}
 
 /** Una chiave nuova dal nome, distinta da quelle già usate. */
 function chiaveNuova(nome: string, usate: ReadonlySet<string>): string {
@@ -57,6 +90,13 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
     delete resto.trofeo;
     return trofeo ? { ...resto, trofeo } : resto;
   }) });
+  // gli oggetti sono facoltativi come il trofeo: un elenco vuoto toglie il campo (gli esiti senza oggetti restano come prima)
+  const cambiaOggetti = (i: number, oggetti: OggettoEsito[]) => esiti && onCambia({ ...esiti, esiti: elenco.map((x, j) => {
+    if (j !== i) return x;
+    const resto: EsitoAttivita = { ...x };
+    delete resto.oggetti;
+    return oggetti.length ? { ...resto, oggetti } : resto;
+  }) });
   const aggiungi = () => {
     const nome = `Esito ${elenco.length + 1}`;
     const chiave = chiaveNuova(nome, new Set(elenco.map((e) => e.chiave)));
@@ -74,7 +114,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
   return (
     <section className="flex min-w-0 flex-col gap-2 rounded-md border border-border p-3" aria-label="Esiti dell’attività">
       <strong className="testo-14">Esiti scelti alla spunta</strong>
-      <p className="m-0 testo-13 text-text-secondary">Per le attività il cui risultato cambia (una sfida vinta o persa, i colpi riusciti, il giorno della settimana): chi gioca sceglie l’esito alla spunta del Diario e al + del contatore, e le Doti dell’esito diventano il promemoria «Applica». Prezzo e ranghi di una sfida stanno nell’articolo del negozio: qui si cita l’articolo. Il trofeo di un esito (la lotteria vinta) si segna da solo registrando il turno.</p>
+      <p className="m-0 testo-13 text-text-secondary">Per le attività il cui risultato cambia (una sfida vinta o persa, i colpi riusciti, il giorno della settimana): chi gioca sceglie l’esito alla spunta del Diario e al + del contatore, e le Doti dell’esito diventano il promemoria «Applica». Prezzo e ranghi di una sfida stanno nell’articolo del negozio: qui si cita l’articolo. Il trofeo e gli oggetti di un esito (la lotteria vinta, i distintivi delle sfide) si segnano da soli registrando il turno.</p>
       {esiti && <Selettore etichetta="Come si decide l’esito" valore={esiti.modo} ricerca="mai" disabilitato={disabilitato} opzioni={MODI_ESITI.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={(modo) => onCambia({ ...esiti, modo: modo === 'automatico' ? 'automatico' : 'scelta' })} />}
       {!valido && <p role="alert" className="m-0 testo-13 text-error-testo">Gli esiti non sono ancora validi: ogni esito ha un nome, chiavi distinte, al più {LIMITI_ESITI.doti} Doti diverse; nel modo automatico ogni esito ha una condizione o un articolo.</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
@@ -84,7 +124,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong> · <TestoNote testo={fraseDotiEsito(e.doti)} />{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong> · <TestoNote testo={fraseDotiEsito(e.doti)} />{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
                   onClick={() => { const resto = elenco.filter((_, j) => j !== i); onCambia(resto.length ? { ...esiti!, esiti: resto } : null); }} />
@@ -94,7 +134,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
                   <CampoTesto etichetta="Nome dell’esito" valore={e.nome} massimo={LIMITI_ESITI.nome} disabilitato={disabilitato} onCambia={(v) => rinomina(i, v)} />
                   <CampoTesto etichetta="Prova (gruppo)" valore={e.gruppo ?? ''} massimo={LIMITI_ESITI.gruppo} aiuto="Per esempio «Comet Burger»: raggruppa gli esiti nella scelta" disabilitato={disabilitato} onCambia={(v) => cambiaEsito(i, { gruppo: v.trim() ? v : null })} />
                   <div className="campo campo--largo">
-                    <Selettore etichetta="Articolo che si paga per tentare" valore={e.articolo ?? ''} vuoto="Nessun articolo" disabilitato={disabilitato || elenchi.caricamento}
+                    <Selettore etichetta="Articolo che l’esito fa pagare" valore={e.articolo ?? ''} vuoto="Nessun articolo" disabilitato={disabilitato || elenchi.caricamento}
                       opzioni={(elenchi.dati?.articoli ?? []).map((a) => ({ chiave: a.chiave, nome: `${a.nome}${a.gruppo ? ` · ${a.gruppo}` : ''}` }))} onCambia={(v) => cambiaEsito(i, { articolo: v || null })} />
                   </div>
                   <div className="campo campo--largo">
@@ -119,7 +159,8 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
                         onClick={() => { const libera = CHIAVI_DOTI.find((c) => !e.doti.some((x) => x.dote === c)); if (libera) cambiaEsito(i, { doti: [...e.doti, { dote: libera, note: 1 }] }); }} />
                     )}
                   </div>
-                  <CampoTesto etichetta="Premi non ancora modellati" tipo="lungo" valore={e.premi ?? ''} massimo={LIMITI_ESITI.premi} aiuto="Oggetti che l’app non ha come dato (un distintivo, dei panini): restano parole" disabilitato={disabilitato} onCambia={(v) => cambiaEsito(i, { premi: v.trim() ? v : null })} />
+                  <OggettiDellEsito oggetti={e.oggetti ?? []} disabilitato={disabilitato} onCambia={(o) => cambiaOggetti(i, o)} />
+                  <CampoTesto etichetta="Altri premi, in parole" tipo="lungo" valore={e.premi ?? ''} massimo={LIMITI_ESITI.premi} aiuto="Solo ciò che non è un oggetto del catalogo: gli oggetti si scelgono qui sopra" disabilitato={disabilitato} onCambia={(v) => cambiaEsito(i, { premi: v.trim() ? v : null })} />
                   <div className="campo campo--largo">
                     <CondizioniEditor condizioni={e.condizioni} massimo={10} disabilitato={disabilitato} onCambia={(c) => cambiaEsito(i, { condizioni: c })} />
                   </div>

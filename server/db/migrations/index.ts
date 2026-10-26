@@ -281,6 +281,7 @@ import { migration268 } from './268_prezzi_copiati_negli_effetti.js';
 import { migration280 } from './280_lotteria_chiosco_e_biglietti.js';
 import { migration281 } from './281_proposte_della_lotteria.js';
 import { migration282 } from './282_vincita_di_sojiro.js';
+import { migration283 } from './283_premi_delle_sfide_come_oggetti.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -300,5 +301,5 @@ export const migrations: Migration[] = [
   migration250, migration251, migration252, migration253,
   migration255, migration256, migration257, migration258,
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
-  migration280, migration281, migration282,
+  migration280, migration281, migration282, migration283,
 ];

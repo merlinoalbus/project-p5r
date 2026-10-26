@@ -46,6 +46,7 @@ import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
 import { TestoNote } from '../components/shared/TestoNote';
 import { simboliNote } from '../../shared/note';
 import { fasceConPrezzoDiverso } from '../../shared/catalogo';
+import { fraseOggettiEsito } from '../../shared/esitiAttivita';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -73,8 +74,9 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
   const gruppi: Array<{ gruppo: string | null; esiti: typeof esiti.esiti }> = [];
   for (const e of esiti.esiti) { const g = gruppi.find((x) => x.gruppo === e.gruppo); if (g) g.esiti.push(e); else gruppi.push({ gruppo: e.gruppo, esiti: [e] }); }
   // Ondata 5 (lotto G): le Doti si dicono solo se gli esiti ne danno (l'estrazione della lotteria: «Vinto» segna un trofeo, nessuna Dote)
-  const conDoti = esiti.esiti.some((e) => e.doti.length > 0), conTrofeo = esiti.esiti.some((e) => e.trofeo);
-  const cosaSegna = [conDoti ? 'le sue Doti diventano il promemoria «Applica»' : null, conTrofeo ? 'il trofeo che dà si segna da solo' : null].filter(Boolean).join(' e ');
+  const conDoti = esiti.esiti.some((e) => e.doti.length > 0), conTrofeo = esiti.esiti.some((e) => e.trofeo), conOggetti = esiti.esiti.some((e) => e.oggetti.length > 0);
+  const cosaSegna = [conDoti ? 'le sue Doti diventano il promemoria «Applica»' : null, conTrofeo ? 'il trofeo che dà si segna da solo' : null,
+    conOggetti ? 'gli oggetti che dà entrano fra quelli ottenuti' : null].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1');
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <strong className="text-text">Esiti</strong>
@@ -89,7 +91,11 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
               <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>
                 {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}
                 {conDoti && <>: <TestoNote testo={e.doti.length ? e.doti.map((d) => `${d.nome} ${simboliNote(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'} /></>}
+                {/* Ondata 5 (lotto G): il prezzo di un esito senza prova (nessuna intestazione lo dice: «Non vinto, ricompri il Lotto R»),
+                    il trofeo e gli oggetti del catalogo che l'esito dà */}
+                {!e.gruppo && e.articolo ? ` · ${e.articolo.nome} ${testoPrezzoEsito(e.articolo)}` : ''}
                 {e.trofeo ? ` · trofeo «${e.trofeo.nome}»` : ''}
+                {fraseOggettiEsito(e.oggetti) ? ` · ${fraseOggettiEsito(e.oggetti)}` : ''}
                 {e.premi ? ` · ${e.premi}` : ''}
                 {e.condizioniTesto ? ` · ${e.disponibile ? '' : 'non ancora: '}${e.condizioniTesto}` : ''}
               </li>

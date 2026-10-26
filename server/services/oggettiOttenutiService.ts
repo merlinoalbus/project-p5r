@@ -8,13 +8,17 @@
 //   - le Richieste completate (decisione 3: le ricompense di una Richiesta le applica solo la Richiesta completata): i suoi oggetti del catalogo
 //     (`ricompensa_oggetto`, fonte «richiesta»), una volta sola per Richiesta, finché è completata nella partita; togliendo il completamento non
 //     ci sono più. Si leggono dallo stato completato e non si copiano in un'altra tabella: un dato in un solo punto, nessuna copia da tenere
-//     allineata quando la Richiesta si corregge, nessun doppio se la si completa da una voce e poi a mano.
+//     allineata quando la Richiesta si corregge, nessun doppio se la si completa da una voce e poi a mano;
+//   - Ondata 5 (lotto G): i turni delle attività registrati con un esito che dà oggetti (la sfida della Big Bang Burger vinta: il distintivo e i
+//     panini), una riga per oggetto del turno (`utente.oggetto_esito_turno`, scritta registrando il turno e tolta togliendolo,
+//     `oggettiDegliEsitiService`).
 // Le copie dello stesso oggetto si sommano nei totali. Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
 import { verificaPartita } from './verificaPartita.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
+import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { OggettiOttenutiDto, OggettoOttenutoDto } from '../../shared/types.js';
 
 /** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
@@ -33,11 +37,21 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
     JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave ${unisciCatalogo('ro.catalogo_chiave')}
     WHERE rp.partita_id = ? AND rp.stato = 'completata' ORDER BY r.ordine, ro.ordine, ro.catalogo_chiave`).all(partitaId) as
     Array<{ catalogo_chiave: string; quantita: number; chiave: string; richiesta_nome: string; nome: string | null; categoria: string | null }> : [];
+  // i turni con un esito che dà oggetti: il nome dell'attività e dell'esito si leggono da dove vivono (l'esito tolto dall'elenco resta con la chiave)
+  const daTurni = prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'oggetto_esito_turno'").get()
+    ? prepared(`SELECT o.catalogo_chiave, o.quantita, o.attivita_chiave, o.ordine, o.esito_chiave, a.nome AS attivita_nome, ${nome} AS nome, ${categoria} AS categoria
+      FROM utente.oggetto_esito_turno o LEFT JOIN main.attivita a ON a.chiave = o.attivita_chiave ${unisciCatalogo('o.catalogo_chiave')}
+      WHERE o.partita_id = ? ORDER BY o.creato_il, o.attivita_chiave, o.ordine, o.catalogo_chiave`).all(partitaId) as
+      Array<{ catalogo_chiave: string; quantita: number; attivita_chiave: string; ordine: number; esito_chiave: string; attivita_nome: string | null; nome: string | null; categoria: string | null }>
+    : [];
+  const nomeEsito = (attivita: string, esito: string): string => esitiDellAttivita(attivita)?.esiti?.esiti.find((e) => e.chiave === esito)?.nome ?? esito;
   const righe: OggettoOttenutoDto[] = [
     ...daVoci.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
       origine: { tipo: 'voce', voceUid: o.voce_uid, giorno: o.data, testo: o.azione } })),
     ...daRichieste.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
       origine: { tipo: 'richiesta', chiave: o.chiave, nome: o.richiesta_nome } })),
+    ...daTurni.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
+      origine: { tipo: 'turno', attivita: o.attivita_chiave, attivitaNome: o.attivita_nome ?? o.attivita_chiave, ordine: o.ordine, esitoNome: nomeEsito(o.attivita_chiave, o.esito_chiave) } })),
   ];
   const totali = new Map<string, OggettiOttenutiDto['totali'][number]>();
   for (const r of righe) {

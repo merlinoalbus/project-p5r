@@ -42,6 +42,7 @@ import { simboliNote } from '../../shared/note.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { fasciaDellaPartita, prezzoDellArticolo } from './prezziArticoli.js';
 import { segnaTrofeoDelTurno, togliTrofeoDelTurno } from './trofeiDegliEsitiService.js';
+import { segnaOggettiDelTurno, togliOggettiDelTurno } from './oggettiDegliEsitiService.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -603,6 +604,9 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     }
     // Ondata 5 (lotto G): il trofeo che l'esito scelto fa ottenere (la lotteria vinta → «Soldi facili») si segna da solo, con il suo «prima»
     if (esito) segnaTrofeoDelTurno(partitaId, chiave, ordine, esito.chiave);
+    // e gli oggetti del catalogo che l'esito dà (la Comet Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger») entrano fra gli ottenuti;
+    // senza esito toglie soltanto le righe rimaste da un turno con lo stesso numero
+    segnaOggettiDelTurno(partitaId, chiave, ordine, esito?.chiave);
     // L13 (decisione 18): gli yen del turno si muovono da soli (la paga del lavoro entra; il costo dell'attività o il prezzo della sfida
     // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
     // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
@@ -676,6 +680,8 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       restituisciYenAutomatico(partitaId, { tipo: 'turno', chiave: `${chiave}:${bersaglio}` }, 'turno-tolto');
       // Ondata 5 (lotto G): il trofeo che il turno aveva segnato con il suo esito torna com'era (resta se c'era già o se un altro lo rivendica)
       togliTrofeoDelTurno(partitaId, chiave, bersaglio);
+      // e gli oggetti che l'esito del turno aveva dato se ne vanno
+      togliOggettiDelTurno(partitaId, chiave, bersaglio);
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
     }

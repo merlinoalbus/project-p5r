@@ -7,13 +7,14 @@
 // 18: il prezzo dell'offerta si scala da solo. Le proposte L13-4b aperte su queste voci mettevano proprio una seconda copia del prezzo
 // («yen −3.000» della lotteria, «yen −500» della sfida) e il trofeo direttamente sulla voce, che invece segna l'esito «Vinto» dell'estrazione
 // (migrazione 280). Che cosa fa, SOLO su `proposta_conversione_voce` (nessuna voce del Diario cambia, impronta controllata):
-//   - 04-18 giorno (`51ff6b73`, «Acquisto biglietto della lotteria»): nuova proposta = collegamento al negozio «Lotteria» + acquisto del
-//     Lotto R (3.000 ¥ dall'offerta); la vecchia «yen −3.000» si chiude come sostituita;
+//   - 04-18 giorno (`51ff6b73`, «Acquisto biglietto della lotteria»): nuova proposta = collegamento al negozio «Chiosco della lotteria» +
+//     acquisto del Lotto R (il prezzo dall'offerta); la vecchia «yen −3.000» si chiude come sostituita;
 //   - 05-09 sera (`351777df`, «compra un biglietto Lotto R», spuntata nella partita 1): la guida [S5] dice di controllare prima l'esito e di
-//     ricomprare solo se non si è vinto. Due proposte, da decidere una per una: (a) collegamento al negozio + verifica dell'estrazione (turno
-//     dell'attività con l'esito scelto alla spunta: «Vinto» segna il trofeo); (b) l'acquisto del Lotto R, solo se non si è vinto. Le vecchie
-//     «yen −3.000» e «trofeo» si chiudono come sostituite. Con la decisione 19 l'approvazione su una voce già spuntata non applica niente da
-//     sola: l'effetto di stato va nell'elenco della partita, e la verifica (un turno) si registra togliendo e rimettendo la spunta;
+//     ricomprare solo se non si è vinto. Una proposta: collegamento al negozio + verifica dell'estrazione (turno dell'attività con l'esito
+//     scelto alla spunta: «Vinto» segna il trofeo, «Non vinto, ricompri il Lotto R» paga il nuovo biglietto, «Non vinto» niente). L'acquisto è
+//     dentro l'esito, mai un effetto a sé della voce: così si paga solo se non si è vinto (un effetto «articolo» varrebbe in ogni partita,
+//     anche dopo la vincita). Le vecchie «yen −3.000» e «trofeo» si chiudono come sostituite. Nella partita 1, dove la voce è già spuntata,
+//     il turno si registra dal + del contatore dell'attività (Partita → Progressi), che chiede lo stesso l'esito: non serve togliere la spunta;
 //   - 05-18 sera (`ca8068b2`, sfida Big Bang Burger): la vecchia «yen −500» si chiude come superata: il prezzo di sera (500 ¥) è un dato
 //     dell'offerta della sfida (lotto E) e lo scala il turno con l'esito, già proposto (`L13-4b-ca8068b2-04-a-esiti-attivita`). Le altre
 //     proposte della voce restano come sono;
@@ -21,7 +22,10 @@
 //     lasciato a questo lotto: hanno già il turno con l'esito (migrazione 234), che paga il prezzo dell'offerta; le loro proposte «yen −500»,
 //     «yen −2.000» e «yen −2.500» sarebbero una seconda copia (l'approvazione le rifiuterebbe, `yen-gia-strutturati`) e si chiudono come
 //     superate, solo finché il turno con l'esito è sulla voce. I 2.000 e 2.500 ¥ di giorno restano da verificare in gioco (decisione 5): il
-//     testo delle voci non cambia.
+//     testo delle voci non cambia;
+//   - 04-23 (`0b3239d9`, «Negozio di videonoleggio Scarlet: abbonarsi per 4.800 yen», periodo validato): il lotto E ha proposto l'acquisto
+//     dell'offerta «Abbonamento annuale» (`O5E-0b3239d9-01-articolo`) e ha lasciato a questo lotto la proposta «yen −4.800» (ROADMAP, lotto E:
+//     «lotto G / revisione riga per riga»): è la seconda copia dello stesso prezzo (decisioni 2 e 4) e si chiude come sostituita da quella.
 // Una proposta vecchia si chiude solo se è ancora aperta e con il contenuto letto il 2026-10-26; una nuova nasce solo se la voce, l'offerta e
 // l'attività esistono. Contenuto delle proposte mai riscritto (append-only, migrazioni 236/237). Idempotente. Audit in `dati_guida.audit-281-proposte-lotteria`.
 // ============================================================
@@ -48,11 +52,9 @@ const verifica = [{ effetto: { tipo: 'turno', attivita: ESTRAZIONE }, completa: 
 interface Nuova { id: string; voce: string; effetti: unknown[]; motivo: string; certezza: 'certa' | 'probabile' | 'da-verificare'; serve: 'articolo' | 'attivita' }
 const NUOVE: readonly Nuova[] = [
   { id: 'O5G-51ff6b73-01-lotto-r', voce: VOCE_18_APRILE, effetti: articolo, certezza: 'da-verificare', serve: 'articolo',
-    motivo: 'Ondata 5, lotto G: «comprare un biglietto della Lotto R per 3.000 Yen dal Chiosco della lotteria» è l’acquisto dell’offerta «Lotto R» del negozio «Lotteria» (Piazza della Stazione); il prezzo lo scala l’offerta (decisioni 2 e 18), quindi la proposta «yen −3.000» della voce è chiusa come sostituita. Resta «da verificare» perché la voce lo dice facoltativo («Se punti ad ottenere tutti i trofei»). Periodo validato: solo con il tuo sì.' },
+    motivo: 'Ondata 5, lotto G: «comprare un biglietto della Lotto R per 3.000 Yen dal Chiosco della lotteria» è l’acquisto dell’offerta «Lotto R» del negozio «Chiosco della lotteria» (Piazza della Stazione); il prezzo lo scala l’offerta (decisioni 2 e 18), quindi la proposta «yen −3.000» della voce è chiusa come sostituita. Resta «da verificare» perché la voce lo dice facoltativo («Se punti ad ottenere tutti i trofei»). Periodo validato: solo con il tuo sì.' },
   { id: 'O5G-351777df-01-verifica', voce: VOCE_9_MAGGIO, effetti: verifica, certezza: 'probabile', serve: 'attivita',
-    motivo: 'Ondata 5, lotto G: la guida del 9 maggio (settimana 5) dice di controllare prima se il biglietto ha vinto: è un turno dell’«Estrazione della lotteria», con l’esito scelto alla spunta («Vinto» segna da solo il trofeo «Soldi facili», «Non vinto» niente). Sostituisce la proposta che metteva il trofeo sulla voce. La voce è spuntata nella partita 1: con la decisione 19 il turno si registra togliendo e rimettendo la spunta. «Probabile»: la voce scrive l’acquisto, la verifica viene dalla guida. Periodo validato: solo con il tuo sì.' },
-  { id: 'O5G-351777df-02-lotto-r', voce: VOCE_9_MAGGIO, effetti: articolo, certezza: 'da-verificare', serve: 'articolo',
-    motivo: 'Ondata 5, lotto G: «compra un biglietto Lotto R (3.000 Yen)» è l’acquisto dell’offerta «Lotto R» del negozio «Lotteria»; il prezzo lo scala l’offerta (decisioni 2 e 18), quindi la proposta «yen −3.000» della voce è chiusa come sostituita. Per la guida si ricompra solo se non si è vinto: approvala solo se è così. La voce è spuntata nella partita 1: con la decisione 19 l’acquisto va nell’elenco della partita da approvare. Periodo validato: solo con il tuo sì.' },
+    motivo: 'Ondata 5, lotto G: la guida del 9 maggio (settimana 5) dice di controllare prima se il biglietto ha vinto e di ricomprarlo solo se non si è vinto: è un turno dell’«Estrazione della lotteria», con l’esito scelto alla spunta: «Vinto» segna da solo il trofeo «Soldi facili»; «Non vinto, ricompri il Lotto R» paga il nuovo biglietto (il prezzo dall’offerta, decisioni 2 e 18); «Non vinto» niente. Sostituisce le proposte che mettevano il trofeo e «yen −3.000» sulla voce: sulla voce varrebbero anche dopo una vincita. Nella partita 1 la voce è già spuntata: il turno si registra dal + del contatore dell’attività (Partita → Progressi), che chiede lo stesso l’esito, senza togliere la spunta. «Probabile»: la voce scrive l’acquisto, la verifica viene dalla guida. Periodo validato: solo con il tuo sì.' },
 ];
 
 /** `da`: la proposta che la sostituisce, o null quando il dato che porta il prezzo è già sulla voce (il turno della sfida, migrazione 234). */
@@ -60,9 +62,9 @@ interface Vecchia { id: string; voce: string; effetti: string; modo: 'sostituita
 const PERCHE_SFIDA = 'il turno della sfida è già sulla voce (migrazione 234) e il suo esito paga il prezzo dell’offerta della sfida (decisioni 2 e 5; il prezzo di giorno dell’offerta resta da verificare in gioco): un effetto yen ne sarebbe una seconda copia, e l’approvazione lo rifiuterebbe (`yen-gia-strutturati`) (migrazione dell’ondata 5, lotto G)';
 const VECCHIE: readonly Vecchia[] = [
   { id: 'L13-4b-51ff6b73-03-b-yen', voce: VOCE_18_APRILE, effetti: '[{"effetto":{"tipo":"yen","importo":-3000},"completa":[],"scelte":null}]', modo: 'sostituita', da: 'O5G-51ff6b73-01-lotto-r',
-    perche: 'il prezzo del Lotto R vive nell’offerta del negozio «Lotteria» e si scala da solo (decisioni 2 e 18): un effetto yen ne sarebbe una seconda copia (migrazione dell’ondata 5, lotto G)' },
-  { id: 'L13-4b-351777df-04-b-yen', voce: VOCE_9_MAGGIO, effetti: '[{"effetto":{"tipo":"yen","importo":-3000},"completa":[],"scelte":null}]', modo: 'sostituita', da: 'O5G-351777df-02-lotto-r',
-    perche: 'il prezzo del Lotto R vive nell’offerta del negozio «Lotteria» e si scala da solo (decisioni 2 e 18): un effetto yen ne sarebbe una seconda copia (migrazione dell’ondata 5, lotto G)' },
+    perche: 'il prezzo del Lotto R vive nell’offerta del negozio «Chiosco della lotteria» e si scala da solo (decisioni 2 e 18): un effetto yen ne sarebbe una seconda copia (migrazione dell’ondata 5, lotto G)' },
+  { id: 'L13-4b-351777df-04-b-yen', voce: VOCE_9_MAGGIO, effetti: '[{"effetto":{"tipo":"yen","importo":-3000},"completa":[],"scelte":null}]', modo: 'sostituita', da: 'O5G-351777df-01-verifica',
+    perche: 'il nuovo Lotto R si paga solo se non si è vinto: lo paga l’esito «Non vinto, ricompri il Lotto R» della verifica dell’estrazione, con il prezzo dell’offerta del «Chiosco della lotteria», che si scala da solo (decisioni 2 e 18); un effetto yen sulla voce ne sarebbe una seconda copia e varrebbe anche dopo una vincita (migrazione dell’ondata 5, lotto G)' },
   { id: 'L13-4b-351777df-03-b-premio', voce: VOCE_9_MAGGIO, effetti: '[{"effetto":{"tipo":"trofeo","trofeo":"soldi-facili"},"completa":[],"scelte":null}]', modo: 'sostituita', da: 'O5G-351777df-01-verifica',
     perche: 'il trofeo «Soldi facili» lo segna l’esito «Vinto» della verifica dell’estrazione, scelto alla spunta: sulla voce varrebbe anche senza vincita (migrazione dell’ondata 5, lotto G)' },
   { id: 'L13-4b-ca8068b2-01-b-yen', voce: VOCE_18_MAGGIO, effetti: '[{"effetto":{"tipo":"yen","importo":-500},"completa":[],"scelte":null}]', modo: 'superata', da: 'L13-4b-ca8068b2-04-a-esiti-attivita',
@@ -71,6 +73,9 @@ const VECCHIE: readonly Vecchia[] = [
   { id: 'L13-4b-3e5106de-01-b-yen', voce: '3e5106dec8bfe998093d39a88dbc301b', effetti: '[{"effetto":{"tipo":"yen","importo":-500},"completa":[],"scelte":null}]', modo: 'superata', da: null, perche: PERCHE_SFIDA },
   { id: 'L13-4b-fb0ac49a-02-b-yen', voce: 'fb0ac49af6e48c2172f4250626e1c521', effetti: '[{"effetto":{"tipo":"yen","importo":-2000},"completa":[],"scelte":null}]', modo: 'superata', da: null, perche: PERCHE_SFIDA },
   { id: 'L13-4b-3c0edc3d-02-b-yen', voce: '3c0edc3d0692f34375c5db5c718248d0', effetti: '[{"effetto":{"tipo":"yen","importo":-2500},"completa":[],"scelte":null}]', modo: 'superata', da: null, perche: PERCHE_SFIDA },
+  // Scarlet, 04-23 (periodo validato): il lotto E ha proposto l'offerta dell'abbonamento e ha lasciato a questo lotto la «yen −4.800»
+  { id: 'L13-4b-0b3239d9-03-b-yen', voce: '0b3239d98c006197b31530bb9187c475', effetti: '[{"effetto":{"tipo":"yen","importo":-4800},"completa":[],"scelte":null}]', modo: 'sostituita', da: 'O5E-0b3239d9-01-articolo',
+    perche: 'il prezzo dell’abbonamento annuale vive nell’offerta «Abbonamento annuale» del Videonoleggio Scarlet, proposta come acquisto della voce, e si scala da solo (decisioni 2, 4 e 18): un effetto yen ne sarebbe una seconda copia (migrazione dell’ondata 5, lotto G)' },
 ];
 
 function nuova(db: AppDatabase, n: Nuova, adesso: string): Esito {

@@ -60,6 +60,14 @@ function trofeoEsito(chiave: string | undefined): EsitoDisponibileDto['trofeo'] 
   return { chiave, nome: r?.nome ?? 'Trofeo non più nell’elenco' };
 }
 
+/** Ondata 5 (lotto G): gli oggetti dell'esito con il nome del catalogo; un oggetto che il catalogo non ha più si dice tale (registrando il
+ *  turno non entra fra gli ottenuti). */
+function oggettiEsito(oggetti: EsitoAttivita['oggetti']): EsitoDisponibileDto['oggetti'] {
+  if (!oggetti?.length) return [];
+  const nome = catalogoOggettiDisponibile() ? prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck() : null;
+  return oggetti.map((o) => ({ chiave: o.oggetto, nome: (nome?.get(o.oggetto) as string | undefined) ?? 'Oggetto non più nel catalogo', quantita: o.quantita }));
+}
+
 /** Un esito come lo vede la scelta: le condizioni sono le sue più quelle dell'articolo, valutate sullo stato (senza stato: disponibile). */
 function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): EsitoDisponibileDto {
   const articolo = e.articolo ? articoloEsito(e.articolo) : null;
@@ -73,6 +81,7 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
     articolo: articolo ? { chiave: articolo.chiave, nome: articolo.nome, prezzo: articolo.prezzo, prezzoPerFascia: articolo.prezzoPerFascia, prezzoNelMomento: prezzoNellaFascia(articolo.prezzo, articolo.prezzoPerFascia, st?.fasciaGioco) }
       : e.articolo ? { chiave: e.articolo, nome: 'Articolo non più nel listino', prezzo: null, prezzoPerFascia: null, prezzoNelMomento: null } : null,
     trofeo: trofeoEsito(e.trofeo),
+    oggetti: oggettiEsito(e.oggetti),
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };

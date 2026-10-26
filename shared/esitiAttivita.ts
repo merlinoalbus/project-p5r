@@ -20,6 +20,12 @@
 // con quell'esito il trofeo si segna da solo nella partita, e togliendo il turno torna com'era (`trofeiDegliEsitiService`): se il trofeo c'era
 // già resta. Il campo è facoltativo: gli esiti scritti prima (Big Bang Burger, centro battute, bagno pubblico) non lo hanno e restano identici.
 // Gli yen della vincita non stanno qui: la guida non dà importi, si scrivono a mano (decisione 18).
+// Sempre col lotto G (progetto dell'ondata 5, §7: «estendere gli esiti con un trofeo e con premi come oggetti per chiave con quantità; serve
+// anche ai distintivi della Big Bang Burger»): un esito può dire gli OGGETTI del catalogo che dà (`oggetti`, chiave e copie: la Comet Burger
+// vinta → «Distintivo numero due» e 3 «Big Bang Burger»). Registrando il turno con quell'esito gli oggetti entrano fra quelli ottenuti nella
+// partita e togliendolo se ne vanno (`oggettiDegliEsitiService`, `utente.oggetto_esito_turno`); `premi` resta per ciò che non è un oggetto
+// del catalogo. Anche questo campo è facoltativo: un esito senza oggetti si rilegge identico. `articolo` può essere anche l'acquisto che
+// l'esito comporta («Non vinto, ricompri il Lotto R» dell'estrazione della lotteria: il prezzo si scala registrando il turno, decisione 18).
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
@@ -28,22 +34,26 @@ import { normalizzaCondizioniSpillo, type RequisitoSpillo } from './condizioniSp
 import type { PrezzoPerFascia } from './catalogo.js';
 
 export interface DoteEsito { dote: DoteChiave; note: 1 | 2 | 3 }
+/** Ondata 5 (lotto G): un oggetto del catalogo che l'esito dà (`catalogo_oggetto.chiave`) e quante copie. */
+export interface OggettoEsito { oggetto: string; quantita: number }
 export interface EsitoAttivita {
   /** Chiave stabile dentro l'attività («comet-vittoria»): la citano la ricevuta della spunta e l'effetto `turno` della voce. */
   chiave: string;
   nome: string;
   /** La prova a cui l'esito appartiene («Comet Burger»): raggruppa gli esiti nella scelta. Null = nessun gruppo. */
   gruppo: string | null;
-  /** L'articolo del negozio che si paga per tentare (prezzo e condizioni di rango dal listino, mai copiati qui). */
+  /** L'articolo del negozio che si paga per tentare, o che l'esito fa comprare (prezzo e condizioni di rango dal listino, mai copiati qui). */
   articolo: string | null;
   /** Le condizioni proprie dell'esito (oltre a quelle dell'articolo): il giorno della settimana, un rango. */
   condizioni: RequisitoSpillo[];
   /** Le Doti che l'esito dà (da segnare a mano, come ogni Dote): vuote = l'esito non dà punti. */
   doti: DoteEsito[];
-  /** I premi che l'app non modella ancora come dato (oggetti senza scheda), in parole. */
+  /** I premi che non sono un oggetto del catalogo, in parole (gli oggetti stanno in `oggetti`). */
   premi: string | null;
   /** Ondata 5 (lotto G): il trofeo che l'esito fa ottenere (chiave di `trofeo`), segnato da solo registrando il turno. Assente = nessuno. */
   trofeo?: string;
+  /** Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà, ottenuti registrando il turno. Assente = nessuno (mai un elenco vuoto). */
+  oggetti?: OggettoEsito[];
 }
 export type ModoEsiti = 'scelta' | 'automatico';
 export interface EsitiAttivita { modo: ModoEsiti; esiti: EsitoAttivita[] }
@@ -52,9 +62,12 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
   { chiave: 'scelta', nome: 'Lo sceglie chi gioca, alla spunta' },
   { chiave: 'automatico', nome: 'Automatico: vale l’esito con le condizioni vere in quel momento' },
 ];
-export const LIMITI_ESITI = { esiti: 20, nome: 120, gruppo: 80, premi: 300, doti: 5 } as const;
+/** `quantita`: le copie di un oggetto, come l'effetto «oggetto ricevuto» delle voci (`QUANTITA_MASSIMA_EFFETTO` di `effettiVoce.ts`). */
+export const LIMITI_ESITI = { esiti: 20, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
 const CHIAVE_ESITO = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const CHIAVE_ARTICOLO = /^[a-z0-9][a-z0-9._:/-]{0,119}$/i;
+/** La chiave di un oggetto del catalogo («consumabile/big-bang-burger»), con la stessa forma di quella di un articolo. */
+const CHIAVE_OGGETTO = CHIAVE_ARTICOLO;
 /** La chiave di un trofeo (`trofeo.chiave`: «soldi-facili»). */
 const CHIAVE_TROFEO = /^[a-z0-9][a-z0-9-]{0,99}$/;
 
@@ -74,7 +87,7 @@ export function chiaveEsitoDaNome(nome: string): string {
 /** Un esito valido o null: campi sconosciuti, chiavi storte, Doti ripetute o note fuori 1–3 non entrano (un dato storto non diventa punti). */
 function normalizzaEsito(x: unknown): EsitoAttivita | null {
   const o = oggetto(x);
-  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo'].includes(k))) return null;
+  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti'].includes(k))) return null;
   const chiave = typeof o.chiave === 'string' && CHIAVE_ESITO.test(o.chiave) ? o.chiave : null;
   const nome = testo(o.nome, LIMITI_ESITI.nome);
   if (!chiave || !nome) return null;
@@ -98,7 +111,23 @@ function normalizzaEsito(x: unknown): EsitoAttivita | null {
   // il trofeo: assente, null o vuoto = nessuno (il campo non si scrive, così gli esiti di prima si rileggono identici); una chiave storta non entra
   const trofeo = o.trofeo == null || o.trofeo === '' ? undefined : typeof o.trofeo === 'string' && CHIAVE_TROFEO.test(o.trofeo) ? o.trofeo : null;
   if (trofeo === null) return null;
-  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}) };
+  // gli oggetti: assenti, null o un elenco vuoto = nessuno (il campo non si scrive); un oggetto ripetuto, una chiave storta o copie fuori
+  // 1–999 rendono l'esito non valido (nessuna copia si inventa né si scarta in silenzio)
+  let oggetti: OggettoEsito[] | undefined;
+  if (o.oggetti != null) {
+    if (!Array.isArray(o.oggetti) || o.oggetti.length > LIMITI_ESITI.oggetti) return null;
+    const elenco: OggettoEsito[] = [];
+    for (const g of o.oggetti) {
+      const v = oggetto(g);
+      if (!v || Object.keys(v).some((k) => k !== 'oggetto' && k !== 'quantita')) return null;
+      const chiaveOggetto = typeof v.oggetto === 'string' ? v.oggetto.trim() : '';
+      if (!CHIAVE_OGGETTO.test(chiaveOggetto) || elenco.some((x) => x.oggetto === chiaveOggetto)) return null;
+      if (typeof v.quantita !== 'number' || !Number.isInteger(v.quantita) || v.quantita < 1 || v.quantita > LIMITI_ESITI.quantita) return null;
+      elenco.push({ oggetto: chiaveOggetto, quantita: v.quantita });
+    }
+    if (elenco.length) oggetti = elenco;
+  }
+  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}) };
 }
 
 /** Gli esiti di un'attività o null se il valore non è un elenco valido per intero (niente si scarta in silenzio). */
@@ -127,6 +156,11 @@ export function fraseDotiEsito(doti: ReadonlyArray<DoteEsito>): string {
   return doti.length ? doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ') : 'nessuna Dote';
 }
 
+/** Ondata 5 (lotto G): gli oggetti che un esito dà, in breve: «Distintivo numero due, Big Bang Burger ×3»; null se nessuno. */
+export function fraseOggettiEsito(oggetti: ReadonlyArray<{ nome: string; quantita: number }>): string | null {
+  return oggetti.length ? oggetti.map((o) => (o.quantita > 1 ? `${o.nome} ×${o.quantita}` : o.nome)).join(', ') : null;
+}
+
 /** Le Doti di un esito con i punti che valgono (senza Fortuna: la Fortuna la conta il server quando registra il turno). */
 export function dotiEsitoConPunti(doti: ReadonlyArray<DoteEsito>): Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }> {
   return doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note, punti: puntiDaNote(d.note) }));
@@ -150,6 +184,8 @@ export interface EsitoDisponibileDto {
   articolo: { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; prezzoNelMomento: number | null } | null;
   /** Ondata 5 (lotto G): il trofeo che l'esito fa ottenere, con il nome (segnato da solo registrando il turno); null se nessuno. */
   trofeo: { chiave: string; nome: string } | null;
+  /** Ondata 5 (lotto G): gli oggetti del catalogo che l'esito dà, con il nome (ottenuti registrando il turno); vuoto se nessuno. */
+  oggetti: Array<{ chiave: string; nome: string; quantita: number }>;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */

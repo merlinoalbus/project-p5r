@@ -8,6 +8,7 @@
 //     «Lotteria gratta e vinci» (dal 4/18);
 //   - «Soluzione settimana 2», riquadro «La lotteria di Shibuya» [S2]: si compra il Lotto R, si torna la settimana dopo; vinto = trofeo «Soldi
 //     facili», altrimenti si ricompra; «Soluzione settimana 5», 9 maggio sera [S5]: prima si controlla, poi si ricompra solo se non si è vinto;
+//     il chiosco è «quello più a sinistra dei tre» banchi della piazza (anche la voce del Diario del 18 aprile);
 //   - «Elenco dei negozi» [N]: Discount Rocinante, «Lotto estivo S | 500 ¥ | 1 settembre – 10 ottobre | 1 | Lunedì successivo».
 // Nessuna pagina dà le date delle estrazioni né gli importi delle vincite: l'esito si sceglie alla verifica e gli yen si scrivono a mano
 // (decisione 18).
@@ -21,8 +22,10 @@ export const FONTE_SETTIMANA_2 = 'https://www.allgamestaff.it/persona-5-royal/so
 export const FONTE_SETTIMANA_5 = 'https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-5/';
 export const FONTE_TROFEI = 'https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/';
 
-/** Il chiosco unico della lotteria (decisione 21: «un solo chiosco della lotteria»), nella sede che esiste già in Piazza della Stazione. */
-export const CHIOSCO = { chiave: 'lotteria-shibuya', nome: 'Lotteria', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya', luogo: 'Shibuya, Piazza della Stazione' } as const;
+/** Il chiosco unico della lotteria (decisione 21: «un solo chiosco della lotteria»), nella sede che esiste già in Piazza della Stazione. Il nome
+ *  è quello delle voci del Diario e del trofeo («Chiosco della lotteria»), lo stesso per il negozio e per il luogo, come per gli altri negozi
+ *  (progetto dell'ondata 5, LOT-04: il luogo nato dal pin con L5 si rinomina e dice che cosa offre). */
+export const CHIOSCO = { chiave: 'lotteria-shibuya', nome: 'Chiosco della lotteria', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya', luogo: 'Shibuya, Piazza della Stazione' } as const;
 export const LOTTO_R = `${CHIOSCO.chiave}/lotto-r`;
 /** L'attività dell'estrazione: un turno = una verifica del biglietto, con l'esito «Vinto» (trofeo) o «Non vinto». */
 export const ESTRAZIONE = 'estrazione-lotteria';

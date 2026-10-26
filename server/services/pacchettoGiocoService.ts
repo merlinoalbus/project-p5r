@@ -121,6 +121,9 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   // Ondata 5 (utente 053): il trofeo segnato da un turno con il suo esito; un'attività o un trofeo che spariscono lasciano la riga orfana
   { tabella: 'trofeo_esito_turno', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'trofeo_esito_turno', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },
+  // Ondata 5 (utente 053): gli oggetti dati da un turno con il suo esito; un'attività o un oggetto che spariscono lasciano la riga orfana
+  { tabella: 'oggetto_esito_turno', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
+  { tabella: 'oggetto_esito_turno', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
   // L13 (utente 046): gli oggetti ricevuti dalle voci; un oggetto che sparisce dal catalogo lascia la riga orfana
   { tabella: 'oggetto_ottenuto_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
   // L13: gli sblocchi ricevuti (utente 046), uno per tipo di bersaglio; gli yen delle Richieste completate (utente 047)
