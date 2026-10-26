@@ -78,6 +78,14 @@ export function prezzoNellaFascia(prezzo: number | null, perFascia: unknown, fas
   return normalizzaPrezzoPerFascia(perFascia)?.[fascia] ?? prezzo;
 }
 
+/** Le fasce in cui l'offerta costa diversamente da `prezzo`, nell'ordine giorno, sera: solo quelle (ripetere lo stesso importo non
+ *  direbbe niente). È la stessa scelta in ogni vista che mostra il prezzo del listino senza conoscere la fascia. */
+export function fasceConPrezzoDiverso(prezzo: number | null, perFascia: unknown): Array<{ fascia: FasciaPrezzo; prezzo: number }> {
+  const p = normalizzaPrezzoPerFascia(perFascia);
+  if (!p) return [];
+  return (['giorno', 'sera'] as const).flatMap((f) => (p[f] !== undefined && p[f] !== prezzo ? [{ fascia: f, prezzo: p[f]! }] : []));
+}
+
 export const CATEGORIE_OGGETTO = [
   'arma', 'arma-da-fuoco', 'protezione', 'accessorio', 'consumabile', 'materiale', 'chiave',
   'regalo', 'cibo', 'libro', 'film', 'videogioco', 'carta-abilita', 'altro',

@@ -26,6 +26,8 @@ import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type Requisi
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { scelteAlternativeDellaVoce } from './alternativeAcquistiService.js';
+import { sqlPrezzoPerFascia } from './prezziArticoli.js';
+import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type PrezzoPerFascia } from '../../shared/catalogo.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
@@ -39,14 +41,16 @@ export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiA
   return r ? { nome: r.nome, esiti: leggiEsitiAttivita(r.esiti_json) } : null;
 }
 
-interface ArticoloEsito { chiave: string; nome: string; prezzo: number | null; condizioni: RequisitoSpillo[] }
-/** L'articolo che fa tentare l'esito: il nome è quello del catalogo (la colonna `nome` dell'articolo può essere vuota), prezzo e condizioni dal listino. */
+interface ArticoloEsito { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; condizioni: RequisitoSpillo[] }
+/** L'articolo che fa tentare l'esito: il nome è quello del catalogo (la colonna `nome` dell'articolo può essere vuota), prezzo (con quello
+ *  per fascia, Ondata 5 lotto E) e condizioni dal listino. */
 function articoloEsito(chiave: string): ArticoloEsito | null {
+  const perFascia = sqlPrezzoPerFascia('a');
   const a = prepared(catalogoOggettiDisponibile()
-    ? "SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, a.condizioni_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?"
-    : "SELECT a.chiave, COALESCE(NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, a.condizioni_json FROM articolo a WHERE a.chiave = ?")
-    .get(chiave) as { chiave: string; nome: string; prezzo: number | null; condizioni_json: string | null } | undefined;
-  return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, condizioni: leggiCondizioniSalvate(a.condizioni_json) } : null;
+    ? `SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?`
+    : `SELECT a.chiave, COALESCE(NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json FROM articolo a WHERE a.chiave = ?`)
+    .get(chiave) as { chiave: string; nome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; condizioni_json: string | null } | undefined;
+  return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(a.prezzo_per_fascia_json), condizioni: leggiCondizioniSalvate(a.condizioni_json) } : null;
 }
 
 /** Un esito come lo vede la scelta: le condizioni sono le sue più quelle dell'articolo, valutate sullo stato (senza stato: disponibile). */
@@ -57,7 +61,10 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
   const esito = st && condizioni.length ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st) : null;
   return {
     chiave: e.chiave, nome: e.nome, gruppo: e.gruppo, premi: e.premi, doti: dotiEsitoConPunti(e.doti),
-    articolo: articolo ? { chiave: articolo.chiave, nome: articolo.nome, prezzo: articolo.prezzo } : e.articolo ? { chiave: e.articolo, nome: 'Articolo non più nel listino', prezzo: null } : null,
+    // il prezzo che si scala è quello della fascia dello stato (la voce del Diario, o la partita per il contatore): la stessa regola di
+    // `motoreDiario.yenDellEffetto` e di `registraTurno`, così la scelta dice l'importo che la spunta toglie davvero dal saldo
+    articolo: articolo ? { chiave: articolo.chiave, nome: articolo.nome, prezzo: articolo.prezzo, prezzoPerFascia: articolo.prezzoPerFascia, prezzoNelMomento: prezzoNellaFascia(articolo.prezzo, articolo.prezzoPerFascia, st?.fasciaGioco) }
+      : e.articolo ? { chiave: e.articolo, nome: 'Articolo non più nel listino', prezzo: null, prezzoPerFascia: null, prezzoNelMomento: null } : null,
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };

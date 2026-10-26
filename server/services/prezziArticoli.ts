@@ -5,7 +5,10 @@
 // Il prezzo vive solo nell'offerta: `articolo.prezzo` e, quando una fascia costa diversamente, `articolo.prezzo_per_fascia_json`
 // (decisione 5: «il prezzo serale di 500 yen è un dato dell'articolo», le sfide della Big Bang Burger). Chi scala gli yen da solo
 // (decisione 18: l'effetto «articolo» della voce spuntata, il turno della sfida, l'anteprima dell'elenco del passato) e chi lo mostra legge
-// da qui, con la fascia della voce del Diario o, senza voce, quella corrente della partita: tutti dicono lo stesso importo.
+// da qui, con la fascia della voce del Diario o, senza voce, quella corrente della partita: tutti dicono lo stesso importo. Lo leggono anche
+// la scelta dell'esito alla spunta e al contatore (`esitiAttivitaService`, con la fascia dello stato), la scelta fra articoli in alternativa
+// (`alternativeAcquistiService`), il prezzo minimo della scheda dell'oggetto (`catalogoOggettiLetture`) e le frasi degli effetti fuori dal
+// Diario (`azioniStrutturateService`, che mostrano il prezzo del listino con quello della fascia accanto).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -16,6 +19,11 @@ const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera
 /** Vero se il file di gioco ha la colonna del prezzo per fascia (migrazione 260); uno schema di prima legge solo `prezzo`. */
 function conPrezzoPerFascia(): boolean {
   return !!prepared("SELECT 1 FROM pragma_table_info('articolo', 'main') WHERE name = 'prezzo_per_fascia_json'").get();
+}
+
+/** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato (`NULL` su uno schema di prima della 260). */
+export function sqlPrezzoPerFascia(alias: string): string {
+  return conPrezzoPerFascia() ? `${alias}.prezzo_per_fascia_json` : 'NULL';
 }
 
 /** La fascia della voce del Diario (giorno o sera); null se la voce non c'è più. */

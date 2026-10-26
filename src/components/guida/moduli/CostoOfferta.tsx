@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LIMITI_COSTO_OGGETTO, TIPI_COSTO_A_IMPORTO, VALUTA_COSTO, eCostoAImporto, normalizzaCostoScambio } from '../../../../shared/catalogo';
 import { SceltaNelCatalogo, type StatoSceltaCatalogo } from '../../catalogo/SceltaCatalogoOggetto';
@@ -17,6 +18,9 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
   const raw = jsonDi<Record<string, unknown> | null>(dati.costo_json, null);
   const righe = Array.isArray(raw?.oggetti) ? raw.oggetti as ComponenteCosto[] : [];
   const modifica = (costo: unknown) => imposta({ costo_json: costo, _costoModificato: true });
+  // il campo del prezzo di sera: visibile se l'offerta ne ha già uno salvato o scritto, oppure dopo averlo chiesto
+  const [seraAperta, setSeraAperta] = useState(false);
+  const seraVisibile = seraAperta || dati.prezzo_sera != null || dati._prezzoPerFasciaIniziale != null;
   // Ondata 5 (lotto E): oltre ai fiori, le monete del Casinò e i punti negozio, ciascuno con il suo importo
   const opzioni = [{ chiave: 'yen', nome: 'Yen' }, ...TIPI_COSTO_A_IMPORTO.map((t) => ({ chiave: t, nome: VALUTA_COSTO[t].scelta })), { chiave: 'oggetti', nome: 'Oggetti da cedere' },
     ...(originaleIlleggibile ? [{ chiave: 'non-leggibile', nome: 'Conserva il costo salvato non leggibile' }] : [])];
@@ -28,8 +32,12 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
         costo_json: v === 'yen' ? null : v === 'oggetti' ? { tipo: v, oggetti: [] } : { tipo: v, importo: null } });
     }} />
     {tipo === 'yen' && <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = costo non indicato; zero = gratis" />}
-    {/* Ondata 5 (lotto E, decisione 5): il prezzo della sera, solo se diverso da quello normale (le sfide della Big Bang Burger) */}
-    {tipo === 'yen' && <Campo nome="prezzo_sera" etichetta="Prezzo di sera in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Solo se di sera costa diversamente; vuoto = come di giorno" />}
+    {/* Ondata 5 (lotto E, decisione 5): il prezzo della sera, solo se diverso da quello normale (le sfide della Big Bang Burger). Il campo
+        compare se l'offerta ne ha uno (o dopo «Prezzo diverso di sera»): nelle altre centinaia di offerte un campo vuoto non direbbe niente
+        («le etichette di testo devono essere visibili solo se hanno senso») */}
+    {tipo === 'yen' && (seraVisibile
+      ? <Campo nome="prezzo_sera" etichetta="Prezzo di sera in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Solo se di sera costa diversamente; vuoto = come di giorno" />
+      : <PulsanteVisivo className="self-start" tono="fantasma" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Prezzo diverso di sera" disabled={disabilitato} onClick={() => setSeraAperta(true)} />)}
     {eCostoAImporto(tipo) && <label className="editor-mappa__campo">{tipo === 'fiori' ? 'Fiori da cedere' : tipo === 'monete' ? 'Monete del Casinò' : 'Punti negozio'}
       <input className="form-input" type="number" min={0} max={LIMITI_COSTO_OGGETTO.importo} step={1} value={testoDi(raw?.importo)} disabled={disabilitato}
         onChange={(e) => modifica({ tipo, importo: e.target.value === '' ? null : Number(e.target.value) })} />

@@ -92,7 +92,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   // è dichiarata prima del salvataggio. «Quale» elenca il genere del tipo e nessuna tessera risulta scelta.
   const altro = eAltroGenere(valore.tipo, rif);
   const suggerito = valore.effettiVoce ? collegamentoSuggerito(valore.tipo, rif, valore.effettiVoce) : null;
-  const nomiFrasi = useMemo(() => nomiEffettiDa(elenchi.azione, elenchi.effetti), [elenchi.azione, elenchi.effetti]);
+  const nomiFrasi = useMemo(() => nomiEffettiDa(elenchi.azione, elenchi.effetti, elenchi.fascia), [elenchi.azione, elenchi.effetti, elenchi.fascia]);
   /**
    * Cambia tipo o «Quale». Se il cambio toglierebbe un effetto che l'utente ha compilato in questa finestra (ritoccato o aggiunto a mano, non
    * quello che nasce da solo), prima lo dice e chiede conferma: niente si perde in silenzio.

@@ -103,8 +103,9 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
 
   const elenchiAzione = useCarica(getElenchiAzione, []);
   const elenchiEffetti = useCarica(getElenchiEffettiVoce, []);
-  const elenchi = useMemo<ElenchiVoce | null>(() => (elenchiAzione.dati && elenchiEffetti.dati ? { azione: elenchiAzione.dati, effetti: elenchiEffetti.dati, giorno } : null), [elenchiAzione.dati, elenchiEffetti.dati, giorno]);
-  const nomi = useMemo(() => (elenchi ? nomiEffettiDa(elenchi.azione, elenchi.effetti) : null), [elenchi]);
+  // Ondata 5 (lotto E): la fascia scelta per la voce dà il prezzo degli articoli (le sfide della Big Bang Burger costano 500 ¥ di sera)
+  const elenchi = useMemo<ElenchiVoce | null>(() => (elenchiAzione.dati && elenchiEffetti.dati ? { azione: elenchiAzione.dati, effetti: elenchiEffetti.dati, giorno, fascia: campi.fascia } : null), [elenchiAzione.dati, elenchiEffetti.dati, giorno, campi.fascia]);
+  const nomi = useMemo(() => (elenchi ? nomiEffettiDa(elenchi.azione, elenchi.effetti, elenchi.fascia) : null), [elenchi]);
   const erroreElenchi = elenchiAzione.errore ?? elenchiEffetti.errore;
   /** Una cosa da fare che diventa promemoria perde tipo, collegamento ed effetti. */
   const perdeEffetti = !!voce && voce.genere === 'azione' && !azione;

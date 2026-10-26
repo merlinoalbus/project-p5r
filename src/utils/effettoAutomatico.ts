@@ -18,7 +18,8 @@ import { RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from
 import { eDote, nomeDote } from '../../shared/doti';
 import { simboliNote } from '../../shared/note';
 import { fraseEffettoConNomi, type EffettoVoce, type NomiFraseEffetto, type RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
-import type { ElenchiAzioneDto, ElenchiEffettiVoceDto } from '../types';
+import type { ElenchiAzioneDto, ElenchiEffettiVoceDto, FasciaGioco } from '../types';
+import { prezzoNellaFascia } from '../../shared/catalogo';
 import type { CampiStrutturati } from './azioneStrutturata';
 
 export type RigaEffetto = RichiestaSalvaEffettiVoce['effetti'][number];
@@ -181,10 +182,17 @@ export interface NomiEffetti {
 
 const mappa = <T extends { chiave: string; nome: string }>(l: T[]): Map<string, string> => new Map(l.map((x) => [x.chiave, x.nome]));
 
-export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto): NomiEffetti {
+/** Ondata 5 (lotto E, decisione 5): con la fascia della voce (`fascia`) il prezzo di un articolo è quello che la spunta scala (500 ¥ di sera per
+ *  le sfide della Big Bang Burger) e il prezzo per fascia non si ripete; senza, resta quello del listino con l'altra fascia accanto nelle frasi. */
+export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto, fascia?: FasciaGioco | null): NomiEffetti {
+  const nellaFascia = (a: ElenchiEffettiVoceDto['articoli'][number]): ElenchiEffettiVoceDto['articoli'][number] => {
+    if (!fascia || !a.prezzoPerFascia) return a;
+    const { prezzoPerFascia, ...resto } = a;
+    return { ...resto, prezzo: prezzoNellaFascia(a.prezzo, prezzoPerFascia, fascia) };
+  };
   return {
     libri: mappa(e.libri), film: mappa(e.film), videogiochi: mappa(e.videogiochi), attivita: mappa(e.attivita), richieste: mappa(e.richieste),
-    articoli: new Map(x.articoli.map((a) => [a.chiave, a])), domande: new Map(x.domande.map((d) => [d.id, d])),
+    articoli: new Map(x.articoli.map((a) => [a.chiave, nellaFascia(a)])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
     oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []),
   };

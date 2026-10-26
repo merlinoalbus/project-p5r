@@ -7,6 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { nodiCatalogoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { effettiVisibiliDelLibro } from '../../shared/effettiLibro.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
+import { sqlPrezzoPerFascia } from './prezziArticoli.js';
 
 export interface RigaCatalogoOggetto {
   chiave: string; categoria: string; sottocategoria: string | null; nome: string; nomi_altri_json: string;
@@ -65,13 +66,25 @@ export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
     modificato: r.seed_json !== null, nascosto: r.nascosto === 1, prezzoMinimo: r.prezzo_minimo ?? null };
 }
 
-const SQL_CATALOGO = `SELECT c.*,
-  (SELECT MIN(a.prezzo) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+/**
+ * La lettura del catalogo con il prezzo minimo in yen fra le offerte. Ondata 5 (lotto E, decisione 5): il minimo conta anche il prezzo di una
+ * fascia (`articolo.prezzo_per_fascia_json`, le sfide della Big Bang Burger a 500 ¥ di sera), la stessa regola di `prezzoNellaFascia`: la fascia
+ * che non compare vale `prezzo`, e un JSON non leggibile vale `prezzo` (mai «gratis»). Su uno schema di prima della 260 resta `MIN(prezzo)`.
+ */
+function sqlCatalogo(): string {
+  const pf = sqlPrezzoPerFascia('a');
+  const prezzoMinimoOfferta = pf === 'NULL' ? 'a.prezzo'
+    // il minimo dei prezzi presenti fra listino, giorno e sera: ogni termine cade sugli altri se è vuoto, così un NULL non azzera il minimo
+    : `CASE WHEN ${pf} IS NOT NULL AND json_valid(${pf}) THEN MIN(COALESCE(a.prezzo, json_extract(${pf}, '$.giorno'), json_extract(${pf}, '$.sera')),
+        COALESCE(json_extract(${pf}, '$.giorno'), a.prezzo, json_extract(${pf}, '$.sera')), COALESCE(json_extract(${pf}, '$.sera'), a.prezzo, json_extract(${pf}, '$.giorno'))) ELSE a.prezzo END`;
+  return `SELECT c.*,
+  (SELECT MIN(${prezzoMinimoOfferta}) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
     WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL AND a.costo_json IS NULL) AS prezzo_minimo
   FROM catalogo_oggetto c`;
+}
 
 export function rigaOggetto(chiave: string, ancheNascosto = false): RigaCatalogoOggetto {
-  const r = prepared(`${SQL_CATALOGO} WHERE c.chiave = ?${ancheNascosto ? '' : ' AND c.nascosto = 0'}`).get(chiave) as RigaCatalogoOggetto | undefined;
+  const r = prepared(`${sqlCatalogo()} WHERE c.chiave = ?${ancheNascosto ? '' : ' AND c.nascosto = 0'}`).get(chiave) as RigaCatalogoOggetto | undefined;
   if (!r) throw httpErrors.notFound('oggetto-non-trovato', 'L’oggetto non è presente nel catalogo.');
   return r;
 }
@@ -80,7 +93,7 @@ export function elencaCatalogoOggetti(filtro: { categoria?: CategoriaOggetto; q?
   const condizioni: string[] = []; const parametri: string[] = [];
   if (!filtro.nascosti) condizioni.push('c.nascosto = 0');
   if (filtro.categoria) { condizioni.push('c.categoria = ?'); parametri.push(filtro.categoria); }
-  const righe = prepared(`${SQL_CATALOGO}${condizioni.length ? ` WHERE ${condizioni.join(' AND ')}` : ''} ORDER BY c.nome COLLATE NOCASE,c.chiave`).all(...parametri) as RigaCatalogoOggetto[];
+  const righe = prepared(`${sqlCatalogo()}${condizioni.length ? ` WHERE ${condizioni.join(' AND ')}` : ''} ORDER BY c.nome COLLATE NOCASE,c.chiave`).all(...parametri) as RigaCatalogoOggetto[];
   const q = normalizzaNomeOggetto(filtro.q ?? '');
   return righe.map(dtoOggetto).filter((o) => !q || [o.nome, ...o.nomiAltri, o.nomeOriginale ?? '', o.effetto].some((n) => normalizzaNomeOggetto(n).includes(q)))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'it') || a.chiave.localeCompare(b.chiave));
@@ -113,7 +126,7 @@ export function oggettiPerFonte(fonte: CatalogoOggettoDto['fonte']['tipo'], chia
       return o ? [[k, o] as const] : [];
     }));
   }
-  const righe = prepared(`SELECT x.*,f.fonte_chiave AS fonte_richiesta FROM (${SQL_CATALOGO}) x
+  const righe = prepared(`SELECT x.*,f.fonte_chiave AS fonte_richiesta FROM (${sqlCatalogo()}) x
     JOIN (${sqlRiferimentiFonte(fonte)}) f ON f.catalogo_chiave = x.chiave
     ${richieste ? 'WHERE f.fonte_chiave IN (SELECT value FROM json_each(?))' : ''}`)
     .all(...(richieste ? [JSON.stringify(richieste)] : [])) as Array<RigaCatalogoOggetto & { fonte_richiesta: string }>;
@@ -133,7 +146,7 @@ export function riferimentiOggettiPerFonti(fonti: Iterable<CatalogoOggettoDto['f
 export function oggettiConChiavi(chiavi: Iterable<string>): Map<string, CatalogoOggettoDto> {
   const elenco = [...new Set(chiavi)];
   if (!elenco.length || !catalogoOggettiDisponibile()) return new Map();
-  return new Map((prepared(`${SQL_CATALOGO} WHERE c.chiave IN (SELECT value FROM json_each(?))`).all(JSON.stringify(elenco)) as RigaCatalogoOggetto[])
+  return new Map((prepared(`${sqlCatalogo()} WHERE c.chiave IN (SELECT value FROM json_each(?))`).all(JSON.stringify(elenco)) as RigaCatalogoOggetto[])
     .map((r) => [r.chiave, dtoOggetto(r)]));
 }
 

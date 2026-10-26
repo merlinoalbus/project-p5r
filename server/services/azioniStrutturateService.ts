@@ -25,6 +25,8 @@ import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
 import { simboliNote } from '../../shared/note.js';
+import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type FasciaPrezzo, type PrezzoPerFascia } from '../../shared/catalogo.js';
+import { sqlPrezzoPerFascia } from './prezziArticoli.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, SemaforoRequisitoDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
@@ -195,20 +197,33 @@ export function nomiEffetti(): NomiEffettiAzione {
   };
 }
 
-/** Il nome dell'articolo come lo vede l'utente: quello del catalogo (la colonna `nome` dell'articolo può essere vuota), altrimenti la chiave. */
-const SQL_ARTICOLO = "SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?";
-export const articoloConNome = (chiave: string): { nome: string; prezzo: number | null } | undefined => prepared(SQL_ARTICOLO).get(chiave) as { nome: string; prezzo: number | null } | undefined;
+/** Il nome dell'articolo come lo vede l'utente: quello del catalogo (la colonna `nome` dell'articolo può essere vuota), altrimenti la chiave.
+ *  Il prezzo è quello del listino, con il prezzo per fascia accanto (Ondata 5, lotto E): chi conosce la fascia usa `nomiFraseEffetto(fascia)`. */
+export const articoloConNome = (chiave: string): { nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null } | undefined => {
+  const r = prepared(`SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${sqlPrezzoPerFascia('a')} AS prezzo_per_fascia_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?`)
+    .get(chiave) as { nome: string; prezzo: number | null; prezzo_per_fascia_json: string | null } | undefined;
+  return r ? { nome: r.nome, prezzo: r.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(r.prezzo_per_fascia_json) } : undefined;
+};
+
+/** L'articolo con il prezzo nella fascia data (giorno o sera: quello che la spunta scala, `prezzoNellaFascia`); senza fascia, quello del listino
+ *  con il prezzo per fascia accanto. */
+export function articoloNellaFascia(chiave: string, fascia?: FasciaPrezzo | null): { nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null } | undefined {
+  const a = articoloConNome(chiave);
+  if (!a || (fascia !== 'giorno' && fascia !== 'sera')) return a;
+  return { nome: a.nome, prezzo: prezzoNellaFascia(a.prezzo, a.prezzoPerFascia, fascia), prezzoPerFascia: null };
+}
 
 /**
  * R12-01/1: i nomi per scrivere le frasi degli effetti che citano il loro oggetto per chiave o per id (domanda, Richiesta, articolo,
  * invito, Persona). Una ricerca per volta sulla riga che serve: le stesse fonti degli elenchi `elenchiEffettiVoce` che la pagina usa
  * negli editor, così la frase è la stessa in ogni vista (`fraseEffettoConNomi`).
  */
-export function nomiFraseEffetto(): NomiFraseEffetto {
+export function nomiFraseEffetto(fascia?: FasciaPrezzo | null): NomiFraseEffetto {
   return {
     domanda: (id) => (prepared('SELECT domanda FROM domanda WHERE id = ?').pluck().get(id) as string | undefined) ?? undefined,
     richiesta: (chiave) => (prepared('SELECT nome FROM richiesta WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
-    articolo: articoloConNome,
+    // Ondata 5 (lotto E): con la fascia della voce il prezzo è quello che la spunta scala; senza, quello del listino con l'altra fascia accanto
+    articolo: (chiave) => articoloNellaFascia(chiave, fascia),
     invito: (chiave) => {
       const r = prepared('SELECT c.nome AS confidenteNome, i.data FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave WHERE i.chiave = ?').get(chiave) as { confidenteNome: string; data: string | null } | undefined;
       return r ?? undefined;
@@ -268,15 +283,17 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
   // L13 (decisione 4): con le alternative (le condizioni «non: articolo ottenuto», in tutte e due le direzioni), il giorno unico in cui si compra
   // e il contenuto; un articolo nascosto resta per il suo nome (una voce che lo cita ancora lo mostra) ma l'editor non lo propone
   const incompatibili = mappaIncompatibili();
-  const righe = prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, a.catalogo_chiave AS catalogoChiave, a.nascosto, a.condizioni_json
-    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; catalogoChiave: string | null; nascosto: number; condizioni_json: string | null }>;
+  const righe = prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, ${sqlPrezzoPerFascia('a')} AS prezzo_per_fascia_json, a.catalogo_chiave AS catalogoChiave, a.nascosto, a.condizioni_json
+    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; catalogoChiave: string | null; nascosto: number; condizioni_json: string | null }>;
   const contenuti = contenutoArticoli(righe.map((a) => a.chiave));
   const articoli = righe
     .filter((a) => !eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogoChiave }))
-    .map(({ catalogoChiave: _scartata, nascosto, condizioni_json, ...a }) => {
+    .map(({ catalogoChiave: _scartata, nascosto, condizioni_json, prezzo_per_fascia_json, ...a }) => {
       const giorno = giornoUnico(condizioni_json);
       const altri = incompatibili.get(a.chiave), contenuto = contenuti.get(a.chiave);
-      return { ...a, ...(nascosto ? { nascosto: true as const } : {}), ...(altri?.length ? { incompatibili: [...altri] } : {}), ...(giorno ? { giorno } : {}), ...(contenuto?.length ? { contenuto } : {}) };
+      // Ondata 5 (lotto E): il prezzo di una fascia diverso dal listino (le sfide della Big Bang Burger di sera), solo se c'è
+      const perFascia = normalizzaPrezzoPerFascia(prezzo_per_fascia_json);
+      return { ...a, ...(perFascia ? { prezzoPerFascia: perFascia } : {}), ...(nascosto ? { nascosto: true as const } : {}), ...(altri?.length ? { incompatibili: [...altri] } : {}), ...(giorno ? { giorno } : {}), ...(contenuto?.length ? { contenuto } : {}) };
     });
   return {
     articoli,

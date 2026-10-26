@@ -1487,6 +1487,8 @@ export interface ElenchiAzioneDto {
 export interface ElenchiEffettiVoceDto {
   /** Articoli dei negozi (l'Aojiru ha il suo effetto e non c'è): `chiave` è «negozio/articolo». */
   articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null;
+    /** Ondata 5 (lotto E): il prezzo di una fascia quando è diverso da `prezzo` (le sfide della Big Bang Burger costano 500 ¥ di sera); solo se c'è. */
+    prezzoPerFascia?: PrezzoPerFascia;
     /** L13: l'articolo è nascosto nel catalogo (per esempio il vecchio articolo unico delle televendite): resta per il nome, non si propone. */
     nascosto?: true;
     /** L13 (decisione 4): gli articoli con cui non si compra insieme (le sue condizioni «non: articolo ottenuto», in tutte e due le direzioni). */
@@ -3568,6 +3570,8 @@ export interface CatalogoOggettoDto extends RiferimentoOggettoDto {
   origine: 'seed' | 'utente';
   modificato: boolean;
   nascosto: boolean;
+  /** Il prezzo in yen più basso fra le offerte visibili, contando anche il prezzo di una fascia (Ondata 5, lotto E: le sfide della Big Bang
+   *  Burger a 500 ¥ di sera); null senza offerte in yen. */
   prezzoMinimo: number | null;
 }
 

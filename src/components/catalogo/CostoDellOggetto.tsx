@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { CostoOggettoDto } from '../../types';
 import { formattaYen } from '../../utils/letture';
-import { testoCostoAImporto, type PrezzoPerFascia } from '../../../shared/catalogo';
+import { fasceConPrezzoDiverso, testoCostoAImporto, type PrezzoPerFascia } from '../../../shared/catalogo';
 
 /** La stessa resa in listino, pagina oggetto e visore: uno scambio non diventa un prezzo in yen.
  *  Ondata 5 (lotto E): le monete del Casinò e i punti negozio si leggono come i fiori («350 monete», «30 punti»); il prezzo di una fascia
@@ -15,9 +15,6 @@ export function CostoDellOggetto({ costo, prezzo, prezzoPerFascia = null, daVeri
   </span>)}</span>;
   const base = prezzo === null ? 'Costo non indicato' : prezzo === 0 ? 'Gratis' : formattaYen(prezzo);
   // solo le fasce con un prezzo diverso da quello normale: ripetere lo stesso importo non direbbe niente
-  const fasce = (['giorno', 'sera'] as const).flatMap((f) => {
-    const p = prezzoPerFascia?.[f];
-    return p !== undefined && p !== prezzo ? [`${f === 'sera' ? 'di sera' : 'di giorno'} ${p === 0 ? 'gratis' : formattaYen(p)}`] : [];
-  });
+  const fasce = fasceConPrezzoDiverso(prezzo, prezzoPerFascia).map((x) => `${x.fascia === 'sera' ? 'di sera' : 'di giorno'} ${x.prezzo === 0 ? 'gratis' : formattaYen(x.prezzo)}`);
   return <span>{base}{fasce.length ? <span className="text-text-secondary"> · {fasce.join(' · ')}</span> : null}</span>;
 }

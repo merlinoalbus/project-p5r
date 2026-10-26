@@ -8,8 +8,10 @@
 //   - 11 hanno un negozio e un periodo nella guida e diventano offerte qui (sotto);
 //   - 9 si vendono solo nei set delle televendite: il prezzo citato è quello del set, che è già un'offerta (decisione 4) — nessuna offerta nuova,
 //     il testo si toglie con la 265;
-//   - 2 (Oh! Shiruko 210 ¥, Stufato misterioso 600 ¥) la guida li dà a «Distributori automatici» senza dire quale, e la pagina dei distributori
-//     non li elenca: un'offerta in un distributore scelto a caso sarebbe un dato inventato. Il prezzo resta nella descrizione, unico punto.
+//   - 2 restano senza offerta, perché la guida non dice in quale distributore si comprano: Oh! Shiruko (210 ¥) è dato solo a «Distributori
+//     automatici», senza luogo; Stufato misterioso (600 ¥) a «Distributori automatici: Akihabara, Electric Town (da Venerdì 9/2)», ma i
+//     distributori di Akihabara sono sei e la pagina dei distributori (che li elenca uno per uno) non lo nomina in nessuno. Un'offerta in un
+//     distributore scelto da noi sarebbe un dato inventato: il prezzo resta nella descrizione, unico punto, e la scelta va all'utente.
 //
 // Guida italiana, Oggetti [O] (letta il 2026-10-26), «Distributore militare, Negozio softair Untouchable (Shibuya)», 800 ¥ ciascuno:
 //   Razione D, Razione di polpette, Pane nero: 12/7–12/19 · Porzione di frutta: 6/07–8/14 e 11/11–12/6 · Porzione di kebab, Porzione di Mont

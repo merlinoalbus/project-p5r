@@ -29,6 +29,8 @@ import { fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnat
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
+// Ondata 5 (lotto E): la frase dell'articolo dice il prezzo della fascia della voce, lo stesso che la spunta scala
+import { fasciaDellaVoce } from './prezziArticoli.js';
 
 /** I conteggi del censimento di una partita. */
 export interface CensimentoPartita {
@@ -116,7 +118,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
           if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
-          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(r.partita_id, e) }, senzaAvanzamento: true });
+          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, e.tipo === 'articolo' ? nomiFraseEffetto(fasciaDellaVoce(r.voce_uid)) : nomi), motivo: motivoDelPassato(r.partita_id, e) }, senzaAvanzamento: true });
           const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
           if (aperteDopo > 0) registra(r, 'proposta');
           if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;

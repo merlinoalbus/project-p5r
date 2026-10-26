@@ -46,7 +46,7 @@ import { alternativeDellaVoceFatta, contenutoArticoli, effettiInAlternativa, inc
 import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce, type EffettoPerYen } from './yenAutomaticiService.js';
 import { applicatoDallaSpunta } from './applicatoDallaSpunta.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { prezzoDellArticolo } from './prezziArticoli.js';
+import { fasciaDellaVoce } from './prezziArticoli.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 
 export interface RigaVoce {
@@ -96,11 +96,9 @@ function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenG
   // L13 (decisione 4): gli articoli in alternativa (Set A o Set B) e che cosa contengono; a voce fatta (`fatta.comprati`, gli articoli che la
   // spunta ha segnato) fra le alternative resta solo quella comprata, salvo quelle aggiunte dopo la spunta (`fatta.daScegliere`), da scegliere
   const contenuti = contenutoArticoli(fonte.effetti.flatMap(({ effetto: e }) => (e.tipo === 'articolo' ? [e.articolo] : [])));
-  const base = nomiDelRiepilogo(nomi);
   // Ondata 5 (lotto E, decisione 5): il prezzo di un articolo è quello della fascia della voce, lo stesso che la spunta scala
   // (`motoreDiario.yenDellEffetto`): di sera le sfide della Big Bang Burger costano 500 ¥
-  const frase: NomiFraseEffetto = { ...base.frase, articolo: (k) => { const a = base.frase.articolo(k); return a ? { ...a, prezzo: prezzoDellArticolo(k, fascia) } : a; } };
-  const nomiRiepilogo: NomiRiepilogoEffetti = { ...base, frase, incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) };
+  const nomiRiepilogo: NomiRiepilogoEffetti = { ...nomiDelRiepilogo(nomi, fascia), incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) };
   // L13 (decisione 18): gli effetti i cui yen erano già nel saldo da prima (per posizione, come gli effetti del riepilogo)
   const vecchi = new Set(fonte.effetti.flatMap((x, i) => (yenGiaNelSaldo.has(x.uid) ? [i] : [])));
   return {
@@ -127,8 +125,8 @@ function quesitoDellaDomanda(id: number): QuesitoRiepilogoEffetti | undefined {
   return { domanda: r.domanda, tipo: r.tipo, risposte };
 }
 /** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
-function nomiDelRiepilogo(nomi: NomiEffettiAzione): NomiRiepilogoEffetti {
-  return { frase: nomiFraseEffetto(), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
+function nomiDelRiepilogo(nomi: NomiEffettiAzione, fascia?: FasciaPrezzo | null): NomiRiepilogoEffetti {
+  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
@@ -269,7 +267,8 @@ export function decisioniApertePerVoce(partitaId: number, voceUid: string): numb
  * `effettiInAlternativa`: senza riga non sono stati scelti, e il riepilogo della voce li dice comprati o da scegliere).
  */
 function statiNonApplicatiDellaVoce(p: number, fonte: StatoEffettiVoceDto): NonNullable<AzionePercorsoDto['statiNonApplicati']> {
-  const nomi = nomiFraseEffetto();
+  // Ondata 5 (lotto E): il prezzo dell'articolo nella frase è quello della fascia della voce, lo stesso che la spunta scala
+  const nomi = nomiFraseEffetto(fasciaDellaVoce(fonte.voceUid));
   const inAlternativa = effettiInAlternativa(fonte.effetti);
   return fonte.effetti.flatMap(({ uid, effetto: e }): NonNullable<AzionePercorsoDto['statiNonApplicati']> => {
     if (!eEffettoDiStato(e) || inAlternativa.has(uid)) return [];
