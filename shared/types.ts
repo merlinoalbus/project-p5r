@@ -22,7 +22,7 @@ import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
 import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
-import type { CategoriaOggetto } from './catalogo.js';
+import type { CategoriaOggetto, PrezzoPerFascia, TipoCostoAImporto } from './catalogo.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
 import type { CarattereVoce } from './caratteriVoce.js';
@@ -1715,6 +1715,8 @@ export interface ArticoloDto {
   /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
   per: string | null;
   prezzo: number | null;
+  /** Ondata 5 (lotto E, decisione 5): il prezzo in una fascia quando è diverso da `prezzo` (le sfide della Big Bang Burger di sera); null = nessuno. */
+  prezzoPerFascia?: PrezzoPerFascia | null;
   effetto: string | null;
   statistiche: string | null;
   /** Quante se ne possono comprare; `null` = nessun limite dichiarato (diverso da zero). */
@@ -2985,7 +2987,7 @@ export interface DettaglioSpilloDto {
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
     /** L5: la sezione del negozio nella pagina della sede, o null. */
-    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
+    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
       /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come
        *  nella pagina del negozio (`ArticoloDto`): la mappa mostra lo stesso dato nello stesso modo («Compra», «rimasti N di Q», «Annulla»). */
       rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'] }> } | null;
@@ -3551,7 +3553,7 @@ export interface RiferimentoOggettoDto { chiave: string; nome: string; casa: str
 export interface ContenutoOggettoDto extends RiferimentoOggettoDto { quantita: number; nota: string | null }
 /** La guida può nominare il prodotto di una ricetta senza dichiararne la resa. Non equivale a una unità. */
 export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null }
-export type CostoOggettoDto = { tipo: 'fiori'; importo: number }
+export type CostoOggettoDto = { tipo: TipoCostoAImporto; importo: number }
   | { tipo: 'oggetti'; oggetti: Array<{ chiave: string; quantita: number; nome?: string; casa?: string }> };
 
 export interface CatalogoOggettoDto extends RiferimentoOggettoDto {
@@ -3594,6 +3596,8 @@ export interface OffertaOggettoDto {
   sedeChiave: string | null;
   sedeNome: string | null;
   prezzo: number | null;
+  /** Ondata 5 (lotto E): il prezzo in una fascia quando è diverso da `prezzo`, dall'offerta. */
+  prezzoPerFascia?: PrezzoPerFascia | null;
   costo: CostoOggettoDto | null;
   costoDaVerificare: boolean;
   condizioni: CondizioneSpilloDto[];

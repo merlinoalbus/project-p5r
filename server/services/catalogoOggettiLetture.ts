@@ -31,7 +31,8 @@ export function statisticheOggetto(json: string | null): Record<string, unknown>
 export function costoOggetto(json: string | null, riferimenti?: ReadonlyMap<string, RiferimentoOggettoDto>): CostoOggettoDto | null {
   const v = normalizzaCostoScambio(json);
   if (!v) return null;
-  if (v.tipo === 'fiori') return v;
+  // fiori, monete del Casinò, punti negozio: una quantità di una valuta, senza riferimenti da risolvere
+  if (v.tipo !== 'oggetti') return v;
   const out: Extract<CostoOggettoDto, { tipo: 'oggetti' }>['oggetti'] = [];
   for (const o of v.oggetti) {
     const r = riferimenti === undefined ? riferimentoOggetto(o.chiave) : riferimenti.get(o.chiave);

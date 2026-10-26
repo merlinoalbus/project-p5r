@@ -27,6 +27,7 @@ import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
 import { NESSUNA_NOTA, simboliNote } from '../../shared/note.js';
+import { fasciaDellaVoce } from './prezziArticoli.js';
 
 const numeroReceipt = z.number().finite();
 const chiaveReceipt = z.string().min(1);
@@ -125,7 +126,9 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno), e la ricevuta lo ricorda;
       // senza la scelta risolta il turno non si registra (sarebbe un turno vuoto: la regola vale per ogni strada che arriva qui)
       if (scelta?.tipo !== 'turno' && esitiDellAttivita(e.attivita)?.esiti) throw httpErrors.conflict('esito-da-scegliere', 'Questa attività dichiara i suoi esiti: scegli l’esito ottenuto prima di registrare il turno.');
-      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito) : registraTurno(partitaId, e.attivita, e.doti);
+      // Ondata 5 (lotto E, decisione 5): il turno si svolge nella fascia della voce, che decide il prezzo della sfida (500 ¥ di sera)
+      const fascia = a.voceUid ? fasciaDellaVoce(a.voceUid) : null;
+      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia);
       turni.push(t);
     }
   }

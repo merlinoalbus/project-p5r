@@ -17,6 +17,7 @@ import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
+import { testoCostoAImporto } from '../../shared/catalogo.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -493,6 +494,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     const prezzi = offerte.flatMap((o) => o.costo === null && !o.costoDaVerificare && o.prezzo !== null ? [o.prezzo] : []);
     const prezzo = prezzi.length ? Math.min(...prezzi) : null; const prezzoMassimo = prezzi.length ? Math.max(...prezzi) : null;
     const scambi = [...new Set(offerte.flatMap((o) => o.costoDaVerificare ? ['Scambio da correggere nel negozio'] : o.costo?.tipo === 'fiori' ? [`Scambio: ${o.costo.importo} fiori`]
+      // Ondata 5 (lotto E): monete del Casinò e punti negozio, con il loro importo
+      : o.costo?.tipo === 'monete' || o.costo?.tipo === 'punti' ? [testoCostoAImporto(o.costo)]
       : o.costo?.tipo === 'oggetti' ? [`Scambio: ${o.costo.oggetti.map((v) => `${v.quantita} × ${v.nome ?? 'oggetto da collegare'}`).join(', ')}`] : []))];
     const costoYen = prezzo === null ? null : prezzo === prezzoMassimo ? `${prezzo.toLocaleString('it-IT')} ¥` : `Da ${prezzo.toLocaleString('it-IT')} a ${prezzoMassimo!.toLocaleString('it-IT')} ¥`;
     return { ...g, modificato: regaloModificato(g), ...(precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: offerte.length > 0,

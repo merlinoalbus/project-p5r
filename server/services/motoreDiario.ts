@@ -29,6 +29,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
 import { risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
 import { effettiInAlternativa, risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
+import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
@@ -117,7 +118,9 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
     const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
     const copie=x.quantita??1;
-    return a?.prezzo!=null&&a.prezzo>0?spesa(a.prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
+    // Ondata 5 (lotto E, decisione 5): il prezzo della fascia della voce (le sfide della Big Bang Burger costano 500 ¥ di sera)
+    const prezzo=a?prezzoDellArticolo(x.articolo,fasciaDellaVoce(uid)):null;
+    return a&&prezzo!=null&&prezzo>0?spesa(prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
   }
   if(x.tipo==='acquisto'&&ricevuta?.creato){
     const a=prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,String(ricevuta.ricevuta.acquistoId)) as {prezzo_yen:number}|undefined;

@@ -19,7 +19,8 @@ import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } f
 import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
-import { categoriaDelListino, normalizzaNomeOggetto } from '../../shared/catalogo.js';
+import { categoriaDelListino, normalizzaNomeOggetto, normalizzaPrezzoPerFascia, prezzoNellaFascia, testoCostoAImporto } from '../../shared/catalogo.js';
+import { fasciaDellaPartita } from './prezziArticoli.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -36,7 +37,7 @@ import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettagli
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
 interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
 interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
+interface RigaArticolo { prezzo_per_fascia_json?: string | null; rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
   negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
@@ -183,6 +184,8 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'),
     categoria: oggetto ? categoriaDelListino(oggetto.categoria, oggetto.sottocategoria) : r.categoria as ArticoloDto['categoria'],
     per: oggetto ? (typeof oggetto.statistiche?.per === 'string' ? oggetto.statistiche.per : null) : r.per, prezzo: r.prezzo,
+    // Ondata 5 (lotto E, decisione 5): il prezzo di una fascia diverso da `prezzo`, un dato dell'offerta; uno scambio non ne ha
+    prezzoPerFascia: r.costo_json == null ? normalizzaPrezzoPerFascia(r.prezzo_per_fascia_json ?? null) : null,
     effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
     disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
@@ -460,7 +463,10 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       }
       if (togliOttenuto && era) togliPresenza(partitaId, articoloChiave, prodotto.nome);
     }
-    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
+    // Ondata 5 (lotto E): il prezzo della fascia corrente della partita, e le monete o i punti di uno scambio a importo
+    const costoEvento = r.costo_json != null ? costoOggetto(r.costo_json) : null;
+    const prezzoEvento = prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json ?? null, fasciaDellaPartita(partitaId));
+    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? (costoEvento && costoEvento.tipo !== 'oggetti' ? ` · ${testoCostoAImporto(costoEvento)}` : ' · Scambio') : prezzoEvento !== null ? ` · ${prezzoEvento.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);

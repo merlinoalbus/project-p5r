@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LIMITI_COSTO_OGGETTO, normalizzaCostoScambio } from '../../../../shared/catalogo';
+import { LIMITI_COSTO_OGGETTO, TIPI_COSTO_A_IMPORTO, VALUTA_COSTO, eCostoAImporto, normalizzaCostoScambio } from '../../../../shared/catalogo';
 import { SceltaNelCatalogo, type StatoSceltaCatalogo } from '../../catalogo/SceltaCatalogoOggetto';
 import { Selettore } from '../../shared/Selettore';
 import { jsonDi, testoDi, type Dati } from './base';
@@ -17,19 +17,22 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
   const raw = jsonDi<Record<string, unknown> | null>(dati.costo_json, null);
   const righe = Array.isArray(raw?.oggetti) ? raw.oggetti as ComponenteCosto[] : [];
   const modifica = (costo: unknown) => imposta({ costo_json: costo, _costoModificato: true });
-  const opzioni = [{ chiave: 'yen', nome: 'Yen' }, { chiave: 'fiori', nome: 'Fiori' }, { chiave: 'oggetti', nome: 'Oggetti da cedere' },
+  // Ondata 5 (lotto E): oltre ai fiori, le monete del Casinò e i punti negozio, ciascuno con il suo importo
+  const opzioni = [{ chiave: 'yen', nome: 'Yen' }, ...TIPI_COSTO_A_IMPORTO.map((t) => ({ chiave: t, nome: VALUTA_COSTO[t].scelta })), { chiave: 'oggetti', nome: 'Oggetti da cedere' },
     ...(originaleIlleggibile ? [{ chiave: 'non-leggibile', nome: 'Conserva il costo salvato non leggibile' }] : [])];
   return <fieldset disabled={disabilitato} className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0">
     <legend className="mb-2 testo-14 font-semibold">Costo dell’offerta</legend>
     <Selettore etichetta="Come si paga" valore={tipo} opzioni={opzioni} ricerca="mai" disabilitato={disabilitato} onCambia={(v) => {
       if (v === 'non-leggibile') imposta({ _tipoCosto: v, costo_json: dati._costoIniziale, _costoModificato: false });
-      else if (v === 'yen' || v === 'fiori' || v === 'oggetti') imposta({ _tipoCosto: v, _costoModificato: true,
-        costo_json: v === 'yen' ? null : v === 'fiori' ? { tipo: v, importo: null } : { tipo: v, oggetti: [] } });
+      else if (v === 'yen' || v === 'oggetti' || eCostoAImporto(v)) imposta({ _tipoCosto: v, _costoModificato: true,
+        costo_json: v === 'yen' ? null : v === 'oggetti' ? { tipo: v, oggetti: [] } : { tipo: v, importo: null } });
     }} />
     {tipo === 'yen' && <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = costo non indicato; zero = gratis" />}
-    {tipo === 'fiori' && <label className="editor-mappa__campo">Fiori da cedere
-      <input className="form-input" type="number" min={0} max={LIMITI_COSTO_OGGETTO.fiori} step={1} value={testoDi(raw?.importo)} disabled={disabilitato}
-        onChange={(e) => modifica({ tipo: 'fiori', importo: e.target.value === '' ? null : Number(e.target.value) })} />
+    {/* Ondata 5 (lotto E, decisione 5): il prezzo della sera, solo se diverso da quello normale (le sfide della Big Bang Burger) */}
+    {tipo === 'yen' && <Campo nome="prezzo_sera" etichetta="Prezzo di sera in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Solo se di sera costa diversamente; vuoto = come di giorno" />}
+    {eCostoAImporto(tipo) && <label className="editor-mappa__campo">{tipo === 'fiori' ? 'Fiori da cedere' : tipo === 'monete' ? 'Monete del Casinò' : 'Punti negozio'}
+      <input className="form-input" type="number" min={0} max={LIMITI_COSTO_OGGETTO.importo} step={1} value={testoDi(raw?.importo)} disabled={disabilitato}
+        onChange={(e) => modifica({ tipo, importo: e.target.value === '' ? null : Number(e.target.value) })} />
     </label>}
     {tipo === 'oggetti' && <>
       {righe.map((r, indice) => {
@@ -50,6 +53,6 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
     </>}
     {tipo === 'non-leggibile' && <p role="alert" className="m-0 testo-13 text-warning">Il costo salvato non è leggibile e non viene trattato come gratis. Scegli come si paga per sostituirlo esplicitamente; altrimenti resta invariato.</p>}
     {dati._costoModificato === true && dati.costo_json != null && !normalizzaCostoScambio(dati.costo_json)
-      && <p role="alert" className="m-0 testo-13 text-error-testo">Completa il numero di fiori oppure aggiungi almeno un oggetto con una quantità intera positiva.</p>}
+      && <p role="alert" className="m-0 testo-13 text-error-testo">{tipo === 'oggetti' ? 'Aggiungi almeno un oggetto con una quantità intera positiva.' : 'Completa l’importo con un numero intero.'}</p>}
   </fieldset>;
 }

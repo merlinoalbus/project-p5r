@@ -78,7 +78,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
       {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
-    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></strong></div>
+    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></strong></div>
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
         Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
         dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}
