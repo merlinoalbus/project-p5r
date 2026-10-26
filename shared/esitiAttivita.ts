@@ -14,6 +14,12 @@
 //     `modo` «automatico»: l'esito è quello le cui condizioni valgono in quel momento (il bagno pubblico: il lunedì e il giovedì il
 //     bagno medicinale), senza domande. La scelta dell'utente del 2026-10-25 per il bagno è «valore fisso per giorno della settimana».
 // Gli yen non stanno qui: il prezzo, se c'è, è quello dell'articolo, e (decisione 18) registrando il turno si scala da solo dal saldo, mai sotto zero.
+//
+// Ondata 5, lotto G (decisione 21 dell'utente: «lotteria con esito "vinto/non vinto" alla spunta e trofeo, yen della vincita a mano»): un
+// esito può dire il TROFEO che fa ottenere (`trofeo`, la chiave: «Vinto» all'estrazione della lotteria → «Soldi facili»). Registrando il turno
+// con quell'esito il trofeo si segna da solo nella partita, e togliendo il turno torna com'era (`trofeiDegliEsitiService`): se il trofeo c'era
+// già resta. Il campo è facoltativo: gli esiti scritti prima (Big Bang Burger, centro battute, bagno pubblico) non lo hanno e restano identici.
+// Gli yen della vincita non stanno qui: la guida non dà importi, si scrivono a mano (decisione 18).
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
@@ -36,6 +42,8 @@ export interface EsitoAttivita {
   doti: DoteEsito[];
   /** I premi che l'app non modella ancora come dato (oggetti senza scheda), in parole. */
   premi: string | null;
+  /** Ondata 5 (lotto G): il trofeo che l'esito fa ottenere (chiave di `trofeo`), segnato da solo registrando il turno. Assente = nessuno. */
+  trofeo?: string;
 }
 export type ModoEsiti = 'scelta' | 'automatico';
 export interface EsitiAttivita { modo: ModoEsiti; esiti: EsitoAttivita[] }
@@ -47,6 +55,8 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
 export const LIMITI_ESITI = { esiti: 20, nome: 120, gruppo: 80, premi: 300, doti: 5 } as const;
 const CHIAVE_ESITO = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const CHIAVE_ARTICOLO = /^[a-z0-9][a-z0-9._:/-]{0,119}$/i;
+/** La chiave di un trofeo (`trofeo.chiave`: «soldi-facili»). */
+const CHIAVE_TROFEO = /^[a-z0-9][a-z0-9-]{0,99}$/;
 
 const oggetto = (x: unknown): Record<string, unknown> | null => x && typeof x === 'object' && !Array.isArray(x) ? x as Record<string, unknown> : null;
 const testo = (x: unknown, max: number): string | null => {
@@ -64,7 +74,7 @@ export function chiaveEsitoDaNome(nome: string): string {
 /** Un esito valido o null: campi sconosciuti, chiavi storte, Doti ripetute o note fuori 1–3 non entrano (un dato storto non diventa punti). */
 function normalizzaEsito(x: unknown): EsitoAttivita | null {
   const o = oggetto(x);
-  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi'].includes(k))) return null;
+  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo'].includes(k))) return null;
   const chiave = typeof o.chiave === 'string' && CHIAVE_ESITO.test(o.chiave) ? o.chiave : null;
   const nome = testo(o.nome, LIMITI_ESITI.nome);
   if (!chiave || !nome) return null;
@@ -85,7 +95,10 @@ function normalizzaEsito(x: unknown): EsitoAttivita | null {
     if (!v || Object.keys(v).some((k) => k !== 'dote' && k !== 'note') || !eDote(v.dote) || !nota(v.note) || doti.some((x) => x.dote === v.dote)) return null;
     doti.push({ dote: v.dote, note: v.note });
   }
-  return { chiave, nome, gruppo, articolo, condizioni, doti, premi };
+  // il trofeo: assente, null o vuoto = nessuno (il campo non si scrive, così gli esiti di prima si rileggono identici); una chiave storta non entra
+  const trofeo = o.trofeo == null || o.trofeo === '' ? undefined : typeof o.trofeo === 'string' && CHIAVE_TROFEO.test(o.trofeo) ? o.trofeo : null;
+  if (trofeo === null) return null;
+  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}) };
 }
 
 /** Gli esiti di un'attività o null se il valore non è un elenco valido per intero (niente si scarta in silenzio). */
@@ -135,6 +148,8 @@ export interface EsitoDisponibileDto {
    *  Burger costano 500 ¥ di sera), `prezzoNelMomento` quello che si scala nella fascia dello stato (la voce del Diario, o la partita per
    *  il contatore; senza stato vale `prezzo`). Lo calcola il server con la stessa regola della spunta (`prezzoNellaFascia`). */
   articolo: { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; prezzoNelMomento: number | null } | null;
+  /** Ondata 5 (lotto G): il trofeo che l'esito fa ottenere, con il nome (segnato da solo registrando il turno); null se nessuno. */
+  trofeo: { chiave: string; nome: string } | null;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */

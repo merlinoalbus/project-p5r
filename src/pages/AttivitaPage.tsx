@@ -72,11 +72,14 @@ function testoPrezzoEsito(a: NonNullable<NonNullable<AttivitaDto['esiti']>['esit
 function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']> }) {
   const gruppi: Array<{ gruppo: string | null; esiti: typeof esiti.esiti }> = [];
   for (const e of esiti.esiti) { const g = gruppi.find((x) => x.gruppo === e.gruppo); if (g) g.esiti.push(e); else gruppi.push({ gruppo: e.gruppo, esiti: [e] }); }
+  // Ondata 5 (lotto G): le Doti si dicono solo se gli esiti ne danno (l'estrazione della lotteria: «Vinto» segna un trofeo, nessuna Dote)
+  const conDoti = esiti.esiti.some((e) => e.doti.length > 0), conTrofeo = esiti.esiti.some((e) => e.trofeo);
+  const cosaSegna = [conDoti ? 'le sue Doti diventano il promemoria «Applica»' : null, conTrofeo ? 'il trofeo che dà si segna da solo' : null].filter(Boolean).join(' e ');
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <strong className="text-text">Esiti</strong>
-      <p className="m-0 text-text-secondary">{esiti.modo === 'scelta'
-        ? 'Quando spunti la voce del Diario (o premi + in Partita → Progressi) scegli l’esito che hai ottenuto: le sue Doti diventano il promemoria «Applica».'
+      <p className="m-0 text-text-secondary text-pretty">{esiti.modo === 'scelta'
+        ? `Quando spunti la voce del Diario (o premi + in Partita → Progressi) scegli l’esito che hai ottenuto${cosaSegna ? `: ${cosaSegna}` : ''}.`
         : 'L’esito vale da solo secondo il giorno: spuntando la voce (o premendo +) l’app registra quello giusto.'}</p>
       {gruppi.map((g) => (
         <div key={g.gruppo ?? '-'} className="flex min-w-0 flex-col gap-0.5">
@@ -84,7 +87,9 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
           <ul className="m-0 pl-4">
             {g.esiti.map((e) => (
               <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>
-                {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}: <TestoNote testo={e.doti.length ? e.doti.map((d) => `${d.nome} ${simboliNote(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'} />
+                {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}
+                {conDoti && <>: <TestoNote testo={e.doti.length ? e.doti.map((d) => `${d.nome} ${simboliNote(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'} /></>}
+                {e.trofeo ? ` · trofeo «${e.trofeo.nome}»` : ''}
                 {e.premi ? ` · ${e.premi}` : ''}
                 {e.condizioniTesto ? ` · ${e.disponibile ? '' : 'non ancora: '}${e.condizioniTesto}` : ''}
               </li>

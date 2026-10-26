@@ -41,6 +41,7 @@ import { annullaInvito, registraInvito } from './inviti.js';
 import { aggiungiPosseduta, registraPersona } from './partiteService.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { capienzaScorta } from './capienzaScortaService.js';
+import { cediTrofeoAUnTurno } from './trofeiDegliEsitiService.js';
 import { t } from './traduzioniService.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
 
@@ -436,6 +437,9 @@ function decidiAnnullo(p: number, voceUid: string, r: RigaStato, restanoInScorta
   // l'ultima voce che toglie la spunta.
   const altre = prepared('SELECT voce_uid, effetto_uid FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND NOT (voce_uid = ? AND effetto_uid = ?)').all(p, r.tipo, r.chiave, voceUid, r.effetto_uid) as Array<{ voce_uid: string; effetto_uid: string }>;
   if (altre.length > 0) return { modo: 'erede', altre };
+  // Ondata 5 (lotto G): il trofeo lo rivendica anche un turno registrato con un esito che lo dà (la lotteria vinta): resta, e se l'aveva
+  // segnato la voce il segno passa al turno (`cediTrofeoAUnTurno`, la stessa regola dell'erede)
+  if (r.tipo === 'trofeo' && cediTrofeoAUnTurno(p, r.chiave, voceUid, !prima.gia)) return { modo: 'gia' };
   if (prima.gia) return { modo: 'gia' };
   if (r.tipo === TIPO_SCORTA) {
     const x = esemplareDellaSpunta(p, Number(r.chiave), prima);

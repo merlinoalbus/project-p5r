@@ -41,6 +41,7 @@ import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { simboliNote } from '../../shared/note.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { fasciaDellaPartita, prezzoDellArticolo } from './prezziArticoli.js';
+import { segnaTrofeoDelTurno, togliTrofeoDelTurno } from './trofeiDegliEsitiService.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -600,6 +601,8 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
         .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });
     }
+    // Ondata 5 (lotto G): il trofeo che l'esito scelto fa ottenere (la lotteria vinta → «Soldi facili») si segna da solo, con il suo «prima»
+    if (esito) segnaTrofeoDelTurno(partitaId, chiave, ordine, esito.chiave);
     // L13 (decisione 18): gli yen del turno si muovono da soli (la paga del lavoro entra; il costo dell'attività o il prezzo della sfida
     // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
     // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
@@ -671,6 +674,8 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       // non ha movimento (il saldo di allora lo contava già) e non restituisce niente. Non si segna: il + del contatore è sempre un turno nuovo,
       // nato adesso, e muove i suoi yen; il turno di una voce di prima rispuntata lo scarta la spunta (`motoreDiario.applicaEffettiVoce`)
       restituisciYenAutomatico(partitaId, { tipo: 'turno', chiave: `${chiave}:${bersaglio}` }, 'turno-tolto');
+      // Ondata 5 (lotto G): il trofeo che il turno aveva segnato con il suo esito torna com'era (resta se c'era già o se un altro lo rivendica)
+      togliTrofeoDelTurno(partitaId, chiave, bersaglio);
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
     }

@@ -277,6 +277,10 @@ import { migration265 } from './265_prezzi_tolti_dalle_descrizioni.js';
 import { migration266 } from './266_prezzi_copiati_di_libri_e_videogiochi.js';
 import { migration267 } from './267_abbonamento_di_scarlet_nei_dvd.js';
 import { migration268 } from './268_prezzi_copiati_negli_effetti.js';
+// Ondata 5, lotto G (lotteria): blocco 280-289
+import { migration280 } from './280_lotteria_chiosco_e_biglietti.js';
+import { migration281 } from './281_proposte_della_lotteria.js';
+import { migration282 } from './282_vincita_di_sojiro.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -296,4 +300,5 @@ export const migrations: Migration[] = [
   migration250, migration251, migration252, migration253,
   migration255, migration256, migration257, migration258,
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268,
+  migration280, migration281, migration282,
 ];

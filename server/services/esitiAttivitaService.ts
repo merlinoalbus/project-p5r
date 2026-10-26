@@ -53,6 +53,13 @@ function articoloEsito(chiave: string): ArticoloEsito | null {
   return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(a.prezzo_per_fascia_json), condizioni: leggiCondizioniSalvate(a.condizioni_json) } : null;
 }
 
+/** Ondata 5 (lotto G): il trofeo dell'esito con il suo nome; un trofeo tolto dall'elenco si dice tale (registrando il turno non si segna). */
+function trofeoEsito(chiave: string | undefined): EsitoDisponibileDto['trofeo'] {
+  if (!chiave) return null;
+  const r = prepared('SELECT nome FROM trofeo WHERE chiave = ?').get(chiave) as { nome: string } | undefined;
+  return { chiave, nome: r?.nome ?? 'Trofeo non più nell’elenco' };
+}
+
 /** Un esito come lo vede la scelta: le condizioni sono le sue più quelle dell'articolo, valutate sullo stato (senza stato: disponibile). */
 function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): EsitoDisponibileDto {
   const articolo = e.articolo ? articoloEsito(e.articolo) : null;
@@ -65,6 +72,7 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
     // `motoreDiario.yenDellEffetto` e di `registraTurno`, così la scelta dice l'importo che la spunta toglie davvero dal saldo
     articolo: articolo ? { chiave: articolo.chiave, nome: articolo.nome, prezzo: articolo.prezzo, prezzoPerFascia: articolo.prezzoPerFascia, prezzoNelMomento: prezzoNellaFascia(articolo.prezzo, articolo.prezzoPerFascia, st?.fasciaGioco) }
       : e.articolo ? { chiave: e.articolo, nome: 'Articolo non più nel listino', prezzo: null, prezzoPerFascia: null, prezzoNelMomento: null } : null,
+    trofeo: trofeoEsito(e.trofeo),
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };
@@ -102,7 +110,8 @@ export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta
     const e = esiti.esiti.find((x) => x.chiave === vale.chiave)!;
     return { tipo: 'turno', esito: { chiave: e.chiave, nome: e.nome, automatico: true }, doti: e.doti };
   }
-  if (scelta === undefined) throw httpErrors.conflict('esito-da-scegliere', `«${nomeAttivita}»: scegli l'esito ottenuto (o «senza punti») prima di registrare il turno.`);
+  // «senza punti» si nomina solo se gli esiti danno Doti (la scelta lo offre solo allora: l'estrazione della lotteria è «Vinto» o «Non vinto»)
+  if (scelta === undefined) throw httpErrors.conflict('esito-da-scegliere', `«${nomeAttivita}»: scegli l'esito ottenuto${esiti.esiti.some((x) => x.doti.length > 0) ? ' (o «senza punti»)' : ''} prima di registrare il turno.`);
   if (scelta === null) return { tipo: 'turno', esito: null, doti: [] };
   const e = esiti.esiti.find((x) => x.chiave === scelta);
   if (!e) throw httpErrors.badRequest('esito-sconosciuto', `«${nomeAttivita}» non dichiara questo esito: rileggi la voce.`);

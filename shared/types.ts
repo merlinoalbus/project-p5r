@@ -3475,6 +3475,8 @@ export interface ElenchiRegoleDto {
   /** L7: allerte effettivamente presenti nel calendario, per la condizione meteo «senza allerta». */
   allerte?: Array<{ chiave: string; nome: string }>;
   articoli: Array<{ chiave: string; nome: string; gruppo: string }>;
+  /** Ondata 5 (lotto G): i trofei, per il trofeo che un esito di un'attività fa ottenere (l'editor degli esiti). */
+  trofei?: Array<{ chiave: string; nome: string }>;
   letture: Array<{ chiave: string; nome: string; categoria: 'libro' | 'film' }>;
   arcani: Array<{ chiave: string; nome: string }>;
   persone: Array<{ chiave: string; nome: string }>;
