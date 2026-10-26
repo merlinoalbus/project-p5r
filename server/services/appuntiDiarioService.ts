@@ -167,9 +167,13 @@ function infiltrazioniApplicabili(v: VoceAppunti, riferimentoValido: boolean): {
   const palazzoRif = riferimentoValido && v.riferimento?.tipo === 'dungeon' && prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(v.riferimento.chiave) ? v.riferimento.chiave : null;
   const palazzo = palazzoRif ?? v.infiltrazioni.map((k) => righe.get(k)?.dungeon_chiave).find((d) => d !== undefined) ?? null;
   const valide: string[] = [], scartate: string[] = [];
+  // una chiave ripetuta (anche non di seguito, da un blocco scritto a mano) si lega una volta sola: la copia non tenta due righe uguali
+  const viste = new Set<string>();
   for (const k of v.infiltrazioni) {
-    if (palazzo && righe.get(k)?.dungeon_chiave === palazzo && valide[valide.length - 1] !== k) valide.push(k);
-    else if (!(palazzo && righe.get(k)?.dungeon_chiave === palazzo)) scartate.push(k);
+    if (viste.has(k)) continue;
+    viste.add(k);
+    if (palazzo && righe.get(k)?.dungeon_chiave === palazzo) valide.push(k);
+    else scartate.push(k);
   }
   return { valide, scartate };
 }
@@ -309,10 +313,13 @@ function calcolaPiano(r: RichiestaIncollaVoci): Piano {
     return a.modo === 'copia' ? pianoCopia(v, i, r.giorno, fasciaDest, rilievi) : pianoTaglio(v, i, r.giorno, fasciaDest, gia, rilievi);
   });
   const incollabili = dettagli.filter((d) => d.stato === 'pronta' || d.stato === 'con-rilievi');
+  // gli stessi criteri di `incollaVoci` (motivo di salto): «comunque» salta chi si incolla solo senza i segnalati, «senza» chi senza non sta insieme
+  const conComunque = incollabili.filter((d) => !d.soloSenzaSegnalati).length;
+  const conSenza = a.modo === 'copia' ? incollabili.filter((d) => !d.senzaNonValida).length : conComunque;
   const voci = dettagli.map((d) => ({ indice: d.indice, uid: d.voce.uid, azione: d.voce.azione, fascia: d.fasciaDest, stato: d.stato }));
   const daConfermare = rilievi.some((x) => x.gravita === 'conferma');
   const impronta = improntaDato({ modo: a.modo, taglio: a.taglio ?? null, giorno: r.giorno, dopo: r.dopoUid ?? null, voci, rilievi });
-  return { dto: { modo: a.modo, giorno: r.giorno, fascia: fasciaAncora, voci, rilievi, daConfermare, daIncollare: incollabili.length, impronta }, dettagli, ancora };
+  return { dto: { modo: a.modo, giorno: r.giorno, fascia: fasciaAncora, voci, rilievi, daConfermare, daIncollare: Math.max(conComunque, conSenza), conComunque, conSenza, impronta }, dettagli, ancora };
 }
 
 /** L'anteprima dell'incolla (`POST …/incolla/anteprima`): sola lettura. */

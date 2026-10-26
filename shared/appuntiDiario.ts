@@ -158,8 +158,14 @@ export interface PianoIncollaDto {
   rilievi: RilievoIncolla[];
   /** Vero se qualche rilievo va confermato prima di incollare. */
   daConfermare: boolean;
-  /** Quante voci si incolleranno (con «Incolla comunque»). */
+  /** Quante voci si possono incollare in almeno uno dei due modi (0 = niente da incollare). */
   daIncollare: number;
+  /** Quante se ne incollano con «Incolla comunque» / «Sposta comunque»: senza le voci che si incollano solo senza gli elementi segnalati. */
+  conComunque: number;
+  /** Quante se ne incollano con «Incolla senza gli effetti segnalati» (copia): senza le voci i cui altri effetti, da soli, non stanno insieme.
+   *  Per il taglio è uguale a `conComunque`. I due conteggi possono differire: la finestra lo dice sul pulsante (rilievo del revisore,
+   *  2026-10-26: il titolo prometteva voci che l'incolla poi saltava). */
+  conSenza: number;
   /** L'impronta del piano: l'esecuzione la confronta con quella confermata. */
   impronta: string;
 }

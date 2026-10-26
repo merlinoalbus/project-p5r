@@ -32,6 +32,9 @@ export interface AzioneNotifica {
   nomeAccessibile?: string;
   /** La scorciatoia da tastiera che fa lo stesso gesto, per `aria-keyshortcuts` e il suggerimento (es. `Control+Z`). */
   scorciatoia?: { aria: string; testo: string };
+  /** Dove va il fuoco dopo il gesto, se era sul pulsante (che con la notifica sparisce): senza, chi usa la tastiera o un lettore di schermo
+   *  si ritroverebbe in cima alla pagina (WCAG 2.4.3). Null = nessun posto adatto. */
+  fuocoDopo?: () => HTMLElement | null;
 }
 
 /** Dove porta il pulsante di una notifica: un percorso interno dell'app (react-router). */

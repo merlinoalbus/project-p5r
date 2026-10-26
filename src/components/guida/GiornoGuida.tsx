@@ -232,13 +232,16 @@ interface Props {
    *  (`compatto`), dove si gioca e un clic sul testo non deve far comparire la barra delle voci selezionate; lì restano Ctrl+clic,
    *  Maiusc+clic e «Seleziona» del menu (rilievo del revisore, 2026-10-26). */
   selezioneAlClic?: boolean;
+  /** Da 768 px la giornata scorre in un'area interna (scheda «Oggi» con `riempi`): la barra delle voci selezionate si ferma sul fondo di
+   *  quell'area, non 72 px più su per scavalcare la barra di navigazione, che lì sta già fuori dall'area. */
+  scorreDentro?: boolean;
 }
 
 /** Richiesta di conferma prima di un gesto che non si disfa (eliminare una voce). */
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash } = useLocation();
@@ -280,6 +283,19 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   } });
   /** Rimette il fuoco sul pulsante «⋯» della voce (dopo un gesto del menu che lo chiude: chi usa un lettore di schermo resta lì). */
   const fuocoAlMenu = (uid: string) => setTimeout(() => document.getElementById(`voce-${uid}`)?.querySelector<HTMLButtonElement>('button[data-menu-voce]')?.focus());
+  const radice = useRef<HTMLDivElement | null>(null);
+  /** Il posto del fuoco nel giorno dopo un incolla o un annullo (WCAG 2.4.3): il «⋯» della voce `uid`, se c'è; altrimenti il primo «⋯»
+   *  attivo del giorno; altrimenti il giorno stesso. Null se il giorno non è più a schermo (e nel rilascio, dove non si incolla). */
+  const fuocoNelGiorno = IN_RILASCIO ? () => null : (uid: string | null): HTMLElement | null => {
+    const r = radice.current;
+    if (!r?.isConnected) return null;
+    const suo = uid ? r.querySelector<HTMLElement>(`[id="voce-${uid}"] button[data-menu-voce]`) : null;
+    const primo = suo ?? r.querySelector<HTMLElement>('button[data-menu-voce]:not(:disabled)');
+    if (primo) return primo;
+    // il giorno stesso prende il fuoco solo per questo (un `tabIndex` fisso gli darebbe il fuoco a ogni clic sulle righe), e lo perde uscendo
+    if (!r.hasAttribute('tabindex')) { r.setAttribute('tabindex', '-1'); r.addEventListener('blur', () => r.removeAttribute('tabindex'), { once: true }); }
+    return r;
+  };
 
   // aprire la finestra o la conferma chiude il menu della voce: tornando alla lista la riga è di nuovo com'era
   const apri = (s: SoggettoVoce) => { setMenu(null); setSoggetto(s); };
@@ -320,12 +336,15 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       setMenu(null);
       fuocoAlMenu(uid);
       return true;
-    } });
+    },
+    fuoco: fuocoNelGiorno });
   const bloccata = occupato || appunti.occupato;
   /** Le voci su cui agisce il menu di una voce: la selezione, se la voce ne fa parte; altrimenti la voce sola. */
   const gruppoDi = (uid: string): readonly string[] => (sel.insieme.has(uid) ? sel.uid : [uid]);
   // il puntatore dell'ultimo gesto sulle righe: col mouse il clic seleziona, col dito no (su tablet e telefono si seleziona dal menu)
   const puntatore = useRef('mouse');
+  /** La selezione prima dell'ultimo clic semplice: un doppio clic (per una parola del testo) la rimette, così non resta la barra delle voci. */
+  const primaDelClic = useRef<string[] | null>(null);
   /** La selezione di una riga: stato, segno del taglio e gestori del clic (clic, Ctrl+clic, Maiusc+clic). */
   const selezioneDi = (uid: string): SelezioneRiga | undefined => (IN_RILASCIO || caselle ? undefined : {
     selezionata: sel.insieme.has(uid),
@@ -335,11 +354,21 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       // Maiusc+clic estenderebbe la selezione del testo: col mouse sulla riga (non sui suoi comandi) seleziona le voci
       onMouseDown: (e) => { if (e.shiftKey && puntatore.current === 'mouse' && !(e.target as Element).closest(INTERATTIVI)) e.preventDefault(); },
       onClick: (e) => {
-        // tocco e penna: niente (il menu della voce); un clic da tastiera (detail 0) è dei comandi; un clic che chiude una selezione di testo resta al testo
-        if (puntatore.current !== 'mouse' || e.button !== 0 || e.detail === 0 || (e.target as Element).closest(INTERATTIVI) || window.getSelection()?.toString()) return;
+        // tocco e penna: niente (il menu della voce); un clic da tastiera (detail 0) è dei comandi
+        if (puntatore.current !== 'mouse' || e.button !== 0 || e.detail === 0 || (e.target as Element).closest(INTERATTIVI)) return;
+        // doppio (o triplo) clic: è per selezionare una parola (o la riga) del testo; la selezione che il primo clic aveva cambiato torna com'era
+        if (e.detail > 1) {
+          const prima = primaDelClic.current;
+          primaDelClic.current = null;
+          if (prima) sel.imposta(prima);
+          return;
+        }
+        primaDelClic.current = null;
+        // un clic che chiude una selezione di testo resta al testo
+        if (window.getSelection()?.toString()) return;
         if (e.shiftKey) sel.intervallo(uid);
         else if (e.ctrlKey || e.metaKey) sel.alterna(uid);
-        else if (selezioneAlClic) sel.sostituisci(uid);
+        else if (selezioneAlClic) { primaDelClic.current = [...sel.uid]; sel.sostituisci(uid); }
       },
     },
   });
@@ -475,7 +504,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={radice} className="flex flex-col gap-3 focus:outline-none">
       <section className={`card flex flex-col gap-1 testo-13 ${compatto ? 'py-3' : ''}`}>
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
@@ -503,7 +532,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       {sezione('sera')}
       {/* la barra delle voci selezionate: in fondo, ferma sopra la barra di navigazione mentre si scorre (non sposta le righe in cima) */}
       {(caselle || sel.uid.length > 0) && (
-        <BarraSelezioneVoci quante={sel.uid.length} caselle={caselle} occupato={bloccata}
+        <BarraSelezioneVoci quante={sel.uid.length} caselle={caselle} occupato={bloccata} scorreDentro={scorreDentro}
           onCopia={() => appunti.copia(sel.uid)} onTaglia={() => appunti.taglia(sel.uid)} onAltroGiorno={() => { setMenu(null); setTrasferimento('copia'); }}
           onFine={() => { setCaselleDi(null); sel.svuota(); }} />
       )}
@@ -511,7 +540,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       {!IN_RILASCIO && <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{sel.uid.length === 0 ? '' : sel.uid.length === 1 ? '1 voce selezionata' : `${sel.uid.length} voci selezionate`}</p>}
       {trasferimento && sel.uid.length > 0 && (
         <TrasferisciVoci modo={trasferimento} voci={g.azioni.filter((v) => sel.insieme.has(v.uid))} giorno={g.giorno} partitaId={partitaId}
-          onChiudi={() => setTrasferimento(null)} onFatto={async () => { setCaselleDi(null); sel.svuota(); await aggiornata(); }} onRicarica={aggiornata} />
+          onChiudi={() => setTrasferimento(null)} onFatto={async () => { setCaselleDi(null); sel.svuota(); await aggiornata(); }} onRicarica={aggiornata}
+          fuoco={() => fuocoNelGiorno(sel.uid[0] ?? null)} />
       )}
       {appunti.inAttesa && <FinestraIncolla piano={appunti.inAttesa.piano} occupato={appunti.occupato} onConferma={appunti.conferma} onChiudi={appunti.chiudiAttesa} />}
       {appunti.manuale && <FinestraIncollaManuale onIncolla={(c) => appunti.incollaContenuto(c, appunti.manuale?.dopoUid ?? null)} onChiudi={appunti.chiudiManuale} />}

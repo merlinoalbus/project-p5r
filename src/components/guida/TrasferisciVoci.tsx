@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react';
 import { getPercorsoIndice, trasferisciVociGiornata } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
-import { notificaOperazioneAnnullabile } from '../../hooks/useAppuntiDiario';
+import { notificaOperazioneAnnullabile, rimettiFuoco } from '../../hooks/useAppuntiDiario';
 import { dataGiocoTesto, meseGioco } from '../../utils/dateGioco';
 import { Modal } from '../shared/Modal';
 import { PageState } from '../shared/PageState';
@@ -38,6 +38,8 @@ interface Props {
   onFatto: (esito: VociTrasferiteDto) => void | Promise<void>;
   /** Dopo «Annulla» nella notifica: la giornata si rilegge. */
   onRicarica: () => void | Promise<void>;
+  /** Dove va il fuoco dopo il gesto e dopo il suo annullo (la barra che ha aperto la finestra sparisce con la selezione): un posto del giorno. */
+  fuoco?: () => HTMLElement | null;
 }
 
 /** «1 voce», «3 voci». */
@@ -51,7 +53,7 @@ const fuocoSullOpzione = (da: HTMLElement, opzione: string) => da.parentElement?
 /** La finestra: giorno (mese e giorno), fascia, il riepilogo e il comando. */
 // L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il trasferimento non esiste; la condizione è costante di build, `TrasferisciVociReale` esce dal bundle
 export const TrasferisciVoci: StrumentoDiModifica<typeof TrasferisciVociReale> = IN_RILASCIO ? NienteInRilascio : TrasferisciVociReale;
-function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onChiudi, onFatto, onRicarica }: Props) {
+function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onChiudi, onFatto, onRicarica, fuoco }: Props) {
   const [modo, setModo] = useState(modoIniziale);
   const indice = useCarica(() => getPercorsoIndice(partitaId ?? undefined), [partitaId]);
   const [destinazione, setDestinazione] = useState(giorno);
@@ -68,9 +70,11 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
     try {
       const esito = await trasferisciVociGiornata({ uid: voci.map((v) => v.uid), giorno: destinazione, fascia, modo }, partitaId ?? undefined);
       notificaOperazioneAnnullabile(`${quanteVoci(esito.uid.length)} ${modo === 'copia' ? (esito.uid.length === 1 ? 'copiata' : 'copiate') : (esito.uid.length === 1 ? 'spostata' : 'spostate')} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}, in fondo: per tutte le partite.`, esito.operazioneId, onRicarica,
-        `${modo === 'copia' ? 'la copia' : 'lo spostamento'} di ${quanteVoci(esito.uid.length)}`);
+        `${modo === 'copia' ? 'la copia' : 'lo spostamento'} di ${quanteVoci(esito.uid.length)}`, fuoco);
       await onFatto(esito);
       onChiudi();
+      // chiusa la finestra, il fuoco tornerebbe al pulsante che l'ha aperta, sparito con la selezione: va nel giorno
+      if (fuoco) rimettiFuoco(fuoco);
     } catch (err) { notifica('error', err instanceof Error ? err.message : `${verbo} non riuscita.`); }
     finally { setOccupato(false); }
   };

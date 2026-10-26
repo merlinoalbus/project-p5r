@@ -8,7 +8,10 @@ conferma, registro append-only `operazione_voci_diario` (migrazione 239) con «A
 il controllo dell'avvio chiede almeno 22.23.4). Da provare dall'utente: giro Win+V, Firefox/Safari, menu touch, tre formati.
 Giro 2 (dopo la verifica avversariale, respinta): corretti l'ordine dell'annullo di più voci in coda alla fascia, il nome del collegamento
 perso nella copia e i rilievi del frontend (selezione fra giorni, Ctrl+V, scrittura dal menu, segno del taglio, finestra dei rilievi, clic in
-«Oggi», Ctrl+Z, notifica sopra la barra, fuoco, contrasto); punto `i` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
+«Oggi», Ctrl+Z, notifica sopra la barra, fuoco, contrasto); punto `i` in `docs/ROADMAP.md`.
+Giro 3 (verifica respinta per UX e accessibilità): Ctrl+Z solo con la notifica a schermo, fuoco dopo «Annulla» e dopo l'incolla, barra della
+scheda «Oggi» sul tablet, come incollare detto nella conferma, segno del taglio, doppio clic, conteggi dei pulsanti della finestra dei
+rilievi; punto `j` in `docs/ROADMAP.md`, ramo `copia-incolla-giro3`. Serve una nuova verifica avversariale.
 
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
 Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle

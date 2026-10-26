@@ -22,6 +22,8 @@ interface Props {
   /** Nella scelta a caselle la barra c'è anche senza voci: il conteggio invita a sceglierle. */
   caselle: boolean;
   occupato: boolean;
+  /** Da 768 px la giornata scorre in un'area interna (scheda «Oggi»): lì la barra di navigazione sta fuori dall'area e non va scavalcata. */
+  scorreDentro?: boolean;
   onCopia: () => void;
   onTaglia: () => void;
   onAltroGiorno: () => void;
@@ -29,11 +31,12 @@ interface Props {
 }
 
 export const BarraSelezioneVoci: StrumentoDiModifica<typeof BarraSelezioneVociReale> = IN_RILASCIO ? NienteInRilascio : BarraSelezioneVociReale;
-function BarraSelezioneVociReale({ quante, caselle, occupato, onCopia, onTaglia, onAltroGiorno, onFine }: Props) {
+function BarraSelezioneVociReale({ quante, caselle, occupato, scorreDentro = false, onCopia, onTaglia, onAltroGiorno, onFine }: Props) {
   const nessuna = quante === 0;
   return (
-    // sotto i 1024 px la barra di navigazione (64 px) copre il fondo della vista: la barra si ferma appena sopra
-    <section className="barra-selezione-voci card sticky bottom-[4.5rem] z-10 flex flex-wrap items-center gap-2 py-2 lg:bottom-2" aria-label="Voci selezionate">
+    // sotto i 1024 px la barra di navigazione (64 px) copre il fondo della vista: la barra si ferma appena sopra. Se da 768 px la giornata
+    // scorre in un'area interna (scheda «Oggi»), lo `sticky` vale per quell'area, che finisce già sopra la navigazione: lì sta sul fondo
+    <section className={`barra-selezione-voci card sticky bottom-[4.5rem] z-10 flex flex-wrap items-center gap-2 py-2 lg:bottom-2 ${scorreDentro ? 'md:bottom-2' : ''}`} aria-label="Voci selezionate">
       {/* il conteggio lo annuncia la regione sempre presente di `GiornoGuida` (una regione che nasce col testo spesso non si legge) */}
       <span className="min-w-0 flex-1 testo-13 tabular-nums">
         <strong>{nessuna ? 'Scegli le voci' : quante === 1 ? '1 voce selezionata' : `${quante} voci selezionate`}</strong>

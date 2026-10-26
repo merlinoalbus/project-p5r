@@ -6,6 +6,7 @@
 // invito) o la Fortuna in un altro giorno, un Confidente non disponibile lì, effetti o collegamenti che non esistono più, ciò che una copia
 // non eredita. Niente si scarta in silenzio: «Incolla comunque» tiene tutto; «Incolla senza gli effetti segnalati» (solo per la copia, mai
 // predefinito) lascia fuori proprio quelli elencati; «Annulla» non scrive niente. Le voci di un taglio già spostate o eliminate si dicono.
+// Se un gesto incolla meno voci del titolo (una voce si incolla solo senza gli elementi segnalati), il suo pulsante porta il numero.
 //
 // `FinestraIncollaManuale`: il riquadro in cui incollare col gesto del sistema (tasto lungo → Incolla) quando il browser non permette di
 // leggere gli appunti dal menu (iOS, permesso negato). L'evento d'incolla del riquadro porta testo e HTML.
@@ -39,14 +40,21 @@ function FinestraIncollaReale({ piano, occupato, onConferma, onChiudi }: Props) 
   const daSapere = piano.rilievi.filter((r) => r.gravita === 'info');
   const segnalabili = !taglio && daVedere.some((r) => SEGNALABILI.has(r.codice));
   const n = piano.daIncollare;
-  const quante = n === 1 ? '1 voce' : `${n} voci`;
+  const voci = (k: number) => (k === 1 ? '1 voce' : `${k} voci`);
   const dove = piano.fascia ? `${piano.fascia === 'sera' ? 'di sera' : 'di giorno'}, dopo la voce selezionata` : 'ognuna nella sua fascia, in fondo';
+  // i due gesti possono incollarne meno del titolo (una voce si incolla solo senza gli elementi segnalati, o solo con): il numero compare
+  // sul pulsante solo quando è diverso, e un gesto che non incollerebbe niente non c'è
+  const conto = (k: number) => (k < n ? ` (${k})` : '');
+  const nomeConto = (k: number) => (k < n ? `: ${voci(k)} su ${n}` : '');
+  const comunque = taglio ? 'Sposta comunque' : 'Incolla comunque';
   return (
-    <Modal aperta titolo={`${taglio ? 'Spostare' : 'Incollare'} ${quante} nel giorno ${dataGiocoTesto(piano.giorno)}?`} onChiudi={onChiudi} azioni={(
+    <Modal aperta titolo={`${taglio ? 'Spostare' : 'Incollare'} ${voci(n)} nel giorno ${dataGiocoTesto(piano.giorno)}?`} onChiudi={onChiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-1.5">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onChiudi} />
-        {segnalabili && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scarta" dimensione={20} />} titolo="Incolla senza gli effetti segnalati" disabled={occupato} onClick={() => onConferma(true)} />}
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={taglio ? 'taglia' : 'incolla'} dimensione={20} />} titolo={taglio ? 'Sposta comunque' : 'Incolla comunque'} disabled={occupato} onClick={() => onConferma(false)} />
+        {segnalabili && piano.conSenza > 0 && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scarta" dimensione={20} />} titolo={`Incolla senza gli effetti segnalati${conto(piano.conSenza)}`}
+          aria-label={`Incolla senza gli effetti segnalati${nomeConto(piano.conSenza)}`} disabled={occupato} onClick={() => onConferma(true)} />}
+        {piano.conComunque > 0 && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={taglio ? 'taglia' : 'incolla'} dimensione={20} />} titolo={`${comunque}${conto(piano.conComunque)}`}
+          aria-label={`${comunque}${nomeConto(piano.conComunque)}`} disabled={occupato} onClick={() => onConferma(false)} />}
       </div>
     )}>
       <div className="flex flex-col gap-3 testo-13">

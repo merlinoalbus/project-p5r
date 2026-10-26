@@ -119,7 +119,8 @@ function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
-      onMouseEnter={() => aggiorna('puntatore', true)} onMouseLeave={() => aggiorna('puntatore', false)}
+      // solo il mouse: il tocco emula l'ingresso del puntatore ma non l'uscita, e la notifica resterebbe ferma finché non si tocca altrove
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') aggiorna('puntatore', true); }} onPointerLeave={(e) => { if (e.pointerType === 'mouse') aggiorna('puntatore', false); }}
       onFocus={() => aggiorna('fuoco', true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) aggiorna('fuoco', false); }}
     >
       <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
@@ -127,7 +128,13 @@ function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void
         <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
       )}
       {n.azione && (
-        <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={() => { chiudi(n.id); n.azione!.onClick(); }}
+        <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={(e) => {
+          // il pulsante sparisce con la notifica: se aveva il fuoco, il fuoco va dove dice il gesto (prima che il pulsante esca dal DOM)
+          const conFuoco = e.currentTarget === document.activeElement;
+          chiudi(n.id);
+          n.azione!.onClick();
+          if (conFuoco) { const dove = n.azione!.fuocoDopo?.(); if (dove?.isConnected) dove.focus(); }
+        }}
           aria-label={n.azione.nomeAccessibile} aria-keyshortcuts={n.azione.scorciatoia?.aria} title={n.azione.scorciatoia ? `${n.azione.etichetta} (${n.azione.scorciatoia.testo})` : undefined}>{n.azione.etichetta}</button>
       )}
       <button
