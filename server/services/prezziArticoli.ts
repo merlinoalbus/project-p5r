@@ -69,22 +69,42 @@ function momentoDellaVoce(voceUid: string): MomentoVoce | null {
 }
 const primaDi = (a: MomentoVoce, b: MomentoVoce): boolean => a[0] !== b[0] ? a[0] < b[0] : a[1] !== b[1] ? a[1] < b[1] : a[2] < b[2];
 
+const DATA_DI_GIOCO = /^\d{2}-\d{2}$/;
+
+/**
+ * Il primo momento in cui il Confidente ha raggiunto il rango nella partita; null se nessun passaggio registrato ne dice il momento.
+ * La fonte è il registro dei passaggi di rango (`utente.incontro_confidente_partita`, `passaggio = 1`), che li scrive da ogni parte: la voce del
+ * Diario spuntata (`origine` «azione», con il giorno e la fascia della voce), l'azione dell'utente («mia») e la pagina Confidenti («pagina», un
+ * passaggio per ogni rango salito, con il giorno e la fascia della partita: `incontriService.aggiornaConfidenteDallaPagina`). Lo legge già così
+ * lo stato delle azioni (`azioniStrutturateService.correzioneARango`). Dentro la fascia l'ordine viene dalla voce spuntata del Confidente che
+ * porta al rango in quel momento; un passaggio senza voce (segnato dalla pagina) non ha un posto nella fascia e vale dal suo inizio.
+ */
+function primoPassaggioARango(partitaId: number, confidente: string, rango: number): MomentoVoce | null {
+  const passaggi = (prepared(`SELECT data, fascia FROM utente.incontro_confidente_partita
+    WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango >= ?`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string }>)
+    .filter((p) => DATA_DI_GIOCO.test(p.data));
+  if (!passaggi.length) return null;
+  const voci = prepared(`SELECT g.data, g.fascia, MIN(g.ordine) AS ordine FROM main.voce_giornata g JOIN utente.spunta_voce_partita s ON s.voce_uid = g.uid AND s.partita_id = ?
+    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ? GROUP BY g.data, g.fascia`).all(partitaId, confidente, rango) as Array<{ data: string; fascia: string; ordine: number }>;
+  const ordineNellaFascia = new Map(voci.map((v) => [`${v.data}|${v.fascia}`, v.ordine]));
+  return passaggi
+    .map((p): MomentoVoce => [ordineGioco(p.data), p.fascia === 'sera' ? 1 : 0, ordineNellaFascia.get(`${p.data}|${p.fascia}`) ?? Number.NEGATIVE_INFINITY])
+    .reduce((a, b) => (primaDi(b, a) ? b : a));
+}
+
 /**
  * Lo sconto del negozio che valeva nel momento della voce del Diario (revisione della chiusura dell'ondata 5, N1: una voce del passato non si paga
- * con il rango di oggi). Il rango si raggiunge nel Diario con la voce spuntata del Confidente che porta al rango dello sconto (`rango_atteso`):
- * una voce che viene prima della prima di queste spunte si paga a prezzo pieno. Se nessuna voce spuntata della partita porta il Confidente a quel
- * rango, il rango è stato segnato fuori dal Diario (dalla pagina Confidenti) e il Diario non dice da quando: vale il rango di adesso.
+ * con il rango di oggi). Una voce che viene prima del primo passaggio del Confidente al rango dello sconto (`primoPassaggioARango`, da qualunque
+ * parte sia stato segnato) si paga a prezzo pieno. Solo se nessun passaggio registrato ne dice il momento (un rango che viene da dati di prima del
+ * registro dei passaggi, o segnato con la partita senza data) vale il rango di adesso: è l'unico dato che c'è.
  */
 export function scontoAllaVoce(negozio: string | null | undefined, partitaId: number | null | undefined, voceUid: string): ScontoNegozio | null {
   const sconto = scontoNellaPartita(negozio, partitaId);
-  if (!sconto) return null;
+  if (!sconto || partitaId === null || partitaId === undefined) return sconto;
   const voce = momentoDellaVoce(voceUid);
   if (!voce) return sconto;
-  const raggiunto = (prepared(`SELECT g.data, g.fascia, g.ordine FROM main.voce_giornata g JOIN utente.spunta_voce_partita s ON s.voce_uid = g.uid AND s.partita_id = ?
-    WHERE g.riferimento_tipo = 'confidente' AND g.riferimento_chiave = ? AND g.rango_atteso >= ?`).all(partitaId, sconto.confidente, sconto.rango) as Array<{ data: string; fascia: string; ordine: number }>)
-    .map((v): MomentoVoce => [ordineGioco(v.data), v.fascia === 'sera' ? 1 : 0, v.ordine]);
-  if (!raggiunto.length) return sconto;
-  const primo = raggiunto.reduce((a, b) => (primaDi(b, a) ? b : a));
+  const primo = primoPassaggioARango(partitaId, sconto.confidente, sconto.rango);
+  if (!primo) return sconto;
   return primaDi(voce, primo) ? null : sconto;
 }
 

@@ -37,7 +37,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
-import { PrezzoScontato } from '../catalogo/PrezzoScontato';
+import { PrezzoScontato, RegolaDelloSconto } from '../catalogo/PrezzoScontato';
 import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
@@ -1293,6 +1293,7 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
         <span>{negozio.nome} · {disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
         {negozio.disponibilita && negozio.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={negozio.disponibilita} compatto />}
       </div>
+      {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
       {disponibili.length === 0
         ? <p className="m-0 testo-12 text-text-secondary">{bloccati > 0 ? 'Niente in vendita in questo momento della partita.' : 'Nessun articolo registrato.'}</p>
         : (
@@ -1469,6 +1470,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
             {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
             <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="testo-12 text-primary-testo">{negozio.nome}</Link>
           </div>
+          {/* seconda revisione della chiusura dell'ondata 5: lo sconto che non vale adesso si dice con la sua regola, come in «Dove si compra» */}
+          {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
           {bloccati > 0 && (
             <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="bloccato" dimensione={20} />} aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}
               titolo={mostraBloccati

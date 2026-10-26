@@ -3015,6 +3015,9 @@ export interface DettaglioSpilloDto {
     /** L5: gli orari del luogo in parole, la presenza, la pagina del luogo e tutti i negozi della sede. */
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
+    /** Seconda revisione della chiusura dell'ondata 5: la regola dello sconto del negozio (`NegozioRiassuntoDto.sconto`), che il pin dice quando
+     *  lo sconto non vale adesso, come «Dove si compra» della scheda dell'oggetto; null se il negozio non ne ha. */
+    sconto?: NegozioRiassuntoDto['sconto'];
     /** L5: la sezione del negozio nella pagina della sede, o null. */
     sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
       /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come

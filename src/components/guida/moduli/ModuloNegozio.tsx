@@ -6,6 +6,7 @@
 // restano storiche: non vengono riattivate dal nuovo editor. Il programma punti si dichiara dove esiste.
 // ============================================================
 
+import { useId } from 'react';
 import { useCarica } from '../../../hooks/useCarica';
 import { getConfidenti } from '../../../services/api';
 import { Selettore } from '../../shared/Selettore';
@@ -36,6 +37,7 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
   // chiusura dell'ondata 5: lo sconto dal rango di un Confidente (la Clinica di Takemi), un dato del negozio; il prezzo resta quello dell'offerta
   const sconto = (dati.sconto_json as ScontoNegozio | null) ?? null;
   const erroriDelloSconto = sconto ? erroriSconto(sconto) : {};
+  const idSconto = useId();
   return (
     <div className="flex flex-col gap-3">
       <Griglia>
@@ -95,19 +97,26 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
         {sconto && (
           <Griglia>
             <Blocco>
+              {/* revisione della chiusura dell'ondata 5 (N2): che cosa manca si dice accanto al campo, non solo spegnendo «Salva»; il messaggio è
+                  la descrizione accessibile del campo (fuori dall'etichetta, che resta il solo nome) e gli id sono propri del modulo */}
               <Selettore etichetta="Confidente" valore={sconto.confidente} vuoto="Scegli il Confidente" disabilitato={disabilitato || confidenti.caricamento}
+                errore={erroriDelloSconto.confidente}
                 opzioni={(confidenti.dati ?? []).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))} onCambia={(k) => imposta({ sconto_json: { ...sconto, confidente: k } })} />
-              {/* revisione della chiusura dell'ondata 5 (N2): che cosa manca si dice accanto al campo, non solo spegnendo «Salva» */}
-              {erroriDelloSconto.confidente && <p id="sconto-errore-confidente" className="m-0 testo-12 text-error-testo">{erroriDelloSconto.confidente}</p>}
             </Blocco>
-            <label className="editor-mappa__campo">Dal rango<input className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={10} value={sconto.rango > 0 ? sconto.rango : ''} disabled={disabilitato}
-              aria-invalid={!!erroriDelloSconto.rango} aria-describedby={erroriDelloSconto.rango ? 'sconto-errore-rango' : undefined}
-              onChange={(e) => imposta({ sconto_json: { ...sconto, rango: e.target.value === '' ? 0 : Number(e.target.value) } })} />
-              {erroriDelloSconto.rango && <span id="sconto-errore-rango" className="testo-12 text-error-testo">{erroriDelloSconto.rango}</span>}</label>
-            <label className="editor-mappa__campo">Sconto in percentuale<input className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={99} value={sconto.percentuale > 0 ? sconto.percentuale : ''} disabled={disabilitato}
-              aria-invalid={!!erroriDelloSconto.percentuale} aria-describedby={erroriDelloSconto.percentuale ? 'sconto-errore-percentuale' : undefined}
-              onChange={(e) => imposta({ sconto_json: { ...sconto, percentuale: e.target.value === '' ? 0 : Number(e.target.value) } })} />
-              {erroriDelloSconto.percentuale && <span id="sconto-errore-percentuale" className="testo-12 text-error-testo">{erroriDelloSconto.percentuale}</span>}</label>
+            <div className="editor-mappa__campo">
+              <label htmlFor={`${idSconto}-rango`} className="campo__etichetta">Dal rango</label>
+              <input id={`${idSconto}-rango`} className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={10} value={sconto.rango > 0 ? sconto.rango : ''} disabled={disabilitato}
+                aria-invalid={erroriDelloSconto.rango ? true : undefined} aria-describedby={erroriDelloSconto.rango ? `${idSconto}-errore-rango` : undefined}
+                onChange={(e) => imposta({ sconto_json: { ...sconto, rango: e.target.value === '' ? 0 : Number(e.target.value) } })} />
+              {erroriDelloSconto.rango && <p id={`${idSconto}-errore-rango`} className="m-0 testo-12 text-error-testo">{erroriDelloSconto.rango}</p>}
+            </div>
+            <div className="editor-mappa__campo">
+              <label htmlFor={`${idSconto}-percentuale`} className="campo__etichetta">Sconto in percentuale</label>
+              <input id={`${idSconto}-percentuale`} className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={99} value={sconto.percentuale > 0 ? sconto.percentuale : ''} disabled={disabilitato}
+                aria-invalid={erroriDelloSconto.percentuale ? true : undefined} aria-describedby={erroriDelloSconto.percentuale ? `${idSconto}-errore-percentuale` : undefined}
+                onChange={(e) => imposta({ sconto_json: { ...sconto, percentuale: e.target.value === '' ? 0 : Number(e.target.value) } })} />
+              {erroriDelloSconto.percentuale && <p id={`${idSconto}-errore-percentuale`} className="m-0 testo-12 text-error-testo">{erroriDelloSconto.percentuale}</p>}
+            </div>
           </Griglia>
         )}
       </fieldset>

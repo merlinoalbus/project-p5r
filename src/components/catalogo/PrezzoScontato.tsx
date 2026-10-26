@@ -17,9 +17,15 @@ export function PrezzoScontato({ scontato, className = '' }: { scontato: Articol
   return <span className={`testo-12 tabular-nums text-pretty text-text-secondary ${className}`}>Con lo sconto del {scontato.percentuale}%: {scontato.prezzo.toLocaleString('it-IT')} ¥</span>;
 }
 
-/** Il prezzo scontato se vale adesso; altrimenti la regola dello sconto del negozio («Sconto del 50% dal rango 7 di Takemi»), se il negozio ne ha una. */
-export function ScontoDellOfferta({ scontato, sconto, className = '' }: { scontato: ArticoloDto['prezzoScontato']; sconto: NegozioRiassuntoDto['sconto'] | undefined; className?: string }) {
-  if (scontato) return <PrezzoScontato scontato={scontato} className={className} />;
+/** La regola dello sconto del negozio («Sconto del 50% dal rango 7 di Tae Takemi»), se il negozio ne ha una. */
+export function RegolaDelloSconto({ sconto, className = '' }: { sconto: NegozioRiassuntoDto['sconto'] | undefined; className?: string }) {
   if (!sconto) return null;
   return <span className={`testo-12 text-pretty text-text-muted ${className}`}>{testoSconto(sconto, sconto.confidenteNome)}</span>;
+}
+
+/** Il prezzo scontato se vale adesso; altrimenti la regola dello sconto del negozio, se il negozio ne ha una. Il pin della mappa dice lo stesso:
+ *  il prezzo scontato sulla riga dell'articolo e, quando lo sconto non vale, la regola una volta sotto il nome del negozio. */
+export function ScontoDellOfferta({ scontato, sconto, className = '' }: { scontato: ArticoloDto['prezzoScontato']; sconto: NegozioRiassuntoDto['sconto'] | undefined; className?: string }) {
+  if (scontato) return <PrezzoScontato scontato={scontato} className={className} />;
+  return <RegolaDelloSconto sconto={sconto} className={className} />;
 }

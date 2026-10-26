@@ -273,6 +273,10 @@
      ancorato a destra, non esca dallo schermo */
   .btn-visivo.btn-visivo--stretto { padding-left: 2px; padding-right: 6px; gap: 4px; }
   details[open] > summary .btn-visivo__freccia--menu { transform: rotate(90deg); }
+  /* il <summary> con la sua freccia ▸ non mostra anche il triangolo nativo: `inline-flex` lo toglie in Chrome e Firefox, Safari e iPad
+     (WebKit) lo disegnano con ::-webkit-details-marker (revisione della chiusura dell'ondata 5, A2) */
+  summary:has(> .btn-visivo__freccia--menu) { list-style: none; }
+  summary:has(> .btn-visivo__freccia--menu)::-webkit-details-marker { display: none; }
   .btn-visivo--compatto { --btn-visivo-icona: 32px; padding: 3px 10px 3px 6px; min-height: 44px; gap: 6px; }
   .btn-visivo--compatto .btn-visivo__titolo { font-size: var(--testo-13); }
   /* Disposizione a colonna (gruppi di interruttori: modificatori delle Doti, moltiplicatori dei Confidenti): icona 48 px sopra al testo
