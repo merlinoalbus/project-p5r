@@ -49,6 +49,13 @@ const PERCORSI_VIETATI: readonly Vietata[] = [
   { testo: '/compendio/schede', cosa: 'sistemazione delle schede della guida' },
   { testo: '/compendio/giorni', cosa: 'scrittura dei giorni del diario' },
   { testo: '/compendio/percorso/voci/trasferisci', cosa: 'trasferimento delle voci del diario' },
+  // appunti del Diario (2026-10-26): Copia / Taglia / Incolla con gli appunti di sistema, solo nella preparazione
+  { testo: '/compendio/percorso/voci/appunti', cosa: 'voci del diario per gli appunti' },
+  { testo: '/compendio/percorso/voci/incolla', cosa: 'incolla delle voci del diario' },
+  { testo: '/compendio/percorso/voci/operazioni', cosa: 'annullo delle operazioni sulle voci del diario' },
+  { testo: 'data-p5r-diario', cosa: 'blocco delle voci del diario negli appunti' },
+  { testo: 'p5r-diario-voci', cosa: 'formato delle voci del diario negli appunti' },
+  { testo: 'P5R-DIARIO-VOCI', cosa: 'marca del blocco delle voci del diario negli appunti' },
   { testo: '/sblocco', cosa: 'scrittura delle condizioni di sblocco' },
   { testo: '/atterraggi', cosa: 'scrittura degli atterraggi dei Palazzi' },
   { testo: '/doti-incontro', cosa: 'scrittura delle Doti dei Confidenti' },

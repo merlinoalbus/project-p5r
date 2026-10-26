@@ -8,15 +8,14 @@
 
 import { useEffect } from 'react';
 import { useRicercaStore } from '../stores/ricercaStore';
-
-const CAMPI = 'input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"], [role="combobox"]';
+import { eInCampoModificabile } from '../utils/campiModificabili';
 
 /** Installa la scorciatoia «/» (da montare una volta, nella cornice dell'app). */
 export function useScorciatoiaRicerca(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.repeat || e.isComposing || e.defaultPrevented) return;
-      if (e.target instanceof Element && e.target.closest(CAMPI)) return;
+      if (eInCampoModificabile(e.target)) return;
       if (document.querySelector('.modal-overlay')) return;
       const { aperta, apri } = useRicercaStore.getState();
       if (aperta) return;

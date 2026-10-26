@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { getPercorsoIndice, trasferisciVociGiornata } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
+import { notificaOperazioneAnnullabile } from '../../hooks/useAppuntiDiario';
 import { dataGiocoTesto, meseGioco } from '../../utils/dateGioco';
 import { Modal } from '../shared/Modal';
 import { PageState } from '../shared/PageState';
@@ -25,7 +26,7 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
-  /** «copia» o «sposta». */
+  /** «copia» o «sposta» all'apertura; dal 2026-10-26 si cambia nella finestra («Altro giorno…» della barra delle voci selezionate). */
   modo: 'copia' | 'sposta';
   /** Le voci scelte. */
   voci: AzionePercorsoDto[];
@@ -35,6 +36,8 @@ interface Props {
   onChiudi: () => void;
   /** Fatto: chi apre la finestra rilegge la giornata ed esce dalla scelta. */
   onFatto: (esito: VociTrasferiteDto) => void | Promise<void>;
+  /** Dopo «Annulla» nella notifica: la giornata si rilegge. */
+  onRicarica: () => void | Promise<void>;
 }
 
 /** «1 voce», «3 voci». */
@@ -43,7 +46,8 @@ const quanteVoci = (n: number) => (n === 1 ? '1 voce' : `${n} voci`);
 /** La finestra: giorno (mese e giorno), fascia, il riepilogo e il comando. */
 // L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il trasferimento non esiste; la condizione è costante di build, `TrasferisciVociReale` esce dal bundle
 export const TrasferisciVoci: StrumentoDiModifica<typeof TrasferisciVociReale> = IN_RILASCIO ? NienteInRilascio : TrasferisciVociReale;
-function TrasferisciVociReale({ modo, voci, giorno, partitaId, onChiudi, onFatto }: Props) {
+function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onChiudi, onFatto, onRicarica }: Props) {
+  const [modo, setModo] = useState(modoIniziale);
   const indice = useCarica(() => getPercorsoIndice(partitaId ?? undefined), [partitaId]);
   const [destinazione, setDestinazione] = useState(giorno);
   const [fascia, setFascia] = useState<FasciaGioco>(voci.every((v) => v.fascia === 'sera') ? 'sera' : 'giorno');
@@ -58,7 +62,7 @@ function TrasferisciVociReale({ modo, voci, giorno, partitaId, onChiudi, onFatto
     setOccupato(true);
     try {
       const esito = await trasferisciVociGiornata({ uid: voci.map((v) => v.uid), giorno: destinazione, fascia, modo }, partitaId ?? undefined);
-      notifica('success', `${quanteVoci(esito.uid.length)} ${modo === 'copia' ? (esito.uid.length === 1 ? 'copiata' : 'copiate') : (esito.uid.length === 1 ? 'spostata' : 'spostate')} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}, in fondo: per tutte le partite.`);
+      notificaOperazioneAnnullabile(`${quanteVoci(esito.uid.length)} ${modo === 'copia' ? (esito.uid.length === 1 ? 'copiata' : 'copiate') : (esito.uid.length === 1 ? 'spostata' : 'spostate')} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}, in fondo: per tutte le partite.`, esito.operazioneId, onRicarica);
       await onFatto(esito);
       onChiudi();
     } catch (err) { notifica('error', err instanceof Error ? err.message : `${verbo} non riuscita.`); }
@@ -72,6 +76,18 @@ function TrasferisciVociReale({ modo, voci, giorno, partitaId, onChiudi, onFatto
             {quanteVoci(voci.length)} {diGiorno > 0 && diGiorno < voci.length ? `(${diGiorno} di giorno, ${voci.length - diGiorno} di sera)` : diGiorno === voci.length ? 'di giorno' : 'di sera'} del {dataGiocoTesto(giorno)}.{' '}
             {modo === 'copia' ? 'Le copie nascono senza spunte; le voci di partenza restano.' : 'Le voci lasciano questo giorno e portano con sé le spunte delle partite.'}
           </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="testo-12 text-text-muted">Come</span>
+            <span className="inline-flex overflow-hidden rounded-md border border-border" role="radiogroup" aria-label="Copia o sposta">
+              {(['copia', 'sposta'] as const).map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={modo === m} tabIndex={modo === m ? 0 : -1}
+                  className={`touch min-w-20 border-l border-border px-3 testo-13 first:border-l-0 ${modo === m ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`}
+                  onClick={() => setModo(m)} onKeyDown={(e) => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) { e.preventDefault(); setModo(modo === 'copia' ? 'sposta' : 'copia'); } }}>
+                  {m === 'copia' ? 'Copia' : 'Sposta'}
+                </button>
+              ))}
+            </span>
+          </div>
           <div className="flex flex-wrap items-end gap-2">
             {/* in linea: dentro una finestra la tendina sovrapposta resterebbe tagliata dal corpo scorrevole */}
             <Selettore className="selettore--in-linea" compatto ricerca="mai" etichetta="Mese" valore={destinazione.slice(0, 2)} opzioni={mesi.map((m) => ({ chiave: m, nome: meseGioco(`${m}-01`) }))}

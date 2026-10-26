@@ -1,5 +1,12 @@
 # Stato attuale del lavoro — lotto L12 «Verso il rilascio» (aggiornato 2026-10-25)
 
+## 26 OTTOBRE 2026 — Appunti del Diario (Copia, Taglia, Incolla con gli appunti di sistema)
+Ramo `lavoro-copia-incolla` (da `integrazione-24`), non unito né pubblicato: selezione delle voci (clic, Ctrl+clic, Maiusc+clic, Esc; menu «⋯» su
+touch), Ctrl+C / Ctrl+X / Ctrl+V con gli appunti di sistema (testo + HTML col blocco versionato, sopravvive a Win+V), piano dei rilievi e
+conferma, registro append-only `operazione_voci_diario` (migrazione 239) con «Annulla». Dettagli in `docs/DECISIONI.md` (2026-10-26) e
+`docs/ROADMAP.md`. Servizio provato su copie dei dati; nell'app non osservato (il backend non parte con il Node 22.17 di questa macchina:
+il controllo dell'avvio chiede almeno 22.23.4). Da provare dall'utente: giro Win+V, Firefox/Safari, menu touch, tre formati.
+
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
 Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle
 due istanze in `lotti/L12/progetto-due-istanze.md`, voci `R12-*` in `stato.json` → `pianoAtomico.voci`. Il repository è pubblico: qui non

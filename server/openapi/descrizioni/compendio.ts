@@ -378,8 +378,32 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'POST /api/compendio/percorso/voci/trasferisci': {
     sommario: 'Copia o sposta una o più voci della giornata in un altro giorno e fascia',
     descrizione: 'Dal 2026-10-12. `uid` (da 1 a 200, senza ripetizioni), `giorno` (MM-GG), `fascia` (`giorno`/`sera`), `modo` (`copia`/`sposta`). Le voci arrivano in fondo alla fascia, nell\'ordine che avevano (giorno, poi giorno prima di sera, poi posto). «copia» crea voci nuove con lo stesso contenuto (genere, testo, note, tipo, collegamento col suo nome, rango atteso, effetti), senza spunte; «sposta» cambia giorno e fascia alle stesse voci, che tengono uid e spunte delle partite; le fasce lasciate si ricompattano. Canone: vale per tutte le partite. Una voce che non c\'è fa fallire tutto senza scrivere niente. `?partita=` facoltativo: le voci della risposta portano lo stato in quella partita.',
-    risposta: '`VociTrasferiteDto`: `giorno`, `fascia`, gli `uid` arrivati in ordine e tutte le voci del giorno di destinazione',
+    risposta: '`VociTrasferiteDto`: `giorno`, `fascia`, gli `uid` arrivati in ordine, l\'`operazioneId` registrato (annullabile, dal 2026-10-26: la copia porta anche le infiltrazioni) e tutte le voci del giorno di destinazione',
     errori: [[404, 'giorno-non-trovato'], [404, 'voce-non-trovata'], PARTITA_NON_TROVATA],
+  },
+  'POST /api/compendio/percorso/voci/appunti': {
+    sommario: 'Le voci del Diario da mettere negli appunti di sistema (sola lettura)',
+    descrizione: 'Dal 2026-10-26 (appunti del Diario). `uid` da 1 a 200, senza ripetizioni. Risponde l\'istantanea `AppuntiDiario` (shared/appuntiDiario.ts) nell\'ordine della giornata: formato `p5r-diario-voci`, versione 1, per ogni voce origine (giorno, fascia, posto, posizione nella guida), genere, testo, note, tipo, collegamento col suo nome, rango atteso, effetti della spunta con tutti i loro valori (anche una fonte da correggere, com\'è), infiltrazioni, «da rivedere». Mai spunte, ricevute o yen delle partite. Non scrive niente.',
+    risposta: '`AppuntiDiario`',
+    errori: [[404, 'voce-non-trovata']],
+  },
+  'POST /api/compendio/percorso/voci/incolla/anteprima': {
+    sommario: 'Il piano dell\'incolla di voci del Diario dagli appunti (sola lettura)',
+    descrizione: 'Dal 2026-10-26. Corpo: `appunti` (il blocco letto dagli appunti di sistema), `giorno` (MM-GG, il giorno aperto), `dopoUid` facoltativo (la voce selezionata: le voci vanno subito dopo di lei e nella sua fascia; senza, ognuna in fondo alla fascia d\'origine). Risponde il piano: per ogni voce lo stato (pronta, con rilievi, non incollabile, già spostata, eliminata) e i rilievi — diario validato, effetti a data fissa (cruciverba, domanda, invito), Fortuna, disponibilità del Confidente, effetti o collegamenti che non esistono più, infiltrazioni non applicabili, ciò che una copia non eredita (eventi del calendario, proposte da completare, proposta d\'infiltrazioni, «da rivedere»), spunte che seguono un taglio — con `daConfermare` e l\'`impronta` da rimandare all\'esecuzione.',
+    risposta: '`PianoIncollaDto`',
+    errori: [[400, 'appunti-non-riconosciuti'], [400, 'versione-appunti'], [400, 'voce-ripetuta'], [400, 'ancora-di-un-altro-giorno'], [400, 'ancora-nel-taglio'], [404, 'giorno-non-trovato'], [409, 'ancora-assente']],
+  },
+  'POST /api/compendio/percorso/voci/incolla': {
+    sommario: 'Incolla voci del Diario dagli appunti: copia (voci nuove) o taglio (le stesse voci si spostano)',
+    descrizione: 'Dal 2026-10-26. Come l\'anteprima, più `conferma` e `impronta` (obbligatorie se il piano ha rilievi da confermare) e `senzaSegnalati` (solo copia: senza gli effetti segnalati e il collegamento che non esiste più). Ricalcola il piano: copia = voci nuove con uid nuovi nell\'ordine del blocco, con effetti (uid nuovi, registrati in `operazione_effetti_voce`) e infiltrazioni, senza spunte; taglio = le stesse voci, solo quelle ancora dove erano al momento del taglio (spunte e ricevute le seguono; cambiando data perdono la posizione nella guida, che l\'annullo rimette). Una transazione; il gesto si registra in `operazione_voci_diario` e si annulla con `operazioni/:id/annulla`.',
+    risposta: '`EsitoIncollaDto`: `operazioneId`, `modo`, `giorno`, gli `uid` arrivati, le voci saltate col motivo, gli effetti lasciati fuori',
+    errori: [[400, 'appunti-non-riconosciuti'], [400, 'versione-appunti'], [404, 'giorno-non-trovato'], [409, 'rilievi-non-confermati'], [409, 'piano-cambiato'], [409, 'niente-da-incollare'], [409, 'yen-gia-strutturati']],
+  },
+  'POST /api/compendio/percorso/voci/operazioni/:id/annulla': {
+    sommario: 'Annulla una copia o uno spostamento di voci del Diario',
+    descrizione: 'Dal 2026-10-26, una volta sola. Copia: le copie ancora presenti e mai spuntate vanno nel Cestino (si ripristinano da lì); una copia spuntata in una partita resta. Spostamento: le voci ancora dove l\'operazione le aveva messe tornano a giorno, fascia, posizione nella guida e posto fra i vicini di prima; le altre restano dove sono. L\'esito dice voce per voce.',
+    risposta: '`EsitoAnnulloIncollaDto`: `rimesse` e `nonRimesse` col motivo',
+    errori: [[404, 'operazione-non-trovata'], [409, 'operazione-gia-annullata']],
   },
   'DELETE /api/compendio/percorso/voci/:uid': {
     sommario: 'Elimina una voce della giornata, per tutte le partite',

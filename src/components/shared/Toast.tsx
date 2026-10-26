@@ -114,6 +114,9 @@ function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void
       {n.collegamento && dentroIlRouter && (
         <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
       )}
+      {n.azione && (
+        <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={() => { chiudi(n.id); n.azione!.onClick(); }}>{n.azione.etichetta}</button>
+      )}
       <button
         className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
         onClick={() => chiudi(n.id)}

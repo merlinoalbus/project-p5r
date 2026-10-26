@@ -1513,6 +1513,8 @@ export interface VociTrasferiteDto {
   giorno: string;
   fascia: FasciaGioco;
   uid: string[];
+  /** Dal 2026-10-26: l'operazione registrata (`operazione_voci_diario`), da annullare con `POST /compendio/percorso/voci/operazioni/:id/annulla`. */
+  operazioneId?: string;
   voci: AzionePercorsoDto[];
 }
 

@@ -1476,6 +1476,23 @@ Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per o
 | g | Da decidere con l'utente: segnare un articolo come comprato dalla pagina del negozio e segnare un film come visto dalla sua pagina non muovono yen (lo stesso articolo li muove se lo segna una voce o un regalo); anche la pesca e l'Aojiru registrate fuori dal Diario non li muovono | aperto (decisione dell'utente) |
 | h | Istanza di rilascio: lo schema delle partite passa alla 049 (048 e 049; come già con la 046 e la 047); l'istanza di rilascio si ferma all'avvio finché non c'è una nuova «Prepara edizione» con la conversione una tantum, dopo il sì dell'utente (`docs/coordinamento/lotti/L12/progetto-due-istanze.md` §5). Confermato dai revisori del 25/10 come informativo | aperto (dopo il sì dell'utente) |
 
+## Richiesta del 26 ottobre 2026 — Copia, Taglia e Incolla delle voci del Diario con gli appunti di sistema — fatto nel codice (ramo `lavoro-copia-incolla`), da provare dall'utente
+
+Richiesta: «Vorrei poter selezionare uno o più elementi del diario con ctrl+C e poterli incollare da un'altra parte con ctrl+v», con «Sì, anche Taglia»,
+«Quella della voce selezionata», «e deve prendere anche quello che succede...», «però deve usare la clipboard del sistema non dentro l'app... così da
+poter anche usare windows V». Decisione del 2026-10-26 in `docs/DECISIONI.md`. Solo nell'istanza di preparazione.
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Selezione delle voci: clic, Ctrl+clic, Maiusc+clic, Esc; «Seleziona» nel menu «⋯» (con `aria-pressed`), «(selezionata)» per il lettore di schermo, conteggio annunciato; barra in fondo con Copia, Taglia, Altro giorno…, Fine (`useSelezioneVoci`, `BarraSelezioneVoci`) | fatto nel codice |
+| b | Copia / Taglia negli appunti di sistema (evento `copy`/`cut`, ripiego `navigator.clipboard.write`): testo leggibile e HTML col blocco `p5r-diario-voci` v1 marcato in due punti (`src/utils/appuntiDiario.ts`); istantanea dal server con ogni campo del modulo, tutti gli effetti e le infiltrazioni, mai spunte né ricevute (`POST /compendio/percorso/voci/appunti`) | fatto nel codice |
+| c | Incolla (evento `paste`; «Incolla qui» del menu touch con `navigator.clipboard.read` e il riquadro manuale se il browser non lo permette): piano del server con i rilievi (diario validato, date proprie, Fortuna, disponibilità, effetti e collegamenti che non esistono più, ciò che la copia non eredita), finestra di conferma, esecuzione in una transazione (`appuntiDiarioService`, `POST …/incolla/anteprima`, `POST …/incolla`) | fatto nel codice |
+| d | Taglio = le stesse voci (spunte e ricevute le seguono), solo se ancora dove erano; un taglio vecchio o incollato due volte non fa danni | fatto nel codice (provato su copie dei dati) |
+| e | Registro append-only `operazione_voci_diario` (migrazione 239); «Annulla» nella notifica (`POST …/operazioni/:id/annulla`): copie nel Cestino, spostamenti rimessi con giorno, fascia, posizione nella guida e vicini | fatto nel codice (provato su copie dei dati) |
+| f | «Copia in…» / «Sposta in…» sullo stesso percorso: la copia porta anche le infiltrazioni (prima le perdeva), il gesto è registrato e annullabile; il modo si sceglie nella finestra | fatto nel codice |
+| g | Bundle di rilascio senza le chiamate né il formato (`verifica-bundle-rilascio.ts`: 62 stringhe vietate assenti) | fatto |
+| h | Prova a mano dell'utente: giro Copia → Win+V → Incolla in Chrome/Edge, Firefox e Safari; menu touch su tablet e telefono; tre formati 1280/768/375 | da fare (utente) |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

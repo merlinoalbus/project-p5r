@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { boolQuery, dataGioco, dote, idParam, livello, testoRicerca, uidVoce } from './comuni.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
 import { bodySalvaEffettiVoce } from './acquisti.js';
+import { MASSIMO_VOCI_APPUNTI } from '../../shared/appuntiDiario.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -80,6 +81,59 @@ export const bodyTrasferisciVoci = z.object({
   fascia: z.enum(['giorno', 'sera']),
   modo: z.enum(['copia', 'sposta']),
 });
+
+// ---- Appunti del Diario (2026-10-26): Copia / Taglia / Incolla con gli appunti di sistema ----
+
+/** Le voci da mettere negli appunti (sola lettura): da 1 a 200, senza ripetizioni. */
+export const bodyEsportaAppunti = z.object({
+  uid: z.array(uidVoce).min(1).max(MASSIMO_VOCI_APPUNTI).refine((u) => new Set(u).size === u.length, { message: 'Una voce compare due volte.' }),
+}).strict();
+const fasciaAppunti = z.enum(['giorno', 'sera']);
+/** Un effetto della voce negli appunti: l'effetto è libero qui (lo riconosce `normalizzaEffettoVoce` nel servizio, integralmente). */
+const effettoAppunti = z.object({
+  uid: uidVoce,
+  effetto: z.unknown().meta({ description: 'Un effetto `EffettoVoce` (shared/effettiVoce.ts), con tutti i suoi valori.' }),
+  origine: z.enum(['seed', 'regola', 'utente']),
+}).strict();
+/** Una voce negli appunti (`VoceAppunti`, shared/appuntiDiario.ts): forma e limiti; il servizio verifica che ciò che cita esista ancora. */
+const voceAppunti = z.object({
+  uid: uidVoce,
+  origine: z.object({ giorno: dataGioco, fascia: fasciaAppunti, posto: z.number().int().min(0).max(100000), indiceGuida: z.number().int().min(0).max(100000).nullable() }).strict(),
+  genere: z.string().min(1).max(20),
+  azione: z.string().max(2000),
+  note: z.string().max(2000).nullable(),
+  tipo: z.string().min(1).max(40),
+  riferimento: z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).strict().nullable(),
+  riferimentoTesto: z.string().max(400).nullable(),
+  rangoAtteso: z.number().int().min(1).max(10).nullable(),
+  effetti: z.object({
+    stato: z.enum(['convertita', 'legacy-da-correggere']),
+    elementi: z.array(effettoAppunti).max(60),
+    rawLegacy: z.string().max(200000),
+    motivo: z.string().max(2000).nullable(),
+  }).strict(),
+  infiltrazioni: z.array(z.string().min(1).max(160)).max(60),
+  daRivedere: z.boolean(),
+}).strict();
+/** Il blocco degli appunti (`AppuntiDiario`): formato e versione si controllano nel servizio, con un messaggio che dice che cosa fare. */
+const appuntiDiario = z.object({
+  formato: z.string().max(40),
+  versione: z.number().int().min(0).max(1000),
+  modo: z.enum(['copia', 'taglia']),
+  taglio: z.string().regex(/^[0-9a-f]{32}$/).optional(),
+  creatoIl: z.string().max(40),
+  voci: z.array(voceAppunti).min(1).max(MASSIMO_VOCI_APPUNTI),
+}).strict();
+/** L'anteprima dell'incolla: il blocco, il giorno aperto, la voce selezionata dopo cui incollare (facoltativa). */
+export const bodyIncollaAnteprima = z.object({ appunti: appuntiDiario, giorno: dataGioco, dopoUid: uidVoce.optional() }).strict();
+/** L'incolla: come l'anteprima, più la conferma dei rilievi del piano mostrato e la scelta «senza gli effetti segnalati». */
+export const bodyIncollaVoci = bodyIncollaAnteprima.extend({
+  conferma: z.boolean().optional(),
+  impronta: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  senzaSegnalati: z.boolean().optional(),
+}).strict();
+/** L'operazione registrata da annullare. */
+export const paramsOperazioneVoci = z.object({ id: z.string().regex(/^[0-9a-f]{32}$/, 'Identità dell’operazione non valida.') });
 
 /** La Dote a ogni incontro di un Confidente, rango per rango: Doti chiuse, note 1–3, al massimo cinque per rango. */
 export const bodyDotiIncontro = z.object({

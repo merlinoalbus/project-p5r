@@ -48,7 +48,9 @@ import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, EsitoRevisioneVoce, PersonaggiDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyAggiornaVoce, bodyDotiIncontro, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyAggiornaVoce, bodyDotiIncontro, bodyEsportaAppunti, bodyIncollaAnteprima, bodyIncollaVoci, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsOperazioneVoci, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { annullaOperazione, esportaAppunti, incollaVoci, pianoIncolla } from '../services/appuntiDiarioService.js';
+import type { RichiestaAppuntiDiario, RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../shared/appuntiDiario.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
@@ -199,6 +201,19 @@ router.put('/percorso/voci/:uid/sposta', validate({ params: paramsVoceGiornata, 
 /** Copia o sposta una o più voci in un altro giorno e fascia (2026-10-12): in fondo, nel loro ordine. */
 router.post('/percorso/voci/trasferisci', validate({ body: bodyTrasferisciVoci, query: queryDomande }), (req, res) => {
   res.json(trasferisciVoci(req.body as TrasferisciVociGiornata, (req.query as unknown as { partita?: number }).partita));
+});
+// Appunti del Diario (2026-10-26): l'istantanea per gli appunti di sistema (sola lettura), il piano e l'esecuzione dell'incolla, l'annullo
+router.post('/percorso/voci/appunti', validate({ body: bodyEsportaAppunti }), (req, res) => {
+  res.json(esportaAppunti((req.body as RichiestaAppuntiDiario).uid));
+});
+router.post('/percorso/voci/incolla/anteprima', validate({ body: bodyIncollaAnteprima }), (req, res) => {
+  res.json(pianoIncolla(req.body as RichiestaIncollaVoci));
+});
+router.post('/percorso/voci/incolla', validate({ body: bodyIncollaVoci }), (req, res) => {
+  res.json(incollaVoci(req.body as RichiestaEseguiIncolla));
+});
+router.post('/percorso/voci/operazioni/:id/annulla', validate({ params: paramsOperazioneVoci }), (req, res) => {
+  res.json(annullaOperazione(String(req.params.id)));
 });
 router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
   eliminaVoce(String(req.params.uid));
