@@ -63,7 +63,7 @@ import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazi
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** I comandi dentro una riga: il clic lì è loro, non seleziona la voce. */
-const INTERATTIVI = 'a, button, input, label, select, textarea, summary, details, [role="button"], [role="dialog"], [contenteditable=""], [contenteditable="true"]';
+const INTERATTIVI = 'a, button, input, label, select, textarea, summary, details, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="menuitem"], [role="dialog"], [contenteditable=""], [contenteditable="true"]';
 
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
@@ -228,13 +228,17 @@ interface Props {
   fasciaCorrente?: 'giorno' | 'sera' | null;
   /** R11-15/1: se c'è, accanto alle allerte meteo del giorno compare la matita per correggerle e rimetterle com'erano nella guida; il gesto la richiama per rileggere. Assente in Partita. */
   onAllerteModificate?: () => void | Promise<void>;
+  /** Appunti del Diario: il clic semplice col mouse su una riga la seleziona. Predefinito: sì nella pagina del Diario, no nella scheda «Oggi»
+   *  (`compatto`), dove si gioca e un clic sul testo non deve far comparire la barra delle voci selezionate; lì restano Ctrl+clic,
+   *  Maiusc+clic e «Seleziona» del menu (rilievo del revisore, 2026-10-26). */
+  selezioneAlClic?: boolean;
 }
 
 /** Richiesta di conferma prima di un gesto che non si disfa (eliminare una voce). */
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash } = useLocation();
@@ -268,8 +272,14 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const partita = partitaId ?? undefined;
   // la chiave del menu porta il giorno: cambiando giorno nessun menu resta aperto su una voce che non c'è più
   const chiaveMenu = (uid: string) => `${g.giorno}/${uid}`;
-  /** Le props del menu di una voce: se è quello aperto e come aprirlo o chiuderlo (uno solo aperto alla volta). */
-  const menuDi = (uid: string) => ({ menuAperto: menu === chiaveMenu(uid), onMenu: (aperto: boolean) => setMenu(aperto ? chiaveMenu(uid) : null) });
+  /** Le props del menu di una voce: se è quello aperto e come aprirlo o chiuderlo (uno solo aperto alla volta). Aprendolo su tablet e
+   *  telefono si prepara il blocco delle voci di Copia e Taglia, così si scrive negli appunti dentro il gesto. */
+  const menuDi = (uid: string) => ({ menuAperto: menu === chiaveMenu(uid), onMenu: (aperto: boolean) => {
+    setMenu(aperto ? chiaveMenu(uid) : null);
+    if (aperto && tocco && !IN_RILASCIO) appunti.prepara(gruppoDi(uid));
+  } });
+  /** Rimette il fuoco sul pulsante «⋯» della voce (dopo un gesto del menu che lo chiude: chi usa un lettore di schermo resta lì). */
+  const fuocoAlMenu = (uid: string) => setTimeout(() => document.getElementById(`voce-${uid}`)?.querySelector<HTMLButtonElement>('button[data-menu-voce]')?.focus());
 
   // aprire la finestra o la conferma chiude il menu della voce: tornando alla lista la riga è di nuovo com'era
   const apri = (s: SoggettoVoce) => { setMenu(null); setSoggetto(s); };
@@ -302,7 +312,15 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   };
 
   // Ctrl+C / Ctrl+X / Ctrl+V / Esc con gli appunti di sistema (nel rilascio niente: l'hook è vuoto e il modulo esce dal bundle)
-  const appunti = useAppuntiDiario({ giorno: g.giorno, voci: g.azioni, selezione: sel, onModificata: async () => { await aggiornata(); } });
+  // Esc chiude prima il menu della voce aperto (il fuoco torna al suo «⋯»), poi annulla la selezione
+  const appunti = useAppuntiDiario({ giorno: g.giorno, voci: g.azioni, selezione: sel, onModificata: async () => { await aggiornata(); },
+    chiudiMenu: () => {
+      if (menu === null) return false;
+      const uid = menu.slice(menu.indexOf('/') + 1);
+      setMenu(null);
+      fuocoAlMenu(uid);
+      return true;
+    } });
   const bloccata = occupato || appunti.occupato;
   /** Le voci su cui agisce il menu di una voce: la selezione, se la voce ne fa parte; altrimenti la voce sola. */
   const gruppoDi = (uid: string): readonly string[] => (sel.insieme.has(uid) ? sel.uid : [uid]);
@@ -321,7 +339,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         if (puntatore.current !== 'mouse' || e.button !== 0 || e.detail === 0 || (e.target as Element).closest(INTERATTIVI) || window.getSelection()?.toString()) return;
         if (e.shiftKey) sel.intervallo(uid);
         else if (e.ctrlKey || e.metaKey) sel.alterna(uid);
-        else sel.sostituisci(uid);
+        else if (selezioneAlClic) sel.sostituisci(uid);
       },
     },
   });
@@ -349,11 +367,17 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const gesti = (v: AzionePercorsoDto, i: number, n: number): GestoVoce[] => [
     // appunti del Diario (2026-10-26): «Seleziona» su ogni dispositivo (anche da tastiera); Copia, Taglia e Incolla qui dove non c'è la tastiera
     { chiave: 'seleziona', titolo: 'Seleziona', premuto: sel.insieme.has(v.uid), icona: <IconaAzione chiave="seleziona" dimensione={20} />, onClick: () => sel.alterna(v.uid) },
-    ...(tocco ? [
-      { chiave: 'copia', titolo: 'Copia', descrizione: sel.insieme.has(v.uid) && sel.uid.length > 1 ? `Copia le ${sel.uid.length} voci selezionate` : 'Copia questa voce', icona: <IconaAzione chiave="copia" dimensione={20} />, onClick: () => { setMenu(null); appunti.copia(gruppoDi(v.uid)); } },
-      { chiave: 'taglia', titolo: 'Taglia', descrizione: sel.insieme.has(v.uid) && sel.uid.length > 1 ? `Taglia le ${sel.uid.length} voci selezionate` : 'Taglia questa voce', icona: <IconaAzione chiave="taglia" dimensione={20} />, onClick: () => { setMenu(null); appunti.taglia(gruppoDi(v.uid)); } },
-      { chiave: 'incolla', titolo: 'Incolla qui', descrizione: 'Incolla dopo questa voce', icona: <IconaAzione chiave="incolla" dimensione={20} />, onClick: () => { setMenu(null); appunti.incollaDagliAppunti(v.uid); } },
-    ] : []),
+    // con più voci selezionate, fra cui questa, Copia e Taglia agiscono su tutte: il numero si vede nel nome («Taglia (3)»), perché sul
+    // tocco il suggerimento non compare. Il menu si chiude e il fuoco torna al suo «⋯»
+    ...(tocco ? (() => {
+      const gruppo = gruppoDi(v.uid);
+      const piu = gruppo.length > 1 ? ` (${gruppo.length})` : '';
+      return [
+        { chiave: 'copia', titolo: `Copia${piu}`, descrizione: piu ? `Copia le ${gruppo.length} voci selezionate` : 'Copia questa voce', icona: <IconaAzione chiave="copia" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.copia(gruppo); } },
+        { chiave: 'taglia', titolo: `Taglia${piu}`, descrizione: piu ? `Taglia le ${gruppo.length} voci selezionate` : 'Taglia questa voce', icona: <IconaAzione chiave="taglia" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.taglia(gruppo); } },
+        { chiave: 'incolla', titolo: 'Incolla qui', descrizione: 'Incolla dopo questa voce', icona: <IconaAzione chiave="incolla" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.incollaDagliAppunti(v.uid); } },
+      ];
+    })() : []),
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'voce', voce: v }) },
     ...(i > 0 ? [{ chiave: 'su', titolo: 'Sposta su', icona: <IconaAzione chiave="su" dimensione={20} />, onClick: () => sposta(v, -1) }] : []),
     ...(i < n - 1 ? [{ chiave: 'giu', titolo: 'Sposta giù', icona: <IconaAzione chiave="giu" dimensione={20} />, onClick: () => sposta(v, 1) }] : []),

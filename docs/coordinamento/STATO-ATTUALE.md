@@ -6,6 +6,9 @@ touch), Ctrl+C / Ctrl+X / Ctrl+V con gli appunti di sistema (testo + HTML col bl
 conferma, registro append-only `operazione_voci_diario` (migrazione 239) con «Annulla». Dettagli in `docs/DECISIONI.md` (2026-10-26) e
 `docs/ROADMAP.md`. Servizio provato su copie dei dati; nell'app non osservato (il backend non parte con il Node 22.17 di questa macchina:
 il controllo dell'avvio chiede almeno 22.23.4). Da provare dall'utente: giro Win+V, Firefox/Safari, menu touch, tre formati.
+Giro 2 (dopo la verifica avversariale, respinta): corretti l'ordine dell'annullo di più voci in coda alla fascia, il nome del collegamento
+perso nella copia e i rilievi del frontend (selezione fra giorni, Ctrl+V, scrittura dal menu, segno del taglio, finestra dei rilievi, clic in
+«Oggi», Ctrl+Z, notifica sopra la barra, fuoco, contrasto); punto `i` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
 
 ## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
 Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle

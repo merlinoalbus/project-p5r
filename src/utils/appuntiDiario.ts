@@ -9,7 +9,8 @@
 //   - `text/plain`: le voci in chiaro (giorno, fascia, testo, collegamento, note, che cosa succede spuntando), utili anche incollate altrove;
 //   - `text/html`: la stessa lista e il blocco completo (`AppuntiDiario`, JSON in base64url UTF-8) marcato e versionato in due punti, l'attributo
 //     `data-p5r-payload` del contenitore `data-p5r-diario` e un commento `P5R-DIARIO-VOCI.<versione>.<base64url>.FINE`: se un browser, leggendo,
-//     ripulisce gli attributi, il commento resta (e viceversa).
+//     ripulisce gli attributi, il commento resta (e viceversa). Un blocco grande, oltre la soglia della cronologia di Windows, sta solo
+//     nell'attributo, e chi copia viene avvisato se anche così Win+V potrebbe non conservarlo.
 //
 // Perché non un blocco marcato nel testo: incollato in un altro programma sporcherebbe il testo con una riga illeggibile, e non serve finché
 // l'HTML arriva. Se la prova a mano con Win+V mostrasse che l'HTML si perde, `SCRIVI_BLOCCO_NEL_TESTO = true` lo aggiunge in una riga (la
@@ -75,20 +76,45 @@ export function testoLeggibile(a: AppuntiDiario, frasi?: FrasiDelleVoci): string
   return righe.join('\n');
 }
 
-/** La lista leggibile in HTML (la stessa del testo), dentro il contenitore marcato. */
-function htmlLeggibile(a: AppuntiDiario, frasi: FrasiDelleVoci | undefined, codice: string): string {
+/** La lista leggibile in HTML (la stessa del testo), dentro il contenitore marcato; `commento`: il blocco anche nel commento finale. */
+function htmlLeggibile(a: AppuntiDiario, frasi: FrasiDelleVoci | undefined, codice: string, commento: boolean): string {
   const parti = gruppi(a).map((g) => `<p><strong>${html(dataGiocoTesto(g.giorno))} · ${g.fascia === 'sera' ? 'di sera' : 'di giorno'}</strong></p><ul>${g.voci.map((v) => {
     const f = frasi?.get(v.uid) ?? [];
     return `<li>${html(v.azione)}${v.riferimentoTesto ? ` · <em>${html(v.riferimentoTesto)}</em>` : ''}${v.note ? `<br>${html(v.note)}` : ''}${f.length ? `<br>Spuntando: ${html(f.join('; '))}` : ''}</li>`;
   }).join('')}</ul>`).join('');
-  return `<meta charset="utf-8"><div data-p5r-diario="1" data-versione="${a.versione}" data-p5r-payload="${codice}">${parti}</div><!--${MARCA}.${a.versione}.${codice}.FINE-->`;
+  return `<meta charset="utf-8"><div data-p5r-diario="1" data-versione="${a.versione}" data-p5r-payload="${codice}">${parti}</div>${commento ? `<!--${MARCA}.${a.versione}.${codice}.FINE-->` : ''}`;
 }
 
-/** Il contenuto da scrivere negli appunti: testo leggibile e HTML con il blocco marcato. */
-export function scriviAppunti(a: AppuntiDiario, frasi?: FrasiDelleVoci, opz: { bloccoNelTesto?: boolean } = {}): { testo: string; html: string } {
+/**
+ * Quanto può pesare un elemento perché la cronologia degli appunti di Windows (Win+V) lo conservi: Microsoft indica 4 MB per elemento;
+ * si resta sotto con margine. Si misura come lo tiene Windows: l'HTML in UTF-8, il testo in UTF-16 (due byte a carattere).
+ */
+export const SOGLIA_CRONOLOGIA_WINDOWS = 3.5 * 1024 * 1024;
+const pesoDi = (testo: string, h: string): number => new TextEncoder().encode(h).length + testo.length * 2;
+
+/** Il contenuto da scrivere negli appunti. */
+export interface ContenutoAppunti {
+  testo: string;
+  html: string;
+  /** Il peso stimato nella cronologia di Windows (byte). */
+  peso: number;
+  /** Oltre `SOGLIA_CRONOLOGIA_WINDOWS` anche con il blocco una volta sola: Win+V potrebbe non conservarlo (lo si dice a chi copia). */
+  troppoPerLaCronologia: boolean;
+}
+
+/**
+ * Il contenuto da scrivere negli appunti: testo leggibile e HTML con il blocco marcato. Il blocco sta due volte nell'HTML (attributo e
+ * commento) finché il peso resta sotto la soglia della cronologia di Windows; oltre, una volta sola, nell'attributo (`data-*` resta anche
+ * negli HTML ripuliti, il commento no), per restare nella cronologia il più possibile (rilievo del revisore, 2026-10-26).
+ */
+export function scriviAppunti(a: AppuntiDiario, frasi?: FrasiDelleVoci, opz: { bloccoNelTesto?: boolean } = {}): ContenutoAppunti {
   const codice = inBase64Url(JSON.stringify(a));
-  const testo = testoLeggibile(a, frasi);
-  return { testo: SCRIVI_BLOCCO_NEL_TESTO || opz.bloccoNelTesto ? `${testo}\n\n[${MARCA}.${a.versione}.${codice}.FINE]` : testo, html: htmlLeggibile(a, frasi, codice) };
+  const leggibile = testoLeggibile(a, frasi);
+  const testo = SCRIVI_BLOCCO_NEL_TESTO || opz.bloccoNelTesto ? `${leggibile}\n\n[${MARCA}.${a.versione}.${codice}.FINE]` : leggibile;
+  let h = htmlLeggibile(a, frasi, codice, true);
+  let peso = pesoDi(testo, h);
+  if (peso > SOGLIA_CRONOLOGIA_WINDOWS) { h = htmlLeggibile(a, frasi, codice, false); peso = pesoDi(testo, h); }
+  return { testo, html: h, peso, troppoPerLaCronologia: peso > SOGLIA_CRONOLOGIA_WINDOWS };
 }
 
 /** Il blocco riconosciuto in un codice base64url: un oggetto con il nostro formato e un elenco di voci, altrimenti null. */

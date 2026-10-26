@@ -19,7 +19,8 @@ export interface GestoVoce {
   tono?: TonoPulsante;
   /** Un interruttore («Seleziona» la voce): acceso, tono primario e `aria-pressed`. */
   premuto?: boolean;
-  /** Il nome per il lettore di schermo e il suggerimento, quando il titolo da solo non basta (le scorciatoie: «Copia (Ctrl+C)»). */
+  /** Il suggerimento al passaggio del puntatore (`title`), quando il titolo da solo non basta. Sul tocco non si vede: ciò che informa sta
+   *  nel titolo («Taglia (3)»). */
   descrizione?: string;
 }
 
@@ -49,7 +50,8 @@ interface PropsPulsante {
 /** Il pulsante che apre e chiude i gesti della voce. */
 export function PulsanteMenuVoce({ voce, aperto, onCambia, disabled }: PropsPulsante) {
   return (
-    <button type="button" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o elimina: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
+    // `data-menu-voce`: chi chiude il menu da un suo gesto (Copia, Taglia, Incolla qui, Esc) ci rimette il fuoco
+    <button type="button" data-menu-voce="" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o elimina: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
       <IconaAzione chiave="dettagli" dimensione={20} />
     </button>
   );

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test postoDellaCoda — la coda delle notifiche non copre il popup di uno spillo
+// Test postoDellaCoda — la coda delle notifiche non copre il popup di uno spillo né la barra delle voci selezionate
 // ============================================================
 
 import { postoDellaCoda } from './postoCoda';
@@ -59,5 +59,25 @@ it('un popup ancorato che lascia troppo poco spazio a sinistra: la coda gli sta 
 
 it('un popup ancorato fuori dalla sua zona non la sposta', () => {
   popup(rettangolo(300, 454, 470, 730));
+  expect(postoDellaCoda(coda())).toEqual({ bottom: null, aSinistra: false });
+});
+
+/** La barra delle voci selezionate del Diario (`.barra-selezione-voci`) che occupa il rettangolo `r`. */
+const barraVoci = (r: DOMRect) => {
+  const el = document.createElement('section');
+  el.className = 'barra-selezione-voci';
+  el.getBoundingClientRect = () => r;
+  document.body.appendChild(el);
+  return el;
+};
+
+it('la barra delle voci selezionate nella sua zona: la coda le sta sopra', () => {
+  // ferma a 72 px dal fondo (sopra la barra di navigazione), alta 110: da 842 a 952
+  barraVoci(rettangolo(842, 952, 16, 752));
+  expect(postoDellaCoda(coda())).toEqual({ bottom: 1024 - 842 + 8, aSinistra: false });
+});
+
+it('la barra delle voci selezionate più in alto, fuori dalla sua zona, non la sposta', () => {
+  barraVoci(rettangolo(400, 510, 16, 752));
   expect(postoDellaCoda(coda())).toEqual({ bottom: null, aSinistra: false });
 });

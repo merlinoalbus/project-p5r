@@ -190,7 +190,7 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
   if (v.riferimento) {
     let ok = TIPI_RIF.has(v.riferimento.tipo);
     if (ok) { try { nomeRiferimento(v.riferimento, { ancheNascosti: true }); } catch (e) { if (!(e instanceof HttpError)) throw e; ok = false; } }
-    if (!ok) { d.riferimentoNonValido = true; d.soloSenzaSegnalati = true; mio({ codice: 'riferimento-non-valido', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}»: il collegamento (${v.riferimento.tipo} «${v.riferimentoTesto ?? v.riferimento.chiave}») non esiste più. Si incolla solo senza collegamento.` }); }
+    if (!ok) { d.riferimentoNonValido = true; d.soloSenzaSegnalati = true; mio({ codice: 'riferimento-non-valido', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}»: il collegamento (${v.riferimento.tipo} «${v.riferimentoTesto ?? v.riferimento.chiave}») non esiste più. Si incolla solo senza collegamento${v.riferimentoTesto ? `, col solo nome «${v.riferimentoTesto}»` : ''}.` }); }
   }
   // gli effetti: ognuno riconosciuto integralmente e verificato come uno nuovo; una fonte da correggere passa com'è
   if (v.effetti.stato === 'convertita') {
@@ -326,21 +326,29 @@ export function pianoIncolla(r: RichiestaIncollaVoci): PianoIncollaDto {
 function inserisciCopia(v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltrazioni: readonly string[], riferimento: VoceAppunti['riferimento'], giorno: string, fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }): { uid: string; mappaEffetti: Record<string, string> } {
   const uid = nuovoId(), adesso = nowIso();
   // `produce_json` resta al suo valore predefinito: gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
-  // (la copia non discende dalla guida di quel giorno) e senza il segno «da rivedere»
+  // (la copia non discende dalla guida di quel giorno) e senza il segno «da rivedere». Il nome del collegamento si copia SEMPRE: la guida
+  // ha voci col solo nome, senza collegamento («Cammino del Santo Graal»), e un collegamento che non esiste più lascia il suo nome (il
+  // rilievo `riferimento-non-valido` lo dice prima)
   prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, giorno, fascia, ordine, v.genere, v.azione.trim(), v.note === null || v.note.trim() === '' ? null : v.note,
-    v.genere === 'azione' ? v.tipo : 'altro', riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento ? v.riferimentoTesto : null, v.rangoAtteso, adesso, adesso);
+    v.genere === 'azione' ? v.tipo : 'altro', riferimento?.tipo ?? null, riferimento?.chiave ?? null, v.riferimentoTesto, v.rangoAtteso, adesso, adesso);
   const mappa = scriviEffettiDaIstantanea(uid, effetti, { verifica: opz.verifica, registro: { origine: 'copia-voce', operazione: opz.operazione, daVoce: v.uid } });
   if (infiltrazioni.length && conLegami()) infiltrazioni.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
   return { uid, mappaEffetti: Object.fromEntries(mappa) };
 }
 
-/** Dove stava la voce prima di spostarsi: giorno, fascia, posto, posizione nella guida e i vicini rimasti (esclusi quelli che si spostano con lei). */
+/**
+ * Dove stava la voce prima di spostarsi: giorno, fascia, posto, posizione nella guida e i vicini. `prima` è la voce che le stava subito
+ * prima nella fascia COMPLETA (anche se si sposta con lei), `dopo` la prima voce dopo di lei che resta. L'annullo rimette le voci
+ * nell'ordine in cui stavano (`annullaOperazione`): così la voce precedente spostata è già tornata quando tocca a questa, e un gruppo di
+ * voci in coda alla fascia ([X, A, B] → annullo) torna [X, A, B] e non [X, B, A] (rilievo del revisore, 2026-10-26).
+ */
 interface OrigineSpostata { giorno: string; fascia: FasciaGioco; posto: number; indiceGuida: number | null; prima: string | null; dopo: string | null }
 function origineDi(r: RigaVoce, spostate: ReadonlySet<string>): OrigineSpostata {
-  const sorelle = righeDelGiorno(r.data).filter((x) => x.fascia === r.fascia && (x.uid === r.uid || !spostate.has(x.uid))).map((x) => x.uid);
+  const sorelle = righeDelGiorno(r.data).filter((x) => x.fascia === r.fascia).map((x) => x.uid);
   const i = sorelle.indexOf(r.uid);
-  return { giorno: r.data, fascia: fasciaDi(r), posto: r.ordine, indiceGuida: r.indice_guida, prima: sorelle[i - 1] ?? null, dopo: sorelle[i + 1] ?? null };
+  const dopo = sorelle.slice(i + 1).find((u) => !spostate.has(u)) ?? null;
+  return { giorno: r.data, fascia: fasciaDi(r), posto: r.ordine, indiceGuida: r.indice_guida, prima: sorelle[i - 1] ?? null, dopo };
 }
 
 /** Sposta le voci (righe lette) nel giorno e nelle fasce indicate, nell'ordine; le fasce lasciate si ricompattano; il registro dei punti si
@@ -442,7 +450,12 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
     const copiate = righe.map((r, i) => {
       const v = istantaneaVoce(r);
       // le infiltrazioni della voce, così come sono (stesso collegamento, quindi stesso Palazzo); gli effetti come sono (non riverificati)
-      const fonte: IstantaneaEffettiVoce = { stato: v.effetti.stato, effetti: v.effetti.elementi.flatMap((x) => { const e = normalizzaEffettoVoce(x.effetto); return e ? [{ uid: x.uid, effetto: e, origine: x.origine }] : []; }), rawLegacy: v.effetti.rawLegacy, motivo: v.effetti.motivo };
+      // un effetto che non si riconosce integralmente non si scarta in silenzio: la copia non si fa e lo si dice (nulla si perde)
+      const fonte: IstantaneaEffettiVoce = { stato: v.effetti.stato, effetti: v.effetti.elementi.map((x) => {
+        const e = normalizzaEffettoVoce(x.effetto);
+        if (!e) throw httpErrors.conflict('effetto-non-copiabile', `«${breve(r.azione)}»: un effetto della spunta non si riconosce integralmente e la copia lo perderebbe. Correggilo dal modulo della voce, poi copiala.`);
+        return { uid: x.uid, effetto: e, origine: x.origine };
+      }), rawLegacy: v.effetti.rawLegacy, motivo: v.effetti.motivo };
       const c = inserisciCopia(v, fonte, v.infiltrazioni, v.riferimento, t.giorno, t.fascia, 1000000 + i, { verifica: false, operazione: id });
       return { uid: c.uid, fascia: t.fascia, daVoce: r.uid, mappaEffetti: c.mappaEffetti };
     });
@@ -479,7 +492,11 @@ export function annullaOperazione(id: string): EsitoAnnulloIncollaDto {
         rimesse.push(x.uid);
       }
     } else {
-      const voci = JSON.parse(op.esito_json) as Array<{ uid: string; da: OrigineSpostata; a: { giorno: string; fascia: FasciaGioco } }>;
+      // nell'ordine in cui stavano prima (giorno del calendario, fascia, posto): ogni voce ritrova come vicina di prima quella che la
+      // precedeva, già rimessa (vedi `origineDi`)
+      const giorni = ordineDeiGiorni();
+      const voci = (JSON.parse(op.esito_json) as Array<{ uid: string; da: OrigineSpostata; a: { giorno: string; fascia: FasciaGioco } }>)
+        .sort((p, q) => (giorni.get(p.da.giorno) ?? 0) - (giorni.get(q.da.giorno) ?? 0) || (p.da.fascia === q.da.fascia ? 0 : p.da.fascia === 'giorno' ? -1 : 1) || p.da.posto - q.da.posto);
       const fasceToccate = new Set<string>();
       for (const x of voci) {
         const r = prepared('SELECT * FROM voce_giornata WHERE uid = ?').get(x.uid) as RigaVoce | undefined;

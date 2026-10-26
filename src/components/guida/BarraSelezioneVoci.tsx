@@ -4,8 +4,9 @@
 //
 // Compare solo con voci selezionate (o nella scelta a caselle di «Copia o sposta voci»), ferma in fondo alla vista sopra la barra di
 // navigazione del telefono: in fondo e non in cima, così comparendo non sposta le righe sotto il puntatore durante Maiusc+clic. Le
-// scorciatoie stanno nel nome dei pulsanti («Copia (Ctrl+C)»), non in un suggerimento sempre a schermo: su tablet e telefono la
-// tastiera non c'è. Sul telefono resta di due righe: il conteggio con «Fine», poi i tre comandi.
+// scorciatoie stanno nel suggerimento e in `aria-keyshortcuts` dei pulsanti, non in un testo sempre a schermo: su tablet e telefono la
+// tastiera non c'è. Sul telefono resta di due righe: il conteggio con «Fine», poi i tre comandi. La coda delle notifiche le sta sopra
+// (`utils/postoCoda`, classe `barra-selezione-voci`).
 // ============================================================
 
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -37,13 +38,15 @@ function BarraSelezioneVociReale({ quante, caselle, occupato, onCopia, onTaglia,
       <span className="min-w-0 flex-1 testo-13 tabular-nums">
         <strong>{nessuna ? 'Scegli le voci' : quante === 1 ? '1 voce selezionata' : `${quante} voci selezionate`}</strong>
       </span>
+      {/* i nomi accessibili cominciano col testo che si vede (WCAG 2.5.3: «clic Fine» col controllo vocale) */}
       <PulsanteVisivo tono="fantasma" compatto className="shrink-0 sm:order-last" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Fine"
-        aria-label={caselle ? 'Esci dalla scelta delle voci' : 'Annulla la selezione (Esc)'} title={caselle ? undefined : 'Annulla la selezione (Esc)'} onClick={onFine} />
+        aria-label={caselle ? 'Fine: esci dalla scelta delle voci' : 'Fine: annulla la selezione'} aria-keyshortcuts={caselle ? undefined : 'Escape'}
+        title={caselle ? undefined : 'Annulla la selezione (Esc)'} onClick={onFine} />
       <div className="flex basis-full flex-wrap gap-2 sm:basis-auto">
         <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" title="Copia negli appunti (Ctrl+C)"
-          aria-label="Copia negli appunti le voci selezionate" disabled={nessuna || occupato} onClick={onCopia} />
+          aria-label="Copia negli appunti le voci selezionate" aria-keyshortcuts="Control+C" disabled={nessuna || occupato} onClick={onCopia} />
         <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="taglia" dimensione={20} />} titolo="Taglia" title="Taglia negli appunti (Ctrl+X)"
-          aria-label="Taglia negli appunti le voci selezionate" disabled={nessuna || occupato} onClick={onTaglia} />
+          aria-label="Taglia negli appunti le voci selezionate" aria-keyshortcuts="Control+X" disabled={nessuna || occupato} onClick={onTaglia} />
         <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Altro giorno…"
           aria-label="Copia o sposta le voci selezionate in un altro giorno" disabled={nessuna || occupato} onClick={onAltroGiorno} />
       </div>

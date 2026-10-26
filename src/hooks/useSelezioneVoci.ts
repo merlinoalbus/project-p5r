@@ -6,7 +6,7 @@
 // o toglie), Maiusc+clic (l'intervallo dall'ultima voce cliccata) ed Esc la annulla; su tablet e telefono «Seleziona» nel menu «⋯» della
 // voce. La stessa selezione serve alle caselle di «Copia o sposta voci» (Copia in… / Sposta in…).
 //
-// La selezione è legata al giorno: cambiando giorno non vale più. Le voci sparite dopo una ricarica non contano (si filtra per l'ordine
+// La selezione è legata al giorno: cambiando giorno si svuota (tornando non ricompare). Le voci sparite dopo una ricarica non contano (si filtra per l'ordine
 // attuale), e l'elenco è sempre nell'ordine visivo: prima le voci di giorno, poi quelle di sera, nel loro posto.
 // ============================================================
 
@@ -35,6 +35,10 @@ export interface SelezioneVoci {
 /** La selezione delle voci di `giorno`, con `ordine` le voci del giorno nell'ordine visivo. */
 export function useSelezioneVoci(giorno: string, ordine: readonly string[]): SelezioneVoci {
   const [stato, setStato] = useState<{ giorno: string; uid: ReadonlySet<string>; perno: string | null }>({ giorno, uid: new Set(), perno: null });
+  // cambiando giorno la selezione si svuota davvero (non solo si ignora): tornando al giorno di prima non ricompare, e Ctrl+C / Ctrl+X /
+  // Ctrl+V non agiscono su voci scelte tempo prima (rilievo del revisore, 2026-10-26). Lo stato si corregge durante il disegno, prima
+  // che i figli lo vedano (il modo di React per lo stato che dipende da una prop)
+  if (stato.giorno !== giorno) setStato({ giorno, uid: new Set(), perno: null });
   const attuale = stato.giorno === giorno ? stato : { giorno, uid: new Set<string>(), perno: null };
   const uid = useMemo(() => ordine.filter((u) => attuale.uid.has(u)), [ordine, attuale.uid]);
   const insieme = useMemo(() => new Set(uid), [uid]);

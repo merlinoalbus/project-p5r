@@ -42,6 +42,11 @@ interface Props {
 
 /** «1 voce», «3 voci». */
 const quanteVoci = (n: number) => (n === 1 ? '1 voce' : `${n} voci`);
+/** I tasti che, in un gruppo di due opzioni, passano all'altra. */
+const FRECCE = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
+/** Nel gruppo di opzioni il fuoco segue la scelta fatta con le frecce (schema WAI-ARIA dei gruppi di opzioni): il lettore di schermo
+ *  annuncia la nuova opzione, e il Tab successivo non riparte da quella appena spenta. */
+const fuocoSullOpzione = (da: HTMLElement, opzione: string) => da.parentElement?.querySelector<HTMLButtonElement>(`[data-opzione="${opzione}"]`)?.focus();
 
 /** La finestra: giorno (mese e giorno), fascia, il riepilogo e il comando. */
 // L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il trasferimento non esiste; la condizione è costante di build, `TrasferisciVociReale` esce dal bundle
@@ -62,7 +67,8 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
     setOccupato(true);
     try {
       const esito = await trasferisciVociGiornata({ uid: voci.map((v) => v.uid), giorno: destinazione, fascia, modo }, partitaId ?? undefined);
-      notificaOperazioneAnnullabile(`${quanteVoci(esito.uid.length)} ${modo === 'copia' ? (esito.uid.length === 1 ? 'copiata' : 'copiate') : (esito.uid.length === 1 ? 'spostata' : 'spostate')} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}, in fondo: per tutte le partite.`, esito.operazioneId, onRicarica);
+      notificaOperazioneAnnullabile(`${quanteVoci(esito.uid.length)} ${modo === 'copia' ? (esito.uid.length === 1 ? 'copiata' : 'copiate') : (esito.uid.length === 1 ? 'spostata' : 'spostate')} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}, in fondo: per tutte le partite.`, esito.operazioneId, onRicarica,
+        `${modo === 'copia' ? 'la copia' : 'lo spostamento'} di ${quanteVoci(esito.uid.length)}`);
       await onFatto(esito);
       onChiudi();
     } catch (err) { notifica('error', err instanceof Error ? err.message : `${verbo} non riuscita.`); }
@@ -76,13 +82,13 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
             {quanteVoci(voci.length)} {diGiorno > 0 && diGiorno < voci.length ? `(${diGiorno} di giorno, ${voci.length - diGiorno} di sera)` : diGiorno === voci.length ? 'di giorno' : 'di sera'} del {dataGiocoTesto(giorno)}.{' '}
             {modo === 'copia' ? 'Le copie nascono senza spunte; le voci di partenza restano.' : 'Le voci lasciano questo giorno e portano con sé le spunte delle partite.'}
           </p>
+          {/* «Copia» / «Sposta» si dicono da sé: nessuna etichetta a schermo davanti (il gruppo ha il suo nome per il lettore di schermo) */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="testo-12 text-text-muted">Come</span>
             <span className="inline-flex overflow-hidden rounded-md border border-border" role="radiogroup" aria-label="Copia o sposta">
               {(['copia', 'sposta'] as const).map((m) => (
-                <button key={m} type="button" role="radio" aria-checked={modo === m} tabIndex={modo === m ? 0 : -1}
+                <button key={m} type="button" role="radio" aria-checked={modo === m} tabIndex={modo === m ? 0 : -1} data-opzione={m}
                   className={`touch min-w-20 border-l border-border px-3 testo-13 first:border-l-0 ${modo === m ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`}
-                  onClick={() => setModo(m)} onKeyDown={(e) => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) { e.preventDefault(); setModo(modo === 'copia' ? 'sposta' : 'copia'); } }}>
+                  onClick={() => setModo(m)} onKeyDown={(e) => { if (FRECCE.has(e.key)) { e.preventDefault(); const altro = modo === 'copia' ? 'sposta' : 'copia'; setModo(altro); fuocoSullOpzione(e.currentTarget, altro); } }}>
                   {m === 'copia' ? 'Copia' : 'Sposta'}
                 </button>
               ))}
@@ -99,9 +105,9 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
             <span className="testo-12 text-text-muted">Fascia</span>
             <span className="inline-flex overflow-hidden rounded-md border border-border" role="radiogroup" aria-label="Fascia di destinazione">
               {(['giorno', 'sera'] as const).map((f) => (
-                <button key={f} type="button" role="radio" aria-checked={fascia === f} tabIndex={fascia === f ? 0 : -1}
+                <button key={f} type="button" role="radio" aria-checked={fascia === f} tabIndex={fascia === f ? 0 : -1} data-opzione={f}
                   className={`touch min-w-20 border-l border-border px-3 testo-13 first:border-l-0 ${fascia === f ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`}
-                  onClick={() => setFascia(f)} onKeyDown={(e) => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) { e.preventDefault(); setFascia(fascia === 'giorno' ? 'sera' : 'giorno'); } }}>
+                  onClick={() => setFascia(f)} onKeyDown={(e) => { if (FRECCE.has(e.key)) { e.preventDefault(); const altra = fascia === 'giorno' ? 'sera' : 'giorno'; setFascia(altra); fuocoSullOpzione(e.currentTarget, altra); } }}>
                   {f === 'giorno' ? 'Di giorno' : 'Di sera'}
                 </button>
               ))}

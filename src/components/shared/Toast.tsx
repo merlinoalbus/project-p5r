@@ -32,7 +32,8 @@ const TOAST_BORDER: Record<NotificationType, string> = {
  * `z-[9999]` non bastava a stare sopra a quel che vive su `body` — il foglio dal basso del popup di una mappa, che la copriva.
  * Con un popup di spillo aperto la coda non lo copre (`postoDellaCoda`): sopra un foglio dal basso, di lato o sopra un popup
  * ancorato che scende nella sua zona. In basso coprirebbe i pulsanti («Riapri» subito dopo «Ottenuto»), in alto la barra della
- * mappa: dove va copre solo la mappa, per qualche secondo. */
+ * mappa: dove va copre solo la mappa, per qualche secondo. Lo stesso per la barra delle voci selezionate del Diario: la coda le sta
+ * sopra (si misura anche scorrendo, perché la barra è ferma in fondo alla vista). */
 export function ToastContainer() {
   const { notifications, removeNotification, chiudiPersistenti } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification, chiudiPersistenti: s.chiudiPersistenti })));
   const coda = useRef<HTMLDivElement | null>(null);
@@ -68,7 +69,9 @@ export function ToastContainer() {
     const osservatore = new MutationObserver(pianifica);
     osservatore.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'] });
     window.addEventListener('resize', pianifica);
-    return () => { osservatore.disconnect(); dimensioni?.disconnect(); window.removeEventListener('resize', pianifica); if (frame) cancelAnimationFrame(frame); };
+    // la barra delle voci selezionate è `sticky`: scorrendo cambia posto senza mutazioni (`capture`: scorre anche un contenitore interno)
+    document.addEventListener('scroll', pianifica, { capture: true, passive: true });
+    return () => { osservatore.disconnect(); dimensioni?.disconnect(); window.removeEventListener('resize', pianifica); document.removeEventListener('scroll', pianifica, { capture: true }); if (frame) cancelAnimationFrame(frame); };
   }, [visibile]);
 
   const stile = { ...(posto.bottom !== null ? { bottom: posto.bottom } : {}), ...(posto.aSinistra ? { left: MARGINE, right: 'auto' } : {}) };
@@ -102,20 +105,30 @@ export function ToastContainer() {
   );
 }
 
-/** Una notifica della coda, con la × per chiuderla: gli errori e gli avvisi restano finché non si chiudono. */
+/** Una notifica della coda, con la × per chiuderla: gli errori e gli avvisi restano finché non si chiudono. Col puntatore sopra o il
+ *  fuoco dentro il conto alla rovescia si ferma (WCAG 2.2.1: un «Annulla» si raggiunge con calma, anche dalla tastiera). */
 function Notifica({ n, chiudi }: { n: Notification; chiudi: (id: string) => void }) {
   // il collegamento è un Link del router: fuori dal router (i test della sola coda) non si mostra
   const dentroIlRouter = useInRouterContext();
+  const { pausa, riprendi } = useNotificationStore.getState();
+  const sopra = useRef({ puntatore: false, fuoco: false });
+  const aggiorna = (cosa: 'puntatore' | 'fuoco', si: boolean) => {
+    sopra.current[cosa] = si;
+    if (sopra.current.puntatore || sopra.current.fuoco) pausa(n.id); else riprendi(n.id);
+  };
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] motion-reduce:animate-none border-l-[3px] ${TOAST_BORDER[n.type]}`}
+      onMouseEnter={() => aggiorna('puntatore', true)} onMouseLeave={() => aggiorna('puntatore', false)}
+      onFocus={() => aggiorna('fuoco', true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) aggiorna('fuoco', false); }}
     >
       <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
       {n.collegamento && dentroIlRouter && (
         <Link to={n.collegamento.verso} onClick={() => chiudi(n.id)} className="btn btn-secondary btn-sm touch shrink-0 no-underline">{n.collegamento.etichetta}</Link>
       )}
       {n.azione && (
-        <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={() => { chiudi(n.id); n.azione!.onClick(); }}>{n.azione.etichetta}</button>
+        <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={() => { chiudi(n.id); n.azione!.onClick(); }}
+          aria-label={n.azione.nomeAccessibile} aria-keyshortcuts={n.azione.scorciatoia?.aria} title={n.azione.scorciatoia ? `${n.azione.etichetta} (${n.azione.scorciatoia.testo})` : undefined}>{n.azione.etichetta}</button>
       )}
       <button
         className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"

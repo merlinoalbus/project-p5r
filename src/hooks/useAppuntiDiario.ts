@@ -1,5 +1,5 @@
 // ============================================================
-// useAppuntiDiario — Ctrl+C, Ctrl+X, Ctrl+V ed Esc sulle voci selezionate del Diario, con gli appunti di sistema (2026-10-26)
+// useAppuntiDiario — Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+Z ed Esc sulle voci selezionate del Diario, con gli appunti di sistema (2026-10-26)
 // ============================================================
 //
 // Richieste dell'utente: «Vorrei poter selezionare uno o più elementi del diario con ctrl+C e poterli incollare da un'altra parte con
@@ -7,24 +7,29 @@
 // del sistema non dentro l'app... così da poter anche usare windows V per gestire eventuali copie precedenti».
 //
 //   - Copia / Taglia: l'evento `copy` / `cut` del documento scrive negli appunti il testo leggibile e l'HTML col blocco delle voci
-//     (`utils/appuntiDiario`). Il blocco lo costruisce il server: si chiede appena cambia la selezione (dopo una breve pausa) e si tiene
-//     finché la giornata non si ricarica, perché l'evento vuole il contenuto subito. Se non è pronto, o se il browser non manda l'evento
-//     (Firefox senza testo selezionato), si scrive con `navigator.clipboard.write` mentre arriva.
+//     (`utils/appuntiDiario`). Il blocco lo costruisce il server: si chiede appena cambia la selezione (dopo una breve pausa) o si apre il
+//     menu di una voce, e si tiene finché la giornata non si ricarica, perché l'evento vuole il contenuto subito. Dal menu e dalla barra il
+//     blocco già pronto si scrive con lo stesso evento (`document.execCommand('copy')` dentro il gesto: niente HTML ripulito dal browser);
+//     se non è pronto, o se il browser non manda l'evento, con `navigator.clipboard.write` mentre arriva, e lì il blocco va anche nel testo
+//     (l'HTML scritto così il browser può ripulirlo).
 //   - Incolla: l'evento `paste` legge gli appunti; un testo qualsiasi che non è un blocco di voci non fa niente (resta il browser).
 //     Dal menu della voce («Incolla qui», tablet e telefono) si leggono con `navigator.clipboard.read`; se il browser non lo permette lo si
-//     dice e si apre un riquadro in cui incollare col gesto del sistema. Poi l'anteprima del server: senza rilievi da confermare si incolla
-//     subito, altrimenti la finestra dei rilievi. Fatto, la notifica ha «Annulla».
-//   - Mai mentre si scrive o con del testo selezionato (Ctrl+C copia quel testo), mai con una finestra aperta.
+//     dice e si apre un riquadro in cui incollare col gesto del sistema. Ctrl+V senza evento `paste` legge con l'API solo se in questa
+//     sessione l'app ha scritto voci negli appunti (niente richiesta di permesso a ogni Ctrl+V). Poi l'anteprima del server: senza rilievi
+//     da confermare si incolla subito, altrimenti la finestra dei rilievi (rinfrescata se nel frattempo il piano cambia). Fatto, la
+//     notifica ha «Annulla», che vale anche come Ctrl+Z; il conto alla rovescia della notifica si ferma col puntatore o il fuoco sopra.
+//   - Esc chiude prima il menu della voce aperto, poi annulla la selezione e il segno del taglio.
+//   - Mai mentre si scrive in un campo di testo o con del testo selezionato (Ctrl+C copia quel testo), mai con una finestra aperta.
 //
 // Nell'istanza di rilascio (sola lettura) niente di tutto questo: la costante di build toglie il modulo dal bundle.
 // ============================================================
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { anteprimaIncollaVoci, annullaOperazioneVoci, esportaAppuntiDiario, incollaVociDiario } from '../services/api';
-import { notifica } from '../stores/notificationStore';
+import { anteprimaIncollaVoci, annullaOperazioneVoci, esportaAppuntiDiario, incollaVociDiario, isApiError } from '../services/api';
+import { notifica, useNotificationStore, type AzioneNotifica } from '../stores/notificationStore';
 import { useAppuntiDiarioStore } from '../stores/appuntiDiarioStore';
-import { comeTaglio, leggiAppunti, scriviAppunti, type FrasiDelleVoci } from '../utils/appuntiDiario';
-import { eInCampoModificabile } from '../utils/campiModificabili';
+import { comeTaglio, leggiAppunti, scriviAppunti, type ContenutoAppunti, type FrasiDelleVoci } from '../utils/appuntiDiario';
+import { eInCampoDiTesto } from '../utils/campiModificabili';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import type { AppuntiDiario, EsitoAnnulloIncollaDto, PianoIncollaDto, RichiestaEseguiIncolla } from '../../shared/appuntiDiario';
 import type { AzionePercorsoDto } from '../types';
@@ -35,18 +40,20 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Quanto aspettare dopo l'ultimo cambio di selezione prima di chiedere il blocco al server. */
 const PAUSA_PRERECUPERO = 120;
-/** Quanto resta a schermo la notifica con «Annulla». */
+/** Quanto resta a schermo la notifica con «Annulla» (si ferma col puntatore o il fuoco sopra). */
 const DURATA_ANNULLABILE = 10000;
+/** Quanti blocchi pronti si tengono per la giornata a schermo (selezione e menu aperti di recente). */
+const BLOCCHI_TENUTI = 8;
 
 const quante = (n: number, uno: string, molti: string) => (n === 1 ? `1 ${uno}` : `${n} ${molti}`);
 
 /** Le istanze montate (una per giorno del Diario a schermo): risponde ai tasti solo l'ultima, così due giornate non incollano due volte. */
 const montate: symbol[] = [];
 
-/** Vero se il gesto va lasciato al browser: si scrive in un campo, c'è una finestra aperta o il gesto è già di qualcun altro. */
+/** Vero se il gesto va lasciato al browser: si scrive in un campo di testo, c'è una finestra aperta o il gesto è già di qualcun altro. */
 function lasciaAlBrowser(e: Event): boolean {
   if (e.defaultPrevented) return true;
-  if (eInCampoModificabile(e.target) || eInCampoModificabile(document.activeElement)) return true;
+  if (eInCampoDiTesto(e.target) || eInCampoDiTesto(document.activeElement)) return true;
   return !!document.querySelector('.modal-overlay');
 }
 /** Vero se nella pagina c'è del testo selezionato: Ctrl+C / Ctrl+X copiano quel testo. */
@@ -56,36 +63,87 @@ const testoSelezionato = (): boolean => !!window.getSelection()?.toString();
 const messaggio = (err: unknown, riserva: string) => (err instanceof Error && err.message ? err.message : riserva);
 
 /**
- * La notifica di un'operazione sulle voci (incolla, «Copia in…», «Sposta in…») con «Annulla»: l'annullo rimette le voci (le copie nel
- * Cestino) e dice ciò che non si poteva rimettere.
+ * Scrive negli appunti con l'evento `copy` del browser, dentro il gesto dell'utente (menu, barra): lo stesso percorso di Ctrl+C, che
+ * mette testo e HTML così come sono (`navigator.clipboard.write` può ripulire l'HTML e togliere il blocco). Falso se il browser non lo fa.
  */
-export function notificaOperazioneAnnullabile(testo: string, operazioneId: string | undefined, dopo: () => void | Promise<void>): void {
+function scriviConEvento(c: ContenutoAppunti): boolean {
+  let fatto = false;
+  const h = (e: ClipboardEvent) => {
+    if (!e.clipboardData) return;
+    e.preventDefault();
+    // è nostro: i gestori della pagina (Ctrl+C delle voci) non lo vedono
+    e.stopImmediatePropagation();
+    e.clipboardData.setData('text/plain', c.testo);
+    e.clipboardData.setData('text/html', c.html);
+    fatto = true;
+  };
+  document.addEventListener('copy', h, true);
+  try { return document.execCommand('copy') && fatto; } catch { return false; } finally { document.removeEventListener('copy', h, true); }
+}
+
+/** Gli appunti letti con l'API del browser (testo e HTML), o null se il browser non la offre. Può fallire (permesso negato). */
+async function leggiConApi(): Promise<{ testo: string; html: string } | null> {
+  if (navigator.clipboard?.read) {
+    // `unsanitized`: Chrome altrimenti ripulisce l'HTML letto (gli altri browser ignorano l'opzione)
+    const elementi = await (navigator.clipboard.read as (o?: unknown) => Promise<ClipboardItems>)({ unsanitized: ['text/html'] });
+    let testo = '', html = '';
+    for (const el of elementi) {
+      if (!html && el.types.includes('text/html')) html = await (await el.getType('text/html')).text();
+      if (!testo && el.types.includes('text/plain')) testo = await (await el.getType('text/plain')).text();
+    }
+    return { testo, html };
+  }
+  if (navigator.clipboard?.readText) return { testo: await navigator.clipboard.readText(), html: '' };
+  return null;
+}
+
+/** Il piano dice «niente da incollare»: lo si dice, con i motivi. */
+const nienteDaIncollare = (piano: PianoIncollaDto) => notifica('warning', `Niente da incollare: ${piano.rilievi.map((x) => x.testo).join(' ') || 'nessuna voce si può incollare qui.'}`);
+
+/** L'ultima operazione annullabile sulle voci (incolla, «Copia in…», «Sposta in…»): Ctrl+Z la annulla come «Annulla» della notifica.
+ *  Una sola, la più recente; annullata (o annullata la successiva) non vale più. */
+let ultimaAnnullabile: (() => void) | null = null;
+
+/**
+ * La notifica di un'operazione sulle voci (incolla, «Copia in…», «Sposta in…») con «Annulla» (anche Ctrl+Z): l'annullo rimette le voci
+ * (le copie nel Cestino) e dice ciò che non si poteva rimettere. `cosa`: che cosa si annulla, per il nome del pulsante («l’incolla di 3
+ * voci»), che da solo direbbe solo «Annulla».
+ */
+export function notificaOperazioneAnnullabile(testo: string, operazioneId: string | undefined, dopo: () => void | Promise<void>, cosa = 'questa operazione sulle voci del Diario'): void {
   if (!operazioneId) { notifica('success', testo); return; }
-  notifica('success', testo, DURATA_ANNULLABILE, {
-    azione: {
-      etichetta: 'Annulla',
-      onClick: () => {
-        void annullaOperazioneVoci(operazioneId).then(async (esito: EsitoAnnulloIncollaDto) => {
-          await dopo();
-          const rimesse = esito.rimesse.length;
-          const cosa = esito.modo === 'copia' ? (rimesse === 1 ? 'copia nel Cestino' : 'copie nel Cestino') : (rimesse === 1 ? 'voce rimessa al suo posto' : 'voci rimesse al loro posto');
-          const testoRimesse = rimesse ? `${rimesse} ${cosa}.` : 'Niente da rimettere.';
-          if (esito.nonRimesse.length) notifica('warning', `${testoRimesse} Non rimesse: ${esito.nonRimesse.map((x) => `${x.azione ? `«${x.azione.slice(0, 50)}» ` : ''}(${x.motivo})`).join('; ')}.`);
-          else notifica('success', testoRimesse);
-        }).catch((err: unknown) => notifica('error', messaggio(err, 'Annullo non riuscito.')));
-      },
-    },
-  });
+  let usato = false;
+  const annulla = () => {
+    if (usato) return;
+    usato = true;
+    if (ultimaAnnullabile === annulla) ultimaAnnullabile = null;
+    // con Ctrl+Z la notifica è ancora a schermo: se ne va qui (dal suo pulsante si chiude da sé)
+    const coda = useNotificationStore.getState();
+    const n = coda.notifications.find((x) => x.azione === azione);
+    if (n) coda.removeNotification(n.id);
+    void annullaOperazioneVoci(operazioneId).then(async (esito: EsitoAnnulloIncollaDto) => {
+      await dopo();
+      const rimesse = esito.rimesse.length;
+      const che = esito.modo === 'copia' ? (rimesse === 1 ? 'copia nel Cestino' : 'copie nel Cestino') : (rimesse === 1 ? 'voce rimessa al suo posto' : 'voci rimesse al loro posto');
+      const testoRimesse = rimesse ? `${rimesse} ${che}.` : 'Niente da rimettere.';
+      if (esito.nonRimesse.length) notifica('warning', `${testoRimesse} Non rimesse: ${esito.nonRimesse.map((x) => `${x.azione ? `«${x.azione.slice(0, 50)}» ` : ''}(${x.motivo})`).join('; ')}.`);
+      else notifica('success', testoRimesse);
+    }).catch((err: unknown) => notifica('error', messaggio(err, 'Annullo non riuscito.')));
+  };
+  const azione: AzioneNotifica = { etichetta: 'Annulla', nomeAccessibile: `Annulla ${cosa}`, scorciatoia: { aria: 'Control+Z', testo: 'Ctrl+Z' }, onClick: annulla };
+  ultimaAnnullabile = annulla;
+  notifica('success', testo, DURATA_ANNULLABILE, { azione });
 }
 
 /** La richiesta d'incolla in attesa della conferma dei rilievi (la finestra dei rilievi la mostra). */
 export interface IncollaInAttesa { piano: PianoIncollaDto; appunti: AppuntiDiario; dopoUid: string | null }
 
 export interface AppuntiDelGiorno {
-  /** Copia negli appunti le voci (dal menu della voce o dalla barra: scrittura asincrona). */
+  /** Copia negli appunti le voci (dal menu della voce o dalla barra). */
   copia: (uid: readonly string[]) => void;
   /** Taglia: come la copia, e le voci si attenuano fino all'incolla. */
   taglia: (uid: readonly string[]) => void;
+  /** Prepara il blocco di queste voci (all'apertura del menu di una voce), così Copia e Taglia lo scrivono subito, nel gesto. */
+  prepara: (uid: readonly string[]) => void;
   /** Incolla dagli appunti (menu «Incolla qui» o barra): dopo la voce `dopoUid`, o ognuna nella sua fascia in fondo. */
   incollaDagliAppunti: (dopoUid: string | null) => void;
   /** Incolla un contenuto letto altrove (il riquadro d'incolla manuale); falso se non sono voci del Diario. */
@@ -108,17 +166,19 @@ interface Opzioni {
   selezione: SelezioneVoci;
   /** Dopo l'incolla o l'annullo: la giornata si ricarica. */
   onModificata: () => Promise<void>;
+  /** Esc: chiude il menu della voce, se ce n'è uno aperto (vero se l'ha chiuso: la selezione resta). */
+  chiudiMenu?: () => boolean;
 }
 
 const NESSUNO: AppuntiDelGiorno = {
-  copia: () => undefined, taglia: () => undefined, incollaDagliAppunti: () => undefined, incollaContenuto: () => false,
+  copia: () => undefined, taglia: () => undefined, prepara: () => undefined, incollaDagliAppunti: () => undefined, incollaContenuto: () => false,
   inAttesa: null, conferma: () => undefined, chiudiAttesa: () => undefined, manuale: null, chiudiManuale: () => undefined, occupato: false,
 };
 
 /** Gli appunti del giorno (solo nella preparazione: nel rilascio un hook vuoto, e il modulo esce dal bundle). */
 export const useAppuntiDiario: (o: Opzioni) => AppuntiDelGiorno = IN_RILASCIO ? () => NESSUNO : useAppuntiDiarioReale;
 
-function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzioni): AppuntiDelGiorno {
+function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMenu }: Opzioni): AppuntiDelGiorno {
   const [inAttesa, setInAttesa] = useState<IncollaInAttesa | null>(null);
   const [manuale, setManuale] = useState<{ dopoUid: string | null } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -126,67 +186,85 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
   const vivo = useRef(true);
   useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
 
-  // ---- il blocco pronto per l'evento `copy` / `cut`: si chiede al cambio di selezione, vale finché la giornata non si ricarica ----
-  const pronto = useRef<{ voci: readonly AzionePercorsoDto[]; chiave: string; appunti: AppuntiDiario } | null>(null);
+  const frasi: FrasiDelleVoci = useMemo(() => new Map(voci.map((v) => [v.uid, v.produceTesto ?? []])), [voci]);
+  // i riferimenti che i gestori dei tasti (montati una volta) leggono sempre aggiornati
+  const ultimi = useRef({ giorno, voci, selezione, frasi, onModificata, chiudiMenu });
+  useLayoutEffect(() => { ultimi.current = { giorno, voci, selezione, frasi, onModificata, chiudiMenu }; });
+
+  // ---- i blocchi pronti per l'evento `copy` / `cut`: per gruppo di voci, validi finché la giornata non si ricarica ----
+  const pronti = useRef<{ voci: readonly AzionePercorsoDto[]; blocchi: Map<string, AppuntiDiario> }>({ voci, blocchi: new Map() });
+  /** Chiede al server il blocco di queste voci, se non c'è già per la giornata di adesso. */
+  const prepara = useCallback((uid: readonly string[]) => {
+    if (!uid.length) return;
+    const k = uid.join(','), v = ultimi.current.voci;
+    if (pronti.current.voci !== v) pronti.current = { voci: v, blocchi: new Map() };
+    if (pronti.current.blocchi.has(k)) return;
+    void esportaAppuntiDiario([...uid]).then((a) => {
+      const p = pronti.current;
+      if (p.voci !== v) return;
+      p.blocchi.set(k, a);
+      if (p.blocchi.size > BLOCCHI_TENUTI) p.blocchi.delete(p.blocchi.keys().next().value!);
+    }).catch(() => undefined);
+  }, []);
+  /** Il blocco già pronto per queste voci e per la giornata di adesso, o null. */
+  const bloccoPronto = useCallback((uid: readonly string[]): AppuntiDiario | null => {
+    const p = pronti.current;
+    return p.voci === ultimi.current.voci ? p.blocchi.get(uid.join(',')) ?? null : null;
+  }, []);
   const chiave = selezione.uid.join(',');
   useEffect(() => {
     if (!chiave) return;
-    let annullato = false;
-    const t = setTimeout(() => {
-      void esportaAppuntiDiario(chiave.split(',')).then((a) => { if (!annullato) pronto.current = { voci, chiave, appunti: a }; }).catch(() => undefined);
-    }, PAUSA_PRERECUPERO);
-    return () => { annullato = true; clearTimeout(t); };
-  }, [chiave, voci]);
-  /** Il blocco già pronto per queste voci e per la giornata di adesso, o null. */
-  const bloccoPronto = (uid: readonly string[]): AppuntiDiario | null => {
-    const p = pronto.current;
-    return p && p.voci === voci && p.chiave === uid.join(',') ? p.appunti : null;
-  };
-  const frasi: FrasiDelleVoci = useMemo(() => new Map(voci.map((v) => [v.uid, v.produceTesto ?? []])), [voci]);
+    const t = setTimeout(() => prepara(chiave.split(',')), PAUSA_PRERECUPERO);
+    return () => clearTimeout(t);
+  }, [chiave, voci, prepara]);
 
-  // i riferimenti che i gestori dei tasti (montati una volta) leggono sempre aggiornati
-  const ultimi = useRef({ giorno, selezione, frasi, onModificata, bloccoPronto });
-  useLayoutEffect(() => { ultimi.current = { giorno, selezione, frasi, onModificata, bloccoPronto }; });
-
-  /** Dopo aver scritto negli appunti: la conferma e, per il taglio, il segno sulle righe e la selezione vuota. */
-  const scritto = useCallback((a: AppuntiDiario) => {
+  /** Dopo aver scritto negli appunti: la conferma (e l'avviso se Win+V potrebbe non conservarlo) e, per il taglio, il segno sulle righe. */
+  const scritto = useCallback((a: AppuntiDiario, c: ContenutoAppunti) => {
     const n = a.voci.length;
+    const store = useAppuntiDiarioStore.getState();
+    store.segnaScritto();
     if (a.modo === 'taglia') {
-      useAppuntiDiarioStore.getState().imposta({ id: a.taglio!, uid: a.voci.map((v) => v.uid), giorno: ultimi.current.giorno });
+      store.imposta({ id: a.taglio!, uid: a.voci.map((v) => v.uid), giorno: ultimi.current.giorno });
       ultimi.current.selezione.svuota();
       notifica('success', `${quante(n, 'voce tagliata', 'voci tagliate')}: incollale dove vuoi.`);
     } else {
-      useAppuntiDiarioStore.getState().svuota();
+      store.svuota();
       notifica('success', `${quante(n, 'voce copiata', 'voci copiate')} negli appunti.`);
     }
+    if (c.troppoPerLaCronologia) notifica('warning', `Le voci negli appunti pesano ${(c.peso / 1048576).toFixed(1)} MB: la cronologia degli appunti di Windows (Win+V) potrebbe non conservarle. Incollale subito, oppure copiane meno alla volta.`);
   }, []);
 
-  /** Scrive negli appunti mentre il blocco arriva dal server (menu, barra, o browser che non manda l'evento). */
+  /** Scrive negli appunti dal menu o dalla barra (o se il browser non manda l'evento): col blocco pronto nel gesto, se no mentre arriva. */
   const scriviAsincrono = useCallback((uid: readonly string[], modo: 'copia' | 'taglia') => {
     if (!uid.length) return;
-    const gia = ultimi.current.bloccoPronto(uid);
+    const f = ultimi.current.frasi;
+    const gia = bloccoPronto(uid);
+    if (gia) {
+      const a = modo === 'taglia' ? comeTaglio(gia) : gia;
+      const c = scriviAppunti(a, f);
+      if (scriviConEvento(c)) { scritto(a, c); return; }
+    }
     const blocco = (gia ? Promise.resolve(gia) : esportaAppuntiDiario([...uid])).then((a) => (modo === 'taglia' ? comeTaglio(a) : a));
-    const { frasi: f } = ultimi.current;
-    const scrivi = async (): Promise<AppuntiDiario> => {
+    // l'HTML scritto con l'API il browser può ripulirlo: il blocco va anche nel testo, perché l'incolla lo ritrovi comunque
+    const contenuto = blocco.then((a) => ({ a, c: scriviAppunti(a, f, { bloccoNelTesto: true }) }));
+    const scrivi = async (): Promise<{ a: AppuntiDiario; c: ContenutoAppunti }> => {
       if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
         // l'oggetto si crea subito (dentro il gesto: Safari lo pretende), il contenuto arriva con la promessa
-        const contenuto = blocco.then((a) => scriviAppunti(a, f));
         await navigator.clipboard.write([new ClipboardItem({
-          'text/plain': contenuto.then((c) => new Blob([c.testo], { type: 'text/plain' })),
-          'text/html': contenuto.then((c) => new Blob([c.html], { type: 'text/html' })),
+          'text/plain': contenuto.then(({ c }) => new Blob([c.testo], { type: 'text/plain' })),
+          'text/html': contenuto.then(({ c }) => new Blob([c.html], { type: 'text/html' })),
         })]);
-        return blocco;
+        return contenuto;
       }
       if (navigator.clipboard?.writeText) {
-        // solo testo: il blocco va nel testo, se no l'incolla non lo ritroverebbe
-        const a = await blocco;
-        await navigator.clipboard.writeText(scriviAppunti(a, f, { bloccoNelTesto: true }).testo);
-        return a;
+        const x = await contenuto;
+        await navigator.clipboard.writeText(x.c.testo);
+        return x;
       }
       throw new Error('Questo browser non permette di scrivere negli appunti.');
     };
-    void scrivi().then(scritto).catch((err: unknown) => notifica('error', `Appunti non scritti: ${messaggio(err, 'il browser non lo permette')}.`));
-  }, [scritto]);
+    void scrivi().then(({ a, c }) => scritto(a, c)).catch((err: unknown) => notifica('error', `Appunti non scritti: ${messaggio(err, 'il browser non lo permette')}.`));
+  }, [bloccoPronto, scritto]);
 
   /** Esegue l'incolla, ricarica la giornata, seleziona le voci arrivate e notifica con «Annulla». */
   const esegui = useCallback(async (r: RichiestaEseguiIncolla) => {
@@ -201,20 +279,23 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
     const base = esito.modo === 'taglia' ? `${quante(n, 'voce spostata', 'voci spostate')} ${dove}` : `${quante(n, 'voce incollata', 'voci incollate')} ${dove}`;
     const saltate = esito.saltate.length ? ` ${quante(esito.saltate.length, 'saltata', 'saltate')}: ${esito.saltate.map((s) => `«${s.azione.slice(0, 40)}» (${s.motivo})`).join('; ')}.` : '';
     const tolti = esito.effettiTolti ? ` Lasciati fuori ${quante(esito.effettiTolti, 'effetto segnalato', 'effetti segnalati')}.` : '';
-    notificaOperazioneAnnullabile(`${base}.${saltate}${tolti}`, esito.operazioneId, ricarica);
+    notificaOperazioneAnnullabile(`${base}.${saltate}${tolti}`, esito.operazioneId, ricarica,
+      esito.modo === 'taglia' ? `lo spostamento di ${quante(n, 'voce', 'voci')}` : `l’incolla di ${quante(n, 'voce', 'voci')}`);
   }, []);
 
   /** L'incolla di un blocco: anteprima; senza rilievi da confermare subito, altrimenti la finestra dei rilievi. */
   const avvia = useCallback(async (a: AppuntiDiario, dopoUid: string | null) => {
     if (occupatoRif.current) return;
+    // dopo una delle voci tagliate non si incolla: lo si dice subito, senza chiedere al server
+    if (a.modo === 'taglia' && dopoUid && a.voci.some((v) => v.uid === dopoUid)) {
+      notifica('info', 'La voce selezionata è una di quelle tagliate: seleziona la voce dopo cui incollarle, oppure nessuna per metterle in fondo alla loro fascia.');
+      return;
+    }
     occupatoRif.current = true; setOccupato(true);
     const g = ultimi.current.giorno;
     try {
       const piano = await anteprimaIncollaVoci({ appunti: a, giorno: g, ...(dopoUid ? { dopoUid } : {}) });
-      if (piano.daIncollare === 0) {
-        notifica('warning', `Niente da incollare: ${piano.rilievi.map((x) => x.testo).join(' ') || 'nessuna voce si può incollare qui.'}`);
-        return;
-      }
+      if (piano.daIncollare === 0) { nienteDaIncollare(piano); return; }
       if (piano.daConfermare) { if (vivo.current) setInAttesa({ piano, appunti: a, dopoUid }); return; }
       await esegui({ appunti: a, giorno: g, ...(dopoUid ? { dopoUid } : {}), impronta: piano.impronta });
     } catch (err) {
@@ -227,30 +308,28 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
     if (!att || occupatoRif.current) return;
     occupatoRif.current = true; setOccupato(true);
     const g = ultimi.current.giorno;
-    void esegui({ appunti: att.appunti, giorno: g, ...(att.dopoUid ? { dopoUid: att.dopoUid } : {}), conferma: true, impronta: att.piano.impronta, ...(senzaSegnalati ? { senzaSegnalati: true } : {}) })
+    const dove = att.dopoUid ? { dopoUid: att.dopoUid } : {};
+    void esegui({ appunti: att.appunti, giorno: g, ...dove, conferma: true, impronta: att.piano.impronta, ...(senzaSegnalati ? { senzaSegnalati: true } : {}) })
       .then(() => { if (vivo.current) setInAttesa(null); })
-      .catch((err: unknown) => notifica('error', messaggio(err, 'Incolla non riuscito.')))
+      .catch(async (err: unknown) => {
+        // nel frattempo il piano è cambiato (una voce spostata, un effetto tolto): la finestra si rinfresca con i rilievi di adesso, invece di
+        // ripetere lo stesso rifiuto a ogni conferma (rilievo del revisore, 2026-10-26)
+        if (!isApiError(err, 'piano-cambiato') && !isApiError(err, 'rilievi-non-confermati')) { notifica('error', messaggio(err, 'Incolla non riuscito.')); return; }
+        try {
+          const piano = await anteprimaIncollaVoci({ appunti: att.appunti, giorno: g, ...dove });
+          if (!vivo.current) return;
+          if (piano.daIncollare === 0) { setInAttesa(null); nienteDaIncollare(piano); return; }
+          setInAttesa({ ...att, piano });
+          notifica('info', 'Nel frattempo qualcosa è cambiato: i rilievi sono aggiornati, rivedili e conferma di nuovo.');
+        } catch (e2) { notifica('error', messaggio(e2, 'Incolla non riuscito.')); }
+      })
       .finally(() => { occupatoRif.current = false; if (vivo.current) setOccupato(false); });
   }, [inAttesa, esegui]);
 
   /** «Incolla qui» del menu o della barra: legge gli appunti con l'API del browser; se non può, il riquadro manuale. */
   const incollaDagliAppunti = useCallback((dopoUid: string | null) => {
     const apriManuale = () => { notifica('info', 'Il browser non permette di leggere gli appunti da qui: incollali nel riquadro.'); setManuale({ dopoUid }); };
-    const leggi = async (): Promise<{ testo: string; html: string } | null> => {
-      if (navigator.clipboard?.read) {
-        // `unsanitized`: Chrome altrimenti ripulisce l'HTML letto (gli altri browser ignorano l'opzione)
-        const elementi = await (navigator.clipboard.read as (o?: unknown) => Promise<ClipboardItems>)({ unsanitized: ['text/html'] });
-        let testo = '', html = '';
-        for (const el of elementi) {
-          if (!html && el.types.includes('text/html')) html = await (await el.getType('text/html')).text();
-          if (!testo && el.types.includes('text/plain')) testo = await (await el.getType('text/plain')).text();
-        }
-        return { testo, html };
-      }
-      if (navigator.clipboard?.readText) return { testo: await navigator.clipboard.readText(), html: '' };
-      return null;
-    };
-    void leggi().then((c) => {
+    void leggiConApi().then((c) => {
       if (!c) { apriManuale(); return; }
       const a = leggiAppunti(c);
       if (!a) { notifica('info', 'Negli appunti non ci sono voci del Diario: copiale o tagliale prima.'); return; }
@@ -274,20 +353,25 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
     /** Il gesto atteso da Ctrl+C/X/V: se il browser non manda l'evento, si fa a mano subito dopo. */
     let atteso: { modo: 'copia' | 'taglia' | 'incolla'; t: ReturnType<typeof setTimeout> } | null = null;
     const annullaAtteso = () => { if (atteso) { clearTimeout(atteso.t); atteso = null; } };
+    const store = () => useAppuntiDiarioStore.getState();
 
     const suCopiaTaglia = (modo: 'copia' | 'taglia') => (e: ClipboardEvent) => {
       if (!mia()) return;
       annullaAtteso();
       const uid = ultimi.current.selezione.uid;
-      if (!uid.length || lasciaAlBrowser(e) || testoSelezionato()) return;
+      if (!uid.length || lasciaAlBrowser(e) || testoSelezionato()) {
+        // si copia altro (un testo, un campo): negli appunti il taglio non c'è più, e il segno sulle righe se ne va
+        if (store().taglio) store().svuota();
+        return;
+      }
       e.preventDefault();
-      const blocco = ultimi.current.bloccoPronto(uid);
+      const blocco = bloccoPronto(uid);
       if (blocco && e.clipboardData) {
         const a = modo === 'taglia' ? comeTaglio(blocco) : blocco;
         const c = scriviAppunti(a, ultimi.current.frasi);
         e.clipboardData.setData('text/plain', c.testo);
         e.clipboardData.setData('text/html', c.html);
-        scritto(a);
+        scritto(a, c);
       } else scriviAsincrono(uid, modo);
     };
     const suCopia = suCopiaTaglia('copia'), suTaglia = suCopiaTaglia('taglia');
@@ -301,18 +385,33 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
       e.preventDefault();
       void avvia(a, ultimi.current.selezione.ancora);
     };
+    /** Ctrl+V senza evento `paste`: si legge con l'API solo se l'app ha scritto voci negli appunti in questa sessione (niente richiesta di
+     *  permesso a ogni Ctrl+V); un contenuto che non è un blocco di voci non fa niente. */
+    const incollaDaTastiera = () => {
+      if (!store().scrittoInSessione) return;
+      void leggiConApi().then((c) => { const a = c ? leggiAppunti(c) : null; if (a) void avvia(a, ultimi.current.selezione.ancora); }).catch(() => undefined);
+    };
     const suTasto = (e: KeyboardEvent) => {
       if (!mia() || e.isComposing || e.repeat) return;
       if (e.key === 'Escape') {
+        if (lasciaAlBrowser(e)) return;
+        // prima il menu della voce aperto (la selezione resta), poi la selezione e il segno del taglio
+        if (ultimi.current.chiudiMenu?.()) { e.preventDefault(); return; }
         const { selezione } = ultimi.current;
-        const taglio = useAppuntiDiarioStore.getState().taglio;
-        if ((!selezione.uid.length && !taglio) || lasciaAlBrowser(e)) return;
+        if (!selezione.uid.length && !store().taglio) return;
         selezione.svuota();
-        useAppuntiDiarioStore.getState().svuota();
+        store().svuota();
         return;
       }
       if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
       const k = e.key.toLowerCase();
+      if (k === 'z') {
+        // Ctrl+Z: l'ultima operazione sulle voci, come «Annulla» della sua notifica (fuori dai campi, dove resta l'annulla del testo)
+        if (!ultimaAnnullabile || lasciaAlBrowser(e)) return;
+        e.preventDefault();
+        ultimaAnnullabile();
+        return;
+      }
       const modo = k === 'c' ? 'copia' : k === 'x' ? 'taglia' : k === 'v' ? 'incolla' : null;
       if (!modo || lasciaAlBrowser(e)) return;
       if (modo !== 'incolla' && (!ultimi.current.selezione.uid.length || testoSelezionato())) return;
@@ -324,21 +423,28 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
         else scriviAsincrono(ultimi.current.selezione.uid, modo);
       }, 0) };
     };
-    /** Ctrl+V senza evento `paste`: si legge con l'API; un contenuto che non è un blocco di voci non fa niente. */
-    const incollaDaTastiera = () => {
-      if (!navigator.clipboard?.read && !navigator.clipboard?.readText) return;
-      const lettura = navigator.clipboard.read
-        ? (navigator.clipboard.read as (o?: unknown) => Promise<ClipboardItems>)({ unsanitized: ['text/html'] }).then(async (el) => {
-            const h = el.find((x) => x.types.includes('text/html')), t = el.find((x) => x.types.includes('text/plain'));
-            return { html: h ? await (await h.getType('text/html')).text() : '', testo: t ? await (await t.getType('text/plain')).text() : '' };
-          })
-        : navigator.clipboard.readText().then((testo) => ({ testo, html: '' }));
-      void lettura.then((c) => { const a = leggiAppunti(c); if (a) void avvia(a, ultimi.current.selezione.ancora); }).catch(() => undefined);
+    /**
+     * Tornando alla finestra gli appunti possono contenere altro (copiato in un altro programma): il segno del taglio resta solo se lo si
+     * può verificare (permesso di lettura già dato) e il taglio è ancora lì; altrimenti se ne va. È solo un segno: il taglio negli appunti,
+     * se c'è ancora, si incolla comunque.
+     */
+    const suRitorno = () => {
+      const t = store().taglio;
+      if (!t || !mia()) return;
+      const via = () => { if (store().taglio?.id === t.id) store().svuota(); };
+      const permesso = navigator.permissions?.query ? navigator.permissions.query({ name: 'clipboard-read' as PermissionName }) : Promise.reject(new Error('permessi non disponibili'));
+      void permesso.then(async (s) => {
+        if (s.state !== 'granted') { via(); return; }
+        const c = await leggiConApi();
+        const a = c ? leggiAppunti(c) : null;
+        if (!(a?.modo === 'taglia' && a.taglio === t.id)) via();
+      }).catch(via);
     };
     document.addEventListener('copy', suCopia);
     document.addEventListener('cut', suTaglia);
     document.addEventListener('paste', suIncolla);
     document.addEventListener('keydown', suTasto);
+    window.addEventListener('focus', suRitorno);
     return () => {
       annullaAtteso();
       const i = montate.indexOf(io);
@@ -347,12 +453,14 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata }: Opzion
       document.removeEventListener('cut', suTaglia);
       document.removeEventListener('paste', suIncolla);
       document.removeEventListener('keydown', suTasto);
+      window.removeEventListener('focus', suRitorno);
     };
-  }, [avvia, scritto, scriviAsincrono]);
+  }, [avvia, bloccoPronto, scritto, scriviAsincrono]);
 
   return {
     copia: (uid) => scriviAsincrono(uid, 'copia'),
     taglia: (uid) => scriviAsincrono(uid, 'taglia'),
+    prepara,
     incollaDagliAppunti, incollaContenuto,
     inAttesa, conferma, chiudiAttesa: () => setInAttesa(null),
     manuale, chiudiManuale: () => setManuale(null),

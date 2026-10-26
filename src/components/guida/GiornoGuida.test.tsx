@@ -458,7 +458,7 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     fireEvent.click(screen.getByRole('button', { name: 'Togli dalla scelta tutte le voci di giorno' }));
     expect(barra).toHaveTextContent('Scegli le voci');
     // «Fine» torna alla giornata com'era
-    fireEvent.click(within(barra).getByRole('button', { name: 'Esci dalla scelta delle voci' }));
+    fireEvent.click(within(barra).getByRole('button', { name: 'Fine: esci dalla scelta delle voci' }));
     expect(screen.getAllByRole('checkbox', { name: /^Fatto:/ }).length).toBeGreaterThan(0);
   });
 
