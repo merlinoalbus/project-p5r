@@ -241,7 +241,8 @@ export const bodyRegala = z.object({
   bonusArcano: z.boolean().optional(), invito: z.boolean().optional(),
   acquisto: z.object({ articolo: z.string().min(1).max(200), sede: z.string().min(1).max(300).optional() }).strict().optional(),
 }).strict();
-export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600) }).strict();
+/** Ondata 5: `id` = la consegna precisa da annullare (lo stesso oggetto si può ridare); senza, l'ultima di quell'oggetto a quel Confidente. */
+export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600), id: z.number().int().positive().optional() }).strict();
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 /** Ondata 5: una riga del registro degli acquisti della partita (annullo per riga). */
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });

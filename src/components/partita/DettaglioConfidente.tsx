@@ -44,7 +44,6 @@ export interface AzioniConfidente {
   apriScheda: () => void;
   nota: (n: 1 | 2 | 3) => void;
   regala: () => void;
-  regalo: () => void;
   uscita: () => void;
   annullaUltimo: () => void;
   sbloccato: () => void;
@@ -200,11 +199,9 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
               })}
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              {/* con regali collegati al catalogo «Regala» apre la finestra unica (oggetto → punti, consegna, acquisto);
-                  senza, resta il regalo con i punti subito, come prima: nessuna capacità si perde */}
-              {c.haRegaliCatalogo
-                ? <PulsanteVisivo compatto icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${valoreRegalo} punti`} disabled={occ} onClick={azioni.regala} aria-label={`${c.nome}: regala un oggetto (${valoreRegalo} punti)`} />
-                : <PulsanteVisivo compatto icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${valoreRegalo} punti`} disabled={occ} onClick={azioni.regalo} aria-label={`${c.nome}: regalo gradito (${valoreRegalo} punti)`} />}
+              {/* ondata 5 (RG-10, RG-11): «Regala» apre la finestra unica (un qualunque oggetto regalo → reazione, punti, consegna, copia o
+                  acquisto) e c'è solo per chi riceve regali: per Yoshida, Mishima, Morgana, Igor, Gemelle e Sae nessun pulsante */}
+              {c.regalabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${valoreRegalo} punti`} disabled={occ} onClick={azioni.regala} aria-label={`${c.nome}: regala un oggetto (${valoreRegalo} punti)`} />}
               <PulsanteVisivo compatto icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprima({ uscita: true }))} punti`} disabled={occ} onClick={azioni.uscita} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprima({ uscita: true }))} punti)`} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${ultimo ? ` (${ultimo.regalo ? 'regalo ' : ''}−${formattaPunti(ultimo.punti)})` : ''}`} disabled={occ || !ultimo} onClick={azioni.annullaUltimo} aria-label={`${c.nome}: annulla ${ultimo?.regalo ? 'l\'ultimo regalo' : 'l\'ultimo incremento'}`} />
             </div>

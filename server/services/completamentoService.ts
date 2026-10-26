@@ -30,8 +30,19 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const ottenuti = ottenutiPartita(partitaId);
   const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti));
   const premi = ricompensePerFonte('covo');
-  const covo = { ...seed.covo, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
+  // ondata 5 (decisione 21 b, migrazione 258): la sfida che conta i regali dice a che punto è la partita chiesta
+  const regali = partitaId === undefined ? null : regaliConsegnati(partitaId);
+  const sfide = seed.covo.sfide.map((s) => (s.conteggio?.tipo === 'regali-consegnati' && regali !== null
+    ? { ...s, progresso: { fatti: regali, obiettivo: s.conteggio.obiettivo, raggiunta: regali >= s.conteggio.obiettivo } } : s));
+  const covo = { ...seed.covo, sfide, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
   return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
+}
+
+/** I regali consegnati di persona nella partita (la Cartolina spedita non è un dono consegnato a un ritrovo: utente 052, `modo`). */
+function regaliConsegnati(partitaId: number): number {
+  const colonne = (prepared('PRAGMA utente.table_info(regalo_partita)').all() as Array<{ name: string }>).map((c) => c.name);
+  if (!colonne.length) return 0;
+  return prepared(`SELECT COUNT(*) FROM regalo_partita WHERE partita_id = ?${colonne.includes('modo') ? " AND modo = 'consegna'" : ''}`).pluck().get(partitaId) as number;
 }
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */

@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { ReazioneRegalo } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
@@ -328,7 +329,7 @@ export interface DialogoConfidenteDto {
 export interface RegaloConfidenteDto {
   /** Posizione del regalo nella scheda del Confidente: con la chiave del Confidente è l'indirizzo `<confidente>:<ordine>` di `/api/correzioni/regalo`. */
   ordine: number;
-  /** Il regalo è stato corretto (oggetto, dove, costo, sconsigliato o nota diversi da come li dà la guida): si può ripristinare. */
+  /** Il regalo è stato corretto (oggetto, dove, costo, reazione o nota diversi da come li dà la guida): si può ripristinare. */
   modificato: boolean;
   /** Ripristina esclusivamente la rettifica storica del costo, con anteprima del valore salvato. */
   ripristinoCosto?: { ordine: number; precedente: string; attuale: string | null };
@@ -342,16 +343,11 @@ export interface RegaloConfidenteDto {
   /** Prosa storica, distinta dal prezzo attuale del listino. */
   nota?: string | null;
   nome: string;
+  /** Ondata 5 (decisione 12): dove si compra e il costo, dal listino quando l'oggetto ne ha uno; il testo della guida solo senza listino. */
   dove: string | null;
   costo: string | null;
-  effetto: string | null;
-}
-
-/** Un regalo sconsigliato (non dà punti): indirizzabile come gli altri (`ordine`) per correggerlo e ripristinarlo. */
-export interface RegaloSconsigliatoDto {
-  ordine: number;
-  nome: string;
-  modificato: boolean;
+  /** Ondata 5 (decisione 21): la reazione del Confidente, +3, +2 o +1 (colonna «Bonus affinità» della guida); null se non indicata. */
+  reazione: ReazioneRegalo | null;
 }
 
 /** Scheda completa di un Confidente (Fase 6.1). */
@@ -360,8 +356,11 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   /** La Dote che dà ogni incontro verso ciascun rango da 1 a 10 (`confidente_dote_incontro`), modificabile; `testo` in parole. */
   dotiIncontro: Array<{ rango: number; doti: DoteNote[]; testo: string }>;
   dialoghi: DialogoConfidenteDto[];
+  /** I regali dell'elenco della guida, con la reazione (+3/+2/+1). Ondata 5 (decisione 21): non ci sono più regali «sconsigliati»: ogni
+   *  oggetto regalo fuori elenco vale +1. */
   regali: RegaloConfidenteDto[];
-  regaliSconsigliati: RegaloSconsigliatoDto[];
+  /** Ondata 5: il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae). */
+  regalabile: boolean;
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
@@ -725,15 +724,16 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: 'primo' | 'primi-10' | 'altro' | null } | null;
   /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
   bloccato: { rango: number; motivi: string[] } | null;
-  /** Regali già consegnati in questa partita (nomi). */
+  /** Regali già consegnati in questa partita (nomi, uno per consegna: dall'ondata 5 lo stesso oggetto si può ridare). */
   regaliFatti: string[];
-  /** Identità consegnate; i nomi storici sopra non vengono riscritti dopo una rinomina. */
+  /** Identità consegnate (una volta per oggetto); i nomi storici sopra non vengono riscritti dopo una rinomina. */
   regaliFattiCatalogo?: string[];
   /** L13 (decisione 18): gli oggetti del catalogo che, regalati adesso con l'acquisto, non scalano il prezzo: una consegna data prima che gli yen
    *  si muovessero da soli, tolta e ridata nello stesso momento di gioco (il suo prezzo era già nel saldo). Assente se nessuno. */
   regaliYenGiaNelSaldo?: string[];
-  /** Il Confidente ha regali graditi collegati a un oggetto del catalogo: solo allora la finestra «Regala» ha oggetti da scegliere. */
-  haRegaliCatalogo?: boolean;
+  /** Ondata 5 (RG-11): il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae): solo allora c'è «Regala».
+   *  Si regala un qualunque oggetto regalo del catalogo, con la reazione della guida (+1 se non è nell'elenco del Confidente). */
+  regalabile: boolean;
   note: string;
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];
@@ -757,14 +757,18 @@ export interface ModificaConfidente {
   deltaPunti?: number;
   noteRisposta?: 1 | 2 | 3;
   regalo?: boolean;
+  /** Ondata 5: la reazione al regalo (solo dall'azione «Regala», mai dal client: lo schema della richiesta non la accetta). */
+  reazioneRegalo?: ReazioneRegalo;
   uscita?: boolean;
   bonusArcano?: boolean;
   invito?: boolean;
   note?: string;
 }
 
-/** R10-18: l'azione unica «Regala». Si sceglie l'oggetto del catalogo (per chiave); dà i punti (50 di base, con i moltiplicatori, solo dove il
- *  Confidente ne conta), registra la consegna e, con `acquisto`, segna anche comprato l'articolo scelto (un'offerta dell'oggetto). */
+/** R10-18: l'azione unica «Regala». Si sceglie l'oggetto del catalogo (per chiave); dà i punti (la base della reazione, con i moltiplicatori,
+ *  solo dove il Confidente ne conta), registra la consegna e, con `acquisto`, segna anche comprato l'articolo scelto (un'offerta dell'oggetto).
+ *  Ondata 5 (decisione 21): ogni oggetto regalo si può dare a un Confidente regalabile già incontrato, anche più volte; senza `acquisto` la
+ *  consegna usa una copia posseduta, se c'è (comprata, ricevuta o di un set). La Cartolina si spedisce (`shared/regali.ts`). */
 export interface RichiestaRegalo {
   confidente: string;
   /** Chiave dell'oggetto nel catalogo. */
@@ -779,6 +783,8 @@ export interface EsitoRegaloDto {
   confidente: ConfidentePartitaDto;
   punti: number;
   acquistato: string | null;
+  /** Ondata 5: la consegna scritta (regalando) o tolta (annullando), per annullare proprio quella. */
+  consegna?: { id: number; catalogo: string; reazione: ReazioneRegalo; copiaConsumata: boolean; modo: 'consegna' | 'cartolina' };
 }
 
 export interface CompendioPartitaDto {
@@ -1201,6 +1207,16 @@ export interface SfideDto {
 
 // ---- Completamento: trofei, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo (Fase 9.1) ----
 
+/** Una sfida del Covo dei Ladri. `conteggio` (ondata 5, migrazione 258): quello che la sfida conta, se l'app lo sa contare; `progresso`: a
+ *  che punto è la partita chiesta (solo con una partita). */
+export interface SfidaCovoDto {
+  nome: string;
+  requisito: string;
+  medaglie: number | null;
+  conteggio?: { tipo: 'regali-consegnati'; obiettivo: number };
+  progresso?: { fatti: number; obiettivo: number; raggiunta: boolean };
+}
+
 export interface TrofeoDto {
   chiave: string;
   nome: string;
@@ -1220,7 +1236,7 @@ export interface CompletamentoDto {
   trofei: TrofeoDto[];
   ottenuti: number;
   finali: Array<{ chiave: string; nome: string; condizioni: string[]; date: string[]; descrizione: string; fonte: string }>;
-  covo: { introduzione: string; medaglie: string; sfide: Array<{ nome: string; requisito: string; medaglie: number | null }>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null; oggettiRicompensa?: RicompensaOggettoDto[] }>; fonte: string };
+  covo: { introduzione: string; medaglie: string; sfide: Array<SfidaCovoDto>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null; oggettiRicompensa?: RicompensaOggettoDto[] }>; fonte: string };
   dlc: Array<{ nome: string; contenuto: string; note: string | null; fonte: string }>;
   meteo: Array<{ condizione: string; effetti: string[]; fonte: string }>;
   nuovaPartitaPlus: { trasferito: string[]; nonTrasferito: string[]; note: string; fonte: string };
@@ -3608,7 +3624,8 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   noteStoriche?: NotaStoricaOfferta[];
   trasformazioni: TrasformazioneOggettoDto[];
   inVendita: OffertaOggettoDto[];
-  regalo: Array<{ confidente: string; nome: string; gradimento: string | null; casa: string; regalato: boolean; sconsigliato: boolean }>;
+  /** A chi piace (l'elenco dei regali dei Confidenti, decisione 13), con la reazione (+3/+2/+1) e, nella partita, se è già stato regalato. */
+  regalo: Array<{ confidente: string; nome: string; reazione: ReazioneRegalo | null; casa: string; regalato: boolean }>;
   forzieri: Array<{
     voce: string; voceNome: string; palazzo: string; palazzoNome: string;
     infiltrazione: string; infiltrazioneNome: string; area: string | null; areaNome: string | null; quantita: number;
@@ -3619,8 +3636,13 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   scambi: OffertaOggettoDto[];
   ricette: Array<{ chiave: string; nome: string; quantita: number; casa: string; prodotti: RicompensaOggettoDto[]; nomeStorico: string }>;
   lettura: { tipo: 'libro'; voce: LibroDto; letturaRapida: boolean } | { tipo: 'film'; voce: FilmDto } | { tipo: 'videogioco'; voce: VideogiocoDto } | null;
-  partita: { acquistato: boolean; regalato: boolean; letto: boolean } | null;
+  /** Nella partita. `copie` (ondata 5, decisione 21: «regalo ripetibile con consumo di copie e oggetti dei set posseduti»): le copie
+   *  possedute (comprate, ricevute da una voce del Diario o dentro un set comprato), quelle già regalate e quelle che restano. */
+  partita: { acquistato: boolean; regalato: boolean; letto: boolean; copie?: CopieOggettoDto } | null;
 }
+
+/** Ondata 5: le copie di un oggetto nella partita, per i regali. `disponibili` non scende mai sotto zero. */
+export interface CopieOggettoDto { possedute: number; regalate: number; disponibili: number }
 
 export interface TrasformazioneOggettoDto {
   palazzo: string;

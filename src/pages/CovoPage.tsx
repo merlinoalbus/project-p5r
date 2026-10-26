@@ -24,6 +24,7 @@
 import { useMemo, useState } from 'react';
 import { getCompletamento } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { usePartitaStore } from '../stores/partitaStore';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -82,14 +83,16 @@ function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: stri
 }
 
 /**
- * Pagina del Covo dei Ladri: prende la sezione `covo` dal completamento (senza partita), mostra i
+ * Pagina del Covo dei Ladri: prende la sezione `covo` dal completamento (con la partita attiva, per le sfide che l'app sa contare), mostra i
  * numeri di riepilogo ricavati da `conti`, l'introduzione e il testo della guida sulle medaglie,
  * poi una ricerca unica che filtra insieme le sfide (nome e requisito) e i premi (nome, sblocco,
  * effetto), elencati in due colonne con il conteggio dei visibili sul totale.
  */
 export function CovoPage() {
   useDocumentTitle('Covo dei Ladri');
-  const dati = useCarica(() => getCompletamento(), []);
+  // ondata 5 (decisione 21 b): con una partita attiva le sfide che l'app sa contare (Benefattore: i regali) dicono a che punto è la partita
+  const partitaId = usePartitaStore((s) => s.attiva?.id ?? null);
+  const dati = useCarica(() => getCompletamento(partitaId ?? undefined), [partitaId]);
   /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   const [ricerca, setRicerca] = useState('');
@@ -156,7 +159,10 @@ export function CovoPage() {
                       <li key={s.nome} className="flex items-start justify-between gap-3 py-2 testo-13">
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span className="font-semibold">{s.nome}</span>
-                          <span className="text-text-secondary">{s.requisito}</span>
+                          <span className="text-text-secondary text-pretty">{s.requisito}</span>
+                          {s.progresso && (s.progresso.raggiunta
+                            ? <span className="chip chip--attivo self-start">Raggiunta in questa partita</span>
+                            : <span className="testo-12 text-text-muted tabular-nums">{s.progresso.fatti} di {s.progresso.obiettivo} regali in questa partita</span>)}
                         </span>
                         {/* Il valore compare solo se c'è: oggi la guida non lo dichiara per
                             nessuna sfida, e una colonna di 52 trattini è rumore, non un dato. */}

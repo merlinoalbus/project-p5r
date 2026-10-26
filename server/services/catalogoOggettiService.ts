@@ -16,6 +16,8 @@ import { regaliDellaPartita } from './regaliPartita.js';
 import { fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
+import { copieDellOggetto } from './copieOggetti.js';
+import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 
 export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
@@ -102,10 +104,14 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   const riga = rigaOggetto(chiave); const oggetto = dtoOggetto(riga);
   const inVendita = offerteDellOggetto(chiave, partita);
   const regalati = new Set(partita === undefined ? [] : regaliDellaPartita(partita).filter((r) => r.catalogo === chiave).map((r) => r.confidente));
-  const regalo = (prepared(`SELECT g.confidente_chiave,c.nome,g.effetto,g.sconsigliato FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
-    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.sconsigliato,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; effetto: string | null; sconsigliato: number }>)
-    .filter((r, i, tutti) => tutti.findIndex((a) => a.confidente_chiave === r.confidente_chiave && a.sconsigliato === r.sconsigliato) === i)
-    .map((r) => ({ confidente: r.confidente_chiave, nome: r.nome, gradimento: r.effetto, casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave), sconsigliato: r.sconsigliato === 1 }));
+  // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
+  // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
+  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const regalo = (prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'} FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
+    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.reazione DESC,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; reazione: number | null }>)
+    .filter((r, i, tutti) => tutti.findIndex((a) => a.confidente_chiave === r.confidente_chiave) === i)
+    .map((r) => ({ confidente: r.confidente_chiave, nome: r.nome, reazione: (r.reazione === 1 || r.reazione === 2 || r.reazione === 3 ? r.reazione : null) as ReazioneRegalo | null,
+      casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave) }));
   const prodottiRicette = ricompensePerFonte('ricetta');
   const ricette = (prepared('SELECT ricetta,quantita FROM ricetta_materiale WHERE catalogo_chiave = ? ORDER BY ricetta').all(chiave) as Array<{ ricetta: string; quantita: number }>)
     .map((r) => {
@@ -132,5 +138,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   return { ...oggetto, noteStoriche: noteStoricheDi('catalogo', riga.chiave), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
     trasformazioni: trasformazioniDiJose(partita === undefined ? undefined : statoDisponibilitaPartita(partita), chiave),
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,
-    partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false } };
+    partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false,
+      // ondata 5 (D2): le copie possedute, regalate e rimaste, per la finestra «Regala» (si regala una copia che c'è, senza ricomprarla)
+      copie: copieDellOggetto(partita, chiave) } };
 }

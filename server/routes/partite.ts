@@ -224,8 +224,8 @@ router.post('/:id/regali', validate({ params: paramsPartita, body: bodyRegala })
   res.status(201).json(regala(Number(req.params.id), req.body as RichiestaRegalo));
 });
 router.post('/:id/regali/annulla', validate({ params: paramsPartita, body: bodyAnnullaRegalo }), (req, res) => {
-  const b = req.body as { confidente: string; catalogo: string };
-  res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo));
+  const b = req.body as { confidente: string; catalogo: string; id?: number };
+  res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo, b.id));
 });
 
 router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {

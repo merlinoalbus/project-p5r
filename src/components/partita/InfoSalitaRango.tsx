@@ -4,12 +4,13 @@
 //
 // Solo lettura, dal dettaglio del compendio già in memoria (`useDettaglioConfidente`, nessuna API nuova). L'abilità del rango N si ottiene
 // raggiungendo N (la scheda del Confidente segna attive quelle con rango ≤ rango della partita): la prossima è quella del rango + 1.
-// I regali: nome ed effetto, quelli già consegnati in questa partita in coda e sbarrati (stesso criterio della scheda del Confidente).
+// I regali: nome e reazione (+3/+2/+1, ondata 5), dalla più alta; quelli già consegnati in questa partita in coda e sbarrati (stesso criterio della scheda del Confidente).
 // I comandi per regalare stanno nel pannello («Regala»): qui nessun pulsante duplicato, solo il collegamento alla scheda completa.
 // ============================================================
 
 import { useDettaglioConfidente } from './useDettaglioConfidente';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
+import { testoReazione } from '../../../shared/regali';
 
 /** Quanti regali mostrare in breve prima del «+ altri». */
 const REGALI_VISIBILI = 4;
@@ -47,7 +48,7 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
               const fatto = consegnato(c, g);
               return (
                 <li key={`${g.ordine}-${i}`} className={`chip ${fatto ? 'line-through opacity-60' : ''}`} title={fatto ? 'Già consegnato in questa partita' : undefined}>
-                  {g.nome}{g.effetto ? ` · ${g.effetto}` : ''}{fatto && <span className="sr-only"> (già consegnato)</span>}
+                  {g.nome}{g.reazione !== null ? <span className="tabular-nums"> · {testoReazione(g.reazione)}</span> : null}{fatto && <span className="sr-only"> (già consegnato)</span>}
                 </li>
               );
             })}

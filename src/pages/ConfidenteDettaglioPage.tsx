@@ -35,6 +35,7 @@ import { DotiIncontro } from '../components/partita/DotiIncontro';
 import { sitoDellaFonte } from '../utils/fonti';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
+import { REAZIONE_FUORI_ELENCO, testoReazione } from '../../shared/regali';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -233,7 +234,8 @@ export function ConfidenteDettaglioPage() {
 
           <section className="card flex flex-col gap-2">
             <TitoloSezione>Regali graditi</TitoloSezione>
-            {attiva && c.regali.some((g) => g.catalogo) && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
+            {/* ondata 5 (RG-10, RG-11): si regala un qualunque oggetto regalo, a chi riceve regali */}
+            {attiva && c.regalabile && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
               disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }} />}
             {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
               onChiudi={() => setSceltaRegaloPer(null)} onFatto={(esito) => {
@@ -241,22 +243,22 @@ export function ConfidenteDettaglioPage() {
                 void stato.ricarica();
                 notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
               }} />}
-            {c.regali.length === 0 ? <p className="m-0 testo-13 text-text-muted">Questo Confidente non accetta regali.</p> : (
+            {!c.regalabile ? <p className="m-0 testo-13 text-text-muted">Questo Confidente non accetta regali.</p> : c.regali.length === 0 ? null : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali">
                 {c.regali.map((g, i) => (
                   <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 testo-13">
-                    {attiva && g.catalogo && (regaloConsegnato(g)
-                      ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Annulla consegna" disabled={regaloInCorso || stato.caricamento}
-                          onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla la consegna di ${g.nome}`} />
-                      : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
-                          onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />)}
+                    {/* ondata 5: lo stesso oggetto si può ridare: «Regala» resta, e accanto la consegna già data si annulla (l'ultima) */}
+                    {attiva && g.catalogo && c.regalabile && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
+                      onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />}
+                    {attiva && g.catalogo && regaloConsegnato(g) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Annulla consegna" disabled={regaloInCorso || stato.caricamento}
+                      onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla l’ultima consegna di ${g.nome}`} />}
                     {attiva && !g.catalogo && (
                       <label className="flex items-center gap-1.5 touch">
                         <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
                       </label>
                     )}
                     <strong className={regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
-                    {g.effetto && <span className="chip">{g.effetto}</span>}
+                    {g.reazione !== null && <span className="chip tabular-nums" title="Reazione del Confidente (bonus affinità della guida)">{testoReazione(g.reazione)}</span>}
                     <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
                     {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
                     {!IN_RILASCIO && g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
@@ -266,20 +268,8 @@ export function ConfidenteDettaglioPage() {
                 ))}
               </ul>
             )}
-            {c.regaliSconsigliati.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <h3 className="m-0 testo-12 font-semibold text-text-muted">Sconsigliati (non danno punti)</h3>
-                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label="Regali sconsigliati">
-                  {c.regaliSconsigliati.map((s) => (
-                    <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 testo-13 text-text-muted">
-                      <span className="min-w-0 break-words">{s.nome}</span>
-                      {!IN_RILASCIO && s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-                      <ModificaGuida tipo="regalo" chiave={`${chiave}:${s.ordine}`} cosa={`il regalo sconsigliato «${s.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* ondata 5 (decisione 21): la guida non ha regali sconsigliati; quel che non è in elenco vale +1 */}
+            {c.regalabile && <p className="m-0 testo-12 text-text-muted">Ogni altro oggetto regalo vale {testoReazione(REAZIONE_FUORI_ELENCO)}.</p>}
           </section>
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">

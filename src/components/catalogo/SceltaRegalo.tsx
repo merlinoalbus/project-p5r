@@ -2,23 +2,31 @@
 // SceltaRegalo — la finestra unica «Regala» (R10-18): si sceglie l'oggetto del catalogo, l'azione fa il resto
 // ============================================================
 //
-// Una sola azione: dà i punti al Confidente (50 di base con i moltiplicatori, dove il rango li conta), registra la consegna per chiave
-// del catalogo e, se l'oggetto non risulta comprato e c'è un'offerta disponibile, può segnare anche l'acquisto. Sostituisce «Regalo» di
-// Partita › Confidenti (+50 senza dire quale oggetto) e «Regalo consegnato» della scheda (consegna senza punti). L13 (decisione 18): con
-// l'acquisto segnato il prezzo si scala da solo dal saldo, mai sotto zero, e togliendo il regalo torna. La logica è nel server
-// (`POST /partite/:id/regali`): qui si scelgono solo i dati.
+// Una sola azione: dà i punti al Confidente (la base della reazione con i moltiplicatori, dove il rango li conta), registra la consegna per
+// chiave del catalogo e, se serve, segna anche l'acquisto. Sostituisce «Regalo» di Partita › Confidenti (+50 senza dire quale oggetto) e
+// «Regalo consegnato» della scheda (consegna senza punti). L13 (decisione 18): con l'acquisto segnato il prezzo si scala da solo dal saldo, mai
+// sotto zero, e togliendo il regalo torna. La logica è nel server (`POST /partite/:id/regali`): qui si scelgono solo i dati.
+//
+// Ondata 5 (decisione 21 dell'utente; censimento RG-09, RG-10, RG-17, RG-18, D2, D3):
+//   - si sceglie fra tutti gli oggetti regalo, raggruppati per reazione: quelli dell'elenco del Confidente (+3/+2/+1) e gli altri, che valgono
+//     +1 («ogni regalo garantisce almeno 1 punto»);
+//   - lo stesso oggetto si può ridare: la consegna di prima si ricorda, non si blocca;
+//   - le copie possedute (comprate, ricevute o dentro un set) si usano prima di ricomprare: con una copia l'acquisto non è proposto di
+//     partenza; senza, «Segna anche comprato» crea la copia che il regalo usa;
+//   - un Confidente non ancora incontrato (rango 0) non riceve regali; la Cartolina si spedisce, mai a chi è al rango massimo.
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import type { CatalogoOggettoDto, ConfidentePartitaDto, EsitoRegaloDto, OffertaOggettoDto, RegaloConfidenteDto } from '../../types';
+import type { ConfidentePartitaDto, EsitoRegaloDto, OffertaOggettoDto, RegaloConfidenteDto } from '../../types';
 import { getConfidenteDettaglio, getConfidentiPartita } from '../../services/api';
 import { regalaOggetto } from '../../services/api/partite';
-import { getOggettoCatalogo } from '../../services/api/catalogoOggetti';
+import { getCatalogoOggetti, getOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaPunti, formattaPunti, formattaYen } from '../../utils/punti';
+import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, testoReazione } from '../../../shared/regali';
+import type { ReazioneRegalo } from '../../../shared/puntiConfidenti';
 import { Modal } from '../shared/Modal';
-import { Selettore } from '../shared/Selettore';
-import { SceltaCatalogoOggetto } from './SceltaCatalogoOggetto';
+import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -26,9 +34,9 @@ interface Props {
   partita: number;
   confidente: string;
   nomeConfidente: string;
-  /** I regali graditi del Confidente (dalla sua scheda); se assenti li legge la finestra. */
+  /** I regali dell'elenco del Confidente (dalla sua scheda), con la reazione; se assenti li legge la finestra. */
   regali?: RegaloConfidenteDto[];
-  /** Le sole chiavi ammesse, se chi apre già le conosce (la scheda dell'oggetto); ha la precedenza su `regali`. */
+  /** Le sole chiavi fra cui scegliere, se chi apre già le conosce (la scheda dell'oggetto); senza, tutti gli oggetti regalo. */
   ammessi?: readonly string[];
   /** Lo stato del Confidente nella partita; se assente (undefined) lo legge la finestra. */
   stato?: ConfidentePartitaDto | null;
@@ -50,15 +58,34 @@ function etichettaOfferta(o: OffertaOggettoDto): string {
   return `${dove}${o.prezzo !== null ? ` · ${o.prezzo === 0 ? 'Gratis' : formattaYen(o.prezzo)}` : ''}`;
 }
 
-/** «Regala a …»: scelta dell'oggetto fra i regali graditi, punti previsti, eventuale acquisto da segnare insieme. */
-export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, ammessi: ammessiDati, stato, bonusArcano, invito = false, oggettoIniziale = '', onChiudi, onFatto }: Props) {
-  const dettaglio = useCarica(() => (regali || ammessiDati ? Promise.resolve(null) : getConfidenteDettaglio(confidente)), [confidente, !!regali, !!ammessiDati]);
+/** Il gruppo dell'oggetto nel selettore: l'elenco del Confidente per reazione, poi gli altri regali, poi la Cartolina da spedire. */
+function gruppo(chiave: string, inElenco: ReazioneRegalo | undefined, nomeConfidente: string): string {
+  if (chiave === CARTOLINA) return 'Da spedire · +1';
+  return inElenco !== undefined ? `Graditi a ${nomeConfidente} · ${testoReazione(inElenco)}` : `Altri regali · ${testoReazione(REAZIONE_FUORI_ELENCO)}`;
+}
+
+/** «Regala a …»: scelta dell'oggetto fra tutti i regali, reazione e punti previsti, copia posseduta o acquisto da segnare insieme. */
+export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, ammessi, stato, bonusArcano, invito = false, oggettoIniziale = '', onChiudi, onFatto }: Props) {
+  const dettaglio = useCarica(() => (regali ? Promise.resolve(null) : getConfidenteDettaglio(confidente)), [confidente, !!regali]);
+  const catalogo = useCarica(() => getCatalogoOggetti({ categoria: 'regalo' }), []);
   const lettoStato = useCarica(() => (stato !== undefined ? Promise.resolve(null) : getConfidentiPartita(partita).then((l) => l.find((c) => c.chiave === confidente) ?? null)), [partita, confidente, stato !== undefined]);
   const sc = stato !== undefined ? stato : lettoStato.dati;
-  const ammessi = useMemo(() => ammessiDati
-    ? [...ammessiDati]
-    : [...new Set((regali ?? dettaglio.dati?.regali ?? []).flatMap((r) => r.catalogo ? [r.catalogo.chiave] : []))], [ammessiDati, regali, dettaglio.dati]);
-  const consegnati = sc?.regaliFattiCatalogo ?? [];
+  const elenco = regali ?? dettaglio.dati?.regali;
+  /** La reazione di ogni oggetto dell'elenco del Confidente (la più alta, se l'oggetto vi compare due volte). */
+  const reazioni = useMemo(() => {
+    const m = new Map<string, ReazioneRegalo>();
+    for (const g of elenco ?? []) if (g.catalogo && g.reazione !== null) m.set(g.catalogo.chiave, Math.max(m.get(g.catalogo.chiave) ?? 0, g.reazione) as ReazioneRegalo);
+    return m;
+  }, [elenco]);
+  const opzioni = useMemo((): OpzioneSelettore[] => {
+    const nomi = new Map<string, string>();
+    for (const o of catalogo.dati ?? []) nomi.set(o.chiave, o.nome);
+    for (const g of elenco ?? []) if (g.catalogo && !nomi.has(g.catalogo.chiave)) nomi.set(g.catalogo.chiave, g.catalogo.nome);
+    const ordine = (k: string) => (k === CARTOLINA ? -1 : reazioni.get(k) ?? 0);
+    return [...nomi].filter(([k]) => !ammessi || ammessi.includes(k))
+      .sort(([a, na], [b, nb]) => ordine(b) - ordine(a) || na.localeCompare(nb, 'it'))
+      .map(([k, nome]) => ({ chiave: k, nome, gruppo: gruppo(k, reazioni.get(k), nomeConfidente) }));
+  }, [catalogo.dati, elenco, reazioni, ammessi, nomeConfidente]);
 
   const [chiave, setChiave] = useState(oggettoIniziale);
   const [vuoleAcquisto, setVuoleAcquisto] = useState<boolean | null>(null);
@@ -67,22 +94,28 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
   const [errore, setErrore] = useState('');
   const oggetto = useCarica(() => (chiave ? getOggettoCatalogo(chiave, partita) : Promise.resolve(null)), [chiave, partita]);
 
-  const giaConsegnato = chiave !== '' && consegnati.includes(chiave);
+  const cartolina = chiave === CARTOLINA;
+  const reazione: ReazioneRegalo = cartolina ? REAZIONE_CARTOLINA : reazioni.get(chiave) ?? REAZIONE_FUORI_ELENCO;
+  const giaRegalato = chiave !== '' && (sc?.regaliFattiCatalogo ?? []).includes(chiave);
+  const copie = oggetto.dati?.partita?.copie;
+  const conCopia = (copie?.disponibili ?? 0) > 0;
   const offerte = oggetto.dati?.inVendita ?? [];
-  const comprato = offerte.some((o) => o.acquistato);
   // si propone di segnare comprata solo un'offerta che c'è adesso: una non disponibile farebbe fallire l'azione (409)
-  const acquistabili = comprato ? [] : offerte.filter((o) => o.disponibileOggi !== false);
+  const acquistabili = offerte.filter((o) => o.disponibileOggi !== false);
   const offerta = acquistabili.find((o) => chiaveOfferta(o) === offertaScelta) ?? acquistabili[0];
-  const segna = (vuoleAcquisto ?? true) && !!offerta;
+  // con una copia posseduta il regalo usa quella: l'acquisto si segna solo se lo si chiede
+  const segna = (vuoleAcquisto ?? !conCopia) && !!offerta;
 
+  const nonIncontrato = !!sc && sc.rango === 0;
+  const cartolinaAlMassimo = cartolina && !!sc && sc.rango >= 10;
   const conPunti = !!sc && sc.rango > 0 && sc.rango < 10 && (sc.puntiNecessari ?? 0) > 0;
   const bonus = bonusArcano ?? sc?.personaArcanoInScorta ?? false;
   // il piazzamento agli esami lo dà la partita (stesso calcolo del server), non una scelta di questa finestra
   const piazzamento = sc?.piazzamentoEsame?.piazzamento ?? null;
-  const punti = anteprimaPunti({ confidente, regalo: true, bonusArcano: bonus, invito, piazzamento });
-  const valido = chiave !== '' && ammessi.includes(chiave) && !giaConsegnato && !oggetto.caricamento;
+  const punti = anteprimaPunti({ confidente, regalo: true, reazioneRegalo: reazione, bonusArcano: bonus, invito, piazzamento });
+  const valido = chiave !== '' && opzioni.some((o) => o.chiave === chiave) && !oggetto.caricamento && !nonIncontrato && !cartolinaAlMassimo;
 
-  const scegli = (o: CatalogoOggettoDto) => { setChiave(o.chiave); setVuoleAcquisto(null); setOffertaScelta(''); setErrore(''); };
+  const scegli = (k: string) => { setChiave(k); setVuoleAcquisto(null); setOffertaScelta(''); setErrore(''); };
   const regala = async () => {
     if (!valido || occupato) return;
     setOccupato(true); setErrore('');
@@ -95,32 +128,38 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Regalo non registrato.'); }
     finally { setOccupato(false); }
   };
+  const erroreElenco = dettaglio.errore ?? catalogo.errore;
 
   return <Modal aperta titolo={`Regala a ${nomeConfidente}`} onChiudi={() => { if (!occupato) onChiudi(); }}
     azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="regalo" dimensione={22} />} titolo={occupato ? 'Registrazione…' : 'Regala'} disabled={occupato || !valido} onClick={() => void regala()} /></>}>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="regalo" dimensione={22} />} titolo={occupato ? 'Registrazione…' : cartolina ? 'Spedisci' : 'Regala'} disabled={occupato || !valido} onClick={() => void regala()} /></>}>
     <div className="flex min-w-0 flex-col gap-3">
-      <SceltaCatalogoOggetto valore={chiave} onScegli={scegli} includi={ammessi} disabilitato={occupato} etichetta="Regalo gradito" />
-      {dettaglio.errore && <p role="alert" className="m-0 testo-13">{dettaglio.errore}</p>}
-      {chiave !== '' && !ammessi.includes(chiave) && !dettaglio.caricamento && <p role="alert" className="m-0 testo-13">Questo oggetto non è fra i regali graditi di {nomeConfidente}.</p>}
-      {giaConsegnato && <p role="status" className="m-0 testo-13">Questo oggetto risulta già consegnato a {nomeConfidente}. Toglilo dall’elenco dei regali per regalarlo di nuovo.</p>}
-      {chiave !== '' && !giaConsegnato && (
-        <p className="m-0 testo-13 text-text-secondary" role="status">
+      {nonIncontrato && <p role="status" className="m-0 testo-13">{nomeConfidente} non è ancora stato incontrato: si regala durante un ritrovo.</p>}
+      <Selettore etichetta="Regalo" valore={chiave} opzioni={opzioni} ricerca="sempre" onCambia={scegli}
+        disabilitato={occupato || catalogo.caricamento || nonIncontrato} segnaposto={catalogo.caricamento ? 'Caricamento dei regali…' : 'Cerca per nome'} />
+      {erroreElenco && <p role="alert" className="m-0 testo-13">{erroreElenco}</p>}
+      {chiave !== '' && !nonIncontrato && (
+        <p className="m-0 testo-13 text-text-secondary text-pretty" role="status">
+          <strong className="text-text tabular-nums">Reazione {testoReazione(reazione)}</strong>
           {conPunti
-            ? <>Dà <strong className="text-text">+{formattaPunti(punti)} punti</strong> a {nomeConfidente} (50 di base{bonus || (piazzamento && piazzamento !== 'altro') || invito ?' con i moltiplicatori attivi' : ''}).</>
-            : <>Nessun punto: al rango attuale di {nomeConfidente} i punti non contano. Si registra solo la consegna.</>}
+            ? <> · dà <strong className="text-text tabular-nums">+{formattaPunti(punti)} punti</strong> a {nomeConfidente}{bonus || (piazzamento && piazzamento !== 'altro') || invito ? ' con i moltiplicatori attivi' : ''}.</>
+            : <> · al rango attuale di {nomeConfidente} i punti non contano: si registra solo {cartolina ? 'la spedizione' : 'la consegna'}.</>}
         </p>
       )}
+      {cartolina && <p className="m-0 testo-12 text-text-muted text-pretty">{cartolinaAlMassimo ? `${nomeConfidente} è al rango massimo: la Cartolina non si spedisce.` : `${AVVISO_CARTOLINA} Con la pioggia non si spedisce.`}</p>}
+      {giaRegalato && !nonIncontrato && <p className="m-0 testo-12 text-text-muted">Già regalato a {nomeConfidente} in questa partita: si può ridare.</p>}
       {chiave !== '' && oggetto.errore && <p role="alert" className="m-0 testo-13">{oggetto.errore}</p>}
-      {valido && comprato && <p className="m-0 testo-12 text-text-muted">L’oggetto risulta già comprato nella partita.</p>}
-      {valido && !comprato && offerte.length > 0 && acquistabili.length === 0 && (
-        <p className="m-0 testo-12 text-text-muted">Non risulta comprato, ma adesso non è disponibile in nessun negozio: potrai segnarlo dai Negozi.</p>
+      {valido && conCopia && copie && (
+        <p className="m-0 testo-12 text-text-muted tabular-nums">{copie.disponibili === 1 ? 'Hai una copia di questo oggetto: il regalo usa quella.' : `Hai ${copie.disponibili} copie di questo oggetto: il regalo ne usa una.`}</p>
+      )}
+      {valido && !conCopia && offerte.length > 0 && acquistabili.length === 0 && (
+        <p className="m-0 testo-12 text-text-muted">Adesso non è in vendita in nessun negozio: potrai segnarlo dai Negozi.</p>
       )}
       {valido && acquistabili.length > 0 && (
         <div className="flex flex-col gap-1.5">
           <label className="touch flex items-center gap-2 testo-13">
             <input type="checkbox" className="h-5 w-5" checked={segna} disabled={occupato} onChange={(e) => setVuoleAcquisto(e.target.checked)} />
-            <span>Segna anche comprato</span>
+            <span>{conCopia ? 'Compra una copia nuova' : 'Segna anche comprato'}</span>
           </label>
           {segna && acquistabili.length > 1 && (
             <Selettore etichetta="Dove l’hai comprato" valore={chiaveOfferta(offerta!)} disabilitato={occupato} ricerca="mai"
@@ -129,7 +168,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
           {segna && acquistabili.length === 1 && <span className="testo-12 text-text-muted">{etichettaOfferta(offerta!)}</span>}
           {/* L13 (decisione 18): la frase dice che cosa farà davvero il prezzo; la consegna di prima, tolta e ridata nello stesso momento di gioco,
               aveva il prezzo già nel saldo (`regaliYenGiaNelSaldo`, dal server) */}
-          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted tabular-nums">{sc?.regaliYenGiaNelSaldo?.includes(chiave)
+          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted tabular-nums text-pretty">{sc?.regaliYenGiaNelSaldo?.includes(chiave)
             ? `Il prezzo (${formattaYen(offerta.prezzo)}) era già nel saldo: questo regalo era stato dato in questo momento del gioco prima che gli yen si muovessero da soli, e ridandolo non si scala.`
             : `Regalando, ${formattaYen(offerta.prezzo)} si scalano da soli dal saldo della squadra, mai sotto zero (il regalo si registra anche se il saldo non basta); togliendo il regalo tornano.`}</span> : null}
         </div>

@@ -22,6 +22,7 @@ import { notifica } from '../stores/notificationStore';
 import { annullaRegaloOggetto } from '../services/api/partite';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { formattaPunti } from '../utils/punti';
+import { testoReazione } from '../../shared/regali';
 import { TrasformazioniDiJose } from '../components/catalogo/TrasformazioniDiJose';
 import { PosizioniDellaLettura } from '../components/catalogo/PosizioniDellaLettura';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -57,12 +58,9 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
     setRegaloInCorso(true);
     try {
       const esito = await annullaRegaloOggetto(partitaId, confidente, o.chiave);
-      dati.imposta((corrente) => {
-        const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: false } : r);
-        return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: regalo.some((r) => r.regalato) } : null };
-      });
       notifica('info', `Consegna annullata${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
-      if (esito.acquistato) void dati.ricarica();
+      // ondata 5: possono restare altre consegne dello stesso oggetto, e le copie cambiano: la scheda si rilegge
+      void dati.ricarica();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Consegna non aggiornata.');
     } finally { setRegaloInCorso(false); }
@@ -123,17 +121,16 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
         <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-3">
           <section className="card order-2 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="a-chi-piace">
             <TitoloSezione id="a-chi-piace">A chi piace</TitoloSezione>
-            {o.regalo.length ? <ul className="m-0 list-none divide-y divide-border p-0">{o.regalo.map((r) => <li key={`${r.confidente}:${r.sconsigliato}`} className="flex flex-wrap items-center gap-2 py-1">
+            {o.regalo.length ? <ul className="m-0 list-none divide-y divide-border p-0">{o.regalo.map((r) => <li key={r.confidente} className="flex flex-wrap items-center gap-2 py-1">
               <Link to={r.casa} className="touch inline-flex items-center">{r.nome}</Link>
-              {r.gradimento && <span className="testo-13 text-text-secondary">{r.gradimento}</span>}
-              {r.sconsigliato && <span className="chip">Sconsigliato</span>}
+              {r.reazione !== null && <span className="chip tabular-nums" title="Reazione del Confidente (bonus affinità della guida)">{testoReazione(r.reazione)}</span>}
               {r.regalato && <span className="chip chip--attivo">Regalato</span>}
-              {/* l'azione di gioco della scheda: «Regala» è il pulsante primario */}
-              {partitaId !== null && (!r.sconsigliato || r.regalato) && (r.regalato
-                ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Togli consegna" aria-label={`Togli la consegna a ${r.nome}`}
-                    disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, false)} />
-                : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" aria-label={`Regala a ${r.nome}`}
-                    disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, true)} />)}
+              {/* l'azione di gioco della scheda: «Regala» è il pulsante primario; ondata 5: lo stesso oggetto si può ridare, e la consegna già
+                  data si toglie (l'ultima) */}
+              {partitaId !== null && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" aria-label={`Regala a ${r.nome}`}
+                disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, true)} />}
+              {partitaId !== null && r.regalato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Togli consegna" aria-label={`Togli l’ultima consegna a ${r.nome}`}
+                disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, false)} />}
             </li>)}</ul> : <p className="m-0 testo-13 text-text-secondary">Nessun regalo gradito collegato.</p>}
           </section>
           <section className="card order-5 flex min-w-0 flex-col gap-3 xl:order-none" aria-labelledby="dove-si-trova">
@@ -165,7 +162,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: true } : r);
             return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: true } : null };
           });
-          if (esito.acquistato) void dati.ricarica();
+          // ondata 5: la consegna usa una copia (o ne compra una): le copie della scheda cambiano
+          void dati.ricarica();
           notifica('success', `Regalo consegnato a ${regalaA.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
         }} />}
       {azione === 'modifica' && <ModuloOggetto key={o.chiave} oggetto={o} onChiudi={() => setAzione(null)} onSalvato={() => { setAzione(null); void dati.ricarica(); }} />}
