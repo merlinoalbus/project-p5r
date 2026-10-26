@@ -22,6 +22,7 @@ import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { effettoCompleto, type CampiStrutturati } from '../../utils/azioneStrutturata';
 import { NOME_FAMIGLIA_EFFETTO, fraseEffetto, indiceDelCollegamento, type NomiEffetti, type RigaEffetto } from '../../utils/effettoAutomatico';
 import { TestoNote } from '../shared/TestoNote';
+import { testoNoteAParole } from '../../../shared/note';
 
 type Tipo = EffettoVoce['tipo'];
 
@@ -43,10 +44,33 @@ const idRiga = (r: RigaEffetto): string => {
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
 
-/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`). L13 (decisione 19): gli effetti di
- *  stato (articoli, oggetti, eventi, domande, cruciverba, Richieste, inviti, Persona, trofei, sblocchi) si applicano invece subito al salvataggio
- *  (`riallineaStatiDellaVoce`), e la finestra della voce notifica che cosa è successo in ogni partita. */
-const CON_APPLICA = 'Doti, letture, turni, Aojiru, pesca e yen';
+/**
+ * Su una voce già spuntata, i nomi dei tipi di effetto per la nota sotto l'elenco. L13 (decisione 19): gli effetti di stato si applicano subito al
+ * salvataggio nelle partite che hanno la spunta (`motoreDiario.riallineaStatiDellaVoce`), e la finestra della voce notifica che cosa è successo in
+ * ogni partita; gli altri compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`). Revisione UX del 2026-10-26 («le etichette di testo
+ * devono essere visibili solo se hanno senso»): la nota nomina solo i tipi che la voce ha, nell'ordine di questi elenchi.
+ */
+const SUBITO: ReadonlyArray<[Tipo, string]> = [['articolo', 'articoli'], ['oggetto', 'oggetti'], ['storia', 'eventi di storia'], ['domanda', 'domande'], ['cruciverba', 'cruciverba'],
+  ['richiesta', 'Richieste'], ['invito', 'inviti'], ['persona', 'Persona'], ['trofeo', 'trofei'], ['sblocco', 'sblocchi']];
+const CON_APPLICA: ReadonlyArray<[Tipo, string]> = [['dote', 'Doti'], ['lettura', 'letture'], ['turno', 'turni'], ['acquisto', 'Aojiru'], ['pesca', 'pesca'], ['yen', 'yen']];
+/** «a, b e c»: i nomi dei tipi presenti fra quelli dell'elenco, o null se nessuno. */
+const tipiPresenti = (elenco: ReadonlyArray<[Tipo, string]>, presenti: ReadonlySet<Tipo>): string | null => {
+  const nomi = elenco.filter(([t]) => presenti.has(t)).map(([, n]) => n);
+  return !nomi.length ? null : nomi.length === 1 ? nomi[0]! : `${nomi.slice(0, -1).join(', ')} e ${nomi[nomi.length - 1]}`;
+};
+/** La nota per una voce già spuntata, solo con i tipi che la voce ha. */
+function NotaVoceSpuntata({ righe }: { righe: readonly RigaEffetto[] }) {
+  const presenti = new Set(righe.map((r) => r.effetto.tipo));
+  const subito = tipiPresenti(SUBITO, presenti), conApplica = tipiPresenti(CON_APPLICA, presenti);
+  const frasi = [
+    subito && `aggiungendo, cambiando o togliendo ${subito} le partite che l’hanno spuntata si aggiornano subito (togliendo, torna com’era solo ciò che la spunta aveva aggiunto e che non hai modificato dopo)`,
+    conApplica && `per ${conApplica} compare il pulsante «Applica» sulla voce`,
+    presenti.has('fortuna') && 'la Fortuna vale solo se la partita è ancora a quel giorno',
+  ].filter((x): x is string => !!x);
+  // senza effetti di questi tipi la nota dice solo che cosa succede a ciò che si aggiunge
+  const testo = frasi.length ? frasi.join('; ') : 'ciò che aggiungi vale anche per le partite che l’hanno spuntata (gli effetti di stato subito, gli altri come pulsante «Applica» sulla voce)';
+  return <p className="m-0 testo-12 text-text-secondary text-pretty">Questa voce è già spuntata: {testo}.</p>;
+}
 
 interface Props {
   valore: CampiStrutturati;
@@ -109,21 +133,26 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
             const id = idRiga(r);
             const editing = inModifica === id || !completo;
             const nome = NOME_FAMIGLIA_EFFETTO[r.effetto.tipo];
+            const frase = completo ? fraseEffetto(r.effetto, nomi) : nome;
+            // il nome per i lettori di schermo: la frase dell'effetto (due effetti dello stesso tipo nella voce restano distinti), o il tipo se da
+            // completare, con le note dette a parole («2 note», non il nome del simbolo ripetuto)
+            const nomeAccessibile = testoNoteAParole(frase);
             return (
               <li key={id}className="flex min-w-0 flex-col gap-2 rounded-md border border-border bg-bg-tertiary p-2">
                 <div className="flex min-w-0 flex-wrap items-start gap-2">
                   <IconaCategoria categoria={CATEGORIA_EFFETTO[r.effetto.tipo]} dimensione={32} />
-                  <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-display testo-13 uppercase tracking-wide text-primary-testo">{nome}</span>
-                      {i === collegato && <span className="chip testo-12" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span>}
+                  {/* 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): niente titolo in maiuscolo sopra la frase, che
+                      dice già di che effetto si tratta (con l'icona della categoria); il nome della famiglia compare solo finché l'effetto è da completare */}
+                  <div className="flex min-h-8 min-w-0 flex-1 basis-40 flex-col justify-center">
+                    <span className="testo-13 break-words text-pretty">
+                      {completo ? <TestoNote testo={frase} /> : `${nome}: da scegliere qui sotto.`}
+                      {i === collegato && <>{' '}<span className="chip testo-12 align-middle" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span></>}
                     </span>
-                    <span className="testo-13 break-words">{completo ? <TestoNote testo={fraseEffetto(r.effetto, nomi)} /> : 'Da scegliere qui sotto.'}</span>
                   </div>
                   <span className="flex shrink-0 gap-1">
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}
-                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${nome}`} disabled={!completo} onClick={() => setInModifica(inModifica === id ? null : id)} />
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nome}`} onClick={() => togli(i)} />
+                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${nomeAccessibile}`} disabled={!completo} onClick={() => setInModifica(inModifica === id ? null : id)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nomeAccessibile}`} onClick={() => togli(i)} />
                   </span>
                 </div>
                 {editing && <CampiEffettoVoce effetto={r.effetto} elenchi={elenchi} righe={righe} onCambia={(e) => cambia(i, e)} />}
@@ -145,7 +174,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
           )}
         </div>
       )}
-      {fatta && <p className="m-0 testo-12 text-text-secondary text-pretty">Questa voce è già spuntata: articoli, oggetti, eventi di storia, domande, cruciverba, Richieste, inviti, Persona, trofei e sblocchi aggiunti, cambiati o tolti si applicano subito alle partite che l’hanno spuntata (togliendo la spunta si annullano come gli altri); {CON_APPLICA} compaiono come pulsante «Applica» sulla voce. La Fortuna vale solo se la partita è ancora a quel giorno.</p>}
+      {fatta && <NotaVoceSpuntata righe={righe} />}
     </div>
   );
 }

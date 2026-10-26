@@ -21,7 +21,7 @@ import { confidenti } from './partiteService.js';
 import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
-import { statoGiaVero } from './effettiDiStatoService.js';
+import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
@@ -267,7 +267,8 @@ function statiNonApplicatiDellaVoce(p: number, fonte: StatoEffettiVoceDto): NonN
   const inAlternativa = effettiInAlternativa(fonte.effetti);
   return fonte.effetti.flatMap(({ uid, effetto: e }): NonNullable<AzionePercorsoDto['statiNonApplicati']> => {
     if (!eEffettoDiStato(e) || inAlternativa.has(uid)) return [];
-    if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, fonte.voceUid, uid)) return [];
+    // la Persona «anche nella scorta» con il solo compendio segnato manca ancora della scorta (`statoSegnatoDallaVoce`)
+    if (statoSegnatoDallaVoce(p, fonte.voceUid, uid, e)) return [];
     const testo = fraseEffettoConNomi(e, nomi);
     if (prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${fonte.voceUid}:${uid}`)) return [{ effettoUid: uid, esito: 'da-approvare' as const, testo }];
     // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre (la stessa regola del censimento)
@@ -850,12 +851,13 @@ function partiteConEffetti(uid: string): string[] {
 }
 
 /** Elimina nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. */
-export function eliminaVoce(uid: string): void {
+/** Mette la voce nel cestino. Restituisce gli avvisi dell'annullo nelle partite (un esemplare in scorta modificato dopo la spunta, che resta). */
+export function eliminaVoce(uid: string): string[] {
   const r = rigaVoce(uid);
   const sorelle = righeDelGiorno(r.data).filter(v => v.fascia === r.fascia).map(v => v.uid), posto = sorelle.indexOf(uid);
   const vicini = { prima: sorelle[posto - 1] ?? null, dopo: sorelle[posto + 1] ?? null };
-  conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
-    preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
+  return conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
+    const avvisi = preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
     revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
@@ -865,6 +867,7 @@ export function eliminaVoce(uid: string): void {
       prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
     }
     compatta(r.data, r.fascia);
+    return avvisi;
   });
 }
 
@@ -886,6 +889,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
   const r = rigaVoce(uid);
   const v = voceBase(r);
   const adesso = nowIso();
+  // 2026-10-26: ciò che chi spunta (o toglie la spunta) deve sapere: la Persona aggiunta alla scorta oltre la capienza, l'esemplare in scorta che
+  // resta perché modificato dopo la spunta
+  let avvisiSpunta: string[] = [];
   getDb().transaction(() => {
     const precedente = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
     // Una voce storica riclassificata conserva l'accesso alla rimozione delle proprie dichiarazioni.
@@ -904,10 +910,11 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
         return;
       }
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
-      const { effettiLegacy: effetti } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
+      const { effettiLegacy: effetti, avvisi } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
         applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
       }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso, scelteEsito: opz.scelteEsito }));
+      avvisiSpunta = avvisi;
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
@@ -917,7 +924,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       // tornano indietro, i punti dopo si riassegnano); l'annullo vecchio, dalla ricevuta, resta per le spunte che non sono nel registro corrente
       const ricevutaDellaSpunta = leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null);
       const eventiTolti = togliEventiDellaVoce(partitaId, uid);
-      annullaEffettiVoce(partitaId, uid, senzaEventiGestiti(ricevutaDellaSpunta, eventiTolti), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
+      avvisiSpunta = annullaEffettiVoce(partitaId, uid, senzaEventiGestiti(ricevutaDellaSpunta, eventiTolti), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
       // chi è stato disfatto col vecchio annullo ha cambiato i valori fuori dal registro: la sua base riparte da qui
       for (const chiave of confidentiAnnullatiAlVecchioModo(ricevutaDellaSpunta, eventiTolti)) nuovaGenerazione(partitaId, chiave);
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
@@ -928,7 +935,8 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+  const aggiornata = vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+  return avvisiSpunta.length ? { ...aggiornata, avvisiSpunta } : aggiornata;
 }
 
 /** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */

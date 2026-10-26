@@ -18,8 +18,9 @@
 //         niente, la scartata nemmeno. Stessa regola degli yen rimasti alla proposta (`fraseYenProposti`);
 //       · le letture no: togliendo la spunta non tornano indietro (`annullaEffettiAzione`);
 //       · la consumazione e la sessione di pesca solo se la voce è l'unica fonte che le tiene (`fonteUnica`): con un'altra fonte restano;
-//   - gli effetti di stato segnati dalla spunta (`effettiDiStatoApplicati`): Persona, trofeo, sblocco, oggetto, evento di storia, domanda,
-//     cruciverba, Richiesta, articolo, invito. Non quelli che c'erano già, né quelli che un'altra voce spuntata tiene comunque;
+//   - gli effetti di stato segnati dalla spunta (`effettiDiStatoApplicati`): Persona (con l'esemplare in scorta, se è ancora com'era), trofeo,
+//     sblocco, oggetto, evento di storia, domanda, cruciverba, Richiesta, articolo, invito. Non quelli che c'erano già, né quelli che un'altra
+//     voce spuntata tiene comunque;
 //   - la Fortuna di Chihaya accesa dalla voce e ancora del giorno di gioco (`fortunaAccesaDallaVoce`);
 //   - gli yen mossi da soli (`yenAutomaticiDellaVoce`, già letti dalla voce), con l'importo davvero mosso (`fraseMovimentoYen`), se togliendo la
 //     spunta tornano (`yenTornano`): un movimento a zero non ha mosso niente. Sono anche nel chip della voce: qui restano nell'elenco completo,
@@ -179,7 +180,13 @@ export function applicatoDallaSpunta(p: number, voceUid: string, fonte: StatoEff
   }
   const quantita = (uid: string): number | undefined => { const e = fonte.effetti.find((x) => x.uid === uid)?.effetto; return e?.tipo === 'articolo' ? e.quantita : undefined; };
   const stati = effettiDiStatoApplicati(p, voceUid, quantita);
-  for (const s of stati) out.push({ id: `stato:${s.effettoUid}`, testo: fraseEffettoConNomi(s.effetto, nomiSenzaPrezzo, { applicato: true }), applicatoIl: s.applicatoIl });
+  // 2026-10-26: della Persona «anche nella scorta» già nel compendio la voce ha aggiunto solo l'esemplare in scorta: si dice solo quello
+  for (const s of stati) {
+    const testo = s.parte === 'scorta' && s.effetto.tipo === 'persona'
+      ? `Aggiunta alla scorta${s.effetto.livello ? ` al livello ${s.effetto.livello}` : ''}: ${nomi.persona(s.effetto.persona) ?? 'la Persona'}`
+      : fraseEffettoConNomi(s.effetto, nomiSenzaPrezzo, { applicato: true });
+    out.push({ id: `stato:${s.effettoUid}${s.parte === 'scorta' ? ':scorta' : ''}`, testo, applicatoIl: s.applicatoIl });
+  }
   const fortuna = fortunaAccesaDallaVoce(p, voceUid);
   if (fortuna) out.push({ id: 'fortuna', testo: fraseEffettoConNomi({ tipo: 'fortuna', dote: fortuna.dote }, nomi, { applicato: true }), applicatoIl: fortuna.accesoIl });
   const richieste = new Set(stati.flatMap((s) => s.effetto.tipo === 'richiesta' ? [s.effetto.richiesta] : []));

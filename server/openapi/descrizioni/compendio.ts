@@ -18,7 +18,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'PUT /api/compendio/percorso/voci/:uid/effetti': {
     sommario: 'Modifica esplicitamente l’intero insieme degli effetti',
     descrizione: 'Corpo strict {revisioneEffettiAttesa,effetti:[{uid,effetto}]}. UID null crea un effetto nuovo. I tre tipi legacy e acquisto passano da un unico writer. L13 (ondata 3): tipi `yen` {importo con segno, non zero; 409 `yen-gia-strutturati` accanto ad articolo, acquisto, pesca o Richiesta; al più uno per voce}, `oggetto` {oggetto, quantita}, `trofeo` {trofeo}, `sblocco` {bersaglio: richiesta|attivita, chiave}; `articolo` accetta `quantita` facoltativa (2–999); `dote.possibili` e `turno.esito` dell’ondata 2. La rimozione di un effetto non cancella fotografie o decisioni personali; le spunte precedenti non vengono rieseguite e ricevono proposte storiche distinte.',
-    risposta: '`StatoEffettiVoceDto`', errori: [[409,'effetti-cambiati']],
+    risposta: '`StatoEffettiVoceDto`; decisione 19, `applicazioni` dice che cosa hanno fatto gli effetti di stato aggiunti, cambiati o tolti nelle partite che hanno la voce spuntata (`ApplicazioneStatoPartitaDto[]`, con `avvisi` quando c\'è da sapere: la Persona entrata nella scorta oltre la capienza, l\'esemplare in scorta che resta perché modificato dopo). 2026-10-26: `persona` accetta `scorta: true` (anche nella scorta) e `livello` (solo con la scorta, non sotto il livello base)', errori: [[409,'effetti-cambiati'],[400,'livello-sotto-base'],[400,'persona-rara-scorta']],
   },
   'GET /api/compendio/percorso/effetti/proposte': {
     sommario: 'Raccordi documentati degli effetti del Diario',
@@ -384,7 +384,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'DELETE /api/compendio/percorso/voci/:uid': {
     sommario: 'Elimina una voce della giornata, per tutte le partite',
     descrizione: 'La voce, la fonte degli effetti e le spunte entrano nel cestino comune. Il motore annulla esattamente le ricevute e le sole provenienze possedute, in tutte le partite, prima della cancellazione; un registro non leggibile provoca rollback. I delta Doti/yen restano proposte esplicite, senza applicazione automatica. La fascia si ricompatta e il ripristino recupera il posto relativo ai vicini.',
-    risposta: 'Nessun contenuto (204)',
+    risposta: 'Nessun contenuto (204); se un annullo lascia qualcosa nella partita (un esemplare in scorta aggiunto dall\'effetto «Persona registrata» e modificato dopo la spunta), 200 con `{ avvisi }`, le frasi da mostrare con il nome della partita',
     errori: [[404, 'voce-non-trovata'], [409, 'ricevuta-spunta-illeggibile']],
   },
 

@@ -25,7 +25,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { normalizzaEffettoVoce, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { statoGiaVero } from './effettiDiStatoService.js';
+import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
@@ -105,7 +105,8 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
       // e torna indietro da sola, senza fermare il censimento delle altre coppie e delle altre partite
       try {
         getDb().transaction(() => {
-          if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(r.partita_id, r.voce_uid, r.effetto_uid)) { c.conRiga += 1; return; }
+          // le righe della voce: per la Persona «anche nella scorta» quella dell'effetto e quella della scorta (2026-10-26, `statoSegnatoDallaVoce`)
+          if (statoSegnatoDallaVoce(r.partita_id, r.voce_uid, r.effetto_uid, e)) { c.conRiga += 1; return; }
           // un articolo in alternativa non scelto: niente da proporre, e una sua proposta aperta di prima non è più dovuta
           if (inAlternativa.get(r.voce_uid)?.has(r.effetto_uid)) { chiudiPropostePassato(r.partita_id, r.voce_uid, r.effetto_uid); c.inAlternativa += 1; return; }
           // già trovata vera da un censimento di prima, con lo stesso effetto: la decisione è presa, anche se poi lo stato è cambiato nella partita
@@ -137,7 +138,7 @@ function contaAperte(p: number, voce: string, effetto: string, soloPassato = fal
 
 /** Perché l'effetto è nell'elenco, a parole: che cosa manca nella partita. */
 function motivoDelPassato(e: EffettoDiStatoVoce): string {
-  const manca = e.tipo === 'persona' ? 'la Persona non è nel Compendio Personale'
+  const manca = e.tipo === 'persona' ? (e.scorta ? 'la Persona non risulta sia nel Compendio Personale sia nella scorta' : 'la Persona non è nel Compendio Personale')
     : e.tipo === 'trofeo' ? 'il trofeo non risulta ottenuto'
       : e.tipo === 'articolo' ? 'l’articolo non risulta comprato'
         : e.tipo === 'oggetto' ? 'l’oggetto non risulta ricevuto'

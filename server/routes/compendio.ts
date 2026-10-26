@@ -201,8 +201,10 @@ router.post('/percorso/voci/trasferisci', validate({ body: bodyTrasferisciVoci, 
   res.json(trasferisciVoci(req.body as TrasferisciVociGiornata, (req.query as unknown as { partita?: number }).partita));
 });
 router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
-  eliminaVoce(String(req.params.uid));
-  res.status(204).end();
+  // 2026-10-26: un esemplare in scorta modificato dopo la spunta resta nella partita: lo si dice (200 con gli avvisi), altrimenti nessun contenuto
+  const avvisi = eliminaVoce(String(req.params.uid));
+  if (avvisi.length) res.json({ avvisi });
+  else res.status(204).end();
 });
 router.get('/negozi', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaNegozi((req.query as unknown as { partita?: number }).partita));

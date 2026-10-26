@@ -8,7 +8,7 @@ import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
-import { statoGiaVero } from './effettiDiStatoService.js';
+import { avvisoScortaPiena, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
@@ -320,7 +320,8 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
  */
 function propostaPassato(partita:number,voce:string,effetto:string,datiJson:string,passato:PassatoDiStato):boolean {
   const causa=`${voce}:${effetto}`;
-  if(prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(partita,voce,effetto))
+  // la voce l'ha già segnato (per la Persona «anche nella scorta», con tutte e due le righe: `statoSegnatoDallaVoce`)
+  if(statoSegnatoDallaVoce(partita,voce,effetto,normalizzaEffettoVoce(leggiJsonRegistro(datiJson,'configurazione effetto'))))
     return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,causa).changes>0;
   const configurazione=leggiOggettoRegistro(datiJson,'configurazione effetto'),firma=improntaDato(configurazione);
   const aperta=prepared("SELECT id,revisione_causa FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").get(partita,causa) as {id:number;revisione_causa:string}|undefined;
@@ -360,6 +361,8 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       // il motivo scritto dal censimento può non valere più (revisione R7): lo stato è stato segnato dopo, a mano o da un'altra voce
       const stato=normalizzaEffettoVoce(dati.effetto);
       if(stato&&eEffettoDiStato(stato)&&stato.tipo!=='oggetto'&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
+      // 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso (la capienza è solo informativa): l'anteprima lo dice
+      else if(stato?.tipo==='persona'&&stato.scorta){const a=avvisoScortaPiena(r.partita_id,stato.persona);if(a)dati.avvisoScorta=a;}
     }
     if(configurazione?.tipo==='acquisto'&&Array.isArray(configurazione.sostituisceDoti))dati.raccordoDoti=configurazione.sostituisceDoti.map((id:unknown)=>{
       if(typeof id!=='string')throw httpErrors.conflict('raccordo-dote-incoerente','L’identità della Dote da raccordare non è valida.');

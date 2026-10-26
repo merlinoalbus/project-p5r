@@ -29,10 +29,11 @@ export function notificaApplicazioni(applicazioni: readonly ApplicazioneStatoPar
   for (const a of applicazioni) {
     const g = perPartita.get(a.partitaId) ?? { nome: a.partitaNome, righe: [] };
     // la frase dell'effetto contiene già i due punti («Trofeo ottenuto: …»): l'esito si stacca con una freccia
-    g.righe.push(`${a.testo} → ${DICITURA[a.esito]}${a.motivo ? ` (${a.motivo})` : ''}`);
+    // 2026-10-26: gli avvisi (la scorta oltre la capienza, l'esemplare in scorta che resta perché modificato dopo) seguono l'esito
+    g.righe.push(`${a.testo} → ${DICITURA[a.esito]}${a.motivo ? ` (${a.motivo})` : ''}${a.avvisi?.length ? ` — ${a.avvisi.map((x) => x.replace(/\.$/, '')).join('; ')}` : ''}`);
     perPartita.set(a.partitaId, g);
   }
-  const nonApplicati = applicazioni.some((a) => a.esito === 'da-approvare' || a.esito === 'fortuna-non-valida' || a.esito === 'non-applicato');
+  const nonApplicati = applicazioni.some((a) => a.esito === 'da-approvare' || a.esito === 'fortuna-non-valida' || a.esito === 'non-applicato' || !!a.avvisi?.length);
   const testo = [...perPartita.values()].map((g) => `«${g.nome}»: ${g.righe.join('; ')}.`).join(' ');
   return { tipo: nonApplicati ? 'warning' : 'info', testo: `Nelle partite che hanno spuntato la voce. ${testo}`, durata: 0 };
 }
