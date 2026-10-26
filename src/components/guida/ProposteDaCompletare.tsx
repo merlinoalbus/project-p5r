@@ -6,7 +6,8 @@
 // preparazione la voce che ne ha mostra un segno discreto «da completare · N»; toccandolo si apre la finestra con le sue proposte. Ogni scheda
 // dice che cosa cambia (tipo, collegamento, effetti aggiunti e tolti, con le frasi di sempre), quanto è certa e perché, e ha tre gesti:
 //   - «Applica»: scrive la voce dal server con la stessa funzione dell'editor; se la proposta chiede di completare un dato (l'elemento fra
-//     quelli indicati, le copie, le note), la scheda lo chiede prima e «Applica» resta spento finché non c'è;
+//     quelli indicati, le copie, le note), la scheda lo chiede prima e «Applica» resta spento finché non c'è; su una voce già spuntata dice
+//     anche che cosa è successo nelle partite (L13, decisione 19: `notificaApplicazioni`, come la finestra della voce);
 //   - «Modifica»: apre la finestra della voce con la proposta già applicata, da rivedere; salvando la proposta risulta applicata;
 //   - «Scarta»: chiede conferma e chiude la proposta, la voce non cambia.
 // Lo stesso componente serve all'elenco «Da completare» (`DaCompletarePage`). Nel rilascio il meccanismo non esiste: la costante di build
@@ -25,6 +26,7 @@ import { CATEGORIA_EFFETTO } from '../../utils/effettiDellaVoce';
 import { useElenchiProposte } from '../../hooks/useProposteDaCompletare';
 import { applicaPropostaConversione, scartaPropostaConversione } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { notificaApplicazioni } from '../../utils/applicazioniEffetti';
 import { conferma } from '../../stores/confermaStore';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { dataGiocoTesto } from '../../utils/dateGioco';
@@ -102,17 +104,27 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
     if (campo) setMancanti((m) => m.map((x, j) => (j === i ? x.filter((c) => c !== campo) : x)));
   };
 
-  const esegui = async (op: () => Promise<unknown>, ok: string) => {
+  // `op` restituisce l'esito del salvataggio nelle partite che hanno già spuntato la voce (L13, decisione 19: gli effetti di stato valgono
+  // subito, e gli yen di un articolo si muovono): detto come nella finestra della voce, anche se la rilettura dell'elenco non riesce
+  const esegui = async (op: () => Promise<ReturnType<typeof notificaApplicazioni>>, ok: string) => {
     setOccupato(true);
-    try { await op(); segnalaMutazioneEffetti(null); notifica('success', ok); await onDecisa(); }
-    catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
+    let registrata = false;
+    try {
+      const esito = await op(); registrata = true;
+      segnalaMutazioneEffetti(null); notifica('success', ok);
+      if (esito) notifica(esito.tipo, esito.testo, esito.durata);
+      await onDecisa();
+    }
+    catch (err) {
+      notifica('error', `${registrata ? 'Proposta registrata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Operazione non riuscita.'}`);
+    }
     finally { setOccupato(false); }
   };
-  const applica = () => void esegui(() => applicaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione, ...(daCompletare ? { effetti: bozze } : {}) }, partitaId ?? undefined),
+  const applica = () => void esegui(async () => notificaApplicazioni((await applicaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione, ...(daCompletare ? { effetti: bozze } : {}) }, partitaId ?? undefined)).voce.applicazioniEffetti),
     'Proposta applicata: voce modificata nella guida, per tutte le partite.');
   const scarta = async () => {
     if (!(await conferma({ titolo: 'Scartare la proposta?', testo: 'La voce resta com’è; la proposta resta registrata come scartata e non torna fra quelle da completare.', etichetta: 'Scarta', icona: 'scarta' }))) return;
-    await esegui(() => scartaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione }), 'Proposta scartata: la voce non cambia.');
+    await esegui(async () => { await scartaPropostaConversione(p.id, { revisionePropostaAttesa: p.revisione }); return null; }, 'Proposta scartata: la voce non cambia.');
   };
 
   return (

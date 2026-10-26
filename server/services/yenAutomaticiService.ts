@@ -233,6 +233,18 @@ export function effettiConYenGiaNelSaldo(p: number, voceUid: string, effetti: re
   return new Set(effetti.filter((e) => yenDellEffettoGiaNelSaldo(p, voceUid, e, inizio, aggiuntiDopo)).map((e) => e.uid));
 }
 /**
+ * L13 (decisione 19, revisione R-Richiesta): vero se l'effetto della voce apparteneva a una spunta fatta prima degli yen automatici (la stessa
+ * lettura di `applicatoPrimaDegliYenAutomatici`: la spunta di prima, l'effetto non aggiunto dopo, nessuna proposta di raccordo aperta). Serve
+ * all'approvazione dell'elenco del passato per la Richiesta, la cui causa vera è la Richiesta stessa (`yenDellEffettoGiaNelSaldo` ne legge lo
+ * stato, che qui non c'è ancora): la sua ricompensa, in quella spunta, era già nel saldo tenuto a mano.
+ */
+export function effettoDiUnaSpuntaDiPrima(p: number, voceUid: string, effettoUid: string): boolean {
+  const inizio = inizioRegistro();
+  if (!inizio) return false;
+  let aggiunti: Set<string> | null = null;
+  return applicatoPrimaDegliYenAutomatici(p, voceUid, effettoUid, inizio, () => (aggiunti ??= effettiAggiuntiDopo(voceUid, inizio)));
+}
+/**
  * Togliendo la spunta di una voce (prima della restituzione e prima di chiudere ricevute e proposte): ogni effetto i cui yen erano già nel saldo
  * da prima (`yenDellEffettoGiaNelSaldo`) resta fuori registro (`voce:effetto`), così rispuntando la stessa voce non muove yen (gli articoli,
  * gli yen, la consumazione, la pesca e il film da `muoviYenAutomatico`; i turni da `scartaYenInCoda` nella spunta). L'effetto «Richiesta» ha il

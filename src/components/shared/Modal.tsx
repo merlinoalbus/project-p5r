@@ -14,7 +14,8 @@
 // Il fuoco (rilievo A5 della verifica completa, 2026-10-03): all'apertura va dentro la finestra (sul
 // campo con `autoFocus` se c'è, altrimenti sulla finestra stessa, così su tablet e telefono non si apre
 // la tastiera); Tab e Maiusc+Tab girano fra gli elementi della finestra invece di uscire sulla
-// pagina sotto; alla chiusura torna all'elemento che l'aveva aperta. Prima restava sulla pagina, e con
+// pagina sotto; alla chiusura torna all'elemento che l'aveva aperta (se non c'è più, alla finestra rimasta sotto o al contenuto
+// della pagina, L13). Prima restava sulla pagina, e con
 // la tastiera o un lettore di schermo la finestra si raggiungeva solo per caso.
 // ============================================================
 
@@ -115,7 +116,13 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
       // solo a finestra davvero chiusa: nello smontaggio simulato di React StrictMode (sviluppo) la finestra è ancora nel
       // documento, e ridare il fuoco al pulsante lì faceva perdere il campo con `autoFocus` al rimontaggio
       if (el?.isConnected) return;
-      if (daRidare && daRidare.isConnected) daRidare.focus();
+      if (daRidare && daRidare.isConnected) { daRidare.focus(); return; }
+      // chi l'ha aperta non c'è più (L13, revisione R2: il pulsante «Da approvare · N» sparisce con l'elenco vuoto): il fuoco non resta perso su
+      // <body>, va alla finestra rimasta sotto (la più in alto) o al contenuto della pagina; mai se qualcosa l'ha già preso
+      const attivo = document.activeElement;
+      if (attivo && attivo !== document.body && attivo.isConnected) return;
+      const sotto = [...document.querySelectorAll<HTMLElement>('.modal-content')].pop() ?? document.getElementById('contenuto');
+      sotto?.focus({ preventScroll: true });
     };
   }, [aperta]);
 

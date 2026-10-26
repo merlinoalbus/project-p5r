@@ -72,20 +72,22 @@ export interface StatoEffettiVoceDto {
 /**
  * L13 (decisione 19): l'esito, in una partita che ha già spuntato la voce, di un effetto di stato aggiunto, cambiato o tolto nella guida.
  * `segnato`: vale adesso; `annullato`: la versione tolta è tornata com'era; `gia-presente`: era già vero (togliendo la spunta resta);
- * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita.
- * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida` e `da-approvare`).
- * Il salvataggio dalla finestra della voce lo riporta in `AzionePercorsoDto.applicazioniEffetti`, e la finestra lo notifica.
+ * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita;
+ * `non-applicato`: il dominio l'ha rifiutato adesso, e non è in elenco perché l'utente ne aveva già tolto la stessa configurazione.
+ * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida`, `da-approvare` e `non-applicato`).
+ * Il salvataggio della voce (finestra della voce, proposta «da completare» applicata, candidato confermato) lo riporta nella risposta
+ * (`AzionePercorsoDto.applicazioniEffetti`, `StatoEffettiVoceDto.applicazioni`), e chi salva lo notifica (`src/utils/applicazioniEffetti.ts`).
  */
 export interface ApplicazioneStatoPartitaDto {
   partitaId: number; partitaNome: string; effettoUid: string;
-  esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare';
+  esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare' | 'non-applicato';
   testo: string;
   motivo?: string;
 }
 /**
  * L13 (decisione 19): lo stato di un effetto di stato di una voce spuntata nella partita, per le ricevute della voce. `segnato`: la spunta (o il
  * salvataggio, o l'approvazione) lo ha scritto, con il suo «prima»; `gia-presente`: c'era già, nessuna riga; `da-approvare`: è nell'elenco della
- * partita; `non-applicato`: non c'è e non è in elenco (scartato con «L'ho già segnato a mano», o un articolo non disponibile al momento della spunta).
+ * partita; `non-applicato`: non c'è e non è in elenco (tolto dall'elenco con «Non applicare», o un articolo non disponibile al momento della spunta).
  */
 export interface StatoEffettoDiStatoDto {
   effettoUid: string; esito: 'segnato' | 'gia-presente' | 'da-approvare' | 'non-applicato'; testo: string;

@@ -83,13 +83,14 @@ export function PartitaPage() {
               {/* per primo: sul telefono e sul tablet la fila scorre, e in fondo «Modifica» restava fuori schermo */}
               <PulsanteVisivo id="modifica-dati-partita" tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica"
                 aria-label="Modifica i dati della partita" onClick={() => setModifica(true)} />
+              {/* L13 (decisione 19): gli effetti delle voci già spuntate mai applicati, da approvare; c'è solo se ce ne sono. Subito dopo «Modifica»
+                  (revisione R8): sul telefono la fila scorre, e dopo i dati restava fuori schermo */}
+              <DaApprovareStati key={attiva.id} partitaId={attiva.id} />
               <span className="chip">Liv. {attiva.livelloProtagonista}</span>
               {/* la data in forma italiana («9 aprile»), come nel resto dell'app: «04-09» si leggeva «4 settembre» (lotto C) */}
               {attiva.dataGioco && <span className="chip">{dataGiocoTesto(attiva.dataGioco)}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
-              {/* L13 (decisione 19): gli effetti delle voci già spuntate mai applicati, da approvare; c'è solo se ce ne sono */}
-              <DaApprovareStati key={attiva.id} partitaId={attiva.id} />
               {/* le scorciatoie della scuola seguono il giorno guardato nella scheda «Oggi» (scelta dell'utente, 2026-10-11); la chiave
                   resta sulla data di gioco: scorrere i giorni filtra gli elenchi già caricati, non li rilegge */}
               <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} giorno={giornoScuola} />

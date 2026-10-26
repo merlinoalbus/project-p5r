@@ -64,13 +64,13 @@ export function RicevuteVoce({ ricevute = [], stati = [], voce }: { ricevute: re
   const idVoce = useId();
   if (!ricevute.length && !stati.length) return null;
   const n = ricevute.length + stati.length;
-  // con soli stati (nessuna ricevuta) la finestra si chiama come ciò che mostra
-  const nome = ricevute.length ? 'Ricevute della spunta' : STATI_NELLA_PARTITA;
+  // la finestra (e il pulsante) si chiamano come ciò che mostrano: il numero conta ricevute ed effetti di stato insieme (revisione R5)
+  const nome = ricevute.length && stati.length ? 'Ricevute ed effetti di stato' : ricevute.length ? 'Ricevute della spunta' : STATI_NELLA_PARTITA;
   const breve = `${nome} (${n})`;
   const inizio = inizioDellaVoce(voce);
   return (
     <>
-      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`${ricevute.length ? 'Ricevute degli effetti della spunta' : nome} (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
+      <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`${ricevute.length && !stati.length ? 'Ricevute degli effetti della spunta' : nome} (${n}): ${inizio.testo}`} title={breve} onClick={() => setAperta(true)}>
         <IconaAzione chiave="ricevute" dimensione={20} />
         <span className="conteggio-pulsante" aria-hidden="true">{n}</span>
       </button>

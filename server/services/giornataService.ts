@@ -895,6 +895,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       // chi è stato disfatto col vecchio annullo ha cambiato i valori fuori dal registro: la sua base riparte da qui
       for (const chiave of confidentiAnnullatiAlVecchioModo(ricevutaDellaSpunta, eventiTolti)) nuovaGenerazione(partitaId, chiave);
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
+      // L13 (decisione 19, revisione B1): il registro del censimento è della spunta: tolta lei, la spunta rifatta si rivaluta da capo (un «già vero»
+      // di allora non deve nascondere uno stato che nel frattempo l'utente ha tolto)
+      prepared('DELETE FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
       revocaEventiDellaVoce(partitaId, uid); // R10-22: solo gli eventi col legame esplicito alla voce; gli eventi storici (voce_uid nullo) restano
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);

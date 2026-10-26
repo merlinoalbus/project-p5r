@@ -152,11 +152,11 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       segnalaMutazioneEffetti(null);
       await onSalvato();
       notifica('success', proposta ? 'Proposta applicata: voce modificata nella guida, per tutte le partite.' : voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
-      if (esito) notifica(esito.tipo, esito.testo);
+      if (esito) notifica(esito.tipo, esito.testo, esito.durata);
       onChiudi();
     } catch (err) {
       notifica('error', `${registrata ? 'Voce salvata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Salvataggio non riuscito.'}`);
-      if (registrata && esito) notifica(esito.tipo, esito.testo);
+      if (registrata && esito) notifica(esito.tipo, esito.testo, esito.durata);
       if (registrata) onChiudi();
     } finally {
       scrittura.current = false;

@@ -5,7 +5,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { MOTIVO_VOCE_ELIMINATA, conCodaRipristinabile, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, segnaYenFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conCodaRipristinabile, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo, effettoDiUnaSpuntaDiPrima, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, segnaYenFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { conVoceDellaSpunta } from './storicoService.js';
 import { avanzaDopoChiusuraAutomatica, type PropostaDecisa } from './avanzamentoGiornataService.js';
 import { altraVoceHaLArticolo, sfideNonPagate, turnoHaPagatoLArticolo } from './sfideDellaVoce.js';
@@ -17,7 +17,7 @@ import type { EffettiAzioneDto } from '../../shared/types.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { annullaFontiDiarioNellaTransazione, anteprimaRegistrazioneAcquisto, registraAcquistoNellaTransazione, verificaOffertaConsumo, type PorteDisponibilitaAcquisto } from './acquistiService.js';
 import { accendiFortunaDaVoce, spegniFortunaDaVoce } from './fortunaService.js';
-import { applicaEffettiDiStato, annullaEffettiDiStato, annullaEffettoDiStato, applicaUnEffettoDiStato, verificaEffettoDiStato } from './effettiDiStatoService.js';
+import { applicaEffettiDiStato, annullaEffettiDiStato, annullaEffettoDiStato, applicaUnEffettoDiStato, statoGiaVero, verificaEffettoDiStato } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico, improntaDato, jsonCanonico, leggiJsonRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiVoce, verificaBeneficio, saldoDoteVoce, trasferisciAttribuzioneDote } from './propostePartitaService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riconciliaRegistroDopoRipristino, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
@@ -273,6 +273,21 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
     // la nozione unica degli yen già nel saldo, letta sulla versione di prima PRIMA di annullarla (dopo, la sua riga non c'è più)
     const vecchioGiaNelSaldo=c.vecchio?.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:c.effettoUid,tipo:'articolo',chiave:null}]).has(c.effettoUid);
     if(chiudiPropostePassato(p,uid,c.effettoUid))chiusa(decisa);
+    // solo le copie dello stesso articolo, già segnato nella partita (revisione M1): lo stato resta com'è (annullarlo e rifarlo manderebbe
+    // l'acquisto nel cestino e lo riscriverebbe), cambiano solo gli yen, con le regole di sempre: il movimento di prima torna e il nuovo si muove
+    if(c.vecchio?.tipo==='articolo'&&c.nuovo?.effetto.tipo==='articolo'&&c.vecchio.articolo===c.nuovo.effetto.articolo){
+      const riga=prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,c.effettoUid) as {prima_json:string}|undefined;
+      if(riga){
+        const nuovo=c.nuovo,articolo=c.nuovo.effetto;
+        getDb().transaction(()=>conCodaRipristinabile(()=>conVoceDellaSpunta(uid,()=>{
+          restituisciYenAutomatico(p,causa,'versione-sostituita');
+          yenDellArticoloSuVoceSpuntata(p,uid,nuovo,vecchioGiaNelSaldo);
+        })))();
+        const gia=leggiJsonRegistro<{gia?:boolean}|null>(riga.prima_json,'stato prima dell’acquisto')?.gia===true;
+        esito(c.effettoUid,gia?'gia-presente':'segnato',fraseDelloStato(articolo));
+        continue;
+      }
+    }
     if(c.vecchio){
       const vecchio=c.vecchio;
       // c'era davvero qualcosa da annullare? (un effetto mai applicato, come un invito rifiutato o una Fortuna fuori giorno, non si «toglie»)
@@ -314,7 +329,9 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
     } catch(err) {
       if(!(err instanceof HttpError)||err.status>=500)throw err;
       creaPropostaEffettoStorico(p,uid,c.effettoUid,undefined,{passato:{descrizione:fraseDelloStato(e),motivo:`Non applicato al salvataggio della voce: ${err.message}`}});
-      esito(c.effettoUid,'da-approvare',fraseDelloStato(e),err.message);
+      // «da approvare» solo se la proposta c'è davvero (revisione B2): una con la stessa configurazione già tolta dall'utente dall'elenco non torna
+      const inElenco=!!prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").get(p,causa.chiave);
+      esito(c.effettoUid,inElenco?'da-approvare':'non-applicato',fraseDelloStato(e),inElenco?err.message:`${err.message}; non torna nell’elenco della partita, perché l’avevi già tolto`);
     }
   }
   yenDelleSfideRimaste(p,uid,articoliRestituiti);
@@ -671,6 +688,12 @@ function applicaStatoDelPassato(p:number,uid:string,e:EffettoVoceDto&{effetto:Ef
   if(prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid))throw httpErrors.conflict('effetto-gia-applicato','Questo effetto è già segnato nella partita.');
   // la nozione unica, letta PRIMA di scrivere la riga dello stato (dopo, la riga nata adesso direbbe «applicato dopo»)
   const giaNelSaldo=e.effetto.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:e.uid,tipo:'articolo',chiave:null}]).has(e.uid);
+  // la Richiesta (revisione della decisione 19): completarla adesso farebbe entrare da sola la ricompensa (`riallineaYenRichiesta`); in una spunta
+  // di prima degli yen automatici quella ricompensa era già nel saldo tenuto a mano, come gli altri effetti della stessa spunta, e non si conta di
+  // nuovo: la Richiesta si segna fuori registro prima di completarla (la stessa lettura dell'anteprima, `sfideDellaVoce.ricompensaGiaNelSaldo`).
+  // Le proposte «Applica» di prima ancora in sospeso restano al loro registro e non si segnano
+  if(e.effetto.tipo==='richiesta'&&!statoGiaVero(p,e.effetto)&&!yenPropostiInSospeso(p,'richiesta',e.effetto.richiesta)&&effettoDiUnaSpuntaDiPrima(p,uid,e.uid))
+    segnaYenFuoriRegistro(p,{tipo:'richiesta',chiave:e.effetto.richiesta},'stato-di-prima');
   conVoceDellaSpunta(uid,()=>{
     applicaUnEffettoDiStato(p,uid,e.uid,e.effetto,{senzaDisponibilita:true});
     // gli yen con le regole della spunta anche se l'articolo risultava già comprato (`yenDellArticoloSuVoceSpuntata`; l'anteprima, con le stesse

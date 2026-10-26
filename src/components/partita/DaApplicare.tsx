@@ -21,8 +21,13 @@ const unita = (u: PropostaPartitaDto['unita']) => u === 'punti-interni' ? 'punti
 const valore = (p: PropostaPartitaDto) => `${p.delta > 0 ? '+' : ''}${p.delta.toLocaleString('it-IT')} ${unita(p.unita)}`;
 const nome = (p: PropostaPartitaDto) => p.dote ? nomeDote(p.dote) : p.tipo === 'yen' ? 'Denaro' : p.tipo === 'punti-pesca' ? 'Punti pesca'
   : delPassato(p) && typeof p.dati.descrizione === 'string' ? p.dati.descrizione : 'Effetto della voce';
-/** Gli yen che l'approvazione di un articolo del passato scalerà (0: erano già nel saldo); null se non è un articolo del passato. */
+/** Il movimento sul saldo che l'approvazione di un effetto del passato farà (negativo: il prezzo di un articolo; positivo: la ricompensa di una
+ *  Richiesta; 0: nessuno); null se l'effetto non muove yen. */
 const yenPrevisti = (p: PropostaPartitaDto): number | null => delPassato(p) && typeof p.dati.yenPrevisti === 'number' ? p.dati.yenPrevisti : null;
+/** Il movimento previsto a parole («Approvandolo si scalano ¥500…»); con 0 solo che non cambiano (i motivi sono più d'uno: già nel saldo, sfida
+ *  pagata dal turno, già comprato, già completata). */
+const testoYenPrevisti = (y: number, inizio: string): string => y < 0 ? `${inizio}si scalano ¥${(-y).toLocaleString('it-IT')} dal saldo (mai sotto zero).`
+  : y > 0 ? `${inizio}entrano ¥${y.toLocaleString('it-IT')} nel saldo.` : 'Gli yen non cambiano.';
 /** Il titolo della proposta: il giorno e il testo della voce da cui nasce («18 aprile · Hai bevuto un Aojiru»). */
 const titolo = (p: PropostaPartitaDto) => [typeof p.dati.giorno === 'string' ? dataLeggibile(p.dati.giorno) : null, p.voceTesto ?? null].filter(Boolean).join(' · ') || 'Voce del Diario';
 const dicituraDecisione: Record<DecisioneProposte['tipo'], string> = {
@@ -61,6 +66,31 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
     ? (elenco.dati ?? []).filter((p) => delPassato(p) && p.stato === 'aperta').sort((a, b) => String(a.dati.giorno ?? '').localeCompare(String(b.dati.giorno ?? '')) || (a.voceTesto ?? '').localeCompare(b.voceTesto ?? '') || a.id - b.id)
     : (elenco.dati ?? []).filter((p) => (richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
   const aperte = dellaVoce.filter((p) => p.stato === 'aperta');
+  // L13 (revisione R2, WCAG 2.4.3): decisa una proposta, la sua riga esce dall'elenco con il pulsante che aveva aperto «Confermi?», e il fuoco
+  // finiva su <body> (fuori anche dalla finestra «Da approvare nella partita»). Quando l'elenco cambia dopo una decisione e il fuoco è andato
+  // perso, va subito alla finestra che contiene l'elenco (o all'elenco stesso), e appena i pulsanti tornano attivi (finita la rilettura) al primo
+  // pulsante della prima voce rimasta: si continua con la tastiera da dove si era
+  const sezione = useRef<HTMLElement | null>(null);
+  const fuoco = useRef<{ fase: 'decisa'; elenco: string } | { fase: 'ripiego'; dove: HTMLElement } | null>(null);
+  const chiaveAperte = aperte.map((p) => p.uid).join(',');
+  useLayoutEffect(() => {
+    const f = fuoco.current, s = sezione.current;
+    if (!f || !s) return;
+    if (f.fase === 'decisa') {
+      if (f.elenco === chiaveAperte) return;
+      const attivo = document.activeElement, dove = s.closest<HTMLElement>('.modal-content') ?? s;
+      // la finestra stessa conta come fuoco perso: è dove lo mette `Modal` quando il pulsante che aveva aperto «Confermi?» non c'è più
+      if (attivo && attivo !== document.body && attivo !== dove && attivo.isConnected) { fuoco.current = null; return; }
+      if (attivo !== dove) dove.focus();
+      fuoco.current = { fase: 'ripiego', dove };
+    }
+    const r = fuoco.current;
+    if (r?.fase !== 'ripiego' || occupato) return;
+    fuoco.current = null;
+    // solo i pulsanti delle proposte (non quelli del registro dei gesti, che sta nella stessa sezione)
+    const primo = s.querySelector<HTMLElement>('[data-elenco-proposte] > li button:not([disabled])');
+    if (primo && document.activeElement === r.dove) primo.focus();
+  }, [chiaveAperte, occupato]);
   /** Annulla il non ancora contato e applica: chi preme «Applica» dice implicitamente che i punti non sono ancora nel saldo. */
   const applica = async (p: PropostaPartitaDto) => {
     if (blocco.current) return;
@@ -100,6 +130,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
       const riguardaPesca = anteprima.proposte.some(p => p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca');
       const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
       registrata = true;
+      fuoco.current = { fase: 'decisa', elenco: aperte.map((p) => p.uid).join(',') };
       // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
       if (vivo.current) {
         setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
@@ -126,25 +157,28 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
   const uidVoce = consumo && typeof consumo.dati.voceUid === 'string' ? consumo.dati.voceUid : null;
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
-  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
+  return <section ref={sezione} tabIndex={-1} className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
     {!!aperte.length && <>
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p, i) => {
+      <ul className="m-0 flex list-none flex-col gap-2 p-0" data-elenco-proposte="">{aperte.map((p, i) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
         // nell'elenco del passato il giorno e la voce fanno da intestazione del gruppo (una volta per voce)
         const gruppo = passati && (i === 0 || titolo(aperte[i - 1]!) !== titolo(p)) ? titolo(p) : null;
+        const giornoGruppo = typeof p.dati.giorno === 'string' ? dataLeggibile(p.dati.giorno) : null;
         const previsti = yenPrevisti(p);
         return <li key={p.uid} className={`flex min-w-0 flex-col gap-1 testo-13 ${gruppo && i > 0 ? 'mt-2 border-t border-border pt-2' : ''}`}>
-          {gruppo && <span className="font-display testo-13 uppercase tracking-wide text-primary-testo break-words text-pretty">{gruppo}</span>}
+          {/* un'intestazione vera (i lettori di schermo ci saltano), in maiuscolo solo il giorno: il testo intero della voce resta leggibile */}
+          {gruppo && <h3 className="m-0 testo-13 font-semibold break-words text-pretty">{giornoGruppo ? <><span className="font-display uppercase tracking-wide text-primary-testo">{giornoGruppo}</span>{p.voceTesto ? ` · ${p.voceTesto}` : ''}</> : gruppo}</h3>}
           {(() => {
             // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
             const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
             return <span className="testo-14"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
           })()}
-          <span className="text-pretty">{p.motivo}</span>
-          {previsti !== null && <span className="testo-12 text-text-secondary tabular-nums">{previsti > 0 ? `Approvandolo si scalano ¥${previsti.toLocaleString('it-IT')} dal saldo (mai sotto zero).` : 'Gli yen non cambiano: il prezzo era già nel saldo.'}</span>}
+          {/* il motivo del censimento non vale più se lo stato è stato segnato dopo (revisione R7): lo dice il server, letto adesso */}
+          <span className="text-pretty">{delPassato(p) && p.dati.oraGiaVero === true ? 'Ora risulta già vero in questa partita (segnato dopo): applicandolo lo stato non cambia, la voce lo ricorda fra i suoi effetti.' : p.motivo}</span>
+          {previsti !== null && <span className="testo-12 text-text-secondary tabular-nums">{testoYenPrevisti(previsti, 'Approvandolo ')}</span>}
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Costo del consumo: ¥{p.promemoriaYen.toLocaleString('it-IT')}</span>}
           {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {
@@ -163,7 +197,8 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
                   <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={etichetta} disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)} />
                   {!inverso && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) })} />}
                 </>}
-                {p.tipo === 'effetto-voce' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })} />}
+                {/* L13 (revisione R3): per l'elenco del passato il rifiuto ha un nome vero in ogni caso (già segnato a mano, o mai fatto in partita) */}
+                {p.tipo === 'effetto-voce' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={delPassato(p) ? 'scarta' : 'raggiunto'} dimensione={20} />} titolo={delPassato(p) ? 'Non applicare' : 'L’ho già segnato a mano'} disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })} />}
               </div>
             </>;
           })()}
@@ -191,12 +226,11 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
       <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : 'Conferma'} disabled={occupato} onClick={() => void conferma()} />
     </>}>
       {anteprima && <div className="flex flex-col gap-2 testo-13">
-        <strong>{dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>
+        <strong>{anteprima.richiesta.decisione.tipo === 'scarta' && anteprima.proposte.length > 0 && anteprima.proposte.every(delPassato) ? 'Non applicare: esce dall’elenco, la partita non cambia' : dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>
         <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{titolo(p)} · {nome(p)}{p.tipo === 'effetto-voce' ? '' : ` ${valore(p)}`}</li>)}</ul>
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.acquisto && <RiepilogoConsumoPreparato consumo={anteprima.richiesta.decisione.acquisto} />}
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.pesca && <RiepilogoSessionePreparata richiesta={anteprima.richiesta.decisione.pesca} sessioneFotografata={anteprima.fotografiaSessionePesca} />}
-        {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.proposte.some((p) => (yenPrevisti(p) ?? 0) > 0) ? <p className="m-0 tabular-nums">Denaro: si scalano ¥{anteprima.proposte.reduce((s, p) => s + (yenPrevisti(p) ?? 0), 0).toLocaleString('it-IT')} dal saldo (mai sotto zero).</p>
-          : anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.proposte.some((p) => yenPrevisti(p) === 0) ? <p className="m-0">Gli yen non cambiano: il prezzo era già nel saldo.</p>
+        {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.proposte.some((p) => yenPrevisti(p) !== null) ? <p className="m-0 tabular-nums">{testoYenPrevisti(anteprima.proposte.reduce((s, p) => s + (yenPrevisti(p) ?? 0), 0), 'Denaro: ')}</p>
           : anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}><strong>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')}</strong> ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti'})</li>)}</ul> : <p className="m-0">Non cambia nessun punteggio.</p>}
         {anteprima.richiesta.decisione.tipo === 'gia-conteggiata' && <p className="m-0">Segno che {anteprima.richiesta.decisione.quantita} punti sono già nel tuo saldo: non ne aggiungo altri.</p>}
         {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}

@@ -11,7 +11,7 @@
 // spunta) senza la riga del «prima» (`utente.effetto_stato_voce`, che la spunta scrive per ogni effetto applicato):
 //   - lo stato è già vero nella partita (la stessa lettura della spunta, `statoGiaVero`): non c'è niente da proporre, solo il registro;
 //   - altrimenti entra nell'elenco della partita: una proposta «da applicare» (`dati.passato`), con le stesse guardie delle altre (una aperta
-//     con la stessa configurazione resta, una scartata dall'utente con «L'ho già segnato a mano» non torna). Si applica solo con «Applica alla
+//     con la stessa configurazione resta, una tolta dall'utente con «Non applicare» non torna). Si applica solo con «Applica alla
 //     partita» (`motoreDiario.applicaStatoDelPassato`).
 // Il registro (`utente.censimento_stato_voce`, utente 050) tiene l'esito per coppia, ed è una decisione presa una volta sola: una coppia trovata
 // «già vera» (con lo stesso effetto: tipo e chiave) non si rivaluta più, così uno stato che l'utente toglie dopo (una Persona consumata in una
@@ -42,6 +42,10 @@ export interface CensimentoPartita {
   invariate: number;
   /** Effetti della voce che non si riconoscono come effetti di stato (la configurazione salvata non è leggibile per intero): non entrano. */
   nonRiconosciuti: number;
+  /** Coppie il cui esame non è riuscito (un registro illeggibile): tornate indietro da sole, le altre proseguono; il prossimo giro le riprova. */
+  errori: number;
+  /** Il motivo del primo errore della partita, per il log (testo del dominio, mai nomi né email). */
+  primoErrore?: string;
 }
 
 interface RigaCandidato { partita_id: number; voce_uid: string; effetto_uid: string; tipo: string; chiave: string | null; dati_json: string; fatta_at: string; data: string; azione: string }
@@ -49,7 +53,8 @@ interface RigaCandidato { partita_id: number; voce_uid: string; effetto_uid: str
 const leggi = (json: string): unknown => { try { return JSON.parse(json) as unknown; } catch { return null; } };
 
 /**
- * Il censimento: vedi l'intestazione del file. Scrive solo le proposte «da applicare» e il registro, dentro UNA transazione: o tutto o niente.
+ * Il censimento: vedi l'intestazione del file. Scrive solo le proposte «da applicare» e il registro, dentro UNA transazione, con un savepoint per
+ * coppia: una coppia che non si esamina torna indietro da sola e si conta in `errori`, le altre restano.
  * Una voce con la fonte non convertita o un effetto non riconoscibile non entra (si vede già «da correggere» sulla voce).
  */
 export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
@@ -64,7 +69,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
       let c = perPartita.get(p);
-      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, nonRiconosciuti: 0 }; perPartita.set(p, c); }
+      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, nonRiconosciuti: 0, errori: 0 }; perPartita.set(p, c); }
       return c;
     };
     const nomi = nomiFraseEffetto(), adesso = nowIso();
@@ -79,17 +84,27 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
       if (!e || !eEffettoDiStato(e) || e.tipo !== r.tipo) { conta(r.partita_id).nonRiconosciuti += 1; continue; }
       const c = conta(r.partita_id);
       c.spunteConStati += 1;
-      if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(r.partita_id, r.voce_uid, r.effetto_uid)) { c.conRiga += 1; continue; }
-      // già trovata vera da un censimento di prima, con lo stesso effetto: la decisione è presa, anche se poi lo stato è cambiato nella partita
-      if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
-        .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.giaPresenti += 1; continue; }
-      // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
-      if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { c.giaPresenti += 1; registra(r, 'gia-presente'); continue; }
-      const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
-      creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(e) }, senzaAvanzamento: true });
-      const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
-      if (aperteDopo > 0) registra(r, 'proposta');
-      if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;
+      // ogni coppia nel suo savepoint (revisione B3): una riga che non si legge (un registro illeggibile della proposta) si conta in `errori`
+      // e torna indietro da sola, senza fermare il censimento delle altre coppie e delle altre partite
+      try {
+        getDb().transaction(() => {
+          if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(r.partita_id, r.voce_uid, r.effetto_uid)) { c.conRiga += 1; return; }
+          // già trovata vera da un censimento di prima, con lo stesso effetto: la decisione è presa, anche se poi lo stato è cambiato nella partita
+          // (togliendo la spunta della voce il registro della coppia se ne va: `giornataService`, la spunta rifatta si rivaluta)
+          if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
+            .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.giaPresenti += 1; return; }
+          // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
+          if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
+          const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
+          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(e) }, senzaAvanzamento: true });
+          const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
+          if (aperteDopo > 0) registra(r, 'proposta');
+          if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;
+        })();
+      } catch (err) {
+        c.errori += 1;
+        c.primoErrore ??= err instanceof Error ? err.message : String(err);
+      }
     }
     return { partite: [...perPartita.values()] };
   })();

@@ -7,14 +7,15 @@
 // di un turno della stessa voce che compra quell'articolo (la Big Bang Burger) si paga una volta sola, dall'articolo. Dalla decisione 19 un
 // articolo si segna anche fuori dalla spunta, su una voce già spuntata (salvataggio della guida, approvazione dell'elenco del passato): lì il
 // turno ha già mosso i suoi yen, e la regola si legge da ciò che è in vigore. Qui le letture comuni, perché salvataggio, approvazione e
-// anteprima dell'approvazione dicano la stessa cosa della spunta.
+// anteprima dell'approvazione dicano la stessa cosa della spunta. Per l'anteprima vale anche la ricompensa di una Richiesta dell'elenco del
+// passato (`ricompensaGiaNelSaldo`: in una spunta di prima degli yen automatici era già nel saldo tenuto a mano, e non si conta di nuovo).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { normalizzaEffettoVoce, eEffettoDiStato } from '../../shared/effettiVoce.js';
 import { yenDellaSfidaDelTurno } from './attivitaService.js';
-import { effettiConYenGiaNelSaldo, yenAutomaticoAttivo, yenFuoriRegistro } from './yenAutomaticiService.js';
+import { effettiConYenGiaNelSaldo, effettoDiUnaSpuntaDiPrima, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { statoGiaVero } from './effettiDiStatoService.js';
 
 /** Un turno con la sfida di un articolo, registrato dalla spunta della voce: `effettoUid` dell'effetto «turno» (null per le spunte di prima
@@ -77,18 +78,41 @@ export function altraVoceHaLArticolo(p: number, articolo: string, voceUid: strin
 }
 
 /**
- * L'anteprima dell'approvazione di un articolo dell'elenco del passato: gli yen che «Applica alla partita» scalerà (0 se nessuno), con le
- * stesse regole di `motoreDiario.applicaStatoDelPassato` → `yenDellArticoloSuVoceSpuntata`: niente se erano già nel saldo da prima (decisione
- * 18) o fuori registro, se un turno della voce ha pagato la sfida, se l'articolo risulta già comprato e nessun'altra voce lo ha segnato (lo
- * stesso acquisto, già pagato); altrimenti prezzo × copie (il saldo non scende mai sotto zero).
+ * L'anteprima dell'approvazione di un effetto dell'elenco del passato che muove yen: il movimento che «Applica alla partita» farà sul saldo, con
+ * il segno (negativo: si scalano; positivo: entrano; 0: nessuno), o null se l'effetto non muove yen. Le stesse regole dell'approvazione
+ * (`motoreDiario.applicaStatoDelPassato`):
+ *   - l'articolo (`yenDellArticoloSuVoceSpuntata`): niente se erano già nel saldo da prima (decisione 18) o fuori registro, se un turno della voce
+ *     ha pagato la sfida, se l'articolo risulta già comprato e nessun'altra voce lo ha segnato (lo stesso acquisto, già pagato); altrimenti
+ *     − prezzo × copie (il saldo non scende mai sotto zero);
+ *   - la Richiesta con una ricompensa (`richiesteService.impostaStatoRichiesta` → `riallineaYenRichiesta`): niente se risulta già completata, se
+ *     la spunta è di prima degli yen automatici (la ricompensa era già nel saldo tenuto a mano: l'approvazione la segna fuori registro), se è fuori
+ *     registro, se ha già un movimento o yen proposti in sospeso; altrimenti + la ricompensa (al più fino al tetto).
  */
-export function yenPrevistiApprovando(p: number, voceUid: string, effettoUid: string, configurazione: unknown): number {
+export function yenPrevistiApprovando(p: number, voceUid: string, effettoUid: string, configurazione: unknown): number | null {
   const e = normalizzaEffettoVoce(configurazione);
-  if (!e || e.tipo !== 'articolo' || !eEffettoDiStato(e)) return 0;
+  if (!e || !eEffettoDiStato(e)) return null;
+  if (e.tipo === 'richiesta') {
+    const yen = (prepared('SELECT yen FROM main.richiesta WHERE chiave = ?').get(e.richiesta) as { yen: number | null } | undefined)?.yen ?? null;
+    if (yen == null || !Number.isSafeInteger(yen) || yen <= 0) return null;
+    const causaRichiesta = { tipo: 'richiesta' as const, chiave: e.richiesta };
+    if (statoGiaVero(p, e) || ricompensaGiaNelSaldo(p, voceUid, effettoUid, e.richiesta) || yenAutomaticoAttivo(p, causaRichiesta)) return 0;
+    return yen;
+  }
+  if (e.tipo !== 'articolo') return null;
   const causa = { tipo: 'voce' as const, chiave: `${voceUid}:${effettoUid}` };
   if (yenFuoriRegistro(p, causa) || effettiConYenGiaNelSaldo(p, voceUid, [{ uid: effettoUid, tipo: 'articolo', chiave: null }]).has(effettoUid)) return 0;
   if (turnoHaPagatoLArticolo(p, voceUid, e.articolo)) return 0;
   if (statoGiaVero(p, e) && !altraVoceHaLArticolo(p, e.articolo, voceUid)) return 0;
   const prezzo = (prepared('SELECT prezzo FROM main.articolo WHERE chiave = ?').get(e.articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
-  return prezzo != null && prezzo > 0 ? prezzo * (e.quantita ?? 1) : 0;
+  return prezzo != null && prezzo > 0 ? -prezzo * (e.quantita ?? 1) : 0;
+}
+
+/**
+ * La ricompensa della Richiesta di un effetto dell'elenco del passato non va contata di nuovo approvandolo: la spunta della voce è di prima degli
+ * yen automatici (il saldo tenuto a mano la conteneva già, come gli altri effetti della stessa spunta: `effettoDiUnaSpuntaDiPrima`), la Richiesta
+ * è già fuori registro, o ha yen proposti in sospeso (restano al loro registro). La usano l'approvazione (che allora segna la Richiesta fuori
+ * registro prima di completarla) e la sua anteprima: dicono la stessa cosa.
+ */
+export function ricompensaGiaNelSaldo(p: number, voceUid: string, effettoUid: string, richiesta: string): boolean {
+  return yenFuoriRegistro(p, { tipo: 'richiesta', chiave: richiesta }) || yenPropostiInSospeso(p, 'richiesta', richiesta) || effettoDiUnaSpuntaDiPrima(p, voceUid, effettoUid);
 }

@@ -88,6 +88,8 @@ try {
   const { partite } = proponiStatiMancanti();
   const conProposte = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0);
   if (conProposte.length) logger.info({ partite: conProposte }, 'effetti di stato mai applicati: nuove proposte nell\'elenco da approvare');
+  const conErrori = partite.filter((p) => p.errori > 0);
+  if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento degli effetti di stato: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');
 } catch (err) {
   logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento degli effetti di stato mai applicati non riuscito (l\'avvio prosegue)');
 }

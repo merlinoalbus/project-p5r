@@ -1,13 +1,14 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { avanzaDopoChiusuraAutomatica, avanzaUnaVoltaAllaFine, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
 import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
+import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
+import { statoGiaVero } from './effettiDiStatoService.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
@@ -349,9 +350,17 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       else if(!prepared('SELECT 1 FROM utente.effetto_applicato WHERE partita_id=? AND id=? AND voce_uid=? AND effetto_uid=? AND annullato_il IS NULL').get(r.partita_id,dati.ricevutaPrecedente,voce,effetto))impedimenti.push('La ricevuta della versione precedente è cambiata.');
     }
     const configurazione=dati.effetto as {tipo?:unknown;sostituisceDoti?:unknown}|undefined;
-    // L13 (decisione 19): l'anteprima dell'approvazione di un articolo dell'elenco del passato dice gli yen che si scaleranno (`yenPrevisti`, 0 = gli
-    // yen non cambiano), con le stesse regole dell'approvazione (`yenPrevistiApprovando`: già nel saldo, sfida pagata dal turno, già comprato)
-    if(dati.passato===true&&r.stato==='aperta'&&configurazione?.tipo==='articolo'&&effetto&&voce)dati.yenPrevisti=yenPrevistiApprovando(r.partita_id,voce,effetto,dati.effetto);
+    // L13 (decisione 19): l'anteprima dell'approvazione di un effetto dell'elenco del passato che muove yen (l'articolo, la Richiesta con una
+    // ricompensa) dice il movimento sul saldo (`yenPrevisti`, con il segno; 0 = gli yen non cambiano), con le stesse regole dell'approvazione
+    // (`yenPrevistiApprovando`). Un registro degli yen illeggibile non fa fallire l'intero elenco della partita: questa proposta lo dice e non si
+    // applica (l'approvazione si fermerebbe sullo stesso registro)
+    if(dati.passato===true&&r.stato==='aperta'&&e&&effetto&&voce){
+      try{const y=yenPrevistiApprovando(r.partita_id,voce,effetto,dati.effetto);if(y!==null)dati.yenPrevisti=y;}
+      catch(err){if(!(err instanceof HttpError)||err.status>=500)throw err;impedimenti.push(err.message);}
+      // il motivo scritto dal censimento può non valere più (revisione R7): lo stato è stato segnato dopo, a mano o da un'altra voce
+      const stato=normalizzaEffettoVoce(dati.effetto);
+      if(stato&&eEffettoDiStato(stato)&&stato.tipo!=='oggetto'&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
+    }
     if(configurazione?.tipo==='acquisto'&&Array.isArray(configurazione.sostituisceDoti))dati.raccordoDoti=configurazione.sostituisceDoti.map((id:unknown)=>{
       if(typeof id!=='string')throw httpErrors.conflict('raccordo-dote-incoerente','L’identità della Dote da raccordare non è valida.');
       const nodo=prepared('SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,id) as {dati_json:string}|undefined,originale=nodo?leggiOggettoRegistro(nodo.dati_json,'Dote da raccordare'):null;

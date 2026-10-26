@@ -445,6 +445,8 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
       const { partite } = proponiStatiMancanti();
       const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0);
       if (daDire.length) logger.info({ partite: daDire }, 'effetti di stato mai applicati dopo l\'importazione: nuove proposte nell\'elenco da approvare');
+      const conErrori = partite.filter((p) => p.errori > 0);
+      if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento dopo l\'importazione: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');
     } catch (err) {
       logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento degli effetti di stato mai applicati non riuscito dopo l\'importazione (l\'importazione resta)');
     }
