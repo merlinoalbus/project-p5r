@@ -1330,7 +1330,7 @@ export interface DialogoVoceDto {
   scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
 }
 
-/** Una cosa che la spunta di una voce ha applicato ed è ancora in vigore: `testo` in parole, coi nomi («Persona registrata nel compendio:
+/** Una cosa che la spunta di una voce ha applicato e che togliendola si annulla: `testo` in parole, coi nomi («Persona registrata nel compendio:
  *  Pixie», «Paga del turno: … · Entrati ¥3.000 nel saldo»), `applicatoIl` il momento (ISO). `id` è stabile fra una lettura e l'altra. */
 export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
 
@@ -1364,10 +1364,10 @@ export interface AzionePercorsoDto {
   /** Ricevute del nuovo formato, separate dalla fotografia legacy della spunta. */
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** 2026-10-26 (richiesta dell'utente: «mi serve sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck
-   *  della casella. ma una volta annullata l'informazione non mi è più utile»): ciò che la spunta della voce ha applicato nella partita ed è
-   *  ancora in vigore, già in parole e con il momento (togliendo la spunta si annulla, salvo le Doti, che si segnano a mano, e le letture,
-   *  che non tornano indietro). Lo scrive il server (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen
-   *  mossi; ricevute annullate, puramente tecniche o che non hanno dato niente no.
+   *  della casella. ma una volta annullata l'informazione non mi è più utile»): ciò che togliendo la spunta della voce si annulla davvero,
+   *  già in parole e con il momento. Lo scrive il server (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen
+   *  mossi; non c'è ciò che togliendo la spunta resta (letture, proposte «Applica» aperte o scartate, stati tenuti da un'altra voce spuntata,
+   *  consumazioni e pesche tenute da un'altra fonte), né le ricevute annullate, illeggibili, tecniche o che non hanno dato niente.
    *  `ricevuteEffetti` resta intero (lo usano le verifiche dei gesti). Assente se la voce non è spuntata o non ha applicato niente. */
   applicatoDallaSpunta?: ApplicatoDallaSpuntaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */

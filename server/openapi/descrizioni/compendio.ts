@@ -354,7 +354,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/percorso/voci/:uid': {
     sommario: 'Una voce della giornata per uid (sola lettura, L3 UX3-1)',
     descrizione: 'La voce com\'è nel suo giorno (`giorno`, fascia, campi del §3.1: insieme delle infiltrazioni, proposta, `infiltrazioneDaAprire`), con `?partita=` anche il suo stato nella partita. La scheda del Palazzo aperta da una voce (`?daVoce=`) la legge per dire da quale proposta viene.',
-    risposta: '`AzionePercorsoDto`, con effettiVoce (fonte completa/CAS) e ricevuteEffetti separate dal formato legacy; per una voce spuntata nella partita, `applicatoDallaSpunta` elenca in parole, col momento, ciò che la spunta ha applicato ed è ancora in vigore (ricevute attive, stati segnati, Fortuna, yen mossi)',
+    risposta: '`AzionePercorsoDto`, con effettiVoce (fonte completa/CAS) e ricevuteEffetti separate dal formato legacy; per una voce spuntata nella partita, `applicatoDallaSpunta` elenca in parole, col momento, ciò che togliendo la spunta si annulla davvero (ricevute attive, stati segnati, Fortuna, yen mossi; non letture, proposte aperte o scartate, stati tenuti da un\'altra voce)',
     errori: [[404, 'voce-non-trovata'], PARTITA_NON_TROVATA],
   },
   'PUT /api/compendio/percorso/voci/:uid': {

@@ -9,9 +9,10 @@
 // 2026-10-26: la finestra mostrava «Incontro e contesto della spunta26/10/2026, 02:49:09annullata» e l'utente: «a che serve? … mi serve
 // sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck della casella. ma una volta annullata
 // l'informazione non mi è più utile... perchè salvarla?». Le ricevute restano nel database (il server le usa per annullare e ripristinare),
-// ma qui si vede solo `applicatoDallaSpunta`: ciò che la spunta ha messo nella partita ed è ancora in vigore, in parole e col momento
-// (Persona registrata, trofeo, sblocco, oggetto, Doti, turni, incontro, consumazione, pesca, Fortuna, yen mossi con l'importo reale).
-// Non è la promessa che togliendo la spunta tutto si annulli: le Doti si segnano a mano e le letture non tornano indietro.
+// ma qui si vede solo `applicatoDallaSpunta`: ciò che togliendo la spunta si annulla davvero, in parole e col momento (Persona registrata,
+// trofeo, sblocco, oggetto, turni, incontro, punti del Confidente, consumazione, pesca, Fortuna, Doti e yen confermati con «Applica», yen
+// mossi con l'importo reale). Ciò che togliendo la spunta resta non c'è: le letture, le proposte ancora aperte o scartate, gli stati che
+// un'altra voce spuntata tiene comunque, le consumazioni e le pesche tenute anche da un'altra fonte, le ricevute illeggibili.
 // Le annullate, quelle tecniche e quelle che non hanno dato niente no; il pulsante c'è solo se c'è qualcosa, e il numero conta solo quello. Ogni riga ha la frase sopra e
 // la data e l'ora sotto, separate (prima uscivano attaccate); lo stato «attiva» non si scrive più: sono tutte in vigore.
 //

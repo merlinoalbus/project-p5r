@@ -155,8 +155,10 @@ function effettoDallaRiga(tipo: string, chiave: string): Exclude<EffettoDiStatoV
 
 /**
  * 2026-10-26 (le ricevute della spunta, `applicatoDallaSpunta.ts`): gli effetti di stato che la spunta della voce ha davvero segnato e che
- * togliere la spunta riporta com'erano. Non quelli che c'erano già (`prima.gia`: la spunta non li ha toccati e togliendola restano); l'oggetto
- * ricevuto sempre, con la quantità della sua riga (è della voce e dell'effetto). `quantita` dell'articolo dalla lista attuale della voce
+ * togliere la spunta riporta com'erano. Non quelli che c'erano già (`prima.gia`: la spunta non li ha toccati e togliendola restano), né quelli
+ * rivendicati anche da un'altra voce spuntata (`annullaEffettiDiStato`: lo stato lo revoca solo l'ultima voce che toglie la spunta, quindi
+ * togliendo questa resta; due effetti della stessa voce sullo stesso stato si annullano insieme e contano come suoi); l'oggetto ricevuto
+ * sempre, con la quantità della sua riga (è della voce e dell'effetto). `quantita` dell'articolo dalla lista attuale della voce
  * (`quantitaArticolo`): la riga ricorda solo l'articolo. Sola lettura.
  */
 export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArticolo: (effettoUid: string) => number | undefined): Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string }> {
@@ -169,6 +171,7 @@ export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArti
     let prima: StatoPrima;
     try { prima = JSON.parse(r.prima_json) as StatoPrima; } catch { return []; }
     if (prima.gia) return [];
+    if (prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND voce_uid <> ? LIMIT 1').get(p, r.tipo, r.chiave, voceUid)) return [];
     const e = effettoDallaRiga(r.tipo, r.chiave);
     const q = e.tipo === 'articolo' ? quantitaArticolo(r.effetto_uid) : undefined;
     return [{ effettoUid: r.effetto_uid, effetto: e.tipo === 'articolo' && q && q > 1 ? { ...e, quantita: q } : e, applicatoIl: r.applicato_il }];
