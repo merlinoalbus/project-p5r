@@ -11,7 +11,8 @@
 // l'informazione non mi è più utile... perchè salvarla?». Le ricevute restano nel database (il server le usa per annullare e ripristinare),
 // ma qui si vede solo `applicatoDallaSpunta`: ciò che la spunta ha messo nella partita ed è ancora in vigore, in parole e col momento
 // (Persona registrata, trofeo, sblocco, oggetto, Doti, turni, incontro, consumazione, pesca, Fortuna, yen mossi con l'importo reale).
-// Le annullate e quelle tecniche no; il pulsante c'è solo se c'è qualcosa, e il numero conta solo quello. Ogni riga ha la frase sopra e
+// Non è la promessa che togliendo la spunta tutto si annulli: le Doti si segnano a mano e le letture non tornano indietro.
+// Le annullate, quelle tecniche e quelle che non hanno dato niente no; il pulsante c'è solo se c'è qualcosa, e il numero conta solo quello. Ogni riga ha la frase sopra e
 // la data e l'ora sotto, separate (prima uscivano attaccate); lo stato «attiva» non si scrive più: sono tutte in vigore.
 //
 // Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino e il numero sta in un

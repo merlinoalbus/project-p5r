@@ -1365,8 +1365,9 @@ export interface AzionePercorsoDto {
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** 2026-10-26 (richiesta dell'utente: «mi serve sapere quando è stata applicata e cosa è stato applicato per annullare in caso di decheck
    *  della casella. ma una volta annullata l'informazione non mi è più utile»): ciò che la spunta della voce ha applicato nella partita ed è
-   *  ancora in vigore, cioè quello che togliere la spunta annulla, già in parole e con il momento. Lo scrive il server
-   *  (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen mossi; ricevute annullate e puramente tecniche no.
+   *  ancora in vigore, già in parole e con il momento (togliendo la spunta si annulla, salvo le Doti, che si segnano a mano, e le letture,
+   *  che non tornano indietro). Lo scrive il server (`applicatoDallaSpunta.ts`) da ricevute attive, stati segnati, Fortuna accesa e yen
+   *  mossi; ricevute annullate, puramente tecniche o che non hanno dato niente no.
    *  `ricevuteEffetti` resta intero (lo usano le verifiche dei gesti). Assente se la voce non è spuntata o non ha applicato niente. */
   applicatoDallaSpunta?: ApplicatoDallaSpuntaDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */

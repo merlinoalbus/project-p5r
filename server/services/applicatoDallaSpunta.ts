@@ -7,11 +7,13 @@
 // volta annullata l'informazione non mi è più utile... perchè salvarla?».
 //
 // Le ricevute restano tutte nel database (il server le usa per annullare, ripristinare, raccordare acquisti e pesca e provare gli
-// assorbimenti); qui si legge soltanto ciò che conta per chi gioca: le cose che la spunta ha messo nella partita e che togliendola
-// tornano com'erano. Le fonti, ognuna col suo momento:
+// assorbimenti); qui si legge soltanto ciò che conta per chi gioca: le cose che la spunta ha registrato nella partita e che sono ancora
+// in vigore. Non tutte tornano com'erano togliendo la spunta: le Doti si segnano a mano (proposte da confermare con «Applica») e le
+// letture non tornano indietro (`partiteService`, `effettiAzioneService`); il resto sì. Le fonti, ognuna col suo momento:
 //   - le ricevute ATTIVE di `utente.effetto_applicato` (Doti, letture, turni, incontro e punti del Confidente, aperture dei Dedali,
 //     consumazioni, pesca, yen proposti con «Applica»). Le annullate no; le puramente tecniche (il «contesto» senza niente dentro, i segni
-//     di annullo) nemmeno; gli yen mossi da soli si dicono dal loro movimento, non due volte;
+//     di annullo) nemmeno, né ciò che non ha dato niente (la Dote con «nessuna nota», la lettura già al massimo senza Doti, `puntiUtili`);
+//     gli yen mossi da soli si dicono dal loro movimento, non due volte;
 //   - gli effetti di stato segnati dalla spunta (`utente.effetto_stato_voce`, `effettiDiStatoApplicati`): Persona, trofeo, sblocco,
 //     oggetto, evento di storia, domanda, cruciverba, Richiesta, articolo, invito. Quelli che c'erano già no;
 //   - la Fortuna di Chihaya accesa dalla voce (`fortunaAccesaDallaVoce`);
@@ -47,14 +49,24 @@ function contestoUtile(l: EffettiAzioneDto): EffettiAzioneDto {
   return { doti: [], confidente: l.confidente, ...(incontro ? { incontro } : {}), ...(l.apertureDedali?.length ? { apertureDedali: l.apertureDedali } : {}) };
 }
 
+/** Ciò che resta di una ricevuta di Doti, letture o turni da dire: via le Doti che non hanno dato niente (la «nessuna nota» scelta alla
+ *  spunta, `effettiAzioneService`: «la ricevuta lo ricorda, nessuna proposta»; i punti a zero) e le letture che non sono avanzate (già al
+ *  massimo) senza Doti dell'elemento. I turni restano tutti: la spunta ha registrato il turno, anche «senza punti». */
+function puntiUtili(l: EffettiAzioneDto): EffettiAzioneDto {
+  const doti = l.doti.filter((d) => !(d.scelta && d.note === 0) && d.delta > 0);
+  const letture = l.letture?.filter((x) => x.dopo > x.prima || (x.doti?.length ?? 0) > 0);
+  return { ...l, doti, ...(l.letture ? { letture } : {}) };
+}
+
 /** La frase di una ricevuta attiva, o null se non dice niente a chi gioca. */
 function fraseRicevuta(r: ReceiptEffettoVoceDto, nomi: NomiFraseEffetto): string | null {
   if (r.tipo === 'dote' || r.tipo === 'lettura' || r.tipo === 'turno' || r.tipo === 'contesto') {
     const l = legacyDi(r);
     if (l === undefined) return r.tipo === 'contesto' ? null : NOME_TIPO[r.tipo] ?? null;
     if (l === null) return null;
-    // la paga dei turni no: gli yen davvero mossi hanno la loro riga (un turno di prima degli yen automatici non ha mosso la paga)
-    return descriviEffetti(r.tipo === 'contesto' ? contestoUtile(l) : l, { senzaPaga: true }) || null;
+    // la paga dei turni no: gli yen davvero mossi hanno la loro riga (un turno di prima degli yen automatici non ha mosso la paga);
+    // se dopo i filtri non resta niente, la riga non c'è (né il pulsante, né il numero)
+    return descriviEffetti(r.tipo === 'contesto' ? contestoUtile(l) : puntiUtili(l), { senzaPaga: true }) || null;
   }
   if (r.tipo === 'acquisto') {
     const nome = (r.chiave ? articoloConNome(r.chiave)?.nome : undefined) ?? 'articolo';
@@ -71,7 +83,7 @@ function fraseRicevuta(r: ReceiptEffettoVoceDto, nomi: NomiFraseEffetto): string
 }
 
 /**
- * Le cose che la spunta della voce ha applicato nella partita `p` e che togliendola si annullano, in ordine di momento. `ricevute` e
+ * Le cose che la spunta della voce ha applicato nella partita `p` e che sono in vigore, in ordine di momento. `ricevute` e
  * `movimenti` sono quelli già letti per la voce (`leggiRicevuteEffettiVoce`, `yenAutomaticiDellaVoce`); `fonte` dà le copie degli articoli.
  */
 export function applicatoDallaSpunta(p: number, voceUid: string, fonte: StatoEffettiVoceDto, ricevute: readonly ReceiptEffettoVoceDto[], movimenti: readonly MovimentoYenAutomaticoDto[]): ApplicatoDallaSpuntaDto[] {
