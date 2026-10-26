@@ -148,7 +148,8 @@ export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto:
                 setTesto(null);
               }} />
           </label>}
-          <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è, anche cambiando qui il livello. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
+          {/* l'inciso sul livello solo quando il campo «Livello in scorta» è a schermo (una Persona fuori elenco non lo mostra) */}
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è{persona ? ', anche cambiando qui il livello' : ''}. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
         </>
       )}
     </div>

@@ -8,7 +8,7 @@ import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
-import { avvisoScortaPiena, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
+import { avvisoScortaPiena, motivoPersonaConScortaAdesso, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
@@ -338,7 +338,7 @@ function propostaPassato(partita:number,voce:string,effetto:string,datiJson:stri
 function dto(r:RigaProposta):PropostaPartitaDto {
   const causa=causaDi(r), dati=leggiOggettoRegistro(r.dati_json,'proposta');
   const impedimenti:string[]=[];
-  let s:SaldoBeneficioDto|null=null, orfana=false;
+  let s:SaldoBeneficioDto|null=null, orfana=false, motivo=r.motivo;
   if(r.tipo==='effetto-voce') {
     const [voce,effetto]=r.causa_chiave.split(':');
     const e=prepared('SELECT dati_json,ordine FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,effetto) as {dati_json:string;ordine:number}|undefined;
@@ -361,8 +361,12 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       // il motivo scritto dal censimento può non valere più (revisione R7): lo stato è stato segnato dopo, a mano o da un'altra voce
       const stato=normalizzaEffettoVoce(dati.effetto);
       if(stato&&eEffettoDiStato(stato)&&stato.tipo!=='oggetto'&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
-      // 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso (la capienza è solo informativa): l'anteprima lo dice
-      else if(stato?.tipo==='persona'&&stato.scorta){const a=avvisoScortaPiena(r.partita_id,stato.persona);if(a)dati.avvisoScorta=a;}
+      // 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso (la capienza è solo informativa): l'anteprima lo dice.
+      // Il motivo del censimento dice la parte che mancava quando è nata la proposta: si riscrive con quella che manca adesso (revisione della fusione)
+      else if(stato?.tipo==='persona'&&stato.scorta){
+        const a=avvisoScortaPiena(r.partita_id,stato.persona);if(a)dati.avvisoScorta=a;
+        motivo=motivoPersonaConScortaAdesso(r.partita_id,stato,r.motivo)??r.motivo;
+      }
     }
     if(configurazione?.tipo==='acquisto'&&Array.isArray(configurazione.sostituisceDoti))dati.raccordoDoti=configurazione.sostituisceDoti.map((id:unknown)=>{
       if(typeof id!=='string')throw httpErrors.conflict('raccordo-dote-incoerente','L’identità della Dote da raccordare non è valida.');
@@ -395,7 +399,7 @@ function dto(r:RigaProposta):PropostaPartitaDto {
   const promemoriaYen=r.tipo==='dote'&&causa.tipo==='acquisto'?((prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {prezzo_yen:number}|undefined)?.prezzo_yen??null):null;
   // BON-01: la voce del Diario a cui il pulsante «Applica» si aggancia (quella della proposta, o quella che ha confermato il consumo)
   const voceUid=r.voce_uid??(causa.tipo==='acquisto'?((prepared('SELECT voce_uid FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? AND voce_uid IS NOT NULL ORDER BY rowid LIMIT 1').get(r.partita_id,causa.chiave) as {voce_uid:string}|undefined)?.voce_uid??null):null);
-  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,voceTesto,voceUid,promemoriaYen,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
+  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,voceTesto,voceUid,promemoriaYen,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
 }
 export function leggiPropostePartita(partita:number,opz:{ancheChiuse?:boolean}={}):PropostaPartitaDto[] {
   verificaPartita(partita);

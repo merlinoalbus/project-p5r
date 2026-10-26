@@ -175,6 +175,34 @@ export const statoGiaVero = (p: number, e: EffettoDiStatoVoce): boolean => leggi
 /** Le due parti della Persona nella partita (registrata nel compendio, presente in scorta): il motivo dell'elenco del passato dice quella che manca. */
 export const partiDellaPersona = (p: number, e: EffettoPersona): { compendio: boolean; scorta: boolean } => ({ compendio: leggiPrima(p, e).gia, scorta: inScorta(p, e.persona) });
 
+/** Il motivo dell'elenco del passato, a parole, attorno a che cosa manca nella partita (`statiMancantiService`). */
+export const fraseMotivoDelPassato = (manca: string): string => `La spunta della voce non l’ha segnato, e ${manca} in questa partita.`;
+
+// la Persona «Compendio e scorta»: la parte che manca, per ognuno dei tre casi possibili (con tutte e due le parti lo stato è già vero)
+const MANCA_PERSONA_CON_SCORTA = {
+  soloCompendio: 'la Persona è nel Compendio Personale ma non nella scorta',
+  soloScorta: 'la Persona è nella scorta ma non è registrata nel Compendio Personale',
+  nessuna: 'la Persona non è né nel Compendio Personale né nella scorta',
+} as const;
+
+/** La Persona «Compendio e scorta», a parole: esattamente la parte che manca adesso nella partita `p`. */
+export function mancaPersonaConScorta(p: number, e: EffettoPersona): string {
+  const { compendio, scorta } = partiDellaPersona(p, e);
+  return compendio ? MANCA_PERSONA_CON_SCORTA.soloCompendio : scorta ? MANCA_PERSONA_CON_SCORTA.soloScorta : MANCA_PERSONA_CON_SCORTA.nessuna;
+}
+
+/**
+ * Revisione della fusione (2026-10-26): il motivo della Persona «Compendio e scorta» scritto dal censimento dice la parte che mancava quando la
+ * proposta è nata, e resta salvato; registrando poi la Persona nel Compendio, o mettendola nella scorta, quel testo non sarebbe più vero. In
+ * lettura il motivo si riscrive con la parte che manca adesso, ma solo se `scritto` è uno dei tre motivi del censimento: un motivo diverso (la
+ * spunta che non è riuscita ad applicarlo, `motoreDiario`, con la sua ragione) resta com'è. `null`: niente da riscrivere.
+ */
+export function motivoPersonaConScortaAdesso(p: number, e: EffettoDiStatoVoce, scritto: string): string | null {
+  if (!conScorta(e)) return null;
+  if (!Object.values(MANCA_PERSONA_CON_SCORTA).some((m) => fraseMotivoDelPassato(m) === scritto)) return null;
+  return fraseMotivoDelPassato(mancaPersonaConScorta(p, e));
+}
+
 /**
  * La voce ha già segnato lo stato dell'effetto nella partita (le righe del «prima» che la spunta, il salvataggio o l'approvazione scrivono): la
  * riga dell'effetto e, per la Persona «anche nella scorta», anche quella della scorta. L'elenco del passato e la finestra della voce guardano

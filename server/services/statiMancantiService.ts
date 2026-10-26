@@ -25,7 +25,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { normalizzaEffettoVoce, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { partiDellaPersona, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
+import { fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
@@ -136,15 +136,10 @@ function contaAperte(p: number, voce: string, effetto: string, soloPassato = fal
     .pluck().get(p, `${voce}:${effetto}`) as number;
 }
 
-/** La Persona «Compendio e scorta», a parole: esattamente la parte che manca nella partita `p`. */
-function mancaPersonaConScorta(p: number, e: Extract<EffettoDiStatoVoce, { tipo: 'persona' }>): string {
-  const { compendio, scorta } = partiDellaPersona(p, e);
-  return compendio ? 'la Persona è nel Compendio Personale ma non nella scorta'
-    : scorta ? 'la Persona è nella scorta ma non è registrata nel Compendio Personale'
-      : 'la Persona non è né nel Compendio Personale né nella scorta';
-}
-
-/** Perché l'effetto è nell'elenco, a parole: che cosa manca nella partita `p`. */
+/**
+ * Perché l'effetto è nell'elenco, a parole: che cosa manca nella partita `p`. Per la Persona «Compendio e scorta» la parte che manca cambia con
+ * la partita: il dto delle proposte la riscrive in lettura (`motivoPersonaConScortaAdesso`).
+ */
 function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
   const manca = e.tipo === 'persona' ? (e.scorta ? mancaPersonaConScorta(p, e) : 'la Persona non è nel Compendio Personale')
     : e.tipo === 'trofeo' ? 'il trofeo non risulta ottenuto'
@@ -158,5 +153,5 @@ function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
                     : 'l’evento di storia non risulta segnato';
   // il motivo vale per tutti i casi dell'elenco: un effetto aggiunto dopo la spunta, quando il salvataggio non lo applicava, o un articolo
   // saltato alla spunta perché in quel momento non risultava in vendita (`applicaUnEffettoDiStato`, «non-disponibile»)
-  return `La spunta della voce non l’ha segnato, e ${manca} in questa partita.`;
+  return fraseMotivoDelPassato(manca);
 }
