@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
 import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
@@ -1730,6 +1731,25 @@ export interface ArticoloDto {
   disponibilita?: DisponibilitaDto;
   /** Acquistato/ottenuto nella partita. */
   acquistato: boolean;
+  /** Ondata 5 (decisione 21): la regola di rifornimento dell'articolo a parole; null = nessuna regola (servizi, Aojiru). */
+  rifornimento?: { regola: RegolaRifornimento; testo: string } | null;
+  /** Solo con la partita e con una regola: la scorta del ciclo in corso, calcolata dal registro degli acquisti. */
+  scorta?: ScortaArticoloDto | null;
+}
+
+/** Ondata 5 (decisione 21): la scorta di un articolo nella partita, alla data di gioco (`scorteService.scortaDellArticolo`). */
+export interface ScortaArticoloDto {
+  /** Pezzi per ciclo; null = nessun limite indicato. */
+  quantita: number | null;
+  comprati: number;
+  rimasti: number | null;
+  esaurito: boolean;
+  /** Il giorno «MM-GG» del rifornimento, se esaurito e il ciclo ne ha uno. */
+  torna: string | null;
+  /** Lo stato a parole: «Rimasti 1 di 3», «Esaurito: torna lunedì 25 aprile». */
+  testo: string;
+  /** Gli acquisti che contano nel ciclo in corso; quelli della pagina del negozio si annullano uno per uno, quelli di una voce togliendone la spunta. */
+  righe: Array<{ id: number; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid: string | null }>;
 }
 
 export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
@@ -3550,6 +3570,9 @@ export interface OffertaOggettoDto {
   noteStoriche?: NotaStoricaOfferta[];
   acquisti?: StatoAcquistiArticoloDto;
   acquistiRegistrati: Array<{ articolo: string; negozioNome: string }>;
+  /** Ondata 5 (decisione 21): la regola di rifornimento dell'offerta e, con la partita, la scorta del ciclo in corso. */
+  rifornimento?: ArticoloDto['rifornimento'];
+  scorta?: ArticoloDto['scorta'];
   articolo: string;
   negozio: string;
   negozioNome: string;

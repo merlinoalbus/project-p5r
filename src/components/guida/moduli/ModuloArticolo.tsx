@@ -24,6 +24,9 @@ import { CostoOfferta } from './CostoOfferta';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 import { TestoNote } from '../../shared/TestoNote';
+import { CampoTesto } from '../../shared/Campo';
+import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
+import { descriviRifornimento, type GiornoRifornimento, type RegolaRifornimento, type TipoRifornimento } from '../../../../shared/rifornimento';
 
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
@@ -68,9 +71,51 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       )}
       <CostoOfferta dati={dati} imposta={imposta} disabilitato={disabilitato} catalogo={catalogo} />
       <Griglia>
-        <Campo nome="quantita" etichetta="Quante se ne possono comprare" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = nessun limite dichiarato" />
-        <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
+        <Campo nome="quantita" etichetta="Pezzi per ciclo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quanti se ne comprano prima del rifornimento. Vuoto = nessun limite dichiarato" />
+        <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null} quantita={typeof dati.quantita === 'number' ? dati.quantita : null}
+          disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r })} />
+        <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} largo />
       </Griglia>
     </div>
+  );
+}
+
+const OPZIONI_RIFORNIMENTO: Array<{ chiave: TipoRifornimento; nome: string }> = [
+  { chiave: 'giorno', nome: 'Il giorno dopo' }, { chiave: 'settimana', nome: 'Ogni settimana' }, { chiave: 'mese', nome: 'Il 1° del mese' },
+  { chiave: 'pioggia', nome: 'A ogni giorno di pioggia' }, { chiave: 'mai', nome: 'Mai: pezzo unico' }, { chiave: 'consegna', nome: 'Dopo la consegna dell’ordine' },
+  { chiave: 'restituzione', nome: 'Alla restituzione del libro' },
+];
+const OPZIONI_ORIGINE: Array<{ chiave: RegolaRifornimento['origine']; nome: string }> = [
+  { chiave: 'guida', nome: 'Dalla guida' }, { chiave: 'fallback-utente', nome: 'Regola dell’utente (la guida tace)' },
+];
+const OPZIONI_GIORNO = GIORNI_SETTIMANA.map((g) => ({ chiave: g.chiave, nome: g.nome[0]!.toUpperCase() + g.nome.slice(1) }));
+
+/**
+ * Ondata 5 (decisione 21): la regola di rifornimento dell'offerta, un punto solo (`articolo.rifornimento_json`): quando torna, da dove viene
+ * la regola e se va verificata in gioco. Il giorno della settimana solo per «Ogni settimana», i giorni di consegna solo per l'ordine.
+ */
+function EditorRifornimento({ valore, quantita, disabilitato, onCambia }: { valore: RegolaRifornimento | null; quantita: number | null; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
+  const cambiaTipo = (tipo: string) => {
+    if (!tipo) { onCambia(null); return; }
+    const t = tipo as TipoRifornimento;
+    onCambia({ tipo: t, origine: valore?.origine ?? 'guida', ...(t === 'settimana' ? { giorno: valore?.giorno ?? 'lunedi' } : {}), ...(t === 'consegna' ? { giorni: valore?.giorni ?? 3 } : {}),
+      ...(valore?.daVerificare ? { daVerificare: true } : {}) });
+  };
+  return (
+    <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
+      <legend>Rifornimento</legend>
+      <div className="griglia-campi">
+        <Blocco><Selettore etichetta="Torna in negozio" valore={valore?.tipo ?? ''} vuoto="Nessuna regola" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_RIFORNIMENTO} onCambia={cambiaTipo} /></Blocco>
+        {valore?.tipo === 'settimana' && <Blocco><Selettore etichetta="Giorno del rifornimento" valore={valore.giorno ?? 'lunedi'} ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_GIORNO}
+          onCambia={(g) => onCambia({ ...valore, giorno: g as GiornoRifornimento })} /></Blocco>}
+        {valore?.tipo === 'consegna' && <CampoTesto etichetta="Giorni di consegna" tipo="numero" valore={String(valore.giorni ?? 3)} disabilitato={disabilitato}
+          onCambia={(v) => onCambia({ ...valore, giorni: Math.min(60, Math.max(1, Number(v) || 1)) })} />}
+        {valore && <Blocco><Selettore etichetta="Da dove viene la regola" valore={valore.origine} ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_ORIGINE}
+          onCambia={(o) => onCambia({ ...valore, origine: o as RegolaRifornimento['origine'] })} /></Blocco>}
+      </div>
+      {valore && <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={valore.daVerificare === true} disabled={disabilitato}
+        onChange={(e) => { const resto: RegolaRifornimento = { ...valore }; delete resto.daVerificare; onCambia(e.target.checked ? { ...resto, daVerificare: true } : resto); }} />Da verificare in gioco</label>}
+      {valore && <p className="m-0 testo-12 text-text-muted text-pretty">{descriviRifornimento(valore, quantita)}</p>}
+    </fieldset>
   );
 }

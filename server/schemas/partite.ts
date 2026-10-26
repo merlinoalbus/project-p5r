@@ -241,6 +241,8 @@ export const bodyRegala = z.object({
 }).strict();
 export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600) }).strict();
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
+/** Ondata 5: una riga del registro degli acquisti della partita (annullo per riga). */
+export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
 

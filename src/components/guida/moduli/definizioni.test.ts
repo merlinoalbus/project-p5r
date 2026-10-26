@@ -52,6 +52,12 @@ describe('articolo', () => {
     const corpo = def.articolo.prepara({ ...def.articolo.iniziali(null, 'u'), _aMano: true, nome: 'Bibita', effetto_json: { famiglia: 'ripristina', risorsa: 'sp', misura: 'assoluta', valore: 100, bersaglio: 'un-alleato' } });
     expect(corpo).toMatchObject({ effetto: 'Ripristina 100 SP di un alleato', oggetto_fonte: null });
   });
+  it('legge e rimanda la regola di rifornimento (Ondata 5); una regola non valida non si salva', () => {
+    const d = def.articolo.iniziali(riga('articolo', { negozio_chiave: 'u', nome: 'X', quantita: 3, rifornimento_json: '{"tipo":"settimana","giorno":"lunedi","origine":"guida"}' }));
+    expect(d.rifornimento_json).toEqual({ tipo: 'settimana', giorno: 'lunedi', origine: 'guida' });
+    expect(def.articolo.prepara(d)).toMatchObject({ quantita: 3, rifornimento_json: { tipo: 'settimana', giorno: 'lunedi', origine: 'guida' } });
+    expect(def.articolo.valido({ ...d, rifornimento_json: { tipo: 'settimana', origine: 'guida' } })).toBe(false);
+  });
 });
 
 describe('film', () => {

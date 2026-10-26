@@ -146,6 +146,8 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       // Anche i duplicati archiviati vanno nello stesso cestino, col riepilogo già confermato: non devono riapparire dopo il SET NULL della FK.
       for (const k of negozi) {
         prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
+        // Ondata 5: le copie del registro degli acquisti vanno nello stesso cestino del loro segno «ottenuto»
+        if (prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
         prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(k);
         prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(k);
         prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(k);

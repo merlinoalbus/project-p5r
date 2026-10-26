@@ -29,12 +29,13 @@ import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listi
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
-import type { ArticoloDto, CatalogoOggettoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
+import { momentoDellaVoce, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
+import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, ScortaArticoloDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
 interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
 interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
+interface RigaArticolo { rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
   negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
@@ -112,13 +113,19 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
 
 /** La disponibilita' di un articolo tiene conto anche di quella del negozio — a bottega chiusa non
  *  si compra niente — ma le due cose restano **distinguibili**: la presenza del negozio sono i suoi
- *  orari (marcati `daNegozio`), il resto è dell'articolo (compreso lo sblocco che era del negozio). */
-function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita) {
+ *  orari (marcati `daNegozio`), il resto è dell'articolo (compreso lo sblocco che era del negozio).
+ *
+ *  Ondata 5 (decisione 21): con una regola di rifornimento e un limite di pezzi, un requisito in più, la scorta del ciclo in corso («Rimasti 1
+ *  di 3», «Esaurito: torna lunedì 25 aprile»), calcolata dal registro degli acquisti (`scorteService`): esaurita, l'articolo è bloccato. */
+function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDellArticolo(r, st)): DisponibilitaDto {
   // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
   const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
   const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
   const esito = valutaRequisiti([...negozio, ...regole(r.condizioni_json)], st);
-  return { ...esito, requisiti: esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q)) };
+  const requisiti = esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q));
+  const daScorta = requisitoScorta(scorta, requisiti.length);
+  if (!daScorta) return { ...esito, requisiti };
+  return { stato: daScorta.stato === 'rosso' ? 'bloccato' : esito.stato, requisiti: [...requisiti, daScorta] };
 }
 /** La riga del negozio, con quel che descrive l'oggetto **letto dall'oggetto**, non copiato.
  *
@@ -162,7 +169,9 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     return { articolo, negozioNome: origine?.nome ?? 'Offerta precedente' };
   });
   const condizioniArticolo = regole(r.condizioni_json);
-  return { ricevuti, condizioni: condizioniArticolo, chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
+  // Ondata 5: la scorta del ciclo in corso (con la partita), letta una volta e passata alla disponibilità
+  const scorta = st ? scortaDellArticolo(r, st) : null;
+  return { ricevuti, condizioni: condizioniArticolo, rifornimento: rifornimentoDellArticolo(r), ...(st ? { scorta } : {}), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
     catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
     nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
     nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'),
@@ -174,7 +183,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
     noteStoriche: noteStoricheDi('articolo', r.chiave),
     acquistato: acquisti?.acquistato === true || articoliEquivalenti(r.chiave, lettureListiniCondivisi()).some(k => acquistati.has(k)), acquistiRegistrati, acquisti,
-    ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
+    ...(st ? { disponibilita: disponibilitaArticolo(r, st, scorta) } : {}) };
 }
 
 /** Le chiavi degli articoli segnati come acquistati nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
@@ -344,10 +353,36 @@ export interface OpzioniAcquisto {
    *  della partita (`effettiDiStatoService.applicaUnEffettoDiStato`): la voce spuntata attesta l'acquisto nel suo giorno, e la disponibilità
    *  (per esempio il panino che si vende solo il venerdì) non lo contraddice. La spunta normale e la pagina del negozio restano con il controllo. */
   senzaDisponibilita?: boolean;
+  /** Ondata 5 (decisione 21): l'acquisto è di una voce del Diario e del suo effetto (`effettiDiStatoService`): la riga del registro porta il
+   *  giorno e la fascia della voce e i pezzi dell'effetto; togliendo, si toglie solo la riga di quella voce. Senza: la pagina del negozio. */
+  voce?: { voceUid: string; effettoUid: string; quantita?: number };
 }
 
-/** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. `opz`: vedi `OpzioniAcquisto` (la pagina del
- *  negozio non ne passa: disponibilità nello stato corrente della partita). */
+/** Il giorno e la fascia correnti della partita, o null se la partita non ha ancora una data di gioco. */
+function momentoCorrente(partitaId: number): { giorno: string; fascia: 'giorno' | 'sera' } | null {
+  const p = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
+  if (!p?.data_gioco || !/^\d{2}-\d{2}$/.test(p.data_gioco)) return null;
+  return { giorno: p.data_gioco, fascia: p.fascia_gioco === 'sera' ? 'sera' : 'giorno' };
+}
+
+/** Toglie il segno «ottenuto» (`acquisto_partita`) con la sua fotografia nel cestino, come ha sempre fatto la spunta tolta. */
+function togliPresenza(partitaId: number, articoloChiave: string, nome: string): void {
+  if (!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave)) return;
+  conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${articoloChiave}`, nome: `Presenza storica: ${nome}`, partitaId }, () => {
+    prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
+  });
+}
+
+/**
+ * Segna (o toglie) un acquisto dell'articolo nella partita; evento alla prima spunta. `opz`: vedi `OpzioniAcquisto` (la pagina del negozio
+ * non ne passa: disponibilità nello stato corrente della partita).
+ *
+ * Ondata 5 (decisione 21): ogni acquisto è una riga del registro (`utente.registro_acquisti`) con il giorno di gioco, e consuma la scorta del
+ * ciclo; `acquisto_partita` resta il segno «ottenuto almeno una volta», scritto al primo acquisto. Togliere un acquisto toglie una riga sola:
+ * quella della voce (`opz.voce`) o l'ultima della pagina del negozio; il segno «ottenuto» se ne va solo con l'ultima riga che lo porta, e una
+ * presenza di prima del registro (nessuna riga) si toglie come prima. Un articolo comprato soltanto da voci del Diario non si toglie dal
+ * negozio: si toglie la spunta della voce.
+ */
 export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string, opz: OpzioniAcquisto = {}): ArticoloDto {
   verificaPartita(partitaId);
   const listini = lettureListiniCondivisi();
@@ -377,11 +412,75 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
       nuovaValutazioneLegacy(getDb(), { partita_id: partitaId, articolo_chiave: articoloChiave, updated_at: adesso });
     }
-    else if (!fatto && era) conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${articoloChiave}`, nome: `Presenza storica: ${prodotto.nome}`, partitaId }, () => {
-      prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
-    });
+    if (fatto) {
+      // la riga del registro: il giorno della voce, o quello corrente della partita (senza una data di gioco non si data niente)
+      const momento = opz.voce ? momentoDellaVoce(opz.voce.voceUid) : momentoCorrente(partitaId);
+      if (momento) scriviRiga(partitaId, r.chiave, { ...momento, quantita: opz.voce?.quantita ?? 1, fonte: opz.voce ? 'voce' : 'negozio',
+        ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : {}), ottenutoQui: !era });
+    } else {
+      let togliOttenuto: boolean;
+      if (opz.voce) {
+        const riga = rigaDellaVoce(partitaId, opz.voce.voceUid, opz.voce.effettoUid);
+        // senza la sua riga (spunta di prima del registro) il segno se ne va come prima, salvo acquisti registrati dopo
+        togliOttenuto = riga ? togliRiga(partitaId, riga.id).tolgoOttenuto : righeDellArticolo(partitaId, r.chiave).length === 0;
+      } else {
+        const riga = ultimaRigaDelNegozio(partitaId, r.chiave);
+        if (riga) togliOttenuto = togliRiga(partitaId, riga.id).tolgoOttenuto;
+        else if (righeDellArticolo(partitaId, r.chiave).length > 0) throw httpErrors.conflict('acquisto-della-voce', `«${prodotto.nome}» risulta comprato da una voce del Diario: si annulla togliendo la spunta della voce.`);
+        else togliOttenuto = true;
+      }
+      if (togliOttenuto && era) togliPresenza(partitaId, articoloChiave, prodotto.nome);
+    }
     if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);
+}
+
+/**
+ * Ondata 5 (decisione 21): una voce del Diario spuntata compra di nuovo un articolo già ottenuto (il Katsu il 06-05 e l'11-13): lo stato
+ * «ottenuto» non cambia, ma la copia entra nel registro con il giorno della voce e consuma la scorta di quel ciclo. Dentro la transazione di
+ * chi chiama (`effettiDiStatoService`); nessun controllo di disponibilità (la voce spuntata attesta l'acquisto). Idempotente per voce ed effetto.
+ */
+export function registraCopiaDaVoce(partitaId: number, articoloChiave: string, voce: { voceUid: string; effettoUid: string; quantita?: number }): void {
+  const canonica = articoloDelListino(articoloChiave, lettureListiniCondivisi());
+  if (!prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(canonica)) return;
+  if (eOffertaAojiru({ chiave: canonica, catalogoChiave: (prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(canonica) as { catalogo_chiave: string | null }).catalogo_chiave })) return;
+  const momento = momentoDellaVoce(voce.voceUid);
+  if (momento) scriviRiga(partitaId, canonica, { ...momento, quantita: voce.quantita ?? 1, fonte: 'voce', voceUid: voce.voceUid, effettoUid: voce.effettoUid, ottenutoQui: false });
+}
+
+/**
+ * Ondata 5: toglie la sola copia della voce dal registro, quando lo stato «ottenuto» resta (c'era già, o lo tiene un'altra voce spuntata):
+ * il segno, se lo portava, passa alla riga più vecchia che resta, e `acquisto_partita` non si tocca (lo decide la regola dell'annullo).
+ */
+export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid: string): void {
+  const riga = rigaDellaVoce(partitaId, voceUid, effettoUid);
+  if (riga) togliRiga(partitaId, riga.id);
+}
+
+/**
+ * Ondata 5 (annullo per riga): toglie un acquisto della pagina del negozio dal registro, qualunque sia il suo ciclo. Quelli di una voce del
+ * Diario si annullano togliendo la spunta della voce (409). Se la riga portava l'ultimo segno «ottenuto», se ne va anche quello, come con la
+ * spunta tolta. Restituisce l'articolo aggiornato.
+ */
+export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
+  verificaPartita(partitaId);
+  const riga = (prepared("SELECT 1 AS c FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()
+    ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
+  if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
+  if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');
+  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(riga.articolo_chiave) as RigaArticolo | undefined;
+  getDb().transaction(() => {
+    const { tolgoOttenuto } = togliRiga(partitaId, rigaId);
+    if (tolgoOttenuto) {
+      const nome = r ? (identitaArticoli([r])?.get(r.catalogo_chiave ?? '')?.nome ?? (r.nome || r.chiave)) : riga.articolo_chiave;
+      togliPresenza(partitaId, riga.articolo_chiave, nome);
+    }
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+  })();
+  if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’acquisto è stato tolto; l’articolo non è più nel listino.');
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(r.negozio_chiave) as RigaNegozio;
+  const conLaSede = conSede(r, negozioNellaSede(negozio, undefined, lettureListiniCondivisi()));
+  return articoloDto(conLaSede, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), identitaArticoli([conLaSede]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
 }

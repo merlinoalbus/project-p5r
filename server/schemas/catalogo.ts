@@ -14,6 +14,7 @@ import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 import { LIMITI_QUIZ, normalizzaQuiz } from '../../shared/quizAttivita.js';
 import { LIMITI_COSTO_OGGETTO } from '../../shared/catalogo.js';
 import { normalizzaEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { normalizzaRifornimento } from '../../shared/rifornimento.js';
 
 /** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
@@ -102,6 +103,10 @@ export const datiArticolo = z.object({
   // Quante se ne possono comprare. `null` non e' zero: zero direbbe «nessuna», null dice «limite
   // non dichiarato», ed e' quel che sappiamo delle 575 righe che c'erano prima di questo campo.
   quantita: z.number().int().min(0).max(9_999).nullable().optional(),
+  // Ondata 5 (decisione 21): la regola di rifornimento (`shared/rifornimento.ts`); `quantita` è la quantità per ciclo. null = nessuna regola.
+  rifornimento_json: z.unknown().superRefine((v, ctx) => {
+    if (v !== null && normalizzaRifornimento(v) === null) ctx.addIssue({ code: 'custom', message: 'Regola di rifornimento non valida.' });
+  }).transform((v) => (v === null ? null : JSON.stringify(normalizzaRifornimento(v)))).optional(),
   // Il collegamento all'oggetto: l'archivio e la sua chiave. Da qui l'articolo legge nome, effetto,
   // statistiche e «per chi» invece di tenerne una copia propria.
   oggetto_fonte: z.enum(['equipaggiamento', 'guida', 'libri', 'film', 'videogiochi', 'catalogo']).nullable().optional(),
