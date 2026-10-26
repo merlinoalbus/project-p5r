@@ -84,7 +84,10 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
         <div className="flex flex-col gap-3 testo-13">
           <p className="m-0 text-text-secondary">
             {quanteVoci(voci.length)} {diGiorno > 0 && diGiorno < voci.length ? `(${diGiorno} di giorno, ${voci.length - diGiorno} di sera)` : diGiorno === voci.length ? 'di giorno' : 'di sera'} del {dataGiocoTesto(giorno)}.{' '}
-            {modo === 'copia' ? 'Le copie nascono senza spunte; le voci di partenza restano.' : 'Le voci lasciano questo giorno e portano con sé le spunte delle partite.'}
+            {/* declinato sul numero delle voci (rilievo del revisore UX, giro 4) */}
+            {modo === 'copia'
+              ? (voci.length === 1 ? 'La copia nasce senza spunte; la voce di partenza resta.' : 'Le copie nascono senza spunte; le voci di partenza restano.')
+              : (voci.length === 1 ? 'La voce lascia questo giorno e porta con sé le spunte delle partite.' : 'Le voci lasciano questo giorno e portano con sé le spunte delle partite.')}
           </p>
           {/* «Copia» / «Sposta» si dicono da sé: nessuna etichetta a schermo davanti (il gruppo ha il suo nome per il lettore di schermo) */}
           <div className="flex flex-wrap items-center gap-2">
@@ -117,7 +120,7 @@ function TrasferisciVociReale({ modo: modoIniziale, voci, giorno, partitaId, onC
               ))}
             </span>
           </div>
-          <p className="m-0 testo-12 text-text-muted">Arrivano in fondo alla fascia, nell’ordine che hanno qui. Vale per tutte le partite: la giornata è la stessa per tutte.</p>
+          <p className="m-0 testo-12 text-text-muted">{voci.length === 1 ? 'Arriva in fondo alla fascia.' : 'Arrivano in fondo alla fascia, nell’ordine che hanno qui.'} Vale per tutte le partite: la giornata è la stessa per tutte.</p>
           <div className="flex flex-wrap gap-1.5">
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={modo === 'copia' ? 'copia' : 'incolla'} dimensione={20} />} titolo={`${verbo} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}`}
               disabled={occupato || !indice.dati} onClick={() => void esegui()} />

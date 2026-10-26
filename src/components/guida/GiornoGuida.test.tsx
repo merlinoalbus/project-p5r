@@ -501,7 +501,7 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     const finestra = await screen.findByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' });
     // una voce sola di sera: la fascia parte da «di sera»
     expect(within(finestra).getByRole('radio', { name: 'Di sera' })).toHaveAttribute('aria-checked', 'true');
-    expect(finestra).toHaveTextContent('Le voci lasciano questo giorno e portano con sé le spunte delle partite.');
+    expect(finestra).toHaveTextContent('La voce lascia questo giorno e porta con sé le spunte delle partite.');
     scegliVoce('Giorno', /^13 aprile/, finestra);
     api.trasferisciVociGiornata.mockRejectedValue(new Error('Questa voce della giornata non esiste (più).'));
     fireEvent.click(within(finestra).getByRole('button', { name: /^Sposta nel 13 aprile, di sera/ }));

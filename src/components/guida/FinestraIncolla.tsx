@@ -41,7 +41,12 @@ function FinestraIncollaReale({ piano, occupato, onConferma, onChiudi }: Props) 
   const segnalabili = !taglio && daVedere.some((r) => SEGNALABILI.has(r.codice));
   const n = piano.daIncollare;
   const voci = (k: number) => (k === 1 ? '1 voce' : `${k} voci`);
-  const dove = piano.fascia ? `${piano.fascia === 'sera' ? 'di sera' : 'di giorno'}, dopo la voce selezionata` : 'ognuna nella sua fascia, in fondo';
+  // il testo si declina sul numero delle voci (rilievo del revisore UX, giro 4): «Una voce nuova… in fondo alla sua fascia. Prima di
+  // incollarla:», «Voci nuove… ognuna in fondo alla sua fascia. Prima di incollarle:»; nel taglio «La stessa voce…» / «Le stesse voci…»
+  const una = n === 1;
+  const dove = piano.fascia ? `${piano.fascia === 'sera' ? 'di sera' : 'di giorno'}, dopo la voce selezionata` : (una ? 'in fondo alla sua fascia' : 'ognuna in fondo alla sua fascia');
+  const cosa = taglio ? (una ? 'La stessa voce, con spunte e ricevute delle partite' : 'Le stesse voci, con spunte e ricevute delle partite') : (una ? 'Una voce nuova, senza spunte' : 'Voci nuove, senza spunte');
+  const primaDi = taglio ? (una ? 'spostarla' : 'spostarle') : (una ? 'incollarla' : 'incollarle');
   // i due gesti possono incollarne meno del titolo (una voce si incolla solo senza gli elementi segnalati, o solo con): il numero compare
   // sul pulsante solo quando è diverso, e un gesto che non incollerebbe niente non c'è
   // «(1 di 2)», non «(1)»: un numero da solo accanto al titolo non dice di che cosa (rilievo del revisore UX, giro 3)
@@ -59,7 +64,7 @@ function FinestraIncollaReale({ piano, occupato, onConferma, onChiudi }: Props) 
       </div>
     )}>
       <div className="flex flex-col gap-3 testo-13">
-        <p className="m-0 text-text-secondary">{taglio ? 'Le stesse voci, con spunte e ricevute delle partite' : 'Voci nuove, senza spunte'}: {dove}. Prima di {taglio ? 'spostarle' : 'incollarle'}:</p>
+        <p className="m-0 text-text-secondary">{cosa}: {dove}. Prima di {primaDi}:</p>
         {daVedere.length > 0 && <ElencoRilievi titolo="Da sapere prima" rilievi={daVedere} />}
         {daSapere.length > 0 && <ElencoRilievi titolo="Inoltre" rilievi={daSapere} />}
       </div>
