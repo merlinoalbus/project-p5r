@@ -13,11 +13,11 @@ import type { EffettiAzioneDto } from '../../shared/types.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { annullaFontiDiarioNellaTransazione, anteprimaRegistrazioneAcquisto, registraAcquistoNellaTransazione, verificaOffertaConsumo, type PorteDisponibilitaAcquisto } from './acquistiService.js';
 import { accendiFortunaDaVoce, spegniFortunaDaVoce } from './fortunaService.js';
-import { applicaEffettiDiStato, annullaEffettiDiStato, verificaEffettoDiStato } from './effettiDiStatoService.js';
+import { applicaEffettiDiStato, annullaEffettiDiStato, applicaParti, descriviParte, statiMancanti, verificaEffettoDiStato } from './effettiDiStatoService.js';
 import { creaPropostaEffettoStorico, improntaDato, jsonCanonico, leggiJsonRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiVoce, verificaBeneficio, saldoDoteVoce, trasferisciAttribuzioneDote } from './propostePartitaService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riconciliaRegistroDopoRipristino, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
-import { verificaEffetti } from './azioniStrutturateService.js';
+import { nomiFraseEffetto, verificaEffetti } from './azioniStrutturateService.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, eAttivitaPesca, type NuovaSessionePesca, type RichiestaRegistraSessionePesca } from '../../shared/pesca.js';
 import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from './pescaService.js';
 import { fontiPesca, quotaSessionePesca } from './pescaLetture.js';
@@ -512,9 +512,45 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
   sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
-/** Togliere la spunta. L13 (decisione 18): gli yen tornano alla fine, prima le spese restituite e poi i guadagni tolti (`conYenInOrdine`). */
-export function annullaEffettiVoce(...a:Parameters<typeof annullaEffettiVoceInOrdine>):void {conYenInOrdine(()=>annullaEffettiVoceInOrdine(...a));}
-function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):void {
+/**
+ * 2026-10-26 (l'effetto «Persona registrata» aggiunto a una voce già spuntata non registrava niente, in silenzio): le parti degli effetti di stato
+ * della voce spuntata che la partita non ha ancora, con la frase da mostrare sulla voce. Vuoto se la voce non è spuntata. Sola lettura.
+ */
+export function statiDaApplicare(p:number,uid:string,effetti:readonly EffettoVoceDto[]):Array<{effettoUid:string;scorta:boolean;descrizione:string}> {
+  const diStato=effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]);
+  if(!diStato.length||!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))return [];
+  const parti=statiMancanti(p,uid,diStato);
+  if(!parti.length)return [];
+  const nomi=nomiFraseEffetto();
+  return parti.map((x)=>({effettoUid:x.effettoUid,scorta:x.scorta,descrizione:descriviParte(x,nomi)}));
+}
+/**
+ * Il gesto «Applica alla partita» (2026-10-26): gli effetti di stato mancanti di una voce già spuntata si applicano come li avrebbe applicati la
+ * spunta (stesse scritture, stesso «prima»: togliendo la spunta tornano come gli altri), senza rieseguire la voce. Gli articoli comprati scalano il
+ * loro prezzo come alla spunta (decisione 18). Va chiamata nella transazione del gesto, dentro `conVoceDellaSpunta` (gli eventi restano della voce).
+ */
+export function applicaStatiVoce(p:number,uid:string):{applicati:string[];nonApplicati:Array<{descrizione:string;motivo:string}>} {
+  if(!getDb().inTransaction)throw new Error('L’applicazione degli stati richiede la transazione del gesto.');
+  verificaPartita(p);
+  if(!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))throw httpErrors.conflict('voce-non-spuntata','La voce non è spuntata in questa partita: i suoi effetti si applicano spuntandola.');
+  const stato=leggiEffettiVoce(uid);
+  if(stato.stato!=='convertita')throw httpErrors.conflict('effetti-da-correggere','Il RAW storico non è convertibile: correggi gli effetti prima di applicarli.');
+  const parti=statiMancanti(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
+  if(!parti.length)return {applicati:[],nonApplicati:[]};
+  const nomi=nomiFraseEffetto();
+  const esito=conYenInOrdine(()=>{
+    const r=applicaParti(p,uid,parti);
+    muoviYenDellaVoce(p,uid,r.scritte.flatMap((x)=>{const e=x.effetto.tipo==='articolo'?stato.effetti.find((y)=>y.uid===x.effettoUid):undefined;return e?[yenDellEffetto(p,uid,e)]:[];}));
+    return r;
+  });
+  return {applicati:esito.scritte.map((x)=>descriviParte(x,nomi)),nonApplicati:esito.nonApplicate.map((x)=>({descrizione:descriviParte(x.parte,nomi),motivo:x.motivo}))};
+}
+/**
+ * Togliere la spunta. L13 (decisione 18): gli yen tornano alla fine, prima le spese restituite e poi i guadagni tolti (`conYenInOrdine`).
+ * Restituisce gli avvisi per chi toglie la spunta (2026-10-26: un esemplare in scorta modificato dopo la spunta resta, e lo si dice).
+ */
+export function annullaEffettiVoce(...a:Parameters<typeof annullaEffettiVoceInOrdine>):string[] {return conYenInOrdine(()=>annullaEffettiVoceInOrdine(...a));}
+function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):string[] {
   if(!getDb().inTransaction)throw new Error('L’annullo richiede la transazione della spunta.');
   const tutte=leggiRicevuteEffettiVoce(p,uid),ricevute=tutte.filter((r)=>r.annullatoIl===null);
   const spunta=prepared('SELECT fatta_at,effetti_json FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid) as {fatta_at:string;effetti_json:string|null}|undefined;
@@ -522,7 +558,7 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   const stessaGenerazione=(x:unknown):boolean=>!!identitaSpunta&&!!x&&typeof x==='object'&&!Array.isArray(x)&&(x as Record<string,unknown>).fattaIl===identitaSpunta.fattaIl;
   const confrontaRaw=(x:unknown):boolean=>{if(!stessaGenerazione(x))return false;const raw=(x as {raw:unknown}).raw;if(!(raw===null||typeof raw==='string'))throw httpErrors.conflict('identita-spunta-incoerente','La fotografia della spunta non è valida.');const prima=leggiRicevutaEffettiAzione(raw),ora=leggiRicevutaEffettiAzione(identitaSpunta!.raw);const senzaAperture=(e:EffettiAzioneDto|null)=>e?Object.fromEntries(Object.entries(e).filter(([k])=>k!=='apertureDedali')):null;if(jsonCanonico(senzaAperture(prima))!==jsonCanonico(senzaAperture(ora)))throw httpErrors.conflict('ricevuta-spunta-cambiata','La stessa spunta contiene effetti diversi dopo l’annullo: nessun effetto viene ripetuto.');return true;};
   const giaAnnullata=!!identitaSpunta&&tutte.some((r)=>r.annullatoIl!==null&&r.ricevuta.annulloLegacyIntegrale===true&&confrontaRaw(r.ricevuta.spunta));
-  if(!spunta&&!ricevute.length&&!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?').get(p,uid))return;
+  if(!spunta&&!ricevute.length&&!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?').get(p,uid))return [];
   let legacyDaAnnullare=legacy===null?null:leggiRicevutaEffettiAzione(jsonCanonico(legacy));
   if(giaAnnullata)legacyDaAnnullare=null;
   const togliUna=<T>(elenco:T[]|undefined,valore:T):T[]=>{const out=[...(elenco??[])],i=out.findIndex((x)=>jsonCanonico(x)===jsonCanonico(valore));if(i<0)throw httpErrors.conflict('porzione-storica-non-presente','Una porzione già sostituita non coincide con il RAW della spunta: nessun doppio annullo.');out.splice(i,1);return out;};
@@ -566,8 +602,9 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
     prepared("INSERT INTO utente.effetto_applicato(id,partita_id,voce_uid,effetto_uid,effetto_ordine,formato,tipo,chiave,prima_json,ricevuta_json,creato,applicato_il,annullato_il) VALUES(?,?,?,?,0,1,'contesto',NULL,NULL,?,0,?,?)").run(id,p,uid,effettoUid,jsonCanonico({voceUid:uid,effettoUid,benefici:[],annulloLegacyIntegrale:true,spunta:identitaSpunta}),adesso,adesso);
   }
   spegniFortunaDaVoce(p,uid);
-  annullaEffettiDiStato(p,uid);
+  const avvisi=annullaEffettiDiStato(p,uid);
   prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND voce_uid=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,uid);
+  return avvisi;
 }
 export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLegacy,'annullaLegacy'>):void {
   if(!getDb().inTransaction)throw new Error('La rimozione richiede la transazione del cestino.');

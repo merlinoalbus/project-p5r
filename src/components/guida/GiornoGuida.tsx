@@ -44,6 +44,7 @@ import { TrasferisciVoci } from './TrasferisciVoci';
 import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
 import { DaApplicare } from '../partita/DaApplicare';
+import { StatiDaApplicareVoce } from './StatiDaApplicareVoce';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import type { SceltaEsitoSpunta } from '../../../shared/esitiAttivita';
@@ -144,6 +145,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       // che cosa è successo e, a parte, le Doti da segnare a mano (la spunta non le tocca)
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. I punti si applicano dal pulsante sulla voce.' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
+      // togliendo la spunta, ciò che resta perché modificato dopo (un esemplare in scorta) si dice, non si toglie in silenzio
+      if (!fatta && agg.avvisiAnnullo?.length) notifica('warning', agg.avvisiAnnullo.join(' '), 9000);
       // era l'ultima attività di giorno o di sera (senza decisioni aperte): la partita è passata alla sera o al giorno dopo
       seGiornoAvanzato(agg);
     } catch (err) {
@@ -195,6 +198,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
           <RicevuteVoce ricevute={a.ricevuteEffetti} voce={a.azione} />
         </span>
       )}
+      {/* 2026-10-26: gli effetti di stato aggiunti dopo la spunta (la Persona nel compendio e in scorta, un trofeo…), applicati solo da qui; una riga
+          intera della voce (come i gesti), perché sul telefono la colonna del testo, fra maniglia, spunta, immagine e menu, è troppo stretta */}
+      {partitaId !== null && !!a.statiDaApplicare?.length && <StatiDaApplicareVoce a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato || !!pendente} />}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}
     </li>
   );

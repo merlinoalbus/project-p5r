@@ -206,8 +206,8 @@ describe('GiornoGuida — la giornata canone', () => {
     apriMenu('Biblioteca');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
-    // Zorro è spuntata: gli effetti nuovi valgono dalla prossima spunta
-    expect(within(finestra).getByText(/già spuntata: gli effetti nuovi valgono dalla prossima spunta/)).toBeInTheDocument();
+    // Zorro è spuntata: gli effetti di stato nuovi si applicano con «Applica alla partita» sulla voce (2026-10-26)
+    expect(within(finestra).getByText(/già spuntata: .*«Applica alla partita» sulla voce/)).toBeInTheDocument();
     expect(within(finestra).getByText('Posto nella giornata (di giorno): 1 di 3')).toBeInTheDocument();
     // in cima: «su» spento; due posti giù → in fondo
     expect(within(finestra).getByRole('button', { name: 'Sposta su di un posto' })).toBeDisabled();

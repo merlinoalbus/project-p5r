@@ -25,7 +25,7 @@ import { impostaStatoRichiesta, riepilogoRichieste } from '../services/richieste
 import { oggettiOttenutiPartita } from '../services/oggettiOttenutiService.js';
 import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
-import { bodySessioneVideogioco } from '../schemas/partite.js';
+import { bodySessioneVideogioco, bodyStatiVoce } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
 import { impostaAcquisto, disponibilitaAcquistoCorrente } from '../services/negoziService.js';
 import { leggiAcquistiPartita, anteprimaRegistrazioneAcquisto, registraAcquisto, anteprimaAnnullaProvenienza, annullaProvenienzaAcquisto, anteprimaRimozionePresenzaLegacy, rimuoviPresenzaLegacy } from '../services/acquistiService.js';
@@ -42,7 +42,7 @@ import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
 import { idParam } from '../schemas/comuni.js';
 import { impostaGiornoCorrente, spuntaEAvanza } from '../services/percorsoService.js';
-import { applicaEffettoStoricoDiario } from '../services/giornataService.js';
+import { applicaEffettoStoricoDiario, applicaStatiDellaVoce } from '../services/giornataService.js';
 import { segnaCruciverbaDallaGuida, segnaDomandaDallaGuida } from '../services/spuntaDellaGuidaService.js';
 import { annullaInvito, registraInvito } from '../services/inviti.js';
 import { impostaFortuna, leggiFortuna } from '../services/fortunaService.js';
@@ -237,6 +237,10 @@ router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePe
   // la spunta e, se era l'ultima attività del giorno corrente, il passaggio al giorno dopo (togliere la spunta non torna indietro)
   // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
   res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito }));
+});
+// 2026-10-26: gli effetti di stato aggiunti o cambiati dopo la spunta (Persona nel compendio e in scorta, trofeo…) si applicano solo da qui, su richiesta
+router.post('/:id/percorso/stati', validate({ params: paramsPartita, body: bodyStatiVoce }), (req, res) => {
+  res.json(applicaStatiDellaVoce(Number(req.params.id), (req.body as z.infer<typeof bodyStatiVoce>).uid));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));

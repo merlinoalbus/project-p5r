@@ -23,14 +23,14 @@ import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, t
 import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, EsitoStatiVoceDto, ConfidentePartitaDto,DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
-import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
+import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce, statiDaApplicare, applicaStatiVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
@@ -256,6 +256,8 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   }
   // BON-01: le proposte di punti ancora aperte di questa voce (quelle della voce e quelle del consumo che la voce ha confermato)
   const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
+  // 2026-10-26: gli effetti di stato aggiunti o cambiati dopo la spunta, che la partita non ha ancora (si applicano solo dal gesto esplicito)
+  const statiDaApplicareVoce = ctx.partita === undefined || !ctx.fatte.has(r.uid) || fonte.stato !== 'convertita' ? [] : statiDaApplicare(ctx.partita, r.uid, fonte.effetti);
   // L13 (decisione 18): gli yen che la spunta di questa voce ha mosso da soli nella partita (spese scalate, guadagni entrati), da mostrare sulla voce
   const yenAutomatici = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : yenAutomaticiDellaVoce(ctx.partita, r.uid);
   // gli effetti con yen il cui denaro era già nel saldo da prima che gli yen si muovessero da soli (la nozione unica,
@@ -269,7 +271,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(statiDaApplicareVoce.length ? { statiDaApplicare: statiDaApplicareVoce } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo) : null),
@@ -829,6 +831,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
   const r = rigaVoce(uid);
   const v = voceBase(r);
   const adesso = nowIso();
+  let avvisiAnnullo: string[] = [];
   getDb().transaction(() => {
     const precedente = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
     // Una voce storica riclassificata conserva l'accesso alla rimozione delle proprie dichiarazioni.
@@ -860,7 +863,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       // tornano indietro, i punti dopo si riassegnano); l'annullo vecchio, dalla ricevuta, resta per le spunte che non sono nel registro corrente
       const ricevutaDellaSpunta = leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null);
       const eventiTolti = togliEventiDellaVoce(partitaId, uid);
-      annullaEffettiVoce(partitaId, uid, senzaEventiGestiti(ricevutaDellaSpunta, eventiTolti), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
+      avvisiAnnullo = annullaEffettiVoce(partitaId, uid, senzaEventiGestiti(ricevutaDellaSpunta, eventiTolti), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
       // chi è stato disfatto col vecchio annullo ha cambiato i valori fuori dal registro: la sua base riparte da qui
       for (const chiave of confidentiAnnullatiAlVecchioModo(ricevutaDellaSpunta, eventiTolti)) nuovaGenerazione(partitaId, chiave);
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
@@ -868,7 +871,24 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+  const aggiornata = vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+  return avvisiAnnullo.length ? { ...aggiornata, avvisiAnnullo } : aggiornata;
+}
+
+/**
+ * «Applica alla partita» (2026-10-26): gli effetti di stato aggiunti o cambiati dopo la spunta di una voce già spuntata (la Persona nel compendio
+ * e in scorta, un trofeo, un evento…) si applicano ora, su richiesta esplicita, senza rieseguire la voce: gli eventi che scrivono restano della
+ * voce (si revocano togliendo la spunta) e lo stato «prima» si ricorda come alla spunta. In un'unica transazione.
+ */
+export function applicaStatiDellaVoce(partitaId: number, uid: string): EsitoStatiVoceDto {
+  verificaPartita(partitaId);
+  const r = rigaVoce(uid);
+  const esito = getDb().transaction(() => {
+    const e = conVoceDellaSpunta(uid, () => applicaStatiVoce(partitaId, uid));
+    if (e.applicati.length) prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+    return e;
+  })();
+  return { voce: vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!, ...esito };
 }
 
 /** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */

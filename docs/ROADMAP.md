@@ -1476,6 +1476,21 @@ Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per o
 | g | Da decidere con l'utente: segnare un articolo come comprato dalla pagina del negozio e segnare un film come visto dalla sua pagina non muovono yen (lo stesso articolo li muove se lo segna una voce o un regalo); anche la pesca e l'Aojiru registrate fuori dal Diario non li muovono | aperto (decisione dell'utente) |
 | h | Istanza di rilascio: lo schema delle partite passa alla 049 (048 e 049; come già con la 046 e la 047); l'istanza di rilascio si ferma all'avvio finché non c'è una nuova «Prepara edizione» con la conversione una tantum, dopo il sì dell'utente (`docs/coordinamento/lotti/L12/progetto-due-istanze.md` §5). Confermato dai revisori del 25/10 come informativo | aperto (dopo il sì dell'utente) |
 
+### Effetto «Persona registrata» con la scelta della scorta (26 ottobre) — fatto nel codice (ramo `lavoro-persona-scorta`), da provare dall'utente
+
+Richiesta dell'utente: «se seleziono l'effetto Persona Registrata mi aspetto che sul Compendio risulti flaggata la persona selezionata. Devo poter
+scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta alla scorta.»
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Diagnosi della voce dello screenshot (04-11, «Prima infiltrazione tutorial…»): già spuntata nelle partite 1 e 3, con gli effetti trofeo e Persona aggiunti DOPO la spunta. Gli effetti di stato si applicavano solo spuntando (nessuna proposta «Applica», raccordo rifiutato), quindi Arsène non veniva registrato, senza alcun avviso visibile | causa trovata |
+| b | Formato `{tipo:'persona', persona, scorta?:true, livello?:1–99}`: senza `scorta` come prima (righe salvate invariate, nessuna migrazione); forma canonica unica (`scorta:false` non si scrive, `livello` solo con la scorta); frase «Persona registrata nel compendio e aggiunta alla scorta (al livello n): Arsène»; riepilogo «Compendio · Arsène — anche nella scorta» | fatto |
+| c | Spunta: compendio con `registraPersona` (come prima); con la scorta `aggiungiPosseduta` (l'unica scrittura della scorta), se non c'è già. La scorta è uno stato a sé (`utente.effetto_stato_voce`, riga `<uid>:scorta`, tipo `persona-scorta`): «prima», rivendicazione fra più voci ed erede come gli altri stati, nessuna migrazione utente | fatto |
+| d | Togliendo la spunta: l'esemplare nato dalla spunta esce solo se intatto (livello e skill di nascita, nessun bonus, valore osservato, tratto, nota o carica, in squadra); l'obiettivo che aveva chiuso si riapre; modificato dopo, resta (e resta nel compendio) con l'avviso «Arsène resta nella scorta…» e l'evento dell'aggiunta resta nello storico | fatto |
+| e | Voce già spuntata: la voce elenca gli effetti di stato mancanti nella partita (Persona, scorta, trofeo, evento, domanda, articolo…) con il pulsante «Applica alla partita» (`POST /api/partite/:id/percorso/stati`); niente si scrive da solo; uno stato già presente per altra via (Arsène registrato a mano nella partita 1) non si propone | fatto |
+| f | Editor: scelta «Solo nel Compendio» / «Compendio e scorta» (tasti da 44 px) e «Livello in scorta» (proposto il livello base); Persone del gruppo tolte dall'elenco; Demone del Tesoro solo nel Compendio (400 `persona-rara-scorta`). Schede degli effetti senza il titolo maiuscolo che ripeteva la frase (resta solo per un effetto da completare) | fatto, visto a 1280/768/375 su una copia |
+| g | Da decidere con l'utente: la scorta piena (capienza solo informativa) non blocca la spunta; il compendio si registra senza istantanea (livello e skill si fissano con «Registra» dalla scheda in scorta); «Applica alla partita» vale per tutti gli effetti di stato, non solo per la Persona | da confermare |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

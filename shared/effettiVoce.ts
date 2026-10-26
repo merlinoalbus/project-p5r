@@ -27,6 +27,8 @@ export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
 export interface EffettoYenVoce { tipo: 'yen'; importo: number }
 /** Il tetto degli yen di un effetto (lo stesso del denaro del gruppo, `bodyYen`). */
 export const YEN_MASSIMI_EFFETTO = 9_999_999;
+/** Il livello più alto di una Persona (quello del gioco): il livello con cui l'effetto «Persona registrata» la aggiunge alla scorta. */
+export const LIVELLO_MASSIMO_PERSONA = 99;
 /** Quante copie di un oggetto o di un articolo dà un effetto, al massimo (decisione 6: facoltativa, 1 se non indicata). */
 export const QUANTITA_MASSIMA_EFFETTO = 999;
 /** L13 (decisione 17): che cosa sblocca l'effetto «sblocco»: una Richiesta dei Mementos o un'attività (un lavoro dopo la candidatura). */
@@ -48,8 +50,11 @@ export type EffettoDiStatoVoce =
   | { tipo: 'articolo'; articolo: string; quantita?: number }
   /** L'invito di un Confidente avvenuto (R10-11i): `invito` è la chiave di `confidente_invito` («makoto/07-30»); si registra solo con le condizioni vere. */
   | { tipo: 'invito'; invito: string }
-  /** Una Persona registrata nel compendio della partita (R10-11/3, voci della Stanza di Velluto): `persona` è l'id della Persona; la spunta la registra con `registraPersona`. */
-  | { tipo: 'persona'; persona: number }
+  /** Una Persona registrata nel compendio della partita (R10-11/3, voci della Stanza di Velluto): `persona` è l'id della Persona; la spunta la registra con `registraPersona`.
+   *  Richiesta dell'utente del 2026-10-26 («devo poter scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta
+   *  alla scorta»): `scorta: true` la aggiunge anche alla scorta della partita (`aggiungiPosseduta`, se non c'è già), al `livello` indicato o al
+   *  suo livello base. Forma canonica unica: «solo nel Compendio» non scrive `scorta`; `livello` esiste solo con la scorta. */
+  | { tipo: 'persona'; persona: number; scorta?: true; livello?: number }
   /** L13 (decisione 1): un oggetto del catalogo ricevuto (`catalogo_oggetto.chiave`), `quantita` copie: va nel registro degli oggetti ottenuti
    *  della partita (`utente.oggetto_ottenuto_partita`), una riga per effetto spuntato; togliere la spunta la toglie. */
   | { tipo: 'oggetto'; oggetto: string; quantita: number }
@@ -99,7 +104,7 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'],dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -111,7 +116,15 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   }
   if (o.tipo === 'fortuna') return eDote(o.dote) ? { tipo: 'fortuna', dote: o.dote } : null;
   if (o.tipo === 'storia') return typeof o.evento === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.evento.trim()) ? { tipo: 'storia', evento: o.evento.trim() } : null;
-  if (o.tipo === 'persona') return Number.isSafeInteger(o.persona) && (o.persona as number) >= 1 ? { tipo: 'persona', persona: o.persona as number } : null;
+  if (o.tipo === 'persona') {
+    if (!Number.isSafeInteger(o.persona) || (o.persona as number) < 1) return null;
+    const persona = o.persona as number;
+    // una sola forma canonica: «solo nel Compendio» non scrive `scorta` (né `false`), e senza la scorta un livello non ha senso
+    if (o.scorta === undefined || o.scorta === false) return o.livello === undefined ? { tipo: 'persona', persona } : null;
+    if (o.scorta !== true) return null;
+    if (o.livello === undefined) return { tipo: 'persona', persona, scorta: true };
+    return Number.isSafeInteger(o.livello) && (o.livello as number) >= 1 && (o.livello as number) <= LIVELLO_MASSIMO_PERSONA ? { tipo: 'persona', persona, scorta: true, livello: o.livello as number } : null;
+  }
   if (o.tipo === 'domanda') return Number.isSafeInteger(o.domanda) && (o.domanda as number) >= 1 ? { tipo: 'domanda', domanda: o.domanda as number } : null;
   if (o.tipo === 'cruciverba') return typeof o.data === 'string' && /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.data) ? { tipo: 'cruciverba', data: o.data } : null;
   if (o.tipo === 'invito') return typeof o.invito === 'string' && /^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.invito.trim()) ? { tipo: 'invito', invito: o.invito.trim() } : null;
@@ -303,6 +316,11 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto):
       return e.bersaglio === 'richiesta' ? `Sblocca la Richiesta «${nome ?? 'Richiesta'}»` : `Sblocca l’attività «${nome ?? 'attività'}»`;
     }
     case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
-    case 'persona': { const p = n.persona(e.persona); return p ? `Persona registrata nel compendio: ${p}` : 'Persona registrata nel compendio'; }
+    case 'persona': {
+      const p = n.persona(e.persona);
+      // con la scorta la frase lo dice (e il livello solo se indicato: senza, vale il livello base della Persona)
+      const scorta = e.scorta ? ` e aggiunta alla scorta${e.livello ? ` al livello ${e.livello}` : ''}` : '';
+      return p ? `Persona registrata nel compendio${scorta}: ${p}` : `Persona registrata nel compendio${scorta}`;
+    }
   }
 }

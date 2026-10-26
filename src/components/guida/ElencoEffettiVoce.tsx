@@ -42,7 +42,7 @@ const idRiga = (r: RigaEffetto): string => {
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
 
-/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`); gli stati valgono dalla prossima spunta. */
+/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`); gli stati con «Applica alla partita». */
 const CON_APPLICA = 'Doti, letture, turni, Aojiru, pesca e yen';
 
 interface Props {
@@ -110,12 +110,13 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
               <li key={id}className="flex min-w-0 flex-col gap-2 rounded-md border border-border bg-bg-tertiary p-2">
                 <div className="flex min-w-0 flex-wrap items-start gap-2">
                   <IconaCategoria categoria={CATEGORIA_EFFETTO[r.effetto.tipo]} dimensione={32} />
-                  <div className="flex min-w-0 flex-1 basis-40 flex-col gap-0.5">
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-display testo-13 uppercase tracking-wide text-primary-testo">{nome}</span>
-                      {i === collegato && <span className="chip testo-12" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span>}
+                  {/* 2026-10-26 («le etichette di testo devono essere visibili solo se hanno senso»): niente titolo in maiuscolo sopra la frase, che
+                      dice già di che effetto si tratta (con l'icona della categoria); il nome della famiglia compare solo finché l'effetto è da completare */}
+                  <div className="flex min-h-8 min-w-0 flex-1 basis-40 flex-col justify-center">
+                    <span className="testo-13 break-words text-pretty">
+                      {completo ? fraseEffetto(r.effetto, nomi) : `${nome}: da scegliere qui sotto.`}
+                      {i === collegato && <>{' '}<span className="chip testo-12 align-middle" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span></>}
                     </span>
-                    <span className="testo-13 break-words">{completo ? fraseEffetto(r.effetto, nomi) : 'Da scegliere qui sotto.'}</span>
                   </div>
                   <span className="flex shrink-0 gap-1">
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}
@@ -142,7 +143,7 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
           )}
         </div>
       )}
-      {fatta && <p className="m-0 testo-12 text-text-secondary">Questa voce è già spuntata: {CON_APPLICA} aggiunti o cambiati compaiono come pulsante «Applica» sulla voce; gli altri effetti (articoli, oggetti, eventi, domande, sblocchi…) valgono dalla prossima spunta. Le ricevute della spunta già fatta non cambiano.</p>}
+      {fatta && <p className="m-0 testo-12 text-text-secondary text-pretty">Questa voce è già spuntata: {CON_APPLICA} aggiunti o cambiati compaiono come pulsante «Applica» sulla voce; gli altri effetti (Persona, trofei, articoli, oggetti, eventi, domande, sblocchi…), dopo il salvataggio, con «Applica alla partita» sulla voce. Le ricevute della spunta già fatta non cambiano.</p>}
     </div>
   );
 }

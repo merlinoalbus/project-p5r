@@ -7,6 +7,7 @@
 // l'app. Il formato dell'effetto non cambia (`EffettoVoce`).
 // ============================================================
 
+import { useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -16,7 +17,7 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
-import { BERSAGLI_SBLOCCO, QUANTITA_MASSIMA_EFFETTO, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { BERSAGLI_SBLOCCO, LIVELLO_MASSIMO_PERSONA, QUANTITA_MASSIMA_EFFETTO,YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 
@@ -103,6 +104,47 @@ export function CampoYen({ importo, onCambia }: { importo: number; onCambia: (im
           <li>il collegamento della voce a un film, un’attività o una Richiesta con i loro yen.</li>
         </ul>
       </details>
+    </div>
+  );
+}
+
+type EffettoPersona = Extract<EffettoVoce, { tipo: 'persona' }>;
+const SCELTE_SCORTA = [{ chiave: 'compendio', nome: 'Solo nel Compendio' }, { chiave: 'scorta', nome: 'Compendio e scorta' }];
+
+/**
+ * 2026-10-26 (richiesta dell'utente: «devo poter scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta alla
+ * scorta»): la scelta a due tasti e, con la scorta, il livello con cui entra (proposto il livello base della Persona, scritto solo se diverso).
+ * Un Demone del Tesoro resta solo nel Compendio, come nella scelta della scorta della partita.
+ */
+export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto: EffettoPersona; persona: { livello: number; rara?: boolean }; onCambia: (e: EffettoPersona) => void }) {
+  const base = persona.livello;
+  // il testo mentre si scrive: «3» verso «35» con il livello base 20 non deve diventare subito 20; il valore valido si scrive appena c'è
+  const [testo, setTesto] = useState<string | null>(null);
+  const scriviLivello = (livello: number) => onCambia(livello === base ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona, scorta: true, livello });
+  return (
+    <div className="flex flex-col gap-2">
+      <FilaScelta etichetta="Dove va la Persona" valore={e.scorta ? 'scorta' : 'compendio'} opzioni={SCELTE_SCORTA} disabilitato={!!persona.rara}
+        onCambia={(v) => onCambia(v === 'scorta' ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona })} />
+      {persona.rara && <p className="m-0 testo-12 text-text-secondary text-pretty">Demone del Tesoro: si registra solo nel Compendio.</p>}
+      {e.scorta && (
+        <>
+          <label className="flex flex-col gap-1 testo-13">Livello in scorta
+            <input className="form-input min-h-11 w-24 tabular-nums" type="number" inputMode="numeric" min={base} max={LIVELLO_MASSIMO_PERSONA} step={1} value={testo ?? String(e.livello ?? base)}
+              onChange={(ev) => {
+                setTesto(ev.target.value);
+                const n = Number(ev.target.value);
+                if (Number.isInteger(n) && n >= base && n <= LIVELLO_MASSIMO_PERSONA) scriviLivello(n);
+              }}
+              // uscendo dal campo vale il livello scritto, portato fra il livello base e 99
+              onBlur={() => {
+                const n = Math.trunc(Number(testo));
+                if (testo !== null) scriviLivello(Number.isFinite(n) && testo.trim() !== '' ? Math.min(LIVELLO_MASSIMO_PERSONA, Math.max(base, n)) : base);
+                setTesto(null);
+              }} />
+          </label>
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
+        </>
+      )}
     </div>
   );
 }
@@ -202,9 +244,15 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     case 'persona': {
       const p = effetti.persone.find((x) => x.id === e.persona);
       return (
-        <div className="flex flex-wrap items-end gap-2">
-          {p && <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} />}
-          <Selettore className="min-w-[12rem] flex-1" etichetta="Persona del compendio" valore={String(e.persona)} opzioni={effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: `${x.arcana} · Liv. ${x.livello}` }))} onCambia={(v) => onCambia({ tipo: 'persona', persona: Number(v) })} />
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-end gap-2">
+            {p && <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} />}
+            <Selettore className="min-w-[12rem] flex-1" etichetta="Persona del compendio" valore={String(e.persona)}
+              opzioni={conCorrente(effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: `${x.arcana} · Liv. ${x.livello}` })), e.persona >= 1 ? String(e.persona) : '', 'Persona non più nell’elenco')}
+              // cambiando Persona la scelta della scorta resta (se la nuova può entrarci); il livello no: era della Persona di prima
+              onCambia={(v) => { const n = effetti.persone.find((x) => x.id === Number(v)); onCambia(e.scorta && n && !n.rara ? { tipo: 'persona', persona: Number(v), scorta: true } : { tipo: 'persona', persona: Number(v) }); }} />
+          </div>
+          {p && <CampiScortaPersona key={p.id} effetto={e} persona={p} onCambia={onCambia} />}
         </div>
       );
     }
