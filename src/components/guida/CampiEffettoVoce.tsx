@@ -121,11 +121,12 @@ export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto:
   // il testo mentre si scrive: «3» verso «35» con il livello base 20 non deve diventare subito 20; il valore valido si scrive appena c'è
   const [testo, setTesto] = useState<string | null>(null);
   const scriviLivello = (livello: number) => onCambia(livello === base ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona, scorta: true, livello });
+  // un Demone del Tesoro non ha scelta: al posto dei due tasti spenti, la nota che lo dice (un'etichetta visibile solo se ha senso)
+  if (persona.rara) return <p className="m-0 testo-12 text-text-secondary text-pretty">Demone del Tesoro: si registra solo nel Compendio, non va nella scorta da una voce.</p>;
   return (
     <div className="flex flex-col gap-2">
-      <FilaScelta etichetta="Dove va la Persona" valore={e.scorta ? 'scorta' : 'compendio'} opzioni={SCELTE_SCORTA} disabilitato={!!persona.rara}
+      <FilaScelta etichetta="Dove va la Persona" valore={e.scorta ? 'scorta' : 'compendio'} opzioni={SCELTE_SCORTA}
         onCambia={(v) => onCambia(v === 'scorta' ? { tipo: 'persona', persona: e.persona, scorta: true } : { tipo: 'persona', persona: e.persona })} />
-      {persona.rara && <p className="m-0 testo-12 text-text-secondary text-pretty">Demone del Tesoro: si registra solo nel Compendio.</p>}
       {e.scorta && (
         <>
           <label className="flex flex-col gap-1 testo-13">Livello in scorta

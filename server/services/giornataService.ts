@@ -31,7 +31,7 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce, statiDaApplicare, applicaStatiVoce } from './motoreDiario.js';
-import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatiApplicatiAlSalvataggioDto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
@@ -675,18 +675,21 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
 }
 
 /** Modifica una voce: testo, note, genere, tipo, collegamento, rango, effetti, fascia e posto nella fascia. */
-export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: number): AzionePercorsoDto {
+/** `opz.applicaStati`: il salvataggio di chi modifica la voce (decisione 19: gli effetti di stato aggiunti o cambiati entrano subito; vedi `salvaEffettiVoce`). */
+export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: number, opz: { applicaStati?: boolean } = {}): AzionePercorsoDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const azione = testoValido(d.azione);
   const genere: GenereVoce = d.genere ?? genereDi(r);
   const fascia: FasciaGioco = d.fascia ?? fasciaDi(r);
   const { riferimento } = struttura(d, r);
+  // decisione 19: gli effetti di stato aggiunti o cambiati entrano subito nelle partite che hanno la voce spuntata; la risposta lo dice
+  let applicatiAlSalvataggio: StatiApplicatiAlSalvataggioDto[] = [];
   getDb().transaction(() => {
     if (d.effettiVoce) {
       if (!d.effettiVoce.revisioneEffettiAttesa) throw httpErrors.conflict('revisione-effetti-richiesta', 'Ricarica la fonte prima di modificare gli effetti.');
       if (genere !== 'azione' && d.effettiVoce.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
-      salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa });
+      applicatiAlSalvataggio = salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa }, opz).applicatiAlSalvataggio ?? [];
     }
     if (genere !== 'azione' && genereDi(r) === 'azione') {
       // un'azione diventa evento: non si spunta più. Con effetti applicati in una partita no (andrebbero persi senza poterli
@@ -716,7 +719,8 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     // R10-11f: se la voce cambia fascia o posto, l'ordine dei suoi eventi nel registro dei punti cambia e i Confidenti toccati si ricalcolano
     riallineaVoceNelRegistro(uid);
   })();
-  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  const aggiornata = vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  return applicatiAlSalvataggio.length ? { ...aggiornata, applicatiAlSalvataggio } : aggiornata;
 }
 
 /** Sposta una voce di un passo dentro la sua fascia (-1 su, +1 giù); ai bordi non cambia nulla. */
@@ -795,12 +799,13 @@ function partiteConEffetti(uid: string): string[] {
 }
 
 /** Elimina nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. */
-export function eliminaVoce(uid: string): void {
+/** Mette la voce nel cestino. Restituisce gli avvisi dell'annullo nelle partite (un esemplare in scorta modificato dopo la spunta, che resta). */
+export function eliminaVoce(uid: string): string[] {
   const r = rigaVoce(uid);
   const sorelle = righeDelGiorno(r.data).filter(v => v.fascia === r.fascia).map(v => v.uid), posto = sorelle.indexOf(uid);
   const vicini = { prima: sorelle[posto - 1] ?? null, dopo: sorelle[posto + 1] ?? null };
-  conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
-    preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
+  return conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
+    const avvisi = preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
     revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
@@ -810,6 +815,7 @@ export function eliminaVoce(uid: string): void {
       prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
     }
     compatta(r.data, r.fascia);
+    return avvisi;
   });
 }
 
@@ -876,15 +882,16 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
 }
 
 /**
- * «Applica alla partita» (2026-10-26): gli effetti di stato aggiunti o cambiati dopo la spunta di una voce già spuntata (la Persona nel compendio
- * e in scorta, un trofeo, un evento…) si applicano ora, su richiesta esplicita, senza rieseguire la voce: gli eventi che scrivono restano della
- * voce (si revocano togliendo la spunta) e lo stato «prima» si ricorda come alla spunta. In un'unica transazione.
+ * «Applica» sulla voce (decisione 19, «Elenco da approvare»): gli effetti di stato di una voce già spuntata che la partita non ha ancora, o ha
+ * in una versione superata (la Persona nel compendio e in scorta, un trofeo, un evento, un articolo con il suo prezzo…), si applicano ora, su
+ * richiesta esplicita, quelli indicati (`effetti`, per uid) o tutti, senza rieseguire la voce: gli eventi che scrivono restano della voce (si
+ * revocano togliendo la spunta) e lo stato «prima» si ricorda come alla spunta. In un'unica transazione, ogni effetto nel suo punto di ripristino.
  */
-export function applicaStatiDellaVoce(partitaId: number, uid: string): EsitoStatiVoceDto {
+export function applicaStatiDellaVoce(partitaId: number, uid: string, effetti?: readonly string[]): EsitoStatiVoceDto {
   verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const esito = getDb().transaction(() => {
-    const e = conVoceDellaSpunta(uid, () => applicaStatiVoce(partitaId, uid));
+    const e = applicaStatiVoce(partitaId, uid, effetti);
     if (e.applicati.length) prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     return e;
   })();

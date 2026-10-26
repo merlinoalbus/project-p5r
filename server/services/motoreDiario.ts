@@ -7,13 +7,15 @@ import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutt
 import { yenDelDato } from './yenDeiDati.js';
 import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { articoloPagatoDalTurno } from './attivitaService.js';
-import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto, EffettoDiStatoVoce, NomiFraseEffetto, StatiApplicatiAlSalvataggioDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { annullaFontiDiarioNellaTransazione, anteprimaRegistrazioneAcquisto, registraAcquistoNellaTransazione, verificaOffertaConsumo, type PorteDisponibilitaAcquisto } from './acquistiService.js';
 import { accendiFortunaDaVoce, spegniFortunaDaVoce } from './fortunaService.js';
-import { applicaEffettiDiStato, annullaEffettiDiStato, applicaParti, descriviParte, statiMancanti, verificaEffettoDiStato } from './effettiDiStatoService.js';
+import { applicaEffettiDiStato, annullaEffettiDiStato, applicaStatoDaApplicare, descriviStatoDaApplicare, statiMancanti, verificaEffettoDiStato, type StatoDaApplicare } from './effettiDiStatoService.js';
+import { conVoceDellaSpunta } from './storicoService.js';
+import type { StatoDaApplicareDto } from '../../shared/types.js';
 import { creaPropostaEffettoStorico, improntaDato, jsonCanonico, leggiJsonRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiVoce, verificaBeneficio, saldoDoteVoce, trasferisciAttribuzioneDote } from './propostePartitaService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riconciliaRegistroDopoRipristino, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
@@ -98,6 +100,11 @@ function muoviYenDellaVoce(p:number,uid:string,elenco:Array<YenDaMuovere|null>):
  * nuova (la sua quota), il biglietto del cinema di una visione. I turni li muove il turno stesso (`attivitaService.registraTurno`), le Richieste la
  * Richiesta completata (`riallineaYenRichiesta`). Mai sotto zero, e la spunta non si ferma per il saldo.
  */
+/** Il nome e il prezzo di un articolo: il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino. */
+function articoloConPrezzo(chiave:string):{nome:string;prezzo:number|null}|undefined {
+  const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
+  return prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(chiave) as {nome:string;prezzo:number|null}|undefined;
+}
 function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEffettoVoceDto,porzione?:EffettiAzioneDto|null):YenDaMuovere|null {
   const x=e.effetto,spesa=(importo:number,motivo:string):YenDaMuovere=>({effettoUid:e.uid,importo:-importo,motivo});
   if(x.tipo==='articolo'){
@@ -108,9 +115,7 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     if(!statoVoce)return null;
     const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
     if(giaComprato&&!prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND tipo='articolo' AND chiave=? AND voce_uid<>?").get(p,x.articolo,uid))return null;
-    // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
-    const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
-    const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
+    const a=articoloConPrezzo(x.articolo);
     const copie=x.quantita??1;
     return a?.prezzo!=null&&a.prezzo>0?spesa(a.prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
   }
@@ -175,7 +180,13 @@ export function inizializzaEffettiVoce(uid:string,elenco:EffettoVoce[],origine:E
   if(prepared('SELECT 1 FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid))throw httpErrors.conflict('effetti-gia-inizializzati','La voce possiede già la propria fonte.');
   scriviLista(uid,validi.map((effetto,ordine)=>({uid:nuovoUid(),ordine,effetto,origine})),'[]');
 }
-export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEffettiVoceDto {
+/**
+ * Salva la lista completa degli effetti della voce. `applicaStati` (decisione 19, «Subito al salvataggio»): solo il salvataggio di chi
+ * modifica la voce (le rotte) applica subito gli effetti di stato aggiunti o cambiati nelle partite che hanno la voce spuntata; le scritture
+ * senza un gesto dell'utente (la migrazione 238 che applica le conversioni certe, un candidato confermato senza risposta che lo dica) no:
+ * per le spunte di prima resta l'«Elenco da approvare» sulla voce.
+ */
+export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce,opz:{applicaStati?:boolean}={}):StatoEffettiVoceDto {
   return getDb().transaction(()=>{
     const prima=leggiEffettiVoce(uid);if(prima.revisione!==r.revisioneEffettiAttesa)throw httpErrors.conflict('effetti-cambiati','Gli effetti o la fonte sono cambiati: rileggi prima di salvare.');
     if(voce(uid).genere!=='azione'&&r.effetti.length)throw httpErrors.conflict('voce-non-spuntabile','Soltanto un’azione può avere effetti eseguibili.');
@@ -199,7 +210,10 @@ export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEf
     const partite=prepared('SELECT partita_id FROM utente.spunta_voce_partita WHERE voce_uid=?').all(uid) as Array<{partita_id:number}>;
     for(const p of partite)for(const e of nuovi){const old=prima.effetti.find((x)=>x.uid===e.uid);if(!old||jsonCanonico(old.effetto)!==jsonCanonico(e.effetto))creaPropostaEffettoStorico(p.partita_id,uid,e.uid,old);}
     for(const p of partite)for(const e of nuovi)if(e.effetto.tipo==='acquisto')for(const id of e.effetto.sostituisceDoti)creaPropostaEffettoStorico(p.partita_id,uid,id);
-    return leggiEffettiVoce(uid);
+    // decisione 19 («Subito al salvataggio»): gli effetti di stato aggiunti o cambiati entrano subito nelle partite che hanno la voce spuntata
+    const applicatiAlSalvataggio=opz.applicaStati?applicaStatiAlSalvataggio(uid,prima,nuovi,partite):[];
+    const dopo=leggiEffettiVoce(uid);
+    return applicatiAlSalvataggio.length?{...dopo,applicatiAlSalvataggio}:dopo;
   })();
 }
 export function copiaEffettiVoce(daUid:string,aUid:string):void {
@@ -512,38 +526,118 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
   sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
+// ------------------------------------------------------------
+// Decisione 19 (26 ottobre; risposte dell'utente «Subito al salvataggio» e «Elenco da approvare»): gli effetti di stato di una voce già
+// spuntata. Salvati o cambiati nell'editor si applicano SUBITO in ogni partita che ha la voce spuntata (`applicaStatiAlSalvataggio`), con il
+// «prima» registrato e la versione superata tolta (l'effetto Arsène diventato Pixie: Pixie entra, Arsène torna com'era se l'aveva messo la
+// voce); quelli mai applicati delle spunte di prima restano elencati sulla voce (`statiDaApplicare`) e si applicano solo con «Applica», uno
+// per uno o tutti (`applicaStatiVoce`). Gli articoli muovono yen (decisione 18) e non si applicano da soli: stanno nell'elenco, con gli yen detti.
+// ------------------------------------------------------------
+const effettiDiStatoDi=(effetti:readonly EffettoVoceDto[]):Array<{uid:string;effetto:EffettoDiStatoVoce}>=>effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]);
+const voceSpuntataIn=(p:number,uid:string):boolean=>!!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid);
+const causaYenEffetto=(uid:string,effettoUid:string)=>({tipo:'voce' as const,chiave:`${uid}:${effettoUid}`});
 /**
- * 2026-10-26 (l'effetto «Persona registrata» aggiunto a una voce già spuntata non registrava niente, in silenzio): le parti degli effetti di stato
- * della voce spuntata che la partita non ha ancora, con la frase da mostrare sulla voce. Vuoto se la voce non è spuntata. Sola lettura.
+ * Decisione 18 per un articolo da applicare: gli yen che il gesto muoverà da solo, con le regole della spunta (`yenDellEffetto` e
+ * `muoviYenAutomatico`): il prezzo scalato per l'articolo di prima torna nel saldo; quello nuovo (prezzo × copie) si scala, mai sotto zero,
+ * se l'articolo ha un prezzo e la sua causa non è già nel saldo da prima degli yen automatici (fuori registro).
  */
-export function statiDaApplicare(p:number,uid:string,effetti:readonly EffettoVoceDto[]):Array<{effettoUid:string;scorta:boolean;descrizione:string}> {
-  const diStato=effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]);
-  if(!diStato.length||!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))return [];
-  const parti=statiMancanti(p,uid,diStato);
-  if(!parti.length)return [];
-  const nomi=nomiFraseEffetto();
-  return parti.map((x)=>({effettoUid:x.effettoUid,scorta:x.scorta,descrizione:descriviParte(x,nomi)}));
+function frasiYenStato(p:number,uid:string,s:StatoDaApplicare):string[] {
+  if(s.effetto.tipo!=='articolo')return [];
+  const causa=causaYenEffetto(uid,s.effettoUid),frasi:string[]=[];
+  if(s.superate.some((r)=>r.tipo==='articolo')&&yenAutomaticoAttivo(p,causa))frasi.push('Torna nel saldo il prezzo scalato per l’articolo di prima');
+  if(s.parti.length&&!yenFuoriRegistro(p,causa)){
+    const a=articoloConPrezzo(s.effetto.articolo),n=(a?.prezzo??0)*(s.effetto.quantita??1);
+    if(n>0)frasi.push(`Si scalano ¥${n.toLocaleString('it-IT')} dal saldo, mai sotto zero`);
+  }
+  return frasi;
+}
+/** Uno stato da applicare per la voce: la frase di ciò che entra e, sotto, ciò che succede alla versione superata e agli yen. null se non c'è niente da dire. */
+function statoDto(p:number,uid:string,s:StatoDaApplicare,nomi:NomiFraseEffetto):StatoDaApplicareDto|null {
+  const d=descriviStatoDaApplicare(p,uid,s,nomi);
+  if(!d)return null;
+  const dettagli=[...d.dettagli,...frasiYenStato(p,uid,s)];
+  return {effettoUid:s.effettoUid,descrizione:d.descrizione,...(dettagli.length?{dettagli}:{})};
+}
+/** La frase di uno stato applicato, per le notifiche: ciò che è entrato e, fra parentesi, ciò che è successo intorno. */
+const fraseApplicato=(d:StatoDaApplicareDto):string=>`${d.descrizione}${d.dettagli?.length?` (${d.dettagli.join('; ')})`:''}`;
+/**
+ * Applica uno stato in un punto di ripristino suo, legato alla voce (`conVoceDellaSpunta`: gli eventi restano della voce e si revocano togliendo
+ * la spunta), con gli yen dell'articolo come alla spunta: prima torna il prezzo dell'articolo di prima, poi si scala quello nuovo. Uno che il
+ * gioco non permette ancora (un invito senza le condizioni, un articolo non disponibile) resta com'era, con il motivo, e non ferma gli altri.
+ */
+function applicaUnoStato(p:number,uid:string,s:StatoDaApplicare,effetti:readonly EffettoVoceDto[]):{avvisi:string[]}|{motivo:string} {
+  try {
+    return getDb().transaction(()=>conVoceDellaSpunta(uid,()=>conYenInOrdine(()=>{
+      if(s.superate.some((r)=>r.tipo==='articolo'))restituisciYenAutomatico(p,causaYenEffetto(uid,s.effettoUid),'versione-sostituita');
+      const avvisi=applicaStatoDaApplicare(p,uid,s);
+      const e=s.effetto.tipo==='articolo'&&s.parti.length?effetti.find((x)=>x.uid===s.effettoUid):undefined;
+      if(e)muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,e)]);
+      return {avvisi};
+    })))();
+  } catch(err) {
+    if(err instanceof HttpError&&err.status<500)return {motivo:err.message};
+    throw err;
+  }
 }
 /**
- * Il gesto «Applica alla partita» (2026-10-26): gli effetti di stato mancanti di una voce già spuntata si applicano come li avrebbe applicati la
- * spunta (stesse scritture, stesso «prima»: togliendo la spunta tornano come gli altri), senza rieseguire la voce. Gli articoli comprati scalano il
- * loro prezzo come alla spunta (decisione 18). Va chiamata nella transazione del gesto, dentro `conVoceDellaSpunta` (gli eventi restano della voce).
+ * Al salvataggio degli effetti (decisione 19, «Subito al salvataggio»): in ogni partita che ha la voce spuntata, gli effetti di stato aggiunti
+ * o cambiati in questo salvataggio si applicano subito (tranne gli articoli: muovono yen e restano nell'elenco sulla voce, con gli yen detti).
+ * Dentro la transazione del salvataggio. Restituisce, partita per partita, che cosa è entrato, gli avvisi e che cosa resta da applicare.
  */
-export function applicaStatiVoce(p:number,uid:string):{applicati:string[];nonApplicati:Array<{descrizione:string;motivo:string}>} {
+function applicaStatiAlSalvataggio(uid:string,prima:StatoEffettiVoceDto,nuovi:readonly EffettoVoceDto[],partite:ReadonlyArray<{partita_id:number}>):StatiApplicatiAlSalvataggioDto[] {
+  const cambiati=effettiDiStatoDi(nuovi).filter((e)=>{
+    if(e.effetto.tipo==='articolo')return false;
+    const old=prima.effetti.find((x)=>x.uid===e.uid);
+    return !old||jsonCanonico(old.effetto)!==jsonCanonico(e.effetto);
+  });
+  if(!cambiati.length||!partite.length)return [];
+  const nomi=nomiFraseEffetto(),esito:StatiApplicatiAlSalvataggioDto[]=[];
+  for(const {partita_id:p} of partite){
+    const applicati:string[]=[],avvisi:string[]=[],nonApplicati:Array<{descrizione:string;motivo:string}>=[];
+    // una versione superata che era un articolo (il prezzo da restituire) non si tocca da qui: resta nell'elenco sulla voce
+    for(const s of statiMancanti(p,uid,cambiati).filter((x)=>!x.superate.some((r)=>r.tipo==='articolo'))){
+      const d=statoDto(p,uid,s,nomi),r=applicaUnoStato(p,uid,s,nuovi);
+      if('motivo' in r){if(d)nonApplicati.push({descrizione:d.descrizione,motivo:r.motivo});}
+      else {if(d)applicati.push(fraseApplicato(d));avvisi.push(...r.avvisi);}
+    }
+    if(applicati.length||avvisi.length||nonApplicati.length){
+      const nome=(prepared('SELECT nome FROM utente.partita WHERE id=?').get(p) as {nome:string}|undefined)?.nome??`Partita ${p}`;
+      esito.push({partitaId:p,partita:nome,applicati,avvisi,nonApplicati});
+    }
+  }
+  return esito;
+}
+/**
+ * Gli stati da applicare di una voce spuntata nella partita (decisione 19, «Elenco da approvare»): gli effetti di stato che la partita non ha
+ * ancora, o ha in una versione superata, con le frasi da mostrare sulla voce. Vuoto se la voce non è spuntata. Sola lettura.
+ */
+export function statiDaApplicare(p:number,uid:string,effetti:readonly EffettoVoceDto[]):StatoDaApplicareDto[] {
+  const diStato=effettiDiStatoDi(effetti);
+  if(!diStato.length||!voceSpuntataIn(p,uid))return [];
+  const stati=statiMancanti(p,uid,diStato);
+  if(!stati.length)return [];
+  const nomi=nomiFraseEffetto();
+  return stati.flatMap((s)=>{const d=statoDto(p,uid,s,nomi);return d?[d]:[];});
+}
+/**
+ * Il gesto «Applica» sulla voce (decisione 19: si applica solo ciò che l'utente approva): gli stati da applicare indicati per effetto
+ * (`effettoUids`; tutti senza), ciascuno come al salvataggio (`applicaUnoStato`), senza rieseguire la voce. Va chiamata nella transazione del gesto.
+ */
+export function applicaStatiVoce(p:number,uid:string,effettoUids?:readonly string[]):{applicati:string[];nonApplicati:Array<{descrizione:string;motivo:string}>;avvisi:string[]} {
   if(!getDb().inTransaction)throw new Error('L’applicazione degli stati richiede la transazione del gesto.');
   verificaPartita(p);
-  if(!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))throw httpErrors.conflict('voce-non-spuntata','La voce non è spuntata in questa partita: i suoi effetti si applicano spuntandola.');
+  if(!voceSpuntataIn(p,uid))throw httpErrors.conflict('voce-non-spuntata','La voce non è spuntata in questa partita: i suoi effetti si applicano spuntandola.');
   const stato=leggiEffettiVoce(uid);
   if(stato.stato!=='convertita')throw httpErrors.conflict('effetti-da-correggere','Il RAW storico non è convertibile: correggi gli effetti prima di applicarli.');
-  const parti=statiMancanti(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
-  if(!parti.length)return {applicati:[],nonApplicati:[]};
-  const nomi=nomiFraseEffetto();
-  const esito=conYenInOrdine(()=>{
-    const r=applicaParti(p,uid,parti);
-    muoviYenDellaVoce(p,uid,r.scritte.flatMap((x)=>{const e=x.effetto.tipo==='articolo'?stato.effetti.find((y)=>y.uid===x.effettoUid):undefined;return e?[yenDellEffetto(p,uid,e)]:[];}));
-    return r;
-  });
-  return {applicati:esito.scritte.map((x)=>descriviParte(x,nomi)),nonApplicati:esito.nonApplicate.map((x)=>({descrizione:descriviParte(x.parte,nomi),motivo:x.motivo}))};
+  const scelti=effettoUids?new Set(effettoUids):null;
+  const nomi=nomiFraseEffetto(),applicati:string[]=[],avvisi:string[]=[],nonApplicati:Array<{descrizione:string;motivo:string}>=[];
+  for(const s of statiMancanti(p,uid,effettiDiStatoDi(stato.effetti)).filter((x)=>!scelti||scelti.has(x.effettoUid))){
+    // le frasi prima di applicare: dicono ciò che il gesto fa (dopo, lo stato non è più «da applicare»)
+    const d=statoDto(p,uid,s,nomi),r=applicaUnoStato(p,uid,s,stato.effetti);
+    if('motivo' in r){if(d)nonApplicati.push({descrizione:d.descrizione,motivo:r.motivo});}
+    else {if(d)applicati.push(fraseApplicato(d));avvisi.push(...r.avvisi);}
+  }
+  return {applicati,nonApplicati,avvisi};
 }
 /**
  * Togliere la spunta. L13 (decisione 18): gli yen tornano alla fine, prima le spese restituite e poi i guadagni tolti (`conYenInOrdine`).
@@ -606,8 +700,13 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND voce_uid=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,uid);
   return avvisi;
 }
-export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLegacy,'annullaLegacy'>):void {
+/**
+ * La voce va nel cestino: in ogni partita i suoi effetti si annullano come togliendo la spunta. Restituisce gli avvisi dell'annullo (un
+ * esemplare in scorta modificato dopo la spunta, che resta), con il nome della partita, da dire a chi elimina.
+ */
+export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLegacy,'annullaLegacy'>):string[] {
   if(!getDb().inTransaction)throw new Error('La rimozione richiede la transazione del cestino.');
+  const avvisi:string[]=[];
   const spunte=prepared('SELECT partita_id,effetti_json FROM utente.spunta_voce_partita WHERE voce_uid=?').all(uid) as Array<{partita_id:number;effetti_json:string|null}>;
   const partite=new Set([...spunte.map((s)=>s.partita_id),...(prepared('SELECT DISTINCT partita_id FROM utente.effetto_applicato WHERE voce_uid=? UNION SELECT DISTINCT partita_id FROM utente.acquisto_provenienza WHERE voce_uid=?').all(uid,uid) as Array<{partita_id:number}>).map((r)=>r.partita_id)]);
   const validati=new Map(spunte.map((s)=>[s.partita_id,leggiRicevutaEffettiAzione(s.effetti_json)]));
@@ -617,10 +716,12 @@ export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLe
   for(const p of partite){
     const ricevuta=validati.get(p)??null,tolti=togliEventiDellaVoce(p,uid);
     // L13 (decisione 18): gli yen della voce tornano con il motivo «voce eliminata», così rimettendola dal cestino si muovono di nuovo
-    conMotivoDiRestituzione(MOTIVO_VOCE_ELIMINATA,()=>annullaEffettiVoce(p,uid,senzaEventiGestiti(ricevuta,tolti),{...porte,applicaLegacy:()=>null}));
+    const dellaPartita=conMotivoDiRestituzione(MOTIVO_VOCE_ELIMINATA,()=>annullaEffettiVoce(p,uid,senzaEventiGestiti(ricevuta,tolti),{...porte,applicaLegacy:()=>null}));
+    if(dellaPartita.length){const nome=(prepared('SELECT nome FROM utente.partita WHERE id=?').get(p) as {nome:string}|undefined)?.nome??`Partita ${p}`;avvisi.push(...dellaPartita.map((a)=>`«${nome}»: ${a}`));}
     for(const chiave of confidentiAnnullatiAlVecchioModo(ricevuta,tolti))nuovaGenerazione(p,chiave);
   }
   for(const r of prepared('SELECT DISTINCT partita_id FROM utente.punti_confidente_voce WHERE voce_uid=?').all(uid) as Array<{partita_id:number}>)togliEventiDellaVoce(r.partita_id,uid);
+  return avvisi;
 }
 export function riconciliaEffettiDopoRipristino(p:number,uids:string[],confidentiNonRimessi:ReadonlySet<string>=new Set()):void {
   if(!getDb().inTransaction)throw new Error('Il ripristino richiede la transazione del cestino.');

@@ -149,7 +149,8 @@ function composizione(dto: PropostaConversioneDto, completati: EffettoVoce[] | u
  * con `aggiornaVoce`, e nella stessa transazione la proposta diventa «applicata». Una proposta illeggibile non si applica; una superata (un
  * effetto da togliere che non c'è più) solo da «Modifica».
  */
-export function applicaPropostaConversione(id: string, r: RichiestaApplicaProposta, partitaId?: number): { proposta: PropostaConversioneDto; voce: AzionePercorsoDto } {
+/** `opz.applicaStati`: l'applicazione fatta da chi gioca (la rotta), non dalla migrazione 238: vedi `aggiornaVoce` e la decisione 19. */
+export function applicaPropostaConversione(id: string, r: RichiestaApplicaProposta, partitaId?: number, opz: { applicaStati?: boolean } = {}): { proposta: PropostaConversioneDto; voce: AzionePercorsoDto } {
   return getDb().transaction(() => {
     const { voce, dto } = propostaAperta(id, r.revisionePropostaAttesa);
     if (!dto.leggibile) throw httpErrors.conflict('proposta-illeggibile', `La proposta non si legge per intero (${dto.problema}): si può solo scartare.`);
@@ -166,7 +167,7 @@ export function applicaPropostaConversione(id: string, r: RichiestaApplicaPropos
       dati = c.dati;
       esito = { modo: 'proposta', dati, aggiunti: c.aggiunti, giaPresenti: c.giaPresenti, tolti: dto.togli.length };
     }
-    const aggiornata = Object.keys(dati).length > 0 ? aggiornaVoce(voce.uid, dati, partitaId) : null;
+    const aggiornata = Object.keys(dati).length > 0 ? aggiornaVoce(voce.uid, dati, partitaId, opz) : null;
     chiudi(id, 'applicata', esito);
     const dopo = prepared('SELECT * FROM main.proposta_conversione_voce WHERE id = ?').get(id) as RigaProposta;
     // nessun cambiamento da scrivere (tutto già presente): la voce si rilegge com'è

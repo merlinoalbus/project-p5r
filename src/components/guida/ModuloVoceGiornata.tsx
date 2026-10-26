@@ -140,13 +140,21 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     setOccupato(true);
     let registrata = false;
     try {
-      if (voce && proposta) await applicaPropostaConversione(proposta.id, { revisionePropostaAttesa: proposta.revisione, voce: dati }, partitaId ?? undefined);
-      else if (voce) await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
+      // decisione 19 («Subito al salvataggio»): la voce salvata dice che cosa è entrato subito nelle partite che la hanno spuntata
+      let salvata: AzionePercorsoDto | null = null;
+      if (voce && proposta) salvata = (await applicaPropostaConversione(proposta.id, { revisionePropostaAttesa: proposta.revisione, voce: dati }, partitaId ?? undefined)).voce;
+      else if (voce) salvata = await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
       else await creaVoceGiornata(giorno, dati, partitaId ?? undefined);
       registrata = true;
       segnalaMutazioneEffetti(null);
       await onSalvato();
       notifica('success', proposta ? 'Proposta applicata: voce modificata nella guida, per tutte le partite.' : voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
+      for (const x of salvata?.applicatiAlSalvataggio ?? []) {
+        if (x.applicati.length) notifica('success', `Applicato a «${x.partita}», dove la voce è spuntata: ${x.applicati.join(' · ')}.`);
+        // avvisi e ciò che resta da applicare non scompaiono da soli (la durata predefinita degli avvisi)
+        if (x.avvisi.length) notifica('warning', `«${x.partita}»: ${x.avvisi.join(' ')}`);
+        if (x.nonApplicati.length) notifica('warning', `«${x.partita}», resta da applicare dalla voce: ${x.nonApplicati.map((n) => `${n.descrizione}: ${n.motivo}`).join(' ')}`);
+      }
       onChiudi();
     } catch (err) {
       notifica('error', `${registrata ? 'Voce salvata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Salvataggio non riuscito.'}`);

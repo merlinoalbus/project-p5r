@@ -15,11 +15,15 @@
 // 2026-10-26 (richiesta dell'utente: «devo poter scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta
 // alla scorta»): la Persona con `scorta` ha una seconda parte, l'esemplare in scorta, che è uno stato a sé (riga `<uid>:scorta`, tipo
 // `persona-scorta`): si aggiunge con `aggiungiPosseduta` (l'unica scrittura della scorta) e si toglie solo se è ancora com'era alla nascita.
-// Per una voce già spuntata gli stati mancanti si applicano col gesto esplicito «Applica alla partita» (`statiMancanti` + `applicaParti`).
+// Per una voce già spuntata (decisione 19, risposte dell'utente «Subito al salvataggio» e «Elenco da approvare») gli stati che la partita
+// non ha ancora, o che ha in una versione superata (l'effetto cambiato dopo la spunta: Arsène diventato Pixie), li trova `statiMancanti`;
+// `applicaStatoDaApplicare` toglie la versione superata con le stesse regole di «togli la spunta» (`decidiAnnullo`, l'unica regola, che dà
+// anche l'anteprima di `descriviStatoDaApplicare`) e scrive la nuova come la spunta. Li applica il salvataggio della voce (motoreDiario) o,
+// per ciò che resta, il gesto «Applica» sulla voce, effetto per effetto.
 // ============================================================
 
-import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { HttpError, httpErrors } from '../utils/httpError.js';
+import { nowIso, prepared } from '../db/dbService.js';
+import { httpErrors } from '../utils/httpError.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { chiaveSblocco, fraseEffettoConNomi, type EffettoDiStatoVoce, type NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { impostaTrofeo } from './completamentoService.js';
@@ -67,11 +71,13 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     if (eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo_chiave })) throw httpErrors.conflict('articolo-aojiru', 'L’Aojiru ha i suoi consumi: usa l’effetto «Acquisto Aojiru».');
   }
   if (e.tipo === 'persona') {
-    const p = prepared('SELECT rara FROM persona WHERE id = ?').get(e.persona) as { rara: number } | undefined;
+    const p = prepared('SELECT rara, livello FROM persona WHERE id = ?').get(e.persona) as { rara: number; livello: number } | undefined;
     if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${e.persona} non esiste.`);
     assicuraNonDelGruppo(e.persona);
     // come la scelta della scorta (`ScortaPersona`): un Demone del Tesoro non si aggiunge alla scorta da qui
     if (e.scorta && p.rara === 1) throw httpErrors.badRequest('persona-rara-scorta', 'Un Demone del Tesoro non si aggiunge alla scorta da una voce: scegli «Solo nel Compendio».');
+    // la stessa regola del campo dell'editor (`min` = livello base): una Persona non entra in scorta sotto il suo livello base
+    if (e.livello !== undefined && e.livello < p.livello) throw httpErrors.badRequest('livello-sotto-base', `Il livello in scorta non può essere sotto il livello base della Persona (${p.livello}).`);
   }
   if (e.tipo === 'invito' && !prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(e.invito)) throw httpErrors.notFound('invito-non-trovato', `L'invito '${e.invito}' non esiste.`);
   if (e.tipo === 'richiesta' && !prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(e.richiesta)) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${e.richiesta}' non esiste.`);
@@ -157,12 +163,10 @@ function aggiungiAllaScorta(p: number, e: EffettoPersona): PrimaScorta {
 }
 
 /**
- * Togliere la spunta: l'esemplare che la spunta aveva aggiunto se ne va solo se è ancora com'era alla nascita (stesso livello e stesse skill,
- * nessun bonus, valore osservato, tratto, nota o carica, sempre in squadra); con lui si riapre l'obiettivo che la sua aggiunta aveva chiuso,
- * se è ancora chiuso da quella. Modificato dopo, resta com'è (mai perdere ciò che è stato aggiunto) e l'avviso lo dice; l'evento della sua
- * aggiunta resta nello storico, senza più il legame con la voce. Restituisce l'avviso, o null.
+ * L'esemplare che la spunta aveva aggiunto alla scorta: null se non c'è più (tolto a mano dopo la spunta); `intatta` se è ancora com'era alla
+ * nascita (stesso livello e stesse skill, nessun bonus, valore osservato, tratto, nota o carica, sempre in squadra). Solo lettura.
  */
-function togliDallaScorta(p: number, voceUid: string, personaId: number, prima: PrimaScorta): string | null {
+function esemplareDellaSpunta(p: number, personaId: number, prima: PrimaScorta): { nome: string; intatta: boolean } | null {
   if (prima.gia || prima.possedutaId === undefined) return null;
   const r = prepared(`SELECT pp.livello, pp.bonus_forza AS b1, pp.bonus_magia AS b2, pp.bonus_resistenza AS b3, pp.bonus_agilita AS b4, pp.bonus_fortuna AS b5, pp.tratto_skill_id, pp.in_squadra, pp.carica, pp.note,
       pp.osservate_livello, pp.osservate_forza, pp.osservate_magia, pp.osservate_resistenza, pp.osservate_agilita, pp.osservate_fortuna, p.nome
@@ -175,13 +179,7 @@ function togliDallaScorta(p: number, voceUid: string, personaId: number, prima: 
   const intatta = r.livello === prima.livello && r.b1 === 0 && r.b2 === 0 && r.b3 === 0 && r.b4 === 0 && r.b5 === 0 && r.tratto_skill_id === null && r.in_squadra === 1 && r.carica === 0 && r.note === ''
     && r.osservate_livello === null && r.osservate_forza === null && r.osservate_magia === null && r.osservate_resistenza === null && r.osservate_agilita === null && r.osservate_fortuna === null
     && skill.length === attese.length && skill.every((s, i) => s === attese[i]);
-  if (!intatta) {
-    prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo IN ('persona-aggiunta', 'obiettivo-raggiunto')").run(p, voceUid, personaId);
-    return `${t('persona', r.nome)} resta nella scorta (e nel compendio): l’hai modificata dopo la spunta.`;
-  }
-  prepared('DELETE FROM persona_posseduta WHERE id = ?').run(prima.possedutaId);
-  if (prima.obiettivo) prepared("UPDATE obiettivo_partita SET stato = 'aperto', raggiunto_at = NULL, updated_at = ? WHERE id = ? AND partita_id = ? AND stato = 'raggiunto' AND raggiunto_at = ?").run(nowIso(), prima.obiettivo.id, p, prima.obiettivo.raggiuntoAt);
-  return null;
+  return { nome: t('persona', r.nome), intatta };
 }
 
 const SQL_RIGA_STATO = 'SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?';
@@ -227,45 +225,93 @@ export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array
   for (const { uid, effetto } of effetti) for (const parte of partiDi(uid, effetto)) applicaParte(p, voceUid, parte);
 }
 
+/** Una riga di `utente.effetto_stato_voce`: lo stato che una spunta ha segnato (o trovato già segnato) e il suo «prima». */
+interface RigaStato { effetto_uid: string; tipo: string; chiave: string; prima_json: string }
+const tipoRiga = (x: ParteDiStato): string => (x.scorta ? TIPO_SCORTA : x.effetto.tipo);
+const chiaveRiga = (x: ParteDiStato): string => (x.scorta ? String((x.effetto as EffettoPersona).persona) : chiaveDi(x.effetto));
+
+/** L'effetto che una riga ricorda (tipo e chiave), per toglierlo e per dirlo: la riga della scorta è la Persona «anche nella scorta». */
+function effettoDaRiga(tipo: string, chiave: string): EffettoDiStatoVoce {
+  return tipo === 'storia' ? { tipo: 'storia', evento: chiave } : tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(chiave) }
+    : tipo === 'cruciverba' ? { tipo: 'cruciverba', data: chiave } : tipo === 'articolo' ? { tipo: 'articolo', articolo: chiave } : tipo === 'invito' ? { tipo: 'invito', invito: chiave }
+      : tipo === 'persona' ? { tipo: 'persona', persona: Number(chiave) } : tipo === TIPO_SCORTA ? { tipo: 'persona', persona: Number(chiave), scorta: true }
+        : tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: chiave } : tipo === 'oggetto' ? { tipo: 'oggetto', oggetto: chiave, quantita: 1 }
+          : tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: chiave.slice(chiave.indexOf(':') + 1) }
+            : { tipo: 'richiesta', richiesta: chiave };
+}
+
+/** L'oggetto ricevuto della voce è nella partita con l'oggetto e le copie che l'effetto dice adesso? */
+const oggettoAllineato = (p: number, voceUid: string, effettoUid: string, e: Extract<EffettoDiStatoVoce, { tipo: 'oggetto' }>): boolean => {
+  const r = prepared('SELECT catalogo_chiave, quantita FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, effettoUid) as { catalogo_chiave: string; quantita: number } | undefined;
+  return !!r && r.catalogo_chiave === e.oggetto && r.quantita === e.quantita;
+};
+
 /**
- * Voce già spuntata (2026-10-26): le parti degli effetti di stato che nella partita non risultano ancora segnate dalla voce (nessuna riga in
- * `utente.effetto_stato_voce`: effetto aggiunto o cambiato dopo la spunta) e il cui stato non c'è già per altra via (una Persona registrata a
- * mano, un trofeo ottenuto dalla sua pagina: niente legami inventati). Sola lettura: le scrive solo il gesto esplicito (`applicaParti`).
+ * Uno stato da applicare a una voce già spuntata (decisione 19): un effetto di stato della voce che la partita non ha ancora (`parti`, nella
+ * forma della spunta) o che ha in una versione superata (`superate`: le righe che la spunta aveva scritto per lo stesso effetto prima che
+ * cambiasse, l'Arsène di un effetto diventato Pixie, o la scorta di un effetto diventato «Solo nel Compendio»).
  */
-export function statiMancanti(p: number, voceUid: string, effetti: ReadonlyArray<{ uid: string; effetto: EffettoDiStatoVoce }>): ParteDiStato[] {
-  return effetti.flatMap(({ uid, effetto }) => partiDi(uid, effetto)).filter((parte) => {
-    if (prepared(SQL_RIGA_STATO).get(p, voceUid, parte.uidRiga)) return false;
-    if (parte.scorta) return !inScorta(p, (parte.effetto as EffettoPersona).persona);
-    if (parte.effetto.tipo === 'oggetto') return true;
-    return !leggiPrima(p, parte.effetto).gia;
+export interface StatoDaApplicare { effettoUid: string; effetto: EffettoDiStatoVoce; parti: ParteDiStato[]; superate: RigaStato[] }
+
+/**
+ * Voce già spuntata: gli stati da applicare. Una parte manca se la voce non l'ha segnata nella partita (nessuna riga valida: effetto aggiunto
+ * o cambiato dopo la spunta) e il suo stato non c'è già per altra via (una Persona registrata a mano, un trofeo ottenuto dalla sua pagina:
+ * niente legami inventati); una riga è superata se l'effetto ora dice un'altra cosa (tipo o chiave diversi) o non ha più quella parte. Il
+ * riconoscimento guarda la CHIAVE della riga, non solo che una riga esista: cambiare la Persona dopo la spunta non lascia la nuova fuori.
+ * Sola lettura.
+ */
+export function statiMancanti(p: number, voceUid: string, effetti: ReadonlyArray<{ uid: string; effetto: EffettoDiStatoVoce }>): StatoDaApplicare[] {
+  return effetti.flatMap(({ uid, effetto }) => {
+    const attese = partiDi(uid, effetto);
+    const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid IN (?, ?)')
+      .all(p, voceUid, uid, uidScorta(uid)) as RigaStato[];
+    const superate = righe.filter((r) => {
+      const x = attese.find((a) => a.uidRiga === r.effetto_uid);
+      return !x || r.tipo !== tipoRiga(x) || r.chiave !== chiaveRiga(x);
+    });
+    const parti = attese.filter((x) => {
+      const valida = righe.some((r) => r.effetto_uid === x.uidRiga && !superate.includes(r));
+      // l'oggetto ricevuto è un registro della voce: va riscritto anche quando le copie sono cambiate dopo la spunta
+      if (x.effetto.tipo === 'oggetto') return !valida || !oggettoAllineato(p, voceUid, x.effettoUid, x.effetto);
+      if (valida) return false;
+      if (x.scorta) return !inScorta(p, (x.effetto as EffettoPersona).persona);
+      return !leggiPrima(p, x.effetto).gia;
+    });
+    return parti.length || superate.length ? [{ effettoUid: uid, effetto, parti, superate }] : [];
   });
 }
 
 /**
- * Il gesto «Applica alla partita» di una voce già spuntata: applica le parti indicate come le avrebbe applicate la spunta (stesse scritture,
- * stesso «prima», quindi togliendo la spunta tornano come gli altri). Ogni parte in un punto di ripristino suo: una che il gioco non permette
- * ancora (un invito senza le condizioni, un articolo non disponibile) resta da applicare, con il motivo, e non ferma le altre.
+ * Applica uno stato da applicare (dentro la transazione, o il punto di ripristino, di chi la chiama): prima la versione superata torna com'era
+ * con le stesse regole di «togli la spunta» (`annullaRighe`, gli eventi che aveva scritto se ne vanno con lei), poi le parti mancanti si scrivono
+ * come le scrive la spunta (stesso «prima»: togliendo la spunta tornano come gli altri). Il compendio prima della scorta, così la scorta trova
+ * la Persona già registrata dalla voce. Un articolo non ancora disponibile qui non si accontenta (alla spunta resta da segnare dal negozio):
+ * 409, e chi chiama riporta tutto com'era. Restituisce gli avvisi (un esemplare modificato dopo la spunta che resta in scorta).
  */
-export function applicaParti(p: number, voceUid: string, parti: readonly ParteDiStato[]): { scritte: ParteDiStato[]; nonApplicate: Array<{ parte: ParteDiStato; motivo: string }> } {
-  const scritte: ParteDiStato[] = [], nonApplicate: Array<{ parte: ParteDiStato; motivo: string }> = [];
-  for (const parte of parti) {
-    try { getDb().transaction(() => applicaParte(p, voceUid, parte))(); }
-    catch (err) {
-      if (err instanceof HttpError && err.status < 500) { nonApplicate.push({ parte, motivo: err.message }); continue; }
-      throw err;
-    }
-    if (prepared(SQL_RIGA_STATO).get(p, voceUid, parte.uidRiga)) scritte.push(parte);
-    else nonApplicate.push({ parte, motivo: 'L’articolo non è ancora disponibile nella partita: segnalo dal negozio quando lo compri.' });
+export function applicaStatoDaApplicare(p: number, voceUid: string, s: StatoDaApplicare): string[] {
+  const avvisi = annullaRighe(p, voceUid, s.superate, true);
+  for (const parte of s.parti) applicaParte(p, voceUid, parte);
+  if (s.effetto.tipo === 'articolo' && s.parti.length && !prepared(SQL_RIGA_STATO).get(p, voceUid, s.effettoUid)) {
+    throw httpErrors.conflict('articolo-non-disponibile', 'L’articolo non è ancora disponibile nella partita: segnalo dal negozio quando lo compri.');
   }
-  return { scritte, nonApplicate };
+  return avvisi;
 }
 
-/** La frase di una parte, per l'avviso «non ancora applicato» e per la risposta del gesto: la stessa frase condivisa degli effetti. */
-export function descriviParte(parte: ParteDiStato, nomi: NomiFraseEffetto): string {
-  const e = parte.effetto;
-  if (e.tipo !== 'persona') return fraseEffettoConNomi(e, nomi);
-  if (!parte.scorta) return fraseEffettoConNomi({ tipo: 'persona', persona: e.persona }, nomi);
-  return `${nomi.persona(e.persona) ?? 'La Persona'} nella scorta${e.livello ? ` al livello ${e.livello}` : ''}`;
+/**
+ * Le frasi di uno stato da applicare, per la voce e per le risposte: `descrizione` dice che cosa entra (la frase condivisa dell'effetto; per la
+ * Persona solo la parte che manca), `dettagli` che cosa succede alla versione superata (la stessa regola dell'annullo, `decidiAnnullo`). null se
+ * non c'è niente da dire (una riga superata che non cambia più niente).
+ */
+export function descriviStatoDaApplicare(p: number, voceUid: string, s: StatoDaApplicare, nomi: NomiFraseEffetto): { descrizione: string; dettagli: string[] } | null {
+  const e = s.effetto;
+  const nuova = !s.parti.length ? null
+    : e.tipo !== 'persona' ? fraseEffettoConNomi(e, nomi)
+      : s.parti.every((x) => x.scorta) ? `${nomi.persona(e.persona) ?? 'La Persona'} nella scorta${e.livello ? ` al livello ${e.livello}` : ''}`
+        : s.parti.some((x) => x.scorta) ? fraseEffettoConNomi(e, nomi) : fraseEffettoConNomi({ tipo: 'persona', persona: e.persona }, nomi);
+  const dettagli = anteprimaAnnullo(p, voceUid, s.superate, nomi);
+  if (nuova) return { descrizione: nuova, dettagli };
+  // solo una versione superata da togliere: la frase è ciò che succede
+  return dettagli.length ? { descrizione: dettagli[0]!, dettagli: dettagli.slice(1) } : null;
 }
 
 /** Per ogni stato, l'evento dello storico che i setter scrivono segnandolo (tipo e campo dei dati che lo identifica); la storia non ne scrive. */
@@ -280,28 +326,88 @@ const EVENTI_DELLA_PERSONA: Record<string, readonly string[] | undefined> = {
 };
 
 /**
- * Togliere la spunta: ogni effetto di stato che la spunta aveva segnato torna com'era; ciò che c'era già resta. Restituisce gli avvisi da
- * mostrare a chi toglie la spunta (un esemplare in scorta modificato dopo, che resta).
+ * Che cosa fa «togli la spunta» su una riga: l'UNICA regola, per l'annullo vero (`annullaRighe`) e per l'anteprima (`anteprimaAnnullo`).
+ * - `oggetto`: l'oggetto ricevuto è della voce e dell'effetto, non uno stato condiviso: se ne va la sua riga;
+ * - `erede`: un'altra voce spuntata rivendica lo stesso stato: resta, e il «prima» (con gli eventi) passa a lei;
+ * - `gia`: lo stato c'era già prima della spunta: resta;
+ * - `scorta-assente` / `scorta-tolta` / `scorta-modificata`: l'esemplare nato dalla spunta non c'è più, se ne va (intatto), resta (modificato dopo);
+ * - `persona-in-scorta`: l'esemplare resta in scorta, quindi la Persona resta registrata (ottenerla la registra);
+ * - `torna`: lo stato torna com'era prima della spunta.
+ * `restanoInScorta`: le Persone il cui esemplare resta in scorta, dalle righe della scorta decise prima (vanno per prime).
  */
-export function annullaEffettiDiStato(p: number, voceUid: string): string[] {
-  const righe = (prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as Array<{ effetto_uid: string; tipo: string; chiave: string; prima_json: string }>)
-    // la scorta per prima: se il suo esemplare resta (modificato dopo), la Persona resta anche nel compendio
-    .sort((a, b) => Number(b.tipo === TIPO_SCORTA) - Number(a.tipo === TIPO_SCORTA));
+type DecisioneAnnullo = { modo: 'oggetto' | 'gia' | 'scorta-assente' | 'persona-in-scorta' | 'torna' } | { modo: 'erede'; altre: Array<{ voce_uid: string; effetto_uid: string }> }
+  | { modo: 'scorta-tolta' | 'scorta-modificata'; nome: string };
+function decidiAnnullo(p: number, voceUid: string, r: RigaStato, restanoInScorta: ReadonlySet<string>): DecisioneAnnullo {
+  if (r.tipo === 'oggetto') return { modo: 'oggetto' };
+  const prima = JSON.parse(r.prima_json) as StatoPrima & PrimaScorta;
+  // Lo stato lo rivendicano tutte le voci spuntate con lo stesso effetto (le righe esistono solo per le spunte attive): si revoca solo
+  // se nessun'altra lo rivendica. Se un'altra lo rivendica, il «prima» originale (non ancora segnato) passa a lei, così lo revoca
+  // l'ultima voce che toglie la spunta.
+  const altre = prepared('SELECT voce_uid, effetto_uid FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND NOT (voce_uid = ? AND effetto_uid = ?)').all(p, r.tipo, r.chiave, voceUid, r.effetto_uid) as Array<{ voce_uid: string; effetto_uid: string }>;
+  if (altre.length > 0) return { modo: 'erede', altre };
+  if (prima.gia) return { modo: 'gia' };
+  if (r.tipo === TIPO_SCORTA) {
+    const x = esemplareDellaSpunta(p, Number(r.chiave), prima);
+    return !x ? { modo: 'scorta-assente' } : { modo: x.intatta ? 'scorta-tolta' : 'scorta-modificata', nome: x.nome };
+  }
+  if (r.tipo === 'persona' && restanoInScorta.has(r.chiave)) return { modo: 'persona-in-scorta' };
+  return { modo: 'torna' };
+}
+/** La scorta per prima: se il suo esemplare resta (modificato dopo), la Persona resta anche nel compendio. */
+const scortaPerPrima = (righe: readonly RigaStato[]): RigaStato[] => [...righe].sort((a, b) => Number(b.tipo === TIPO_SCORTA) - Number(a.tipo === TIPO_SCORTA));
+
+/**
+ * Gli eventi dello storico che la spunta aveva scritto segnando lo stato di una riga, legati alla voce: se ne vanno con lo stato quando una
+ * versione superata torna com'era (togliendo la spunta li revoca tutti insieme `revocaEventiDellaVoce`).
+ */
+function revocaEventiDelloStato(p: number, voceUid: string, r: RigaStato): void {
+  const evento = EVENTO_DELLO_STATO[r.tipo];
+  if (evento) prepared(`DELETE FROM utente.evento_partita WHERE partita_id = ? AND voce_uid = ? AND tipo = ? AND json_extract(dati_json, '$.${evento.campo}') = ?`)
+    .run(p, voceUid, evento.tipo, r.tipo === 'domanda' ? Number(r.chiave) : r.chiave);
+  const eventiPersona = EVENTI_DELLA_PERSONA[r.tipo];
+  if (eventiPersona) prepared(`DELETE FROM utente.evento_partita WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo IN (${eventiPersona.map(() => '?').join(', ')})`)
+    .run(p, voceUid, Number(r.chiave), ...eventiPersona);
+}
+
+/**
+ * Le frasi di ciò che succede alle righe superate di uno stato da applicare (la regola di `decidiAnnullo`): «Arsène esce dal Compendio»,
+ * «Arsène resta nella scorta (e nel Compendio): l'hai modificata dopo la spunta». Niente per ciò che non cambia niente da dire.
+ */
+function anteprimaAnnullo(p: number, voceUid: string, righe: readonly RigaStato[], nomi: NomiFraseEffetto): string[] {
+  const restano = new Set<string>();
+  return scortaPerPrima(righe).flatMap((r) => {
+    const d = decidiAnnullo(p, voceUid, r, restano);
+    const persona = r.tipo === 'persona' || r.tipo === TIPO_SCORTA ? nomi.persona(Number(r.chiave)) ?? 'La Persona' : null;
+    const frase = fraseEffettoConNomi(effettoDaRiga(r.tipo, r.chiave), nomi);
+    const dove = r.tipo === TIPO_SCORTA ? 'nella scorta' : 'nel Compendio';
+    switch (d.modo) {
+      case 'oggetto': return [`Si toglie: ${frase}`];
+      case 'erede': return [persona ? `${persona} resta ${dove}: la dà anche un’altra voce spuntata` : `Resta: ${frase} (lo dà anche un’altra voce spuntata)`];
+      case 'gia': return [persona ? `${persona} resta ${dove}: c’era già prima della spunta` : `Resta: ${frase} (c’era già prima della spunta)`];
+      case 'scorta-tolta': return [`${d.nome} esce dalla scorta`];
+      case 'scorta-modificata': restano.add(r.chiave); return [`${d.nome} resta nella scorta (e nel Compendio): l’hai modificata dopo la spunta`];
+      case 'torna': return [persona ? `${persona} esce dal Compendio` : `Si toglie: ${frase}`];
+      // l'esemplare tolto a mano, la Persona che resta con l'esemplare in scorta (già detto dalla riga della scorta): niente da aggiungere
+      default: return [];
+    }
+  });
+}
+
+/**
+ * Riporta com'erano gli stati delle righe indicate (dentro la transazione di chi la chiama), con la regola di `decidiAnnullo`, e le toglie.
+ * `revocaEventi`: anche gli eventi che la spunta aveva scritto per quegli stati se ne vanno (una versione superata; togliendo la spunta li revoca
+ * `revocaEventiDellaVoce`, tutti insieme). Restituisce gli avvisi (un esemplare in scorta modificato dopo, che resta).
+ */
+function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], revocaEventi: boolean): string[] {
   const avvisi: string[] = [];
   const restanoInScorta = new Set<string>();
-  for (const r of righe) {
-    // L13: l'oggetto ricevuto è della voce e dell'effetto, non uno stato condiviso: si toglie la sua riga e basta (le altre voci tengono le loro)
-    if (r.tipo === 'oggetto') {
+  for (const r of scortaPerPrima(righe)) {
+    const d = decidiAnnullo(p, voceUid, r, restanoInScorta);
+    const prima = JSON.parse(r.prima_json) as StatoPrima & PrimaScorta;
+    if (d.modo === 'oggetto') {
       prepared('DELETE FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
-      prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
-      continue;
-    }
-    const prima = JSON.parse(r.prima_json) as StatoPrima;
-    // Lo stato lo rivendicano tutte le voci spuntate con lo stesso effetto (le righe esistono solo per le spunte attive): si revoca solo
-    // se nessun'altra lo rivendica. Se un'altra lo rivendica, il «prima» originale (non ancora segnato) passa a lei, così lo revoca
-    // l'ultima voce che toglie la spunta.
-    const altre = prepared('SELECT voce_uid, effetto_uid FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND NOT (voce_uid = ? AND effetto_uid = ?)').all(p, r.tipo, r.chiave, voceUid, r.effetto_uid) as Array<{ voce_uid: string; effetto_uid: string }>;
-    if (altre.length > 0) {
+    } else if (d.modo === 'erede') {
+      const altre = d.altre;
       if (!prima.gia) {
         for (const o of altre) prepared('UPDATE utente.effetto_stato_voce SET prima_json = ? WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(r.prima_json, p, o.voce_uid, o.effetto_uid);
         // anche l'evento che questa voce aveva scritto segnando lo stato passa a chi lo tiene ancora: resta nello storico (e nella
@@ -317,24 +423,34 @@ export function annullaEffettiDiStato(p: number, voceUid: string): string[] {
         if (erede && eventiPersona) prepared(`UPDATE utente.evento_partita SET voce_uid = ? WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo IN (${eventiPersona.map(() => '?').join(', ')})`)
           .run(erede.voce_uid, p, voceUid, Number(r.chiave), ...eventiPersona);
       }
-    } else if (r.tipo === TIPO_SCORTA) {
-      const avviso = togliDallaScorta(p, voceUid, Number(r.chiave), prima as PrimaScorta);
-      if (avviso) { avvisi.push(avviso); restanoInScorta.add(r.chiave); }
-    } else if (!prima.gia) {
-      if (r.tipo === 'persona' && restanoInScorta.has(r.chiave)) {
-        // l'esemplare resta in scorta: la Persona resta registrata (ottenerla la registra), e l'evento della registrazione resta nello storico
-        prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo = 'compendio-registrata'").run(p, voceUid, Number(r.chiave));
-      } else {
-        const e: EffettoDiStatoVoce = r.tipo === 'storia' ? { tipo: 'storia', evento: r.chiave } : r.tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(r.chiave) }
-          : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : r.tipo === 'persona' ? { tipo: 'persona', persona: Number(r.chiave) }
-            : r.tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: r.chiave }
-            : r.tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: r.chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: r.chiave.slice(r.chiave.indexOf(':') + 1) }
-            : { tipo: 'richiesta', richiesta: r.chiave };
-        // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
-        try { scrivi(p, e, false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
-      }
+    } else if (d.modo === 'scorta-modificata') {
+      // l'esemplare è stato modificato dopo la spunta: resta com'è (mai perdere ciò che è stato aggiunto) e l'avviso lo dice; l'evento della sua
+      // aggiunta resta nello storico, senza più il legame con la voce
+      prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo IN ('persona-aggiunta', 'obiettivo-raggiunto')").run(p, voceUid, Number(r.chiave));
+      avvisi.push(`${d.nome} resta nella scorta (e nel compendio): l’hai modificata dopo la spunta.`);
+      restanoInScorta.add(r.chiave);
+    } else if (d.modo === 'scorta-tolta') {
+      // l'esemplare intatto se ne va e con lui si riapre l'obiettivo che la sua aggiunta aveva chiuso, se è ancora chiuso da quella
+      prepared('DELETE FROM persona_posseduta WHERE id = ?').run(prima.possedutaId);
+      if (prima.obiettivo) prepared("UPDATE obiettivo_partita SET stato = 'aperto', raggiunto_at = NULL, updated_at = ? WHERE id = ? AND partita_id = ? AND stato = 'raggiunto' AND raggiunto_at = ?").run(nowIso(), prima.obiettivo.id, p, prima.obiettivo.raggiuntoAt);
+      if (revocaEventi) revocaEventiDelloStato(p, voceUid, r);
+    } else if (d.modo === 'persona-in-scorta') {
+      // l'esemplare resta in scorta: la Persona resta registrata (ottenerla la registra), e l'evento della registrazione resta nello storico
+      prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo = 'compendio-registrata'").run(p, voceUid, Number(r.chiave));
+    } else if (d.modo === 'torna') {
+      // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
+      try { scrivi(p, effettoDaRiga(r.tipo, r.chiave), false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
+      if (revocaEventi) revocaEventiDelloStato(p, voceUid, r);
     }
     prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
   }
   return avvisi;
+}
+
+/**
+ * Togliere la spunta: ogni effetto di stato che la spunta aveva segnato torna com'era; ciò che c'era già resta. Restituisce gli avvisi da
+ * mostrare a chi toglie la spunta (un esemplare in scorta modificato dopo, che resta).
+ */
+export function annullaEffettiDiStato(p: number, voceUid: string): string[] {
+  return annullaRighe(p, voceUid, prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as RigaStato[], false);
 }

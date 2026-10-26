@@ -94,8 +94,9 @@ export const confermaRequisitoConfidente = (id: number, chiave: string, rango: n
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 /** Spunta (o riapre) una voce della giornata nella partita, per identità: applica i suoi effetti (con le note ottenute, se è un
  *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. */
-/** 2026-10-26: «Applica alla partita» gli effetti di stato aggiunti dopo la spunta di una voce già spuntata (mai ripetuto da solo: `maxRetries: 0`). */
-export const applicaStatiVoce = (id: number, uid: string): Promise<EsitoStatiVoceDto> => apiPost(`/partite/${id}/percorso/stati`, { uid }, { maxRetries: 0 });
+/** Decisione 19: «Applica» gli effetti di stato mancanti di una voce già spuntata, quelli indicati (uid degli effetti) o tutti (mai ripetuto da solo: `maxRetries: 0`). */
+export const applicaStatiVoce = (id: number, uid: string, effetti?: string[]): Promise<EsitoStatiVoceDto> =>
+  apiPost(`/partite/${id}/percorso/stati`, { uid, ...(effetti?.length ? { effetti } : {}) }, { maxRetries: 0 });
 export const impostaAzionePercorso =(id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, apertureDedali?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], scelteEsito?: SceltaEsitoSpunta[]): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(apertureDedali !== undefined ? { apertureDedali } : {}), ...(acquisti !== undefined ? { acquisti } : {}), ...(pesche !== undefined ? { pesche } : {}), ...(scelteEsito?.length ? { scelteEsito } : {}) }, { maxRetries: 0 });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });

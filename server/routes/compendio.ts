@@ -71,7 +71,8 @@ const queryCalendario = z.object({ partita: idParam.optional(), mese: z.string()
 const router = Router();
 
 router.put('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata, body: bodySalvaEffettiVoce }), (req, res) => {
-  res.json(salvaEffettiVoce(String(req.params.uid), req.body));
+  // decisione 19: il salvataggio di chi modifica la voce applica subito gli effetti di stato aggiunti o cambiati nelle partite che la hanno spuntata
+  res.json(salvaEffettiVoce(String(req.params.uid), req.body, { applicaStati: true }));
 });
 router.get('/percorso/effetti/proposte', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -96,7 +97,7 @@ router.post('/proposte-conversione/:id/applica', validate({ params: paramsPropos
   const corpo = req.body as RichiestaApplicaProposta & { voce?: DatiVoceGiornata & { infiltrazioni?: unknown } };
   // le infiltrazioni di una voce di Palazzo si salvano da sole, dalla voce: una proposta non le tocca
   if (corpo.voce?.infiltrazioni !== undefined) throw httpErrors.badRequest('infiltrazioni-da-sole', 'Le infiltrazioni della voce si salvano da sole, dalla voce.');
-  res.json(applicaPropostaConversione(String(req.params.id), corpo, (req.query as unknown as { partita?: number }).partita));
+  res.json(applicaPropostaConversione(String(req.params.id), corpo, (req.query as unknown as { partita?: number }).partita, { applicaStati: true }));
 });
 router.post('/proposte-conversione/:id/scarta', validate({ params: paramsPropostaConversione, body: bodyScartaProposta }), (req, res) => {
   res.json(scartaPropostaConversione(String(req.params.id), req.body as RichiestaScartaProposta));
@@ -186,7 +187,7 @@ router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: b
     res.json(impostaInfiltrazioniVoce(String(req.params.uid), infiltrazioni, partita));
     return;
   }
-  res.json(aggiornaVoce(String(req.params.uid), resto, partita));
+  res.json(aggiornaVoce(String(req.params.uid), resto, partita, { applicaStati: true }));
 });
 /** L3 §1.4: «Tieni il nuovo», «Rimetti il precedente» o «Fatto» su una voce da rivedere. */
 router.post('/percorso/voci/:uid/rivista', validate({ params: paramsVoceGiornata, body: bodyRivistaVoce, query: queryDomande }), (req, res) => {
@@ -201,8 +202,10 @@ router.post('/percorso/voci/trasferisci', validate({ body: bodyTrasferisciVoci, 
   res.json(trasferisciVoci(req.body as TrasferisciVociGiornata, (req.query as unknown as { partita?: number }).partita));
 });
 router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
-  eliminaVoce(String(req.params.uid));
-  res.status(204).end();
+  // 2026-10-26: un esemplare in scorta modificato dopo la spunta resta nella partita: lo si dice (200 con gli avvisi), altrimenti nessun contenuto
+  const avvisi = eliminaVoce(String(req.params.uid));
+  if (avvisi.length) res.json({ avvisi });
+  else res.status(204).end();
 });
 router.get('/negozi', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaNegozi((req.query as unknown as { partita?: number }).partita));

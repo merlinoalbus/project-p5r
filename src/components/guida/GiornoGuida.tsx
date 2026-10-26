@@ -146,7 +146,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. I punti si applicano dal pulsante sulla voce.' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // togliendo la spunta, ciò che resta perché modificato dopo (un esemplare in scorta) si dice, non si toglie in silenzio
-      if (!fatta && agg.avvisiAnnullo?.length) notifica('warning', agg.avvisiAnnullo.join(' '), 9000);
+      // un avviso resta finché chi gioca non lo chiude (la durata predefinita degli avvisi): dice che un dato è rimasto nella partita
+      if (!fatta && agg.avvisiAnnullo?.length) notifica('warning', agg.avvisiAnnullo.join(' '));
       // era l'ultima attività di giorno o di sera (senza decisioni aperte): la partita è passata alla sera o al giorno dopo
       seGiornoAvanzato(agg);
     } catch (err) {
@@ -293,8 +294,11 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
 
   /** Una sola operazione server raccoglie voce, spunte, fonti e ricevute nel Cestino prima della rimozione. */
   const elimina = (v: AzionePercorsoDto) => {
-    /** L'eliminazione vera e propria della voce dalla guida. */
-    const via = () => eliminaVoceGiornata(v.uid);
+    /** L'eliminazione vera e propria della voce dalla guida; ciò che resta in una partita (un esemplare in scorta modificato dopo la spunta) lo si dice. */
+    const via = async () => {
+      const esito = await eliminaVoceGiornata(v.uid);
+      if (esito?.avvisi.length) notifica('warning', esito.avvisi.join(' '));
+    };
     const che = { azione: ['la voce', 'Voce eliminata'], evento: ['l\'evento', 'Evento eliminato'], scadenza: ['la scadenza', 'Scadenza eliminata'], promemoria: ['il promemoria', 'Promemoria eliminato'] }[v.genere];
     chiedi({
       titolo: `Eliminare ${che[0]}?`,

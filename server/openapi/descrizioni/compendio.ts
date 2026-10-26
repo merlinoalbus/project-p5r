@@ -18,7 +18,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'PUT /api/compendio/percorso/voci/:uid/effetti': {
     sommario: 'Modifica esplicitamente l’intero insieme degli effetti',
     descrizione: 'Corpo strict {revisioneEffettiAttesa,effetti:[{uid,effetto}]}. UID null crea un effetto nuovo. I tre tipi legacy e acquisto passano da un unico writer. L13 (ondata 3): tipi `yen` {importo con segno, non zero; 409 `yen-gia-strutturati` accanto ad articolo, acquisto, pesca o Richiesta; al più uno per voce}, `oggetto` {oggetto, quantita}, `trofeo` {trofeo}, `sblocco` {bersaglio: richiesta|attivita, chiave}; `articolo` accetta `quantita` facoltativa (2–999); `dote.possibili` e `turno.esito` dell’ondata 2. La rimozione di un effetto non cancella fotografie o decisioni personali; le spunte precedenti non vengono rieseguite e ricevono proposte storiche distinte.',
-    risposta: '`StatoEffettiVoceDto`', errori: [[409,'effetti-cambiati']],
+    risposta: '`StatoEffettiVoceDto`; decisione 19, con `applicatiAlSalvataggio` quando gli effetti di stato aggiunti o cambiati (Persona, trofeo, oggetto, evento, domanda, cruciverba, Richiesta, invito, sblocco; non gli articoli) sono entrati subito in partite che hanno la voce spuntata (`StatiApplicatiAlSalvataggioDto[]`: per partita applicati, avvisi e ciò che resta con il motivo)', errori: [[409,'effetti-cambiati'],[400,'livello-sotto-base'],[400,'persona-rara-scorta']],
   },
   'GET /api/compendio/percorso/effetti/proposte': {
     sommario: 'Raccordi documentati degli effetti del Diario',
@@ -44,7 +44,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'POST /api/compendio/proposte-conversione/:id/applica': {
     sommario: 'Applica una proposta «da completare»',
     descrizione: 'Corpo `RichiestaApplicaProposta`: `revisionePropostaAttesa` più, se la proposta chiede di completare dati, gli `effetti` completati nello stesso ordine; oppure, da «Modifica», la `voce` come la salva la finestra. La voce si scrive con la stessa funzione dell’editor (`aggiornaVoce`: verifiche del collegamento e degli effetti, proposte «Applica» per le partite già spuntate, ricevute salvate intatte) e la proposta diventa `applicata` nella stessa transazione, con l’esito. `?partita=` per avere la voce con lo stato di quella partita.',
-    risposta: '`{ proposta: PropostaConversioneDto, voce: AzionePercorsoDto }`',
+    risposta: '`{ proposta: PropostaConversioneDto, voce: AzionePercorsoDto }`; come la modifica della voce, `voce.applicatiAlSalvataggio` dice gli effetti di stato entrati subito nelle partite che hanno la voce spuntata (decisione 19)',
     errori: [[400, 'proposta-da-completare'], [400, 'proposta-fuori-scelta'], [400, 'proposta-diversa'], [404, 'proposta-non-trovata'], [409, 'proposta-cambiata'], [409, 'proposta-decisa'], [409, 'proposta-superata'], [409, 'proposta-illeggibile']],
   },
   'POST /api/compendio/proposte-conversione/:id/scarta': {
@@ -360,7 +360,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'PUT /api/compendio/percorso/voci/:uid': {
     sommario: 'Modifica una voce della giornata (canone, per tutte le partite)',
     descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',
-    risposta: 'La voce aggiornata, `AzionePercorsoDto`. effettiVoce:{effetti:[{uid,effetto}],revisioneEffettiAttesa} salva canone e campi voce nella medesima transazione. Mutuamente esclusivo con produce legacy; senza entrambi, la fonte resta intatta. La creazione usa uid:null senza token fittizio.',
+    risposta: 'La voce aggiornata, `AzionePercorsoDto`. effettiVoce:{effetti:[{uid,effetto}],revisioneEffettiAttesa} salva canone e campi voce nella medesima transazione. Mutuamente esclusivo con produce legacy; senza entrambi, la fonte resta intatta. La creazione usa uid:null senza token fittizio. Decisione 19 («Subito al salvataggio»): gli effetti di stato aggiunti o cambiati (non gli articoli, che muovono yen) entrano subito in ogni partita che ha la voce spuntata, con il «prima» registrato e la versione di prima tolta con le regole di «togli la spunta»; `applicatiAlSalvataggio` lo dice partita per partita (applicati, avvisi, ciò che resta con il motivo).',
     errori: [[400, 'voce-vuota'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'], [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [400, 'infiltrazioni-da-sole'], [400, 'voce-senza-palazzo'], [400, 'infiltrazione-inesistente'], [400, 'infiltrazione-di-un-altro-palazzo'], [400, 'infiltrazione-ripetuta-di-seguito'], [404, 'voce-non-trovata'], PARTITA_NON_TROVATA, [409, 'voce-con-effetti']],
   },
   'POST /api/compendio/percorso/voci/:uid/rivista': {
@@ -384,7 +384,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'DELETE /api/compendio/percorso/voci/:uid': {
     sommario: 'Elimina una voce della giornata, per tutte le partite',
     descrizione: 'La voce, la fonte degli effetti e le spunte entrano nel cestino comune. Il motore annulla esattamente le ricevute e le sole provenienze possedute, in tutte le partite, prima della cancellazione; un registro non leggibile provoca rollback. I delta Doti/yen restano proposte esplicite, senza applicazione automatica. La fascia si ricompatta e il ripristino recupera il posto relativo ai vicini.',
-    risposta: 'Nessun contenuto (204)',
+    risposta: 'Nessun contenuto (204); se un annullo lascia qualcosa nella partita (un esemplare in scorta aggiunto dall\'effetto «Persona registrata» e modificato dopo la spunta), 200 con `{ avvisi }`, le frasi da mostrare con il nome della partita',
     errori: [[404, 'voce-non-trovata'], [409, 'ricevuta-spunta-illeggibile']],
   },
 

@@ -29,7 +29,7 @@ import type { CompletamentoPalazzo } from './completamentoGuida.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
 import type { StatoAcquistiArticoloDto } from './acquisti.js';
-import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce } from './effettiVoce.js';
+import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatiApplicatiAlSalvataggioDto } from './effettiVoce.js';
 
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
  *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
@@ -1330,10 +1330,14 @@ export interface DialogoVoceDto {
   scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
 }
 
-/** Una parte di un effetto di stato da applicare a una voce già spuntata: `scorta` = l'esemplare in scorta dell'effetto Persona. */
-export interface StatoDaApplicareDto { effettoUid: string; scorta: boolean; descrizione: string }
-/** La risposta di «Applica alla partita»: la voce riletta e, con le frasi, che cosa è stato applicato e che cosa resta (con il motivo). */
-export interface EsitoStatiVoceDto { voce: AzionePercorsoDto; applicati: string[]; nonApplicati: Array<{ descrizione: string; motivo: string }> }
+/**
+ * Decisione 19: un effetto di stato di una voce già spuntata che la partita non ha ancora, o ha in una versione superata (l'effetto cambiato
+ * dopo la spunta). `descrizione`: che cosa entra (per la Persona solo la parte che manca); `dettagli`: che cosa succede alla versione di prima
+ * («Arsène esce dal Compendio») e gli yen che si muovono da soli per un articolo («Si scalano ¥1.200 dal saldo, mai sotto zero»).
+ */
+export interface StatoDaApplicareDto { effettoUid: string; descrizione: string; dettagli?: string[] }
+/** La risposta di «Applica»: la voce riletta e, con le frasi, che cosa è stato applicato, che cosa resta (con il motivo) e gli avvisi. */
+export interface EsitoStatiVoceDto { voce: AzionePercorsoDto; applicati: string[]; nonApplicati: Array<{ descrizione: string; motivo: string }>; avvisi: string[] }
 export interface AzionePercorsoDto {
   /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
@@ -1365,11 +1369,15 @@ export interface AzionePercorsoDto {
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
-  /** 2026-10-26: gli effetti di stato (Persona nel compendio e in scorta, trofeo, evento, domanda…) di una voce GIÀ spuntata che la partita non ha
-   *  ancora, perché aggiunti o cambiati dopo la spunta: la voce li mostra con il gesto esplicito «Applica alla partita». Assente se non ce ne sono. */
+  /** Decisione 19 («Elenco da approvare»): gli effetti di stato (Persona nel compendio e in scorta, trofeo, evento, domanda, articolo…) di una voce
+   *  GIÀ spuntata che la partita non ha ancora, o ha in una versione superata: la voce li elenca e li applica solo con «Applica», uno per uno o
+   *  tutti. Assente se non ce ne sono. */
   statiDaApplicare?: StatoDaApplicareDto[];
   /** 2026-10-26: solo nella risposta di «togli la spunta»: ciò che è rimasto perché modificato dopo (un esemplare in scorta), da dire a chi gioca. */
   avvisiAnnullo?: string[];
+  /** Decisione 19 («Subito al salvataggio»): solo nella risposta della modifica di una voce, gli effetti di stato aggiunti o cambiati applicati
+   *  subito nelle partite che hanno la voce spuntata. Assente se non è successo niente. */
+  applicatiAlSalvataggio?: StatiApplicatiAlSalvataggioDto[];
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
    *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
   yenAutomatici?: MovimentoYenAutomaticoDto[];

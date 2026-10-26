@@ -129,8 +129,8 @@ export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number)
  *  da sola, una copia ripetuta creerebbe due volte le voci. */
 export const trasferisciVociGiornata = (dati: TrasferisciVociGiornata, partita?: number): Promise<VociTrasferiteDto> =>
   apiPost(`/compendio/percorso/voci/trasferisci${queryString({ partita })}`, dati);
-/** Rimozione atomica nel Cestino con spunte, fonti e ricevute; nessun secondo invio automatico. */
-export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`, { maxRetries: 0 });
+/** Rimozione atomica nel Cestino con spunte, fonti e ricevute; nessun secondo invio automatico. Gli avvisi (un esemplare in scorta modificato dopo la spunta, che resta) se ce ne sono. */
+export const eliminaVoceGiornata = (uid: string): Promise<{ avvisi: string[] } | undefined> => apiDelete(`/compendio/percorso/voci/${uid}`, { maxRetries: 0 });
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */

@@ -71,6 +71,13 @@ export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoV
 export interface StatoEffettiVoceDto {
   voceUid: string; stato: 'convertita' | 'legacy-da-correggere'; effetti: EffettoVoceDto[];
   rawLegacy: string; motivo: string | null; revisione: string;
+  /** Solo nella risposta di un salvataggio (decisione 19, «Subito al salvataggio»): gli effetti di stato aggiunti o cambiati applicati subito
+   *  nelle partite che hanno la voce spuntata. Assente se non è successo niente. */
+  applicatiAlSalvataggio?: StatiApplicatiAlSalvataggioDto[];
+}
+/** Che cosa ha fatto il salvataggio degli effetti in una partita che ha la voce spuntata: ciò che è entrato, gli avvisi e ciò che resta (con il motivo). */
+export interface StatiApplicatiAlSalvataggioDto {
+  partitaId: number; partita: string; applicati: string[]; avvisi: string[]; nonApplicati: Array<{ descrizione: string; motivo: string }>;
 }
 export interface RichiestaSalvaEffettiVoce {
   revisioneEffettiAttesa: string;

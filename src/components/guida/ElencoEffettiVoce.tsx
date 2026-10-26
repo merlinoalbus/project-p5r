@@ -42,8 +42,13 @@ const idRiga = (r: RigaEffetto): string => {
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
 
-/** Gli effetti di una spunta già fatta che compaiono come «Applica» sulla voce (`creaPropostaEffettoStorico`); gli stati con «Applica alla partita». */
-const CON_APPLICA = 'Doti, letture, turni, Aojiru, pesca e yen';
+/**
+ * Su una voce già spuntata (decisione 19): gli effetti di stato che il salvataggio applica subito nelle partite in cui è spuntata
+ * (`motoreDiario.applicaStatiAlSalvataggio`) e quelli che restano sulla voce come «Applica» (gli articoli, che muovono yen, negli stati da
+ * applicare; gli altri con la proposta di `creaPropostaEffettoStorico`).
+ */
+const SUBITO = 'Persona, trofeo, oggetto ricevuto, evento di storia, domanda, cruciverba, Richiesta, invito, sblocco';
+const CON_APPLICA = 'articoli comprati (muovono yen), Doti, letture, turni, Aojiru, pesca e yen';
 
 interface Props {
   valore: CampiStrutturati;
@@ -106,6 +111,8 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
             const id = idRiga(r);
             const editing = inModifica === id || !completo;
             const nome = NOME_FAMIGLIA_EFFETTO[r.effetto.tipo];
+            // il nome per i lettori di schermo: la frase dell'effetto (due effetti dello stesso tipo nella voce restano distinti), o il tipo se da completare
+            const frase = completo ? fraseEffetto(r.effetto, nomi) : nome;
             return (
               <li key={id}className="flex min-w-0 flex-col gap-2 rounded-md border border-border bg-bg-tertiary p-2">
                 <div className="flex min-w-0 flex-wrap items-start gap-2">
@@ -114,14 +121,14 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
                       dice già di che effetto si tratta (con l'icona della categoria); il nome della famiglia compare solo finché l'effetto è da completare */}
                   <div className="flex min-h-8 min-w-0 flex-1 basis-40 flex-col justify-center">
                     <span className="testo-13 break-words text-pretty">
-                      {completo ? fraseEffetto(r.effetto, nomi) : `${nome}: da scegliere qui sotto.`}
+                      {completo ? frase : `${nome}: da scegliere qui sotto.`}
                       {i === collegato && <>{' '}<span className="chip testo-12 align-middle" title="Cambiando «Quale» questo effetto si aggiorna da solo">segue «Quale»</span></>}
                     </span>
                   </div>
                   <span className="flex shrink-0 gap-1">
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}
-                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${nome}`} disabled={!completo} onClick={() => setInModifica(inModifica === id ? null : id)} />
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nome}`} onClick={() => togli(i)} />
+                      aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${frase}`} disabled={!completo} onClick={() => setInModifica(inModifica === id ? null : id)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${frase}`} onClick={() => togli(i)} />
                   </span>
                 </div>
                 {editing && <CampiEffettoVoce effetto={r.effetto} elenchi={elenchi} righe={righe} onCambia={(e) => cambia(i, e)} />}
@@ -143,7 +150,16 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
           )}
         </div>
       )}
-      {fatta && <p className="m-0 testo-12 text-text-secondary text-pretty">Questa voce è già spuntata: {CON_APPLICA} aggiunti o cambiati compaiono come pulsante «Applica» sulla voce; gli altri effetti (Persona, trofei, articoli, oggetti, eventi, domande, sblocchi…), dopo il salvataggio, con «Applica alla partita» sulla voce. Le ricevute della spunta già fatta non cambiano.</p>}
+      {fatta && (
+        <div className="flex flex-col gap-0.5 testo-12 text-text-secondary">
+          <p className="m-0 text-pretty">Questa voce è già spuntata. Aggiunti o cambiati:</p>
+          <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">
+            <li className="text-pretty">entrano subito, salvando, nelle partite in cui è spuntata: {SUBITO};</li>
+            <li className="text-pretty">restano sulla voce, da applicare con «Applica»: {CON_APPLICA}.</li>
+          </ul>
+          <p className="m-0 text-pretty">Le ricevute della spunta già fatta non cambiano.</p>
+        </div>
+      )}
     </div>
   );
 }

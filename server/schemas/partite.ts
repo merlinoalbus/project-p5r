@@ -194,8 +194,8 @@ export const bodySalvaCiclo = z.object({
 export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
 export const paramsPartitaCiclo = z.object({ id: idParam, cicloId: idParam });
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
-/** 2026-10-26: «Applica alla partita» gli effetti di stato mancanti di una voce già spuntata (per uid). */
-export const bodyStatiVoce = z.object({ uid: uidVoce }).strict();
+/** Decisione 19: «Applica» gli effetti di stato mancanti di una voce già spuntata (per uid): quelli di `effetti` (uid degli effetti) o tutti. */
+export const bodyStatiVoce = z.object({ uid: uidVoce, effetti: z.array(z.string().regex(/^[0-9a-f]{32}$/, 'Identità non valida.')).min(1).max(100).optional() }).strict();
 /** Spunta di una voce della giornata, per uid (le 32 cifre esadecimali di `voce_giornata.uid`). */
 export const bodyAzionePercorso = z.object({
   uid: uidVoce, fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),

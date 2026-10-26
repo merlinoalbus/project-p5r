@@ -206,8 +206,9 @@ describe('GiornoGuida — la giornata canone', () => {
     apriMenu('Biblioteca');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
-    // Zorro è spuntata: gli effetti di stato nuovi si applicano con «Applica alla partita» sulla voce (2026-10-26)
-    expect(within(finestra).getByText(/già spuntata: .*«Applica alla partita» sulla voce/)).toBeInTheDocument();
+    // Zorro è spuntata (decisione 19): gli effetti di stato aggiunti entrano subito salvando, gli articoli e le Doti restano con «Applica» sulla voce
+    expect(within(finestra).getByText('Questa voce è già spuntata. Aggiunti o cambiati:')).toBeInTheDocument();
+    expect(within(finestra).getByText(/^entrano subito, salvando, nelle partite in cui è spuntata: Persona/)).toBeInTheDocument();
     expect(within(finestra).getByText('Posto nella giornata (di giorno): 1 di 3')).toBeInTheDocument();
     // in cima: «su» spento; due posti giù → in fondo
     expect(within(finestra).getByRole('button', { name: 'Sposta su di un posto' })).toBeDisabled();
@@ -235,7 +236,8 @@ describe('GiornoGuida — la giornata canone', () => {
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     const tipi = await waitFor(() => within(finestra).getByRole('radiogroup', { name: 'Tipo della voce' }));
     // l'effetto del turno è una scheda dell'elenco; «Togli» lo toglie (nessuno lo cita come sostituito)
-    fireEvent.click(within(finestra).getByRole('button', { name: 'Togli: Turno di un’attività' }));
+    // 2026-10-26: il nome per i lettori di schermo è la frase dell'effetto (due effetti dello stesso tipo restano distinti)
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Togli: Turno: / }));
     expect(within(finestra).getByText('Nessun effetto: la spunta registra solo che l’hai fatta.')).toBeInTheDocument();
     fireEvent.click(within(tipi).getByRole('radio', { name: 'Confidente' }));
     // a collegamento incompleto non si salva: «Quale» (il Confidente) si sceglie fra le tessere

@@ -238,9 +238,11 @@ router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePe
   // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
   res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito }));
 });
-// 2026-10-26: gli effetti di stato aggiunti o cambiati dopo la spunta (Persona nel compendio e in scorta, trofeo…) si applicano solo da qui, su richiesta
+// decisione 19 («Elenco da approvare»): gli effetti di stato mancanti di una voce già spuntata (Persona nel compendio e in scorta, trofeo…) si
+// applicano da qui, su richiesta, quelli indicati in `effetti` o tutti
 router.post('/:id/percorso/stati', validate({ params: paramsPartita, body: bodyStatiVoce }), (req, res) => {
-  res.json(applicaStatiDellaVoce(Number(req.params.id), (req.body as z.infer<typeof bodyStatiVoce>).uid));
+  const b = req.body as z.infer<typeof bodyStatiVoce>;
+  res.json(applicaStatiDellaVoce(Number(req.params.id), b.uid, b.effetti));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
