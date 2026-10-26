@@ -6,10 +6,11 @@
 // della lotteria»; raccomandazione 13 del progetto, approvata con la stessa decisione: «Lotto estivo S» del chiosco e quello di Discount Rocinante
 // restano due offerte distinte. Prima di questa migrazione la lotteria non esisteva come dato: c'erano solo il luogo creato dal pin
 // (`shibuya/u-banco-della-lotteria-di-shibuya`), il pin 1466 e il trofeo. Fonti in `lotteriaOndata5.ts`. Che cosa fa:
-//   (1) il negozio «Chiosco della lotteria» (`lotteria-shibuya`), uno solo per i banchi della guida, nella sede che esiste già; se la sede non
-//       c'è il negozio nasce senza sede, con il quartiere. Il luogo (nato dal pin con L5, «Banco della lotteria di Shibuya», «cosa offre» vuoto)
-//       prende lo stesso nome, quello delle voci del Diario e del trofeo, e dice che cosa offre (progetto dell'ondata 5, LOT-04, approvato con la
-//       decisione 21: «le altre raccomandazioni dell'architetto si applicano»), solo se è ancora com'era; il nome di prima resta nell'audit;
+//   (1) il negozio «Lotteria sparsa» (`lotteria-shibuya`, il nome della guida [OC]; progetto dell'ondata 5, LOT-01), uno solo per i banchi
+//       della guida, nella sede che esiste già; se la sede non c'è il negozio nasce senza sede, con il quartiere. Il luogo (nato dal pin con L5,
+//       «Banco della lotteria di Shibuya», «cosa offre» vuoto) si chiama «Chiosco della lotteria», come nelle voci del Diario e nel trofeo, e
+//       dice che cosa offre (LOT-04; il progetto è approvato con la decisione 21: «le altre raccomandazioni dell'architetto si applicano»),
+//       solo se è ancora com'era; il nome di prima resta nell'audit;
 //   (2) cinque offerte, con le schede del catalogo (categoria «altro», la descrizione della guida [OC]): Lotto R e Lotto S 3.000 ¥ dal 04-18,
 //       Lotto estivo R ed S 5.000 ¥ dal 07-01 al 07-30, Lotteria gratta e vinci 200 ¥ dal 04-18. La guida non dice quanti biglietti si comprano
 //       né quando tornano: vale la regola dell'utente (`fallback-utente`). Il «Lotto estivo S» del chiosco usa la scheda che esiste già
@@ -57,7 +58,7 @@ const BIGLIETTI: readonly Biglietto[] = [
 ];
 
 // la guida [S2, S5] e la voce del 18 aprile: il chiosco è «quello più a sinistra dei tre», provenendo dalla stazione; [OC] dà i nomi dei banchi
-const NOTA_NEGOZIO = 'In Piazza della Stazione i banchi della lotteria sono tre: per la guida il chiosco è quello più a sinistra, provenendo dalla stazione. La guida nomina «Lotteria sparsa» (Lotto R, Lotto S e i Lotti estivi) e «Lotteria gratta e vinci».';
+const NOTA_NEGOZIO = 'In Piazza della Stazione i banchi della lotteria sono tre: per la guida il chiosco è quello più a sinistra, provenendo dalla stazione. La guida vende Lotto R, Lotto S e i Lotti estivi alla «Lotteria sparsa» e il gratta e vinci alla «Lotteria gratta e vinci»: qui sono riuniti in un solo negozio.';
 // una nota sulla fonte, senza cifre: prezzo e periodo vivono soltanto nelle due offerte (un dato in un solo punto, decisione 4)
 const NOTA_ESTIVO_S = {
   chiave: 'lotto-estivo-s-due-offerte',
@@ -161,11 +162,11 @@ function estrazione(db: AppDatabase, adesso: string): Esito {
 function luogo(db: AppDatabase, adesso: string): Esito & { prima?: { nome: string; cosa_offre: string } } {
   const l = db.prepare('SELECT nome, cosa_offre FROM main.luogo WHERE chiave = ?').get(CHIOSCO.sede) as { nome: string; cosa_offre: string | null } | undefined;
   if (!l) return { chiave: `luogo:${CHIOSCO.sede}`, esito: 'luogo assente' };
-  if (l.nome === CHIOSCO.nome && l.cosa_offre === COSA_OFFRE) return { chiave: `luogo:${CHIOSCO.sede}`, esito: 'già rinominato' };
+  if (l.nome === CHIOSCO.nomeSede && l.cosa_offre === COSA_OFFRE) return { chiave: `luogo:${CHIOSCO.sede}`, esito: 'già rinominato' };
   if (l.nome !== LUOGO_PRIMA || (l.cosa_offre ?? '') !== '') return { chiave: `luogo:${CHIOSCO.sede}`, esito: 'nome o «cosa offre» diversi da quelli nati dal pin: non toccato' };
   if (db.prepare("UPDATE main.luogo SET nome = ?, cosa_offre = ?, updated_at = ? WHERE chiave = ? AND nome = ? AND COALESCE(cosa_offre, '') = ''")
-    .run(CHIOSCO.nome, COSA_OFFRE, adesso, CHIOSCO.sede, LUOGO_PRIMA).changes !== 1) errore('il luogo del chiosco non si aggiorna');
-  return { chiave: `luogo:${CHIOSCO.sede}`, esito: `rinominato «${CHIOSCO.nome}», con «cosa offre»`, prima: { nome: l.nome, cosa_offre: l.cosa_offre ?? '' } };
+    .run(CHIOSCO.nomeSede, COSA_OFFRE, adesso, CHIOSCO.sede, LUOGO_PRIMA).changes !== 1) errore('il luogo del chiosco non si aggiorna');
+  return { chiave: `luogo:${CHIOSCO.sede}`, esito: `rinominato «${CHIOSCO.nomeSede}», con «cosa offre»`, prima: { nome: l.nome, cosa_offre: l.cosa_offre ?? '' } };
 }
 
 function trofeoCome(db: AppDatabase): Esito {

@@ -17,8 +17,8 @@
 //       si collega solo se il premio è ancora uno dei due testi attesi (prima o dopo la 274) e se tutte le sue schede sono nel catalogo:
 //       altrimenti resta com'è (l'audit dice perché; senza la 273 i distintivi non ci sono e il testo resta);
 //   (2) la terza prova si chiama come nella guida, «Cosmic Tower Burger»: gruppo e nomi dei suoi due esiti (le chiavi `cosmo-tower-*` non
-//       cambiano: le citano voci e ricevute), il nome della scheda e dell'offerta della sfida e la frase dei dettagli dell'attività, solo se
-//       sono ancora i testi attesi;
+//       cambiano: le citano voci e ricevute), il nome della scheda e dell'offerta della sfida, la frase dei dettagli dell'attività e la nota
+//       del negozio Big Bang Burger (`negozio.note`, l'unico altro testo di gioco che la nomina), solo se sono ancora i testi attesi;
 //   (3) le proposte «oggetto Big Bang Burger ×3» (05-18 sera `ca8068b2`, periodo validato) e «×5» (08-14 `fb0ac49a`) si chiudono come superate,
 //       solo se l'esito vinto della loro sfida dà ora quei panini: approvate, raddoppierebbero il premio.
 // I turni già registrati nelle partite non si riscrivono: nessun oggetto si aggiunge da solo a una partita salvata (l'audit conta i turni).
@@ -59,6 +59,10 @@ const NOMI_ESITI: Readonly<Record<string, { prima: string; dopo: string }>> = {
 const SFIDA_COSMIC = { catalogo: 'altro/sfida-cosmo-tower-burger', articolo: 'big-bang-burger/sfida-cosmo-tower-burger', prima: `Sfida ${COSMO}`, dopo: `Sfida ${COSMIC}` };
 const DETTAGLI_PRIMA = 'Sblocco (dalla guida): Tre sfide progressive: Comet Burger (Coraggio/Conoscenza/Perizia Rango 2), Gravity Burger (Rango 3), Cosmo Tower Burger (Rango 4)';
 const DETTAGLI_DOPO = 'Sblocco (dalla guida): Tre sfide progressive: Comet Burger (Coraggio/Conoscenza/Perizia Rango 2), Gravity Burger (Rango 3), Cosmic Tower Burger (Rango 4)';
+/** La nota del negozio Big Bang Burger, che nomina anche lei la terza sfida (l'unico altro testo di gioco con «Cosmo Tower»). */
+const NEGOZIO = 'big-bang-burger';
+const NOTA_NEGOZIO_PRIMA = 'Oltre al menu normale offre tre sfide di divoramento (Comet, Gravity, Cosmo Tower Burger) che danno bonus permanenti alle statistiche sociali. Dettagli della sfida da fonte secondaria samurai-gamers.com, non italiana.';
+const NOTA_NEGOZIO_DOPO = 'Oltre al menu normale offre tre sfide di divoramento (Comet, Gravity, Cosmic Tower Burger) che danno bonus permanenti alle statistiche sociali. Dettagli della sfida da fonte secondaria samurai-gamers.com, non italiana.';
 
 /** Le proposte «oggetto Big Bang Burger» che raddoppierebbero il premio dell'esito vinto. `da`: la proposta del turno che la sostituisce. */
 const PROPOSTE: ReadonlyArray<{ id: string; voce: string; quantita: number; esito: string; da: string | null }> = [
@@ -93,7 +97,7 @@ function correggiEsiti(db: AppDatabase, dati: EsitiAttivita): Esito[] {
   return out;
 }
 
-/** Il nome della terza prova nella scheda, nell'offerta e nei dettagli dell'attività, solo se sono ancora i testi attesi. */
+/** Il nome della terza prova nella scheda, nell'offerta, nei dettagli dell'attività e nella nota del negozio, solo se sono ancora i testi attesi. */
 function rinominaProva(db: AppDatabase, adesso: string): Esito[] {
   const out: Esito[] = [];
   const s = db.prepare('SELECT nome, origine, seed_json FROM main.catalogo_oggetto WHERE chiave = ?').get(SFIDA_COSMIC.catalogo) as { nome: string; origine: string; seed_json: string | null } | undefined;
@@ -119,6 +123,18 @@ function rinominaProva(db: AppDatabase, adesso: string): Esito[] {
     else {
       if (db.prepare('UPDATE main.attivita SET dettagli = ?, updated_at = ? WHERE chiave = ? AND dettagli = ?').run(DETTAGLI_DOPO, adesso, ATTIVITA, DETTAGLI_PRIMA).changes !== 1) errore('i dettagli della sfida non si aggiornano');
       out.push({ chiave: `dettagli:${ATTIVITA}`, esito: 'dettagli con «Cosmic Tower Burger»' });
+    }
+  }
+  if (esisteTabella(db, 'negozio') && haColonna(db, 'negozio', 'note')) {
+    const conSeed = haColonna(db, 'negozio', 'seed_json');
+    const n = db.prepare(`SELECT note, origine${conSeed ? ', seed_json' : ', NULL AS seed_json'} FROM main.negozio WHERE chiave = ?`).get(NEGOZIO) as { note: string | null; origine: string; seed_json: string | null } | undefined;
+    if (!n) out.push({ chiave: `nota:${NEGOZIO}`, esito: 'negozio assente' });
+    else if (n.note === NOTA_NEGOZIO_DOPO) out.push({ chiave: `nota:${NEGOZIO}`, esito: 'già «Cosmic»' });
+    else if (n.note !== NOTA_NEGOZIO_PRIMA || n.origine !== 'seed' || n.seed_json !== null) out.push({ chiave: `nota:${NEGOZIO}`, esito: 'nota diversa da quella attesa o corretta dall’utente: non toccata' });
+    else {
+      if (db.prepare(`UPDATE main.negozio SET note = ?, updated_at = ? WHERE chiave = ? AND note = ? AND origine = 'seed'${conSeed ? ' AND seed_json IS NULL' : ''}`)
+        .run(NOTA_NEGOZIO_DOPO, adesso, NEGOZIO, NOTA_NEGOZIO_PRIMA).changes !== 1) errore('la nota del negozio Big Bang Burger non si aggiorna');
+      out.push({ chiave: `nota:${NEGOZIO}`, esito: 'nome «Cosmic Tower Burger» nella nota del negozio' });
     }
   }
   return out;

@@ -47,7 +47,7 @@ function OggettiDellEsito({ oggetti, disabilitato, onCambia }: { oggetti: readon
             <SceltaNelCatalogo {...stato} etichetta="Oggetto" valore={o.oggetto} escludi={scelti.filter((c) => c !== o.oggetto)} disabilitato={disabilitato}
               onScegli={(c) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, oggetto: c.chiave } : x)))} />
           </span>
-          <CampoQuantita valore={o.quantita} onCambia={(q) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, quantita: Math.min(LIMITI_ESITI.quantita, q) } : x)))} />
+          <CampoQuantita valore={o.quantita} disabilitato={disabilitato} onCambia={(q) => onCambia(oggetti.map((x, j) => (j === k ? { ...x, quantita: Math.min(LIMITI_ESITI.quantita, q) } : x)))} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli l’oggetto" disabled={disabilitato} onClick={() => onCambia(oggetti.filter((_, j) => j !== k))} />
         </span>
       ))}
