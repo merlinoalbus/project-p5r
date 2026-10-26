@@ -322,8 +322,22 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   return { articoli: valutati.slice(0, 300), totale: valutati.length };
 }
 
-/** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
-export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string): ArticoloDto {
+/**
+ * L13 (decisione 4): la disponibilità di un articolo nello stato dato (per la scelta fra i set alternativi di una voce: lo stato al giorno della
+ * voce, `statoAlMomento`), con la stessa regola di `impostaAcquisto` (listino condiviso, presenza del negozio nella sua sede, condizioni
+ * dell'articolo). null se l'articolo non c'è.
+ */
+export function disponibilitaArticoloNelloStato(articoloChiave: string, st: StatoDisponibilita): ReturnType<typeof disponibilitaArticolo> | null {
+  const listini = lettureListiniCondivisi();
+  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloDelListino(articoloChiave, listini)) as RigaArticolo | undefined;
+  if (!riga) return null;
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(riga.negozio_chiave) as RigaNegozio | undefined;
+  return negozio ? disponibilitaArticolo(conSede(riga, negozioNellaSede(negozio, undefined, listini)), st) : null;
+}
+
+/** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. `st` (L13): lo stato in cui valutarne la
+ *  disponibilità, se non è quello di adesso (la spunta di una voce lo valuta al giorno della voce); senza, quello corrente della partita. */
+export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string, stDelGesto?: StatoDisponibilita): ArticoloDto {
   verificaPartita(partitaId);
   const listini = lettureListiniCondivisi();
   const canonica = articoloDelListino(articoloChiave, listini);
@@ -334,7 +348,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   // Togliere una spunta resta possibile anche da una scheda vecchia, dopo che la sede aggiuntiva è stata rimossa.
   const sedeDaUsare = !fatto && sede && sede !== negozio.sede_chiave && !listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede) ? undefined : sede;
   const r = conSede(riga, negozioNellaSede(negozio, sedeDaUsare, listini));
-  const st = statoDisponibilitaPartita(partitaId);
+  const st = stDelGesto ?? statoDisponibilitaPartita(partitaId);
   const catalogo = identitaArticoli([r]);
   const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
   const prodotto = articoloDto(r, new Set(), st, catalogo, ricevuti);

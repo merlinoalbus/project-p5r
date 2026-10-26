@@ -27,6 +27,7 @@ import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { annullaInvito, registraInvito } from './inviti.js';
 import { registraPersona } from './partiteService.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
+import type { StatoDisponibilita } from './disponibilitaService.js';
 
 type StatoPrima = { gia: boolean; stato?: string | null };
 
@@ -81,8 +82,9 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
   return { gia: stato === 'completata', stato };
 }
 
-/** Segna (nel verso `segna`) lo stato dell'effetto, o lo riporta com'era (`stato` della Richiesta). */
-function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null): void {
+/** Segna (nel verso `segna`) lo stato dell'effetto, o lo riporta com'era (`stato` della Richiesta). `st` (L13): lo stato in cui valutare la
+ *  disponibilità di un articolo (quello al giorno della voce, solo per un set scelto fra alternative); senza, quello corrente della partita. */
+function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null, st?: StatoDisponibilita): void {
   // l'invito: la stessa regola del gesto diretto («Invito avvenuto»): solo con le condizioni vere (409 `invito-non-possibile`), una volta sola; si toglie solo se l'ha scritto la voce
   if (e.tipo === 'invito') { if (segna) registraInvito(p, e.invito, voceUid); else annullaInvito(p, e.invito, voceUid); }
   else if (e.tipo === 'trofeo') impostaTrofeo(p, e.trofeo, segna);
@@ -109,12 +111,18 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
   else if (e.tipo === 'cruciverba') impostaCruciverba(p, e.data, segna);
-  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna);
+  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, undefined, st);
   else impostaStatoRichiesta(p, e.richiesta, segna ? 'completata' : (statoRichiesta as 'completata' | null));
 }
 
-/** La spunta: segna ogni effetto di stato della voce, ricordando com'era lo stato (dentro la transazione della spunta). */
-export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array<{ uid: string; effetto: EffettoDiStatoVoce }>): void {
+/**
+ * La spunta: segna ogni effetto di stato della voce, ricordando com'era lo stato (dentro la transazione della spunta). L13 (decisione 4):
+ * `opz.scelti` sono gli articoli scelti alla spunta fra quelli in alternativa e `opz.st` lo stato al giorno della voce, in cui SOLO per loro
+ * si valuta la disponibilità (un set delle televendite si compra solo la sua domenica; ogni altro articolo resta valutato sullo stato
+ * corrente della partita, come prima). Per un set scelto un «non disponibile» non si ingoia (la scelta è già stata verificata: se qui non
+ * vale, la spunta si ferma invece di dire «comprato» senza segnarlo).
+ */
+export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array<{ uid: string; effetto: EffettoDiStatoVoce }>, opz: { st?: StatoDisponibilita; scelti?: ReadonlySet<string> } = {}): void {
   for (const { uid, effetto: e } of effetti) {
     const prima = leggiPrima(p, e);
     // rispuntando, il «prima» resta quello della prima volta (non diventa «già segnato» per colpa della spunta di prima)
@@ -125,10 +133,10 @@ export function applicaEffettiDiStato(p: number, voceUid: string, effetti: Array
     }
     if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); continue; }
     if (prima.gia) continue;
-    try { scrivi(p, e, true, null, voceUid); }
+    try { scrivi(p, e, true, null, voceUid, opz.scelti?.has(uid) ? opz.st : undefined); }
     catch (err) {
-      // un articolo non ancora disponibile nella partita non ferma la spunta della voce: resta da segnare dal negozio
-      if (e.tipo === 'articolo' && (err as { code?: string }).code === 'articolo-non-disponibile') {
+      // un articolo non ancora disponibile nella partita non ferma la spunta della voce: resta da segnare dal negozio (non un set scelto)
+      if (e.tipo === 'articolo' && !opz.scelti?.has(uid) && (err as { code?: string }).code === 'articolo-non-disponibile') {
         if (!vecchio) prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, uid);
         continue;
       }

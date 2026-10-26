@@ -120,7 +120,10 @@ export function dotiEsitoConPunti(doti: ReadonlyArray<DoteEsito>): Array<{ dote:
 /** La scelta che accompagna la spunta di una voce: per un turno l'esito (null = «senza punti»), per una Dote a valori possibili le note (0 = nessuna). */
 export type SceltaEsitoSpunta =
   | { effettoUid: string; tipo: 'turno'; esito: string | null }
-  | { effettoUid: string; tipo: 'dote'; note: 0 | 1 | 2 | 3 };
+  | { effettoUid: string; tipo: 'dote'; note: 0 | 1 | 2 | 3 }
+  /** L13 (decisione 4): fra gli articoli in alternativa della voce (Set A o Set B), quello comprato: l'UID del suo effetto, o null = nessuno.
+   *  `effettoUid` è l'UID del primo effetto del gruppo (il gruppo non ha un'identità sua: lo calcola il catalogo). */
+  | { effettoUid: string; tipo: 'alternativa'; scelto: string | null };
 
 /** Un esito come lo vede la scelta: Doti con i punti, prezzo e nome dell'articolo, e se è possibile in quel momento (con il motivo). */
 export interface EsitoDisponibileDto {
@@ -139,9 +142,26 @@ export interface EsitiAttivitaDto {
   /** Nel modo automatico, con una partita: l'esito che vale adesso (null se nessuno o più d'uno). */
   automatico: string | null;
 }
+/** Un articolo fra quelli in alternativa della voce, come lo vede la scelta alla spunta: prezzo, copie, che cosa contiene e se si può comprare. */
+export interface OpzioneAlternativaDto {
+  /** L'UID dell'effetto «articolo» della voce: è la scelta che la spunta manda. */
+  effettoUid: string;
+  articolo: { chiave: string; nome: string; prezzo: number | null };
+  /** Le copie dell'effetto (1 se la voce non le dice). */
+  quantita: number;
+  /** Che cosa si riceve comprandolo (le righe di `ricompensa_oggetto` dell'articolo): vuoto se il catalogo non lo dice. */
+  contenuto: Array<{ nome: string; quantita: number | null }>;
+  /** Falso se le condizioni proprie dell'articolo non valgono al giorno della voce (per esempio l'altro set è già comprato). */
+  disponibile: boolean;
+  /** Perché non si può, in parole («Non insieme a «Set Condiv. primaverile»»); null se si può. */
+  motivo: string | null;
+}
 /** Le scelte che la spunta di una voce chiede, nell'ordine degli effetti. */
 export type SceltaEsitoVoceDto =
   /** `yenGiaNelSaldo` (L13, decisione 18): l'effetto «turno» è di una voce spuntata prima che gli yen si muovessero da soli, ora rispuntata: il
    *  prezzo della sfida era già nel saldo e non si scala (la scelta lo dice). */
   | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true }
-  | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3 };
+  | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3 }
+  /** L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite): se ne compra uno, o nessuno. `preselezionato`:
+   *  l'UID dell'effetto dell'articolo già comprato nella partita (dal negozio), se ce n'è uno. */
+  | { effettoUid: string; tipo: 'alternativa'; negozioNome: string | null; opzioni: OpzioneAlternativaDto[]; preselezionato: string | null };

@@ -187,9 +187,10 @@ function fonteDaConvertire(x: unknown): boolean {
  * Gli effetti aggiunti alla voce dopo che gli yen si muovono da soli, dal registro delle operazioni sugli effetti (`main.operazione_effetti_voce`,
  * scritto da ogni salvataggio, decisione su un candidato e migrazione che aggiunge un effetto): un uid assente in `prima_json` e presente in
  * `dopo_json` di un'operazione nata da `inizio` in poi. Una conversione della fonte legacy non conta (l'effetto c'era già, come testo). Una riga
- * del registro illeggibile ferma il gesto (`registro-yen-illeggibile`): niente si muove alla cieca.
+ * del registro illeggibile ferma il gesto (`registro-yen-illeggibile`): niente si muove alla cieca. L13 (decisione 4): la usa anche il
+ * riepilogo di una voce spuntata con articoli in alternativa aggiunti dopo la spunta (`alternativeAggiunteDopoLaSpunta`), con la data della spunta.
  */
-function effettiAggiuntiDopo(voceUid: string, inizio: string): Set<string> {
+export function effettiAggiuntiDopo(voceUid: string, inizio: string): Set<string> {
   const aggiunti = new Set<string>();
   for (const r of prepared('SELECT prima_json, dopo_json FROM main.operazione_effetti_voce WHERE voce_uid = ? AND creata_il >= ? ORDER BY creata_il, rowid').all(voceUid, inizio) as Array<{ prima_json: string; dopo_json: string }>) {
     const prima = leggiRegistroYen(r.prima_json, 'Il registro delle operazioni sugli effetti'), dopo = leggiRegistroYen(r.dopo_json, 'Il registro delle operazioni sugli effetti');

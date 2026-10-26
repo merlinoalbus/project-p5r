@@ -77,6 +77,11 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
             <span className={`min-w-0 break-words ${r.risposte ? 'text-pretty' : ''} ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}>{r.nome}</span>
             {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
             {r.risposte && <RisposteGiuste risposte={r.risposte} />}
+            {/* L13 (decisione 4): che cosa contiene un set, in una riga sotto nome e prezzo, su tutta la larghezza; va a capo, mai troncato.
+                Da 641 px le colonne sono larghe quanto il contenuto: `w-0 min-w-full` toglie il contenuto dal calcolo della loro larghezza (un
+                contenuto lungo allargava le due colonne e allontanava il prezzo dal nome, rilievo della revisione UX) e lo stende sulla
+                larghezza che nome e prezzo danno alla riga */}
+            {r.contenuto && <span className="min-w-0 break-words testo-12 text-text-muted text-pretty min-[641px]:col-span-2 min-[641px]:w-0 min-[641px]:min-w-full">{r.contenuto}</span>}
           </li>
         ))}
       </ul>

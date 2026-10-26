@@ -13,6 +13,8 @@ import { bodyRegistraSessionePesca } from './pesca.js';
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
   z.object({ effettoUid: uidVoce, tipo: z.literal('turno'), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable() }).strict(),
   z.object({ effettoUid: uidVoce, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
+  // L13 (decisione 4): fra gli articoli in alternativa della voce (il gruppo è l'UID del suo primo effetto), quello comprato o null = nessuno
+  z.object({ effettoUid: uidVoce, tipo: z.literal('alternativa'), scelto: uidVoce.nullable() }).strict(),
 ]);
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
