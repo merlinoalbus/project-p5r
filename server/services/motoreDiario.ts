@@ -317,7 +317,13 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
         if(aveva&&vecchio.tipo==='articolo')articoliRestituiti.add(vecchio.articolo);
         return aveva||c1;
       }))();
-      if(!c.nuovo){if(tolto)esito(c.effettoUid,'annullato',vecchio.tipo==='fortuna'?fraseEffettoConNomi(vecchio,nomiFraseEffetto()):fraseDelloStato(vecchio),undefined,avvisiAnnullo);continue;}
+      if(!c.nuovo){
+        const frase=vecchio.tipo==='fortuna'?fraseEffettoConNomi(vecchio,nomiFraseEffetto()):fraseDelloStato(vecchio);
+        // tolto, oppure rimasto perché modificato dopo la spunta (un esemplare in scorta): in tutti e due i casi lo si dice
+        if(tolto)esito(c.effettoUid,'annullato',frase,undefined,avvisiAnnullo);
+        else if(avvisiAnnullo.length)esito(c.effettoUid,'resta',frase,undefined,avvisiAnnullo);
+        continue;
+      }
       // la versione superata è tornata com'era: lo si dice prima della nuova (con una Persona diversa, un altro trofeo; della stessa Persona,
       // la sola scorta che l'effetto non dice più)
       if(tolto&&vecchio.tipo!=='fortuna'){
@@ -338,7 +344,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       continue;
     }
     if(e.tipo==='articolo'&&inAlternativa.has(c.effettoUid)){
-      esito(c.effettoUid,'non-applicato',fraseDelloStato(e),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalo dalla pagina del negozio');
+      esito(c.effettoUid,'non-applicato',fraseDelloStato(e),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalalo dalla pagina del negozio');
       continue;
     }
     // decisione 18, la nozione unica per effetto (letta PRIMA di scrivere la riga nuova): l'articolo che corregge lo stesso effetto (stesso uid:
@@ -728,7 +734,7 @@ function applicaStatoDelPassato(p:number,uid:string,e:EffettoVoceDto&{effetto:Ef
   if(proposta.dati.passato!==true)throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
   if(statoSegnatoDallaVoce(p,uid,e.uid,e.effetto))throw httpErrors.conflict('effetto-gia-applicato','Questo effetto è già segnato nella partita.');
   // decisione 4: un articolo in alternativa lo sceglie solo la spunta (il censimento non lo propone; una proposta di prima non lo segna)
-  if(e.effetto.tipo==='articolo'&&effettiInAlternativa(leggiEffettiVoce(uid).effetti).has(e.uid))throw httpErrors.conflict('articolo-in-alternativa','Questo articolo è in alternativa con altri della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalo dalla pagina del negozio.');
+  if(e.effetto.tipo==='articolo'&&effettiInAlternativa(leggiEffettiVoce(uid).effetti).has(e.uid))throw httpErrors.conflict('articolo-in-alternativa','Questo articolo è in alternativa con altri della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalalo dalla pagina del negozio.');
   // la nozione unica, letta PRIMA di scrivere la riga dello stato (dopo, la riga nata adesso direbbe «applicato dopo»)
   const giaNelSaldo=e.effetto.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:e.uid,tipo:'articolo',chiave:null}]).has(e.uid);
   // la Richiesta (revisione della decisione 19): completarla adesso farebbe entrare da sola la ricompensa (`riallineaYenRichiesta`); in una spunta

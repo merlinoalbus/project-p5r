@@ -426,13 +426,17 @@ function revocaEventiDelloStato(p: number, voceUid: string, r: RigaStato): void 
 /**
  * Riporta com'erano gli stati delle righe indicate (dentro la transazione di chi la chiama), con la regola di `decidiAnnullo`, e le toglie.
  * `revocaEventi`: anche gli eventi che la voce aveva scritto per quegli stati se ne vanno (un effetto tolto o cambiato nella guida; togliendo la
- * spunta li revoca `revocaEventiDellaVoce`, tutti insieme). Restituisce gli avvisi (un esemplare in scorta modificato dopo, che resta).
+ * spunta li revoca `revocaEventiDellaVoce`, tutti insieme). Restituisce gli avvisi (un esemplare in scorta modificato dopo, che resta) e se
+ * qualcosa è davvero tornato com'era (`tornato`: uno stato riportato indietro, un esemplare o un oggetto tolti; non ciò che resta perché c'era
+ * già, lo tiene un'altra voce o è stato modificato dopo).
  */
-function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], revocaEventi: boolean): string[] {
+function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], revocaEventi: boolean): { avvisi: string[]; tornato: boolean } {
   const avvisi: string[] = [];
+  let tornato = false;
   const restanoInScorta = new Set<string>();
   for (const r of scortaPerPrima(righe)) {
     const d = decidiAnnullo(p, voceUid, r, restanoInScorta);
+    if (d.modo === 'oggetto' || d.modo === 'scorta-tolta' || d.modo === 'torna') tornato = true;
     const prima = JSON.parse(r.prima_json) as StatoPrima & PrimaScorta;
     if (d.modo === 'oggetto') {
       prepared('DELETE FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
@@ -473,7 +477,7 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
     }
     prepared('DELETE FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').run(p, voceUid, r.effetto_uid);
   }
-  return avvisi;
+  return { avvisi, tornato };
 }
 
 /**
@@ -481,7 +485,7 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
  * mostrare a chi toglie la spunta (un esemplare in scorta modificato dopo, che resta).
  */
 export function annullaEffettiDiStato(p: number, voceUid: string): string[] {
-  return annullaRighe(p, voceUid, prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as RigaStato[], false);
+  return annullaRighe(p, voceUid, prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ?').all(p, voceUid) as RigaStato[], false).avvisi;
 }
 
 /**
@@ -489,8 +493,8 @@ export function annullaEffettiDiStato(p: number, voceUid: string): string[] {
  * «togli la spunta» (`decidiAnnullo`): torna com'era prima solo ciò che la voce aveva aggiunto, e solo se intatto; gli eventi che aveva scritto
  * per quegli stati se ne vanno con loro. `resta`: la versione nuova dello stesso effetto; le parti che dice ancora (stesso tipo, stessa chiave:
  * la stessa Persona, lo stesso trofeo) restano com'erano, con il loro «prima», e se ne vanno solo quelle superate (l'Arsène di un effetto
- * diventato Pixie, la scorta di un effetto tornato «Solo nel Compendio»). `tolto`: c'era una riga da annullare; `avvisi`: ciò che resta perché
- * modificato dopo (un esemplare in scorta).
+ * diventato Pixie, la scorta di un effetto tornato «Solo nel Compendio»). `tolto`: qualcosa è davvero tornato com'era (non ciò che c'era già, che
+ * un'altra voce tiene o che è stato modificato dopo); `avvisi`: ciò che resta perché modificato dopo (un esemplare in scorta).
  */
 export function annullaEffettoDiStato(p: number, voceUid: string, effettoUid: string, resta?: EffettoDiStatoVoce): { tolto: boolean; avvisi: string[] } {
   const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid IN (?, ?)')
@@ -501,5 +505,6 @@ export function annullaEffettoDiStato(p: number, voceUid: string, effettoUid: st
   ];
   const superate = righe.filter((r) => !restano.some((x) => x.uid === r.effetto_uid && x.tipo === r.tipo && x.chiave === r.chiave));
   if (!superate.length) return { tolto: false, avvisi: [] };
-  return { tolto: true, avvisi: annullaRighe(p, voceUid, superate, true) };
+  const { avvisi, tornato } = annullaRighe(p, voceUid, superate, true);
+  return { tolto: tornato, avvisi };
 }

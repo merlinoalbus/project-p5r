@@ -313,7 +313,9 @@ function separaAvanzamento(x: unknown): { avanzamento: AvanzamentoGiornataDto; r
 }
 const schemaApplicazioni = z.array(z.object({
   partitaId: z.number().int(), partitaNome: z.string(), effettoUid: z.string(),
-  esito: z.enum(['segnato', 'annullato', 'gia-presente', 'fortuna-non-valida', 'da-approvare', 'non-applicato']), testo: z.string(), motivo: z.string().optional(),
+  esito: z.enum(['segnato', 'annullato', 'resta', 'gia-presente', 'fortuna-non-valida', 'da-approvare', 'non-applicato']), testo: z.string(), motivo: z.string().optional(),
+  // 2026-10-26: gli avvisi dell'esito (la scorta oltre la capienza, l'esemplare in scorta che resta perché modificato dopo)
+  avvisi: z.array(z.string()).optional(),
 }).strict());
 /** L13 (decisione 19): stacca dalla risposta della conferma di un candidato l'esito nelle partite che hanno già spuntato la voce (il resto della
  *  ricevuta lo valida `validaRicevuta`, che resta stretta). `illeggibile`: c'era, ma non ha la forma attesa (chi chiama lo dice). */

@@ -16,6 +16,7 @@ import type { ApplicazioneStatoPartitaDto } from '../../shared/effettiVoce';
 const DICITURA: Record<ApplicazioneStatoPartitaDto['esito'], string> = {
   segnato: 'segnato',
   annullato: 'tolto',
+  resta: 'resta nella partita',
   'gia-presente': 'era già vero',
   'fortuna-non-valida': 'non applicata',
   'da-approvare': 'da approvare nella partita',

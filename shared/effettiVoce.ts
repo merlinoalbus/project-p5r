@@ -79,6 +79,7 @@ export interface StatoEffettiVoceDto {
  * `segnato`: vale adesso; `annullato`: la versione tolta è tornata com'era; `gia-presente`: era già vero (togliendo la spunta resta);
  * `fortuna-non-valida`: la Fortuna vale solo il giorno della spunta; `da-approvare`: il dominio l'ha rifiutato adesso, ed è nell'elenco della partita;
  * `non-applicato`: il dominio l'ha rifiutato adesso, e non è in elenco perché l'utente ne aveva già tolto la stessa configurazione.
+ * `resta` (2026-10-26): l'effetto tolto ha lasciato il suo stato nella partita perché modificato dopo la spunta (un esemplare in scorta: lo dicono gli `avvisi`).
  * `testo`: l'effetto a parole (la frase del «Il gioco dà»); `motivo`: perché non vale (solo `fortuna-non-valida`, `da-approvare` e `non-applicato`);
  * `avvisi` (2026-10-26, la Persona «anche nella scorta»): ciò che chi salva deve sapere anche se l'effetto vale, la Persona entrata nella scorta
  * oltre la capienza («n/N») o l'esemplare in scorta che resta perché modificato dopo la spunta.
@@ -87,7 +88,7 @@ export interface StatoEffettiVoceDto {
  */
 export interface ApplicazioneStatoPartitaDto {
   partitaId: number; partitaNome: string; effettoUid: string;
-  esito: 'segnato' | 'annullato' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare' | 'non-applicato';
+  esito: 'segnato' | 'annullato' | 'resta' | 'gia-presente' | 'fortuna-non-valida' | 'da-approvare' | 'non-applicato';
   testo: string;
   motivo?: string;
   avvisi?: string[];
