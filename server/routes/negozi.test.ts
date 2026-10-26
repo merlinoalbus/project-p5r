@@ -40,7 +40,8 @@ describe('API negozi e inventario', () => {
     expect(n.find((x) => x.chiave === 'tanaka-affari-loschi')?.luogoChiave).toBeNull();
     const d = (await request(app).get('/api/compendio/negozi/untouchable')).body.data as NegozioDettaglioDto;
     expect(d.articoliElenco).toHaveLength(218);
-    expect(d.articoliElenco[0]).toMatchObject({ chiave: 'untouchable/kogatana-nera', nome: 'Kogatana nera', categoria: 'arma', per: 'Joker', prezzo: 1000, acquistato: false, verificato: true });
+    // la 250 unisce le due Kogatana nere nella scheda «materiale» (Oggetti chiave e materiali) e vi conserva le statistiche dell'arma (Joker)
+    expect(d.articoliElenco[0]).toMatchObject({ chiave: 'untouchable/kogatana-nera', nome: 'Kogatana nera', categoria: 'materiale', per: 'Joker', prezzo: 1000, acquistato: false, verificato: true });
     expect(d.articoliElenco.every((a) => a.chiave.startsWith('untouchable/'))).toBe(true);
     expect(new Set(d.articoliElenco.map((a) => a.chiave)).size).toBe(218);
     expect((await request(app).get('/api/compendio/negozi/emporio-fantasma')).status).toBe(404);
