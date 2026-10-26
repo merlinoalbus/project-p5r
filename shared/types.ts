@@ -3627,8 +3627,10 @@ export interface OggettoDettaglioDto extends CatalogoOggettoDto {
   noteStoriche?: NotaStoricaOfferta[];
   trasformazioni: TrasformazioneOggettoDto[];
   inVendita: OffertaOggettoDto[];
-  /** A chi piace (l'elenco dei regali dei Confidenti, decisione 13), con la reazione (+3/+2/+1) e, nella partita, se è già stato regalato. */
-  regalo: Array<{ confidente: string; nome: string; reazione: ReazioneRegalo | null; casa: string; regalato: boolean }>;
+  /** A chi piace (l'elenco dei regali dei Confidenti, decisione 13), con la reazione (+3/+2/+1), la nota della riga e, nella partita, se è già
+   *  stato regalato. Un Confidente compare una volta: la reazione più alta delle sue righe, le note diverse unite. Chi lo gradisce lo dice
+   *  `fraIGraditi` di `shared/regali.ts`, lo stesso criterio della scheda del Confidente (revisione dei lotti D e D2). */
+  regalo: Array<{ confidente: string; nome: string; reazione: ReazioneRegalo | null; nota: string | null; casa: string; regalato: boolean }>;
   forzieri: Array<{
     voce: string; voceNome: string; palazzo: string; palazzoNome: string;
     infiltrazione: string; infiltrazioneNome: string; area: string | null; areaNome: string | null; quantita: number;

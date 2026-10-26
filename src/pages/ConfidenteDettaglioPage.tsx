@@ -162,10 +162,15 @@ export function ConfidenteDettaglioPage() {
   // quanto ogni altro regalo (revisione dei lotti D e D2: presentarle come «gradite» contraddiceva la guida)
   const graditi = (c?.regali ?? []).filter(fraIGraditi);
   const altriInElenco = (c?.regali ?? []).filter((g) => !graditi.includes(g));
+  // revisione dei lotti D e D2: «Regala» compare solo quando il regalo si può fare davvero, cioè a un Confidente che riceve regali e che nella
+  // partita è già stato incontrato (si regala durante un ritrovo: rango 1 o più, come vuole il server). Al rango 0 il pulsante aprirebbe una
+  // finestra con tutto disabilitato: al suo posto una riga dice perché
+  const regalabileOra = !!attiva && !!c?.regalabile && !!mio && mio.rango > 0;
+  const nonIncontrato = !!attiva && !!c?.regalabile && !!mio && mio.rango === 0;
   const rigaRegalo = (g: RegaloConfidenteDto) => (
     <li key={g.ordine} className="py-1.5 flex flex-wrap items-center gap-2 testo-13">
       {/* ondata 5: lo stesso oggetto si può ridare; le consegne già date (e il loro annullo) stanno in «Regali dati in questa partita» */}
-      {attiva && g.catalogo && c?.regalabile && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
+      {regalabileOra && g.catalogo && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
         onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />}
       {attiva && !g.catalogo && (
         <label className="flex items-center gap-1.5 touch">
@@ -281,9 +286,10 @@ export function ConfidenteDettaglioPage() {
           <section className="card flex flex-col gap-2">
             <TitoloSezione>Regali graditi</TitoloSezione>
             {/* ondata 5 (RG-10, RG-11): si regala un qualunque oggetto regalo, a chi riceve regali */}
-            {attiva && c.regalabile && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
+            {regalabileOra && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
               disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }} />}
-            {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
+            {nonIncontrato && <p className="m-0 testo-13 text-text-secondary text-pretty">{c.nome} non è ancora stato incontrato in questa partita: si regala durante un ritrovo.</p>}
+            {regalabileOra && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
               onChiudi={() => setSceltaRegaloPer(null)} onFatto={(esito) => {
                 setSceltaRegaloPer((corrente) => corrente === bersaglioRegalo ? null : corrente);
                 void stato.ricarica();

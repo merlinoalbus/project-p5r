@@ -22,7 +22,7 @@ import { notifica } from '../stores/notificationStore';
 import { annullaRegaloOggetto } from '../services/api/partite';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { formattaPunti } from '../utils/punti';
-import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, annulloDelRegalo, eGradito, esitoDelRegalo, testoReazione } from '../../shared/regali';
+import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, annulloDelRegalo, esitoDelRegalo, fraIGraditi, testoReazione } from '../../shared/regali';
 import type { ConsegnaRegaloDto } from '../types';
 import { ChipReazione } from '../components/catalogo/ChipReazione';
 import { ElencoConsegne } from '../components/catalogo/ConsegneRegalo';
@@ -90,7 +90,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
   useDocumentTitle(o?.nome ?? 'Oggetto');
   // revisione dei lotti D e D2: «A chi piace» elenca solo chi lo gradisce più di ogni altro regalo (le righe a +1 valgono quanto un regalo
   // qualunque); a tutti gli altri che possono riceverlo adesso si dà dal selettore; le consegne della partita si vedono e si annullano qui
-  const graditi = (o?.regalo ?? []).filter((r) => eGradito(r.reazione));
+  // stesso criterio della scheda del Confidente e del cassetto (`fraIGraditi`): più di +1, o una riga con una nota; la riga è di questo oggetto
+  const graditi = (o?.regalo ?? []).filter((r) => fraIGraditi({ catalogo: o?.chiave, reazione: r.reazione, nota: r.nota }));
   const cartolina = o?.chiave === CARTOLINA;
   const altriDestinatari = (o?.partita?.destinatari ?? []).filter((d) => !graditi.some((r) => r.confidente === d.confidente));
   const gruppiConsegne = raggruppaConsegne(o?.partita?.consegne ?? [], (x) => ({ chiave: x.confidente, nome: x.nomeConfidente, casa: `/confidenti/${encodeURIComponent(x.confidente)}` }));
@@ -143,6 +144,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
                   ricevere adesso (`destinatari`: riceve regali ed è già stato incontrato) */}
               {partitaId !== null && o.partita?.destinatari?.some((d) => d.confidente === r.confidente) && <PulsanteVisivo tono="primario" compatto className="ml-auto" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" aria-label={`Regala a ${r.nome}`}
                 disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => regala(r.confidente, r.nome)} />}
+              {/* la nota della riga dell'elenco (come nella scheda del Confidente): è ciò che rende gradita una riga a +1 */}
+              {r.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted text-pretty">{r.nota}</span>}
             </li>)}</ul> : <p className="m-0 testo-13 text-text-secondary text-pretty">{cartolina ? `Vale ${testoReazione(REAZIONE_CARTOLINA)} con chi riceve regali.`
               : o.categoria === 'regalo' ? `Nessun Confidente lo gradisce in particolare: vale ${testoReazione(REAZIONE_FUORI_ELENCO)} con chi riceve regali.` : 'Nessun regalo gradito collegato.'}</p>}
             {graditi.length > 0 && o.categoria === 'regalo' && !cartolina && <p className="m-0 testo-12 text-text-muted">Con gli altri Confidenti che ricevono regali vale {testoReazione(REAZIONE_FUORI_ELENCO)}.</p>}

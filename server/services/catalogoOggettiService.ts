@@ -111,11 +111,18 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
   // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
   const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
-  const regalo = (prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'} FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
-    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.reazione DESC,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; reazione: number | null }>)
+  // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
+  // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
+  const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'},g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave
+    WHERE g.catalogo_chiave = ? ORDER BY c.ordine,g.reazione DESC,g.ordine`).all(chiave) as Array<{ confidente_chiave: string; nome: string; reazione: number | null; nota: string | null }>;
+  const noteDi = (confidente: string): string | null => {
+    const note = [...new Set(righeRegalo.filter((r) => r.confidente_chiave === confidente).map((r) => r.nota?.trim() ?? '').filter(Boolean))];
+    return note.length ? note.join('\n') : null;
+  };
+  const regalo = righeRegalo
     .filter((r, i, tutti) => tutti.findIndex((a) => a.confidente_chiave === r.confidente_chiave) === i)
     .map((r) => ({ confidente: r.confidente_chiave, nome: r.nome, reazione: (r.reazione === 1 || r.reazione === 2 || r.reazione === 3 ? r.reazione : null) as ReazioneRegalo | null,
-      casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave) }));
+      nota: noteDi(r.confidente_chiave), casa: `/confidenti/${encodeURIComponent(r.confidente_chiave)}`, regalato: regalati.has(r.confidente_chiave) }));
   const prodottiRicette = ricompensePerFonte('ricetta');
   const ricette = (prepared('SELECT ricetta,quantita FROM ricetta_materiale WHERE catalogo_chiave = ? ORDER BY ricetta').all(chiave) as Array<{ ricetta: string; quantita: number }>)
     .map((r) => {
