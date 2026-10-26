@@ -248,6 +248,8 @@ export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1)
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 /** Ondata 5: una riga del registro degli acquisti della partita (annullo per riga). */
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });
+/** Ondata 5 (lotto F-bis): una riga del registro dei consumi della partita (l'uso di un incenso in un Isolamento, da annullare). */
+export const paramsPartitaConsumo = z.object({ id: idParam, consumoId: idParam });
 /** Ondata 5: la sede in cui si guarda l'articolo (listino condiviso), per restituirlo con la sua presenza e la sua scorta. */
 export const queryRigaAcquisto = z.object({ sede: z.string().min(1).max(300).optional() }).strict();
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });

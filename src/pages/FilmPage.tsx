@@ -16,6 +16,7 @@ import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { opzioniDaNomi } from '../utils/selettore';
 import { getFilm, impostaProgressoFilm } from '../services/api';
+import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 import { useCarica } from '../hooks/useCarica';
 import { useCodaProgresso } from '../hooks/useCodaProgresso';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -163,8 +164,12 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
         <TesseraKpi valore={`${d.sessioniCompletamentoFatte}/${d.sessioniObiettivo}`} segno="sessioni" etichetta="sessioni obiettivo" />
         <TesseraKpi valore={d.visioniRegistrate} segno="visioni" etichetta="visioni registrate" />
       </> }}
-      avvisi={partitaId && <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
-        dettaglio="Al cinema prima visione e successive possono valere diverso: l’avviso dice quanto." />}
+      avvisi={partitaId && <>
+        <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
+          dettaglio="Al cinema prima visione e successive possono valere diverso: l’avviso dice quanto." />
+        {/* Ondata 5 (lotto F-bis): «Anima da cineasta» letto, come promemoria (la guida non dice di quanto aumentano i punti) */}
+        <PromemoriaLibri promemoria={d.promemoria} className="prosa-misurata" />
+      </>}
       filtri={{ etichetta: 'Filtri film e DVD', contenuto: <>
         <div className="filtri-articoli__riga">
           <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca titolo o effetto…" />

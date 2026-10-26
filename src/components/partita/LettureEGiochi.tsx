@@ -26,11 +26,14 @@ import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
 import { bloccata, motivoBlocco } from '../../utils/letture';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
 
 const GRUPPI: Gruppo[] = ['libri', 'film', 'videogiochi'];
 const CHIAVE_CATEGORIA = 'p5r.letture.categoria';
+/** Il libro che raddoppia la resa della lettura (non tocca sé stesso), come in `LibriPage`. */
+const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
 
 /** L'ultima categoria scelta su questo dispositivo (libri se non c'è o la memoria non risponde). */
 function categoriaRicordata(): Gruppo {
@@ -52,6 +55,8 @@ interface Voce {
   /** Non ancora disponibile nella partita: il «+» resta spento e il motivo sta nel titolo. */
   bloccata: boolean;
   motivo: string;
+  /** Quanto muovono − e +: 2 per un libro quando «Lettura rapida» è letto (come nella Guida → Libri), altrimenti 1. */
+  passo: number;
 }
 
 const ETICHETTA: Record<Gruppo, { titolo: string; categoria: 'libri' | 'film' | 'minigiochi'; unita: string; percorso: string }> = {
@@ -78,8 +83,8 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
         </span>
       </span>
       <span className="flex shrink-0 gap-1">
-        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || v.progresso === 0} onClick={() => onCambia(v, v.progresso - 1)} aria-label={`Togli a ${v.nome}`}>−</button>
-        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || (!v.senzaTetto && v.progresso >= v.totale) || v.bloccata} title={v.bloccata ? `Non ancora: ${v.motivo}` : undefined} onClick={() => onCambia(v, v.progresso + 1)} aria-label={`Aggiungi a ${v.nome}`}>+</button>
+        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || v.progresso === 0} onClick={() => onCambia(v, Math.max(0, v.progresso - v.passo))} aria-label={`Togli a ${v.nome}`}>−</button>
+        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || (!v.senzaTetto && v.progresso >= v.totale) || v.bloccata} title={v.bloccata ? `Non ancora: ${v.motivo}` : undefined} onClick={() => onCambia(v, v.senzaTetto ? v.progresso + v.passo : Math.min(v.totale, v.progresso + v.passo))} aria-label={`Aggiungi a ${v.nome}`}>+</button>
       </span>
     </li>
   );
@@ -101,8 +106,9 @@ function Sezione({ gruppo, voci, occupati, visibile, onCambia, promemoria = [] }
         <span className="chip testo-12">{fatti.length} di {voci.length}</span>
         <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" to={e.percorso} />
       </div>
-      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano il gruppo (Anima da cineasta per i film), solo se ce ne sono */}
-      {promemoria.map((p) => <p key={p} className="m-0 testo-12 text-text-muted text-pretty">Dai libri letti: {p}</p>)}
+      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano il gruppo (Lettura rapida e Comprendere il cuore per i libri,
+          Anima da cineasta per i film, Segreti di gioco per i videogiochi), solo se ce ne sono */}
+      <PromemoriaLibri promemoria={promemoria} compatto />
       {/* da 1024 px la testata sta ferma e scorre solo questo corpo (area interna, barra visibile); sotto scorre la pagina */}
       <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
       {daFare.length === 0
@@ -146,15 +152,22 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
     try { localStorage.setItem(CHIAVE_CATEGORIA, g); } catch { /* memoria del browser non disponibile: si ricorda solo per questa visita */ }
   };
 
-  /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. */
-  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
+  /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. Ondata 5 (lotto F-bis): con «Lettura rapida» letto un pomeriggio vale due
+   *  sessioni degli altri libri, come nella Guida → Libri (`LibriPage`): − e + muovono di due. */
+  const letturaRapida = libri.dati?.letturaRapida ?? false;
+  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita),
+    passo: letturaRapida && l.chiave !== CHIAVE_LETTURA_RAPIDA ? 2 : 1 });
   /** Un film come `Voce`: senza tetto quando si vede al cinema. */
-  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita) });
+  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita), passo: 1 });
   /** Un videogioco come `Voce`: round sul totale. */
-  const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita) });
+  const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita), passo: 1 });
 
   /** La versione aggiornata qui della voce, se c'è; altrimenti quella caricata. */
-  const conToppa = (v: Voce): Voce => toccate[v.chiave] ?? v;
+  const conToppa = (v: Voce): Voce => {
+    const t = toccate[v.chiave];
+    // il passo è quello di adesso (Lettura rapida può essere stata finita dopo la toppa)
+    return t ? { ...t, passo: v.passo } : v;
+  };
   const locali: Record<Gruppo, Voce[]> = {
     libri: (libri.dati?.libri ?? []).map(daLibro).map(conToppa),
     film: (film.dati?.film ?? []).map(daFilm).map(conToppa),
@@ -176,6 +189,8 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
       setToccate((t) => ({ ...t, [agg.chiave]: agg }));
       // il conseguimento dà le sue Doti: si segnano a mano, l'avviso le ricorda
       avvisaDotiDaSegnare(esito.daSegnare, v.nome);
+      // Ondata 5 (lotto F-bis): un libro finito (o riaperto) cambia i promemoria dei libri letti nei tre gruppi: si rileggono, con la toppa sopra
+      if (gruppo === 'libri' && agg.fatto !== v.fatto) { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {
@@ -183,6 +198,11 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
     }
   };
 
+  // Ondata 5 (lotto F-bis): nei libri, «Lettura rapida» (dal suo segno, un solo punto) e le capacità dei libri letti senza un'attività dell'app
+  const promemoriaLibri = [
+    ...(letturaRapida ? ['Lettura rapida: un pomeriggio di lettura vale doppio, quindi − e + muovono di due sessioni (le sessioni già lette restano quelle)'] : []),
+    ...(libri.dati?.promemoria ?? []),
+  ];
   const tutte = [...locali.libri, ...locali.film, ...locali.videogiochi];
   const totali = { fatti: tutte.filter((v) => v.fatto).length, tutti: tutte.length };
 
@@ -206,7 +226,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
         </div>
         <div className="flex flex-col gap-3 lg:grid lg:min-h-[240px] lg:flex-1 lg:grid-cols-3">
           {GRUPPI.map((g) => <Sezione key={g} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)}
-            promemoria={g === 'film' ? film.dati?.promemoria ?? [] : []} />)}
+            promemoria={g === 'libri' ? promemoriaLibri : (g === 'film' ? film.dati?.promemoria : giochi.dati?.promemoria) ?? []} />)}
         </div>
       </div>
     </PageState>

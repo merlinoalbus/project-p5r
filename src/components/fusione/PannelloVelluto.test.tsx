@@ -69,7 +69,9 @@ describe('ForcaIsolamento', () => {
   it('Forca: sacrifici ordinati per moltiplicatore con rango, Tesoro, stesso arcano e penalità; Isolamento: giorni, incenso e tier', async () => {
     getSuggerimentoIsolamento.mockResolvedValue({ elemento: 'fire', elementoNome: 'Fuoco', tier: 'Evade', skill: { id: 5, nome: 'Evade Fire', nomeIt: 'Schiva fuoco' } });
     // Ondata 5 (lotto F-bis): l'incenso è un oggetto del catalogo, con il prezzo dell'offerta e le copie della partita
-    getIncensiIsolamento.mockResolvedValue([{ oggetto: 'materiale/incenso-fr', nome: 'Incenso FR', incenso: 'base', punti: 1, statistiche: ['forza'], dove: ['4000 ¥ · Mantra Ganda'], disponibili: 1 }]);
+    // (rilievo R3: con le condizioni dell'offerta; con una copia è la scelta di partenza)
+    getIncensiIsolamento.mockResolvedValue([{ oggetto: 'materiale/incenso-fr', nome: 'Incenso FR', incenso: 'base', punti: 1, statistiche: ['forza'], dove: ['4.000 ¥ · Mantra Ganda'],
+      offerte: [{ testo: '4.000 ¥ · Mantra Ganda', condizioniTesto: 'Gemelle al rango 3', acquistabile: true }], disponibili: 1 }]);
     getPossedute.mockResolvedValue([
       posseduta(11, 1, 'Arsène', 'Fool', 'Matto', 20),
       posseduta(12, 2, 'Pixie', 'Lovers', 'Amanti', 30),

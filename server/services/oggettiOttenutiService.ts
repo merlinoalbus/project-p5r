@@ -15,7 +15,8 @@
 //   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, regola scritta dalla
 //     migrazione 306): letti dallo stato, come le Richieste, mai copiati.
 // Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`, utente 055:
-// turni con un esito che consuma e incensi dell'Isolamento), con la loro origine. Sola lettura: nessuna scrittura, anche nel rilascio.
+// turni con un esito che consuma e incensi dell'Isolamento), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
+// cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -25,6 +26,7 @@ import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { OggettiOttenutiDto, OggettoConsumatoDto, OggettoOttenutoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti } from './doniConfidenti.js';
 import { consumiDellaPartita } from './consumiOggettiService.js';
+import { dettaglioCopie } from './copieOggetti.js';
 
 /** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
 export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
@@ -69,13 +71,20 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
     if (t) t.quantita += r.quantita;
     else totali.set(r.catalogoChiave, { catalogoChiave: r.catalogoChiave, nome: r.nome, categoria: r.categoria, quantita: r.quantita, consumate: 0 });
   }
-  // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato senza copie note nella partita compare comunque nei totali
-  const consumi: OggettoConsumatoDto[] = consumiDellaPartita(partitaId).map((c) => ({ catalogoChiave: c.catalogo, quantita: c.quantita,
+  // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
+  // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
+  const consumi: OggettoConsumatoDto[] = consumiDellaPartita(partitaId).map((c) => ({ id: c.id, catalogoChiave: c.catalogo, quantita: c.quantita, annullabile: c.fonte === 'isolamento',
     origine: c.fonte === 'isolamento' ? 'Isolamento nella Stanza di Velluto' : `${nomeAttivita(c.attivita!)} · ${nomeEsito(c.attivita!, c.esito!)}` }));
   for (const c of consumi) {
     const t = totali.get(c.catalogoChiave);
     if (t) t.consumate += c.quantita;
     else { const s = scheda(c.catalogoChiave); totali.set(c.catalogoChiave, { catalogoChiave: c.catalogoChiave, nome: s.nome, categoria: s.categoria, quantita: 0, consumate: c.quantita }); }
+  }
+  // Rilievo della revisione (R2): le cifre di ogni oggetto vengono dalla stessa lettura delle copie della scelta dell'esito e di «Regala»
+  // (`dettaglioCopie`): comprate, regalate, cedute negli scambi e quelle che restano; mai un «×0» accanto a una copia usata che si era comprata
+  for (const t of totali.values()) {
+    const d = dettaglioCopie(partitaId, t.catalogoChiave);
+    t.comprate = d.comprate; t.regalate = d.regalate; t.cedute = d.cedute; t.disponibili = d.disponibili;
   }
   return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')), consumi };
 }

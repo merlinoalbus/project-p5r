@@ -44,7 +44,7 @@ import { fasciaDellaPartita, prezzoDellArticolo } from './prezziArticoli.js';
 import { segnaTrofeoDelTurno, togliTrofeoDelTurno } from './trofeiDegliEsitiService.js';
 import { segnaOggettiDelTurno, togliOggettiDelTurno } from './oggettiDegliEsitiService.js';
 import { segnaConsumiDelTurno, togliConsumiDelTurno } from './consumiOggettiService.js';
-import { promemoriaLibriPerFilm } from './modificatoriLibri.js';
+import { promemoriaLibriPerAttivita, promemoriaLibriPerFilm, promemoriaLibriPerVideogiochi, promemoriaLibriSenzaAttivita } from './modificatoriLibri.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -111,6 +111,9 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const esiti = !fonteConfidente && !r.pesca_regola_chiave ? leggiEsitiAttivita(r.esiti_json) : null;
   const dto = {
     esiti: esiti ? esitiDto(esiti, st, r.chiave) : null,
+    // Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano l'attività, anche senza esiti (biliardo, freccette,
+    // Fioraio Rafflesia, pesca); mai per una fonte Confidente, che rimanda alla sua scheda
+    promemoria: st && !fonteConfidente ? promemoriaLibriPerAttivita(st.letture, { chiave: r.chiave, tipo: r.tipo }) : [],
     // R10-27/3: lo stato della partita nella scheda, come nelle schede di Confidente e Palazzo (volte svolte, dal contatore unico)
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
@@ -248,7 +251,9 @@ export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const sedi = sediAttivita(); const negozi = articoliCollegati('videogiochi');
   const catalogo = oggettiPerFonte('videogioco');
   const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' AND nascosto = 0 ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, sedi, negozi, st, catalogo));
-  return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0), noteCategorie: noteCategorieAttivita() };
+  return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0), noteCategorie: noteCategorieAttivita(),
+    // Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano i videogiochi («Segreti di gioco»)
+    promemoria: partitaId === undefined ? [] : promemoriaLibriPerVideogiochi(stato.fatti) };
 }
 
 /** Le posizioni di ogni film (`film_posizione`), raggruppate per film nell'ordine dichiarato. */
@@ -295,6 +300,8 @@ export function libriTutti(partitaId?: number): LibriDto {
     sessioniFatte: libri.reduce((n, l) => n + l.progresso, 0),
     sessioniTotali: libri.reduce((n, l) => n + l.totaleSessioni, 0),
     letturaRapida: haLetturaRapida(stato),
+    // Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti senza un'attività dell'app (Lettura rapida la dice `letturaRapida`)
+    promemoria: partitaId === undefined ? [] : promemoriaLibriSenzaAttivita(stato.fatti),
   };
 }
 

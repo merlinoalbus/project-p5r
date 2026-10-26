@@ -47,6 +47,7 @@ import { TestoNote } from '../components/shared/TestoNote';
 import { simboliNote } from '../../shared/note';
 import { fasceConPrezzoDiverso } from '../../shared/catalogo';
 import { fraseConsumaEsito, fraseOggettiEsito } from '../../shared/esitiAttivita';
+import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -85,8 +86,6 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
       <p className="m-0 text-text-secondary text-pretty">{esiti.modo === 'scelta'
         ? `Quando spunti la voce del Diario (o premi + in Partita → Progressi) scegli l’esito che hai ottenuto${cosaSegna ? `: ${cosaSegna}` : ''}.`
         : 'L’esito vale da solo secondo il giorno: spuntando la voce (o premendo +) l’app registra quello giusto.'}</p>
-      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti nella partita che riguardano l'attività, solo se ce ne sono */}
-      {(esiti.promemoria ?? []).map((p) => <p key={p} className="m-0 text-text-muted text-pretty">Dai libri letti: {p}</p>)}
       {gruppi.map((g) => (
         <div key={g.gruppo ?? '-'} className="flex min-w-0 flex-col gap-0.5">
           {g.gruppo && <span className="font-semibold">{g.gruppo}{g.esiti[0]?.articolo ? ` · ${testoPrezzoEsito(g.esiti[0].articolo)}` : ''}</span>}
@@ -156,6 +155,9 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}
         {a.quiz && <PulsanteGuidaQuiz voce={{ attivita: a.chiave, nome: a.nome, quiz: a.quiz, oggi: giorno !== null && eGiornoDelQuiz(a.quiz, giorno) }} />}
       </div>
+      {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti nella partita che riguardano l'attività, con o senza esiti (biliardo, freccette,
+          fabbricazione…), visibili anche a scheda chiusa; niente se non ce ne sono */}
+      <PromemoriaLibri promemoria={a.promemoria} compatto />
       {aperta && (
         <div className="flex flex-col gap-1">
           {a.dettagli && <div className="flex min-w-0 flex-col gap-1">

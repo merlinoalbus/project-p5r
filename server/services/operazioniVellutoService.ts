@@ -21,6 +21,9 @@ import { analisiEredita } from './fusione/eredita.js';
 import { CHIAVI_STATISTICHE, type Statistiche } from '../../shared/statistiche.js';
 import { registraConsumoIsolamento } from './consumiOggettiService.js';
 import { copieDellOggetto } from './copieOggetti.js';
+import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita } from './disponibilitaService.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { FORCA_INCIDENTE_BONUS, INCENSI, INCENSI_DEL_CATALOGO, bonusLivelliFusione, guadagnoIncenso, moltiplicatoreForca, puntiAllarmeFusione, tierResistenza } from '../../shared/bonusVelluto.js';
 import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, IncensoIsolamentoDto, PersonaPossedutaDto, SkillRiassuntoDto } from '../../shared/types.js';
 
@@ -274,19 +277,32 @@ export interface DatiIsolamento {
 export function incensiDellaPartita(partitaId: number): IncensoIsolamentoDto[] {
   verificaPartita(partitaId);
   const scheda = prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ? AND nascosto = 0').pluck();
-  const offerte = prepared(`SELECT a.prezzo, a.costo_json, n.nome AS negozio FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+  const offerte = prepared(`SELECT a.prezzo, a.costo_json, a.condizioni_json, n.nome AS negozio, n.condizioni_json AS condizioni_negozio FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
     WHERE a.catalogo_chiave = ? AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY a.prezzo IS NULL, a.prezzo, n.ordine`);
+  // Rilievo della revisione (R3): quando l'incenso si compra lo dicono le condizioni dell'offerta e del negozio (Gemelle al rango 3, dal 1
+  // ottobre, un Dedalo aperto), valutate nella partita: la scelta dice che cosa si può già comprare, come diceva la nota tolta da `INCENSI`
+  const st = statoDisponibilitaPartita(partitaId);
+  const nomi = nomiCondizioniMemo();
   const out: IncensoIsolamentoDto[] = [];
   for (const x of INCENSI_DEL_CATALOGO) {
     const nome = scheda.get(x.oggetto) as string | undefined;
     const famiglia = INCENSI.find((i) => i.chiave === x.incenso);
     if (!nome || !famiglia) continue;
-    const prezzi = (offerte.all(x.oggetto) as Array<{ prezzo: number | null; costo_json: string | null; negozio: string }>).map((o) => {
+    const elenco = (offerte.all(x.oggetto) as Array<{ prezzo: number | null; costo_json: string | null; condizioni_json: string | null; negozio: string; condizioni_negozio: string | null }>).map((o) => {
       let costo: string | null = o.prezzo != null && o.prezzo > 0 ? `${o.prezzo.toLocaleString('it-IT')} ¥` : null;
       if (!costo && o.costo_json) { try { const c = JSON.parse(o.costo_json) as { tipo?: unknown; importo?: unknown }; if (c.tipo === 'fiori' && typeof c.importo === 'number') costo = `${c.importo} fiori`; } catch { costo = null; } }
-      return costo ? `${costo} · ${o.negozio}` : o.negozio;
+      const testo = costo ? `${costo} · ${o.negozio}` : o.negozio;
+      // le condizioni del negozio e dell'offerta, una volta sola (Mantra Ganda chiede il rango 3 delle Gemelle in tutte e due)
+      const viste = new Set<string>();
+      const condizioni = [...leggiCondizioniSalvate(o.condizioni_negozio), ...leggiCondizioniSalvate(o.condizioni_json)]
+        .filter((c) => { const k = JSON.stringify(c); if (viste.has(k)) return false; viste.add(k); return true; })
+        .map((c) => condizioneConTesto(c, nomi));
+      const frasi = condizioni.map((c) => ('testo' in c ? c.testo : null)).filter((s): s is string => !!s);
+      const stato = condizioni.length ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st).stato : 'disponibile';
+      return { testo, condizioniTesto: frasi.length ? frasi.join(' · ') : null, acquistabile: stato === 'disponibile' ? true : stato === 'bloccato' ? false : null };
     });
-    out.push({ oggetto: x.oggetto, nome, incenso: famiglia.chiave, punti: famiglia.punti, statistiche: [...x.statistiche], dove: prezzi, disponibili: copieDellOggetto(partitaId, x.oggetto).disponibili });
+    out.push({ oggetto: x.oggetto, nome, incenso: famiglia.chiave, punti: famiglia.punti, statistiche: [...x.statistiche], dove: elenco.map((o) => o.testo), offerte: elenco,
+      disponibili: copieDellOggetto(partitaId, x.oggetto).disponibili });
   }
   return out;
 }

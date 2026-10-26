@@ -1003,15 +1003,19 @@ export interface EsitoIsolamentoDto {
 }
 
 /** Ondata 5 (lotto F-bis): un incenso del catalogo per l'Isolamento (`GET /api/partite/:id/velluto/incensi`): la famiglia con i punti per
- *  applicazione, le statistiche che alza (quelle del suo nome), dove si compra con il prezzo dell'offerta (vuoto per un tesoro dei Palazzi) e
- *  le copie che la partita ha adesso. */
+ *  applicazione, le statistiche che alza (quelle del suo nome), dove si compra con il prezzo dell'offerta (vuoto per un tesoro dei Palazzi),
+ *  quando si compra (le condizioni dell'offerta, valutate nella partita) e le copie che la partita ha adesso. */
 export interface IncensoIsolamentoDto {
   oggetto: string;
   nome: string;
   incenso: string;
   punti: number;
   statistiche: Array<'forza' | 'magia' | 'resistenza' | 'agilita' | 'fortuna'>;
+  /** «4.000 ¥ · Mantra Ganda», «80 fiori · Jose»: una frase per offerta (la stessa di `offerte[].testo`). */
   dove: string[];
+  /** Rilievo della revisione (R3): ogni offerta con le sue condizioni in parole («Gemelle al rango 3 · dal 1 ottobre», null se nessuna) e se
+   *  nella partita si può già comprare (null se non si sa: una condizione da verificare). Vuoto per un tesoro dei Palazzi. */
+  offerte?: Array<{ testo: string; condizioniTesto: string | null; acquistabile: boolean | null }>;
   disponibili: number;
 }
 
@@ -2208,6 +2212,9 @@ export interface AttivitaDto {
   disponibilita: DisponibilitaDto | null;
   /** L13: gli esiti che l'attività dichiara (`esiti_json`), con la disponibilità nella partita; null se non ne dichiara. */
   esiti?: EsitiAttivitaDto | null;
+  /** Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano l'attività, anche senza esiti («Il mago del biliardo:
+   *  sblocca il tiro masse in Biliardo»). Un promemoria senza importi; vuoto o assente se nessuno. */
+  promemoria?: string[];
 }
 
 export interface LibroDto {
@@ -2263,6 +2270,9 @@ export interface LibriDto {
    *  sessioni (arrotondate per eccesso). Va detto a chi legge: senza, i totali calerebbero da soli
    *  fra una visita e l'altra e sembrerebbe un errore dell'app. */
   letturaRapida: boolean;
+  /** Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che non valgono in un'attività dell'app («Comprendere il cuore», in
+   *  combattimento). «Lettura rapida» la dice `letturaRapida`. Un promemoria; vuoto o assente se nessuno. */
+  promemoria?: string[];
 }
 
 export interface FilmDto {
@@ -2338,6 +2348,9 @@ export interface VideogiochiDto {
   roundObiettivo: number;
   /** Le note comuni alle categorie (R9-14/1): `videogioco` è la frase comune ai sette giochi, da mostrare una volta sola in testa all'elenco. */
   noteCategorie?: Record<string, string>;
+  /** Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano i videogiochi («Segreti di gioco»). Un promemoria;
+   *  vuoto o assente se nessuno. */
+  promemoria?: string[];
 }
 
 export type TipoLettura = 'libro' | 'film' | 'videogioco';
@@ -2515,13 +2528,22 @@ export interface OggettoConsumatoDto {
   quantita: number;
   /** «Concimare la pianta · Con i Bionutrienti» per un turno, «Isolamento» per un incenso bruciato. */
   origine: string;
+  /** La riga del registro dei consumi; assente nelle risposte precedenti. */
+  id?: number;
+  /** Vero per un incenso bruciato in un Isolamento: l'uso si annulla da qui (`DELETE …/consumi/:id`). Un turno si annulla togliendo il turno. */
+  annullabile?: boolean;
 }
 
 /** L13: gli oggetti ottenuti nella partita: le righe per origine e il totale per oggetto (le copie dello stesso oggetto si sommano).
- *  Ondata 5 (lotto F-bis): `consumate` nel totale sono le copie usate (turni con un esito che consuma, Isolamento), con le righe in `consumi`. */
+ *  Ondata 5 (lotto F-bis): `consumate` nel totale sono le copie usate (turni con un esito che consuma, Isolamento), con le righe in `consumi`.
+ *  Le altre cifre del totale vengono dalla stessa lettura delle copie della scelta dell'esito e della finestra «Regala» (`dettaglioCopie`):
+ *  `quantita` le copie ricevute (le righe), `comprate` quelle comprate (anche dentro un set), `regalate`, `cedute` negli scambi e `disponibili`
+ *  quelle che restano. Un oggetto usato che la partita ha solo comprato compare con le sue copie comprate. Assenti nelle risposte
+ *  precedenti. */
 export interface OggettiOttenutiDto {
   righe: OggettoOttenutoDto[];
-  totali: Array<{ catalogoChiave: string; nome: string; categoria: string | null; quantita: number; consumate: number }>;
+  totali: Array<{ catalogoChiave: string; nome: string; categoria: string | null; quantita: number; consumate: number;
+    comprate?: number; regalate?: number; cedute?: number; disponibili?: number }>;
   consumi: OggettoConsumatoDto[];
 }
 
@@ -3562,7 +3584,9 @@ export interface ProgressiPartitaDto {
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[];
     /** L13: gli esiti dichiarati dall'attività con la disponibilità nella partita: il + apre la scelta dell'esito (null se non ne dichiara). */
-    esiti: EsitiAttivitaDto | null }>;
+    esiti: EsitiAttivitaDto | null;
+    /** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività (anche senza esiti); assente nelle risposte precedenti. */
+    promemoria?: string[] }>;
   /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   /** I negozi con programma punti manuale. */

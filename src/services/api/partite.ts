@@ -147,6 +147,8 @@ export const getRiepilogoRichieste = (id: number): Promise<RiepilogoRichiesteDto
 
 /** L13: gli oggetti del catalogo ottenuti nella partita (voci con l'effetto «oggetto ricevuto» e Richieste completate). */
 export const getOggettiOttenuti = (id: number): Promise<OggettiOttenutiDto> => apiGet(`/partite/${id}/oggetti-ottenuti`);
+/** Ondata 5 (lotto F-bis): annulla l'uso di un incenso in un Isolamento (la copia torna); risponde con gli oggetti ottenuti aggiornati. */
+export const annullaConsumoIsolamento = (id: number, consumoId: number): Promise<OggettiOttenutiDto> => apiDelete(`/partite/${id}/consumi/${consumoId}`);
 
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera); 400 se la guida non ne dichiara il totale. */
 export const impostaTimbri = (id: number, area: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { area, raccolti });

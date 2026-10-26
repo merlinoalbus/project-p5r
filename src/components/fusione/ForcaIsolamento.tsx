@@ -11,7 +11,7 @@ import { NOMI_STATISTICHE, type ChiaveStatistica } from '../../../shared/statist
 import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
-import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
+import type { IncensoIsolamentoDto, PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 import { SelettorePosseduta } from './SelettorePosseduta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -95,19 +95,43 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
   );
 }
 
+/** I gruppi della scelta dell'incenso, nell'ordine: prima quelli che la partita ha, poi quelli che può comprare adesso, poi gli altri. */
+const GRUPPI_INCENSO = ['Ne hai', 'In vendita adesso', 'In vendita, da verificare', 'Non ancora in vendita', 'Tesori dei Palazzi'] as const;
+type GruppoIncenso = (typeof GRUPPI_INCENSO)[number];
+
+/** Rilievo della revisione (R3): dove sta un incenso nella partita, e la frase che lo dice nella scelta (copie, prezzo, da quando si compra). */
+function statoIncenso(i: IncensoIsolamentoDto): { gruppo: GruppoIncenso; dettaglio: string } {
+  const offerte = i.offerte ?? i.dove.map((testo) => ({ testo, condizioniTesto: null, acquistabile: null }));
+  const ora = offerte.find((o) => o.acquistabile === true);
+  const forse = offerte.find((o) => o.acquistabile === null);
+  if (i.disponibili > 0) return { gruppo: 'Ne hai', dettaglio: [`${i.disponibili} ${i.disponibili === 1 ? 'copia' : 'copie'}`, (ora ?? offerte[0])?.testo].filter(Boolean).join(' · ') };
+  if (offerte.length === 0) return { gruppo: 'Tesori dei Palazzi', dettaglio: 'si trova nei Palazzi' };
+  if (ora) return { gruppo: 'In vendita adesso', dettaglio: ora.testo };
+  if (forse) return { gruppo: 'In vendita, da verificare', dettaglio: [forse.testo, forse.condizioniTesto].filter(Boolean).join(' · ') };
+  return { gruppo: 'Non ancora in vendita', dettaglio: [offerte[0]!.testo, offerte[0]!.condizioniTesto].filter(Boolean).join(' · ') };
+}
+
 /**
  * Isolamento: Persona (scorta), incenso, giorni → punti stimati e resistenza ottenuta. Ondata 5 (lotto F-bis): l'incenso è un oggetto del catalogo
  * (`GET …/velluto/incensi`): le statistiche sono quelle del suo nome, il prezzo è quello dell'offerta (Mantra Ganda in yen, Jose in fiori) e
- * registrando l'Isolamento una copia esce da quelle possedute; le copie che la partita ha si vedono nella scelta.
+ * registrando l'Isolamento una copia esce da quelle possedute; le copie che la partita ha si vedono nella scelta. Rilievi della revisione (R3,
+ * R4): la scelta dice da quando ogni incenso si compra e se adesso si può (condizioni dell'offerta valutate nella partita), mette prima quelli
+ * che la partita ha e parte dal primo di questi (mai da uno che non ha); senza incensi, o senza catalogo, si registra «Senza incenso» (solo la
+ * skill di resistenza), e il caricamento e l'errore si dicono.
  */
 function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: PersonaPossedutaDto[]; velluto: VellutoDto | null; partitaId: number; onScortaCambiata: () => void }) {
   const [possedutaId, setPossedutaId] = useState<number | null>(null);
   const incensi = useCarica(() => getIncensiIsolamento(partitaId), [partitaId]);
+  // null: nessuna scelta fatta (vale il primo incenso che la partita ha, altrimenti «Senza incenso»); '': «Senza incenso» scelto
   const [oggettoScelto, setOggettoScelto] = useState<string | null>(null);
   const [giorni, setGiorni] = useState(4);
   const persona = scorta.find((p) => p.id === possedutaId) ?? null;
-  const elenco = incensi.dati ?? [];
-  const scelto = elenco.find((i) => i.oggetto === oggettoScelto) ?? elenco[0] ?? null;
+  const elenco = useMemo(() => (incensi.dati ?? []).map((i) => ({ i, ...statoIncenso(i) }))
+    .sort((a, b) => GRUPPI_INCENSO.indexOf(a.gruppo) - GRUPPI_INCENSO.indexOf(b.gruppo)), [incensi.dati]);
+  const predefinito = elenco.find((x) => x.gruppo === 'Ne hai')?.i.oggetto ?? '';
+  const sceltaChiave = oggettoScelto ?? predefinito;
+  const sceltoVoce = elenco.find((x) => x.i.oggetto === sceltaChiave) ?? null;
+  const scelto = sceltoVoce?.i ?? null;
   const incenso = scelto ? INCENSI.find((i) => i.chiave === scelto.incenso) ?? null : null;
   const allarme = velluto?.allarmeAttivo ?? false;
   const rangoGemelle = velluto?.gemelle.rango ?? 0;
@@ -120,11 +144,15 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
    * fine notifica i punti guadagnati e l'eventuale skill appresa, fa ricaricare la scorta e le copie degli incensi, altrimenti notifica l'errore.
    */
   const registra = async () => {
-    if (!persona || !scelto) return;
+    if (!persona) return;
     setOccupato(true);
     try {
-      const esito = await eseguiIsolamento(partitaId, { possedutaId: persona.id, oggetto: scelto.oggetto, giorni });
-      notifica('success', `${persona.nomeIt}: +${esito.guadagno.puntiPerStatistica} a ${statScelte.map((k) => NOMI_STATISTICHE[k]).join(', ')}${esito.skillAppresa ? `, appresa ${esito.skillAppresa.nomeIt}` : ''}; usata una copia di ${scelto.nome}.`);
+      // senza incenso il server registra solo la skill di resistenza (nessuna statistica, nessuna copia usata)
+      const esito = await eseguiIsolamento(partitaId, scelto ? { possedutaId: persona.id, oggetto: scelto.oggetto, giorni } : { possedutaId: persona.id, giorni });
+      const skill = esito.skillAppresa ? `appresa ${esito.skillAppresa.nomeIt}` : 'nessuna skill di resistenza';
+      notifica('success', scelto
+        ? `${persona.nomeIt}: +${esito.guadagno.puntiPerStatistica} a ${statScelte.map((k) => NOMI_STATISTICHE[k]).join(', ')}, ${skill}; usata una copia di ${scelto.nome}.`
+        : `${persona.nomeIt}: Isolamento senza incenso, ${skill}.`);
       onScortaCambiata();
       void incensi.ricarica();
     } catch (err) {
@@ -141,8 +169,8 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
         <div className="form-label">
-          <Selettore etichettaSopra etichetta="Incenso" valore={scelto?.oggetto ?? ''} disabilitato={incensi.caricamento && !incensi.dati}
-            opzioni={elenco.map((i) => ({ chiave: i.oggetto, nome: i.nome, dettaglio: [i.dove[0] ?? 'tesoro dei Palazzi', i.disponibili > 0 ? `${i.disponibili} ${i.disponibili === 1 ? 'copia' : 'copie'}` : null].filter(Boolean).join(' · ') }))}
+          <Selettore etichettaSopra etichetta="Incenso" valore={sceltaChiave} disabilitato={incensi.caricamento && !incensi.dati} vuoto="Senza incenso"
+            opzioni={elenco.map((x) => ({ chiave: x.i.oggetto, nome: x.i.nome, gruppo: x.gruppo, dettaglio: x.dettaglio }))}
             onCambia={setOggettoScelto} />
         </div>
         <label className="form-label">Giorni
@@ -151,14 +179,31 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       </div>
       <div className="testo-13 flex flex-col gap-1">
         <div>Durata dell'addestramento al rango {rangoGemelle} delle Gemelle: <strong>{giorniIsolamento(rangoGemelle)} giorni</strong>{rangoGemelle < 3 ? ' (una volta sbloccato)' : ''}.</div>
-        {incensi.errore && <div role="alert" className="text-error-testo">Gli incensi non si sono caricati: {incensi.errore}</div>}
+        {/* Rilievo R4: caricamento, errore ed elenco vuoto si dicono; senza incensi si registra «Senza incenso» */}
+        {incensi.caricamento && !incensi.dati && <div role="status" className="text-text-muted">Carico gli incensi del catalogo…</div>}
+        {incensi.errore && <div role="alert" className="text-error-testo">Gli incensi non si sono caricati: {incensi.errore}. Puoi registrare l’Isolamento senza incenso.</div>}
+        {incensi.dati && elenco.length === 0 && <div className="text-text-muted">Il catalogo non ha incensi da bruciare: l’Isolamento si registra senza incenso (solo la skill di resistenza).</div>}
+        {!scelto && incensi.dati && elenco.length > 0 && (
+          <div className="text-text-muted">Senza incenso nessuna statistica cresce: la Persona impara solo la skill di resistenza.{predefinito === '' ? ' Nella partita non risulta nessun incenso: sceglilo dall’elenco se l’hai.' : ''}</div>
+        )}
         {scelto && incenso && (
           <div>«{scelto.nome}» per {giorni} giorni{allarme ? ' con Allarme' : ''}: <strong className="tabular-nums">{guadagno.applicazioni}</strong> applicazioni → <strong className="tabular-nums">+{guadagno.puntiPerStatistica}</strong> per statistica interessata ({incenso.statistiche === 1 ? 'una statistica' : `${incenso.statistiche} statistiche`}, totale +{guadagno.totale}).
-            {scelto.dove.length > 0 && <span className="text-text-muted"> Si compra: {scelto.dove.join('; ')}.</span>}
             {/* le copie si dicono solo se la partita ne ha, o se non ne ha e l'Isolamento ne userebbe una che l'app non conosce */}
-            <span className={scelto.disponibili > 0 ? 'text-text-muted' : 'text-warning'}> {scelto.disponibili > 0 ? `Ne hai ${scelto.disponibili}: registrando ne usi una.` : 'Nella partita non risulta nessuna copia: registrando, l’uso si segna comunque.'}</span>
+            <span className={scelto.disponibili > 0 ? 'text-text-muted' : 'text-warning'}> {scelto.disponibili > 0 ? `Ne hai ${scelto.disponibili}: registrando ne usi una.` : 'Nella partita non risulta nessuna copia: registrando, l’uso si segna comunque (si annulla dagli Oggetti ottenuti).'}</span>
           </div>
         )}
+        {/* Rilievo R3: dove e da quando si compra, con le condizioni dell'offerta valutate nella partita */}
+        {scelto && (scelto.offerte?.length ?? 0) > 0 && (
+          <ul className="m-0 flex list-none flex-col gap-0.5 p-0 testo-12 text-text-muted" aria-label={`Dove si compra ${scelto.nome}`}>
+            {scelto.offerte!.map((o, i) => (
+              <li key={`${o.testo}:${i}`} className="text-pretty">
+                Si compra: {o.testo}{o.condizioniTesto ? ` (${o.condizioniTesto})` : ''}
+                {' · '}<span className={o.acquistabile === false ? 'text-warning' : ''}>{o.acquistabile === true ? 'già in vendita' : o.acquistabile === false ? 'non ancora in vendita' : 'da verificare'}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {scelto && (scelto.offerte?.length ?? scelto.dove.length) === 0 && <div className="testo-12 text-text-muted">Non si compra: si trova nei Palazzi.</div>}
         {persona && (
           <div>
             {persona.nomeIt} (livello {persona.livello}): resistenza ottenuta di tier <strong>{tierResistenza(persona.livello).skill}</strong>
@@ -177,7 +222,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
         )}
         {persona && (
           <div className="flex items-center gap-2 flex-wrap">
-            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}</>} disabled={occupato || !scelto || rangoGemelle < 3} onClick={() => void registra()} />
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}{scelto ? '' : ' senza incenso'}</>} disabled={occupato || rangoGemelle < 3} onClick={() => void registra()} />
           </div>
         )}
       </div>

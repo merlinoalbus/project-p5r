@@ -8,13 +8,15 @@
 //   - un turno registrato con un esito che dichiara `consuma` (`attivita.esiti_json`, `shared/esitiAttivita.ts`) scrive una riga per oggetto
 //     (registrando il turno, dentro la sua transazione) e la toglie togliendolo: lo stesso percorso degli oggetti dati
 //     (`oggettiDegliEsitiService`) e del trofeo (`trofeiDegliEsitiService`);
-//   - un ciclo di Isolamento con un incenso del catalogo scrive una riga con l'evento dello storico.
+//   - un ciclo di Isolamento con un incenso del catalogo scrive una riga con l'evento dello storico; quella riga si annulla dagli «Oggetti
+//     ottenuti» (`annullaConsumoIsolamento`), perché l'Isolamento non ha un gesto che lo tolga.
 // Il consumo non chiede di avere le copie: chi gioca le ha prese in un modo che l'app può non conoscere (un'aggiunta a mano, una partita
 // iniziata prima del registro). Le copie rimaste si leggono in `copieOggetti` (mai sotto zero), e la scelta dell'esito le mostra.
 // Nessuno yen si muove da qui: il prezzo l'oggetto lo aveva già quando si è comprato.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { httpErrors } from '../utils/httpError.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 
@@ -61,9 +63,26 @@ export function copieConsumate(p: number, catalogo: string): number {
 }
 
 /** I consumi della partita, per la pagina degli oggetti: una riga per consumo, in ordine di registrazione. */
-export function consumiDellaPartita(p: number): Array<{ catalogo: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita: string | null; ordine: number | null; esito: string | null; creatoIl: string }> {
+export function consumiDellaPartita(p: number): Array<{ id: number; catalogo: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita: string | null; ordine: number | null; esito: string | null; creatoIl: string }> {
   if (!conRegistroConsumi()) return [];
-  return (prepared(`SELECT catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, creato_il FROM utente.${TABELLA} WHERE partita_id = ? ORDER BY creato_il, id`).all(p) as
-    Array<{ catalogo_chiave: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita_chiave: string | null; ordine: number | null; esito_chiave: string | null; creato_il: string }>)
-    .map((r) => ({ catalogo: r.catalogo_chiave, quantita: r.quantita, fonte: r.fonte, attivita: r.attivita_chiave, ordine: r.ordine, esito: r.esito_chiave, creatoIl: r.creato_il }));
+  return (prepared(`SELECT id, catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, creato_il FROM utente.${TABELLA} WHERE partita_id = ? ORDER BY creato_il, id`).all(p) as
+    Array<{ id: number; catalogo_chiave: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita_chiave: string | null; ordine: number | null; esito_chiave: string | null; creato_il: string }>)
+    .map((r) => ({ id: r.id, catalogo: r.catalogo_chiave, quantita: r.quantita, fonte: r.fonte, attivita: r.attivita_chiave, ordine: r.ordine, esito: r.esito_chiave, creatoIl: r.creato_il }));
+}
+
+/**
+ * Annulla l'uso di un incenso bruciato in un Isolamento (rilievo della revisione: l'uso non si poteva togliere). La copia torna fra quelle
+ * possedute; le statistiche e la skill che l'Isolamento ha dato restano, come quando si elimina la sua voce dallo storico («la modifica
+ * registrata resta valida»): si correggono nella Persona. Solo le righe dell'Isolamento: l'uso di un turno si toglie togliendo il turno, che
+ * è la sua sola fonte. 404 se la riga non c'è (o è di un'altra partita), 409 se è di un turno.
+ */
+export function annullaConsumoIsolamento(p: number, id: number): void {
+  if (!conRegistroConsumi()) throw httpErrors.notFound('consumo-non-trovato', 'Nessun uso registrato da annullare.');
+  const riga = prepared(`SELECT fonte FROM utente.${TABELLA} WHERE id = ? AND partita_id = ?`).get(id, p) as { fonte: string } | undefined;
+  if (!riga) throw httpErrors.notFound('consumo-non-trovato', `L'uso ${id} non esiste in questa partita.`);
+  if (riga.fonte !== 'isolamento') throw httpErrors.conflict('consumo-di-un-turno', 'Questo uso viene da un turno di un’attività: si annulla togliendo il turno (Partita → Progressi o il Diario).');
+  getDb().transaction(() => {
+    prepared(`DELETE FROM utente.${TABELLA} WHERE id = ? AND partita_id = ?`).run(id, p);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), p);
+  })();
 }
