@@ -25,7 +25,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { normalizzaEffettoVoce, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
+import { partiDellaPersona, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
@@ -116,7 +116,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
           if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
-          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(e) }, senzaAvanzamento: true });
+          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, nomi), motivo: motivoDelPassato(r.partita_id, e) }, senzaAvanzamento: true });
           const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
           if (aperteDopo > 0) registra(r, 'proposta');
           if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;
@@ -136,9 +136,17 @@ function contaAperte(p: number, voce: string, effetto: string, soloPassato = fal
     .pluck().get(p, `${voce}:${effetto}`) as number;
 }
 
-/** Perché l'effetto è nell'elenco, a parole: che cosa manca nella partita. */
-function motivoDelPassato(e: EffettoDiStatoVoce): string {
-  const manca = e.tipo === 'persona' ? (e.scorta ? 'la Persona non risulta sia nel Compendio Personale sia nella scorta' : 'la Persona non è nel Compendio Personale')
+/** La Persona «Compendio e scorta», a parole: esattamente la parte che manca nella partita `p`. */
+function mancaPersonaConScorta(p: number, e: Extract<EffettoDiStatoVoce, { tipo: 'persona' }>): string {
+  const { compendio, scorta } = partiDellaPersona(p, e);
+  return compendio ? 'la Persona è nel Compendio Personale ma non nella scorta'
+    : scorta ? 'la Persona è nella scorta ma non è registrata nel Compendio Personale'
+      : 'la Persona non è né nel Compendio Personale né nella scorta';
+}
+
+/** Perché l'effetto è nell'elenco, a parole: che cosa manca nella partita `p`. */
+function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
+  const manca = e.tipo === 'persona' ? (e.scorta ? mancaPersonaConScorta(p, e) : 'la Persona non è nel Compendio Personale')
     : e.tipo === 'trofeo' ? 'il trofeo non risulta ottenuto'
       : e.tipo === 'articolo' ? 'l’articolo non risulta comprato'
         : e.tipo === 'oggetto' ? 'l’oggetto non risulta ricevuto'

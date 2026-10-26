@@ -344,7 +344,7 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       continue;
     }
     if(e.tipo==='articolo'&&inAlternativa.has(c.effettoUid)){
-      esito(c.effettoUid,'non-applicato',fraseDelloStato(e),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalalo dalla pagina del negozio');
+      esito(c.effettoUid,'non-applicato',fraseDelloStato(e),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnane l’acquisto dalla pagina del negozio');
       continue;
     }
     // decisione 18, la nozione unica per effetto (letta PRIMA di scrivere la riga nuova): l'articolo che corregge lo stesso effetto (stesso uid:
@@ -734,7 +734,7 @@ function applicaStatoDelPassato(p:number,uid:string,e:EffettoVoceDto&{effetto:Ef
   if(proposta.dati.passato!==true)throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
   if(statoSegnatoDallaVoce(p,uid,e.uid,e.effetto))throw httpErrors.conflict('effetto-gia-applicato','Questo effetto è già segnato nella partita.');
   // decisione 4: un articolo in alternativa lo sceglie solo la spunta (il censimento non lo propone; una proposta di prima non lo segna)
-  if(e.effetto.tipo==='articolo'&&effettiInAlternativa(leggiEffettiVoce(uid).effetti).has(e.uid))throw httpErrors.conflict('articolo-in-alternativa','Questo articolo è in alternativa con altri della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnalalo dalla pagina del negozio.');
+  if(e.effetto.tipo==='articolo'&&effettiInAlternativa(leggiEffettiVoce(uid).effetti).has(e.uid))throw httpErrors.conflict('articolo-in-alternativa','Questo articolo è in alternativa con altri della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnane l’acquisto dalla pagina del negozio.');
   // la nozione unica, letta PRIMA di scrivere la riga dello stato (dopo, la riga nata adesso direbbe «applicato dopo»)
   const giaNelSaldo=e.effetto.tipo==='articolo'&&effettiConYenGiaNelSaldo(p,uid,[{uid:e.uid,tipo:'articolo',chiave:null}]).has(e.uid);
   // la Richiesta (revisione della decisione 19): completarla adesso farebbe entrare da sola la ricompensa (`riallineaYenRichiesta`); in una spunta

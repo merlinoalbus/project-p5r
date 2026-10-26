@@ -63,7 +63,7 @@ function NotaVoceSpuntata({ righe }: { righe: readonly RigaEffetto[] }) {
   const presenti = new Set(righe.map((r) => r.effetto.tipo));
   const subito = tipiPresenti(SUBITO, presenti), conApplica = tipiPresenti(CON_APPLICA, presenti);
   const frasi = [
-    subito && `aggiungendo, cambiando o togliendo ${subito} le partite che l’hanno spuntata si aggiornano subito (togliendo, torna com’era solo ciò che la spunta aveva aggiunto e che non hai modificato dopo)`,
+    subito && `aggiungendo, cambiando o togliendo ${subito}, le partite che l’hanno spuntata si aggiornano subito (togliendo, torna com’era solo ciò che la spunta aveva aggiunto e che non hai modificato dopo)`,
     conApplica && `per ${conApplica} compare il pulsante «Applica» sulla voce`,
     presenti.has('fortuna') && 'la Fortuna vale solo se la partita è ancora a quel giorno',
   ].filter((x): x is string => !!x);

@@ -172,6 +172,9 @@ const nomePersona = (personaId: number): string => {
  */
 export const statoGiaVero = (p: number, e: EffettoDiStatoVoce): boolean => leggiPrima(p, e).gia && (!conScorta(e) || inScorta(p, e.persona));
 
+/** Le due parti della Persona nella partita (registrata nel compendio, presente in scorta): il motivo dell'elenco del passato dice quella che manca. */
+export const partiDellaPersona = (p: number, e: EffettoPersona): { compendio: boolean; scorta: boolean } => ({ compendio: leggiPrima(p, e).gia, scorta: inScorta(p, e.persona) });
+
 /**
  * La voce ha già segnato lo stato dell'effetto nella partita (le righe del «prima» che la spunta, il salvataggio o l'approvazione scrivono): la
  * riga dell'effetto e, per la Persona «anche nella scorta», anche quella della scorta. L'elenco del passato e la finestra della voce guardano
