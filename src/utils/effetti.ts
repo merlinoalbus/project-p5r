@@ -32,7 +32,7 @@ export interface NomiPerEffetti {
   attivita?: Array<{ chiave: string; nome: string }>;
   /** Per il modulo dell'attività (il Confidente collegato); gli editor degli effetti non li usano più (lotto F, RG-03). */
   confidenti?: Array<{ chiave: string; nome: string }>;
-  /** Il caricamento dei nomi è fallito: l'editor lo dice e offre di riprovare. */
+  /** Il caricamento dei nomi è fallito (quali elenchi): lo dice una volta il modulo (`AvvisoNomiPerEffetti`), con «Riprova». */
   erroreNomi?: string | null;
   riprovaNomi?: () => void;
 }

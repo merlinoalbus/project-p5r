@@ -18,7 +18,9 @@
 // Oggetti chiave/essenziali [C], sezione «Altro»: le tessere e la carta sono oggetti da collezione per appassionati e si ottengono completando
 //   il videogioco (Star Forneus, Train of Life, Punch Ouch, Gambla Goemon, Golfer Sarutahiko, Power Intuition, Featherman Seeker).
 //
-// Che cosa fa: 10 schede «accessorio» (i distintivi) e 7 schede «altro» (tessere e carta), della guida; 7 offerte di scambio al Super Baron
+//   - Laghetto di pesca Ichigaya: Distintivo dio-pesce (Danza di Ali, riduce di molto la precisione di un nemico; 100.000 punti); DLC:
+//     Distintivo St. Hermelin (annulla le abilità sacre e maledette).
+// Che cosa fa: 12 schede «accessorio» (i distintivi) e 7 schede «altro» (tessere e carta), della guida; 7 offerte di scambio al Super Baron
 // (`costo_json` «oggetti»: la tessera, 1 pezzo), nello stesso quartiere e dalla stessa data delle altre offerte del negozio, pezzo unico (la
 // tessera è una sola). Conservativa: una scheda o un'offerta che c'è già (anche nascosta) non si tocca; con lo stesso nome nella stessa
 // categoria non si crea un doppione (l'audit lo dice). Nessuna voce del Diario e nessun dato delle partite cambia. Idempotente.
@@ -54,6 +56,11 @@ const DISTINTIVI: readonly SchedaNuova[] = [
   { chiave: 'accessorio/distintivo-golfer', categoria: 'accessorio', nome: 'Distintivo Golfer', nomeOriginale: null, effetto: 'Potenzia abilità di Psicocinesi del 50 percento (cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },
   { chiave: 'accessorio/distintivo-pi', categoria: 'accessorio', nome: 'Distintivo PI', nomeOriginale: null, effetto: 'Potenzia abilità Nucleari del 50 percento (cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },
   { chiave: 'accessorio/distintivo-featherman', categoria: 'accessorio', nome: 'Distintivo Featherman', nomeOriginale: null, effetto: 'Potenzia abilità di Vento del 50 percento (cumulabile)', descrizione: '', fonte: FONTE_ACCESSORI },
+  // [A], gli altri due distintivi della pagina (rilievo della revisione del lotto F: nulla si rimanda). Il Laghetto di pesca non è un negozio
+  // dei dati (i punti della pesca non sono una moneta delle offerte): il costo in punti resta nella descrizione, come per le altre schede
+  // della guida senza offerta
+  { chiave: 'accessorio/distintivo-dio-pesce', categoria: 'accessorio', nome: 'Distintivo dio-pesce', nomeOriginale: null, effetto: 'Attiva Danza di Ali: riduce di molto la precisione di un nemico', descrizione: 'Laghetto di pesca Ichigaya, in cambio di 100.000 punti della pesca', fonte: FONTE_ACCESSORI },
+  { chiave: 'accessorio/distintivo-st-hermelin', categoria: 'accessorio', nome: 'Distintivo St. Hermelin', nomeOriginale: null, effetto: 'Annulla le abilità sacre e maledette', descrizione: 'Contenuto scaricabile (DLC e bonus di Persona 5 Royal)', fonte: FONTE_ACCESSORI },
 ];
 
 /** Le tessere e la carta, con il distintivo che si riceve in cambio al Super Baron. */
@@ -121,7 +128,7 @@ export const migration273: Migration = {
       nonToccate: esiti.filter((e) => /non toccat|nessun/.test(e.esito)).length,
     };
     if (conteggi.schedeCreate + conteggi.offerteCreate) invalidaCacheDiGioco();
-    scriviAuditTesti(db, AUDIT, 273, { fonti: [FONTE_ACCESSORI, FONTE_CHIAVE], conteggi, esiti });
+    scriviAuditTesti(db, AUDIT, 273, { fonti: [FONTE_ACCESSORI, FONTE_CHIAVE], conteggi, esiti }, conteggi.schedeCreate + conteggi.offerteCreate);
     logger.info({ migrazione: 273, ...conteggi }, 'Catalogo: distintivi, Tessere dei minigiochi, Carta Phoenix Rangers e scambi del Super Baron');
   },
 };

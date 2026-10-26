@@ -66,7 +66,7 @@ export const migration274: Migration = {
     }
     if (improntaDiario(db) !== diarioPrima) errore('le voci del Diario sono cambiate');
     const conteggi = { corretti: esiti.filter((e) => e.risultato === 'corretto').length, nonToccati: esiti.filter((e) => /non toccat|assente/.test(e.risultato)).length };
-    scriviAuditTesti(db, AUDIT, 274, { fonti: [FONTE_ACCESSORI], attivita: ATTIVITA, ...(motivo ? { motivo } : {}), conteggi, esiti });
+    scriviAuditTesti(db, AUDIT, 274, { fonti: [FONTE_ACCESSORI], attivita: ATTIVITA, ...(motivo ? { motivo } : {}), conteggi, esiti }, conteggi.corretti);
     if (motivo) logger.warn({ migrazione: 274, motivo }, 'premi della sfida Big Bang Burger: nessuna correzione');
     logger.info({ migrazione: 274, ...conteggi }, 'Big Bang Burger: premi delle sfide con il nome del distintivo (l’effetto è nel catalogo)');
   },

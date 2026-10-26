@@ -121,7 +121,13 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
             {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="tabella-oggetti__altro block testo-12 text-text-secondary">{o.statistiche.per}</span>}
           </td>
           <td className="tabella-oggetti__categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
-          <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : undefined}>{o.effetto ? <TestoNote testo={o.effetto} daParole="conteggi" /> : 'Non dichiarato'}</td>
+          {/* Ondata 5, lotto F: le statistiche di armi e protezioni stanno in `statistiche.testo` (migrazione 275): si mostrano sotto
+              l'effetto, e «Non dichiarato» solo se non c'è né l'uno né le altre */}
+          <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : undefined}>
+            {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
+            {typeof o.statistiche?.testo === 'string' && o.statistiche.testo && <span className="block testo-12 text-text-secondary">{o.statistiche.testo}</span>}
+            {!o.effetto && !(typeof o.statistiche?.testo === 'string' && o.statistiche.testo) && 'Non dichiarato'}
+          </td>
           <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" role="img" aria-label="Nessuna offerta in yen">—</span></> : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>

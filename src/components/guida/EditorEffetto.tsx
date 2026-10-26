@@ -15,8 +15,6 @@ import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { NOME_DOTE } from '../../utils/citta';
 import { BERSAGLI, FUNZIONI, GUADAGNI, MISURE, NOME_BERSAGLIO, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RESE, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import { OPZIONI_FAMIGLIA, effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { simboliNote } from '../../../shared/note';
 
@@ -34,7 +32,7 @@ interface Props extends NomiPerEffetti {
 }
 
 /** I parametri di una famiglia, con la frase che ne discende. */
-export function EditorEffetto({ valore, onCambia, quartieri, attivita, erroreNomi, riprovaNomi, conNessuno, etichetta = 'Effetto', disabilitato }: Props) {
+export function EditorEffetto({ valore, onCambia, quartieri, attivita, conNessuno, etichetta = 'Effetto', disabilitato }: Props) {
   const nomiEffetto = {
     luoghi: Object.fromEntries((quartieri ?? []).map((q) => [q.chiave, q.nome])),
     attivita: Object.fromEntries((attivita ?? []).map((a) => [a.chiave, a.nome])),
@@ -83,9 +81,8 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, erroreNom
         {scelta('Quale Dote', valore.dote, Object.keys(NOME_DOTE) as string[], NOME_DOTE, (dote) => onCambia({ ...valore, dote }))}
         <Selettore etichetta="Quante note"valore={String(Math.min(4, Math.max(1, valore.note)))} disabilitato={disabilitato} ricerca="mai" opzioni={NOTE_OGGETTO} onCambia={(k) => onCambia({ ...valore, note: Number(k) })} />
       </div>}
-      {/* Ondata 5, lotto F (RG-03): niente più «Gradito a» scritto a mano — a chi piace un regalo si legge da `confidente_regalo`. */}
-      {erroreNomi && (valore?.famiglia === 'sblocca-luogo' || valore?.famiglia === 'sblocca-funzione') &&
-        <span role="alert" className="testo-12 text-error-testo">Impossibile caricare quartieri e attività. {riprovaNomi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprovaNomi} />}</span>}
+      {/* Ondata 5, lotto F (RG-03): niente più «Gradito a» scritto a mano — a chi piace un regalo si legge da `confidente_regalo`. Un
+          caricamento dei nomi fallito lo dice una volta sola il modulo (`AvvisoNomiPerEffetti`), non ogni editor. */}
       {valore?.famiglia === 'sblocca-luogo' &&
         <Selettore etichetta="Quale quartiere" valore={valore.luogo} disabilitato={disabilitato} vuoto="Scegli il quartiere…" opzioni={(quartieri ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(luogo) => onCambia({ ...valore, luogo })} />}
       {valore?.famiglia === 'sblocca-funzione' && <div className="grid gap-2 sm:grid-cols-2">

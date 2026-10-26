@@ -31,8 +31,8 @@ describe('API catalogo (Fase 16.1)', () => {
     expect(negozio.chiave).toBe('u-negozio-di-retrogaming-super-baron');
 
     const articolo = (await request(app).post('/api/catalogo/articolo').send({
-      negozio_chiave: negozio.chiave, nome: 'Featherman Seeker', categoria: 'altro', prezzo: 5000,
-      effetto: 'Videogioco: aumenta Conoscenza', disponibile_dal: 'dal 1 settembre',
+      // Ondata 5, lotto F: l'effetto non è dell'offerta (con il catalogo si rifiuta con un 400): si scrive nell'oggetto del catalogo
+      negozio_chiave: negozio.chiave, nome: 'Featherman Seeker', categoria: 'altro', prezzo: 5000, disponibile_dal: 'dal 1 settembre',
     })).body.data as ElementoCatalogoDto;
     expect(articolo.chiave).toBe(`${negozio.chiave}/u-featherman-seeker`);
 

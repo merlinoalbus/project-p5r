@@ -8,8 +8,17 @@
 // 1. Correzioni O5-08 (censimento ECC dell'ondata 5) — Oggetti [O] e Accessori [A], letti il 2026-10-26:
 //    - Collana cremisi: [A] «Fuoco +50%», cumulabile (la scheda non diceva che si cumula); con lei le altre sette collane di Stoneon, che
 //      dicevano «Potenzia attacco Luce/Oscurità/Psi…» senza la misura né i nomi degli elementi della guida;
-//    - Unguento fisico: [O] respinge una volta gli attacchi fisici e da arma da fuoco (la scheda diceva solo «fisici»; l'offerta della Clinica
-//      lo diceva giusto, ma era una copia);
+//    - Unguento fisico: [O] respinge una volta gli attacchi fisici e da arma da fuoco; lo corregge la 270 prima di togliere la copia della
+//      Clinica, che lo diceva giusto (qui non si ripete);
+//    - le schede che la 270 ha lasciato come unico testo e che la guida dice in modo più preciso: Aroma rinfrescante e Olio del recupero
+//      («alterazioni negative non speciali di un alleato»), Incenso del risveglio («non speciali degli alleati»), Sacra sindone e Tavola
+//      Ouija (morte istantanea di tutti i nemici con un'abilità sacra o maledetta), Sandalo rasta ([C]: +1 a Forza, Magia e Agilità di una
+//      Persona; la scheda parlava di un «Isolamento»), Corona della salvezza ([A]: accessorio, «Salvezza»; «una sola volta» è già nella
+//      quantità e nel rifornimento dell'offerta di Tanaka);
+//    - quattro accessori del Venditore ambulante che dicevano «Fascino 2/3» (rilievo della revisione del lotto F): Cintura Rakshasa, Vajra,
+//      Skanda (Tarukaja, Rakukaja, Sukukaja all'inizio della battaglia) e Specchio della vendetta (10% di riflettere gli attacchi fisici);
+//    - tre accessori di 37 Gradi Celsius con «bonus medio/alto» al posto della misura: Anello della vitalità (HP +30%), Strangolino della
+//      mente (SP +20%) e dell'anima (SP +30%);
 //    - Vino della grazia (tutti gli HP di tutti gli alleati), Soma (HP e SP di tutti gli alleati), Spray supremo (statistiche di un nemico per
 //      tre turni), Curry del Leblanc (50 SP a tutti gli alleati): la scheda è già quella della guida (decisione 11: vale il catalogo; il bersaglio
 //      resta da confermare in gioco) — qui solo il controllo, che l'audit riporta; le frasi sbagliate stavano nelle offerte (270).
@@ -29,7 +38,7 @@
 import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { esisteTabella } from './pulizieL11.js';
-import { FONTE_ACCESSORI, FONTE_OGGETTI, FONTE_REGALI, correggiTestoCatalogo, improntaDiario, scriviAuditTesti, type EsitoTesto } from './testiOndata5.js';
+import { FONTE_ACCESSORI, FONTE_CHIAVE, FONTE_OGGETTI, FONTE_REGALI, correggiTestoCatalogo, improntaDiario, scriviAuditTesti, type EsitoTesto } from './testiOndata5.js';
 import { invalidaCacheDiGioco } from '../../services/cacheDiGioco.js';
 
 const AUDIT = 'audit-272-testi-effetti';
@@ -38,7 +47,25 @@ const errore = (motivo: string): never => { throw new Error(`272: ${motivo}; nes
 /** O5-08: le schede da correggere (testo atteso → testo della guida). */
 const CORREZIONI: ReadonlyArray<{ chiave: string; prima: string; dopo: string }> = [
   { chiave: 'accessorio/collana-cremisi', prima: 'Potenzia abilità di Fuoco del 50 percento', dopo: 'Potenzia abilità di Fuoco del 50 percento (cumulabile)' },
-  { chiave: 'consumabile/unguento-fisico', prima: 'Crea una barriera che respinge una volta gli attacchi fisici', dopo: 'Crea una barriera che respinge una volta gli attacchi fisici e da arma da fuoco' },
+  // [O]: le schede rimaste unico testo dopo la 270, più precise secondo la guida
+  { chiave: 'consumabile/aroma-rinfrescante', prima: 'Cura tutte le alterazioni negative', dopo: 'Cura tutte le alterazioni negative non speciali di un alleato' },
+  { chiave: 'consumabile/olio-del-recupero', prima: 'Cura tutte le alterazioni negative', dopo: 'Cura tutte le alterazioni negative non speciali di un alleato' },
+  { chiave: 'consumabile/incenso-del-risveglio', prima: 'Cura tutte le alterazioni di stato degli alleati', dopo: 'Cura tutte le alterazioni negative non speciali degli alleati' },
+  { chiave: 'consumabile/sacra-sindone', prima: 'Media probabilità di infliggere morte istantanea di tipo Sacro', dopo: 'Probabilità media che un’abilità sacra uccida all’istante tutti i nemici' },
+  { chiave: 'consumabile/tavola-ouija', prima: 'Media probabilità di infliggere morte istantanea di tipo Maledetto', dopo: 'Probabilità media che un’abilità maledetta uccida all’istante tutti i nemici' },
+  // [C]: «Aumenta Fr, Ma e Ag di una Persona di 1» (FR è la Forza nel glossario delle statistiche)
+  { chiave: 'materiale/sandalo-rasta', prima: 'Bruciato durante l\'Isolamento (Lockdown) nella Stanza di Velluto per potenziare la Persona imprigionata; variante di incenso di fascia alta', dopo: 'Aumenta di 1 la Forza, la Magia e l’Agilità di una Persona' },
+  // [A]: «Salvezza: cura le alterazioni non spec. ripristinando tutti gli HP degli alleati»
+  { chiave: 'consumabile/corona-della-salvezza', prima: 'Cura tutte le alterazioni e ripristina interamente HP di tutto il gruppo (acquistabile una sola volta)', dopo: 'Attiva Salvezza: cura le alterazioni non speciali e ripristina tutti gli HP degli alleati' },
+  // [A], Venditore ambulante: le schede dicevano «Fascino 3» e «Fascino 2»
+  { chiave: 'accessorio/cintura-rakshasa', prima: 'Fascino 3', dopo: 'Attiva Signore dell’attacco: Tarukaja all’inizio della battaglia' },
+  { chiave: 'accessorio/cintura-vajra', prima: 'Fascino 3', dopo: 'Attiva Signore della difesa: Rakukaja all’inizio della battaglia' },
+  { chiave: 'accessorio/cintura-skanda', prima: 'Fascino 3', dopo: 'Attiva Signore della velocità: Sukukaja all’inizio della battaglia' },
+  { chiave: 'accessorio/specchio-della-vendetta', prima: 'Fascino 2', dopo: 'Attiva Risposta: probabilità del 10 percento di riflettere gli attacchi fisici' },
+  // [A], 37 Gradi Celsius: tre schede dicevano «bonus medio/alto» invece della misura della guida (come le altre tre dello stesso negozio)
+  { chiave: 'accessorio/anello-della-vitalita', prima: 'HP massimi, bonus alto', dopo: 'HP massimi più 30 percento' },
+  { chiave: 'accessorio/strangolino-della-mente', prima: 'SP massimi, bonus medio', dopo: 'SP massimi più 20 percento' },
+  { chiave: 'accessorio/strangolino-dell-anima', prima: 'SP massimi, bonus alto', dopo: 'SP massimi più 30 percento' },
   // le altre sette collane di Stoneon, come la Collana cremisi: [A] «+50%», cumulabili; i nomi degli elementi della guida (Sacro, non «Luce»;
   // Maledizione, non «Oscurità»; Psicocinesi, non «Psi»)
   { chiave: 'accessorio/collana-del-ghiaccio', prima: 'Potenzia attacco Ghiaccio', dopo: 'Potenzia abilità di Ghiaccio del 50 percento (cumulabile)' },
@@ -74,6 +101,7 @@ const ACCESSORI: ReadonlyArray<{ chiave: string; effetto: string; descrizione?: 
   { chiave: 'accessorio/portafortuna-croce', effetto: 'Aumenta la probabilità di successo delle abilità Hama' },
   { chiave: 'accessorio/portafortuna-teschio', effetto: 'Aumenta la probabilità di successo delle abilità Mudo' },
   { chiave: 'accessorio/specchio-del-rimbotto', effetto: 'Probabilità del 15 percento di riflettere gli attacchi fisici (non cumulabile)' },
+  // [A] lo abbrevia «Spec. rappresaglia» (Rimonta, 20% non cumulabile, 24.000 ¥, Venditore ambulante): è lo Specchio di rappresaglia del listino
   { chiave: 'accessorio/specchio-di-rappresaglia', effetto: 'Probabilità del 20 percento di riflettere gli attacchi fisici (non cumulabile)' },
   // guida: scambi con Jose (gli Anelli dei peccati, in cambio dei Cristalli)
   { chiave: 'accessorio/anello-della-gola', effetto: 'Attiva Guardia del caveau: aumenta la Difesa di tutti gli alleati per 3 turni', descrizione: { prima: '', dopo: JOSE('Cristallo della gola') } },
@@ -94,7 +122,7 @@ const ACCESSORI: ReadonlyArray<{ chiave: string; effetto: string; descrizione?: 
   { chiave: 'accessorio/cristallo-della-boria', effetto: 'Attiva Signore della difesa: Rakukaja all’inizio della battaglia', descrizione: { prima: '', dopo: SEMI('Shido') } },
   { chiave: 'accessorio/cristallo-del-dolore', effetto: 'Attiva Supporto medico: ripristina l’8 percento di HP e SP massimi dopo ogni battaglia', descrizione: { prima: '', dopo: SEMI('Maruki') } },
   // guida: premi delle Battaglie sfida, della battaglia con le Gemelle custodi e di una Richiesta
-  { chiave: 'accessorio/anello-della-velocita', effetto: 'Punti esperienza ottenuti in battaglia +50 percento', descrizione: { prima: 'accessorio, +50% PE', dopo: 'Premio di partecipazione della battaglia con le Gemelle custodi, dopo averle sconfitte almeno una volta' } },
+  { chiave: 'accessorio/anello-della-velocita', effetto: 'Punti esperienza ottenuti in battaglia +50 percento', descrizione: { prima: 'accessorio, +50% PE', dopo: 'Premio di partecipazione della battaglia con le Gemelle custodi: si ottiene dopo averci combattuto e perso almeno una volta' } },
   { chiave: 'accessorio/anello-supremo', effetto: 'Attiva Megidolaon: danno divino grave a tutti i nemici', descrizione: { prima: 'accessorio, attiva Megidolaon', dopo: SFIDA('Trial', 80) } },
   { chiave: 'accessorio/cav-debilitazione', effetto: 'Attiva Debilitazione: riduce Attacco, Difesa, Precisione ed Elusione di un nemico', descrizione: { prima: 'accessorio, attiva debilitazione sui nemici', dopo: SFIDA('Trickster') } },
   { chiave: 'accessorio/cav-potenziamento', effetto: 'Attiva Potenziamento: aumenta Attacco, Difesa, Precisione ed Elusione di un alleato', descrizione: { prima: 'accessorio, attiva Potenziamento', dopo: SFIDA('Survival') } },
@@ -143,7 +171,7 @@ export const migration272: Migration = {
       accessoriSenzaEffetto: db.prepare("SELECT COUNT(*) FROM main.catalogo_oggetto WHERE categoria = 'accessorio' AND nascosto = 0 AND effetto = ''").pluck().get() as number,
     };
     if (conteggi.corretti) invalidaCacheDiGioco();
-    scriviAuditTesti(db, AUDIT, 272, { fonti: [FONTE_OGGETTI, FONTE_ACCESSORI, FONTE_REGALI], conteggi, esiti });
+    scriviAuditTesti(db, AUDIT, 272, { fonti: [FONTE_OGGETTI, FONTE_ACCESSORI, FONTE_CHIAVE, FONTE_REGALI], conteggi, esiti }, conteggi.corretti);
     logger.info({ migrazione: 272, ...conteggi }, 'Catalogo: testi degli effetti secondo la guida (O5-08, accessori, Cartolina)');
   },
 };

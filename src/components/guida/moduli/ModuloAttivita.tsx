@@ -29,6 +29,7 @@ import { FonteConfidenteAttivita } from '../../confidenti/FonteConfidenteAttivit
 import { FontePescaAttivita } from '../../pesca/FontePescaAttivita';
 import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
+import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 
@@ -55,7 +56,7 @@ const NOMI_CAMPI: Record<string, string> = {
  * (e un'attività che ne ha già una) hanno la guida del quiz.
  */
 export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato }: PropsModulo) {
-  const nomi = useNomiPerEffetti();
+  const nomi = useNomiPerEffetti({ confidenti: true });
   const tipo = testoDi(dati.tipo);
   const videogioco = dati._tipoFisso === 'videogioco';
   const lavoro = tipo === 'lavoro';
@@ -97,10 +98,11 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
   const cambiaTipo = (nuovo: string) => imposta({ tipo: nuovo, tracciamento: tracciamentoPerTipo(nuovo), ...(nuovo === 'lavoro' ? {} : { paga_yen: null, paga_massima: null }) });
   return (
     <div className="flex flex-col gap-3">
+      {/* un avviso solo per i nomi che non si sono caricati (Confidenti del selettore, quartieri e attività degli effetti) */}
+      <AvvisoNomiPerEffetti errore={nomi.erroreNomi} riprova={nomi.riprovaNomi} disabilitato={disabilitato} />
       {(!videogioco || !!confidente) && <div className="flex flex-col gap-2">
         <Selettore etichetta="Progressione del Confidente" valore={confidente} opzioni={opzioniConfidenti} vuoto="Attività autonoma"
           disabilitato={disabilitato} onCambia={(chiave) => imposta({ confidente_chiave: chiave || null })} />
-        {nomi.erroreNomi && <p role="alert" className="m-0 text-error-testo">{nomi.erroreNomi} <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" disabled={disabilitato} onClick={nomi.riprovaNomi} /></p>}
         {confidente && <>
           <p className="m-0 text-sm">La guida degli incontri e delle Doti viene dal Confidente. Cambiare questa scelta conserva i campi: risolvi quelli incompatibili prima di salvare. Rimuovere il collegamento conserva i valori attuali.</p>
           {fonte?.chiave === confidente ? <div className="flex flex-col gap-1"><p className="m-0 text-xs text-text-muted">Guida attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FonteConfidenteAttivita fonte={fonte} /></div> : <Link className="touch inline-flex self-start items-center text-primary-testo" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}

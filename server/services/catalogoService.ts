@@ -299,6 +299,12 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   }
   if (tipo === 'articolo') {
     const conCatalogo = catalogoOggettiDisponibile();
+    // Ondata 5, lotto F (decisione 21): con il catalogo il testo dell'effetto e le statistiche vivono solo nell'oggetto. Un valore mandato
+    // per l'offerta non si accetta in silenzio (prima si scartava con un 200): si rifiuta e si dice dove si scrive. `null` o vuoto passano.
+    if (conCatalogo) {
+      const mandati = (['effetto', 'statistiche', 'effetto_json'] as const).filter((c) => d[c] != null && (typeof d[c] !== 'string' || (d[c] as string).trim() !== ''));
+      if (mandati.length) throw httpErrors.badRequest('effetto-nell-oggetto', `L’effetto e le statistiche si scrivono nell’oggetto del catalogo, non nell’offerta (campi: ${mandati.join(', ')}).`);
+    }
     if (!conCatalogo) { delete d.catalogo_chiave; delete d.costo_json; }
     else if (!('catalogo_chiave' in d) && legameStoricoCambiato(d, esistente)) d.catalogo_chiave = chiaveDaLegameStorico(d, esistente);
     const chiave = 'catalogo_chiave' in d ? d.catalogo_chiave : esistente?.catalogo_chiave;

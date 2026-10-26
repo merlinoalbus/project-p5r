@@ -1,5 +1,5 @@
 // ============================================================
-// Testi degli effetti dell'Ondata 5 (Lotto F ridotto; decisione 21 dell'utente) — strumenti comuni delle migrazioni 270-274
+// Testi degli effetti dell'Ondata 5 (Lotto F ridotto; decisione 21 dell'utente) — strumenti comuni delle migrazioni 270-277
 // ============================================================
 //
 // Decisione 21 (a): «Gli effetti degli oggetti ai fini di questa app non è necessario gestirli se non come informazione testuale»: nessuna
@@ -18,16 +18,48 @@ export const FONTE_ACCESSORI = 'https://www.allgamestaff.it/persona-5-royal/acce
 export const FONTE_CHIAVE = 'https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/';
 export const FONTE_REGALI = 'https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/';
 
-/** L'audit di una migrazione del lotto, con le esecuzioni accodate (una migrazione rieseguita su un'altra copia ne aggiunge una). */
-export function scriviAuditTesti(db: AppDatabase, chiave: string, migrazione: number, esecuzione: Record<string, unknown>): void {
+/**
+ * L'audit di una migrazione del lotto, con le esecuzioni accodate (una migrazione rieseguita su un'altra copia ne aggiunge una). Una
+ * esecuzione che non ha cambiato niente (`cambiate` = 0) si scrive solo se l'audit non c'è ancora: rieseguita sugli stessi dati, la
+ * migrazione non tocca nemmeno `dati_guida` (idempotenza piena, rilievo 6 della revisione del lotto F).
+ */
+export function scriviAuditTesti(db: AppDatabase, chiave: string, migrazione: number, esecuzione: Record<string, unknown>, cambiate: number): void {
   if (!esisteTabella(db, 'dati_guida')) return;
   const vecchio = db.prepare('SELECT json FROM main.dati_guida WHERE chiave = ?').pluck().get(chiave) as string | undefined;
+  if (vecchio !== undefined && cambiate === 0) return;
   let esecuzioni: unknown[] = [];
   if (vecchio) {
     try { const v = JSON.parse(vecchio) as { esecuzioni?: unknown }; esecuzioni = Array.isArray(v.esecuzioni) ? v.esecuzioni : []; } catch { esecuzioni = []; }
   }
   db.prepare('INSERT INTO main.dati_guida (chiave, json) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json')
     .run(chiave, JSON.stringify({ migrazione, lotto: 'ondata-5-F', decisione: 'L13-21', esecuzioni: [...esecuzioni, { il: new Date().toISOString(), ...esecuzione }] }));
+}
+
+/**
+ * Il testo di un effetto ridotto alla sola sostanza, per confrontare la copia di un'offerta con l'oggetto del catalogo: minuscole,
+ * apostrofi uniformi, «percento» come «%», punteggiatura e spazi ignorati. Due testi uguali così dicono la stessa cosa con la stessa
+ * forma; ogni altra differenza va decisa voce per voce (migrazione 270).
+ */
+export function sostanzaTesto(s: string | null | undefined): string {
+  return (s ?? '').toLowerCase().replace(/[’']/g, "'").replace(/\bper ?cento\b/g, '%').replace(/\s*%/g, '%')
+    .replace(/[.,;:()/]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+export interface NotaStoricaTesti { chiave: string; testo: string; fonte: string; catalogo: readonly string[]; articoli: readonly string[] }
+
+/**
+ * Una nota storica sulla fonte (come le 246 e 252): si crea se non c'è (mai riscritta: una nota corretta dall'utente resta) e si lega alle
+ * schede e alle offerte che ci sono. Restituisce l'esito e i legami nuovi (0 se c'era già tutto).
+ */
+export function notaStoricaTesti(db: AppDatabase, n: NotaStoricaTesti): { esito: string; cambiate: number } {
+  if (!esisteTabella(db, 'nota_storica') || !esisteTabella(db, 'nota_storica_legame')) return { esito: 'tabelle delle note storiche assenti', cambiate: 0 };
+  const creata = db.prepare('INSERT OR IGNORE INTO main.nota_storica (chiave, testo, fonte, versione, seed_json, updated_at) VALUES (?, ?, ?, 1, ?, ?)')
+    .run(n.chiave, n.testo, n.fonte, JSON.stringify({ versione: 1, testo: n.testo, fonte: n.fonte }), new Date().toISOString()).changes;
+  const lega = db.prepare('INSERT OR IGNORE INTO main.nota_storica_legame (nota_chiave, tipo, chiave) VALUES (?, ?, ?)');
+  let legami = 0;
+  for (const c of n.catalogo) if (db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?').get(c)) legami += lega.run(n.chiave, 'catalogo', c).changes;
+  for (const a of n.articoli) if (db.prepare('SELECT 1 FROM main.articolo WHERE chiave = ?').get(a)) legami += lega.run(n.chiave, 'articolo', a).changes;
+  return { esito: `${creata ? 'nota creata' : 'nota già presente'}, legami nuovi ${legami}`, cambiate: creata + legami };
 }
 
 export type CampoTesto = 'effetto' | 'descrizione';

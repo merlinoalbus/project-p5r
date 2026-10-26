@@ -26,6 +26,15 @@ import type {
 
 // ---- Righe DB ----
 
+/**
+ * Il testo di un oggetto dell'equipaggiamento nel compendio (elenco e oggetto dell'esecuzione di una Persona): le statistiche
+ * (`statistiche.testo`, separate dall'effetto dalla migrazione 275) e poi l'effetto, come li dava la vecchia descrizione in un solo testo.
+ */
+function testoOggettoCompendio(o: CatalogoOggettoDto): string {
+  const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo.trim() : '';
+  return [statistiche, o.effetto.trim()].filter(Boolean).join(' / ');
+}
+
 /** L'API storica conserva le sezioni della guida, ma dopo M7 non usa il crosswalk per dare identità agli oggetti. */
 export function oggettiGuida(): Congelato<OggettiGuidaDto> {
   const dati = datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida');
@@ -351,10 +360,12 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const catalogoEsecuzione = oggettiPerFonte('equipaggiamento', originali.map((o) => String(o.id)));
   const identitaEsecuzione = (nome: string | null) => { const o = nome === null ? undefined : perNome.get(nome); return o ? catalogoEsecuzione.get(String(o.id)) : undefined; };
   const normale = identitaEsecuzione(r.oggetto); const allarme = identitaEsecuzione(r.oggetto_allarme);
-  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (la copia in `traduzione` è tolta dalla 271)
+  // Ondata 5, lotto F (decisione 21): che cosa fa l'oggetto si legge solo dal catalogo (la copia in `traduzione` è tolta dalla 271),
+  // con le statistiche che la 275 ha separato dall'effetto
   const descrizioneOggetto = (nome: string | null): string | null => {
     if (nome === null) return null;
-    return identitaEsecuzione(nome)?.effetto || null;
+    const o = identitaEsecuzione(nome);
+    return o ? testoOggettoCompendio(o) || null : null;
   };
   const riferimento = (pid: number | null) => {
     if (pid === null) return null;
@@ -444,9 +455,9 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     const c = catalogo.get(String(o.id));
     return { id: o.id, nome: o.nome, nomeIt: c?.nome ?? tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
       vincolo: o.vincolo, vincoloNome: c ? typeof c.statistiche?.per === 'string' ? c.statistiche.per : null : tOpz('vincoloOggetto', o.vincolo),
-      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'effetto dell'oggetto del catalogo; la copia in `traduzione`
+      // Ondata 5, lotto F (decisione 21): la resa italiana è solo l'oggetto del catalogo (statistiche ed effetto); la copia in `traduzione`
       // (ambito descrizioneOggetto) è tolta dalla migrazione 271. Senza oggetto del catalogo non c'è una resa: vuoto, mai l'inglese.
-      descrizione: o.descrizione, descrizioneNome: c?.effetto ?? '',
+      descrizione: o.descrizione, descrizioneNome: c ? testoOggettoCompendio(c) : '',
       catalogo: c ? { chiave: c.chiave, nome: c.nome, casa: c.casa } : null, nomiAltri: c?.nomiAltri ?? [] };
   });
   const q = f.q;

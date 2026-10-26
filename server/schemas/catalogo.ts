@@ -121,8 +121,8 @@ export const datiArticolo = z.object({
     if (v !== null && normalizzaPrezzoPerFascia(v) === null) ctx.addIssue({ code: 'custom', message: 'Prezzo per fascia non valido: un prezzo intero per «giorno» o «sera».' });
   }).transform((v) => (v === null ? null : JSON.stringify(normalizzaPrezzoPerFascia(v)))).optional(),
   // Ondata 5, lotto F (decisione 21): il testo dell'effetto e le statistiche vivono solo nell'oggetto del catalogo.
-  // Con il catalogo questi tre campi si accettano ma non si scrivono (non sono fra le colonne scrivibili dell'offerta,
-  // `catalogoService.CAMPI`); restano solo per un pacchetto senza catalogo, dove la riga è l'unico punto.
+  // Con il catalogo un valore non vuoto di questi tre campi si rifiuta (400 `effetto-nell-oggetto`, `catalogoService.normalizzaScrittura`):
+  // restano nello schema solo per un pacchetto senza catalogo, dove la riga è l'unico punto.
   effetto_json: effettoJson,
   effetto: testo(600).nullable().optional(),
   statistiche: testo(400).nullable().optional(),
