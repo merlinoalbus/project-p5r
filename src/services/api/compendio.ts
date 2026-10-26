@@ -7,6 +7,7 @@ import type {
 import { apiDelete, apiPut, apiPost, apiGet, apiGetGioco, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, ElenchiEffettiVoceDto,EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
+import type { AppuntiDiario, EsitoAnnulloIncollaDto, EsitoIncollaDto, PianoIncollaDto, RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../../shared/appuntiDiario';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
 import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
 import type { ModificaAffinitaPersona } from '../../../shared/affinitaPersona';
@@ -129,6 +130,14 @@ export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number)
  *  da sola, una copia ripetuta creerebbe due volte le voci. */
 export const trasferisciVociGiornata = (dati: TrasferisciVociGiornata, partita?: number): Promise<VociTrasferiteDto> =>
   apiPost(`/compendio/percorso/voci/trasferisci${queryString({ partita })}`, dati);
+/** Appunti del Diario (2026-10-26): l'istantanea delle voci da scrivere negli appunti di sistema (sola lettura). */
+export const esportaAppuntiDiario = (uid: string[]): Promise<AppuntiDiario> => apiPost('/compendio/percorso/voci/appunti', { uid });
+/** Il piano dell'incolla (sola lettura): rilievi da vedere prima, voci che si incolleranno. */
+export const anteprimaIncollaVoci = (r: RichiestaIncollaVoci): Promise<PianoIncollaDto> => apiPost('/compendio/percorso/voci/incolla/anteprima', r);
+/** L'incolla: mai ripetuto da solo (una copia ripetuta creerebbe due volte le voci). */
+export const incollaVociDiario = (r: RichiestaEseguiIncolla): Promise<EsitoIncollaDto> => apiPost('/compendio/percorso/voci/incolla', r, { maxRetries: 0 });
+/** L'annullo di un incolla o di un «Copia in…» / «Sposta in…», una volta sola. */
+export const annullaOperazioneVoci = (id: string): Promise<EsitoAnnulloIncollaDto> => apiPost(`/compendio/percorso/voci/operazioni/${encodeURIComponent(id)}/annulla`, undefined, { maxRetries: 0 });
 /** Rimozione atomica nel Cestino con spunte, fonti e ricevute; nessun secondo invio automatico. Gli avvisi (un esemplare in scorta modificato dopo la spunta, che resta) se ce ne sono. */
 export const eliminaVoceGiornata = (uid: string): Promise<{ avvisi: string[] } | undefined> => apiDelete(`/compendio/percorso/voci/${uid}`, { maxRetries: 0 });
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */

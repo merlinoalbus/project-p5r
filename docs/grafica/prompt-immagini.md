@@ -389,6 +389,16 @@ riserva SVG è lo scontrino di `iconeGuida.tsx` (`IconRicevuta`). Il distintivo 
 
 Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: uno scontrino di cassa verticale con il bordo inferiore strappato a denti di sega e tre righe orizzontali di importi, l'ultima più corta. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessuna cifra, nessun marchio; niente appunti con la molletta, niente libro. → azione-ricevute.png`
 
+### Aggiunta del 2026-10-26 — Taglia (appunti del Diario) — stesse regole
+Richiesta dell'utente: copiare, tagliare e incollare voci del Diario con gli appunti di sistema («Sì, anche Taglia»). «Taglia» è un gesto nuovo
+della barra delle voci selezionate e del menu della voce; fino all'immagine la riserva SVG sono le forbici di `iconeGuida.tsx` (`IconForbici`).
+
+| File | Uso | Soggetto |
+|---|---|---|
+| `azione-taglia.png` | «Taglia» le voci selezionate del Diario (si spostano incollandole) | forbici aperte viste di lato, due anelli in basso a sinistra e lame incrociate verso l'alto a destra |
+
+Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un paio di forbici aperte viste di lato, i due anelli in basso a sinistra e le lame incrociate che puntano in alto a destra. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente fogli né linee tratteggiate. → azione-taglia.png`
+
 ## 22. Icone di categoria (22) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
 Le figure che stanno **dentro il cartiglio rosso a taglio diagonale** delle schede: tipo di negozio, categoria di oggetto, tipo di attività, tipo di
 azione del percorso. L'app le mostra a 18–44 px sopra il cartiglio, quindi il soggetto deve leggersi anche piccolo: silhouette piena, niente

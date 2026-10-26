@@ -15,7 +15,8 @@ export interface PostoCoda { bottom: number | null; aSinistra: boolean }
  *   spillo) occupa tutta la larghezza: la coda gli sta sopra.
  * - Un popup **ancorato** che scende nella zona della coda (in basso a destra) non si scavalca dall'alto — si coprirebbe lo spillo,
  *   che gli sta subito sopra o sotto —: la coda passa sul lato opposto se lì c'è spazio, altrimenti gli sta sopra.
- * `coda` è la coda così com'è (per la sua altezza e larghezza); senza popup aperti il posto è quello delle classi.
+ * - La **barra delle voci selezionate** del Diario che sta nella zona della coda: la coda le sta sopra.
+ * `coda` è la coda così com'è (per la sua altezza e larghezza); senza popup aperti né barra il posto è quello delle classi.
  */
 export function postoDellaCoda(coda: HTMLElement | null): PostoCoda {
   const popup = [...document.querySelectorAll<HTMLElement>('.spillo-popup')];
@@ -30,12 +31,19 @@ export function postoDellaCoda(coda: HTMLElement | null): PostoCoda {
   const basso = largo >= 1024 ? 20 : 80;
   const { offsetHeight: h, offsetWidth: w } = coda;
   const zona = { top: alto - basso - h, bottom: alto - basso, left: largo - MARGINE - w, right: largo - MARGINE };
+  const tocca = (r: DOMRect) => !(r.width === 0 || r.bottom <= zona.top || r.top >= zona.bottom || r.right <= zona.left || r.left >= zona.right);
   for (const p of popup) {
     const r = p.getBoundingClientRect();
-    if (r.width === 0 || r.bottom <= zona.top || r.top >= zona.bottom || r.right <= zona.left || r.left >= zona.right) continue;
+    if (!tocca(r)) continue;
     // sul lato sinistro c'è posto se la coda ci sta tutta prima del popup
     if (MARGINE + w + STACCO <= r.left) return { bottom: null, aSinistra: true };
     return { bottom: Math.max(STACCO, alto - r.top + STACCO), aSinistra: false };
+  }
+  // la barra delle voci selezionate del Diario (2026-10-26), ferma in fondo alla vista: la coda le sta sopra, perché coprirebbe Copia,
+  // Taglia e «Altro giorno…» proprio mentre la notifica dell'incolla offre «Annulla» (rilievo del revisore)
+  for (const b of [...document.querySelectorAll<HTMLElement>('.barra-selezione-voci')]) {
+    const r = b.getBoundingClientRect();
+    if (tocca(r)) return { bottom: Math.max(STACCO, alto - r.top + STACCO), aSinistra: false };
   }
   return { bottom: null, aSinistra: false };
 }

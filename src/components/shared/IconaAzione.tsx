@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
-import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFilm, IconFiltro, IconGioca, IconGioco, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRicevuta, IconRiepilogo, IconSpunta, IconStella, IconSu, IconGiu, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
+import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFilm, IconFiltro, IconForbici, IconGioca, IconGioco, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRicevuta, IconRiepilogo, IconSpunta, IconStella, IconSu, IconGiu, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
 
 export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro' | 'filtri' | 'copia' | 'incolla'
   // Aggiunte col rifacimento delle pagine: **nessun pulsante di solo testo**, quindi ogni gesto
@@ -21,7 +21,9 @@ export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 
   | 'scarta'
   // Le ricevute degli effetti della spunta dietro un pulsantino (2026-10-25): uno scontrino, non gli appunti di «piano» (piani di fusione,
   // domande in classe). Prompt §21, aggiunta del 2026-10-25 (2).
-  | 'ricevute';
+  | 'ricevute'
+  // Appunti del Diario (2026-10-26): «Taglia» le voci selezionate. Riserva: le forbici; prompt §21, aggiunta del 2026-10-26.
+  | 'taglia';
 export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore'
   // Le schede di Trofei e finali, Sfide, Oggetti e Richieste: erano barre di sole parole, e con
   // l'immagine sopra l'etichetta (la forma che l'utente ha indicato) senza figura resterebbero
@@ -104,6 +106,7 @@ const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = 
   'giu': (d) => <IconGiu size={d} />,
   'scarta': (d) => <IconFiltro size={d} />,
   'ricevute': (d) => <IconRicevuta size={d} />,
+  'taglia': (d) => <IconForbici size={d} />,
 };
 
 const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = {

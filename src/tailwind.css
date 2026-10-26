@@ -1155,6 +1155,14 @@
   .azione--bloccata { border-left-color: var(--color-text-muted); color: var(--color-text-secondary); }
   .azione--bloccata > div > span:first-child { color: var(--color-text-muted); }
   .azione--evidenziata { outline: 1px solid var(--color-primary); outline-offset: -1px; }
+  /* appunti del Diario (2026-10-26): la voce selezionata (fondo e bordo sinistro del colore primario, non solo il colore: anche il bordo
+     e, per il lettore di schermo, «(selezionata)») e la voce tagliata finché non si incolla: bordo sinistro tratteggiato e fondo a righe
+     oblique, col testo nel colore secondario (contrasto oltre 4.5:1 sulla card: non un'opacità, che lo farebbe scendere sotto) e senza
+     contorno, che cancellerebbe quello di `.azione--evidenziata` */
+  .azione--selezionata { border-left-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent); }
+  .azione--in-taglio { border-left-style: dashed; border-left-color: var(--color-text-muted); color: var(--color-text-secondary); background-image: repeating-linear-gradient(-45deg, transparent 0 7px, color-mix(in srgb, var(--color-text-muted) 12%, transparent) 7px 14px); }
+  .azione--selezionata, .azione--in-taglio { transition-property: background-color, box-shadow, color; transition-duration: 150ms; transition-timing-function: ease-out; }
+  @media (prefers-reduced-motion: reduce) { .azione--selezionata, .azione--in-taglio { transition: none; } }
   /* `.chip--oro` e `.chip--bloccata` stanno dopo `.chip` (più sotto): con la stessa specificità vince la regola che viene dopo */
   /* ---- Editor delle mappe (13.3) ---- */
   .visore-mappa--editor .visore-mappa__barra { background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-secondary)); border-bottom-color: var(--color-primary); }

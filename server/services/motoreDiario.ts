@@ -402,14 +402,53 @@ function yenDelleSfideRimaste(p:number,uid:string,articoli:ReadonlySet<string>):
 }
 export function copiaEffettiVoce(daUid:string,aUid:string):void {
   if(!getDb().inTransaction)throw new Error('La copia richiede la transazione della voce.');
-  const fonte=leggiEffettiVoce(daUid);voce(aUid);
+  scriviEffettiDaIstantanea(aUid,leggiEffettiVoce(daUid),{verifica:false});
+}
+/** La fonte degli effetti da scrivere in una voce nuova: com'è nella voce d'origine (o com'era nell'istantanea degli appunti del Diario). */
+export interface IstantaneaEffettiVoce {stato:StatoEffettiVoceDto['stato'];effetti:ReadonlyArray<{uid:string;effetto:EffettoVoce;origine:EffettoVoceDto['origine']}>;rawLegacy:string;motivo:string|null}
+/**
+ * La copia degli effetti in una voce nuova (senza fonte), UN punto per «Copia in…» e per gli appunti del Diario (2026-10-26, «e deve
+ * prendere anche quello che succede...»): ogni effetto con tutti i suoi valori e un uid nuovo; i raccordi di acquisti e pesca
+ * (`sostituisceDoti`, `sostituisceTurni`) seguono gli uid nuovi. Una fonte storica ancora da correggere passa com'è (testo e motivo).
+ * `verifica`: ogni effetto si verifica come uno nuovo (gli elementi che cita esistono ancora): lo chiede chi incolla dagli appunti, che
+ * possono venire da molto prima. `registro`: la riga del registro delle operazioni sugli effetti (`operazione_effetti_voce`), con la
+ * fonte vuota prima e gli effetti nuovi dopo (la forma che `yenAutomaticiService.effettiAggiuntiDopo` legge). Restituisce la mappa
+ * vecchio uid → nuovo. Dentro la transazione della voce.
+ */
+export function scriviEffettiDaIstantanea(aUid:string,fonte:IstantaneaEffettiVoce,opz:{verifica:boolean;registro?:Record<string,unknown>}):Map<string,string> {
+  if(!getDb().inTransaction)throw new Error('La copia richiede la transazione della voce.');
+  voce(aUid);
   if(prepared('SELECT 1 FROM main.voce_effetto_transizione WHERE voce_uid=?').get(aUid))throw httpErrors.conflict('fonte-gia-presente','La destinazione possiede già una fonte.');
+  const registra=(mappa:Map<string,string>,dopo:unknown)=>{
+    if(opz.registro)prepared('INSERT INTO main.operazione_effetti_voce(id,voce_uid,payload_json,prima_json,dopo_json,creata_il) VALUES(?,?,?,?,?,?)')
+      .run(nuovoUid(),aUid,jsonCanonico({...opz.registro,mappaUidEffetti:Object.fromEntries(mappa)}),jsonCanonico({stato:'convertita',effetti:[]}),jsonCanonico(dopo),nowIso());
+  };
   if(fonte.stato==='legacy-da-correggere'){
-    prepared('INSERT INTO main.voce_effetto_transizione(voce_uid,stato,raw_json,motivo,impronta,aggiornata_il) VALUES(?,?,?,?,?,?)').run(aUid,fonte.stato,fonte.rawLegacy,fonte.motivo,improntaDato(fonte.rawLegacy),nowIso());return;
+    prepared('INSERT INTO main.voce_effetto_transizione(voce_uid,stato,raw_json,motivo,impronta,aggiornata_il) VALUES(?,?,?,?,?,?)').run(aUid,fonte.stato,fonte.rawLegacy,fonte.motivo,improntaDato(fonte.rawLegacy),nowIso());
+    const mappa=new Map<string,string>();registra(mappa,{stato:fonte.stato,effetti:[],rawLegacy:fonte.rawLegacy,motivo:fonte.motivo});return mappa;
   }
   const mappa=new Map(fonte.effetti.map((e)=>[e.uid,nuovoUid()]));
-  const effetti=fonte.effetti.map((e):EffettoVoceDto=>({...e,uid:mappa.get(e.uid)!,effetto:e.effetto.tipo==='acquisto'?{...e.effetto,sostituisceDoti:e.effetto.sostituisceDoti.map((id)=>mappa.get(id)!)}:e.effetto.tipo==='pesca'?{...e.effetto,sostituisceDoti:e.effetto.sostituisceDoti.map(id=>mappa.get(id)!),sostituisceTurni:e.effetto.sostituisceTurni.map(id=>mappa.get(id)!)}:e.effetto}));
+  // un raccordo verso un effetto che non c'è (lasciato fuori da chi incolla) non si porta: il controllo della lista lo direbbe comunque
+  const nuovi=(ids:readonly string[])=>ids.flatMap((id)=>mappa.has(id)?[mappa.get(id)!]:[]);
+  const effetti=fonte.effetti.map((e,ordine):EffettoVoceDto=>({uid:mappa.get(e.uid)!,ordine,origine:e.origine,effetto:e.effetto.tipo==='acquisto'?{...e.effetto,sostituisceDoti:nuovi(e.effetto.sostituisceDoti)}:e.effetto.tipo==='pesca'?{...e.effetto,sostituisceDoti:nuovi(e.effetto.sostituisceDoti),sostituisceTurni:nuovi(e.effetto.sostituisceTurni)}:e.effetto}));
+  if(opz.verifica)for(const e of effetti)verificaNuovoEffetto(e.effetto);
   scriviLista(aUid,effetti,fonte.rawLegacy);
+  registra(mappa,effetti);
+  return mappa;
+}
+/** Perché un effetto degli appunti non si può incollare in questa istanza (non riconoscibile, o cita qualcosa che non c'è più), o null. */
+export function problemaEffettoDaIncollare(grezzo:unknown):string|null {
+  const e=normalizzaEffettoVoce(grezzo);
+  if(!e)return 'L’effetto non è riconoscibile integralmente.';
+  try{verificaNuovoEffetto(e);return null;}
+  catch(err){if(err instanceof HttpError)return err.message;throw err;}
+}
+/** Perché una lista di effetti (già riconosciuti) non può stare insieme in una voce con quel collegamento (yen contati due volte, raccordi), o null. */
+export function problemaListaDaIncollare(effetti:ReadonlyArray<{uid:string;effetto:EffettoVoce}>,riferimento:{tipo:string;chiave:string}|null):string|null {
+  try{
+    verificaLista(effetti.map((e,ordine)=>({uid:e.uid,ordine,effetto:e.effetto,origine:'utente'})));
+    return motivoYenGiaStrutturati(effetti.map((e)=>e.effetto),{riferimento,yenDi:yenDelDato});
+  }catch(err){if(err instanceof HttpError)return err.message;throw err;}
 }
 
 function ricevutaDto(r:RigaRicevuta):ReceiptEffettoVoceDto {

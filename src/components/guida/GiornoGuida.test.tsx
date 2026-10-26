@@ -16,6 +16,8 @@ const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
   getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   getElenchiAzione: vi.fn(), getPercorsoIndice: vi.fn(), trasferisciVociGiornata: vi.fn(),
+  // appunti del Diario (2026-10-26): il blocco per gli appunti si chiede appena cambia la selezione (qui resta in attesa)
+  esportaAppuntiDiario: vi.fn(() => new Promise(() => undefined)), anteprimaIncollaVoci: vi.fn(), incollaVociDiario: vi.fn(), annullaOperazioneVoci: vi.fn(),
   // L13 (ondata 4a): le proposte «da completare» del giorno (nessuna, in queste prove)
   getProposteConversione: vi.fn().mockResolvedValue([]),
   // la finestra della voce carica anche gli elenchi per gli effetti (articoli, domande, oggetti…)
@@ -444,24 +446,24 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
 
   it('«Copia o sposta voci» apre la scelta: righe da spuntare (niente spunte di partita né gesti), «Tutte» per fascia, conto nella barra', () => {
     disegna();
-    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Voci selezionate' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
-    const barra = screen.getByRole('region', { name: 'Copia o sposta voci' });
+    const barra = screen.getByRole('region', { name: 'Voci selezionate' });
     expect(barra).toHaveTextContent('Scegli le voci');
-    expect(within(barra).getByRole('button', { name: /^Copia in…/ })).toBeDisabled();
+    expect(within(barra).getByRole('button', { name: 'Copia o sposta le voci selezionate in un altro giorno' })).toBeDisabled();
     // le righe della scelta al posto delle azioni: niente «Fatto», niente menu dei gesti, niente «Aggiungi»
     expect(screen.queryByRole('checkbox', { name: /^Fatto:/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /^Modifica, sposta o elimina/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /^Aggiungi di/ })).toBeNull();
     expect(within(screen.getByRole('list', { name: 'Voci di sera da scegliere' })).getByText('Consegna del Palazzo')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
-    expect(barra).toHaveTextContent('1 voce scelta');
+    expect(barra).toHaveTextContent('1 voce selezionata');
     fireEvent.click(screen.getByRole('button', { name: 'Scegli tutte le voci di giorno' }));
-    expect(barra).toHaveTextContent('3 voci scelte');
+    expect(barra).toHaveTextContent('3 voci selezionate');
     fireEvent.click(screen.getByRole('button', { name: 'Togli dalla scelta tutte le voci di giorno' }));
     expect(barra).toHaveTextContent('Scegli le voci');
     // «Fine» torna alla giornata com'era
-    fireEvent.click(within(barra).getByRole('button', { name: 'Esci dalla scelta' }));
+    fireEvent.click(within(barra).getByRole('button', { name: 'Fine: esci dalla scelta delle voci' }));
     expect(screen.getAllByRole('checkbox', { name: /^Fatto:/ }).length).toBeGreaterThan(0);
   });
 
@@ -470,8 +472,10 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Consegna del Palazzo/ }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Biblioteca: prendere Zorro/ }));
-    fireEvent.click(screen.getByRole('button', { name: /^Copia in…/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Copia o sposta le voci selezionate in un altro giorno' }));
     const finestra = await screen.findByRole('dialog', { name: 'Copia 2 voci in un altro giorno' });
+    // la finestra parte da «Copia»
+    expect(within(finestra).getByRole('radio', { name: 'Copia' })).toHaveAttribute('aria-checked', 'true');
     expect(finestra).toHaveTextContent('2 voci (1 di giorno, 1 di sera)');
     // parte dal giorno di partenza; la fascia, con voci di giorno e di sera, è «di giorno»
     expect(selettore('Giorno', finestra)).toHaveTextContent('12 aprile (mar)');
@@ -486,25 +490,26 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate nel 2 maggio, di sera, in fondo: per tutte le partite.');
     expect(ricarica).toHaveBeenCalled();
-    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Voci selezionate' })).toBeNull();
   });
 
-  it('«Sposta in…» manda `sposta`; un errore resta in notifica e la finestra resta aperta con la scelta', async () => {
+  it('«Sposta» nella finestra manda `sposta`; un errore resta in notifica e la finestra resta aperta con la scelta', async () => {
     disegna();
     fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Consegna del Palazzo/ }));
-    fireEvent.click(screen.getByRole('button', { name: /^Sposta in…/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Copia o sposta le voci selezionate in un altro giorno' }));
+    fireEvent.click(within(await screen.findByRole('dialog', { name: 'Copia 1 voce in un altro giorno' })).getByRole('radio', { name: 'Sposta' }));
     const finestra = await screen.findByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' });
     // una voce sola di sera: la fascia parte da «di sera»
     expect(within(finestra).getByRole('radio', { name: 'Di sera' })).toHaveAttribute('aria-checked', 'true');
-    expect(finestra).toHaveTextContent('Le voci lasciano questo giorno e portano con sé le spunte delle partite.');
+    expect(finestra).toHaveTextContent('La voce lascia questo giorno e porta con sé le spunte delle partite.');
     scegliVoce('Giorno', /^13 aprile/, finestra);
     api.trasferisciVociGiornata.mockRejectedValue(new Error('Questa voce della giornata non esiste (più).'));
     fireEvent.click(within(finestra).getByRole('button', { name: /^Sposta nel 13 aprile, di sera/ }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Questa voce della giornata non esiste (più).'));
     expect(api.trasferisciVociGiornata).toHaveBeenCalledWith({ uid: [uid(4)], giorno: '04-13', fascia: 'sera', modo: 'sposta' }, 3);
     expect(screen.getByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Copia o sposta voci' })).toHaveTextContent('1 voce scelta');
+    expect(screen.getByRole('region', { name: 'Voci selezionate' })).toHaveTextContent('1 voce selezionata');
   });
 
   it('senza voci nel giorno il comando non c\'è; cambiando giorno la scelta non resta', () => {
@@ -515,6 +520,6 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
     rerender(<MemoryRouter><GiornoGuida g={{ ...base, giorno: '04-13' }} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
-    expect(screen.queryByRole('region', { name: 'Copia o sposta voci' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Voci selezionate' })).toBeNull();
   });
 });

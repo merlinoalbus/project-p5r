@@ -7,7 +7,7 @@
 // larghezza della riga (sotto casella, immagine e testo) e va a capo da sola sui tre formati.
 // ============================================================
 
-import type { ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import { PulsanteVisivo, type TonoPulsante } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -17,6 +17,26 @@ export interface GestoVoce {
   icona: ReactNode;
   onClick: () => void;
   tono?: TonoPulsante;
+  /** Un interruttore («Seleziona» la voce): acceso, tono primario e `aria-pressed`. */
+  premuto?: boolean;
+  /** Il suggerimento al passaggio del puntatore (`title`), quando il titolo da solo non basta. Sul tocco non si vede: ciò che informa sta
+   *  nel titolo («Taglia (3)»). */
+  descrizione?: string;
+}
+
+/**
+ * La selezione di una riga del Diario (appunti del Diario, 2026-10-26): se è selezionata o tagliata e i gestori del puntatore (clic,
+ * Ctrl+clic, Maiusc+clic col mouse). Assente nel rilascio. Lo stato si dice anche al lettore di schermo (`TestoSelezioneRiga`).
+ */
+export interface SelezioneRiga {
+  selezionata: boolean;
+  inTaglio: boolean;
+  gestori: Pick<HTMLAttributes<HTMLLIElement>, 'onClick' | 'onMouseDown' | 'onPointerDown'>;
+}
+/** Lo stato della riga per il lettore di schermo, solo quando c'è. */
+export function TestoSelezioneRiga({ s }: { s: SelezioneRiga | undefined }) {
+  if (!s || (!s.selezionata && !s.inTaglio)) return null;
+  return <span className="sr-only">{s.selezionata ? ' (selezionata)' : ''}{s.inTaglio ? ' (tagliata: si sposta incollando)' : ''}</span>;
 }
 
 interface PropsPulsante {
@@ -30,7 +50,8 @@ interface PropsPulsante {
 /** Il pulsante che apre e chiude i gesti della voce. */
 export function PulsanteMenuVoce({ voce, aperto, onCambia, disabled }: PropsPulsante) {
   return (
-    <button type="button" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o elimina: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
+    // `data-menu-voce`: chi chiude il menu da un suo gesto (Copia, Taglia, Incolla qui, Esc) ci rimette il fuoco
+    <button type="button" data-menu-voce="" className={`btn btn-sm touch shrink-0 self-start ${aperto ? 'btn-primary' : 'btn-ghost'}`} disabled={disabled} aria-expanded={aperto} aria-label={`Modifica, sposta o elimina: ${voce.slice(0, 60)}`} onClick={() => onCambia(!aperto)}>
       <IconaAzione chiave="dettagli" dimensione={20} />
     </button>
   );
@@ -41,7 +62,8 @@ export function GestiVoce({ gesti, disabled, etichetta, voce }: { gesti: GestoVo
   return (
     // `basis-full`: nella riga (flex a capo) la fila va sotto tutta la voce e ne prende l'intera larghezza, non la colonna stretta del testo
     <div className="flex flex-wrap justify-end gap-1.5 basis-full" role="group" aria-label={etichetta} data-voce={voce}>
-      {gesti.map((g) => <PulsanteVisivo key={g.chiave} compatto tono={g.tono ?? 'secondario'} icona={g.icona} titolo={g.titolo} disabled={disabled} onClick={g.onClick} />)}
+      {gesti.map((g) => <PulsanteVisivo key={g.chiave} compatto tono={g.tono ?? 'secondario'} icona={g.icona} titolo={g.titolo} disabled={disabled} onClick={g.onClick}
+        attivo={g.premuto} title={g.descrizione} />)}
     </div>
   );
 }

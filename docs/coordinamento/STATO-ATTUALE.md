@@ -1,5 +1,26 @@
 # Stato attuale del lavoro — lotto L12 «Verso il rilascio» (aggiornato 2026-10-25)
 
+## 26 OTTOBRE 2026 — Appunti del Diario (Copia, Taglia, Incolla con gli appunti di sistema)
+Ramo `lavoro-copia-incolla` (da `integrazione-24`), non unito né pubblicato: selezione delle voci (clic, Ctrl+clic, Maiusc+clic, Esc; menu «⋯» su
+touch), Ctrl+C / Ctrl+X / Ctrl+V con gli appunti di sistema (testo + HTML col blocco versionato, sopravvive a Win+V), piano dei rilievi e
+conferma, registro append-only `operazione_voci_diario` (migrazione 240) con «Annulla». Dettagli in `docs/DECISIONI.md` (2026-10-26) e
+`docs/ROADMAP.md`. Servizio provato su copie dei dati; nell'app non osservato (il backend non parte con il Node 22.17 di questa macchina:
+il controllo dell'avvio chiede almeno 22.23.4). Da provare dall'utente: giro Win+V, Firefox/Safari, menu touch, tre formati.
+Giro 2 (dopo la verifica avversariale, respinta): corretti l'ordine dell'annullo di più voci in coda alla fascia, il nome del collegamento
+perso nella copia e i rilievi del frontend (selezione fra giorni, Ctrl+V, scrittura dal menu, segno del taglio, finestra dei rilievi, clic in
+«Oggi», Ctrl+Z, notifica sopra la barra, fuoco, contrasto); punto `i` in `docs/ROADMAP.md`.
+Giro 3 (verifica respinta per UX e accessibilità): Ctrl+Z solo con la notifica a schermo, fuoco dopo «Annulla» e dopo l'incolla, barra della
+scheda «Oggi» sul tablet, come incollare detto nella conferma, segno del taglio, doppio clic, conteggi dei pulsanti della finestra dei
+rilievi; punto `j` in `docs/ROADMAP.md`, ramo `copia-incolla-giro3`.
+Giro 4 (giro 3 approvato da due revisori su tre, respinto dal revisore UX): conferma di Copia / Taglia declinata sul numero delle voci e
+a schermo 10 s, fuoco che non si ferma sul giorno mentre i «⋯» sono disattivati (e contorno visibile se ci arriva), barra che non
+lampeggia col doppio clic, «(1 di 2)» sui pulsanti della finestra dei rilievi; la migrazione del registro diventa la 240 (la 239 è delle
+televendite) e il ramo `copia-incolla-giro4` contiene `integrazione-24`. Punto `k` in `docs/ROADMAP.md`.
+Giro 5 (giro 4 respinto dal revisore UX): anche la finestra dei rilievi («Una voce nuova… in fondo alla sua fascia. Prima di incollarla:»,
+«La stessa voce… Prima di spostarla:») e la finestra «Copia in…» / «Sposta in…» sono declinate su una voce sola; il ramo è riunito con
+`integrazione-24` a `36a65ab9` (Persona e scorta, con i rilievi UX della fusione: `eliminaVoceGiornata` restituisce gli avvisi, la copia degli effetti porta `scorta` e
+`livello` con `normalizzaEffettoVoce`). Punto `l` in `docs/ROADMAP.md`. Serve una nuova verifica avversariale.
+
 ## AGGIORNAMENTO 26 OTTOBRE 2026 — L13, televendite (decisione 4)
 - **Dove:** ramo di lavoro delle televendite, già unito con `integrazione-24` (che contiene gli yen automatici, decisione 18). Non è su `main`.
 - **Cosa fa:** Set A e Set B sono articoli italiani alternativi (migrazione 239). Alla spunta si sceglie quale set si è comprato, o «Nessuno», e si paga solo quello scelto. Dettaglio in `ROADMAP.md` (sezione «Televendite»), `ARCHITETTURA.md` («Alternative d'acquisto») e `DECISIONI.md` (2026-10-26).

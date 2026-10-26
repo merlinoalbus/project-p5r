@@ -14,7 +14,7 @@
 // diventano righe da spuntare, e «Copia in…» / «Sposta in…» le mandano in un altro giorno e fascia (`TrasferisciVoci`).
 // ============================================================
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -32,7 +32,14 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { Modal } from '../shared/Modal';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
-import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
+import { GestiVoce, PulsanteMenuVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
+import { classeSelezioneRiga } from '../../utils/selezioneRiga';
+import { useSelezioneVoci } from '../../hooks/useSelezioneVoci';
+import { useAppuntiDiario } from '../../hooks/useAppuntiDiario';
+import { useAppuntiDiarioStore } from '../../stores/appuntiDiarioStore';
+import { useMedia } from '../../hooks/useMedia';
+import { BarraSelezioneVoci } from './BarraSelezioneVoci';
+import { FinestraIncolla, FinestraIncollaManuale } from './FinestraIncolla';
 import { ModuloVoceGiornata, type SoggettoVoce } from './ModuloVoceGiornata';
 import { VoceEvento } from './VociAgenda';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
@@ -55,6 +62,13 @@ import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazi
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** Quanto si aspetta, dopo un clic che seleziona la prima voce, il secondo clic di un doppio clic (di solito entro 200–300 ms) prima di
+ *  mostrare la barra delle voci selezionate. */
+const ATTESA_DOPPIO_CLIC = 400;
+
+/** I comandi dentro una riga: il clic lì è loro, non seleziona la voce. */
+const INTERATTIVI = 'a, button, input, label, select, textarea, summary, details, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="menuitem"], [role="dialog"], [contenteditable=""], [contenteditable="true"]';
 
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
@@ -85,6 +99,8 @@ interface PropsAzione {
   classeRiga?: string;
   /** L13 (ondata 4a, solo preparazione): le proposte «da completare» della voce, con il gesto che le apre. */
   daCompletare?: { n: number; onApri: () => void };
+  /** Appunti del Diario (2026-10-26, solo preparazione): la riga selezionata o tagliata e i gestori del clic che la selezionano. */
+  selezione?: SelezioneRiga;
 }
 
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
@@ -93,7 +109,7 @@ export function Azione(props: PropsAzione) {
   const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
   return <AzioneNelContesto key={contesto} {...props} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare }: PropsAzione) {
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[]; esiti?: SceltaEsitoSpunta[] } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
@@ -159,13 +175,14 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const stato = a.fatta ? null : a.stato;
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
-    <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''}`} aria-current={evidenziata ? 'true' : undefined}>
+    <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
+      {...selezione?.gestori}>
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
-        <span className={a.fatta ? 'line-through' : ''}>{a.azione}{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
+        <span className={a.fatta ? 'line-through' : ''}>{a.azione}<TestoSelezioneRiga s={selezione} />{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
         {!IN_RILASCIO && daCompletare && <span className="flex"><SegnoDaCompletare n={daCompletare.n} voce={a.azione} onApri={daCompletare.onApri} /></span>}
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}
@@ -222,13 +239,20 @@ interface Props {
   fasciaCorrente?: 'giorno' | 'sera' | null;
   /** R11-15/1: se c'è, accanto alle allerte meteo del giorno compare la matita per correggerle e rimetterle com'erano nella guida; il gesto la richiama per rileggere. Assente in Partita. */
   onAllerteModificate?: () => void | Promise<void>;
+  /** Appunti del Diario: il clic semplice col mouse su una riga la seleziona. Predefinito: sì nella pagina del Diario, no nella scheda «Oggi»
+   *  (`compatto`), dove si gioca e un clic sul testo non deve far comparire la barra delle voci selezionate; lì restano Ctrl+clic,
+   *  Maiusc+clic e «Seleziona» del menu (rilievo del revisore, 2026-10-26). */
+  selezioneAlClic?: boolean;
+  /** Da 768 px la giornata scorre in un'area interna (scheda «Oggi» con `riempi`): la barra delle voci selezionate si ferma sul fondo di
+   *  quell'area, non 72 px più su per scavalcare la barra di navigazione, che lì sta già fuori dall'area. */
+  scorreDentro?: boolean;
 }
 
 /** Richiesta di conferma prima di un gesto che non si disfa (eliminare una voce). */
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash } = useLocation();
@@ -241,26 +265,53 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const [menu, setMenu] = useState<string | null>(null);
   const [soggetto, setSoggetto] = useState<SoggettoVoce | null>(null);
   const [conferma, setConferma] = useState<Conferma | null>(null);
-  // Copiare o spostare voci in un altro giorno (2026-10-12, «Una o più insieme»): le voci scelte, legate al giorno (cambiando
-  // giorno la scelta non vale più), e la finestra aperta («copia» o «sposta»)
-  const [scelta, setScelta] = useState<{ giorno: string; uid: ReadonlySet<string> } | null>(null);
+  // Appunti del Diario (2026-10-26): le voci selezionate (clic, Ctrl+clic, Maiusc+clic col mouse; «Seleziona» nel menu della voce), legate al
+  // giorno e nell'ordine visivo. La stessa selezione fa da scelta a caselle di «Copia o sposta voci» (2026-10-12, «Una o più insieme»),
+  // e la finestra «Copia in…» / «Sposta in…» la manda in un altro giorno.
+  const ordineVisivo = useMemo(() => [...g.azioni.filter((a) => a.fascia === 'giorno'), ...g.azioni.filter((a) => a.fascia === 'sera')].map((a) => a.uid), [g.azioni]);
+  const sel = useSelezioneVoci(g.giorno, ordineVisivo);
+  const [caselleDi, setCaselleDi] = useState<string | null>(null);
+  const caselle = !IN_RILASCIO && caselleDi === g.giorno;
   const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
   // L13 (ondata 4a, solo preparazione): le proposte «da completare» del giorno, rilette dopo ogni modifica della giornata; la voce di cui sono aperte
   const [versioneProposte, setVersioneProposte] = useState(0);
   const proposte = useProposteDelGiorno(g.giorno, versioneProposte);
   const [proposteDi, setProposteDi] = useState<string | null>(null);
-  const scelte = scelta?.giorno === g.giorno ? scelta.uid : null;
-  /** Mette o toglie voci dalla scelta. */
-  const scegli = (uid: string[], dentro: boolean) => setScelta((s) => {
-    const n = new Set(s?.giorno === g.giorno ? s.uid : []);
-    for (const u of uid) { if (dentro) n.add(u); else n.delete(u); }
-    return { giorno: g.giorno, uid: n };
-  });
+  const scelte = caselle ? sel.insieme : null;
+  /** Mette o toglie voci dalla scelta a caselle. */
+  const scegli = (uid: string[], dentro: boolean) => sel.scegli(uid, dentro);
+  // su tablet e telefono Copia, Taglia e Incolla qui stanno nel menu della voce (lì la tastiera non c'è)
+  const tocco = useMedia('(pointer: coarse)');
+  const taglio = useAppuntiDiarioStore((s) => s.taglio);
   const partita = partitaId ?? undefined;
   // la chiave del menu porta il giorno: cambiando giorno nessun menu resta aperto su una voce che non c'è più
   const chiaveMenu = (uid: string) => `${g.giorno}/${uid}`;
-  /** Le props del menu di una voce: se è quello aperto e come aprirlo o chiuderlo (uno solo aperto alla volta). */
-  const menuDi = (uid: string) => ({ menuAperto: menu === chiaveMenu(uid), onMenu: (aperto: boolean) => setMenu(aperto ? chiaveMenu(uid) : null) });
+  /** Le props del menu di una voce: se è quello aperto e come aprirlo o chiuderlo (uno solo aperto alla volta). Aprendolo su tablet e
+   *  telefono si prepara il blocco delle voci di Copia e Taglia, così si scrive negli appunti dentro il gesto. */
+  const menuDi = (uid: string) => ({ menuAperto: menu === chiaveMenu(uid), onMenu: (aperto: boolean) => {
+    setMenu(aperto ? chiaveMenu(uid) : null);
+    if (aperto && tocco && !IN_RILASCIO) appunti.prepara(gruppoDi(uid));
+  } });
+  /** Rimette il fuoco sul pulsante «⋯» della voce (dopo un gesto del menu che lo chiude: chi usa un lettore di schermo resta lì). */
+  const fuocoAlMenu = (uid: string) => setTimeout(() => document.getElementById(`voce-${uid}`)?.querySelector<HTMLButtonElement>('button[data-menu-voce]')?.focus());
+  const radice = useRef<HTMLDivElement | null>(null);
+  /** Il posto del fuoco nel giorno dopo un incolla o un annullo (WCAG 2.4.3): il «⋯» della voce `uid`, se c'è; altrimenti il primo «⋯»
+   *  attivo del giorno; altrimenti il giorno stesso. Null se il giorno non è più a schermo (e nel rilascio, dove non si incolla).
+   *  `attendi` (chi riprova al frame dopo, `rimettiFuoco`): finché la riga di `uid` non è ancora disegnata o dei «⋯» sono disattivati
+   *  (un'operazione li tiene fermi) dà null, così si riprova invece di posare il fuoco sul giorno, che fermerebbe i tentativi (rilievo del
+   *  revisore UX, giro 3); il giorno resta l'ultima riserva, all'ultimo tentativo o per chi non riprova. */
+  const fuocoNelGiorno = IN_RILASCIO ? () => null : (uid: string | null, attendi = false): HTMLElement | null => {
+    const r = radice.current;
+    if (!r?.isConnected) return null;
+    const suo = uid ? r.querySelector<HTMLButtonElement>(`[id="voce-${uid}"] button[data-menu-voce]`) : null;
+    if (suo && !suo.disabled) return suo;
+    if (attendi && (suo || (uid && !r.querySelector(`[id="voce-${uid}"]`)) || r.querySelector('button[data-menu-voce]:disabled'))) return null;
+    const primo = r.querySelector<HTMLElement>('button[data-menu-voce]:not(:disabled)');
+    if (primo) return primo;
+    // il giorno stesso prende il fuoco solo per questo (un `tabIndex` fisso gli darebbe il fuoco a ogni clic sulle righe), e lo perde uscendo
+    if (!r.hasAttribute('tabindex')) { r.setAttribute('tabindex', '-1'); r.addEventListener('blur', () => r.removeAttribute('tabindex'), { once: true }); }
+    return r;
+  };
 
   // aprire la finestra o la conferma chiude il menu della voce: tornando alla lista la riga è di nuovo com'era
   const apri = (s: SoggettoVoce) => { setMenu(null); setSoggetto(s); };
@@ -292,6 +343,70 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     }
   };
 
+  // Ctrl+C / Ctrl+X / Ctrl+V / Esc con gli appunti di sistema (nel rilascio niente: l'hook è vuoto e il modulo esce dal bundle)
+  // Esc chiude prima il menu della voce aperto (il fuoco torna al suo «⋯»), poi annulla la selezione
+  const appunti = useAppuntiDiario({ giorno: g.giorno, voci: g.azioni, selezione: sel, onModificata: async () => { await aggiornata(); },
+    chiudiMenu: () => {
+      if (menu === null) return false;
+      const uid = menu.slice(menu.indexOf('/') + 1);
+      setMenu(null);
+      fuocoAlMenu(uid);
+      return true;
+    },
+    fuoco: fuocoNelGiorno });
+  const bloccata = occupato || appunti.occupato;
+  /** Le voci su cui agisce il menu di una voce: la selezione, se la voce ne fa parte; altrimenti la voce sola. */
+  const gruppoDi = (uid: string): readonly string[] => (sel.insieme.has(uid) ? sel.uid : [uid]);
+  // il puntatore dell'ultimo gesto sulle righe: col mouse il clic seleziona, col dito no (su tablet e telefono si seleziona dal menu)
+  const puntatore = useRef('mouse');
+  /** La selezione prima dell'ultimo clic semplice: un doppio clic (per una parola del testo) la rimette, così non resta la barra delle voci. */
+  const primaDelClic = useRef<string[] | null>(null);
+  /** Vero subito dopo un clic semplice che ha selezionato la prima voce: finché non si sa se è un doppio clic (per una parola del testo) la
+   *  barra delle voci e il loro annuncio non compaiono, così non lampeggiano per niente (rilievo del revisore UX, giro 3). Solo dal nulla:
+   *  con una selezione già a schermo la barra resta e dice subito il numero vero, che è quello su cui agiscono i suoi comandi. */
+  const [attesaDoppioClic, setAttesaDoppioClic] = useState(false);
+  const timerDoppioClic = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fineAttesaDoppioClic = () => { if (timerDoppioClic.current) { clearTimeout(timerDoppioClic.current); timerDoppioClic.current = null; } setAttesaDoppioClic(false); };
+  useEffect(() => () => { if (timerDoppioClic.current) clearTimeout(timerDoppioClic.current); }, []);
+  /** Quante voci selezionate mostrano la barra e l'annuncio (zero durante l'attesa del doppio clic). */
+  const selezionateAVista = attesaDoppioClic ? 0 : sel.uid.length;
+  /** La selezione di una riga: stato, segno del taglio e gestori del clic (clic, Ctrl+clic, Maiusc+clic). */
+  const selezioneDi = (uid: string): SelezioneRiga | undefined => (IN_RILASCIO || caselle ? undefined : {
+    selezionata: sel.insieme.has(uid),
+    inTaglio: !!taglio && taglio.giorno === g.giorno && taglio.uid.includes(uid),
+    gestori: {
+      onPointerDown: (e) => { puntatore.current = e.pointerType || 'mouse'; },
+      // Maiusc+clic estenderebbe la selezione del testo: col mouse sulla riga (non sui suoi comandi) seleziona le voci
+      onMouseDown: (e) => { if (e.shiftKey && puntatore.current === 'mouse' && !(e.target as Element).closest(INTERATTIVI)) e.preventDefault(); },
+      onClick: (e) => {
+        // tocco e penna: niente (il menu della voce); un clic da tastiera (detail 0) è dei comandi
+        if (puntatore.current !== 'mouse' || e.button !== 0 || e.detail === 0 || (e.target as Element).closest(INTERATTIVI)) return;
+        // doppio (o triplo) clic: è per selezionare una parola (o la riga) del testo; la selezione che il primo clic aveva cambiato torna com'era
+        if (e.detail > 1) {
+          const prima = primaDelClic.current;
+          primaDelClic.current = null;
+          if (prima) sel.imposta(prima);
+          fineAttesaDoppioClic();
+          return;
+        }
+        primaDelClic.current = null;
+        fineAttesaDoppioClic();
+        // un clic che chiude una selezione di testo resta al testo
+        if (window.getSelection()?.toString()) return;
+        if (e.shiftKey) sel.intervallo(uid);
+        else if (e.ctrlKey || e.metaKey) sel.alterna(uid);
+        else if (selezioneAlClic) {
+          primaDelClic.current = [...sel.uid];
+          sel.sostituisci(uid);
+          if (primaDelClic.current.length === 0) {
+            setAttesaDoppioClic(true);
+            timerDoppioClic.current = setTimeout(() => { timerDoppioClic.current = null; setAttesaDoppioClic(false); }, ATTESA_DOPPIO_CLIC);
+          }
+        }
+      },
+    },
+  });
+
   /** Una sola operazione server raccoglie voce, spunte, fonti e ricevute nel Cestino prima della rimozione. */
   const elimina = (v: AzionePercorsoDto) => {
     /** L'eliminazione vera e propria della voce dalla guida; ciò che resta in una partita (un esemplare in scorta modificato dopo la spunta) lo si dice. */
@@ -316,6 +431,19 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
 
   /** I gesti di una voce, al suo posto `i` nella fascia di `n` voci. */
   const gesti = (v: AzionePercorsoDto, i: number, n: number): GestoVoce[] => [
+    // appunti del Diario (2026-10-26): «Seleziona» su ogni dispositivo (anche da tastiera); Copia, Taglia e Incolla qui dove non c'è la tastiera
+    { chiave: 'seleziona', titolo: 'Seleziona', premuto: sel.insieme.has(v.uid), icona: <IconaAzione chiave="seleziona" dimensione={20} />, onClick: () => sel.alterna(v.uid) },
+    // con più voci selezionate, fra cui questa, Copia e Taglia agiscono su tutte: il numero si vede nel nome («Taglia (3)»), perché sul
+    // tocco il suggerimento non compare. Il menu si chiude e il fuoco torna al suo «⋯»
+    ...(tocco ? (() => {
+      const gruppo = gruppoDi(v.uid);
+      const piu = gruppo.length > 1 ? ` (${gruppo.length})` : '';
+      return [
+        { chiave: 'copia', titolo: `Copia${piu}`, descrizione: piu ? `Copia le ${gruppo.length} voci selezionate` : 'Copia questa voce', icona: <IconaAzione chiave="copia" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.copia(gruppo); } },
+        { chiave: 'taglia', titolo: `Taglia${piu}`, descrizione: piu ? `Taglia le ${gruppo.length} voci selezionate` : 'Taglia questa voce', icona: <IconaAzione chiave="taglia" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.taglia(gruppo); } },
+        { chiave: 'incolla', titolo: 'Incolla qui', descrizione: 'Incolla dopo questa voce', icona: <IconaAzione chiave="incolla" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.incollaDagliAppunti(v.uid); } },
+      ];
+    })() : []),
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'voce', voce: v }) },
     ...(i > 0 ? [{ chiave: 'su', titolo: 'Sposta su', icona: <IconaAzione chiave="su" dimensione={20} />, onClick: () => sposta(v, -1) }] : []),
     ...(i < n - 1 ? [{ chiave: 'giu', titolo: 'Sposta giù', icona: <IconaAzione chiave="giu" dimensione={20} />, onClick: () => sposta(v, 1) }] : []),
@@ -399,10 +527,12 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
-                ? <VoceEvento key={v.uid} e={v} gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
-                    dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={occupato} /> : undefined} />
+                ? <VoceEvento key={v.uid} e={v} gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} occupato={bloccata} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
+                    selezione={selezioneDi(v.uid)}
+                    dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={bloccata} /> : undefined} />
                 : <Azione key={`${partitaId}:${v.uid}`} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
-                    gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
+                    gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={bloccata} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
+                    selezione={selezioneDi(v.uid)}
                     daCompletare={IN_RILASCIO || !proposte.perVoce.get(v.uid)?.length ? undefined : { n: proposte.perVoce.get(v.uid)!.length, onApri: () => { setMenu(null); setProposteDi(v.uid); } }} />)}
             </ul>
           )}
@@ -411,7 +541,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={radice} className="flex flex-col gap-3 rounded-lg outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
       <section className={`card flex flex-col gap-1 testo-13 ${compatto ? 'py-3' : ''}`}>
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
@@ -429,31 +559,29 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
         {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
       </section>
-      {/* copiare o spostare voci in un altro giorno (2026-10-12): fuori dalla scelta un comando solo; nella scelta la barra, che resta
-          in vista scorrendo, col conto e i comandi */}
-      {!IN_RILASCIO && !scelte && g.azioni.length > 0 && (
+      {/* copiare o spostare voci in un altro giorno (2026-10-12): la scelta a caselle, per chi non usa il mouse; con voci già selezionate
+          (clic, Ctrl+clic, Maiusc+clic, «Seleziona») la barra in fondo ha già i comandi */}
+      {!IN_RILASCIO && !caselle && selezionateAVista === 0 && g.azioni.length > 0 && (
         <PulsanteVisivo tono="fantasma" compatto className="self-end" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
-          aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={occupato} onClick={() => { setMenu(null); setScelta({ giorno: g.giorno, uid: new Set() }); }} />
-      )}
-      {scelte && (
-        <section className="card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci">
-          {/* i comandi non si restringono mai (testo troncato); sul telefono «Fine» sta accanto al conto e «Copia in…» / «Sposta in…»
-              prendono la riga sotto, così la barra fissa resta di due righe */}
-          <span className="min-w-0 flex-1 testo-13"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
-            <span className="text-text-muted"> · da copiare o spostare in un altro giorno</span></span>
-          <div className="order-last flex basis-full gap-2 sm:order-none sm:basis-auto">
-            <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('copia')} />
-            <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('sposta')} />
-          </div>
-          <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Fine" aria-label="Esci dalla scelta" onClick={() => setScelta(null)} />
-        </section>
+          aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={bloccata} onClick={() => { setMenu(null); setCaselleDi(g.giorno); }} />
       )}
       {sezione('giorno')}
       {sezione('sera')}
-      {scelte && trasferimento && (
-        <TrasferisciVoci modo={trasferimento} voci={g.azioni.filter((v) => scelte.has(v.uid))} giorno={g.giorno} partitaId={partitaId}
-          onChiudi={() => setTrasferimento(null)} onFatto={async () => { setScelta(null); await aggiornata(); }} />
+      {/* la barra delle voci selezionate: in fondo, ferma sopra la barra di navigazione mentre si scorre (non sposta le righe in cima) */}
+      {(caselle || selezionateAVista > 0) && (
+        <BarraSelezioneVoci quante={sel.uid.length} caselle={caselle} occupato={bloccata} scorreDentro={scorreDentro}
+          onCopia={() => appunti.copia(sel.uid)} onTaglia={() => appunti.taglia(sel.uid)} onAltroGiorno={() => { setMenu(null); setTrasferimento('copia'); }}
+          onFine={() => { setCaselleDi(null); sel.svuota(); }} />
       )}
+      {/* il conteggio per il lettore di schermo, in una regione sempre presente */}
+      {!IN_RILASCIO && <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{selezionateAVista === 0 ? '' : selezionateAVista === 1 ? '1 voce selezionata' : `${selezionateAVista} voci selezionate`}</p>}
+      {trasferimento && sel.uid.length > 0 && (
+        <TrasferisciVoci modo={trasferimento} voci={g.azioni.filter((v) => sel.insieme.has(v.uid))} giorno={g.giorno} partitaId={partitaId}
+          onChiudi={() => setTrasferimento(null)} onFatto={async () => { setCaselleDi(null); sel.svuota(); await aggiornata(); }} onRicarica={aggiornata}
+          fuoco={(attendi) => fuocoNelGiorno(sel.uid[0] ?? null, attendi)} />
+      )}
+      {appunti.inAttesa && <FinestraIncolla piano={appunti.inAttesa.piano} occupato={appunti.occupato} onConferma={appunti.conferma} onChiudi={appunti.chiudiAttesa} />}
+      {appunti.manuale && <FinestraIncollaManuale onIncolla={(c) => appunti.incollaContenuto(c, appunti.manuale?.dopoUid ?? null)} onChiudi={appunti.chiudiManuale} />}
       {partitaId && totali.tutte > 0 && <p className="m-0 testo-12 text-text-muted">{totali.fatte} azioni fatte su {totali.tutte}.</p>}
       {soggetto && <ModuloVoceGiornata soggetto={soggetto} giorno={g.giorno} voci={g.azioni} partitaId={partitaId} onChiudi={() => setSoggetto(null)} onSalvato={aggiornata} />}
       {!IN_RILASCIO && proposteDi && (() => {
