@@ -5,8 +5,11 @@
 // Test Selettore — l'elenco chiuso di tutta l'app: soglia della ricerca, voce vuota, gruppi, tastiera
 // ============================================================
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { useState } from 'react';
+import { Modal } from './Modal';
 import { Selettore, type OpzioneSelettore } from './Selettore';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../../test/selettore';
 
@@ -131,51 +134,82 @@ describe('Selettore', () => {
     expect(valoreSelettore('Categoria')).toBe('Tutte');
   });
 
-  it('quando a destra non c’è spazio la tendina si appende al bordo destro del pulsante', () => {
-    render(<Selettore compatto etichetta="Partita attiva" valore="" opzioni={poche} onCambia={() => {}} />);
-    const pulsante = screen.getByRole('combobox', { name: 'Partita attiva: Scegli…' });
-    const larghezzaOriginale = window.innerWidth;
-    Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
-    /** Rettangolo finto del pulsante (80×44 px) con il bordo sinistro alla coordinata data. */
-    const rettangolo = (left: number): DOMRect => ({ left, top: 0, width: 80, height: 44, right: left + 80, bottom: 44, x: left, y: 0, toJSON: () => ({}) }) as DOMRect;
-    pulsante.getBoundingClientRect = () => rettangolo(900);
-    fireEvent.click(pulsante);
-    expect(document.querySelector('.selettore__tendina')).toHaveClass('selettore__tendina--destra');
-    fireEvent.click(pulsante);
-    pulsante.getBoundingClientRect = () => rettangolo(10);
-    fireEvent.click(pulsante);
-    expect(document.querySelector('.selettore__tendina')).not.toHaveClass('selettore__tendina--destra');
-    Object.defineProperty(window, 'innerWidth', { value: larghezzaOriginale, configurable: true });
+  /** Rettangolo finto (DOMRect) con i bordi dati. */
+  const rettangolo = (left: number, top: number, width: number, height: number): DOMRect =>
+    ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
+  /** Schermo finto della prova (jsdom non dispone la pagina: `clientWidth`/`clientHeight` valgono 0 e il componente usa questi). */
+  const schermo = (larghezza: number, altezza: number) => {
+    Object.defineProperty(window, 'innerWidth', { value: larghezza, configurable: true });
+    Object.defineProperty(window, 'innerHeight', { value: altezza, configurable: true });
+  };
+  const larghezzaOriginale = window.innerWidth;
+  const altezzaOriginale = window.innerHeight;
+  const altezzaElementi = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight');
+  afterEach(() => {
+    schermo(larghezzaOriginale, altezzaOriginale);
+    if (altezzaElementi) Object.defineProperty(HTMLElement.prototype, 'offsetHeight', altezzaElementi);
   });
 
-  it('in una finestra il corpo scorre quanto basta a mostrare la tendina, senza far uscire il pulsante dalla cima', () => {
-    render(<div className="modal-body"><Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} /></div>);
-    const corpo = document.querySelector<HTMLElement>('.modal-body')!;
-    const pulsante = screen.getByRole('combobox', { name: 'Scelta' });
-    /** Rettangoli finti: il corpo va da 100 a 100 + altezza a schermo; pulsante e fondo della tendina dove li mette la prova. */
-    let schermo = 300; let cimaPulsante = 0; let fondoTendina = 0;
-    Object.defineProperty(corpo, 'offsetHeight', { value: 300, configurable: true });
-    const rettangolo = (top: number, bottom: number): DOMRect => ({ left: 0, right: 100, top, bottom, width: 100, height: bottom - top, x: 0, y: top, toJSON: () => ({}) }) as DOMRect;
-    const spia = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-      if (this === corpo) return rettangolo(100, 100 + schermo);
-      if (this === pulsante) return rettangolo(cimaPulsante, cimaPulsante + 44);
-      if (this.classList.contains('selettore__tendina')) return rettangolo(cimaPulsante + 46, fondoTendina);
-      return rettangolo(0, 0);
+  it('la tendina si allinea al pulsante e, quando a destra non c’è spazio, al suo bordo destro: mai fuori dallo schermo', () => {
+    schermo(1000, 768);
+    render(<Selettore compatto etichetta="Partita attiva" valore="" opzioni={poche} onCambia={() => {}} />);
+    const pulsante = screen.getByRole('combobox', { name: 'Partita attiva: Scegli…' });
+    const tendina = () => document.querySelector<HTMLElement>('.selettore__tendina')!;
+    // pulsante 80×44 a 900 px: la tendina (260 px) sporgerebbe oltre 992; si appoggia al bordo destro del pulsante (980 − 260)
+    pulsante.getBoundingClientRect = () => rettangolo(900, 0, 80, 44);
+    fireEvent.click(pulsante);
+    expect(tendina().style.left).toBe('720px');
+    expect(tendina().style.width).toBe('260px');
+    expect(tendina().style.top).toBe('46px');
+    fireEvent.click(pulsante);
+    pulsante.getBoundingClientRect = () => rettangolo(10, 0, 80, 44);
+    fireEvent.click(pulsante);
+    expect(tendina().style.left).toBe('10px');
+  });
+
+  it('se sotto il pulsante non c’è spazio la tendina si apre sopra, attaccata al pulsante; altrimenti l’elenco si accorcia quanto serve', () => {
+    schermo(1000, 768);
+    // tendina naturale alta 400 px, di cui 350 di elenco
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      get(this: HTMLElement) { return this.classList.contains('selettore__tendina') ? 400 : this.classList.contains('selettore__elenco') ? 350 : 0; },
     });
-    /** Apre la tendina partendo da `scrollTop` 0 e dice di quanto è sceso il corpo; poi la richiude. */
-    const apri = (cima: number, fondo: number): number => {
-      cimaPulsante = cima; fondoTendina = fondo; corpo.scrollTop = 0;
-      fireEvent.click(pulsante);
-      const sceso = corpo.scrollTop;
-      fireEvent.click(pulsante);
-      return sceso;
-    };
-    expect(apri(150, 380)).toBe(0); // ci sta: fermo
-    expect(apri(300, 520)).toBe(120); // sporge di 120 sotto il fondo (400): scende di 120
-    expect(apri(150, 600)).toBe(50); // sporge di 200, ma il pulsante è a 50 dalla cima: scende di 50 e il pulsante resta in vista
-    schermo = 285; // finestra ancora in scala 0.95 (animazione d'apertura): 95 a schermo sono 100 veri
-    expect(apri(300, 480)).toBe(100);
-    spia.mockRestore();
+    render(<Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} />);
+    const pulsante = screen.getByRole('combobox', { name: 'Scelta' });
+    const tendina = () => document.querySelector<HTMLElement>('.selettore__tendina')!;
+    const elenco = () => document.querySelector<HTMLElement>('.selettore__elenco')!;
+    // in fondo allo schermo (700–744): sotto restano 14 px, sopra 690 → sopra, ancorata col bordo inferiore a 2 px dal pulsante (768 − 700 + 2)
+    pulsante.getBoundingClientRect = () => rettangolo(10, 700, 300, 44);
+    fireEvent.click(pulsante);
+    expect(tendina().style.top).toBe('auto');
+    expect(tendina().style.bottom).toBe('70px');
+    expect(elenco().style.maxHeight).toBe('');
+    fireEvent.click(pulsante);
+    // a metà (356–400): sotto 358, sopra 346 → sotto, e l'elenco perde i 42 px che non ci stanno (350 − 42)
+    pulsante.getBoundingClientRect = () => rettangolo(10, 356, 300, 44);
+    fireEvent.click(pulsante);
+    expect(tendina().style.top).toBe('402px');
+    expect(tendina().style.bottom).toBe('auto');
+    expect(elenco().style.maxHeight).toBe('308px');
+  });
+
+  it('nel foglio di stile la tendina è fissa sopra il contenuto e nessuna variante la rimette nel flusso dei contenitori', () => {
+    const css = readFileSync(join(__dirname, '../../tailwind.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toMatch(/\.selettore__tendina \{ position:fixed;/);
+    expect(css).not.toMatch(/selettore__tendina[^{]*\{[^}]*position:\s*(static|absolute|relative)/);
+  });
+
+  it('in una finestra il primo Esc chiude la tendina e lascia aperta la finestra; il secondo chiude la finestra', () => {
+    const onChiudi = vi.fn();
+    render(<Modal titolo="Infiltrazioni della voce" aperta onChiudi={onChiudi}><Selettore etichetta="Scelta" valore="" opzioni={poche} onCambia={() => {}} /></Modal>);
+    const pulsante = screen.getByRole('combobox', { name: 'Scelta' });
+    fireEvent.click(pulsante);
+    fireEvent.keyDown(pulsante, { key: 'Escape' });
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(onChiudi).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(pulsante);
+    fireEvent.keyDown(pulsante, { key: 'Escape' });
+    expect(onChiudi).toHaveBeenCalledTimes(1);
   });
 
   it('disabilitato non si apre', () => {

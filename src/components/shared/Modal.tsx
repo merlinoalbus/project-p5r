@@ -89,7 +89,9 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
     /** Esc chiude la finestra, ma solo quella più in alto: con una finestra aperta sopra un'altra (le note sopra il cassetto del
      *  Confidente) un solo Esc chiudeva tutte e due. Le finestre si aggiungono in fondo a <body>: la più in alto è l'ultima. */
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
+      // un Esc già usato da un controllo della finestra (la tendina aperta di un Selettore, che lo segna con `preventDefault`) chiude
+      // quel controllo e non la finestra: il primo Esc chiude la tendina, il secondo la finestra
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
       const aperte = document.querySelectorAll('.modal-overlay');
       if (aperte.length > 0 && aperte[aperte.length - 1] !== sfondo.current) return;
       chiudi.current();

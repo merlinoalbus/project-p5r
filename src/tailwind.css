@@ -2174,7 +2174,11 @@
 .selettore--con-etichetta .selettore__scelta { flex-direction:row; align-items:center; padding:8px 30px 8px 12px; border-radius:var(--radius-md); background:var(--color-surface); }
 .selettore--con-etichetta .selettore__valore { font-size:var(--testo-15); font-weight:400; }
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
-.selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
+/* La tendina sta sopra il contenuto, fissa rispetto allo schermo: `left`, `top`/`bottom` e `width` li mette il componente (Selettore.tsx,
+   `collocaTendina`) accanto al pulsante. Fissa, non conta nello scorrimento di nessun contenitore: aperta in una finestra o in un pannello
+   non li allunga e non li fa scorrere, e la sola barra è quella dell'elenco (segnalazione dell'utente, 2026-10-27: «doppia barra di
+   scorrimento verticale»). Il 110 la tiene sopra le intestazioni e la barra di navigazione; dentro una finestra conta il livello della finestra. */
+.selettore__tendina { position:fixed; z-index:110; left:0; top:0; width:260px; max-width:calc(100vw - 16px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
@@ -2192,15 +2196,10 @@
    pagine, non un ornamento, e i 40 px lo rendevano il solo bersaglio sotto soglia di tutta l'app. */
 .selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:44px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
 .selettore--compatto .selettore__valore { font-size:var(--testo-13); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.selettore--compatto .selettore__tendina { width:max(100%, 260px); }
-/* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
-.selettore__tendina--destra { left:auto; right:0; }
-/* In linea: la tendina si apre nel flusso e allunga chi la contiene, invece di sovrapporsi. Per un selettore in fondo a una
-   finestra breve, dove sovrapposta resterebbe tagliata dal corpo scorrevole (si vedeva una riga). Sul telefono resta il foglio
-   dal basso: la regola sotto, a pari specificità, viene dopo. */
-.selettore--in-linea .selettore__tendina { position:static; width:auto; max-width:none; margin-top:2px; box-shadow:none; }
-/* l'elenco aperto allunga la finestra: più basso, perché ci stia intero (a 1366×657 la finestra andava a scorrere insieme all'elenco) */
-@media (min-width: 640px) { .selettore--in-linea .selettore__elenco { max-height:min(30vh, 320px); } }
+/* Larghezza e lato (a destra se non ci sta, sopra se sotto manca spazio) li decide il componente per ogni tendina: non servono più le regole
+   `.selettore--compatto .selettore__tendina` e `.selettore__tendina--destra`. Nemmeno la variante `.selettore--in-linea`, che apriva la
+   tendina nel flusso per non farla tagliare dal corpo della finestra, allungandolo e facendolo scorrere insieme all'elenco: fissa, la
+   tendina non è più tagliata da nessun contenitore. La classe resta sui chiamanti come segno, senza regole. */
 
 /* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
    sovrascrivere come per tutte le altre componenti */

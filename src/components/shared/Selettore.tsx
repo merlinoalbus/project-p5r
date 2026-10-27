@@ -14,10 +14,19 @@
 // Accessibilità (WCAG 2.2, schema APG del combobox con listbox): il fuoco resta sul pulsante (o sul campo di ricerca) e la voce
 // evidenziata è dichiarata con `aria-activedescendant`; le voci sono `option` senza pulsanti dentro, quindi Tab non le attraversa
 // una a una e chiude la tendina. Il nome accessibile dice anche il valore quando l'etichetta non è visibile (selettore compatto).
+//
+// La tendina sta SOPRA il contenuto, mai dentro il suo scorrimento (segnalazione dell'utente, 2026-10-27, sulla finestra «Infiltrazioni
+// della voce»: «questo è rotto... doppia barra di scorrimento verticale»). Prima era `position:absolute` dentro il pulsante: in una
+// finestra o in un pannello allungava l'area scorrevole che la conteneva, e accanto alla barra dell'elenco compariva quella del corpo.
+// Ora è `position:fixed`, collocata da `collocaTendina` rispetto al pulsante e dentro lo schermo: sotto il pulsante, oppure sopra se
+// sotto non ci sta e sopra c'è più spazio; l'elenco si accorcia quanto serve a starci. Un elemento fisso non conta nello scorrimento di
+// nessun antenato, quindi nessun contenitore si allunga né scorre: una barra sola, quella dell'elenco. Resta nel DOM del selettore (niente
+// portale), così il fuoco tenuto nella finestra, il tocco fuori, Tab ed Esc funzionano come prima. Se il contenitore scorre la tendina
+// segue il pulsante; se il pulsante esce dalla vista la tendina si chiude. Sul telefono (sotto 640 px) resta il foglio dal basso del CSS.
 // ============================================================
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { LARGHEZZA_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { LARGHEZZA_MASSIMA_TENDINA, LARGHEZZA_TENDINA, MEDIA_FOGLIO_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
 import { piatto } from '../../utils/testo';
 import { testoNoteAParole } from '../../../shared/note';
 import { TestoNote } from './TestoNote';
@@ -54,6 +63,86 @@ export interface PropsSelettore {
   className?: string;
 }
 
+/** Da che lato del pulsante si apre la tendina. */
+type Verso = 'sotto' | 'sopra';
+/** Distanza minima della tendina dai bordi dello schermo, in px. */
+const MARGINE_SCHERMO = 8;
+/** Stacco fra il pulsante e la tendina, in px. */
+const STACCO = 2;
+/** Altezza sotto cui l'elenco non si accorcia (due righe da 44 px): sotto, la tendina sporge piuttosto che diventare inusabile. */
+const ALTEZZA_MINIMA_ELENCO = 88;
+
+/** Vero se il rettangolo `r` di `el` è fuori dallo schermo o nascosto da un antenato che taglia il contenuto (scorrevole o con
+ *  `overflow: hidden`): il corpo di una finestra scorso fin oltre il pulsante, per esempio. */
+function fuoriVista(el: HTMLElement, r: DOMRect, larghezza: number, altezza: number): boolean {
+  if (r.bottom <= 0 || r.top >= altezza || r.right <= 0 || r.left >= larghezza) return true;
+  for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+    const stile = getComputedStyle(a);
+    if (stile.overflowX === 'visible' && stile.overflowY === 'visible') continue;
+    const c = a.getBoundingClientRect();
+    if (r.bottom <= c.top || r.top >= c.bottom || r.right <= c.left || r.left >= c.right) return true;
+  }
+  return false;
+}
+
+/**
+ * Colloca la tendina (`position: fixed`) rispetto al pulsante, dentro lo schermo: larga quanto il pulsante e almeno
+ * `LARGHEZZA_TENDINA` (al più `LARGHEZZA_MASSIMA_TENDINA`), allineata a sinistra col pulsante o, se a destra non ci sta, al suo bordo
+ * destro; sotto il pulsante o sopra, col lato `verso` dato oppure, se è `null`, scelto qui (sopra solo se sotto non ci sta e sopra c'è
+ * più spazio). L'elenco si accorcia quanto serve a stare nello spazio di quel lato. Restituisce il lato usato, `'fuori'` se il pulsante
+ * non è più in vista (la tendina va chiusa), `null` sul telefono, dove la colloca il CSS come foglio dal basso.
+ */
+function collocaTendina(pulsante: HTMLElement, tendina: HTMLElement, elenco: HTMLElement | null, verso: Verso | null): Verso | 'fuori' | null {
+  const s = tendina.style;
+  if (typeof window.matchMedia === 'function' && window.matchMedia(MEDIA_FOGLIO_TENDINA).matches) {
+    s.left = ''; s.top = ''; s.bottom = ''; s.width = '';
+    if (elenco) elenco.style.maxHeight = '';
+    return null;
+  }
+  const r = pulsante.getBoundingClientRect();
+  // la parte visibile della finestra del browser, senza la barra di scorrimento della pagina (se c'è)
+  const larghezzaSchermo = document.documentElement.clientWidth || window.innerWidth;
+  const altezzaSchermo = document.documentElement.clientHeight || window.innerHeight;
+  // un pulsante senza misure (non disposto) non si giudica: si colloca e basta
+  if ((r.width > 0 || r.height > 0) && fuoriVista(pulsante, r, larghezzaSchermo, altezzaSchermo)) return 'fuori';
+  const larghezza = Math.max(0, Math.min(Math.max(r.width, LARGHEZZA_TENDINA), LARGHEZZA_MASSIMA_TENDINA, larghezzaSchermo - 2 * MARGINE_SCHERMO));
+  const preferita = r.left + larghezza > larghezzaSchermo - MARGINE_SCHERMO ? r.right - larghezza : r.left;
+  const sinistra = Math.max(MARGINE_SCHERMO, Math.min(preferita, larghezzaSchermo - MARGINE_SCHERMO - larghezza));
+  // l'altezza naturale si misura alla larghezza vera (i nomi lunghi vanno a capo) e con l'elenco al tetto del CSS
+  s.width = `${larghezza}px`;
+  if (elenco) elenco.style.maxHeight = '';
+  const naturale = tendina.offsetHeight;
+  const spazioSotto = altezzaSchermo - r.bottom - STACCO - MARGINE_SCHERMO;
+  const spazioSopra = r.top - STACCO - MARGINE_SCHERMO;
+  const lato: Verso = verso ?? (naturale > spazioSotto && spazioSopra > spazioSotto ? 'sopra' : 'sotto');
+  const spazio = lato === 'sopra' ? spazioSopra : spazioSotto;
+  if (elenco && naturale > spazio) elenco.style.maxHeight = `${Math.max(ALTEZZA_MINIMA_ELENCO, elenco.offsetHeight - (naturale - spazio))}px`;
+  // sopra si ancora col bordo inferiore: quando il filtro accorcia l'elenco, la tendina resta attaccata al pulsante
+  let x = sinistra;
+  let y = lato === 'sopra' ? altezzaSchermo - r.top + STACCO : r.bottom + STACCO;
+  const applica = () => {
+    s.left = `${x}px`;
+    if (lato === 'sopra') { s.top = 'auto'; s.bottom = `${y}px`; } else { s.bottom = 'auto'; s.top = `${y}px`; }
+  };
+  applica();
+  // Un antenato con `transform` fa da riferimento al posto dello schermo (l'animazione d'apertura di una finestra, il popup di un pin
+  // dentro la mappa ingrandita): si misura dove è finita davvero e si corregge lo scarto, nella scala di quel riferimento (misure a
+  // schermo divise per quelle di layout). Finita un'animazione la tendina si ricolloca (ascoltatore `animationend` del componente).
+  const t = tendina.getBoundingClientRect();
+  if (t.width > 0 && t.height > 0) {
+    const scalaX = larghezza > 0 ? t.width / larghezza : 1;
+    const scalaY = tendina.offsetHeight > 0 ? t.height / tendina.offsetHeight : 1;
+    const dx = sinistra - t.left;
+    const dy = lato === 'sopra' ? r.top - STACCO - t.bottom : r.bottom + STACCO - t.top;
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      x += dx / scalaX;
+      y += (lato === 'sopra' ? -dy : dy) / scalaY;
+      applica();
+    }
+  }
+  return lato;
+}
+
 /**
  * Pulsante combobox con etichetta e voce scelta (o `segnaposto`) che apre una tendina con l'elenco delle voci,
  * eventualmente filtrabile; la scelta chiama `onCambia` con la chiave. L'elenco mostra al massimo `TETTO_VOCI`
@@ -64,11 +153,13 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
-  const [aDestra, setADestra] = useState(false);
   const id = useId();
   const radice = useRef<HTMLDivElement | null>(null);
   const pulsante = useRef<HTMLButtonElement | null>(null);
+  const tendina = useRef<HTMLDivElement | null>(null);
   const elenco = useRef<HTMLUListElement | null>(null);
+  /** Il lato scelto all'apertura: scorrendo o filtrando la tendina resta da quel lato, non salta da sopra a sotto a ogni lettera. */
+  const verso = useRef<Verso | null>(null);
   /** Spazio gestito alla pressione: il rilascio non deve riattivare il pulsante (che riaprirebbe la tendina appena chiusa). */
   const spazioGestito = useRef(false);
   const tutte = useMemo(() => (vuoto === undefined ? opzioni : [{ chiave: '', nome: vuoto }, ...opzioni]), [opzioni, vuoto]);
@@ -91,14 +182,10 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const idErrore = `${id}-errore`;
   const descrizione = [nomeConValore ? null : idValore, errore ? idErrore : null].filter(Boolean).join(' ') || undefined;
 
-  /** Apre la tendina con il filtro vuoto e la voce scelta evidenziata, decidendo da che lato ancorarla. */
+  /** Apre la tendina con il filtro vuoto e la voce scelta evidenziata (dove collocarla lo decide `colloca`, prima che si veda). */
   const apri = () => {
     setTesto('');
     setEvidenziata(Math.max(0, tutte.findIndex((o) => o.chiave === valore)));
-    // La tendina è larga almeno LARGHEZZA_TENDINA: se da qui al bordo destro non ci sta, si
-    // appende al bordo destro del pulsante invece di sfondare la finestra e far scorrere la pagina.
-    const r = pulsante.current?.getBoundingClientRect();
-    setADestra(!!r && typeof window !== 'undefined' && r.left + Math.max(r.width, LARGHEZZA_TENDINA) > window.innerWidth - 8);
     setAperto(true);
   };
   useEffect(() => {
@@ -113,24 +200,48 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const chiudi = () => { setAperto(false); pulsante.current?.focus(); };
   /** Comunica la voce scelta e chiude. */
   const scegli = (chiave: string) => { onCambia(chiave); chiudi(); };
+  /**
+   * Colloca la tendina aperta (vedi `collocaTendina`): con `decidi` sceglie di nuovo il lato, altrimenti tiene quello dell'apertura.
+   * Se il pulsante è uscito dalla vista chiude la tendina, e il fuoco che stava nel suo campo di ricerca torna sul pulsante.
+   */
+  const colloca = useCallback((decidi: boolean) => {
+    if (!pulsante.current || !tendina.current) return;
+    const esito = collocaTendina(pulsante.current, tendina.current, elenco.current, decidi ? null : verso.current);
+    if (esito !== 'fuori') { verso.current = esito; return; }
+    if (tendina.current.contains(document.activeElement)) pulsante.current.focus({ preventScroll: true });
+    setAperto(false);
+  }, []);
+  // Prima che la tendina si veda (effetto di layout, nessun fotogramma fuori posto) la si colloca; poi la si ricolloca quando scorre un
+  // contenitore (la segue il pulsante), quando cambia lo schermo (rotazione, tastiera del tablet) e alla fine di un'animazione che la
+  // spostava (l'apertura della finestra). Lo scorrimento del suo stesso elenco non la tocca.
+  useLayoutEffect(() => {
+    if (!aperto) { verso.current = null; return; }
+    colloca(true);
+    const suScorrimento = (e: Event) => { if (!(e.target instanceof Node && tendina.current?.contains(e.target))) colloca(false); };
+    const suMisure = () => colloca(true);
+    window.addEventListener('scroll', suScorrimento, true);
+    window.addEventListener('resize', suMisure);
+    window.visualViewport?.addEventListener('resize', suMisure);
+    document.addEventListener('animationend', suMisure, true);
+    return () => {
+      window.removeEventListener('scroll', suScorrimento, true);
+      window.removeEventListener('resize', suMisure);
+      window.visualViewport?.removeEventListener('resize', suMisure);
+      document.removeEventListener('animationend', suMisure, true);
+    };
+  }, [aperto, colloca]);
+  // il filtro cambia l'altezza dell'elenco: la tendina resta dal suo lato e si riadatta allo spazio
+  useLayoutEffect(() => { if (aperto) colloca(false); }, [aperto, filtrate, colloca]);
   useEffect(() => {
     if (!aperto) return;
-    // In una finestra la tendina sta nel corpo scorrevole, che la taglia: in fondo al modulo se ne vedeva una riga (a 768×1024
-    // 42 px su 304). All'apertura il corpo scorre quanto basta a mostrarla intera, ma mai oltre il punto in cui il pulsante arriva
-    // in cima: chi l'ha toccato deve continuare a vederlo. Non per il foglio dal basso del telefono (fixed), che sta già in vista.
-    const corpo = radice.current?.closest<HTMLElement>('.modal-body');
-    const tendina = corpo ? radice.current?.querySelector<HTMLElement>('.selettore__tendina') : null;
-    if (!corpo || !tendina || !pulsante.current || getComputedStyle(tendina).position === 'fixed') return;
-    const c = corpo.getBoundingClientRect();
-    const sotto = tendina.getBoundingClientRect().bottom - c.bottom;
-    const finoAlPulsante = pulsante.current.getBoundingClientRect().top - c.top;
-    // le misure a schermo sono in scala durante l'animazione d'apertura della finestra (0.95): si riportano a quelle vere
-    const scala = corpo.offsetHeight > 0 ? c.height / corpo.offsetHeight : 1;
-    if (sotto > 0 && finoAlPulsante > 0) corpo.scrollTop += Math.min(sotto, finoAlPulsante) / scala;
-  }, [aperto]);
-  useEffect(() => {
-    if (!aperto) return;
-    elenco.current?.querySelector<HTMLElement>('.selettore__voce--evidenziata')?.scrollIntoView?.({ block: 'nearest' });
+    // la voce evidenziata entra in vista scorrendo solo l'elenco: `scrollIntoView` farebbe scorrere anche i contenitori del selettore
+    const l = elenco.current;
+    const voce = l?.querySelector<HTMLElement>('.selettore__voce--evidenziata');
+    if (!l || !voce) return;
+    const e = l.getBoundingClientRect();
+    const v = voce.getBoundingClientRect();
+    if (v.top < e.top) l.scrollTop -= e.top - v.top;
+    else if (v.bottom > e.bottom) l.scrollTop += v.bottom - e.bottom;
   }, [aperto, evidenziata, filtrate]);
   /**
    * Tastiera nella tendina: Esc chiude, frecce spostano l'evidenziazione entro le voci filtrate (PagSu/PagGiù di dieci), Invio sceglie
@@ -189,7 +300,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
       </button>
       {errore && <p id={idErrore} className="m-0 mt-1 testo-12 text-error-testo">{errore}</p>}
       {aperto && (
-        <div className={`selettore__tendina ${aDestra ? 'selettore__tendina--destra' : ''}`} onKeyDown={conRicerca ? tastiera : undefined}>
+        <div ref={tendina} className="selettore__tendina" onKeyDown={conRicerca ? tastiera : undefined}>
           {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} aria-activedescendant={attiva >= 0 ? idVoce(attiva) : undefined} autoComplete="off" autoFocus />}
           {/* il fuoco resta sul pulsante o sul campo: premere su una voce non deve spostarlo (toglierebbe la tendina da sotto il dito) */}
           <ul ref={elenco} id={id} role="listbox" aria-label={etichetta} className="selettore__elenco" onMouseDown={(e) => e.preventDefault()}>
