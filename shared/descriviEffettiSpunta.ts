@@ -13,10 +13,11 @@ import { NESSUNA_NOTA, testoDoteInPunti } from './note.js';
 /**
  * 2026-10-27 (revisione: «Grimaldello · creato · ricevuti Grimaldello ×3» ripeteva il nome): l'esito di un turno detto nel riepilogo. Per uno
  * strumento (`bonus` presente) con gli oggetti ricevuti accanto, che dicono già lo strumento, basta «con il bonus» o «senza bonus»; altrimenti
- * il nome dell'esito. Una sola regola per il chip della voce e per le ricevute del server.
+ * il nome dell'esito. Una sola regola per il chip della voce e per le ricevute del server. (revisione) Per uno strumento senza versione con il
+ * bonus (`creazione`: la fabbricazione di Kawakami) con gli oggetti ricevuti accanto non c'è niente da aggiungere: null (la frase lo salta).
  */
-export const nomeEsitoDelTurno = (esito: { nome: string; bonus?: boolean }, conOggettiRicevuti: boolean): string =>
-  esito.bonus === undefined || !conOggettiRicevuti ? esito.nome : esito.bonus ? 'con il bonus' : 'senza bonus';
+export const nomeEsitoDelTurno = (esito: { nome: string; bonus?: boolean; creazione?: true }, conOggettiRicevuti: boolean): string | null =>
+  !conOggettiRicevuti ? esito.nome : esito.creazione ? null : esito.bonus === undefined ? esito.nome : esito.bonus ? 'con il bonus' : 'senza bonus';
 
 /** Testo breve degli effetti della spunta (es. «Perizia ♪ · 2 punti · Zorro, il fuorilegge 1 → 2 · Fioraio Rafflesia: turno 1 (Gentilezza ♪♪ · 3 punti) · Ryuji Sakamoto +15 punti»).
  *  Le Doti sono ciò che il gioco dà (l'app non le tocca: si segnano a mano); `senzaDoti` le lascia fuori, per metterle nel
@@ -38,7 +39,8 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
     // 2026-10-27: gli oggetti che il turno ha dato e usato (con la quantità e il bonus della voce), solo se ci sono
     const elenco = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');
     const ricevuti = elenco(t.oggetti), usati = elenco(t.consumati);
-    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · ${nomeEsitoDelTurno(t.esito, !!ricevuti)}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${ricevuti ? ` · ricevuti ${ricevuti}` : ''}${usati ? ` · usati ${usati}` : ''}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
+    const nomeEsito = t.esito ? nomeEsitoDelTurno(t.esito, !!ricevuti) : null;
+    parti.push(`${t.nome}: turno ${t.ordine}${nomeEsito ? ` · ${nomeEsito}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${ricevuti ? ` · ricevuti ${ricevuti}` : ''}${usati ? ` · usati ${usati}` : ''}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
   }
   if (e.incontro) {
     const rango = e.incontro.rango ? ` · rango ${e.incontro.rango.da} → ${e.incontro.rango.a}` : '';

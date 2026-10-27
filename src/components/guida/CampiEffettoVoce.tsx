@@ -198,7 +198,9 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       // come il suo strumento: cambiando strumento o quantità si scrive la versione base
       // (revisione) con esiti misti (strumenti ed esiti a sé) si propongono anche gli esiti a sé, come esito atteso da confermare alla spunta:
       // un'attività di soli strumenti dice «Strumento» e non lascia la voce senza (`soloStrumenti` del server, 409 `strumento-da-scegliere`)
-      const strumenti = esiti?.elenco.some((x) => x.bonusDi) ? esiti.elenco.filter((x) => !x.bonusDi) : null;
+      // (revisione) uno strumento è anche la creazione senza versione con il bonus (`strumento` con `senzaBonus`: la fabbricazione di Kawakami):
+      // stesso schema, strumento e quantità qui; alla spunta niente da chiedere
+      const strumenti = esiti?.elenco.some((x) => x.strumento) ? esiti.elenco.filter((x) => !x.bonusDi) : null;
       const soloStrumentiQui = !!strumenti && strumenti.every((x) => x.strumento);
       const baseDi = (k: string | undefined): string => (k ? esiti?.elenco.find((x) => x.chiave === k)?.bonusDi ?? k : '');
       const eStrumento = (k: string): boolean => !!esiti?.elenco.find((x) => x.chiave === k)?.strumento;

@@ -41,7 +41,7 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   // L13: `possibili` (Dote a valori scelti alla spunta) ed `esito` (turno con esito atteso) dell'ondata 2: la forma completa la verifica `normalizzaEffettoVoce`
   z.object({tipo:z.literal('dote'),dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)]),possibili:z.array(z.union([z.literal(1),z.literal(2),z.literal(3)])).min(2).max(3).optional()}).strict(),
   z.object({tipo:z.literal('lettura'),categoria:z.enum(['libro','film','videogioco']),chiave,almeno:z.number().int().positive().nullable()}).strict(),
-  // 2026-10-27: `quantita` = le creazioni dello strumento (esito con la versione con il bonus); la forma canonica la verifica `normalizzaEffettoVoce`
+  // 2026-10-27: `quantita` = le creazioni dello strumento (`strumentoDi`: con o senza versione con il bonus); la forma canonica la verifica `normalizzaEffettoVoce`
   z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional(),esito:z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional(),quantita:z.number().int().min(1).max(999).optional()}).strict(),
   // L13 (ondata 3): yen, oggetto ricevuto, trofeo, sblocco; quantità facoltativa dell'articolo
   z.object({tipo:z.literal('yen'),importo:z.number().int().min(-9_999_999).max(9_999_999).refine((n)=>n!==0,'L’importo non può essere zero.')}).strict(),

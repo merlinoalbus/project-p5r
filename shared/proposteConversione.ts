@@ -11,7 +11,8 @@
 //
 // Un effetto proposto può chiedere di completare un dato prima di applicarlo (`completa`):
 //   - `elemento`: l'oggetto che l'effetto cita (l'articolo del Set A o del Set B, il libro…), fra `scelte` se la proposta le elenca;
-//   - `quantita`: le copie comprate o ricevute (articolo, oggetto), che la guida non dice;
+//   - `quantita`: le copie comprate o ricevute (articolo, oggetto), che la guida non dice; 2026-10-27 (revisione) anche le creazioni dello
+//     strumento di un turno con l'esito (Kawakami fabbrica i grimaldelli: quanti, lo dice chi applica);
 //   - `note`: le note della Dote.
 // Il campo da completare può arrivare vuoto (l'elemento: '' o 0) o con un valore indicativo: chi applica lo sceglie comunque.
 // ============================================================

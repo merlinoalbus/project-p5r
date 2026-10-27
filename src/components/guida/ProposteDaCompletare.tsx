@@ -173,6 +173,19 @@ export function SchedaProposta({ proposta: p, elenchi, nomi, partitaId, conVoce,
                         }} />
                     </label>
                   )}
+                  {/* 2026-10-27 (revisione): le creazioni dello strumento di un turno (Kawakami fabbrica i grimaldelli: quanti, la guida non lo dice) */}
+                  {aperta && pe.completa.includes('quantita') && b.tipo === 'turno' && b.esito && (
+                    <label className="flex flex-col gap-1 testo-13">Quantità (la guida non la dice)
+                      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1}
+                        value={manca.includes('quantita') ? '' : b.quantita ?? 1}
+                        onChange={(ev) => {
+                          const n = Math.trunc(Number(ev.target.value));
+                          if (!Number.isFinite(n) || n < 1 || !b.esito) return;
+                          const q = Math.min(QUANTITA_MASSIMA_EFFETTO, n);
+                          cambia(i, q > 1 ? { tipo: 'turno', attivita: b.attivita, esito: b.esito, quantita: q } : { tipo: 'turno', attivita: b.attivita, esito: b.esito }, 'quantita');
+                        }} />
+                    </label>
+                  )}
                   {aperta && pe.completa.includes('note') && b.tipo === 'dote' && (
                     <>
                       <span className="testo-13 text-text-secondary">Note che dà il gioco</span>

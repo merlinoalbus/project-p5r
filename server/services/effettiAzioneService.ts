@@ -197,8 +197,14 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${frasiDoti(l.doti)})` : ''}`);
   // 2026-10-27: anche gli oggetti che il turno ha dato e usato (con la quantità e il bonus della voce), solo se ci sono
   const oggetti = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');
-  // (revisione) per uno strumento con gli oggetti ricevuti accanto, «con il bonus» / «senza bonus» invece del nome ripetuto (`nomeEsitoDelTurno`)
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · ${t.esito.bonus !== undefined && t.oggetti?.length ? nomeEsitoDelTurno(t.esito, true) : `esito ${t.esito.nome}`}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
+  // (revisione) per uno strumento con gli oggetti ricevuti accanto, «con il bonus» / «senza bonus» invece del nome ripetuto, e niente per uno
+  // strumento senza versione con il bonus (`nomeEsitoDelTurno`)
+  const esitoDi = (x: NonNullable<NonNullable<EffettiAzioneDto['turni']>[number]['esito']>, oggettiRicevuti: boolean): string | null =>
+    (x.bonus !== undefined || x.creazione) && oggettiRicevuti ? nomeEsitoDelTurno(x, true) : `esito ${x.nome}`;
+  for (const t of e.turni ?? []) {
+    const nomeEsito = t.esito ? esitoDi(t.esito, !!t.oggetti?.length) : null;
+    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? `${nomeEsito ? ` · ${nomeEsito}` : ''}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
+  }
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);

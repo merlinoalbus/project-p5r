@@ -81,7 +81,9 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
   { chiave: 'automatico', nome: 'Automatico: vale l’esito con le condizioni vere in quel momento' },
 ];
 /** `quantita`: le copie di un oggetto, come l'effetto «oggetto ricevuto» delle voci (`QUANTITA_MASSIMA_EFFETTO` di `effettiVoce.ts`). */
-export const LIMITI_ESITI = { esiti: 20, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
+/** `esiti` (2026-10-27, revisione): 50, perché la fabbricazione della guida ha 19 ricette, ognuna con la versione base e quella con il bonus
+ *  (38 esiti); prima 20 bastavano alle 10 ricette senza le bombe. */
+export const LIMITI_ESITI = { esiti: 50, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
 const CHIAVE_ESITO = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const CHIAVE_ARTICOLO = /^[a-z0-9][a-z0-9._:/-]{0,119}$/i;
 /** La chiave di un oggetto del catalogo («consumabile/big-bang-burger»), con la stessa forma di quella di un articolo. */
@@ -197,22 +199,47 @@ export function coppiaBonus(esiti: EsitiAttivita | null | undefined, chiave: str
  *  alla spunta resta solo l'interruttore «Bonus». */
 export const haVersioniBonus = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti?.esiti.some((e) => e.bonusDi);
 
-/** 2026-10-27 (revisione): TUTTI gli esiti dell'attività stanno in una coppia base / con il bonus (sono solo strumenti, come la fabbricazione)?
- *  Allora una voce senza lo strumento non si spunta: lo si sceglie nell'editor. Con esiti misti (strumenti e esiti a sé) la voce senza esito
- *  si spunta scegliendo l'esito come prima, e l'editor propone anche gli esiti a sé. */
-export const soloStrumenti = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti && haVersioniBonus(esiti) && esiti.esiti.every((e) => !!coppiaBonus(esiti, e.chiave));
+/**
+ * 2026-10-27 (revisione: la fabbricazione di Kawakami, «e quando creo l'aroma calmante? o il Goho-M?», vale per ogni strumento): un esito è una
+ * CREAZIONE quando consuma oggetti del catalogo e ne dà altri (una ricetta: i materiali diventano lo strumento). Ricavato dai dati, nessun
+ * nome scritto a mano: vale anche per la forma vista dalla scelta (`EsitoDisponibileDto`, con elenchi vuoti al posto di quelli assenti).
+ */
+export const eCreazione = (e: { oggetti?: readonly OggettoEsito[] | readonly { quantita: number }[]; consuma?: readonly OggettoEsito[] | readonly { quantita: number }[] }): boolean =>
+  !!e.oggetti?.length && !!e.consuma?.length;
+
+/** Uno strumento: l'esito base e la sua versione con il bonus, se l'attività la dichiara (null: lo strumento non ha bonus). */
+export interface StrumentoEsito { base: EsitoAttivita; bonus: EsitoAttivita | null }
+/**
+ * 2026-10-27 (revisione): lo strumento di cui fa parte l'esito. È uno strumento l'esito di una coppia base / con il bonus (`coppiaBonus`) e
+ * la creazione senza versione con il bonus (`eCreazione`: Kawakami fabbrica al posto tuo, il bonus di Morgana non c'è). Per uno strumento la
+ * voce dice esito e quantità; alla spunta si chiede solo «Bonus» sì/no se c'è la versione con il bonus, altrimenti niente. Null per gli altri
+ * esiti (una sfida vinta o persa, il caffè preparato) e per un esito che non c'è.
+ */
+export function strumentoDi(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): StrumentoEsito | null {
+  const coppia = coppiaBonus(esiti, chiave);
+  if (coppia) return coppia;
+  const e = chiave ? esiti?.esiti.find((x) => x.chiave === chiave) : undefined;
+  return e && !e.bonusDi && eCreazione(e) ? { base: e, bonus: null } : null;
+}
+/** 2026-10-27 (revisione): l'esito è uno strumento SENZA versione con il bonus? Allora alla spunta non si chiede niente: vale l'esito della voce. */
+export const strumentoSenzaBonus = (esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): boolean => strumentoDi(esiti, chiave)?.bonus === null;
+
+/** 2026-10-27 (revisione): TUTTI gli esiti dell'attività sono strumenti (`strumentoDi`: la fabbricazione, con il bonus; quella di Kawakami,
+ *  senza)? Allora una voce senza lo strumento non si spunta: lo si sceglie nell'editor. Con esiti misti (strumenti e esiti a sé) la voce senza
+ *  esito si spunta scegliendo l'esito come prima, e l'editor propone anche gli esiti a sé. */
+export const soloStrumenti = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti && esiti.esiti.length > 0 && esiti.esiti.every((e) => !!strumentoDi(esiti, e.chiave));
 
 /** Il nome breve di uno strumento (l'esito base di una coppia): il gruppo («Grimaldello»), altrimenti il nome dell'esito. */
 export const nomeStrumento = (base: Pick<EsitoAttivita, 'nome' | 'gruppo'>): string => base.gruppo ?? base.nome;
 
 /** 2026-10-27 (revisione, punto 4 della richiesta: «nessun doppione»): gli oggetti del catalogo che lo strumento dà (le chiavi della versione
- *  base e di quella con il bonus), con il nome dello strumento; null se l'esito non ha una versione con il bonus. Un effetto «oggetto
- *  ricevuto» di uno di questi oggetti nella stessa voce li conterebbe due volte (`motivoOggettiGiaNelTurno`). */
-export function prodottiDelloStrumento(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): { strumento: string; oggetti: string[] } | null {
-  const coppia = coppiaBonus(esiti, chiave);
-  if (!coppia) return null;
-  const oggetti = [...new Set([...(coppia.base.oggetti ?? []), ...(coppia.bonus.oggetti ?? [])].map((o) => o.oggetto))];
-  return { strumento: nomeStrumento(coppia.base), oggetti };
+ *  base e, se c'è, di quella con il bonus), con il nome dello strumento e se ha la versione con il bonus; null se l'esito non è uno strumento
+ *  (`strumentoDi`). Un effetto «oggetto ricevuto» di uno di questi oggetti nella stessa voce li conterebbe due volte (`motivoOggettiGiaNelTurno`). */
+export function prodottiDelloStrumento(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): { strumento: string; oggetti: string[]; conBonus: boolean } | null {
+  const s = strumentoDi(esiti, chiave);
+  if (!s) return null;
+  const oggetti = [...new Set([...(s.base.oggetti ?? []), ...(s.bonus?.oggetti ?? [])].map((o) => o.oggetto))];
+  return { strumento: nomeStrumento(s.base), oggetti, conBonus: s.bonus !== null };
 }
 
 /** Somma due elenchi di oggetti per chiave (l'ordine è quello del primo, poi i nuovi). */

@@ -139,11 +139,15 @@ export interface NomiEffettiAzione {
   esiti?: Record<string, string>;
   /** Le attività che dichiarano esiti, con il loro modo (L13): il turno dice che l'esito si sceglie alla spunta o vale da solo. */
   modiEsiti?: Record<string, 'scelta' | 'automatico'>;
-  /** 2026-10-27: per gli esiti che hanno una versione con il bonus («attività/esito», base o con il bonus), il nome dello strumento («Grimaldello»). */
+  /** 2026-10-27: per gli esiti che sono strumenti («attività/esito», base o con il bonus; revisione: anche le creazioni senza bonus,
+   *  `strumentoDi`), il nome dello strumento («Grimaldello»). */
   strumenti?: Record<string, string>;
-  /** 2026-10-27: le attività i cui esiti sono tutti strumenti con una versione con il bonus (`soloStrumenti`: lo strumento si sceglie nella
-   *  voce, il bonus alla spunta). Con esiti misti l'esito si sceglie alla spunta come prima. */
+  /** 2026-10-27: le attività i cui esiti sono tutti strumenti (`soloStrumenti`: lo strumento e la quantità si scelgono nella voce, il bonus,
+   *  se c'è, alla spunta). Con esiti misti l'esito si sceglie alla spunta come prima. */
   conBonus?: Record<string, true>;
+  /** 2026-10-27 (revisione): gli strumenti («attività/esito») SENZA versione con il bonus (la fabbricazione di Kawakami): alla spunta non si
+   *  chiede niente, quindi la frase non parla del bonus. */
+  senzaBonus?: Record<string, true>;
 }
 
 /**
@@ -162,7 +166,7 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
   const modo = nomi.modiEsiti?.[e.attivita];
   // 2026-10-27: un esito con la versione con il bonus è lo strumento della voce, con le creazioni; il bonus lo dice l'interruttore alla spunta
   const strumento = e.esito ? nomi.strumenti?.[`${e.attivita}/${e.esito}`] : undefined;
-  const esito = strumento ? `${strumento}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, bonus sì o no alla spunta`
+  const esito = strumento ? `${strumento}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}${nomi.senzaBonus?.[`${e.attivita}/${e.esito}`] ? '' : ', bonus sì o no alla spunta'}`
     : e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, lo confermi alla spunta`
       : nomi.conBonus?.[e.attivita] ? 'strumento e quantità da scegliere nell’editor della voce'
         : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? 'esito automatico secondo il giorno' : '';

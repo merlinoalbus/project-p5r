@@ -2376,3 +2376,15 @@ Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente)
 - **Attività con esiti misti** (strumenti ed esiti a sé, oggi nessuna): la voce senza esito si spunta scegliendo l'esito come prima;
   il blocco «strumento da scegliere» vale solo se tutti gli esiti sono strumenti (`soloStrumenti`).
 - **Il riepilogo** di un turno di uno strumento dice «con il bonus» / «senza bonus» accanto agli oggetti ricevuti, senza ripetere il nome.
+- **Seconda revisione: ogni fabbricazione è uno strumento.** È uno strumento anche la creazione senza versione con il bonus (un esito che
+  consuma oggetti e ne dà altri: `eCreazione`/`strumentoDi`, ricavato dai dati). La voce dice strumento e quantità; alla spunta non si chiede
+  niente. È il caso della fabbricazione di Kawakami (abilità «Domestica tuttofare», rango letto dai dati: 6), un'attività a parte
+  (`fabbricazione-kawakami`, migrazione 300) perché il bonus di Morgana arriva solo quando fabbrichi tu. Gli esiti non danno Doti: la guida
+  non dà Perizia per questa via; se in gioco la dà, si aggiunge all'esito dall'editor degli esiti.
+- **Le bombe della guida** (nove ricette degli strumenti da battaglia) entrano nel catalogo, nelle ricette e negli esiti della fabbricazione
+  (38 esiti; il massimo di un'attività passa da 20 a 50). Il 12-23 (Kawakami, un grimaldello duraturo) diventa lo strumento della fabbricazione
+  di Kawakami; l'11-22 e il 04-17 ricevono proposte con lo strumento al posto dell'«oggetto ricevuto»; il 09-18 (più bombe, obiettivi su più
+  sessioni) resta com'è. Le note «Perizia +3» del 07-25 e «Perizia +3 possibile» dell'11-18 si tolgono (testo di prima conservato): la
+  Perizia la dice lo strumento.
+- **Le condizioni di rango delle ricette** («Strumenti magistrali», rango 6 di Morgana) restano nei dettagli, non come condizioni degli esiti:
+  come nella 290, perché una condizione non registrata nella partita fermerebbe la spunta. Da decidere con l'utente se vanno negli esiti.

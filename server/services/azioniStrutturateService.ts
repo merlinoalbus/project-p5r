@@ -21,7 +21,7 @@ import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE
 import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
-import { coppiaBonus, leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti } from '../../shared/esitiAttivita.js';
+import { leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti, strumentoDi } from '../../shared/esitiAttivita.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
 import { simboliNote } from '../../shared/note.js';
@@ -166,16 +166,17 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
       if (esiti && e.doti?.length) throw httpErrors.badRequest('turno-doti-con-esiti', `L'attività «${e.attivita}» dichiara i suoi esiti: le Doti del turno vengono dall'esito scelto, non si scrivono nella voce.`);
       if (e.esito && !esiti?.esiti.some((x) => x.chiave === e.esito)) throw httpErrors.badRequest('esito-sconosciuto', `L'attività «${e.attivita}» non dichiara l'esito «${e.esito}».`);
       if (e.esito && esiti?.modo === 'automatico') throw httpErrors.badRequest('esito-automatico', `L'attività «${e.attivita}» ricava l'esito dal giorno: la voce non ne indica uno.`);
-      // 2026-10-27: la quantità (le creazioni) ha senso solo per un esito con la versione con il bonus: lo strumento scelto nella voce
-      if (e.quantita !== undefined && !coppiaBonus(esiti, e.esito)) throw httpErrors.badRequest('quantita-senza-strumento', `La quantità del turno vale solo per uno strumento di «${e.attivita}» con la versione con il bonus.`);
+      // 2026-10-27: la quantità (le creazioni) ha senso solo per uno strumento scelto nella voce (`strumentoDi`: con la versione con il bonus o,
+      // revisione, una creazione senza, come la fabbricazione di Kawakami)
+      if (e.quantita !== undefined && !strumentoDi(esiti, e.esito)) throw httpErrors.badRequest('quantita-senza-strumento', `La quantità del turno vale solo per uno strumento di «${e.attivita}» (un esito che crea un oggetto dai materiali).`);
     }
   }
   return produce;
 }
 
 /** L13: i nomi degli esiti («attività/esito») e il modo di ogni attività che li dichiara, per la frase del turno. */
-function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus'> {
-  const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {}, strumenti: Record<string, string> = {}, conBonus: Record<string, true> = {};
+function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus' | 'senzaBonus'> {
+  const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {}, strumenti: Record<string, string> = {}, conBonus: Record<string, true> = {}, senzaBonus: Record<string, true> = {};
   // `SELECT *`: su uno schema di prima della 233 la colonna non c'è e nessuna attività ha esiti
   for (const r of prepared('SELECT * FROM attivita').all() as Array<{ chiave: string; esiti_json?: string | null }>) {
     const e = leggiEsitiAttivita(r.esiti_json);
@@ -185,12 +186,13 @@ function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti
     if (soloStrumenti(e)) conBonus[r.chiave] = true;
     for (const x of e.esiti) {
       esiti[`${r.chiave}/${x.chiave}`] = x.nome;
-      // 2026-10-27: un esito con la versione con il bonus (base o con il bonus) si dice con il nome dello strumento
-      const coppia = coppiaBonus(e, x.chiave);
-      if (coppia) strumenti[`${r.chiave}/${x.chiave}`] = nomeStrumento(coppia.base);
+      // 2026-10-27: uno strumento (base o con il bonus; revisione: anche la creazione senza bonus) si dice con il nome dello strumento
+      const s = strumentoDi(e, x.chiave);
+      if (s) strumenti[`${r.chiave}/${x.chiave}`] = nomeStrumento(s.base);
+      if (s && !s.bonus) senzaBonus[`${r.chiave}/${x.chiave}`] = true;
     }
   }
-  return { esiti, modiEsiti, strumenti, conBonus };
+  return { esiti, modiEsiti, strumenti, conBonus, senzaBonus };
 }
 
 /** I nomi di libri, film, videogiochi e attività per descrivere gli effetti: una lettura per richiesta. */
@@ -266,7 +268,8 @@ export function elenchiAzione(): ElenchiAzioneDto {
   // regola del server `motivoOggettiGiaNelTurno`)
   const esitiDi = (json: string | null) => { const e = leggiEsitiAttivita(json); return e ? { esiti: { modo: e.modo, elenco: e.esiti.map((x) => {
     const prodotti = prodottiDelloStrumento(e, x.chiave);
-    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(prodotti ? { strumento: prodotti.strumento, oggetti: prodotti.oggetti } : {}) };
+    // (revisione) `senzaBonus`: lo strumento non ha la versione con il bonus (la fabbricazione di Kawakami): alla spunta non si chiede niente
+    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(prodotti ? { strumento: prodotti.strumento, oggetti: prodotti.oggetti, ...(prodotti.conBonus ? {} : { senzaBonus: true as const }) } : {}) };
   }) } } : {}; };
   // L13 (decisione 2): gli yen che film, attività e Richieste portano già (`yenDeiDati`, la stessa definizione del controllo del server), perché
   // l'editor della voce avvisi subito di un effetto «yen» che li conterebbe due volte
