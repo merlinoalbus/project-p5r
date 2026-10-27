@@ -112,6 +112,19 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
     delete resto.consuma;
     return consuma.length ? { ...resto, consuma } : resto;
   }) });
+  // 2026-10-27: la versione con il bonus è facoltativa come il trofeo: «Nessuna» toglie il campo
+  const cambiaBonusDi = (i: number, bonusDi: string) => esiti && onCambia({ ...esiti, esiti: elenco.map((x, j) => {
+    if (j !== i) return x;
+    const resto: EsitoAttivita = { ...x };
+    delete resto.bonusDi;
+    return bonusDi ? { ...resto, bonusDi } : resto;
+  }) });
+  /** Togliendo un esito, le versioni con il bonus che lo citavano tornano esiti a sé (nessun riferimento resta a un esito che non c'è). */
+  const togliEsito = (i: number) => {
+    const via = elenco[i]!.chiave;
+    const resto = elenco.filter((_, j) => j !== i).map((x) => { if (x.bonusDi !== via) return x; const y: EsitoAttivita = { ...x }; delete y.bonusDi; return y; });
+    onCambia(resto.length ? { ...esiti!, esiti: resto } : null);
+  };
   const aggiungi = () => {
     const nome = `Esito ${elenco.length + 1}`;
     const chiave = chiaveNuova(nome, new Set(elenco.map((e) => e.chiave)));
@@ -131,7 +144,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
       <strong className="testo-14">Esiti scelti alla spunta</strong>
       <p className="m-0 testo-13 text-text-secondary">Per le attività il cui risultato cambia (una sfida vinta o persa, i colpi riusciti, il giorno della settimana): chi gioca sceglie l’esito alla spunta del Diario e al + del contatore, e le Doti dell’esito diventano il promemoria «Applica». Prezzo e ranghi di una sfida stanno nell’articolo del negozio: qui si cita l’articolo. Il trofeo e gli oggetti di un esito (la lotteria vinta, i distintivi delle sfide) si segnano da soli registrando il turno.</p>
       {esiti && <Selettore etichetta="Come si decide l’esito" valore={esiti.modo} ricerca="mai" disabilitato={disabilitato} opzioni={MODI_ESITI.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={(modo) => onCambia({ ...esiti, modo: modo === 'automatico' ? 'automatico' : 'scelta' })} />}
-      {!valido && <p role="alert" className="m-0 testo-13 text-error-testo">Gli esiti non sono ancora validi: ogni esito ha un nome, chiavi distinte, al più {LIMITI_ESITI.doti} Doti diverse; nel modo automatico ogni esito ha una condizione o un articolo.</p>}
+      {!valido && <p role="alert" className="m-0 testo-13 text-error-testo">Gli esiti non sono ancora validi: ogni esito ha un nome, chiavi distinte, al più {LIMITI_ESITI.doti} Doti diverse; nel modo automatico ogni esito ha una condizione o un articolo; le versioni con il bonus valgono solo nel modo «scelta», una per esito base.</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {elenco.map((e, i) => {
           const qui = aperto === e.chiave;
@@ -139,15 +152,24 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}{e.bonusDi ? ` · con il bonus di «${elenco.find((x) => x.chiave === e.bonusDi)?.nome ?? 'esito non più nell’elenco'}»` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
-                  onClick={() => { const resto = elenco.filter((_, j) => j !== i); onCambia(resto.length ? { ...esiti!, esiti: resto } : null); }} />
+                  onClick={() => togliEsito(i)} />
               </span>
               {qui && (
                 <div className="griglia-campi">
                   <CampoTesto etichetta="Nome dell’esito" valore={e.nome} massimo={LIMITI_ESITI.nome} disabilitato={disabilitato} onCambia={(v) => rinomina(i, v)} />
                   <CampoTesto etichetta="Prova (gruppo)" valore={e.gruppo ?? ''} massimo={LIMITI_ESITI.gruppo} aiuto="Per esempio «Comet Burger»: raggruppa gli esiti nella scelta" disabilitato={disabilitato} onCambia={(v) => cambiaEsito(i, { gruppo: v.trim() ? v : null })} />
+                  {/* 2026-10-27: la versione con il bonus di un altro esito (la fabbricazione: «Grimaldello · con il bonus»): nella voce si sceglie lo
+                      strumento e la quantità, alla spunta solo «Bonus» sì/no. Solo nel modo «scelta» e fra gli esiti che non sono già versioni con il bonus */}
+                  {esiti?.modo === 'scelta' && !elenco.some((x) => x.bonusDi === e.chiave) && (
+                    <div className="campo campo--largo">
+                      <Selettore etichetta="Versione con il bonus di" valore={e.bonusDi ?? ''} vuoto="Nessuna: esito a sé" disabilitato={disabilitato}
+                        opzioni={elenco.filter((x) => x.chiave !== e.chiave && !x.bonusDi && !elenco.some((y) => y.bonusDi === x.chiave && y.chiave !== e.chiave)).map((x) => ({ chiave: x.chiave, nome: x.nome }))}
+                        onCambia={(v) => cambiaBonusDi(i, v)} />
+                    </div>
+                  )}
                   <div className="campo campo--largo">
                     <Selettore etichetta="Articolo che l’esito fa pagare" valore={e.articolo ?? ''} vuoto="Nessun articolo" disabilitato={disabilitato || elenchi.caricamento}
                       opzioni={(elenchi.dati?.articoli ?? []).map((a) => ({ chiave: a.chiave, nome: `${a.nome}${a.gruppo ? ` · ${a.gruppo}` : ''}` }))} onCambia={(v) => cambiaEsito(i, { articolo: v || null })} />

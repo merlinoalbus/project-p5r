@@ -32,6 +32,14 @@
 // partita (`consumiOggettiService`, `utente.consumo_oggetto_partita`, lo stesso registro dei consumi dell'Isolamento) e togliendolo tornano. Il
 // prezzo dell'oggetto non si paga di nuovo: l'oggetto si era già comprato (per questo il consumo non usa `articolo`). Campo facoltativo: gli
 // esiti scritti prima non lo hanno e restano identici.
+// 2026-10-27 (richiesta dell'utente: «bastava un pulsante bonus sì/no. L'oggetto è stato già scelto, la quantità anche... se il pulsante bonus
+// è attivo quando riscuoto applica la versione con il bonus, altrimenti quella base»): un esito può essere la VERSIONE CON IL BONUS di un altro
+// (`bonusDi`, la chiave dell'esito base: «Grimaldello · con il bonus» di «Grimaldello · creato»). È un dato, non una regola scritta a mano:
+// vale per ogni attività che lo dichiara. La voce del Diario sceglie l'esito (lo strumento) e la quantità nell'editor (`quantita` dell'effetto
+// `turno`); alla spunta resta solo l'interruttore «Bonus»: acceso registra la versione con il bonus, spento quella base. Con `quantita` q le
+// creazioni sono q: gli oggetti dati e consumati dell'esito base contano q volte; con il bonus UNA delle q creazioni è quella con il bonus
+// (gli oggetti della versione con il bonus + quelli base per le altre q − 1), e le Doti dell'esito si danno una volta per turno
+// (`oggettiDelTurno`). Esempio della guida (decisione 22): Grimaldello ×3 → Perizia ♪♪ e 3 Grimaldelli; con il bonus Perizia ♪♪♪ e 4.
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
@@ -62,6 +70,8 @@ export interface EsitoAttivita {
   oggetti?: OggettoEsito[];
   /** Ondata 5 (lotto F-bis): gli oggetti del catalogo che l'esito consuma, tolti dalle copie possedute registrando il turno. Assente = nessuno. */
   consuma?: OggettoEsito[];
+  /** 2026-10-27: questo esito è la versione con il bonus dell'esito con questa chiave (alla spunta: l'interruttore «Bonus»). Assente = esito a sé. */
+  bonusDi?: string;
 }
 export type ModoEsiti = 'scelta' | 'automatico';
 export interface EsitiAttivita { modo: ModoEsiti; esiti: EsitoAttivita[] }
@@ -71,7 +81,9 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
   { chiave: 'automatico', nome: 'Automatico: vale l’esito con le condizioni vere in quel momento' },
 ];
 /** `quantita`: le copie di un oggetto, come l'effetto «oggetto ricevuto» delle voci (`QUANTITA_MASSIMA_EFFETTO` di `effettiVoce.ts`). */
-export const LIMITI_ESITI = { esiti: 20, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
+/** `esiti` (2026-10-27, revisione): 50, perché la fabbricazione della guida ha 19 ricette, ognuna con la versione base e quella con il bonus
+ *  (38 esiti); prima 20 bastavano alle 10 ricette senza le bombe. */
+export const LIMITI_ESITI = { esiti: 50, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
 const CHIAVE_ESITO = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const CHIAVE_ARTICOLO = /^[a-z0-9][a-z0-9._:/-]{0,119}$/i;
 /** La chiave di un oggetto del catalogo («consumabile/big-bang-burger»), con la stessa forma di quella di un articolo. */
@@ -95,7 +107,7 @@ export function chiaveEsitoDaNome(nome: string): string {
 /** Un esito valido o null: campi sconosciuti, chiavi storte, Doti ripetute o note fuori 1–3 non entrano (un dato storto non diventa punti). */
 function normalizzaEsito(x: unknown): EsitoAttivita | null {
   const o = oggetto(x);
-  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti', 'consuma'].includes(k))) return null;
+  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti', 'consuma', 'bonusDi'].includes(k))) return null;
   const chiave = typeof o.chiave === 'string' && CHIAVE_ESITO.test(o.chiave) ? o.chiave : null;
   const nome = testo(o.nome, LIMITI_ESITI.nome);
   if (!chiave || !nome) return null;
@@ -126,7 +138,10 @@ function normalizzaEsito(x: unknown): EsitoAttivita | null {
   // Ondata 5 (lotto F-bis): gli oggetti consumati, con le stesse regole di quelli dati
   const consuma = elencoOggetti(o.consuma);
   if (consuma === null) return null;
-  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}), ...(consuma ? { consuma } : {}) };
+  // 2026-10-27: la versione con il bonus di un altro esito (la chiave; se l'esito esiste lo verifica l'elenco intero)
+  const bonusDi = o.bonusDi == null || o.bonusDi === '' ? undefined : typeof o.bonusDi === 'string' && CHIAVE_ESITO.test(o.bonusDi) ? o.bonusDi : null;
+  if (bonusDi === null) return null;
+  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}), ...(consuma ? { consuma } : {}), ...(bonusDi ? { bonusDi } : {}) };
 }
 
 /** Un elenco di oggetti per chiave e copie (`oggetti` e `consuma` di un esito): undefined se assente, null o vuoto (il campo non si scrive);
@@ -158,7 +173,99 @@ export function normalizzaEsitiAttivita(x: unknown): EsitiAttivita | null {
   if (new Set(validi.map((e) => e.chiave)).size !== validi.length) return null;
   // l'automatico sceglie per condizioni: un esito senza condizioni né articolo varrebbe sempre, insieme agli altri
   if (o.modo === 'automatico' && validi.length > 1 && validi.some((e) => e.condizioni.length === 0 && e.articolo === null)) return null;
+  // 2026-10-27: la versione con il bonus cita un esito base dello stesso elenco, diverso da sé, che non è a sua volta una versione con il
+  // bonus; ogni esito base ne ha al più una; il bonus si sceglie alla spunta, quindi solo nel modo «scelta»
+  const conBonus = validi.filter((e) => e.bonusDi);
+  if (conBonus.length) {
+    if (o.modo !== 'scelta') return null;
+    if (new Set(conBonus.map((e) => e.bonusDi)).size !== conBonus.length) return null;
+    if (conBonus.some((e) => { const base = validi.find((x) => x.chiave === e.bonusDi); return !base || base.chiave === e.chiave || !!base.bonusDi; })) return null;
+  }
   return { modo: o.modo, esiti: validi };
+}
+
+/** 2026-10-27: la coppia base / con il bonus di cui fa parte l'esito (lo cita come base o lo è come versione con il bonus); null se l'esito
+ *  non ha una versione con il bonus (o non c'è). */
+export function coppiaBonus(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): { base: EsitoAttivita; bonus: EsitoAttivita } | null {
+  if (!esiti || !chiave) return null;
+  const e = esiti.esiti.find((x) => x.chiave === chiave);
+  if (!e) return null;
+  const base = e.bonusDi ? esiti.esiti.find((x) => x.chiave === e.bonusDi) : e;
+  const bonus = base ? esiti.esiti.find((x) => x.bonusDi === base.chiave) : undefined;
+  return base && bonus ? { base, bonus } : null;
+}
+
+/** 2026-10-27: l'attività dichiara esiti con una versione con il bonus? Allora lo strumento (l'esito) e la quantità si scelgono nella voce e
+ *  alla spunta resta solo l'interruttore «Bonus». */
+export const haVersioniBonus = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti?.esiti.some((e) => e.bonusDi);
+
+/**
+ * 2026-10-27 (revisione: la fabbricazione di Kawakami, «e quando creo l'aroma calmante? o il Goho-M?», vale per ogni strumento): un esito è una
+ * CREAZIONE quando consuma oggetti del catalogo e ne dà altri (una ricetta: i materiali diventano lo strumento). Ricavato dai dati, nessun
+ * nome scritto a mano: vale anche per la forma vista dalla scelta (`EsitoDisponibileDto`, con elenchi vuoti al posto di quelli assenti).
+ */
+export const eCreazione = (e: { oggetti?: readonly OggettoEsito[] | readonly { quantita: number }[]; consuma?: readonly OggettoEsito[] | readonly { quantita: number }[] }): boolean =>
+  !!e.oggetti?.length && !!e.consuma?.length;
+
+/** Uno strumento: l'esito base e la sua versione con il bonus, se l'attività la dichiara (null: lo strumento non ha bonus). */
+export interface StrumentoEsito { base: EsitoAttivita; bonus: EsitoAttivita | null }
+/**
+ * 2026-10-27 (revisione): lo strumento di cui fa parte l'esito. È uno strumento l'esito di una coppia base / con il bonus (`coppiaBonus`) e
+ * la creazione senza versione con il bonus (`eCreazione`: Kawakami fabbrica al posto tuo, il bonus di Morgana non c'è). Per uno strumento la
+ * voce dice esito e quantità; alla spunta si chiede solo «Bonus» sì/no se c'è la versione con il bonus, altrimenti niente. Null per gli altri
+ * esiti (una sfida vinta o persa, il caffè preparato) e per un esito che non c'è.
+ */
+export function strumentoDi(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): StrumentoEsito | null {
+  const coppia = coppiaBonus(esiti, chiave);
+  if (coppia) return coppia;
+  const e = chiave ? esiti?.esiti.find((x) => x.chiave === chiave) : undefined;
+  return e && !e.bonusDi && eCreazione(e) ? { base: e, bonus: null } : null;
+}
+/** 2026-10-27 (revisione): l'esito è uno strumento SENZA versione con il bonus? Allora alla spunta non si chiede niente: vale l'esito della voce. */
+export const strumentoSenzaBonus = (esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): boolean => strumentoDi(esiti, chiave)?.bonus === null;
+
+/** 2026-10-27 (revisione): TUTTI gli esiti dell'attività sono strumenti (`strumentoDi`: la fabbricazione, con il bonus; quella di Kawakami,
+ *  senza)? Allora una voce senza lo strumento non si spunta: lo si sceglie nell'editor. Con esiti misti (strumenti e esiti a sé) la voce senza
+ *  esito si spunta scegliendo l'esito come prima, e l'editor propone anche gli esiti a sé. */
+export const soloStrumenti = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti && esiti.esiti.length > 0 && esiti.esiti.every((e) => !!strumentoDi(esiti, e.chiave));
+
+/** Il nome breve di uno strumento (l'esito base di una coppia): il gruppo («Grimaldello»), altrimenti il nome dell'esito. */
+export const nomeStrumento = (base: Pick<EsitoAttivita, 'nome' | 'gruppo'>): string => base.gruppo ?? base.nome;
+
+/** 2026-10-27 (revisione, punto 4 della richiesta: «nessun doppione»): gli oggetti del catalogo che lo strumento dà (le chiavi della versione
+ *  base e, se c'è, di quella con il bonus), con il nome dello strumento e se ha la versione con il bonus; null se l'esito non è uno strumento
+ *  (`strumentoDi`). Un effetto «oggetto ricevuto» di uno di questi oggetti nella stessa voce li conterebbe due volte (`motivoOggettiGiaNelTurno`). */
+export function prodottiDelloStrumento(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): { strumento: string; oggetti: string[]; conBonus: boolean } | null {
+  const s = strumentoDi(esiti, chiave);
+  if (!s) return null;
+  const oggetti = [...new Set([...(s.base.oggetti ?? []), ...(s.bonus?.oggetti ?? [])].map((o) => o.oggetto))];
+  return { strumento: nomeStrumento(s.base), oggetti, conBonus: s.bonus !== null };
+}
+
+/** Somma due elenchi di oggetti per chiave (l'ordine è quello del primo, poi i nuovi). */
+function sommaOggetti(a: readonly OggettoEsito[], b: readonly OggettoEsito[]): OggettoEsito[] {
+  const out = a.map((o) => ({ ...o }));
+  for (const o of b) {
+    const x = out.find((y) => y.oggetto === o.oggetto);
+    if (x) x.quantita += o.quantita; else out.push({ ...o });
+  }
+  return out;
+}
+const perVolte = (o: readonly OggettoEsito[] | undefined, volte: number): OggettoEsito[] => (o ?? []).map((x) => ({ oggetto: x.oggetto, quantita: x.quantita * volte }));
+
+/**
+ * 2026-10-27: gli oggetti che un turno con l'esito `chiave` dà e consuma, con la quantità della voce (`quantita`, le creazioni; 1 se assente).
+ * Senza versione con il bonus: quelli dell'esito per `quantita`. Con l'esito «con il bonus» di una coppia: una creazione con il bonus e
+ * `quantita` − 1 base (Grimaldello ×3 con il bonus: 1 × 2 + 2 × 1 = 4 Grimaldelli; i materiali di 3 creazioni). Le copie possono superare il
+ * massimo di una riga (`LIMITI_ESITI.quantita`): lo controlla chi le scrive. Null se l'attività non dichiara l'esito.
+ */
+export function oggettiDelTurno(esiti: EsitiAttivita | null | undefined, chiave: string, quantita = 1): { oggetti: OggettoEsito[]; consuma: OggettoEsito[] } | null {
+  const e = esiti?.esiti.find((x) => x.chiave === chiave);
+  if (!e) return null;
+  const q = Number.isSafeInteger(quantita) && quantita >= 1 ? quantita : 1;
+  const base = e.bonusDi ? esiti!.esiti.find((x) => x.chiave === e.bonusDi) : undefined;
+  if (base && q > 1) return { oggetti: sommaOggetti(perVolte(e.oggetti, 1), perVolte(base.oggetti, q - 1)), consuma: sommaOggetti(perVolte(e.consuma, 1), perVolte(base.consuma, q - 1)) };
+  return { oggetti: perVolte(e.oggetti, q), consuma: perVolte(e.consuma, q) };
 }
 
 /** La colonna `esiti_json` letta: null se è vuota o non è un elenco valido (l'attività allora non ha esiti dichiarati). */
@@ -218,6 +325,8 @@ export interface EsitoDisponibileDto {
   /** Ondata 5 (lotto F-bis): gli oggetti del catalogo che l'esito consuma, con il nome e, con una partita, le copie possedute adesso
    *  (`disponibili`, null senza partita): registrando il turno si tolgono. Vuoto se nessuno. */
   consuma: Array<{ chiave: string; nome: string; quantita: number; disponibili: number | null }>;
+  /** 2026-10-27: la chiave dell'esito base di cui questo è la versione con il bonus (al contatore: lo strumento con l'interruttore «Bonus»); null se nessuna. */
+  bonusDi: string | null;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */
@@ -254,7 +363,13 @@ export type SceltaEsitoVoceDto =
    *  prezzo della sfida era già nel saldo e non si scala (la scelta lo dice). */
   | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true;
     /** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività (promemoria, `EsitiAttivitaDto.promemoria`); assente se nessuno. */
-    promemoria?: string[] }
+    promemoria?: string[];
+    /** 2026-10-27: l'esito della voce ha una versione con il bonus. La spunta mostra SOLO l'interruttore «Bonus» (sempre spento all'inizio: il
+     *  bonus arriva a caso, lo dice chi gioca), e manda `conBonus` se acceso, `base` se spento. `nome` e `quantita` (lo strumento e le
+     *  creazioni scelti nella voce) servono al nome accessibile dell'interruttore; `esiti` resta per la stessa forma, la scelta non lo elenca. */
+    bonus?: { base: string; conBonus: string; nome: string; quantita: number };
+    /** 2026-10-27: l'attività ha esiti con la versione con il bonus ma la voce non dice lo strumento: si sceglie nell'editor della voce, non qui. */
+    strumentoDaScegliere?: true }
   /** `punti`: per ognuna delle note possibili, i punti che la spunta proporrà (regola unica `puntiDaNote` con Fortuna, libro e «Anima da
    *  cineasta» della voce e della partita, come `applicaEffettiAzione`), nello stesso ordine di `possibili`. `preselezionato`: le note base
    *  dell'effetto (quelle dell'editor), NON preselezionate alla spunta: le note ottenute le tocca sempre chi gioca (`SceltaEsitiVoce`). */

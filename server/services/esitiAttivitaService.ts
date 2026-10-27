@@ -18,7 +18,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
-import { dotiEsitoConPunti, leggiEsitiAttivita, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
+import { coppiaBonus, dotiEsitoConPunti, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
 import { nomeDote } from '../../shared/doti.js';
 import { simboliPossibili } from '../../shared/note.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
@@ -35,7 +35,7 @@ import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
-  | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean } | null; doti: DoteEsito[] }
+  | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null; doti: DoteEsito[] }
   | { tipo: 'dote'; note: 0 | 1 | 2 | 3 };
 
 /** Gli esiti dichiarati da un'attività (null se non ne dichiara o se la colonna non c'è ancora) e il suo nome. */
@@ -100,6 +100,7 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
     trofeo: trofeoEsito(e.trofeo),
     oggetti: oggettiEsito(e.oggetti),
     consuma: consumaEsito(e.consuma, st?.partitaId),
+    bonusDi: e.bonusDi ?? null,
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };
@@ -151,14 +152,22 @@ export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta
   const e = esiti.esiti.find((x) => x.chiave === scelta);
   if (!e) throw httpErrors.badRequest('esito-sconosciuto', `«${nomeAttivita}» non dichiara questo esito: rileggi la voce.`);
   if (!elenco.find((x) => x.chiave === scelta)!.disponibile) throw httpErrors.conflict('esito-non-disponibile', `«${e.nome}» non è ancora possibile nella partita: ${elenco.find((x) => x.chiave === scelta)!.condizioniTesto ?? 'le condizioni non sono soddisfatte'}.`);
-  return { tipo: 'turno', esito: { chiave: e.chiave, nome: e.nome }, doti: e.doti };
+  // 2026-10-27 (revisione): per uno strumento (esito con la versione con il bonus) il turno ricorda se è la versione con il bonus, perché il
+  // riepilogo dica «con il bonus» / «senza bonus» senza ripetere il nome dello strumento accanto agli oggetti ricevuti; uno strumento senza la
+  // versione con il bonus (la fabbricazione di Kawakami) si dice solo con gli oggetti ricevuti (`creazione`)
+  const strumento = strumentoDi(esiti, e.chiave);
+  const segno = !strumento ? {} : strumento.bonus ? { bonus: strumento.bonus.chiave === e.chiave } : { creazione: true as const };
+  return { tipo: 'turno', esito: { chiave: e.chiave, nome: e.nome, ...segno }, doti: e.doti };
 }
 
-/** L'effetto chiede una scelta alla spunta? Un turno di un'attività con esiti nel modo «scelta», o una Dote a valori possibili. */
+/** L'effetto chiede una scelta alla spunta? Un turno di un'attività con esiti nel modo «scelta», o una Dote a valori possibili. 2026-10-27
+ *  (revisione): non il turno con uno strumento SENZA versione con il bonus (la fabbricazione di Kawakami): la voce dice già esito e
+ *  quantità, e non c'è niente da chiedere (vale l'esito della voce, `risolviScelteSpunta`). */
 function richiedeScelta(e: EffettoVoceDto['effetto']): boolean {
   if (e.tipo === 'dote') return !!e.possibili;
   if (e.tipo !== 'turno') return false;
-  return esitiDellAttivita(e.attivita)?.esiti?.modo === 'scelta';
+  const esiti = esitiDellAttivita(e.attivita)?.esiti;
+  return esiti?.modo === 'scelta' && !strumentoSenzaBonus(esiti, e.esito);
 }
 
 /** Le scelte che la spunta di una voce chiede, con gli esiti disponibili al giorno della voce (per il Diario). L13 (decisione 4): anche
@@ -185,8 +194,15 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
     const a = esitiDellAttivita(t.attivita)!;
     const dto = esitiDto(a.esiti!, st, t.attivita);
     const elenco = dto.esiti;
-    return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato: t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null, esiti: elenco,
-      ...(dto.promemoria.length ? { promemoria: dto.promemoria } : {}) } };
+    // 2026-10-27: lo strumento della voce ha una versione con il bonus: la spunta chiede solo «Bonus» sì/no, e parte sempre da «no» (il bonus
+    // arriva a caso: lo dice chi gioca, decisione 22). Senza lo strumento nella voce, si sceglie nell'editor della voce, non alla spunta
+    const coppia = coppiaBonus(a.esiti, t.esito);
+    const bonus = coppia ? { bonus: { base: coppia.base.chiave, conBonus: coppia.bonus.chiave, nome: nomeStrumento(coppia.base), quantita: t.quantita ?? 1 } } : {};
+    // (revisione) solo se TUTTI gli esiti sono strumenti: con esiti misti la voce senza esito si spunta scegliendo l'esito, come prima
+    const daScegliere = !t.esito && soloStrumenti(a.esiti) ? { strumentoDaScegliere: true as const } : {};
+    const preselezionato = coppia ? coppia.base.chiave : t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null;
+    return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato, esiti: elenco,
+      ...(dto.promemoria.length ? { promemoria: dto.promemoria } : {}), ...bonus, ...daScegliere } };
   });
   return [...esiti, ...scelteAlternativeDellaVoce(effetti, stato)].sort((a, b) => a.posizione - b.posizione).map((x) => x.scelta);
 }
@@ -220,7 +236,13 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
       const a = esitiDellAttivita(e.attivita);
       if (!a?.esiti) continue;
       const s = per.get(uid);
-      const scelta = s?.tipo === 'turno' ? s.esito : opz.storico && a.esiti.modo === 'scelta' && e.esito ? e.esito : undefined;
+      // (revisione) lo strumento senza versione con il bonus non chiede niente: vale l'esito della voce, con le sue condizioni
+      const scelta = s?.tipo === 'turno' ? s.esito : strumentoSenzaBonus(a.esiti, e.esito) ? e.esito : opz.storico && a.esiti.modo === 'scelta' && e.esito ? e.esito : undefined;
+      // 2026-10-27: lo strumento con la versione con il bonus lo dice la voce; alla spunta si sceglie solo se con il bonus o no (la versione
+      // base o quella con il bonus dello STESSO strumento). Senza strumento nella voce la spunta si ferma: lo si sceglie nell'editor
+      const coppia = coppiaBonus(a.esiti, e.esito);
+      if (coppia && scelta !== undefined && scelta !== coppia.base.chiave && scelta !== coppia.bonus.chiave) throw httpErrors.badRequest('esito-fuori-strumento', `«${a.nome}»: la voce indica ${nomeStrumento(coppia.base)}; alla spunta si sceglie solo se con il bonus o no.`);
+      if (!coppia && !e.esito && soloStrumenti(a.esiti) && !opz.storico) throw httpErrors.conflict('strumento-da-scegliere', `«${a.nome}»: la voce non dice che cosa si crea. Scegli strumento e quantità nell’editor della voce, poi spunta.`);
       if (opz.storico && a.esiti.modo === 'scelta' && scelta === undefined) throw httpErrors.conflict('esito-da-scegliere', `«${a.nome}»: l'esito si sceglie alla spunta. Togli e rimetti la spunta della voce per sceglierlo.`);
       out.set(uid, risolviEsitoTurno(e.attivita, a.esiti, scelta, stato()));
     }

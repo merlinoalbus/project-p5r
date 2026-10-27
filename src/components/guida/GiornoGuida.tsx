@@ -18,7 +18,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import { useLocation } from 'react-router-dom';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { avvisoSpunta } from '../../utils/percorso';
+import { avvisoSpunta, descriviEffetti } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto, FasciaGioco, GenereVoce, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
@@ -162,7 +162,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       // spuntando, le Doti registrate con le loro note e i punti («Perizia ♪♪♪ · 5 punti»): chi ha scelto le note vede subito che cosa è entrato
       // (prima l'avviso non lo diceva, e ♪♪ registrate al posto di ♪♪♪ si scoprivano solo dall'«Applica»)
       const dotiRegistrate = fatta ? testoDotiDaSegnare(dotiDaSegnareDaEffetti(agg.effetti)) : '';
-      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${dotiRegistrate ? `: ${dotiRegistrate}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
+      // 2026-10-27: e i turni registrati, con l'esito applicato (base o con il bonus) e gli oggetti ricevuti e usati: chi spunta vede che cosa è entrato
+      const turniRegistrati = fatta && agg.effetti?.turni?.length ? descriviEffetti({ doti: [], confidente: null, turni: agg.effetti.turni }, { senzaDoti: true, senzaPaga: true }) : '';
+      const registrati = [turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
+      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${registrati ? `: ${registrati}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
       // togliendo la spunta, l'esemplare in scorta rimasto perché modificato dopo. Un avviso resta finché chi gioca non lo chiude (la durata
@@ -206,7 +209,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti)} />}
-        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
+        {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
+        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
         {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}

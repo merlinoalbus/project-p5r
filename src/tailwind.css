@@ -1541,6 +1541,20 @@
   }
   /* L3: un'area del Palazzo toccata dall'infiltrazione aperta (evidenziata, ma non scelta) */
   .chip--toccata { --chip-bordo: color-mix(in srgb, var(--color-primary) 60%, transparent); }
+  /* 2026-10-27: l'interruttore «Bonus» della spunta (sì/no): una pista con il pomello dentro il chip; lo stato si legge anche dal testo («sì»/«no»),
+     non solo dal colore. Transizioni solo sulle proprietà che cambiano */
+  .interruttore-pista {
+    position: relative; display: inline-block; flex: none; width: 2.25rem; height: 1.25rem; border-radius: 9999px;
+    background: var(--color-bg-tertiary); border: 1px solid var(--color-border-input);
+    transition-property: background-color, border-color; transition-duration: 150ms; transition-timing-function: ease-out;
+  }
+  .interruttore-pista::after {
+    content: ""; position: absolute; top: 1px; left: 1px; width: 1rem; height: 1rem; border-radius: 9999px; background: var(--color-text-secondary);
+    transition-property: transform, background-color; transition-duration: 150ms; transition-timing-function: ease-out;
+  }
+  .interruttore-pista--acceso { background: var(--color-primary-fondo); border-color: var(--color-primary); }
+  .interruttore-pista--acceso::after { transform: translateX(1rem); background: var(--color-text-on-primary); }
+  @media (prefers-reduced-motion: reduce) { .interruttore-pista, .interruttore-pista::after { transition-duration: 0ms; } }
   /* L3: da 1280 px, nella colonna centrale stretta della scheda del Palazzo (fra «Aree» e «Da raccogliere»), i comandi delle righe
      restano solo icona: il nome lo dicono `aria-label` e il suggerimento, e la riga non va a capo (R3-41) */
   /* L3 (R3-41): la stessa cosa da 1024 px, per l'intestazione compatta della scheda del Palazzo («Sulla mappa di Tokyo») */

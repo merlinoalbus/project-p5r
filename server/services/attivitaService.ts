@@ -593,7 +593,12 @@ export interface TurnoRegistrato {
    *  saldo quando il turno si registra (`yenDelTurno`, `utente.yen_automatico`), e si toglie togliendo il turno. Null se non ne ha. */
   paga: { yen: number; massima: number | null } | null;
   /** L13: l'esito ottenuto (null = «senza punti»), per le attività che dichiarano esiti; assente per le altre. */
-  esito?: { chiave: string; nome: string; automatico?: boolean } | null;
+  /** 2026-10-27 (revisione): `bonus` per gli strumenti (esiti con la versione con il bonus): vero se è la versione con il bonus. */
+  esito?: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean } | null;
+  /** 2026-10-27: le creazioni della voce (solo se più di una) e gli oggetti dati e consumati dal turno, per dire alla spunta che cosa ha applicato. */
+  quantita?: number;
+  oggetti?: Array<{ nome: string; quantita: number }>;
+  consumati?: Array<{ nome: string; quantita: number }>;
 }
 
 /**
@@ -605,7 +610,9 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
   /** Ondata 5 (lotto E): la fascia in cui si svolge il turno (quella della voce del Diario che lo registra); senza, quella corrente della partita. */
   fascia?: FasciaPrezzo | null,
   /** Revisione della chiusura dell'ondata 5 (N1): la voce del Diario che lo registra, per lo sconto del negozio del suo momento (`scontoAllaVoce`). */
-  voceUid?: string | null): TurnoRegistrato {
+  voceUid?: string | null,
+  /** 2026-10-27: le creazioni dello strumento dichiarate dalla voce (l'effetto `turno`): moltiplicano gli oggetti dati e consumati dall'esito. */
+  quantita?: number): TurnoRegistrato {
   const riga = attivitaConTurni(chiave,false,interno?.pescaAutorizzata===true);
   const adesso = nowIso();
   return getDb().transaction(() => {
@@ -630,9 +637,10 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     if (esito) segnaTrofeoDelTurno(partitaId, chiave, ordine, esito.chiave);
     // e gli oggetti del catalogo che l'esito dà (la Comet Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger») entrano fra gli ottenuti;
     // senza esito toglie soltanto le righe rimaste da un turno con lo stesso numero
-    segnaOggettiDelTurno(partitaId, chiave, ordine, esito?.chiave);
+    // 2026-10-27: con la quantità della voce (le creazioni) e la versione con il bonus scelta alla spunta (`oggettiDelTurno`)
+    const oggetti = segnaOggettiDelTurno(partitaId, chiave, ordine, esito?.chiave, quantita);
     // Ondata 5 (lotto F-bis): e gli oggetti che l'esito consuma (il concime della pianta, i materiali della fabbricazione) escono dalle copie
-    segnaConsumiDelTurno(partitaId, chiave, ordine, esito?.chiave);
+    const consumati = segnaConsumiDelTurno(partitaId, chiave, ordine, esito?.chiave, quantita);
     // L13 (decisione 18): gli yen del turno si muovono da soli (la paga del lavoro entra; il costo dell'attività o il prezzo della sfida
     // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
     // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
@@ -642,7 +650,8 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
       if (y) muoviYenAutomatico(partitaId, causa, y.importo, y.motivo);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null, ...(esito !== undefined ? { esito } : {}) };
+    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null, ...(esito !== undefined ? { esito } : {}),
+      ...(esito && quantita && quantita > 1 ? { quantita } : {}), ...(oggetti.length ? { oggetti } : {}), ...(consumati.length ? { consumati } : {}) };
   })();
 }
 

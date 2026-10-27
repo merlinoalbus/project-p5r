@@ -9,11 +9,13 @@ export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
  * L13 (ondata 2): `possibili` = i valori che il gioco può dare (la fabbricazione: Perizia ♪♪ o ♪♪♪): alla spunta si sceglie quale,
  * `note` è il valore proposto. `esito` del turno = l'esito atteso fra quelli dichiarati dall'attività (`attivita.esiti_json`), proposto
  * alla spunta; senza, chi gioca lo sceglie (o l'attività lo ricava da sola, nel modo automatico). Un turno con esito non ha Doti proprie.
+ * 2026-10-27: `quantita` del turno con esito = le creazioni (Grimaldello ×3): gli oggetti dati e consumati dall'esito contano tante volte
+ * (`oggettiDelTurno` di `shared/esitiAttivita.ts`); 1 è sottinteso e non si scrive (una sola forma canonica), e senza esito non c'è.
  */
 export type EffettoLegacyVoce =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLetturaVoce; chiave: string; almeno: number | null }
-  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string };
+  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string; quantita?: number };
 /** L'acquisto non porta più la Fortuna (R10-10/2): è lo stato della partita, letto quando si registra il consumo. */
 export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
@@ -134,7 +136,7 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -186,8 +188,13 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
     if (o.esito !== undefined) {
       // l'esito porta le sue Doti: un turno con esito non dichiara anche Doti proprie (due fonti dello stesso dato)
       if (o.doti != null || typeof o.esito !== 'string' || !/^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esito)) return null;
-      return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      // 2026-10-27: le creazioni dell'esito (1 sottinteso, non si scrive)
+      if (o.quantita === undefined || o.quantita === 1) return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      const q = quantita(o.quantita);
+      return q ? { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito, quantita: q } : null;
     }
+    // la quantità vale solo con l'esito: senza, il turno non dice che cosa si crea
+    if (o.quantita !== undefined) return null;
     if (o.doti == null) return { tipo: 'turno', attivita: o.attivita.trim() };
     if (!Array.isArray(o.doti) || !o.doti.length) return null;
     const doti: DoteNoteVoce[] = [];
@@ -269,6 +276,36 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
   const r = c.riferimento;
   if (!chi && r && (r.tipo === 'film' || r.tipo === 'attivita' || r.tipo === 'richiesta') && conYen(r.tipo, r.chiave)) chi = `il collegamento della voce: ${NOME_DATO_CON_YEN[r.tipo]}`;
   return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte.` : null;
+}
+
+/** Il contesto della regola degli oggetti già dati dallo strumento del turno: gli oggetti che lo strumento («attività/esito») dà, e i nomi. */
+export interface ContestoOggettiTurno {
+  /** Lo strumento dell'esito (con la versione con il bonus) e le chiavi degli oggetti che dà, base e con il bonus; null per gli altri esiti. */
+  prodottiDi: (attivita: string, esito: string) => { strumento: string; oggetti: readonly string[] } | null;
+  /** Il nome dell'oggetto del catalogo, se si conosce. */
+  nomeOggetto?: (chiave: string) => string | undefined;
+}
+/**
+ * 2026-10-27 (punto 4 della richiesta dell'utente: «nessun doppione: gli oggetti ricevuti vengono dall'esito scelto, base o bonus, non ripetuti
+ * come effetto separato della voce»): perché un effetto «oggetto ricevuto» non può stare accanto al turno di uno strumento che dà già lo stesso
+ * oggetto (con la quantità della voce e il bonus della spunta), o null se può. Una regola sola: la usano il server (rifiuto 409
+ * `oggetto-gia-nel-turno` al salvataggio, alla proposta applicata, alla copia e alla spunta) e l'editor della voce (avviso subito).
+ */
+export function motivoOggettiGiaNelTurno(effetti: readonly EffettoVoce[], c: ContestoOggettiTurno): string | null {
+  const oggetti = effetti.filter((e): e is Extract<EffettoVoce, { tipo: 'oggetto' }> => e.tipo === 'oggetto');
+  if (!oggetti.length) return null;
+  for (const t of effetti) {
+    if (t.tipo !== 'turno' || !t.esito) continue;
+    const p = c.prodottiDi(t.attivita, t.esito);
+    const doppio = p ? oggetti.find((o) => p.oggetti.includes(o.oggetto)) : undefined;
+    if (p && doppio) {
+      // il nome dello strumento solo se diverso da quello dell'oggetto: «“Grimaldello” lo dà già lo strumento del turno», non «… Grimaldello»
+      const nome = c.nomeOggetto?.(doppio.oggetto) ?? p.strumento;
+      const chi = nome === p.strumento ? 'lo strumento del turno' : `lo strumento del turno (${p.strumento})`;
+      return `«${nome}» lo dà già ${chi}, con la quantità della voce e il bonus della spunta: togli l’effetto «Oggetto ricevuto», non si conta due volte.`;
+    }
+  }
+  return null;
 }
 
 /**

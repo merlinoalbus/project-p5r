@@ -72,10 +72,11 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
   );
 }
 
-/** L13: quante copie (1–999; decisione 6: facoltativa, 1 se non indicata). */
-export function CampoQuantita({ valore, disabilitato, onCambia }: { valore: number; disabilitato?: boolean; onCambia: (q: number) => void }) {
+/** L13: quante copie (1–999; decisione 6: facoltativa, 1 se non indicata). `etichetta`: «Copie» se non detta (2026-10-27: «Quantità» per le
+ *  creazioni dello strumento di un turno). */
+export function CampoQuantita({ valore, disabilitato, onCambia, etichetta = 'Copie' }: { valore: number; disabilitato?: boolean; onCambia: (q: number) => void; etichetta?: string }) {
   return (
-    <label className="flex flex-col gap-1 testo-13">Copie
+    <label className="flex flex-col gap-1 testo-13">{etichetta}
       <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={valore} disabled={disabilitato}
         onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia(Number.isFinite(n) ? Math.min(QUANTITA_MASSIMA_EFFETTO, Math.max(1, n)) : 1); }} />
     </label>
@@ -192,6 +193,19 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     case 'turno': {
       // L13: un'attività con esiti dichiarati dà le Doti dell'esito scelto alla spunta: qui al più l'esito atteso, mai Doti proprie
       const esiti = azione.attivita.find((a) => a.chiave === e.attivita)?.esiti;
+      // 2026-10-27 («L'oggetto è stato già scelto, la quantità anche»): un'attività con esiti che hanno la versione con il bonus si sceglie per
+      // strumento (gli esiti base) e quantità; alla spunta resta solo «Bonus» sì/no. Un esito con il bonus già scritto nella voce si mostra
+      // come il suo strumento: cambiando strumento o quantità si scrive la versione base
+      // (revisione) con esiti misti (strumenti ed esiti a sé) si propongono anche gli esiti a sé, come esito atteso da confermare alla spunta:
+      // un'attività di soli strumenti dice «Strumento» e non lascia la voce senza (`soloStrumenti` del server, 409 `strumento-da-scegliere`)
+      // (revisione) uno strumento è anche la creazione senza versione con il bonus (`strumento` con `senzaBonus`: la fabbricazione di Kawakami):
+      // stesso schema, strumento e quantità qui; alla spunta niente da chiedere
+      const strumenti = esiti?.elenco.some((x) => x.strumento) ? esiti.elenco.filter((x) => !x.bonusDi) : null;
+      const soloStrumentiQui = !!strumenti && strumenti.every((x) => x.strumento);
+      const baseDi = (k: string | undefined): string => (k ? esiti?.elenco.find((x) => x.chiave === k)?.bonusDi ?? k : '');
+      const eStrumento = (k: string): boolean => !!esiti?.elenco.find((x) => x.chiave === k)?.strumento;
+      // la quantità (le creazioni) solo per uno strumento: il server la rifiuta per gli altri esiti (`quantita-senza-strumento`)
+      const turnoStrumento = (esito: string, quantita: number): Turno => (quantita > 1 && eStrumento(esito) ? { tipo: 'turno', attivita: e.attivita, esito, quantita } : { tipo: 'turno', attivita: e.attivita, esito });
       return (
         <div className="flex flex-col gap-2">
           <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => {
@@ -200,7 +214,17 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
             const nuovaConEsiti = !!azione.attivita.find((a) => a.chiave === v)?.esiti;
             onCambia(e.doti && !nuovaConEsiti ? { tipo: 'turno', attivita: v, doti: e.doti } : { tipo: 'turno', attivita: v });
           }} />
-          {esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
+          {strumenti && (
+            <div className="flex flex-wrap items-end gap-2">
+              <Selettore className="min-w-[12rem] flex-1" etichetta={soloStrumentiQui ? 'Strumento' : 'Strumento o esito atteso'} valore={baseDi(e.esito)}
+                vuoto={soloStrumentiQui ? 'Da scegliere' : 'Nessuno: lo scegli alla spunta'}
+                opzioni={conCorrente(strumenti.map((x) => ({ chiave: x.chiave, nome: x.strumento ?? x.nome })), baseDi(e.esito), soloStrumentiQui ? 'Strumento non più dichiarato' : 'Esito non più dichiarato')}
+                onCambia={(v) => onCambia(v ? turnoStrumento(v, e.quantita ?? 1) : { tipo: 'turno', attivita: e.attivita })} />
+              {/* la quantità solo con uno strumento scelto: senza, o con un esito a sé, non direbbe niente */}
+              {e.esito && eStrumento(baseDi(e.esito)) && <CampoQuantita etichetta="Quantità" valore={e.quantita ?? 1} onCambia={(q) => onCambia(turnoStrumento(baseDi(e.esito), q))} />}
+            </div>
+          )}
+          {!strumenti && esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
             opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
           {esiti?.modo === 'automatico' && <p className="m-0 testo-13 text-text-secondary">L’esito si ricava dal giorno della voce: nessuna scelta da indicare.</p>}
           {!esiti && <DotiProprieTurno effetto={e} onCambia={onCambia} />}

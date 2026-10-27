@@ -2355,3 +2355,36 @@ Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente)
 - **Benefattore conta tutti i regali**, Cartolina compresa: la guida dice «almeno 10 regali totali» e non ne esclude nessuno.
 - **Il segno «prezzo già nel saldo»** di una consegna di prima degli yen automatici vale per una consegna sola: la usa la prima consegna ridata
   nello stesso momento, e torna valido se la si toglie.
+
+## 2026-10-27 — Fabbricazione: alla spunta solo «Bonus» sì/no
+
+Richiesta dell'utente, dopo aver visto la finestra della spunta che elencava per ogni ricetta «creato» / «con il bonus» con i materiali
+(«TOTALMENTE INUSABILE»; «e quando creo l'aroma calmante? o il Goho-M?»): «bastava un pulsante bonus sì/no. L'oggetto è stato già scelto, la
+quantità anche... se il pulsante bonus è attivo quando riscuoto applica la versione con il bonus, altrimenti quella base».
+Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente):
+
+- **La versione con il bonus è un dato dell'esito** (`bonusDi` = l'esito base), per ogni attività che lo dichiara; nessuna regola sul nome.
+- **Lo strumento e la quantità stanno nella voce** (l'effetto `turno` con l'esito base e `quantita`, le creazioni); l'editor della voce propone
+  solo gli strumenti e la quantità. La spunta mostra solo l'interruttore «Bonus», spento all'inizio (decisione 22: il bonus arriva a caso).
+- **Con la quantità q** gli oggetti dati e i materiali sono q volte quelli dell'esito base; con il bonus una delle q creazioni è quella con il
+  bonus (un oggetto in più senza materiali); le Doti dell'esito valgono una volta per turno (♪♪ base, ♪♪♪ con il bonus).
+- **Una voce senza strumento** (11-18, «bombe o strumenti») non si spunta finché lo strumento non è scelto nell'editor della voce.
+- **Gli oggetti li dà l'esito**: un «oggetto ricevuto» dello stesso prodotto nella voce esce (o, nel periodo validato, la proposta lo toglie).
+- **Nessun doppione anche dopo** (revisione): una regola sola (`motivoOggettiGiaNelTurno`, `shared/effettiVoce.ts`) rifiuta con 409
+  `oggetto-gia-nel-turno` un «oggetto ricevuto» che lo strumento del turno della stessa voce dà già (base o con il bonus): al salvataggio
+  degli effetti, all'applicazione di una proposta, alla copia e alla spunta; l'editor della voce lo avvisa subito, come per gli yen.
+- **Attività con esiti misti** (strumenti ed esiti a sé, oggi nessuna): la voce senza esito si spunta scegliendo l'esito come prima;
+  il blocco «strumento da scegliere» vale solo se tutti gli esiti sono strumenti (`soloStrumenti`).
+- **Il riepilogo** di un turno di uno strumento dice «con il bonus» / «senza bonus» accanto agli oggetti ricevuti, senza ripetere il nome.
+- **Seconda revisione: ogni fabbricazione è uno strumento.** È uno strumento anche la creazione senza versione con il bonus (un esito che
+  consuma oggetti e ne dà altri: `eCreazione`/`strumentoDi`, ricavato dai dati). La voce dice strumento e quantità; alla spunta non si chiede
+  niente. È il caso della fabbricazione di Kawakami (abilità «Domestica tuttofare», rango letto dai dati: 6), un'attività a parte
+  (`fabbricazione-kawakami`, migrazione 300) perché il bonus di Morgana arriva solo quando fabbrichi tu. Gli esiti non danno Doti: la guida
+  non dà Perizia per questa via; se in gioco la dà, si aggiunge all'esito dall'editor degli esiti.
+- **Le bombe della guida** (nove ricette degli strumenti da battaglia) entrano nel catalogo, nelle ricette e negli esiti della fabbricazione
+  (38 esiti; il massimo di un'attività passa da 20 a 50). Il 12-23 (Kawakami, un grimaldello duraturo) diventa lo strumento della fabbricazione
+  di Kawakami; l'11-22 e il 04-17 ricevono proposte con lo strumento al posto dell'«oggetto ricevuto»; il 09-18 (più bombe, obiettivi su più
+  sessioni) resta com'è. Le note «Perizia +3» del 07-25 e «Perizia +3 possibile» dell'11-18 si tolgono (testo di prima conservato): la
+  Perizia la dice lo strumento.
+- **Le condizioni di rango delle ricette** («Strumenti magistrali», rango 6 di Morgana) restano nei dettagli, non come condizioni degli esiti:
+  come nella 290, perché una condizione non registrata nella partita fermerebbe la spunta. Da decidere con l'utente se vanno negli esiti.

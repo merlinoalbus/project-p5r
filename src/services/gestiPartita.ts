@@ -46,7 +46,7 @@ const doteNote = z.object({ dote: z.enum(CHIAVI_DOTI), note: z.union([z.literal(
 const effetto = z.discriminatedUnion('tipo', [
   doteNote.extend({ tipo: z.literal('dote'), possibili: z.array(z.union([z.literal(1),z.literal(2),z.literal(3)])).min(2).max(3).optional() }).strict(),
   z.object({ tipo: z.literal('lettura'), categoria: z.enum(['libro','film','videogioco']), chiave, almeno: positivo.nullable() }).strict(),
-  z.object({ tipo: z.literal('turno'), attivita: chiave, doti: z.array(doteNote).min(1).max(20).optional(), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional() }).strict(),
+  z.object({ tipo: z.literal('turno'), attivita: chiave, doti: z.array(doteNote).min(1).max(20).optional(), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional(), quantita: z.number().int().min(1).max(999).optional() }).strict(),
   z.object({ tipo: z.literal('yen'), importo: z.number().int().min(-9_999_999).max(9_999_999).refine(n => n !== 0) }).strict(),
   z.object({ tipo: z.literal('oggetto'), oggetto: chiave, quantita: z.number().int().min(1).max(999) }).strict(),
   z.object({ tipo: z.literal('trofeo'), trofeo: chiave }).strict(),

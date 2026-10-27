@@ -27,6 +27,7 @@ import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
 import { NESSUNA_NOTA, simboliNote, testoDoteInPunti } from '../../shared/note.js';
+import { nomeEsitoDelTurno } from '../../shared/descriviEffettiSpunta.js';
 import { fasciaDellaVoce } from './prezziArticoli.js';
 
 const numeroReceipt = z.number().finite();
@@ -131,7 +132,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       // Ondata 5 (lotto E, decisione 5): il turno si svolge nella fascia della voce, che decide il prezzo della sfida (500 ¥ di sera)
       const fascia = a.voceUid ? fasciaDellaVoce(a.voceUid) : null;
       // revisione della chiusura dell'ondata 5 (N1): con la voce, lo sconto del negozio che valeva nel suo momento
-      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia, a.voceUid ?? null) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null);
+      // 2026-10-27: la quantità della voce (le creazioni dello strumento) vale con l'esito scelto, base o con il bonus
+      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia, a.voceUid ?? null, scelta.esito ? e.quantita : undefined) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null);
       turni.push(t);
     }
   }
@@ -193,7 +195,16 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   // L13: «nessuna ♪» scelta alla spunta per una Dote a valori possibili si dice, non si propone
   const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)` : `${testoDoteInPunti(d)}${d.note && (d.cinema || d.scelta) ? ` (${[d.cinema ? 'Anima da cineasta' : null, d.scelta ? 'note scelte alla spunta' : null].filter(Boolean).join(', ')})` : ''} da segnare nelle Doti`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${frasiDoti(l.doti)})` : ''}`);
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · esito ${t.esito.nome}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}`);
+  // 2026-10-27: anche gli oggetti che il turno ha dato e usato (con la quantità e il bonus della voce), solo se ci sono
+  const oggetti = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');
+  // (revisione) per uno strumento con gli oggetti ricevuti accanto, «con il bonus» / «senza bonus» invece del nome ripetuto, e niente per uno
+  // strumento senza versione con il bonus (`nomeEsitoDelTurno`)
+  const esitoDi = (x: NonNullable<NonNullable<EffettiAzioneDto['turni']>[number]['esito']>, oggettiRicevuti: boolean): string | null =>
+    (x.bonus !== undefined || x.creazione) && oggettiRicevuti ? nomeEsitoDelTurno(x, true) : `esito ${x.nome}`;
+  for (const t of e.turni ?? []) {
+    const nomeEsito = t.esito ? esitoDi(t.esito, !!t.oggetti?.length) : null;
+    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? `${nomeEsito ? ` · ${nomeEsito}` : ''}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
+  }
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);

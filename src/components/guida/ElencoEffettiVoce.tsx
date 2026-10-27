@@ -12,7 +12,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
+import { motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
 import { CATEGORIA_EFFETTO, MENU_EFFETTI as MENU, effettoNuovo } from '../../utils/effettiDellaVoce';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -43,6 +43,12 @@ const idRiga = (r: RigaEffetto): string => {
 /** Gli yen che film, attività e Richieste portano già, dagli elenchi dell'editor (il server li calcola con `yenDeiDati`). */
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
   (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
+
+/** Lo strumento di un esito e gli oggetti che dà (base e con il bonus), dagli elenchi dell'editor (il server li calcola con `prodottiDelloStrumento`). */
+const prodottiDiStrumento = (el: ElenchiVoce, attivita: string, esito: string): { strumento: string; oggetti: readonly string[] } | null => {
+  const x = el.azione.attivita.find((a) => a.chiave === attivita)?.esiti?.elenco.find((e) => e.chiave === esito);
+  return x?.strumento && x.oggetti ? { strumento: x.strumento, oggetti: x.oggetti } : null;
+};
 
 /**
  * Su una voce già spuntata, i nomi dei tipi di effetto per la nota sotto l'elenco. L13 (decisione 19): gli effetti di stato si applicano subito al
@@ -122,9 +128,13 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
 
   // L13 (decisione 2): un effetto «yen» accanto a un dato che porta già i suoi yen si segnala SUBITO, con la stessa regola del server
   const motivoYen = motivoYenGiaStrutturati(righe.map((r) => r.effetto), { riferimento: valore.riferimento, yenDi: (tipo, chiave) => yenDelDato(elenchi, tipo, chiave) });
+  // 2026-10-27 (punto 4 della richiesta: «nessun doppione»): un «oggetto ricevuto» che lo strumento del turno dà già si segnala SUBITO, con la
+  // stessa regola del server (che lo rifiuta con 409 `oggetto-gia-nel-turno`)
+  const motivoOggetti = motivoOggettiGiaNelTurno(righe.map((r) => r.effetto), { prodottiDi: (attivita, esito) => prodottiDiStrumento(elenchi, attivita, esito), nomeOggetto: (k) => nomi.oggetti?.get(k) });
   return (
     <div className="flex flex-col gap-2">
       {motivoYen && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning">{motivoYen}</p>}
+      {motivoOggetti && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning text-pretty">{motivoOggetti}</p>}
       {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">{righe.length === 0 ? 'Nessun effetto: la spunta registra solo che l’hai fatta.' : 'Nessun altro effetto.'}</p>}
       {visibili.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Effetti della spunta">
