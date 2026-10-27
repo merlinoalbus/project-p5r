@@ -136,12 +136,14 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
               const scelto = bonus ? conBonus : base;
               const idMotivo = `${prefisso}-motivo-${base.chiave}`;
               return (
-                <button key={base.chiave} type="button" className={`chip touch ${!scelto.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
+                // (revisione) il motivo di uno strumento non ancora possibile è scritto nel bottone, come in `ElencoEsiti`, non solo per i lettori di schermo
+                <button key={base.chiave} type="button" className={`chip touch flex-col items-start text-left ${!scelto.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
                   aria-disabled={!scelto.disponibile ? true : undefined} aria-describedby={!scelto.disponibile ? idMotivo : undefined}
+                  title={!scelto.disponibile ? `Non ancora possibile: ${scelto.condizioniTesto ?? 'condizioni non soddisfatte'}` : undefined}
                   aria-label={`${nomeStrumento(base)}${bonus ? ', con il bonus' : ''}${!scelto.disponibile ? '; non ancora possibile' : ''}`}
                   onClick={() => { if (scelto.disponibile) onScegli(scelto.chiave); }}>
-                  {nomeStrumento(base)}
-                  {!scelto.disponibile && <span id={idMotivo} className="sr-only">Non ancora: {scelto.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
+                  <span>{nomeStrumento(base)}</span>
+                  {!scelto.disponibile && <span id={idMotivo} className="testo-12 text-text-muted text-pretty">Non ancora: {scelto.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
                 </button>
               );
             })}

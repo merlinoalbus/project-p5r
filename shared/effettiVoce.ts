@@ -278,6 +278,36 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
   return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte.` : null;
 }
 
+/** Il contesto della regola degli oggetti già dati dallo strumento del turno: gli oggetti che lo strumento («attività/esito») dà, e i nomi. */
+export interface ContestoOggettiTurno {
+  /** Lo strumento dell'esito (con la versione con il bonus) e le chiavi degli oggetti che dà, base e con il bonus; null per gli altri esiti. */
+  prodottiDi: (attivita: string, esito: string) => { strumento: string; oggetti: readonly string[] } | null;
+  /** Il nome dell'oggetto del catalogo, se si conosce. */
+  nomeOggetto?: (chiave: string) => string | undefined;
+}
+/**
+ * 2026-10-27 (punto 4 della richiesta dell'utente: «nessun doppione: gli oggetti ricevuti vengono dall'esito scelto, base o bonus, non ripetuti
+ * come effetto separato della voce»): perché un effetto «oggetto ricevuto» non può stare accanto al turno di uno strumento che dà già lo stesso
+ * oggetto (con la quantità della voce e il bonus della spunta), o null se può. Una regola sola: la usano il server (rifiuto 409
+ * `oggetto-gia-nel-turno` al salvataggio, alla proposta applicata, alla copia e alla spunta) e l'editor della voce (avviso subito).
+ */
+export function motivoOggettiGiaNelTurno(effetti: readonly EffettoVoce[], c: ContestoOggettiTurno): string | null {
+  const oggetti = effetti.filter((e): e is Extract<EffettoVoce, { tipo: 'oggetto' }> => e.tipo === 'oggetto');
+  if (!oggetti.length) return null;
+  for (const t of effetti) {
+    if (t.tipo !== 'turno' || !t.esito) continue;
+    const p = c.prodottiDi(t.attivita, t.esito);
+    const doppio = p ? oggetti.find((o) => p.oggetti.includes(o.oggetto)) : undefined;
+    if (p && doppio) {
+      // il nome dello strumento solo se diverso da quello dell'oggetto: «“Grimaldello” lo dà già lo strumento del turno», non «… Grimaldello»
+      const nome = c.nomeOggetto?.(doppio.oggetto) ?? p.strumento;
+      const chi = nome === p.strumento ? 'lo strumento del turno' : `lo strumento del turno (${p.strumento})`;
+      return `«${nome}» lo dà già ${chi}, con la quantità della voce e il bonus della spunta: togli l’effetto «Oggetto ricevuto», non si conta due volte.`;
+    }
+  }
+  return null;
+}
+
 /**
  * L13 (ondata 4a, richiesta dell'utente): TUTTI gli articoli comprati della voce con le copie e il totale, «Arginade ×2 · Acqua della
  * rinascita ×1 · ¥900». Lo stesso articolo in più effetti si conta una volta sola, con le copie sommate, al posto del primo; un articolo

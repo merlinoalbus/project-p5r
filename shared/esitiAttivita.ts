@@ -197,8 +197,23 @@ export function coppiaBonus(esiti: EsitiAttivita | null | undefined, chiave: str
  *  alla spunta resta solo l'interruttore «Bonus». */
 export const haVersioniBonus = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti?.esiti.some((e) => e.bonusDi);
 
+/** 2026-10-27 (revisione): TUTTI gli esiti dell'attività stanno in una coppia base / con il bonus (sono solo strumenti, come la fabbricazione)?
+ *  Allora una voce senza lo strumento non si spunta: lo si sceglie nell'editor. Con esiti misti (strumenti e esiti a sé) la voce senza esito
+ *  si spunta scegliendo l'esito come prima, e l'editor propone anche gli esiti a sé. */
+export const soloStrumenti = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti && haVersioniBonus(esiti) && esiti.esiti.every((e) => !!coppiaBonus(esiti, e.chiave));
+
 /** Il nome breve di uno strumento (l'esito base di una coppia): il gruppo («Grimaldello»), altrimenti il nome dell'esito. */
 export const nomeStrumento = (base: Pick<EsitoAttivita, 'nome' | 'gruppo'>): string => base.gruppo ?? base.nome;
+
+/** 2026-10-27 (revisione, punto 4 della richiesta: «nessun doppione»): gli oggetti del catalogo che lo strumento dà (le chiavi della versione
+ *  base e di quella con il bonus), con il nome dello strumento; null se l'esito non ha una versione con il bonus. Un effetto «oggetto
+ *  ricevuto» di uno di questi oggetti nella stessa voce li conterebbe due volte (`motivoOggettiGiaNelTurno`). */
+export function prodottiDelloStrumento(esiti: EsitiAttivita | null | undefined, chiave: string | null | undefined): { strumento: string; oggetti: string[] } | null {
+  const coppia = coppiaBonus(esiti, chiave);
+  if (!coppia) return null;
+  const oggetti = [...new Set([...(coppia.base.oggetti ?? []), ...(coppia.bonus.oggetti ?? [])].map((o) => o.oggetto))];
+  return { strumento: nomeStrumento(coppia.base), oggetti };
+}
 
 /** Somma due elenchi di oggetti per chiave (l'ordine è quello del primo, poi i nuovi). */
 function sommaOggetti(a: readonly OggettoEsito[], b: readonly OggettoEsito[]): OggettoEsito[] {

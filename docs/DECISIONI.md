@@ -2370,3 +2370,9 @@ Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente)
   bonus (un oggetto in più senza materiali); le Doti dell'esito valgono una volta per turno (♪♪ base, ♪♪♪ con il bonus).
 - **Una voce senza strumento** (11-18, «bombe o strumenti») non si spunta finché lo strumento non è scelto nell'editor della voce.
 - **Gli oggetti li dà l'esito**: un «oggetto ricevuto» dello stesso prodotto nella voce esce (o, nel periodo validato, la proposta lo toglie).
+- **Nessun doppione anche dopo** (revisione): una regola sola (`motivoOggettiGiaNelTurno`, `shared/effettiVoce.ts`) rifiuta con 409
+  `oggetto-gia-nel-turno` un «oggetto ricevuto» che lo strumento del turno della stessa voce dà già (base o con il bonus): al salvataggio
+  degli effetti, all'applicazione di una proposta, alla copia e alla spunta; l'editor della voce lo avvisa subito, come per gli yen.
+- **Attività con esiti misti** (strumenti ed esiti a sé, oggi nessuna): la voce senza esito si spunta scegliendo l'esito come prima;
+  il blocco «strumento da scegliere» vale solo se tutti gli esiti sono strumenti (`soloStrumenti`).
+- **Il riepilogo** di un turno di uno strumento dice «con il bonus» / «senza bonus» accanto agli oggetti ricevuti, senza ripetere il nome.

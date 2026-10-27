@@ -141,7 +141,8 @@ export interface NomiEffettiAzione {
   modiEsiti?: Record<string, 'scelta' | 'automatico'>;
   /** 2026-10-27: per gli esiti che hanno una versione con il bonus («attività/esito», base o con il bonus), il nome dello strumento («Grimaldello»). */
   strumenti?: Record<string, string>;
-  /** 2026-10-27: le attività con esiti che hanno una versione con il bonus (lo strumento si sceglie nella voce, il bonus alla spunta). */
+  /** 2026-10-27: le attività i cui esiti sono tutti strumenti con una versione con il bonus (`soloStrumenti`: lo strumento si sceglie nella
+   *  voce, il bonus alla spunta). Con esiti misti l'esito si sceglie alla spunta come prima. */
   conBonus?: Record<string, true>;
 }
 

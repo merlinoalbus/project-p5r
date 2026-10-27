@@ -1305,7 +1305,9 @@ export interface EffettiAzioneDto {
     paga?: { yen: number; massima: number | null } | null;
     /** L13: l'esito ottenuto, fra quelli dichiarati dall'attività (le Doti del turno sono le sue); null = «senza punti» scelto alla spunta.
      *  Assente per le attività senza esiti e nelle ricevute di prima. `automatico`: ricavato dalle condizioni (il giorno), non scelto. */
-    esito?: { chiave: string; nome: string; automatico?: boolean } | null;
+    /** 2026-10-27 (revisione): `bonus` per gli strumenti (esiti con la versione con il bonus): vero se la versione con il bonus, falso se quella
+     *  base; assente per gli altri esiti e nelle ricevute di prima. */
+    esito?: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean } | null;
     /** 2026-10-27: le creazioni della voce (Grimaldello ×3), solo se più di una; assente nelle ricevute di prima. */
     quantita?: number;
     /** 2026-10-27: gli oggetti che il turno ha dato e consumato (con la quantità e il bonus), per dire alla spunta che cosa è stato applicato.
@@ -1523,8 +1525,9 @@ export interface ElenchiAzioneDto {
   /** `turni`: si conta per volte, quindi può essere l'attività di un effetto «turno». */
   /** L13 `esiti`: gli esiti dichiarati dall'attività (nome e chiave) con il modo, per l'esito atteso del turno nella voce. */
   /** 2026-10-27: negli esiti, `bonusDi` (la versione con il bonus di un altro esito) e `strumento` (il nome breve, per gli esiti di una coppia
-   *  base / con il bonus): l'editor della voce propone solo gli strumenti e la quantità. */
-  attivita: Array<VoceElencoAzione & { turni: boolean; esiti?: { modo: 'scelta' | 'automatico'; elenco: Array<{ chiave: string; nome: string; bonusDi?: string; strumento?: string }> } }>;
+   *  base / con il bonus): l'editor della voce propone solo gli strumenti e la quantità. `oggetti` (revisione): per gli esiti di una coppia, le
+   *  chiavi degli oggetti del catalogo che lo strumento dà (base e con il bonus), perché l'editor avvisi subito di un «oggetto ricevuto» doppio. */
+  attivita: Array<VoceElencoAzione & { turni: boolean; esiti?: { modo: 'scelta' | 'automatico'; elenco: Array<{ chiave: string; nome: string; bonusDi?: string; strumento?: string; oggetti?: string[] }> } }>;
   negozi: VoceElencoAzione[];
   doti: VoceElencoAzione[];
 }

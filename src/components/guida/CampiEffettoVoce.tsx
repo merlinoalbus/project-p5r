@@ -196,9 +196,14 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       // 2026-10-27 («L'oggetto è stato già scelto, la quantità anche»): un'attività con esiti che hanno la versione con il bonus si sceglie per
       // strumento (gli esiti base) e quantità; alla spunta resta solo «Bonus» sì/no. Un esito con il bonus già scritto nella voce si mostra
       // come il suo strumento: cambiando strumento o quantità si scrive la versione base
-      const strumenti = esiti?.elenco.some((x) => x.bonusDi) ? esiti.elenco.filter((x) => x.strumento && !x.bonusDi) : null;
+      // (revisione) con esiti misti (strumenti ed esiti a sé) si propongono anche gli esiti a sé, come esito atteso da confermare alla spunta:
+      // un'attività di soli strumenti dice «Strumento» e non lascia la voce senza (`soloStrumenti` del server, 409 `strumento-da-scegliere`)
+      const strumenti = esiti?.elenco.some((x) => x.bonusDi) ? esiti.elenco.filter((x) => !x.bonusDi) : null;
+      const soloStrumentiQui = !!strumenti && strumenti.every((x) => x.strumento);
       const baseDi = (k: string | undefined): string => (k ? esiti?.elenco.find((x) => x.chiave === k)?.bonusDi ?? k : '');
-      const turnoStrumento = (esito: string, quantita: number): Turno => (quantita > 1 ? { tipo: 'turno', attivita: e.attivita, esito, quantita } : { tipo: 'turno', attivita: e.attivita, esito });
+      const eStrumento = (k: string): boolean => !!esiti?.elenco.find((x) => x.chiave === k)?.strumento;
+      // la quantità (le creazioni) solo per uno strumento: il server la rifiuta per gli altri esiti (`quantita-senza-strumento`)
+      const turnoStrumento = (esito: string, quantita: number): Turno => (quantita > 1 && eStrumento(esito) ? { tipo: 'turno', attivita: e.attivita, esito, quantita } : { tipo: 'turno', attivita: e.attivita, esito });
       return (
         <div className="flex flex-col gap-2">
           <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => {
@@ -209,11 +214,12 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
           }} />
           {strumenti && (
             <div className="flex flex-wrap items-end gap-2">
-              <Selettore className="min-w-[12rem] flex-1" etichetta="Strumento" valore={baseDi(e.esito)} vuoto="Da scegliere"
-                opzioni={conCorrente(strumenti.map((x) => ({ chiave: x.chiave, nome: x.strumento! })), baseDi(e.esito), 'Strumento non più dichiarato')}
+              <Selettore className="min-w-[12rem] flex-1" etichetta={soloStrumentiQui ? 'Strumento' : 'Strumento o esito atteso'} valore={baseDi(e.esito)}
+                vuoto={soloStrumentiQui ? 'Da scegliere' : 'Nessuno: lo scegli alla spunta'}
+                opzioni={conCorrente(strumenti.map((x) => ({ chiave: x.chiave, nome: x.strumento ?? x.nome })), baseDi(e.esito), soloStrumentiQui ? 'Strumento non più dichiarato' : 'Esito non più dichiarato')}
                 onCambia={(v) => onCambia(v ? turnoStrumento(v, e.quantita ?? 1) : { tipo: 'turno', attivita: e.attivita })} />
-              {/* la quantità solo con lo strumento scelto: senza, non direbbe niente */}
-              {e.esito && <CampoQuantita etichetta="Quantità" valore={e.quantita ?? 1} onCambia={(q) => onCambia(turnoStrumento(baseDi(e.esito), q))} />}
+              {/* la quantità solo con uno strumento scelto: senza, o con un esito a sé, non direbbe niente */}
+              {e.esito && eStrumento(baseDi(e.esito)) && <CampoQuantita etichetta="Quantità" valore={e.quantita ?? 1} onCambia={(q) => onCambia(turnoStrumento(baseDi(e.esito), q))} />}
             </div>
           )}
           {!strumenti && esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"

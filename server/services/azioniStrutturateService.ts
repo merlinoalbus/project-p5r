@@ -21,7 +21,7 @@ import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE
 import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
-import { coppiaBonus, haVersioniBonus, leggiEsitiAttivita, nomeStrumento } from '../../shared/esitiAttivita.js';
+import { coppiaBonus, leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti } from '../../shared/esitiAttivita.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
 import { simboliNote } from '../../shared/note.js';
@@ -181,7 +181,8 @@ function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti
     const e = leggiEsitiAttivita(r.esiti_json);
     if (!e) continue;
     modiEsiti[r.chiave] = e.modo;
-    if (haVersioniBonus(e)) conBonus[r.chiave] = true;
+    // (revisione) «strumento da scegliere nell'editor» solo per le attività di soli strumenti: con esiti misti l'esito si sceglie alla spunta
+    if (soloStrumenti(e)) conBonus[r.chiave] = true;
     for (const x of e.esiti) {
       esiti[`${r.chiave}/${x.chiave}`] = x.nome;
       // 2026-10-27: un esito con la versione con il bonus (base o con il bonus) si dice con il nome dello strumento
@@ -261,9 +262,11 @@ export function elenchiAzione(): ElenchiAzioneDto {
   // L13: gli esiti di ogni attività, per scegliere nella voce l'esito atteso del turno (solo nel modo «scelta»)
   // 2026-10-27: con `bonusDi` (la versione con il bonus di un altro esito) e il nome dello strumento, l'editor della voce propone solo gli
   // strumenti (gli esiti base) e la quantità: il bonus si sceglie alla spunta
+  // (revisione: con gli oggetti che lo strumento dà, base e con il bonus, per l'avviso dell'editor sull'«oggetto ricevuto» doppio, la stessa
+  // regola del server `motivoOggettiGiaNelTurno`)
   const esitiDi = (json: string | null) => { const e = leggiEsitiAttivita(json); return e ? { esiti: { modo: e.modo, elenco: e.esiti.map((x) => {
-    const coppia = coppiaBonus(e, x.chiave);
-    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(coppia ? { strumento: nomeStrumento(coppia.base) } : {}) };
+    const prodotti = prodottiDelloStrumento(e, x.chiave);
+    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(prodotti ? { strumento: prodotti.strumento, oggetti: prodotti.oggetti } : {}) };
   }) } } : {}; };
   // L13 (decisione 2): gli yen che film, attività e Richieste portano già (`yenDeiDati`, la stessa definizione del controllo del server), perché
   // l'editor della voce avvisi subito di un effetto «yen» che li conterebbe due volte

@@ -222,7 +222,9 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
         const quanti = e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : '';
         return x?.strumento ? `Turno: ${nome} — ${x.strumento}${quanti}, bonus sì o no alla spunta` : `Turno: ${nome} — esito atteso: ${x?.nome ?? 'esito non più dichiarato'}${quanti}, lo confermi alla spunta`;
       }
-      if ([...(n.esitiTurno ?? [])].some(([k, x]) => k.startsWith(`${e.attivita}/`) && x.strumento)) return `Turno: ${nome} — strumento e quantità da scegliere nell’editor della voce`;
+      // (revisione) solo per le attività di soli strumenti (`soloStrumenti` del server): con esiti misti l'esito si sceglie alla spunta
+      const esitiAttivita = [...(n.esitiTurno ?? [])].filter(([k]) => k.startsWith(`${e.attivita}/`));
+      if (esitiAttivita.length > 0 && esitiAttivita.every(([, x]) => x.strumento)) return `Turno: ${nome} — strumento e quantità da scegliere nell’editor della voce`;
       return `Turno: ${nome} — ${e.doti?.length ? `Doti proprie di questo turno (${e.doti.map((d) => `${nomeDote(d.dote)} ${note(d.note)}`).join('; ')})` : 'le Doti sono quelle del lavoro'}`;
     }
     case 'acquisto': return `Acquisto Aojiru${e.variante ? `: ${nomeDote(e.variante)}` : ' (variante da osservare nella partita)'}`;

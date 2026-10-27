@@ -3,7 +3,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, fraseEffettoConNomi, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce, type ApplicazioneStatoPartitaDto, type EffettoDiStatoVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
 import { MOTIVO_VOCE_ELIMINATA, conCodaRipristinabile, conMotivoDiRestituzione, conYenDellaVoce, conYenInOrdine, effettiConYenGiaNelSaldo, effettoDiUnaSpuntaDiPrima, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, segnaYenFuoriRegistro, superaYenFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { conVoceDellaSpunta } from './storicoService.js';
@@ -27,10 +27,11 @@ import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from
 import { fontiPesca, quotaSessionePesca } from './pescaLetture.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
-import { risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
+import { esitiDellAttivita, risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
+import { nomeOggettoCatalogo } from './oggettiDegliEsitiService.js';
 import { effettiInAlternativa, risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
 import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
-import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
+import { prodottiDelloStrumento, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
 interface Transizione {voce_uid:string;stato:StatoEffettiVoceDto['stato'];raw_json:string;motivo:string|null;impronta:string;aggiornata_il:string}
@@ -148,6 +149,10 @@ function verificaLista(effetti:EffettoVoceDto[]):void {
   // effetto «yen» accanto a loro li conterebbe due volte. Qui gli effetti; il collegamento della voce lo guarda `verificaYenVoce` al salvataggio
   const motivo=motivoYenGiaStrutturati(effetti.map((e)=>e.effetto),{riferimento:null,yenDi:yenDelDato});
   if(motivo)throw httpErrors.conflict('yen-gia-strutturati',motivo);
+  // 2026-10-27 (punto 4 della richiesta: «nessun doppione»): un «oggetto ricevuto» che lo strumento del turno della stessa voce dà già (base o
+  // con il bonus) lo conterebbe due volte: si toglie l'effetto, gli oggetti li dà l'esito. Vale al salvataggio, alla proposta applicata, alla copia e alla spunta
+  const doppio=motivoOggettiGiaNelTurno(effetti.map((e)=>e.effetto),{prodottiDi:(attivita,esito)=>prodottiDelloStrumento(esitiDellAttivita(attivita)?.esiti,esito),nomeOggetto:nomeOggettoCatalogo});
+  if(doppio)throw httpErrors.conflict('oggetto-gia-nel-turno',doppio);
   if(effetti.filter((e)=>e.effetto.tipo==='yen').length>1)throw httpErrors.badRequest('yen-ripetuti','Una voce ha al più un effetto Yen: scrivi l’importo complessivo.');
   for(const e of effetti)if(e.effetto.tipo==='acquisto')for(const id of e.effetto.sostituisceDoti){
     const sostituito=effetti.find((x)=>x.uid===id);
