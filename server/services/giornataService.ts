@@ -321,7 +321,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // da un acquisto o da una pesca non si applicano come legacy e quindi non chiedono niente (stessa regola di `applicaEffettiVoce`)
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
-    ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
+    ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid)), v) : [];
   // L13 (decisione 19): gli effetti di stato che nella partita non valgono (da approvare nell'elenco, o non applicati), a parte da ciò che la
   // spunta ha applicato: «era già vero» non si dice (non informa)
   const statiNonApplicati = ctx.partita === undefined || !spuntabile || !ctx.fatte.has(r.uid) ? [] : statiNonApplicatiDellaVoce(ctx.partita, fonte);
@@ -921,10 +921,15 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
 
 /** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */
 export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string,pesca?:import('../../shared/pesca.js').NuovaSessionePesca,tokenPesca?:string): void {
+  // il tipo e il collegamento della voce vera (non «altro» senza collegamento): le note di una Dote raccordata valgono come quelle della spunta,
+  // da libro (quarto scalino) o da film con «Anima da cineasta» (`origineNoteDellaVoce`). L'incontro con un Confidente non si riapplica: senza
+  // `momento` né note di risposta `applicaEffettiAzione` non registra incontri né punti del Confidente
+  const riga = proposta.causa.tipo === 'voce' ? prepared('SELECT * FROM voce_giornata WHERE uid = ?').get(proposta.causa.chiave.split(':')[0]) as RigaVoce | undefined : undefined;
+  const voce = riga ? { tipo: tipoDi(riga), riferimento: riferimentoDi(riga) } : { tipo: 'altro', riferimento: null };
   applicaEffettoStorico(partitaId, proposta, acquisto, tokenAcquisti, {
     // Solo gli effetti selezionati dal motore: niente contesto Confidente o
     // riesecuzione dell'intera voce già spuntata.
-    applicaLegacy: (id, produce, scelte) => applicaEffettiAzione(id, { tipo: 'altro', riferimento: null, produce, scelte }),
+    applicaLegacy: (id, produce, scelte) => applicaEffettiAzione(id, { ...voce, produce, scelte }),
     annullaLegacy: annullaEffettiAzione,
   }, { valutaCorrente: disponibilitaAcquistoCorrente },pesca,tokenPesca);
 }

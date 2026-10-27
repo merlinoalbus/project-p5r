@@ -1,5 +1,5 @@
 // ============================================================
-// DotiSociali — stella delle cinque Doti + schede compatte con note (+1/+2/+3), modificatori, rango e punti mancanti
+// DotiSociali — stella delle cinque Doti + schede compatte con note (♪, ♪♪, ♪♪♪ con i loro punti), modificatori, rango e punti mancanti
 // ============================================================
 //
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
@@ -14,7 +14,7 @@
 import { useState, type ReactNode } from 'react';
 import { aggiornaDote, getDoti, getFortuna, impostaFortuna } from '../../services/api';
 import { puntiDaNote } from '../../../shared/doti';
-import { noteAParole, simboliNote } from '../../../shared/note';
+import { noteAParole, simboliNote, testoPunti } from '../../../shared/note';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -157,11 +157,13 @@ export function DotiSociali({ partitaId }: Props) {
                           aria-label={`${d.nome}: aggiungi ${noteAParole(n)} (${puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
                         >
                           <span aria-hidden="true">{simboliNote(n)}</span>
-                          <span className="testo-13 opacity-90">+{puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
+                          {/* i punti scritti per intero: «+3» sotto ♪♪ si leggeva come «+3 note» (segnalazione dell'utente, 2026-10-26) */}
+                          <span className="testo-13 opacity-90" aria-hidden="true">{testoPunti(puntiDaNote(n, libro, fortunaAttiva === d.chiave, cinema), { segno: true })}</span>
                         </button>
                       ))}
-                      <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || d.punti === 0 || undefined} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
-                      <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || undefined} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
+                      {/* un punto alla volta, non una nota: la parola lo dice accanto ai pulsanti delle note */}
+                      <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || d.punti === 0 || undefined} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>{testoPunti(-1)}</button>
+                      <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || undefined} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>{testoPunti(1, { segno: true })}</button>
                     </div>
                   )}
                 />

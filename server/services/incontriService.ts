@@ -27,9 +27,9 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { aggiornaConfidente, nomeDote, puntiDaNote } from './partiteService.js';
+import { aggiornaConfidente, nomeDote } from './partiteService.js';
+import { puntiDote } from './puntiDoti.js';
 import { nuovaGenerazione } from './puntiCronologici.js';
-import { fortunaSu } from './fortunaService.js';
 import { verificaPartita } from './verificaPartita.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
@@ -56,7 +56,7 @@ function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: stri
 
 /** La Dote del passaggio al rango `verso`, come la ricorda l'incontro (nome e punti dalle note). */
 function dotiDelPassaggio(partitaId: number, confidente: string, verso: number): IncontroConfidenteDto['doti'] {
-  return dotiDellIncontro(confidente, verso).map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false, fortunaSu(partitaId, d.dote)), note: d.note }));
+  return dotiDellIncontro(confidente, verso).map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDote(partitaId, d.dote, d.note), note: d.note }));
 }
 
 /** Il rango del Confidente nella partita (0 se non ha ancora una riga). */
@@ -107,8 +107,8 @@ export function registraIncontro(partitaId: number, confidente: string, momento:
 }
 
 /** Toglie un incontro registrato e dice le Doti che dava (in meno, da togliere a mano se le avevi segnate): le Doti non si toccano. */
-function togliRiga(_partitaId: number, r: RigaIncontro): Array<{ chiave: string; nome: string; delta: number }> {
-  const out = (JSON.parse(r.doti_json) as Array<{ chiave: string; delta: number }>).map((d) => ({ chiave: d.chiave, nome: nomeDote(d.chiave), delta: -d.delta }));
+function togliRiga(_partitaId: number, r: RigaIncontro): Array<{ chiave: string; nome: string; delta: number; note?: number }> {
+  const out = (JSON.parse(r.doti_json) as Array<{ chiave: string; delta: number; note?: unknown }>).map((d) => ({ chiave: d.chiave, nome: nomeDote(d.chiave), delta: -d.delta, ...(typeof d.note === 'number' ? { note: d.note } : {}) }));
   prepared('DELETE FROM incontro_confidente_partita WHERE id = ?').run(r.id);
   return out;
 }
@@ -166,23 +166,27 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
     nuovaGenerazione(partitaId, chiave); // R10-11: la correzione a mano è prioritaria: la base del registro cronologico riparte da qui
     const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string };
     const momento: MomentoIncontro = { data: partita.data_gioco ?? '', fascia: partita.fascia_gioco ?? '', origine: 'pagina' };
-    const cambi: Array<{ chiave: string; nome: string; delta: number }> = [];
+    const cambi: Array<{ chiave: string; nome: string; delta: number; note?: number }> = [];
     if (dto.rango > prima) {
-      for (let r = prima + 1; r <= dto.rango; r++) for (const d of registraIncontro(partitaId, chiave, momento, r).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta });
+      for (let r = prima + 1; r <= dto.rango; r++) for (const d of registraIncontro(partitaId, chiave, momento, r).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta, note: d.note });
     } else if (dto.rango < prima) {
       const oltre = prepared("SELECT * FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango > ? AND origine = 'pagina'").all(partitaId, chiave, dto.rango) as RigaIncontro[];
       for (const r of oltre) cambi.push(...togliRiga(partitaId, r));
     } else if (dati.noteRisposta !== undefined || dati.uscita) {
-      for (const d of registraIncontro(partitaId, chiave, momento, null, puntiPrima).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta });
+      for (const d of registraIncontro(partitaId, chiave, momento, null, puntiPrima).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta, note: d.note });
     } else if ((dati.deltaPunti ?? 0) < 0) {
       // «Annulla ultimo»: tornati ai punti di prima delle risposte di questo momento, l'incontro non c'è stato
       const r = prepared("SELECT * FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND data = ? AND fascia = ? AND origine = 'pagina' AND passaggio = 0 AND punti_prima IS NOT NULL ORDER BY id DESC LIMIT 1")
         .get(partitaId, chiave, momento.data, momento.fascia) as (RigaIncontro & { punti_prima: number }) | undefined;
       if (r && dto.punti <= r.punti_prima + 0.001) cambi.push(...togliRiga(partitaId, r));
     }
-    // più Doti uguali (passaggi multipli) si sommano in una riga
-    const somma = new Map<string, { chiave: string; nome: string; delta: number }>();
-    for (const c of cambi) { const s = somma.get(c.chiave); if (s) s.delta += c.delta; else somma.set(c.chiave, { ...c }); }
+    // più Doti uguali (passaggi multipli) si sommano in una riga, in punti; le note restano solo per la Dote di un passaggio solo
+    // (sommate non dicono più quante ne ha date il gioco): il promemoria dice «Coraggio ♪ · 2 punti»
+    const somma = new Map<string, { chiave: string; nome: string; delta: number; note?: number }>();
+    for (const c of cambi) {
+      const s = somma.get(c.chiave);
+      somma.set(c.chiave, s ? { chiave: c.chiave, nome: s.nome, delta: s.delta + c.delta } : { chiave: c.chiave, nome: c.nome, delta: c.delta, ...(c.note !== undefined ? { note: c.note } : {}) });
+    }
     return { ...dto, doteIncontro: [...somma.values()].filter((c) => c.delta !== 0) };
   })();
 }

@@ -95,7 +95,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect(libro(p, 'zorro-il-fuorilegge')).toEqual({ avanzamento: 1, letto: false });
     const e = await effetti(p, '04-25', 1);
     // la spunta dice che cosa dà il libro: il bonus che l'utente non vedeva
-    expect(e?.letture).toEqual([{ categoria: 'libro', chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge', prima: 1, dopo: 2, doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7 }] }]);
+    expect(e?.letture).toEqual([{ categoria: 'libro', chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge', prima: 1, dopo: 2, doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7, note: 3 }] }]);
     expect(libro(p, 'la-ballerina-seducente')).toEqual({ avanzamento: 0, letto: false });
 
     // togliere la spunta non disfa la lettura (si disfa dalla pagina dei Libri), e rispuntare non la ridice
@@ -107,7 +107,8 @@ describe('API — effetti strutturati delle azioni della guida', () => {
   it('una sola sorgente: Zorro finito dalla pagina Libri, poi la spunta non dice altro; e viceversa', async () => {
     const p = await nuovaPartita('Zorro dai Libri', '04-25');
     const dalLibro = (await request(app).put(`/api/partite/${p}/letture`).send({ tipo: 'libro', chiave: 'zorro-il-fuorilegge', fatto: true }).expect(200)).body.data as { daSegnare?: unknown };
-    expect(dalLibro.daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7 }]);
+    // ♪♪♪ di un libro: il quarto scalino, 7 punti, con le note accanto (una sola fonte)
+    expect(dalLibro.daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7, note: 3 }]);
     const e = await effetti(p, '04-25', 1);
     expect(e?.letture).toEqual([{ categoria: 'libro', chiave: 'zorro-il-fuorilegge', nome: 'Zorro, il fuorilegge', prima: 2, dopo: 2 }]);
 
@@ -193,7 +194,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect(volte()).toBe(2);
     // il contatore scende a 1: toglie l'ultimo turno registrato, e dice di togliere i suoi punti se li avevi segnati
     const giu = (await request(app).put(`/api/condizioni/partite/${p}/attivita/lavoro-ore-no-beko`).send({ volte: 1 }).expect(200)).body.data as ProgressiPartitaDto;
-    expect(giu.daSegnare).toEqual([{ chiave: 'perizia', nome: 'Perizia', delta: -5 }]);
+    expect(giu.daSegnare).toEqual([{ chiave: 'perizia', nome: 'Perizia', delta: -5, note: 3 }]);
     expect(volte()).toBe(1);
     // la spunta del secondo turno non ha più un turno da togliere: il contatore resta a 1
     await spunta(p, '05-08', 4, false).expect(200);
@@ -216,9 +217,10 @@ describe('API — effetti strutturati delle azioni della guida', () => {
     expect((await contatore(0)).daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: -6 }]);
     // due turni segnati prima che esistesse il registro: niente da dire, ma si contano
     prepared("INSERT INTO attivita_svolta_partita (partita_id, attivita_chiave, volte, updated_at) VALUES (?, 'lavoro-rafflesia', 2, 'x') ON CONFLICT(partita_id, attivita_chiave) DO UPDATE SET volte = 2").run(p);
-    expect((await contatore(3)).daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }]);
+    // un turno solo: le note restano accanto ai punti (due turni sommati, sopra, dicono solo i punti)
+    expect((await contatore(3)).daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3, note: 2 }]);
     expect(prepared("SELECT ordine FROM turno_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-rafflesia'").all(p)).toEqual([{ ordine: 3 }]);
-    expect((await contatore(1)).daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: -3 }]);
+    expect((await contatore(1)).daSegnare).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: -3, note: 2 }]);
     expect(prepared("SELECT volte FROM attivita_svolta_partita WHERE partita_id = ? AND attivita_chiave = 'lavoro-rafflesia'").get(p)).toEqual({ volte: 1 });
     expect(await tutteAZero(p)).toBe(true);
     // un'attività che non si conta per volte non ha turni

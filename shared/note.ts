@@ -30,6 +30,24 @@ export function noteAParole(n: number): string {
 /** «nessuna ♪»: zero note (a voce «nessuna nota», vedi `pezziTestoNote`). */
 export const NESSUNA_NOTA = `nessuna ${SIMBOLO_NOTA}`;
 
+/** «5 punti», «1 punto», «−3 punti»; `segno`: anche il «+» davanti ai punti in più. */
+export function testoPunti(n: number, opz: { segno?: boolean } = {}): string {
+  const assoluto = Math.abs(n);
+  return `${n < 0 ? '−' : opz.segno ? '+' : ''}${assoluto} ${assoluto === 1 ? 'punto' : 'punti'}`;
+}
+
+/**
+ * Una Dote come la dà il gioco e come entra nella scheda Doti, scritta in un modo solo: le note (♪, come le mostra il gioco) e i punti che
+ * valgono, già calcolati dalla regola unica `puntiDaNote` (`shared/doti.ts`): «Perizia ♪♪♪ · 5 punti». Senza note conosciute (punti scritti
+ * a mano, più fonti sommate) restano solo i punti, con il segno: «Perizia +5 punti». Mai un «+N» nudo accanto a una Dote: nella guida «+N»
+ * conta le note, e l'utente (2026-10-26: «ho scelto +3 note e poi ora guardo e Perizia è a valore 3») lo leggeva come note anche dove
+ * erano punti.
+ */
+export function testoDoteInPunti(d: { nome: string; delta: number; note?: number | null }): string {
+  const note = typeof d.note === 'number' && Number.isInteger(d.note) && d.note >= 1 && d.note <= 3 ? simboliNote(d.note) : null;
+  return note ? `${d.nome} ${note} · ${testoPunti(d.delta)}` : `${d.nome} ${testoPunti(d.delta, { segno: true })}`;
+}
+
 /** «♪♪ o ♪♪♪», «♪, ♪♪ o ♪♪♪»: i valori possibili di una Dote, in simboli. */
 export function simboliPossibili(possibili: ReadonlyArray<number>): string {
   const s = possibili.map(simboliNote);
@@ -80,8 +98,9 @@ const CONTEGGIO_A_PAROLE = /(?<![\d.,])(?:\+\s?)?[1-4](?!\d)(?:(?:\s*[/,–-]\s*
  * Il nome di una Dote seguito da «+N» senza unità («Conoscenza +1 nota, Fascino +1» delle domande in classe, «Perizia +2» delle voci
  * della guida): nei testi della GUIDA «+N» dopo una Dote è un numero di note (la convenzione «+N = N note», la stessa con cui
  * `server/db/conversioneEffettiAzione.ts` ne ha ricavato gli effetti). Non prende «Perizia +2 punti», «+1 rango», «+10%». Fuori dalla
- * guida non vale: nelle ricevute che il server scrive nello storico «Fascino +3 (♪♪) da segnare nelle Doti», «Incontro con X:
- * Coraggio +2» il numero sono punti (`d.delta`), e scriverlo come note direbbe il falso.
+ * guida non vale: nelle ricevute che il server scriveva nello storico prima del 2026-10-26 («Fascino +3 (♪♪) da segnare nelle Doti»,
+ * «Incontro con X: Coraggio +2») il numero sono punti (`d.delta`), e scriverlo come note direbbe il falso. Dal 2026-10-26 le frasi nuove
+ * dicono note e punti insieme (`testoDoteInPunti`: «Fascino ♪♪ · 3 punti», «Coraggio +2 punti»), che questa regola non tocca.
  */
 const DOTE_PIU = new RegExp(`\\b(${DOTI_SOCIALI.map((d) => d.nome).join('|')}) \\+([1-4])(?!\\d)(?!\\s*(?:punt|rang|%))`, 'gu');
 

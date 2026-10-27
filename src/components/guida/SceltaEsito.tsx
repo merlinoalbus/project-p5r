@@ -17,13 +17,14 @@
 
 import { useId, useState } from 'react';
 import { fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
-import { noteAParole, simboliNote, testoNoteAParole } from '../../../shared/note';
+import { noteAParole, simboliNote, testoNoteAParole, testoPunti } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/letture';
 import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
 
-/** Le Doti di un esito in breve: «Coraggio ♪, Fascino ♪» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
+/** Le Doti di un esito in breve, con i punti che il server ha calcolato per la partita (Fortuna compresa): «Coraggio ♪ · 2 punti, Fascino
+ *  ♪ · 2 punti» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
 const dotiTesto = (e: EsitoDisponibileDto): string => fraseDotiEsito(e.doti);
 /** Gli esiti parlano di Doti? Solo allora «nessuna Dote» e «Senza punti» hanno senso (l'estrazione della lotteria non dà Doti: Vinto o Non vinto). */
 const conDoti = (esiti: readonly EsitoDisponibileDto[]): boolean => esiti.some((e) => e.doti.length > 0);
@@ -102,10 +103,16 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
 
 type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null };
 
-/** La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile), le note proposte o il set già comprato nella partita. */
+/**
+ * La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile) o il set già comprato nella partita. Le note di una Dote a
+ * valori possibili partono SENZA scelta: le note dell'effetto (`preselezionato`) sono solo il valore base dell'editor (la più bassa delle
+ * possibili, quando si attiva la scelta), non quelle ottenute. Prima comparivano già «scelte» (♪♪ acceso) e la spunta della voce del 04-17
+ * ha registrato ♪♪ · 3 punti a chi aveva ottenuto ♪♪♪ (segnalazione dell'utente del 2026-10-26: «anche se ho scelto 3 note ha fatto +3»):
+ * ora nessun valore è acceso finché chi gioca non tocca le note ottenute.
+ */
 function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore | undefined> {
   return Object.fromEntries(scelte.map((s): [string, Valore | undefined] => {
-    if (s.tipo === 'dote') return [s.effettoUid, { tipo: 'dote', note: s.preselezionato }];
+    if (s.tipo === 'dote') return [s.effettoUid, undefined];
     if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
     return [s.effettoUid, s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined];
   }));
@@ -128,8 +135,9 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
     return { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
   });
   const imposta = (uid: string, v: Valore) => {
-    if (unica) { onConferma(costruisci({ [uid]: v })); return; }
+    // il valore toccato si accende anche con una scelta sola: mentre la spunta si salva si vede che cosa è stato inviato
     setValori((x) => ({ ...x, [uid]: v }));
+    if (unica) onConferma(costruisci({ [uid]: v }));
   };
   const complete = scelte.every((s) => valori[s.effettoUid] !== undefined);
   // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
@@ -149,10 +157,14 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         if (s.tipo === 'dote') return (
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Note di ${s.doteNome}`}>
             <span className="w-full text-text-secondary">{s.doteNome}: quante note hai ottenuto?</span>
-            {s.possibili.map((n) => (
-              <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === n}
-                onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
-            ))}
+            {/* le note con i punti che la spunta proporrà (calcolati dal server con la regola unica: Fortuna, libro, «Anima da cineasta») */}
+            {s.possibili.map((n) => {
+              const punti = s.punti.find((x) => x.note === n)?.punti;
+              return (
+                <button key={n} type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === n ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === n}
+                  onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: n })} aria-label={`${noteAParole(n)}${punti !== undefined ? `, ${testoPunti(punti)}` : ''}`}>{simboliNote(n)}{punti !== undefined ? ` · ${testoPunti(punti)}` : ''}</button>
+              );
+            })}
             <button type="button" className={`chip touch ${v?.tipo === 'dote' && v.note === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={v?.tipo === 'dote' && v.note === 0} onClick={() => imposta(s.effettoUid, { tipo: 'dote', note: 0 })}>Nessuna</button>
           </span>
         );

@@ -6,12 +6,12 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import { nomeDote, puntiDaNote } from './partiteService.js';
-import { fortunaSu } from './fortunaService.js';
+import { nomeDote } from './partiteService.js';
+import { puntiDote } from './puntiDoti.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 import { vociCollegate } from './vociDiStato.js';
-import { simboliNote } from '../../shared/note.js';
+import { testoDoteInPunti } from '../../shared/note.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
@@ -55,7 +55,7 @@ export function scriviCruciverba(partitaId: number, data: string, fatto: boolean
     // Il cruciverba di Leblanc dà una nota di Conoscenza: la risposta lo dice (`daSegnare`), ma le Doti si
     // segnano a mano (scelta dell'utente, 2026-09-30) e qui non si toccano, né risolvendolo né togliendo la spunta.
     nuovo = fatto && !era;
-    if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà Conoscenza ${simboliNote(1)} (da segnare nelle Doti).`, { data });
+    if (nuovo) registraEvento(partitaId, 'cruciverba', `Cruciverba risolto: ${r.risposta}`, `${r.indizio} · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti).`, { data });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return { riga: dto(r, new Set(fatto ? [data] : []), vociCollegate('cruciverba').get(data)?.voceUid), nuovo };
@@ -65,5 +65,5 @@ export function scriviCruciverba(partitaId: number, data: string, fatto: boolean
  *  `segnaCruciverbaDallaGuida` (spuntaDellaGuidaService), che lo usa solo dove non c'è una voce del Diario che segna lo stesso cruciverba. */
 export function impostaCruciverba(partitaId: number, data: string, fatto: boolean): CruciverbaDto {
   const { riga: esito, nuovo } = scriviCruciverba(partitaId, data, fatto);
-  return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
+  return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDote(partitaId, 'conoscenza', 1), note: 1 }] } : esito;
 }

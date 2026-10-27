@@ -3,9 +3,9 @@ import { collegaGenerazioneLegacy, fotoLegacy, generazioneRappresentata, valutaz
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento, annullaEventiFonteAcquistoNellaTransazione } from './storicoService.js';
-import { eDote } from '../../shared/doti.js';
+import { eDote, puntiDaNote } from '../../shared/doti.js';
 import { giornoDellaSettimanaPiatto } from '../../shared/date.js';
-import { ARTICOLO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru, prossimaVarianteAojiru } from '../../shared/acquisti.js';
+import { AOJIRU_NOTE, ARTICOLO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru, prossimaVarianteAojiru } from '../../shared/acquisti.js';
 import type { AnteprimaRegistrazioneAcquistoDto, AnteprimaRimozioneAcquistoDto, DatiConsumoAojiru, FonteAcquisto, IdentitaAcquisto, NuovaRegistrazioneAcquisto, PresenzaStoricaAcquistoDto, ProvenienzaAcquistoDto, RegistrazioneAcquistoDto, RicevutaOperazioneAcquistoDto, RichiestaAnnullaProvenienza, RichiestaAnteprimaAnnullaProvenienza, RichiestaAnteprimaRimozioneLegacy, RichiestaRegistraAcquisto, RichiestaRimozioneLegacy, StatoAcquistiArticoloDto, StatoAcquistiDto } from '../../shared/acquisti.js';
 import type { DisponibilitaDto } from '../../shared/types.js';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
@@ -129,7 +129,7 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
     const firma=r.rapportoLegacy.firma,rappresentante=stato.registrazioni.find((a)=>a.legacyFirma===firma&&a.legacyValutazioneId===legacy?.valutazione?.id&&a.identita.articolo===r.articolo);
     if(rappresentante&&(r.scelta.tipo!=='collega'||r.scelta.acquistoId!==rappresentante.id))throw httpErrors.conflict('legacy-gia-rappresentata','La presenza storica ha già una registrazione, anche se inattiva: usa quel medesimo UUID.');
   }
-  return {nuovo:r,identita:o.identita,acquisti,disponibilita:{tipo:corrente?'corrente':'osservazione',calendario:'compatibile',condizioniStoricheNonRicostruibili:!corrente,motivi:corrente?[]:['Solo il calendario è verificato; i progressi del momento storico non sono ricostruiti. La consumazione è una tua osservazione esplicita.']},effetto:{dote:r.variante,puntiBase:2,puntiConfermati:r.fortuna===null?null:r.fortuna?3:2,note:r.fortuna===null?null:r.fortuna?2:1,prezzoYen:5000},esitoPrevisto,revisioneAcquistiAttesa:improntaDato({richiesta:r,stato,o,fonte,p,g,valutazione})};
+  return {nuovo:r,identita:o.identita,acquisti,disponibilita:{tipo:corrente?'corrente':'osservazione',calendario:'compatibile',condizioniStoricheNonRicostruibili:!corrente,motivi:corrente?[]:['Solo il calendario è verificato; i progressi del momento storico non sono ricostruiti. La consumazione è una tua osservazione esplicita.']},effetto:{dote:r.variante,puntiBase:2,puntiConfermati:r.fortuna===null?null:puntiDaNote(AOJIRU_NOTE,false,r.fortuna),note:AOJIRU_NOTE,prezzoYen:5000},esitoPrevisto,revisioneAcquistiAttesa:improntaDato({richiesta:r,stato,o,fonte,p,g,valutazione})};
 }
 export function anteprimaRegistrazioneAcquisto(p:number,r:NuovaRegistrazioneAcquisto,porte?:PorteDisponibilitaAcquisto):AnteprimaRegistrazioneAcquistoDto {return getDb().transaction(()=>preparaRegistrazione(p,r,porte))();}
 function replay(p:number,id:string,azione:string,payload:unknown):RicevutaOperazioneAcquistoDto|null {

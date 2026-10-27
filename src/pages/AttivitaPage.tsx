@@ -44,9 +44,8 @@ import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { eGiornoDelQuiz } from '../../shared/quizAttivita';
 import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
 import { TestoNote } from '../components/shared/TestoNote';
-import { simboliNote } from '../../shared/note';
 import { fasceConPrezzoDiverso } from '../../shared/catalogo';
-import { fraseConsumaEsito, fraseOggettiEsito } from '../../shared/esitiAttivita';
+import { fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito } from '../../shared/esitiAttivita';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
@@ -93,7 +92,8 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
             {g.esiti.map((e) => (
               <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>
                 {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}
-                {conDoti && <>: <TestoNote testo={e.doti.length ? e.doti.map((d) => `${d.nome} ${simboliNote(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'} /></>}
+                {/* note e punti con la frase unica («Perizia ♪♪♪ · 5 punti»): i punti li calcola il server, con la Fortuna della partita */}
+                {conDoti && <>: <TestoNote testo={fraseDotiEsito(e.doti)} /></>}
                 {/* Ondata 5 (lotto G): il prezzo di un esito senza prova (nessuna intestazione lo dice: «Non vinto, ricompri il Lotto R»),
                     il trofeo e gli oggetti del catalogo che l'esito dà */}
                 {!e.gruppo && e.articolo ? ` · ${e.articolo.nome} ${testoPrezzoEsito(e.articolo)}` : ''}

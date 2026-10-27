@@ -113,7 +113,7 @@ describe('API — voci aggiunte dall\'utente come azioni della guida', () => {
     const zorro = (await crea('04-25', { azione: 'Finire Zorro', tipo: 'libro', riferimento: { tipo: 'libro', chiave: 'zorro-il-fuorilegge' }, produce: [{ tipo: 'lettura', categoria: 'libro', chiave: 'zorro-il-fuorilegge', almeno: null }] })).body.data as AzionePercorsoDto;
     expect(zorro.produceTesto).toEqual(['Zorro, il fuorilegge: completato']);
     const letto = (await spunta(zorro.uid, p, true).expect(200)).body.data as AzionePercorsoDto;
-    expect(letto.effetti?.letture).toEqual([expect.objectContaining({ chiave: 'zorro-il-fuorilegge', doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7 }] })]);
+    expect(letto.effetti?.letture).toEqual([expect.objectContaining({ chiave: 'zorro-il-fuorilegge', doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 7, note: 3 }] })]);
     expect(await dote(p, 'gentilezza')).toBe(0);
     const turno = (await crea('04-26', { azione: 'Svolgere il primo giorno di lavoro dal Fioraio', tipo: 'lavoro', riferimento: { tipo: 'attivita', chiave: 'lavoro-rafflesia' }, produce: [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }] })).body.data as AzionePercorsoDto;
     const r = (await spunta(turno.uid, p, true).expect(200)).body.data as AzionePercorsoDto;

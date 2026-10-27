@@ -59,7 +59,8 @@ function dotiApplicate(p: number, causaChiave: string): Map<string, number> {
 }
 
 /** Le Doti della ricevuta da dire: solo quelle applicate (`dotiApplicate`), nell'ordine in cui la ricevuta le nomina, con il nome della
- *  ricevuta. Una Dote applicata per intero da una sola voce della ricevuta resta com'era («Perizia ♪♪ · 3 punti»); altrimenti i punti applicati. */
+ *  ricevuta. Una Dote applicata per intero da una sola voce della ricevuta (la Dote della voce, di una lettura, di un turno o dell'incontro)
+ *  resta com'era, con le sue note («Perizia ♪♪♪ · 5 punti»); altrimenti i punti applicati. */
 function dotiDaDire(l: EffettiAzioneDto, applicate: ReadonlyMap<string, number>): EffettiAzioneDto['doti'] {
   if (!applicate.size) return [];
   const tutte = [...l.doti, ...(l.letture ?? []).flatMap((x) => x.doti ?? []), ...(l.turni ?? []).flatMap((t) => t.doti), ...(l.incontro?.doti ?? [])];
@@ -67,7 +68,7 @@ function dotiDaDire(l: EffettiAzioneDto, applicate: ReadonlyMap<string, number>)
   return chiavi.map((chiave) => {
     const n = applicate.get(chiave)!;
     const stesse = tutte.filter((d) => d.chiave === chiave);
-    const sola = stesse.length === 1 ? l.doti.find((d) => d.chiave === chiave) : undefined;
+    const sola = stesse.length === 1 ? stesse[0] : undefined;
     return sola && sola.delta === n ? sola : { chiave, nome: stesse[0]?.nome ?? nomeDote(chiave), delta: n };
   });
 }

@@ -42,8 +42,9 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
   const incontri = (p: number) => prepared('SELECT verso_rango AS verso, passaggio, origine FROM incontro_confidente_partita WHERE partita_id = ? ORDER BY id').all(p);
   /** L'azione della guida del giorno `data` che riferisce Takemi. */
   const azioneTakemi = async (data: string) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.riferimento?.chiave === 'takemi')!;
-  const nota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2 }];
-  const menoNota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: -2 }];
+  // i punti da segnare con le note accanto (un passaggio solo: Coraggio ♪ · 2 punti)
+  const nota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }];
+  const menoNota = [{ chiave: 'coraggio', nome: 'Coraggio', delta: -2, note: 1 }];
 
   it('la Dote degli incontri è un dato del Confidente per rango (088), e le azioni del passaggio non la danno più da sé', async () => {
     const takemi = (await request(app).get('/api/compendio/confidenti/takemi')).body.data as ConfidenteDettaglioDto;
@@ -192,7 +193,7 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
     expect(r.dotiIncontro.find((x) => x.rango === 3)).toEqual({ rango: 3, doti: [{ dote: 'coraggio', note: 2 }, { dote: 'perizia', note: 1 }], testo: 'Coraggio ♪♪ · Perizia ♪' });
     const p = await nuovaPartita('Takemi modificata', '04-29');
     await pagina(p, { rango: 2 });
-    expect((await pagina(p, { rango: 3 })).doteIncontro).toEqual([{ chiave: 'coraggio', nome: 'Coraggio', delta: 3 }, { chiave: 'perizia', nome: 'Perizia', delta: 2 }]);
+    expect((await pagina(p, { rango: 3 })).doteIncontro).toEqual([{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2 }, { chiave: 'perizia', nome: 'Perizia', delta: 2, note: 1 }]);
     await put({ ranghi: [{ rango: 3, doti: [{ dote: 'coraggio', note: 1 }] }] }).expect(200);
   });
 

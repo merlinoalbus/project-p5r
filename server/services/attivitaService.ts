@@ -17,8 +17,8 @@ import { datiGuidaCorretti } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CatalogoOggettoDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
-import { nomeDote, puntiDaNote } from './partiteService.js';
-import { fortunaSu } from './fortunaService.js';
+import { nomeDote } from './partiteService.js';
+import { haAnimaDaCineasta, puntiDote } from './puntiDoti.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { libriCheSbloccano } from '../../shared/dipendenzeCondizioni.js';
 import { effettiVisibiliDelLibro } from '../../shared/effettiLibro.js';
@@ -29,7 +29,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizAttivita.js';
 import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './catalogoOggettiLetture.js';
-import { avanzamentoCompleto, lettureCompletate, letturaCompletata } from './lettureCompletate.js';
+import { avanzamentoCompleto, lettureCompletate } from './lettureCompletate.js';
 import { sessioniVideogioco } from './sessioniVideogioco.js';
 import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
@@ -38,7 +38,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
 import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
-import { simboliNote } from '../../shared/note.js';
+import { testoDoteInPunti } from '../../shared/note.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
 import { fasciaDellaPartita, prezzoDellArticolo } from './prezziArticoli.js';
 import { segnaTrofeoDelTurno, togliTrofeoDelTurno } from './trofeiDegliEsitiService.js';
@@ -374,10 +374,9 @@ function noteCategorieAttivita(): Record<string, string> {
   return Object.fromEntries(Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1].trim() !== ''));
 }
 
-/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. La usano anche gli effetti delle azioni (K1). */
-export function haAnimaDaCineasta(partitaId: number): boolean {
-  return letturaCompletata(partitaId, 'libro', 'anima-da-cineasta');
-}
+/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. Vive con la conversione delle note
+ *  (`puntiDoti.ts`); qui resta riesportata per chi la importava da questo modulo. */
+export { haAnimaDaCineasta };
 
 /** Le note che un conseguimento dà, Dote per Dote, dagli effetti dichiarati.
  *
@@ -397,13 +396,16 @@ function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, success
 /** Registra le note di un conseguimento: **che cosa il gioco dà** (tre note lette in un libro valgono il quarto scalino:
  *  `puntiDaNote` lo sa già). Le Doti non si toccano — si segnano a mano (`aggiornaDote`, scelta dell'utente 2026-09-30) —:
  *  il registro dice che cosa ricordare e, al cinema, quale visione è la prima. */
+/** Che cosa dà le note di una lettura: un libro (quarto scalino) o un film (con «Anima da cineasta» letto, uno scalino in più). */
+const origineLettura = (partitaId: number, tipo: TipoLettura) => ({ libro: tipo === 'libro', cinema: tipo === 'film' && haAnimaDaCineasta(partitaId) });
+
 function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: string, riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, adesso: string, st: StatoDisponibilita): void {
   const doti = noteDelConseguimento(riga, successiva, st);
   if (doti.length === 0) return;
   const ordine = ((prepared('SELECT MAX(ordine) AS m FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave) as { m: number | null }).m ?? 0) + 1;
-  const cinema = tipo === 'film' && haAnimaDaCineasta(partitaId);
+  const origine = origineLettura(partitaId, tipo);
   for (const n of doti) {
-    const punti = puntiDaNote(n.note, tipo === 'libro', fortunaSu(partitaId, n.dote), cinema);
+    const punti = puntiDote(partitaId, n.dote, n.note, origine);
     prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .run(partitaId, tipo, chiave, ordine, n.dote, punti, n.note, adesso);
   }
@@ -422,15 +424,22 @@ function annullaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: str
 }
 
 /** I punti che il registro dei conseguimenti attribuisce a un elemento, Dote per Dote. */
-function puntiRegistrati(partitaId: number, tipo: string, chiave: string): Map<string, number> {
-  return new Map((prepared('SELECT dote_chiave, SUM(punti) AS punti FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? GROUP BY dote_chiave').all(partitaId, tipo, chiave) as Array<{ dote_chiave: string; punti: number }>)
-    .map((r) => [r.dote_chiave, r.punti]));
+function puntiRegistrati(partitaId: number, tipo: string, chiave: string): Map<string, { punti: number; note: number }> {
+  return new Map((prepared('SELECT dote_chiave, SUM(punti) AS punti, SUM(note) AS note FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ? GROUP BY dote_chiave').all(partitaId, tipo, chiave) as Array<{ dote_chiave: string; punti: number; note: number | null }>)
+    .map((r) => [r.dote_chiave, { punti: r.punti, note: r.note ?? 0 }]));
 }
 
-/** Che cosa cambia fra due letture del registro: le Doti da segnare a mano (in più o in meno). */
-function daSegnareFra(prima: Map<string, number>, dopo: Map<string, number>): DoteDaSegnareDto[] {
+/** Che cosa cambia fra due letture del registro: le Doti da segnare a mano (in più o in meno), in punti. Le note si dicono accanto ai punti
+ *  quando il cambio è di un solo conseguimento (da 1 a 3 note, nello stesso verso dei punti): «Perizia ♪♪♪ · 5 punti». */
+function daSegnareFra(prima: Map<string, { punti: number; note: number }>, dopo: Map<string, { punti: number; note: number }>): DoteDaSegnareDto[] {
   const chiavi = [...new Set([...prima.keys(), ...dopo.keys()])];
-  return chiavi.map((c) => ({ chiave: c, nome: nomeDote(c), delta: (dopo.get(c) ?? 0) - (prima.get(c) ?? 0) })).filter((d) => d.delta !== 0);
+  return chiavi.flatMap((c) => {
+    const delta = (dopo.get(c)?.punti ?? 0) - (prima.get(c)?.punti ?? 0);
+    if (delta === 0) return [];
+    const note = (dopo.get(c)?.note ?? 0) - (prima.get(c)?.note ?? 0);
+    const unaFonte = Math.sign(note) === Math.sign(delta) && Math.abs(note) >= 1 && Math.abs(note) <= 3;
+    return [{ chiave: c, nome: nomeDote(c), delta, ...(unaFonte ? { note: Math.abs(note) } : {}) }];
+  });
 }
 
 /**
@@ -489,7 +498,9 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     const registrato = richiesto >= totale;
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
-      const dote = doti.length ? ` · Dote: ${doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ')}` : '';
+      // le note e i punti che il conseguimento registra subito sotto (`applicaEffettiLettura`, stessa regola e stessa origine)
+      const origine = origineLettura(partitaId, tipo);
+      const dote = doti.length ? ` · Dote: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
@@ -610,7 +621,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, st ?? statoDisponibilitaPartita(partitaId));
     const applicate: TurnoRegistrato['doti'] = [];
     for (const d of daApplicare) {
-      const punti = puntiDaNote(d.note, false, fortunaSu(partitaId, d.dote));
+      const punti = puntiDote(partitaId, d.dote, d.note);
       prepared("INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, 'attivita', ?, ?, ?, ?, ?, ?)")
         .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });

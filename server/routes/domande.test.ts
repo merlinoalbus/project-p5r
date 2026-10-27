@@ -68,7 +68,7 @@ describe('API domande', () => {
     expect(doti.find((x) => x.chiave === 'conoscenza')!.punti).toBe(conPrima);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=domanda-risposta`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
-    expect(storico.eventi[0].dettaglio).toContain('il gioco dà Conoscenza ♪ (da segnare nelle Doti)');
+    expect(storico.eventi[0].dettaglio).toContain('il gioco dà Conoscenza ♪ · 2 punti (da segnare nelle Doti)');
     // rimozione della spunta (le Doti restano come l'utente le ha segnate)
     d = (await request(app).put(`/api/partite/${id}/domande/${prima.id}`).send({ fatta: false })).body.data as DomandeDto;
     expect(d.fatte).toBe(0);

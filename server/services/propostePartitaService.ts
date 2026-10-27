@@ -1,11 +1,10 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { avanzaDopoChiusuraAutomatica, avanzaUnaVoltaAllaFine, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
-import { eDote, type DoteChiave } from '../../shared/doti.js';
-import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
+import { eDote, puntiDaNote, type DoteChiave } from '../../shared/doti.js';
+import { AOJIRU_NOTE, type NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import { avvisoScortaPiena, motivoPersonaConScortaAdesso, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
@@ -45,7 +44,9 @@ export function leggiOggettoRegistro(raw:string,contesto='registro'):Record<stri
 type Causa = { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta'; chiave: string };
 /** La chiave di una Richiesta come la scrive `richiesteService` (slug, al più 200 caratteri). */
 const CHIAVE_RICHIESTA = /^[a-z0-9][a-z0-9._-]{0,199}$/i;
-interface Beneficio { tipo: 'dote' | 'yen' | 'punti-pesca'; chiave: string; delta: number; motivo: string; fortunaIgnota?: boolean; storica?: boolean; intervallo?: IntervalloBeneficioPesca }
+/** `note`: per una Dote, le note (1–3) da cui vengono i punti, quando il beneficio viene da una fonte sola (`noteDellaRicevuta`): solo per
+ *  dirle accanto ai punti, mai nella firma del beneficio (`firmaTarget`), così una proposta già decisa non rinasce. */
+interface Beneficio { tipo: 'dote' | 'yen' | 'punti-pesca'; chiave: string; delta: number; motivo: string; fortunaIgnota?: boolean; storica?: boolean; intervallo?: IntervalloBeneficioPesca; note?: 1 | 2 | 3 }
 interface Target extends Beneficio { attiva: boolean }
 interface RigaProposta {
   id: number; uid: string; partita_id: number; voce_uid: string | null; causa_tipo: Causa['tipo']; causa_chiave: string;
@@ -64,6 +65,23 @@ export const verificaBeneficio = (v: unknown): Beneficio => {
   if(b.intervallo!==undefined){const i=b.intervallo as IntervalloBeneficioPesca;if(!i||!Number.isSafeInteger(i.minimo)||(i.massimo!==null&&(!Number.isSafeInteger(i.massimo)||i.massimo<i.minimo)))throw httpErrors.conflict('beneficio-non-valido','Intervallo del beneficio non riconoscibile.');intervallo=i;}
   return { tipo: b.tipo, chiave: b.chiave, delta: b.delta as number, motivo: typeof b.motivo === 'string' ? b.motivo : 'Effetto confermato', fortunaIgnota: b.fortunaIgnota === true, storica: b.storica === true,...(intervallo?{intervallo}:{}) };
 };
+
+/**
+ * Le note di una Dote della ricevuta della spunta (`ricevuta.legacy`: Doti della voce, delle letture, dei turni e dell'incontro), quando i suoi
+ * punti vengono da una sola di queste con le note conosciute e lo stesso numero di punti: «Perizia ♪♪♪ · 5 punti» invece di «Perizia +5». Più
+ * fonti sommate, note mancanti (ricevute di prima) o punti diversi: nessuna nota, restano i punti. Sola lettura, tollerante: una ricevuta che
+ * non si legge così non ferma niente (la validano altrove).
+ */
+function noteDellaRicevuta(legacy: unknown, chiave: string, delta: number): 1 | 2 | 3 | undefined {
+  if (!legacy || typeof legacy !== 'object') return undefined;
+  const l = legacy as { doti?: unknown; letture?: unknown; turni?: unknown; incontro?: unknown };
+  const elenco = (x: unknown): unknown[] => (Array.isArray(x) ? x : []);
+  const dotiDi = (x: unknown): unknown[] => (x && typeof x === 'object' ? elenco((x as { doti?: unknown }).doti) : []);
+  const tutte = [...elenco(l.doti), ...elenco(l.letture).flatMap(dotiDi), ...elenco(l.turni).flatMap(dotiDi), ...dotiDi(l.incontro)]
+    .filter((d): d is { chiave: string; delta: number; note?: unknown } => !!d && typeof d === 'object' && (d as { chiave?: unknown }).chiave === chiave && typeof (d as { delta?: unknown }).delta === 'number' && (d as { delta: number }).delta !== 0);
+  const sola = tutte.length === 1 ? tutte[0]! : undefined;
+  return sola && sola.delta === delta && (sola.note === 1 || sola.note === 2 || sola.note === 3) ? sola.note : undefined;
+}
 
 function targetCausa(partita: number, causa: Causa): Target[] {
   if(causa.tipo==='richiesta'){
@@ -93,7 +111,8 @@ function targetCausa(partita: number, causa: Causa): Target[] {
       // Gli yen non sono più una proposta (BON-12): la proposta Dote porta il costo della consumazione come dato. L13 (decisione 18): la
       // consumazione nuova registrata dalla spunta di una voce li scala da sola dal saldo (`motoreDiario.yenDellEffetto`).
       return [
-        { tipo:'dote',chiave:d.variante,delta:d.fortuna === true ? moltiplicaFortuna(2) : 2,motivo:d.fortuna === null ? 'Aojiru: sola base certa di 2 punti; bonus Fortuna non attestato.' : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva },
+        // l'Aojiru dà una nota (♪) della Dote scelta: i punti con la regola unica, con la Fortuna solo se attestata (sconosciuta: la base certa)
+        { tipo:'dote',chiave:d.variante,delta:puntiDaNote(AOJIRU_NOTE,false,d.fortuna === true),motivo:d.fortuna === null ? `Aojiru: sola base certa di ${puntiDaNote(AOJIRU_NOTE)} punti; bonus Fortuna non attestato.` : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva,note:AOJIRU_NOTE },
         ...righeCausa(partita,causa).filter((r)=>r.tipo==='yen'&&r.stato==='aperta'&&r.delta_applicato===0&&r.delta_riconosciuto===0).map((r):Target=>({...verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta').beneficio),attiva:false})),
       ];
     }
@@ -104,7 +123,8 @@ function targetCausa(partita: number, causa: Causa): Target[] {
     if (ricevute[0]) {
       const d = leggiOggettoRegistro(ricevute[0].ricevuta_json,'effetto applicato');
       if (!Array.isArray(d.benefici)) throw httpErrors.conflict('ricevuta-incoerente','La ricevuta non dichiara i propri benefici.');
-      const correnti=d.benefici.map(verificaBeneficio).map((b) => ({...b,attiva:true}));
+      // le note della Dote dalla ricevuta della spunta, solo per dirle accanto ai punti (fuori dalla firma del beneficio)
+      const correnti=d.benefici.map(verificaBeneficio).map((b) => {const note=b.tipo==='dote'?noteDellaRicevuta(d.legacy,b.chiave,b.delta):undefined;return {...b,...(note?{note}:{}),attiva:true};});
       const storici=new Map<string,Target>();
       for(const r of righeCausa(partita,causa))if(r.tipo!=='effetto-voce'){const b=verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta').beneficio);storici.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
       for(const b of correnti)storici.set(`${b.tipo}\0${b.chiave}`,b);
@@ -380,6 +400,9 @@ function dto(r:RigaProposta):PropostaPartitaDto {
   } else {
     const target=targetCausa(r.partita_id,causa).find((t)=>t.tipo===r.tipo&&t.chiave===r.chiave);
     if(!target) throw httpErrors.conflict('proposta-incoerente','La proposta non ha una descrizione del proprio beneficio.');
+    // le note della Dote e i punti che la fonte dà in tutto, per dirli accanto ai punti della proposta («Perizia ♪♪♪ · 5 punti»; una proposta
+    // che completa la differenza dice anche da dove viene: «Perizia ♪♪♪ · 5 punti in tutto»). Solo vista: il registro non cambia
+    if(r.tipo==='dote'&&target.note){dati.note=target.note;dati.puntiDellaFonte=target.delta;}
     s=saldo(r.partita_id,causa,target);
     if(s.differenza!==r.delta || r.revisione_causa!==firmaTarget(target)) impedimenti.push('La causa o il saldo sono cambiati: rivedere la proposta.');
     if(r.tipo==='dote'&&!prepared('SELECT 1 FROM main.dote_sociale WHERE chiave=?').get(r.chiave)) {orfana=true;impedimenti.push('La Dote destinataria non esiste.');}

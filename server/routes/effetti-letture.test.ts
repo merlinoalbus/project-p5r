@@ -46,10 +46,10 @@ describe('API — il conseguimento dice le Doti, non le tocca', () => {
     // A metà non è ancora un conseguimento: niente da segnare.
     if (l.totaleSessioni > 1) expect(await segna(id, 'libro', l.chiave, l.totaleSessioni - 1)).toEqual([]);
     // Tre note lette in un libro sono il quarto scalino: 7, non 5.
-    expect(await segna(id, 'libro', l.chiave, l.totaleSessioni)).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: 7 }]);
+    expect(await segna(id, 'libro', l.chiave, l.totaleSessioni)).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: 7, note: 3 }]);
     expect(await punti(id, 'conoscenza')).toBe(0);
     // Disfare dice esattamente quel che dava, in negativo; le Doti restano come l'utente le ha segnate.
-    expect(await segna(id, 'libro', l.chiave, 0)).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: -7 }]);
+    expect(await segna(id, 'libro', l.chiave, 0)).toEqual([{ chiave: 'conoscenza', nome: 'Conoscenza', delta: -7, note: 3 }]);
     expect(await punti(id, 'conoscenza')).toBe(0);
   });
 

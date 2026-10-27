@@ -35,7 +35,7 @@
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
-import { simboliNote } from './note.js';
+import { testoDoteInPunti } from './note.js';
 import { normalizzaCondizioniSpillo, type RequisitoSpillo } from './condizioniSpillo.js';
 import type { PrezzoPerFascia } from './catalogo.js';
 
@@ -167,9 +167,13 @@ export function leggiEsitiAttivita(json: string | null | undefined): EsitiAttivi
   try { return normalizzaEsitiAttivita(JSON.parse(json)); } catch { return null; }
 }
 
-/** La frase delle Doti di un esito: «Coraggio ♪, Conoscenza ♪» oppure «nessuna Dote». */
-export function fraseDotiEsito(doti: ReadonlyArray<DoteEsito>): string {
-  return doti.length ? doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join(', ') : 'nessuna Dote';
+/**
+ * La frase delle Doti di un esito, con le note e i punti che entrano nella scheda Doti: «Coraggio ♪ · 2 punti, Conoscenza ♪ · 2 punti»
+ * (`testoDoteInPunti`) oppure «nessuna Dote». I punti sono quelli calcolati dal server per la partita (`punti`, con la Fortuna: la scelta e
+ * la scheda dell'attività); senza (l'editor degli esiti, nessuna partita) quelli della regola unica senza modificatori (`puntiDaNote`).
+ */
+export function fraseDotiEsito(doti: ReadonlyArray<DoteEsito & { punti?: number }>): string {
+  return doti.length ? doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: d.punti ?? puntiDaNote(d.note) })).join(', ') : 'nessuna Dote';
 }
 
 /** Ondata 5 (lotto G): gli oggetti che un esito dà, in breve: «Distintivo numero due, Big Bang Burger ×3»; null se nessuno. */
@@ -184,9 +188,11 @@ export function fraseConsumaEsito(consuma: ReadonlyArray<{ nome: string; quantit
   return `usa ${consuma.map((o) => `${o.nome}${o.quantita > 1 ? ` ×${o.quantita}` : ''}${o.disponibili !== null ? ` (ne hai ${o.disponibili})` : ''}`).join(', ')}`;
 }
 
-/** Le Doti di un esito con i punti che valgono (senza Fortuna: la Fortuna la conta il server quando registra il turno). */
-export function dotiEsitoConPunti(doti: ReadonlyArray<DoteEsito>): Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }> {
-  return doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note, punti: puntiDaNote(d.note) }));
+/** Le Doti di un esito con i punti che valgono, con la regola unica (`puntiDaNote`). `fortunaSu`: con una partita, se la Fortuna è accesa
+ *  sulla Dote (il server la legge dallo stato della partita, come quando registra il turno), così la scelta dice i punti che il turno darà;
+ *  senza partita, senza Fortuna. */
+export function dotiEsitoConPunti(doti: ReadonlyArray<DoteEsito>, fortunaSu?: (dote: DoteChiave) => boolean): Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }> {
+  return doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note, punti: puntiDaNote(d.note, false, fortunaSu?.(d.dote) ?? false) }));
 }
 
 /** La scelta che accompagna la spunta di una voce: per un turno l'esito (null = «senza punti»), per una Dote a valori possibili le note (0 = nessuna). */
@@ -249,7 +255,10 @@ export type SceltaEsitoVoceDto =
   | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true;
     /** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività (promemoria, `EsitiAttivitaDto.promemoria`); assente se nessuno. */
     promemoria?: string[] }
-  | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3 }
+  /** `punti`: per ognuna delle note possibili, i punti che la spunta proporrà (regola unica `puntiDaNote` con Fortuna, libro e «Anima da
+   *  cineasta» della voce e della partita, come `applicaEffettiAzione`), nello stesso ordine di `possibili`. `preselezionato`: le note base
+   *  dell'effetto (quelle dell'editor), NON preselezionate alla spunta: le note ottenute le tocca sempre chi gioca (`SceltaEsitiVoce`). */
+  | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3; punti: Array<{ note: 1 | 2 | 3; punti: number }> }
   /** L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite): se ne compra uno, o nessuno. `preselezionato`:
    *  l'UID dell'effetto dell'articolo già comprato nella partita (dal negozio), se ce n'è uno. */
   | { effettoUid: string; tipo: 'alternativa'; negozioNome: string | null; opzioni: OpzioneAlternativaDto[]; preselezionato: string | null };

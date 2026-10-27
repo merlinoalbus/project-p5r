@@ -1108,7 +1108,9 @@ export interface EsameDto {
 export interface DoteDaSegnareDto {
   chiave: string;
   nome: string;
+  /** I punti da segnare (regola unica `puntiDaNote`: 1 nota = 2, 2 = 3, 3 = 5, libro 7, Anima da cineasta, Fortuna ×1,5). */
   delta: number;
+  /** Le note (1–3) da cui vengono i punti, quando sono di una sola fonte: il testo le mostra accanto ai punti («Perizia ♪♪♪ · 5 punti»). */
   note?: number;
 }
 
@@ -1292,7 +1294,7 @@ export interface EffettiAzioneDto {
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
   /** Letture e visioni portate avanti dalla spunta (`prima` → `dopo`) con le Doti che l'elemento dà (`doti`, da segnare a
    *  mano: l'app non le tocca), e togliere la spunta non disfa la lettura. `visione`: una visione al cinema contata con le altre spunte. */
-  letture?: Array<{ categoria: CategoriaLettura; chiave: string; nome: string; prima: number; dopo: number; doti?: Array<{ chiave: string; nome: string; delta: number }>; visione?: boolean }>;
+  letture?: Array<{ categoria: CategoriaLettura; chiave: string; nome: string; prima: number; dopo: number; doti?: Array<{ chiave: string; nome: string; delta: number; note?: number }>; visione?: boolean }>;
   /** L'incontro con un Confidente che la spunta ha registrato (la Dote a ogni incontro): `id` se l'ha creato (togliendo la spunta
    *  si toglie con le sue Doti), `marcato` se ha segnato come passaggio di rango un incontro già registrato in quel momento della
    *  giornata, `giaContato` se quell'incontro (o il passaggio a quel rango) c'era già e non ha dato niente di nuovo. */

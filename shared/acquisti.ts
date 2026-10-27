@@ -5,6 +5,9 @@ export const ARTICOLO_AOJIRU = 'chiosco-kiyasuku/succo-aojiru';
 export const CATALOGO_AOJIRU = 'consumabile/succo-aojiru';
 export const ORDINE_AOJIRU: readonly DoteChiave[] = ['fascino', 'perizia', 'coraggio', 'gentilezza', 'conoscenza'];
 export const PREZZO_AOJIRU = 5000;
+/** L'Aojiru dà una nota (♪) della Dote della variante: i punti li dà la regola unica (`puntiDaNote`: 2, con la Fortuna 3). La Fortuna cambia
+ *  i punti, non le note. */
+export const AOJIRU_NOTE = 1;
 export type AojiruVariante = DoteChiave;
 export type FortunaAojiru = boolean | null;
 export function eOffertaAojiru(o: { chiave: string; catalogoChiave?: string | null }): boolean {

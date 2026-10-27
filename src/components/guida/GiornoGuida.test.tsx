@@ -313,7 +313,7 @@ describe('GiornoGuida — la giornata canone', () => {
     apriMenu('Biblioteca');
     fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
     const finestra = screen.getByRole('dialog', { name: 'Eliminare una voce già spuntata?' });
-    expect(within(finestra).getByText(/Coraggio \+3/)).toBeInTheDocument();
+    expect(within(finestra).getByText(/Coraggio ♪♪ · 3 punti/)).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la spunta ed elimina' }));
     await waitFor(() => expect(api.eliminaVoceGiornata).toHaveBeenCalledWith(uid(1)));
     expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(1), false);
@@ -365,7 +365,7 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(11), true, 2));
     // le Doti si segnano a mano: l'avviso le ricorda invece di dirle date
     // (resta 7 secondi, come per ogni spunta che ha Doti da segnare)
-    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio +2', 7000));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio ♪ · 2 punti', 7000));
   });
 
   it('un evento: modifica il genere (resta dov\'è), sposta di giorno', async () => {

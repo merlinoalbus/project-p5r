@@ -15,20 +15,25 @@ const effetti: EffettiAzioneDto = {
 };
 
 it('somma le Doti dell’azione, delle letture, dei turni e dell’incontro', () => {
+  // sommate da più fonti le note non dicono più quante ne ha date il gioco: restano i punti
   expect(dotiDaSegnareDaEffetti(effetti)).toEqual([{ chiave: 'coraggio', nome: 'Coraggio', delta: 4 }, { chiave: 'gentilezza', nome: 'Gentilezza', delta: 10 }]);
+  // da una fonte sola le note restano accanto ai punti
+  expect(dotiDaSegnareDaEffetti({ doti: [], confidente: null, turni: effetti.turni })).toEqual([{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3, note: 2 }]);
   // un incontro già contato non dà niente di nuovo
   expect(dotiDaSegnareDaEffetti({ ...effetti, doti: [], letture: [], turni: [], incontro: { ...effetti.incontro!, giaContato: true } })).toEqual([]);
   expect(dotiDaSegnareDaEffetti(null)).toEqual([]);
 });
 
 it('il testo e il promemoria, anche in negativo', () => {
-  expect(testoDotiDaSegnare([{ chiave: 'fascino', nome: 'Fascino', delta: 3 }, { chiave: 'perizia', nome: 'Perizia', delta: -5 }])).toBe('Fascino +3, Perizia −5');
-  expect(promemoriaDoti([{ chiave: 'fascino', nome: 'Fascino', delta: 3 }])).toBe('Da segnare nelle Doti: Fascino +3');
+  expect(testoDotiDaSegnare([{ chiave: 'fascino', nome: 'Fascino', delta: 3 }, { chiave: 'perizia', nome: 'Perizia', delta: -5 }])).toBe('Fascino +3 punti, Perizia −5 punti');
+  expect(promemoriaDoti([{ chiave: 'fascino', nome: 'Fascino', delta: 3 }])).toBe('Da segnare nelle Doti: Fascino +3 punti');
+  // il caso dell'utente (2026-10-26): ♪♪♪ di Perizia sono 5 punti, e il promemoria lo dice con le note accanto
+  expect(promemoriaDoti([{ chiave: 'perizia', nome: 'Perizia', delta: 5, note: 3 }])).toBe('Da segnare nelle Doti: Perizia ♪♪♪ · 5 punti');
   expect(promemoriaDoti([])).toBeNull();
   expect(promemoriaDoti(undefined)).toBeNull();
 });
 
 it('l’avviso della spunta: che cosa è successo, poi le Doti da segnare', () => {
-  expect(avvisoSpunta(effetti)).toBe('Zorro 1 → 2 · Fioraio: turno 1 · Incontro con Tae Takemi · Tae Takemi +10 punti · Da segnare nelle Doti: Coraggio +4, Gentilezza +10');
+  expect(avvisoSpunta(effetti)).toBe('Zorro 1 → 2 · Fioraio: turno 1 · Incontro con Tae Takemi · Tae Takemi +10 punti · Da segnare nelle Doti: Coraggio +4 punti, Gentilezza +10 punti');
   expect(avvisoSpunta({ doti: [], confidente: null })).toBe('Segnata come fatta.');
 });

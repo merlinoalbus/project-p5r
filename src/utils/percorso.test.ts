@@ -15,17 +15,19 @@ describe('descriviEffetti', () => {
         { categoria: 'film', chiave: 'dvd-31', nome: '31', prima: 2, dopo: 2 },
       ],
       turni: [{ attivita: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', ordine: 1, doti: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3, note: 2 }] }],
-    })).toBe('Fascino ♪♪♪ · 5 punti · Zorro, il fuorilegge 1 → 2 (Gentilezza +7) · 31 già a 2 · Fioraio Rafflesia: turno 1 (Gentilezza +3) · Ryuji Sakamoto +10 punti');
+    })).toBe('Fascino ♪♪♪ · 5 punti · Zorro, il fuorilegge 1 → 2 (Gentilezza +7 punti) · 31 già a 2 · Fioraio Rafflesia: turno 1 (Gentilezza ♪♪ · 3 punti) · Ryuji Sakamoto +10 punti');
   });
 
   it('l\'incontro con un Confidente: la Dote che ha dato, o «già contato»', () => {
     const incontro = { id: 1, marcato: null, confidente: 'takemi', nome: 'Tae Takemi', verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }] };
-    expect(descriviEffetti({ doti: [], confidente: null, incontro })).toBe('Incontro con Tae Takemi: Coraggio +2');
+    expect(descriviEffetti({ doti: [], confidente: null, incontro })).toBe('Incontro con Tae Takemi: Coraggio ♪ · 2 punti');
     expect(descriviEffetti({ doti: [], confidente: null, incontro: { ...incontro, id: null, giaContato: true, doti: [] } })).toBe('Incontro con Tae Takemi già contato');
   });
 
   it('senza letture né turni resta com\'era', () => {
     expect(descriviEffetti({ doti: [{ chiave: 'perizia', nome: 'Perizia', delta: 2, note: 1 }], confidente: null })).toBe('Perizia ♪ · 2 punti');
+    // senza note conosciute i punti hanno la parola e il segno: mai un «+N» nudo, che si legge come note
+    expect(descriviEffetti({ doti: [{ chiave: 'perizia', nome: 'Perizia', delta: 3 }], confidente: null })).toBe('Perizia +3 punti');
   });
 });
 

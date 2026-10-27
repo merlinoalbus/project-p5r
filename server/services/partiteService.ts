@@ -13,8 +13,8 @@ import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { cambiaGiornoPartita } from './giornoPartitaService.js';
-import { fortunaSu } from './fortunaService.js';
 import { puntiDaNote } from '../../shared/doti.js';
+import { puntiDote } from './puntiDoti.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
@@ -197,7 +197,8 @@ export function eliminaPartita(id: number): void {
 // ---- Doti sociali ----
 
 // I punti per numero di note sono la regola unica di `shared/doti.ts` (`puntiDaNote`), la stessa che la scheda Doti usa per l'anteprima dei
-// pulsanti; qui si riesporta perché i servizi (attività, domande, cruciverba, incontri, effetti delle azioni) la importano da questo modulo.
+// pulsanti; i servizi la usano attraverso `puntiDote` (`puntiDoti.ts`), che legge la Fortuna della partita in un posto solo. Qui resta
+// riesportata per chi la importava da questo modulo.
 export { puntiDaNote };
 
 /** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
@@ -246,7 +247,7 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
   if (!dote) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   const attuale = (prepared('SELECT punti FROM dote_sociale_partita WHERE partita_id = ? AND dote_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
   // la Fortuna non arriva più dal chiamante: è lo stato della partita (R10-10/2), letto qui per la Dote che si sta segnando
-  const incremento = mod.note !== undefined ? puntiDaNote(mod.note, mod.libro, fortunaSu(partitaId, chiave), mod.cinema) : (mod.delta ?? 0);
+  const incremento = mod.note !== undefined ? puntiDote(partitaId, chiave, mod.note, { libro: mod.libro, cinema: mod.cinema }) : (mod.delta ?? 0);
   const nuovo = Math.max(0, mod.punti !== undefined ? mod.punti : attuale + incremento);
   const ranghi = ranghiDote(chiave);
   const prima = progressoDote(attuale, ranghi);

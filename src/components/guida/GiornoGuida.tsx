@@ -19,7 +19,7 @@ import { useLocation } from 'react-router-dom';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta } from '../../utils/percorso';
-import { dotiDaSegnareDaEffetti } from '../../utils/dotiDaSegnare';
+import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto, FasciaGioco, GenereVoce, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { Maniglia } from '../shared/Maniglia';
@@ -159,7 +159,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
       // che cosa è successo e, a parte, le Doti da segnare a mano (la spunta non le tocca)
-      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. I punti si applicano dal pulsante sulla voce.' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
+      // spuntando, le Doti registrate con le loro note e i punti («Perizia ♪♪♪ · 5 punti»): chi ha scelto le note vede subito che cosa è entrato
+      // (prima l'avviso non lo diceva, e ♪♪ registrate al posto di ♪♪♪ si scoprivano solo dall'«Applica»)
+      const dotiRegistrate = fatta ? testoDotiDaSegnare(dotiDaSegnareDaEffetti(agg.effetti)) : '';
+      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${dotiRegistrate ? `: ${dotiRegistrate}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
       // togliendo la spunta, l'esemplare in scorta rimasto perché modificato dopo. Un avviso resta finché chi gioca non lo chiude (la durata

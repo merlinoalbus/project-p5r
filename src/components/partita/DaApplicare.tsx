@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { delPassato, type AnteprimaDecisioneProposteDto, type DecisioneProposte, type PropostaPartitaDto } from '../../../shared/propostePartita';
 import { normalizzaEffettoVoce } from '../../../shared/effettiVoce';
 import { nomeDote } from '../../../shared/doti';
+import { testoDoteInPunti, testoPunti } from '../../../shared/note';
+import { Note, TestoNote } from '../shared/TestoNote';
 import { anteprimaDecisioneProposte, getDaApplicare, getDoti } from '../../services/api';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
 import { useCarica } from '../../hooks/useCarica';
@@ -21,6 +23,16 @@ const unita = (u: PropostaPartitaDto['unita']) => u === 'punti-interni' ? 'punti
 const valore = (p: PropostaPartitaDto) => `${p.delta > 0 ? '+' : ''}${p.delta.toLocaleString('it-IT')} ${unita(p.unita)}`;
 const nome = (p: PropostaPartitaDto) => p.dote ? nomeDote(p.dote) : p.tipo === 'yen' ? 'Denaro' : p.tipo === 'punti-pesca' ? 'Punti pesca'
   : delPassato(p) && typeof p.dati.descrizione === 'string' ? p.dati.descrizione : 'Effetto della voce';
+/** Le note (1–3) della Dote da cui vengono i punti e i punti che quella fonte dà in tutto (il server le legge dalla ricevuta della spunta,
+ *  solo quando la Dote viene da una fonte sola); null se non si conoscono. */
+const fonteDote = (p: PropostaPartitaDto): { note: 1 | 2 | 3; punti: number } | null =>
+  p.tipo === 'dote' && (p.dati.note === 1 || p.dati.note === 2 || p.dati.note === 3) && typeof p.dati.puntiDellaFonte === 'number' ? { note: p.dati.note, punti: p.dati.puntiDellaFonte } : null;
+/** La Dote della proposta come il gioco la dà e come entra nella scheda: «Perizia ♪♪♪ · 5 punti»; se la proposta muove solo una parte dei punti
+ *  della fonte (una differenza, dopo un cambio dell'effetto) le note non valgono per quel numero: «Perizia +2 punti». */
+const testoDote = (p: PropostaPartitaDto): string => {
+  const f = fonteDote(p);
+  return testoDoteInPunti({ nome: nome(p), delta: p.delta, note: f && Math.abs(p.delta) === f.punti ? f.note : null });
+};
 /** Il movimento sul saldo che l'approvazione di un effetto del passato farà (negativo: il prezzo di un articolo; positivo: la ricompensa di una
  *  Richiesta; 0: nessuno); null se l'effetto non muove yen. */
 const yenPrevisti = (p: PropostaPartitaDto): number | null => delPassato(p) && typeof p.dati.yenPrevisti === 'number' ? p.dati.yenPrevisti : null;
@@ -174,7 +186,14 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
           {(() => {
             // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
             const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
-            return <span className="testo-14"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
+            // le note che il gioco ha dato, accanto al nome (la regola che le converte è quella del server: «Perizia ♪♪♪: 3 → 8 punti»)
+            const f = fonteDote(p);
+            return <span className="testo-14"><strong>{nome(p)}{f && Math.abs(p.delta) === f.punti && <> <Note n={f.note} /></>}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{p.tipo === 'dote' ? testoPunti(p.delta, { segno: true }) : valore(p)}</strong>}</>}</span>;
+          })()}
+          {/* una proposta che muove solo una parte della fonte (la differenza dopo un cambio dell'effetto) dice da dove viene il numero */}
+          {(() => {
+            const f = fonteDote(p);
+            return f && Math.abs(p.delta) !== f.punti ? <span className="testo-12 text-text-secondary"><TestoNote testo={`La fonte dà ${testoDoteInPunti({ nome: nome(p), delta: f.punti, note: f.note })} in tutto.`} /></span> : null;
           })()}
           {/* il motivo del censimento non vale più se lo stato è stato segnato dopo (revisione R7): lo dice il server, letto adesso */}
           <span className="text-pretty">{delPassato(p) && p.dati.oraGiaVero === true ? 'Ora risulta già vero in questa partita (segnato dopo): applicandolo lo stato non cambia, la voce lo ricorda fra i suoi effetti.' : p.motivo}</span>
@@ -188,7 +207,8 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
             const soloVerifica = p.impedimenti.every((i) => i.startsWith('Prima indica'));
             const altri = p.impedimenti.filter((i) => !i.startsWith('Prima indica'));
             const inverso = p.delta < 0;
-            const etichetta = `${inverso ? 'Annulla' : 'Applica'} ${nome(p)}${p.tipo === 'effetto-voce' ? '' : ` ${p.delta > 0 ? '+' : ''}${p.delta}`}`;
+            // la Dote con note e punti («Applica Perizia ♪♪♪ · 5 punti»): un «+5» nudo si leggeva come note
+            const etichetta = `${inverso ? 'Annulla' : 'Applica'} ${p.tipo === 'dote' ? testoDote(p) : `${nome(p)}${p.tipo === 'effetto-voce' ? '' : ` ${p.delta > 0 ? '+' : ''}${p.delta}`}`}`;
             return <>
               {!!altri.length && <ul className="m-0 pl-4 text-warning">{altri.map((i) => <li key={i}>{i}</li>)}</ul>}
               <div className="flex flex-wrap gap-1.5">
@@ -196,7 +216,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
                   if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
                   else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
                 }} /> : <>
-                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={etichetta} disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)} />
+                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={<TestoNote testo={etichetta} />} disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)} />
                   {!inverso && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) })} />}
                 </>}
                 {/* L13 (revisione R3): per l'elenco del passato il rifiuto ha un nome vero in ogni caso (già segnato a mano, o mai fatto in partita) */}
@@ -207,7 +227,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
         </li>;
       })}</ul>
     </>}
-    {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch testo-13">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 testo-12">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
+    {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch testo-13">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 testo-12">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.tipo === 'dote' ? testoPunti(p.deltaApplicato, { segno: true }) : `${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}`}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.tipo === 'dote' ? testoPunti(p.deltaRiconosciuto) : p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
     {ricevuta && <p role="status" className="m-0 testo-13 text-success">{ricevuta}</p>}
     {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
     <Modal aperta={consumo !== null} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>

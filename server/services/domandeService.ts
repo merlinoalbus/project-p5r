@@ -6,14 +6,14 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import { nomeDote, puntiDaNote } from './partiteService.js';
-import { fortunaSu } from './fortunaService.js';
+import { nomeDote } from './partiteService.js';
+import { puntiDote } from './puntiDoti.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { righePerEsame } from './esamiCollegamento.js';
 import { vociCollegate } from './vociDiStato.js';
-import { simboliNote } from '../../shared/note.js';
+import { testoDoteInPunti } from '../../shared/note.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
@@ -89,7 +89,7 @@ export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: 
       const info = prepared('INSERT OR IGNORE INTO domanda_partita (partita_id, domanda_id, fatta_at) VALUES (?, ?, ?)').run(partitaId, domandaId, adesso);
       if (info.changes > 0) {
         nuova = true;
-        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà Conoscenza ${simboliNote(1)} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
+        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
       }
     } else {
       prepared('DELETE FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').run(partitaId, domandaId);
@@ -106,5 +106,5 @@ export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: 
 export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta: boolean, conoscenza: boolean): DomandeDto {
   const { nuova } = scriviDomandaFatta(partitaId, domandaId, fatta, conoscenza);
   const esito = domande(partitaId);
-  return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
+  return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDote(partitaId, 'conoscenza', 1), note: 1 }] } : esito;
 }

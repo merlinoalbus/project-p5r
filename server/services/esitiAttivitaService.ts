@@ -30,6 +30,8 @@ import { sqlPrezzoPerFascia } from './prezziArticoli.js';
 import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type PrezzoPerFascia } from '../../shared/catalogo.js';
 import { copieDellOggetto } from './copieOggetti.js';
 import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
+import { fortunaSu } from './fortunaService.js';
+import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
@@ -87,8 +89,10 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
   const nomi = nomiCondizioniMemo();
   const condizioni = [...(articolo?.condizioni ?? []), ...e.condizioni].map((c) => condizioneConTesto(c, nomi));
   const esito = st && condizioni.length ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st) : null;
+  const partitaId = st?.partitaId;
   return {
-    chiave: e.chiave, nome: e.nome, gruppo: e.gruppo, premi: e.premi, doti: dotiEsitoConPunti(e.doti),
+    // i punti che il turno darà davvero: con una partita anche la Fortuna accesa sulla Dote (la stessa lettura di `registraTurno`, `puntiDote`)
+    chiave: e.chiave, nome: e.nome, gruppo: e.gruppo, premi: e.premi, doti: dotiEsitoConPunti(e.doti, partitaId !== undefined ? (dote) => fortunaSu(partitaId, dote) : undefined),
     // il prezzo che si scala è quello della fascia dello stato (la voce del Diario, o la partita per il contatore): la stessa regola di
     // `motoreDiario.yenDellEffetto` e di `registraTurno`, così la scelta dice l'importo che la spunta toglie davvero dal saldo
     articolo: articolo ? { chiave: articolo.chiave, nome: articolo.nome, prezzo: articolo.prezzo, prezzoPerFascia: articolo.prezzoPerFascia, prezzoNelMomento: prezzoNellaFascia(articolo.prezzo, articolo.prezzoPerFascia, st?.fasciaGioco) }
@@ -159,7 +163,9 @@ function richiedeScelta(e: EffettoVoceDto['effetto']): boolean {
 
 /** Le scelte che la spunta di una voce chiede, con gli esiti disponibili al giorno della voce (per il Diario). L13 (decisione 4): anche
  *  la scelta fra gli articoli in alternativa (Set A o Set B, o nessuno), al posto del primo effetto del gruppo: tutto nell'ordine degli effetti. */
-export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string; fascia: 'giorno' | 'sera' }, effetti: readonly EffettoVoceDto[]): SceltaEsitoVoceDto[] {
+export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string; fascia: 'giorno' | 'sera' }, effetti: readonly EffettoVoceDto[],
+  /** Il tipo e il collegamento della voce: dicono se le note di una Dote valgono come libro o come film (`origineNoteDellaVoce`). */
+  voce: { tipo: string; riferimento: { tipo: string } | null }): SceltaEsitoVoceDto[] {
   const da = effetti.filter((e) => richiedeScelta(e.effetto));
   const articoli = effetti.filter((e) => e.effetto.tipo === 'articolo');
   if (!da.length && articoli.length < 2) return [];
@@ -169,7 +175,12 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
   const esiti = da.map(({ uid, effetto: e }): { posizione: number; scelta: SceltaEsitoVoceDto } => {
     const st = stato();
     const posizione = effetti.findIndex((x) => x.uid === uid);
-    if (e.tipo === 'dote') return { posizione, scelta: { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note } };
+    // le note possibili con i punti che la spunta proporrà per ciascuna (la stessa conversione di `applicaEffettiAzione`)
+    if (e.tipo === 'dote') {
+      const origine = origineNoteDellaVoce(partitaId, voce);
+      return { posizione, scelta: { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note,
+        punti: e.possibili!.map((note) => ({ note, punti: puntiDote(partitaId, e.dote, note, origine) })) } };
+    }
     const t = e as Extract<EffettoVoceDto['effetto'], { tipo: 'turno' }>;
     const a = esitiDellAttivita(t.attivita)!;
     const dto = esitiDto(a.esiti!, st, t.attivita);

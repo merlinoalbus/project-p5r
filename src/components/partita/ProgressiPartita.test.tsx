@@ -76,10 +76,10 @@ it('un lavoro dice che cosa dà ogni turno, e il + ricorda le Doti da segnare a 
   impostaAttivitaSvolta.mockResolvedValue({ ...dati, daSegnare: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: 3 }] });
   await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });
   expect(impostaAttivitaSvolta).toHaveBeenCalledWith(1, 'lavoro-rafflesia', 1);
-  expect(notifica).toHaveBeenCalledWith('info', 'Da segnare nelle Doti: Gentilezza +3', 7000);
+  expect(notifica).toHaveBeenCalledWith('info', 'Da segnare nelle Doti: Gentilezza +3 punti', 7000);
   impostaAttivitaSvolta.mockResolvedValue({ ...dati, daSegnare: [{ chiave: 'gentilezza', nome: 'Gentilezza', delta: -3 }] });
   await act(async () => { fireEvent.click(within(attivita).getByRole('button', { name: 'Fioraio Rafflesia: una volta in più' })); });
-  expect(notifica).toHaveBeenLastCalledWith('info', 'Da segnare nelle Doti: Gentilezza −3', 7000);
+  expect(notifica).toHaveBeenLastCalledWith('info', 'Da segnare nelle Doti: Gentilezza −3 punti', 7000);
 });
 
 it('un evento chiesto da un Confidente dice quale rango sblocca', async () => {

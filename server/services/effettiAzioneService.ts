@@ -15,18 +15,18 @@
 import { prepared } from '../db/dbService.js';
 import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
-import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
+import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote } from './partiteService.js';
 import { applicaEventoDiario } from './puntiCronologici.js';
 import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
-import { fortunaSu } from './fortunaService.js';
-import { avanzamentoLettura, haAnimaDaCineasta, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
+import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
+import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 import { z } from 'zod';
 import { httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
-import { NESSUNA_NOTA, simboliNote } from '../../shared/note.js';
+import { NESSUNA_NOTA, simboliNote, testoDoteInPunti } from '../../shared/note.js';
 import { fasciaDellaVoce } from './prezziArticoli.js';
 
 const numeroReceipt = z.number().finite();
@@ -102,16 +102,18 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   const doti: EffettiAzioneDto['doti'] = [];
   const letture: NonNullable<EffettiAzioneDto['letture']> = [];
   const turni: NonNullable<EffettiAzioneDto['turni']> = [];
-  // le Doti di un'azione su un film o un DVD salgono di uno scalino con «Anima da cineasta», come i film stessi
-  const cinema = (a.tipo === 'dvd' || a.riferimento?.tipo === 'film') && haAnimaDaCineasta(partitaId);
+  // le Doti di un'azione su un film o un DVD salgono di uno scalino con «Anima da cineasta», come i film stessi; quelle di un libro («Leggere
+  // Donna nell'ombra»: Perizia ♪♪♪) valgono il quarto scalino, come la lettura del libro (`origineNoteDellaVoce`, la regola unica)
+  const origine = origineNoteDellaVoce(partitaId, a);
+  const { cinema } = origine;
   for (const [i, e] of a.produce.entries()) {
     const scelta = a.scelte?.[i];
     if (e.tipo === 'dote') {
       // L13: una Dote a valori possibili vale le note scelte alla spunta (0 = nessuna: la ricevuta lo ricorda, nessuna proposta)
       if (e.possibili && scelta?.tipo !== 'dote') throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: scegli quante note hai ottenuto prima di spuntare.`);
       const note = scelta?.tipo === 'dote' ? scelta.note : e.note;
-      // le Doti si segnano a mano (`aggiornaDote`): qui si dice che cosa il gioco dà, e lo si ricorda
-      const punti = note === 0 ? 0 : puntiDaNote(note, false, fortunaSu(partitaId, e.dote), cinema);
+      // le Doti si segnano a mano (`aggiornaDote`): qui si dice che cosa il gioco dà, in punti (`puntiDote`), e lo si ricorda
+      const punti = note === 0 ? 0 : puntiDote(partitaId, e.dote, note, origine);
       doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note, cinema, ...(scelta?.tipo === 'dote' ? { scelta: true } : {}) });
     } else if (e.tipo === 'lettura') {
       const stato = avanzamentoLettura(partitaId, e.categoria, e.chiave);
@@ -176,19 +178,22 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
   if (e.incontro) annullaIncontro(partitaId, e.incontro);
 }
 
-/** «Incontro con Tae Takemi: Coraggio +2», o «già contato» se quell'incontro (o quel passaggio di rango) c'era già. */
+/** Le Doti di un effetto per lo storico: note e punti insieme («Coraggio ♪ · 2 punti»), mai un «+N» nudo. */
+const frasiDoti = (doti: ReadonlyArray<{ nome: string; delta: number; note?: number }>): string => doti.map((d) => testoDoteInPunti(d)).join(', ');
+
+/** «Incontro con Tae Takemi: Coraggio ♪ · 2 punti», o «già contato» se quell'incontro (o quel passaggio di rango) c'era già. */
 function descriviIncontro(i: IncontroConfidenteDto): string {
   const rango = i.rango ? `, rango ${i.rango.da} → ${i.rango.a}` : '';
   if (i.giaContato) return `Incontro con ${i.nome} già contato${rango}`;
-  return `Incontro con ${i.nome}${i.doti.length ? `: ${i.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}${rango}`;
+  return `Incontro con ${i.nome}${i.doti.length ? `: ${frasiDoti(i.doti)}` : ''}${rango}`;
 }
 
-/** La frase di ciò che la spunta ha fatto, per lo storico. Le Doti sono quelle che il gioco dà, da segnare a mano. */
+/** La frase di ciò che la spunta ha fatto, per lo storico. Le Doti sono quelle che il gioco dà, da segnare a mano, in note e punti. */
 export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   // L13: «nessuna ♪» scelta alla spunta per una Dote a valori possibili si dice, non si propone
-  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)` : `${d.nome} +${d.delta}${d.note ? ` (${simboliNote(d.note)}${d.cinema ? ' + Anima da cineasta' : ''}${d.scelta ? ', scelte alla spunta' : ''})` : ''} da segnare nelle Doti`);
-  for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${l.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · esito ${t.esito.nome}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
+  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)` : `${testoDoteInPunti(d)}${d.note && (d.cinema || d.scelta) ? ` (${[d.cinema ? 'Anima da cineasta' : null, d.scelta ? 'note scelte alla spunta' : null].filter(Boolean).join(', ')})` : ''} da segnare nelle Doti`);
+  for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${frasiDoti(l.doti)})` : ''}`);
+  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · esito ${t.esito.nome}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}`);
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
