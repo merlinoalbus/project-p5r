@@ -1,5 +1,5 @@
 // ============================================================
-// Lotto F-bis dell'Ondata 5 (decisioni 21 e 22 dell'utente) — strumenti comuni delle migrazioni 288-297
+// Lotto F-bis dell'Ondata 5 (decisioni 21 e 22 dell'utente) — strumenti comuni delle migrazioni 288-297 (e della 298, con il suo lotto)
 // ============================================================
 //
 // Decisione 21, precisazione dell'utente (26 ottobre): «Ovviamente esula dalla decisione 1 se esistono oggetti con effetti che incidono su cose
@@ -118,6 +118,8 @@ export interface ConversioneVoce {
   modifica?: EffettoConUid[];
   collega?: { tipoPrima: string; riferimentoPrima: { tipo: string; chiave: string } | null; tipo: string; riferimento: { tipo: string; chiave: string } };
   motivo: string;
+  /** Il lotto nel registro delle operazioni sugli effetti (e nel seme del suo id); senza, quello del lotto F-bis (`LOTTO_FBIS`), come per 288-297. */
+  lotto?: string;
 }
 
 interface RigaEffetto { uid: string; ordine: number; tipo: string; chiave: string | null; dati_json: string; origine: string }
@@ -211,9 +213,10 @@ export function convertiVoce(db: AppDatabase, c: ConversioneVoce, partite: strin
   // il registro delle operazioni sugli effetti, come per ogni salvataggio (`motoreDiario.salvaEffettiVoce`) e per le migrazioni 147 e 154:
   // la conversione resta nella storia della voce, con prima e dopo
   if (esisteTabella(db, 'operazione_effetti_voce')) {
-    const id = uidDa(`O5-Fbis:operazione:${c.uid}:${canonico(dopo.map((e) => e.uid))}`);
+    const lotto = c.lotto ?? LOTTO_FBIS;
+    const id = uidDa(`${lotto}:operazione:${c.uid}:${canonico(dopo.map((e) => e.uid))}`);
     db.prepare('INSERT OR IGNORE INTO main.operazione_effetti_voce (id, voce_uid, payload_json, prima_json, dopo_json, creata_il) VALUES (?, ?, ?, ?, ?, ?)')
-      .run(id, c.uid, canonico({ lotto: LOTTO_FBIS, motivo: c.motivo, ...(c.collega ? { collegamento: c.collega.riferimento } : {}) }), canonico({ effetti: attesi }), canonico({ effetti: dopo }), adesso);
+      .run(id, c.uid, canonico({ lotto, motivo: c.motivo, ...(c.collega ? { collegamento: c.collega.riferimento } : {}) }), canonico({ effetti: attesi }), canonico({ effetti: dopo }), adesso);
   }
   if (c.collega) {
     if (db.prepare('UPDATE main.voce_giornata SET tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = NULL WHERE uid = ?')
@@ -234,6 +237,8 @@ export interface NuovaProposta {
   effetti: Array<{ effetto: Record<string, unknown>; completa: string[]; scelte: string[] | null }>;
   togli: string[];
   motivo: string; certezza: 'certa' | 'probabile' | 'da-verificare';
+  /** Il lotto della proposta; senza, quello del lotto F-bis (`LOTTO_FBIS`), come per 288-297. */
+  lotto?: string;
 }
 export function nuovaProposta(db: AppDatabase, p: NuovaProposta, adesso: string): Esito {
   if (!esisteTabella(db, 'proposta_conversione_voce')) return { chiave: p.id, esito: 'tabella delle proposte assente' };
@@ -242,7 +247,7 @@ export function nuovaProposta(db: AppDatabase, p: NuovaProposta, adesso: string)
   for (const u of p.togli) if (!db.prepare('SELECT 1 FROM main.voce_effetto WHERE uid = ? AND voce_uid = ?').get(u, p.voce)) return { chiave: p.id, esito: `l'effetto da togliere ${u} non è più sulla voce: nessuna proposta` };
   db.prepare(`INSERT INTO main.proposta_conversione_voce (id, voce_uid, lotto, tipo_proposto, riferimento_tipo, riferimento_chiave, effetti_json, togli_json, motivo, certezza, creata_il)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run(p.id, p.voce, LOTTO_FBIS, p.tipo, p.riferimento?.tipo ?? null, p.riferimento?.chiave ?? null, JSON.stringify(p.effetti), JSON.stringify(p.togli), p.motivo, p.certezza, adesso);
+    .run(p.id, p.voce, p.lotto ?? LOTTO_FBIS, p.tipo, p.riferimento?.tipo ?? null, p.riferimento?.chiave ?? null, JSON.stringify(p.effetti), JSON.stringify(p.togli), p.motivo, p.certezza, adesso);
   return { chiave: p.id, esito: `proposta creata (aperta, ${p.certezza})` };
 }
 

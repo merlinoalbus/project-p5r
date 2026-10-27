@@ -12,7 +12,7 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto, tipoGiaDetto } from '../../utils/percorso';
+import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, notaRipeteRisposte, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto, tipoGiaDetto } from '../../utils/percorso';
 import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
@@ -33,7 +33,7 @@ import { TestoNote } from '../shared/TestoNote';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenGiaNelSaldo' | 'effettiVoce'>>;
+  & Partial<Pick<AzionePercorsoDto, 'produceRiepilogo' | 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce' | 'yenAutomatici' | 'yenGiaNelSaldo' | 'effettiVoce' | 'ricevuteEffetti'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -148,11 +148,17 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti
           resta, senza etichetta (2026-10-26, «non serve "Guida:" prima del testo contenuto dentro Note»): lo riconosce lo stile, piccolo e attenuato */}
-      {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="min-w-0 testo-12 text-text-secondary break-words"><TestoNote testo={a.note} daParole="guida" /></span>}
+      {/* 2026-10-27 («come già per le domande in classe...»): la nota che ripete soltanto la risposta del riquadro («Risposta: "Sono uguali"»)
+          non si scrive, per ogni domanda, quiz, esame e cruciverba (`notaRipeteRisposte`); se dice anche altro, resta. Il confronto è con il
+          riepilogo della voce anche a voce spuntata, quando il riquadro non c'è più: dopo la spunta la risposta non serve */}
+      {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && !notaRipeteRisposte(a.note, gruppiDellaVoce(a)) && <span className="min-w-0 testo-12 text-text-secondary break-words"><TestoNote testo={a.note} daParole="guida" /></span>}
       {/* la paga dei turni i cui yen erano già nel saldo da prima (effetto per effetto, `produceTesto[i]` è l'effetto `i`): il fatto, senza la
           promessa di un movimento; la paga mossa dalla spunta la dice il chip del movimento */}
       {a.fatta && pagheGiaNelSaldo.map((t, i) => <span key={`${i}:${t}`} className="testo-12 text-text-muted tabular-nums">{t}</span>)}
-      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}><TestoNote testo={descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })} /></span>}
+      {/* 2026-10-27 («questo non è più valido»): con le ricevute della spunta le Doti non si segnano a mano, si applicano dal pulsante
+          «Applica» sulla voce e, togliendo la spunta, tornano con «Annulla» (`DaApplicare`); solo una spunta di prima, senza ricevute, le
+          lasciava da segnare a mano, e il titolo lo dice soltanto lì */}
+      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; ${a.ricevuteEffetti?.length ? 'le Doti applicate con «Applica» tornano con il pulsante «Annulla» sulla voce' : 'le Doti di questa spunta di prima si segnavano a mano (la spunta non le tocca)'}, letture e visioni restano (si disfano dalla loro pagina)`}><TestoNote testo={descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })} /></span>}
       {/* L13 (decisione 18): gli yen che la spunta ha mosso da soli, uno per causa, con l'importo davvero mosso (il saldo non scende sotto zero) */}
       {a.fatta && a.yenAutomatici?.map((m) => (
         <span key={`${m.causa}:${m.chiave}`} className="chip testo-12 tabular-nums" title="Mossi da soli dalla spunta: togliendola torna quanto era stato mosso">
@@ -168,7 +174,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
     {/* dove avviene la voce (le infiltrazioni del Palazzo, accanto al suo cartellino) prima di che cosa dà */}
     {infiltrazioni}
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
-        si segnano a mano (scelta dell'utente, 2026-09-30); gli yen (decisione 18) si muovono da soli spuntando la voce, e il riepilogo lo dice */}
+        si applicano dal pulsante «Applica» dopo la spunta, senza una nota che lo ripeta (2026-10-27); gli yen (decisione 18) si muovono da
+        soli spuntando la voce, e il riepilogo lo dice; domande, quiz, esami e cruciverba con la risposta giusta */}
     <RiepilogoEffettiVoce gruppi={gruppi} />
     </>
   );

@@ -314,6 +314,8 @@ import { migration294 } from './294_caffe_e_curry_con_i_prodotti.js';
 import { migration295 } from './295_doni_dei_confidenti_raccolti_e_vaschetta.js';
 import { migration296 } from './296_incensi_e_oggetti_delle_fusioni.js';
 import { migration297 } from './297_aojiru_dote_assorbita.js';
+// 2026-10-27: le domande, i quiz in TV e il cruciverba delle voci che non li citavano (risposte nel riquadro «Il gioco dà»)
+import { migration298 } from './298_risposte_di_domande_e_cruciverba_nelle_voci.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -335,5 +337,5 @@ export const migrations: Migration[] = [
   migration260, migration261, migration262, migration263, migration264, migration265, migration266, migration267, migration268, migration269,
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
-  migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297,
+  migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298,
 ];

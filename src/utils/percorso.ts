@@ -143,6 +143,39 @@ export function noteDellaGuidaCoincideConEffetto(note: string, produce: Readonly
   return produce.some((e) => e.tipo === 'dote' && (n === compatto(`${nomeDote(e.dote)} +${e.note}`) || n === compatto(`${nomeDote(e.dote)} ${simboliNote(e.note)}`)));
 }
 
+/** Il testo ridotto alle sole parole (senza accenti, maiuscole, virgolette e punteggiatura), per riconoscere una risposta scritta altrimenti. */
+const soloParole = (s: string): string => normaNome(s).replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+/** Le etichette con cui una nota introduce la risposta o la domanda («Risposta:», «Soluzione:», «DOMANDA:»), già ridotte da `soloParole`. */
+const ETICHETTA_NOTA = /^(?:rispost[ae] (?:giust[ae]|corrett[ae]|esatt[ae])|rispost[ae]|soluzion[ei]|domand[ae]|indizio|definizione)(?: |$)/;
+
+/**
+ * La nota della voce ripete soltanto la risposta che il riquadro «Il gioco dà» mostra già? 2026-10-27, sullo screenshot della voce
+ * «Rispondere alla domanda in classe» (nota «Risposta: "Sono uguali"» accanto al riquadro con «Sono uguali»): «come già per le domande in
+ * classe...» e «le etichette di testo devono essere visibili solo se hanno senso». Vale per ogni domanda, quiz, esame e cruciverba che il
+ * riepilogo mostra con le risposte (`RigaRiepilogoEffettiDto.risposte`). La nota si legge a pezzi (righe, «;», «/», «·»): ogni pezzo, senza
+ * l'etichetta («Risposta:», «Soluzione:», «Domanda:») e la numerazione, deve essere una risposta giusta (o una sua parte) o la domanda del
+ * riquadro, e almeno uno una risposta. Se la nota dice anche altro («Conoscenza +1», un consiglio), resta. Senza risposte nel riepilogo, resta.
+ */
+export function notaRipeteRisposte(note: string, gruppi: readonly GruppoRiepilogoEffettiDto[]): boolean {
+  const righe = gruppi.flatMap((g) => g.righe).filter((r) => r.risposte?.length);
+  if (!righe.length) return false;
+  const risposte = righe.flatMap((r) => (r.risposte ?? []).map((x) => soloParole(x.testo))).filter(Boolean);
+  const domande = righe.flatMap((r) => [r.nome, ...(r.risposte ?? []).map((x) => x.domanda ?? '')]).map(soloParole).filter(Boolean);
+  // un pezzo vale se sta dentro una risposta (o una domanda) a parole intere: «John Silver» in «John Silver (personaggio letterario…)»
+  const dentro = (testo: string, pezzo: string): boolean => ` ${testo} `.includes(` ${pezzo} `);
+  let haRisposta = false;
+  for (const grezzo of note.split(/[\n;/·•|]+/)) {
+    let pezzo = soloParole(grezzo);
+    // la numerazione e le etichette davanti, anche insieme («1. Risposta: …»)
+    for (let prima = ''; prima !== pezzo;) { prima = pezzo; pezzo = pezzo.replace(/^\d+ /, '').replace(ETICHETTA_NOTA, '').trim(); }
+    if (!pezzo) continue;
+    if (risposte.some((r) => dentro(r, pezzo))) { haRisposta = true; continue; }
+    if (domande.some((d) => dentro(d, pezzo))) continue;
+    return false;
+  }
+  return haRisposta;
+}
+
 /** Testo breve degli effetti della spunta: vive in `shared/descriviEffettiSpunta.ts` (2026-10-26), perché lo usa anche il server per le
  *  ricevute della spunta; qui resta riesportato per il chip della voce e per `avvisoSpunta`. */
 export { descriviEffetti };

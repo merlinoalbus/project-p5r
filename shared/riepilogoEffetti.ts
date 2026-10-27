@@ -26,12 +26,15 @@ export interface RispostaRiepilogoEffettiDto { testo: string; domanda?: string }
  * Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga).
  * 2026-10-26 («Per le domande/quiz/Esami devono essere visualizzate le domande ma anche le risposte»): la riga di una domanda in classe,
  * di un quiz in TV o di un esame ha per nome la domanda e in `risposte` le risposte giuste, nell'ordine (più passi per le domande a catena,
- * un quesito per risposta negli esami), lette dalla riga della domanda del gioco (`domanda.risposte_json`).
+ * un quesito per risposta negli esami), lette dalla riga della domanda del gioco (`domanda.risposte_json`). 2026-10-27 («come già per le
+ * domande in classe»): la riga di un cruciverba ha per nome l'indizio e in `risposte` la soluzione (`cruciverba.risposta`), con la stessa resa.
  * `contenuto` (L13, decisione 4): che cosa contiene un set, in una riga («Cerotto alla caffeina · Gocce per occhioni ×10»), se il catalogo lo dice.
  */
 export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string; risposte?: RispostaRiepilogoEffettiDto[]; contenuto?: string }
 /** Una domanda del gioco come la legge il riepilogo: il testo, il tipo (classe, esame, quiz in TV) e le risposte giuste in ordine. */
 export interface QuesitoRiepilogoEffetti { domanda: string; tipo: string; risposte: RispostaRiepilogoEffettiDto[] }
+/** Un cruciverba del gioco come lo legge il riepilogo: l'indizio e la soluzione (la riga della tabella `cruciverba`, la sola fonte). */
+export interface CruciverbaRiepilogoEffetti { indizio: string; risposta: string }
 /** Un gruppo del riepilogo: l'etichetta, le righe nell'ordine degli effetti, il totale (solo gli acquisti) e una nota che vale per tutto il gruppo. */
 export interface GruppoRiepilogoEffettiDto {
   /** Identità stabile del gruppo nella voce («acquisti:distributore-bagno», «doti», «turni»). */
@@ -53,6 +56,9 @@ export interface NomiRiepilogoEffetti {
   pagaTurno: (attivita: string) => { yen: number; massima: number | null } | undefined;
   /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
   quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
+  /** Il cruciverba del gioco dalla sua data «MM-GG», con l'indizio e la soluzione (2026-10-27, «Aggiungere la visualizzazione della
+   *  risposta anche per i cruciverba»). */
+  cruciverba: (data: string) => CruciverbaRiepilogoEffetti | undefined;
   /** L13 (decisione 4): gli articoli con cui un articolo non si compra insieme (le sue condizioni «non: articolo ottenuto»). Senza: nessuna alternativa. */
   incompatibili?: (articolo: string) => readonly string[] | undefined;
   /** L13 (decisione 4): che cosa contiene un articolo (un set delle televendite): gli oggetti con le copie. */
@@ -83,12 +89,15 @@ function rigaArticolo(r: RigaContoArticoli, n: NomiRiepilogoEffetti): RigaRiepil
 
 /** Le etichette e le note fisse dei gruppi che non dipendono da un elemento (la parte che non riguarda gli yen: quella è in `NOTE_YEN`). */
 // 2026-10-25 («le etichette di testo devono essere visibili solo se hanno senso»): una nota resta solo se dice un'eccezione. Che la spunta
-// segni letture e turni è il caso normale di ogni voce (via «Le segna la spunta.» e «Li segna la spunta.», uguali in ogni voce); restano le
-// Doti, che si segnano a mano. La nota dell'Aojiru ripeteva la sua riga («variante da dichiarare»): il quando sta ora nella riga stessa, e
-// solo se la variante non è ancora nota.
+// segni letture e turni è il caso normale di ogni voce (via «Le segna la spunta.» e «Li segna la spunta.», uguali in ogni voce). 2026-10-27
+// (l'utente, sulla voce del cruciverba del 18 aprile: «questo non è più valido... "Le Doti le segni tu nella scheda Doti." da togliere nelle
+// voci del diario»): via anche la nota delle Doti. Non era più vera: spuntando la voce le Doti entrano nelle ricevute della spunta e si
+// applicano dal pulsante «Applica» sulla voce (`DaApplicare`, proposte `utente.da_applicare`); togliendo la spunta l'applicato torna con la
+// proposta inversa. È il caso normale di ogni voce, che il pulsante dice da solo. La nota dell'Aojiru ripeteva la sua riga («variante da
+// dichiarare»): il quando sta ora nella riga stessa, e solo se la variante non è ancora nota.
 const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   aojiru: { titolo: 'Aojiru' },
-  doti: { titolo: 'Doti sociali', nota: 'Le Doti le segni tu nella scheda Doti.' },
+  doti: { titolo: 'Doti sociali' },
   letture: { titolo: 'Letture e visioni' },
   turni: { titolo: 'Turni' },
   yen: { titolo: 'Yen' },
@@ -309,7 +318,18 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         gruppo(gruppoDellaDomanda(q?.tipo)).righe.push(r);
         break;
       }
-      case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;
+      case 'cruciverba': {
+        // 2026-10-27 («Aggiungere la visualizzazione della risposta anche per i cruciverba»; «come già per le domande in classe»): la stessa
+        // resa delle domande, l'indizio come nome e la soluzione nel blocco delle risposte giuste, dalla riga del cruciverba del gioco. Senza
+        // la riga (o senza soluzione) resta il giorno del cruciverba, come prima
+        const c = n.cruciverba(e.data);
+        const indizio = c?.indizio.trim() ?? '';
+        const soluzione = c?.risposta.trim() ?? '';
+        gruppo('cruciverba').righe.push(indizio
+          ? { nome: indizio, ...(soluzione ? { risposte: [{ testo: soluzione }] } : {}) }
+          : { nome: `Del ${dataLeggibile(e.data)}` });
+        break;
+      }
       case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
       // il gruppo si chiama «Compendio»: la riga dice solo il nome; il dettaglio compare solo quando aggiunge qualcosa (anche nella scorta)
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', e.scorta ? `anche nella scorta${e.livello ? `, livello ${e.livello}` : ''}` : undefined); break;

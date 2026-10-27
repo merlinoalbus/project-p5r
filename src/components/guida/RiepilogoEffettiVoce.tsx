@@ -36,6 +36,7 @@ interface Props {
  * le domande ma anche le risposte»). La risposta si distingue non solo per il colore: la spunta accanto, il grassetto e il filo a sinistra
  * del blocco; per un lettore di schermo ogni risposta comincia con «Risposta giusta». Negli esami ogni risposta ha sopra il suo quesito;
  * una domanda a catena (più risposte senza quesito) è un elenco numerato, nell'ordine in cui si danno. Testi lunghi a capo, mai troncati.
+ * 2026-10-27 («come già per le domande in classe...»): lo stesso blocco, identico, per la soluzione dei cruciverba (l'indizio è il nome della riga).
  */
 function RisposteGiuste({ risposte }: { risposte: readonly RispostaRiepilogoEffettiDto[] }) {
   const catena = risposte.length > 1 && risposte.every((x) => !x.domanda);

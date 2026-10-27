@@ -33,7 +33,7 @@ import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
-import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
+import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -124,9 +124,16 @@ function quesitoDellaDomanda(id: number): QuesitoRiepilogoEffetti | undefined {
   });
   return { domanda: r.domanda, tipo: r.tipo, risposte };
 }
+/**
+ * Il cruciverba del gioco dalla sua data per «Il gioco dà» (2026-10-27: «Aggiungere la visualizzazione della risposta anche per i
+ * cruciverba»): l'indizio e la soluzione, dalla riga della tabella `cruciverba` (la stessa fonte della pagina dei cruciverba).
+ */
+function cruciverbaDellaData(data: string): CruciverbaRiepilogoEffetti | undefined {
+  return prepared('SELECT indizio, risposta FROM cruciverba WHERE data = ?').get(data) as CruciverbaRiepilogoEffetti | undefined;
+}
 /** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
 function nomiDelRiepilogo(nomi: NomiEffettiAzione, fascia?: FasciaPrezzo | null): NomiRiepilogoEffetti {
-  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda };
+  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda, cruciverba: cruciverbaDellaData };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
