@@ -27,7 +27,10 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
   // davvero mosso la sua paga (`turniConYen`, «attività:ordine»): un turno di prima degli yen automatici ha la paga già nel saldo
   for (const t of e.turni ?? []) {
     const variabile = t.paga?.massima && t.paga.massima > t.paga.yen ? ` (fino a ¥${t.paga.massima.toLocaleString('it-IT')}${opz.turniConYen?.has(`${t.attivita}:${t.ordine}`) ? ': entra da sola la paga base, il di più no' : ''})` : '';
-    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · ${t.esito.nome}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
+    // 2026-10-27: gli oggetti che il turno ha dato e usato (con la quantità e il bonus della voce), solo se ci sono
+    const elenco = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');
+    const ricevuti = elenco(t.oggetti), usati = elenco(t.consumati);
+    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · ${t.esito.nome}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${ricevuti ? ` · ricevuti ${ricevuti}` : ''}${usati ? ` · usati ${usati}` : ''}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
   }
   if (e.incontro) {
     const rango = e.incontro.rango ? ` · rango ${e.incontro.rango.da} → ${e.incontro.rango.a}` : '';

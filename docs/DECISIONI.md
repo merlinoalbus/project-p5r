@@ -2355,3 +2355,18 @@ Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente)
 - **Benefattore conta tutti i regali**, Cartolina compresa: la guida dice «almeno 10 regali totali» e non ne esclude nessuno.
 - **Il segno «prezzo già nel saldo»** di una consegna di prima degli yen automatici vale per una consegna sola: la usa la prima consegna ridata
   nello stesso momento, e torna valido se la si toglie.
+
+## 2026-10-27 — Fabbricazione: alla spunta solo «Bonus» sì/no
+
+Richiesta dell'utente, dopo aver visto la finestra della spunta che elencava per ogni ricetta «creato» / «con il bonus» con i materiali
+(«TOTALMENTE INUSABILE»; «e quando creo l'aroma calmante? o il Goho-M?»): «bastava un pulsante bonus sì/no. L'oggetto è stato già scelto, la
+quantità anche... se il pulsante bonus è attivo quando riscuoto applica la versione con il bonus, altrimenti quella base».
+Come si realizza (scelte tecniche, nessuna decisione presa al posto dell'utente):
+
+- **La versione con il bonus è un dato dell'esito** (`bonusDi` = l'esito base), per ogni attività che lo dichiara; nessuna regola sul nome.
+- **Lo strumento e la quantità stanno nella voce** (l'effetto `turno` con l'esito base e `quantita`, le creazioni); l'editor della voce propone
+  solo gli strumenti e la quantità. La spunta mostra solo l'interruttore «Bonus», spento all'inizio (decisione 22: il bonus arriva a caso).
+- **Con la quantità q** gli oggetti dati e i materiali sono q volte quelli dell'esito base; con il bonus una delle q creazioni è quella con il
+  bonus (un oggetto in più senza materiali); le Doti dell'esito valgono una volta per turno (♪♪ base, ♪♪♪ con il bonus).
+- **Una voce senza strumento** (11-18, «bombe o strumenti») non si spunta finché lo strumento non è scelto nell'editor della voce.
+- **Gli oggetti li dà l'esito**: un «oggetto ricevuto» dello stesso prodotto nella voce esce (o, nel periodo validato, la proposta lo toglie).

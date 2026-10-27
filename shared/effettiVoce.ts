@@ -9,11 +9,13 @@ export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
  * L13 (ondata 2): `possibili` = i valori che il gioco può dare (la fabbricazione: Perizia ♪♪ o ♪♪♪): alla spunta si sceglie quale,
  * `note` è il valore proposto. `esito` del turno = l'esito atteso fra quelli dichiarati dall'attività (`attivita.esiti_json`), proposto
  * alla spunta; senza, chi gioca lo sceglie (o l'attività lo ricava da sola, nel modo automatico). Un turno con esito non ha Doti proprie.
+ * 2026-10-27: `quantita` del turno con esito = le creazioni (Grimaldello ×3): gli oggetti dati e consumati dall'esito contano tante volte
+ * (`oggettiDelTurno` di `shared/esitiAttivita.ts`); 1 è sottinteso e non si scrive (una sola forma canonica), e senza esito non c'è.
  */
 export type EffettoLegacyVoce =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLetturaVoce; chiave: string; almeno: number | null }
-  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string };
+  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string; quantita?: number };
 /** L'acquisto non porta più la Fortuna (R10-10/2): è lo stato della partita, letto quando si registra il consumo. */
 export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
@@ -134,7 +136,7 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -186,8 +188,13 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
     if (o.esito !== undefined) {
       // l'esito porta le sue Doti: un turno con esito non dichiara anche Doti proprie (due fonti dello stesso dato)
       if (o.doti != null || typeof o.esito !== 'string' || !/^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esito)) return null;
-      return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      // 2026-10-27: le creazioni dell'esito (1 sottinteso, non si scrive)
+      if (o.quantita === undefined || o.quantita === 1) return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      const q = quantita(o.quantita);
+      return q ? { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito, quantita: q } : null;
     }
+    // la quantità vale solo con l'esito: senza, il turno non dice che cosa si crea
+    if (o.quantita !== undefined) return null;
     if (o.doti == null) return { tipo: 'turno', attivita: o.attivita.trim() };
     if (!Array.isArray(o.doti) || !o.doti.length) return null;
     const doti: DoteNoteVoce[] = [];

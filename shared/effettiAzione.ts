@@ -65,7 +65,8 @@ export interface DoteNote { dote: DoteChiave; note: 1 | 2 | 3 }
 export type EffettoAzione =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLettura; chiave: string; almeno: number | null }
-  | { tipo: 'turno'; attivita: string; doti?: DoteNote[]; esito?: string };
+  /** 2026-10-27: `quantita` = le creazioni dell'esito (Grimaldello ×3), solo con l'esito; 1 sottinteso (`shared/effettiVoce.ts`). */
+  | { tipo: 'turno'; attivita: string; doti?: DoteNote[]; esito?: string; quantita?: number };
 
 export const TIPI_EFFETTO_AZIONE = [
   { chiave: 'dote', nome: 'Dote sociale' }, { chiave: 'lettura', nome: 'Lettura o visione' }, { chiave: 'turno', nome: 'Turno di un’attività' },
@@ -107,8 +108,12 @@ function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
     if (typeof o.attivita !== 'string' || !o.attivita.trim()) return null;
     if (o.esito !== undefined) {
       if (o.doti != null || typeof o.esito !== 'string' || !/^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esito)) return null;
-      return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      // 2026-10-27: le creazioni dell'esito, come in `normalizzaEffettoVoce` (1 sottinteso; 2–999)
+      if (o.quantita === undefined || o.quantita === 1) return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+      if (!Number.isSafeInteger(o.quantita) || (o.quantita as number) < 2 || (o.quantita as number) > 999) return null;
+      return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito, quantita: o.quantita as number };
     }
+    if (o.quantita !== undefined) return null;
     if (o.doti === undefined || o.doti === null) return { tipo: 'turno', attivita: o.attivita.trim() };
     // «Doti proprie» vuote non dicono niente: o ci sono, o il turno usa quelle dell'attività
     if (!Array.isArray(o.doti) || o.doti.length === 0) return null;
@@ -134,6 +139,10 @@ export interface NomiEffettiAzione {
   esiti?: Record<string, string>;
   /** Le attività che dichiarano esiti, con il loro modo (L13): il turno dice che l'esito si sceglie alla spunta o vale da solo. */
   modiEsiti?: Record<string, 'scelta' | 'automatico'>;
+  /** 2026-10-27: per gli esiti che hanno una versione con il bonus («attività/esito», base o con il bonus), il nome dello strumento («Grimaldello»). */
+  strumenti?: Record<string, string>;
+  /** 2026-10-27: le attività con esiti che hanno una versione con il bonus (lo strumento si sceglie nella voce, il bonus alla spunta). */
+  conBonus?: Record<string, true>;
 }
 
 /**
@@ -150,8 +159,12 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
   }
   const nome = nomi.attivita?.[e.attivita] ?? e.attivita;
   const modo = nomi.modiEsiti?.[e.attivita];
-  const esito = e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}, lo confermi alla spunta`
-    : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? 'esito automatico secondo il giorno' : '';
+  // 2026-10-27: un esito con la versione con il bonus è lo strumento della voce, con le creazioni; il bonus lo dice l'interruttore alla spunta
+  const strumento = e.esito ? nomi.strumenti?.[`${e.attivita}/${e.esito}`] : undefined;
+  const esito = strumento ? `${strumento}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, bonus sì o no alla spunta`
+    : e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, lo confermi alla spunta`
+      : nomi.conBonus?.[e.attivita] ? 'strumento e quantità da scegliere nell’editor della voce'
+        : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? 'esito automatico secondo il giorno' : '';
   const doti = e.doti?.length ? e.doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join('; ') : '';
   return { nome, dettaglio: [doti, esito].filter(Boolean).join(' · '), doti, esito };
 }

@@ -178,6 +178,8 @@ export interface NomiEffetti {
   inviti: Map<string, ElenchiEffettiVoceDto['inviti'][number]>; persone: Map<number, ElenchiEffettiVoceDto['persone'][number]>;
   /** L13: oggetti del catalogo e trofei, per chiave (assenti finché il server non li serve). */
   oggetti?: Map<string, string>; trofei?: Map<string, string>;
+  /** 2026-10-27: gli esiti dei turni per «attività/esito»: il nome e, per gli esiti con la versione con il bonus, lo strumento («Grimaldello»). */
+  esitiTurno?: Map<string, { nome: string; strumento?: string }>;
 }
 
 const mappa = <T extends { chiave: string; nome: string }>(l: T[]): Map<string, string> => new Map(l.map((x) => [x.chiave, x.nome]));
@@ -195,6 +197,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto, fas
     articoli: new Map(x.articoli.map((a) => [a.chiave, nellaFascia(a)])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
     oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []),
+    esitiTurno: new Map(e.attivita.flatMap((a) => (a.esiti?.elenco ?? []).map((x) => [`${a.chiave}/${x.chiave}`, { nome: x.nome, ...(x.strumento ? { strumento: x.strumento } : {}) }] as const))),
   };
 }
 
@@ -213,6 +216,13 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
     }
     case 'turno': {
       const nome = n.attivita.get(e.attivita) ?? 'Attività';
+      // 2026-10-27: con l'esito, lo strumento e la quantità (il bonus si dice alla spunta) o l'esito atteso; le Doti le dà l'esito
+      if (e.esito) {
+        const x = n.esitiTurno?.get(`${e.attivita}/${e.esito}`);
+        const quanti = e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : '';
+        return x?.strumento ? `Turno: ${nome} — ${x.strumento}${quanti}, bonus sì o no alla spunta` : `Turno: ${nome} — esito atteso: ${x?.nome ?? 'esito non più dichiarato'}${quanti}, lo confermi alla spunta`;
+      }
+      if ([...(n.esitiTurno ?? [])].some(([k, x]) => k.startsWith(`${e.attivita}/`) && x.strumento)) return `Turno: ${nome} — strumento e quantità da scegliere nell’editor della voce`;
       return `Turno: ${nome} — ${e.doti?.length ? `Doti proprie di questo turno (${e.doti.map((d) => `${nomeDote(d.dote)} ${note(d.note)}`).join('; ')})` : 'le Doti sono quelle del lavoro'}`;
     }
     case 'acquisto': return `Acquisto Aojiru${e.variante ? `: ${nomeDote(e.variante)}` : ' (variante da osservare nella partita)'}`;

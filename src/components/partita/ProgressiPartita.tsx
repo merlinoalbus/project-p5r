@@ -255,7 +255,10 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                                     </>
                                   );
                                 })()}
-                                {esiti && esiti.modo === 'scelta' && <span className="block testo-12 text-text-secondary">{`Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
+                                {/* 2026-10-27: con le versioni con il bonus si sceglie lo strumento (gli esiti base) e il bonus sì/no */}
+                                {esiti && esiti.modo === 'scelta' && <span className="block testo-12 text-text-secondary">{esiti.esiti.some((e) => e.bonusDi)
+                                  ? `Strumenti: ${esiti.esiti.filter((e) => !e.bonusDi).length} da scegliere a ogni +, con il bonus sì o no`
+                                  : `Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
                                 {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività, con o senza esiti; niente se nessuno */}
                                 <PromemoriaLibri promemoria={a.promemoria} compatto />
                               </span>

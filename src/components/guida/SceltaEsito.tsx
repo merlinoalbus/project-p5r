@@ -13,10 +13,15 @@
 // libri letti che riguardano l'attività (L'ABC dell'artigianato per la fabbricazione), come promemoria.
 // L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite) chiedono quale si è comprato, o «Nessuno»
 // (`SceltaAcquistoAlternativo`), con le stesse regole: con una sola scelta il tocco spunta, con più scelte si conferma.
+// 2026-10-27 (richiesta dell'utente: «bastava un pulsante bonus sì/no. L'oggetto è stato già scelto, la quantità anche... se il pulsante bonus è
+// attivo quando riscuoto applica la versione con il bonus, altrimenti quella base»): per lo strumento della voce con una versione con il bonus
+// (`bonus` della scelta) la spunta mostra SOLO l'interruttore «Bonus» (spento all'inizio), con «Spunta» e «Annulla»: niente elenco di esiti,
+// materiali o «Senza punti». Se la voce non dice lo strumento (`strumentoDaScegliere`) la spunta lo dice e rimanda all'editor della voce. Al +
+// del contatore gli esiti con la versione con il bonus si scelgono per strumento, con lo stesso interruttore.
 // ============================================================
 
 import { useId, useState } from 'react';
-import { fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito, nomeStrumento, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
 import { noteAParole, simboliNote, testoNoteAParole, testoPunti } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -87,15 +92,66 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
   );
 }
 
-/** Il + del contatore di un'attività con esiti: un tocco sull'esito lo registra; «Senza punti» registra il turno senza Doti. */
+/**
+ * 2026-10-27: l'interruttore «Bonus» (sì/no). Un bersaglio da 44 px (`touch`), con lo stato detto dal testo («sì»/«no») oltre che dalla pista e
+ * dal colore; `role="switch"` con `aria-checked`. `descrizione`: il nome accessibile completo (lo strumento e la quantità), il testo visibile
+ * resta «Bonus».
+ */
+export function InterruttoreBonus({ acceso, disabled, descrizione, onCambia, className = '' }: { acceso: boolean; disabled?: boolean; descrizione: string; onCambia: (acceso: boolean) => void; className?: string }) {
+  return (
+    <button type="button" role="switch" aria-checked={acceso} aria-label={`Bonus: ${descrizione}`} disabled={disabled} onClick={() => onCambia(!acceso)}
+      className={`chip touch gap-2 ${acceso ? 'chip--attivo' : ''} ${className}`}>
+      <span aria-hidden="true" className={`interruttore-pista ${acceso ? 'interruttore-pista--acceso' : ''}`} />
+      <span>Bonus</span>
+      <span aria-hidden="true" className="tabular-nums font-semibold">{acceso ? 'sì' : 'no'}</span>
+    </button>
+  );
+}
+
+/** Gli esiti base che hanno una versione con il bonus (gli strumenti), con la loro versione con il bonus, nell'ordine dichiarato. */
+function strumentiConBonus(esiti: readonly EsitoDisponibileDto[]): Array<{ base: EsitoDisponibileDto; bonus: EsitoDisponibileDto }> {
+  return esiti.flatMap((base) => {
+    const bonus = esiti.find((x) => x.bonusDi === base.chiave);
+    return !base.bonusDi && bonus ? [{ base, bonus }] : [];
+  });
+}
+
+/** Il + del contatore di un'attività con esiti: un tocco sull'esito lo registra; «Senza punti» registra il turno senza Doti. 2026-10-27: gli
+ *  esiti con una versione con il bonus si scelgono per strumento (il nome breve), con l'interruttore «Bonus» che decide quale versione. */
 export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, promemoria = [] }: { nome: string; esiti: readonly EsitoDisponibileDto[]; occupato: boolean; onScegli: (esito: string | null) => void; onAnnulla: () => void; promemoria?: readonly string[] }) {
+  const [bonus, setBonus] = useState(false);
+  const strumenti = strumentiConBonus(esiti);
+  const nelleCoppie = new Set(strumenti.flatMap((s) => [s.base.chiave, s.bonus.chiave]));
+  const altri = esiti.filter((e) => !nelleCoppie.has(e.chiave));
+  const prefisso = useId();
   return (
     <span className="flex w-full flex-wrap items-center gap-1.5 testo-12" role="group" aria-label={`Esito del turno: ${nome}`}>
-      <span className="w-full text-text-secondary">Che esito hai ottenuto?</span>
+      <span className="w-full text-text-secondary">{strumenti.length && !altri.length ? 'Che cosa hai creato?' : 'Che esito hai ottenuto?'}</span>
       {promemoria.map((p) => <span key={p} className="w-full text-text-muted text-pretty">Dai libri letti: {p}</span>)}
-      <ElencoEsiti esiti={esiti} scelto={undefined} occupato={occupato} onScegli={(c) => onScegli(c)} />
-      {/* «Senza punti» solo se gli esiti danno Doti: per l'estrazione della lotteria la scelta è fra «Vinto» e «Non vinto» */}
-      {conDoti(esiti) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" disabled={occupato} onClick={() => onScegli(null)} />}
+      {strumenti.length > 0 && (
+        <>
+          <InterruttoreBonus acceso={bonus} disabled={occupato} descrizione={`${nome}, vale per lo strumento che tocchi`} onCambia={setBonus} />
+          <span className="flex w-full flex-wrap gap-1.5" role="group" aria-label="Strumenti">
+            {strumenti.map(({ base, bonus: conBonus }) => {
+              const scelto = bonus ? conBonus : base;
+              const idMotivo = `${prefisso}-motivo-${base.chiave}`;
+              return (
+                <button key={base.chiave} type="button" className={`chip touch ${!scelto.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
+                  aria-disabled={!scelto.disponibile ? true : undefined} aria-describedby={!scelto.disponibile ? idMotivo : undefined}
+                  aria-label={`${nomeStrumento(base)}${bonus ? ', con il bonus' : ''}${!scelto.disponibile ? '; non ancora possibile' : ''}`}
+                  onClick={() => { if (scelto.disponibile) onScegli(scelto.chiave); }}>
+                  {nomeStrumento(base)}
+                  {!scelto.disponibile && <span id={idMotivo} className="sr-only">Non ancora: {scelto.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
+                </button>
+              );
+            })}
+          </span>
+        </>
+      )}
+      {altri.length > 0 && <ElencoEsiti esiti={altri} scelto={undefined} occupato={occupato} onScegli={(c) => onScegli(c)} />}
+      {/* «Senza punti» solo se gli esiti danno Doti e non sono solo strumenti: per l'estrazione della lotteria la scelta è fra «Vinto» e «Non
+          vinto»; per uno strumento il turno si registra con lo strumento creato */}
+      {altri.length > 0 && conDoti(altri) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Senza punti" disabled={occupato} onClick={() => onScegli(null)} />}
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
     </span>
   );
@@ -114,6 +170,9 @@ function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore 
   return Object.fromEntries(scelte.map((s): [string, Valore | undefined] => {
     if (s.tipo === 'dote') return [s.effettoUid, undefined];
     if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
+    // 2026-10-27: lo strumento della voce parte dalla versione base (interruttore «Bonus» spento); senza strumento nella voce non c'è scelta
+    if (s.bonus) return [s.effettoUid, { tipo: 'turno', esito: s.bonus.base }];
+    if (s.strumentoDaScegliere) return [s.effettoUid, undefined];
     return [s.effettoUid, s.preselezionato && s.esiti.some((e) => e.chiave === s.preselezionato && e.disponibile) ? { tipo: 'turno', esito: s.preselezionato } : undefined];
   }));
 }
@@ -126,8 +185,10 @@ function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore 
 export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { scelte: readonly SceltaEsitoVoceDto[]; occupato: boolean; onConferma: (s: SceltaEsitoSpunta[]) => void; onAnnulla: () => void }) {
   const [valori, setValori] = useState<Record<string, Valore | undefined>>(() => iniziali(scelte));
   // con UNA sola scelta un tocco basta (come le note di un Confidente e il + di Progressi): il tocco registra subito;
-  // con più scelte insieme si fanno tutte e poi si conferma
-  const unica = scelte.length === 1;
+  // con più scelte insieme si fanno tutte e poi si conferma. 2026-10-27: l'interruttore «Bonus» non spunta da solo (si accende e si spegne),
+  // e lo strumento da scegliere nell'editor non ha tocchi: con loro serve il pulsante «Spunta»
+  const conInterruttore = scelte.some((s) => s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere));
+  const unica = scelte.length === 1 && !conInterruttore;
   const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
     const x = v[s.effettoUid]!;
     if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
@@ -143,7 +204,10 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
   // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
   // acquisti con esiti o note: «scelte»; senza acquisti resta «esiti», come prima
   const acquisti = scelte.filter((s) => s.tipo === 'alternativa').length;
-  const parola = acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
+  // 2026-10-27: solo interruttori «Bonus»: il pulsante dice soltanto «Spunta» (gli esiti non si scelgono qui)
+  const soloBonus = scelte.every((s) => s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere));
+  const parola = soloBonus ? { gruppo: 'Spunta della voce', pulsante: 'Spunta' }
+    : acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
     : acquisti === scelte.length ? { gruppo: 'Acquisti da scegliere per la spunta', pulsante: 'Spunta con questi acquisti' }
       : { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' };
   const conferma = () => {
@@ -151,7 +215,8 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
     onConferma(costruisci(valori));
   };
   return (
-    <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label={parola.gruppo}>
+    // 2026-10-27: solo l'interruttore «Bonus»: interruttore, «Spunta» e «Annulla» su una riga (vanno a capo sul telefono se serve)
+    <span className={soloBonus ? 'flex w-full flex-wrap items-center gap-1.5 testo-12' : 'flex w-full flex-col gap-2 testo-12'} role="group" aria-label={parola.gruppo}>
       {scelte.map((s) => {
         const v = valori[s.effettoUid];
         if (s.tipo === 'dote') return (
@@ -172,6 +237,15 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         if (s.tipo === 'alternativa') return (
           <SceltaAcquistoAlternativo key={s.effettoUid} s={s} scelto={v?.tipo === 'alternativa' ? v.scelto : undefined} occupato={occupato} onScegli={(uid) => imposta(s.effettoUid, { tipo: 'alternativa', scelto: uid })} />
         );
+        // 2026-10-27: lo strumento e la quantità li dice la voce; qui solo «Bonus» sì/no (acceso = la versione con il bonus, spento = quella base)
+        if (s.bonus) {
+          const b = s.bonus;
+          return <InterruttoreBonus key={s.effettoUid} className="self-start" acceso={v?.tipo === 'turno' && v.esito === b.conBonus} disabled={occupato}
+            descrizione={`${s.attivitaNome}, ${b.nome}${b.quantita > 1 ? ` ×${b.quantita}` : ''}`}
+            onCambia={(acceso) => imposta(s.effettoUid, { tipo: 'turno', esito: acceso ? b.conBonus : b.base })} />;
+        }
+        // la voce non dice lo strumento: si sceglie nell'editor della voce, non alla spunta
+        if (s.strumentoDaScegliere) return <span key={s.effettoUid} role="alert" className="w-full text-warning text-pretty">{s.attivitaNome}: la voce non dice che cosa si crea. Scegli strumento e quantità nell’editor della voce, poi spunta.</span>;
         return (
           <span key={s.effettoUid} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Esito: ${s.attivitaNome}`}>
             <span className="w-full text-text-secondary">{s.attivitaNome}: che esito hai ottenuto?</span>
@@ -183,7 +257,8 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         );
       })}
       <span className="flex flex-wrap gap-1.5">
-        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={occupato || !complete} onClick={conferma} />}
+        {/* uno strumento da scegliere nell'editor non lascia spuntare: il pulsante non si mostra (non si accenderebbe mai) */}
+        {!unica && !scelte.some((s) => s.tipo === 'turno' && s.strumentoDaScegliere) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={parola.pulsante} disabled={occupato || !complete} onClick={conferma} />}
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
       </span>
     </span>

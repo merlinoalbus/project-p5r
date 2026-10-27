@@ -17,8 +17,8 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import { esitiDellAttivita } from './esitiAttivitaService.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
+import { nomeOggettoCatalogo, oggettiDelTurnoVerificati } from './oggettiDegliEsitiService.js';
 
 const TABELLA = 'consumo_oggetto_partita';
 
@@ -28,19 +28,22 @@ export const conRegistroConsumi = (): boolean => !!prepared("SELECT 1 FROM utent
 /**
  * Registrando il turno `ordine` dell'attività con l'esito `esito`: gli oggetti che l'esito consuma escono dalle copie possedute. Va chiamata
  * dentro la transazione del turno. Le righe rimaste da un turno con lo stesso numero (tolto per un'altra strada) si tolgono prima.
+ * 2026-10-27: con la quantità della voce (le creazioni) e la versione con il bonus (`oggettiDelTurno`): ritorna che cosa ha consumato, per la ricevuta.
  */
-export function segnaConsumiDelTurno(p: number, attivita: string, ordine: number, esito: string | null | undefined): void {
-  if (!conRegistroConsumi()) return;
+export function segnaConsumiDelTurno(p: number, attivita: string, ordine: number, esito: string | null | undefined, quantita?: number): Array<{ nome: string; quantita: number }> {
+  if (!conRegistroConsumi()) return [];
   togliConsumiDelTurno(p, attivita, ordine);
-  if (!esito) return;
-  const consuma = esitiDellAttivita(attivita)?.esiti?.esiti.find((e) => e.chiave === esito)?.consuma ?? [];
-  if (!consuma.length || !catalogoOggettiDisponibile()) return;
+  if (!esito) return [];
+  const consuma = oggettiDelTurnoVerificati(attivita, esito, quantita, 'consumati');
+  if (!consuma.length || !catalogoOggettiDisponibile()) return [];
   const nelCatalogo = prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?');
   const inserisci = prepared(`INSERT INTO utente.${TABELLA} (partita_id, catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, evento_id, creato_il)
     VALUES (?, ?, ?, 'turno', ?, ?, ?, NULL, ?)`);
   const adesso = new Date().toISOString();
   // un oggetto che il catalogo non ha più non si consuma: nessuna riga orfana nasce da qui
-  for (const o of consuma) if (nelCatalogo.get(o.oggetto)) inserisci.run(p, o.oggetto, o.quantita, attivita, ordine, esito, adesso);
+  const scritti: Array<{ nome: string; quantita: number }> = [];
+  for (const o of consuma) if (nelCatalogo.get(o.oggetto)) { inserisci.run(p, o.oggetto, o.quantita, attivita, ordine, esito, adesso); scritti.push({ nome: nomeOggettoCatalogo(o.oggetto), quantita: o.quantita }); }
+  return scritti;
 }
 
 /** Togliendo il turno `ordine` dell'attività: le copie che aveva consumato tornano. Va chiamata dentro la transazione del turno. */
