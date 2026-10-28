@@ -12,17 +12,18 @@
 //     ripulisce gli attributi, il commento resta (e viceversa). Un blocco grande, oltre la soglia della cronologia di Windows, sta solo
 //     nell'attributo, e chi copia viene avvisato se anche così Win+V potrebbe non conservarlo.
 //
-// Perché non un blocco marcato nel testo: incollato in un altro programma sporcherebbe il testo con una riga illeggibile, e non serve finché
-// l'HTML arriva. Se la prova a mano con Win+V mostrasse che l'HTML si perde, `SCRIVI_BLOCCO_NEL_TESTO = true` lo aggiunge in una riga (la
-// lettura lo cerca già). Un testo qualsiasi che non contiene il blocco dà `null`: chi incolla lascia il comportamento del browser.
+// Il blocco sta anche in fondo al testo semplice (`SCRIVI_BLOCCO_NEL_TESTO`, acceso il 2026-10-28 su scelta dell'utente): un incolla di solo
+// testo (Notepad, chat, Win+V che ha conservato solo il testo) si riconosce lo stesso; incollato in un altro programma mostra quella riga.
+// Un testo qualsiasi che non contiene il blocco dà `null`: chi incolla lascia il comportamento del browser.
 // Funzioni pure, senza stato: la fonte dell'incolla è sempre il contenuto degli appunti, mai una copia tenuta dall'app.
 // ============================================================
 
 import { FORMATO_APPUNTI_DIARIO, type AppuntiDiario } from '../../shared/appuntiDiario';
 import { dataGiocoTesto } from './dateGioco';
 
-/** Piano B (vedi sopra): il blocco anche nel testo semplice. Spento: il testo resta pulito. */
-const SCRIVI_BLOCCO_NEL_TESTO = false;
+/** Piano B (vedi sopra): il blocco anche nel testo semplice. Acceso il 2026-10-28 (scelta dell'utente: «vai con la soluzione 1»): un testo
+ *  rimasto senza HTML (Notepad, chat, Win+V in solo testo) si incolla lo stesso; incollato altrove mostra in fondo la riga del blocco. */
+const SCRIVI_BLOCCO_NEL_TESTO = true;
 /** La marca del blocco nel commento HTML (e nel testo, col piano B). */
 const MARCA = 'P5R-DIARIO-VOCI';
 const RE_ATTRIBUTO = /data-p5r-payload="([A-Za-z0-9_-]+)"/;
