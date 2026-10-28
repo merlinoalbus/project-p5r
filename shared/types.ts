@@ -1561,7 +1561,8 @@ export interface ElenchiEffettiVoceDto {
   /** Le Persona dell'effetto «Persona registrata»: non quelle del gruppo; `rara` (Demone del Tesoro) non si aggiunge alla scorta da una voce. */
   persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number; rara?: boolean }>;
   /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
-  oggetti?: Array<{ chiave: string; nome: string; categoria: string }>;
+  /** 2026-10-28: `prestito` = un'offerta lo dà in prestito (regola «restituzione»: Biblioteca, DVD a noleggio), per l'effetto «Restituito». */
+  oggetti?: Array<{ chiave: string; nome: string; categoria: string; prestito?: true }>;
   trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
 }
 
@@ -2548,7 +2549,8 @@ export interface OggettoOttenutoDto {
 export interface OggettoConsumatoDto {
   catalogoChiave: string;
   quantita: number;
-  /** «Concimare la pianta · Con i Bionutrienti» per un turno, «Isolamento» per un incenso bruciato. */
+  /** «Concimare la pianta · Con i Bionutrienti» per un turno, «Isolamento» per un incenso bruciato; 2026-10-28: «Restituito · <voce>» o
+   *  «Venduto · <voce>» per l'uscita da una voce del Diario (si annulla togliendo la spunta). */
   origine: string;
   /** La riga del registro dei consumi; assente nelle risposte precedenti. */
   id?: number;

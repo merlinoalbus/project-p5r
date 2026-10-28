@@ -472,8 +472,9 @@ export function rimettiYenDellaVoceRipristinata(p: number, voceUid: string): voi
 /** Vero se lo stato che aveva mosso gli yen è tornato con il ripristino della voce. */
 function statoTornato(p: number, voceUid: string, r: RigaYenAutomatico): boolean {
   if (r.causa_tipo === 'voce') {
-    // l'articolo comprato: la riga dello stato della voce (il ripristino la rimette con l'acquisto); gli altri effetti passano dal raccordo
-    return !!prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND tipo = 'articolo'").get(p, voceUid, r.causa_chiave.slice(voceUid.length + 1));
+    // l'articolo comprato (e, 2026-10-28, l'oggetto venduto): la riga dello stato della voce (il ripristino la rimette con l'acquisto o
+    // l'uscita); gli altri effetti passano dal raccordo
+    return !!prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND tipo IN ('articolo', 'uscitaOggetto')").get(p, voceUid, r.causa_chiave.slice(voceUid.length + 1));
   }
   if (r.causa_tipo === 'turno') {
     const i = r.causa_chiave.lastIndexOf(':'), ordine = Number(r.causa_chiave.slice(i + 1));

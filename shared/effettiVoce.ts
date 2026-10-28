@@ -64,8 +64,34 @@ export type EffettoDiStatoVoce =
   /** L13 (decisione 1): un trofeo ottenuto (`trofeo.chiave`), con lo stesso setter della pagina dei trofei (`impostaTrofeo`). */
   | { tipo: 'trofeo'; trofeo: string }
   /** L13 (decisioni 1 e 17): lo sblocco di una Richiesta o di un'attività (`utente.sblocco_partita`): la condizione «sblocco ricevuto» lo legge. */
-  | { tipo: 'sblocco'; bersaglio: BersaglioSblocco; chiave: string };
-export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito' || e.tipo === 'oggetto' || e.tipo === 'trofeo' || e.tipo === 'sblocco';
+  | { tipo: 'sblocco'; bersaglio: BersaglioSblocco; chiave: string }
+  /** 2026-10-28 (richiesta dell'utente: «manca la rimozione di una persona dalla scorta come possibile effetto»): la Persona (`persona` = id) esce
+   *  dalla scorta della partita alla spunta, con l'esemplare ricordato com'era per rimetterlo togliendo la spunta. Se non è in scorta non c'è
+   *  niente da togliere (e la spunta lo dice); le Persone del gruppo non si scelgono. */
+  | { tipo: 'personaTolta'; persona: number }
+  /** 2026-10-28 («la gestione di aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»): `punti`
+   *  di rango al Confidente (`confidente` = chiave), nel registro cronologico dei punti (`puntiCronologici`, lo stesso delle note delle risposte):
+   *  contano solo dove il rango sale a punti, come le note; togliendo la spunta se ne vanno. Non registra un incontro: quello resta della voce. */
+  | { tipo: 'puntiConfidente'; confidente: string; punti: number }
+  /** 2026-10-28 («non c'è un vendi prodotto/restituisci prodotto per gestire vendita, restituzione»): `quantita` copie dell'oggetto del catalogo
+   *  escono dalle copie possedute (il registro unico delle uscite, `utente.consumo_oggetto_partita`), mai sotto zero. `modo` «restituito»: un
+   *  prestito (il libro della Biblioteca, il DVD a noleggio) torna, e la regola «restituzione» del rifornimento lo rende di nuovo disponibile;
+   *  «venduto»: con `prezzo` (facoltativo, il ricavo di tutte le copie) gli yen entrano da soli nel saldo (decisione 18). */
+  | { tipo: 'uscitaOggetto'; oggetto: string; quantita: number; modo: ModoUscitaOggetto; prezzo?: number };
+export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito' || e.tipo === 'oggetto' || e.tipo === 'trofeo' || e.tipo === 'sblocco'
+  || e.tipo === 'personaTolta' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto';
+/**
+ * Gli effetti di stato che non sono uno stato sì/no ma una riga che somma, della voce e dell'effetto (l'oggetto ricevuto, i punti a un Confidente,
+ * l'oggetto restituito o venduto): ogni voce spuntata porta la sua, nessuna «c'era già», e togliendo la spunta se ne va solo quella.
+ */
+export const eEffettoCheSomma = (e: { tipo: string }): boolean => e.tipo === 'oggetto' || e.tipo === 'puntiConfidente' || e.tipo === 'uscitaOggetto';
+/** Come esce un oggetto con l'effetto «uscitaOggetto»: restituito (un prestito) o venduto. */
+export type ModoUscitaOggetto = 'restituito' | 'venduto';
+export const MODI_USCITA_OGGETTO: ReadonlyArray<{ chiave: ModoUscitaOggetto; nome: string }> = [
+  { chiave: 'restituito', nome: 'Restituito' }, { chiave: 'venduto', nome: 'Venduto' },
+];
+/** I punti di rango che un effetto dà a un Confidente, al massimo (un regalo ne vale 50). */
+export const PUNTI_MASSIMI_EFFETTO = 99;
 /** La chiave con cui un effetto «sblocco» si registra e la condizione lo cerca: «richiesta:chiave», «attivita:chiave». */
 export const chiaveSblocco = (bersaglio: BersaglioSblocco, chiave: string): string => `${bersaglio}:${chiave}`;
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
@@ -136,7 +162,8 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
+    personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -170,6 +197,19 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   if (o.tipo === 'yen') return Number.isSafeInteger(o.importo) && o.importo !== 0 && Math.abs(o.importo as number) <= YEN_MASSIMI_EFFETTO ? { tipo: 'yen', importo: o.importo as number } : null;
   if (o.tipo === 'oggetto') { const q = quantita(o.quantita); return chiaveOk(o.oggetto, 199) && q ? { tipo: 'oggetto', oggetto: o.oggetto.trim(), quantita: q } : null; }
   if (o.tipo === 'trofeo') return chiaveOk(o.trofeo) ? { tipo: 'trofeo', trofeo: o.trofeo.trim() } : null;
+  if (o.tipo === 'personaTolta') return Number.isSafeInteger(o.persona) && (o.persona as number) >= 1 ? { tipo: 'personaTolta', persona: o.persona as number } : null;
+  if (o.tipo === 'puntiConfidente') {
+    const punti = Number.isSafeInteger(o.punti) && (o.punti as number) >= 1 && (o.punti as number) <= PUNTI_MASSIMI_EFFETTO ? o.punti as number : null;
+    return chiaveOk(o.confidente, 79) && punti ? { tipo: 'puntiConfidente', confidente: o.confidente.trim(), punti } : null;
+  }
+  if (o.tipo === 'uscitaOggetto') {
+    const q = quantita(o.quantita);
+    if (!chiaveOk(o.oggetto, 199) || !q || (o.modo !== 'restituito' && o.modo !== 'venduto')) return null;
+    // una sola forma canonica: il prezzo esiste solo per la vendita, e solo se c'è (assente = venduto senza ricavo indicato)
+    if (o.prezzo === undefined) return { tipo: 'uscitaOggetto', oggetto: o.oggetto.trim(), quantita: q, modo: o.modo };
+    if (o.modo !== 'venduto' || !Number.isSafeInteger(o.prezzo) || (o.prezzo as number) < 1 || (o.prezzo as number) > YEN_MASSIMI_EFFETTO) return null;
+    return { tipo: 'uscitaOggetto', oggetto: o.oggetto.trim(), quantita: q, modo: 'venduto', prezzo: o.prezzo as number };
+  }
   if (o.tipo === 'sblocco') return (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') && chiaveOk(o.chiave) ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave: o.chiave.trim() } : null;
   if (o.tipo === 'richiesta') return typeof o.richiesta === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.richiesta.trim()) ? { tipo: 'richiesta', richiesta: o.richiesta.trim() } : null;
   if (o.tipo === 'pesca') {
@@ -232,6 +272,8 @@ export interface NomiFraseEffetto {
   oggetto?: (chiave: string) => string | undefined;
   trofeo?: (chiave: string) => string | undefined;
   attivita?: (chiave: string) => string | undefined;
+  /** 2026-10-28: il nome del Confidente dell'effetto «punti a un Confidente» (facoltativo: senza, la frase resta generica). */
+  confidente?: (chiave: string) => string | undefined;
 }
 
 /** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca, Fortuna e yen. */
@@ -269,6 +311,7 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
     if (e.tipo === 'acquisto' || e.tipo === 'articolo') chi = 'l’effetto «acquisto» (il prezzo dell’articolo)';
     else if (e.tipo === 'pesca') chi = 'l’effetto «pesca» (la quota della visita)';
     else if (e.tipo === 'richiesta') chi = 'l’effetto «Richiesta completata» (la ricompensa della Richiesta)';
+    else if (e.tipo === 'uscitaOggetto' && e.prezzo) chi = 'l’effetto «Oggetto venduto» (il ricavo della vendita)';
     else if (e.tipo === 'turno' && conYen('attivita', e.attivita)) chi = `il turno: ${NOME_DATO_CON_YEN.attivita}`;
     else if (e.tipo === 'lettura' && e.categoria === 'film' && conYen('film', e.chiave)) chi = `la visione: ${NOME_DATO_CON_YEN.film}`;
     if (chi) break;
@@ -443,6 +486,14 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
       // con la scorta la frase lo dice (e il livello solo se indicato: senza, vale il livello base della Persona)
       const scorta = e.scorta ? ` e aggiunta alla scorta${e.livello ? ` al livello ${e.livello}` : ''}` : '';
       return p ? `Persona registrata nel compendio${scorta}: ${p}` : `Persona registrata nel compendio${scorta}`;
+    }
+    case 'personaTolta': { const p = n.persona(e.persona); return p ? `Persona tolta dalla scorta: ${p}` : 'Persona tolta dalla scorta'; }
+    case 'puntiConfidente': { const c = n.confidente?.(e.confidente); return `Punti di rango a ${c ?? 'un Confidente'}: +${e.punti}`; }
+    case 'uscitaOggetto': {
+      const o = n.oggetto?.(e.oggetto) ?? 'oggetto del catalogo';
+      if (e.modo === 'restituito') return `Restituito: ${o}${copie(e.quantita)}`;
+      // il ricavo nella frase solo prima della spunta: dopo, gli yen davvero entrati hanno la loro riga (il movimento) e non si ripetono
+      return `Venduto: ${o}${copie(e.quantita)}${e.prezzo && !opz.applicato ? ` · ${yen(e.prezzo)}` : ''}`;
     }
   }
 }

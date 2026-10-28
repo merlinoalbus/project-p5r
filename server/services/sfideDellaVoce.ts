@@ -103,6 +103,8 @@ export function yenPrevistiApprovando(p: number, voceUid: string, effettoUid: st
     if (statoGiaVero(p, e) || ricompensaGiaNelSaldo(p, voceUid, effettoUid, e.richiesta) || yenAutomaticoAttivo(p, causaRichiesta)) return 0;
     return yen;
   }
+  // 2026-10-28: la vendita approvata fa entrare il suo ricavo (lo stesso movimento della spunta, `motoreDiario.yenDellEffetto`)
+  if (e.tipo === 'uscitaOggetto') return e.modo === 'venduto' && e.prezzo ? e.prezzo : null;
   if (e.tipo !== 'articolo') return null;
   const causa = { tipo: 'voce' as const, chiave: `${voceUid}:${effettoUid}` };
   if (yenFuoriRegistro(p, causa) || effettiConYenGiaNelSaldo(p, voceUid, [{ uid: effettoUid, tipo: 'articolo', chiave: null }]).has(effettoUid)) return 0;

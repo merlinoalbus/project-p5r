@@ -15,7 +15,7 @@
 //   - Ondata 5 (lotto F-bis): i doni dei Confidenti che la partita ha meritato, dal rango e dal giorno (`doniConfidenti`, regola scritta dalla
 //     migrazione 295): letti dallo stato, come le Richieste, mai copiati.
 // Le copie dello stesso oggetto si sommano nei totali. Ondata 5 (lotto F-bis): accanto, le copie USATE (`consumo_oggetto_partita`, utente 054:
-// turni con un esito che consuma e incensi dell'Isolamento), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
+// turni con un esito che consuma e incensi dell'Isolamento; 2026-10-28, utente 055: copie restituite o vendute da una voce), con la loro origine, e per ogni oggetto le cifre delle copie (comprate, regalate,
 // cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
@@ -73,8 +73,15 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   }
   // Ondata 5 (lotto F-bis): le copie usate, con la loro origine; un oggetto usato che la partita non ha ricevuto (comprato: il concime, gli
   // incensi, i materiali) compare comunque nei totali. Un Isolamento si annulla da qui (l'uso di un turno si toglie togliendo il turno)
+  // 2026-10-28: le copie restituite o vendute da una voce del Diario (utente 055), con il testo della voce; si annullano togliendo la spunta
+  const voceDi = (uid: string | null): string | null => (uid ? (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').pluck().get(uid) as string | undefined) ?? null : null);
+  const origineConsumo = (c: ReturnType<typeof consumiDellaPartita>[number]): string => {
+    if (c.fonte === 'isolamento') return 'Isolamento nella Stanza di Velluto';
+    if (c.fonte === 'voce') { const v = voceDi(c.voceUid); const modo = c.modo === 'venduto' ? 'Venduto' : 'Restituito'; return v ? `${modo} · ${v.length > 80 ? `${v.slice(0, 79).trimEnd()}…` : v}` : modo; }
+    return `${nomeAttivita(c.attivita!)} · ${nomeEsito(c.attivita!, c.esito!)}`;
+  };
   const consumi: OggettoConsumatoDto[] = consumiDellaPartita(partitaId).map((c) => ({ id: c.id, catalogoChiave: c.catalogo, quantita: c.quantita, annullabile: c.fonte === 'isolamento',
-    origine: c.fonte === 'isolamento' ? 'Isolamento nella Stanza di Velluto' : `${nomeAttivita(c.attivita!)} · ${nomeEsito(c.attivita!, c.esito!)}` }));
+    origine: origineConsumo(c) }));
   for (const c of consumi) {
     const t = totali.get(c.catalogoChiave);
     if (t) t.consumate += c.quantita;

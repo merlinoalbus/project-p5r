@@ -112,6 +112,11 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   cruciverba: { titolo: 'Cruciverba' },
   inviti: { titolo: 'Inviti' },
   persone: { titolo: 'Compendio' },
+  // 2026-10-28: i tre effetti nuovi; il titolo dice già che cosa succede, la riga solo il nome (e le copie o i punti)
+  scortaTolte: { titolo: 'Tolte dalla scorta' },
+  puntiConfidenti: { titolo: 'Punti di rango' },
+  restituiti: { titolo: 'Restituiti' },
+  venduti: { titolo: 'Venduti' },
   trofei: { titolo: 'Trofei' },
   pesca: { titolo: 'Pesca' },
   fortuna: { titolo: 'Fortuna di Chihaya' },
@@ -126,6 +131,7 @@ const NOTE_YEN: Record<string, string> = {
   yen: 'Spuntando la voce entrano nel saldo o se ne scalano da soli, mai sotto zero; togliendo la spunta tornano.',
   richieste: 'La ricompensa in yen di una Richiesta entra da sola nel saldo quando la Richiesta risulta completata.',
   pesca: 'La quota di una visita nuova si scala da sola dal saldo, mai sotto zero.',
+  venduti: 'Spuntando la voce il ricavo entra da solo nel saldo; togliendo la spunta esce.',
 };
 /** Decisione 18: gli effetti del gruppo nati prima che gli yen si muovessero da soli, tutti (il loro denaro era già nel saldo). */
 const YEN_GIA_NEL_SALDO = 'I loro yen erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.';
@@ -176,6 +182,7 @@ export function nomeEffettoConYen(e: EffettoVoce, n: NomiRiepilogoEffetti): stri
     case 'yen': return `${e.importo > 0 ? 'Ricevuti' : 'Spesi'} ${yen(e.importo)}`;
     case 'richiesta': return n.frase.richiesta(e.richiesta) ?? 'Richiesta';
     case 'pesca': return 'Sessione a Ichigaya';
+    case 'uscitaOggetto': return e.prezzo ? n.frase.oggetto?.(e.oggetto) ?? 'Oggetto venduto' : '';
     default: return '';
   }
 }
@@ -334,6 +341,17 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       // il gruppo si chiama «Compendio»: la riga dice solo il nome; il dettaglio compare solo quando aggiunge qualcosa (anche nella scorta)
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', e.scorta ? `anche nella scorta${e.livello ? `, livello ${e.livello}` : ''}` : undefined); break;
       case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo'); break;
+      case 'personaTolta': riga('scortaTolte', n.frase.persona(e.persona) ?? 'Persona'); break;
+      case 'puntiConfidente': riga('puntiConfidenti', n.frase.confidente?.(e.confidente) ?? 'Confidente', `+${e.punti}`); break;
+      case 'uscitaOggetto': {
+        const nome = n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo';
+        if (e.modo === 'restituito') { riga('restituiti', nome, e.quantita > 1 ? `×${e.quantita}` : undefined); break; }
+        // il ricavo solo se indicato: «×2 · ¥1.000», «¥500», o nessun dettaglio; la nota degli yen solo per chi ha il ricavo
+        const dettaglio = [e.quantita > 1 ? `×${e.quantita}` : '', e.prezzo ? yen(e.prezzo) : ''].filter(Boolean).join(' · ');
+        riga('venduti', nome, dettaglio || undefined);
+        if (e.prezzo) conYen('venduti', i);
+        break;
+      }
       case 'pesca': riga('pesca', 'Sessione a Ichigaya', 'da osservare alla spunta'); conYen('pesca', i); break;
       case 'fortuna': riga('fortuna', nomeDote(e.dote), 'per il resto del giorno'); break;
     }

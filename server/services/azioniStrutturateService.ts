@@ -243,6 +243,7 @@ export function nomiFraseEffetto(fascia?: FasciaPrezzo | null): NomiFraseEffetto
     oggetto: (chiave) => (prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
     trofeo: (chiave) => (prepared('SELECT nome FROM trofeo WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
     attivita: (chiave) => (prepared('SELECT nome FROM attivita WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
+    confidente: (chiave) => (prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? undefined,
   };
 }
 
@@ -323,7 +324,10 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     persone: (prepared('SELECT id, nome, arcana, livello, rara FROM persona WHERE del_party = 0 ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number; rara: number }>)
       .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana), livello: p.livello, ...(p.rara === 1 ? { rara: true } : {}) })),
     // L13 (ondata 3): gli oggetti del catalogo visibili e i trofei, scelti per nome negli effetti «oggetto ricevuto» e «trofeo»
-    oggetti: prepared('SELECT chiave, nome, categoria FROM catalogo_oggetto WHERE nascosto = 0 ORDER BY nome').all() as NonNullable<ElenchiEffettiVoceDto['oggetti']>,
+    // 2026-10-28: `prestito` per gli oggetti che un'offerta dà con la regola «restituzione» (Biblioteca, DVD a noleggio): l'effetto «Restituito» li propone
+    oggetti: (prepared(`SELECT c.chiave, c.nome, c.categoria, EXISTS (SELECT 1 FROM articolo a WHERE a.catalogo_chiave = c.chiave AND json_valid(a.rifornimento_json)
+      AND json_extract(a.rifornimento_json, '$.tipo') = 'restituzione') AS prestito FROM catalogo_oggetto c WHERE c.nascosto = 0 ORDER BY c.nome`).all() as Array<{ chiave: string; nome: string; categoria: string; prestito: number }>)
+      .map((o) => ({ chiave: o.chiave, nome: o.nome, categoria: o.categoria, ...(o.prestito ? { prestito: true as const } : {}) })),
     trofei: prepared('SELECT chiave, nome, tipo FROM trofeo ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['trofei']>,
   };
 }

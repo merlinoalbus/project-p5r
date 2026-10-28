@@ -24,7 +24,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { normalizzaEffettoVoce, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
+import { normalizzaEffettoVoce, eEffettoCheSomma, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
@@ -71,7 +71,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
       JOIN main.voce_giornata v ON v.uid = s.voce_uid
       JOIN main.voce_effetto_transizione t ON t.voce_uid = s.voce_uid AND t.stato = 'convertita'
       JOIN main.voce_effetto e ON e.voce_uid = s.voce_uid
-      WHERE e.tipo IN ('storia','domanda','cruciverba','richiesta','articolo','invito','persona','oggetto','trofeo','sblocco')
+      WHERE e.tipo IN ('storia','domanda','cruciverba','richiesta','articolo','invito','persona','oggetto','trofeo','sblocco','personaTolta','puntiConfidente','uscitaOggetto')
       ORDER BY s.partita_id, v.data, s.voce_uid, e.ordine`).all() as RigaCandidato[];
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
@@ -115,8 +115,8 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           // (togliendo la spunta della voce il registro della coppia se ne va: `giornataService`, la spunta rifatta si rivaluta)
           if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
             .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.giaPresenti += 1; return; }
-          // l'oggetto ricevuto somma, non è uno stato sì/no: senza la sua riga manca sempre
-          if (e.tipo !== 'oggetto' && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
+          // l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito o venduto sommano, non sono uno stato sì/no: senza la loro riga mancano sempre
+          if (!eEffettoCheSomma(e) && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
           creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, e.tipo === 'articolo' ? nomiFraseEffetto(fasciaDellaVoce(r.voce_uid)) : nomi), motivo: motivoDelPassato(r.partita_id, e) }, senzaAvanzamento: true });
           const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
@@ -148,6 +148,9 @@ function motivoDelPassato(p: number, e: EffettoDiStatoVoce): string {
       : e.tipo === 'articolo' ? 'l’articolo non risulta comprato'
         : e.tipo === 'oggetto' ? 'l’oggetto non risulta ricevuto'
           : e.tipo === 'sblocco' ? 'lo sblocco non risulta segnato'
+            : e.tipo === 'personaTolta' ? 'la Persona risulta ancora nella scorta'
+              : e.tipo === 'puntiConfidente' ? 'i punti al Confidente non risultano aggiunti'
+                : e.tipo === 'uscitaOggetto' ? `l’oggetto non risulta ${e.modo === 'venduto' ? 'venduto' : 'restituito'}`
             : e.tipo === 'invito' ? 'l’invito non risulta avvenuto'
               : e.tipo === 'richiesta' ? 'la Richiesta non risulta completata'
                 : e.tipo === 'domanda' ? 'la domanda non risulta risposta'

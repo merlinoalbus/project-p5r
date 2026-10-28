@@ -135,11 +135,18 @@ export interface StatoScorta {
  * Le opzioni del conto: `letto` per `restituzione`; `consegnaDelNegozio` per un negozio che spedisce (Tanaka): i giorni di consegna e gli
  * acquisti degli ALTRI articoli dello stesso negozio, qualunque sia la loro regola (anche i pezzi unici si ordinano e si spediscono).
  */
-export interface OpzioniStatoScorta { letto?: boolean; consegnaDelNegozio?: { giorni: number; ordini: readonly AcquistoDelCiclo[] } }
+export interface OpzioniStatoScorta {
+  letto?: boolean;
+  consegnaDelNegozio?: { giorni: number; ordini: readonly AcquistoDelCiclo[] };
+  /** 2026-10-28 (effetto della voce «oggetto restituito»): le copie del prestito restituite fino alla data della partita; per `restituzione`
+   *  liberano altrettanti pezzi presi in prestito, dai più vecchi. */
+  restituiti?: number;
+}
 
 /**
  * Il conto della scorta: gli acquisti che cadono nel ciclo in corso (mai quelli con un giorno dopo `oggi`), i pezzi rimasti e il giorno del
- * rifornimento. `letto` vale per `restituzione`: il libro preso in prestito è stato letto, quindi restituito. Senza data della partita (`oggi`
+ * rifornimento. `letto` vale per `restituzione`: il libro preso in prestito è stato letto, quindi restituito; `restituiti` (2026-10-28) le copie
+ * restituite esplicitamente da una voce, che liberano i prestiti più vecchi. Senza data della partita (`oggi`
  * null) non c'è un ciclo: niente è esaurito (la disponibilità resta quella delle condizioni).
  *
  * Tanaka (guida italiana, Negozi speciali): «Gli oggetti ordinati richiedono però tre giorni per essere consegnati e fino all'arrivo della
@@ -156,7 +163,17 @@ export function statoScorta(regola: RegolaRifornimento, quantita: number | null,
   let nelCiclo: number[];
   let torna: number | null = null;
   if (regola.tipo === 'mai') nelCiclo = acquisti.map((_, i) => i).filter(finoAOggi);
-  else if (regola.tipo === 'restituzione') nelCiclo = opz.letto ? [] : acquisti.map((_, i) => i).filter(finoAOggi);
+  else if (regola.tipo === 'restituzione') {
+    nelCiclo = opz.letto ? [] : acquisti.map((_, i) => i).filter(finoAOggi);
+    // le copie restituite (l'effetto della voce) tornano: escono dal ciclo i prestiti più vecchi, finché le restituzioni li coprono per intero
+    let restano = Math.max(0, opz.restituiti ?? 0);
+    if (restano > 0) {
+      const ordinati = [...nelCiclo].sort((a, b) => giorni[a]! - giorni[b]! || a - b);
+      const usciti = new Set<number>();
+      for (const i of ordinati) { const q = Math.max(1, acquisti[i]!.quantita); if (q > restano) break; restano -= q; usciti.add(i); }
+      nelCiclo = nelCiclo.filter((i) => !usciti.has(i));
+    }
+  }
   else if (regola.tipo === 'consegna') {
     const durata = regola.giorni ?? 1;
     nelCiclo = acquisti.map((_, i) => i).filter((i) => finoAOggi(i) && giorni[i]! + durata > n);

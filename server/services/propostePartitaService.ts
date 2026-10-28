@@ -6,7 +6,7 @@ import { avanzaDopoChiusuraAutomatica, avanzaUnaVoltaAllaFine, prelevaAvanzament
 import { eDote, puntiDaNote, type DoteChiave } from '../../shared/doti.js';
 import { AOJIRU_NOTE, type NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
+import { eEffettoCheSomma, eEffettoDiStato, normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import { avvisoScortaPiena, motivoPersonaConScortaAdesso, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
 import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
@@ -307,7 +307,8 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
   const tipoEffetto = leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo;
   if (tipoEffetto === 'fortuna') return false;
   // gli stati: decisione 19, al salvataggio si applicano da soli (`motoreDiario.riallineaStatiDellaVoce`); diventano proposta solo per l'elenco del passato
-  const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco';
+  const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco'
+    || tipoEffetto === 'personaTolta' || tipoEffetto === 'puntiConfidente' || tipoEffetto === 'uscitaOggetto';
   if (diStato && !opz.passato) return false;
   if (!diStato && opz.passato) throw new Error('Solo un effetto di stato entra nell’elenco del passato.');
   if (diStato) return propostaPassato(partita,voce,effetto,e.dati_json,opz.passato!);
@@ -380,7 +381,7 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       catch(err){if(!(err instanceof HttpError)||err.status>=500)throw err;impedimenti.push(err.message);}
       // il motivo scritto dal censimento può non valere più (revisione R7): lo stato è stato segnato dopo, a mano o da un'altra voce
       const stato=normalizzaEffettoVoce(dati.effetto);
-      if(stato&&eEffettoDiStato(stato)&&stato.tipo!=='oggetto'&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
+      if(stato&&eEffettoDiStato(stato)&&!eEffettoCheSomma(stato)&&statoGiaVero(r.partita_id,stato))dati.oraGiaVero=true;
       // 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso (la capienza è solo informativa): l'anteprima lo dice.
       // Il motivo del censimento dice la parte che mancava quando è nata la proposta: si riscrive con quella che manca adesso (revisione della fusione)
       else if(stato?.tipo==='persona'&&stato.scorta){
