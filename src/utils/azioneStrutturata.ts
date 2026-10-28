@@ -66,6 +66,9 @@ export function effettoCompleto(e: EffettoVoce): boolean {
     case 'oggetto': return !!e.oggetto && e.quantita >= 1;
     case 'trofeo': return !!e.trofeo;
     case 'sblocco': return !!e.chiave;
+    case 'personaTolta': return e.persona >= 1;
+    case 'puntiConfidente': return !!e.confidente && e.punti >= 1;
+    case 'uscitaOggetto': return !!e.oggetto && e.quantita >= 1;
     default: return true;
   }
 }

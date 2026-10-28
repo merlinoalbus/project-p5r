@@ -180,6 +180,8 @@ export interface NomiEffetti {
   oggetti?: Map<string, string>; trofei?: Map<string, string>;
   /** 2026-10-27: gli esiti dei turni per «attività/esito»: il nome e, per gli esiti con la versione con il bonus, lo strumento («Grimaldello»). */
   esitiTurno?: Map<string, { nome: string; strumento?: string; senzaBonus?: true }>;
+  /** 2026-10-28: i Confidenti per chiave (l'effetto «punti a un Confidente»). */
+  confidenti?: Map<string, string>;
 }
 
 const mappa = <T extends { chiave: string; nome: string }>(l: T[]): Map<string, string> => new Map(l.map((x) => [x.chiave, x.nome]));
@@ -196,7 +198,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto, fas
     libri: mappa(e.libri), film: mappa(e.film), videogiochi: mappa(e.videogiochi), attivita: mappa(e.attivita), richieste: mappa(e.richieste),
     articoli: new Map(x.articoli.map((a) => [a.chiave, nellaFascia(a)])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
-    oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []),
+    oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []), confidenti: mappa(e.confidenti),
     esitiTurno: new Map(e.attivita.flatMap((a) => (a.esiti?.elenco ?? []).map((x) => [`${a.chiave}/${x.chiave}`, { nome: x.nome, ...(x.strumento ? { strumento: x.strumento } : {}), ...(x.senzaBonus ? { senzaBonus: true as const } : {}) }] as const))),
   };
 }
@@ -238,7 +240,7 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
 const nomiFrase = (n: NomiEffetti): NomiFraseEffetto => ({
   domanda: (id) => n.domande.get(id)?.testo, richiesta: (k) => n.richieste.get(k), articolo: (k) => n.articoli.get(k),
   invito: (k) => n.inviti.get(k), persona: (id) => n.persone.get(id)?.nome,
-  oggetto: (k) => n.oggetti?.get(k), trofeo: (k) => n.trofei?.get(k), attivita: (k) => n.attivita.get(k),
+  oggetto: (k) => n.oggetti?.get(k), trofeo: (k) => n.trofei?.get(k), attivita: (k) => n.attivita.get(k), confidente: (k) => n.confidenti?.get(k),
 });
 
 /** Il nome di una famiglia di effetto, per le schede dell'elenco degli effetti (e il menu «Aggiungi un effetto»). */
@@ -247,4 +249,5 @@ export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
   storia: 'Evento di storia', domanda: 'Domanda risposta', cruciverba: 'Cruciverba', richiesta: 'Richiesta completata', articolo: 'Articolo comprato',
   invito: 'Invito avvenuto', persona: 'Persona registrata',
   yen: 'Yen', oggetto: 'Oggetto ricevuto', trofeo: 'Trofeo ottenuto', sblocco: 'Sblocco',
+  personaTolta: 'Persona tolta dalla scorta', puntiConfidente: 'Punti a un Confidente', uscitaOggetto: 'Oggetto restituito o venduto',
 };

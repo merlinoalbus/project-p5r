@@ -60,7 +60,8 @@ export function SegnoDaCompletare({ n, voce, onApri }: { n: number; voce: string
 function nomeElemento(e: EffettoVoce, chiave: string, n: NomiEffetti): string {
   switch (e.tipo) {
     case 'articolo': return n.articoli.get(chiave)?.nome ?? chiave;
-    case 'oggetto': return n.oggetti?.get(chiave) ?? chiave;
+    case 'oggetto': case 'uscitaOggetto': return n.oggetti?.get(chiave) ?? chiave;
+    case 'puntiConfidente': return n.confidenti?.get(chiave) ?? chiave;
     case 'lettura': return (e.categoria === 'libro' ? n.libri : e.categoria === 'film' ? n.film : n.videogiochi).get(chiave) ?? chiave;
     case 'turno': return n.attivita.get(chiave) ?? chiave;
     case 'sblocco': return (e.bersaglio === 'richiesta' ? n.richieste : n.attivita).get(chiave) ?? chiave;

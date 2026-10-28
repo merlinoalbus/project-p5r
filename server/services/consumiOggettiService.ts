@@ -9,7 +9,10 @@
 //     (registrando il turno, dentro la sua transazione) e la toglie togliendolo: lo stesso percorso degli oggetti dati
 //     (`oggettiDegliEsitiService`) e del trofeo (`trofeiDegliEsitiService`);
 //   - un ciclo di Isolamento con un incenso del catalogo scrive una riga con l'evento dello storico; quella riga si annulla dagli «Oggetti
-//     ottenuti» (`annullaConsumoIsolamento`), perché l'Isolamento non ha un gesto che lo tolga.
+//     ottenuti» (`annullaConsumoIsolamento`), perché l'Isolamento non ha un gesto che lo tolga;
+//   - 2026-10-28 (utente 055): una voce spuntata con l'effetto «oggetto restituito o venduto» scrive una riga per effetto (`fonte` «voce», con il
+//     modo, il ricavo e il giorno della voce: `scriviUscitaDaVoce`) e la toglie togliendo la spunta. Lei sì controlla le copie (mai sotto zero:
+//     `effettiDiStatoService`), perché restituire o vendere ciò che non si possiede non ha senso.
 // Il consumo non chiede di avere le copie: chi gioca le ha prese in un modo che l'app può non conoscere (un'aggiunta a mano, una partita
 // iniziata prima del registro). Le copie rimaste si leggono in `copieOggetti` (mai sotto zero), e la scelta dell'esito le mostra.
 // Nessuno yen si muove da qui: il prezzo l'oggetto lo aveva già quando si è comprato.
@@ -65,12 +68,57 @@ export function copieConsumate(p: number, catalogo: string): number {
   return prepared(`SELECT COALESCE(SUM(quantita), 0) FROM utente.${TABELLA} WHERE partita_id = ? AND catalogo_chiave = ?`).pluck().get(p, catalogo) as number;
 }
 
-/** I consumi della partita, per la pagina degli oggetti: una riga per consumo, in ordine di registrazione. */
-export function consumiDellaPartita(p: number): Array<{ id: number; catalogo: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita: string | null; ordine: number | null; esito: string | null; creatoIl: string }> {
+/** Il registro ha le uscite dalle voci (utente 055)? Senza, l'effetto «oggetto restituito o venduto» non ha dove scrivere. */
+export const conUsciteDaVoce = (): boolean => conRegistroConsumi() && !!prepared("SELECT 1 FROM pragma_table_info('consumo_oggetto_partita', 'utente') WHERE name = 'voce_uid'").get();
+
+/** Una riga di uscita scritta da una voce (utente 055): l'oggetto restituito o venduto dall'effetto della voce. */
+export interface UscitaDaVoce { catalogo: string; quantita: number; modo: 'restituito' | 'venduto'; prezzo: number | null; giorno: string | null; creatoIl: string }
+
+/** L'uscita che l'effetto `effettoUid` della voce ha scritto nella partita, o null. Sola lettura. */
+export function uscitaDellaVoce(p: number, voceUid: string, effettoUid: string): UscitaDaVoce | null {
+  if (!conUsciteDaVoce()) return null;
+  const r = prepared(`SELECT catalogo_chiave, quantita, modo, prezzo, giorno, creato_il FROM utente.${TABELLA} WHERE partita_id = ? AND fonte = 'voce' AND voce_uid = ? AND effetto_uid = ?`)
+    .get(p, voceUid, effettoUid) as { catalogo_chiave: string; quantita: number; modo: 'restituito' | 'venduto'; prezzo: number | null; giorno: string | null; creato_il: string } | undefined;
+  return r ? { catalogo: r.catalogo_chiave, quantita: r.quantita, modo: r.modo, prezzo: r.prezzo, giorno: r.giorno, creatoIl: r.creato_il } : null;
+}
+
+/**
+ * 2026-10-28 (effetto «oggetto restituito o venduto» della voce): scrive l'uscita dell'effetto della voce, al posto di quella che aveva (una riga
+ * per effetto). Dentro la transazione di chi la chiama (la spunta, il salvataggio della guida, l'approvazione dell'elenco del passato). Le copie le
+ * controlla chi chiama: qui si scrive soltanto.
+ */
+export function scriviUscitaDaVoce(p: number, voceUid: string, effettoUid: string, u: { catalogo: string; quantita: number; modo: 'restituito' | 'venduto'; prezzo?: number; giorno: string | null }): void {
+  if (!conUsciteDaVoce()) throw httpErrors.conflict('registro-uscite-assente', 'Il file delle partite non ha ancora il registro delle uscite: riavvia l’app perché si aggiorni.');
+  togliUscitaDaVoce(p, voceUid, effettoUid);
+  prepared(`INSERT INTO utente.${TABELLA} (partita_id, catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, evento_id, creato_il, voce_uid, effetto_uid, modo, prezzo, giorno)
+    VALUES (?, ?, ?, 'voce', NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?)`).run(p, u.catalogo, u.quantita, new Date().toISOString(), voceUid, effettoUid, u.modo, u.modo === 'venduto' ? u.prezzo ?? null : null, u.giorno);
+}
+
+/** Toglie l'uscita dell'effetto della voce (la spunta tolta, l'effetto cambiato o tolto nella guida): le copie tornano. Restituisce se c'era. */
+export function togliUscitaDaVoce(p: number, voceUid: string, effettoUid: string): boolean {
+  if (!conUsciteDaVoce()) return false;
+  return prepared(`DELETE FROM utente.${TABELLA} WHERE partita_id = ? AND fonte = 'voce' AND voce_uid = ? AND effetto_uid = ?`).run(p, voceUid, effettoUid).changes > 0;
+}
+
+/**
+ * Le copie dell'oggetto del catalogo restituite dalle voci nella partita, per la regola «restituzione» del rifornimento (`scorteService`): un
+ * prestito restituito torna disponibile. `finoA` dice quali giorni contano (quelli fino alla data della partita: decide chi chiama).
+ */
+export function copieRestituite(p: number, catalogo: string, finoA: (giorno: string | null) => boolean): number {
+  if (!conUsciteDaVoce()) return 0;
+  const righe = prepared(`SELECT quantita, giorno FROM utente.${TABELLA} WHERE partita_id = ? AND fonte = 'voce' AND modo = 'restituito' AND catalogo_chiave = ?`).all(p, catalogo) as Array<{ quantita: number; giorno: string | null }>;
+  return righe.filter((r) => finoA(r.giorno)).reduce((n, r) => n + r.quantita, 0);
+}
+
+/** I consumi della partita, per la pagina degli oggetti: una riga per consumo, in ordine di registrazione. 2026-10-28: anche le uscite dalle
+ *  voci (`fonte` «voce», con il modo e la voce), che si annullano togliendo la spunta. */
+export function consumiDellaPartita(p: number): Array<{ id: number; catalogo: string; quantita: number; fonte: 'turno' | 'isolamento' | 'voce'; attivita: string | null; ordine: number | null; esito: string | null; creatoIl: string;
+  voceUid: string | null; modo: 'restituito' | 'venduto' | null }> {
   if (!conRegistroConsumi()) return [];
-  return (prepared(`SELECT id, catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, creato_il FROM utente.${TABELLA} WHERE partita_id = ? ORDER BY creato_il, id`).all(p) as
-    Array<{ id: number; catalogo_chiave: string; quantita: number; fonte: 'turno' | 'isolamento'; attivita_chiave: string | null; ordine: number | null; esito_chiave: string | null; creato_il: string }>)
-    .map((r) => ({ id: r.id, catalogo: r.catalogo_chiave, quantita: r.quantita, fonte: r.fonte, attivita: r.attivita_chiave, ordine: r.ordine, esito: r.esito_chiave, creatoIl: r.creato_il }));
+  const conVoce = conUsciteDaVoce();
+  return (prepared(`SELECT id, catalogo_chiave, quantita, fonte, attivita_chiave, ordine, esito_chiave, creato_il, ${conVoce ? 'voce_uid, modo' : 'NULL AS voce_uid, NULL AS modo'} FROM utente.${TABELLA} WHERE partita_id = ? ORDER BY creato_il, id`).all(p) as
+    Array<{ id: number; catalogo_chiave: string; quantita: number; fonte: 'turno' | 'isolamento' | 'voce'; attivita_chiave: string | null; ordine: number | null; esito_chiave: string | null; creato_il: string; voce_uid: string | null; modo: 'restituito' | 'venduto' | null }>)
+    .map((r) => ({ id: r.id, catalogo: r.catalogo_chiave, quantita: r.quantita, fonte: r.fonte, attivita: r.attivita_chiave, ordine: r.ordine, esito: r.esito_chiave, creatoIl: r.creato_il, voceUid: r.voce_uid, modo: r.modo }));
 }
 
 /**
@@ -83,6 +131,7 @@ export function annullaConsumoIsolamento(p: number, id: number): void {
   if (!conRegistroConsumi()) throw httpErrors.notFound('consumo-non-trovato', 'Nessun uso registrato da annullare.');
   const riga = prepared(`SELECT fonte FROM utente.${TABELLA} WHERE id = ? AND partita_id = ?`).get(id, p) as { fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('consumo-non-trovato', `L'uso ${id} non esiste in questa partita.`);
+  if (riga.fonte === 'voce') throw httpErrors.conflict('consumo-di-una-voce', 'Questa uscita viene da una voce del Diario: si annulla togliendo la spunta della voce.');
   if (riga.fonte !== 'isolamento') throw httpErrors.conflict('consumo-di-un-turno', 'Questo uso viene da un turno di un’attività: si annulla togliendo il turno (Partita → Progressi o il Diario).');
   getDb().transaction(() => {
     prepared(`DELETE FROM utente.${TABELLA} WHERE id = ? AND partita_id = ?`).run(id, p);

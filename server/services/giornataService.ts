@@ -146,6 +146,8 @@ function effettoConYen(e: EffettoVoce): boolean {
   if (e.tipo === 'turno') return (yenDelDato('attivita', e.attivita) ?? 0) > 0;
   if (e.tipo === 'lettura' && e.categoria === 'film') return (yenDelDato('film', e.chiave) ?? 0) > 0;
   if (e.tipo === 'richiesta') return (yenDelDato('richiesta', e.richiesta) ?? 0) > 0;
+  // 2026-10-28: l'oggetto venduto con il ricavo indicato
+  if (e.tipo === 'uscitaOggetto') return e.modo === 'venduto' && !!e.prezzo;
   return false;
 }
 /** L'effetto come lo legge la nozione degli yen già nel saldo: l'attività del turno e la Richiesta sono le cause vere dei loro yen. */

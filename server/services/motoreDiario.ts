@@ -29,6 +29,7 @@ import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
 import { esitiDellAttivita, risolviScelteSpunta, statoAlMomento, type SceltaRisolta } from './esitiAttivitaService.js';
 import { nomeOggettoCatalogo } from './oggettiDegliEsitiService.js';
+import { uscitaDellaVoce } from './consumiOggettiService.js';
 import { effettiInAlternativa, risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
 import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
 import { prodottiDelloStrumento, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
@@ -76,7 +77,8 @@ export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
   }
 }
 const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona)
-  :e.tipo==='yen'?'yen':e.tipo==='oggetto'?e.oggetto:e.tipo==='trofeo'?e.trofeo:e.tipo==='sblocco'?chiaveSblocco(e.bersaglio,e.chiave):e.attivita;
+  :e.tipo==='yen'?'yen':e.tipo==='oggetto'?e.oggetto:e.tipo==='trofeo'?e.trofeo:e.tipo==='sblocco'?chiaveSblocco(e.bersaglio,e.chiave)
+    :e.tipo==='personaTolta'?String(e.persona):e.tipo==='puntiConfidente'?e.confidente:e.tipo==='uscitaOggetto'?e.oggetto:e.attivita;
 /**
  * L13: il beneficio in yen di un effetto «yen» nel vecchio registro delle proposte (la ricevuta lo dichiara, la proposta «Applica» lo porta nel
  * saldo). Dalla decisione 18 si usa SOLO per una causa che ha ancora yen proposti in sospeso (`yenPropostiInSospeso`): così la proposta applicata
@@ -137,6 +139,14 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const l=porzione?.letture?.find((v)=>v.categoria==='film'&&v.chiave===x.chiave);
     const f=prepared('SELECT nome,prezzo FROM main.film WHERE chiave=?').get(x.chiave) as {nome:string;prezzo:number|null}|undefined;
     return l&&(l.visione===true||l.dopo>l.prima)&&f?.prezzo!=null&&f.prezzo>0?spesa(f.prezzo,`Biglietto del cinema: ${f.nome}`):null;
+  }
+  // 2026-10-28 («vendi prodotto»): il ricavo di una vendita entra da solo nel saldo, solo se le copie sono davvero uscite (la riga dell'uscita
+  // della voce: senza copie abbastanza non esce niente, e niente entra)
+  if(x.tipo==='uscitaOggetto'&&x.modo==='venduto'&&x.prezzo){
+    const u=uscitaDellaVoce(p,uid,e.uid);
+    if(!u||u.modo!=='venduto'||!u.prezzo)return null;
+    const nome=nomeOggettoCatalogo(u.catalogo);
+    return {effettoUid:e.uid,importo:u.prezzo,motivo:`Vendita: ${nome}${u.quantita>1?` ×${u.quantita}`:''}`};
   }
   return null;
 }
@@ -368,6 +378,8 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       const r=getDb().transaction(()=>conCodaRipristinabile(()=>conVoceDellaSpunta(uid,()=>{
         const fatto=applicaUnEffettoDiStato(p,uid,c.effettoUid,e,{senzaDisponibilita:true});
         if(e.tipo==='articolo')yenDellArticoloSuVoceSpuntata(p,uid,nuovo,giaNelSaldo);
+        // 2026-10-28: il ricavo della vendita della versione nuova (quello della versione di prima è già tornato qui sopra)
+        if(e.tipo==='uscitaOggetto')muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,nuovo)]);
         // un'eventuale proposta di raccordo aperta della versione di prima non è più dovuta: lo stato è segnato adesso
         if(prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,causa.chiave).changes>0)chiusa(decisa);
         return fatto;
@@ -678,6 +690,8 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   // gli articoli comprati: il loro prezzo, solo se l'acquisto è stato davvero segnato (un articolo non ancora disponibile resta da segnare dal negozio).
   // Decisione 4 con la 18: un set non scelto non si paga (escluso qui oltre che dalla mancanza della riga di stato, che `yenDellEffetto` richiede)
   for(const e of stato.effetti)if(e.effetto.tipo==='articolo'&&!alternative.esclusi.has(e.uid))yenDaMuovere.push(yenDellEffetto(p,uid,e));
+  // 2026-10-28: il ricavo degli oggetti venduti, solo per le copie davvero uscite (`yenDellEffetto` guarda la riga dell'uscita)
+  for(const e of stato.effetti)if(e.effetto.tipo==='uscitaOggetto')yenDaMuovere.push(yenDellEffetto(p,uid,e));
   // i turni registrati qui che non devono muovere yen (`scartaYenDeiTurni`): quelli degli effetti di una voce di prima rispuntata, e la sfida
   // che un articolo della stessa voce paga già (lo stesso acquisto si paga una volta, dall'articolo)
   const articoliPagati=new Set(stato.effetti.flatMap((e)=>e.effetto.tipo==='articolo'&&yenDaMuovere.some((m)=>m?.effettoUid===e.uid)?[e.effetto.articolo]:[]));
@@ -799,6 +813,8 @@ function applicaStatoDelPassato(p:number,uid:string,e:EffettoVoceDto&{effetto:Ef
     // gli yen con le regole della spunta anche se l'articolo risultava già comprato (`yenDellArticoloSuVoceSpuntata`; l'anteprima, con le stesse
     // regole, è `sfideDellaVoce.yenPrevistiApprovando`)
     if(e.effetto.tipo==='articolo')yenDellArticoloSuVoceSpuntata(p,uid,e,giaNelSaldo);
+    // 2026-10-28: il ricavo della vendita approvata, come alla spunta
+    if(e.effetto.tipo==='uscitaOggetto')muoviYenDellaVoce(p,uid,[yenDellEffetto(p,uid,e)]);
   });
 }
 /**

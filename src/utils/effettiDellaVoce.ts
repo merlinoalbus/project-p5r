@@ -33,6 +33,9 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
     case 'oggetto': return { tipo: 'oggetto', oggetto: '', quantita: 1 };
     case 'trofeo': return { tipo: 'trofeo', trofeo: '' };
     case 'sblocco': return { tipo: 'sblocco', bersaglio: 'richiesta', chiave: '' };
+    case 'personaTolta': return { tipo: 'personaTolta', persona: 0 };
+    case 'puntiConfidente': return { tipo: 'puntiConfidente', confidente: '', punti: 1 };
+    case 'uscitaOggetto': return { tipo: 'uscitaOggetto', oggetto: '', quantita: 1, modo: 'restituito' };
   }
 }
 
@@ -40,9 +43,11 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
 export const MENU_EFFETTI: ReadonlyArray<{ tipo: Tipo; categoria: string }> = [
   { tipo: 'dote', categoria: 'dote' }, { tipo: 'lettura', categoria: 'libro' }, { tipo: 'turno', categoria: 'lavoro' },
   { tipo: 'articolo', categoria: 'acquisto' }, { tipo: 'yen', categoria: 'acquisto' }, { tipo: 'oggetto', categoria: 'acquisto' },
+  { tipo: 'uscitaOggetto', categoria: 'acquisto' },
   { tipo: 'sblocco', categoria: 'richiesta' }, { tipo: 'richiesta', categoria: 'richiesta' }, { tipo: 'trofeo', categoria: 'trama' },
   { tipo: 'storia', categoria: 'trama' }, { tipo: 'domanda', categoria: 'esame' }, { tipo: 'cruciverba', categoria: 'esame' },
-  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'persona', categoria: 'velluto' }, { tipo: 'fortuna', categoria: 'dote' },
+  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'confidente' },
+  { tipo: 'persona', categoria: 'velluto' }, { tipo: 'personaTolta', categoria: 'velluto' }, { tipo: 'fortuna', categoria: 'dote' },
   { tipo: 'acquisto', categoria: 'acquisto' }, { tipo: 'pesca', categoria: 'attivita' },
 ];
 /** La categoria (l'icona) di ogni tipo di effetto. */

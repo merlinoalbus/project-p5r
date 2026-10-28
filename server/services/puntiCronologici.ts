@@ -22,10 +22,20 @@ import { aggiornaConfidente, confidente as leggiConfidente, sogliaAPunti } from 
 import { registraEvento } from './storicoService.js';
 
 export interface ParametriPunti { noteRisposta: 1 | 2 | 3; bonusArcano: boolean; invito: boolean; piazzamento: PiazzamentoEsame | null }
+/**
+ * 2026-10-28 (richiesta dell'utente: «la gestione di aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri
+ * effetti»): i punti dell'effetto «puntiConfidente» di una voce, `fissi` così come scritti (nessun moltiplicatore: li ha già decisi chi li scrive),
+ * con l'effetto che li porta (`effetto`, il suo uid), perché si tolgano da soli anche quando cambia o si toglie solo quell'effetto. Contano dove
+ * contano le note: un rango da 1 a 9 che sale a punti. La riga del registro è di tipo «punti», nello stesso ordine delle note della voce.
+ */
+export interface ParametriPuntiFissi { fissi: number; effetto: string }
+const sonoFissi = (p: ParametriPunti | ParametriPuntiFissi): p is ParametriPuntiFissi => typeof (p as ParametriPuntiFissi).fissi === 'number';
+/** I parametri di una riga del registro sono i punti di un effetto? (Una riga illeggibile no: la legge come sempre chi la ricalcola.) */
+const rigaDiPuntiFissi = (json: string): boolean => { try { return sonoFissi(JSON.parse(json) as ParametriPunti | ParametriPuntiFissi); } catch { return false; } };
 interface PosizioneNelDiario { voceUid: string; data: string; fascia: string; ordineVoce: number }
-/** Un evento del Diario per un Confidente: le note di una risposta o il passaggio a un rango più alto. */
+/** Un evento del Diario per un Confidente: le note di una risposta (o i punti di un effetto) o il passaggio a un rango più alto. */
 export type EventoDiario =
-  | (PosizioneNelDiario & { tipo: 'punti'; parametri: ParametriPunti })
+  | (PosizioneNelDiario & { tipo: 'punti'; parametri: ParametriPunti | ParametriPuntiFissi })
   | (PosizioneNelDiario & { tipo: 'passaggio'; verso: number });
 
 interface Stato { sbloccato: number; rango: number; punti: number }
@@ -86,9 +96,44 @@ export function applicaEventoDiario(partitaId: number, chiave: string, e: Evento
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run(partitaId, chiave, e.voceUid, generazione, e.tipo, d, f, v, s, JSON.stringify(e.tipo === 'punti' ? e.parametri : { verso: e.verso }), nowIso());
   if (successivi > 0) return ricalcola(partitaId, chiave);
-  return e.tipo === 'passaggio'
-    ? aggiornaConfidente(partitaId, chiave, { rango: e.verso, forza: true }, { origine: 'diario', voce: e.voceUid })
-    : aggiornaConfidente(partitaId, chiave, { noteRisposta: e.parametri.noteRisposta, bonusArcano: e.parametri.bonusArcano, ...(e.parametri.invito ? { invito: true } : {}) });
+  if (e.tipo === 'passaggio') return aggiornaConfidente(partitaId, chiave, { rango: e.verso, forza: true }, { origine: 'diario', voce: e.voceUid });
+  if (sonoFissi(e.parametri)) {
+    // la stessa regola del ricalcolo: i punti contano solo dove il rango sale a punti (rango 1–9 con una soglia), altrimenti niente cambia
+    const s = statoDi(partitaId, chiave);
+    return s.rango > 0 && s.rango < 10 && sogliaAPunti(chiave, s.rango) > 0
+      ? aggiornaConfidente(partitaId, chiave, { deltaPunti: e.parametri.fissi })
+      : leggiConfidente(partitaId, chiave);
+  }
+  return aggiornaConfidente(partitaId, chiave, { noteRisposta: e.parametri.noteRisposta, bonusArcano: e.parametri.bonusArcano, ...(e.parametri.invito ? { invito: true } : {}) });
+}
+
+/**
+ * 2026-10-28: toglie dal registro i punti dell'effetto `effettoUid` della voce (l'effetto cambiato o tolto nella guida, o la spunta tolta) e, se
+ * erano della generazione corrente, rifà il calcolo del Confidente: i punti tornano com'erano. Quelli di una generazione precedente (una correzione
+ * a mano dalla pagina Confidenti è venuta dopo, ed è prioritaria) si cancellano senza ricalcolo. Restituisce se il calcolo è stato rifatto.
+ * Va chiamata nella transazione di chi la usa.
+ */
+export function togliPuntiDellEffetto(partitaId: number, voceUid: string, effettoUid: string): boolean {
+  const righe = prepared(`SELECT id, confidente_chiave, generazione FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ? AND tipo = 'punti'
+    AND json_valid(parametri_json) AND json_extract(parametri_json, '$.effetto') = ?`).all(partitaId, voceUid, effettoUid) as Array<{ id: number; confidente_chiave: string; generazione: number }>;
+  if (!righe.length) return false;
+  const correnti = new Set<string>();
+  for (const r of righe) {
+    const g = prepared('SELECT generazione FROM utente.punti_confidente_generazione WHERE partita_id = ? AND confidente_chiave = ?').pluck().get(partitaId, r.confidente_chiave) as number | undefined;
+    if (g === r.generazione) correnti.add(r.confidente_chiave);
+    prepared('DELETE FROM utente.punti_confidente_voce WHERE id = ?').run(r.id);
+  }
+  for (const chiave of correnti) ricalcola(partitaId, chiave);
+  return correnti.size > 0;
+}
+
+/** 2026-10-28: i punti dell'effetto `effettoUid` della voce che il registro tiene nella generazione corrente (togliendo la spunta se ne vanno), o null. Sola lettura. */
+export function puntiDellEffettoInVigore(partitaId: number, voceUid: string, effettoUid: string): { confidente: string; punti: number } | null {
+  const r = prepared(`SELECT v.confidente_chiave AS confidente, json_extract(v.parametri_json, '$.fissi') AS punti FROM utente.punti_confidente_voce v
+    JOIN utente.punti_confidente_generazione g ON g.partita_id = v.partita_id AND g.confidente_chiave = v.confidente_chiave AND g.generazione = v.generazione
+    WHERE v.partita_id = ? AND v.voce_uid = ? AND v.tipo = 'punti' AND json_valid(v.parametri_json) AND json_extract(v.parametri_json, '$.effetto') = ? LIMIT 1`)
+    .get(partitaId, voceUid, effettoUid) as { confidente: string; punti: number | null } | undefined;
+  return r && typeof r.punti === 'number' ? { confidente: r.confidente, punti: r.punti } : null;
 }
 
 /** Rifà il calcolo del Confidente dalla base della generazione corrente, rigiocando gli eventi in ordine cronologico, e scrive il risultato. */
@@ -110,8 +155,10 @@ export function ricalcola(partitaId: number, chiave: string): ConfidentePartitaD
       for (let k = rango; k < verso && riporto > 0; k++) { const soglia = sogliaAPunti(chiave, k); riporto = soglia > 0 ? Math.max(0, riporto - soglia) : 0; }
       punti = round2(riporto); rango = verso;
     } else if (rango > 0 && rango < 10 && sogliaAPunti(chiave, rango) > 0) {
-      const par = JSON.parse(r.parametri_json) as ParametriPunti;
-      punti = round2(Math.max(0, punti + puntiDelModulo({ confidente: chiave, noteRisposta: par.noteRisposta, bonusArcano: par.bonusArcano, invito: par.invito, piazzamento: par.piazzamento })));
+      const par = JSON.parse(r.parametri_json) as ParametriPunti | ParametriPuntiFissi;
+      // i punti di un effetto valgono così come scritti; le note passano dal calcolo del modulo, come sempre
+      const delta = sonoFissi(par) ? par.fissi : puntiDelModulo({ confidente: chiave, noteRisposta: par.noteRisposta, bonusArcano: par.bonusArcano, invito: par.invito, piazzamento: par.piazzamento });
+      punti = round2(Math.max(0, punti + delta));
     }
   }
   const prima = statoDi(partitaId, chiave);
@@ -140,20 +187,25 @@ export type EventiTolti = Map<string, { punti: boolean; passaggio: boolean }>;
  * quello vecchio, dalla ricevuta. Va chiamata nella transazione della spunta.
  */
 export function togliEventiDellaVoce(partitaId: number, voceUid: string): EventiTolti {
-  const righe = prepared('SELECT confidente_chiave, generazione, tipo FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?')
-    .all(partitaId, voceUid) as Array<{ confidente_chiave: string; generazione: number; tipo: 'punti' | 'passaggio' }>;
+  const righe = prepared('SELECT confidente_chiave, generazione, tipo, parametri_json FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?')
+    .all(partitaId, voceUid) as Array<{ confidente_chiave: string; generazione: number; tipo: 'punti' | 'passaggio'; parametri_json: string }>;
   if (righe.length === 0) return new Map();
   const correnti = new Map((prepared('SELECT confidente_chiave, generazione FROM utente.punti_confidente_generazione WHERE partita_id = ?').all(partitaId) as Array<{ confidente_chiave: string; generazione: number }>)
     .map((r) => [r.confidente_chiave, r.generazione]));
   const tolti: EventiTolti = new Map();
+  // 2026-10-28: i Confidenti da ricalcolare comprendono quelli dei punti di un effetto, che però non dicono niente della ricevuta della spunta
+  // (`senzaEventiGestiti` guarda le note e il passaggio della ricevuta): non si segnano in `tolti`
+  const daRicalcolare = new Set<string>();
   for (const r of righe) {
     if (correnti.get(r.confidente_chiave) !== r.generazione) continue;
+    daRicalcolare.add(r.confidente_chiave);
+    if (r.tipo === 'punti' && rigaDiPuntiFissi(r.parametri_json)) continue;
     const voce = tolti.get(r.confidente_chiave) ?? { punti: false, passaggio: false };
     if (r.tipo === 'punti') voce.punti = true; else voce.passaggio = true;
     tolti.set(r.confidente_chiave, voce);
   }
   prepared('DELETE FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').run(partitaId, voceUid);
-  for (const chiave of tolti.keys()) ricalcola(partitaId, chiave);
+  for (const chiave of daRicalcolare) ricalcola(partitaId, chiave);
   return tolti;
 }
 

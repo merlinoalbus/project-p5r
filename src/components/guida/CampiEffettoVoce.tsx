@@ -18,7 +18,7 @@ import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoc
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
 import { noteAParole, simboliNote } from '../../../shared/note';
-import { BERSAGLI_SBLOCCO, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { BERSAGLI_SBLOCCO, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, MODI_USCITA_OGGETTO, PUNTI_MASSIMI_EFFETTO, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type ModoUscitaOggetto, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { elencoNomi } from '../../../shared/riepilogoEffetti';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
@@ -153,6 +153,45 @@ export function CampiScortaPersona({ effetto: e, persona, onCambia }: { effetto:
           <p className="m-0 testo-12 text-text-secondary text-pretty">Se è già nella scorta della partita resta com’è{persona ? ', anche cambiando qui il livello' : ''}. Togliendo la spunta esce dalla scorta solo se non l’hai modificata.</p>
         </>
       )}
+    </div>
+  );
+}
+
+type Uscita = Extract<EffettoVoce, { tipo: 'uscitaOggetto' }>;
+
+/**
+ * 2026-10-28 (richiesta dell'utente: «non c'è un vendi prodotto/restituisci prodotto per gestire vendita, restituzione»): come esce l'oggetto, quale,
+ * quante copie e, per la vendita, il ricavo facoltativo. «Restituito» propone i prestiti (Biblioteca, DVD a noleggio); «Venduto» tutto il catalogo.
+ * Le note compaiono solo quando dicono qualcosa che i campi non dicono (il prestito che torna in negozio, il ricavo che entra nel saldo).
+ */
+export function CampiUscitaOggetto({ effetto: e, oggetti, onCambia }: { effetto: Uscita; oggetti: NonNullable<ElenchiVoce['effetti']['oggetti']>; onCambia: (e: Uscita) => void }) {
+  const restituito = e.modo === 'restituito';
+  const elenco = restituito ? oggetti.filter((o) => o.prestito) : oggetti;
+  const senza = (x: Uscita): Uscita => ({ tipo: 'uscitaOggetto', oggetto: x.oggetto, quantita: x.quantita, modo: x.modo });
+  return (
+    <div className="flex flex-col gap-2">
+      <FilaScelta etichetta="Come esce" valore={e.modo} opzioni={MODI_USCITA_OGGETTO.map((m) => ({ chiave: m.chiave, nome: m.nome }))}
+        onCambia={(v) => {
+          if (v === e.modo) return;
+          const modo = v as ModoUscitaOggetto;
+          // tornando a «Restituito» il ricavo non ha più senso, e un oggetto che non si presta va scelto di nuovo
+          const resta = modo === 'venduto' || oggetti.some((o) => o.chiave === e.oggetto && o.prestito);
+          onCambia({ tipo: 'uscitaOggetto', oggetto: resta ? e.oggetto : '', quantita: e.quantita, modo });
+        }} />
+      <div className="flex flex-wrap items-end gap-2">
+        <Selettore className="min-w-[12rem] flex-1" etichetta={restituito ? 'Prestito restituito' : 'Oggetto venduto'} valore={e.oggetto}
+          opzioni={conCorrente(elenco.map((o) => ({ chiave: o.chiave, nome: o.nome, gruppo: o.categoria })), e.oggetto, 'Oggetto non più nel catalogo')}
+          onCambia={(v) => onCambia({ ...e, oggetto: v })} />
+        <CampoQuantita valore={e.quantita} onCambia={(quantita) => onCambia({ ...e, quantita })} />
+        {!restituito && (
+          <label className="flex flex-col gap-1 testo-13">Ricavo in yen (facoltativo)
+            <input className="form-input min-h-11 w-32 tabular-nums" type="number" inputMode="numeric" min={1} max={YEN_MASSIMI_EFFETTO} step={1} value={e.prezzo ?? ''}
+              onChange={(ev) => { const n = Math.min(YEN_MASSIMI_EFFETTO, Math.max(0, Math.trunc(Number(ev.target.value) || 0))); onCambia(n >= 1 ? { ...senza(e), prezzo: n } : senza(e)); }} />
+          </label>
+        )}
+      </div>
+      {restituito && <p className="m-0 testo-12 text-text-secondary text-pretty">Dal giorno della voce il prestito torna disponibile in negozio.</p>}
+      {!restituito && !!e.prezzo && <p className="m-0 testo-12 text-text-secondary text-pretty">Spuntando la voce il ricavo entra da solo nel saldo; togliendo la spunta esce.</p>}
     </div>
   );
 }
@@ -300,5 +339,37 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
         </div>
       );
     }
+    // 2026-10-28 («manca la rimozione di una persona dalla scorta come possibile effetto»): le Persone fuori dal gruppo, come «Persona registrata»
+    case 'personaTolta': {
+      const p = effetti.persone.find((x) => x.id === e.persona);
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-end gap-2">
+            {p && <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} />}
+            <Selettore className="min-w-[12rem] flex-1" etichetta="Persona da togliere dalla scorta" valore={e.persona >= 1 ? String(e.persona) : ''}
+              opzioni={conCorrente(effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: x.arcana })), e.persona >= 1 ? String(e.persona) : '', 'Persona non più nell’elenco')}
+              onCambia={(v) => onCambia({ tipo: 'personaTolta', persona: Number(v) })} />
+          </div>
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Togliendo la spunta torna com’era, se nel frattempo non l’hai rimessa nella scorta.</p>
+        </div>
+      );
+    }
+    // 2026-10-28 («aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»)
+    case 'puntiConfidente':
+      return (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-end gap-2">
+            <Selettore className="min-w-[12rem] flex-1" etichetta="Confidente" valore={e.confidente} opzioni={conCorrente(azione.confidenti, e.confidente, 'Confidente non più nell’elenco')}
+              onCambia={(v) => onCambia({ ...e, confidente: v })} />
+            <label className="flex flex-col gap-1 testo-13">Punti di rango
+              <input className="form-input min-h-11 w-24 tabular-nums" type="number" inputMode="numeric" min={1} max={PUNTI_MASSIMI_EFFETTO} step={1} value={e.punti}
+                onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia({ ...e, punti: Number.isFinite(n) ? Math.min(PUNTI_MASSIMI_EFFETTO, Math.max(1, n)) : 1 }); }} />
+            </label>
+          </div>
+          <p className="m-0 testo-12 text-text-secondary text-pretty">Contano dove il rango sale a punti, come le note delle risposte; l’incontro resta quello della voce.</p>
+        </div>
+      );
+    case 'uscitaOggetto':
+      return <CampiUscitaOggetto effetto={e} oggetti={effetti.oggetti ?? []} onCambia={onCambia} />;
   }
 }

@@ -19,6 +19,7 @@ import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { descriviRifornimento, descriviStatoScorta, normalizzaRifornimento, numeroGiorno, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
 import type { ScortaArticoloDto } from '../../shared/types.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
+import { copieRestituite } from './consumiOggettiService.js';
 
 /** Una riga del registro degli acquisti. `sede_chiave`: il luogo in cui si è comprato; null = la sede principale del negozio della chiave. */
 export interface RigaRegistro { id: number; partita_id: number; articolo_chiave: string; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voce_uid: string | null; effetto_uid: string | null; ottenuto_qui: number; creato_il: string; sede_chiave?: string | null }
@@ -118,10 +119,14 @@ export function scortaDellArticolo(a: ArticoloConRegola, st: StatoDisponibilita 
   // il prestito torna quando il libro è letto o (Ondata 5, lotto F-bis: il noleggio dei DVD di Scarlet) il DVD è visto per intero
   const letto = regola.tipo === 'restituzione' && !!a.oggetto_chiave
     && ((a.oggetto_fonte === 'libri' && st.letture.has(`libro/${a.oggetto_chiave}`)) || (a.oggetto_fonte === 'film' && st.letture.has(`film/${a.oggetto_chiave}`)));
-  const spedisce = consegnaDelNegozio(st.partitaId, gruppo);
-  const s = statoScorta(regola, a.quantita, qui, st.dataGioco, { letto, ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
-  const nelCiclo = new Set(s.nelCiclo.map((i) => qui[i]!.id));
+  // 2026-10-28 (effetto della voce «oggetto restituito»): le copie del prestito restituite da una voce fino alla data della partita liberano i
+  // prestiti più vecchi, anche senza aver letto o visto il titolo per intero
   const oggi = numeroGiorno(st.dataGioco);
+  const catalogo = regola.tipo === 'restituzione' ? prepared('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck().get(a.chiave) as string | null | undefined : null;
+  const restituiti = catalogo ? copieRestituite(st.partitaId, catalogo, (g) => { const n = numeroGiorno(g); return oggi === null || n === null || n <= oggi; }) : 0;
+  const spedisce = consegnaDelNegozio(st.partitaId, gruppo);
+  const s = statoScorta(regola, a.quantita, qui, st.dataGioco, { letto, ...(restituiti > 0 ? { restituiti } : {}), ...(spedisce ? { consegnaDelNegozio: spedisce } : {}) });
+  const nelCiclo = new Set(s.nelCiclo.map((i) => qui[i]!.id));
   const nomeLuogo = prepared('SELECT nome FROM main.luogo WHERE chiave = ?').pluck();
   const nomeNegozio = prepared('SELECT n.nome FROM main.articolo a JOIN main.negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').pluck();
   return {
