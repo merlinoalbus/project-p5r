@@ -50,7 +50,10 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('sblocco'),bersaglio:z.enum(['richiesta','attivita']),chiave}).strict(),
   // 2026-10-28: Persona tolta dalla scorta, punti a un Confidente, oggetto restituito o venduto (il prezzo solo per la vendita: lo verifica `normalizzaEffettoVoce`)
   z.object({tipo:z.literal('personaTolta'),persona:z.number().int().positive()}).strict(),
-  z.object({tipo:z.literal('puntiConfidente'),confidente:chiave,punti:z.number().int().min(1).max(99)}).strict(),
+  // 2026-10-28 («i punti rango andavano gestiti come note»): le note (1–3); i punti fissi solo per rimandare com'è un effetto scritto prima
+  // della correzione. Una forma sola per effetto (note oppure punti, mai insieme), come `normalizzaEffettoVoce`
+  z.object({tipo:z.literal('puntiConfidente'),confidente:chiave,note:z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(),punti:z.number().int().min(1).max(99).optional()}).strict()
+    .refine((v)=>(v.note===undefined)!==(v.punti===undefined),'Le note di rango oppure i punti fissi, non insieme.'),
   z.object({tipo:z.literal('uscitaOggetto'),oggetto:z.string().min(1).max(200),quantita:z.number().int().min(1).max(999),modo:z.enum(['restituito','venduto']),prezzo:z.number().int().min(1).max(9_999_999).optional()}).strict(),
   z.object({tipo:z.literal('acquisto'),articolo:chiave,variante:dote.nullable(),fortuna:z.boolean().nullable().optional(),sostituisceDoti:z.array(uid).max(20).refine((x)=>new Set(x).size===x.length,'Gli effetti sostituiti devono essere distinti.')}).strict(),
   z.object({tipo:z.literal('pesca'),regola:z.literal(REGOLA_PESCA),attivita:z.literal(ATTIVITA_PESCA),sostituisceTurni:z.array(uid).max(20),sostituisceDoti:z.array(uid).max(20)}).strict(),

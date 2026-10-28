@@ -21,17 +21,23 @@ import type { ConfidentePartitaDto, EffettiAzioneDto } from '../../shared/types.
 import { aggiornaConfidente, confidente as leggiConfidente, sogliaAPunti } from './partiteService.js';
 import { registraEvento } from './storicoService.js';
 
-export interface ParametriPunti { noteRisposta: 1 | 2 | 3; bonusArcano: boolean; invito: boolean; piazzamento: PiazzamentoEsame | null }
 /**
- * 2026-10-28 (richiesta dell'utente: «la gestione di aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri
- * effetti»): i punti dell'effetto «puntiConfidente» di una voce, `fissi` così come scritti (nessun moltiplicatore: li ha già decisi chi li scrive),
- * con l'effetto che li porta (`effetto`, il suo uid), perché si tolgano da soli anche quando cambia o si toglie solo quell'effetto. Contano dove
- * contano le note: un rango da 1 a 9 che sale a punti. La riga del registro è di tipo «punti», nello stesso ordine delle note della voce.
+ * Le note di una riga «punti» e gli ingressi del calcolo, ricordati alla spunta. 2026-10-28 (richiesta dell'utente: «i punti rango andavano gestiti
+ * come note non come punti specifici»): le note di rango dell'effetto «puntiConfidente» di una voce sono righe come quelle della risposta, con gli
+ * stessi ingressi (Persona dello stesso arcano, invito della voce, piazzamento all'esame) e in più `effetto`, l'uid dell'effetto che le porta,
+ * perché si tolgano da sole anche quando cambia o si toglie solo quell'effetto.
+ */
+export interface ParametriPunti { noteRisposta: 1 | 2 | 3; bonusArcano: boolean; invito: boolean; piazzamento: PiazzamentoEsame | null; effetto?: string }
+/**
+ * 2026-10-28, la forma di prima della correzione: i punti dell'effetto «puntiConfidente» `fissi` così come scritti (nessun moltiplicatore), con
+ * l'effetto che li porta. Restano per le spunte già date con quella forma e per gli effetti che la migrazione di gioco 301 non ha potuto portare
+ * in note (punti diversi da 5, 10 o 15). Contano dove contano le note: un rango da 1 a 9 che sale a punti.
  */
 export interface ParametriPuntiFissi { fissi: number; effetto: string }
 const sonoFissi = (p: ParametriPunti | ParametriPuntiFissi): p is ParametriPuntiFissi => typeof (p as ParametriPuntiFissi).fissi === 'number';
-/** I parametri di una riga del registro sono i punti di un effetto? (Una riga illeggibile no: la legge come sempre chi la ricalcola.) */
-const rigaDiPuntiFissi = (json: string): boolean => { try { return sonoFissi(JSON.parse(json) as ParametriPunti | ParametriPuntiFissi); } catch { return false; } };
+/** I parametri di una riga del registro sono quelli di un effetto della voce (note di rango o punti fissi), non della risposta dell'incontro?
+ *  (Una riga illeggibile no: la legge come sempre chi la ricalcola.) */
+const rigaDiUnEffetto = (json: string): boolean => { try { return typeof (JSON.parse(json) as { effetto?: unknown }).effetto === 'string'; } catch { return false; } };
 interface PosizioneNelDiario { voceUid: string; data: string; fascia: string; ordineVoce: number }
 /** Un evento del Diario per un Confidente: le note di una risposta (o i punti di un effetto) o il passaggio a un rango più alto. */
 export type EventoDiario =
@@ -127,13 +133,21 @@ export function togliPuntiDellEffetto(partitaId: number, voceUid: string, effett
   return correnti.size > 0;
 }
 
-/** 2026-10-28: i punti dell'effetto `effettoUid` della voce che il registro tiene nella generazione corrente (togliendo la spunta se ne vanno), o null. Sola lettura. */
-export function puntiDellEffettoInVigore(partitaId: number, voceUid: string, effettoUid: string): { confidente: string; punti: number } | null {
-  const r = prepared(`SELECT v.confidente_chiave AS confidente, json_extract(v.parametri_json, '$.fissi') AS punti FROM utente.punti_confidente_voce v
+/**
+ * 2026-10-28: i punti dell'effetto `effettoUid` della voce che il registro tiene nella generazione corrente (togliendo la spunta se ne vanno), o
+ * null. Per le note di rango anche `note`, e i punti sono quelli del calcolo del modulo con gli ingressi ricordati alla spunta (la stessa funzione
+ * del ricalcolo); per la forma di prima i punti fissi. Sola lettura.
+ */
+export function puntiDellEffettoInVigore(partitaId: number, voceUid: string, effettoUid: string): { confidente: string; punti: number; note?: 1 | 2 | 3 } | null {
+  const r = prepared(`SELECT v.confidente_chiave AS confidente, v.parametri_json AS parametri FROM utente.punti_confidente_voce v
     JOIN utente.punti_confidente_generazione g ON g.partita_id = v.partita_id AND g.confidente_chiave = v.confidente_chiave AND g.generazione = v.generazione
     WHERE v.partita_id = ? AND v.voce_uid = ? AND v.tipo = 'punti' AND json_valid(v.parametri_json) AND json_extract(v.parametri_json, '$.effetto') = ? LIMIT 1`)
-    .get(partitaId, voceUid, effettoUid) as { confidente: string; punti: number | null } | undefined;
-  return r && typeof r.punti === 'number' ? { confidente: r.confidente, punti: r.punti } : null;
+    .get(partitaId, voceUid, effettoUid) as { confidente: string; parametri: string } | undefined;
+  if (!r) return null;
+  const par = JSON.parse(r.parametri) as ParametriPunti | ParametriPuntiFissi;
+  if (sonoFissi(par)) return { confidente: r.confidente, punti: par.fissi };
+  if (par.noteRisposta !== 1 && par.noteRisposta !== 2 && par.noteRisposta !== 3) return null;
+  return { confidente: r.confidente, note: par.noteRisposta, punti: puntiDelModulo({ confidente: r.confidente, noteRisposta: par.noteRisposta, bonusArcano: par.bonusArcano, invito: par.invito, piazzamento: par.piazzamento }) };
 }
 
 /** Rifà il calcolo del Confidente dalla base della generazione corrente, rigiocando gli eventi in ordine cronologico, e scrive il risultato. */
@@ -199,7 +213,7 @@ export function togliEventiDellaVoce(partitaId: number, voceUid: string): Eventi
   for (const r of righe) {
     if (correnti.get(r.confidente_chiave) !== r.generazione) continue;
     daRicalcolare.add(r.confidente_chiave);
-    if (r.tipo === 'punti' && rigaDiPuntiFissi(r.parametri_json)) continue;
+    if (r.tipo === 'punti' && rigaDiUnEffetto(r.parametri_json)) continue;
     const voce = tolti.get(r.confidente_chiave) ?? { punti: false, passaggio: false };
     if (r.tipo === 'punti') voce.punti = true; else voce.passaggio = true;
     tolti.set(r.confidente_chiave, voce);

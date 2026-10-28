@@ -2,6 +2,8 @@ import { eDote, nomeDote, type DoteChiave } from './doti.js';
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
 import { fasceConPrezzoDiverso, type PrezzoPerFascia } from './catalogo.js';
+import { simboliNote, testoPunti } from './note.js';
+import { puntiBase } from './puntiConfidenti.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
 export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -69,10 +71,14 @@ export type EffettoDiStatoVoce =
    *  dalla scorta della partita alla spunta, con l'esemplare ricordato com'era per rimetterlo togliendo la spunta. Se non è in scorta non c'è
    *  niente da togliere (e la spunta lo dice); le Persone del gruppo non si scelgono. */
   | { tipo: 'personaTolta'; persona: number }
-  /** 2026-10-28 («la gestione di aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»): `punti`
-   *  di rango al Confidente (`confidente` = chiave), nel registro cronologico dei punti (`puntiCronologici`, lo stesso delle note delle risposte):
-   *  contano solo dove il rango sale a punti, come le note; togliendo la spunta se ne vanno. Non registra un incontro: quello resta della voce. */
-  | { tipo: 'puntiConfidente'; confidente: string; punti: number }
+  /** 2026-10-28 («la gestione di aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»; corretta
+   *  lo stesso giorno: «i punti rango andavano gestiti come note non come punti specifici»): le `note` (♪, ♪♪, ♪♪♪, come le risposte nei dialoghi)
+   *  date al Confidente (`confidente` = chiave). I punti si calcolano alla spunta con la regola unica delle risposte (`shared/puntiConfidenti.ts`:
+   *  5 per nota, bonus arcano, esame per i sette, invito della voce) e vanno nel registro cronologico dei punti (`puntiCronologici`, lo stesso
+   *  delle note delle risposte): contano solo dove il rango sale a punti; togliendo la spunta se ne vanno. Non registra un incontro: quello resta
+   *  della voce. La forma con `punti` fissi (`EffettoPuntiFissiConfidente`) è quella scritta prima della correzione: si legge e si mostra. */
+  | EffettoNotePuntiConfidente
+  | EffettoPuntiFissiConfidente
   /** 2026-10-28 («non c'è un vendi prodotto/restituisci prodotto per gestire vendita, restituzione»): `quantita` copie dell'oggetto del catalogo
    *  escono dalle copie possedute (il registro unico delle uscite, `utente.consumo_oggetto_partita`), mai sotto zero. `modo` «restituito»: un
    *  prestito (il libro della Biblioteca, il DVD a noleggio) torna, e la regola «restituzione» del rifornimento lo rende di nuovo disponibile;
@@ -90,8 +96,24 @@ export type ModoUscitaOggetto = 'restituito' | 'venduto';
 export const MODI_USCITA_OGGETTO: ReadonlyArray<{ chiave: ModoUscitaOggetto; nome: string }> = [
   { chiave: 'restituito', nome: 'Restituito' }, { chiave: 'venduto', nome: 'Venduto' },
 ];
-/** I punti di rango che un effetto dà a un Confidente, al massimo (un regalo ne vale 50). */
+/** Le note di rango (♪, ♪♪, ♪♪♪) che l'effetto «puntiConfidente» dà a un Confidente, come una risposta nei dialoghi. */
+export type NotePuntiConfidente = 1 | 2 | 3;
+/** L'effetto «punti a un Confidente» in note (la forma di oggi: la sola che l'editor scrive). */
+export interface EffettoNotePuntiConfidente { tipo: 'puntiConfidente'; confidente: string; note: NotePuntiConfidente }
+/**
+ * La forma scritta prima della correzione del 2026-10-28 («i punti rango andavano gestiti come note non come punti specifici»): `punti` fissi.
+ * Non si cambia in silenzio: la migrazione di gioco 301 la porta in note solo se i punti sono esattamente 5, 10 o 15 (♪, ♪♪, ♪♪♪); le altre
+ * restano così, leggibili, e alla spunta danno i loro punti come scritti (nessun moltiplicatore), finché chi corregge la voce non sceglie le note.
+ */
+export interface EffettoPuntiFissiConfidente { tipo: 'puntiConfidente'; confidente: string; punti: number }
+/** L'effetto «punti a un Confidente» è in note (non nella forma con i punti fissi)? */
+export const eInNote = (e: EffettoNotePuntiConfidente | EffettoPuntiFissiConfidente): e is EffettoNotePuntiConfidente => 'note' in e;
+/** I punti fissi della forma di prima, al massimo (un regalo ne vale 50): solo per leggerla. */
 export const PUNTI_MASSIMI_EFFETTO = 99;
+/** I punti base delle note di rango: quelli di una risposta con le stesse note (`puntiBase` della regola unica, 5 per nota). */
+export const puntiBaseNote = (note: NotePuntiConfidente): number => puntiBase({ noteRisposta: note });
+/** «♪♪ · 10 punti»: le note di rango e i punti (`punti` quelli davvero dati alla spunta; senza, quelli base). L'unica scrittura di questo testo. */
+export const testoNotePuntiConfidente = (note: NotePuntiConfidente, punti?: number): string => `${simboliNote(note)} · ${testoPunti(punti ?? puntiBaseNote(note))}`;
 /** La chiave con cui un effetto «sblocco» si registra e la condizione lo cerca: «richiesta:chiave», «attivita:chiave». */
 export const chiaveSblocco = (bersaglio: BersaglioSblocco, chiave: string): string => `${bersaglio}:${chiave}`;
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
@@ -163,7 +185,7 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
   const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
-    personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
+    personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','note','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
@@ -199,8 +221,11 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   if (o.tipo === 'trofeo') return chiaveOk(o.trofeo) ? { tipo: 'trofeo', trofeo: o.trofeo.trim() } : null;
   if (o.tipo === 'personaTolta') return Number.isSafeInteger(o.persona) && (o.persona as number) >= 1 ? { tipo: 'personaTolta', persona: o.persona as number } : null;
   if (o.tipo === 'puntiConfidente') {
+    if (!chiaveOk(o.confidente, 79)) return null;
+    // una forma sola per effetto: le note (di oggi) o i punti fissi (scritti prima della correzione del 2026-10-28, solo da leggere), mai insieme
+    if (o.note !== undefined) return o.punti === undefined && nota(o.note) ? { tipo: 'puntiConfidente', confidente: o.confidente.trim(), note: o.note } : null;
     const punti = Number.isSafeInteger(o.punti) && (o.punti as number) >= 1 && (o.punti as number) <= PUNTI_MASSIMI_EFFETTO ? o.punti as number : null;
-    return chiaveOk(o.confidente, 79) && punti ? { tipo: 'puntiConfidente', confidente: o.confidente.trim(), punti } : null;
+    return punti ? { tipo: 'puntiConfidente', confidente: o.confidente.trim(), punti } : null;
   }
   if (o.tipo === 'uscitaOggetto') {
     const q = quantita(o.quantita);
@@ -456,8 +481,9 @@ const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEn
  * (il «Il gioco dà» del Diario) e la pagina (editor della voce), ognuno con i propri nomi.
  * `applicato`: la frase al passato, per ciò che la spunta ha già fatto (la finestra «Applicato dalla spunta», `applicatoDallaSpunta.ts`);
  * solo lo sblocco ha una forma diversa («Sblocca la Richiesta «X»» → «Richiesta «X» sbloccata»), le altre sono già al passato.
+ * `punti`: per le note di rango a un Confidente, i punti che la spunta ha davvero dato (con i moltiplicatori della partita); senza, i punti base.
  */
-export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, opz: { applicato?: boolean } = {}): string {
+export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, opz: { applicato?: boolean; punti?: number } = {}): string {
   switch (e.tipo) {
     case 'pesca': return 'Sessione di pesca a Ichigaya osservata';
     case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
@@ -488,7 +514,11 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
       return p ? `Persona registrata nel compendio${scorta}: ${p}` : `Persona registrata nel compendio${scorta}`;
     }
     case 'personaTolta': { const p = n.persona(e.persona); return p ? `Persona tolta dalla scorta: ${p}` : 'Persona tolta dalla scorta'; }
-    case 'puntiConfidente': { const c = n.confidente?.(e.confidente); return `Punti di rango a ${c ?? 'un Confidente'}: +${e.punti}`; }
+    case 'puntiConfidente': {
+      const c = n.confidente?.(e.confidente) ?? 'un Confidente';
+      // le note come le risposte nei dialoghi, con i punti («♪♪ · 10 punti»); la forma di prima con i suoi punti fissi
+      return eInNote(e) ? `Note di rango a ${c}: ${testoNotePuntiConfidente(e.note, opz.punti)}` : `Punti di rango a ${c}: ${testoPunti(e.punti, { segno: true })}`;
+    }
     case 'uscitaOggetto': {
       const o = n.oggetto?.(e.oggetto) ?? 'oggetto del catalogo';
       if (e.modo === 'restituito') return `Restituito: ${o}${copie(e.quantita)}`;

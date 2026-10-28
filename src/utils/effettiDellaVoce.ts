@@ -34,7 +34,8 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
     case 'trofeo': return { tipo: 'trofeo', trofeo: '' };
     case 'sblocco': return { tipo: 'sblocco', bersaglio: 'richiesta', chiave: '' };
     case 'personaTolta': return { tipo: 'personaTolta', persona: 0 };
-    case 'puntiConfidente': return { tipo: 'puntiConfidente', confidente: '', punti: 1 };
+    // 2026-10-28 («i punti rango andavano gestiti come note»): un effetto nuovo dà note, come una risposta nei dialoghi
+    case 'puntiConfidente': return { tipo: 'puntiConfidente', confidente: '', note: 1 };
     case 'uscitaOggetto': return { tipo: 'uscitaOggetto', oggetto: '', quantita: 1, modo: 'restituito' };
   }
 }

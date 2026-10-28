@@ -22,6 +22,7 @@ import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturat
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
+import { voceConInvitoDi } from './inviti.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto } from '../../shared/types.js';
@@ -357,7 +358,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
 /** R10-11k: la voce ha l'effetto «invito avvenuto» del Confidente a cui è collegata (la chiave dell'invito comincia con «confidente/»): ×1,2 ai punti. */
 function haInvitoDelConfidente(voceUid: string, riferimento: RiferimentoAzioneDto | null): boolean {
   if (riferimento?.tipo !== 'confidente') return false;
-  return !!prepared("SELECT 1 FROM voce_effetto WHERE voce_uid = ? AND tipo = 'invito' AND chiave LIKE ?").get(voceUid, `${riferimento.chiave}/%`);
+  return voceConInvitoDi(voceUid, riferimento.chiave);
 }
 
 /**

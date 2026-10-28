@@ -319,6 +319,8 @@ import { migration298 } from './298_risposte_di_domande_e_cruciverba_nelle_voci.
 import { migration299 } from './299_bonus_si_no_della_fabbricazione.js';
 // 2026-10-27 (revisione di «bonus sì/no»): le ricette delle bombe, la fabbricazione di Kawakami, le voci con lo strumento
 import { migration300 } from './300_bombe_e_fabbricazione_di_kawakami.js';
+// 2026-10-28 («i punti rango andavano gestiti come note»): l'effetto «punti a un Confidente» in note, solo dove i punti sono 5, 10 o 15
+import { migration301 } from './301_note_di_rango_degli_effetti.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -341,5 +343,5 @@ export const migrations: Migration[] = [
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
-  migration300,
+  migration300, migration301,
 ];

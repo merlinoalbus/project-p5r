@@ -32,7 +32,9 @@
 //   - `personaTolta`: uno stato sì/no («la Persona non è nella scorta»). La spunta toglie l'esemplare ricordandolo per intero nel «prima»
 //     (la riga e le skill); togliendo la spunta torna com'era, solo se nel frattempo la Persona non è rientrata nella scorta (allora resta quella);
 //   - `puntiConfidente`: una riga che somma, nel registro cronologico dei punti (`puntiCronologici`, lo stesso delle note delle risposte, con
-//     l'effetto che la porta): contano dove il rango sale a punti; togliendo la spunta, o l'effetto, se ne vanno e il Confidente si ricalcola;
+//     l'effetto che la porta): contano dove il rango sale a punti; togliendo la spunta, o l'effetto, se ne vanno e il Confidente si ricalcola.
+//     Corretto lo stesso giorno («i punti rango andavano gestiti come note non come punti specifici»): l'effetto dà note (♪–♪♪♪) e i punti
+//     li calcola la regola delle risposte con gli ingressi dell'incontro (`applicaPunti`);
 //   - `uscitaOggetto`: una riga che somma, nel registro unico delle uscite (`consumo_oggetto_partita`, utente 055), mai oltre le copie possedute;
 //     gli yen di una vendita li muove `motoreDiario.yenDellEffetto` (decisione 18), solo se l'uscita è stata scritta.
 // ============================================================
@@ -40,7 +42,8 @@
 import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
-import { chiaveSblocco, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, eInNote, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
+import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { dettaglioCopie } from './copieOggetti.js';
 import { scriviUscitaDaVoce, togliUscitaDaVoce, uscitaDellaVoce } from './consumiOggettiService.js';
 import { applicaEventoDiario, puntiDellEffettoInVigore, togliPuntiDellEffetto } from './puntiCronologici.js';
@@ -53,7 +56,7 @@ import { impostaCruciverba } from './cruciverbaService.js';
 import { impostaStatoRichiesta } from './richiesteService.js';
 import { impostaAcquisto, registraCopiaDaVoce, togliCopiaDaVoce } from './negoziService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
-import { annullaInvito, registraInvito } from './inviti.js';
+import { annullaInvito, registraInvito, voceConInvitoDi } from './inviti.js';
 import { aggiungiPosseduta, registraPersona } from './partiteService.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { capienzaScorta } from './capienzaScortaService.js';
@@ -310,15 +313,21 @@ function momentoDellaVoce(voceUid: string): { data: string; fascia: string; ordi
 }
 
 /**
- * I punti a un Confidente: la versione di prima dello stesso effetto esce dal registro (decisione 19: cambiati i punti nella guida), poi i punti
- * entrano nel registro cronologico nel momento della voce, con la stessa aritmetica delle note (contano solo dove il rango sale a punti). Nessun
- * incontro si registra da qui: l'incontro, se c'è, è quello della voce. L'avviso dice quando adesso non contano.
+ * Le note di rango a un Confidente: la versione di prima dello stesso effetto esce dal registro (decisione 19: cambiate le note nella guida), poi
+ * le note entrano nel registro cronologico nel momento della voce come quelle di una risposta (2026-10-28, «i punti rango andavano gestiti come
+ * note»): gli stessi ingressi dell'incontro (`effettiAzioneService`: la Persona dello stesso arcano nella partita, l'invito di quel Confidente
+ * nella voce, il piazzamento all'esame) e lo stesso calcolo (`shared/puntiConfidenti.ts`); contano solo dove il rango sale a punti. La forma di
+ * prima con i punti fissi (non portata in note dalla migrazione 301) dà i suoi punti come scritti. Nessun incontro si registra da qui:
+ * l'incontro, se c'è, è quello della voce. L'avviso dice quando adesso non contano.
  */
 function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiConfidente): EsitoStato {
   togliPuntiDellEffetto(p, voceUid, uid);
   const v = momentoDellaVoce(voceUid);
   const c = confidenteDellaPartita(p, e.confidente);
-  applicaEventoDiario(p, e.confidente, { tipo: 'punti', voceUid, data: v.data, fascia: v.fascia, ordineVoce: v.ordine, parametri: { fissi: e.punti, effetto: uid } });
+  const parametri = eInNote(e)
+    ? { noteRisposta: e.note, bonusArcano: c.personaArcanoInScorta, invito: voceConInvitoDi(voceUid, e.confidente), piazzamento: piazzamentoCorrente(p), effetto: uid }
+    : { fissi: e.punti, effetto: uid };
+  applicaEventoDiario(p, e.confidente, { tipo: 'punti', voceUid, data: v.data, fascia: v.fascia, ordineVoce: v.ordine, parametri });
   const aPunti = c.rango > 0 && c.rango < 10 && sogliaAPunti(e.confidente, c.rango) > 0;
   return { esito: 'segnato', avvisi: aPunti ? [] : [`${c.nome}: ${c.rango === 0 ? 'non ancora incontrato' : c.rango === 10 ? 'al rango massimo' : `il rango ${c.rango} non sale a punti`}, i punti dell’effetto adesso non contano.`] };
 }
@@ -457,7 +466,7 @@ function effettoDaRiga(tipo: string, chiave: string): EffettoDiStatoVoce {
         : tipo === 'trofeo' ? { tipo: 'trofeo', trofeo: chiave } : tipo === 'oggetto' ? { tipo: 'oggetto', oggetto: chiave, quantita: 1 }
           : tipo === 'sblocco' ? { tipo: 'sblocco', bersaglio: chiave.startsWith('richiesta:') ? 'richiesta' : 'attivita', chiave: chiave.slice(chiave.indexOf(':') + 1) }
             // 2026-10-28: i punti e l'uscita si dicono dalla loro riga del registro (qui solo per il tipo e la chiave)
-            : tipo === 'personaTolta' ? { tipo: 'personaTolta', persona: Number(chiave) } : tipo === 'puntiConfidente' ? { tipo: 'puntiConfidente', confidente: chiave, punti: 1 }
+            : tipo === 'personaTolta' ? { tipo: 'personaTolta', persona: Number(chiave) } : tipo === 'puntiConfidente' ? { tipo: 'puntiConfidente', confidente: chiave, note: 1 }
               : tipo === 'uscitaOggetto' ? { tipo: 'uscitaOggetto', oggetto: chiave, quantita: 1, modo: 'restituito' }
                 : { tipo: 'richiesta', richiesta: chiave };
 }
@@ -490,9 +499,10 @@ function esemplareDellaSpunta(p: number, personaId: number, prima: PrimaScorta):
  * sempre, con la quantità della sua riga (è della voce e dell'effetto). `quantita` dell'articolo dalla lista attuale della voce
  * (`quantitaArticolo`): la riga ricorda solo l'articolo. La Persona «anche nella scorta» (la regola di `decidiAnnullo`): l'esemplare solo se è
  * ancora com'era (togliendo la spunta esce), e allora una voce sola con le due parti; un esemplare modificato dopo resta, e con lui il
- * compendio: nessuna delle due si dice. `parte: 'scorta'`: della Persona la voce ha aggiunto solo l'esemplare (il compendio c'era già). Sola lettura.
+ * compendio: nessuna delle due si dice. `parte: 'scorta'`: della Persona la voce ha aggiunto solo l'esemplare (il compendio c'era già).
+ * `punti`: per le note di rango a un Confidente, i punti che la spunta ha dato (il calcolo del registro, con i moltiplicatori). Sola lettura.
  */
-export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArticolo: (effettoUid: string) => number | undefined): Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string; parte?: 'scorta' }> {
+export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArticolo: (effettoUid: string) => number | undefined): Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string; parte?: 'scorta'; punti?: number }> {
   const righe = prepared('SELECT effetto_uid, tipo, chiave, prima_json, applicato_il FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? ORDER BY applicato_il, rowid').all(p, voceUid) as Array<RigaStato & { applicato_il: string }>;
   const altraVoce = (r: RigaStato): boolean => !!prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = ? AND chiave = ? AND voce_uid <> ? LIMIT 1').get(p, r.tipo, r.chiave, voceUid);
   // l'esemplare della scorta di ogni effetto: che cosa ne fa togliere la spunta (`intatta`: esce; altrimenti resta, e il compendio con lui)
@@ -504,7 +514,7 @@ export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArti
     const x = esemplareDellaSpunta(p, Number(r.chiave), prima);
     if (x) scorte.set(r.effetto_uid.slice(0, -':scorta'.length), { intatta: x.intatta, ...(prima.livello !== undefined ? { livello: prima.livello } : {}) });
   }
-  const out: Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string; parte?: 'scorta' }> = [];
+  const out: Array<{ effettoUid: string; effetto: EffettoDiStatoVoce; applicatoIl: string; parte?: 'scorta'; punti?: number }> = [];
   const compendioDetto = new Set<string>();
   for (const r of righe) {
     if (r.tipo === TIPO_SCORTA) continue;
@@ -517,7 +527,10 @@ export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArti
     // Confidenti, prioritaria, togliendo la spunta non si ricalcolano: restano), l'uscita dell'oggetto dalla sua riga
     if (r.tipo === 'puntiConfidente') {
       const x = puntiDellEffettoInVigore(p, voceUid, r.effetto_uid);
-      if (x) out.push({ effettoUid: r.effetto_uid, effetto: { tipo: 'puntiConfidente', confidente: x.confidente, punti: x.punti }, applicatoIl: r.applicato_il });
+      // le note di rango con i punti davvero dati («♪♪ · 15 punti»); la forma di prima con i suoi punti fissi
+      if (x) out.push(x.note !== undefined
+        ? { effettoUid: r.effetto_uid, effetto: { tipo: 'puntiConfidente', confidente: x.confidente, note: x.note }, applicatoIl: r.applicato_il, punti: x.punti }
+        : { effettoUid: r.effetto_uid, effetto: { tipo: 'puntiConfidente', confidente: x.confidente, punti: x.punti }, applicatoIl: r.applicato_il });
       continue;
     }
     if (r.tipo === 'uscitaOggetto') {

@@ -18,7 +18,8 @@
 import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
-import { contoArticoli, formatoYen, gruppiAlternativi, REGOLA_ALTERNATIVE, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
+import { contoArticoli, eInNote, formatoYen, gruppiAlternativi, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
+import { testoPunti } from './note.js';
 
 /** Una risposta giusta di una domanda del gioco: il testo e, se la riga ne raccoglie più d'una (gli esami), il quesito a cui risponde. */
 export interface RispostaRiepilogoEffettiDto { testo: string; domanda?: string }
@@ -342,7 +343,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', e.scorta ? `anche nella scorta${e.livello ? `, livello ${e.livello}` : ''}` : undefined); break;
       case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo'); break;
       case 'personaTolta': riga('scortaTolte', n.frase.persona(e.persona) ?? 'Persona'); break;
-      case 'puntiConfidente': riga('puntiConfidenti', n.frase.confidente?.(e.confidente) ?? 'Confidente', `+${e.punti}`); break;
+      // 2026-10-28 («i punti rango andavano gestiti come note»): le note con i punti base («♪♪ · 10 punti»); la forma di prima con i suoi punti
+      case 'puntiConfidente': riga('puntiConfidenti', n.frase.confidente?.(e.confidente) ?? 'Confidente', eInNote(e) ? testoNotePuntiConfidente(e.note) : testoPunti(e.punti, { segno: true })); break;
       case 'uscitaOggetto': {
         const nome = n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo';
         if (e.modo === 'restituito') { riga('restituiti', nome, e.quantita > 1 ? `×${e.quantita}` : undefined); break; }

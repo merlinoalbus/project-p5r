@@ -17,8 +17,9 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
-import { noteAParole, simboliNote } from '../../../shared/note';
-import { BERSAGLI_SBLOCCO, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, MODI_USCITA_OGGETTO, PUNTI_MASSIMI_EFFETTO, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type ModoUscitaOggetto, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { noteAParole, SCELTE_NOTE, simboliNote, testoPunti } from '../../../shared/note';
+import { BERSAGLI_SBLOCCO, eInNote, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, MODI_USCITA_OGGETTO, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type ModoUscitaOggetto, type NotePuntiConfidente, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { Segmenti } from '../shared/Segmenti';
 import { elencoNomi } from '../../../shared/riepilogoEffetti';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
@@ -26,6 +27,9 @@ import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, typ
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
 
 export type { ElenchiVoce };
+
+/** Le note di rango a un Confidente (♪ ♪♪ ♪♪♪), con i punti base di una risposta con le stesse note: «♪♪ · 10 punti». */
+const NOTE_DI_RANGO = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: testoNotePuntiConfidente(Number(s.chiave) as NotePuntiConfidente) }));
 
 const FIN_DOVE = [{ chiave: '', nome: 'Completato' }, ...Array.from({ length: 9 }, (_, i) => ({ chiave: String(i + 1), nome: String(i + 1) }))];
 
@@ -354,21 +358,27 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
         </div>
       );
     }
-    // 2026-10-28 («aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»)
-    case 'puntiConfidente':
+    // 2026-10-28 («aggiunta punti rango del confidente (sempre come effetto) così da poterlo combinare ad altri effetti»; corretto lo stesso
+    // giorno: «i punti rango andavano gestiti come note non come punti specifici»): le note come le risposte nei dialoghi, con i punti base
+    case 'puntiConfidente': {
+      const inNote = eInNote(e);
       return (
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-end gap-2">
             <Selettore className="min-w-[12rem] flex-1" etichetta="Confidente" valore={e.confidente} opzioni={conCorrente(azione.confidenti, e.confidente, 'Confidente non più nell’elenco')}
               onCambia={(v) => onCambia({ ...e, confidente: v })} />
-            <label className="flex flex-col gap-1 testo-13">Punti di rango
-              <input className="form-input min-h-11 w-24 tabular-nums" type="number" inputMode="numeric" min={1} max={PUNTI_MASSIMI_EFFETTO} step={1} value={e.punti}
-                onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia({ ...e, punti: Number.isFinite(n) ? Math.min(PUNTI_MASSIMI_EFFETTO, Math.max(1, n)) : 1 }); }} />
-            </label>
+            <div className="flex flex-col gap-1 testo-13">
+              <span aria-hidden="true">Note di rango</span>
+              {/* un effetto scritto prima della correzione (punti fissi) non ha note scelte: si sceglie qui, e solo allora diventa in note */}
+              <Segmenti etichetta="Note di rango" valore={inNote ? String(e.note) as '1' | '2' | '3' : ''} opzioni={NOTE_DI_RANGO}
+                onCambia={(v) => onCambia({ tipo: 'puntiConfidente', confidente: e.confidente, note: Number(v) as NotePuntiConfidente })} />
+            </div>
           </div>
-          <p className="m-0 testo-12 text-text-secondary text-pretty">Contano dove il rango sale a punti, come le note delle risposte; l’incontro resta quello della voce.</p>
+          {!inNote && <p className="m-0 testo-12 text-pretty">Scritto prima come {testoPunti(e.punti)} fissi: scegli le note per usare il calcolo delle risposte.</p>}
+          <p className="m-0 testo-12 text-text-secondary text-pretty">I punti si calcolano alla spunta come per le risposte nei dialoghi (Persona dello stesso arcano, esame, invito della voce) e contano dove il rango sale a punti; l’incontro resta quello della voce.</p>
         </div>
       );
+    }
     case 'uscitaOggetto':
       return <CampiUscitaOggetto effetto={e} oggetti={effetti.oggetti ?? []} onCambia={onCambia} />;
   }

@@ -5,7 +5,7 @@
 import type { EffettoAzione, TipoAzione, TipoRiferimentoAzione } from '../../shared/effettiAzione';
 import type { AzionePercorsoDto } from '../types';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
-import { normalizzaEffettoVoce } from '../../shared/effettiVoce';
+import { eInNote, normalizzaEffettoVoce } from '../../shared/effettiVoce';
 import { eAttivitaPesca } from '../../shared/pesca';
 import type { PropostaConversioneDto } from '../../shared/proposteConversione';
 
@@ -67,7 +67,8 @@ export function effettoCompleto(e: EffettoVoce): boolean {
     case 'trofeo': return !!e.trofeo;
     case 'sblocco': return !!e.chiave;
     case 'personaTolta': return e.persona >= 1;
-    case 'puntiConfidente': return !!e.confidente && e.punti >= 1;
+    // le note (1–3), o i punti fissi di un effetto scritto prima della correzione del 2026-10-28
+    case 'puntiConfidente': return !!e.confidente && (eInNote(e) ? e.note >= 1 && e.note <= 3 : e.punti >= 1);
     case 'uscitaOggetto': return !!e.oggetto && e.quantita >= 1;
     default: return true;
   }

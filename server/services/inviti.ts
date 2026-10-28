@@ -20,6 +20,15 @@ import { casaDelLuogo } from './luoghiService.js';
 import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import type { InvitoDto, PostoApertoDto } from '../../shared/types.js';
 
+/**
+ * La voce del Diario ha l'effetto «invito» di quel Confidente (la chiave dell'invito comincia con la sua)? Allora i punti delle sue note valgono
+ * ×1,2: la regola unica per le note della risposta dell'incontro (`giornataService`) e per le note di rango dell'effetto «puntiConfidente»
+ * (2026-10-28, `effettiDiStatoService`). Sola lettura.
+ */
+export function voceConInvitoDi(voceUid: string, confidente: string): boolean {
+  return !!prepared("SELECT 1 FROM voce_effetto WHERE voce_uid = ? AND tipo = 'invito' AND chiave LIKE ?").get(voceUid, `${confidente}/%`);
+}
+
 /** Il posto che un invito apre, con il nome e la pagina. */
 function postoAperto(r: RigaInvito): PostoApertoDto {
   if (r.apre_tipo === 'luogo') {

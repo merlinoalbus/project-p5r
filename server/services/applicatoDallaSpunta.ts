@@ -185,7 +185,8 @@ export function applicatoDallaSpunta(p: number, voceUid: string, fonte: StatoEff
   for (const s of stati) {
     const testo = s.parte === 'scorta' && s.effetto.tipo === 'persona'
       ? `Aggiunta alla scorta${s.effetto.livello ? ` al livello ${s.effetto.livello}` : ''}: ${nomi.persona(s.effetto.persona) ?? 'la Persona'}`
-      : fraseEffettoConNomi(s.effetto, nomiSenzaPrezzo, { applicato: true });
+      // 2026-10-28: le note di rango a un Confidente con i punti davvero dati dalla spunta («♪♪ · 15 punti»)
+      : fraseEffettoConNomi(s.effetto, nomiSenzaPrezzo, { applicato: true, ...(s.punti !== undefined ? { punti: s.punti } : {}) });
     out.push({ id: `stato:${s.effettoUid}${s.parte === 'scorta' ? ':scorta' : ''}`, testo, applicatoIl: s.applicatoIl });
   }
   const fortuna = fortunaAccesaDallaVoce(p, voceUid);

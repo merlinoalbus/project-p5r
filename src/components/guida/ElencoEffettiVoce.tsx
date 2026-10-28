@@ -57,7 +57,7 @@ const prodottiDiStrumento = (el: ElenchiVoce, attivita: string, esito: string): 
  * devono essere visibili solo se hanno senso»): la nota nomina solo i tipi che la voce ha, nell'ordine di questi elenchi.
  */
 const SUBITO: ReadonlyArray<[Tipo, string]> = [['articolo', 'articoli'], ['oggetto', 'oggetti'], ['uscitaOggetto', 'oggetti restituiti o venduti'], ['storia', 'eventi di storia'], ['domanda', 'domande'], ['cruciverba', 'cruciverba'],
-  ['richiesta', 'Richieste'], ['invito', 'inviti'], ['puntiConfidente', 'punti ai Confidenti'], ['persona', 'Persona'], ['personaTolta', 'Persone tolte dalla scorta'], ['trofeo', 'trofei'], ['sblocco', 'sblocchi']];
+  ['richiesta', 'Richieste'], ['invito', 'inviti'], ['puntiConfidente', 'note di rango ai Confidenti'], ['persona', 'Persona'], ['personaTolta', 'Persone tolte dalla scorta'], ['trofeo', 'trofei'], ['sblocco', 'sblocchi']];
 const CON_APPLICA: ReadonlyArray<[Tipo, string]> = [['dote', 'Doti'], ['lettura', 'letture'], ['turno', 'turni'], ['acquisto', 'Aojiru'], ['pesca', 'pesca'], ['yen', 'yen']];
 /** «a, b e c»: i nomi dei tipi presenti fra quelli dell'elenco, o null se nessuno. */
 const tipiPresenti = (elenco: ReadonlyArray<[Tipo, string]>, presenti: ReadonlySet<Tipo>): string | null => {

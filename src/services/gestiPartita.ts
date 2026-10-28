@@ -52,7 +52,9 @@ const effetto = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('trofeo'), trofeo: chiave }).strict(),
   z.object({ tipo: z.literal('sblocco'), bersaglio: z.enum(['richiesta','attivita']), chiave }).strict(),
   z.object({ tipo: z.literal('personaTolta'), persona: z.number().int().positive() }).strict(),
-  z.object({ tipo: z.literal('puntiConfidente'), confidente: chiave, punti: z.number().int().min(1).max(99) }).strict(),
+  // 2026-10-28: le note (1–3), o i punti fissi di un effetto scritto prima della correzione; una forma sola, mai le due insieme
+  z.object({ tipo: z.literal('puntiConfidente'), confidente: chiave, note: z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(), punti: z.number().int().min(1).max(99).optional() }).strict()
+    .refine(v => (v.note === undefined) !== (v.punti === undefined)),
   z.object({ tipo: z.literal('uscitaOggetto'), oggetto: chiave, quantita: z.number().int().min(1).max(999), modo: z.enum(['restituito','venduto']), prezzo: z.number().int().min(1).max(9_999_999).optional() }).strict(),
   z.object({ tipo: z.literal('acquisto'), articolo: chiave, variante: z.enum(CHIAVI_DOTI).nullable(), fortuna: z.boolean().nullable().optional(), sostituisceDoti: z.array(uid).max(20).refine(v => new Set(v).size === v.length) }).strict(),
   schemaEffettoGestoPesca,
@@ -221,7 +223,8 @@ function validaRicevuta(x: unknown, g: GestoPartita): Ricevuta {
   } else if (p.tipo === 'decisione-effetto-voce') {
     const v = schemaStatoEffetti.safeParse(x);
     if (v.success && g.partitaId === null && v.data.voceUid === g.bersaglio.voceUid
-      && (p.dati.decisione === 'scarta' || (v.data.stato === 'convertita' && v.data.effetti.some(e => uguali(e.effetto, p.dati.effetto))))) return v.data;
+      // (lo schema dice «puntiConfidente» con note e punti facoltativi e ne vuole uno solo: è la forma di `EffettoVoce`)
+      && (p.dati.decisione === 'scarta' || (v.data.stato === 'convertita' && v.data.effetti.some(e => uguali(e.effetto, p.dati.effetto))))) return v.data as StatoEffettiVoceDto;
   } else if (p.tipo === 'spunta-acquisti') { if (ricevutaSpuntaValida(x, g)) return x; }
   else if (p.tipo === 'decisione-proposte') {
     const v = schemaRicevutaDecisione.safeParse(x);
