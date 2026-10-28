@@ -20,8 +20,10 @@ const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.g
  * quello (il succo se la voce non lo dice e la rotazione non lo sa, se un consumo o una visita già registrati in quel momento sono gli stessi,
  * il vecchio segno «Acquistato», il turno di pesca) e dice in una riga che cosa la spunta registrerà. Momento, succo scritto nella voce,
  * Fortuna e prezzo non si chiedono più. Il comando finale invia un'unica spunta atomica, come prima.
+ * Se il server rifiuta il giorno della voce per l'Aojiru, la finestra chiede mese e giorno; un rifiuto che nessuna domanda risolve offre
+ * «Modifica la voce» (`onModifica`, il gesto della riga), così la finestra non resta mai senza una via d'uscita oltre ad «Annulla».
  */
-export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRileggi }: { a: AzionePercorsoDto; partitaId: number; onChiudi: () => void; onRileggi: (aggiornata: AzionePercorsoDto) => void; onConferma: (acquisti: RichiestaRegistraAcquisto[], pesche: RichiestaRegistraSessionePesca[], descrizioni: string[]) => Promise<void> }) {
+export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRileggi, onModifica }: { a: AzionePercorsoDto; partitaId: number; onChiudi: () => void; onRileggi: (aggiornata: AzionePercorsoDto) => void; onConferma: (acquisti: RichiestaRegistraAcquisto[], pesche: RichiestaRegistraSessionePesca[], descrizioni: string[]) => Promise<void>; onModifica?: () => void }) {
   const verifica = useCarica(() => getVocePercorso(a.uid, partitaId), [partitaId, a.uid]);
   useGestiPartita();
   const oggi = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.dataGioco : null));
@@ -42,7 +44,13 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   const aperti = effetti.filter((x) => x.domande.length > 0 || x.errore);
   const pronte = effetti.flatMap((x) => x.pronta ? [x.pronta.descrizione] : []);
   const pronto = !!prep.dati?.complete && !prep.caricamento;
-  const rispondi = (uid: string, campo: keyof RisposteOsservazione, valore: string) => { setErrore(null); setRisposte((r) => ({ ...r, [uid]: { ...r[uid], [campo]: valore } as RisposteOsservazione })); };
+  // un altro mese azzera il giorno; un altro giorno azzera la scelta del consumo, che dipende dal giorno
+  const rispondi = (uid: string, campo: keyof RisposteOsservazione, valore: string) => { setErrore(null); setRisposte((r) => {
+    const prima: RisposteOsservazione = { ...r[uid] };
+    if (campo === 'mese' && prima.mese !== valore) { prima.giorno = undefined; prima.consumo = undefined; }
+    if (campo === 'giorno' && prima.giorno !== valore) prima.consumo = undefined;
+    return { ...r, [uid]: { ...prima, [campo]: valore } as RisposteOsservazione };
+  }); };
   const spunta = async () => {
     if (blocco.current || incerto || pendente || nonPronta || !pronto || !prep.dati) return;
     blocco.current = true; setOccupato(true); setErrore(null);
@@ -74,6 +82,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
           {aperti.length > 1 && <h3 className="m-0 testo-14">{x.nome}</h3>}
           {x.domande.map((d) => <Selettore key={d.campo} etichetta={d.etichetta} valore={risposte[x.effettoUid]?.[d.campo] ?? ''} opzioni={d.opzioni} onCambia={(v) => rispondi(x.effettoUid, d.campo, v)} />)}
           {x.errore && <p role="alert" className="m-0 text-error-testo">{x.errore}</p>}
+          {x.daCorreggereNellaVoce && onModifica && <PulsanteVisivo className="self-start" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Modifica la voce" onClick={() => { onChiudi(); onModifica(); }} />}
         </section>)}
       </fieldset>
       {pronte.length > 0 && <div className="flex min-w-0 flex-col gap-1">

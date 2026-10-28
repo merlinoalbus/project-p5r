@@ -14,17 +14,22 @@
 //     rivedono dal registro della pesca).
 // Ogni richiesta completa passa dall'anteprima del server, che dà il token (CAS) e il riepilogo: la spunta invia le richieste insieme,
 // come prima. Se tutto è determinato la spunta registra senza finestra; altrimenti la finestra mostra solo le domande aperte.
+// Revisione (rilievo 1): se il server rifiuta il giorno della voce per l'Aojiru (`momento-non-compatibile`, per esempio una voce spostata
+// su un giorno in cui il chiosco non lo vende), il giorno diventa una domanda aperta (mese e giorno, la fascia resta quella della voce);
+// un rifiuto che nessuna domanda risolve resta sull'effetto e la finestra offre di modificare la voce.
 
 import {
   ORDINE_AOJIRU, PREZZO_AOJIRU, prossimaVarianteAojiru,
   type NuovaRegistrazioneAcquisto, type RegistrazioneAcquistoDto, type RichiestaRegistraAcquisto, type StatoAcquistiDto,
 } from '../../shared/acquisti';
+import { dataValida, GIORNI_NEL_MESE, MESI_GIOCO } from '../../shared/condizioniSpillo';
+import { giornoDellaSettimana } from '../../shared/date';
 import { eDote, nomeDote, type DoteChiave } from '../../shared/doti';
 import type { EffettoVoceDto } from '../../shared/effettiVoce';
 import type { FortunaPartitaDto } from '../../shared/fortuna';
 import type { NuovaSessionePesca, RichiestaRegistraSessionePesca, SceltaTurnoPesca, SessionePescaDto, StatoPescaDto } from '../../shared/pesca';
 import type { AzionePercorsoDto } from '../types';
-import { anteprimaRegistrazioneAcquisto, getFortuna, leggiAcquistiRegistrati } from './api';
+import { anteprimaRegistrazioneAcquisto, getFortuna, isApiError, leggiAcquistiRegistrati } from './api';
 import { anteprimaPesca, leggiPesca } from './api/pesca';
 import { fortunaDelConsumo } from '../utils/fortunaConsumo';
 import { osservazionePescaIgnota } from '../utils/pesca';
@@ -37,6 +42,9 @@ const fasciaInParole = (f: 'giorno' | 'sera') => f === 'sera' ? 'di sera' : 'di 
 
 /** Le risposte date nella finestra, per effetto della voce. Una chiave assente = domanda non ancora risposta. */
 export interface RisposteOsservazione {
+  /** Aojiru: mese («MM») e giorno («GG») del consumo, chiesti solo se il server rifiuta il giorno della voce. */
+  mese?: string;
+  giorno?: string;
   /** Aojiru: il succo bevuto, quando la voce non lo dice e la rotazione non lo sa. */
   variante?: DoteChiave;
   /** Aojiru: 'nuovo' = un consumo nuovo, altrimenti l'id del consumo già registrato in quel momento. */
@@ -65,6 +73,8 @@ export interface OsservazioneEffetto {
   pronta: null | { acquisto?: RichiestaRegistraAcquisto; pesca?: RichiestaRegistraSessionePesca; descrizione: string };
   /** Perché la richiesta, pur completa, non si può preparare (anteprima rifiutata, regola della pesca non collegata…). */
   errore: string | null;
+  /** Vero se nessuna domanda della finestra risolve `errore`: l'unica via è correggere la voce. */
+  daCorreggereNellaVoce: boolean;
 }
 export interface OsservazioniVoce {
   effetti: OsservazioneEffetto[];
@@ -77,7 +87,20 @@ interface Contesto { acquisti: StatoAcquistiDto | null; fortuna: FortunaPartitaD
 /** L'ordine dell'anno scolastico (aprile → marzo), come il registro degli acquisti del server. */
 const chiaveMomento = (giorno: string, fascia: 'giorno' | 'sera', ordine: number): string =>
   `${giorno < '04' ? 1 : 0}${giorno}${fascia === 'giorno' ? 0 : 1}${String(ordine).padStart(8, '0')}`;
-const stessoMomento = (m: { giorno: string; fascia: 'giorno' | 'sera' }, a: AzionePercorsoDto) => m.giorno === a.giorno && m.fascia === a.fascia;
+interface Momento { giorno: string; fascia: 'giorno' | 'sera' }
+const stessoMomento = (m: Momento, a: Momento) => m.giorno === a.giorno && m.fascia === a.fascia;
+
+/** Le domande sul giorno del consumo (mese, poi giorno con il giorno della settimana accanto): la fascia resta quella della voce. */
+function domandeGiorno(r: RisposteOsservazione): DomandaOsservazione[] {
+  const giorni = r.mese ? GIORNI_NEL_MESE[r.mese] ?? 0 : 0;
+  return [
+    { campo: 'mese', etichetta: 'Mese', opzioni: MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome })) },
+    ...(r.mese ? [{ campo: 'giorno' as const, etichetta: 'Giorno', opzioni: Array.from({ length: giorni }, (_, i) => {
+      const gg = String(i + 1).padStart(2, '0');
+      return { chiave: gg, nome: String(i + 1), dettaglio: giornoDellaSettimana(`${r.mese}-${gg}`) ?? undefined };
+    }) }] : []),
+  ];
+}
 
 type EffettoAcquisto = EffettoVoceDto & { effetto: Extract<EffettoVoceDto['effetto'], { tipo: 'acquisto' }> };
 type EffettoPesca = EffettoVoceDto & { effetto: Extract<EffettoVoceDto['effetto'], { tipo: 'pesca' }> };
@@ -91,20 +114,21 @@ export const effettiDaOsservare = (a: AzionePercorsoDto): EffettoVoceDto[] => a.
 const diAltraVoce = (fonti: ReadonlyArray<{ fonte: { tipo: 'manuale' } | { tipo: 'diario'; voceUid: string } }>, voceUid: string) =>
   fonti.some((f) => f.fonte.tipo === 'diario' && f.fonte.voceUid !== voceUid);
 
-/** L'Aojiru della voce: richiesta (se completa) e domande aperte. Puro: nessuna chiamata. */
-function risolviAcquisto(c: Contesto, a: AzionePercorsoDto, e: EffettoAcquisto, risposte: RisposteOsservazione): { domande: DomandaOsservazione[]; richiesta: NuovaRegistrazioneAcquisto | null } {
+/** L'Aojiru della voce nel momento `m` (quello della voce o il giorno indicato nella finestra): richiesta (se completa) e domande aperte.
+ *  Puro: nessuna chiamata. */
+function risolviAcquisto(c: Contesto, a: AzionePercorsoDto, m: Momento, e: EffettoAcquisto, risposte: RisposteOsservazione): { domande: DomandaOsservazione[]; richiesta: NuovaRegistrazioneAcquisto | null } {
   const stato = c.acquisti!;
   const registrazioni = stato.registrazioni.filter((r) => r.identita.articolo === e.effetto.articolo);
   const domande: DomandaOsservazione[] = [];
   // il succo: quello della voce; se manca, il successivo della rotazione dopo l'ultimo consumo confermato prima di questo momento
-  const precedenti = registrazioni.filter((r) => r.attiva && chiaveMomento(r.momento.giorno, r.momento.fascia, r.momento.ordine) < chiaveMomento(a.giorno, a.fascia, 0))
+  const precedenti = registrazioni.filter((r) => r.attiva && chiaveMomento(r.momento.giorno, r.momento.fascia, r.momento.ordine) < chiaveMomento(m.giorno, m.fascia, 0))
     .sort((x, y) => chiaveMomento(x.momento.giorno, x.momento.fascia, x.momento.ordine).localeCompare(chiaveMomento(y.momento.giorno, y.momento.fascia, y.momento.ordine)));
   const ultimo = precedenti[precedenti.length - 1];
   const varianteNota: DoteChiave | null = e.effetto.variante ?? (ultimo ? prossimaVarianteAojiru(ultimo.consumo.variante) : null);
   if (!varianteNota) domande.push({ campo: 'variante', etichetta: 'Che succo hai bevuto', opzioni: ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) })) });
   const variante = varianteNota ?? (eDote(risposte.variante) ? risposte.variante : null);
   // il consumo: solo uno già registrato nello stesso momento e con lo stesso succo può essere lo stesso (il server collega solo quelli)
-  const nelMomento = registrazioni.filter((r) => stessoMomento(r.momento, a));
+  const nelMomento = registrazioni.filter((r) => stessoMomento(r.momento, m));
   const collegabili = nelMomento.filter((r) => variante === null || r.consumo.variante === variante);
   const liberi = collegabili.filter((r) => !diAltraVoce(r.provenienze, a.uid));
   let scelta: RegistrazioneAcquistoDto | null | undefined;
@@ -123,15 +147,16 @@ function risolviAcquisto(c: Contesto, a: AzionePercorsoDto, e: EffettoAcquisto, 
     if (rappresentaGia) rapporto = 'rappresenta';
     else if (presenza.rappresentataDa !== null || stato.registrazioni.some((r) => r.legacyFirma === presenza.firma)) rapporto = 'ulteriore';
     else {
-      domande.push({ campo: 'rapporto', etichetta: 'Il vecchio segno «Acquistato»', opzioni: [{ chiave: 'rappresenta', nome: 'Questo consumo prende il suo posto' }, { chiave: 'ulteriore', nome: 'È un consumo in più' }] });
+      // la partita ha già il segno «Acquistato» senza un consumo dietro: è questo consumo o un altro?
+      domande.push({ campo: 'rapporto', etichetta: 'L’Aojiru era già segnato «Acquistato»: è questo consumo?', opzioni: [{ chiave: 'rappresenta', nome: 'Sì, è questo' }, { chiave: 'ulteriore', nome: 'No, è un consumo in più' }] });
       rapporto = risposte.rapporto;
     }
   }
   if (!variante || scelta === undefined || (presenza && !rapporto)) return { domande, richiesta: null };
   const ordine = scelta ? scelta.momento.ordine : nelMomento.reduce((m, r) => Math.max(m, r.momento.ordine + 1), 0);
   return { domande, richiesta: {
-    operazioneId: nuovoId(), articolo: e.effetto.articolo, momento: { giorno: a.giorno, fascia: a.fascia, ordine },
-    variante, fortuna: scelta ? scelta.consumo.fortuna : fortunaDelConsumo(c.fortuna, a.giorno, variante, c.oggi),
+    operazioneId: nuovoId(), articolo: e.effetto.articolo, momento: { giorno: m.giorno, fascia: m.fascia, ordine },
+    variante, fortuna: scelta ? scelta.consumo.fortuna : fortunaDelConsumo(c.fortuna, m.giorno, variante, c.oggi),
     fonte: { tipo: 'diario', voceUid: a.uid, effettoUid: e.uid },
     scelta: scelta ? { tipo: 'collega', acquistoId: scelta.id } : { tipo: 'nuova' },
     rapportoLegacy: presenza && rapporto ? { tipo: rapporto, firma: presenza.firma, valutazione: presenza.valutazione } : null,
@@ -197,29 +222,46 @@ export async function preparaOsservazioniVoce(partitaId: number, a: AzionePercor
     // decisione 18: gli yen di un effetto già nel saldo da prima che si muovessero da soli non si muovono: la riga non li dice
     const yenMossi = !a.yenGiaNelSaldo?.effetti.includes(e.uid);
     if (eAcquisto(e)) {
-      const { domande, richiesta } = risolviAcquisto(c, a, e, r);
-      const base = { effettoUid: e.uid, tipo: 'acquisto' as const, nome: 'Aojiru', domande };
-      if (!richiesta) return { ...base, pronta: null, errore: null };
+      // il giorno: quello della voce, salvo che chi gioca ne abbia indicato un altro dopo il rifiuto del server (rilievo 1)
+      const chiedeGiorno = r.mese !== undefined || r.giorno !== undefined;
+      const indicato = r.mese && r.giorno ? `${r.mese}-${r.giorno}` : null;
+      const domandeMomento = chiedeGiorno ? domandeGiorno(r) : [];
+      const base = { effettoUid: e.uid, tipo: 'acquisto' as const, nome: 'Aojiru', daCorreggereNellaVoce: false };
+      if (chiedeGiorno && !(indicato && dataValida(indicato))) return { ...base, domande: domandeMomento, pronta: null, errore: null };
+      const m: Momento = { giorno: chiedeGiorno ? indicato! : a.giorno, fascia: a.fascia };
+      const { domande, richiesta } = risolviAcquisto(c, a, m, e, r);
+      if (!richiesta) return { ...base, domande: [...domandeMomento, ...domande], pronta: null, errore: null };
       try {
         const ant = await anteprimaRegistrazioneAcquisto(partitaId, richiesta);
-        const punti = ant.effetto.puntiConfermati === null ? '2 punti certi' : `${ant.effetto.puntiConfermati} punti`;
+        // rilievo 3: con la Fortuna ignota i punti sono 2, o 3 se quel giorno la Fortuna era accesa su quella Dote
+        const punti = ant.effetto.puntiConfermati === null ? '2 punti, 3 con la Fortuna' : `${ant.effetto.puntiConfermati} punti`;
+        const quando = m.giorno !== a.giorno ? ` · ${dataGiocoTesto(m.giorno)}` : '';
         const descrizione = ant.esitoPrevisto === 'registrata'
-          ? `${ant.identita.nome} ${nomeDote(ant.effetto.dote)} · ♪ · ${punti}${yenMossi ? ` · ${formattaYen(PREZZO_AOJIRU)}` : ''}`
-          : `${ant.identita.nome} ${nomeDote(ant.effetto.dote)} · collegato al consumo già registrato`;
-        return { ...base, nome: ant.identita.nome, pronta: { acquisto: { ...ant.nuovo, revisioneAcquistiAttesa: ant.revisioneAcquistiAttesa }, descrizione }, errore: null };
-      } catch (err) { return { ...base, pronta: null, errore: messaggio(err) }; }
+          ? `${ant.identita.nome} ${nomeDote(ant.effetto.dote)}${quando} · ♪ · ${punti}${yenMossi ? ` · ${formattaYen(PREZZO_AOJIRU)}` : ''}`
+          : `${ant.identita.nome} ${nomeDote(ant.effetto.dote)}${quando} · collegato al consumo già registrato`;
+        return { ...base, domande: [...domandeMomento, ...domande], nome: ant.identita.nome, pronta: { acquisto: { ...ant.nuovo, revisioneAcquistiAttesa: ant.revisioneAcquistiAttesa }, descrizione }, errore: null };
+      } catch (err) {
+        // il server rifiuta il giorno: diventa la domanda aperta (le altre dipendono dal giorno e si rifanno dopo la risposta)
+        if (isApiError(err, 'momento-non-compatibile')) {
+          return { ...base, domande: chiedeGiorno ? [...domandeMomento, ...domande] : domandeGiorno(r), pronta: null,
+            errore: chiedeGiorno ? `${dataGiocoTesto(m.giorno)}: ${err.message}` : `${dataGiocoTesto(a.giorno)}, il giorno della voce: ${err.message}` };
+        }
+        return { ...base, domande: [...domandeMomento, ...domande], pronta: null, errore: messaggio(err), daCorreggereNellaVoce: domandeMomento.length + domande.length === 0 };
+      }
     }
+    // la pesca di una voce è sempre nel giorno e nella fascia della voce (il server non accetta altro): un rifiuto si risolve dalla voce
     const { domande, richiesta, blocco } = risolviPesca(c, a, e as EffettoPesca, r);
     const base = { effettoUid: e.uid, tipo: 'pesca' as const, nome: 'Pesca', domande };
-    if (!richiesta) return { ...base, pronta: null, errore: blocco };
+    if (!richiesta) return { ...base, pronta: null, errore: blocco, daCorreggereNellaVoce: false };
     try {
       const ant = await anteprimaPesca(partitaId, { azione: 'registra-sessione', bersaglio: null, richiesta });
       const quota = pesca?.regola.dati?.quote[a.fascia];
+      // rilievo 2: la visita nuova si registra con catture e Perizia ignote; si aggiungono dalla scheda Pesca di Progressi
       const descrizione = richiesta.scelta.tipo === 'nuova'
-        ? `Visita di pesca ${dataGiocoTesto(a.giorno)}, ${fasciaInParole(a.fascia)}${quota !== undefined && yenMossi ? ` · ${formattaYen(quota)}` : ''}`
+        ? `Visita di pesca ${dataGiocoTesto(a.giorno)}, ${fasciaInParole(a.fascia)}${quota !== undefined && yenMossi ? ` · ${formattaYen(quota)}` : ''} · catture da segnare in Progressi › Pesca`
         : 'Visita di pesca · collegata a quella già registrata';
-      return { ...base, pronta: { pesca: { ...richiesta, revisionePescaAttesa: ant.revisionePescaAttesa }, descrizione }, errore: null };
-    } catch (err) { return { ...base, pronta: null, errore: messaggio(err) }; }
+      return { ...base, pronta: { pesca: { ...richiesta, revisionePescaAttesa: ant.revisionePescaAttesa }, descrizione }, errore: null, daCorreggereNellaVoce: false };
+    } catch (err) { return { ...base, pronta: null, errore: messaggio(err), daCorreggereNellaVoce: domande.length === 0 }; }
   }));
   return { effetti: esiti, complete: esiti.every((x) => x.pronta !== null) };
 }
