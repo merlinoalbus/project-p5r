@@ -78,7 +78,16 @@ function effettiDelleVoci(db: AppDatabase, adesso: string, esiti: Esito[]): void
       esiti.push({ ...base, esito: `portato in note: +${e.punti} → ${'♪'.repeat(note)}` });
     }
     if (!daConvertire.length) continue;
-    const prima = effettiDellaVoce(db, voce);
+    // un altro effetto illeggibile della stessa voce non deve fermare l'avvio: la voce resta com'è e l'audit lo dice
+    let prima: ReturnType<typeof effettiDellaVoce>;
+    try { prima = effettiDellaVoce(db, voce); }
+    catch {
+      for (const c of daConvertire) {
+        const i = esiti.findIndex((x) => x.voce === voce && x.effetto === c.uid);
+        if (i >= 0) esiti[i] = { ...esiti[i]!, esito: 'lasciato con i punti fissi: la voce ha un altro effetto illeggibile' };
+      }
+      continue;
+    }
     for (const c of daConvertire) {
       if (canonico(normalizzaEffettoVoce(JSON.parse(canonico(c.dopo)))) !== canonico(c.dopo)) errore(`effetto in note non valido sulla voce ${voce}`);
       if (db.prepare('UPDATE main.voce_effetto SET dati_json = ?, updated_at = ? WHERE uid = ? AND voce_uid = ?').run(canonico(c.dopo), adesso, c.uid, voce).changes !== 1) errore(`l'effetto ${c.uid} non è stato scritto`);
