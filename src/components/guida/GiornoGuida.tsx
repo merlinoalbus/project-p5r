@@ -51,6 +51,8 @@ import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
 import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
+import { effettiDaOsservare, preparaOsservazioniVoce, richiesteOsservazioni, type OsservazioniVoce } from '../../services/osservazioniVoce';
+import { usePartitaStore } from '../../stores/partitaStore';
 import { DaApplicare } from '../partita/DaApplicare';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
@@ -118,6 +120,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const scrittura = useRef(false);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
   useGestiPartita();
+  const oggi = usePartitaStore((s) => (partitaId !== null && s.attiva?.id === partitaId ? s.attiva.dataGioco : null));
   const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid, ...(a.effettiVoce?.effetti.some(e => e.effetto.tipo === 'pesca') ? { pesca: true } : {}) }) : null;
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
@@ -128,7 +131,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[]) => {
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: string[] = [], automatica = false): Promise<void> => {
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
@@ -142,8 +145,19 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
       setChiediNote(false); setChiediAperture(false); setChiediEsiti({ noteRisposta, senzaPunti, aperture }); return;
     }
-    if (fatta && !a.fatta && a.effettiVoce?.effetti.some((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca') && acquisti === undefined && pesche === undefined) {
-      setChiediNote(false); setChiediAperture(false); setChiediEsiti(null); setChiediAcquisti({ noteRisposta, senzaPunti, aperture, esiti }); return;
+    // 2026-10-28: consumazioni e visite di pesca si preparano da sole dalla voce e dallo stato della partita (`preparaOsservazioniVoce`): se
+    // tutto è determinato la spunta registra senza finestra; la finestra compare solo con qualcosa di davvero aperto, e chiede solo quello
+    if (fatta && !a.fatta && effettiDaOsservare(a).length && acquisti === undefined && pesche === undefined) {
+      setChiediNote(false); setChiediAperture(false); setChiediEsiti(null);
+      scrittura.current = true; setOccupato(true);
+      let pronte: OsservazioniVoce | null;
+      // una lettura fallita apre la finestra, che mostra l'errore e lascia rileggere
+      try { pronte = await preparaOsservazioniVoce(partitaId, a, oggi); } catch { pronte = null; }
+      finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
+      if (!vivo.current) return;
+      if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, aperture, esiti }); return; }
+      const r = richiesteOsservazioni(pronte);
+      return cambia(true, noteRisposta, senzaPunti, aperture, r.acquisti, r.pesche, esiti, r.descrizioni, true);
     }
     setChiediNote(false);
     scrittura.current = true;
@@ -164,7 +178,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const dotiRegistrate = fatta ? testoDotiDaSegnare(dotiDaSegnareDaEffetti(agg.effetti)) : '';
       // 2026-10-27: e i turni registrati, con l'esito applicato (base o con il bonus) e gli oggetti ricevuti e usati: chi spunta vede che cosa è entrato
       const turniRegistrati = fatta && agg.effetti?.turni?.length ? descriviEffetti({ doti: [], confidente: null, turni: agg.effetti.turni }, { senzaDoti: true, senzaPaga: true }) : '';
-      const registrati = [turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
+      // 2026-10-28: e le consumazioni e le visite di pesca registrate con la spunta («Succo Aojiru Perizia · ♪ · 2 punti · 5000 ¥»)
+      const registrati = [...(fatta ? osservate : []), turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${registrati ? `: ${registrati}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
@@ -175,7 +190,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       seGiornoAvanzato(agg);
     } catch (err) {
       if (vivo.current) notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-      if (acquisti || pesche) throw err;
+      // la finestra tiene l'errore e decide se rileggere; la spunta automatica lo ha già notificato
+      if ((acquisti || pesche) && !automatica) throw err;
     } finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
   };
   const stato = a.fatta ? null : a.stato;
@@ -208,7 +224,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
-        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti)} />}
+        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche, descrizioni) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti, descrizioni)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
