@@ -17,6 +17,9 @@
 // Revisione (rilievo 1): se il server rifiuta il giorno della voce per l'Aojiru (`momento-non-compatibile`, per esempio una voce spostata
 // su un giorno in cui il chiosco non lo vende), il giorno diventa una domanda aperta (mese e giorno, la fascia resta quella della voce);
 // un rifiuto che nessuna domanda risolve resta sull'effetto e la finestra offre di modificare la voce.
+// Revisione (rilievo yen): la riga dopo la spunta dice gli yen DAVVERO mossi, dalla risposta del server (`yenAutomatici` della voce, causa
+// `voce:effetto`), con la frase degli yen automatici («scalati ¥1200 dal saldo: la spesa era ¥5000, il saldo non bastava»); prima della
+// spunta la finestra dice soltanto il prezzo o la quota («prezzo ¥5000»), perché il saldo può cambiare fino al gesto.
 
 import {
   ORDINE_AOJIRU, PREZZO_AOJIRU, prossimaVarianteAojiru,
@@ -34,7 +37,7 @@ import { anteprimaPesca, leggiPesca } from './api/pesca';
 import { fortunaDelConsumo } from '../utils/fortunaConsumo';
 import { osservazionePescaIgnota } from '../utils/pesca';
 import { dataGiocoTesto } from '../utils/dateGioco';
-import { formattaYen } from '../utils/punti';
+import { fraseMovimentoYen, testoYen, type MovimentoYenAutomaticoDto } from '../../shared/yenAutomatici';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const messaggio = (e: unknown) => e instanceof Error ? e.message : 'Anteprima non riuscita.';
@@ -69,8 +72,9 @@ export interface OsservazioneEffetto {
   /** Il nome breve dell'effetto (titolo del riquadro quando gli effetti aperti sono più di uno). */
   nome: string;
   domande: DomandaOsservazione[];
-  /** Le richieste pronte (con il token dell'anteprima) e che cosa registrano, in una riga. */
-  pronta: null | { acquisto?: RichiestaRegistraAcquisto; pesca?: RichiestaRegistraSessionePesca; descrizione: string };
+  /** Le richieste pronte (con il token dell'anteprima) e che cosa registrano: `descrizione` (senza yen), `spesa` (il prezzo o la quota che la
+   *  spunta scala da sola, «prezzo ¥5000»; null se non muove yen, decisione 18) e `nota` (in coda alla riga). */
+  pronta: null | { acquisto?: RichiestaRegistraAcquisto; pesca?: RichiestaRegistraSessionePesca; descrizione: string; spesa: string | null; nota: string | null };
   /** Perché la richiesta, pur completa, non si può preparare (anteprima rifiutata, regola della pesca non collegata…). */
   errore: string | null;
   /** Vero se nessuna domanda della finestra risolve `errore`: l'unica via è correggere la voce. */
@@ -236,10 +240,13 @@ export async function preparaOsservazioniVoce(partitaId: number, a: AzionePercor
         // rilievo 3: con la Fortuna ignota i punti sono 2, o 3 se quel giorno la Fortuna era accesa su quella Dote
         const punti = ant.effetto.puntiConfermati === null ? '2 punti, 3 con la Fortuna' : `${ant.effetto.puntiConfermati} punti`;
         const quando = m.giorno !== a.giorno ? ` · ${dataGiocoTesto(m.giorno)}` : '';
-        const descrizione = ant.esitoPrevisto === 'registrata'
-          ? `${ant.identita.nome} ${nomeDote(ant.effetto.dote)}${quando} · ♪ · ${punti}${yenMossi ? ` · ${formattaYen(PREZZO_AOJIRU)}` : ''}`
+        const nuovo = ant.esitoPrevisto === 'registrata';
+        const descrizione = nuovo
+          ? `${ant.identita.nome} ${nomeDote(ant.effetto.dote)}${quando} · ♪ · ${punti}`
           : `${ant.identita.nome} ${nomeDote(ant.effetto.dote)}${quando} · collegato al consumo già registrato`;
-        return { ...base, domande: [...domandeMomento, ...domande], nome: ant.identita.nome, pronta: { acquisto: { ...ant.nuovo, revisioneAcquistiAttesa: ant.revisioneAcquistiAttesa }, descrizione }, errore: null };
+        // solo il consumo nuovo scala il prezzo (il server lo muove per la consumazione creata)
+        const spesa = nuovo && yenMossi ? `prezzo ${testoYen(PREZZO_AOJIRU)}` : null;
+        return { ...base, domande: [...domandeMomento, ...domande], nome: ant.identita.nome, pronta: { acquisto: { ...ant.nuovo, revisioneAcquistiAttesa: ant.revisioneAcquistiAttesa }, descrizione, spesa, nota: null }, errore: null };
       } catch (err) {
         // il server rifiuta il giorno: diventa la domanda aperta (le altre dipendono dal giorno e si rifanno dopo la risposta)
         if (isApiError(err, 'momento-non-compatibile')) {
@@ -257,20 +264,40 @@ export async function preparaOsservazioniVoce(partitaId: number, a: AzionePercor
       const ant = await anteprimaPesca(partitaId, { azione: 'registra-sessione', bersaglio: null, richiesta });
       const quota = pesca?.regola.dati?.quote[a.fascia];
       // rilievo 2: la visita nuova si registra con catture e Perizia ignote; si aggiungono dalla scheda Pesca di Progressi
-      const descrizione = richiesta.scelta.tipo === 'nuova'
-        ? `Visita di pesca ${dataGiocoTesto(a.giorno)}, ${fasciaInParole(a.fascia)}${quota !== undefined && yenMossi ? ` · ${formattaYen(quota)}` : ''} · catture da segnare in Progressi › Pesca`
-        : 'Visita di pesca · collegata a quella già registrata';
-      return { ...base, pronta: { pesca: { ...richiesta, revisionePescaAttesa: ant.revisionePescaAttesa }, descrizione }, errore: null, daCorreggereNellaVoce: false };
+      const nuova = richiesta.scelta.tipo === 'nuova';
+      const descrizione = nuova ? `Visita di pesca ${dataGiocoTesto(a.giorno)}, ${fasciaInParole(a.fascia)}` : 'Visita di pesca · collegata a quella già registrata';
+      const spesa = nuova && yenMossi && quota !== undefined && quota > 0 ? `quota ${testoYen(quota)}` : null;
+      return { ...base, pronta: { pesca: { ...richiesta, revisionePescaAttesa: ant.revisionePescaAttesa }, descrizione, spesa, nota: nuova ? 'catture da segnare in Progressi › Pesca' : null }, errore: null, daCorreggereNellaVoce: false };
     } catch (err) { return { ...base, pronta: null, errore: messaggio(err), daCorreggereNellaVoce: domande.length === 0 }; }
   }));
   return { effetti: esiti, complete: esiti.every((x) => x.pronta !== null) };
 }
 
+/** Che cosa la spunta registra per un effetto, da completare dopo la spunta con gli yen davvero mossi (`descriviOsservate`). */
+export interface OsservataSpunta { effettoUid: string; descrizione: string; nota: string | null }
+
+/** La riga di un effetto pronto prima della spunta: che cosa registra, il prezzo o la quota (non ancora scalati) e la nota. */
+export const rigaAnteprima = (p: NonNullable<OsservazioneEffetto['pronta']>): string => [p.descrizione, p.spesa, p.nota].filter(Boolean).join(' · ');
+
 /** Le richieste pronte, nell'ordine degli effetti, per la spunta. */
-export function richiesteOsservazioni(o: OsservazioniVoce): { acquisti: RichiestaRegistraAcquisto[]; pesche: RichiestaRegistraSessionePesca[]; descrizioni: string[] } {
+export function richiesteOsservazioni(o: OsservazioniVoce): { acquisti: RichiestaRegistraAcquisto[]; pesche: RichiestaRegistraSessionePesca[]; osservate: OsservataSpunta[] } {
   return {
     acquisti: o.effetti.flatMap((x) => x.pronta?.acquisto ? [x.pronta.acquisto] : []),
     pesche: o.effetti.flatMap((x) => x.pronta?.pesca ? [x.pronta.pesca] : []),
-    descrizioni: o.effetti.flatMap((x) => x.pronta ? [x.pronta.descrizione] : []),
+    osservate: o.effetti.flatMap((x) => x.pronta ? [{ effettoUid: x.effettoUid, descrizione: x.pronta.descrizione, nota: x.pronta.nota }] : []),
   };
+}
+
+/**
+ * Le righe di ciò che la spunta ha registrato, con gli yen DAVVERO mossi per ciascun effetto: il movimento in vigore della causa
+ * `voce:effetto` nella risposta della spunta (`AzionePercorsoDto.yenAutomatici`), detto con la frase degli yen automatici («scalati ¥5000
+ * dal saldo», «nessuno yen scalato: la spesa era ¥5000, il saldo era a zero»). Nessun movimento (consumo collegato, yen già nel saldo,
+ * decisione 18) ⇒ la riga non parla di yen.
+ */
+export function descriviOsservate(osservate: OsservataSpunta[], voceUid: string, movimenti: MovimentoYenAutomaticoDto[] | undefined): string[] {
+  return osservate.map((o) => {
+    const m = movimenti?.find((x) => x.causa === 'voce' && x.chiave === `${voceUid}:${o.effettoUid}`);
+    const frase = m ? fraseMovimentoYen(m) : null;
+    return [o.descrizione, frase ? frase.charAt(0).toLowerCase() + frase.slice(1) : null, o.nota].filter(Boolean).join(' · ');
+  });
 }

@@ -8,7 +8,7 @@ import { Selettore } from '../shared/Selettore';
 import { getVocePercorso } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPartita';
-import { preparaOsservazioniVoce, richiesteOsservazioni, type RisposteOsservazione, type RisposteOsservazioni } from '../../services/osservazioniVoce';
+import { preparaOsservazioniVoce, richiesteOsservazioni, rigaAnteprima, type OsservataSpunta, type RisposteOsservazione, type RisposteOsservazioni } from '../../services/osservazioniVoce';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -23,7 +23,7 @@ const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.g
  * Se il server rifiuta il giorno della voce per l'Aojiru, la finestra chiede mese e giorno; un rifiuto che nessuna domanda risolve offre
  * «Modifica la voce» (`onModifica`, il gesto della riga), così la finestra non resta mai senza una via d'uscita oltre ad «Annulla».
  */
-export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRileggi, onModifica }: { a: AzionePercorsoDto; partitaId: number; onChiudi: () => void; onRileggi: (aggiornata: AzionePercorsoDto) => void; onConferma: (acquisti: RichiestaRegistraAcquisto[], pesche: RichiestaRegistraSessionePesca[], descrizioni: string[]) => Promise<void>; onModifica?: () => void }) {
+export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRileggi, onModifica }: { a: AzionePercorsoDto; partitaId: number; onChiudi: () => void; onRileggi: (aggiornata: AzionePercorsoDto) => void; onConferma: (acquisti: RichiestaRegistraAcquisto[], pesche: RichiestaRegistraSessionePesca[], osservate: OsservataSpunta[]) => Promise<void>; onModifica?: () => void }) {
   const verifica = useCarica(() => getVocePercorso(a.uid, partitaId), [partitaId, a.uid]);
   useGestiPartita();
   const oggi = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.dataGioco : null));
@@ -42,7 +42,8 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
   const effetti = prep.dati?.effetti ?? [];
   const aperti = effetti.filter((x) => x.domande.length > 0 || x.errore);
-  const pronte = effetti.flatMap((x) => x.pronta ? [x.pronta.descrizione] : []);
+  // prima della spunta il prezzo o la quota (il saldo può cambiare fino al gesto): gli yen davvero scalati li dice l'avviso dopo la spunta
+  const pronte = effetti.flatMap((x) => x.pronta ? [rigaAnteprima(x.pronta)] : []);
   const pronto = !!prep.dati?.complete && !prep.caricamento;
   // un altro mese azzera il giorno; un altro giorno azzera la scelta del consumo, che dipende dal giorno
   const rispondi = (uid: string, campo: keyof RisposteOsservazione, valore: string) => { setErrore(null); setRisposte((r) => {
@@ -54,8 +55,8 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   const spunta = async () => {
     if (blocco.current || incerto || pendente || nonPronta || !pronto || !prep.dati) return;
     blocco.current = true; setOccupato(true); setErrore(null);
-    const { acquisti, pesche, descrizioni } = richiesteOsservazioni(prep.dati);
-    try { await onConferma(acquisti, pesche, descrizioni); }
+    const { acquisti, pesche, osservate } = richiesteOsservazioni(prep.dati);
+    try { await onConferma(acquisti, pesche, osservate); }
     catch (e) {
       if (!vivo.current) return;
       setErrore(e instanceof Error ? e.message : 'Spunta non confermata.');

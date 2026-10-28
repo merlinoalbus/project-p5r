@@ -51,7 +51,7 @@ import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
 import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
-import { effettiDaOsservare, preparaOsservazioniVoce, richiesteOsservazioni, type OsservazioniVoce } from '../../services/osservazioniVoce';
+import { descriviOsservate, effettiDaOsservare, preparaOsservazioniVoce, richiesteOsservazioni, type OsservataSpunta, type OsservazioniVoce } from '../../services/osservazioniVoce';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { DaApplicare } from '../partita/DaApplicare';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -131,7 +131,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: string[] = [], automatica = false): Promise<void> => {
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: OsservataSpunta[] = [], automatica = false): Promise<void> => {
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
@@ -157,7 +157,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       if (!vivo.current) return;
       if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, aperture, esiti }); return; }
       const r = richiesteOsservazioni(pronte);
-      return cambia(true, noteRisposta, senzaPunti, aperture, r.acquisti, r.pesche, esiti, r.descrizioni, true);
+      return cambia(true, noteRisposta, senzaPunti, aperture, r.acquisti, r.pesche, esiti, r.osservate, true);
     }
     setChiediNote(false);
     scrittura.current = true;
@@ -178,8 +178,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const dotiRegistrate = fatta ? testoDotiDaSegnare(dotiDaSegnareDaEffetti(agg.effetti)) : '';
       // 2026-10-27: e i turni registrati, con l'esito applicato (base o con il bonus) e gli oggetti ricevuti e usati: chi spunta vede che cosa è entrato
       const turniRegistrati = fatta && agg.effetti?.turni?.length ? descriviEffetti({ doti: [], confidente: null, turni: agg.effetti.turni }, { senzaDoti: true, senzaPaga: true }) : '';
-      // 2026-10-28: e le consumazioni e le visite di pesca registrate con la spunta («Succo Aojiru Perizia · ♪ · 2 punti · 5000 ¥»)
-      const registrati = [...(fatta ? osservate : []), turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
+      // 2026-10-28: e le consumazioni e le visite di pesca registrate con la spunta, con gli yen davvero mossi letti dalla risposta
+      // («Succo Aojiru Perizia · ♪ · 2 punti, 3 con la Fortuna · scalati ¥5000 dal saldo»; mai sotto zero: «nessuno yen scalato: …»)
+      const registrati = [...(fatta ? descriviOsservate(osservate, a.uid, agg.yenAutomatici) : []), turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${registrati ? `: ${registrati}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
@@ -224,7 +225,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
-        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, descrizioni) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti, descrizioni)} />}
+        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti, osservate)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}

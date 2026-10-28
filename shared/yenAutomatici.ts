@@ -30,7 +30,9 @@ export interface MovimentoYenAutomaticoDto {
   creatoIl: string;
 }
 
-const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+/** Un importo come lo scrivono le frasi degli yen automatici («¥5000», «¥12.000»: il separatore it-IT parte da cinque cifre), senza segno. */
+export const testoYen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
+const yen = testoYen;
 
 /**
  * La frase di un movimento: «Entrati ¥3.500 nel saldo», «Scalati ¥500 dal saldo», e quando il saldo non bastava (o era al tetto) l'importo
