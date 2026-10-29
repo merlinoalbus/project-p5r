@@ -469,13 +469,13 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
             `covo-dei-ladri.png` arriva, il Covo diventa un cartellino come tutti gli altri senza
             che nessuno debba toccare il codice; finché non c'è, resta la targa sola, che è quel
             che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire.
-            La fermata porta alla pagina delle sfide: nel gioco il Covo si apre dal menu, dal 6/5, e non si raggiunge in metro
+            La fermata porta alla pagina delle sfide: nel gioco il Covo si apre dal menu, dal 5/5, e non si raggiunge in metro
             (registro dell'Esperto della guida, G-004; L2). Prima il cartellino diceva «la soffitta del Leblanc», che è sbagliato. */}
         <Cartellino
           s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri', destinazione: null,
             src: risolvi(SEGNO_COVO), dove: COVO_TOKYO, palazzo: false,
             href: PAGINA_COVO, presente: true,
-            quando: 'dal menu di gioco, dal 6/5' }}
+            quando: 'dal menu di gioco, dal 5/5' }}
           acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} onApri={onApri} />
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}

@@ -40,7 +40,7 @@ import type { AreaDettaglioDto, ElementoAreaDto } from '../types';
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Il suggerimento del collegamento alle sfide del Covo, in testata o in fondo alla fila delle versioni. */
-const TITOLO_COVO = 'Nel gioco il Covo si apre dal menu, dal 6/5';
+const TITOLO_COVO = 'Nel gioco il Covo si apre dal menu, dal 5/5';
 
 /** La pagina della guida di un elemento segnato sull'Area, quando il server non dice la sua `casa`: il luogo nella sua pagina (L5), il
  *  negozio nella sua scheda (che rimanda alla sua sede), l'attività nell'elenco delle attività, il Confidente nella sua pagina. */

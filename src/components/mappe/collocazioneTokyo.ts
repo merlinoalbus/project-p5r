@@ -147,7 +147,7 @@ export const RADICI_TOKYO: Record<string, Collocazione> = {
   'dungeon-mementos': { x: 82.5, y: 17, scala: 4.2 },
 };
 
-/** Il Covo dei Ladri: nel gioco si apre dal menu, dal 6/5, e non è un posto della città (G-004; prima qui stava scritto «la soffitta
+/** Il Covo dei Ladri: nel gioco si apre dal menu, dal 5/5, e non è un posto della città (G-004; prima qui stava scritto «la soffitta
  * del Leblanc», che è sbagliato).
  *
  * Sta nell'angolo libero in basso a sinistra e non addosso a Yongen-Jaya, dove copriva Chinatown:

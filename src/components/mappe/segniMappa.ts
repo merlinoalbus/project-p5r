@@ -47,7 +47,7 @@ export const segnoQuartiere = (chiave: string): string => `mappe/lmap/tokyo/${ch
 /** Lo stemma di un Palazzo (o dei Memento): i Palazzi non stanno nel foglio della mappa di viaggio e tengono il loro. */
 export const segnoPalazzo = (chiave: string): string => `palazzi/${chiave}`;
 
-/** Il Covo dei Ladri: nel gioco è una schermata del menu di Royal (dal 6/5), non una fermata né la soffitta del Leblanc (G-004), e nel foglio degli
+/** Il Covo dei Ladri: nel gioco è una schermata del menu di Royal (dal 5/5), non una fermata né la soffitta del Leblanc (G-004), e nel foglio degli
  *  sprite non c'è (voce 4 di `docs/grafica/fabbisogno.md`). Finché non arriva il manifesto non lo ha, e resta la targa. */
 export const SEGNO_COVO = 'mappe/lmap/tokyo/covo-dei-ladri';
 
