@@ -2,6 +2,7 @@
 // CampoRicerca — input di ricerca con icona e pulsante di azzeramento
 // ============================================================
 
+import { useRef } from 'react';
 import { IconClose, IconSearch } from './icons';
 
 interface Props {
@@ -17,9 +18,11 @@ interface Props {
 
 /**
  * Campo di ricerca compatto, adatto al touch. La «×» è una sola, quella da 44 px qui sotto: la croce nativa di
- * `type="search"` (Chrome, Safari, Edge) è tolta da `.campo-ricerca__input` in src/tailwind.css (lotto C).
+ * `type="search"` (Chrome, Safari, Edge) è tolta da `.campo-ricerca__input` in src/tailwind.css (lotto C). Azzerando, il fuoco torna nel
+ * campo: la «×» sparisce col testo e il fuoco altrimenti cadrebbe sul documento.
  */
 export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFocus, className, id }: Props) {
+  const campo = useRef<HTMLInputElement>(null);
   return (
     <div className={`relative flex-1 min-w-[180px] ${className ?? ''}`}>
       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
@@ -27,6 +30,7 @@ export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFo
       </span>
       <input
         type="search"
+        ref={campo}
         id={id}
         className="form-input campo-ricerca__input pl-9 pr-11"
         placeholder={segnaposto}
@@ -39,7 +43,7 @@ export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFo
         <button
           type="button"
           className="absolute right-0 top-1/2 -translate-y-1/2 touch flex items-center justify-center text-text-muted hover:text-text bg-transparent border-none cursor-pointer"
-          onClick={() => onCambia('')}
+          onClick={() => { onCambia(''); campo.current?.focus(); }}
           aria-label="Azzera ricerca"
         >
           <IconClose size={16} />

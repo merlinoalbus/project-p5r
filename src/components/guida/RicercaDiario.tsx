@@ -7,7 +7,7 @@
 // risultati del filtro/ricerca in modo comodo...».
 //
 //   - `BarraRicercaDiario`: il campo (testo in «Che cosa fare» e note) e il tipo della voce; con una ricerca attiva resta in cima mentre la
-//     pagina scorre (`fissa`) e offre «Cancella ricerca». Sta sempre nello stesso punto della pagina, così scrivendo il campo non perde il fuoco
+//     pagina scorre (`fissa`) e, con un tipo scelto, offre «Cancella ricerca» (testo e tipo; il solo testo lo svuota la «×» del campo). Sta sempre nello stesso punto della pagina, così scrivendo il campo non perde il fuoco
 //     quando il giorno lascia il posto ai risultati.
 //   - `RisultatiRicercaDiario`: al posto del giorno, a tutta larghezza; il numero dei risultati (annunciato), poi i risultati per mese e per
 //     giorno («martedì 12 aprile»), una riga per voce: fascia, testo con le parole evidenziate, collegamento, note ridotte se lunghe,
@@ -37,7 +37,7 @@ interface PropsBarra {
   onTesto: (v: string) => void;
   tipo: TipoAzione | null;
   onTipo: (t: TipoAzione | null) => void;
-  /** Con una ricerca attiva: la barra resta in cima scorrendo e offre «Cancella ricerca». */
+  /** Con una ricerca attiva: la barra resta in cima scorrendo e, se c'è un tipo scelto, offre «Cancella ricerca». */
   attiva: boolean;
   onCancella: () => void;
   /** Quante voci per tipo corrispondono al testo: il selettore lo dice accanto al nome (solo con un testo cercato). */
@@ -46,19 +46,22 @@ interface PropsBarra {
   idCampo: string;
 }
 
-/** Il campo di ricerca e il tipo della voce; con una ricerca attiva, fissi in cima con «Cancella ricerca». */
+/** Il campo di ricerca e il tipo della voce; con una ricerca attiva, fissi in cima (con «Cancella ricerca» se c'è un tipo scelto). */
 export function BarraRicercaDiario({ testo, onTesto, tipo, onTipo, attiva, onCancella, perTipo, idCampo }: PropsBarra) {
   // il numero accanto al tipo ha senso solo quando c'è un testo cercato (altrimenti direbbe solo quante voci ha ogni tipo nell'anno)
   const conteggi = perTipo && testoSufficiente(testo) ? perTipo : null;
   return (
-    <div role="search" className={`ricerca-diario__barra ${attiva ? 'ricerca-diario__barra--fissa' : ''}`} aria-label="Cerca nel Diario">
-      {/* base 15rem: sul telefono in verticale il campo prende la riga e tipo e «Cancella» vanno sotto; da circa 600 px tutto sta su una riga
-          (telefono in orizzontale compreso), così la barra fissa resta bassa */}
-      <CampoRicerca valore={testo} onCambia={onTesto} segnaposto="Cerca nel Diario (che cosa fare, note)" className="basis-60" id={idCampo} />
+    <div role="search" className={`ricerca-diario__barra ricerca-diario__barra--cerca ${attiva ? 'ricerca-diario__barra--fissa' : ''}`} aria-label="Cerca nel Diario">
+      {/* una sola riga a ogni larghezza: sotto i 640 px il campo prende lo spazio che resta (almeno 9rem) accanto al tipo, ridotto a 8.5rem, e a
+          «Cancella ricerca» che lì è la sola icona (`tailwind.css`, `.ricerca-diario__barra`); da 640 px il campo parte da 15rem. Così né il
+          giorno né la barra fissa dei risultati perdono altezza per una seconda riga */}
+      <CampoRicerca valore={testo} onCambia={onTesto} segnaposto="Cerca nel Diario" className="sm:basis-60 min-w-36!" id={idCampo} />
       <Selettore compatto etichetta="Tipo di voce" valore={tipo ?? ''} vuoto="Tutti i tipi" ricerca="mai"
         opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, dettaglio: conteggi ? String(conteggi[t.chiave] ?? 0) : undefined }))}
         onCambia={(k) => onTipo(tipoDaIndirizzo(k))} />
-      {attiva && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Cancella ricerca" onClick={onCancella} />}
+      {/* solo con un tipo scelto: senza tipo la «×» del campo fa già la stessa cosa (svuotato il campo si torna al giorno), e due «×» affiancate
+          si confonderebbero; l'icona è quella del filtro, non una seconda «×» */}
+      {attiva && tipo !== null && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scarta" dimensione={20} />} titolo="Cancella ricerca" onClick={onCancella} />}
     </div>
   );
 }
@@ -125,6 +128,10 @@ function RigaRisultato({ r, parole, conTipo, q, tipo }: { r: RisultatoRicercaDia
   const posizione = useLocation();
   const navigate = useNavigate();
   const note = noteDaMostrare(r, parole);
+  // il nome della riga per il lettore di schermo è fascia e «Che cosa fare»; note e «Spuntando» sono la sua descrizione, letta dopo una
+  // pausa (con centinaia di risultati scorrere le righe non obbliga ad ascoltare tutto)
+  const id = useId();
+  const descritta = [note ? `${id}-note` : '', r.spuntando.length > 0 ? `${id}-effetto` : ''].filter(Boolean).join(' ');
   // prima di aprire la voce, la voce di cronologia dei risultati ricorda la riga (`voceDiRitorno`): tornando anche con «indietro» del
   // sistema la riga torna in vista e riprende il fuoco (stesso modo dell'«Entra» nei Palazzi, `PartiAzione.ricordaVoce`). Con i tasti
   // che aprono altrove (nuova scheda, finestra) la pagina resta questa e non serve
@@ -135,21 +142,22 @@ function RigaRisultato({ r, parole, conTipo, q, tipo }: { r: RisultatoRicercaDia
   };
   return (
     <li>
-      <Link id={`ricerca-voce-${r.uid}`} className="ricerca-diario__voce" to={{ pathname: `/guida/percorso/${r.giorno}`, search: `?voce=${r.uid}`, hash: `#voce-${r.uid}` }} state={{ ritornoRicerca }} onClick={ricordaRiga}>
-        <span className="ricerca-diario__fascia">
+      <Link id={`ricerca-voce-${r.uid}`} className="ricerca-diario__voce" to={{ pathname: `/guida/percorso/${r.giorno}`, search: `?voce=${r.uid}`, hash: `#voce-${r.uid}` }} state={{ ritornoRicerca }} onClick={ricordaRiga}
+        aria-labelledby={`${id}-fascia ${id}-azione`} aria-describedby={descritta || undefined}>
+        <span id={`${id}-fascia`} className="ricerca-diario__fascia">
           <IconaFascia fascia={r.fascia} dimensione={18} className="w-5 h-5 object-contain shrink-0" />
           <span>{r.fascia === 'sera' ? 'Di sera' : 'Di giorno'}</span>
           {conTipo && <span className="ricerca-diario__tipo">{nomeTipo(r.tipo)}</span>}
           {r.fatta && <span className="chip chip--attivo testo-12">Fatta</span>}
         </span>
         <span className="ricerca-diario__corpo">
-          <span className="ricerca-diario__azione">
+          <span id={`${id}-azione`} className="ricerca-diario__azione">
             <Evidenziato testo={r.azione} parole={parole} />
             {r.riferimentoTesto && <span className="ricerca-diario__collegamento"> · {r.riferimentoTesto}</span>}
           </span>
-          {note && <span className="ricerca-diario__note"><Evidenziato testo={note} parole={parole} /></span>}
+          {note && <span id={`${id}-note`} className="ricerca-diario__note"><Evidenziato testo={note} parole={parole} /></span>}
         </span>
-        {r.spuntando.length > 0 && <span className="ricerca-diario__effetto"><span className="ricerca-diario__etichetta">Spuntando:</span> {r.spuntando.join('; ')}</span>}
+        {r.spuntando.length > 0 && <span id={`${id}-effetto`} className="ricerca-diario__effetto"><span className="ricerca-diario__etichetta">Spuntando:</span> {r.spuntando.join('; ')}</span>}
       </Link>
     </li>
   );

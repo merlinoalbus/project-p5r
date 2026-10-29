@@ -32,6 +32,8 @@ import { ProviderPannelloScheda } from '../components/scheda/PannelloScheda';
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 /** Quanto aspetta la ricerca nel Diario dopo l'ultima lettera scritta, prima di partire. */
 const RITARDO_RICERCA_MS = 300;
+/** Nello stato della voce di cronologia: questa voce l'ha aggiunta la pagina entrando nella ricerca (vedi `scriviRicerca`). */
+const RICERCA_AGGIUNTA = 'ricercaAggiunta';
 
 /**
  * Guida giorno per giorno: carica l'indice dei giorni per la partita attiva e il giorno preso
@@ -43,7 +45,7 @@ const RITARDO_RICERCA_MS = 300;
  */
 export function PercorsoPage() {
   const { data: dataParam } = useParams();
-  const [parametri, setParametri] = useSearchParams();
+  const [parametri] = useSearchParams();
   const posizione = useLocation();
   // la voce da mostrare: `?voce=<uid>` o l'ancora `#voce-<uid>` (ritorno da un Palazzo, voce aperta dalla ricerca)
   const voceDaMostrare = parametri.get('voce') ?? (posizione.hash.startsWith('#voce-') ? posizione.hash.slice('#voce-'.length) : undefined);
@@ -65,16 +67,28 @@ export function PercorsoPage() {
     setQVisto(qIndirizzo);
     if (qIndirizzo !== qInviato) { setTestoRicerca(qIndirizzo); setQInviato(qIndirizzo); }
   }
-  /** Scrive testo e tipo nell'indirizzo (sostituendo la voce di cronologia: scrivere non riempie «indietro»), togliendo la voce da mostrare. */
+  // la voce di cronologia aggiunta entrando nella ricerca (`RICERCA_AGGIUNTA` nel suo stato): «indietro» da lì torna al giorno di prima
+  const ricercaAggiunta = (posizione.state as Record<string, unknown> | null)?.[RICERCA_AGGIUNTA] === true;
+  /**
+   * Scrive testo e tipo nell'indirizzo, togliendo la voce da mostrare. Entrando nella ricerca (l'indirizzo non ne aveva) aggiunge UNA voce di
+   * cronologia, così «indietro» del sistema dai risultati torna al giorno da cui si è partiti invece di uscire dalla Guida; scrivendo e
+   * cambiando tipo poi la sostituisce (le lettere non riempiono «indietro»). Uscendo dalla ricerca (campo vuoto e nessun tipo) da quella voce si
+   * torna indietro di un passo, al giorno com'era; se la voce non l'ha aggiunta la pagina (indirizzo aperto già con `?q=`, ritorno ricostruito
+   * da «Torna ai risultati») si sostituisce, come prima.
+   */
   const scriviRicerca = (q: string, tipo: TipoAzione | null) => {
     setQInviato(q);
-    setParametri((p) => {
-      const n = new URLSearchParams(p);
-      if (q.trim()) n.set('q', q); else n.delete('q');
-      if (tipo) n.set('tipo', tipo); else n.delete('tipo');
-      n.delete('voce');
-      return n;
-    }, { replace: true });
+    const conRicerca = q.trim() !== '' || tipo !== null;
+    const idx = (window.history.state as { idx?: unknown } | null)?.idx;
+    if (!conRicerca && ricercaAggiunta && typeof idx === 'number' && idx >= 1) { void navigate(-1); return; }
+    const n = new URLSearchParams(parametri);
+    if (q.trim()) n.set('q', q); else n.delete('q');
+    if (tipo) n.set('tipo', tipo); else n.delete('tipo');
+    n.delete('voce');
+    const s = n.toString();
+    const verso = { pathname: posizione.pathname, search: s ? `?${s}` : '' };
+    const entra = conRicerca && !ricercaAggiunta && !qIndirizzo.trim() && tipoRicerca === null;
+    void navigate(verso, { replace: !entra, state: entra || ricercaAggiunta ? { [RICERCA_AGGIUNTA]: true } : undefined });
   };
   useEffect(() => {
     if (testoRicerca === qInviato) return;
@@ -85,7 +99,7 @@ export function PercorsoPage() {
   const ricerca = useRicercaDiario(qIndirizzo, tipoRicerca, partitaId);
   const ritornoRicerca = leggiRitornoRicerca(posizione.state);
   const voceDiRitorno = (posizione.state as { voceDiRitorno?: unknown } | null)?.voceDiRitorno;
-  /** «Cancella ricerca»: torna al giorno e rimette il fuoco nel campo. */
+  /** «Cancella ricerca»: torna al giorno (un passo indietro se la ricerca aveva aggiunto la sua voce di cronologia) e rimette il fuoco nel campo. */
   const cancellaRicerca = () => {
     setTestoRicerca('');
     scriviRicerca('', null);
