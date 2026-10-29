@@ -458,7 +458,7 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     // errore non annulla l'importazione; il log lo dice (solo conteggi), e il prossimo avvio lo rifà
     try {
       const { partite } = proponiStatiMancanti();
-      const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0);
+      const daDire = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0 || p.chiuseNullaDaTogliere > 0);
       if (daDire.length) logger.info({ partite: daDire }, 'effetti di stato mai applicati dopo l\'importazione: nuove proposte nell\'elenco da approvare');
       const conErrori = partite.filter((p) => p.errori > 0);
       if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento dopo l\'importazione: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');

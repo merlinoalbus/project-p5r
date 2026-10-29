@@ -86,7 +86,8 @@ try {
   // L13 (decisione 19, «Elenco da approvare»): gli effetti di stato delle voci già spuntate mai applicati entrano nell'elenco da approvare della
   // partita (mai applicati da soli). Tollerante come le regole all'avvio: il server parte comunque, e il log lo dice (solo conteggi, mai nomi)
   const { partite } = proponiStatiMancanti();
-  const conProposte = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0);
+  // (anche le proposte chiuse in questo giro perché non c'era nulla da togliere: l'audit delle chiusure, solo conteggi)
+  const conProposte = partite.filter((p) => p.proposte > 0 || p.nonRiconosciuti > 0 || p.chiuseNullaDaTogliere > 0);
   if (conProposte.length) logger.info({ partite: conProposte }, 'effetti di stato mai applicati: nuove proposte nell\'elenco da approvare');
   const conErrori = partite.filter((p) => p.errori > 0);
   if (conErrori.length) logger.warn({ partite: conErrori }, 'censimento degli effetti di stato: alcune voci non si sono potute esaminare (le altre sì; il prossimo avvio le riprova)');

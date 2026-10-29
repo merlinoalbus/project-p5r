@@ -110,7 +110,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
       blocco.current = true; setOccupato(true); setErrore(null); setRicevuta(null);
       try {
         const a = await anteprimaDecisioneProposte(partitaId, { operazioneId: crypto.randomUUID().replaceAll('-', ''), decisione: { tipo: 'non-conteggiata', proposte: [riferimento(p)] } });
-        await decidiProposteConRegistro(partitaId, { ...a.richiesta, revisioneProposteAttesa: a.revisioneProposteAttesa }, { etichetta: 'Punti non ancora contati' });
+        await decidiProposteConRegistro(partitaId, { ...a.richiesta, revisioneProposteAttesa: a.revisioneProposteAttesa }, { etichetta: titolo(p).slice(0, 300) });
         await elenco.ricarica();
       } catch (e) { if (vivo.current) setErrore(testoErrore(e)); return; }
       finally { blocco.current = false; if (vivo.current) setOccupato(false); }
@@ -140,7 +140,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
     let registrata = false;
     try {
       const riguardaPesca = anteprima.proposte.some(p => p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca');
-      const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
+      const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: anteprima.proposte.length === 1 ? `Decisione su 1 proposta: ${titolo(anteprima.proposte[0]!).slice(0, 300)}` : `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
       registrata = true;
       fuoco.current = { fase: 'decisa', elenco: aperte.map((p) => p.uid).join(',') };
       // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
