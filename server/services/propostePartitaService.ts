@@ -295,9 +295,11 @@ export interface PassatoDiStato { descrizione:string; motivo:string }
 export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato;senzaAvanzamento?:true}={}):void {
   if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente,opz)&&!opz.senzaAvanzamento)avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
 }
-/** L13 (decisione 19): chiude la proposta del passato di quell'effetto, aperta, se c'è (una per coppia partita/effetto). Dice se l'ha chiusa. */
-export function chiudiPropostePassato(partita:number,voce:string,effetto:string):boolean {
-  return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta' AND json_extract(dati_json,'$.passato')=1").run(nowIso(),partita,`${voce}:${effetto}`).changes>0;
+/** L13 (decisione 19): chiude la proposta del passato di quell'effetto, aperta, se c'è (una per coppia partita/effetto). Dice se l'ha chiusa.
+ *  `motivo` è la nota della chiusura: «non-piu-dovuta» (di solito), «nulla-da-togliere» (2026-10-29: l'uscita di un oggetto che la partita non
+ *  possiede, `statiMancantiService`). */
+export function chiudiPropostePassato(partita:number,voce:string,effetto:string,motivo:'non-piu-dovuta'|'nulla-da-togliere'='non-piu-dovuta'):boolean {
+  return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura=?,decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta' AND json_extract(dati_json,'$.passato')=1").run(motivo,nowIso(),partita,`${voce}:${effetto}`).changes>0;
 }
 /** Dice se ha chiuso una proposta aperta. */
 function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto,opz:{passato?:PassatoDiStato}={}):boolean {

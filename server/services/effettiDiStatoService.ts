@@ -333,6 +333,16 @@ function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiCo
 }
 
 /**
+ * Le copie dell'oggetto che l'effetto «oggetto restituito o venduto» può far uscire dalla partita `p`: quelle possedute (`dettaglioCopie`) più
+ * quelle che la stessa riga dell'effetto aveva già fatto uscire. Una lettura sola per chi applica (`applicaUscita`) e per il censimento
+ * dell'elenco del passato (`statiMancantiService`), che con meno copie di quelle indicate non propone l'uscita (non uscirebbe niente).
+ */
+export function copiePerUscita(p: number, voceUid: string, uid: string, e: EffettoUscita): number {
+  const mia = uscitaDellaVoce(p, voceUid, uid);
+  return dettaglioCopie(p, e.oggetto).disponibili + (mia && mia.catalogo === e.oggetto ? mia.quantita : 0);
+}
+
+/**
  * L'oggetto restituito o venduto: escono le copie dell'effetto, mai più di quelle che la partita possiede (comprate, ricevute, nei set, meno
  * regalate, cedute e usate: `dettaglioCopie`, la stessa lettura della scelta dell'esito e di «Regala»), contando come sue quelle che la stessa
  * riga aveva già fatto uscire. Senza copie abbastanza: alla spunta non esce niente e l'avviso lo dice (la spunta non si ferma); su una voce già
@@ -340,7 +350,7 @@ function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiCo
  */
 function applicaUscita(p: number, voceUid: string, uid: string, e: EffettoUscita, opz: OpzioniStato, vecchio: boolean): EsitoStato {
   const mia = uscitaDellaVoce(p, voceUid, uid);
-  const possedute = dettaglioCopie(p, e.oggetto).disponibili + (mia && mia.catalogo === e.oggetto ? mia.quantita : 0);
+  const possedute = copiePerUscita(p, voceUid, uid, e);
   if (possedute < e.quantita) {
     const nome = (prepared('SELECT nome FROM catalogo_oggetto WHERE chiave = ?').pluck().get(e.oggetto) as string | undefined) ?? 'L’oggetto';
     const motivo = possedute === 0 ? `«${nome}» non è fra le copie della partita: non esce niente.`

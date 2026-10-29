@@ -284,7 +284,12 @@ export function caricaRegistroGestiPartita(): void {
     });
     if (esitiNoti.some(n => !gesti.some(g => g.id === n.id))) throw new Error('Manca il gesto dell’esito già acquisito: nessuna sovrascrittura.');
     store.setState({ gesti: immutabile(gesti), erroreArchivio: null });
-    if (letti.some(g => g.stato === 'invio')) scrivi(gesti);
+    // 2026-10-29 (segnalazione dell'utente: 55 righe, quasi tutte «Completata»): il registro tiene solo ciò che è in sospeso. Alla lettura escono
+    // le operazioni completate (la ricevuta c'è: toglierle dal registro conservato È salvarne l'esito) e i rifiuti già mostrati e salvati in una
+    // lettura di prima; un rifiuto noto solo qui (non ancora salvato) resta, salvato, perché se ne legga il motivo una volta
+    const pulita = gesti.filter(g => g.stato !== 'riuscita' && !(g.stato === 'rifiutata' && g.ricevutaPersistita))
+      .map(g => g.stato === 'rifiutata' ? { ...g, ricevutaPersistita: true } : g);
+    if (letti.some(g => g.stato === 'invio') || pulita.length !== gesti.length || pulita.some((g, i) => g !== gesti[i])) scrivi(pulita);
   } catch (e) { bloccaArchivio(e); }
 }
 export function useGestiPartita(): StatoGestiPartita {
@@ -332,12 +337,15 @@ function separaApplicazioni(x: unknown): { applicazioni: ApplicazioneStatoPartit
   return { applicazioni: v.success ? v.data : undefined, illeggibile: !v.success, resto };
 }
 const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
+/** 2026-10-29: un'operazione confermata esce dal registro (che tiene solo ciò che è in sospeso): toglierla dal registro conservato ne salva l'esito. */
+const togli = (id: string) => scrivi(store.getState().gesti.filter(x => x.id !== id));
 /** Come si chiama il gesto nelle notifiche: solo parole (che cosa si stava facendo), mai identificativi tecnici (numero di partita, operazione). */
 const scopeTesto = (g: GestoPartita) => g.bersaglio.etichetta;
 async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
   if (inVolo.has(g.id)) throw new Error('Questa operazione è ancora in invio.');
   // (una ricevuta di spunta conservata prima della separazione può ancora portare l'avanzamento di allora: non si restituisce una fotografia vecchia della partita)
-  if (g.stato === 'riuscita' && g.ricevuta !== null) { if (!g.ricevutaPersistita) cambia({ ...g, ricevutaPersistita: true }); return separaAvanzamento(g.ricevuta).resto as Ricevuta; }
+  // («Salva l'esito»: una ricevuta acquisita che la scheda non aveva potuto salvare; salvarla è toglierla dal registro)
+  if (g.stato === 'riuscita' && g.ricevuta !== null) { togli(g.id); return separaAvanzamento(g.ricevuta).resto as Ricevuta; }
   if (g.stato === 'rifiutata') throw new Error('Questa richiesta è già stata rifiutata: non viene ripetuta.');
   if (store.getState().erroreArchivio) throw new Error(store.getState().erroreArchivio!);
   const inInvio = { ...g, stato: 'invio' as const, errore: null, aggiornatoIl: new Date().toISOString() };
@@ -378,7 +386,8 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
     const { applicazioni, illeggibile, resto } = p.tipo === 'decisione-effetto-voce' ? separaApplicazioni(senzaAvanzamento) : { applicazioni: undefined, illeggibile: false, resto: senzaAvanzamento };
     risposta = validaRicevuta(resto, g);
     const riuscita = { ...g, stato: 'riuscita' as const, ricevuta: risposta, ricevutaPersistita: true, errore: null, aggiornatoIl: new Date().toISOString() };
-    try { cambia(riuscita); }
+    // confermata: esce dall'elenco da sola; se la scheda non la salva resta, in sospeso, con «Salva l'esito»
+    try { togli(g.id); }
     catch {
       store.setState(s => ({ gesti: immutabile(s.gesti.map(x => x.id === g.id ? { ...riuscita, ricevutaPersistita: false } : x)) }));
       notifica('warning', `${scopeTesto(g)}: successo ricevuto; ricevuta non salvata nella scheda. Conserva questa scheda e recupera lo stesso gesto.`, 0);

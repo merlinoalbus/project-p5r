@@ -12,6 +12,10 @@
 //   - lo stato è già vero nella partita (la stessa lettura della spunta, `statoGiaVero`): non c'è niente da proporre, solo il registro;
 //   - un articolo in alternativa con altri della voce (L13, decisione 4, `effettiInAlternativa`): lo sceglie solo la spunta (uno, o nessuno), e
 //     senza la sua riga non è stato scelto: non entra (una sua proposta aperta di prima si chiude);
+//   - un oggetto restituito o venduto («uscitaOggetto») che la partita non possiede in copie abbastanza (2026-10-29, segnalazione dell'utente:
+//     «La leggenda dei pirati» presa in prestito prima che l'inventario si tracciasse, proposta e poi rifiutata da «Applica» con «non è fra le
+//     copie della partita: non esce niente»): non c'è nulla da togliere, quindi non entra; il registro lo dice («nulla-da-togliere», una
+//     decisione presa una volta sola come il «già vero») e una sua proposta aperta di prima si chiude con la stessa nota;
 //   - altrimenti entra nell'elenco della partita: una proposta «da applicare» (`dati.passato`), con le stesse guardie delle altre (una aperta
 //     con la stessa configurazione resta, una tolta dall'utente con «Non applicare» non torna). Si applica solo con «Applica alla
 //     partita» (`motoreDiario.applicaStatoDelPassato`).
@@ -25,7 +29,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { normalizzaEffettoVoce, eEffettoCheSomma, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
-import { fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
+import { copiePerUscita, fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
@@ -47,6 +51,10 @@ export interface CensimentoPartita {
   invariate: number;
   /** Articoli in alternativa con altri della voce (decisione 4) senza riga: non scelti alla spunta, quindi non mancano e non entrano nell'elenco. */
   inAlternativa: number;
+  /** Oggetti restituiti o venduti senza copie abbastanza nella partita: nulla da togliere, non entrano (e una loro proposta aperta si chiude). */
+  nullaDaTogliere: number;
+  /** Di quelle, le proposte aperte di prima chiuse in questo giro con la nota «nulla-da-togliere» (per il log). */
+  chiuseNullaDaTogliere: number;
   /** Effetti della voce che non si riconoscono come effetti di stato (la configurazione salvata non è leggibile per intero): non entrano. */
   nonRiconosciuti: number;
   /** Coppie il cui esame non è riuscito (un registro illeggibile): tornate indietro da sole, le altre proseguono; il prossimo giro le riprova. */
@@ -76,7 +84,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
       let c = perPartita.get(p);
-      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, inAlternativa: 0, nonRiconosciuti: 0, errori: 0 }; perPartita.set(p, c); }
+      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, inAlternativa: 0, nullaDaTogliere: 0, chiuseNullaDaTogliere: 0, nonRiconosciuti: 0, errori: 0 }; perPartita.set(p, c); }
       return c;
     };
     // decisione 4: gli articoli in alternativa di ogni voce (le righe portano tutti i suoi effetti «articolo»): quale si è comprato lo sceglie solo
@@ -92,7 +100,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     }
     const inAlternativa = new Map([...articoliPerVoce].map(([voce, m]) => [voce, effettiInAlternativa([...m.values()])]));
     const nomi = nomiFraseEffetto(), adesso = nowIso();
-    const registra = (r: RigaCandidato, esito: 'proposta' | 'gia-presente'): void => {
+    const registra = (r: RigaCandidato, esito: 'proposta' | 'gia-presente' | 'nulla-da-togliere'): void => {
       prepared(`INSERT INTO utente.censimento_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, esito, rilevato_il) VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(partita_id, voce_uid, effetto_uid) DO UPDATE SET tipo = excluded.tipo, chiave = excluded.chiave, esito = excluded.esito,
           rilevato_il = CASE WHEN censimento_stato_voce.esito = excluded.esito THEN censimento_stato_voce.rilevato_il ELSE excluded.rilevato_il END`)
@@ -115,6 +123,18 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           // (togliendo la spunta della voce il registro della coppia se ne va: `giornataService`, la spunta rifatta si rivaluta)
           if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
             .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.giaPresenti += 1; return; }
+          // l'uscita di un oggetto senza copie abbastanza: «Applica» la rifiuterebbe (`applicaUscita`, «non esce niente»), quindi non si propone.
+          // Decisione presa una volta sola (con lo stesso effetto): una copia ottenuta dopo nella partita è un'altra, e la voce di allora non la toglie
+          if (e.tipo === 'uscitaOggetto') {
+            if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'nulla-da-togliere' AND tipo = ? AND chiave IS ?")
+              .get(r.partita_id, r.voce_uid, r.effetto_uid, r.tipo, r.chiave)) { c.nullaDaTogliere += 1; return; }
+            if (copiePerUscita(r.partita_id, r.voce_uid, r.effetto_uid, e) < e.quantita) {
+              if (chiudiPropostePassato(r.partita_id, r.voce_uid, r.effetto_uid, 'nulla-da-togliere')) c.chiuseNullaDaTogliere += 1;
+              registra(r, 'nulla-da-togliere');
+              c.nullaDaTogliere += 1;
+              return;
+            }
+          }
           // l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito o venduto sommano, non sono uno stato sì/no: senza la loro riga mancano sempre
           if (!eEffettoCheSomma(e) && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
