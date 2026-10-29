@@ -321,6 +321,9 @@ import { migration299 } from './299_bonus_si_no_della_fabbricazione.js';
 import { migration300 } from './300_bombe_e_fabbricazione_di_kawakami.js';
 // 2026-10-28 («i punti rango andavano gestiti come note»): l'effetto «punti a un Confidente» in note, solo dove i punti sono 5, 10 o 15
 import { migration301 } from './301_note_di_rango_degli_effetti.js';
+// 2026-10-29 (decisione 23: «applicale direttamente a meno di impatti per i quali è necessaria mia decisione esplicita»): le proposte aperte
+// si applicano anche nel periodo validato; restano solo le incerte, quelle con una scelta dell'utente e quelle già registrate nelle partite
+import { migration302 } from './302_decisione_23_proposte_aperte.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -343,5 +346,5 @@ export const migrations: Migration[] = [
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
-  migration300, migration301,
+  migration300, migration301, migration302,
 ];
