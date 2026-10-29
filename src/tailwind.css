@@ -1164,10 +1164,13 @@
      (sticky, fino al bordo: annulla il padding di <main>, 16 px, 20 px da 1024). I risultati scorrono con la pagina, nessuna area interna.
      Ogni voce è un collegamento: sotto 768 px le parti si impilano (fascia e stato, testo, note, «Spuntando»); da 768 tre colonne logiche
      fascia | voce | effetto. Le note e «Spuntando» lunghi si riducono a poche righe; le parole cercate sono evidenziate (<mark>). */
-  .ricerca-diario__barra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-  .ricerca-diario__barra--fissa { position: sticky; top: -16px; z-index: 20; margin: 0 -16px; padding: 8px 16px;
+  .ricerca-diario__barra { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+  /* fissa anche «Torna ai risultati» nel giorno aperto da un risultato. Altezza (intestazione ≤ 30%): una riga 6+44+6+1 = 57 px, due righe
+     sul telefono in verticale 6+44+4+44+6+1 = 105 px; sugli schermi bassi (telefono in orizzontale) il bordo verticale scende a 2 px */
+  .ricerca-diario__barra--fissa { position: sticky; top: -16px; z-index: 20; margin: 0 -16px; padding: 6px 16px;
     background: var(--color-bg); border-bottom: 1px solid var(--color-border); }
-  @media (min-width: 1024px) { .ricerca-diario__barra--fissa { top: -20px; margin: 0 -20px; padding: 8px 20px; } }
+  @media (max-height: 480px) { .ricerca-diario__barra--fissa { padding-block: 2px; } }
+  @media (min-width: 1024px) { .ricerca-diario__barra--fissa { top: -20px; margin: 0 -20px; padding-inline: 20px; } }
   .ricerca-diario__risultati { display: flex; flex-direction: column; gap: 12px; }
   .ricerca-diario__in-corso { opacity: .6; transition-property: opacity; transition-duration: 150ms; transition-timing-function: ease-out; }
   @media (prefers-reduced-motion: reduce) { .ricerca-diario__in-corso { transition: none; } }

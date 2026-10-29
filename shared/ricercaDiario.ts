@@ -70,18 +70,9 @@ export function voceCorrispondeRicerca(parole: readonly string[], ...testi: Arra
   return parole.every((p) => piatti.some((t) => t.includes(p)));
 }
 
-/** Un pezzo del testo da mostrare: evidenziato se è una parola cercata. */
-export interface PezzoEvidenziato { testo: string; evidenziato: boolean }
-
-/**
- * Il testo diviso nei pezzi da evidenziare, con le stesse regole del confronto (senza maiuscole né accenti): «Studia sul Divanetto» con
- * «studia» → [«Studia» evidenziato, « sul Divanetto»]. Il testo piatto può avere una lunghezza diversa dall'originale (una lettera accentata
- * scomposta), quindi ogni carattere piatto ricorda il carattere originale da cui viene; le parti che si sovrappongono si uniscono.
- */
-export function pezziEvidenziati(testo: string, parole: readonly string[]): PezzoEvidenziato[] {
-  if (!testo) return [];
-  if (!parole.length) return [{ testo, evidenziato: false }];
-  // il testo piatto, con per ogni suo carattere l'indice del carattere (code point) originale
+/** Il testo per caratteri (code point) con il suo testo piatto: per ogni carattere piatto l'indice del carattere originale da cui viene, e per
+ *  ogni carattere originale il suo inizio nella stringa (più la fine, in coda). */
+function mappaPiatta(testo: string): { caratteri: string[]; inizi: number[]; piatto: string; origini: number[] } {
   const origini: number[] = [];
   const caratteri = Array.from(testo);
   const inizi: number[] = [];
@@ -95,6 +86,51 @@ export function pezziEvidenziati(testo: string, parole: readonly string[]): Pezz
     for (let k = 0; k < p.length; k++) origini.push(i);
   });
   inizi.push(pos);
+  return { caratteri, inizi, piatto, origini };
+}
+
+/**
+ * Da dove mostrare un testo lungo ridotto a poche righe (le note dei risultati) perché si veda la prima parola cercata che contiene: 0 se la
+ * parola sta già entro `soglia` caratteri (o non c'è), altrimenti l'inizio della parola che sta circa `contesto` caratteri prima. Così una
+ * voce trovata per una parola che compare solo in fondo alle note non resta senza nessuna evidenziazione visibile. Indice nella stringa.
+ */
+export function inizioEstrattoRicerca(testo: string, parole: readonly string[], soglia = 60, contesto = 30): number {
+  if (!testo || !parole.length) return 0;
+  const { caratteri, inizi, piatto, origini } = mappaPiatta(testo);
+  let primo = -1;
+  for (const parola of parole) {
+    const da = piatto.indexOf(parola);
+    if (da >= 0 && (primo < 0 || origini[da]! < primo)) primo = origini[da]!;
+  }
+  if (primo <= soglia) return 0;
+  // si parte dall'inizio della riga della parola trovata, se comincia entro `contesto` caratteri prima (le note vanno spesso a capo fra un
+  // argomento e l'altro); altrimenti dall'inizio di una parola in quel tratto; senza spazi in mezzo, dalla parola stessa
+  const minimo = Math.max(0, primo - contesto);
+  let da = primo;
+  let aCapo = false;
+  for (let k = primo - 1; k >= minimo; k--) {
+    if (caratteri[k] === '\n') { da = k + 1; aCapo = true; break; }
+  }
+  if (!aCapo) {
+    for (let k = minimo; k < primo; k++) {
+      if (/\s/.test(caratteri[k]!)) { da = k + 1; break; }
+    }
+  }
+  return inizi[da]!;
+}
+
+/** Un pezzo del testo da mostrare: evidenziato se è una parola cercata. */
+export interface PezzoEvidenziato { testo: string; evidenziato: boolean }
+
+/**
+ * Il testo diviso nei pezzi da evidenziare, con le stesse regole del confronto (senza maiuscole né accenti): «Studia sul Divanetto» con
+ * «studia» → [«Studia» evidenziato, « sul Divanetto»]. Il testo piatto può avere una lunghezza diversa dall'originale (una lettera accentata
+ * scomposta), quindi ogni carattere piatto ricorda il carattere originale da cui viene; le parti che si sovrappongono si uniscono.
+ */
+export function pezziEvidenziati(testo: string, parole: readonly string[]): PezzoEvidenziato[] {
+  if (!testo) return [];
+  if (!parole.length) return [{ testo, evidenziato: false }];
+  const { caratteri, inizi, piatto, origini } = mappaPiatta(testo);
   const segnati = new Array<boolean>(caratteri.length).fill(false);
   for (const parola of parole) {
     for (let da = piatto.indexOf(parola); da >= 0; da = piatto.indexOf(parola, da + 1)) {

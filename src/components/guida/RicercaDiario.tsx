@@ -16,18 +16,18 @@
 // La lettura dal server sta in `hooks/useRicercaDiario.ts`, gli aiuti (tipo dall'indirizzo, ritorno ai risultati) in `utils/ricercaDiario.ts`.
 // ============================================================
 
-import { useEffect, useId, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useId, useMemo, useRef, type MouseEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaFascia } from './FasciaGiornata';
 import { TIPI_AZIONE, type TipoAzione } from '../../../shared/effettiAzione';
-import { MINIMO_CARATTERI_RICERCA_DIARIO, paroleRicercaDiario, pezziEvidenziati, type RicercaDiarioDto, type RisultatoRicercaDiarioDto } from '../../../shared/ricercaDiario';
+import { MINIMO_CARATTERI_RICERCA_DIARIO, inizioEstrattoRicerca, paroleRicercaDiario, pezziEvidenziati, piattoRicercaDiario, type RicercaDiarioDto, type RisultatoRicercaDiarioDto } from '../../../shared/ricercaDiario';
 import { giornoDellaSettimana } from '../../../shared/date';
 import { dataGiocoTesto, meseGioco } from '../../utils/dateGioco';
-import { nomeTipoVoce as nomeTipo, testoSufficiente, tipoDaIndirizzo, type RitornoRicercaDiario } from '../../utils/ricercaDiario';
+import { descrizioneRicerca, nomeTipoVoce as nomeTipo, testoSufficiente, tipoDaIndirizzo, type RitornoRicercaDiario } from '../../utils/ricercaDiario';
 import type { RicercaDiario } from '../../hooks/useRicercaDiario';
 
 // ---------------------------------------------------------------- barra
@@ -52,11 +52,25 @@ export function BarraRicercaDiario({ testo, onTesto, tipo, onTipo, attiva, onCan
   const conteggi = perTipo && testoSufficiente(testo) ? perTipo : null;
   return (
     <div role="search" className={`ricerca-diario__barra ${attiva ? 'ricerca-diario__barra--fissa' : ''}`} aria-label="Cerca nel Diario">
-      <CampoRicerca valore={testo} onCambia={onTesto} segnaposto="Cerca nel Diario (che cosa fare, note)" className="basis-full md:basis-auto" id={idCampo} />
+      {/* base 15rem: sul telefono in verticale il campo prende la riga e tipo e «Cancella» vanno sotto; da circa 600 px tutto sta su una riga
+          (telefono in orizzontale compreso), così la barra fissa resta bassa */}
+      <CampoRicerca valore={testo} onCambia={onTesto} segnaposto="Cerca nel Diario (che cosa fare, note)" className="basis-60" id={idCampo} />
       <Selettore compatto etichetta="Tipo di voce" valore={tipo ?? ''} vuoto="Tutti i tipi" ricerca="mai"
         opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, dettaglio: conteggi ? String(conteggi[t.chiave] ?? 0) : undefined }))}
         onCambia={(k) => onTipo(tipoDaIndirizzo(k))} />
       {attiva && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Cancella ricerca" onClick={onCancella} />}
+    </div>
+  );
+}
+
+/**
+ * Nel giorno aperto da un risultato: «Torna ai risultati» con ciò che si cercava, fisso in cima mentre la pagina scorre (come la barra della
+ * ricerca), perché la voce aperta sta a metà schermo e il comando in cima al giorno resterebbe fuori vista.
+ */
+export function BarraRitornoRisultati({ ritorno, onTorna }: { ritorno: RitornoRicercaDiario; onTorna: () => void }) {
+  return (
+    <div className="ricerca-diario__barra ricerca-diario__barra--fissa">
+      <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo="Torna ai risultati" dettaglio={descrizioneRicerca(ritorno)} onClick={onTorna} />
     </div>
   );
 }
@@ -93,12 +107,35 @@ function perMeseEGiorno(risultati: readonly RisultatoRicercaDiarioDto[]): Gruppo
 
 const voci = (n: number): string => (n === 1 ? '1 voce' : `${n} voci`);
 
+/**
+ * Le note da mostrare nella riga, ridotta a poche righe: se una parola cercata non è in «Che cosa fare» e nelle note compare solo dopo
+ * l'inizio, la riga mostra le note dal punto della parola («…» davanti), così si vede perché la voce è stata trovata; altrimenti tutte.
+ */
+function noteDaMostrare(r: RisultatoRicercaDiarioDto, parole: readonly string[]): string | null {
+  if (!r.note) return null;
+  const azione = piattoRicercaDiario(r.azione);
+  const mancanti = parole.filter((p) => !azione.includes(p));
+  const da = inizioEstrattoRicerca(r.note, mancanti);
+  return da > 0 ? `…${r.note.slice(da)}` : r.note;
+}
+
 /** Una voce trovata: un collegamento che apre il suo giorno sulla voce. */
 function RigaRisultato({ r, parole, conTipo, q, tipo }: { r: RisultatoRicercaDiarioDto; parole: readonly string[]; conTipo: boolean; q: string; tipo: TipoAzione | null }) {
-  const ritornoRicerca: RitornoRicercaDiario = { q, tipo, voce: r.uid };
+  const ritornoRicerca: RitornoRicercaDiario = { q, tipo, voce: r.uid, passi: 1 };
+  const posizione = useLocation();
+  const navigate = useNavigate();
+  const note = noteDaMostrare(r, parole);
+  // prima di aprire la voce, la voce di cronologia dei risultati ricorda la riga (`voceDiRitorno`): tornando anche con «indietro» del
+  // sistema la riga torna in vista e riprende il fuoco (stesso modo dell'«Entra» nei Palazzi, `PartiAzione.ricordaVoce`). Con i tasti
+  // che aprono altrove (nuova scheda, finestra) la pagina resta questa e non serve
+  const ricordaRiga = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    const stato = posizione.state && typeof posizione.state === 'object' ? posizione.state as Record<string, unknown> : {};
+    navigate({ pathname: posizione.pathname, search: posizione.search, hash: posizione.hash }, { replace: true, state: { ...stato, voceDiRitorno: r.uid } });
+  };
   return (
     <li>
-      <Link id={`ricerca-voce-${r.uid}`} className="ricerca-diario__voce" to={{ pathname: `/guida/percorso/${r.giorno}`, search: `?voce=${r.uid}`, hash: `#voce-${r.uid}` }} state={{ ritornoRicerca }}>
+      <Link id={`ricerca-voce-${r.uid}`} className="ricerca-diario__voce" to={{ pathname: `/guida/percorso/${r.giorno}`, search: `?voce=${r.uid}`, hash: `#voce-${r.uid}` }} state={{ ritornoRicerca }} onClick={ricordaRiga}>
         <span className="ricerca-diario__fascia">
           <IconaFascia fascia={r.fascia} dimensione={18} className="w-5 h-5 object-contain shrink-0" />
           <span>{r.fascia === 'sera' ? 'Di sera' : 'Di giorno'}</span>
@@ -110,7 +147,7 @@ function RigaRisultato({ r, parole, conTipo, q, tipo }: { r: RisultatoRicercaDia
             <Evidenziato testo={r.azione} parole={parole} />
             {r.riferimentoTesto && <span className="ricerca-diario__collegamento"> · {r.riferimentoTesto}</span>}
           </span>
-          {r.note && <span className="ricerca-diario__note"><Evidenziato testo={r.note} parole={parole} /></span>}
+          {note && <span className="ricerca-diario__note"><Evidenziato testo={note} parole={parole} /></span>}
         </span>
         {r.spuntando.length > 0 && <span className="ricerca-diario__effetto"><span className="ricerca-diario__etichetta">Spuntando:</span> {r.spuntando.join('; ')}</span>}
       </Link>
@@ -134,7 +171,7 @@ export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRit
   const idTitolo = useId();
   const testo = q.trim();
   const parole = useMemo(() => paroleRicercaDiario(testoSufficiente(testo) ? testo : ''), [testo]);
-  const { dati, inCorso, errore, valida, riprova } = ricerca;
+  const { dati, inCorso, errore, riprova } = ricerca;
   const gruppi = useMemo(() => perMeseEGiorno(dati?.risultati ?? []), [dati]);
   // tornando dalla voce aperta, la sua riga torna in vista e riprende il fuoco (una volta per ritorno)
   const ripresa = useRef<string | null>(null);
@@ -147,9 +184,9 @@ export function RisultatiRicercaDiario({ q, tipo, ricerca, conPartita, voceDiRit
     riga.focus({ preventScroll: true });
   }, [voceDiRitorno, dati]);
 
+  // la vista c'è solo con una ricerca valida (`PercorsoPage`: almeno due lettere o un tipo), quindi qui c'è sempre qualcosa da cercare
   let riepilogo: string;
-  if (!valida) riepilogo = `Scrivi almeno ${MINIMO_CARATTERI_RICERCA_DIARIO} lettere o scegli un tipo di voce.`;
-  else if (errore) riepilogo = 'La ricerca non è riuscita.';
+  if (errore) riepilogo = 'La ricerca non è riuscita.';
   else if (!dati) riepilogo = 'Cerco…';
   else {
     const fatte = conPartita ? dati.risultati.filter((r) => r.fatta).length : 0;

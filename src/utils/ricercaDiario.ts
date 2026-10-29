@@ -20,14 +20,25 @@ export function tipoDaIndirizzo(valore: string | null): TipoAzione | null {
 /** Vero se il testo basta per cercare (lo stesso minimo del server). */
 export const testoSufficiente = (q: string): boolean => q.trim().length >= MINIMO_CARATTERI_RICERCA_DIARIO;
 
-/** Da dove si è aperta una voce trovata: la ricerca a cui «Torna ai risultati» riporta e la voce su cui rimettere il fuoco. */
-export interface RitornoRicercaDiario { q: string; tipo: TipoAzione | null; voce: string }
+/**
+ * Da dove si è aperta una voce trovata: la ricerca a cui «Torna ai risultati» riporta, la voce su cui rimettere il fuoco e quante voci di
+ * cronologia ci sono fra la pagina e i risultati (1 aprendo la voce, uno in più a ogni giorno cambiato da lì): «Torna ai risultati» torna
+ * indietro di tanti passi, così la cronologia non si allunga e «indietro» non rifà il giro.
+ */
+export interface RitornoRicercaDiario { q: string; tipo: TipoAzione | null; voce: string; passi: number }
 
 /** Il ritorno alla ricerca dallo stato della cronologia, se c'è e ha la forma giusta; altrimenti null. */
 export function leggiRitornoRicerca(stato: unknown): RitornoRicercaDiario | null {
   const r = (stato as { ritornoRicerca?: unknown } | null)?.ritornoRicerca as Partial<RitornoRicercaDiario> | undefined;
   if (!r || typeof r.q !== 'string' || typeof r.voce !== 'string') return null;
-  return { q: r.q, tipo: tipoDaIndirizzo(typeof r.tipo === 'string' ? r.tipo : null), voce: r.voce };
+  const passi = typeof r.passi === 'number' && Number.isInteger(r.passi) && r.passi >= 1 ? r.passi : 0;
+  return { q: r.q, tipo: tipoDaIndirizzo(typeof r.tipo === 'string' ? r.tipo : null), voce: r.voce, passi };
+}
+
+/** Che cosa si stava cercando, da dire accanto a «Torna ai risultati»: «studia», il tipo, o tutti e due. */
+export function descrizioneRicerca(r: Pick<RitornoRicercaDiario, 'q' | 'tipo'>): string {
+  const q = r.q.trim();
+  return [q ? `«${q}»` : '', r.tipo ? nomeTipoVoce(r.tipo) : ''].filter(Boolean).join(' · ');
 }
 
 /** La parte dopo «?» dell'indirizzo di una ricerca ('' senza testo né tipo). */

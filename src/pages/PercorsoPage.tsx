@@ -5,10 +5,11 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { BarraRicercaDiario, RisultatiRicercaDiario } from '../components/guida/RicercaDiario';
+import { BarraRicercaDiario, BarraRitornoRisultati, RisultatiRicercaDiario } from '../components/guida/RicercaDiario';
 import { useRicercaDiario } from '../hooks/useRicercaDiario';
-import { leggiRitornoRicerca, parametriRicerca, tipoDaIndirizzo, type RitornoRicercaDiario } from '../utils/ricercaDiario';
+import { leggiRitornoRicerca, parametriRicerca, testoSufficiente, tipoDaIndirizzo, type RitornoRicercaDiario } from '../utils/ricercaDiario';
 import type { TipoAzione } from '../../shared/effettiAzione';
+import { profonditaDaStato } from '../utils/pannelloScheda';
 import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -52,7 +53,8 @@ export function PercorsoPage() {
   // ---- ricerca nel Diario (2026-10-29): testo e tipo nell'indirizzo (`?q=&tipo=`); con uno dei due la pagina mostra i risultati al posto del giorno
   const qIndirizzo = parametri.get('q') ?? '';
   const tipoRicerca = tipoDaIndirizzo(parametri.get('tipo'));
-  const ricercaAttiva = qIndirizzo.trim() !== '' || tipoRicerca !== null;
+  // con una lettera sola (e nessun tipo) il giorno resta: sul telefono una pausa fra due lettere non deve farlo sparire
+  const ricercaAttiva = testoSufficiente(qIndirizzo) || tipoRicerca !== null;
   const idCampoRicerca = useId();
   // il campo segue ciò che si scrive; l'indirizzo lo segue con un piccolo ritardo (`RITARDO_RICERCA_MS`). Se l'indirizzo cambia da fuori
   // (indietro, «Torna ai risultati») il campo lo riprende, salvo che sia il testo appena scritto da qui
@@ -89,9 +91,18 @@ export function PercorsoPage() {
     scriviRicerca('', null);
     setTimeout(() => document.getElementById(idCampoRicerca)?.focus());
   };
-  /** «Torna ai risultati»: la ricerca da cui si è aperta la voce, nello stesso punto (la riga della voce riprende il fuoco). */
+  /**
+   * «Torna ai risultati»: la ricerca da cui si è aperta la voce, nello stesso punto (la riga della voce riprende il fuoco). Si torna indietro
+   * nella cronologia di tanti passi quanti ne sono stati fatti dai risultati (la loro voce ricorda già la riga, `RigaRisultato`): la
+   * cronologia non si allunga e un «indietro» dopo non ripassa dal giorno. Se quei passi non ci sono (stato senza conteggio, cronologia più
+   * corta), si sostituisce la pagina con la ricerca.
+   */
   const tornaAiRisultati = (r: RitornoRicercaDiario) => {
-    navigate({ pathname: posizione.pathname, search: parametriRicerca(r.q, r.tipo) }, { state: { voceDiRitorno: r.voce } });
+    const idx = (window.history.state as { idx?: unknown } | null)?.idx;
+    // con una scheda aperta nel pannello sopra il diario, anche le sue voci di cronologia (che portano con sé `ritornoRicerca`)
+    const passi = r.passi >= 1 ? r.passi + profonditaDaStato(posizione.state) : 0;
+    if (passi >= 1 && typeof idx === 'number' && idx >= passi) { void navigate(-passi); return; }
+    void navigate({ pathname: posizione.pathname, search: parametriRicerca(r.q, r.tipo) }, { replace: true, state: { voceDiRitorno: r.voce } });
   };
   const indice = useCarica(() => getPercorsoIndice(partitaId ?? undefined), [partitaId]);
   const data = dataParam ?? indice.dati?.dataCorrente ?? indice.dati?.giorni[0]?.giorno ?? null;
@@ -99,7 +110,19 @@ export function PercorsoPage() {
   const g = giorno.dati;
   const giornoCaricato = g?.giorno;
   useEffect(() => {
-    if (giornoCaricato && voceDaMostrare) document.getElementById(`voce-${voceDaMostrare}`)?.scrollIntoView({ block: 'center' });
+    if (!giornoCaricato || !voceDaMostrare) return;
+    const riga = document.getElementById(`voce-${voceDaMostrare}`);
+    if (!riga) return;
+    riga.scrollIntoView({ block: 'center' });
+    // la voce aperta (dalla ricerca, dall'«Esci» di un Palazzo) prende anche il fuoco, così il Tab riparte da lì: solo se il fuoco non è su
+    // un comando della pagina (è sul documento, perché il collegamento toccato è sparito, o sul titolo messo dal cambio di pagina)
+    const ora = document.activeElement;
+    if (ora && ora !== document.body && ora.tagName !== 'H1' && ora.tagName !== 'MAIN') return;
+    if (!riga.hasAttribute('tabindex')) {
+      riga.setAttribute('tabindex', '-1');
+      riga.addEventListener('blur', () => riga.removeAttribute('tabindex'), { once: true });
+    }
+    riga.focus({ preventScroll: true });
   }, [giornoCaricato, voceDaMostrare]);
   useDocumentTitle(ricercaAttiva ? `Ricerca nel Diario${qIndirizzo.trim() ? ` «${qIndirizzo.trim()}»` : ''} — Guida giorno per giorno` : g ? `${dataGiocoTesto(g.giorno)} — Guida giorno per giorno` : 'Guida giorno per giorno');
   const [occupatoGiorno, setOccupatoGiorno] = useState(false);
@@ -127,8 +150,9 @@ export function PercorsoPage() {
       notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupatoGiorno(false); }
   };
-  /** Apre la pagina di un altro giorno; con null non fa niente. Aperta una voce dalla ricerca, «Torna ai risultati» resta anche negli altri giorni. */
-  const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`, { state: ritornoRicerca ? { ritornoRicerca } : undefined }); };
+  /** Apre la pagina di un altro giorno; con null non fa niente. Aperta una voce dalla ricerca, «Torna ai risultati» resta anche negli altri
+   *  giorni e conta un passo in più (più quelli del pannello aperto) per tornare indietro fino ai risultati. */
+  const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`, { state: ritornoRicerca ? { ritornoRicerca: { ...ritornoRicerca, passi: ritornoRicerca.passi >= 1 ? ritornoRicerca.passi + profonditaDaStato(posizione.state) + 1 : 0 } } : undefined }); };
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>
       {indice.dati && g && (
@@ -142,8 +166,8 @@ export function PercorsoPage() {
           {ricercaAttiva ? (
             <RisultatiRicercaDiario q={qIndirizzo} tipo={tipoRicerca} ricerca={ricerca} conPartita={partitaId !== null} voceDiRitorno={typeof voceDiRitorno === 'string' ? voceDiRitorno : null} onTogliTipo={() => scriviRicerca(testoRicerca, null)} />
           ) : (<>
+          {ritornoRicerca && <BarraRitornoRisultati ritorno={ritornoRicerca} onTorna={() => tornaAiRisultati(ritornoRicerca)} />}
           <div className="flex flex-wrap items-center gap-1.5">
-            {ritornoRicerca && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo="Torna ai risultati" onClick={() => tornaAiRisultati(ritornoRicerca)} />}
             <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => vai(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
             <Selettore compatto ricerca="mai" etichetta="Mese" valore={g.giorno.slice(0, 2)} opzioni={mesi.map((m) => ({ chiave: m, nome: meseGioco(`${m}-01`) }))} onCambia={(k) => { const primo = indice.dati?.giorni.find((x) => x.giorno.slice(0, 2) === k); vai(primo?.giorno ?? null); }} />
             <Selettore compatto etichetta="Giorno" valore={g.giorno} opzioni={giorniDelMese.map((x) => ({ chiave: x.giorno, nome: `${dataGiocoTesto(x.giorno)} (${x.giornoSettimana})`, dettaglio: x.azioni ? `${x.fatte}/${x.azioni}` : undefined }))} onCambia={(k) => vai(k)} />
