@@ -24,6 +24,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconMedaglia } from '../components/shared/iconeGuida';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
 
 // Il Covo dei Ladri non è più una linguetta qui: ha una pagina sua, `/guida/covo`. Non era un
 // capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
@@ -104,6 +105,10 @@ export function CompletamentoPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getCompletamento(partitaId ?? undefined), [partitaId]);
+  // il Covo c'è nella partita (dal 5 maggio, dato dell'Area del Covo): senza partita o senza l'Area resta visibile
+  const covo = useCovoNellaPartita(partitaId, attiva);
+  // si nasconde solo quando il server dice «non ancora» (in attesa, senza partita o con la lettura fallita resta visibile)
+  const covoAperto = covo?.disponibile !== false;
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'trofei') as Scheda;
   const [tipo, setTipo] = useState('');
@@ -124,7 +129,8 @@ export function CompletamentoPage() {
           <IntestazionePagina titolo="Trofei e finali" sottotitolo={<>{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</>} />
           {/* Il Covo stava qui come terza linguetta ed è andato in una pagina sua: chi lo cercava
               dov'era lo trova lo stesso, invece di concludere che è sparito. */}
-          <CollegamentoVisivo to="/guida/covo" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Covo dei Ladri" dettaglio="sfide, premi e Medaglie P" />
+          {/* 2026-10-29: con una partita prima del 5 maggio il Covo non c'è ancora, e il collegamento non compare (esito dell'Area del Covo) */}
+          {covoAperto && <CollegamentoVisivo to="/guida/covo" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Covo dei Ladri" dettaglio="sfide, premi e Medaglie P" />}
           <FilaScorrevole {...schede.lista} aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => (
               <button key={k} type="button" {...schede.scheda(k)} title={l}

@@ -3,14 +3,22 @@
 // Test GuidaPage — indice a piastrelle: tutte le sezioni con il loro collegamento e la riserva vettoriale
 // ============================================================
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GuidaPage } from './GuidaPage';
 import { SEZIONI_GUIDA } from '../components/guida/sezioniGuida';
 import { useAssetStore } from '../stores/assetStore';
+import { usePartitaStore } from '../stores/partitaStore';
+import { COVO_AREA } from '../utils/covo';
+import type { PartitaDto } from '../types';
+
+const { getAreeDelQuartiere } = vi.hoisted(() => ({ getAreeDelQuartiere: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getAreeDelQuartiere }));
 
 beforeEach(() => {
   useAssetStore.setState({ manifest: null, caricato: false, mancanti: {} });
+  usePartitaStore.setState({ attiva: null });
+  getAreeDelQuartiere.mockResolvedValue([{ chiave: COVO_AREA.chiave, disponibile: true }]);
 });
 
 describe('GuidaPage', () => {
@@ -36,5 +44,21 @@ describe('GuidaPage', () => {
     render(<MemoryRouter><GuidaPage /></MemoryRouter>);
     expect(document.querySelector('img[src="/asset/guida/dungeon.png"]')).not.toBeNull();
     expect(document.querySelectorAll('.piastrella-guida__riserva')).toHaveLength(SEZIONI_GUIDA.length - 1);
+  });
+
+  // 2026-10-29 («il covo dei ladri si sblocca il 5 maggio»): con una partita prima di quella data la piastrella del Covo non c'è
+  it('nasconde il Covo dei Ladri solo quando nella partita non è ancora aperto', async () => {
+    usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova' } as PartitaDto });
+    getAreeDelQuartiere.mockResolvedValue([{ chiave: COVO_AREA.chiave, disponibile: false, bloccoMotivo: 'dal 5 maggio' }]);
+    render(<MemoryRouter><GuidaPage /></MemoryRouter>);
+    await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(SEZIONI_GUIDA.length - 1));
+    expect(screen.queryByText('Covo dei Ladri', { selector: 'span' })).toBeNull();
+  });
+
+  it('mostra il Covo dei Ladri quando nella partita è aperto', async () => {
+    usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova' } as PartitaDto });
+    render(<MemoryRouter><GuidaPage /></MemoryRouter>);
+    await waitFor(() => expect(getAreeDelQuartiere).toHaveBeenCalled());
+    expect(screen.getByText('Covo dei Ladri', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/guida/covo');
   });
 });

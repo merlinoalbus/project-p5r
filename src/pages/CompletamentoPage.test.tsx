@@ -11,9 +11,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { CompletamentoPage } from './CompletamentoPage';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { CompletamentoDto, PartitaDto, TrofeoDto } from '../types';
+import { COVO_AREA } from '../utils/covo';
 
-const { getCompletamento, impostaTrofeo } = vi.hoisted(() => ({ getCompletamento: vi.fn(), impostaTrofeo: vi.fn() }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento, impostaTrofeo }));
+const { getCompletamento, impostaTrofeo, getAreeDelQuartiere } = vi.hoisted(() => ({ getCompletamento: vi.fn(), impostaTrofeo: vi.fn(), getAreeDelQuartiere: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { getCompletamento, impostaTrofeo, getAreeDelQuartiere }));
+// il collegamento al Covo compare solo se l'Area del Covo è già nel mondo della partita (dal 5 maggio): qui è aperta
+getAreeDelQuartiere.mockResolvedValue([{ chiave: COVO_AREA.chiave, disponibile: true }]);
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Costruisce un trofeo verificato, non ancora ottenuto, con chiave, nome e tipo dati. */
@@ -50,7 +53,7 @@ describe('CompletamentoPage', () => {
     // il rimando, e la prova serve a garantire che chi lo cercava dov'era non trovi il vuoto.
     expect(screen.queryByRole('tab', { name: 'Covo dei Ladri' })).toBeNull();
     expect(screen.queryByText('Stomaco di ferro')).toBeNull();
-    expect(screen.getByRole('link', { name: /Covo dei Ladri/ })).toHaveAttribute('href', '/guida/covo');
+    expect(await screen.findByRole('link', { name: /Covo dei Ladri/ })).toHaveAttribute('href', '/guida/covo');
   });
 
   it('due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
