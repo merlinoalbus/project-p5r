@@ -55,7 +55,7 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
   return <div className="flex min-w-0 flex-col gap-2">
     <Selettore etichetta="Offerta collegata" valore={effetto.articolo} opzioni={[{ chiave: ARTICOLO_AOJIRU, nome: offerta.dati ?? `${ARTICOLO_AOJIRU} · ${offerta.caricamento ? 'lettura del nome corrente' : 'nome non disponibile'}` }, ...(effetto.articolo && effetto.articolo !== ARTICOLO_AOJIRU ? [{ chiave: effetto.articolo, nome: `${effetto.articolo} · riferimento conservato` }] : [])]} onCambia={(a) => onCambia({ ...effetto, articolo: a })} />
     {offerta.errore && <p role="alert" className="m-0 text-warning">{offerta.errore} Il riferimento dell’effetto resta conservato.</p>}
-    <p className="m-0 testo-12 text-text-secondary">L’offerta conserva la propria identità commerciale e i suoi acquisti. La scheda distinta del Chiosco dei succhi non trasferisce questa offerta.</p>
+    <p className="m-0 testo-12 text-text-secondary">L’offerta conserva la propria identità commerciale e i suoi acquisti.</p>
     <Selettore etichetta="Variante indicata dalla guida" valore={effetto.variante ?? ''} vuoto="Da osservare nella partita" opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => onCambia({ ...effetto, variante: d ? d as DoteChiave : null })} />
     {!!doti.length && <fieldset className="m-0 flex flex-col gap-1 border border-border p-2"><legend>Doti già presenti che questo acquisto sostituisce</legend>
       <p className="m-0 testo-12">Seleziona solo i premi della stessa consumazione: rimangono conservati, ma il nuovo effetto evita di attribuirli una seconda volta.</p>

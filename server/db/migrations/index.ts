@@ -327,6 +327,10 @@ import { migration302 } from './302_decisione_23_proposte_aperte.js';
 // 2026-10-29 («il covo dei ladri si sblocca il 5 maggio»; «far sì che compaia in mappa solo da quella data in poi»): l'Area del Covo ha la
 // sua condizione (dal 5 maggio, scritta una volta), che i suoi luoghi ereditano; l'introduzione della guida dice «si sblocca il 5 maggio»
 import { migration303 } from './303_covo_dal_5_maggio.js';
+// 2026-10-29 («8 maggio», screenshot: la spunta dell'Aojiru del 05-08 di sera dà «L'offerta non risulta disponibile»): l'Aojiru passa, con la
+// stessa chiave, nel negozio a sé «Chiosco delle bevande» del Sottopasso (domenica, giorno e sera, dagli orari della sua sede); era nel
+// KiyasuKu, aperto solo di giorno
+import { migration304 } from './304_chiosco_delle_bevande.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -349,5 +353,5 @@ export const migrations: Migration[] = [
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
-  migration300, migration301, migration302, migration303,
+  migration300, migration301, migration302, migration303, migration304,
 ];

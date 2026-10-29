@@ -1,6 +1,8 @@
 import type { DoteChiave } from './doti.js';
 import type { ValutazionePresenza } from './valutazioneAcquisto.js';
 
+/** La chiave dell'offerta dell'Aojiru: il prefisso è storico. Dalla migrazione 304 l'offerta sta nel «Chiosco delle bevande» del Sottopasso
+ *  (`chiosco-bevande-sottopasso`), non più nel KiyasuKu; la chiave resta perché la citano effetti delle voci, consumazioni e ricevute. */
 export const ARTICOLO_AOJIRU = 'chiosco-kiyasuku/succo-aojiru';
 export const CATALOGO_AOJIRU = 'consumabile/succo-aojiru';
 export const ORDINE_AOJIRU: readonly DoteChiave[] = ['fascino', 'perizia', 'coraggio', 'gentilezza', 'conoscenza'];
