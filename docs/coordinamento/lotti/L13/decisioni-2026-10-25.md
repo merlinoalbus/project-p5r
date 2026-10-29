@@ -80,4 +80,7 @@ verificati sulle copie in sola lettura dei dati reali.
     partite (yen scalati, Doti applicate, spunte da ricalcolare). Vale anche per le proposte già aperte. Supera la regola «nel periodo
     validato solo con il sì riga per riga».
 
-Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
+Fino al 28 ottobre le conversioni delle singole voci del periodo validato (fino al 05-31) restavano da approvare riga per riga. Dalla
+decisione 23 si applicano direttamente, salvo i casi (a), (b) e (c): la migrazione 302 applica le proposte aperte che non vi ricadono e
+scrive in `dati_guida.audit-302-decisione-23` ogni proposta lasciata con il suo motivo; le migrazioni nuove non creano più proposte per il
+solo periodo validato (`server/db/migrations/fbisOndata5.ts`).

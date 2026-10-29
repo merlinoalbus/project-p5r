@@ -7,10 +7,14 @@
 // alla spunta; tesori a mano; Black Frost e Bugs solo etichetta. Le migrazioni del lotto modellano con i tipi dell'app gli oggetti che incidono
 // su Doti, yen, oggetti ricevuti e consumati, letture e fusioni, e convertono le voci del Diario che li citano.
 //
-// Regole comuni (le stesse della 234 e del lotto G):
-//   - le voci del periodo validato (fino al 05-31) NON si scrivono mai: per loro si preparano proposte «da completare» da approvare riga per
-//     riga (`proposta_conversione_voce`); `convertiVoce` rifiuta da sola una voce di quel periodo;
-//   - una voce dopo il 05-31 si converte solo se è ancora esattamente come letta il 2026-10-26 sulla copia dei dati (testo e, uno per uno,
+// Regole comuni (le stesse della 234 e del lotto G, con la decisione 23 del 29 ottobre):
+//   - fino al 28 ottobre le voci del periodo validato (fino al 05-31) non si scrivevano mai: le migrazioni 288-300 preparano per loro proposte
+//     «da completare» (`proposta_conversione_voce`), e lo fanno ancora da sole, nel loro codice. Dalla decisione 23 («applicale direttamente
+//     a meno di impatti per i quali è necessaria mia decisione esplicita») il periodo validato NON è più un motivo per fermarsi: `convertiVoce`
+//     converte anche una voce di quel periodo, con le stesse condizioni di ogni altra. Una migrazione nuova prepara una proposta, invece di
+//     convertire, solo per (a) una correzione incerta, (b) una scelta che solo l'utente conosce, (c) una voce già registrata nelle partite
+//     (che `convertiVoce` salta comunque); le proposte rimaste aperte da prima le applica la migrazione 302;
+//   - una voce si converte solo se è ancora esattamente come letta il 2026-10-26 sulla copia dei dati (testo e, uno per uno,
 //     uid, ordine e valore degli effetti) e se NESSUNA partita la cita (ogni tabella dello schema `utente` con la colonna `voce_uid`): le
 //     partite già spuntate non si riscrivono. Gli effetti si scrivono come li scrive `salvaEffettiVoce` (`dati_json` canonico, `chiave`
 //     dell'effetto, registro di transizione con l'impronta della lista); l'uid di un effetto nuovo è derivato dall'uid della voce;
@@ -27,6 +31,8 @@ import { esisteTabella } from './pulizieL11.js';
 import { normalizzaEffettoVoce, type EffettoVoce } from '../../../shared/effettiVoce.js';
 import { ordineGioco } from '../../../shared/condizioniSpillo.js';
 
+/** L'ultimo giorno del periodo validato. Dalla decisione 23 non blocca più nessuna conversione: resta per le migrazioni 288-300, che lo
+ *  usano nel loro codice, e per i conteggi degli audit. */
 export const ULTIMO_GIORNO_VALIDATO = '05-31';
 export const LOTTO_FBIS = 'O5-Fbis';
 export const FONTE_DOTI = 'https://www.allgamestaff.it/persona-5-royal/doti-sociali/';
@@ -126,12 +132,13 @@ interface RigaEffetto { uid: string; ordine: number; tipo: string; chiave: strin
 
 const errore = (m: string): never => { throw new Error(`F-bis: ${m}; nessuna modifica applicata.`); };
 
-/** Perché la voce non si converte (null = si può). Solo letture. */
-/** Il giorno è nel periodo validato (dal 04-01 al 05-31)? Con l'ordine dell'anno scolastico: gennaio-marzo vengono DOPO maggio. */
+/** Il giorno è nel periodo validato (dal 04-01 al 05-31)? Con l'ordine dell'anno scolastico: gennaio-marzo vengono DOPO maggio. Dalla
+ *  decisione 23 è solo un'informazione (la usa la 299, già eseguita), non un motivo per non convertire. */
 export const nelPeriodoValidato = (data: string): boolean => ordineGioco(data) <= ordineGioco(ULTIMO_GIORNO_VALIDATO);
 
+/** Perché la voce non si converte (null = si può). Solo letture. Il periodo validato non è un motivo (decisione 23); la voce già registrata
+ *  nelle partite sì (c), come la voce cambiata dopo la lettura. */
 function motivoPerSaltare(db: AppDatabase, c: ConversioneVoce, partite: string[] | null): string | null {
-  if (nelPeriodoValidato(c.data)) return 'voce del periodo validato (fino al 05-31): solo proposte';
   if (partite === null) return 'schema delle partite non attaccato: spunte non verificabili';
   const v = db.prepare('SELECT data, azione, tipo, riferimento_tipo, riferimento_chiave FROM main.voce_giornata WHERE uid = ?').get(c.uid) as
     { data: string; azione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null } | undefined;
@@ -162,7 +169,7 @@ function motivoPerSaltare(db: AppDatabase, c: ConversioneVoce, partite: string[]
 }
 
 /**
- * Converte una voce dopo il 05-31 (vedi `ConversioneVoce`), con il registro di transizione. Ritorna l'esito per l'audit, con prima e dopo.
+ * Converte una voce (vedi `ConversioneVoce`; dalla decisione 23 anche del periodo validato), con il registro di transizione. Ritorna l'esito per l'audit, con prima e dopo.
  * Una voce già convertita (gli effetti nuovi ci sono già con il loro uid e gli effetti tolti non ci sono più) si dice tale e non si tocca.
  */
 export function convertiVoce(db: AppDatabase, c: ConversioneVoce, partite: string[] | null, adesso: string): Esito & { prima?: unknown; dopo?: unknown } {
@@ -230,7 +237,8 @@ export function convertiVoce(db: AppDatabase, c: ConversioneVoce, partite: strin
     dopo: { effetti: dopo, ...(c.collega ? { collegamento: { tipo: c.collega.tipo, riferimento: c.collega.riferimento } } : {}) } };
 }
 
-/** Una proposta «da completare» nuova su una voce (anche del periodo validato: non si applica da sola). */
+/** Una proposta «da completare» nuova su una voce: non si applica da sola. Dalla decisione 23 serve solo per (a) una correzione incerta,
+ *  (b) una scelta che solo l'utente conosce, (c) una voce già registrata nelle partite; non per il solo periodo validato. */
 export interface NuovaProposta {
   id: string; voce: string;
   tipo: string | null; riferimento: { tipo: string; chiave: string } | null;
