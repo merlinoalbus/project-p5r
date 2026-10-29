@@ -6,7 +6,8 @@ import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, apiGetGioco, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, ElenchiEffettiVoceDto,EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
-import type { DoteNote } from '../../../shared/effettiAzione';
+import type { DoteNote, TipoAzione } from '../../../shared/effettiAzione';
+import type { RicercaDiarioDto } from '../../../shared/ricercaDiario';
 import type { AppuntiDiario, EsitoAnnulloIncollaDto, EsitoIncollaDto, PianoIncollaDto, RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../../shared/appuntiDiario';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
 import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
@@ -101,6 +102,8 @@ export const getCompletamento = (partita?: number): Promise<CompletamentoDto> =>
 export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> => apiGet(`/compendio/percorso${queryString({ partita })}`);
 /** Scheda di un giorno del percorso. */
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
+/** La ricerca fra tutte le voci del Diario: testo in «Che cosa fare» e note, tipo della voce; con la partita, la spunta di ogni voce. */
+export const cercaVociDiario = (q: string, tipo: TipoAzione | undefined, partita?: number): Promise<RicercaDiarioDto> => apiGet(`/compendio/percorso-ricerca${queryString({ q, tipo, partita })}`);
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
 export const getElenchiAzione = (): Promise<ElenchiAzioneDto> => apiGet('/compendio/percorso-elenchi');
 export const getElenchiEffettiVoce = (): Promise<ElenchiEffettiVoceDto> => apiGet('/compendio/percorso-elenchi-effetti');

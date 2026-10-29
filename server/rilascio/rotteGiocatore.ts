@@ -45,6 +45,7 @@ export const ROTTE_DEL_GIOCATORE: readonly string[] = [
   'GET /api/compendio/percorso',
   'GET /api/compendio/percorso/:data',
   'GET /api/compendio/percorso/voci/:uid',
+  'GET /api/compendio/percorso-ricerca',
   'GET /api/compendio/negozi',
   'GET /api/compendio/negozi/:chiave',
   'GET /api/compendio/articoli',

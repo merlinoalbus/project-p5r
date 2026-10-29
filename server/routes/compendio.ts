@@ -34,6 +34,7 @@ import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../se
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { cercaVociDiario } from '../services/ricercaDiarioService.js';
 import { elenchiAzione, elenchiEffettiVoce } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
@@ -48,7 +49,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, EsitoRevisioneVoce, PersonaggiDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyAggiornaVoce, bodyDotiIncontro, bodyEsportaAppunti, bodyIncollaAnteprima, bodyIncollaVoci, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsOperazioneVoci, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyAggiornaVoce, bodyDotiIncontro, bodyEsportaAppunti, bodyIncollaAnteprima, bodyIncollaVoci, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsOperazioneVoci, paramsVoceGiornata, queryOggetti, queryPersona, queryRicercaDiario, querySkill, type QueryRicercaDiario } from '../schemas/compendio.js';
 import { annullaOperazione, esportaAppunti, incollaVoci, pianoIncolla } from '../services/appuntiDiarioService.js';
 import type { RichiestaAppuntiDiario, RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../shared/appuntiDiario.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
@@ -161,6 +162,11 @@ router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/percorso/:data', validate({ params: z.object({ data: dataGioco }), query: queryDomande }), (req, res) => {
   res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
+});
+/** La ricerca fra tutte le voci del Diario, per testo («Che cosa fare» e note) e per tipo, nell'ordine del calendario di gioco. */
+router.get('/percorso-ricerca', validate({ query: queryRicercaDiario }), (req, res) => {
+  const { q, tipo, partita } = req.query as unknown as QueryRicercaDiario;
+  res.json(cercaVociDiario(q, tipo, partita));
 });
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
 router.get('/percorso-elenchi', (_req, res) => {

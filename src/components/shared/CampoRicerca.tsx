@@ -11,13 +11,15 @@ interface Props {
   autoFocus?: boolean;
   /** Classi aggiuntive del contenitore (es. `basis-full` per prendere tutta la riga sul telefono). */
   className?: string;
+  /** L'id del campo (per rimettervi il fuoco da fuori, come dopo «Cancella ricerca» del Diario). */
+  id?: string;
 }
 
 /**
  * Campo di ricerca compatto, adatto al touch. La «×» è una sola, quella da 44 px qui sotto: la croce nativa di
  * `type="search"` (Chrome, Safari, Edge) è tolta da `.campo-ricerca__input` in src/tailwind.css (lotto C).
  */
-export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFocus, className }: Props) {
+export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFocus, className, id }: Props) {
   return (
     <div className={`relative flex-1 min-w-[180px] ${className ?? ''}`}>
       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
@@ -25,6 +27,7 @@ export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFo
       </span>
       <input
         type="search"
+        id={id}
         className="form-input campo-ricerca__input pl-9 pr-11"
         placeholder={segnaposto}
         value={valore}

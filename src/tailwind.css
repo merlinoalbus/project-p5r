@@ -1159,6 +1159,42 @@
   .azione--bloccata { border-left-color: var(--color-text-muted); color: var(--color-text-secondary); }
   .azione--bloccata > div > span:first-child { color: var(--color-text-muted); }
   .azione--evidenziata { outline: 1px solid var(--color-primary); outline-offset: -1px; }
+  /* ---- Ricerca nel Diario (Guida › Giorno per giorno, 2026-10-29): «devo poter visualizzare i risultati del filtro/ricerca in modo comodo» ----
+     La barra (campo, tipo, «Cancella ricerca») va a capo sul telefono; con la ricerca attiva resta in cima a <main> mentre la pagina scorre
+     (sticky, fino al bordo: annulla il padding di <main>, 16 px, 20 px da 1024). I risultati scorrono con la pagina, nessuna area interna.
+     Ogni voce è un collegamento: sotto 768 px le parti si impilano (fascia e stato, testo, note, «Spuntando»); da 768 tre colonne logiche
+     fascia | voce | effetto. Le note e «Spuntando» lunghi si riducono a poche righe; le parole cercate sono evidenziate (<mark>). */
+  .ricerca-diario__barra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .ricerca-diario__barra--fissa { position: sticky; top: -16px; z-index: 20; margin: 0 -16px; padding: 8px 16px;
+    background: var(--color-bg); border-bottom: 1px solid var(--color-border); }
+  @media (min-width: 1024px) { .ricerca-diario__barra--fissa { top: -20px; margin: 0 -20px; padding: 8px 20px; } }
+  .ricerca-diario__risultati { display: flex; flex-direction: column; gap: 12px; }
+  .ricerca-diario__in-corso { opacity: .6; transition-property: opacity; transition-duration: 150ms; transition-timing-function: ease-out; }
+  @media (prefers-reduced-motion: reduce) { .ricerca-diario__in-corso { transition: none; } }
+  .ricerca-diario__mese { margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: var(--font-display); font-size: var(--testo-20); line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; text-wrap: balance; }
+  .ricerca-diario__conteggio { font-family: var(--font-sans); font-size: var(--testo-12); text-transform: none; letter-spacing: normal; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .ricerca-diario__giorno { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; padding-bottom: 4px; }
+  .ricerca-diario__data { margin: 0; font-size: var(--testo-14); font-weight: 600; color: var(--color-text-secondary); }
+  .ricerca-diario__voce { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-height: 44px; padding: 8px 6px; margin: 0 -6px;
+    border-radius: var(--radius-md); color: var(--color-text); text-decoration: none; overflow-wrap: anywhere;
+    transition-property: background-color; transition-duration: 150ms; transition-timing-function: ease-out; }
+  .ricerca-diario__voce:hover { background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+  .ricerca-diario__voce:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+  @media (prefers-reduced-motion: reduce) { .ricerca-diario__voce { transition: none; } }
+  .ricerca-diario__fascia { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  .ricerca-diario__tipo { color: var(--color-text-muted); }
+  .ricerca-diario__corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ricerca-diario__azione { font-weight: 600; text-wrap: pretty; }
+  .ricerca-diario__collegamento { font-weight: 400; color: var(--color-text-secondary); }
+  .ricerca-diario__note, .ricerca-diario__effetto { font-size: var(--testo-13); color: var(--color-text-secondary); text-wrap: pretty;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .ricerca-diario__etichetta { color: var(--color-text-muted); }
+  .ricerca-diario__evidenza { background: color-mix(in srgb, var(--color-oro) 30%, transparent); color: inherit; border-radius: 2px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-oro) 55%, transparent); }
+  @media (min-width: 768px) {
+    .ricerca-diario__voce { grid-template-columns: 8.5rem minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 16px; align-items: start; }
+    .ricerca-diario__effetto { grid-column: 3; -webkit-line-clamp: 4; line-clamp: 4; }
+    .ricerca-diario__note { -webkit-line-clamp: 2; line-clamp: 2; }
+  }
   /* appunti del Diario (2026-10-26): la voce selezionata (fondo e bordo sinistro del colore primario, non solo il colore: anche il bordo
      e, per il lettore di schermo, «(selezionata)») e la voce tagliata finché non si incolla: bordo sinistro tratteggiato e fondo a righe
      oblique, col testo nel colore secondario (contrasto oltre 4.5:1 sulla card: non un'opacità, che lo farebbe scendere sotto) e senza

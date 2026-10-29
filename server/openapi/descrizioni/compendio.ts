@@ -335,6 +335,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`PercorsoGiornoDto`',
     errori: [[404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
+  'GET /api/compendio/percorso-ricerca': {
+    sommario: 'Cerca fra tutte le voci del Diario per testo e per tipo',
+    descrizione: 'Sola lettura. `q` si cerca in «Che cosa fare» e nelle note di tutte le voci dell\'anno, senza maiuscole né accenti, anche come parte di parola; con più parole ognuna deve comparire nella voce, in qualunque ordine. `tipo` tiene solo le voci di quel tipo (`TIPI_AZIONE`; un tipo salvato fuori elenco vale «altro»). Il testo, se c\'è, ha almeno 2 caratteri, e serve almeno uno fra testo e tipo (altrimenti 400). Le voci arrivano tutte (niente pagine: il Diario ne ha circa mille) nell\'ordine del calendario di gioco, poi di giorno prima di sera, poi il posto nella fascia, con giorno, fascia, tipo, testo, nome del collegamento, note e le frasi di «Spuntando succede» (le stesse di `produceTesto` della voce del giorno). Con `?partita=` ogni voce dice se è spuntata e non compaiono le voci d\'ingresso a un Palazzo concluso che il giorno nasconde. `perTipo` conta le voci che corrispondono al testo per ogni tipo, senza il filtro del tipo.',
+    risposta: '`RicercaDiarioDto` (shared/ricercaDiario.ts): `q`, `tipo`, `totale`, `perTipo` e i `RisultatoRicercaDiarioDto`',
+    errori: [[400, 'validation-error'], PARTITA_NON_TROVATA],
+  },
   'GET /api/compendio/percorso-elenchi': {
     sommario: 'Elenchi per classificare, collegare e dare effetti a un\'azione della giornata',
     descrizione: 'Gli elementi a cui un\'azione si può collegare o che un effetto può nominare: Confidenti (con l\'arcano come dettaglio), dungeon, Richieste, libri, film, videogiochi, attività (con `turni` vero per quelle contate per volte), negozi e Doti. Sono gli stessi elementi che il server accetta salvando una voce; le righe nascoste dal catalogo sono escluse.',

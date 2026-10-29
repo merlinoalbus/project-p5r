@@ -7,6 +7,7 @@ import { boolQuery, dataGioco, dote, idParam, livello, testoRicerca, uidVoce } f
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
 import { bodySalvaEffettiVoce } from './acquisti.js';
 import { MASSIMO_VOCI_APPUNTI } from '../../shared/appuntiDiario.js';
+import { MASSIMO_CARATTERI_RICERCA_DIARIO, MINIMO_CARATTERI_RICERCA_DIARIO } from '../../shared/ricercaDiario.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -48,6 +49,20 @@ const campiAzioneStrutturata = {
   revisioneEffettiAttesa: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   effettiVoce: bodySalvaEffettiVoce.partial({ revisioneEffettiAttesa: true }).strict().optional(),
 };
+/** La ricerca nel Diario (2026-10-29): testo cercato in «Che cosa fare» e note, tipo della voce, partita facoltativa. Il testo, se c'è, ha
+ *  almeno `MINIMO_CARATTERI_RICERCA_DIARIO` caratteri (con una lettera sola troverebbe quasi tutto); serve almeno uno fra testo e tipo. */
+export const queryRicercaDiario = z.object({
+  q: z.string().trim().max(MASSIMO_CARATTERI_RICERCA_DIARIO).refine((q) => q === '' || q.length >= MINIMO_CARATTERI_RICERCA_DIARIO, {
+    message: `Il testo da cercare ha almeno ${MINIMO_CARATTERI_RICERCA_DIARIO} caratteri.`,
+  }).optional(),
+  tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
+  partita: idParam.optional(),
+}).refine((x) => !!x.q || x.tipo !== undefined, {
+  message: `Scrivi almeno ${MINIMO_CARATTERI_RICERCA_DIARIO} caratteri o scegli un tipo di voce.`,
+  path: ['q'],
+});
+export type QueryRicercaDiario = z.infer<typeof queryRicercaDiario>;
+
 /** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
 export const paramsVoceGiornata = z.object({ uid: uidVoce });
 const campiVoce = {
