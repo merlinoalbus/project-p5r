@@ -16,7 +16,7 @@ lo si scrive mentre lo si scopre.
 > **Aggiornamento 2026-10-29**: censimento rifatto con lo stesso metodo, dopo le ondate 5 e L13 (registri del codice
 > contro `public/asset/ui/`; una copia nuova di `gioco.db` con le migrazioni fino alla 301 contro ogni punto che chiede
 > un'immagine predefinita). Mancano **18 file**: 5 azioni con il prompt già scritto in §21 ma mai consegnate (`su`, `giu`,
-> `scarta` — con il soggetto rifatto, perché la chiave ha sette usi —, `ricevute`, `taglia`), la tessera
+> `scarta` — con il soggetto rifatto, perché la chiave ha otto usi —, `ricevute`, `taglia`), la tessera
 > `scheda-persona-partita`, le illustrazioni di 4 attività nuove (`estrazione-lotteria`, `concimare-pianta`,
 > `fabbricazione-strumenti`, `fabbricazione-kawakami`), 2 riconsegne (le allerte `ondata-di-calore` e `ondata-di-gelo`,
 > con la soglia «alfa > 8 nel contorno di 3 px» della consegna del 2026-09-29) e 6 figure **proposte** per i tipi di effetto della voce che ne condividono una
@@ -452,12 +452,12 @@ La soglia vale per i file nuovi e per quelli già respinti, non riapre i file ac
 | stato | gruppo | file | nota |
 |---|---|---|---|
 | `pronto` | A — chiave già nel codice | `ui/azione-su`, `ui/azione-giu` | prompt in §21 dal 2026-10-01, mai consegnati; riserve `IconSu`/`IconGiu`. `su` ha 14 punti d'uso: 12 per riordinare (Diario, acquisti, infiltrazioni, aree, regole di Tokyo, editor dei Confidenti) e 2 per salire di rango, pulsanti primari rossi a 20–22 px. `giu` ha i 12 di riordino. Il prompt della consegna copre tutti e due i sensi |
-| `pronto` | A | `ui/azione-scarta` | 7 punti d'uso tutti nel senso di «lasciar fuori»: parti illeggibili nei moduli, «Incolla senza gli effetti segnalati», «Scarta» e «Non applicare» una proposta, «Cancella ricerca» del Diario (che vuole di proposito la figura del filtro, `RicercaDiario.tsx:62–63`). Il soggetto del §21 (foglio tagliato) è **superato**: nella consegna del 2026-10-29 è l'imbuto con un pezzetto espulso, diverso da `azione-filtri.png` |
-| `pronto` | A | `ui/azione-ricevute` | §21 dal 2026-10-25; riserva `IconRicevuta` |
-| `pronto` | A | `ui/azione-taglia` | §21 dal 2026-10-26; riserva `IconForbici` |
+| `pronto` | A | `ui/azione-scarta` | 8 punti d'uso tutti nel senso di «lasciar fuori»: parti illeggibili nei moduli (`ModuloCatalogo.tsx:217`, `ModuloAttivita.tsx:143` e `:182`), «Incolla senza gli effetti segnalati», «Scarta» e «Non applicare» una proposta, «Cancella ricerca» del Diario (che vuole di proposito la figura del filtro, `RicercaDiario.tsx:62–63`). Il soggetto del §21 (foglio tagliato) è **superato**: nella consegna del 2026-10-29 è l'imbuto con un pezzetto espulso, diverso da `azione-filtri.png` |
+| `pronto` | A | `ui/azione-ricevute` | §21 dal 2026-10-25; riserva `IconRicevuta`; 1 punto d'uso, 20 px in un pulsantino fantasma (`RicevuteVoce.tsx:97`) |
+| `pronto` | A | `ui/azione-taglia` | §21 dal 2026-10-26; riserva `IconForbici`; 3 punti d'uso a 20 px, uno nel pulsante primario rosso «Sposta comunque» (`FinestraIncolla.tsx:62`): il prompt della consegna lo copre |
 | `pronto` | A | `ui/scheda-persona-partita` | l'unica delle 35 tessere senza figura; la riserva sono le tre sagome di «Confidenti» |
 | `pronto` | B — attività nuove (database) | `attivita/estrazione-lotteria`, `attivita/concimare-pianta`, `attivita/fabbricazione-strumenti`, `attivita/fabbricazione-kawakami` | le uniche 4 attività su 34 senza illustrazione; tutte di tipo `altro`, oggi mostrano a 56 px la figura generica `ui/categoria-altro.png` (rombo con tre punti), uguale per le quattro |
-| `pronto` | R — riconsegne | `ui/allerta-ondata-di-calore`, `ui/allerta-ondata-di-gelo` | rifacimento chiesto il 2026-10-12, mai arrivato: i file sono ancora quelli del commit 24c61a7d. Il soggetto tocca il bordo: 14 e 28 pixel con alfa fino a 255 e 227 |
+| `pronto` | R — riconsegne | `ui/allerta-ondata-di-calore`, `ui/allerta-ondata-di-gelo` | rifacimento chiesto il 2026-10-12, mai arrivato: i file sono ancora quelli del commit 24c61a7d. Il soggetto tocca il bordo: 8 e 10 pixel con alfa > 8, fino a 255 e 227 |
 | `consegnato` | R — tolti dalla riconsegna | `ui/allerta-polline`, `ui/allerta-stagione-influenzale`, `attivita/videogioco-golfer-sarutahiko` | nel contorno hanno solo un alone con alfa da 1 a 4, che non si vede. Con la soglia «alfa > 8» sono puliti, quindi cade la ripulitura chiesta il 2026-10-12 per le due allerte |
 | `da verificare` | C — proposte | `ui/categoria-yen`, `ui/categoria-oggetto-ricevuto`, `ui/categoria-oggetto-uscito`, `ui/categoria-persona-tolta`, `ui/categoria-punti-confidente`, `ui/categoria-trofeo` | 20 tipi di effetto con 10 figure; i file si vedono solo dopo l'aggancio in `MENU_EFFETTI` e in `ICONE`, che chiede il sì dell'utente |
 

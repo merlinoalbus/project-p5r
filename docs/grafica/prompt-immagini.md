@@ -377,7 +377,7 @@ Finché il file manca, la riserva SVG è l'imbuto di `iconeGuida.tsx` (`IconFilt
 
 Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente forbici, niente cestino, niente imbuto. → azione-scarta.png`
 
-> **Superato il 2026-10-29** (§29): la chiave `scarta` ha sette usi, fra cui «Scarta» una proposta intera e «Cancella
+> **Superato il 2026-10-29** (§29): la chiave `scarta` ha otto usi, fra cui «Scarta» una proposta intera e «Cancella
 > ricerca» del Diario, che vuole di proposito la figura del filtro (`RicercaDiario.tsx:62–63`). Il soggetto valido è
 > l'imbuto con un pezzetto espulso, nel prompt A3 di [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md).
 > Il prompt qui sopra resta solo come storico: non va generato.
@@ -833,7 +833,7 @@ completi.
 |---|---|---|
 | `azione-su.png` | «Sposta su di un posto» in 12 elenchi riordinabili (Diario, acquisti, infiltrazioni, aree, regole di Tokyo, editor dei Confidenti) e «Sali al rango» / «Aggiorna il rango» di un Confidente, pulsanti primari rossi a 20–22 px (§21, 2026-10-01) | freccia spessa e slanciata verso l'alto sopra una base orizzontale corta |
 | `azione-giu.png` | «Sposta giù di un posto» negli stessi 12 elenchi (§21, 2026-10-01) | lo specchio esatto di `azione-su` |
-| `azione-scarta.png` | sette usi col senso di «lasciar fuori»: parti illeggibili nei moduli, «Incolla senza gli effetti segnalati», «Scarta» e «Non applicare» una proposta, «Cancella ricerca» del Diario (§21, 2026-10-25, soggetto **rifatto**) | l'imbuto dei filtri senza le tre righe che entrano, con un pezzetto di carta appallottolato espulso di lato |
+| `azione-scarta.png` | otto usi col senso di «lasciar fuori»: parti illeggibili nei moduli, «Incolla senza gli effetti segnalati», «Scarta» e «Non applicare» una proposta, «Cancella ricerca» del Diario (§21, 2026-10-25, soggetto **rifatto**) | l'imbuto dei filtri senza le tre righe che entrano, con un pezzetto di carta appallottolato espulso di lato |
 | `azione-ricevute.png` | ricevute degli effetti della spunta (§21, 2026-10-25) | scontrino con il bordo basso a denti di sega |
 | `azione-taglia.png` | «Taglia» le voci del Diario (§21, 2026-10-26) | forbici aperte viste di lato |
 | `scheda-persona-partita.png` | tessera «Persona della partita» (22 px) | maschera da ladro davanti a tre carte a ventaglio |

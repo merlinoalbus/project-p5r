@@ -30,7 +30,7 @@ galaxy_task_validator), ognuno con una riserva disegnata nel codice.
 **18 file da consegnare** (censimento dopo le ondate 5 e L13). Le quattro allerte qui sopra non sono mai state
 riconsegnate: rimisurate il 2026-10-29, sono identiche. Ora si misurano con una soglia dichiarata, la stessa della
 consegna del 2026-09-29: un pixel del contorno di 3 px conta solo se ha alfa > 8. Con questa soglia `allerta-ondata-di-calore`
-(14 pixel, alfa fino a 255) e `allerta-ondata-di-gelo` (28 pixel, fino a 227) restano da rifare e rientrano nella consegna
+(8 pixel, alfa fino a 255) e `allerta-ondata-di-gelo` (10 pixel, fino a 227) restano da rifare e rientrano nella consegna
 nuova come R1–R2. `allerta-polline` e `allerta-stagione-influenzale` hanno solo un alone con alfa da 1 a 4: sono
 **accettate**, e la ripulitura chiesta il 2026-10-12 cade. Anche i due videogiochi della consegna del 2026-09-29 risultano
 rifatti nella copia del database di gioco: `videogioco-star-forneus` ha il contorno pulito; `videogioco-golfer-sarutahiko`

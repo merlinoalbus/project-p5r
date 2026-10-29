@@ -51,19 +51,19 @@ colonna), quindi funziona anche prima della consegna.
 |---|---|---|---|---|---|
 | A1 | `public/asset/ui/azione-su.png` | 128×128 | freccia spessa verso l'alto sopra una base orizzontale corta | **14 punti nel codice**, con due significati: (a) **riordinare un elemento di un posto in su** (12 punti a 20 px: pulsantini fantasma, uno secondario, e le voci del menu della voce del Diario): voci del Diario (`GiornoGuida`, `PostoVoce`), acquisti di una voce (`AcquistiNegozioVoce`), infiltrazioni di una voce e legami di un'infiltrazione (`InfiltrazioniVoce`, `FinestraLegamiInfiltrazione`), guida dell'area (`GuidaDellArea`), aree del Dedalo e del quartiere (`AreeDelDedalo`, `AreeDelQuartiere`, `FinestraModificaArea`), regole di Tokyo (`AtterraggioTokyo`), abilità e dialoghi nell'editor dei Confidenti (`ModificaAbilita`, `ModificaDialogo`); (b) **salire di rango con un Confidente** (2 punti, pulsanti **primari rossi**): «Sali al rango N» a **22 px** (`partita/DettaglioConfidente.tsx`) e «Aggiorna il rango» a 20 px (`ConfidenteDettaglioPage.tsx`) | `IconSu` |
 | A2 | `public/asset/ui/azione-giu.png` | 128×128 | freccia spessa verso il basso sotto una base orizzontale corta | **12 punti nel codice**, solo «sposta giù di un posto»: gli stessi 12 di A1 (a), a 20 px | `IconGiu` |
-| A3 | `public/asset/ui/azione-scarta.png` | 128×128 | l'imbuto dei filtri, senza le tre righe che vi entrano in `azione-filtri.png`, con un pezzetto di carta appallottolato espulso di lato | **7 punti nel codice**, tutti col senso «lasciar fuori»: «Usa le condizioni leggibili e scarta le altre parti» (`ModuloCatalogo.tsx:217`, 22 px) e «Sostituisci con gli esiti dell'editor» (`moduli/ModuloAttivita.tsx:182`, 22 px); «Incolla senza gli effetti segnalati» (`FinestraIncolla.tsx:60`, pulsante secondario, 20 px); «Scarta» una proposta intera (`ProposteDaCompletare.tsx:216`, 20 px, e il pulsante del dialogo di conferma alla riga 129); «Non applicare» una proposta del passato (`partita/DaApplicare.tsx:223`, 20 px); «Cancella ricerca» del Diario (`RicercaDiario.tsx:64`, 20 px, a sola icona sul telefono) | `IconFiltro`, lo stesso imbuto di `azione-filtri.png` |
+| A3 | `public/asset/ui/azione-scarta.png` | 128×128 | l'imbuto dei filtri, senza le tre righe che vi entrano in `azione-filtri.png`, con un pezzetto di carta appallottolato espulso di lato | **8 punti nel codice**, tutti col senso «lasciar fuori»: «Usa le condizioni leggibili e scarta le altre parti» (`ModuloCatalogo.tsx:217`, 22 px), «Usa gli effetti leggibili dell'editor e scarta le altre parti» e lo stesso per il quiz (`moduli/ModuloAttivita.tsx:143`, 22 px: la chiave è `scarta`, o `elimina` quando dopo la sostituzione non resta nulla) e «Sostituisci con gli esiti dell'editor» (`moduli/ModuloAttivita.tsx:182`, 22 px); «Incolla senza gli effetti segnalati» (`FinestraIncolla.tsx:60`, pulsante secondario, 20 px); «Scarta» una proposta intera (`ProposteDaCompletare.tsx:216`, 20 px, e il pulsante del dialogo di conferma alla riga 129); «Non applicare» una proposta del passato (`partita/DaApplicare.tsx:223`, 20 px); «Cancella ricerca» del Diario (`RicercaDiario.tsx:64`, 20 px, a sola icona sul telefono) | `IconFiltro`, lo stesso imbuto di `azione-filtri.png` |
+| A4 | `public/asset/ui/azione-ricevute.png` | 128×128 | scontrino con il bordo basso a denti di sega | **1 punto nel codice**: pulsantino fantasma piccolo (`btn-sm btn-ghost`) a sola icona «Ricevute degli effetti della spunta» nella colonna dei comandi di una voce del Diario (`RicevuteVoce.tsx:97`), icona a **20 px**, con il distintivo del numero disegnato dall'app sopra l'angolo in alto a destra (`.conteggio-pulsante`) | `IconRicevuta` |
+| A5 | `public/asset/ui/azione-taglia.png` | 128×128 | forbici aperte viste di lato | **3 punti nel codice, tutti a 20 px**: «Taglia» nella barra delle voci selezionate (`BarraSelezioneVoci.tsx:51`, pulsante secondario), «Taglia» nel menu della voce del Diario (`GiornoGuida.tsx:467`) e «Sposta comunque» nella finestra che incolla dopo un taglio (`FinestraIncolla.tsx:62`, pulsante **primario rosso**: la chiave è `taglia` quando le voci arrivano da un taglio, `incolla` altrimenti) | `IconForbici` |
+| A6 | `public/asset/ui/scheda-persona-partita.png` | 128×128 | maschera da ladro davanti a tre carte a ventaglio | tessera «Persona della partita» nella fila delle schede della Partita, **22 px** sopra l'etichetta, accanto a «Scorta» (due carte) e «Compendio» (libro aperto) | `IconPersone` (tre sagome: la stessa di «Confidenti») |
 
 **Perché A3 è un imbuto e non un foglio tagliato.** La versione precedente di questo prompt (§21 di
 [prompt-immagini.md](prompt-immagini.md), 2026-10-25) disegnava un foglio di cui «si tiene una parte», pensato solo per i
-due moduli. Ma la stessa chiave serve anche a scartare una proposta intera e a cancellare la ricerca, e
+moduli. Ma la stessa chiave serve anche a scartare una proposta intera e a cancellare la ricerca, e
 `RicercaDiario.tsx:62–63` vuole di proposito la figura del filtro: «l'icona è quella del filtro, non una seconda «×»». Il
-soggetto giusto per tutti e sette gli usi è quindi **l'imbuto che lascia fuori qualcosa**. Resta della famiglia del filtro,
+soggetto giusto per tutti e otto gli usi è quindi **l'imbuto che lascia fuori qualcosa**. Resta della famiglia del filtro,
 come vuole la ricerca, e si distingue da `azione-filtri.png` per il pezzetto espulso, che dice «questo resta fuori». Usare
 due figure diverse (per esempio «scarta la parte» e «scarta tutto») vorrebbe dire separare la chiave nel codice. Non è
 richiesto e questa consegna non lo presuppone.
-| A4 | `public/asset/ui/azione-ricevute.png` | 128×128 | scontrino con il bordo basso a denti di sega | pulsantino a sola icona «Ricevute degli effetti della spunta» nella colonna dei comandi di una voce del Diario; **32 px**, con il distintivo del numero disegnato dall'app sopra l'angolo | `IconRicevuta` |
-| A5 | `public/asset/ui/azione-taglia.png` | 128×128 | forbici aperte viste di lato | «Taglia» nella barra delle voci selezionate e nel menu della voce del Diario; **32–40 px** | `IconForbici` |
-| A6 | `public/asset/ui/scheda-persona-partita.png` | 128×128 | maschera da ladro davanti a tre carte a ventaglio | tessera «Persona della partita» nella fila delle schede della Partita, **22 px** sopra l'etichetta, accanto a «Scorta» (due carte) e «Compendio» (libro aperto) | `IconPersone` (tre sagome: la stessa di «Confidenti») |
 
 ### Gruppo B — illustrazioni delle attività nuove (4)
 
@@ -96,8 +96,8 @@ Misurati il 2026-10-29 con questa soglia:
 
 | # | File | Misura | Pixel con alfa > 8 nel contorno di 3 px | Esito |
 |---|---|---|---|---|
-| R1 | `public/asset/ui/allerta-ondata-di-calore.png` | 128×128 | 14, opacità fino a 255: il raggio del sole tocca il bordo | **da riconsegnare** |
-| R2 | `public/asset/ui/allerta-ondata-di-gelo.png` | 128×128 | 28, opacità fino a 227: fiocco e ghiaccioli toccano il bordo | **da riconsegnare** |
+| R1 | `public/asset/ui/allerta-ondata-di-calore.png` | 128×128 | 8, opacità fino a 255: il raggio del sole tocca il bordo | **da riconsegnare** |
+| R2 | `public/asset/ui/allerta-ondata-di-gelo.png` | 128×128 | 10, opacità fino a 227: fiocco e ghiaccioli toccano il bordo | **da riconsegnare** |
 | — | `public/asset/ui/allerta-polline.png` | 128×128 | 0 (6 pixel con alfa fino a 4: alone invisibile) | accettato, fuori consegna |
 | — | `public/asset/ui/allerta-stagione-influenzale.png` | 128×128 | 0 (4 pixel con alfa 1) | accettato, fuori consegna |
 | — | `attivita/videogioco-golfer-sarutahiko` (database) | 256×256 | 0 (66 pixel con alfa fino a 4); il fondo pieno della prima consegna non c'è più | accettato, fuori consegna |
@@ -244,8 +244,10 @@ leggersi a 20 px. Nessun testo, nessuna cifra, nessun marchio; niente appunti co
 nessuna cornice: un paio di forbici aperte viste di lato, i due anelli in basso a sinistra e le lame incrociate che
 puntano in alto a destra, con angoli tagliati in diagonale. Forme piatte bianche #ececf1 con contorno nero #0b0b0e
 spesso, ombra rossa #e5352b sfalsata in basso a destra, come le icone «copia» (due fogli) e «incolla» (tavoletta
-con molletta) che le stanno accanto nella stessa barra. Deve leggersi a 20 px. Nessun testo, nessun marchio;
-niente fogli né linee tratteggiate. [prompt negativo]
+con molletta) che le stanno accanto nella stessa barra. Deve leggersi a 20 px su fondo scuro e a 20 px dentro un
+pulsante rosso acceso #e5352b («Sposta comunque» dopo un taglio), dove l'ombra rossa non si vede e la figura deve
+reggersi su bianco e contorno nero: anelli e lame ben separati, nessun dettaglio affidato all'ombra. Nessun testo,
+nessun marchio; niente fogli né linee tratteggiate. [prompt negativo]
 ```
 
 ### A6 · `public/asset/ui/scheda-persona-partita.png` (128×128)
@@ -477,7 +479,7 @@ Un file è accettato solo se tutte queste cose sono vere:
 6. leggibile alla misura più piccola del §1 — controllare rimpicciolendo davvero (20–24 px per le icone, 56 px per le
    illustrazioni);
 7. distinto dalle figure vicine indicate nel prompt: su/giù specchiati fra loro, e «su» leggibile anche a 22 px dentro il
-   pulsante rosso di «Sali al rango»; scarta della famiglia dell'imbuto ma diverso da `azione-filtri.png` (niente righe
+   pulsante rosso di «Sali al rango»; «taglia» leggibile a 20 px dentro il pulsante rosso di «Sposta comunque»; scarta della famiglia dell'imbuto ma diverso da `azione-filtri.png` (niente righe
    che entrano, pezzetto espulso), dal cestino e dalla «×»; la tessera
    «Persona della partita» diversa da «Scorta», «Compendio» e «Confidenti», le due fabbricazioni diverse fra loro, le
    coppie C2/C3 con la stessa sagoma;
