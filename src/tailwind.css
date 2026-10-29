@@ -1159,6 +1159,46 @@
   .azione--bloccata { border-left-color: var(--color-text-muted); color: var(--color-text-secondary); }
   .azione--bloccata > div > span:first-child { color: var(--color-text-muted); }
   .azione--evidenziata { outline: 1px solid var(--color-primary); outline-offset: -1px; }
+  /* ---- Ricerca nel Diario (Guida › Giorno per giorno, 2026-10-29): «devo poter visualizzare i risultati del filtro/ricerca in modo comodo» ----
+     La barra (campo, tipo, «Cancella ricerca») va a capo sul telefono; con la ricerca attiva resta in cima a <main> mentre la pagina scorre
+     (sticky, fino al bordo: annulla il padding di <main>, 16 px, 20 px da 1024). I risultati scorrono con la pagina, nessuna area interna.
+     Ogni voce è un collegamento: sotto 768 px le parti si impilano (fascia e stato, testo, note, «Spuntando»); da 768 tre colonne logiche
+     fascia | voce | effetto. Le note e «Spuntando» lunghi si riducono a poche righe; le parole cercate sono evidenziate (<mark>). */
+  .ricerca-diario__barra { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+  /* fissa anche «Torna ai risultati» nel giorno aperto da un risultato. Altezza (intestazione ≤ 30%): una riga 6+44+6+1 = 57 px a ogni
+     larghezza (sul telefono la barra di ricerca non va a capo: `.ricerca-diario__barra--cerca` sotto i 640 px, dopo i selettori compatti);
+     sugli schermi bassi (telefono in orizzontale) il bordo verticale scende a 2 px */
+  .ricerca-diario__barra--fissa { position: sticky; top: -16px; z-index: 20; margin: 0 -16px; padding: 6px 16px;
+    background: var(--color-bg); border-bottom: 1px solid var(--color-border); }
+  @media (max-height: 480px) { .ricerca-diario__barra--fissa { padding-block: 2px; } }
+  @media (min-width: 1024px) { .ricerca-diario__barra--fissa { top: -20px; margin: 0 -20px; padding-inline: 20px; } }
+  .ricerca-diario__risultati { display: flex; flex-direction: column; gap: 12px; }
+  .ricerca-diario__in-corso { opacity: .6; transition-property: opacity; transition-duration: 150ms; transition-timing-function: ease-out; }
+  @media (prefers-reduced-motion: reduce) { .ricerca-diario__in-corso { transition: none; } }
+  .ricerca-diario__mese { margin: 0; display: flex; align-items: baseline; gap: 8px; font-family: var(--font-display); font-size: var(--testo-20); line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; text-wrap: balance; }
+  .ricerca-diario__conteggio { font-family: var(--font-sans); font-size: var(--testo-12); text-transform: none; letter-spacing: normal; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  .ricerca-diario__giorno { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; padding-bottom: 4px; }
+  .ricerca-diario__data { margin: 0; font-size: var(--testo-14); font-weight: 600; color: var(--color-text-secondary); }
+  .ricerca-diario__voce { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; min-height: 44px; padding: 8px 6px; margin: 0 -6px;
+    border-radius: var(--radius-md); color: var(--color-text); text-decoration: none; overflow-wrap: anywhere;
+    transition-property: background-color; transition-duration: 150ms; transition-timing-function: ease-out; }
+  .ricerca-diario__voce:hover { background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+  .ricerca-diario__voce:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+  @media (prefers-reduced-motion: reduce) { .ricerca-diario__voce { transition: none; } }
+  .ricerca-diario__fascia { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  .ricerca-diario__tipo { color: var(--color-text-muted); }
+  .ricerca-diario__corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ricerca-diario__azione { font-weight: 600; text-wrap: pretty; }
+  .ricerca-diario__collegamento { font-weight: 400; color: var(--color-text-secondary); }
+  .ricerca-diario__note, .ricerca-diario__effetto { font-size: var(--testo-13); color: var(--color-text-secondary); text-wrap: pretty;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .ricerca-diario__etichetta { color: var(--color-text-muted); }
+  .ricerca-diario__evidenza { background: color-mix(in srgb, var(--color-oro) 30%, transparent); color: inherit; border-radius: 2px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-oro) 55%, transparent); }
+  @media (min-width: 768px) {
+    .ricerca-diario__voce { grid-template-columns: 8.5rem minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 16px; align-items: start; }
+    .ricerca-diario__effetto { grid-column: 3; -webkit-line-clamp: 4; line-clamp: 4; }
+    .ricerca-diario__note { -webkit-line-clamp: 2; line-clamp: 2; }
+  }
   /* appunti del Diario (2026-10-26): la voce selezionata (fondo e bordo sinistro del colore primario, non solo il colore: anche il bordo
      e, per il lettore di schermo, «(selezionata)») e la voce tagliata finché non si incolla: bordo sinistro tratteggiato e fondo a righe
      oblique, col testo nel colore secondario (contrasto oltre 4.5:1 sulla card: non un'opacità, che lo farebbe scendere sotto) e senza
@@ -2295,6 +2335,16 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .selettore .selettore__tendina, .selettore--compatto .selettore__tendina { position:fixed; left:8px; right:8px; top:auto; bottom:calc(4rem + 8px); width:auto; max-width:none; z-index:110; }
   .selettore--compatto { flex:1 1 auto; }
   .selettore--compatto .selettore__scelta { width:100%; }
+}
+/* Ricerca nel Diario sul telefono (DOPO il blocco precedente, nello stesso livello: qui vince la specificità): campo, tipo e «Cancella
+   ricerca» su una sola riga, perché la barra sta sopra il giorno e, fissa, sopra i risultati (intestazione ≤ 30%). Il tipo non riempie
+   la riga ma resta largo quanto il suo valore fino a 8.5rem (oltre, «…»); «Cancella ricerca» resta la sola icona (nome accessibile intero).
+   A 375 px: 343 − 6 − 136 − 6 − 44 = 151 px al campo, sopra il suo minimo di 9rem */
+@media (max-width: 639px) {
+  .ricerca-diario__barra--cerca { flex-wrap:nowrap; }
+  .ricerca-diario__barra--cerca .selettore--compatto { flex:0 1 auto; max-width:8.5rem; }
+  .ricerca-diario__barra--cerca > .btn-visivo { flex:none; padding:3px 6px; gap:0; }
+  .ricerca-diario__barra--cerca > .btn-visivo .btn-visivo__testo { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 }
 
 /* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono

@@ -66,8 +66,8 @@ export const fasciaDi = (r: Pick<RigaVoce, 'fascia'>): FasciaGioco => (r.fascia 
 /** Il genere della voce: «azione» (si spunta) o «promemoria». Un valore di prima dei due generi (evento, scadenza: il vincolo del
  *  DB li ammette ancora, nessuna voce li usa) si legge come promemoria, che non si spunta; un valore ignoto resta «azione». */
 const genereDi = (r: RigaVoce): GenereVoce => (r.genere === 'promemoria' || r.genere === 'evento' || r.genere === 'scadenza' ? 'promemoria' : 'azione');
-/** Il tipo d'azione della voce, ricondotto ad «altro» se il valore salvato non è fra i tipi noti. */
-function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
+/** Il tipo d'azione della voce, ricondotto ad «altro» se il valore salvato non è fra i tipi noti (anche il filtro della ricerca nel Diario). */
+export function tipoDi(r: Pick<RigaVoce, 'tipo'>): AzionePercorsoDto['tipo'] {
   return (TIPI.has(r.tipo) ? r.tipo : 'altro') as AzionePercorsoDto['tipo'];
 }
 /** Il collegamento, se è di un tipo che la giornata conosce (un evento scritto prima del 2026-09-30 può averne un altro). */
@@ -487,6 +487,41 @@ function campiInfiltrazioni(r: RigaVoce, partitaId?: number): Partial<AzionePerc
     propostaInfiltrazioni: proposta,
     ...(daAprire !== undefined ? { infiltrazioneDaAprire: daAprire } : {}),
   };
+}
+
+/** Ciò che la ricerca nel Diario mostra di una voce trovata, oltre al testo e alle note della riga. */
+export interface VocePerRicerca { riferimentoTesto: string | null; spuntando: string[]; fatta: boolean | null }
+
+/**
+ * La ricerca nel Diario (Guida › Giorno per giorno, 2026-10-29): per le voci trovate, il nome del collegamento, le frasi di «Spuntando succede»
+ * e, con la partita, la spunta, con le STESSE regole della voce del giorno (`voceDto`): la fonte unica degli effetti, isolata «da correggere»
+ * (senza frasi) se la ricevuta della spunta o le ricevute degli effetti non si leggono, i nomi degli effetti, gli yen già nel saldo e, a voce
+ * fatta, le alternative comprate; un promemoria non ha frasi. Le spunte della partita si leggono una volta sola per tutte le voci.
+ */
+export function vociPerRicerca(righe: readonly RigaVoce[], partitaId?: number): Map<string, VocePerRicerca> {
+  const spunte = leggiSpunte(partitaId);
+  const nomi = nomiEffetti();
+  const out = new Map<string, VocePerRicerca>();
+  for (const r of righe) {
+    let fonte = leggiEffettiVocePerMostrare(r.uid);
+    if (partitaId !== undefined) {
+      try { leggiRicevuteEffettiVoce(partitaId, r.uid); }
+      catch (e) {
+        if (!(e instanceof HttpError) || e.status !== 409) throw e;
+        fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: e.message };
+      }
+    }
+    const ricevutaRotta = spunte.illeggibili.get(r.uid);
+    if (ricevutaRotta !== undefined) fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: ricevutaRotta };
+    const v = voceBase(r, fonte);
+    const spuntabile = v.genere === 'azione';
+    const fatta = spunte.fatte.has(r.uid);
+    const conYen = partitaId === undefined || !spuntabile ? [] : fonte.effetti.filter((x) => effettoConYen(x.effetto));
+    const yenGiaNelSaldo = partitaId === undefined || !conYen.length ? new Set<string>() : effettiConYenGiaNelSaldo(partitaId, r.uid, conYen.map((x) => effettoPerYen(x.uid, x.effetto)));
+    const spuntando = spuntabile ? cosaDaLaFonte(fonte, nomi, yenGiaNelSaldo, partitaId !== undefined && fatta ? alternativeDellaVoceFatta(partitaId, r.uid, fonte.effetti) : undefined, fasciaDi(r)).testo : [];
+    out.set(r.uid, { riferimentoTesto: v.riferimentoTesto, spuntando, fatta: partitaId === undefined ? null : spuntabile && fatta });
+  }
+  return out;
 }
 
 /** Una voce della giornata per uid, com'è nel suo giorno (con la partita, il suo stato): la scheda del Palazzo aperta da una voce
