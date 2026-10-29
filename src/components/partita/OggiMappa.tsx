@@ -21,6 +21,7 @@ import { MappaTokyo } from '../mappe/MappaTokyo';
 import { getDungeons, getQuartieri } from '../../services/api';
 import { radiciMetaverso } from '../../utils/palazzi';
 import { useCarica } from '../../hooks/useCarica';
+import { useCovoNellaPartita } from '../../hooks/useCovoNellaPartita';
 import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
 import { usePartitaStore } from '../../stores/partitaStore';
 import type { Oggi } from '../../hooks/useOggi';
@@ -47,6 +48,9 @@ export function OggiMappa({ oggi, riempi }: Props) {
   // con la partita: un Palazzo completato sulla mappa di Tokyo non c'è più; col suo giorno, che decide dove si atterra
   // toccando un Palazzo (`atterraggio`, 2026-10-04)
   const dungeon = useCarica(async () => (suTokyo ? radiciMetaverso(await getDungeons(oggi.partitaId)) : []), [suTokyo, oggi.partitaId, attiva?.dataGioco]);
+  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati: migrazione 303); si rilegge quando
+  // cambia lo stato della partita (il giorno che avanza)
+  const covo = useCovoNellaPartita(oggi.partitaId, attiva, suTokyo);
 
   // Una voce della giornata ha chiesto la mappa («Sulla mappa», il cartellino di un Palazzo): se la colonna è fuori dallo
   // schermo — sul telefono sta in fondo, sotto la guida — la pagina ci scorre (scelta dell'utente, 2026-10-04). Se è già in
@@ -73,6 +77,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}
           dataGioco={attiva?.dataGioco ?? null}
+          covo={covo}
           // La metro dice dove scendere (L2): l'area d'ingresso di un quartiere col suo centro, o la planimetria d'arrivo di un
           // Palazzo col suo pin. Prima l'indirizzo si interpretava con un'espressione regolare e il centro dell'ingresso si perdeva.
           // Dove non c'è nulla su cui scendere (il Covo) il cartellino resta un collegamento.

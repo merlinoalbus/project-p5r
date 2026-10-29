@@ -14,12 +14,13 @@ import { validate } from '../middleware/validate.js';
 import { httpErrors } from '../utils/httpError.js';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import {
-  aggiornaArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, impostaInfiltrazioniDellArea, mappeDaCollocare, riordinaAree, ripristinaArea,
+  aggiornaArea, aggiornaSbloccoArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, impostaInfiltrazioniDellArea, mappeDaCollocare, riordinaAree, ripristinaArea,
   type ContenitoreRotta, type ImmagineNuova,
 } from '../services/mappe/areeService.js';
 import {
-  bodyAggiornaArea, bodyColloca, bodyInfiltrazioniArea, bodyOrdineAree, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryColloca, queryCreaArea, queryDettaglioArea, queryEliminaArea,
+  bodyAggiornaArea, bodyColloca, bodyInfiltrazioniArea, bodyOrdineAree, bodySbloccoArea, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryColloca, queryCreaArea, queryDettaglioArea, queryEliminaArea,
 } from '../schemas/aree.js';
+import type { RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 const router = Router();
 
@@ -71,6 +72,10 @@ router.post('/:contenitore/:chiave/:slug/planimetrie', validate({ params: params
 });
 router.put('/:contenitore/:chiave/:slug/planimetrie', validate({ params: paramsArea, body: bodyVersioni }), (req, res) => {
   res.json(aggiornaVersioni(...parametri(req), String(req.params.slug), req.body as Parameters<typeof aggiornaVersioni>[3]));
+});
+/** 303: la condizione propria dell'Area (in AND con il quartiere, ereditata dai suoi luoghi); gli inviti restano dei Confidenti. */
+router.put('/:contenitore/:chiave/:slug/sblocco', validate({ params: paramsArea, body: bodySbloccoArea }), (req, res) => {
+  res.json(aggiornaSbloccoArea(...parametri(req), String(req.params.slug), (req.body as { condizioni: RequisitoSpillo[] }).condizioni));
 });
 /** L3 (R3-23): le infiltrazioni che toccano un'Area di un Palazzo (dall'area); non sposta voci né pin. */
 router.put('/:contenitore/:chiave/:slug/infiltrazioni', validate({ params: paramsArea, body: bodyInfiltrazioniArea }), (req, res) => {

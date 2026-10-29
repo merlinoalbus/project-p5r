@@ -126,7 +126,7 @@ Ogni riga cita il file che la prova. Dove una tabella è «tolta», il dato vive
 | Entità | Fonte unica | Chi la legge e la scrive |
 |---|---|---|
 | Quartiere | `quartiere` (migrazione 015); ingresso in `quartiere_ingresso` (039) | `cittaService.ts`; pagine `CittaPage`, `QuartierePage` |
-| Area del mondo | `area` (109): contenitore `quartiere_chiave`, `dungeon_chiave` o `citta_chiave`; planimetria predefinita e `da_verificare` | `mappe/areeService.ts`, rotte `/api/aree` (`routes/aree.ts`); la casa in `mappe/casaMappa.ts` |
+| Area del mondo | `area` (109): contenitore `quartiere_chiave`, `dungeon_chiave` o `citta_chiave`; planimetria predefinita e `da_verificare`; dalla 303 la condizione propria `condizioni_json` (in AND con il quartiere, ereditata dai luoghi dell'Area: il Covo dei Ladri dal 5 maggio; `condizioneEffettivaArea`, `PUT /api/aree/…/sblocco`) | `mappe/areeService.ts`, rotte `/api/aree` (`routes/aree.ts`); la casa in `mappe/casaMappa.ts` |
 | Planimetria | riga di `mappa` (027) con `area_chiave`, `versione_etichetta`, `versione_ordine` (109); immagine nell'ambito `mappa` di `immagine` | `mappeService.ts`, `areeService.ts`; il ruolo dell'immagine si deduce dal posto (§ risolutore d'immagine) |
 | Pin | `spillo` (027), con `uid` = impronta dell'identità (067, `mappe/identitaSpillo.ts`) | `mappeService.ts`; legami alle voci in `spillo_voce` (098) |
 | Palazzo | `dungeon` (013), le infiltrazioni in `dungeon_area`; le Aree del Palazzo sono righe di `area` con `dungeon_chiave` (110); legame infiltrazione↔Area in `infiltrazione_area` (110) | `palazziService.ts`, `mappe/legamiInfiltrazioni.ts`; pagina `DungeonDettaglioPage` |

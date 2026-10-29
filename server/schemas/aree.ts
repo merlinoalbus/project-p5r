@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { CONTENITORI_AREA } from '../services/mappe/areeService.js';
 import { boolQuery, idParam } from './comuni.js';
+import { condizioneSpillo } from './mappe.js';
 
 /** Il contenitore e la sua chiave: `citta/<quartiere>` o `citta/tokyo` (la città), `dungeon/<palazzo>` (L3). */
 export const paramsContenitore = z.object({ contenitore: z.enum(CONTENITORI_AREA), chiave: z.string().min(1).max(80) });
@@ -44,6 +45,9 @@ export const bodyAggiornaArea = z.object({
   predefinita: z.string().min(1).max(200).optional(),
   daVerificare: z.literal(false).optional(),
 }).strict();
+
+/** La condizione propria di un'Area (303), in AND con quella del quartiere; un elenco vuoto la toglie. */
+export const bodySbloccoArea = z.object({ condizioni: z.array(condizioneSpillo).max(20) }).strict();
 
 /** L'ordine delle Aree del contenitore: tutti gli slug, una volta. */
 export const bodyOrdineAree = z.object({ slug: z.array(z.string().min(1).max(120)).max(200) }).strict();

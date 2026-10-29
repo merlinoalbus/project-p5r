@@ -24,6 +24,7 @@
 import { useMemo, useState } from 'react';
 import { getCompletamento } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
@@ -93,6 +94,11 @@ export function CovoPage() {
   // ondata 5 (decisione 21 b): con una partita attiva le sfide che l'app sa contare (Benefattore: i regali) dicono a che punto è la partita
   const partitaId = usePartitaStore((s) => s.attiva?.id ?? null);
   const dati = useCarica(() => getCompletamento(partitaId ?? undefined), [partitaId]);
+  // la carta verso l'Area del Covo solo quando il Covo è nel mondo della partita (dal 5 maggio, dalla condizione della sua Area,
+  // migrazione 303: richiesta dell'utente del 2026-10-29); prima dice perché. Finché l'esito non arriva la carta resta com'era.
+  const attiva = usePartitaStore((s) => s.attiva);
+  const covoNelMondo = useCovoNellaPartita(partitaId, attiva);
+  const covoChiuso = covoNelMondo ? !covoNelMondo.disponibile : false;
   /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   const [ricerca, setRicerca] = useState('');
@@ -110,10 +116,14 @@ export function CovoPage() {
             sottotitolo={`L'area bonus di Royal: ${covo.sfide.length} sfide, contenuti acquistabili con Medaglie P e ricompense finali.`} />
           {/* le planimetrie del Covo sono un'Area di Yongen-Jaya (L2, D2): le due pagine si collegano nei due sensi */}
           {/* un bersaglio da toccare: almeno 48 px di altezza a ogni larghezza (LAY2-6, gemello di LAY2-2) */}
-          <Link to={COVO_AREA.pagina} className="card card--cliccabile touch no-underline text-text flex min-h-12 items-center gap-2 py-2 self-start">
-            <IconaAzione chiave="mappa" dimensione={20} /><span className="font-semibold">Planimetrie del Covo</span>
-            <span className="testo-12 text-text-muted">un’area di Yongen-Jaya</span>
-          </Link>
+          {covoChiuso
+            ? <p className="card m-0 flex min-h-12 items-center gap-2 py-2 self-start testo-13 text-text-secondary" role="status">
+                <IconaAzione chiave="bloccato" dimensione={20} />Nella partita il Covo non è ancora aperto{covoNelMondo?.quando ? `: ${covoNelMondo.quando}` : ''}.
+              </p>
+            : <Link to={COVO_AREA.pagina} className="card card--cliccabile touch no-underline text-text flex min-h-12 items-center gap-2 py-2 self-start">
+                <IconaAzione chiave="mappa" dimensione={20} /><span className="font-semibold">Planimetrie del Covo</span>
+                <span className="testo-12 text-text-muted">un’area di Yongen-Jaya</span>
+              </Link>}
 
           <section className="card flex flex-col gap-3" aria-label="Come funziona il Covo">
             <div className="flex flex-wrap gap-2">

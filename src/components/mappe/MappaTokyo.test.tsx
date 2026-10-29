@@ -67,6 +67,26 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
   });
 });
 
+// richiesta dell'utente del 2026-10-29: «far sì che compaia in mappa solo da quella data in poi» (il Covo dal 5 maggio, dati della 303)
+describe('MappaTokyo — il Covo dei Ladri segue la sua Area', () => {
+  /** La fermata del Covo sulla mappa (il cartellino, non il chip dell'elenco), o null se non è disegnata. */
+  const fermata = () => document.querySelector('a.spillo-tokyo[href="/guida/covo"]');
+  it('il 4 maggio non c’è, ed è fra le mete non ancora nel mondo col suo perché; dal 5 maggio c’è', () => {
+    const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dataGioco="05-04" covo={{ disponibile: false, quando: 'dal 5 maggio' }} /></MemoryRouter>);
+    expect(fermata()).toBeNull();
+    expect(screen.getByText('Covo dei Ladri', { selector: 'span[title]' })).toHaveAttribute('title', 'dal 5 maggio');
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dataGioco="05-05" covo={{ disponibile: true, quando: 'dal 5 maggio' }} /></MemoryRouter>);
+    expect(fermata()).not.toBeNull();
+    expect(screen.queryByText('Covo dei Ladri', { selector: 'span[title]' })).toBeNull();
+  });
+  it('finché l’esito non è arrivato non si disegna; senza la sua Area (nessuna data) c’è', () => {
+    const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dataGioco="05-04" /></MemoryRouter>);
+    expect(fermata()).toBeNull();
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dataGioco="05-04" covo={null} /></MemoryRouter>);
+    expect(fermata()).not.toBeNull();
+  });
+});
+
 describe('MappaTokyo — i segni dei posti con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-20)', () => {
   afterEach(() => { usePreferenzeStore.setState({ graficaPredefinita: true }); });
   it('sagome e stemmi restano, presi dal manifesto, e ogni cartellino ha il suo nome', () => {

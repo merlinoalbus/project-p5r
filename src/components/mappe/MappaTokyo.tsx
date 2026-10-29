@@ -36,6 +36,7 @@ import {
 } from './collocazioneTokyo';
 import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere, useRisolviSegno } from './segniMappa';
 import { PAGINA_COVO } from '../../utils/covo';
+import type { CovoNellaPartita } from '../../hooks/useCovoNellaPartita';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -54,6 +55,9 @@ interface Props {
   dungeon?: DungeonRiassuntoDto[];
   /** Data della partita in MM-GG. Senza, si mostra il mondo intero. */
   dataGioco?: string | null;
+  /** Il Covo dei Ladri nella partita, dall'esito della sua Area (`useCovoNellaPartita`; la data — dal 5 maggio — sta nei dati, migrazione
+   *  303): `undefined` finché non è arrivato (la fermata non si disegna), `null` se l'Area non c'è (nessuna data: la fermata c'è). */
+  covo?: CovoNellaPartita | null;
   /** La chiave accesa: si illumina d'oro e passa davanti alle vicine. La stessa che accende la
    *  scheda corrispondente, perché mappa e schede sono **una** selezione vista in due modi. */
   evidenziato?: string | null;
@@ -272,7 +276,7 @@ const ZOOM_PASSO = 1.4;
  * o, con `riempi`, come conteggio con una finestra di dettaglio; senza `dataGioco` si mostra tutto e
  * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
  * `onApri` può intercettare il clic sui cartellini. */
-export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
+export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
   const cornice = useRef<HTMLDivElement>(null);
@@ -408,6 +412,19 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         quando: d.concluso ? `concluso: ${d.concluso}` : f ? (f.al ? `dal ${dataLeggibile(f.dal)} al ${dataLeggibile(f.al)}` : `dal ${dataLeggibile(f.dal)}`) : null,
       });
     }
+    // Il Covo dei Ladri: nel gioco si apre dal menu, dal 5 maggio, e non si raggiunge in metro (registro dell'Esperto della guida, G-004;
+    // L2), quindi la fermata porta alla pagina delle sfide. C'è **quando c'è la sua Area** nella partita (richiesta dell'utente del
+    // 2026-10-29: «far sì che compaia in mappa solo da quella data in poi»): la data sta una volta nei dati, sull'Area (migrazione 303), e
+    // qui arriva solo l'esito, come per quartieri e Palazzi; prima della data va fra le mete «non ancora nel mondo», col suo perché.
+    // Finché l'esito non è arrivato non si disegna. Il segno è la voce 4 di `docs/grafica/fabbisogno.md`: senza il file resta la targa.
+    if (covo !== undefined) {
+      segni.push({
+        chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri', destinazione: null,
+        src: risolvi(SEGNO_COVO), dove: COVO_TOKYO, palazzo: false, href: PAGINA_COVO,
+        presente: covo === null || covo.disponibile,
+        quando: covo?.quando ?? null,
+      });
+    }
     // Il nome di ogni fermata, cartellino o non cartellino. Serve ai pallini: quando una fermata
     // è chiusa — non ancora sbloccata, o senza una scheda nella guida — il pallino è tutto quel
     // che resta, e senza il nome sarebbe un puntino muto.
@@ -421,7 +438,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       if (QUARTIERI_TOKYO[chiave] && !nomi.has(chiave)) nomi.set(chiave, nome);
     }
     return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
-  }, [quartieri, dungeon, risolvi]);
+  }, [quartieri, dungeon, covo, risolvi]);
   const [elencoAssenti, setElencoAssenti] = useState(false);
   const { blocco, mappa } = useLarghezzaCheSta(riempi, `${presenti.length}/${assenti.length}/${dataGioco ?? ''}`);
 
@@ -462,21 +479,8 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
           <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
         </svg>
         <Rete nomi={nomiFermate} />
+        {/* Fra i presenti c'è anche il Covo dei Ladri, quando la sua Area è nel mondo (dal 5 maggio, dai dati: vedi sopra). */}
         {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} onApri={onApri} />)}
-        {/* Il Covo è l'unico elemento della mappa senza figura, ed è la voce 4 di
-            `docs/grafica/fabbisogno.md`: il prompt è scritto e la sagoma la genera Codex.
-            Qui c'è **la metà che tocca a me**, scritta prima che il file esista: quando
-            `covo-dei-ladri.png` arriva, il Covo diventa un cartellino come tutti gli altri senza
-            che nessuno debba toccare il codice; finché non c'è, resta la targa sola, che è quel
-            che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire.
-            La fermata porta alla pagina delle sfide: nel gioco il Covo si apre dal menu, dal 5/5, e non si raggiunge in metro
-            (registro dell'Esperto della guida, G-004; L2). Prima il cartellino diceva «la soffitta del Leblanc», che è sbagliato. */}
-        <Cartellino
-          s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri', destinazione: null,
-            src: risolvi(SEGNO_COVO), dove: COVO_TOKYO, palazzo: false,
-            href: PAGINA_COVO, presente: true,
-            quando: 'dal menu di gioco, dal 5/5' }}
-          acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} onApri={onApri} />
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
       <div className="visore-mappa__controlli">

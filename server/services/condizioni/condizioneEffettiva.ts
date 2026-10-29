@@ -67,9 +67,30 @@ export function condizioneEffettivaQuartiere(chiave: string, inviti: readonly Ri
   return conGliInviti(salvata ?? [], aprono);
 }
 
-/** La condizione propria di un luogo (`luogo.condizioni_json`) in OR con gli inviti che lo aprono: è quella che dice se il luogo è
- *  sbloccato (la condizione `luogo{}`), senza il quartiere. */
+/** La condizione propria di un'Area (`area.condizioni_json`, migrazione 303: il Covo dei Ladri dal 5 maggio) in OR con gli inviti che la
+ *  aprono; vuota se l'Area non ne ha una (allora segue solo il suo contenitore, e gli inviti verso di lei aprono il quartiere), se non
+ *  c'è o se lo schema è di prima della 303. */
+export function condizionePropriaArea(chiave: string | null | undefined, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
+  if (!chiave) return [];
+  let r: { condizioni_json: string | null } | undefined;
+  try { r = prepared('SELECT condizioni_json FROM area WHERE chiave = ?').get(chiave) as { condizioni_json: string | null } | undefined; }
+  catch { return []; } // uno schema di prima della 303 (o senza Aree): nessuna condizione propria
+  const propria = leggiCondizioniSalvate(r?.condizioni_json ?? null);
+  return propria.length === 0 ? [] : conGliInviti(propria, invitiCheAprono('area', chiave, inviti));
+}
+
+/** La condizione effettiva di un'Area: quella del suo quartiere (null per le Aree della città e dei Palazzi) e la sua propria, in AND;
+ *  null se non c'è né l'una né l'altra. Senza condizione propria è esattamente quella del quartiere, come prima della 303. */
+export function condizioneEffettivaArea(a: { chiave?: string | null; quartiere_chiave: string | null }, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] | null {
+  const quartiere = a.quartiere_chiave ? condizioneEffettivaQuartiere(a.quartiere_chiave, inviti) : null;
+  const propria = condizionePropriaArea(a.chiave, inviti);
+  if (propria.length === 0) return quartiere;
+  return [...(quartiere ?? []), ...propria];
+}
+
+/** La condizione propria di un luogo (`luogo.condizioni_json`) in OR con gli inviti che lo aprono, e quella propria della sua Area (303):
+ *  è quella che dice se il luogo è sbloccato (la condizione `luogo{}`), senza il quartiere. */
 export function condizioneDelLuogo(chiave: string, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
-  const r = prepared('SELECT condizioni_json FROM luogo WHERE chiave = ?').get(chiave) as { condizioni_json: string | null } | undefined;
-  return conGliInviti(leggiCondizioniSalvate(r?.condizioni_json ?? null), invitiCheAprono('luogo', chiave, inviti));
+  const r = prepared('SELECT condizioni_json, area_chiave FROM luogo WHERE chiave = ?').get(chiave) as { condizioni_json: string | null; area_chiave: string | null } | undefined;
+  return [...condizionePropriaArea(r?.area_chiave, inviti), ...conGliInviti(leggiCondizioniSalvate(r?.condizioni_json ?? null), invitiCheAprono('luogo', chiave, inviti))];
 }

@@ -111,7 +111,9 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
   const punto = useMemo(() => centroAccessoMondo(params), [params]);
   const conPin = a.planimetrie.find((p) => p.numeroSpilli > 0 && p.chiave !== scelta?.chiave) ?? null;
   const elementiQui = a.elementi.filter((e) => e.planimetria === scelta?.chiave);
-  const covo = a.chiave === COVO_AREA.chiave;
+  // il collegamento alle sfide del Covo solo quando il Covo è nel mondo della partita (dal 5 maggio, dalla condizione della sua Area,
+  // migrazione 303: richiesta dell'utente del 2026-10-29); senza partita c'è, come ogni altro posto datato
+  const covo = a.chiave === COVO_AREA.chiave && a.disponibile !== false;
   /** L'Area ha la fila delle versioni (più di una planimetria). */
   const conFila = a.planimetrie.length > 1;
 

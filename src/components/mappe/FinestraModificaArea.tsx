@@ -15,10 +15,12 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { aggiornaAreaMondo, aggiornaPlanimetrieArea, collocaPlanimetria, eliminaMappa, impostaInfiltrazioniArea, isApiError } from '../../services/api';
+import { aggiornaAreaMondo, aggiornaPlanimetrieArea, aggiornaSbloccoAreaMondo, collocaPlanimetria, eliminaMappa, impostaInfiltrazioniArea, isApiError } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { nomeVersione } from '../../utils/aree';
-import type { AreaDettaglioDto } from '../../types';
+import { CondizioniEditor } from '../guida/CondizioniEditor';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import type { AreaDettaglioDto, SbloccoDto } from '../../types';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -41,6 +43,13 @@ interface Props {
 /** «Un'area a sé»: la versione diventa un'area nuova del Palazzo (col nome scelto). */
 const AREA_NUOVA = '__nuova';
 
+/** La condizione propria salvata dell'area (migrazione 303), come elenco in AND per l'editor; vuota se l'area segue solo il quartiere. */
+function condizioniProprie(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
+  const salvata = sblocco?.condizioneSalvata as RequisitoSpillo | null | undefined;
+  if (!salvata) return [];
+  return salvata.tipo === 'gruppo' && salvata.modo === 'tutte' ? salvata.condizioni : [salvata];
+}
+
 /** La finestra: nome, planimetria predefinita, tabella delle versioni (etichetta, ↑/↓, «Apri nell'editor», elimina, nei Palazzi
  *  «Sposta…») e, nei Palazzi, le infiltrazioni. */
 // L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraModificaAreaReale` esce dal bundle
@@ -53,6 +62,8 @@ function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltra
   const iniziali = (area.infiltrazioni ?? []).map((x) => x.chiave);
   const [infiltrazioni, setInfiltrazioni] = useState<string[]>(iniziali);
   const [predefinita, setPredefinita] = useState(area.predefinita ?? '');
+  // la condizione propria dell'area (303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere ed ereditata dai suoi luoghi
+  const [sblocco, setSblocco] = useState<RequisitoSpillo[]>(() => condizioniProprie(area.sblocco));
   // la finestra si monta quando si apre (la pagina la rende solo aperta), quindi riparte sempre dai valori dell'Area
   const [etichette, setEtichette] = useState<Record<string, string>>(() => Object.fromEntries(area.planimetrie.map((p) => [p.chiave, p.etichetta ?? ''])));
   const [ordine, setOrdine] = useState<string[]>(() => area.planimetrie.map((p) => p.chiave));
@@ -85,6 +96,7 @@ function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltra
         const cambiate = scelte.length !== iniziali.length || scelte.some((k) => !iniziali.includes(k));
         if (cambiate) await impostaInfiltrazioniArea(area.contenitore, area.slug, scelte);
       }
+      if (JSON.stringify(sblocco) !== JSON.stringify(condizioniProprie(area.sblocco))) await aggiornaSbloccoAreaMondo(area.contenitore, area.slug, sblocco);
       notifica('success', `${nomeNuovo} salvata.`);
       await onSalvata();
       onChiudi();
@@ -144,6 +156,11 @@ function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltra
         </label>
         {area.planimetrie.length > 1 && <Selettore etichetta="Planimetria che si apre per prima" valore={predefinita}
           opzioni={area.planimetrie.map((p, i) => ({ chiave: p.chiave, nome: nomeVersione(p, i), dettaglio: `${p.numeroSpilli} pin` }))} onCambia={setPredefinita} />}
+        <section className="flex flex-col gap-2" aria-label="Sblocco dell’area">
+          <h3 className="m-0 testo-14">Sblocco dell’area</h3>
+          <p className="m-0 testo-12 text-text-muted">Vale insieme a quello {area.contenitore.tipo === 'quartiere' ? `di ${area.contenitore.nome}` : 'del contenitore'} e lo ereditano i luoghi dell’area: finché non è vero l’area resta fuori dalla mappa della partita. Senza condizioni l’area segue solo {area.contenitore.tipo === 'quartiere' ? 'il quartiere' : 'il contenitore'}.</p>
+          <CondizioniEditor condizioni={sblocco} onCambia={setSblocco} disabilitato={occupato} />
+        </section>
         <section className="flex flex-col gap-2" aria-label="Planimetrie dell’area">
           <h3 className="m-0 testo-14">Planimetrie</h3>
           <ol className="m-0 flex list-none flex-col gap-2 p-0">

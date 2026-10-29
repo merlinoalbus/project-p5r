@@ -29,9 +29,9 @@ import { creaMappa, creaSpillo, eliminaMappa, eliminaSpillo, impostaImmagineMapp
 import { caricataDellaMappa, illustrazioneDellaMappa, immaginiCaricateDelleMappe, urlCaricata } from './immagineMappa.js';
 import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { lettureLuoghi, luoghiDellArea, luogoDelPin } from '../luoghiService.js';
-import { condizioneEffettivaQuartiere } from '../condizioni/condizioneEffettiva.js';
+import { condizioneEffettivaArea } from '../condizioni/condizioneEffettiva.js';
 import { elencaInviti } from '../inviti.js';
-import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from '../condizioni/nomiCondizioni.js';
 import { cosaManca, valutaInsieme, valutaInsiemeSpillo } from '../condizioni/valutatore.js';
 import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
@@ -136,14 +136,21 @@ function raccoltaDelContenitore(c: Contenitore, partitaId?: number): { perMappa:
  * le infiltrazioni che la toccano e la raccolta delle sue planimetrie. Nei Palazzi non c'è un passaggio (l'illustrazione del Palazzo
  * non ha pin verso le aree) né un ingresso.
  */
+/** La condizione dell'Area: quella del suo quartiere e, dalla 303, la sua propria in AND (il Covo dei Ladri dal 5 maggio). */
 function condizioneArea(a: RigaArea): RequisitoSpillo[] | null {
-  return a.quartiere_chiave ? condizioneEffettivaQuartiere(a.quartiere_chiave) : null;
+  return condizioneEffettivaArea(a);
+}
+
+/** La condizione propria salvata dell'Area (`area.condizioni_json`, senza inviti né quartiere), per l'editor; vuota se non ne ha. */
+function condizionePropriaSalvata(a: RigaArea): RequisitoSpillo[] {
+  return leggiCondizioniSalvate(a.condizioni_json ?? null);
 }
 
 function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 'sblocco' | 'disponibile' | 'bloccoMotivo'> {
   const condizioni = condizioneArea(a);
   if (!condizioni) return { disponibile: true, bloccoMotivo: null };
   const nomi = nomiCondizioniMemo();
+  const propria = condizionePropriaSalvata(a);
   const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
   const testo = descriviRequisitoSpillo(condizione, nomi);
   const fonte = a.quartiere_chiave ? (prepared('SELECT fonte_condizioni_json FROM quartiere WHERE chiave = ?').get(a.quartiere_chiave) as { fonte_condizioni_json: string | null } | undefined)?.fonte_condizioni_json : null;
@@ -152,7 +159,7 @@ function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 's
   const esito = st ? valutaInsieme(condizioni.map((c) => condizioneConTesto(c, nomi)), st) : null;
   const stato = esito?.stato;
   const manca = stato === 'bloccato' ? cosaManca(condizione, st!, nomi) : null;
-  const sblocco: SbloccoDto = { condizione, testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca, inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false };
+  const sblocco: SbloccoDto = { condizione, condizioneSalvata: propria.length === 1 ? propria[0] : propria.length > 1 ? { tipo: 'gruppo', modo: 'tutte', condizioni: propria } : null, testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca, inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false };
   return { sblocco, disponibile: stato !== 'bloccato', bloccoMotivo: manca };
 }
 
@@ -439,6 +446,19 @@ export function aggiornaArea(contenitore: ContenitoreRotta, chiave: string, slug
     if (dati.daVerificare === false) prepared('UPDATE area SET da_verificare = 0 WHERE chiave = ?').run(a.chiave);
     prepared('UPDATE area SET updated_at = ? WHERE chiave = ?').run(nowIso(), a.chiave);
   })();
+  invalidaCacheDiGioco();
+  return dettaglioArea(contenitore, chiave, slugArea);
+}
+
+/**
+ * Sostituisce la condizione propria dell'Area (303: il Covo dei Ladri dal 5 maggio), che vale in AND con quella del quartiere e che i
+ * luoghi dell'Area ereditano: è l'unico punto in cui si scrive. Un elenco vuoto la toglie (l'Area torna a seguire solo il quartiere).
+ * Gli inviti dei Confidenti restano separati e intatti.
+ */
+export function aggiornaSbloccoArea(contenitore: ContenitoreRotta, chiave: string, slugArea: string, condizioni: ReadonlyArray<RequisitoSpillo>): AreaDettaglioDto {
+  const a = rigaArea(contenitoreDaRotta(contenitore, chiave), slugArea);
+  const normalizzate = normalizzaCondizioniSpillo(condizioni);
+  prepared('UPDATE area SET condizioni_json = ?, updated_at = ? WHERE chiave = ?').run(normalizzate.length ? JSON.stringify(normalizzate) : null, nowIso(), a.chiave);
   invalidaCacheDiGioco();
   return dettaglioArea(contenitore, chiave, slugArea);
 }

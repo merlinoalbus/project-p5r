@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { getDungeons, getQuartieri } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
+import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -57,6 +58,8 @@ export function CittaPage() {
   // Col giorno della partita, perché da quello dipende dove si atterra toccando un Palazzo (`atterraggio`, 2026-10-04).
   const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id]);
   useRileggiAlCambio(dungeon.ricarica, attiva);
+  // il Covo dei Ladri sulla mappa solo quando la sua Area è nel mondo (dal 5 maggio, dai dati: migrazione 303)
+  const covo = useCovoNellaPartita(attiva?.id, attiva);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -82,7 +85,7 @@ export function CittaPage() {
               Sotto il desktop si impila: due colonne su un tablet in verticale darebbero una
               mappa piccola e schede strette, cioè il peggio di tutti e due. */}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-            <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
+            <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null} covo={covo}
               evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:min-w-0" />
             {/* Tante colonne quante ne stanno con schede di almeno 300 px: con colonne fisse per larghezza della
                 finestra, da 1536 px ne entravano due nella colonna di 411 px accanto alla mappa, e il nome del

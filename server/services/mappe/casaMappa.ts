@@ -26,6 +26,8 @@ export interface RigaArea {
   chiave: string; quartiere_chiave: string | null; dungeon_chiave: string | null; citta_chiave: string | null; slug: string; nome: string;
   nome_rivisto: number; ordine: number; planimetria_predefinita: string | null; origine: 'seed' | 'utente'; seed_json: string | null;
   da_verificare: number; updated_at: string;
+  /** La condizione propria dell'Area (303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere; assente prima della 303. */
+  condizioni_json?: string | null;
 }
 
 /** Le Aree e i nomi dei loro contenitori, letti una volta per una risposta che descrive molte mappe. */

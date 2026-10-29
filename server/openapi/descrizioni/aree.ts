@@ -63,6 +63,12 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
     risposta: '`AreaDettaglioDto`',
     errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [400, 'nome-vuoto'], [400, 'planimetria-di-altra-area']],
   },
+  'PUT /api/aree/:contenitore/:chiave/:slug/sblocco': {
+    sommario: 'La condizione propria di un’Area (migrazione 303)',
+    descrizione: 'Corpo `{ condizioni: [...] }` (al più 20, normalizzate): sostituisce la condizione propria dell’Area (`area.condizioni_json`), che vale in AND con quella del quartiere ed è ereditata dai luoghi dell’Area (il Covo dei Ladri dal 5 maggio). Con una partita, un’Area bloccata esce dagli elenchi delle Aree, dai figli della mappa del quartiere, dall’indice delle Mappe e dalla mappa di Tokyo. Un elenco vuoto la toglie e l’Area torna a seguire solo il quartiere. Gli inviti dei Confidenti restano separati e intatti. `sblocco.condizioneSalvata` del dettaglio la riporta.',
+    risposta: '`AreaDettaglioDto`',
+    errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, AREA_NON_TROVATA],
+  },
   'DELETE /api/aree/:contenitore/:chiave/:slug': {
     sommario: 'Elimina un’Area (nel cestino), con le sue planimetrie',
     descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che portano alle sue planimetrie (dal quartiere o da altre mappe), l’ingresso del quartiere, elementi, nei Palazzi le infiltrazioni che la toccano — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi, pinConVoci, infiltrazioni }` (le voci della guida dei pin restano nelle loro infiltrazioni). Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano, l’ingresso e i legami con le infiltrazioni; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',

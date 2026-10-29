@@ -25,6 +25,15 @@ export const getArea = (contenitore: RifContenitore, slug: string, partita?: num
 /** Le aree agganciate alla città (Tokyo): quelle che nessuna fonte colloca in un quartiere, come lo staff (da verificare). */
 export const getAreeCitta = (): Promise<AreaRiassuntoDto[]> => apiGet('/aree/citta/tokyo');
 
+/** Le aree di un quartiere nel loro ordine; con la partita ognuna dice se è già nel mondo (`disponibile`, `bloccoMotivo`). */
+export const getAreeDelQuartiere = (quartiere: string, partita?: number): Promise<AreaRiassuntoDto[]> =>
+  apiGet(`/aree/citta/${encodeURIComponent(quartiere)}${queryString({ partita })}`);
+
+/** La condizione propria di un'area (migrazione 303: il Covo dei Ladri dal 5 maggio), in AND con il quartiere e ereditata dai suoi
+ *  luoghi; un elenco vuoto la toglie. Gli inviti dei Confidenti restano separati. */
+export const aggiornaSbloccoAreaMondo = (contenitore: RifContenitore, slug: string, condizioni: unknown[]): Promise<AreaDettaglioDto> =>
+  apiPut(`${percorsoArea(contenitore, slug)}/sblocco`, { condizioni });
+
 /** I dati di una nuova area: nome, etichetta della prima planimetria, punto sull'illustrazione del quartiere (in coppia, 0–100) e,
  *  nei Palazzi (L3), le infiltrazioni da collegare. */
 export interface DatiNuovaArea { nome: string; etichetta?: string; x?: number; y?: number; infiltrazioni?: string[] }

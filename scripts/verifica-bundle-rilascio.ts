@@ -82,6 +82,7 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Modifica area', cosa: 'finestra di modifica delle aree' },
   { testo: 'Aggiungi planimetria', cosa: 'finestra di aggiunta delle planimetrie' },
   { testo: 'Elimina area', cosa: 'eliminazione delle aree' },
+  { testo: 'Sblocco dell’area', cosa: 'condizione propria delle aree (migrazione 303)' },
   { testo: 'Salva contenuto', cosa: 'modulo del contenuto della guida' },
   { testo: 'Pacchetto di gioco', cosa: 'sezione del pacchetto di gioco' },
   { testo: 'Documentazione delle API', cosa: 'sezione della documentazione delle API' },
