@@ -25,13 +25,13 @@ Il censimento è stato fatto **confrontando i dati**, non guardando le pagine a 
 tutte le categorie che arrivano a `IconaCategoria` (con un'eccezione che è un dato, non un disegno: §9), i 23 Confidenti (46 ritratti), i 10 palazzi, le 21 sezioni della
 Guida, gli 11 fregi, il meteo, le 316 mappe, gli arcani.
 
-**Che cosa manca davvero**: 21 file in quattro gruppi.
+**Che cosa manca davvero**: 18 file in quattro gruppi.
 
 | Gruppo | Dove vive | File | Che cosa |
 |---|---|---:|---|
 | **A** — icone con la chiave già nel codice | `public/asset/ui/` (repository) | 6 | 5 azioni (prompt scritti fra l'1 e il 26 ottobre, mai consegnati) e la tessera «Persona della partita» |
 | **B** — illustrazioni delle attività nuove | `gioco.db`, ambito `attivita` | 4 | estrazione della lotteria, concimare la pianta, le due fabbricazioni |
-| **R** — riconsegne | `public/asset/ui/` e `gioco.db` | 5 | le 4 icone delle allerte e un videogioco con l'alone sul bordo |
+| **R** — riconsegne | `public/asset/ui/` | 2 | le 2 icone delle allerte il cui soggetto tocca il bordo (soglia dichiarata nel §1, gruppo R) |
 | **C** — proposte che chiedono un aggancio nel codice | `public/asset/ui/` (repository) | 6 | figure distinte per i tipi di effetto della voce che oggi ne condividono una |
 
 I gruppi A, B e R si vedono nell'app appena il file c'è. **Il gruppo C no**: è la risposta alla seconda metà della
@@ -42,14 +42,25 @@ richiesta («altri elementi per i quali possiamo generare grafiche») e serve so
 ### Gruppo A — icone dell'interfaccia (6)
 
 Tutti in **`public/asset/ui/`**: le icone dell'interfaccia vivono nel repository, non nel database di gioco (regola di
-`public/asset/README.md`). Il manifest si rigenera da sé al riavvio del FE; finché un file manca l'app mostra la riserva
-SVG disegnata in codice (indicata nell'ultima colonna), quindi funziona anche prima della consegna.
+`public/asset/README.md`). Nessun elenco da aggiornare: in sviluppo il plugin `vite/assetPredefiniti.ts` calcola
+`/asset/manifest.json` a ogni richiesta (un file appena copiato compare al prossimo ricaricamento della pagina), nella build
+lo emette insieme ai file. Finché un file manca l'app mostra la riserva SVG disegnata in codice (indicata nell'ultima
+colonna), quindi funziona anche prima della consegna.
 
 | # | File | Misura | Soggetto | Dove si vede e a che misura | Riserva oggi |
 |---|---|---|---|---|---|
-| A1 | `public/asset/ui/azione-su.png` | 128×128 | freccia spessa verso l'alto sopra una riga orizzontale corta | «Sposta su» una voce del Diario: menu della voce e finestra della voce; dentro il pulsante, riquadro di **32–48 px** (14 punti nel codice) | `IconSu` |
-| A2 | `public/asset/ui/azione-giu.png` | 128×128 | freccia spessa verso il basso sotto una riga orizzontale corta | «Sposta giù»: stessi punti e misure di A1 (12 punti nel codice) | `IconGiu` |
-| A3 | `public/asset/ui/azione-scarta.png` | 128×128 | foglio tagliato in diagonale, la metà bassa che cade | «Usa le condizioni / gli effetti / il quiz leggibili e scarta le altre parti» nei moduli del catalogo e delle attività; **32–40 px** | `IconFiltro` (l'imbuto dei filtri: oggi due gesti diversi hanno la stessa figura) |
+| A1 | `public/asset/ui/azione-su.png` | 128×128 | freccia spessa verso l'alto sopra una base orizzontale corta | **14 punti nel codice**, con due significati: (a) **riordinare un elemento di un posto in su** (12 punti a 20 px: pulsantini fantasma, uno secondario, e le voci del menu della voce del Diario): voci del Diario (`GiornoGuida`, `PostoVoce`), acquisti di una voce (`AcquistiNegozioVoce`), infiltrazioni di una voce e legami di un'infiltrazione (`InfiltrazioniVoce`, `FinestraLegamiInfiltrazione`), guida dell'area (`GuidaDellArea`), aree del Dedalo e del quartiere (`AreeDelDedalo`, `AreeDelQuartiere`, `FinestraModificaArea`), regole di Tokyo (`AtterraggioTokyo`), abilità e dialoghi nell'editor dei Confidenti (`ModificaAbilita`, `ModificaDialogo`); (b) **salire di rango con un Confidente** (2 punti, pulsanti **primari rossi**): «Sali al rango N» a **22 px** (`partita/DettaglioConfidente.tsx`) e «Aggiorna il rango» a 20 px (`ConfidenteDettaglioPage.tsx`) | `IconSu` |
+| A2 | `public/asset/ui/azione-giu.png` | 128×128 | freccia spessa verso il basso sotto una base orizzontale corta | **12 punti nel codice**, solo «sposta giù di un posto»: gli stessi 12 di A1 (a), a 20 px | `IconGiu` |
+| A3 | `public/asset/ui/azione-scarta.png` | 128×128 | l'imbuto dei filtri, senza le tre righe che vi entrano in `azione-filtri.png`, con un pezzetto di carta appallottolato espulso di lato | **7 punti nel codice**, tutti col senso «lasciar fuori»: «Usa le condizioni leggibili e scarta le altre parti» (`ModuloCatalogo.tsx:217`, 22 px) e «Sostituisci con gli esiti dell'editor» (`moduli/ModuloAttivita.tsx:182`, 22 px); «Incolla senza gli effetti segnalati» (`FinestraIncolla.tsx:60`, pulsante secondario, 20 px); «Scarta» una proposta intera (`ProposteDaCompletare.tsx:216`, 20 px, e il pulsante del dialogo di conferma alla riga 129); «Non applicare» una proposta del passato (`partita/DaApplicare.tsx:223`, 20 px); «Cancella ricerca» del Diario (`RicercaDiario.tsx:64`, 20 px, a sola icona sul telefono) | `IconFiltro`, lo stesso imbuto di `azione-filtri.png` |
+
+**Perché A3 è un imbuto e non un foglio tagliato.** La versione precedente di questo prompt (§21 di
+[prompt-immagini.md](prompt-immagini.md), 2026-10-25) disegnava un foglio di cui «si tiene una parte», pensato solo per i
+due moduli. Ma la stessa chiave serve anche a scartare una proposta intera e a cancellare la ricerca, e
+`RicercaDiario.tsx:62–63` vuole di proposito la figura del filtro: «l'icona è quella del filtro, non una seconda «×»». Il
+soggetto giusto per tutti e sette gli usi è quindi **l'imbuto che lascia fuori qualcosa**. Resta della famiglia del filtro,
+come vuole la ricerca, e si distingue da `azione-filtri.png` per il pezzetto espulso, che dice «questo resta fuori». Usare
+due figure diverse (per esempio «scarta la parte» e «scarta tutto») vorrebbe dire separare la chiave nel codice. Non è
+richiesto e questa consegna non lo presuppone.
 | A4 | `public/asset/ui/azione-ricevute.png` | 128×128 | scontrino con il bordo basso a denti di sega | pulsantino a sola icona «Ricevute degli effetti della spunta» nella colonna dei comandi di una voce del Diario; **32 px**, con il distintivo del numero disegnato dall'app sopra l'angolo | `IconRicevuta` |
 | A5 | `public/asset/ui/azione-taglia.png` | 128×128 | forbici aperte viste di lato | «Taglia» nella barra delle voci selezionate e nel menu della voce del Diario; **32–40 px** | `IconForbici` |
 | A6 | `public/asset/ui/scheda-persona-partita.png` | 128×128 | maschera da ladro davanti a tre carte a ventaglio | tessera «Persona della partita» nella fila delle schede della Partita, **22 px** sopra l'etichetta, accanto a «Scorta» (due carte) e «Compendio» (libro aperto) | `IconPersone` (tre sagome: la stessa di «Confidenti») |
@@ -57,8 +68,10 @@ SVG disegnata in codice (indicata nell'ultima colonna), quindi funziona anche pr
 ### Gruppo B — illustrazioni delle attività nuove (4)
 
 Vivono **nel database di gioco** (tabella `immagine`, ambito `attivita`, chiave = chiave dell'attività, senza prefisso),
-non nel repository. Si vedono **a 56 px, a sinistra della riga** di ogni attività in Guida → Attività; oggi al loro
-posto c'è il cartiglio rosso della categoria «altro». Le altre 30 attività hanno già la loro figura.
+non nel repository. Si vedono **a 56 px, a sinistra della riga** di ogni attività in Guida → Attività. Oggi tutte e
+quattro hanno tipo `altro` e mostrano la stessa figura generica di quel tipo, `ui/categoria-altro.png` (rombo pieno con
+tre punti): `AttivitaPage.tsx:130–132` passa a `IconaCategoria`, che con il file presente mostra l'illustrazione e non
+il cartiglio (`IconaCategoria.tsx:66–72`). Le altre 30 attività hanno già la loro figura.
 
 | # | Chiave nel database | Misura | Attività (nome che legge chi gioca) | Soggetto |
 |---|---|---|---|---|
@@ -67,20 +80,35 @@ posto c'è il cartiglio rosso della categoria «altro». Le altre 30 attività h
 | B3 | `attivita/fabbricazione-strumenti` | 256×256 | Fabbricazione degli strumenti d'infiltrazione — Yongen-Jaya, Leblanc (mansarda), di sera | il banco di lavoro della mansarda con attrezzi, materiali e uno strumento appena finito |
 | B4 | `attivita/fabbricazione-kawakami` | 256×256 | Fabbricazione degli strumenti di Kawakami — Yongen-Jaya, Leblanc, di sera | il bancone del Leblanc con un grembiule da domestica piegato e gli strumenti fatti in fila |
 
-### Gruppo R — riconsegne (5)
+### Gruppo R — riconsegne (2)
 
-| # | File o chiave | Misura | Difetto misurato il 2026-10-29 (pixel non trasparenti nel contorno di 3 px) |
-|---|---|---|---|
-| R1 | `public/asset/ui/allerta-ondata-di-calore.png` | 128×128 | 14 pixel, opacità fino a 255: il raggio del sole tocca il bordo |
-| R2 | `public/asset/ui/allerta-ondata-di-gelo.png` | 128×128 | 28 pixel, opacità fino a 227: fiocco e ghiaccioli toccano il bordo |
-| R3 | `public/asset/ui/allerta-polline.png` | 128×128 | 6 pixel, opacità fino a 4: alone invisibile |
-| R4 | `public/asset/ui/allerta-stagione-influenzale.png` | 128×128 | 4 pixel, opacità fino a 1: alone invisibile |
-| R5 | `attivita/videogioco-golfer-sarutahiko` (database) | 256×256 | 66 pixel, opacità fino a 4: alone invisibile (il fondo pieno della prima consegna non c'è più) |
+**Soglia dichiarata.** Un pixel del contorno di 3 px conta come «non trasparente» solo se ha **alfa > 8**. È la misura con
+cui la consegna del 2026-09-29 ha accettato e respinto i file
+([consegna-2026-09-29-spilli-e-categorie.md](consegna-2026-09-29-spilli-e-categorie.md) §1, righe 55–56). Un alone con
+alfa da 1 a 8 non si vede su nessun fondo dell'app e non basta a far rifare un file. La regola vale **per i file nuovi e
+per quelli già respinti**. Non riapre i file accettati in passato: alcuni hanno il soggetto fino al bordo, e fra questi
+anche dei modelli di stile citati nel §2 (`categoria-acquisto`, `categoria-trama`, `categoria-confidente`,
+`categoria-velluto`, `attivita/videogioco-punch-ouch`, `attivita/caffe-leblanc`). Restano modelli **per il tratto e la
+palette**, non per il margine. Rimisurarli tutti con questa soglia sarebbe un lavoro a parte: si fa solo se l'utente lo
+chiede.
 
-R1–R4 sono le stesse quattro della consegna del 2026-10-12 ([consegna-2026-10-12-allerte.md](consegna-2026-10-12-allerte.md)
-§5), mai riconsegnate: i file in `public/asset/ui/` sono ancora quelli del commit 24c61a7d. Per R5 la copia del database ha
-già la versione rifatta di entrambi i videogiochi della consegna del 2026-09-29: `videogioco-star-forneus` ha il contorno
-pulito (0 pixel) e non va toccato; `videogioco-golfer-sarutahiko` ha solo l'alone quasi trasparente.
+Misurati il 2026-10-29 con questa soglia:
+
+| # | File | Misura | Pixel con alfa > 8 nel contorno di 3 px | Esito |
+|---|---|---|---|---|
+| R1 | `public/asset/ui/allerta-ondata-di-calore.png` | 128×128 | 14, opacità fino a 255: il raggio del sole tocca il bordo | **da riconsegnare** |
+| R2 | `public/asset/ui/allerta-ondata-di-gelo.png` | 128×128 | 28, opacità fino a 227: fiocco e ghiaccioli toccano il bordo | **da riconsegnare** |
+| — | `public/asset/ui/allerta-polline.png` | 128×128 | 0 (6 pixel con alfa fino a 4: alone invisibile) | accettato, fuori consegna |
+| — | `public/asset/ui/allerta-stagione-influenzale.png` | 128×128 | 0 (4 pixel con alfa 1) | accettato, fuori consegna |
+| — | `attivita/videogioco-golfer-sarutahiko` (database) | 256×256 | 0 (66 pixel con alfa fino a 4); il fondo pieno della prima consegna non c'è più | accettato, fuori consegna |
+
+R1 e R2 sono due delle quattro icone della consegna del 2026-10-12
+([consegna-2026-10-12-allerte.md](consegna-2026-10-12-allerte.md) §5). Quella consegna le aveva già fatte rifare perché il
+soggetto risultava tagliato, ma non sono mai arrivate: i file in `public/asset/ui/` sono ancora quelli del commit 24c61a7d.
+La stessa consegna chiedeva di ripulire anche `allerta-polline` e `allerta-stagione-influenzale`. Con la soglia qui sopra
+quella richiesta cade: il loro alone non si vede. Anche il golfer non va più rifatto: nella copia del database c'è già la
+versione rifatta di entrambi i videogiochi della consegna del 2026-09-29. `videogioco-star-forneus` ha il contorno pulito,
+`videogioco-golfer-sarutahiko` ha soltanto un alone che non si vede.
 
 ### Gruppo C — proposte: figure distinte per i tipi di effetto della voce (6)
 
@@ -112,9 +140,11 @@ Le stesse delle consegne precedenti ([consegna-2026-09-13-asset-mancanti.md](con
 - **Nessun testo dentro l'immagine**: niente lettere, numeri, cifre sui biglietti, simboli di valuta scritti (niente «¥»),
   sigle, insegne leggibili.
 - **PNG RGBA con alfa nativo**: trasparenza vera, non una scacchiera disegnata né un fondo bianco. Generare più grande e
-  ridurre con lo stesso fattore sui due assi. **Il contorno di 3 px dell'immagine deve essere trasparente** (alfa 0); per le
-  illustrazioni 256×256 il soggetto lascia almeno 8 px di margine trasparente su ogni lato. È il difetto che ha fatto
-  rifare sei file nelle ultime due consegne: va controllato prima di consegnare.
+  ridurre con lo stesso fattore sui due assi. **Il contorno di 3 px dell'immagine deve essere trasparente**: nessun pixel
+  con alfa > 8 (la soglia del §1, gruppo R; l'obiettivo resta alfa 0). Nelle illustrazioni 256×256 il soggetto lascia
+  almeno 8 px di margine trasparente su ogni lato. Per questo difetto, nelle ultime due consegne, quattro file sono stati
+  rifatti o sono ancora da rifare (i due videogiochi e R1–R2): va controllato prima di consegnare. La regola vale per
+  questa consegna e non riapre i file accettati in passato (§1, gruppo R).
 - **Un solo soggetto**, centrato; deve leggersi alla misura più piccola della tabella del §1.
 - **Palette**: nero `#0b0b0e`, bianco `#ececf1`, grigio `#6f6f80`, rosso `#e5352b`. **Niente oro**, niente pastello, niente
   sfumature. Le riconsegne del gruppo R tengono i colori che hanno (il giallo d'avviso `#f59e0b` e l'azzurro del gelo).
@@ -128,6 +158,8 @@ Le stesse delle consegne precedenti ([consegna-2026-09-13-asset-mancanti.md](con
   - categorie (C): come `categoria-acquisto.png`, `categoria-velluto.png`, `categoria-confidente.png`,
     `categoria-trama.png`: silhouette piena, bianco e grigio con dettagli rossi, contorno nero spesso, ombra rossa sfalsata.
 - Ogni figura nuova deve **distinguersi dalle vicine** indicate nel prompt: è la ragione per cui esiste.
+- I modelli di famiglia citati qui sopra servono **per tratto, palette e peso**, non per il margine: alcuni toccano il
+  bordo (§1, gruppo R) e non vanno imitati in questo.
 
 ### Blocco di stile — anteporre a OGNI prompt
 
@@ -157,10 +189,13 @@ intero.
 ```
 [blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente,
 nessuna cornice: una freccia spessa che punta verso l'alto, con la punta triangolare larga e gli angoli tagliati in
-diagonale, posata sopra una riga orizzontale corta e spessa che fa da «posto». Forma piatta bianca #ececf1 con
-contorno nero #0b0b0e spesso e uniforme, ombra rossa #e5352b sfalsata in basso a destra, come le altre icone di
-azione dell'app. Deve leggersi a 20 px su fondo rosso acceso e su fondo scuro, ed essere lo specchio esatto
-dell'icona «sposta giù» (stessa freccia capovolta). Nessun testo, nessun numero. [prompt negativo]
+diagonale, posata sopra una base orizzontale corta e spessa. La stessa icona dice due cose: «sposta su di un posto»
+in un elenco e «sali di rango» con un Confidente, quindi la freccia è dinamica e decisa, con uno slancio verso
+l'alto, e non deve sembrare un'icona di caricamento né un cursore. Forma piatta bianca #ececf1 con contorno nero
+#0b0b0e spesso e uniforme, ombra rossa #e5352b sfalsata in basso a destra, come le altre icone di azione dell'app.
+Deve leggersi a 20 px su fondo scuro e a 22 px dentro un pulsante rosso acceso #e5352b, dove l'ombra rossa non si
+vede e la figura deve reggersi su bianco e contorno nero. È lo specchio esatto dell'icona «sposta giù» (stessa
+freccia capovolta). Nessun testo, nessun numero. [prompt negativo]
 ```
 
 ### A2 · `public/asset/ui/azione-giu.png` (128×128)
@@ -168,10 +203,10 @@ dell'icona «sposta giù» (stessa freccia capovolta). Nessun testo, nessun nume
 ```
 [blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente,
 nessuna cornice: una freccia spessa che punta verso il basso, con la punta triangolare larga e gli angoli tagliati in
-diagonale, posata sotto una riga orizzontale corta e spessa che fa da «posto». Forma piatta bianca #ececf1 con
-contorno nero #0b0b0e spesso e uniforme, ombra rossa #e5352b sfalsata in basso a destra, come le altre icone di
-azione dell'app. Deve leggersi a 20 px su fondo rosso acceso e su fondo scuro, ed essere lo specchio esatto
-dell'icona «sposta su» (stessa freccia capovolta, stessa riga, stesso spessore). Nessun testo, nessun numero.
+diagonale, sotto una base orizzontale corta e spessa: dice «sposta giù di un posto» in un elenco. Forma piatta
+bianca #ececf1 con contorno nero #0b0b0e spesso e uniforme, ombra rossa #e5352b sfalsata in basso a destra, come le
+altre icone di azione dell'app. Deve leggersi a 20 px su fondo scuro, ed essere lo specchio esatto dell'icona
+«sposta su» (stessa freccia capovolta, stessa base, stesso spessore, stesso slancio). Nessun testo, nessun numero.
 [prompt negativo]
 ```
 
@@ -179,12 +214,15 @@ dell'icona «sposta su» (stessa freccia capovolta, stessa riga, stesso spessore
 
 ```
 [blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente,
-nessuna cornice: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta
-ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini
-di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra
-rossa #e5352b sfalsata in basso a destra. Deve leggersi a 20 px e distinguersi dall'imbuto dei filtri e dal
-cestino dell'eliminazione: qui si tiene una parte e si butta l'altra. Nessun testo, nessun marchio; niente
-forbici, niente cestino, niente imbuto. [prompt negativo]
+nessuna cornice: un imbuto da filtro visto di fronte, leggermente inclinato, con la bocca larga in alto e il
+becco stretto in basso, e un pezzetto di carta appallottolato che ne è appena stato espulso di lato, verso
+destra, con due trattini di movimento. Il senso è «lasciare fuori»: scartare una parte, scartare una proposta,
+togliere un filtro. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale,
+ombra rossa #e5352b sfalsata in basso a destra; la pallina espulsa è grigia #6f6f80. Deve leggersi a 20 px e restare
+della famiglia dell'icona «filtri» (lo stesso imbuto con tre righe che vi entrano dall'alto), distinguendosi da
+quella perché qui non ci sono le tre righe e c'è il pezzetto espulso di lato. Deve
+distinguersi anche dal cestino dell'eliminazione e dalla «×» di chiusura: niente cestino, niente croce, niente
+forbici. Nessun testo, nessun marchio. [prompt negativo]
 ```
 
 ### A4 · `public/asset/ui/azione-ricevute.png` (128×128)
@@ -313,8 +351,8 @@ percorso**. Non si ridisegna.
 Riesporta l'icona già consegnata public/asset/ui/allerta-ondata-di-calore.png senza ridisegnarla (stesso sole a
 raggi spigolosi, stesse onde di calore, stessi colori). Oggi la punta del raggio in alto tocca il bordo: riduci il
 soggetto in proporzione, con lo stesso fattore sui due assi, quanto basta a stare dentro i 122×122 px centrali, e
-ricentralo. Il contorno di 3 px dell'immagine 128×128 deve avere alfa 0 su ogni pixel delle prime e ultime 3 righe
-e colonne. PNG RGBA 128×128, alfa nativo, stesso nome e percorso, nessun altro file modificato.
+ricentralo. Nel contorno di 3 px dell'immagine 128×128 (prime e ultime 3 righe e colonne) nessun pixel deve avere
+alfa > 8; meglio alfa 0 ovunque. PNG RGBA 128×128, alfa nativo, stesso nome e percorso, nessun altro file modificato.
 ```
 
 ### R2 · `public/asset/ui/allerta-ondata-di-gelo.png` (128×128)
@@ -323,40 +361,13 @@ e colonne. PNG RGBA 128×128, alfa nativo, stesso nome e percorso, nessun altro 
 Riesporta l'icona già consegnata public/asset/ui/allerta-ondata-di-gelo.png senza ridisegnarla (stesso fiocco a
 sei bracci, stessi ghiaccioli, stesso taglio rosso, stessi colori). Oggi il fiocco in alto e i ghiaccioli in basso
 toccano il bordo: riduci il soggetto in proporzione, con lo stesso fattore sui due assi, quanto basta a stare dentro
-i 122×122 px centrali, e ricentralo. Il contorno di 3 px dell'immagine 128×128 deve avere alfa 0 su ogni pixel
-delle prime e ultime 3 righe e colonne. PNG RGBA 128×128, alfa nativo, stesso nome e percorso, nessun altro file
-modificato.
+i 122×122 px centrali, e ricentralo. Nel contorno di 3 px dell'immagine 128×128 (prime e ultime 3 righe e colonne)
+nessun pixel deve avere alfa > 8; meglio alfa 0 ovunque. PNG RGBA 128×128, alfa nativo, stesso nome e percorso,
+nessun altro file modificato.
 ```
 
-### R3 · `public/asset/ui/allerta-polline.png` (128×128)
-
-```
-Riesporta l'icona già consegnata public/asset/ui/allerta-polline.png senza ridisegnarla e senza ridimensionarla:
-azzera soltanto l'alone quasi trasparente (alfa 1–4) rimasto vicino al bordo in alto e in basso, così che il
-contorno di 3 px dell'immagine 128×128 abbia alfa 0 su ogni pixel. PNG RGBA 128×128, alfa nativo, stesso nome e
-percorso, nessun altro file modificato.
-```
-
-### R4 · `public/asset/ui/allerta-stagione-influenzale.png` (128×128)
-
-```
-Riesporta l'icona già consegnata public/asset/ui/allerta-stagione-influenzale.png senza ridisegnarla e senza
-ridimensionarla: azzera soltanto l'alone quasi trasparente (alfa 1) rimasto vicino al bordo destro, così che il
-contorno di 3 px dell'immagine 128×128 abbia alfa 0 su ogni pixel. PNG RGBA 128×128, alfa nativo, stesso nome e
-percorso, nessun altro file modificato.
-```
-
-### R5 · `attivita/videogioco-golfer-sarutahiko` (256×256, nel database)
-
-Il file di partenza è quello oggi nel database: si scarica da `GET /api/immagini/attivita/videogioco-golfer-sarutahiko/file`
-(sola lettura) o dalla scheda del videogioco.
-
-```
-Riesporta l'illustrazione già rifatta videogioco-golfer-sarutahiko (televisore CRT con il tengu golfista sullo
-schermo) senza ridisegnarla e senza ridimensionarla: azzera soltanto l'alone quasi trasparente (alfa 1–4) rimasto
-vicino ai bordi, così che il contorno di 3 px dell'immagine 256×256 abbia alfa 0 su ogni pixel. PNG RGBA 256×256,
-alfa nativo, stesso nome.
-```
+I prompt di ripulitura di `allerta-polline`, `allerta-stagione-influenzale` e `videogioco-golfer-sarutahiko`, presenti in
+una prima stesura di questa consegna, sono stati tolti: con la soglia del §1 (gruppo R) quei tre file sono accettati.
 
 ## 6. Prompt — gruppo C (proposte, da agganciare nel codice)
 
@@ -438,18 +449,19 @@ maschera) e dalla medaglia dei segni: qui è un trofeo del gioco. Nessun testo, 
 
 ## 7. Istruzioni di consegna
 
-**Gruppi A, C e R1–R4 — repository.** Copiare i PNG in `public/asset/ui/` con i nomi esatti del §1 (sovrascrivendo i
-quattro di R1–R4). Non serve registrare niente: il plugin `vite/assetPredefiniti.ts` rigenera `/asset/manifest.json` al
-riavvio del FE. Non toccare nessun altro file del repository.
+**Gruppi A, C e R — repository.** Copiare i PNG in `public/asset/ui/` con i nomi esatti del §1 (sovrascrivendo i due
+di R1–R2). Non serve registrare niente: in sviluppo il plugin `vite/assetPredefiniti.ts` calcola `/asset/manifest.json` a
+ogni richiesta, quindi il file compare al prossimo ricaricamento della pagina; nella build il manifest si emette con i
+file. Non toccare nessun altro file del repository.
 
-**Gruppi B e R5 — database di gioco.** Le illustrazioni `attivita/*` non vanno in `public/asset/` (regola dell'utente,
+**Gruppo B — database di gioco.** Le illustrazioni `attivita/*` non vanno in `public/asset/` (regola dell'utente,
 `public/asset/README.md`, migrazione 079: tutto fuorché compendio e `ui/` vive in `gioco.db`). Codex consegna i quattro
-PNG (più R5) in una cartella d'appoggio fuori dal repository, con il nome `<chiave>.png` (per esempio
+PNG in una cartella d'appoggio fuori dal repository, con il nome `<chiave>.png` (per esempio
 `estrazione-lotteria.png`); poi si **caricano nel database dell'istanza di preparazione** con
 `PUT /api/immagini/attivita/<chiave>`, il PNG come corpo e `Content-Type: image/png` (per esempio
 `PUT /api/immagini/attivita/estrazione-lotteria`). La riga dell'attività mostra la figura ma non ha un riquadro di
 caricamento (l'unico componente che carica immagini è `ImmagineEntita`, usato per Arcani, Confidenti, personaggi e
-Persona): il caricamento passa dalla rotta. R5 sostituisce l'immagine con la stessa chiave. La produzione si
+Persona): il caricamento passa dalla rotta. La produzione si
 guarda soltanto: il caricamento si fa dove si prepara, e arriva al rilascio con il database.
 
 ## 8. Criteri di accettazione
@@ -457,14 +469,16 @@ guarda soltanto: il caricamento si fa dove si prepara, e arriva al rilascio con 
 Un file è accettato solo se tutte queste cose sono vere:
 
 1. misura esatta (128×128 per `ui/`, 256×256 per `attivita/`), PNG RGBA, alfa nativo;
-2. **contorno di 3 px con alfa 0 su ogni pixel**, misurato sul file e non a occhio; per le 256×256 il soggetto ha
-   almeno 8 px di margine;
+2. **nel contorno di 3 px nessun pixel con alfa > 8** (la soglia del §1, gruppo R, la stessa della consegna del
+   2026-09-29), misurato sul file e non a occhio; per le 256×256 il soggetto ha almeno 8 px di margine;
 3. nome e percorso (o chiave) identici a quelli della tabella del §1;
 4. nessun testo, numero, simbolo di valuta, logo o volto riconoscibile;
 5. palette rispettata, niente oro, niente sfumature;
 6. leggibile alla misura più piccola del §1 — controllare rimpicciolendo davvero (20–24 px per le icone, 56 px per le
    illustrazioni);
-7. distinto dalle figure vicine indicate nel prompt: su/giù specchiati fra loro, scarta diverso dall'imbuto, la tessera
+7. distinto dalle figure vicine indicate nel prompt: su/giù specchiati fra loro, e «su» leggibile anche a 22 px dentro il
+   pulsante rosso di «Sali al rango»; scarta della famiglia dell'imbuto ma diverso da `azione-filtri.png` (niente righe
+   che entrano, pezzetto espulso), dal cestino e dalla «×»; la tessera
    «Persona della partita» diversa da «Scorta», «Compendio» e «Confidenti», le due fabbricazioni diverse fra loro, le
    coppie C2/C3 con la stessa sagoma;
 8. in famiglia con i file esistenti dello stesso gruppo (stesso tratto, stessa ombra rossa, stesso peso);

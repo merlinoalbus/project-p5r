@@ -377,6 +377,11 @@ Finché il file manca, la riserva SVG è l'imbuto di `iconeGuida.tsx` (`IconFilt
 
 Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente forbici, niente cestino, niente imbuto. → azione-scarta.png`
 
+> **Superato il 2026-10-29** (§29): la chiave `scarta` ha sette usi, fra cui «Scarta» una proposta intera e «Cancella
+> ricerca» del Diario, che vuole di proposito la figura del filtro (`RicercaDiario.tsx:62–63`). Il soggetto valido è
+> l'imbuto con un pezzetto espulso, nel prompt A3 di [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md).
+> Il prompt qui sopra resta solo come storico: non va generato.
+
 ### Aggiunta del 2026-10-25 — ricevute della spunta (2) — stesse regole
 Richiesta dell'utente: le ricevute degli effetti della spunta di una voce del Diario non stanno più sempre aperte sotto la voce, ma dietro
 un pulsantino a sola icona nella colonna dei comandi, con il numero delle ricevute in un distintivo. Prima l'icona era quella degli
@@ -812,7 +817,7 @@ La riesportazione corretta stava **non committata** nel worktree del generatore,
 dentro prima di chiuderlo sarebbe andata persa: 128×128 come le sorelle, 23% rosso / 19% chiaro /
 48% scuro, cioè in famiglia con `scheda-letture` (20/21/51). È quella che sta su `main` adesso.
 
-## 29. Asset mancanti dopo le ondate 5 e L13 (21) — richiesti il 2026-10-29
+## 29. Asset mancanti dopo le ondate 5 e L13 (18) — richiesti il 2026-10-29
 
 Richiesta dell'utente: «ok se ci sono asset grafici da generare o altri elementi per i quali possiamo generare grafiche su
 codex prepara e aggiorna i prompt come fatto in passato e forniscimi i prompt per far generare gli asset grafici».
@@ -826,9 +831,9 @@ completi.
 
 | File | Uso nell'app | Soggetto |
 |---|---|---|
-| `azione-su.png` | «Sposta su» una voce del Diario (§21, 2026-10-01) | freccia spessa verso l'alto sopra una riga orizzontale corta |
-| `azione-giu.png` | «Sposta giù» una voce del Diario (§21, 2026-10-01) | freccia spessa verso il basso sotto una riga orizzontale corta |
-| `azione-scarta.png` | «Usa le … leggibili e scarta le altre parti» (§21, 2026-10-25) | foglio tagliato in diagonale, la metà bassa che cade |
+| `azione-su.png` | «Sposta su di un posto» in 12 elenchi riordinabili (Diario, acquisti, infiltrazioni, aree, regole di Tokyo, editor dei Confidenti) e «Sali al rango» / «Aggiorna il rango» di un Confidente, pulsanti primari rossi a 20–22 px (§21, 2026-10-01) | freccia spessa e slanciata verso l'alto sopra una base orizzontale corta |
+| `azione-giu.png` | «Sposta giù di un posto» negli stessi 12 elenchi (§21, 2026-10-01) | lo specchio esatto di `azione-su` |
+| `azione-scarta.png` | sette usi col senso di «lasciar fuori»: parti illeggibili nei moduli, «Incolla senza gli effetti segnalati», «Scarta» e «Non applicare» una proposta, «Cancella ricerca» del Diario (§21, 2026-10-25, soggetto **rifatto**) | l'imbuto dei filtri senza le tre righe che entrano, con un pezzetto di carta appallottolato espulso di lato |
 | `azione-ricevute.png` | ricevute degli effetti della spunta (§21, 2026-10-25) | scontrino con il bordo basso a denti di sega |
 | `azione-taglia.png` | «Taglia» le voci del Diario (§21, 2026-10-26) | forbici aperte viste di lato |
 | `scheda-persona-partita.png` | tessera «Persona della partita» (22 px) | maschera da ladro davanti a tre carte a ventaglio |
@@ -843,9 +848,10 @@ della §26, prompt costruiti dal testo della scheda).
 | `attivita/fabbricazione-strumenti` | Fabbricazione degli strumenti d'infiltrazione (Leblanc, mansarda, sera) | banco di lavoro con lampada, materiali e grimaldello finito |
 | `attivita/fabbricazione-kawakami` | Fabbricazione degli strumenti di Kawakami (Leblanc, sera) | bancone con grembiule da domestica piegato e strumenti in fila |
 
-**Gruppo R — riconsegne** (stesso disegno, contorno di 3 px trasparente): `ui/allerta-ondata-di-calore`,
-`ui/allerta-ondata-di-gelo` (il soggetto tocca il bordo), `ui/allerta-polline`, `ui/allerta-stagione-influenzale` e
-`attivita/videogioco-golfer-sarutahiko` (alone con alfa ≤ 4).
+**Gruppo R — riconsegne** (stesso disegno; nel contorno di 3 px nessun pixel con alfa > 8, la soglia della consegna del
+2026-09-29): `ui/allerta-ondata-di-calore` e `ui/allerta-ondata-di-gelo`, perché il soggetto tocca il bordo.
+`ui/allerta-polline`, `ui/allerta-stagione-influenzale` e `attivita/videogioco-golfer-sarutahiko` hanno solo un alone con
+alfa ≤ 4 che non si vede: con quella soglia sono accettati e non vanno rifatti.
 
 **Gruppo C — proposte, da agganciare nel codice** (`public/asset/ui/`, 128×128): figure distinte per i tipi di effetto
 della voce che oggi ne condividono una (`MENU_EFFETTI` in `src/utils/effettiDellaVoce.ts`). Senza l'aggancio i file non si

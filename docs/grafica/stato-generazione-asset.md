@@ -27,12 +27,16 @@ galaxy_task_validator), ognuno con una riserva disegnata nel codice.
 (alone quasi trasparente, alfa ≤ 4, vicino al bordo); prompt di rifacimento al §5 della consegna.
 
 **Aggiornamento 2026-10-29 — nuova consegna** [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md):
-**21 file da consegnare** (censimento dopo le ondate 5 e L13). Le quattro allerte qui sopra non sono mai state
-riconsegnate: rimisurate il 2026-10-29, sono identiche (14, 28, 6 e 4 pixel non trasparenti nel contorno di 3 px) e
-rientrano nella consegna nuova come R1–R4. I due videogiochi della consegna del 2026-09-29 risultano invece rifatti nella
-copia del database di gioco: `videogioco-star-forneus` ha il contorno pulito (accettato); `videogioco-golfer-sarutahiko`
-non ha più il fondo pieno ma conserva un alone con alfa ≤ 4 (66 pixel) e rientra come R5. Elenco completo più sotto,
-sezione «Consegna del 2026-10-29».
+**18 file da consegnare** (censimento dopo le ondate 5 e L13). Le quattro allerte qui sopra non sono mai state
+riconsegnate: rimisurate il 2026-10-29, sono identiche. Ora si misurano con una soglia dichiarata, la stessa della
+consegna del 2026-09-29: un pixel del contorno di 3 px conta solo se ha alfa > 8. Con questa soglia `allerta-ondata-di-calore`
+(14 pixel, alfa fino a 255) e `allerta-ondata-di-gelo` (28 pixel, fino a 227) restano da rifare e rientrano nella consegna
+nuova come R1–R2. `allerta-polline` e `allerta-stagione-influenzale` hanno solo un alone con alfa da 1 a 4: sono
+**accettate**, e la ripulitura chiesta il 2026-10-12 cade. Anche i due videogiochi della consegna del 2026-09-29 risultano
+rifatti nella copia del database di gioco: `videogioco-star-forneus` ha il contorno pulito; `videogioco-golfer-sarutahiko`
+non ha più il fondo pieno, ha solo un alone con alfa fino a 4 (66 pixel). Sono **accettati** tutti e due. La soglia vale per
+i file nuovi e per quelli già respinti, non riapre quelli accettati. Elenco completo più sotto, sezione «Consegna del
+2026-10-29».
 
 ## Generazioni non consegnate
 
@@ -82,7 +86,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | guida (sezione Mappe, §20) | 1 | 1 | 0 |
 | ui (azioni e tessera, consegna 2026-10-29 gruppo A) | 6 | 0 | 6 |
 | attivita (consegna 2026-10-29 gruppo B, nel database) | 4 | 0 | 4 |
-| riconsegne (consegna 2026-10-29 gruppo R) | 5 | 0 | 5 |
+| riconsegne (consegna 2026-10-29 gruppo R) | 2 | 0 | 2 |
 | ui (categorie degli effetti, consegna 2026-10-29 gruppo C, proposte) | 6 | 0 | 6 |
 
 ## Elenco degli asset da consegnare
@@ -92,7 +96,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 Gruppo A — icone dell'interfaccia, `public/asset/ui/`:
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-su.png` — 128×128 (A1; prompt anche in §21 dal 2026-10-01)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-giu.png` — 128×128 (A2; prompt anche in §21 dal 2026-10-01)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-scarta.png` — 128×128 (A3; prompt anche in §21 dal 2026-10-25)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-scarta.png` — 128×128 (A3; il prompt valido è quello della consegna, che supera il §21 del 2026-10-25: imbuto con un pezzetto espulso, non foglio tagliato)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-ricevute.png` — 128×128 (A4; prompt anche in §21 dal 2026-10-25)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-taglia.png` — 128×128 (A5; prompt anche in §21 dal 2026-10-26)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-persona-partita.png` — 128×128 (A6)
@@ -103,12 +107,12 @@ Gruppo B — illustrazioni delle attività, database di gioco (ambito `attivita`
 - [ ] **DA CONSEGNARE** — `attivita/fabbricazione-strumenti` — 256×256 (B3)
 - [ ] **DA CONSEGNARE** — `attivita/fabbricazione-kawakami` — 256×256 (B4)
 
-Gruppo R — riconsegne (stesso disegno, contorno di 3 px trasparente):
+Gruppo R — riconsegne (stesso disegno, nessun pixel con alfa > 8 nel contorno di 3 px):
 - [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-ondata-di-calore.png` — 128×128 (R1)
 - [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-ondata-di-gelo.png` — 128×128 (R2)
-- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-polline.png` — 128×128 (R3)
-- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-stagione-influenzale.png` — 128×128 (R4)
-- [ ] **DA RICONSEGNARE** — `attivita/videogioco-golfer-sarutahiko` — 256×256, database (R5)
+- [x] **ACCETTATO con la soglia del 2026-10-29** — `public/asset/ui/allerta-polline.png` (alone con alfa ≤ 4, non si vede)
+- [x] **ACCETTATO con la soglia del 2026-10-29** — `public/asset/ui/allerta-stagione-influenzale.png` (alone con alfa 1)
+- [x] **ACCETTATO con la soglia del 2026-10-29** — `attivita/videogioco-golfer-sarutahiko` (alone con alfa ≤ 4)
 
 Gruppo C — proposte, si vedono solo dopo l'aggancio in `MENU_EFFETTI` (`src/utils/effettiDellaVoce.ts`) e in `ICONE`
 (`IconaCategoria.tsx`), da decidere con l'utente:
