@@ -26,6 +26,14 @@ galaxy_task_validator), ognuno con una riserva disegnata nel codice.
 `allerta-ondata-di-calore` e `allerta-ondata-di-gelo` (il soggetto tocca il bordo di 3 px), `allerta-polline` e `allerta-stagione-influenzale`
 (alone quasi trasparente, alfa ≤ 4, vicino al bordo); prompt di rifacimento al §5 della consegna.
 
+**Aggiornamento 2026-10-29 — nuova consegna** [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md):
+**21 file da consegnare** (censimento dopo le ondate 5 e L13). Le quattro allerte qui sopra non sono mai state
+riconsegnate: rimisurate il 2026-10-29, sono identiche (14, 28, 6 e 4 pixel non trasparenti nel contorno di 3 px) e
+rientrano nella consegna nuova come R1–R4. I due videogiochi della consegna del 2026-09-29 risultano invece rifatti nella
+copia del database di gioco: `videogioco-star-forneus` ha il contorno pulito (accettato); `videogioco-golfer-sarutahiko`
+non ha più il fondo pieno ma conserva un alone con alfa ≤ 4 (66 pixel) e rientra come R5. Elenco completo più sotto,
+sezione «Consegna del 2026-10-29».
+
 ## Generazioni non consegnate
 
 Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con alfa reale, ridotta proporzionalmente e approvata da galaxy_task_validator.
@@ -72,8 +80,44 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui (spilli, §18) | 34 | 34 | 0 |
 | mappe (§19) | 25 | 25 | 0 |
 | guida (sezione Mappe, §20) | 1 | 1 | 0 |
+| ui (azioni e tessera, consegna 2026-10-29 gruppo A) | 6 | 0 | 6 |
+| attivita (consegna 2026-10-29 gruppo B, nel database) | 4 | 0 | 4 |
+| riconsegne (consegna 2026-10-29 gruppo R) | 5 | 0 | 5 |
+| ui (categorie degli effetti, consegna 2026-10-29 gruppo C, proposte) | 6 | 0 | 6 |
 
 ## Elenco degli asset da consegnare
+
+### Consegna del 2026-10-29 ([consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md))
+
+Gruppo A — icone dell'interfaccia, `public/asset/ui/`:
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-su.png` — 128×128 (A1; prompt anche in §21 dal 2026-10-01)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-giu.png` — 128×128 (A2; prompt anche in §21 dal 2026-10-01)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-scarta.png` — 128×128 (A3; prompt anche in §21 dal 2026-10-25)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-ricevute.png` — 128×128 (A4; prompt anche in §21 dal 2026-10-25)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-taglia.png` — 128×128 (A5; prompt anche in §21 dal 2026-10-26)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-persona-partita.png` — 128×128 (A6)
+
+Gruppo B — illustrazioni delle attività, database di gioco (ambito `attivita`):
+- [ ] **DA CONSEGNARE** — `attivita/estrazione-lotteria` — 256×256 (B1)
+- [ ] **DA CONSEGNARE** — `attivita/concimare-pianta` — 256×256 (B2)
+- [ ] **DA CONSEGNARE** — `attivita/fabbricazione-strumenti` — 256×256 (B3)
+- [ ] **DA CONSEGNARE** — `attivita/fabbricazione-kawakami` — 256×256 (B4)
+
+Gruppo R — riconsegne (stesso disegno, contorno di 3 px trasparente):
+- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-ondata-di-calore.png` — 128×128 (R1)
+- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-ondata-di-gelo.png` — 128×128 (R2)
+- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-polline.png` — 128×128 (R3)
+- [ ] **DA RICONSEGNARE** — `public/asset/ui/allerta-stagione-influenzale.png` — 128×128 (R4)
+- [ ] **DA RICONSEGNARE** — `attivita/videogioco-golfer-sarutahiko` — 256×256, database (R5)
+
+Gruppo C — proposte, si vedono solo dopo l'aggancio in `MENU_EFFETTI` (`src/utils/effettiDellaVoce.ts`) e in `ICONE`
+(`IconaCategoria.tsx`), da decidere con l'utente:
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-yen.png` — 128×128 (C1)
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-oggetto-ricevuto.png` — 128×128 (C2)
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-oggetto-uscito.png` — 128×128 (C3)
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-persona-tolta.png` — 128×128 (C4)
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-punti-confidente.png` — 128×128 (C5)
+- [ ] **PROPOSTA** — `public/asset/ui/categoria-trofeo.png` — 128×128 (C6)
 
 ### persona-gruppo (§15)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/captain-kidd.png` — 768×768 (§15)

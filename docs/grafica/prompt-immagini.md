@@ -811,3 +811,51 @@ rosse per progetto (`nav-home` 0%, `nav-home-attiva` 100%: la coppia funziona co
 La riesportazione corretta stava **non committata** nel worktree del generatore, e senza guardarci
 dentro prima di chiuderlo sarebbe andata persa: 128×128 come le sorelle, 23% rosso / 19% chiaro /
 48% scuro, cioè in famiglia con `scheda-letture` (20/21/51). È quella che sta su `main` adesso.
+
+## 29. Asset mancanti dopo le ondate 5 e L13 (21) — richiesti il 2026-10-29
+
+Richiesta dell'utente: «ok se ci sono asset grafici da generare o altri elementi per i quali possiamo generare grafiche su
+codex prepara e aggiorna i prompt come fatto in passato e forniscimi i prompt per far generare gli asset grafici».
+Censimento, regole, blocco di stile, prompt negativo, **un prompt completo per ogni file**, istruzioni di consegna e criteri
+di accettazione: [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md). Qui l'elenco, per la
+tracciabilità.
+
+**Gruppo A — icone con la chiave già nel codice** (`public/asset/ui/`, 128×128, trasparenti). Le prime cinque erano già
+in questa sezione (§21, aggiunte dell'1, 25 e 26 ottobre) ma non sono mai arrivate: la consegna del 29 ne riporta i prompt
+completi.
+
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-su.png` | «Sposta su» una voce del Diario (§21, 2026-10-01) | freccia spessa verso l'alto sopra una riga orizzontale corta |
+| `azione-giu.png` | «Sposta giù» una voce del Diario (§21, 2026-10-01) | freccia spessa verso il basso sotto una riga orizzontale corta |
+| `azione-scarta.png` | «Usa le … leggibili e scarta le altre parti» (§21, 2026-10-25) | foglio tagliato in diagonale, la metà bassa che cade |
+| `azione-ricevute.png` | ricevute degli effetti della spunta (§21, 2026-10-25) | scontrino con il bordo basso a denti di sega |
+| `azione-taglia.png` | «Taglia» le voci del Diario (§21, 2026-10-26) | forbici aperte viste di lato |
+| `scheda-persona-partita.png` | tessera «Persona della partita» (22 px) | maschera da ladro davanti a tre carte a ventaglio |
+
+**Gruppo B — illustrazioni delle attività nuove** (database di gioco, ambito `attivita`, 256×256, trasparenti; stesse regole
+della §26, prompt costruiti dal testo della scheda).
+
+| Chiave | Attività | Soggetto |
+|---|---|---|
+| `attivita/estrazione-lotteria` | Estrazione della lotteria (Shibuya, Piazza della Stazione) | chiosco della lotteria con il biglietto controllato allo sportello |
+| `attivita/concimare-pianta` | Concimare la pianta della mansarda (Leblanc) | pianta in vaso sul davanzale e sacchetto di concime |
+| `attivita/fabbricazione-strumenti` | Fabbricazione degli strumenti d'infiltrazione (Leblanc, mansarda, sera) | banco di lavoro con lampada, materiali e grimaldello finito |
+| `attivita/fabbricazione-kawakami` | Fabbricazione degli strumenti di Kawakami (Leblanc, sera) | bancone con grembiule da domestica piegato e strumenti in fila |
+
+**Gruppo R — riconsegne** (stesso disegno, contorno di 3 px trasparente): `ui/allerta-ondata-di-calore`,
+`ui/allerta-ondata-di-gelo` (il soggetto tocca il bordo), `ui/allerta-polline`, `ui/allerta-stagione-influenzale` e
+`attivita/videogioco-golfer-sarutahiko` (alone con alfa ≤ 4).
+
+**Gruppo C — proposte, da agganciare nel codice** (`public/asset/ui/`, 128×128): figure distinte per i tipi di effetto
+della voce che oggi ne condividono una (`MENU_EFFETTI` in `src/utils/effettiDellaVoce.ts`). Senza l'aggancio i file non si
+vedono.
+
+| File | Tipo di effetto | Soggetto |
+|---|---|---|
+| `categoria-yen.png` | `yen` | pila di tre monete di sbieco con una quarta che cade |
+| `categoria-oggetto-ricevuto.png` | `oggetto` | sacchetto chiuso con una freccia che entra dall'alto |
+| `categoria-oggetto-uscito.png` | `uscitaOggetto` | lo stesso sacchetto, aperto, con la freccia che esce di lato |
+| `categoria-persona-tolta.png` | `personaTolta` | carta con la maschera tagliata in diagonale, la metà destra che si stacca |
+| `categoria-punti-confidente.png` | `puntiConfidente` | due mani che si stringono con tre note musicali che salgono |
+| `categoria-trofeo.png` | `trofeo` | coppa a due manici su base a gradino, con una stella sul corpo |

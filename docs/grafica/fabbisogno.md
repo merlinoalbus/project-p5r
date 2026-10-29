@@ -13,6 +13,16 @@ lo si scrive mentre lo si scopre.
 > da rifare: [consegna-2026-09-29-spilli-e-categorie.md](consegna-2026-09-29-spilli-e-categorie.md). Le tabelle più sotto
 > sono ferme all'8 settembre (per esempio «37 spilli»: oggi sono 42).
 
+> **Aggiornamento 2026-10-29**: censimento rifatto con lo stesso metodo, dopo le ondate 5 e L13 (registri del codice
+> contro `public/asset/ui/`; una copia nuova di `gioco.db` con le migrazioni fino alla 301 contro ogni punto che chiede
+> un'immagine predefinita). Mancano **21 file**: 5 azioni con il prompt già scritto in §21 ma mai consegnate (`su`, `giu`,
+> `scarta`, `ricevute`, `taglia`), la tessera `scheda-persona-partita`, le illustrazioni di 4 attività nuove
+> (`estrazione-lotteria`, `concimare-pianta`, `fabbricazione-strumenti`, `fabbricazione-kawakami`), 5 riconsegne (4
+> allerte, `videogioco-golfer-sarutahiko`) e 6 figure **proposte** per i tipi di effetto della voce che ne condividono una
+> (servono solo con l'aggancio nel codice). Oggetti, negozi, luoghi e trofei non hanno un posto dove mostrare
+> un'immagine propria: fuori consegna. Prompt e dettagli: [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md);
+> registro in fondo a questo file (voce 7).
+
 **Chi fa cosa:** i prompt li scrive chi ha rifatto la pagina che ne ha bisogno, li verifica
 l'altro, e **la generazione è di Codex**. Un prompt sbagliato costa una generazione buttata;
 verificarlo costa una lettura.
@@ -420,3 +430,42 @@ sottopagina — è stata verificata contando, non a occhio:
 - Le **22 categorie** della §22 sono consegnate (PR #39); restano le **11 della §24**, che finché
   non arrivano hanno riserve SVG **distinte fra loro** — verificato da un test, perché prima
   «richiesta», «esame» e «libro» condividevano lo stesso segno.
+
+---
+
+## 7. Censimento del 29 ottobre 2026 — dopo le ondate 5 e L13 (21 file)
+
+Richiesta dell'utente: «ok se ci sono asset grafici da generare o altri elementi per i quali possiamo generare grafiche su
+codex prepara e aggiorna i prompt come fatto in passato e forniscimi i prompt per far generare gli asset grafici».
+È la voce che `IconaAzione.tsx` indica come registro delle chiavi nuove. Prompt completi:
+[consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md).
+
+**Come si è contato.** I registri del codice (`ChiaveAzione`: 59 chiavi; `ChiaveScheda`: 35; `ChiaveSegno`: 12;
+`TIPI_SPILLO`: 41; `ICONE` di `IconaCategoria` con gli alias e tutte le categorie che gli arrivano) confrontati con i 242
+file di `public/asset/ui/`; ogni punto che chiede un'immagine predefinita (`attivita/`, `confidenti/`, `personaggi/`,
+`palazzi/`, `guida/`, `decori/`, `meteo/`, `illustrazioni/`, `sfondi/`, le 316 mappe, le 259 Persona) confrontato con la
+tabella `immagine` di una copia nuova di `gioco.db` migrata fino alla 301. Il contorno trasparente dei file da riconsegnare
+è stato misurato pixel per pixel.
+
+| stato | gruppo | file | nota |
+|---|---|---|---|
+| `pronto` | A — chiave già nel codice | `ui/azione-su`, `ui/azione-giu` | prompt in §21 dal 2026-10-01, mai consegnati; riserve `IconSu`/`IconGiu` |
+| `pronto` | A | `ui/azione-scarta` | §21 dal 2026-10-25; la riserva è l'imbuto dei filtri, quindi oggi due gesti hanno la stessa figura |
+| `pronto` | A | `ui/azione-ricevute` | §21 dal 2026-10-25; riserva `IconRicevuta` |
+| `pronto` | A | `ui/azione-taglia` | §21 dal 2026-10-26; riserva `IconForbici` |
+| `pronto` | A | `ui/scheda-persona-partita` | l'unica delle 35 tessere senza figura; la riserva sono le tre sagome di «Confidenti» |
+| `pronto` | B — attività nuove (database) | `attivita/estrazione-lotteria`, `attivita/concimare-pianta`, `attivita/fabbricazione-strumenti`, `attivita/fabbricazione-kawakami` | le uniche 4 attività su 34 senza illustrazione; oggi il cartiglio «altro» a 56 px |
+| `pronto` | R — riconsegne | `ui/allerta-ondata-di-calore`, `ui/allerta-ondata-di-gelo`, `ui/allerta-polline`, `ui/allerta-stagione-influenzale` | rifacimento chiesto il 2026-10-12, mai arrivato: i file sono ancora quelli del commit 24c61a7d |
+| `pronto` | R | `attivita/videogioco-golfer-sarutahiko` | la versione rifatta è nel database; resta un alone con alfa ≤ 4 sul contorno |
+| `da verificare` | C — proposte | `ui/categoria-yen`, `ui/categoria-oggetto-ricevuto`, `ui/categoria-oggetto-uscito`, `ui/categoria-persona-tolta`, `ui/categoria-punti-confidente`, `ui/categoria-trofeo` | 20 tipi di effetto con 10 figure; i file si vedono solo dopo l'aggancio in `MENU_EFFETTI` e in `ICONE`, che chiede il sì dell'utente |
+
+**Fuori consegna, e perché.** Oggetti del catalogo (bombe, accessori, distintivi, tessere, Carta Phoenix Rangers, set
+delle televendite, biglietti della lotteria), negozi e luoghi nuovi (chiosco della lotteria, Canale di televendite,
+Videonoleggio Scarlet) e trofei non hanno un'immagine propria nell'app: nessun ambito in `shared/immagini.ts`, nessun
+componente che la chieda. Si riconoscono dalla figura della categoria, dallo spillo del tipo di luogo e dal colore del
+grado, tutti consegnati. Un'illustrazione per elemento richiede prima la decisione e l'aggancio nel codice.
+
+**Già a posto**: 41 spilli su 41, 12 segni su 12, 54 azioni su 59, 34 tessere su 35, tutte le categorie che arrivano a
+`IconaCategoria` (tranne la categoria `chiave` di un articolo, che è un dato senza alias, non un disegno mancante: §9 della
+consegna), 30 attività su 34, i 23 Confidenti, 10 palazzi, 21 sezioni della Guida, 11 fregi, il meteo, le 316
+mappe, il compendio (le 27 Persona dei personaggi giocabili hanno la figura in `persona-gruppo/`).
