@@ -73,4 +73,11 @@ verificati sulle copie in sola lettura dei dati reali.
     indica alla spunta). Vendita dei tesori all'Untouchable: yen a mano (decisione 18). Black Frost e Bugs: «Solo etichetta» (il requisito
     dell'oggetto si mostra, il motore di fusione la propone comunque).
 
+23. **Correzioni sulle voci del periodo validato** (29 ottobre; risposta dell'utente: «applicale direttamente a meno di impatti per i quali
+    è necessaria mia decisione esplicita»). Le correzioni delle voci dal 1 aprile al 31 maggio si applicano direttamente, come fuori dal
+    periodo. Restano proposte da decidere solo: (a) le correzioni incerte («probabile», «da verificare»); (b) quelle che dipendono da una
+    scelta che solo l'utente conosce (quale set, quale esito, quale succo…); (c) quelle che cambierebbero ciò che è già registrato nelle
+    partite (yen scalati, Doti applicate, spunte da ricalcolare). Vale anche per le proposte già aperte. Supera la regola «nel periodo
+    validato solo con il sì riga per riga».
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
