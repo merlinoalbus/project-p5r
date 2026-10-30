@@ -109,7 +109,11 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         <IconaCategoria categoria="richiesta" dimensione={36} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <h3 className="m-0 testo-16 leading-tight">{r.nome}</h3>
-          <span className="testo-12 text-text-muted">{r.areaNome ?? r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
+          {/* il Dedalo e l'area in cui è collocata (310: il `piano` in testo resta solo dove non è il nome dell'area) */}
+          <span className="testo-12 text-text-muted">{[r.areaNome ?? r.area, r.areaDedaloNome, r.piano].filter(Boolean).join(' · ')}</span>
+          {/* O7-1: passata la scadenza con la proroga valida, il bersaglio si è spostato (la guida: nel Dedalo di Da'at durante il terzo semestre) */}
+          {/* (la frase non nomina il terzo semestre: dice la proroga, qualunque sia la sua condizione, che il server ha già valutato) */}
+          {r.statoPartita?.doveOggi.spostato && <span className="testo-12 text-text-secondary">Durante la proroga il bersaglio è nel {[r.statoPartita.doveOggi.dedaloNome, r.statoPartita.doveOggi.areaDedaloNome].filter(Boolean).join(', ')}</span>}
         </div>
         {r.statoPartita ? <span className={`chip shrink-0 testo-12 ${r.statoPartita.stato === 'accettata' || r.statoPartita.stato === 'disponibile' ? 'chip--attivo' : r.statoPartita.stato === 'da-verificare' ? 'border-warning text-warning' : ''}`}>{NOME_STATO[r.statoPartita.stato]}</span>
           : r.stato && <span className={`chip shrink-0 testo-12 ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
@@ -119,6 +123,13 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         <ul className={`m-0 flex flex-col gap-0.5 pl-4 testo-12 ${r.statoPartita.stato === 'bloccata' || r.statoPartita.stato === 'scaduta' || r.statoPartita.stato === 'da-verificare' ? 'text-warning' : 'text-text-secondary'}`}>
           {r.statoPartita.motivi.map((m) => <li key={m}>{m}</li>)}
         </ul>
+      )}
+      {/* O7-1: accettata (o accettabile) ma non ancora completabile: il Dedalo del bersaglio chiuso nella partita o una condizione propria */}
+      {r.statoPartita && !r.statoPartita.completabile && r.statoPartita.motiviCompletamento.length > 0 && (
+        <div className="flex min-w-0 flex-col gap-0.5 testo-12 text-text-secondary" id={`completa-${r.chiave}`}>
+          <span className="text-text-muted">Si completa dopo:</span>
+          <ul className="m-0 flex flex-col gap-0.5 pl-4">{r.statoPartita.motiviCompletamento.map((m) => <li key={m}>{m}</li>)}</ul>
+        </div>
       )}
       {r.statoPartita && r.statoPartita.giorniAllaScadenza !== null && r.statoPartita.giorniAllaScadenza <= GIORNI_AVVISO && r.statoPartita.stato !== 'completata' && r.statoPartita.stato !== 'bloccata' && (
         <span className="testo-12 text-warning">{r.statoPartita.giorniAllaScadenza === 0 ? 'Scade oggi' : `Scade fra ${r.statoPartita.giorniAllaScadenza} ${r.statoPartita.giorniAllaScadenza === 1 ? 'giorno' : 'giorni'}`} ({dataLeggibile(r.statoPartita.scadenzaEffettiva!)})</span>
@@ -179,11 +190,14 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         titolo={<>{aperta ? 'Nascondi i dettagli' : 'Dettagli'}<FrecciaApertura aperto={aperta} /></>} />
       {aperta && (
         <div className="flex flex-col gap-1 testo-12 text-text-secondary">
-          <span><span className="text-text-muted">Da:</span> {r.committente || '—'}</span>
+          {r.committente && <span><span className="text-text-muted">Da:</span> {r.committente}</span>}
           {r.condizioni.length > 0 && <span><span className="text-text-muted">Si sblocca:</span> {r.condizioni.map((c) => c.testo).join(' · ')}</span>}
+          {/* O7-1: le condizioni proprie per completarla (oltre al Dedalo aperto, che lo stato della partita dice da sé) */}
+          {r.completamentoCondizioni.length > 0 && <span><span className="text-text-muted">Per completarla:</span> {r.completamentoCondizioni.map((c) => c.testo).join(' · ')}</span>}
           {r.disponibileDal && <span><span className="text-text-muted">Disponibile dal (guida)</span> {r.disponibileDal}</span>}
           {!r.condizioni.length && !r.disponibileDal && <span><span className="text-text-muted">Si sblocca:</span> da subito</span>}
-          {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata al ${dataLeggibile(r.proroga.data)} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}</span>}
+          {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata al ${dataLeggibile(r.proroga.data)} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}
+            {r.proroga?.areaDedaloNome ? ` · intanto il bersaglio è nel ${[r.proroga.dedaloNome, r.proroga.areaDedaloNome].filter(Boolean).join(', ')}` : ''}</span>}
           {r.scadenza && <span><span className="text-text-muted">Scadenza (guida)</span> {r.scadenza}</span>}
           {r.note && <span>{r.note}</span>}
         </div>
@@ -193,9 +207,13 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         {/* L13: «Accetta» solo se la Richiesta è disponibile nella partita, o da verificare con l'avviso (il server rifiuta il resto anche lui) */}
         {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && (!r.statoPartita || r.statoPartita.accettabile) && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata"
           dettaglio={r.statoPartita?.stato === 'da-verificare' ? 'da verificare' : undefined} disabled={occupato} onClick={() => void cambia('accettata')} />}
-        {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata" disabled={occupato} onClick={() => void cambia('completata')} />}
+        {/* O7-1: «Completata» solo col bersaglio raggiungibile (il server rifiuta il resto con 409); il motivo è qui sopra, «Si completa dopo» */}
+        {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata"
+          disabled={occupato || r.statoPartita?.completabile === false} aria-describedby={r.statoPartita?.completabile === false && r.statoPartita.motiviCompletamento.length ? `completa-${r.chiave}` : undefined}
+          onClick={() => void cambia('completata')} />}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
-        {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
+        {/* il Dedalo dove sta il bersaglio oggi: quello della proroga, se si è spostato */}
+        {(r.statoPartita?.doveOggi.dedalo ?? r.areaChiave) && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.statoPartita?.doveOggi.dedalo ?? r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
         {r.ombra && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Ombra" aria-label={`Apri la scheda dell’Ombra «${r.ombra.nome}»`} to={`/guida/ombra/${encodeURIComponent(r.ombra.chiave)}`} />}
         {/* la Richiesta si corregge (o si elimina) dove la si legge (scelta dell'utente, 2026-10-11) */}

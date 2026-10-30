@@ -250,8 +250,10 @@ export interface DatiRichiestaApi {
   nome?: string; committente?: string; disponibileDal?: string; scadenza?: string; dedalo?: string | null; areaDedalo?: string | null; piano?: string;
   bersaglio?: RichiestaDto['bersaglio']; ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
   /** L13 (ondata 3): sblocco, scadenza e proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
-  condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[] } | null;
+  condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[]; areaDedalo?: string | null } | null;
   ombra?: string | null; yen?: number | null; esperienza?: number | null; oggetti?: Array<{ chiave: string; quantita: number }>;
+  /** L13 (ondata 7): le condizioni proprie per completarla (oltre al Dedalo aperto). */
+  completamentoCondizioni?: unknown[];
 }
 /** Una Richiesta nuova (nome e bersaglio obbligatori); risponde con la Richiesta creata. */
 export const creaRichiesta = (dati: DatiRichiestaApi & { nome: string; bersaglio: RichiestaDto['bersaglio'] }): Promise<RichiestaDto> => apiPost('/compendio/richieste', dati);

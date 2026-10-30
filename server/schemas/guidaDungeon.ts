@@ -161,7 +161,9 @@ export const bodyRichiesta = z.object({
   // gioco, Ombra del compendio, yen e PE, oggetti del catalogo con le copie
   condizioni: z.array(z.unknown()).max(20).optional(),
   scadenzaData: dataGioco.nullable().optional(),
-  proroga: z.object({ data: dataGioco, condizioni: z.array(z.unknown()).max(20) }).strict().nullable().optional(),
+  // L13 (ondata 7, O7-1): l'area in cui il bersaglio si sposta finché vale la proroga, e le condizioni proprie per completarla
+  proroga: z.object({ data: dataGioco, condizioni: z.array(z.unknown()).max(20), areaDedalo: z.string().min(1).max(200).nullable().optional() }).strict().nullable().optional(),
+  completamentoCondizioni: z.array(z.unknown()).max(20).optional(),
   ombra: z.string().min(1).max(200).nullable().optional(),
   yen: z.number().int().min(1).max(9_999_999).nullable().optional(), esperienza: z.number().int().min(1).max(999_999).nullable().optional(),
   oggetti: z.array(z.object({ chiave: z.string().min(1).max(200), quantita: z.number().int().min(1).max(999) }).strict()).max(30).optional(),

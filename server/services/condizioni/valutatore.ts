@@ -107,11 +107,21 @@ function esitoDelPosto(chiave: string, condizioni: () => RequisitoSpillo[] | nul
 export function esitoAperturaDedalo(evento: string, st: StatoValutazione, nomi: NomiCondizioni = nomiCondizioniMemo()): { stato: SemaforoRequisitoDto['stato']; dettaglio: string; condizione: string | null } {
   const nome = EVENTI_STORIA.find((e) => e.chiave === evento)?.nome ?? evento;
   const dedalo = dedaloDellEvento(evento);
-  const condizioni = dedalo ? condizioneAperturaDedalo(dedalo) : null;
-  if (!dedalo || !condizioni) return { stato: 'grigio', dettaglio: `${nome}: il Dedalo non ha una condizione d’apertura`, condizione: null };
+  const a = dedalo ? esitoAperturaDelDedalo(dedalo, st, nomi) : null;
+  if (!a || a.condizione === null) return { stato: 'grigio', dettaglio: `${nome}: il Dedalo non ha una condizione d’apertura`, condizione: null };
+  return { stato: a.stato, condizione: a.condizione, dettaglio: `${nome}: ${a.stato === 'verde' ? 'sì' : a.stato === 'rosso' ? 'non ancora' : 'non si può dire'} (si apre ${a.condizione})` };
+}
+
+/**
+ * L13 (ondata 7, O7-1): l'apertura di un Dedalo dei Memento per chiave (`dungeon_area`), con lo stesso valutatore e la stessa memoria dell'evento
+ * «Dedalo di … aperto»: verde se la sua condizione d'apertura è vera nella partita, rosso se non lo è, grigio senza condizione (`condizione` null).
+ * La usano le Richieste per dire se il bersaglio si può già raggiungere (completare).
+ */
+export function esitoAperturaDelDedalo(dedalo: string, st: StatoValutazione, nomi: NomiCondizioni = nomiCondizioniMemo()): { stato: SemaforoRequisitoDto['stato']; condizione: string | null } {
+  const condizioni = condizioneAperturaDedalo(dedalo);
+  if (!condizioni) return { stato: 'grigio', condizione: null };
   const condizione = condizioni.map((c) => descriviRequisitoSpillo(c, nomi)).join(' e ');
-  const stato = esitoDelPosto(`dedalo:${dedalo}`, () => condizioni, st, nomi) ?? 'grigio';
-  return { stato, condizione, dettaglio: `${nome}: ${stato === 'verde' ? 'sì' : stato === 'rosso' ? 'non ancora' : 'non si può dire'} (si apre ${condizione})` };
+  return { stato: esitoDelPosto(`dedalo:${dedalo}`, () => condizioni, st, nomi) ?? 'grigio', condizione };
 }
 
 /**

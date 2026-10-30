@@ -17,7 +17,7 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStat
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una richiesta di Mishima nel dedalo dato (bersaglio Nakanohara, debole al Tuono), senza stato; `extra` sovrascrive i campi. */
-const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', disponibileDal: '7 maggio', scadenza: '', area: areaNome, areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, areaDedalo: null, areaDedaloNome: null, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, ...extra });
+const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', disponibileDal: '7 maggio', scadenza: '', area: areaNome, areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, areaDedalo: null, areaDedaloNome: null, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, completamentoCondizioni: [], ...extra });
 const dati: RichiesteDto = {
   dedali: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', ordine: 0, totale: 1, completate: 0 }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', ordine: 1, totale: 1, completate: 0 }],
   richieste: [ric('a', 'Un ex piuttosto appiccicoso', 'mementos-01-qimranut', 'Dedalo di Qimranut'), ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { confidente: { chiave: 'ryuji', nome: 'Ryuji', rango: 2 }, bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco'], resistenze: [], vulnerabileConfusione: false } })],
@@ -123,5 +123,24 @@ describe('RichiestePage', () => {
     expect(getRichieste.mock.calls.length).toBeGreaterThan(letture);
     fireEvent.click(screen.getByRole('button', { name: /^Aggiungi una Richiesta/ }));
     expect(await screen.findByRole('dialog', { name: 'Aggiungi una Richiesta' })).toBeInTheDocument();
+  });
+
+  it('O7-1: col Dedalo del bersaglio chiuso «Completata» è spento e la carta dice dopo che cosa si completa; con la proroga dice dove si è spostato', async () => {
+    usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
+    const dove = { dedalo: 'mementos-02-aiyatsbus', dedaloNome: 'Dedalo di Aiyatsbus', areaDedalo: null, areaDedaloNome: null, spostato: false };
+    const chiusa = ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { stato: 'accettata', statoPartita: { stato: 'accettata', motivi: [], scadenzaEffettiva: '12-23', giorniAllaScadenza: null,
+      accettabile: false, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
+    const spostata = ric('c', 'Il sadismo è un gesto d’amore', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { statoPartita: { stato: 'disponibile', motivi: [], scadenzaEffettiva: '02-01', giorniAllaScadenza: 7,
+      accettabile: true, completabile: true, motiviCompletamento: [], doveOggi: { dedalo: 'mementos-09-daat', dedaloNome: 'Dedalo di Da’at', areaDedalo: 'd-1', areaDedaloNome: 'Piano 1', spostato: true } } });
+    getRichieste.mockReset().mockResolvedValue({ ...dati, richieste: [chiusa, spostata], totale: 2 });
+    render(<MemoryRouter><RichiestePage /></MemoryRouter>);
+    const carta = within((await screen.findByText('Bullismo sui bulli')).closest('li')!);
+    expect(carta.getByText('Si completa dopo:')).toBeInTheDocument();
+    expect(carta.getByText('Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame')).toBeInTheDocument();
+    expect(carta.getByRole('button', { name: 'Completata' })).toBeDisabled();
+    const altra = within(screen.getByText('Il sadismo è un gesto d’amore').closest('li')!);
+    expect(altra.getByText('Durante la proroga il bersaglio è nel Dedalo di Da’at, Piano 1')).toBeInTheDocument();
+    expect(altra.getByRole('button', { name: 'Completata' })).toBeEnabled();
+    expect(altra.queryByText('Si completa dopo:')).toBeNull();
   });
 });

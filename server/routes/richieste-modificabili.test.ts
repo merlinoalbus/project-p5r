@@ -27,6 +27,9 @@ const elenco = async (partita?: number) => (await request(app).get(`/api/compend
 const leggi = async (chiave: string, partita?: number) => (await elenco(partita)).richieste.find((r) => r.chiave === chiave);
 /** Una partita nuova. */
 const nuovaPartita = async (nome: string) => ((await request(app).post('/api/partite').send({ nome })).body.data as { id: number }).id;
+/** O7-1: completare una Richiesta chiede il suo Dedalo aperto nella partita (305); dove il test non parla di questo, i Dedali restano senza
+ *  condizione d'apertura (un Dedalo senza condizione non blocca). */
+const apriIDedali = () => prepared("UPDATE dungeon_area SET condizioni_json = NULL WHERE dungeon_chiave = 'mementos'").run();
 
 describe('le Richieste modificabili', () => {
   beforeEach(() => { dbDiProva(); });
@@ -122,6 +125,7 @@ describe('le Richieste modificabili', () => {
     expect((await request(app).put(`/api/compendio/richieste/${r.chiave}`).send({ nome: 'Lo Zio Insaziabile' }).expect(200)).body.data.nome).toBe('Lo Zio Insaziabile');
     // completata nella partita, il requisito è verde: la riconosce per chiave
     const partita = await nuovaPartita('Rinomina');
+    apriIDedali();
     await request(app).put(`/api/partite/${partita}/richieste`).send({ richiesta: r.chiave, stato: 'completata' }).expect(200);
     const st = statoPartitaSemafori(partita, new Map(), new Map());
     const requisito = semaforiConfidente('sojiro', prima.rango - 1, st).flatMap((s) => s.requisiti).find((q) => q.tipo === 'richiesta');
@@ -133,7 +137,8 @@ describe('le Richieste modificabili', () => {
     // «Un fidanzato violento»: un requisito di Chihaya (per nome), una voce della giornata (per chiave); in più un pin, una
     // condizione di un libro e uno stato nella partita messi qui
     const r = prepared("SELECT chiave, nome FROM richiesta WHERE nome = 'Un fidanzato violento'").get() as { chiave: string; nome: string };
-    await request(app).put(`/api/partite/${partita}/richieste`).send({ richiesta: r.chiave, stato: 'accettata' }).expect(200);
+    // O7-1 (310): «Un fidanzato violento» si accetta solo dal 30 giugno con lo sblocco della voce; qui conta solo che la partita abbia uno stato
+    prepared("INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, 'accettata', ?)").run(partita, r.chiave, new Date().toISOString());
     const pin = prepared("SELECT id, nome FROM spillo WHERE riferimento_tipo IS NULL AND mappa_chiave IS NOT NULL ORDER BY id LIMIT 1").get() as { id: number; nome: string };
     prepared("UPDATE spillo SET riferimento_tipo = 'richiesta', riferimento_chiave = ? WHERE id = ?").run(r.chiave, pin.id);
     const libro = prepared('SELECT chiave, nome FROM libro ORDER BY chiave LIMIT 1').get() as { chiave: string; nome: string };
@@ -187,6 +192,7 @@ describe('le Richieste modificabili', () => {
       .toEqual({ dati_json: '{"richiesta":"lo-zio-ingordo"}', testo: 'Completare la richiesta dei Mementos "Lo zio ingordo" prima di poter far salire il Rango Confidente' });
     // citata per chiave, il dettaglio dice il nome
     expect(requisito()).toMatchObject({ stato: 'rosso', dettaglio: 'Richiesta «Lo zio ingordo» non risulta completata (Guida → Richieste)' });
+    apriIDedali();
     await request(app).put(`/api/partite/${partita}/richieste`).send({ richiesta: 'lo-zio-ingordo', stato: 'completata' }).expect(200);
     expect(requisito()).toMatchObject({ stato: 'verde', dettaglio: 'Richiesta «Lo zio ingordo» completata' });
     // eliminata anche questa, il requisito che la citava per chiave torna a citarla per nome: l'avviso dice quale, non la chiave
@@ -202,5 +208,26 @@ describe('le Richieste modificabili', () => {
     expect((await request(app).put('/api/compendio/confidenti/chihaya/requisiti/1/1').send({ richiesta: 'lo-zio-ingordo' })).body.error.code).toBe('requisito-non-di-richiesta');
     expect((await request(app).delete('/api/compendio/confidenti/chihaya/requisiti/1/2')).body.error.code).toBe('requisito-non-di-richiesta');
     expect((await request(app).put('/api/compendio/confidenti/sojiro/requisiti/9/0').send({ richiesta: 'nessuna' })).body.error.code).toBe('richiesta-non-trovata');
+  });
+
+  it('O7-1: condizioni proprie per completarla e area della proroga si salvano e si validano; le condizioni di completamento contano fra le citazioni', async () => {
+    const chiave = 'un-bullo-che-abbaia-e-morde';
+    const area = 'mementos-09-daat-area-1';
+    const r = (await request(app).put(`/api/compendio/richieste/${chiave}`).send({ scadenzaData: '12-23',
+      proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }], areaDedalo: area },
+      completamentoCondizioni: [{ tipo: 'richiesta', richiesta: 'un-ex-piuttosto-appiccicoso' }] }).expect(200)).body.data as RichiestaDto;
+    expect(r.proroga).toMatchObject({ data: '02-01', areaDedalo: area, areaDedaloNome: 'Piano 1', dedaloNome: "Dedalo di Da'at" });
+    expect(r.completamentoCondizioni).toEqual([expect.objectContaining({ tipo: 'richiesta', richiesta: 'un-ex-piuttosto-appiccicoso' })]);
+    expect(prepared('SELECT proroga_area_dedalo_chiave AS a, completamento_condizioni_json AS c FROM richiesta WHERE chiave = ?').get(chiave))
+      .toEqual({ a: area, c: '[{"tipo":"richiesta","richiesta":"un-ex-piuttosto-appiccicoso"}]' });
+    // la Richiesta citata dalle condizioni di completamento lo sa
+    expect(((await request(app).get('/api/compendio/richieste/un-ex-piuttosto-appiccicoso/citazioni').expect(200)).body.data as CitazioniRichiestaDto).condizioni)
+      .toContain('Richiesta: Un bullo che abbaia e morde (per completarla)');
+    // un'area che non c'è, una condizione che non si riconosce: niente salvato
+    expect((await request(app).put(`/api/compendio/richieste/${chiave}`).send({ scadenzaData: '12-23', proroga: { data: '02-01', condizioni: [], areaDedalo: 'nessuna' } })).body.error.code).toBe('area-dedalo-non-trovata');
+    expect((await request(app).put(`/api/compendio/richieste/${chiave}`).send({ completamentoCondizioni: [{ tipo: 'boh' }] })).body.error.code).toBe('condizioni-non-valide');
+    // senza condizioni la colonna torna vuota; togliendo la proroga se ne va anche la sua area
+    await request(app).put(`/api/compendio/richieste/${chiave}`).send({ completamentoCondizioni: [], scadenzaData: '12-23', proroga: null }).expect(200);
+    expect(prepared('SELECT proroga_area_dedalo_chiave AS a, completamento_condizioni_json AS c FROM richiesta WHERE chiave = ?').get(chiave)).toEqual({ a: null, c: null });
   });
 });

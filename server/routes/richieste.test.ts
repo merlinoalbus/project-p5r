@@ -3,7 +3,7 @@
 // ============================================================
 
 import request from 'supertest';
-import { closeDb } from '../db/dbService.js';
+import { closeDb, getDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import type { DungeonDettaglioDto, RichiestaDto, RichiesteDto, StoricoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
@@ -44,6 +44,13 @@ describe('API Richieste dei Mementos', () => {
     const prima = ((await request(app).get('/api/compendio/richieste')).body.data as RichiesteDto).richieste[0];
     let r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'accettata' })).body.data as RichiestaDto;
     expect(r.stato).toBe('accettata');
+    // O7-1: completarla chiede il Dedalo del bersaglio aperto nella partita (la sua condizione d'apertura, 305): nella partita nuova non lo è
+    const chiuso = await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' });
+    expect(chiuso.status).toBe(409);
+    expect(chiuso.body.error.code).toBe('dedalo-non-aperto');
+    expect(chiuso.body.error.message).toContain('Il bersaglio è nel Dedalo di Qimranut: si apre');
+    // un Dedalo senza condizione d'apertura non blocca (il dato che manca non impedisce di registrare quel che è successo nel gioco)
+    getDb().prepare('UPDATE dungeon_area SET condizioni_json = NULL WHERE chiave = ?').run(prima.areaChiave);
     r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' })).body.data as RichiestaDto;
     expect(r.stato).toBe('completata');
     r = (await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: prima.chiave, stato: 'completata' })).body.data as RichiestaDto;

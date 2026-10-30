@@ -1,0 +1,210 @@
+{
+  "descrizione": "Migrazione 310 (L13, ondata 7, lotto O7-1): le Richieste dei Memento con sblocco, completamento e proroga strutturati e senza i testi che ripetono i dati. Letto il 2026-10-30 su una copia portata alla 309 (gioco-copia2 235 → 309). Elenco CHIUSO: per ogni Richiesta i campi da cambiare con il valore di oggi (prima) e quello nuovo (dopo); una riga si scrive solo se ogni campo è ancora quello letto (o è già quello nuovo). Le condizioni sono elenchi del vocabolario unico (`shared/condizioniSpillo.ts`), scritti come li scrive l'app; i testi (`ricompense_json`) sono elenchi di stringhe. `proposte`: le proposte «da completare» del lotto L13-4b che la guida ora conferma, applicate con la stessa funzione della pagina «Da completare» (come la 302). `lasciate` e `discrepanze`: ciò che non si applica, con il motivo (domande all'utente, decisione 23 casi a/b/c, o righe da confrontare).",
+  "lotto": "O7-1",
+  "letto": "2026-10-30",
+  "fonti": {
+    "richieste": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/",
+    "chihaya": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-chihaya-fortuna/",
+    "dedali": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-<nome>/ (aiyatsbus, chemdah, kaitul, akzeriyyuth, adyeshach, sheriruth, daat)"
+  },
+  "regole": {
+    "ricompense": "ricompense_json → [] dove ogni testo nomina un oggetto già in ricompensa_oggetto (fonte «richiesta»): stesso nome del catalogo, tolta la parentesi (categoria «(carta abilità)», «(armatura)», «(libro)», «(accessorio)», «(consumabile)», «(oggetto chiave)», «(materiale di fusione)», portatore «(arma per Panther)»…) e la quantità «x8» (= quantita 8). Quel che la parentesi dice in più è già nel catalogo: il portatore in `statistiche_json.per` (Panther = Ann, Skull = Ryuji, Mona = Morgana), «materiale di fusione» nell'effetto della Palla peli appiccicosa, «utile per il Rango Confidente con le Gemelle» nella descrizione di Rimonta, la traccia «He's a Trickster☆» nell'effetto del Nuovo CD di Star Lilina e il ritiro da Lily-Nyan nella nota della sua riga di ricompensa_oggetto: nessuna frase da portare nelle note.",
+    "committente": "svuotato dove è solo «Rango Confidente X (Nome) N» e quel rango è già una condizione di sblocco della Richiesta (10 righe; «Il Netturbino» dice il Confidente senza rango e resta).",
+    "piano": "svuotato dove è il nome dell'area del Dedalo in cui la Richiesta è collocata (`area_dedalo`), anche «Area 13» per l'area «Piano 13» del Da'at (stesso numero, stessa chiave mementos-09-daat-area-13), e dove è «Area N (Dedalo) / Area M (Da'at)», con l'area M scritta ora come area della proroga.",
+    "proroga": "le 6 Richieste con la scadenza in prosa «23 dicembre; se non completata … Dedalo di Da'at (Area M) nel terzo semestre»: scadenza 12-23, proroga 02-01 con «Terzo semestre avviato» (la stessa delle altre 22), area della proroga = mementos-09-daat-area-M letta dal testo di oggi. La guida dice il termine (23 dicembre, 1 febbraio col terzo semestre) e che il bersaglio rimasto nell'ultima area del suo percorso «lo ritroverete nel Dedalo di Da'at durante il terzo semestre», ma non elenca le aree del Da'at: il numero dell'area è il dato esistente, non verificato sulla guida. `scadenza` e `area` in prosa tornano vuota e il nome del Dedalo.",
+    "sblocco": "la condizione «Sblocco ricevuto» (bersaglio Richiesta) accanto a quelle di oggi per le Richieste che una voce del Diario sblocca già (effetto «sblocco»), solo se la voce non viene prima della condizione di data scritta; «Un intruso a Yongen-Jaya» no (voce 08-29, condizione dal 08-30, la guida non dice la data: lasciata)."
+  },
+  "richieste": [
+    { "chiave": "un-ex-piuttosto-appiccicoso", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Perla dell'attaccamento"], "dopo": [] },
+      "piano": { "prima": "Tutorial", "dopo": "" } } },
+    { "chiave": "un-bullo-che-abbaia-e-morde", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Frullato proteico"], "dopo": [] },
+      "piano": { "prima": "Area 2", "dopo": "" } } },
+    { "chiave": "bullismo-sui-bulli", "motivo": "il Palazzo di Kaneshiro è il requisito dell'Area 5 di Aiyatsbus («Requisito: aver completato il Palazzo di Kaneshiro», pagina del Dedalo), cioè per raggiungere il bersaglio: passa dallo sblocco al completamento (la pagina delle Richieste la sblocca con la Richiesta precedente e il Rango Luna 3); ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Fiocco di neve malvagio (oggetto chiave)"], "dopo": [] },
+      "piano": { "prima": "Area 5", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "richiesta", "richiesta": "un-bullo-che-abbaia-e-morde" }, { "tipo": "confidente", "confidente": "mishima", "rango": 3 }, { "tipo": "palazzo", "dungeon": "kaneshiro" }],
+        "dopo": [{ "tipo": "richiesta", "richiesta": "un-bullo-che-abbaia-e-morde" }, { "tipo": "confidente", "confidente": "mishima", "rango": 3 }] },
+      "completamento_condizioni_json": { "prima": null, "dopo": [{ "tipo": "palazzo", "dungeon": "kaneshiro" }] } } },
+    { "chiave": "se-scomparissero-i-gatti", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Fermaglio per gatti"], "dopo": [] },
+      "piano": { "prima": "Area 6", "dopo": "" } } },
+    { "chiave": "il-senso-della-vita-nella-terza-eta", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Cintura del fastidio"], "dopo": [] },
+      "piano": { "prima": "Area 3", "dopo": "" } } },
+    { "chiave": "ladri-fantasma-vs-ladri-e-basta", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Vecchia chiave"], "dopo": [] },
+      "piano": { "prima": "Area 4", "dopo": "" } } },
+    { "chiave": "il-sadismo-e-un-gesto-damore", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; sblocco dalla voce del 06-06; ricompense, piano e area ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Spadafrusta (arma per Panther)"], "dopo": [] },
+      "piano": { "prima": "Area 7 (Aiyatsbus) / Area 1 (Da'at)", "dopo": "" },
+      "area": { "prima": "Dedalo di Aiyatsbus (Area 7) / Dedalo di Da'at (Area 1) se rimandata al terzo semestre", "dopo": "Dedalo di Aiyatsbus" },
+      "scadenza": { "prima": "23 dicembre; se non completata entro tale data, il bersaglio si sposta nel Dedalo di Da'at (Area 1) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-1" },
+      "condizioni_json": { "prima": [{ "tipo": "data", "dal": "06-06" }], "dopo": [{ "tipo": "data", "dal": "06-06" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "il-sadismo-e-un-gesto-damore" }] } } },
+    { "chiave": "un-part-time-infernale", "motivo": "committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Dolci cinesi (libro)"], "dopo": [] },
+      "piano": { "prima": "Area 1", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Luna (Mishima) 4", "dopo": "" } } },
+    { "chiave": "medicina-amara", "motivo": "sblocco dalla voce del 07-19; committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Mediarama (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 2", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Morte (Tae Takemi) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "takemi", "rango": 7 }], "dopo": [{ "tipo": "confidente", "confidente": "takemi", "rango": 7 }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "medicina-amara" }] } } },
+    { "chiave": "un-fidanzato-violento", "motivo": "«Dopo aver parlato con Chihaya» → dal 30 giugno (guida del Confidente Fortuna: «30 GIUGNO», in serata a Shinjuku, nessun rango) e lo sblocco della voce del 06-30; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Ramo del sonno (arma per Skull)"], "dopo": [] },
+      "piano": { "prima": "Area 3", "dopo": "" },
+      "disponibile_dal": { "prima": "Dopo aver parlato con Chihaya", "dopo": "" },
+      "condizioni_json": { "prima": null, "dopo": [{ "tipo": "data", "dal": "06-30" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "un-fidanzato-violento" }] } } },
+    { "chiave": "le-fatiche-di-una-maid-in-cattedra", "motivo": "committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Catena dell'invidia (arma per Ann)"], "dopo": [] },
+      "piano": { "prima": "Area 7", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Temperanza (Kawakami) 8", "dopo": "" } } },
+    { "chiave": "la-stalker-informatica", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; ricompense, piano e area ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Palla peli appiccicosa (materiale di fusione)"], "dopo": [] },
+      "piano": { "prima": "Area 8 (Chemdah) / Area 2 (Da'at)", "dopo": "" },
+      "area": { "prima": "Dedalo di Chemdah (Area 8) / Dedalo di Da'at (Area 2) se rimandata", "dopo": "Dedalo di Chemdah" },
+      "scadenza": { "prima": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 2) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-2" } } },
+    { "chiave": "giustizia-per-i-gatti", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Scimitarra insanguinata"], "dopo": [] },
+      "piano": { "prima": "Area 1", "dopo": "" } } },
+    { "chiave": "smascheriamo-i-ciarlatani", "motivo": "sblocco dalla voce del 08-18 (guida di Chihaya: «18 AGOSTO»); committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Mano del profeta (arma per Makoto)"], "dopo": [] },
+      "piano": { "prima": "Area 3", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Fortuna (Chihaya) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "chihaya", "rango": 7 }], "dopo": [{ "tipo": "confidente", "confidente": "chihaya", "rango": 7 }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "smascheriamo-i-ciarlatani" }] } } },
+    { "chiave": "affari-loschi-nellombra", "motivo": "sblocco dalla voce del 11-05; committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Fascia strana (armatura)"], "dopo": [] },
+      "piano": { "prima": "Area 4", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Appeso (Iwai) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "iwai", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }], "dopo": [{ "tipo": "confidente", "confidente": "iwai", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "affari-loschi-nellombra" }] } } },
+    { "chiave": "chi-e-laggressore", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Carica (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 5", "dopo": "" } } },
+    { "chiave": "non-siamo-i-tuoi-schiavi", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Parchi divertimento (libro)"], "dopo": [] },
+      "piano": { "prima": "Area 8", "dopo": "" } } },
+    { "chiave": "lottare-per-la-liberta-di-stampa", "motivo": "sblocco dalla voce del 08-29; committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Recupero 3 (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 9", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Diavolo (Ohya) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "ohya", "rango": 7 }], "dopo": [{ "tipo": "confidente", "confidente": "ohya", "rango": 7 }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "lottare-per-la-liberta-di-stampa" }] } } },
+    { "chiave": "un-intruso-a-yongen-jaya", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; ricompense, piano e area ripetono i dati. Lo sblocco NON si aggiunge (vedi «lasciate»)", "campi": {
+      "ricompense_json": { "prima": ["Shitamachi rinato (libro)"], "dopo": [] },
+      "piano": { "prima": "Area 10 (Kaitul) / Area 6 (Da'at)", "dopo": "" },
+      "area": { "prima": "Dedalo di Kaitul (Area 10) / Dedalo di Da'at (Area 6) se rimandata", "dopo": "Dedalo di Kaitul" },
+      "scadenza": { "prima": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 6) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-6" } } },
+    { "chiave": "mille-volti-e-mille-debiti", "motivo": "committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Termopili (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 3", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Luna (Mishima) 8", "dopo": "" } } },
+    { "chiave": "i-vincenti-non-imbrogliano", "motivo": "«4 settembre (Parte 1, dopo Palazzo di Futaba); Parte 2 dopo il Palazzo di Okumura» → dal 4 settembre con lo sblocco della voce del 09-04 (guida: «dal 4 settembre … parlando con il giocatore nella sala giochi di Shibuya»); la Parte 1 si fa col Dedalo di Akzeriyyuth aperto (Palazzo di Futaba, migrazione 305), la Parte 2 è il completamento: Palazzo di Okumura («Area 5 (Parte 2) — Requisito: aver completato il Palazzo di Okumura», pagina del Dedalo di Akzeriyyuth). Il Rango Torre 1 della pagina delle Richieste NON si aggiunge (vedi «lasciate»); ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Annulla att. fisici (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 5", "dopo": "" },
+      "disponibile_dal": { "prima": "4 settembre (Parte 1, dopo Palazzo di Futaba); Parte 2 dopo il Palazzo di Okumura", "dopo": "" },
+      "condizioni_json": { "prima": null, "dopo": [{ "tipo": "data", "dal": "09-04" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "i-vincenti-non-imbrogliano" }] },
+      "completamento_condizioni_json": { "prima": null, "dopo": [{ "tipo": "palazzo", "dungeon": "okumura" }] } } },
+    { "chiave": "la-mamma-manager", "motivo": "sblocco dalla voce del 10-22; committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Catena di perline"], "dopo": [] },
+      "piano": { "prima": "Area 6", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Stella (Hifumi Togo) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "hifumi", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }], "dopo": [{ "tipo": "confidente", "confidente": "hifumi", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "la-mamma-manager" }] } } },
+    { "chiave": "il-netturbino", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; ricompense, piano e area ripetono i dati (il committente resta: dice il Confidente senza rango)", "campi": {
+      "ricompense_json": { "prima": ["Rimonta (carta abilità, utile per il Rango Confidente con le Gemelle)"], "dopo": [] },
+      "piano": { "prima": "Area 12 (Akzeriyyuth) / Area 9 (Da'at)", "dopo": "" },
+      "area": { "prima": "Dedalo di Akzeriyyuth (Area 12) / Dedalo di Da'at (Area 9) se rimandata", "dopo": "Dedalo di Akzeriyyuth" },
+      "scadenza": { "prima": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 9) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-9" } } },
+    { "chiave": "lo-zio-ingordo", "motivo": "il Rango Gerofante 8 (colonna confidente_rango, letta solo dal ripiego del servizio) diventa una condizione di sblocco: comportamento invariato; «può essere avviata in anticipo parlando con Futaba anche senza aver sbloccato il Dedalo di Adyeshach» è ora il modello (accettarla non chiede il Dedalo aperto, completarla sì); ricompense ripetono i dati (il piano resta: la Richiesta non è collocata in un'area)", "campi": {
+      "ricompense_json": { "prima": ["Sciabola del rischio (arma per Mona)"], "dopo": [] },
+      "disponibile_dal": { "prima": "Rango Confidente Gerofante (Sojiro Sakura) 8; può essere avviata in anticipo parlando con Futaba anche senza aver sbloccato il Dedalo di Adyeshach", "dopo": "" },
+      "condizioni_json": { "prima": null, "dopo": [{ "tipo": "confidente", "confidente": "sojiro", "rango": 8 }] },
+      "confidente_rango": { "prima": 8, "dopo": null } } },
+    { "chiave": "e-una-figlia-o-un-buono-pasto", "motivo": "sblocco dalla voce del 11-02; committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Crescita 3 (carta abilità)"], "dopo": [] },
+      "piano": { "prima": "Area 3", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Eremita (Futaba) 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "confidente", "confidente": "futaba", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }], "dopo": [{ "tipo": "confidente", "confidente": "futaba", "rango": 7 }, { "tipo": "palazzo", "dungeon": "okumura" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "e-una-figlia-o-un-buono-pasto" }] } } },
+    { "chiave": "una-madre-aggressiva", "motivo": "committente = rango già nelle condizioni; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Soma (consumabile)"], "dopo": [] },
+      "piano": { "prima": "Area 11", "dopo": "" },
+      "committente": { "prima": "Rango Confidente Torre (Shinya Oda) 8", "dopo": "" } } },
+    { "chiave": "raggirare-gli-anziani-non-si-fa", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; ricompense, piano e area ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Veste haten (armatura)"], "dopo": [] },
+      "piano": { "prima": "Area 13 (Adyeshach) / Area 12 (Da'at)", "dopo": "" },
+      "area": { "prima": "Dedalo di Adyeshach (Area 13) / Dedalo di Da'at (Area 12) se rimandata", "dopo": "Dedalo di Adyeshach" },
+      "scadenza": { "prima": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 12) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-12" } } },
+    { "chiave": "la-ballata-del-rubacuori", "motivo": "ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Corona del tumulto (accessorio)"], "dopo": [] },
+      "piano": { "prima": "Area 8", "dopo": "" } } },
+    { "chiave": "il-capoccia-dello-show-business", "motivo": "scadenza in prosa → scadenza, proroga e area del Da'at; ricompense, piano e area ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Gilet immortale (armatura)"], "dopo": [] },
+      "piano": { "prima": "Area 14 (Sheriruth)", "dopo": "" },
+      "area": { "prima": "Dedalo di Sheriruth (Area 14) / Dedalo di Da'at (Area 14) se rimandata", "dopo": "Dedalo di Sheriruth" },
+      "scadenza": { "prima": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 14) nel terzo semestre", "dopo": "" },
+      "scadenza_data": { "prima": null, "dopo": "12-23" },
+      "proroga_data": { "prima": null, "dopo": "02-01" },
+      "proroga_condizioni_json": { "prima": null, "dopo": [{ "tipo": "evento", "evento": "terzo-semestre-avviato" }] },
+      "proroga_area_dedalo_chiave": { "prima": null, "dopo": "mementos-09-daat-area-14" } } },
+    { "chiave": "una-piccola-richiesta-daiuto", "motivo": "sblocco dalla voce del 01-13; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["An. inferno a spirale (accessorio)"], "dopo": [] },
+      "piano": { "prima": "Piano 3", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "data", "dal": "01-13" }, { "tipo": "evento", "evento": "terzo-semestre-avviato" }], "dopo": [{ "tipo": "data", "dal": "01-13" }, { "tipo": "evento", "evento": "terzo-semestre-avviato" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "una-piccola-richiesta-daiuto" }] } } },
+    { "chiave": "per-il-mio-bene", "motivo": "sblocco dalla voce del 01-14; ricompense («x8» = 8 copie) e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Ofuda della forza x8"], "dopo": [] },
+      "piano": { "prima": "Piano 7", "dopo": "" },
+      "condizioni_json": { "prima": [{ "tipo": "data", "dal": "01-14" }, { "tipo": "evento", "evento": "terzo-semestre-avviato" }], "dopo": [{ "tipo": "data", "dal": "01-14" }, { "tipo": "evento", "evento": "terzo-semestre-avviato" }, { "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "per-il-mio-bene" }] } } },
+    { "chiave": "lidol-e-lunicorno", "motivo": "lo sblocco dalla voce del 01-28 «Nuova richiesta Mementos: Un idolo e un unicorno» (guida: si sblocca «dopo aver ricevuto un SMS»; pagina del Da'at: le due Richieste il 28 gennaio); il testo «Il giorno dopo aver completato il Palazzo finale (Maruki)» resta da verificare (vedi «lasciate»); ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Centro perfetto (carta abilità)", "Nuovo CD di Star Lilina (traccia 'He's a Trickster☆', ottenibile parlando con Lily-Nyan ad Akihabara dopo la richiesta)"], "dopo": [] },
+      "piano": { "prima": "Area 13", "dopo": "" },
+      "condizioni_json": { "prima": null, "dopo": [{ "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "lidol-e-lunicorno" }] } } },
+    { "chiave": "falsita-in-scena", "motivo": "lo sblocco da una voce del Diario (la guida: «dopo un SMS»); nessuna voce lo dà ancora (la voce del 01-29 resta da confermare, vedi «lasciate»), e finché è così la condizione non blocca; il testo «Il giorno dopo aver completato il Palazzo finale (Maruki)» resta da verificare; ricompense e piano ripetono i dati", "campi": {
+      "ricompense_json": { "prima": ["Cintura eccentrica"], "dopo": [] },
+      "piano": { "prima": "Area 15", "dopo": "" },
+      "condizioni_json": { "prima": null, "dopo": [{ "tipo": "sblocco", "bersaglio": "richiesta", "chiave": "falsita-in-scena" }] } } }
+  ],
+  "proposte": [
+    { "id": "L13-4b-ae9a1839-01-b-richiesta", "voce": "ae9a18392a2006439f78b7be60754773", "data": "09-04", "azione": "Sala giochi di Shibuya: parlare con un giocatore arrabbiato, scoperta del nome Yoshikuni Nejima",
+      "attesa": { "tipo_proposto": null, "riferimento_tipo": null, "riferimento_chiave": null, "effetti_json": "[{\"effetto\":{\"tipo\":\"sblocco\",\"bersaglio\":\"richiesta\",\"chiave\":\"i-vincenti-non-imbrogliano\"},\"completa\":[],\"scelte\":null}]", "togli_json": "[]" },
+      "motivo": "era «da verificare» (che la scoperta del nome fosse lo sblocco era dedotto): la guida lo dice, «disponibile dal 4 settembre, si avvia parlando con il giocatore nella sala giochi di Shibuya»" },
+    { "id": "L13-4b-29a79ec9-01-a-riferimento-mancante", "voce": "29a79ec953dc80e0488516e62e939261", "data": "01-28", "azione": "Nuova richiesta Mementos: Un idolo e un unicorno",
+      "attesa": { "tipo_proposto": null, "riferimento_tipo": "richiesta", "riferimento_chiave": "lidol-e-lunicorno", "effetti_json": "[]", "togli_json": "[]" },
+      "motivo": "era «probabile»: «Un idolo e un unicorno» è «L'idol e l'unicorno», la sola Richiesta col bersaglio Unicorno (Fuwa), e la pagina del Da'at la mette il 28 gennaio" },
+    { "id": "L13-4b-29a79ec9-02-b-richiesta", "voce": "29a79ec953dc80e0488516e62e939261", "data": "01-28", "azione": "Nuova richiesta Mementos: Un idolo e un unicorno",
+      "attesa": { "tipo_proposto": null, "riferimento_tipo": null, "riferimento_chiave": null, "effetti_json": "[{\"effetto\":{\"tipo\":\"sblocco\",\"bersaglio\":\"richiesta\",\"chiave\":\"lidol-e-lunicorno\"},\"completa\":[],\"scelte\":null}]", "togli_json": "[]" },
+      "motivo": "era «probabile» come il collegamento: la voce è l'SMS che la sblocca («si sblocca … dopo aver ricevuto un SMS»)" }
+  ],
+  "lasciate": [
+    { "chiave": "un-intruso-a-yongen-jaya", "caso": "a", "domanda": "La voce del Diario del 29 agosto «Nuova richiesta: Un intruso a Yongen-Jaya» la sblocca, ma la condizione della Richiesta dice «dal 30 agosto» e la guida non dà la data (pagina del Dedalo di Kaitul: solo «Requisito: aver completato il Palazzo di Futaba»): la Richiesta arriva il 29 (la data diventa 29 e si aggiunge lo sblocco) o il 30 (la voce va spostata al 30)?" },
+    { "chiave": "i-vincenti-non-imbrogliano", "caso": "a", "domanda": "La guida dice che per affrontare davvero il bersaglio serve prima il legame col Confidente Torre (Shinya), ma il requisito del rango 1 della Torre è «Completare la richiesta I vincenti non imbrogliano» (e il Diario stringe il legame il 19 settembre, la completa il 6 novembre): il requisito della Torre va corretto (per esempio la Parte 1 tentata) per poter mettere «Rango Torre 1» fra le condizioni di completamento senza un giro chiuso?" },
+    { "chiave": "lidol-e-lunicorno, falsita-in-scena", "caso": "a", "domanda": "La pagina delle Richieste dice «dopo il Palazzo finale», ma il Palazzo di Maruki risulta concluso solo il 3 febbraio, dopo la scadenza del 1 febbraio (con quella condizione non si potrebbero mai accettare), e la pagina del Da'at chiede per L'idol e l'unicorno di essersi infiltrati nel Corridoio del Crepuscolo (Diario: 26-27 gennaio): quale condizione? Intanto il testo resta «da verificare» e vale solo lo sblocco." },
+    { "chiave": "falsita-in-scena (voce 01-29 2890a52c)", "caso": "a", "domanda": "«Nuova richiesta Mementos: Il finto spettacolo dell'uomo» (29 gennaio) è «Falsità in scena»? La pagina del Da'at le affronta entrambe il 28 gennaio e la pagina delle Richieste dice che si attiva ascoltando i cittadini di Kichijoji e poi due studenti (Diario: 30 gennaio). Le due proposte di questa voce restano aperte in «Da completare»." },
+    { "chiave": "un-bullo-che-abbaia-e-morde (voce 05-09 84750a56)", "caso": "c", "domanda": "La voce del 9 maggio «Ricevi prima Richiesta dei Memento…» è spuntata in una partita: la proposta di darle lo sblocco resta in «Da completare» e la Richiesta resta senza la condizione di sblocco." }
+  ],
+  "discrepanze": [
+    "Dedalo di Chemdah, aree 1, 2, 3 e 7 («Requisito: aver completato il Palazzo di Kaneshiro»): Un part-time infernale, Medicina amara, Un fidanzato violento, Le fatiche di una maid in cattedra non hanno il Palazzo di Kaneshiro (il Dedalo si apre con Madarame)",
+    "Dedalo di Kaitul, aree 1, 3, 5, 8, 9 e 10 («Requisito: aver completato il Palazzo di Futaba»): Giustizia per i gatti, Smascheriamo i ciarlatani, Chi è l'aggressore?, Non siamo i tuoi schiavi, Lottare per la libertà di stampa, Un intruso a Yongen-Jaya non hanno il Palazzo di Futaba (il Dedalo si apre con Kaneshiro)",
+    "Requisito d'area scritto fra le condizioni di SBLOCCO e non di completamento: Affari loschi nell'ombra (Kaitul area 4, Okumura), Mille volti e mille…debiti, La mamma manager, Il «Netturbino» (Akzeriyyuth aree 3, 6, 12, Okumura), È una figlia o un buono pasto?, Una madre aggressiva (Adyeshach aree 3, 11, Okumura: è anche l'apertura del Dedalo), Raggirare gli anziani? (Adyeshach area 13, «Palazzo di Sae»), La ballata del rubacuori, Il capoccia (Sheriruth, Shido: la pagina delle Richieste lo chiede anche per riceverle)",
+    "Lo zio ingordo: la pagina del Dedalo di Adyeshach non la elenca; piano e data restano quelli della nota",
+    "Il 24 dicembre «resta un giorno in cui non è possibile completarle» (pagina delle Richieste): vale solo per le Richieste spostate nel Da'at (chiuso fino al 20 gennaio); per le altre 22 con la proroga non è un dato"
+  ]
+}

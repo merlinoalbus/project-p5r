@@ -2483,7 +2483,13 @@ export interface RichiestaDto {
   condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
   /** La scadenza come data di gioco (MM-GG) e la proroga, valida solo con le sue condizioni; null = non indicata (resta il testo `scadenza`). */
   scadenzaData: string | null;
-  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }> } | null;
+  /**
+   * La proroga, valida solo con le sue condizioni. L13 (ondata 7, O7-1): `areaDedalo` è l'area (di un altro Dedalo, il Da'at della guida) in cui
+   * il bersaglio si sposta finché vale la proroga, passata la scadenza; null = resta dov'è. `areaDedaloNome` e `dedaloNome` per mostrarla.
+   */
+  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>; areaDedalo: string | null; areaDedaloNome: string | null; dedaloNome: string | null } | null;
+  /** L13 (ondata 7, O7-1): le condizioni proprie per COMPLETARLA, oltre al Dedalo aperto (stesso vocabolario dello sblocco); vuoto = solo il Dedalo. */
+  completamentoCondizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
   /**
    * Il bersaglio come Ombra del compendio: livello e affinità si leggono da lì (null = i campi propri di `bersaglio`). Il server li risolve
    * dalla scheda dell'Ombra (livello, affinità della sua Persona con sopra le proprie: la stessa lettura del compendio delle Ombre) e li
@@ -2511,6 +2517,16 @@ export interface StatoCalcolatoRichiestaDto {
   giorniAllaScadenza: number | null;
   /** Vero se si può accettare adesso (da disponibile o da verificare). */
   accettabile: boolean;
+  /**
+   * L13 (ondata 7, O7-1): vero se si può segnare completata adesso: il Dedalo del bersaglio è aperto nella partita (quello della proroga, se il
+   * bersaglio si è spostato) e nessuna condizione propria di completamento è falsa. Accettarla non lo chiede: la guida fa ricevere Richieste
+   * prima che il loro Dedalo si apra. Una completata è sempre `true`.
+   */
+  completabile: boolean;
+  /** Perché non si può ancora completare («Il bersaglio è nel Dedalo di …: si apre dopo …», la condizione propria che manca); vuoto se completabile. */
+  motiviCompletamento: string[];
+  /** Il Dedalo e l'area dove sta il bersaglio oggi: quelli della proroga quando vale e la scadenza è passata (il bersaglio si è spostato). */
+  doveOggi: { dedalo: string | null; dedaloNome: string | null; areaDedalo: string | null; areaDedaloNome: string | null; spostato: boolean };
   /** L13 (decisione 18): vero se gli yen della ricompensa passano ancora da una proposta «Applica» nata prima (aperta, o applicata e non tornata
    *  a zero): allora non entrano da soli e vale quella proposta. Assente se entrano da soli. */
   yenDaProposta?: boolean;
