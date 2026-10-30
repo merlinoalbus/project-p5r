@@ -20,6 +20,14 @@ export function meseGioco(data: string): string {
 /** «MM-GG» → «GG mese» (una data che non è «MM-GG» resta com'è). */
 export const dataGiocoTesto = (data: string): string => dataLeggibile(data);
 
+/** «MM-GG» → «22 apr»: il giorno e le prime tre lettere del mese (che in italiano sono la sua abbreviazione), per i chip stretti come le
+ *  tappe di un Palazzo (L13 O6-3). Una data che non è «MM-GG» resta com'è. */
+export function dataGiocoBreve(data: string): string {
+  const [m, g] = data.split('-');
+  const mese = MESI_GIOCO.find((x) => x.numero === m);
+  return mese && g && /^\d{2}$/.test(g) ? `${Number(g)} ${mese.nome.slice(0, 3)}` : data;
+}
+
 /** La data con l'articolo davanti, apostrofato davanti a «8» e «11» (che si leggono «otto», «undici»): «il 12 aprile»,
  *  «l'11 aprile»; con la preposizione: «del 12» / «dell'11», «al 12» / «all'11», «dal 12» / «dall'11». */
 export function dataGiocoConArticolo(data: string, preposizione: '' | 'di' | 'a' | 'da' = ''): string {

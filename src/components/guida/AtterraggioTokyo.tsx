@@ -4,19 +4,20 @@
 //
 // Richiesta dell'utente (2026-10-04): «devi visualizzare l'icona e permettermi di valorizzare per fasce temporali o giorni
 // specifici il punto di atterraggio dell'icona della mappa rispetto al mappamondo delle planimetrie». Dall'intestazione del
-// Palazzo un pulsante apre una finestra con due parti, ognuna con il suo «Salva»:
+// Palazzo un pulsante apre una finestra con due parti:
 //
 // - **Quando compare**: la finestra del Palazzo sulla mappa di Tokyo (dal–al, o senza fine), la stessa che dice l'arco della
-//   storia alle condizioni dei pin;
+//   storia alle condizioni dei pin. Dal L13 (O6-3, una fonte e un editor per le date del Palazzo) qui si legge soltanto: si cambia in
+//   «Correggi la scheda», con le altre date del Palazzo;
 // - **Atterraggio dalla mappa di Tokyo**: un elenco di regole (sempre, un giorno, da un giorno in poi, dal–al), ognuna con una
 //   planimetria del Palazzo e, se serve, il pin d'arrivo su cui centrarla. Vale la prima che copre il giorno della partita:
-//   l'ordine si cambia con le frecce.
+//   l'ordine si cambia con le frecce, e «Salva le regole» le scrive.
 //
-// Le bozze nascono all'apertura dai dati della pagina; chiudere la finestra le scarta.
+// La bozza delle regole nasce all'apertura dai dati della pagina; chiudere la finestra la scarta.
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import { getMappa, impostaAtterraggiDungeon, impostaFinestraDungeon } from '../../services/api';
+import { getMappa, impostaAtterraggiDungeon } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { ordineGioco } from '../../../shared/condizioniSpillo';
@@ -95,9 +96,6 @@ function AtterraggioTokyoReale({ dungeon: d, onSalvato, compatto }: Props) {
 /** La finestra modale: si monta all'apertura, così le bozze ripartono ogni volta dai dati della pagina. */
 function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDto; onSalvato: () => Promise<unknown>; onChiudi: () => void }) {
   const partenzaDal = d.finestra?.dal ?? PRIMO_GIORNO;
-  const [dal, setDal] = useState(partenzaDal);
-  const [senzaFine, setSenzaFine] = useState(!d.finestra?.al);
-  const [al, setAl] = useState(d.finestra?.al ?? partenzaDal);
   const [regole, setRegole] = useState<RegolaBozza[]>(() => d.atterraggi.map((r, i) => ({
     id: i, quando: quandoDi(r), dal: r.dal ?? partenzaDal, al: r.al ?? r.dal ?? partenzaDal, mappa: r.mappa, spillo: r.spillo, spilloNome: r.spilloNome,
   })));
@@ -117,13 +115,9 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
     return () => { vivo = false; };
   }, [daLeggere]);
 
-  const finestraNuova = { dal, al: senzaFine ? null : al };
-  const finestraCambiata = !d.finestra || d.finestra.dal !== finestraNuova.dal || d.finestra.al !== finestraNuova.al;
-  const finestraRovesciata = finestraNuova.al !== null && ordineGioco(finestraNuova.al) < ordineGioco(finestraNuova.dal);
   const regoleCambiate = JSON.stringify(regole.map(regolaPerServer)) !== JSON.stringify(d.atterraggi.map((r) => ({ dal: r.dal, al: r.al, mappa: r.mappa, spillo: r.spillo })));
-  // la finestra «quando compare» toccata rispetto ai dati salvati (senza finestra salvata, rispetto ai valori di partenza) o le regole cambiate: bozza sporca
-  const finestraToccata = dal !== partenzaDal || senzaFine !== !d.finestra?.al || (!senzaFine && al !== d.finestra?.al);
-  useBozzaSporca('atterraggio-tokyo', `«Sulla mappa di Tokyo» del Palazzo ${d.nome}`, finestraToccata || regoleCambiate);
+  // le regole cambiate rispetto a quelle salvate: bozza sporca (la finestra qui si legge soltanto)
+  useBozzaSporca('atterraggio-tokyo', `«Sulla mappa di Tokyo» del Palazzo ${d.nome}`, regoleCambiate);
   const rovesciate = regole.filter((r) => r.quando === 'intervallo' && ordineGioco(r.al) < ordineGioco(r.dal)).map((r) => regole.indexOf(r) + 1);
   const opzioniMappa = d.planimetrie.map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome) }));
   // dove si atterra oggi: la regola che il server ha scelto per il giorno della partita
@@ -158,20 +152,9 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
       <div className="flex flex-col gap-5 testo-13">
         <section aria-labelledby="tokyo-quando" className="flex flex-col gap-2">
           <h3 id="tokyo-quando" className="m-0 font-display testo-16 uppercase">Quando compare</h3>
-          <p className="m-0 testo-12 text-text-muted">L’icona {delPosto} sta sulla mappa di Tokyo nei giorni della partita dentro questa finestra (ora: {testoFinestra(d.finestra)}). È la stessa finestra che dice l’arco della storia alle condizioni dei pin.</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <SelettoreData etichetta="Compare dal" valore={dal} onCambia={setDal} disabilitato={occupato} />
-            <label className="touch flex items-center gap-1.5 testo-12">
-              <input type="checkbox" className="h-5 w-5" checked={senzaFine} disabled={occupato} onChange={(e) => setSenzaFine(e.target.checked)} />Senza fine
-            </label>
-            {!senzaFine && <SelettoreData etichetta="Compare fino al" valore={al} onCambia={setAl} disabilitato={occupato} />}
-          </div>
-          {finestraRovesciata && <p className="m-0 testo-12 text-error-testo" role="alert">La fine viene prima dell’inizio.</p>}
-          <div>
-            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva quando compare"
-              disabled={occupato || !finestraCambiata || finestraRovesciata}
-              onClick={() => void salva('Quando compare', () => impostaFinestraDungeon(d.chiave, finestraNuova.dal, finestraNuova.al))} />
-          </div>
+          {/* L13 O6-3: le date {delPosto} hanno un solo editor, «Correggi la scheda»; qui si dice la finestra e dove cambiarla */}
+          <p className="m-0 testo-13" data-finestra>L’icona {delPosto} sta sulla mappa di Tokyo <strong>{testoFinestra(d.finestra)}</strong>.</p>
+          <p className="m-0 testo-12 text-text-muted">È la stessa finestra che dice l’arco della storia alle condizioni dei pin. Si cambia in «Correggi la scheda» {delPosto}, insieme alle altre sue date.</p>
         </section>
 
         <section aria-labelledby="tokyo-atterraggio" className="flex flex-col gap-2">

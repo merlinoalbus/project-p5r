@@ -8,10 +8,10 @@ import { AtterraggioTokyo } from './AtterraggioTokyo';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../../test/selettore';
 import type { DungeonDettaglioDto } from '../../types';
 
-const { impostaFinestraDungeon, impostaAtterraggiDungeon, getMappa, notifica } = vi.hoisted(() => ({
-  impostaFinestraDungeon: vi.fn(), impostaAtterraggiDungeon: vi.fn(), getMappa: vi.fn(), notifica: vi.fn(),
+const { impostaAtterraggiDungeon, getMappa, notifica } = vi.hoisted(() => ({
+  impostaAtterraggiDungeon: vi.fn(), getMappa: vi.fn(), notifica: vi.fn(),
 }));
-vi.mock('../../services/api', (vero) => moduloApi(vero, { impostaFinestraDungeon, impostaAtterraggiDungeon, getMappa }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { impostaAtterraggiDungeon, getMappa }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
 
 /** Una planimetria del Palazzo come la dà la scheda. */
@@ -32,7 +32,6 @@ const scheda = (cambi: Partial<DungeonDettaglioDto> = {}) => ({
 const mappaConPin = (chiave: string) => ({ chiave, spilli: chiave === 'k/prigione' ? [{ id: 42, nome: 'Cella', tipoNome: 'Nota', x: 10, y: 10 }, { id: 43, nome: 'Armeria', tipoNome: 'Nota', x: 20, y: 20 }] : chiave === 'k/sala' ? [{ id: 7, nome: 'Sala Centrale', tipoNome: 'Passaggio', x: 50, y: 50 }] : [] });
 
 beforeEach(() => {
-  impostaFinestraDungeon.mockReset().mockResolvedValue({ dal: '04-11', al: null });
   impostaAtterraggiDungeon.mockReset().mockResolvedValue([]);
   getMappa.mockReset().mockImplementation((k: string) => Promise.resolve(mappaConPin(k)));
   notifica.mockReset();
@@ -63,24 +62,19 @@ describe('AtterraggioTokyo', () => {
     expect(getMappa.mock.calls.map((c) => c[0]).sort()).toEqual(['k/ingresso', 'k/prigione']);
   });
 
-  it('«Quando compare»: si salva la finestra, anche senza fine, e la pagina si rilegge', async () => {
-    const { finestra, onSalvato } = apri();
-    const salva = within(finestra).getByRole('button', { name: /Salva quando compare/ });
-    expect(salva).toBeDisabled();
-    fireEvent.click(within(finestra).getByRole('checkbox', { name: 'Senza fine' }));
-    expect(within(finestra).queryByRole('group', { name: 'Compare fino al' })).toBeNull();
-    fireEvent.click(salva);
-    await vi.waitFor(() => expect(onSalvato).toHaveBeenCalled());
-    expect(impostaFinestraDungeon).toHaveBeenCalledWith('kamoshida', '04-11', null);
-    expect(notifica).toHaveBeenCalledWith('success', 'Quando compare: salvato.');
+  // L13 O6-3: le date del Palazzo hanno un solo editor, «Correggi la scheda»; qui la finestra si legge e si dice dove cambiarla
+  it('«Quando compare» dice la finestra a parole e rimanda a «Correggi la scheda»: niente selettori né «Salva» della finestra', () => {
+    const { finestra } = apri();
+    expect(within(finestra).getByText(/L’icona del Palazzo sta sulla mappa di Tokyo/)).toHaveTextContent('L’icona del Palazzo sta sulla mappa di Tokyo dall’11 aprile al 2 maggio.');
+    expect(within(finestra).getByText(/Si cambia in «Correggi la scheda» del Palazzo/)).toBeInTheDocument();
+    expect(within(finestra).queryByRole('group', { name: 'Compare dal' })).toBeNull();
+    expect(within(finestra).queryByRole('checkbox', { name: 'Senza fine' })).toBeNull();
+    expect(within(finestra).queryByRole('button', { name: /Salva quando compare/ })).toBeNull();
   });
 
-  it('una finestra con la fine prima dell’inizio non si salva e lo dice', () => {
-    const { finestra } = apri();
-    scegliVoce('Compare fino al: mese', 'aprile', within(finestra).getByRole('group', { name: 'Compare fino al' }));
-    scegliVoce('Compare fino al: giorno', '10', within(finestra).getByRole('group', { name: 'Compare fino al' }));
-    expect(within(finestra).getByRole('alert')).toHaveTextContent('La fine viene prima dell’inizio.');
-    expect(within(finestra).getByRole('button', { name: /Salva quando compare/ })).toBeDisabled();
+  it('senza fine (i Memento) la finestra dice «dal …» e basta', () => {
+    const { finestra } = apri(scheda({ finestra: { dal: '05-09', al: null } }));
+    expect(within(finestra).getByText(/L’icona del Palazzo sta sulla mappa di Tokyo/)).toHaveTextContent('sta sulla mappa di Tokyo dal 9 maggio.');
   });
 
   it('le regole: si aggiunge, si cambia il «quando», la planimetria e il pin, si sposta, si toglie; si salva nell’ordine', async () => {

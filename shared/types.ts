@@ -2789,12 +2789,14 @@ export interface DungeonRiassuntoDto {
   sovrano: string;
   arcanaSovrano: string;
   arcanaSovranoNome: string;
-  date: { sblocco: string; scadenza: string; furtoConsigliato: string };
-  /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco. `date` qui sopra è
-   *  prosa — «12 Aprile (Martedì) – prima infiltrazione» — e da una frase non si ricava una data
-   *  senza sbagliarne qualcuna in silenzio: questa viene dalla voce `finestre-dungeon` di `dati_guida`, trascritta a
-   *  mano una volta. Serve a mostrare il Palazzo sulla mappa **solo quando c'è**. `al` manca dove
-   *  il gioco non fissa una scadenza: Iweleth e i Memento, una volta aperti, restano. */
+  /** L13 O6-3 (migrazione 308): le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
+   *  finestra (`dungeon.finestra_dal`/`finestra_al`), il termine della lettera di sfida (`lettera_entro`) e il furto consigliato
+   *  (`furto_consigliato_data`). Null dove la guida non le dà (Iweleth e i Memento non scadono, e non hanno furto né lettera). Prima
+   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. */
+  date: { dal: string | null; al: string | null; letteraEntro: string | null; furtoConsigliato: string | null };
+  /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco (le stesse date di `date.dal`/`date.al`): serve a mostrare
+   *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
+   *  aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
   livelloConsigliato: string;
   aree: number;

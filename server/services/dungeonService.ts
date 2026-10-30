@@ -35,13 +35,16 @@ import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
 import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
-import { elencaAtterraggi } from './atterraggioPalazziService.js';
+import { elencaAtterraggi, impostaFinestra, type ConsigliPalazzo } from './atterraggioPalazziService.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
 
-interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string;
+interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; livello_consigliato: string; note: string; fonti_json: string;
+  /** 118 e 308 (L13 O6-3): il termine della lettera di sfida e il furto consigliato, MM-GG; null dove la guida non li dà. Con la finestra
+   *  sono le date del Palazzo, una fonte sola (i testi in prosa di prima sono usciti con la 308). */
+  lettera_entro?: string | null; furto_consigliato_data?: string | null;
   /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null;
   /** 113 (L4 §8.15) */ regola_boss?: 'voce-finale' | 'memento' }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
@@ -298,7 +301,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
   const sp = gia.segni ?? null;
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
-    date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
+    // L13 O6-3: le date del Palazzo da una fonte sola, la finestra e le colonne strutturate (MM-GG)
+    date: { dal: finestra?.dal ?? null, al: finestra?.al ?? null, letteraEntro: r.lettera_entro ?? null, furtoConsigliato: r.furto_consigliato_data ?? null },
     finestra, livelloConsigliato: r.livello_consigliato,
     disponibile: !concluso && (!giorno || !finestra || copreIlGiorno([finestra.al ? { tipo: 'intervallo', dal: finestra.dal, al: finestra.al } : { tipo: 'data', dal: finestra.dal }], giorno)),
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
@@ -549,24 +553,27 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
 // Le correzioni sono **dati di gioco** (stanno in `gioco.db`), quindi entrano nel pacchetto quando
 // lo si rigenera, e valgono per ogni partita: non sono avanzamento.
 
-export interface DatiDungeon { nome?: string; sovrano?: string; dataSblocco?: string; dataScadenza?: string; furtoConsigliato?: string; livelloConsigliato?: string; note?: string;
+export interface DatiDungeon { nome?: string; sovrano?: string; livelloConsigliato?: string; note?: string;
+  /** L13 O6-3: le date del Palazzo (MM-GG; `al`, furto e lettera null = la guida non li dà), scritte da `impostaFinestra`. */
+  date?: { dal: string; al: string | null } & ConsigliPalazzo;
   /** L4 §8.14: la voce del boss finale («Modifica › Boss finale»); null = nessuna. */
   voceBossFinale?: string | null }
 
 /**
- * Testi della scheda di un Palazzo (o dei Memento) e, per un Palazzo, la voce del boss finale (L4 §8.14, «Modifica › Boss finale»): una
- * voce `boss` del Palazzo (400 `voce-non-boss`, 400 `voce-di-un-altro-palazzo`, 404 `punto-non-trovato`; nei Memento 400
- * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Il primo cambio conserva il valore della guida in `seed_json`, per
- * «Ripristina» (`ripristinaDungeon`).
+ * Testi della scheda di un Palazzo (o dei Memento), le sue date e, per un Palazzo, la voce del boss finale (L4 §8.14, «Modifica › Boss
+ * finale»): una voce `boss` del Palazzo (400 `voce-non-boss`, 400 `voce-di-un-altro-palazzo`, 404 `punto-non-trovato`; nei Memento 400
+ * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Il primo cambio della voce conserva il valore della guida in
+ * `seed_json`, per «Ripristina» (`ripristinaDungeon`). Le date (L13 O6-3) passano da `impostaFinestra`, l'unico che le scrive (400 se non
+ * sono giorni del calendario o se sono rovesciate); tutto in una transazione: con una data sbagliata non si salva niente.
  */
 export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
   if (dati.voceBossFinale !== undefined) verificaVoceBossFinale(r, dati.voceBossFinale);
   getDb().transaction(() => {
-    prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, data_sblocco = ?, data_scadenza = ?, furto_consigliato = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
-      dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.dataSblocco ?? r.data_sblocco, dati.dataScadenza ?? r.data_scadenza,
-      dati.furtoConsigliato ?? r.furto_consigliato, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+    prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
+      dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+    if (dati.date) impostaFinestra(chiave, dati.date.dal, dati.date.al, { furtoConsigliato: dati.date.furtoConsigliato, letteraEntro: dati.date.letteraEntro });
     if (dati.voceBossFinale !== undefined && dati.voceBossFinale !== (r.voce_boss_finale ?? null)) {
       // il valore della guida si conserva al primo cambio, come per le Aree (`seed_json` non nullo = corretto dall'utente)
       const seed = r.seed_json ?? JSON.stringify({ voce_boss_finale: r.voce_boss_finale ?? null });

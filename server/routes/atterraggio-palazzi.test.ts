@@ -67,9 +67,18 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
   it('097 porta la finestra di Kamoshida all\'11 aprile; la finestra si cambia, anche senza fine, e torna nel riassunto', async () => {
     expect(finestreDungeon().get('kamoshida')).toEqual({ dal: '04-11', al: '05-02' });
     expect((await kamoshida()).finestra).toEqual({ dal: '04-11', al: '05-02' });
-    const r = await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: null }).expect(200);
-    expect(r.body.data).toEqual({ dal: '04-10', al: null });
-    expect((await kamoshida()).finestra).toEqual({ dal: '04-10', al: null });
+    // L13 O6-3: un Palazzo ha una scadenza («senza fine» solo i Memento e Iweleth)
+    expect((await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: null })).body.error.code).toBe('scadenza-necessaria');
+    const r = await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: '05-03' }).expect(200);
+    expect(r.body.data).toEqual({ dal: '04-10', al: '05-03' });
+    expect((await kamoshida()).finestra).toEqual({ dal: '04-10', al: '05-03' });
+    expect((await kamoshida()).date).toMatchObject({ dal: '04-10', al: '05-03' });
+    // furto e lettera insieme, nell'ordine; rovesciati: 400 col perché
+    const rovesciati = await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: '04-20' });
+    expect(rovesciati.body.error.code).toBe('date-rovesciate');
+    expect(rovesciati.body.error.message).toBe('Il termine della lettera di sfida (20 aprile) viene prima del furto consigliato (22 aprile).');
+    await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: null }).expect(200);
+    expect((await kamoshida()).date).toEqual({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: null });
     // le altre voci del blocco restano com'erano
     expect(finestreDungeon().get('madarame')).toBeTruthy();
     await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-11', al: '05-02' }).expect(200);

@@ -136,9 +136,10 @@ describe('i testi della guida si possono risalvare così come sono', () => {
     expect(dungeon.length).toBeGreaterThan(0);
     for (const { chiave } of dungeon) {
       const d = dettaglioDungeon(chiave);
+      // L13 O6-3: le date si risalvano come date di gioco (solo dove la finestra c'è: senza, la scheda si salva senza `date`)
       await request(app).put(`/api/compendio/dungeon/${chiave}`).send({
-        nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza,
-        furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note,
+        nome: d.nome, sovrano: d.sovrano, livelloConsigliato: d.livelloConsigliato, note: d.note,
+        ...(d.date.dal ? { date: { dal: d.date.dal, al: d.date.al, furtoConsigliato: d.date.furtoConsigliato, letteraEntro: d.date.letteraEntro } } : {}),
       }).expect(200);
       for (const a of d.aree) {
         await request(app).put(`/api/compendio/aree/${encodeURIComponent(a.chiave)}`).send({ nome: a.nome, descrizione: a.descrizione }).expect(200);

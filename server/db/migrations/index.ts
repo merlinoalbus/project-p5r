@@ -340,6 +340,9 @@ import { migration306 } from './306_disponibilita_confidenti_fonte_unica.js';
 // 2026-10-30 (L13 ondata 6, lotto O6-2): le colonne in prosa della disponibilità dei Confidenti (giorni, fasce, luogo, sblocco) escono come
 // fonte dove la struttura dice lo stesso; le note senza le frasi già rese dalla struttura o dai requisiti di rango
 import { migration307 } from './307_disponibilita_confidenti_senza_prosa.js';
+// 2026-10-30 (L13 ondata 6, lotto O6-3): le date dei Palazzi da una fonte sola — `furto_consigliato_data` strutturata, i testi in prosa di
+// apertura, scadenza e furto svuotati (quel che dicevano in più va nelle note), l'evento 84 legato alla scadenza di Futaba
+import { migration308 } from './308_palazzi_date_fonte_unica.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -362,5 +365,5 @@ export const migrations: Migration[] = [
   migration270, migration271, migration272, migration273, migration274, migration275, migration276, migration277, migration278, migration279,
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
-  migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307,
+  migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308,
 ];
