@@ -10,7 +10,7 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { ingressoDelPalazzo, palazzoDiIngresso, palazzoDiOgniMappa } from '../services/palazziService.js';
+import { destinazioneDellaVoce, destinazionePalazzo, ingressoDelPalazzo, palazzoDiIngresso, palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PercorsoGiornoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -77,5 +77,15 @@ describe('«Sulla mappa» di un Palazzo', () => {
     const memento = ingressoDelPalazzo('mementos')!;
     expect(memento.chiave).not.toBe('dungeon-mementos');
     expect(ingressoDelPalazzo('nessuno')).toBeNull();
+  });
+
+  // 2026-10-30 («Memento - aree fisse — Strutture che i Memento riusano si può rimuovere»): nel Diario i Memento non ripiegano sulla
+  // planimetria delle strutture fisse; senza atterraggio né ingresso la voce non ha «Sulla mappa». I Palazzi restano con il ripiego
+  it('nel Diario i Memento senza ingresso non portano alle strutture fisse; i Palazzi sì alla prima planimetria', () => {
+    const conIngresso = ingressoDelPalazzo('mementos', undefined, { ripiego: false });
+    expect(destinazioneDellaVoce('mementos')).toEqual(conIngresso);
+    if (!conIngresso) expect(destinazioneDellaVoce('mementos', '05-09')).toBeNull();
+    expect(destinazioneDellaVoce('kamoshida', '04-11')).toEqual(destinazionePalazzo('kamoshida', '04-11'));
+    expect(destinazioneDellaVoce('nessuno')).toBeNull();
   });
 });

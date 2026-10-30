@@ -187,8 +187,10 @@ export function palazziConclusi(partitaId: number): Map<string, string> {
  * della voce (le sue condizioni di data: la Shujin ha l'ingresso del solo 11 aprile e quello dal 12 aprile al 2 maggio),
  * poi quello in città, poi il primo. Se il dungeon non ha ingresso sulle mappe, la prima planimetria del Palazzo in
  * ordine logico (quello della scheda del Palazzo); se non ha nemmeno quella, la radice. `null` se il dungeon non ha mappe.
+ * Con `ripiego: false` (il Diario per i dungeon che non sono di tipo Palazzo, `destinazioneDellaVoce`) niente prima planimetria né
+ * radice: solo uno spillo d'ingresso vero, altrimenti `null`.
  */
-export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: string; spilloId: number | null } | null {
+export function ingressoDelPalazzo(dungeon: string, giorno?: string, opzioni: { ripiego?: boolean } = {}): { chiave: string; spilloId: number | null } | null {
   const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
@@ -203,6 +205,7 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: 
   const aperti = giorno ? ingressi.filter((s) => apertoIl(s.condizioni_json, giorno)) : ingressi;
   const ingresso = aperti.find(inCitta) ?? aperti[0] ?? ingressi.find(inCitta) ?? ingressi[0];
   if (ingresso) return { chiave: ingresso.mappa_chiave, spilloId: ingresso.id };
+  if (opzioni.ripiego === false) return null;
   // la prima planimetria vera (pianta del gioco o illustrazione), nell'ordine che si cambia trascinando nella scheda
   const prima = prepared(`${SQL_SOTTOALBERO}
     SELECT m.chiave FROM mappa m JOIN albero t ON t.chiave = m.chiave
@@ -220,6 +223,22 @@ export function destinazionePalazzo(dungeon: string, giorno?: string | null): { 
   const atterraggio = atterraggioDelGiorno(dungeon, giorno ?? null);
   if (atterraggio) return { chiave: idMappa(atterraggio.mappa), spilloId: atterraggio.spillo };
   return ingressoDelPalazzo(dungeon, giorno ?? undefined);
+}
+
+/**
+ * Dove porta «Sulla mappa» di una voce del Diario collegata a un dungeon (o a una richiesta, che porta ai Memento). Per un dungeon di
+ * tipo Palazzo la destinazione unica (`destinazionePalazzo`, la stessa della metro e del cartellino). 2026-10-30 («Memento - aree fisse —
+ * Strutture che i Memento riusano si può rimuovere»): per un dungeon di altro tipo (i Memento, i cui piani si generano a ogni discesa:
+ * le strutture fisse che riusano non sono un posto dove si arriva) vale solo una destinazione vera — la regola d'atterraggio del giorno
+ * o uno spillo d'ingresso —, mai il ripiego sulla prima planimetria; senza, `null` e la voce non mostra «Sulla mappa». La regola è il
+ * tipo del dungeon, non il nome delle planimetrie.
+ */
+export function destinazioneDellaVoce(dungeon: string, giorno?: string | null): { chiave: string; spilloId: number | null } | null {
+  const d = prepared('SELECT tipo FROM dungeon WHERE chiave = ?').get(dungeon) as { tipo: string } | undefined;
+  if (d?.tipo === 'palazzo') return destinazionePalazzo(dungeon, giorno);
+  const atterraggio = atterraggioDelGiorno(dungeon, giorno ?? null);
+  if (atterraggio) return { chiave: idMappa(atterraggio.mappa), spilloId: atterraggio.spillo };
+  return ingressoDelPalazzo(dungeon, giorno ?? undefined, { ripiego: false });
 }
 
 /** La stessa destinazione nella forma del campo `atterraggio` (metro, cartellino del diario): la chiave pubblica della mappa e il pin. */

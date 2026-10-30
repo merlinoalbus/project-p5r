@@ -1465,7 +1465,8 @@ export interface AzionePercorsoDto {
   effetti: EffettiAzioneDto | null;
   /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
   stato: StatoAzioneDto | null;
-  /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
+  /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos (solo con un atterraggio o un ingresso veri, mai la planimetria
+   *  delle strutture fisse: 2026-10-30), negozio, luogo del Confidente. */
   /** `posto` (L5, M23): il nome del posto del pin — il luogo, altrimenti l'Area della planimetria — per il gesto che lo apre. */
   mappa: { chiave: string; spilloId: number | null; posto?: string | null } | null;
   /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce (2026-10-04); il cartellino del Palazzo porta lì. L6

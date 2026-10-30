@@ -13,7 +13,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
-import { destinazionePalazzo } from './palazziService.js';
+import { destinazioneDellaVoce } from './palazziService.js';
 import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
@@ -90,8 +90,9 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   return { tipo: 'neutra', motivo: grigi.length > 0 ? `da confermare: ${grigi.map((r) => r.testo).join(' · ')}` : null };
 }
 
-/** Mappa (e spillo) del luogo dell'azione: Palazzo → la sua destinazione del giorno (`destinazionePalazzo`: la regola d'atterraggio, o
- *  l'ingresso: lo spillo in città, o la prima planimetria), richiesta → l'ingresso dei Mementos, negozio/Confidente → spillo del luogo in città. Con `posto`, il nome del posto del
+/** Mappa (e spillo) del luogo dell'azione: Palazzo → la sua destinazione del giorno (`destinazioneDellaVoce`: la regola d'atterraggio, o
+ *  l'ingresso: lo spillo in città, o la prima planimetria), Memento e richiesta → l'atterraggio o l'ingresso dei Memento se esistono
+ *  (mai la planimetria delle strutture fisse, 2026-10-30), negozio/Confidente → spillo del luogo in città. Con `posto`, il nome del posto del
  *  pin (L5, M23). */
 export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: number | null; posto?: string | null } | null {
   const m = mappaAzioneSenzaPosto(a);
@@ -100,9 +101,10 @@ export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: 
 
 function mappaAzioneSenzaPosto(a: AzioneClassificata): { chiave: string; spilloId: number | null } | null {
   const r = a.riferimento;
-  // L6 (R6-17): la destinazione unica del Palazzo (regola d'atterraggio del giorno, o l'ingresso), la stessa della metro
-  if (r?.tipo === 'dungeon') return destinazionePalazzo(r.chiave, a.giorno);
-  if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return destinazionePalazzo('mementos', a.giorno);
+  // L6 (R6-17): la destinazione unica del Palazzo (regola d'atterraggio del giorno, o l'ingresso), la stessa della metro. 2026-10-30: per i
+  // Memento (dungeon non di tipo Palazzo) solo un atterraggio o un ingresso veri, mai la planimetria delle strutture fisse (`destinazioneDellaVoce`)
+  if (r?.tipo === 'dungeon') return destinazioneDellaVoce(r.chiave, a.giorno);
+  if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return destinazioneDellaVoce('mementos', a.giorno);
   if (r?.tipo === 'negozio') {
     const s = prepared(`SELECT id, mappa_chiave FROM spillo WHERE (riferimento_tipo = 'negozio' AND riferimento_chiave = ?)
       OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT sede_chiave FROM negozio WHERE chiave = ? AND sede_chiave IS NOT NULL)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;
