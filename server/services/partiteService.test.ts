@@ -60,5 +60,8 @@ describe('puntiConfidente', () => {
     expect(puntiConfidente({ noteRisposta: 1, bonusArcano: true, invito: true }, 'kasumi', 'primo')).toBe(12);
     expect(puntiConfidente({ noteRisposta: 1, invito: true }, 'haru', 'primi-10')).toBe(7);
     expect(puntiConfidente({ noteRisposta: 2 }, 'igor', 'primo')).toBe(10);
+    // L13 (ondata 7, O7-2): «sopra la media» dà il Fascino del premio ma nessun moltiplicatore, come «altro»
+    expect(puntiConfidente({ noteRisposta: 2 }, 'ryuji', 'sopra-media')).toBe(10);
+    expect(puntiConfidente({ noteRisposta: 2 }, 'ryuji', 'altro')).toBe(10);
   });
 });

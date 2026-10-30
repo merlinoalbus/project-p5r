@@ -66,9 +66,12 @@ export type EffettoAzione =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLettura; chiave: string; almeno: number | null }
   /** 2026-10-27: `quantita` = le creazioni dell'esito (Grimaldello ×3), solo con l'esito; 1 sottinteso (`shared/effettiVoce.ts`). */
-  | { tipo: 'turno'; attivita: string; doti?: DoteNote[]; esito?: string; quantita?: number };
+  | { tipo: 'turno'; attivita: string; doti?: DoteNote[]; esito?: string; quantita?: number }
+  /** L13 (ondata 7, O7-2): i risultati di un esame (`esame.chiave`): alla spunta si sceglie il piazzamento, che dà le Doti del suo premio. */
+  | { tipo: 'esame'; esame: string };
 
 export const TIPI_EFFETTO_AZIONE = [
+  // L13 (ondata 7, O7-2): «esame» non sta qui: è un effetto della fonte con UID (editor `CampiEffettoVoce`), non della vecchia lista
   { chiave: 'dote', nome: 'Dote sociale' }, { chiave: 'lettura', nome: 'Lettura o visione' }, { chiave: 'turno', nome: 'Turno di un’attività' },
 ] as const;
 
@@ -121,6 +124,7 @@ function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
     if (doti.some((d) => d === null)) return null;
     return { tipo: 'turno', attivita: o.attivita.trim(), doti: doti as DoteNote[] };
   }
+  if (o.tipo === 'esame') return typeof o.esame === 'string' && /^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esame) && Object.keys(o).every((k) => k === 'tipo' || k === 'esame') ? { tipo: 'esame', esame: o.esame } : null;
   return null;
 }
 
@@ -148,6 +152,8 @@ export interface NomiEffettiAzione {
   /** 2026-10-27 (revisione): gli strumenti («attività/esito») SENZA versione con il bonus (la fabbricazione di Kawakami): alla spunta non si
    *  chiede niente, quindi la frase non parla del bonus. */
   senzaBonus?: Record<string, true>;
+  /** L13 (ondata 7, O7-2): i nomi degli esami, per chiave («Esame di metà semestre 1»). */
+  esami?: Record<string, string>;
 }
 
 /**
@@ -162,6 +168,8 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
     const nome = elenco?.[e.chiave] ?? e.chiave;
     return { nome, dettaglio: e.almeno === null ? (e.categoria === 'film' ? 'completato (al cinema: una visione)' : 'completato') : `almeno ${e.almeno} ${e.categoria === 'film' ? (e.almeno === 1 ? 'visione o serata' : 'visioni o serate') : e.almeno === 1 ? 'sessione' : 'sessioni'}`, doti: '', esito: '' };
   }
+  // L13 (ondata 7, O7-2): un esame che la guida non ha più si dice tale, mai con la chiave
+  if (e.tipo === 'esame') return { nome: nomi.esami?.[e.esame] ?? 'Esame non più nella guida', dettaglio: 'piazzamento da scegliere alla spunta', doti: '', esito: '' };
   const nome = nomi.attivita?.[e.attivita] ?? e.attivita;
   const modo = nomi.modiEsiti?.[e.attivita];
   // 2026-10-27: un esito con la versione con il bonus è lo strumento della voce, con le creazioni; il bonus lo dice l'interruttore alla spunta
@@ -179,5 +187,6 @@ export function descriviEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione 
   const p = partiEffettoAzione(e, nomi);
   if (e.tipo === 'dote') return `${p.nome} ${p.dettaglio}`;
   if (e.tipo === 'lettura') return `${p.nome}: ${p.dettaglio}`;
+  if (e.tipo === 'esame') return `Risultati: ${p.nome} · ${p.dettaglio}`;
   return `Turno: ${p.nome}${p.doti ? ` (${p.doti})` : ''}${p.esito ? ` · ${p.esito}` : ''}`;
 }

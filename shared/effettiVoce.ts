@@ -17,7 +17,12 @@ export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
 export type EffettoLegacyVoce =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLetturaVoce; chiave: string; almeno: number | null }
-  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string; quantita?: number };
+  | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[]; esito?: string; quantita?: number }
+  /** L13 (ondata 7, O7-2): i risultati di un esame (`esame.chiave`). Alla spunta si sceglie il piazzamento (409 `piazzamento-da-scegliere`
+   *  senza): la spunta lo segna nella partita (`utente.esame_piazzamento_partita`, la stessa riga di Partita, con il «prima» nella ricevuta)
+   *  e dà le Doti del suo premio (`esame.premi_json`) come le altre Doti della voce; togliendo la spunta il piazzamento torna quello di prima. */
+  | EffettoEsameVoce;
+export interface EffettoEsameVoce { tipo: 'esame'; esame: string }
 /** L'acquisto non porta più la Fortuna (R10-10/2): è lo stato della partita, letto quando si registra il consumo. */
 export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
@@ -184,7 +189,7 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
 }
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], esame: ['tipo','esame'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
     personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','note','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());
   const quantita = (v: unknown): number | null => Number.isSafeInteger(v) && (v as number) >= 1 && (v as number) <= QUANTITA_MASSIMA_EFFETTO ? v as number : null;
@@ -196,6 +201,7 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
     return possibili ? { tipo: 'dote', dote: o.dote, note: o.note, possibili } : null;
   }
   if (o.tipo === 'fortuna') return eDote(o.dote) ? { tipo: 'fortuna', dote: o.dote } : null;
+  if (o.tipo === 'esame') return typeof o.esame === 'string' && /^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esame) ? { tipo: 'esame', esame: o.esame } : null;
   if (o.tipo === 'storia') return typeof o.evento === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.evento.trim()) ? { tipo: 'storia', evento: o.evento.trim() } : null;
   if (o.tipo === 'persona') {
     if (!Number.isSafeInteger(o.persona) || (o.persona as number) < 1) return null;

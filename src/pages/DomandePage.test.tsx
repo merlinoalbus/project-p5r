@@ -23,8 +23,16 @@ const esame = dom(3, '05-11', 'Serie di domande su Yoshitsune', { tipo: 'esame-m
 const tv = dom(4, '05-19', 'Quale delle due è una lesione?', { tipo: 'tv', chi: 'Game show in TV', ricompensa: 'Aumento della Dote Conoscenza' });
 const dati: DomandeDto = {
   domande: [dom(1, '04-12', 'Prima domanda'), dom(2, '05-07', 'Seconda domanda'), esame, tv],
-  esami: [{ chiave: 'esame-1', nome: 'Esame di metà semestre 1', date: ['05-11'], dataRisultati: '05-20', domande: [{ data: '05-11', ordine: 1, domanda: 'Chi?', risposta: 'Yoshitsune' }], note: '' }],
-  premi: { fascinoPerPiazzamento: { primi_10: 'Fascino +3' } }, dataGioco: '05-01', prossime: [dom(2, '05-07', 'Seconda domanda')], fatte: 0, totale: 4,
+  esami: [{ chiave: 'esame-1', nome: 'Esame di metà semestre 1', date: ['05-11'], dataRisultati: '05-20', domande: [{ data: '05-11', ordine: 1, domanda: 'Chi?', risposta: 'Yoshitsune' }], note: '',
+    // L13 (ondata 7, O7-2): i premi per piazzamento e il requisito del primo posto dalle colonne dell'esame
+    premi: [
+      { piazzamento: 'primi-10', nome: 'Primi 10', doti: [{ dote: 'fascino', nome: 'Fascino', note: 3 }], trofeo: null },
+      { piazzamento: 'sopra-media', nome: 'Sopra la media', doti: [{ dote: 'fascino', nome: 'Fascino', note: 2 }], trofeo: null },
+    ],
+    requisitoConoscenza: { rango: 5, tutteCorrette: true } }],
+  premi: { noteGenerali: 'Quattro sessioni d’esame.' },
+  moltiplicatore: { confidenti: [{ chiave: 'ryuji', nome: 'Ryuji' }], piazzamenti: [{ piazzamento: 'primo', nome: 'Primo', valore: 1.5 }] },
+  dataGioco: '05-01', prossime: [dom(2, '05-07', 'Seconda domanda')], fatte: 0, totale: 4,
 };
 
 describe('DomandePage', () => {
@@ -49,6 +57,10 @@ describe('DomandePage', () => {
     expect(screen.getByText('Chi? →')).toBeInTheDocument();
     expect(screen.getAllByText('Yoshitsune')).toHaveLength(1);
     expect(screen.getByText(/risultati il 20 maggio/)).toBeInTheDocument();
+    // L13 (ondata 7, O7-2): i premi per piazzamento in elenco, il requisito del primo posto, il moltiplicatore dalla regola del codice
+    expect(within(screen.getByRole('list', { name: 'Premi di ogni esame' })).getAllByRole('listitem').map((x) => x.textContent)).toEqual(['Primi 10 · Fascino ♪♪♪', 'Sopra la media · Fascino ♪♪']);
+    expect(screen.getByText('Primo posto: Conoscenza rango 5, tutte giuste')).toBeInTheDocument();
+    expect(screen.getByText(/i punti di Ryuji valgono ×1,5 \(primo\)/)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Aprile' })).toBeInTheDocument();
     expect(screen.getAllByText('→ Risposta 2').length).toBeGreaterThan(0);
     // il quiz in TV ha la risposta visibile

@@ -70,6 +70,8 @@ export function effettoCompleto(e: EffettoVoce): boolean {
     // le note (1–3), o i punti fissi di un effetto scritto prima della correzione del 2026-10-28
     case 'puntiConfidente': return !!e.confidente && (eInNote(e) ? e.note >= 1 && e.note <= 3 : e.punti >= 1);
     case 'uscitaOggetto': return !!e.oggetto && e.quantita >= 1;
+    // L13 (ondata 7, O7-2): l'esame scelto dall'elenco
+    case 'esame': return !!e.esame;
     default: return true;
   }
 }

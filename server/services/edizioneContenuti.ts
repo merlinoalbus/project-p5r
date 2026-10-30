@@ -123,7 +123,7 @@ const ANAGRAFICA: Record<string, Anagrafica> = {
   richiesta: paginaDi('Richiesta', '/guida/richieste'),
   domanda: paginaDi('Domanda', '/guida/domande'),
   esame: paginaDi('Esame', '/guida/domande'),
-  esame_premi: paginaDi('Premi degli esami', '/guida/domande'),
+  esame_premi: paginaDi('Note sugli esami', '/guida/domande'),
   persona: { etichetta: 'Persona', pagina: (r) => con(r.id, '/compendio/persona/', '/compendio') },
   skill: { etichetta: 'Skill', pagina: (r) => con(r.id, '/skill/', '/skill') },
   allerta_meteo: paginaDi('Allerta meteo', '/guida/calendario'),

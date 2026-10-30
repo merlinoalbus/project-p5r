@@ -31,7 +31,20 @@ describe('API domande', () => {
     expect(d.esami).toHaveLength(4);
     expect(d.esami[0]).toMatchObject({ nome: 'Esame di metà semestre 1', date: ['05-11', '05-12', '05-13'], dataRisultati: '05-20' });
     expect(d.esami[0].domande.length).toBe(8);
-    expect(d.premi?.fascinoPerPiazzamento).toBeDefined();
+    // L13 (ondata 7, O7-2): i premi per piazzamento e il requisito stanno nelle colonne dell'esame (migrazione 311); in `premi` le sole note
+    expect(d.esami[0].premi.map((p) => [p.piazzamento, p.doti.map((x) => `${x.dote}:${x.note}`)])).toEqual([['primo', ['fascino:3']], ['primi-10', ['fascino:3']], ['sopra-media', ['fascino:2']]]);
+    expect(d.esami[0].premi[0]!.trofeo?.chiave).toBe('un-travestimento-sapiente');
+    expect(d.esami[0].requisitoConoscenza).toEqual({ rango: 4, tutteCorrette: false });
+    expect(d.esami[3]!.requisitoConoscenza).toEqual({ rango: 5, tutteCorrette: true });
+    expect(Object.keys(d.premi ?? {}).sort()).toEqual(['fonte', 'noteGenerali']);
+    // il moltiplicatore descritto dalla regola del codice: primo ×1,5, primi 10 ×1,2 (sopra la media e altro non moltiplicano)
+    expect(d.moltiplicatore.piazzamenti).toEqual([{ piazzamento: 'primo', nome: 'Primo', valore: 1.5 }, { piazzamento: 'primi-10', nome: 'Primi 10', valore: 1.2 }]);
+    expect(d.moltiplicatore.confidenti.map((c) => c.chiave)).toContain('ryuji');
+    // la ricompensa dalle voci del Diario: la prima domanda in classe dà Conoscenza ♪ (testo della guida svuotato dalla 311), la prima riga
+    // d'esame nessuna Dote (conta per il piazzamento). Nel pacchetto iniziale la voce del 24 ottobre non si converte (la 311 gira prima dello
+    // schema delle partite: spunte non verificabili) e la domanda 50 tiene il suo testo
+    expect(d.domande[0]).toMatchObject({ ricompensa: '', premioVoce: { doti: [{ dote: 'conoscenza', nome: 'Conoscenza', note: 1 }], esameAllaSpunta: false } });
+    expect(d.domande.find((x) => x.tipo === 'esame-medio')).toMatchObject({ ricompensa: '', premioVoce: { doti: [], esameAllaSpunta: false } });
     expect(d.prossime).toEqual([]);
     expect(d.fatte).toBe(0);
     expect(d.dataGioco).toBeNull();

@@ -36,6 +36,7 @@ import { articoloConNome, nomiFraseEffetto } from './azioniStrutturateService.js
 import { effettiDiStatoApplicati } from './effettiDiStatoService.js';
 import { fortunaAccesaDallaVoce } from './fortunaService.js';
 import { incontroSiAnnulla } from './incontriService.js';
+import { piazzamentoDellEsame, trofeoSiToglie } from './piazzamentoEsamiService.js';
 import { descriviEffetti } from '../../shared/descriviEffettiSpunta.js';
 import { nomeDote } from '../../shared/doti.js';
 import { fraseEffettoConNomi, normalizzaEffettoVoce, type EffettoConNomiVoce, type NomiFraseEffetto, type ReceiptEffettoVoceDto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
@@ -63,7 +64,7 @@ function dotiApplicate(p: number, causaChiave: string): Map<string, number> {
  *  resta com'era, con le sue note («Perizia ♪♪♪ · 5 punti»); altrimenti i punti applicati. */
 function dotiDaDire(l: EffettiAzioneDto, applicate: ReadonlyMap<string, number>): EffettiAzioneDto['doti'] {
   if (!applicate.size) return [];
-  const tutte = [...l.doti, ...(l.letture ?? []).flatMap((x) => x.doti ?? []), ...(l.turni ?? []).flatMap((t) => t.doti), ...(l.incontro?.doti ?? [])];
+  const tutte = [...l.doti, ...(l.letture ?? []).flatMap((x) => x.doti ?? []), ...(l.turni ?? []).flatMap((t) => t.doti), ...(l.incontro?.doti ?? []), ...(l.esami ?? []).flatMap((x) => x.doti)];
   const chiavi = [...new Set([...tutte.map((d) => d.chiave), ...applicate.keys()])].filter((k) => applicate.has(k));
   return chiavi.map((chiave) => {
     const n = applicate.get(chiave)!;
@@ -91,6 +92,13 @@ function annullabile(p: number, r: ReceiptEffettoVoceDto, l: EffettiAzioneDto): 
     confidente: l.confidente && l.confidente.punti > 0 ? l.confidente : null,
     ...(l.turni?.length ? { turni: l.turni.map((t) => ({ ...t, doti: [] })) } : {}),
     ...(incontro ? { incontro } : {}),
+    // L13 (ondata 7, O7-2): il piazzamento torna quello di prima solo se nella partita c'è ancora quello della spunta (`annullaPiazzamentoDallaSpunta`);
+    // le Doti del premio sono fra le applicate, il trofeo solo se se ne va davvero
+    ...(() => {
+      const esami = (l.esami ?? []).filter((x) => piazzamentoDellEsame(p, x.esame) === x.piazzamento)
+        .map(({ trofeo, ...x }) => ({ ...x, doti: [], ...(trofeo && trofeoSiToglie(p, trofeo.chiave) ? { trofeo } : {}) }));
+      return esami.length ? { esami } : {};
+    })(),
     // le aperture dei Dedali di una ricevuta di prima della 305 restano nella ricevuta ma non sono in vigore: si calcolano dai Palazzi
   };
 }
@@ -127,7 +135,7 @@ function fraseYenProposti(p: number, r: ReceiptEffettoVoceDto, e: Extract<Effett
 
 /** La frase di una ricevuta attiva, o null se togliendo la spunta non si annulla niente che chi gioca veda. */
 function fraseRicevuta(p: number, r: ReceiptEffettoVoceDto): string | null {
-  if (r.tipo === 'dote' || r.tipo === 'lettura' || r.tipo === 'turno' || r.tipo === 'contesto') {
+  if (r.tipo === 'dote' || r.tipo === 'lettura' || r.tipo === 'turno' || r.tipo === 'esame' || r.tipo === 'contesto') {
     const l = legacyDi(r);
     // se dopo i filtri non resta niente, la riga non c'è (né il pulsante, né il numero)
     return l ? descriviEffetti(annullabile(p, r, l), { senzaPaga: true }) || null : null;

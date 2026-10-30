@@ -66,6 +66,8 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('richiesta'),richiesta:chiave}).strict(),
   z.object({tipo:z.literal('articolo'),articolo:chiave,quantita:z.number().int().min(1).max(999).optional()}).strict(),
   z.object({tipo:z.literal('invito'),invito:z.string().regex(/^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)}).strict(),
+  // L13 (ondata 7, O7-2): i risultati di un esame (il piazzamento si sceglie alla spunta)
+  z.object({tipo:z.literal('esame'),esame:z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/)}).strict(),
 ]);
 export const bodySalvaEffettiVoce = z.object({revisioneEffettiAttesa:revisione,effetti:z.array(z.object({uid:uid.nullable(),effetto:effettoVoce}).strict()).max(100)}).strict();
 export const bodyAnteprimaDecisioneEffettoVoce = z.object({operazioneId:uid,decisione:z.enum(['conferma','scarta']),effetto:effettoVoce.optional()}).strict();

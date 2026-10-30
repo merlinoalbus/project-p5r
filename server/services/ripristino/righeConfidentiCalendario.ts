@@ -5,7 +5,9 @@
 // Quattro oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne
 // `origine`, `seed_json`, `updated_at` della migrazione 219).
 //   - `confidente` (23, chiave = chiave del Confidente): il nome e l'Arcano. NON si corregge l'ordine (è un ordinamento) né la chiave (la usano ranghi, partite, mappe).
-//   - `esame-premi` (1, chiave «premi»): i premi di piazzamento degli esami, un JSON di testi in `esame_premi.json`; ogni testo è un campo. La struttura non cambia.
+//   - `esame-premi` (1, chiave «premi»): le note generali sugli esami, un JSON di testi in `esame_premi.json`; ogni testo è un campo. La struttura non cambia.
+//     L13 (ondata 7, O7-2): dalla 311 premi per piazzamento, requisito di Conoscenza e trofeo stanno nelle colonne dell'esame (`righeScuola`) e qui
+//     restano fonte e note generali; le etichette dei campi di prima servono solo a una riga che la 311 non ha ridotto (corretta dall'utente).
 //   - `settimana-guida` (42, chiave = numero): titolo, periodo, riassunto e incertezze della settimana. L'indirizzo della fonte (`url`) non si corregge.
 //   - `evento-voce` (135, chiave «<id evento>:<uid voce>»): la certezza del collegamento fra un evento del Calendario e una voce del Diario. Il collegamento
 //     stesso (quale evento, quale voce) è l'identità della riga e non si corregge.
@@ -65,7 +67,7 @@ function foglie(o: Record<string, unknown>, prefisso = ''): Array<[string, strin
 }
 
 const esamePremi: DefRiga = {
-  modalita: 'riga', etichetta: 'Premi degli esami', tabella: 'esame_premi', colonnaChiave: 'chiave',
+  modalita: 'riga', etichetta: 'Note sugli esami', tabella: 'esame_premi', colonnaChiave: 'chiave',
   chiavi: () => (prepared('SELECT chiave FROM esame_premi ORDER BY chiave').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM esame_premi WHERE chiave = ?').get(chiave),
   campi: () => foglie(premiGrezzi()).map(([p]): CampoDef => ({ p, e: ETICHETTE_PREMI[p] ?? umanizza(p), t: 'testolungo', max: 2000 })),
@@ -86,7 +88,7 @@ const esamePremi: DefRiga = {
     }
     prepared('UPDATE esame_premi SET json = ? WHERE chiave = ?').run(JSON.stringify(radice), chiave);
   },
-  nome: () => 'Premi dei piazzamenti agli esami',
+  nome: () => 'Note generali sugli esami',
 };
 
 // ---- Settimane della guida ----

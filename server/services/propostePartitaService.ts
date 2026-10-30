@@ -308,6 +308,9 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
   // la Fortuna vale per il giorno della spunta: su una spunta già fatta non c'è niente da applicare dopo
   const tipoEffetto = leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo;
   if (tipoEffetto === 'fortuna') return false;
+  // L13 (ondata 7, O7-2): il piazzamento all'esame si sceglie solo alla spunta: su una spunta già fatta nessuno l'ha scelto, e una proposta
+  // «Applica» si fermerebbe (409 `piazzamento-da-scegliere`). La voce si toglie e si rispunta (lo dice la nota dell'editor della voce)
+  if (tipoEffetto === 'esame') return false;
   // gli stati: decisione 19, al salvataggio si applicano da soli (`motoreDiario.riallineaStatiDellaVoce`); diventano proposta solo per l'elenco del passato
   const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco'
     || tipoEffetto === 'personaTolta' || tipoEffetto === 'puntiConfidente' || tipoEffetto === 'uscitaOggetto';

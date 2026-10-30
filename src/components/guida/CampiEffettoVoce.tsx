@@ -381,5 +381,10 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     }
     case 'uscitaOggetto':
       return <CampiUscitaOggetto effetto={e} oggetti={effetti.oggetti ?? []} onCambia={onCambia} />;
+    // L13 (ondata 7, O7-2): i risultati di un esame, scelto dall'elenco (con il giorno dei risultati); il piazzamento si sceglie alla spunta
+    case 'esame':
+      return <Selettore etichetta="Esame" valore={e.esame} ricerca="mai"
+        opzioni={conCorrente((effetti.esami ?? []).map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dataRisultati ? { dettaglio: `risultati il ${dataGiocoTesto(x.dataRisultati)}` } : {}) })), e.esame, 'Esame non più nella guida')}
+        onCambia={(v) => onCambia({ tipo: 'esame', esame: v })} />;
   }
 }

@@ -46,6 +46,7 @@ import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';
 import { testoDoteInPunti } from './note.js';
 import { normalizzaCondizioniSpillo, type RequisitoSpillo } from './condizioniSpillo.js';
 import type { PrezzoPerFascia } from './catalogo.js';
+import type { PiazzamentoEsame } from './puntiConfidenti.js';
 
 export interface DoteEsito { dote: DoteChiave; note: 1 | 2 | 3 }
 /** Ondata 5 (lotto G): un oggetto del catalogo che l'esito dà (`catalogo_oggetto.chiave`) e quante copie. */
@@ -308,7 +309,9 @@ export type SceltaEsitoSpunta =
   | { effettoUid: string; tipo: 'dote'; note: 0 | 1 | 2 | 3 }
   /** L13 (decisione 4): fra gli articoli in alternativa della voce (Set A o Set B), quello comprato: l'UID del suo effetto, o null = nessuno.
    *  `effettoUid` è l'UID del primo effetto del gruppo (il gruppo non ha un'identità sua: lo calcola il catalogo). */
-  | { effettoUid: string; tipo: 'alternativa'; scelto: string | null };
+  | { effettoUid: string; tipo: 'alternativa'; scelto: string | null }
+  /** L13 (ondata 7, O7-2): il piazzamento ottenuto all'esame dell'effetto «esame» (sempre uno: «Nella media o sotto» è `altro`). */
+  | { effettoUid: string; tipo: 'esame'; piazzamento: PiazzamentoEsame };
 
 /** Un esito come lo vede la scelta: Doti con i punti, prezzo e nome dell'articolo, e se è possibile in quel momento (con il motivo). */
 export interface EsitoDisponibileDto {
@@ -376,4 +379,9 @@ export type SceltaEsitoVoceDto =
   | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3; punti: Array<{ note: 1 | 2 | 3; punti: number }> }
   /** L13 (decisione 4): gli articoli in alternativa della voce (Set A o Set B delle televendite): se ne compra uno, o nessuno. `preselezionato`:
    *  l'UID dell'effetto dell'articolo già comprato nella partita (dal negozio), se ce n'è uno. */
-  | { effettoUid: string; tipo: 'alternativa'; negozioNome: string | null; opzioni: OpzioneAlternativaDto[]; preselezionato: string | null };
+  | { effettoUid: string; tipo: 'alternativa'; negozioNome: string | null; opzioni: OpzioneAlternativaDto[]; preselezionato: string | null }
+  /** L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame. `opzioni`: tutti i piazzamenti in ordine, ciascuno con le Doti del suo
+   *  premio e i punti che la spunta proporrà (vuote = nessun premio) e il trofeo del primo posto se c'è; `preselezionato`: il piazzamento già
+   *  segnato nella partita per quell'esame (da Partita), null se nessuno: senza scelta la spunta non passa. */
+  | { effettoUid: string; tipo: 'esame'; esame: string; esameNome: string; preselezionato: PiazzamentoEsame | null;
+    opzioni: Array<{ piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }>; trofeo: { chiave: string; nome: string } | null }> };

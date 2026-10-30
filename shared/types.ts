@@ -18,7 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
-import type { ReazioneRegalo } from './puntiConfidenti.js';
+import type { PiazzamentoEsame, PremioPiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
@@ -726,7 +726,7 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** R10-11: i punti del motore contano per questo Confidente adesso (rango da 1 a 9 che sale a punti); altrove l'anteprima dà 0 e il server non somma. */
   contaPunti?: boolean;
   /** R10-11: l'esame che vale adesso (l'ultimo con i risultati usciti alla data di gioco) col piazzamento segnato nella partita, uguale per tutti i Confidenti; null prima del primo esame. Il server prende il piazzamento da qui, mai dal client. */
-  piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: 'primo' | 'primi-10' | 'altro' | null } | null;
+  piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: PiazzamentoEsame | null } | null;
   /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
   bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi, uno per consegna: dall'ondata 5 lo stesso oggetto si può ridare). */
@@ -1093,7 +1093,16 @@ export interface DomandaDto {
   fatta: boolean;
   /** La voce del Diario che segna questa domanda (una sola, con effetto «domanda»): la spunta dalla Guida passa dal suo stesso gesto, e la Conoscenza si applica da lì. Assente se non c'è. */
   voceUid?: string;
+  /** L13 (ondata 7, O7-2; decisione 9: la Dote la applica la voce): ciò che danno le voci del Diario che segnano la domanda, dai loro effetti
+   *  (le Doti, senza doppioni, e se una di loro chiede alla spunta il piazzamento di un esame). È la ricompensa che la pagina mostra; il testo
+   *  `ricompensa` resta solo dove la guida dice altro (da decidere) o non c'è una voce. Assente senza voce. */
+  premioVoce?: { doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; esameAllaSpunta: boolean };
 }
+
+/** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi, come lo mostra la pagina («Primi 10 · Fascino ♪♪♪»). */
+export interface PremioEsameDto { piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; trofeo: { chiave: string; nome: string } | null }
+/** I premi per piazzamento letti dalla colonna, prima dei nomi (per chi li applica). */
+export type PremiEsame = PremioPiazzamentoEsame[];
 
 export interface EsameDto {
   chiave: string;
@@ -1103,6 +1112,10 @@ export interface EsameDto {
   domande: Array<{ data: string; ordine: number; domanda: string; risposta: string }>;
   note: string;
   oggettiRicompensa?: RicompensaOggettoDto[];
+  /** L13 (ondata 7, O7-2): i premi per piazzamento (`esame.premi_json`), in ordine; vuoto se l'esame non ne dichiara. */
+  premi: PremioEsameDto[];
+  /** L13 (ondata 7, O7-2): il requisito di Conoscenza per il primo posto (`esame.requisito_conoscenza`); null se non dichiarato. */
+  requisitoConoscenza: RequisitoConoscenzaEsame | null;
 }
 
 /** Una Dote che il gioco dà (o, disfacendo un conseguimento, toglie): da segnare **a mano** nella scheda Doti — l'app non
@@ -1125,7 +1138,12 @@ export interface DomandeDto {
   fasciaAvanzata?: FasciaAvanzataDto;
   domande: DomandaDto[];
   esami: EsameDto[];
-  premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
+  /** Le note generali sugli esami (`esame_premi`, testo informativo). L13 (ondata 7, O7-2): premi, requisiti e trofeo stanno negli esami
+   *  (`EsameDto.premi`, `requisitoConoscenza`), il moltiplicatore nella regola del codice (`moltiplicatore`). */
+  premi: { fonte?: string; noteGenerali?: string } | null;
+  /** L13 (ondata 7, O7-2): il moltiplicatore dell'esame sui punti dei Confidenti, descritto dalla regola del codice (`shared/puntiConfidenti.ts`):
+   *  i Confidenti che lo ricevono e il valore di ogni piazzamento che lo dà (gli altri non moltiplicano). */
+  moltiplicatore: { confidenti: Array<{ chiave: string; nome: string }>; piazzamenti: Array<{ piazzamento: PiazzamentoEsame; nome: string; valore: number }> };
   dataGioco: string | null;
   /** Le domande non fatte della **prima** data da quella di gioco in poi (una o due): il prossimo appuntamento, non un elenco. */
   prossime: DomandaDto[];
@@ -1320,6 +1338,11 @@ export interface EffettiAzioneDto {
   /** Aperture dei Dedali dichiarate in una visita ai Memento, solo nelle ricevute di prima della 305: restano com'erano ma non decidono più
    *  nulla (le aperture si calcolano dai Palazzi conclusi, `condizioni/valutatore.ts`), e non si chiedono più. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
+  /** L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta (effetto «esame»): il piazzamento scelto, quello che c'era prima
+   *  nella partita (null = nessuno: togliendo la spunta si torna lì), le Doti del premio (da applicare con «Applica», come le altre Doti della
+   *  voce) e il trofeo del primo posto, solo se l'ha segnato questa spunta (togliendola si toglie, se nessun altro lo rivendica). */
+  esami?: Array<{ esame: string; nome: string; piazzamento: PiazzamentoEsame; prima: PiazzamentoEsame | null;
+    doti: Array<{ chiave: string; nome: string; delta: number; note: number }>; trofeo?: { chiave: string; nome: string } }>;
 }
 
 export interface RiferimentoAzioneDto {
@@ -1567,6 +1590,8 @@ export interface ElenchiEffettiVoceDto {
   /** 2026-10-28: `prestito` = un'offerta lo dà in prestito (regola «restituzione»: Biblioteca, DVD a noleggio), per l'effetto «Restituito». */
   oggetti?: Array<{ chiave: string; nome: string; categoria: string; prestito?: true }>;
   trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
+  /** L13 (ondata 7, O7-2): gli esami dell'effetto «esame» (i risultati, con il piazzamento scelto alla spunta), con la data dei risultati. */
+  esami?: Array<{ chiave: string; nome: string; dataRisultati: string | null }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,

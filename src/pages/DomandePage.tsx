@@ -25,7 +25,11 @@ import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
-import type { DomandaDto, DomandeDto } from '../types';
+import type { DomandaDto, DomandeDto, PremioEsameDto } from '../types';
+import { RicompensaDomanda } from '../components/shared/RicompensaDomanda';
+import { daConoscenza } from '../utils/ricompensaDomanda';
+import { simboliNote } from '../../shared/note';
+import { elencoNomi } from '../../shared/riepilogoEffetti';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
@@ -47,6 +51,22 @@ const eEsame = (t: DomandaDto['tipo']) => t === 'esame-medio' || t === 'esame-fi
 /** L'id della riga di una data, usato come ancora per scorrere al prossimo appuntamento. */
 const ancoraData = (data: string) => `domande-${data}`;
 
+/** L13 (ondata 7, O7-2): i premi per piazzamento, «Primi 10 · Fascino ♪♪♪», uno per riga breve (vanno a capo sul telefono). */
+function ElencoPremi({ premi, etichetta }: { premi: readonly PremioEsameDto[]; etichetta: string }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 testo-12 text-text-secondary">
+      <strong aria-hidden="true">{etichetta}:</strong>
+      <ul className="m-0 p-0 list-none contents" aria-label={etichetta}>
+        {premi.map((p) => (
+          <li key={p.piazzamento} className="text-pretty">
+            {p.nome} · <TestoNote testo={[...p.doti.map((x) => `${x.nome} ${simboliNote(x.note)}`), ...(p.trofeo ? [`trofeo «${p.trofeo.nome}»`] : [])].join(' · ')} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /**
  * La riga di una domanda: spunta di «fatta» (solo con una partita), data, chi la fa, tipo se non
  * è in classe, segno di «prossima», ricompensa, testo della domanda e risposte giuste in ordine
@@ -55,9 +75,8 @@ const ancoraData = (data: string) => `domande-${data}`;
  */
 function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: DomandaDto; partitaId: number | null; onCambiata: (r: DomandeDto) => void; onCorretta: () => void; evidenzia?: boolean }) {
   const [occupato, setOccupato] = useState(false);
-  // Solo dove la guida scrive «Conoscenza +1 nota» o «Conoscenza ♪» (le domande in classe): gli esami «contribuiscono alla
-  // classifica» e i quiz in TV parlano di «aumento», e per quelli non c'è una nota da ricordare.
-  const daConoscenza = /Conoscenza (\+|♪)/.test(d.ricompensa);
+  // L13 (ondata 7, O7-2): la nota di Conoscenza la dicono le voci del Diario che segnano la domanda; senza voce, il testo della guida
+  const conoscenza = daConoscenza(d);
   /** Segna la domanda fatta o no nella partita, chiedendo la nota di Conoscenza solo quando la si segna fatta e la ricompensa la prevede; passa al genitore l'elenco restituito, ricorda le Doti da segnare o notifica l'errore. */
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
@@ -70,7 +89,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     }))) return;
     setOccupato(true);
     try {
-      const { giornoAvanzato, fasciaAvanzata, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
+      const { giornoAvanzato, fasciaAvanzata, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && conoscenza);
       onCambiata(esito);
       // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta è la sua
       // (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
@@ -97,7 +116,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <span className="text-text-muted">{d.chi}</span>
           {d.tipo !== 'classe' && <span className="chip">{NOME_TIPO[d.tipo]}</span>}
           {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
-          {d.ricompensa && <span className="testo-12 text-text-muted"><TestoNote testo={d.ricompensa} daParole="guida" /></span>}
+          <RicompensaDomanda d={d} className="testo-12 text-text-muted" />
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
@@ -153,6 +172,12 @@ export function DomandePage() {
     return [...m.entries()];
   }, [visibili]);
   const prossima = d?.prossime[0] ?? null;
+  // L13 (ondata 7, O7-2): i premi uguali per tutti gli esami (il caso della guida) si dicono una volta sola, sopra l'elenco
+  const premiComuni = useMemo(() => {
+    const esami = d?.esami ?? [];
+    const primo = esami[0]?.premi ?? [];
+    return primo.length && esami.every((e) => JSON.stringify(e.premi) === JSON.stringify(primo)) ? primo : null;
+  }, [d]);
   // Il rimando in cima azzera i filtri e porta alla riga evidenziata: la riga c'è solo dopo il render, quindi si scorre al giro successivo.
   const vaiAllaProssima = () => {
     if (!prossima) return;
@@ -178,6 +203,8 @@ export function DomandePage() {
           <section className="card flex flex-col gap-2">
             <TitoloSezione>Esami</TitoloSezione>
             <p className="m-0 testo-12 text-text-muted">Date, risultati e premi. Le domande di ogni esame stanno nell’elenco per data, con il quesito accanto a ogni risposta.</p>
+            {/* L13 (ondata 7, O7-2): i premi per piazzamento dalle colonne dell'esame; uguali per tutti gli esami si dicono una volta sola */}
+            {premiComuni && <ElencoPremi premi={premiComuni} etichetta="Premi di ogni esame" />}
             <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13">
               {d.esami.map((e) => (
                 <li key={e.chiave} className="flex min-w-0 flex-col gap-1 py-1">
@@ -186,19 +213,22 @@ export function DomandePage() {
                     <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
                     <ModificaGuida tipo="esame" chiave={e.chiave} cosa={`l’esame «${e.nome}»`} soloIcona className="ml-auto" onSalvato={() => void dati.ricarica()} />
                   </div>
+                  {!premiComuni && e.premi.length > 0 && <ElencoPremi premi={e.premi} etichetta="Premi" />}
+                  {e.requisitoConoscenza && <span className="testo-12 text-text-secondary">Primo posto: Conoscenza rango {e.requisitoConoscenza.rango}{e.requisitoConoscenza.tutteCorrette ? ', tutte giuste' : ''}</span>}
                   {e.note && <span className="testo-12 text-text-muted">{e.note}</span>}
                   {!!e.oggettiRicompensa?.length && <OggettiCollegati oggetti={e.oggettiRicompensa} />}
                 </li>
               ))}
             </ul>
-            {d.premi && (
-              <div className="testo-12 text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> <TestoNote testo={Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')} daParole="guida" /></span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
-                {d.premi.moltiplicatoreConfidenti && <span>{d.premi.moltiplicatoreConfidenti}</span>}
-                {d.premi.requisitoConoscenza && <span>Per il primo posto: {Object.entries(d.premi.requisitoConoscenza).filter(([k]) => k !== 'fonte').map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>}
-                {d.premi.trofeo && <span>{d.premi.trofeo}</span>}
-              </div>
-            )}
+            <div className="testo-12 text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
+              {/* il moltiplicatore dalla regola del codice (`shared/puntiConfidenti.ts`): chi lo riceve e quanto vale ogni piazzamento */}
+              {d.moltiplicatore.piazzamenti.length > 0 && d.moltiplicatore.confidenti.length > 0 && (
+                <span className="text-pretty">Fino ai risultati dell’esame successivo i punti di {elencoNomi(d.moltiplicatore.confidenti.map((c) => c.nome), false)} valgono {d.moltiplicatore.piazzamenti.map((p) => `×${p.valore.toLocaleString('it-IT')} (${p.nome.toLowerCase()})`).join(', ')}.</span>
+              )}
+              {d.premi?.noteGenerali && (
+                <span className="flex items-start gap-1"><span className="text-pretty">{d.premi.noteGenerali}</span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="le note sugli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
+              )}
+            </div>
           </section>
 
           <section className="filtri-articoli" role="search" aria-label="Filtri delle domande">

@@ -171,6 +171,9 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
       // 2026-10-27: la quantità (le creazioni) ha senso solo per uno strumento scelto nella voce (`strumentoDi`: con la versione con il bonus o,
       // revisione, una creazione senza, come la fabbricazione di Kawakami)
       if (e.quantita !== undefined && !strumentoDi(esiti, e.esito)) throw httpErrors.badRequest('quantita-senza-strumento', `La quantità del turno vale solo per uno strumento di «${e.attivita}» (un esito che crea un oggetto dai materiali).`);
+    } else if (e.tipo === 'esame') {
+      // L13 (ondata 7, O7-2): l'esame deve esistere; i premi li legge la spunta dalla sua riga (`esame.premi_json`)
+      if (!prepared('SELECT 1 FROM esame WHERE chiave = ?').get(e.esame)) throw httpErrors.badRequest('effetto-inesistente', 'L’esame indicato non esiste nella guida.');
     }
   }
   return produce;
@@ -206,6 +209,8 @@ export function nomiEffetti(): NomiEffettiAzione {
     film: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('film')})`),
     videogiochi: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita', "WHERE l.tipo = 'videogioco'")})`),
     attivita: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita')})`),
+    // L13 (ondata 7, O7-2): gli esami dell'effetto «esame»
+    esami: mappa('SELECT chiave, nome FROM esame'),
     ...nomiEsiti(),
   };
 }
@@ -331,5 +336,7 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
       AND json_extract(a.rifornimento_json, '$.tipo') = 'restituzione') AS prestito FROM catalogo_oggetto c WHERE c.nascosto = 0 ORDER BY c.nome`).all() as Array<{ chiave: string; nome: string; categoria: string; prestito: number }>)
       .map((o) => ({ chiave: o.chiave, nome: o.nome, categoria: o.categoria, ...(o.prestito ? { prestito: true as const } : {}) })),
     trofei: prepared('SELECT chiave, nome, tipo FROM trofeo ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['trofei']>,
+    // L13 (ondata 7, O7-2): gli esami dell'effetto «esame»
+    esami: prepared('SELECT chiave, nome, data_risultati AS dataRisultati FROM esame ORDER BY ordine').all() as NonNullable<ElenchiEffettiVoceDto['esami']>,
   };
 }

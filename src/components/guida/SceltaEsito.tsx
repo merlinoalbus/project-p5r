@@ -30,6 +30,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/letture';
 import { SceltaAcquistoAlternativo } from './SceltaAcquistoAlternativo';
+import type { PiazzamentoEsame } from '../../../shared/puntiConfidenti';
 
 /** Le Doti di un esito in breve, con i punti che il server ha calcolato per la partita (Fortuna compresa): «Coraggio ♪ · 2 punti, Fascino
  *  ♪ · 2 punti» (la frase unica di `fraseDotiEsito`), o «nessuna Dote». */
@@ -167,7 +168,30 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
   );
 }
 
-type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null };
+type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null } | { tipo: 'esame'; piazzamento: PiazzamentoEsame };
+
+/** L13 (ondata 7, O7-2): il premio di un piazzamento in breve, con i punti che la spunta proporrà: «Fascino ♪♪♪ · 5 punti · trofeo «…»». */
+const premioTesto = (o: Extract<SceltaEsitoVoceDto, { tipo: 'esame' }>['opzioni'][number]): string =>
+  [o.doti.length ? fraseDotiEsito(o.doti) : null, o.trofeo ? `trofeo «${o.trofeo.nome}»` : null].filter((x): x is string => !!x).join(' · ');
+
+/** L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame, a pulsanti (≥ 44 px), ognuno col suo premio; senza premio, il solo nome. */
+function SceltaPiazzamento({ s, scelto, occupato, onScegli }: { s: Extract<SceltaEsitoVoceDto, { tipo: 'esame' }>; scelto: PiazzamentoEsame | undefined; occupato: boolean; onScegli: (p: PiazzamentoEsame) => void }) {
+  return (
+    <span className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Piazzamento: ${s.esameNome}`}>
+      <span className="w-full text-text-secondary">{s.esameNome}: come ti sei piazzato?</span>
+      {s.opzioni.map((o) => {
+        const premio = premioTesto(o);
+        return (
+          <button key={o.piazzamento} type="button" className={`chip touch flex-col items-start text-left ${scelto === o.piazzamento ? 'chip--attivo' : ''}`} disabled={occupato}
+            aria-pressed={scelto === o.piazzamento} onClick={() => onScegli(o.piazzamento)} aria-label={`${o.nome}${premio ? `: ${testoNoteAParole(premio)}` : ''}`}>
+            <span>{o.nome}</span>
+            {premio && <span className="testo-12 text-text-secondary text-pretty">{premio}</span>}
+          </button>
+        );
+      })}
+    </span>
+  );
+}
 
 /**
  * La scelta iniziale di ogni effetto: l'esito atteso dalla voce (se possibile) o il set già comprato nella partita. Le note di una Dote a
@@ -180,6 +204,8 @@ function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore 
   return Object.fromEntries(scelte.map((s): [string, Valore | undefined] => {
     if (s.tipo === 'dote') return [s.effettoUid, undefined];
     if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
+    // L13 (ondata 7, O7-2): il piazzamento già segnato da Partita per lo stesso esame (è un dato della partita, non un valore proposto)
+    if (s.tipo === 'esame') return [s.effettoUid, s.preselezionato ? { tipo: 'esame', piazzamento: s.preselezionato } : undefined];
     // 2026-10-27: lo strumento della voce parte dalla versione base (interruttore «Bonus» spento); senza strumento nella voce non c'è scelta
     if (s.bonus) return [s.effettoUid, { tipo: 'turno', esito: s.bonus.base }];
     if (s.strumentoDaScegliere) return [s.effettoUid, undefined];
@@ -205,6 +231,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
     const x = v[s.effettoUid]!;
     if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
     if (x.tipo === 'alternativa') return { effettoUid: s.effettoUid, tipo: 'alternativa', scelto: x.scelto };
+    if (x.tipo === 'esame') return { effettoUid: s.effettoUid, tipo: 'esame', piazzamento: x.piazzamento };
     return { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
   });
   const imposta = (uid: string, v: Valore) => {
@@ -216,9 +243,13 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
   // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
   // acquisti con esiti o note: «scelte»; senza acquisti resta «esiti», come prima
   const acquisti = scelte.filter((s) => s.tipo === 'alternativa').length;
+  // L13 (ondata 7, O7-2): con soli piazzamenti d'esame la parola è «piazzamento»; misti con altro, «scelte»
+  const esami = scelte.filter((s) => s.tipo === 'esame').length;
   // 2026-10-27: solo interruttori «Bonus»: il pulsante dice soltanto «Spunta» (gli esiti non si scelgono qui)
   const soloBonus = scelte.every((s) => s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere));
   const parola = soloBonus ? { gruppo: 'Spunta della voce', pulsante: 'Spunta' }
+    : esami === scelte.length ? { gruppo: 'Piazzamento da scegliere per la spunta', pulsante: 'Spunta con questo piazzamento' }
+    : esami > 0 ? { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' }
     : acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
     : acquisti === scelte.length ? { gruppo: 'Acquisti da scegliere per la spunta', pulsante: 'Spunta con questi acquisti' }
       : { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' };
@@ -248,6 +279,10 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
         // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) quello comprato, o «Nessuno»
         if (s.tipo === 'alternativa') return (
           <SceltaAcquistoAlternativo key={s.effettoUid} s={s} scelto={v?.tipo === 'alternativa' ? v.scelto : undefined} occupato={occupato} onScegli={(uid) => imposta(s.effettoUid, { tipo: 'alternativa', scelto: uid })} />
+        );
+        // L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame, col premio di ciascuno
+        if (s.tipo === 'esame') return (
+          <SceltaPiazzamento key={s.effettoUid} s={s} scelto={v?.tipo === 'esame' ? v.piazzamento : undefined} occupato={occupato} onScegli={(p) => imposta(s.effettoUid, { tipo: 'esame', piazzamento: p })} />
         );
         // 2026-10-27: lo strumento e la quantità li dice la voce; qui solo «Bonus» sì/no (acceso = la versione con il bonus, spento = quella base)
         if (s.bonus) {

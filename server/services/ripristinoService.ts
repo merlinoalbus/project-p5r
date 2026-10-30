@@ -41,7 +41,7 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   tesoro: 'Lo spostamento di rango vale per la fusione del Demone con una Persona di quell’Arcano: più alto sposta verso l’alto, meno verso il basso.',
   'eredita-tipo': 'Dice quali tipi di skill un tipo può ereditare nella fusione; l’ordine e i nomi delle colonne non si correggono.',
   confidente: 'La chiave e l’ordine del Confidente non si correggono (li usano ranghi, partite e mappe). Il nome si legge in tutta l’app.',
-  'esame-premi': 'Ogni testo dei premi si corregge a parte; la struttura dei premi non cambia.',
+  'esame-premi': 'Ogni testo delle note sugli esami si corregge a parte; i premi per piazzamento e il requisito di Conoscenza si correggono sull’esame.',
   'settimana-guida': 'Il numero della settimana e l’indirizzo della fonte non si correggono.',
   'evento-voce': 'Si corregge la certezza del collegamento; quale evento e quale voce sono collegati non si cambia da qui.',
   'negoziazione-variante': 'Si corregge la resa italiana; il testo originale, la fonte e il localizzatore non si correggono.',
