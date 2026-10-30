@@ -13,7 +13,8 @@ import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { aggiornaElemento } from './catalogoService.js';
 import { CHIAVE_SEED_DISPONIBILITA, disponibilitaConfidente, luoghiDelConfidente, rigaStruttura, type RigaStruttura } from './disponibilitaStrutturataService.js';
 import { MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
-import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../shared/disponibilitaStrutturata.js';
+import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata, EccezioneDisponibilita } from '../../shared/disponibilitaStrutturata.js';
+import { dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
 
 export interface ModificaDisponibilita {
   modo?: DisponibilitaStrutturata['modo'];
@@ -26,16 +27,34 @@ export interface ModificaDisponibilita {
   luoghi?: string[];
 }
 
+/**
+ * Le eccezioni da salvare: una per tipo dove il tipo vale per tutto il Confidente (giorni dopo un rango, giorni del calendario esclusi), una per rango
+ * dove vale per un rango (fascia, giorni); i giorni del calendario esistono, senza doppioni e nell'ordine del calendario di gioco. 400 altrimenti.
+ */
+function normalizzaEccezioni(eccezioni: EccezioneDisponibilita[]): EccezioneDisponibilita[] {
+  const viste = new Set<string>();
+  return eccezioni.map((e) => {
+    const chiave = e.tipo === 'fascia-rango' || e.tipo === 'giorni-rango' ? `${e.tipo}:${e.rango}` : e.tipo;
+    if (viste.has(chiave)) throw httpErrors.badRequest('eccezione-doppia', e.tipo === 'fascia-rango' || e.tipo === 'giorni-rango' ? `Il rango ${e.rango} ha già un'eccezione di questo tipo.` : 'Questa eccezione c’è già.');
+    viste.add(chiave);
+    if (e.tipo !== 'date') return e;
+    const sbagliata = e.date.find((d) => !dataValida(d));
+    if (sbagliata) throw httpErrors.badRequest('data-non-valida', `«${sbagliata}» non è un giorno del calendario di gioco.`);
+    return { ...e, date: [...new Set(e.date)].sort((a, b) => ordineGioco(a) - ordineGioco(b)) };
+  });
+}
+
 /** Cambia la struttura (e, se indicati, i luoghi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». */
 export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilita): DisponibilitaConfidenteDto {
   const prima = rigaStruttura(confidente);
   if (mod.modo !== undefined && !MODI_DISPONIBILITA.includes(mod.modo)) throw httpErrors.badRequest('modo-non-valido', `Il modo '${mod.modo}' non esiste.`);
   if (mod.dal !== undefined && mod.dal !== null && !/^\d{2}-\d{2}$/.test(mod.dal)) throw httpErrors.badRequest('data-non-valida', 'La data «dal» è nel formato MM-GG.');
+  const eccezioni = mod.eccezioni ? normalizzaEccezioni(mod.eccezioni) : undefined;
   const nuova: RigaStruttura = {
     modo: mod.modo ?? prima.modo,
     giorni_settimana_json: mod.giorni ? JSON.stringify(mod.giorni) : prima.giorni_settimana_json,
     fasce_orarie_json: mod.fasce ? JSON.stringify(mod.fasce) : prima.fasce_orarie_json,
-    eccezioni_json: mod.eccezioni ? JSON.stringify(mod.eccezioni) : prima.eccezioni_json,
+    eccezioni_json: eccezioni ? JSON.stringify(eccezioni) : prima.eccezioni_json,
     dal: mod.dal === undefined ? prima.dal : mod.dal,
     motivo_senza_luogo: mod.motivoSenzaLuogo ?? prima.motivo_senza_luogo,
     fonte: prima.fonte,

@@ -19,7 +19,7 @@ import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
-import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
+import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
@@ -69,6 +69,8 @@ export interface StatoPartitaSemafori {
   eventi: Set<string>;
   /** Non più letto (R6-01b: niente conferme a mano); `requisito_partita` è stata tolta (utente 44). */
   conferme?: Set<string>;
+  /** La partita dello stato: il semaforo della disponibilità legge da qui il giorno dell'ultimo rango (registro degli incontri). Assente = non si sa. */
+  partitaId?: number;
 }
 
 /** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
@@ -106,7 +108,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca };
+  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca };
 }
 
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
@@ -162,9 +164,11 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
  */
 function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoValutazione): SemaforoRequisitoDto | null {
   if (!st.dataGioco) return null;
+  // la pioggia la legge il verdetto dai requisiti del rango successivo (fonte unica, migrazione 306); i giorni dall'ultimo rango dal registro degli incontri
   const esito = verdettoDelConfidente(chiave, {
     data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),
-    piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale, giorniDallUltimoRango: null,
+    piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale,
+    giorniDallUltimoRango: st.partitaId === undefined ? null : giorniDalGiorno(giornoDellUltimoRango(st.partitaId, chiave, rangoAttuale), st.dataGioco),
   });
   if (!esito) return null;
   return { indice: 900, tipo: 'disponibilita', testo: 'Giorno e fascia dell’incontro', stato: esito.stato === 'disponibile' ? 'verde' : esito.stato === 'non-disponibile' ? 'rosso' : 'grigio',

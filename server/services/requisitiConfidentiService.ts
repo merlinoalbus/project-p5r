@@ -12,6 +12,7 @@
 
 import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { condizioneDelRequisito } from './semaforiService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviRequisitoSpillo, type Condizione } from '../../shared/condizioniSpillo.js';
@@ -113,6 +114,8 @@ export function impostaRequisitiRango(confidente: string, rango: number, requisi
       ins.run(confidente, rango, indice, r.condizione.tipo, datiDellaCondizione(r.condizione), testo);
     });
   })();
+  // la disponibilità legge dai requisiti la pioggia e il «dal» del rango 1 (migrazione 306, R9-04/4) e li tiene in memoria
+  invalidaCacheDiGioco();
   return requisitiDelConfidente(confidente);
 }
 
@@ -126,5 +129,6 @@ export function ripristinaRequisitiRango(confidente: string, rango: number): Req
     const ins = prepared('INSERT INTO confidente_requisito (confidente_chiave, rango, indice, tipo, dati_json, testo) VALUES (?, ?, ?, ?, ?, ?)');
     for (const r of guida) ins.run(confidente, rango, r.indice, r.tipo, r.dati_json, r.testo);
   })();
+  invalidaCacheDiGioco();
   return requisitiDelConfidente(confidente);
 }

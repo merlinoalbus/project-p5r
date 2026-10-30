@@ -24,6 +24,17 @@ export function giornoDellaSettimana(data: string | null | undefined): NomeGiorn
   return NOMI[d.getUTCDay()]!;
 }
 
+/** I giorni di gioco da `da` ad `a` («MM-GG», con l'anno del calendario di gioco): 0 se è lo stesso giorno, negativo se `a` viene prima; null se una delle due non è una data. */
+export function giorniDiGiocoFra(da: string | null | undefined, a: string | null | undefined): number | null {
+  const ms = (d: string | null | undefined): number | null => {
+    if (giornoDellaSettimana(d) === null) return null;
+    const [mese, giorno] = d!.split('-').map(Number) as [number, number];
+    return Date.UTC(annoDiGioco(mese), mese - 1, giorno);
+  };
+  const x = ms(da), y = ms(a);
+  return x === null || y === null ? null : Math.round((y - x) / 86_400_000);
+}
+
 /** Lo stesso giorno in minuscolo e senza accenti («lunedi»), la forma che il valutatore delle condizioni confronta. */
 export function giornoDellaSettimanaPiatto(data: string | null | undefined): string | null {
   const g = giornoDellaSettimana(data);

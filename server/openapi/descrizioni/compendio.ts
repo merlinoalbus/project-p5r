@@ -147,15 +147,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Disponibilità strutturata del Confidente, con i luoghi per chiave e, con ?partita=, se è disponibile adesso',
-    descrizione: 'Sola lettura, no-store. La struttura (modo, giorni, fasce, eccezioni, «dal», motivo senza luogo, fonte G-036) è la fonte di ciò che l’app valuta; il testo libero resta nelle note. I luoghi sono quelli non nascosti di L5 (`luogo.confidenti_json`). Con `?partita=` aggiunge `oggi`: stato (disponibile, non-disponibile, su-messaggio, trama, sconosciuto), motivo e causa.',
+    descrizione: 'Sola lettura, no-store. La struttura (modo, giorni, fasce, eccezioni, «dal», motivo senza luogo, fonte G-036) è la fonte di ciò che l’app valuta; il testo libero resta nelle note. I luoghi sono quelli non nascosti di L5 (`luogo.confidenti_json`). La pioggia non è un’eccezione: sta nei requisiti di rango (migrazione 306) e `ranghiNonConLaPioggia` li riassume. Con `?partita=` aggiunge `oggi`: stato (disponibile, non-disponibile, su-messaggio, trama, sconosciuto), motivo e causa (giorno, date, fascia, dal, pioggia, dopo-rango); i giorni dall’ultimo rango vengono dal registro degli incontri della partita.',
     risposta: '`DisponibilitaConfidenteDto`',
     errori: [[404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata'], [404, 'partita-non-trovata']],
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
-    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni, dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date: una per tipo, o per rango; le date sono giorni del calendario di gioco), dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
     risposta: '`DisponibilitaConfidenteDto` aggiornato',
-    errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
+    errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [400, 'eccezione-doppia'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
   },
   'POST /api/compendio/confidenti/:chiave/disponibilita-strutturata/ripristina': {
     sommario: 'Riporta la disponibilità strutturata alla fonte G-036',

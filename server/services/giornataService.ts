@@ -236,8 +236,10 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
  */
 export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
   if (r.genere !== 'azione' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
+  // la pioggia dei requisiti del rango la legge il verdetto (fonte unica, migrazione 306), ma senza meteo non produce avvisi; un giorno del
+  // calendario escluso (`date`) è un avviso di giorno come quello della settimana
   const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null });
-  if (!esito || esito.stato !== 'non-disponibile' || (esito.causa !== 'giorno' && esito.causa !== 'fascia' && esito.causa !== 'dal')) return {};
+  if (!esito || esito.stato !== 'non-disponibile' || (esito.causa !== 'giorno' && esito.causa !== 'date' && esito.causa !== 'fascia' && esito.causa !== 'dal')) return {};
   return { avvisiDisponibilita: [{ tipo: esito.causa === 'fascia' ? 'fuori-fascia' : 'fuori-giorno', testo: esito.motivo }] };
 }
 
