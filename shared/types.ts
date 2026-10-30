@@ -314,9 +314,10 @@ export interface ConfidenteDto {
 export interface SceltaDialogoDto {
   ordine: number | null;
   testo: string;
-  /** Note ♪ (1–3) secondo la guida; null se non indicato. */
+  /** Note ♪ (1–3) secondo la guida, 0 = nessun punto; null se la guida non ne dà. */
   punti: number | null;
-  puntiTesto: string | null;
+  /** Solo dove la guida dà un valore diverso nel ramo amore (migrazione 309); altrimenti null. */
+  puntiAmore: number | null;
   romantica: boolean;
   avviso: string | null;
 }
@@ -1374,12 +1375,13 @@ export type GenereVoce = 'azione' | 'promemoria';
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
-/** Il dialogo di un rango di un Confidente (`confidente_dialogo`): le scelte con le note che danno (1-3; null = nessuna nota o non documentata). */
+/** Il dialogo di un rango di un Confidente (`confidente_dialogo`): le scelte con i punti che danno, come nella scheda del Confidente
+ *  (`punti` null = la guida non ne dà, 0 = nessun punto; `puntiAmore` solo dove il ramo amore dà altro). La resa è `resaPuntiScelta`. */
 export interface DialogoVoceDto {
   confidente: string;
   rango: number;
   note: string;
-  scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
+  scelte: Array<{ ordine: number; testo: string; punti: number | null; puntiAmore: number | null; romantica: boolean; avviso: string | null }>;
 }
 
 /** Una cosa che la spunta di una voce ha applicato e che togliendola si annulla: `testo` in parole, coi nomi («Persona registrata nel compendio:

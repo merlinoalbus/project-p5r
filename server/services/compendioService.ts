@@ -19,6 +19,7 @@ import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
+import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -510,7 +511,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   const abilita = (prepared('SELECT rango, nome, descrizione FROM confidente_abilita WHERE confidente_chiave = ? ORDER BY rango, ordine').all(chiave) as Array<{ rango: number; nome: string; descrizione: string }>);
   const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
-    .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: (JSON.parse(d.scelte_json) as Array<Record<string, unknown>>).map((s) => ({ ordine: (s.ordine as number | null) ?? null, testo: String(s.testo ?? ''), punti: (s.punti as number | null) ?? null, puntiTesto: (s.puntiTesto as string | null) ?? null, romantica: s.romantica === true, avviso: (s.avviso as string | null) ?? null })) }));
+    // migrazione 309: i punti solo numerici (con il ramo amore), letti dall'unico lettore delle scelte
+    .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: leggiScelteDialogo(d.scelte_json).map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) }));
   const conCatalogo = catalogoOggettiDisponibile();
   // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
   const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');

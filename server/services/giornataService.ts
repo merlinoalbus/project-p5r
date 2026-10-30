@@ -35,6 +35,7 @@ import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizia
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
+import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riallineaVoceNelRegistro, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
@@ -386,11 +387,10 @@ function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | nul
 function dialogoDelRango(chiave: string, rango: number): DialogoVoceDto | null {
   const r = prepared('SELECT note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { note: string; scelte_json: string } | undefined;
   if (!r) return null;
-  let scelte: Array<{ ordine: number; testo: string; punti: number | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
-  try { scelte = JSON.parse(r.scelte_json) as typeof scelte; } catch { return null; }
-  if (!Array.isArray(scelte) || scelte.length === 0) return null;
-  return { confidente: chiave, rango, note: r.note,
-    scelte: scelte.map((s) => ({ ordine: s.ordine, testo: s.testo, note: s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null, puntiTesto: s.puntiTesto ?? null, romantica: !!s.romantica, avviso: s.avviso ?? null })) };
+  // migrazione 309: le stesse scelte della scheda del Confidente, dall'unico lettore (punti solo numerici, con il ramo amore)
+  const scelte = leggiScelteDialogo(r.scelte_json);
+  if (scelte.length === 0) return null;
+  return { confidente: chiave, rango, note: r.note, scelte: scelte.map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) };
 }
 
 // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (lotti/L3/modifiche.md §2.1.6, §3.4, §4.4) ----

@@ -26,9 +26,10 @@ const dettaglio: ConfidenteDettaglioDto = {
     { rango: 3, doti: [], testo: '' },
   ],
   dialoghi: [
-    { id: 1, rango: 1, etichetta: '1', note: 'Data consigliata 18 aprile.', scelte: [{ ordine: 1, testo: 'Hai farmaci speciali?', punti: 2, puntiTesto: '+2', romantica: false, avviso: null }] },
-    { id: 2, rango: 2, etichetta: '2', note: 'Richiede Coraggio 2.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiTesto: '+3', romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiTesto: '+0', romantica: false, avviso: 'Da evitare' }] },
-    { id: 3, rango: 9, etichetta: '9', note: '', scelte: [{ ordine: 1, testo: 'Ti amo', punti: 3, puntiTesto: '+3', romantica: true, avviso: null }] },
+    // migrazione 309: i punti solo numerici (con `puntiAmore` dove il ramo amore dà altro), la nota senza i requisiti già strutturati
+    { id: 1, rango: 1, etichetta: '1', note: 'Data consigliata 18 aprile.', scelte: [{ ordine: 1, testo: 'Hai farmaci speciali?', punti: 2, puntiAmore: null, romantica: false, avviso: null }] },
+    { id: 2, rango: 2, etichetta: '2', note: 'Data consigliata 25 aprile.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiAmore: null, romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiAmore: null, romantica: false, avviso: 'Da evitare' }] },
+    { id: 3, rango: 9, etichetta: '9', note: '', scelte: [{ ordine: 1, testo: 'Ti amo', punti: 3, puntiAmore: null, romantica: true, avviso: null }, { ordine: 2, testo: 'Incredibile', punti: 0, puntiAmore: 2, romantica: false, avviso: null }] },
   ],
   regali: [{ ordine: 1, modificato: false, nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', reazione: 2 }, { ordine: 2, modificato: false, nome: 'Mini cactus', dove: null, costo: null, reazione: 3 }],
   regalabile: true,
@@ -56,6 +57,9 @@ describe('ConfidenteDettaglioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Rango 9/ }));
     expect(screen.getByText('Ti amo')).toBeInTheDocument();
     expect(screen.getByText('romantica')).toBeInTheDocument();
+    // la resa unica dei punti: zero è «nessun punto», il ramo amore diverso si legge accanto (`resaPuntiScelta`)
+    expect(screen.getByText('nessun punto')).toBeInTheDocument();
+    expect(screen.getByText(/nessun punto \(amicizia\) · /)).toBeInTheDocument();
     // regali: Castella già consegnato, Mini cactus da spuntare
     expect(screen.getByRole('checkbox', { name: 'Regalo Castella consegnato' })).toBeChecked();
     const cactus = screen.getByRole('checkbox', { name: 'Regalo Mini cactus consegnato' });

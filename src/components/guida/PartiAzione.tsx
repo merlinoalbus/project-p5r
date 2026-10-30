@@ -27,7 +27,7 @@ import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
 import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
 import { fraseYenInParteNelSaldo } from '../../../shared/riepilogoEffetti';
-import { noteAParole, simboliNote } from '../../../shared/note';
+import { NESSUN_PUNTO, noteAParole, noteDellaScelta, resaPuntiScelta, sceltaToccabile, simboliNote } from '../../../shared/note';
 import { TestoNote } from '../shared/TestoNote';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
@@ -191,11 +191,12 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupat
           <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
           <span className="flex flex-wrap gap-1.5">
             {dialogo.scelte.map((s) => {
-              const valore = s.note !== null ? simboliNote(s.note) : s.puntiTesto && /^\+?0\b|da evitare/.test(s.puntiTesto) ? '0' : s.puntiTesto ?? '';
-              const toccabile = s.note !== null || s.puntiTesto === null || /^\+?0\b|da evitare/.test(s.puntiTesto);
+              // migrazione 309: i punti sono numeri (con il ramo amore dove la guida lo dà); la resa e la regola «si tocca» sono una sola (`shared/note`)
+              const valore = resaPuntiScelta(s);
               const etichetta = `${s.testo}${valore ? ` ${valore}` : ''}`;
-              return toccabile
-                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(s.note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${s.note !== null ? noteAParole(s.note) : 'nessun punto'}`}>{etichetta}</button>
+              const note = noteDellaScelta(s);
+              return sceltaToccabile(s)
+                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${note !== null ? noteAParole(note) : NESSUN_PUNTO}`}><TestoNote testo={etichetta} /></button>
                 : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}><TestoNote testo={etichetta} /></span>;
             })}
           </span>

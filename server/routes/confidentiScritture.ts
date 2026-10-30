@@ -44,7 +44,9 @@ router.post('/confidenti/:chiave/doti-incontro/:rango/ripristina', validate({ pa
   res.json(dettaglioConfidente(p.chiave));
 });
 
-const scelta = z.object({ testo: z.string().trim().min(1).max(500), punti: z.number().min(0).max(100).nullable(), puntiTesto: z.string().max(200).nullable(), romantica: z.boolean(), avviso: z.string().max(500).nullable() }).strict();
+// migrazione 309: i punti solo numerici, da 0 a 3 note (null = la guida non ne dà), e quelli del ramo amore dove la guida dà altro
+const puntiScelta = z.number().int().min(0).max(3).nullable();
+const scelta = z.object({ testo: z.string().trim().min(1).max(500), punti: puntiScelta, puntiAmore: puntiScelta.optional(), romantica: z.boolean(), avviso: z.string().max(500).nullable() }).strict();
 router.put('/confidenti/:chiave/dialoghi/:id', validate({ params: paramsDialogo, body: z.object({ note: z.string().max(4000).optional(), scelte: z.array(scelta).max(40).optional() }).strict() }), (req, res) => {
   const p = req.params as unknown as { chiave: string; id: number };
   res.json(impostaDialogo(p.chiave, p.id, req.body as Parameters<typeof impostaDialogo>[2]));

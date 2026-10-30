@@ -11,7 +11,7 @@ import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 
-import { MODI_RANGO, type AbilitaRangoDto, type DialogoModificatoDto, type ModoRango, type RangoConfidenteDto, type SceltaDialogo } from '../../shared/confidentiScritture.js';
+import { leggiScelteDialogo, MODI_RANGO, type AbilitaRangoDto, type DialogoModificatoDto, type ModoRango, type RangoConfidenteDto, type SceltaDialogo } from '../../shared/confidentiScritture.js';
 export { MODI_RANGO };
 
 const chiaveFotografia = (tabella: string, id: string): string => `confidente-seed-v1:${tabella}:${id}`;
@@ -144,19 +144,27 @@ function rigaDialogo(chiave: string, id: number): RigaDialogo {
   return r;
 }
 function comeDto(r: RigaDialogo): DialogoModificatoDto {
-  let scelte: SceltaDialogo[] = [];
-  try { const v = JSON.parse(r.scelte_json) as unknown; if (Array.isArray(v)) scelte = v as SceltaDialogo[]; } catch { /* scelte illeggibili: nessuna */ }
-  return { id: r.id, note: r.note, scelte, modificato: haFotografia('dialogo', String(r.id)) };
+  return { id: r.id, note: r.note, scelte: leggiScelteDialogo(r.scelte_json), modificato: haFotografia('dialogo', String(r.id)) };
 }
 
-/** Cambia le note e/o le scelte (testo, punti, romantica, avviso) di un dialogo; le scelte si rinumerano da 1 nell'ordine dato. */
+/** I punti di una scelta: nessuno (null) o da 0 a 3 note, interi (i valori della guida; la migrazione 309 li ha trovati tutti fra 0 e 3). */
+const puntiValidi = (p: number | null | undefined): boolean => p === null || p === undefined || (Number.isInteger(p) && p >= 0 && p <= 3);
+
+/**
+ * Cambia le note e/o le scelte (testo, punti, punti del ramo amore, romantica, avviso) di un dialogo; le scelte si rinumerano da 1 nell'ordine
+ * dato. I punti del ramo amore si salvano solo se diversi da quelli dell'amicizia (uguali non dicono niente di più); con un ramo amore diverso
+ * l'amicizia ha sempre un valore (senza punti = 0, «nessun punto»).
+ */
 export function impostaDialogo(chiave: string, id: number, dati: { note?: string; scelte?: Array<Omit<SceltaDialogo, 'ordine'>> }): DialogoModificatoDto {
   esisteConfidente(chiave);
   const r = rigaDialogo(chiave, id);
-  const scelte = dati.scelte?.map((s, i): SceltaDialogo => ({ ordine: i + 1, testo: s.testo.trim(), punti: s.punti, puntiTesto: s.puntiTesto, romantica: s.romantica, avviso: s.avviso }));
-  if (scelte && (scelte.length > 40 || scelte.some((s) => s.testo === '' || (s.punti !== null && (!Number.isFinite(s.punti) || s.punti < 0 || s.punti > 100))))) {
-    throw httpErrors.badRequest('scelte-non-valide', 'Fino a 40 scelte, ciascuna con un testo e punti da 0 a 100 (o nessuno).');
+  if (dati.scelte && (dati.scelte.length > 40 || dati.scelte.some((s) => s.testo.trim() === '' || !puntiValidi(s.punti) || !puntiValidi(s.puntiAmore)))) {
+    throw httpErrors.badRequest('scelte-non-valide', 'Fino a 40 scelte, ciascuna con un testo e punti da 0 a 3 note (o nessuno).');
   }
+  const scelte = dati.scelte?.map((s, i): SceltaDialogo => {
+    const amore = typeof s.puntiAmore === 'number' && s.puntiAmore !== (s.punti ?? 0) ? s.puntiAmore : null;
+    return { ordine: i + 1, testo: s.testo.trim(), punti: amore !== null ? (s.punti ?? 0) : s.punti, ...(amore !== null ? { puntiAmore: amore } : {}), romantica: s.romantica, avviso: s.avviso };
+  });
   const note = dati.note ?? r.note;
   const scelteJson = scelte ? JSON.stringify(scelte) : r.scelte_json;
   if (note === r.note && scelteJson === r.scelte_json) return comeDto(r);
