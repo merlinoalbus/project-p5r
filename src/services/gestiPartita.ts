@@ -70,6 +70,7 @@ const effetto = z.discriminatedUnion('tipo', [
 const decisioneEffetto = z.object({ operazioneId: uid, decisione: z.enum(['conferma','scarta']), effetto: effetto.optional(), revisionePropostaAttesa: token }).strict()
   .refine(v => v.decisione === 'conferma' ? v.effetto !== undefined : v.effetto === undefined);
 const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(),
+  // solo per leggere i gesti conservati di prima della 305 (la visita ai Memento non dichiara più aperture: il server rifiuta il campo)
   apertureDedali: z.array(z.string().min(1).max(200)).max(100).refine(a => new Set(a).size === a.length).optional(),
   acquisti: z.array(registra).min(1).max(100).refine(a => new Set(a.map(r => r.operazioneId)).size === a.length).optional(),
   pesche: z.array(schemaRegistraSessioneGestoPesca).min(1).max(100).refine(a => new Set(a.map(r => r.operazioneId)).size === a.length).optional(),

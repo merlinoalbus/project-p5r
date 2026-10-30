@@ -1315,8 +1315,8 @@ export interface EffettiAzioneDto {
      *  Assenti se nessuno e nelle ricevute di prima. */
     oggetti?: Array<{ nome: string; quantita: number }>;
     consumati?: Array<{ nome: string; quantita: number }> }>;
-  /** Aperture dichiarate dall'utente durante questa visita ai Memento. Valgono finché resta la spunta;
-   *  altre visite o registrazioni manuali dello stesso evento restano indipendenti. Nessuna data presunta. */
+  /** Aperture dei Dedali dichiarate in una visita ai Memento, solo nelle ricevute di prima della 305: restano com'erano ma non decidono più
+   *  nulla (le aperture si calcolano dai Palazzi conclusi, `condizioni/valutatore.ts`), e non si chiedono più. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
 }
 
@@ -1386,8 +1386,6 @@ export interface DialogoVoceDto {
 export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
 
 export interface AzionePercorsoDto {
-  /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
-  apertureDedali?: Array<{ chiave: string; nome: string }>;
   /** Solo riferimenti strutturati già presenti: nessuna riscrittura del testo o classificazione per somiglianza. */
   oggettoRiferimento?: RiferimentoOggettoDto | null;
   oggettiCitati?: RiferimentoOggettoDto[];
@@ -3570,7 +3568,7 @@ export interface ElenchiRegoleDto {
   attivita: Array<{ chiave: string; nome: string }>;
   /** Con il programma punti: «punti negozio» va solo ai programmi manuali, «grado cliente» solo a chi ha il rango. */
   negozi: Array<{ chiave: string; nome: string; programma: 'manuale' | 'rango-cliente' | null }>;
-  /** `calcolato`: l'evento si legge dalla squadra della partita e non si segna a mano. */
+  /** `calcolato`: l'evento si legge dalla squadra della partita o, per un'apertura di un Dedalo dei Memento, dai Palazzi conclusi (305), e non si segna a mano. */
   eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
   contatori: Array<{ chiave: string; nome: string }>;
   /** L6: i luoghi (condizione `luogo`), col quartiere come gruppo. */
@@ -3603,11 +3601,11 @@ export interface ManifestImmaginiDto {
 
 /** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export interface ProgressiPartitaDto {
-  /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato); `manuale`: la spunta. */
+  /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato) o, per le aperture dei Dedali dei Memento, dalla condizione d'apertura del
+   *  Dedalo (`apertura`: la sua lettura, «dopo il Palazzo di Madarame»; null se il Dedalo non ne ha una); `manuale`: la spunta. */
   /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
-  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[]; dalDiario?: boolean;
-    /** Contributo manuale distinto dall'esito effettivo (che include le dichiarazioni delle visite). */
-    manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }>;
+  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[];
+    apertura?: string | null;
     /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
     daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */

@@ -15,7 +15,6 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
-import { eventiEffettivi } from './apertureDedaliService.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -66,7 +65,7 @@ export interface StatoPartitaSemafori {
   invitiRegistrati?: Set<string>;
   /** L13: gli sblocchi ricevuti nella partita da una voce spuntata (`utente.sblocco_partita`), come «richiesta:chiave» o «attivita:chiave». */
   sblocchiRicevuti?: Set<string>;
-  /** Eventi manuali e aperture dichiarate nelle visite del Diario: i requisiti `evento` leggono il loro insieme. */
+  /** Gli eventi segnati a mano nella partita: i requisiti `evento` li leggono (le aperture dei Dedali no: si calcolano, migrazione 305). */
   eventi: Set<string>;
   /** Non più letto (R6-01b: niente conferme a mano); `requisito_partita` è stata tolta (utente 44). */
   conferme?: Set<string>;
@@ -99,7 +98,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  const eventi = eventiEffettivi(partitaId);
+  // gli eventi segnati a mano (Partita → Progressi, «Condizione soddisfatta»); le aperture dei Dedali le calcola il valutatore (305)
+  const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
   const fattiPesca=new Map(leggiFattiPesca(partitaId,dataGioco&&fasciaGioco?{giorno:dataGioco,fascia:fasciaGioco,ordineVisita:Number.MAX_SAFE_INTEGER}:undefined,true).map(f=>[f.evento,f.valore]));
   // i Palazzi letti una volta: conclusi (Tesoro e boss finale, §8.10) col perché, gli altri con quel che manca al furto
   const palazzi = statoPalazzi(partitaId);
@@ -173,8 +173,7 @@ function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoVa
 
 /** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
 export function impostaEventoStoria(partitaId: number, evento: string, avvenuto: boolean): void {
-  if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');
-  prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at').run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
+  if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');  prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at').run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
 }
 
 /** «Condizione soddisfatta» di un requisito `evento`: segna l'evento della partita, così il Confidente e Partita → Progressi dicono la

@@ -22,7 +22,6 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
-import { dataGiocoTesto } from '../../utils/dateGioco';
 import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
@@ -69,20 +68,15 @@ function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; o
   return (
     <li>
       <label className="progressi-partita__riga progressi-partita__riga--evento touch">
-        <input type="checkbox" className="progressi-casella" checked={e.manuale ?? e.avvenuto === true} aria-label={e.nome} disabled={occupato} onChange={(ev) => onCambia(ev.target.checked)} />
+        <input type="checkbox" className="progressi-casella" checked={e.avvenuto === true} aria-label={e.nome} disabled={occupato} onChange={(ev) => onCambia(ev.target.checked)} />
         <span className="min-w-0 flex-1">
           <span className="block">{e.nome}</span>
           {!!e.serveA?.length && <span className="block testo-12 text-primary-testo">Sblocca: {e.serveA.join(' · ')}</span>}
-          {e.visiteDiario && <span className="block testo-12 text-text-secondary">Le visite dichiarate nel Diario contano da sole; la casella è un tuo segno in più. Si correggono dal Diario.</span>}
         </span>
         <span className={`shrink-0 testo-12 ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
       </label>
       {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 testo-12 text-text-secondary">
         {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
-      </div>}
-      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 testo-12 text-text-secondary">
-        <span>Già nel Diario:</span>
-        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>visita del {dataGiocoTesto(v.giorno)}</Link>)}
       </div>}
     </li>
   );
@@ -127,6 +121,9 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const rileggi = async () => { setStato(null); await dati.ricarica(); };
 
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
+  // dalla squadra (un Ladro in squadra) e, a parte, le aperture dei Dedali dei Memento (dai Palazzi conclusi, migrazione 305)
+  const dallaSquadra = calcolati.filter((e) => e.apertura === undefined);
+  const dedali = calcolati.filter((e) => e.apertura !== undefined);
   const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some((chiave) => chiave === e.chiave)) ?? [];
   const daSegnare = manuali.filter((e) => e.avvenuto !== true);
   const avvenutiManuali = manuali.filter((e) => e.avvenuto === true);
@@ -198,7 +195,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                     <TitoloSezione variante="display" id="progressi-squadra" className="flex flex-wrap items-center gap-2">Automatici dalla squadra <Automatico /></TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                      {calcolati.map((e) => (
+                      {dallaSquadra.map((e) => (
                         <li key={e.chiave} className="progressi-partita__riga">
                           <Pallino stato={e.avvenuto} />
                           <span className="min-w-0 flex-1">{e.nome}</span>
@@ -207,6 +204,24 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                       ))}
                     </ul>
                   </section>
+                  {dedali.length > 0 && (
+                    <section className="card flex flex-col gap-2" aria-labelledby="progressi-dedali">
+                      <TitoloSezione variante="display" id="progressi-dedali" className="flex flex-wrap items-center gap-2">Dedali dei Memento <Automatico /></TitoloSezione>
+                      <p className="m-0 testo-12 text-text-muted">Si aprono con i Palazzi conclusi nella partita (Tesoro e boss finale) o con la data della guida.</p>
+                      <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                        {dedali.map((e) => (
+                          <li key={e.chiave} className="progressi-partita__riga">
+                            <Pallino stato={e.avvenuto} />
+                            <span className="min-w-0 flex-1">
+                              <span className="block">{e.nome}</span>
+                              {e.apertura && <span className="block testo-12 text-text-secondary">Si apre {e.apertura}</span>}
+                            </span>
+                            <span className={`shrink-0 testo-12 ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto === true ? 'aperto' : e.avvenuto === false ? 'non ancora' : 'da verificare'}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
                     <TitoloSezione variante="display" id="progressi-contatori" className="flex flex-wrap items-center gap-2">Dalle letture <Automatico /></TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>

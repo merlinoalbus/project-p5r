@@ -78,8 +78,9 @@ export const EVENTI_STORIA = [
   { chiave: 'pietra-sacra-comprata', nome: 'Pietra Sacra comprata da Chihaya' },
   { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
   { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
-  // Aperture dichiarate nella visita ai Memento del Diario, mai dedotte dalla data o dal completamento delle aree.
-  // `dedalo` collega il fatto alla scheda esistente; Jose usa sette di questi nove fatti.
+  // Le aperture dei Dedali dei Memento **si calcolano** (migrazione 305, richiesta dell'utente del 2026-10-30: «le aperture dovrebbero dipendere
+  // dai palazzi affrontati»): `dedalo` è il Dedalo (`dungeon_area`), e il fatto vale quanto la sua condizione d'apertura (`condizioni_json`: il
+  // Palazzo concluso o la data della guida). Non si dichiarano nelle visite né si segnano a mano. Jose usa sette di questi nove fatti.
   { chiave: 'dedalo-qimranut-aperto', nome: 'Dedalo di Qimranut aperto', dedalo: 'mementos-01-qimranut' },
   { chiave: 'dedalo-aiyatsbus-aperto', nome: 'Dedalo di Aiyatsbus aperto', dedalo: 'mementos-02-aiyatsbus' },
   { chiave: 'dedalo-chemdah-aperto', nome: 'Dedalo di Chemdah aperto', dedalo: 'mementos-03-chemdah' },
@@ -90,12 +91,15 @@ export const EVENTI_STORIA = [
   { chiave: 'dedalo-iweleth-aperto', nome: 'Dedalo di Iweleth aperto', dedalo: 'mementos-08-iweleth' },
   { chiave: 'dedalo-daat-aperto', nome: 'Dedalo di Da’at aperto', dedalo: 'mementos-09-daat' },
 ] as const;
-/** Le aperture selezionabili nella visita: riferimenti ai nove dedali esistenti, non un secondo elenco di avanzamenti. */
-export const APERTURE_DEDALI = EVENTI_STORIA.flatMap((e) => 'dedalo' in e ? [{ chiave: e.chiave, nome: e.nome, dedalo: e.dedalo }] : []);
 /** Il Ladro che fa avvenire l'evento, o null se l'evento si segna a mano. */
 export function membroDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
   return e && 'membro' in e ? e.membro : null;
+}
+/** Il Dedalo dei Memento la cui condizione d'apertura fa avvenire l'evento (migrazione 305), o null se l'evento non è un'apertura. */
+export function dedaloDellEvento(chiave: string): string | null {
+  const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
+  return e && 'dedalo' in e ? e.dedalo : null;
 }
 
 /** Una condizione: uno stato della partita e il valore richiesto. Le date sono «MM-GG» del calendario di gioco. */

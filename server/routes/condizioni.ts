@@ -21,10 +21,9 @@ import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
 import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
-import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
-import { valutazione } from '../services/condizioni/valutatore.js';
+import { esitoAperturaDedalo, valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
@@ -36,7 +35,7 @@ import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { esitiDto } from '../services/esitiAttivitaService.js';
 import { promemoriaLibriPerAttivita } from '../services/modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
-import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
 
 const router = Router();
@@ -85,7 +84,7 @@ router.get('/elenchi', (_req, res) => {
     attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
     // Con il programma punti: l'editor offre «punti negozio» solo ai programmi manuali e «grado cliente» solo a chi ha il rango.
     negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
-    eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null })),
+    eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null || dedaloDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
     // L6: luoghi, tutti i quartieri e gli inviti (questi ultimi si leggono soltanto)
     luoghi: prepared('SELECT l.chiave, l.nome, q.nome AS gruppo FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as NonNullable<ElenchiRegoleDto['luoghi']>,
@@ -113,7 +112,6 @@ function progressi(id: number): ProgressiPartitaDto {
   const st = statoDisponibilitaPartita(id);
   const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
   const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?').all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
-  const dalDiario = apertureDalDiario(id);
   // R10-22/3: da quale voce del Diario viene un evento di storia (l'effetto «storia» della spunta, ancora attiva), e solo se la voce l'ha
   // segnato davvero: se l'evento era già segnato prima della spunta (`prima.gia`) non è stata la voce
 
@@ -121,7 +119,6 @@ function progressi(id: number): ProgressiPartitaDto {
   for (const r of prepared("SELECT s.chiave, v.uid, v.data AS giorno, v.azione AS testo FROM effetto_stato_voce s JOIN main.voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND s.tipo = 'storia' AND json_extract(s.prima_json, '$.gia') = 0 ORDER BY v.data, v.fascia, v.ordine").all(id) as Array<{ chiave: string; uid: string; giorno: string; testo: string }>) {
     dalleVoci.set(r.chiave, [...(dalleVoci.get(r.chiave) ?? []), { uid: r.uid, giorno: r.giorno, testo: r.testo }]);
   }
-  const nomiAperture = new Map(apertureDichiarabili().map((a) => [a.chiave, a.nome]));
   const svolte = new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(id) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte]));
   const punti = new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(id) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti]));
   const negozi = negoziConProgramma();
@@ -129,10 +126,14 @@ function progressi(id: number): ProgressiPartitaDto {
   const serveA = ranghiPerEvento();
   return {
     eventi: EVENTI_STORIA.map((e) => {
+      // 305: l'apertura di un Dedalo dei Memento si calcola dalla sua condizione d'apertura (il Palazzo concluso, la data della guida)
+      if (dedaloDellEvento(e.chiave)) {
+        const a = esitoAperturaDedalo(e.chiave, st);
+        return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto: a.stato === 'verde' ? true : a.stato === 'rosso' ? false : null, apertura: a.condizione };
+      }
       const membro = membroDellEvento(e.chiave);
-      if (!membro) return { chiave: e.chiave, nome: nomiAperture.get(e.chiave) ?? e.nome, origine: 'manuale' as const,
-        avvenuto: (eventiManuali.get(e.chiave) ?? false) || dalDiario.has(e.chiave), manuale: eventiManuali.get(e.chiave) ?? false,
-        ...(nomiAperture.has(e.chiave) ? { dalDiario: dalDiario.has(e.chiave), visiteDiario: dalDiario.get(e.chiave) ?? [] } : {}),
+      if (!membro) return { chiave: e.chiave, nome: e.nome, origine: 'manuale' as const,
+        avvenuto: eventiManuali.get(e.chiave) ?? false,
         ...(dalleVoci.has(e.chiave) ? { daVoci: dalleVoci.get(e.chiave) } : {}),
         ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
       // Tre stati, come i semafori: in squadra, dichiarato fuori, non ancora segnato.
@@ -186,6 +187,7 @@ router.put('/partite/:partita/eventi/:chiave', validate({ params: z.object({ par
   if (!EVENTI_STORIA.some((e) => e.chiave === evento)) throw httpErrors.notFound('evento-non-trovato', 'Evento di storia non trovato.');
   // «Entra in squadra» si legge dalla squadra della partita: si segna lì, non qui.
   if (membroDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'Questo evento si calcola dalla squadra della partita (Partita → Denaro e squadra): non si segna a mano.');
+  if (dedaloDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'L’apertura di un Dedalo dei Memento si calcola dai Palazzi conclusi nella partita: non si segna a mano.');
   const { avvenuto } = req.body as { avvenuto: boolean };
   // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`); evento e data di modifica della partita
   // cambiano insieme o per niente

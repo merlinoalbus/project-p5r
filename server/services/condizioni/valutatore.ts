@@ -17,8 +17,8 @@ import { prepared } from '../../db/dbService.js';
 import { nellaFinestraPalazzo } from './finestrePalazzi.js';
 import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
-import { condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataLeggibile, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneAperturaDedalo, condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
 import { nomeDote } from '../../../shared/doti.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
@@ -98,6 +98,20 @@ function esitoDelPosto(chiave: string, condizioni: () => RequisitoSpillo[] | nul
     st.esitiPosti.set(chiave, stato);
     return stato;
   } finally { st.postiInCorso.delete(chiave); }
+}
+
+/**
+ * 305: l'apertura di un Dedalo dei Memento nella partita, dalla condizione d'apertura del Dedalo (`dungeon_area.condizioni_json`): verde se è
+ * vera, rosso se non lo è, grigio se il Dedalo non ne ha una. `condizione` è la sua lettura («dopo il Palazzo di Madarame»), null senza.
+ */
+export function esitoAperturaDedalo(evento: string, st: StatoValutazione, nomi: NomiCondizioni = nomiCondizioniMemo()): { stato: SemaforoRequisitoDto['stato']; dettaglio: string; condizione: string | null } {
+  const nome = EVENTI_STORIA.find((e) => e.chiave === evento)?.nome ?? evento;
+  const dedalo = dedaloDellEvento(evento);
+  const condizioni = dedalo ? condizioneAperturaDedalo(dedalo) : null;
+  if (!dedalo || !condizioni) return { stato: 'grigio', dettaglio: `${nome}: il Dedalo non ha una condizione d’apertura`, condizione: null };
+  const condizione = condizioni.map((c) => descriviRequisitoSpillo(c, nomi)).join(' e ');
+  const stato = esitoDelPosto(`dedalo:${dedalo}`, () => condizioni, st, nomi) ?? 'grigio';
+  return { stato, condizione, dettaglio: `${nome}: ${stato === 'verde' ? 'sì' : stato === 'rosso' ? 'non ancora' : 'non si può dire'} (si apre ${condizione})` };
 }
 
 /**
@@ -275,6 +289,12 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       if(EVENTI_PESCA.includes(r.evento as typeof EVENTI_PESCA[number])){
         const valore=st.fattiPesca?.get(r.evento)??'ignoto';
         return esito('evento',valore==='ignoto'?'grigio':valore==='avvenuto'?'verde':'rosso',`${nome}: ${valore==='ignoto'?'non attestato per questo momento':valore==='avvenuto'?'avvenuto secondo le fonti temporali':'non ancora avvenuto al limite osservato'}`);
+      }
+      // 305: l'apertura di un Dedalo dei Memento vale quanto la sua condizione d'apertura (il Palazzo concluso, la data della guida); mai segnata
+      // a mano né dichiarata nelle visite, e quindi mai «da segnare» nemmeno in un requisito di rango
+      if (dedaloDellEvento(r.evento)) {
+        const a = esitoAperturaDedalo(r.evento, st, nomi());
+        return esito('evento', a.stato, a.dettaglio);
       }
       const membro = membroDellEvento(r.evento);
       if (membro) {

@@ -44,6 +44,7 @@ const schemaRicevutaLegacy = z.object({
   incontro: z.object({ id: z.number().int().positive().nullable(), marcato: z.number().int().positive().nullable(), confidente: chiaveReceipt,
     nome: z.string(), verso: z.number().int().min(1).max(10), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt),
     rango: z.object({ da: z.number().int().min(0).max(10), a: z.number().int().min(1).max(10), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
+  // le aperture dei Dedali dichiarate nelle visite di prima della 305: si leggono ancora (la ricevuta resta valida), non si scrivono più
   apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
 }).passthrough();
 /** Valida senza ricostruire o scartare campi della fotografia storica. */
@@ -61,8 +62,6 @@ export interface OpzioniSpunta {
   acquisti?: RichiestaRegistraAcquisto[];
   /** Note della risposta al Confidente (1–3) quando l'azione è un incontro con un Confidente; assente = nessun punto. */
   noteRisposta?: 1 | 2 | 3;
-  /** Scelte esplicite della visita, validate da giornataService; assente preserva quelle già registrate. */
-  apertureDedali?: string[];
   /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto (`risolviScelteSpunta`). */
   scelteEsito?: SceltaEsitoSpunta[];
 }
@@ -75,7 +74,6 @@ export interface AzioneConEffetti {
   produce: EffettoAzione[];
   rangoAtteso?: number | null;
   momento?: MomentoIncontro;
-  apertureDedali?: EffettiAzioneDto['apertureDedali'];
   /** La voce porta l'effetto «invito avvenuto» di questo Confidente (R10-11k): i punti dell'incontro valgono ×1,2 (invito accettato subito). */
   invito?: boolean;
   /** La voce del Diario che applica gli effetti e il suo ordine nella giornata: i punti e il passaggio di rango entrano nel registro cronologico (R10-11c). */
@@ -168,8 +166,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }
-  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro && !a.apertureDedali?.length) return null;
-  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(a.apertureDedali?.length ? { apertureDedali: a.apertureDedali } : {}) };
+  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro) return null;
+  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}) };
 }
 
 /** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati e l'incontro (le Doti no). */
