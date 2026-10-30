@@ -46,7 +46,8 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
       case 'dungeon': {
         // L3 (§4.4, «Entra»): con le infiltrazioni della voce scelte, la prima non completata dell'insieme (la calcola il server per la
         // partita, `infiltrazioneDaAprire`; tutte completate = l'ultima); senza, la regola d'atterraggio se c'è, altrimenti per una
-        // voce di Palazzo la prima infiltrazione non completata del Palazzo (`in-corso`). I Memento (campi assenti) restano com'erano.
+        // voce di Palazzo la prima infiltrazione non completata del Palazzo (`in-corso`). I Memento (campi assenti, atterraggio compreso:
+        // il server lo dà solo ai dungeon di tipo Palazzo, 2026-10-30) aprono la loro scheda, come la sezione di un Palazzo.
         const scelte = a.infiltrazioni ?? [];
         if (scelte.length) {
           const daAprire = a.infiltrazioneDaAprire ?? scelte[scelte.length - 1].chiave;

@@ -1472,7 +1472,8 @@ export interface AzionePercorsoDto {
   mappa: { chiave: string; spilloId: number | null; posto?: string | null } | null;
   /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce (2026-10-04); il cartellino del Palazzo porta lì. L6
    *  (R6-17): la destinazione unica `destinazionePalazzo`, la stessa della metro e del campo `mappa` (la regola d'atterraggio del giorno,
-   *  o l'ingresso del Palazzo). Null senza Palazzo o se il Palazzo non ha mappe (allora porta alla sua scheda). Assente vale come null. */
+   *  o l'ingresso del Palazzo). Null senza Palazzo, per un dungeon che non è di tipo Palazzo (i Memento: il cartellino apre la loro
+   *  scheda, 2026-10-30) o se il Palazzo non ha mappe (allora porta alla sua scheda). Assente vale come null. */
   atterraggio?: { mappa: string; spillo: number | null } | null;
   /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (migrazione 105), con `oggi` vero
    *  se il giorno della voce è uno dei giorni del quiz. Assente o vuoto: nessun quiz. */

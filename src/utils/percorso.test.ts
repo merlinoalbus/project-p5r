@@ -53,7 +53,8 @@ describe('collegamentoAzione — il Palazzo con le regole d’atterraggio (2026-
     // senza indicazione del server (nessuna partita): l'ultima dell'insieme
     expect(collegamentoAzione({ ...palazzo(null), infiltrazioni: [{ chiave: 'k-1', nome: 'Primo giorno' }, { chiave: 'k-2', nome: 'Secondo giorno' }], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=k-2');
   });
-  it('una voce di Palazzo senza infiltrazioni né atterraggio apre la prima non completata del Palazzo; i Memento restano com’erano', () => {
+  // 2026-10-30: il server non dà l'atterraggio ai Memento (non sono di tipo Palazzo): il cartellino apre la loro scheda, mai la mappa
+  it('una voce di Palazzo senza infiltrazioni né atterraggio apre la prima non completata del Palazzo; i Memento aprono la loro scheda', () => {
     expect(collegamentoAzione({ ...palazzo(null), infiltrazioni: [], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=in-corso');
     expect(collegamentoAzione({ ...palazzo({ mappa: 'kamoshida/sala', spillo: null }), infiltrazioni: [], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/mappe/kamoshida%2Fsala');
     expect(collegamentoAzione({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'mementos' }, riferimentoTesto: 'Memento', atterraggio: null })?.href).toBe('/guida/dungeon/mementos');
