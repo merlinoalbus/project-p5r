@@ -64,11 +64,13 @@ import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
 import { raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
-import { dataBreve } from '../utils/testoBreve';
+import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
+import { erroreDatePalazzo, type DatePalazzo } from '../../shared/datePalazzo';
+import { SelettoreData } from '../components/shared/SelettoreData';
 import type { AreaDedaloDto, AreaDungeonDto, AreaRiassuntoDto, DungeonDettaglioDto, PlanimetriaAreaDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
 import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDellArea';
 import { BarraCollegamentoPin } from '../components/guida/BarraCollegamentoPin';
-import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IndietroScheda, TitoloScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
@@ -93,21 +95,29 @@ function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null)
   return { chiave: conPin.chiave, nome, testo: `Su questa planimetria non ci sono pin: quelli dell’area stanno su «${nome}».` };
 }
 
-/** Le tre date di un Palazzo come una linea: si apre, conviene rubare, scade. La prosa della guida nel `title`. */
-/** LAY3-4: vero se il valore di una data della guida comincia con una data («12 Aprile», «24 novembre (…)»), falso se è una frase
- *  («Nella tabella di marcia…», «Il Palazzo diventa esplorabile…»). */
-const eUnaData = (valore: string) => /^\d{1,2}\s+\p{L}+$/u.test(dataBreve(valore));
+/** Le date di un Palazzo come una linea: si apre, conviene rubare, la lettera di sfida entro, scade (L13 O6-3: da una fonte sola, le date
+ *  MM-GG della scheda; quel che la guida diceva in più sta nelle note). Mostrate «22 apr»; la data per esteso nel `title`. */
+const TAPPE = [
+  { chiave: 'dal', etichetta: 'Si apre', tono: 'bg-white/10 text-text', segno: 'si-apre' },
+  { chiave: 'furtoConsigliato', etichetta: 'Furto consigliato', tono: 'bg-oro/15 text-oro', segno: 'furto' },
+  // il termine della lettera è un limite come la scadenza: lo stesso segno, col tono del consiglio (l'oro) perché viene prima
+  { chiave: 'letteraEntro', etichetta: 'Lettera entro', tono: 'bg-oro/15 text-oro', segno: 'scade' },
+  { chiave: 'al', etichetta: 'Scade', tono: 'bg-primary/20 text-primary-testo', segno: 'scade' },
+] as const satisfies ReadonlyArray<{ chiave: keyof DungeonDettaglioDto['date']; etichetta: string; tono: string; segno: ChiaveSegno }>;
+
+/** Le date nella bozza di «Correggi la scheda»: MM-GG, '' = nessuna (per la scadenza: senza fine), come vuole `SelettoreData`. */
+interface BozzaDate { dal: string; al: string; furto: string; lettera: string }
+const bozzaDate = (date: DungeonDettaglioDto['date']): BozzaDate => ({ dal: date.dal ?? '', al: date.al ?? '', furto: date.furtoConsigliato ?? '', lettera: date.letteraEntro ?? '' });
+/** Le date della bozza come le vuole la regola (e il server): '' diventa null. */
+const dateDellaBozza = (b: BozzaDate): DatePalazzo => ({ dal: b.dal || null, al: b.al || null, furtoConsigliato: b.furto || null, letteraEntro: b.lettera || null });
+/** Le date della bozza sono diverse da quelle salvate? */
+const dateCambiate = (b: BozzaDate, date: DungeonDettaglioDto['date']): boolean => { const s = bozzaDate(date); return b.dal !== s.dal || b.al !== s.al || b.furto !== s.furto || b.lettera !== s.lettera; };
 
 /** La finestra del Palazzo (o dei Memento) in tappe. Nei Palazzi (LAY3-5, regola dell'utente «intestazione al massimo il 30% della
  *  schermata») la tappa è compatta a ogni larghezza, come era da 1024 px (R3-41): segno e data su una riga, l'etichetta per chi non vede e
  *  nel suggerimento, niente frecce; nei Memento resta com'era (compatta da 1024 px). */
 function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
-  const tappe = [
-    // `breve`: l'etichetta dei chip stretti (sotto i 1024 px) quando il valore è una frase; ha senso da sola (UX3-12)
-    { chiave: 'sblocco', etichetta: 'Si apre', breve: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
-    { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-oro/15 text-oro', segno: 'furto' as const },
-    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary-testo', segno: 'scade' as const },
-  ].filter((t) => !!t.valore);
+  const tappe = TAPPE.flatMap((t) => { const valore = date[t.chiave]; return valore ? [{ ...t, valore }] : []; });
   if (tappe.length === 0) return null;
   return (
     <ol className={`m-0 flex list-none flex-wrap items-stretch p-0 ${memento ? 'gap-1.5' : 'gap-1 lg:gap-1.5'}`} aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
@@ -119,26 +129,12 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
           {i > 0 && memento && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
           {/* Da 1024 px (R3-41; nei Palazzi a ogni larghezza, LAY3-5) la tappa sta su una riga: segno e data, l'etichetta per chi non vede
               e nel suggerimento */}
-          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
+          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${dataGiocoTesto(t.valore)}`}>
             {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
             <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
-            {/* LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) da 1024 px non si tronca:
-                il chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida». Andare a capo (strada (a)) alzava l'intestazione
-                e a 1024×690 il visore usciva dalla soglia di R3-41 (340 su 345). Una data vera resta la data, al massimo 6,5rem. */}
-            {memento
-              ? (eUnaData(t.valore!)
-                ? <span className="font-display testo-17 leading-none lg:max-w-[6.5rem] lg:truncate lg:testo-14">{dataBreve(t.valore!)}</span>
-                : <span className="font-display testo-17 leading-none lg:testo-14">
-                    <span className="lg:hidden">{dataBreve(t.valore!)}</span>
-                    <span aria-hidden className="hidden lg:inline">{t.etichetta}</span>
-                  </span>)
-              // nei Palazzi a ogni larghezza (LAY3-5): una data al massimo 6,5rem, una frase diventa l'etichetta (intera nei «Dettagli»)
-              : eUnaData(t.valore!)
-                ? <span className="max-w-[6.5rem] truncate font-display testo-14 leading-none">{dataBreve(t.valore!)}</span>
-                // UX3-12: da 1024 px l'etichetta intera; sotto, quella breve del tipo della data («Si apre», «Furto», «Scade»), che ha senso
-                // da sola (l'abbreviazione presa dalla prima parola dava «Si»). «Furto consigliato» intero a 375 mandava a capo le date di
-                // Shido (intestazione 234 su 243, oltre la soglia con «Suggerito oggi»)
-                : <span className="font-display testo-14 leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.breve}</span></span>}
+            {/* L13 O6-3: ogni tappa è una data di gioco, «22 apr» (le frasi di Shido e Maruki che a 1024×690 alzavano l'intestazione, LAY3-4,
+                non ci sono più: stanno nelle note). Corta a ogni larghezza: l'intestazione resta entro il 30% (LAY3-5, R3-41). */}
+            <span className={`whitespace-nowrap font-display leading-none ${memento ? 'testo-17 lg:testo-14' : 'testo-14'}`}>{dataGiocoBreve(t.valore)}</span>
           </span>
         </li>
       ))}
@@ -552,11 +548,6 @@ export function DungeonDettaglioPage() {
   const suggerimentoDiffuso = !!d && d.aree.length > 0 && areeSuggerite === d.aree.length;
   /** Se un'area va evidenziata come suggerita: no quando lo sono tutte, perché allora il suggerimento riguarda il Palazzo intero e lo dice il chip dell'intestazione. */
   const areaSuggerita = (chiaveArea: string) => !suggerimentoDiffuso && sugg.evidenziato('aree', chiaveArea);
-  const tempoInProsa = !d ? [] : ([
-    { etichetta: 'Si apre', valore: d.date.sblocco },
-    { etichetta: 'Furto consigliato', valore: d.date.furtoConsigliato },
-    { etichetta: 'Scade', valore: d.date.scadenza },
-  ] as const).filter((t) => !!t.valore && t.valore !== dataBreve(t.valore));
   /** Apre la sezione «Da verificare» (in fondo a «Da raccogliere») e la porta in vista. */
   const apriDaVerificare = () => { const s = sezioneDaVerificare.current; if (s) { s.open = true; s.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } };
   /** R3-41, da 1024 px: il chip che riassume livello («Concluso», «Completato» o «In corso»), Tesoro e boss (✓/✗) e «N da verificare».
@@ -587,7 +578,7 @@ export function DungeonDettaglioPage() {
   const testoAreePlanimetrie = `${areePalazzo.length} ${areePalazzo.length === 1 ? 'area' : 'aree'} · ${d?.planimetrie.length ?? 0} planimetrie${planimetrieComplete !== null ? ` · ${planimetrieComplete} complete` : ''}`;
   // `sotto`: è l'istanza dei «Dettagli» della riga sotto il titolo (quella che si vede sotto i 1024 px); solo lei porta «Sulla mappa di
   // Tokyo», che così non è montato due volte
-  const dettagliGuida = (classe: string, sotto = false) => d && (d.livelloConsigliato || d.note || tempoInProsa.length > 0 || !memento) ? (
+  const dettagliGuida = (classe: string, sotto = false) => d && (d.livelloConsigliato || d.note || !memento) ? (
     <details className={`testo-12 ${classe}`}>
       <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
       <div className="flex flex-col gap-1 pt-1.5">
@@ -611,7 +602,6 @@ export function DungeonDettaglioPage() {
         {!memento && d.sovrano && <TestoRipiegabile testo={`Sovrano: ${d.sovrano}`} massimo={120} className="testo-12 text-text-secondary" />}
         {!memento && d.arcanaSovranoNome && <TestoRipiegabile testo={`Arcana: ${d.arcanaSovranoNome}`} massimo={120} className="testo-12 text-text-secondary" />}
         {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="testo-13 text-text-secondary" />}
-        {tempoInProsa.map((t) => <TestoRipiegabile key={t.etichetta} testo={`${t.etichetta}: ${t.valore}`} massimo={90} className="testo-12 text-text-muted" />)}
         {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="testo-12 text-text-muted whitespace-pre-wrap" />}
       </div>
     </details>
@@ -626,19 +616,50 @@ export function DungeonDettaglioPage() {
   const illustrato = !!useImmagineMappa(memento ? null : d?.illustrazione);
 
   const senzaPin = versioneSenzaPin(versioniArea, planimetriaScelta);
+  // L13 O6-3: «senza fine» solo dove il gioco non fissa una scadenza, come vuole il server: i Memento e i Palazzi col boss dei Memento (Iweleth)
+  const senzaFinePossibile = memento || d?.regolaBoss === 'memento';
   /** La correzione della scheda (nome, sovrano, date, livello, note). Nei Memento è il pulsante ✎ dell'intestazione, in «Modifica la
    *  guida»; nei Palazzi (lotto B) si apre dal menu «Modifica ⋯» e il modulo sta sotto l'intestazione (`onChiudi`). */
   const correzioneScheda = (onChiudi?: () => void) => d && (
     <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
       {...(onChiudi ? { aperta: true, onChiudi } : {})}
-      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
-      onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
+      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloConsigliato: d.livelloConsigliato, note: d.note, ...bozzaDate(d.date) })}
+      onSalva={async (b) => {
+        const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: b.livelloConsigliato, note: b.note };
+        // le date si mandano solo se sono cambiate: senza, la scheda di un posto senza finestra si salverebbe con una data vuota. Una data
+        // rovesciata o mancante non parte: il messaggio è quello del server (la stessa regola, `shared/datePalazzo`)
+        const date = dateDellaBozza(b);
+        if (dateCambiate(b, d.date)) {
+          const errore = erroreDatePalazzo(date, senzaFinePossibile);
+          if (errore || !date.dal) throw new Error(errore?.messaggio ?? 'Manca il giorno in cui si apre.');
+          await aggiornaDungeon(d.chiave, { ...testi, date: { ...date, dal: date.dal } });
+        } else await aggiornaDungeon(d.chiave, testi);
+        await dati.ricarica();
+      }}>
       {(b, cambia) => {
         /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
         const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+        // la regola del server, detta prima di salvare; solo se le date sono state toccate (una scheda senza finestra resta salvabile)
+        const errore = dateCambiate(b, d.date) ? erroreDatePalazzo(dateDellaBozza(b), senzaFinePossibile)?.messaggio : null;
         return <>
           {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
-          {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
+          {/* L13 O6-3: un solo editor delle date del Palazzo, giorni del calendario di gioco (prima tre testi qui e la finestra in «Sulla
+              mappa di Tokyo»). La finestra è anche quella della mappa di Tokyo e dell'arco della storia. */}
+          <fieldset className="m-0 flex w-full basis-full flex-col gap-2 border-0 p-0">
+            <legend className="mb-1 p-0 testo-12 uppercase tracking-[0.08em] text-text-secondary">{memento ? 'Date dei Memento' : 'Date del Palazzo'}</legend>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <SelettoreData etichetta="Si apre" valore={b.dal} onCambia={(v) => cambia({ dal: v })} />
+              {!memento && <SelettoreData etichetta="Furto consigliato" facoltativa valore={b.furto} onCambia={(v) => cambia({ furto: v })} />}
+              {!memento && <SelettoreData etichetta="Lettera entro" facoltativa valore={b.lettera} onCambia={(v) => cambia({ lettera: v })} />}
+              {senzaFinePossibile && (
+                <label className="touch flex items-center gap-1.5 testo-12">
+                  <input type="checkbox" className="h-5 w-5" checked={b.al === ''} onChange={(e) => cambia({ al: e.target.checked ? '' : b.dal })} />Senza fine
+                </label>
+              )}
+              {(!senzaFinePossibile || b.al !== '') && <SelettoreData etichetta="Scade" valore={b.al} onCambia={(v) => cambia({ al: v })} />}
+            </div>
+            {errore && <p className="m-0 testo-12 text-error-testo" role="alert">{errore}</p>}
+          </fieldset>
           {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
         </>; }}
     </CorrezioneGuida>

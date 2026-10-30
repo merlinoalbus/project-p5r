@@ -362,10 +362,11 @@ router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyD
 router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(ripristinaDungeon(String(req.params.chiave)));
 });
-/** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04). */
+/** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04); con L13 O6-3
+ *  anche furto consigliato e lettera, insieme. La pagina modifica le date da «Correggi la scheda» (`PUT /dungeon/:chiave` con `date`). */
 router.put('/dungeon/:chiave/finestra', validate({ params: paramsChiaveGuida, body: bodyFinestraDungeon }), (req, res) => {
-  const { dal, al } = req.body as { dal: string; al: string | null };
-  res.json(impostaFinestra(String(req.params.chiave), dal, al));
+  const { dal, al, furtoConsigliato, letteraEntro } = req.body as { dal: string; al: string | null; furtoConsigliato?: string | null; letteraEntro?: string | null };
+  res.json(impostaFinestra(String(req.params.chiave), dal, al, furtoConsigliato !== undefined && letteraEntro !== undefined ? { furtoConsigliato, letteraEntro } : undefined));
 });
 /** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
 router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {
@@ -451,7 +452,7 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
 });
-/** Editor informativo indipendente dal dettaglio, leggibile anche con elenchi JSON storici malformati. */
+/** Editor informativo (note, note generali, fonti: L13, migrazione 307) indipendente dal dettaglio, leggibile anche con fonti JSON storiche malformate. */
 router.get('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(informazioniConfidente(String(req.params.chiave)));

@@ -12,7 +12,15 @@ import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
 import { nowIso, type AppDatabase } from '../dbService.js';
-import type { CampoInformazioniConfidente, InformazioniConfidente, InformazioniConfidenteRaw } from '../../../shared/disponibilitaConfidenti.js';
+// I tipi com'erano al 23/10 (otto campi): dal lotto O6-2 (migrazione 307) i tipi vivi di `shared/disponibilitaConfidenti.ts` hanno solo note,
+// note generali e fonti; questa copia congelata non deve seguirli.
+interface InformazioniConfidente {
+  giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string; noteGenerali: string; fonti: string[];
+}
+type CampoInformazioniConfidente = keyof InformazioniConfidente;
+interface InformazioniConfidenteRaw {
+  giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string;
+}
 
 const PREFISSO = 'confidente-disponibilita-editor-v1:';
 const COLONNE: Record<CampoInformazioniConfidente, keyof InformazioniConfidenteRaw> = {

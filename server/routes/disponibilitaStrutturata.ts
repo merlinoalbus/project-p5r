@@ -13,10 +13,12 @@ import { FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA } from '.
 const router = Router();
 
 const queryPartita = z.object({ partita: z.coerce.number().int().positive().optional() }).strict();
+// L13 (ondata 6, migrazione 306): la pioggia non è un'eccezione della disponibilità, sta nei requisiti di rango (fonte unica)
 const eccezione = z.discriminatedUnion('tipo', [
-  z.object({ tipo: z.literal('pioggia'), effetto: z.literal('non-disponibile'), ranghi: z.array(z.number().int().min(1).max(10)).max(10).optional() }).strict(),
   z.object({ tipo: z.literal('dopo-rango'), giorni: z.number().int().min(1).max(30), effetto: z.literal('non-disponibile') }).strict(),
   z.object({ tipo: z.literal('fascia-rango'), rango: z.number().int().min(1).max(10), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),
+  z.object({ tipo: z.literal('giorni-rango'), rango: z.number().int().min(1).max(10), giorni: z.array(z.enum(GIORNI_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(8) }).strict(),
+  z.object({ tipo: z.literal('date'), date: z.array(z.string().regex(/^\d{2}-\d{2}$/)).min(1).max(120), effetto: z.literal('non-disponibile') }).strict(),
 ]);
 const bodyDisponibilita = z.object({
   modo: z.enum(MODI_DISPONIBILITA as unknown as [string, ...string[]]).optional(),

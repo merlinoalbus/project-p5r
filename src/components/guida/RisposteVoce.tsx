@@ -15,16 +15,16 @@ import type { AzionePercorsoDto, DialogoVoceDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
-import { simboliNote } from '../../../shared/note';
+import { resaPuntiScelta } from '../../../shared/note';
 
-/** Le scelte di un evento: la (o le) migliori in evidenza, il valore in note o come lo scrive la guida. */
+/** Le scelte di un evento: la (o le) migliori in evidenza, il valore in note (la resa unica `resaPuntiScelta`, col ramo amore dove la guida lo dà). */
 function ScelteEvento({ d }: { d: DialogoVoceDto }) {
-  const migliore = Math.max(0, ...d.scelte.map((s) => s.note ?? 0));
+  const migliore = Math.max(0, ...d.scelte.map((s) => s.punti ?? 0));
   return (
     <ol className="m-0 p-0 list-none flex flex-col gap-1">
       {d.scelte.map((s) => {
-        const top = migliore > 0 && s.note === migliore;
-        const valore = s.note !== null ? simboliNote(s.note) : s.puntiTesto ?? '';
+        const top = migliore > 0 && s.punti === migliore;
+        const valore = resaPuntiScelta(s);
         return (
           <li key={s.ordine} className={`risposta-voce ${top ? 'risposta-voce--migliore' : ''}`} title={s.avviso ?? undefined}>
             <span className="text-text-muted tabular-nums">{s.ordine}.</span>

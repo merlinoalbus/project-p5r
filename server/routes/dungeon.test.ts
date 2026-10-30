@@ -32,7 +32,9 @@ describe('API dungeon', () => {
     const k = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
     expect(k.aree).toHaveLength(18);
     expect(k.aree[0].ordine).toBe(0);
-    expect(k.date.scadenza.length).toBeGreaterThan(0);
+    // L13 O6-3: le date sono giorni del calendario di gioco (MM-GG), dalla finestra e dalle colonne strutturate
+    expect(k.date.al).toMatch(/^\d{2}-\d{2}$/);
+    expect(k.date.dal).toBe(k.finestra?.dal);
     const tipi = new Set(['sicura', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'altro']);
     for (const a of k.aree) {
       expect('mappa' in a).toBe(false); // L1: il campo morto della vecchia pianta dell'area non c'è più

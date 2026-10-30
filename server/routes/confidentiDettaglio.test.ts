@@ -27,7 +27,9 @@ describe('API dettaglio Confidenti', () => {
       expect(d.abilita.length).toBeGreaterThan(0);
       expect(d.dialoghi.length).toBeGreaterThan(0);
       expect(d.fonti.length).toBeGreaterThan(0);
-      expect(d.disponibilita.luogo.length).toBeGreaterThan(0);
+      // L13 (O6-2, migrazione 307): quando e dove si incontra è la disponibilità strutturata; della prosa restano le note
+      expect(d.disponibilitaStrutturata).toBeDefined();
+      expect(Object.keys(d.disponibilita)).toEqual(['note']);
       dialoghi += d.dialoghi.length;
       for (const x of d.dialoghi) {
         scelte += x.scelte.length;
@@ -45,7 +47,9 @@ describe('API dettaglio Confidenti', () => {
     expect(takemi.abilita[0]).toMatchObject({ rango: 1, nome: 'Rigenerazione' });
     expect(takemi.regali.some((g) => g.nome === 'Castella')).toBe(true);
     // Takemi rango 1: la guida dà solo la sequenza e l'esito («RANGO CONFIDENTE +1!»), nessun punto per scelta
-    expect(takemi.dialoghi[0].scelte[0]).toMatchObject({ punti: null, puntiTesto: null, romantica: false });
+    // migrazione 309: i punti solo numerici, senza il testo della guida accanto; il ramo amore solo dove dà altro
+    expect(takemi.dialoghi[0].scelte[0]).toMatchObject({ punti: null, puntiAmore: null, romantica: false });
+    expect(takemi.dialoghi.flatMap((d) => d.scelte).some((s) => 'puntiTesto' in s)).toBe(false);
     expect(takemi.dialoghi[0].note).toContain('Esito della sequenza');
     const sojiro = (await request(app).get('/api/compendio/confidenti/sojiro')).body.data as ConfidenteDettaglioDto;
     expect(sojiro.dialoghi.find((x) => x.etichetta === '2')!.scelte.every((x) => x.punti === 2)).toBe(true);

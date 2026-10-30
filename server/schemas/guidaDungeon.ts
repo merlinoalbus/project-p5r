@@ -31,9 +31,13 @@ const dettaglioPunto = z.union([
 ]);
 
 export const paramsChiaveGuida =z.object({ chiave: z.string().min(1).max(200) });
+/** Le date di un Palazzo (L13 O6-3, migrazione 308): giorni del calendario di gioco; `al`, furto e lettera null = la guida non li dà
+ *  (l'esistenza del giorno e l'ordine apertura ≤ furto ≤ lettera ≤ scadenza li controlla `impostaFinestra`). */
+const consigliPalazzo = { furtoConsigliato: dataGioco.nullable(), letteraEntro: dataGioco.nullable() };
 export const bodyDungeon = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.dungeon.nome).optional(), sovrano: z.string().max(LIMITI_GUIDA.dungeon.sovrano).optional(),
-  dataSblocco: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), dataScadenza: z.string().max(LIMITI_GUIDA.dungeon.data).optional(), furtoConsigliato: z.string().max(LIMITI_GUIDA.dungeon.data).optional(),
+  /** L13 O6-3: le date al posto dei tre testi di prima («Si apre», «Furto consigliato», «Scade»), una fonte sola. */
+  date: z.object({ dal: dataGioco, al: dataGioco.nullable(), ...consigliPalazzo }).optional(),
   livelloConsigliato: z.string().max(LIMITI_GUIDA.dungeon.livello).optional(), note: z.string().max(LIMITI_GUIDA.dungeon.note).optional(),
   /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
   voceBossFinale: z.string().min(1).max(200).nullable().optional(),
@@ -111,8 +115,12 @@ export const paramsPinDelPunto = z.object({ chiave: z.string().min(1).max(200), 
 /** Il giorno MM-GG del calendario di gioco (l'esistenza del giorno la controlla il servizio con `dataValida`). */
 const giornoGioco = z.string().regex(/^\d{2}-\d{2}$/, 'Il giorno è nel formato MM-GG.');
 
-/** La finestra del Palazzo sulla mappa di Tokyo (2026-10-04): da quando c'è e fino a quando (null = senza fine). */
-export const bodyFinestraDungeon = z.object({ dal: giornoGioco, al: giornoGioco.nullable() });
+/** La finestra del Palazzo sulla mappa di Tokyo (2026-10-04): da quando c'è e fino a quando (null = senza fine); con L13 O6-3, insieme,
+ *  il furto consigliato e il termine della lettera (tutti e due o nessuno: senza, restano quelli salvati). */
+export const bodyFinestraDungeon = z.object({
+  dal: giornoGioco, al: giornoGioco.nullable(),
+  furtoConsigliato: giornoGioco.nullable().optional(), letteraEntro: giornoGioco.nullable().optional(),
+}).refine((b) => (b.furtoConsigliato === undefined) === (b.letteraEntro === undefined), { message: 'Il furto consigliato e il termine della lettera si danno insieme.' });
 
 /**
  * Le regole d'atterraggio dalla mappa di Tokyo (2026-10-04), nell'ordine in cui si provano: quando valgono (date nulle = sempre;

@@ -19,7 +19,8 @@ import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
-import { dataBreve, sintesi } from '../utils/testoBreve';
+import { sintesi } from '../utils/testoBreve';
+import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
@@ -76,8 +77,9 @@ export function DungeonPage() {
                       </div>
                       {d.sovrano && <span className="testo-13 text-text-secondary">{d.sovrano}</span>}
                       <div className="flex flex-wrap gap-1.5">
-                        {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}
-                        {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
+                        {/* L13 O6-3: le date della scheda (MM-GG, una fonte sola), «11 apr»; per esteso nel suggerimento */}
+                        {d.date.dal && <span className="chip" title={`Si apre: ${dataGiocoTesto(d.date.dal)}`}>Sblocco {dataGiocoBreve(d.date.dal)}</span>}
+                        {d.date.al && <span className="chip chip--attivo" title={`Scade: ${dataGiocoTesto(d.date.al)}`}>Scadenza {dataGiocoBreve(d.date.al)}</span>}
                         {/* la prima frase «Non esplicitato/indicato da…» è una nota di ricerca: nella chip si salta e si legge quel che segue («Il boss
                             finale è di Livello 11»); il testo intero resta nel `title` e nella scheda */}
                         {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato.replace(/^Non (esplicitato|indicato).*?\.\s+(?=[A-ZÀ-Ý])/, '') || d.livelloConsigliato, 36)}</span>}

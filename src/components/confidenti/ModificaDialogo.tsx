@@ -1,11 +1,16 @@
 // ============================================================
-// ModificaDialogo — le note e le scelte di un dialogo di rango, con i punti: «Modifica» e «Ripristina» (R9-07/4, R11-15/2)
+// ModificaDialogo — le note e le scelte di un dialogo di rango, con i punti: «Modifica» e «Ripristina» (R9-07/4, R11-15/2, L13 O6-4)
 // ============================================================
 //
-// La matita sta accanto al dialogo (Risposte migliori per rango). La finestra mostra le note e le scelte, ciascuna con testo, punti (nessuno, o un
-// numero da 0 a 100), testo dei punti come lo scrive la guida («♪♪»), «romantica» e avviso; le scelte si possono aggiungere, togliere e spostare (il
-// server le rinumera da 1). Si inviano solo i campi cambiati: un dialogo non toccato non perde la sua fotografia. «Ripristina» rimette note e scelte
-// della guida; la scheda non dice se il dialogo è già stato cambiato, quindi un dialogo mai modificato risponde 409 e lo si dice con parole.
+// La matita sta accanto al dialogo (Risposte migliori per rango). È la `FinestraModifica` comune: corpo che scorre, piè fisso con
+// «Ripristina», «Annulla» e «Salva», conferma prima di chiudere con modifiche non salvate. Per ogni scelta: testo, punti come scelta a
+// pulsanti (Nessun punto · ♪ · ♪♪ · ♪♪♪, i soli valori della guida), l'interruttore «Punti diversi nel ramo amore» che mostra la stessa
+// scelta per il ramo amore, «romantica» e avviso; le scelte si aggiungono, si tolgono e si spostano (il server le rinumera da 1).
+// L13 (ondata 6, lotto O6-4, migrazione 309): prima c'erano un numero da 0 a 100 e il testo libero «Punti come li scrive la guida»; i punti
+// ora sono solo numerici e la resa è unica (`resaPuntiScelta`). «Nessun punto» vale anche per la scelta di cui la guida non dà punti: la si
+// lascia com'è finché non si sceglie un'altra nota; scelto dopo una nota, lo scrive come zero.
+// Si inviano solo i campi cambiati: un dialogo non toccato non perde la sua fotografia. «Ripristina» rimette note e scelte della guida; la
+// scheda non dice se il dialogo è già stato cambiato, quindi un dialogo mai modificato risponde 409 e lo si dice con parole.
 // Rotte: PUT `/api/compendio/confidenti/:chiave/dialoghi/:id`, POST `…/dialoghi/:id/ripristina`.
 // ============================================================
 
@@ -14,21 +19,36 @@ import { isApiError, ripristinaDialogoConfidente, salvaDialogoConfidente } from 
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { DialogoConfidenteDto } from '../../types';
-import { Modal } from '../shared/Modal';
+import { FinestraModifica } from '../shared/FinestraModifica';
+import { Campo, CampoTesto, SezioneCampi } from '../shared/Campo';
+import { FilaScelta } from '../guida/FilaScelta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { conferma, CHIUDI_SENZA_SALVARE, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
+import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { SCELTE_NOTE } from '../../../shared/note';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-/** Una scelta in modifica: i punti restano testo finché si scrive («» = nessuno). */
-interface SceltaBozza { testo: string; punti: string; puntiTesto: string; romantica: boolean; avviso: string }
+/** Una scelta in modifica: i punti come numeri (null = la guida non ne dà), il ramo amore acceso solo se la guida dà un valore diverso. */
+interface SceltaBozza { testo: string; punti: number | null; amore: boolean; puntiAmore: number | null; romantica: boolean; avviso: string }
 
-const daDto = (s: DialogoConfidenteDto['scelte'][number]): SceltaBozza => ({ testo: s.testo, punti: s.punti === null ? '' : String(s.punti), puntiTesto: s.puntiTesto ?? '', romantica: s.romantica, avviso: s.avviso ?? '' });
-const puntiValidi = (p: string): boolean => p.trim() === '' || (Number.isFinite(Number(p)) && Number(p) >= 0 && Number(p) <= 100);
-const perServer = (s: SceltaBozza) => ({ testo: s.testo.trim(), punti: s.punti.trim() === '' ? null : Number(s.punti), puntiTesto: s.puntiTesto.trim() === '' ? null : s.puntiTesto, romantica: s.romantica, avviso: s.avviso.trim() === '' ? null : s.avviso });
+/** Le voci della scelta dei punti: nessuno e da una a tre note (i soli valori della guida). */
+const NESSUNO = 'nessuno';
+const OPZIONI_PUNTI = [{ chiave: NESSUNO, nome: 'Nessun punto' }, ...SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }))];
+/** La voce accesa per un valore: «Nessun punto» per zero e per nessun punto dato; '' (nessuna accesa) per un valore ancora da scegliere. */
+const voceDi = (p: number | null, vuotoENessuno: boolean): string => (p === null ? (vuotoENessuno ? NESSUNO : '') : p === 0 ? NESSUNO : String(p));
+
+const daDto = (s: DialogoConfidenteDto['scelte'][number]): SceltaBozza => {
+  const amore = s.puntiAmore !== null && s.puntiAmore !== (s.punti ?? 0);
+  return { testo: s.testo, punti: s.punti, amore, puntiAmore: amore ? s.puntiAmore : null, romantica: s.romantica, avviso: s.avviso ?? '' };
+};
+const perServer = (s: SceltaBozza) => ({ testo: s.testo.trim(), punti: s.punti, puntiAmore: s.amore ? s.puntiAmore : null, romantica: s.romantica, avviso: s.avviso.trim() === '' ? null : s.avviso });
+/** Il problema del ramo amore della scelta, o null: acceso, va scelto e deve dire altro dal ramo amicizia. */
+const erroreAmore = (s: SceltaBozza): string | null => !s.amore ? null
+  : s.puntiAmore === null ? 'Scegli i punti del ramo amore.'
+  : s.puntiAmore === (s.punti ?? 0) ? 'Sono gli stessi del ramo amicizia: spegni l’interruttore.' : null;
 
 /** La matita del dialogo e, dopo una modifica fatta da qui, il chip «Modificato». */
 // L12 (passo 8): nel rilascio (sola lettura) la modifica non esiste; la condizione è costante di build, `ModificaDialogoReale` esce dal bundle
@@ -55,18 +75,16 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   const noteCambiate = note !== partenzaNote;
   const scelteCambiate = JSON.stringify(scelte) !== JSON.stringify(partenzaScelte);
   const sporca = noteCambiate || scelteCambiate;
-  const valida = scelte.length <= 40 && scelte.every((s) => s.testo.trim() !== '' && puntiValidi(s.punti));
+  const valida = scelte.length <= 40 && scelte.every((s) => s.testo.trim() !== '' && erroreAmore(s) === null);
   useBozzaSporca(`dialogo:${dialogo.id}`, `il dialogo di ${nome}`, sporca);
 
-  const chiudi = async () => {
-    if (occupato) return;
-    if (sporca && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
-    onChiudi();
-  };
   const cambiaScelta = (i: number, parte: Partial<SceltaBozza>) => setScelte((l) => l.map((x, j) => (j === i ? { ...x, ...parte } : x)));
   const sposta = (i: number, verso: -1 | 1) => setScelte((l) => { const n = [...l]; const j = i + verso; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j]!, n[i]!]; return n; });
+  /** «Nessun punto» lascia com'è la scelta senza punti nella guida (o già a zero); dopo una nota scrive zero. */
+  const puntiDa = (voce: string, attuale: number | null): number | null => (voce === NESSUNO ? (attuale === null ? null : 0) : Number(voce));
 
   const salva = async () => {
+    if (!sporca || !valida) return;
     setOccupato(true);
     try {
       const esito = await salvaDialogoConfidente(chiave, dialogo.id, { ...(noteCambiate ? { note } : {}), ...(scelteCambiate ? { scelte: scelte.map(perServer) } : {}) });
@@ -91,46 +109,40 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   };
 
   return (
-    <Modal titolo={`Dialogo del rango ${dialogo.etichetta}: ${nome}`} aperta larga onChiudi={chiudi} azioni={(
-      <div className="flex w-full flex-wrap justify-end gap-2">
-        <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void ripristina()} />
-        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca || !valida} onClick={() => void salva()} />
-      </div>
-    )}>
-      <div className="flex flex-col gap-3 testo-13">
-        <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. I punti sono un numero da 0 a 100; lasciali vuoti se la scelta non ne dà. «Ripristina» rimette note e scelte come nella guida.</p>
-        <label className="flex flex-col gap-1">Note del dialogo
-          <textarea className="form-input" rows={3} value={note} maxLength={4000} disabled={occupato} onChange={(e) => setNote(e.target.value)} />
-        </label>
-        <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Scelte</legend>
-          {scelte.length === 0 && <span className="text-text-muted">Nessuna scelta.</span>}
-          <ol className="m-0 flex list-none flex-col gap-2 p-0">{scelte.map((s, i) => (
-            <li key={i} className="flex flex-col gap-2 rounded border border-border p-2" aria-label={`Scelta ${i + 1}`}>
-              <label className="flex flex-col gap-1">Testo della scelta {i + 1}
-                <input className="form-input" value={s.testo} maxLength={500} disabled={occupato} aria-invalid={s.testo.trim() === ''} onChange={(e) => cambiaScelta(i, { testo: e.target.value })} />
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <label className="flex flex-col gap-1">Punti
-                  <input className="form-input w-24" type="number" inputMode="decimal" min={0} max={100} step="any" value={s.punti} disabled={occupato} aria-invalid={!puntiValidi(s.punti)} onChange={(e) => cambiaScelta(i, { punti: e.target.value })} />
-                </label>
-                <label className="flex min-w-0 flex-1 flex-col gap-1">Punti come li scrive la guida
-                  <input className="form-input" value={s.puntiTesto} maxLength={200} disabled={occupato} onChange={(e) => cambiaScelta(i, { puntiTesto: e.target.value })} />
-                </label>
-              </div>
-              <label className="flex flex-col gap-1">Avviso (facoltativo)
-                <input className="form-input" value={s.avviso} maxLength={500} disabled={occupato} onChange={(e) => cambiaScelta(i, { avviso: e.target.value })} />
-              </label>
-              <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={s.romantica} disabled={occupato} onChange={(e) => cambiaScelta(i, { romantica: e.target.checked })} /> Avvia o riguarda la relazione romantica</label>
-              <div className="flex flex-wrap gap-2">
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su la scelta ${i + 1}`} />
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù la scelta ${i + 1}`} />
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setScelte((l) => l.filter((_, j) => j !== i))} aria-label={`Togli la scelta ${i + 1}`} />
-              </div>
-            </li>))}</ol>
-          <div><PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una scelta" disabled={occupato || scelte.length >= 40} onClick={() => setScelte((l) => [...l, { testo: '', punti: '', puntiTesto: '', romantica: false, avviso: '' }])} /></div>
-        </fieldset>
-      </div>
-    </Modal>
+    <FinestraModifica titolo={`Dialogo del rango ${dialogo.etichetta}: ${nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && valida} occupato={occupato} sporca={sporca}
+      azioniExtra={<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" disabled={occupato} onClick={() => void ripristina()} />}>
+      <p className="m-0 testo-13 text-text-muted">Le modifiche valgono per tutte le partite. «Ripristina» rimette note e scelte come nella guida.</p>
+      <SezioneCampi titolo="Note del dialogo">
+        <CampoTesto etichetta="Note" tipo="lungo" valore={note} onCambia={setNote} massimo={4000} disabilitato={occupato} />
+      </SezioneCampi>
+      {scelte.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessuna scelta.</p>}
+      {scelte.map((s, i) => (
+        <SezioneCampi key={i} titolo={`Scelta ${i + 1}`}>
+          <CampoTesto etichetta="Testo" valore={s.testo} onCambia={(v) => cambiaScelta(i, { testo: v })} massimo={500} obbligatorio largo disabilitato={occupato}
+            errore={s.testo.trim() === '' ? 'Scrivi il testo della scelta.' : undefined} />
+          <Campo etichetta="Punti" senzaGruppo>
+            <FilaScelta etichetta={`Punti della scelta ${i + 1}`} valore={voceDi(s.punti, true)} opzioni={OPZIONI_PUNTI} disabilitato={occupato}
+              onCambia={(v) => cambiaScelta(i, { punti: puntiDa(v, s.punti) })} />
+          </Campo>
+          <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={s.amore} disabled={occupato}
+            onChange={(e) => cambiaScelta(i, { amore: e.target.checked, puntiAmore: null })} /> Punti diversi nel ramo amore</label>
+          {s.amore && (
+            <Campo etichetta="Punti nel ramo amore" senzaGruppo errore={erroreAmore(s) ?? undefined}>
+              <FilaScelta etichetta={`Punti della scelta ${i + 1} nel ramo amore`} valore={voceDi(s.puntiAmore, false)} opzioni={OPZIONI_PUNTI} disabilitato={occupato}
+                onCambia={(v) => cambiaScelta(i, { puntiAmore: v === NESSUNO ? 0 : Number(v) })} />
+            </Campo>
+          )}
+          <CampoTesto etichetta="Avviso (facoltativo)" valore={s.avviso} onCambia={(v) => cambiaScelta(i, { avviso: v })} massimo={500} largo disabilitato={occupato} />
+          <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={s.romantica} disabled={occupato} onChange={(e) => cambiaScelta(i, { romantica: e.target.checked })} /> Avvia o riguarda la relazione romantica</label>
+          <div className="flex flex-wrap gap-2">
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su la scelta ${i + 1}`} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù la scelta ${i + 1}`} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setScelte((l) => l.filter((_, j) => j !== i))} aria-label={`Togli la scelta ${i + 1}`} />
+          </div>
+        </SezioneCampi>
+      ))}
+      <div><PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una scelta" disabled={occupato || scelte.length >= 40}
+        onClick={() => setScelte((l) => [...l, { testo: '', punti: null, amore: false, puntiAmore: null, romantica: false, avviso: '' }])} /></div>
+    </FinestraModifica>
   );
 }

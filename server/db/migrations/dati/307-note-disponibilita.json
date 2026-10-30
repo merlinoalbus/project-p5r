@@ -1,0 +1,356 @@
+{
+  "descrizione": "Migrazione 307 (L13, ondata 6, lotto O6-2): le colonne in prosa della disponibilità dei Confidenti escono come fonte. Per ogni Confidente: il testo di oggi (letto il 2026-10-30 su una copia portata alla 306) di ogni colonna in prosa; per giorni e fasce la lettura in struttura (che la migrazione confronta con la riga) o il motivo per cui la prosa dice altro; per note e note generali il testo nuovo, senza le frasi già rese dalla struttura della disponibilità o dai requisiti di rango, e le frasi tolte con la sede che le rende. Le frasi con un vincolo non strutturato restano.",
+  "letture": {
+    "settimanale": "la riga ha modo «settimanale» e la colonna strutturata (giorni_settimana_json o fasce_orarie_json) è esattamente questo elenco",
+    "modo": "la riga ha questo modo e la colonna strutturata è vuota (il modo dice da sé quando si incontra)",
+    "dateDeiRequisiti": "la riga ha modo «trama» e le date «dal» dei requisiti di rango del Confidente sono esattamente queste"
+  },
+  "fonti": {
+    "takemi": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/",
+    "yusuke": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-yusuke-imperatore/"
+  },
+  "voci": [
+    {
+      "confidente": "akechi",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab"] } },
+      "fasce": { "atteso": "[\"sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Inizialmente Kichijoji (freccette/biliardo); poi Jazz Club, sala giochi, Café Leblanc, Kichijoji, Memento e Palazzo di Shido a seconda del rango",
+      "sbloccoData": "10 giugno",
+      "sbloccoRequisiti": "Evento narrativo automatico dopo l'incontro con Akechi in TV; da quel momento è contattabile la sera da lunedì a sabato a Kichijoji, salvo blocchi narrativi ai singoli ranghi (vedi note per rango)",
+      "note": {
+        "atteso": "Disponibile anche con pioggia, tranne per lo specifico appuntamento di Rango 4 (Jazz Club). Akechi NON consegna un regalo d'addio il 19 marzo: le abilità confidente vanno riacquisite in Nuova Partita+. Attenzione: le fonti in lingua inglese (RPG Site, Inverse) descrivono una disponibilità settimanale leggermente diversa da quella riportata da AllGameStaff — mercoledì e sabato sera come base, con l'aggiunta di martedì e sabato fra metà luglio e metà agosto — mentre AllGameStaff generalizza 'lunedì-sabato sera'.",
+        "nuovo": "Akechi NON consegna un regalo d'addio il 19 marzo: le abilità confidente vanno riacquisite in Nuova Partita+. Attenzione: le fonti in lingua inglese (RPG Site, Inverse) descrivono una disponibilità settimanale leggermente diversa da quella riportata da AllGameStaff — mercoledì e sabato sera come base, con l'aggiunta di martedì e sabato fra metà luglio e metà agosto — mentre AllGameStaff generalizza 'lunedì-sabato sera'.",
+        "tolte": [
+          { "frase": "Disponibile anche con pioggia, tranne per lo specifico appuntamento di Rango 4 (Jazz Club).", "resaDa": "requisito di rango 4 «meteo non-piove», l'unico di pioggia del Confidente" }
+        ]
+      }
+    },
+    {
+      "confidente": "ann",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Venerdì\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "ven", "dom"] } },
+      "fasce": { "atteso": "[\"giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Centro Commerciale Sotterraneo della Stazione di Shibuya (l'Aula 2-D solo il 6 maggio)",
+      "sbloccoData": "Rango 1: 15 aprile (dopo il Palazzo di Kamoshida)",
+      "sbloccoRequisiti": "Rango 2 richiede Dote Gentilezza (Kindness) almeno 2. Rango 9 presenta una scelta esclusiva che determina il percorso romantico vs amicizia."
+    },
+    {
+      "confidente": "chihaya",
+      "giorni": { "atteso": "[\"Martedì\",\"Giovedì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["mar", "gio", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Shinjuku",
+      "sbloccoData": "",
+      "sbloccoRequisiti": "Completare la richiesta Memento 'Un fidanzato violento'",
+      "note": {
+        "atteso": "Non disponibile in caso di pioggia. La Lettura delle affinità (Rango 5+) costa 5.000¥ per potenziare il legame con un altro Confidente a scelta; al raggiungimento del Rango 9 vengono restituiti 100.000¥ complessivamente spesi in precedenza per le letture.",
+        "nuovo": "La Lettura delle affinità (Rango 5+) costa 5.000¥ per potenziare il legame con un altro Confidente a scelta; al raggiungimento del Rango 9 vengono restituiti 100.000¥ complessivamente spesi in precedenza per le letture.",
+        "tolte": [
+          { "frase": "Non disponibile in caso di pioggia.", "resaDa": "requisiti «meteo non-piove» di tutti i ranghi, dall'1 al 10" }
+        ]
+      }
+    },
+    {
+      "confidente": "futaba",
+      "giorni": { "atteso": "[\"Mercoledì\",\"Giovedì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["mer", "gio", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Principalmente Café Leblanc / stanza di Futaba (attico Leblanc); anche Akihabara, Biblioteca, Diner, stanza del protagonista",
+      "sbloccoData": "31 agosto",
+      "sbloccoRequisiti": "Nessun requisito di Dote sociale per l'avvio; evento automatico legato alla trama con Sojiro"
+    },
+    {
+      "confidente": "gemelle",
+      "giorni": { "atteso": "[\"Sempre accessibile (Stanza di Velluto), nessun vincolo di giorno della settimana\"]", "lettura": { "modo": "stanza-velluto" } },
+      "fasce": { "atteso": "[\"Qualsiasi momento in cui sia possibile accedere alla Stanza di Velluto\"]", "lettura": { "modo": "stanza-velluto" } },
+      "luogo": "Stanza di Velluto (accessibile dal 18 maggio, durante il Palazzo di Madarame)",
+      "sbloccoData": "Rango 1 disponibile da subito dopo l'accesso alla Stanza di Velluto (dal 18 maggio, durante il Palazzo di Madarame); date consigliate dalla guida per procedere in modo efficiente: 19 maggio (R1), 8 giugno (R2-R4), 26 giugno (R5), 1 agosto/6 settembre (R6), 6 settembre (R7-R8), 6 novembre (R9-R10)",
+      "sbloccoRequisiti": "Nessuna Dote sociale richiesta. Requisito reale: possedere/fondere una Persona che eredita l'abilità specifica indicata per ogni rango (vedi campo abilità/descrizione).",
+      "noteGenerali": {
+        "atteso": "Confidente atipico: nel menu confidenti compaiono come 'Gemelle Carceriere' (Twin Wardens), poi 'Lavenza' a fine gioco. Il rango NON avanza tramite scelte di dialogo affini né tramite regali (non accettano doni), ma esclusivamente fondendo, nella Stanza di Velluto, una Persona bersaglio specifica che possiede una determinata abilità ereditata (es. Mabufu, Frei, Tarukaja, ecc.). Non risultano romanzabili in nessuna fonte consultata (il rapporto è quello di carcerieri/assistenti della Stanza di Velluto). Esistono inoltre delle 'uscite' (Hangout) opzionali con le gemelle nel mondo reale, separate dal rango del confidente, che offrono carte abilità bonus.",
+        "nuovo": "Confidente atipico: nel menu confidenti compaiono come 'Gemelle Carceriere' (Twin Wardens), poi 'Lavenza' a fine gioco. Il rango NON avanza tramite scelte di dialogo affini né tramite regali (non accettano doni). Non risultano romanzabili in nessuna fonte consultata (il rapporto è quello di carcerieri/assistenti della Stanza di Velluto). Esistono inoltre delle 'uscite' (Hangout) opzionali con le gemelle nel mondo reale, separate dal rango del confidente, che offrono carte abilità bonus.",
+        "tolte": [
+          { "frase": "ma esclusivamente fondendo, nella Stanza di Velluto, una Persona bersaglio specifica che possiede una determinata abilità ereditata (es. Mabufu, Frei, Tarukaja, ecc.)", "resaDa": "requisiti «persona-abilita» dei ranghi 1-10 (la Persona da consegnare e l'abilità che deve conoscere)" }
+        ]
+      }
+    },
+    {
+      "confidente": "haru",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab"] } },
+      "fasce": { "atteso": "[\"giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Tetto della Shujin Academy (principale); anche Big Bang Burger, Libreria di Jinbocho, Leblanc",
+      "sbloccoData": "31 ottobre",
+      "sbloccoRequisiti": "Avere Persona con Arcano Imperatrice",
+      "note": {
+        "atteso": "Rango 4 richiede Perizia al massimo (Migliore). Rango 9 non disponibile prima del 25 novembre e presenta bivio romantico/amicizia esplicito.",
+        "nuovo": "Rango 9 presenta un bivio romantico/amicizia esplicito.",
+        "tolte": [
+          { "frase": "Rango 4 richiede Perizia al massimo (Migliore).", "resaDa": "requisito di rango 4 «dote perizia 5»" },
+          { "frase": "Rango 9 non disponibile prima del 25 novembre", "resaDa": "requisito di rango 9 «data dal 11-25»" }
+        ]
+      }
+    },
+    {
+      "confidente": "hifumi",
+      "giorni": { "atteso": "[\"Lunedì\",\"Mercoledì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mer", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Chiesa a Kanda",
+      "sbloccoData": "Dal 28 giugno (data di gioco)",
+      "sbloccoRequisiti": "Dote Fascino >= 3; si sblocca dopo aver raggiunto il Rango 2 del confidente di Yusuke (Imperatore), che menziona la giocatrice di shogi a Kanda",
+      "note": {
+        "atteso": "I ranghi 4 e 6 non sono disponibili in caso di pioggia. Il rango 7 richiede Dote Conoscenza 5. La 'Lettura delle affinità' da Chihaya (5.000 yen) è consigliata per i ranghi 7 e 10.",
+        "nuovo": "La 'Lettura delle affinità' da Chihaya (5.000 yen) è consigliata per i ranghi 7 e 10.",
+        "tolte": [
+          { "frase": "I ranghi 4 e 6 non sono disponibili in caso di pioggia.", "resaDa": "requisiti «meteo non-piove» dei ranghi 4 e 6" },
+          { "frase": "Il rango 7 richiede Dote Conoscenza 5.", "resaDa": "requisito di rango 8 «dote conoscenza 5» (il passaggio dal rango 7)" }
+        ]
+      }
+    },
+    {
+      "confidente": "igor",
+      "giorni": { "atteso": "[\"12 aprile\",\"20 aprile\",\"5 maggio\",\"1 giugno\",\"11 giugno\",\"27 giugno\",\"22 agosto\",\"31 agosto\",\"11 ottobre\",\"24 dicembre\"]", "diverso": "le date in prosa non coincidono con i requisiti di rango: 1 giugno e 27 giugno sono i Palazzi di Madarame e Kaneshiro (ranghi 4 e 6), il 31 agosto non ha un requisito (rango 8)" },
+      "fasce": { "atteso": "[\"notte (durante il sonno, sogno nella Stanza di Velluto)\"]", "diverso": "«notte» non è una fascia della struttura (modo «trama», senza fasce)" },
+      "luogo": "Stanza di Velluto (dimensione onirica, non un luogo fisico di Tokyo)",
+      "sbloccoData": "Rango 1: 12 aprile (dopo l'incursione nel Palazzo di Kamoshida)",
+      "sbloccoRequisiti": "Nessuna Dote sociale richiesta. Igor non accetta regali. Il legame avanza automaticamente ai punti chiave della trama, senza necessità di 'uscite' pianificate dal giocatore."
+    },
+    {
+      "confidente": "iwai",
+      "giorni": { "atteso": "[\"Giovedì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["gio", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Negozio Softair (Untouchable), Central Street, Shibuya",
+      "sbloccoData": "15 agosto",
+      "sbloccoRequisiti": "Dote sociale Coraggio rango 4",
+      "note": {
+        "atteso": "Gli eventi di rango 4 e 9 non sono disponibili nei giorni di pioggia. Non risultano periodi di indisponibilità legati a Palazzi o malattie.",
+        "nuovo": "Non risultano periodi di indisponibilità legati a Palazzi o malattie.",
+        "tolte": [
+          { "frase": "Gli eventi di rango 4 e 9 non sono disponibili nei giorni di pioggia.", "resaDa": "requisiti «meteo non-piove» dei ranghi 4 e 9" }
+        ]
+      }
+    },
+    {
+      "confidente": "kasumi",
+      "giorni": { "atteso": "[]", "lettura": { "modo": "su-messaggio" } },
+      "fasce": { "atteso": "[\"sera (presunta, non specificata esplicitamente per ogni data)\"]", "diverso": "la prosa presume la sera; la struttura (modo «su-messaggio») non ha fasce" },
+      "luogo": "Variabile per rango: Parco (inizio), Parco Inokashira, mensa scolastica, negozio di occhiali e gabbie di battuta a Kichijoji, poi galleria/Kichijoji, Café Leblanc, esibizione a Kichijoji",
+      "sbloccoData": "30 maggio",
+      "sbloccoRequisiti": "Evento scolastico obbligatorio (giornata di pulizia al parco). Il Confidente si blocca a Rango 5 fino al 22 dicembre e riprende dal 12 gennaio, condizionato dall'aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) durante la Terza Semestre.",
+      "note": {
+        "atteso": "AllGameStaff non fornisce un elenco esplicito di giorni della settimana ricorrenti per Kasumi (a differenza di Sojiro e Chihaya): le interazioni sono agganciate a date/eventi di trama specifici, non a una disponibilità settimanale libera. Ogni incontro con Kasumi garantisce +5 HP massimi al protagonista. La vera identità (Sumire Yoshizawa) si rivela dal 12 gennaio. Sumire non fornisce regalo d'addio il 19 marzo: le abilità vanno riottenute in Nuova Partita+.",
+        "nuovo": "Ogni incontro con Kasumi garantisce +5 HP massimi al protagonista. La vera identità (Sumire Yoshizawa) si rivela dal 12 gennaio. Sumire non fornisce regalo d'addio il 19 marzo: le abilità vanno riottenute in Nuova Partita+.",
+        "tolte": [
+          { "frase": "AllGameStaff non fornisce un elenco esplicito di giorni della settimana ricorrenti per Kasumi (a differenza di Sojiro e Chihaya): le interazioni sono agganciate a date/eventi di trama specifici, non a una disponibilità settimanale libera.", "resaDa": "modo «su-messaggio» della disponibilità e requisiti «data» dei ranghi 6-9" }
+        ]
+      },
+      "noteGenerali": {
+        "atteso": "Kasumi (in realtà Sumire Yoshizawa sotto l'identità della sorella defunta) è un Confidente introdotto in Persona 5 Royal e strettamente legato alla trama Royal: il Confidente Fede si blocca obbligatoriamente al Rango 5 il 28 luglio e resta bloccato fino al 22 dicembre. Riprende solo il 12 gennaio, durante la Terza Semestre, con un evento automatico nel Palazzo di Maruki in cui Sumire si unisce ufficialmente al gruppo come 'Violet'; da qui il Confidente prosegue fino al Rango 10 (25 gennaio) con una scena finale esclusiva Royal il 2 febbraio. ['Aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) prima del 12 gennaio', 'Aver raggiunto almeno il Rango 5 con Kasumi durante la prima parte del gioco'] 2 febbraio (giovedì) — evento nella stanza di Sumire Vanadis → Ella, con nuova tecnica 'In maschera' (danno fisico grave, applicato 2 volte)",
+        "nuovo": "Kasumi (in realtà Sumire Yoshizawa sotto l'identità della sorella defunta) è un Confidente introdotto in Persona 5 Royal e strettamente legato alla trama Royal: il Confidente Fede si blocca obbligatoriamente al Rango 5 il 28 luglio e resta bloccato fino al 22 dicembre. Riprende solo il 12 gennaio, durante la Terza Semestre, con un evento automatico nel Palazzo di Maruki in cui Sumire si unisce ufficialmente al gruppo come 'Violet'; da qui il Confidente prosegue fino al Rango 10 (25 gennaio) con una scena finale esclusiva Royal il 2 febbraio. 2 febbraio (giovedì) — evento nella stanza di Sumire Vanadis → Ella, con nuova tecnica 'In maschera' (danno fisico grave, applicato 2 volte)",
+        "tolte": [
+          { "frase": "['Aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) prima del 12 gennaio', 'Aver raggiunto almeno il Rango 5 con Kasumi durante la prima parte del gioco']", "resaDa": "requisito di rango 6 «confidente maruki 10» (e il rango 5 raggiunto è il passaggio stesso al rango 6)" }
+        ]
+      }
+    },
+    {
+      "confidente": "kawakami",
+      "giorni": { "atteso": "[\"Venerdì\",\"Sabato\"]", "lettura": { "settimanale": ["ven", "sab"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Telefono a pagamento del Leblanc (il corridoio del 2° piano della Shujin solo per il primo incontro del 4 giugno)",
+      "sbloccoData": "3-4 giugno",
+      "sbloccoRequisiti": "Dote sociale Coraggio rango 3",
+      "note": {
+        "atteso": "Disponibile anche con pioggia. Prima dello sblocco del confidente si può chiamare qualsiasi giorno. Dal rango 9 in poi diventa disponibile ogni giorno della settimana.\n\nDiscordanza con Royal: le fonti Royal danno l'avvio il 24/5 («Operazione Maidwatch») e la prima chiamata il 27/5; la guida italiana dà lo sblocco il 4/6 e il rango 1 l'8/6. Per scelta dell'utente (24/10) restano le date della guida italiana.",
+        "nuovo": "Discordanza con Royal: le fonti Royal danno l'avvio il 24/5 («Operazione Maidwatch») e la prima chiamata il 27/5; la guida italiana dà lo sblocco il 4/6 e il rango 1 l'8/6. Per scelta dell'utente (24/10) restano le date della guida italiana.",
+        "tolte": [
+          { "frase": "Disponibile anche con pioggia.", "resaDa": "nessun requisito «meteo non-piove» del Confidente" },
+          { "frase": "Prima dello sblocco del confidente si può chiamare qualsiasi giorno.", "resaDa": "eccezione «giorni-rango» del rango 1, tutti i giorni (306)" },
+          { "frase": "Dal rango 9 in poi diventa disponibile ogni giorno della settimana.", "resaDa": "eccezione «giorni-rango» del rango 10, tutti i giorni (306)" }
+        ]
+      }
+    },
+    {
+      "confidente": "makoto",
+      "giorni": { "atteso": "[\"Martedì\",\"Giovedì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["mar", "gio", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Cancello della scuola (Shujin, Aoyama-Itchome) come principale; anche Biblioteca 3° piano, Big Bang Burger, Shinjuku, mansarda del Leblanc (finale ramo amore)",
+      "sbloccoData": "",
+      "sbloccoRequisiti": "Conoscenza al rango 3 (Studioso).",
+      "note": {
+        "atteso": "Rango 6 richiede Fascino 5. Rango 9 presenta un bivio esplicito romantico/amicizia che determina quale rango 10 si ottiene.\n\nStorico delle informazioni precedenti (non è una regola corrente):\nGiorni precedenti (elenco originale integrale):\n[\"Legato a date fisse di trama: 26/07 (mar), 20/08 (sab), 22/09 (gio), 25/09 (dom), 27/09 (mar), 29/09 (gio), 2/10 (dom), 7/10 (ven), 9/10 (dom), poi 5/11 (sab, ramo amicizia) o 16/10 (dom, ramo amore)\"]\nFasce precedenti (elenco originale integrale):\n[\"giorno, salvo diversa indicazione\"]\nData precedentemente riportata:\n26 luglio\nRequisiti precedentemente riportati:\nDote sociale Conoscenza a rango 3; Persona con Arcano Papessa equipaggiata\n\nCalendario informativo secondo la guida AGS: incontri diurni martedì, giovedì, sabato e domenica; i ranghi 2 e 9 richiedono assenza di pioggia. Le date dell’itinerario sono giorni consigliati, non date fisse di trama né prova della prima data possibile del legame. Una Persona dell’Arcano Papessa in scorta aumenta l’affinità: non deve essere equipaggiata e non è un requisito di accesso.",
+        "nuovo": "Rango 9 presenta un bivio esplicito romantico/amicizia che determina quale rango 10 si ottiene.\n\nLe date dell’itinerario sono giorni consigliati, non date fisse di trama né prova della prima data possibile del legame. Una Persona dell’Arcano Papessa in scorta aumenta l’affinità: non deve essere equipaggiata e non è un requisito di accesso.",
+        "tolte": [
+          { "frase": "Rango 6 richiede Fascino 5.", "resaDa": "requisito di rango 6 «dote fascino 5»" },
+          { "frase": "Storico delle informazioni precedenti (non è una regola corrente): giorni, fasce, data e requisiti di prima, copiati dalla 131", "resaDa": "storico dell'editor delle informazioni (revisione 1 «bonifica» della 131, che li conserva integrali)" },
+          { "frase": "Calendario informativo secondo la guida AGS: incontri diurni martedì, giovedì, sabato e domenica; i ranghi 2 e 9 richiedono assenza di pioggia.", "resaDa": "struttura della disponibilità (martedì, giovedì, sabato, domenica, di giorno) e requisiti «meteo non-piove» dei ranghi 2 e 9" }
+        ]
+      }
+    },
+    {
+      "confidente": "maruki",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Venerdì\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "ven"] } },
+      "fasce": { "atteso": "[\"Giorno (scuola)\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Infermeria/Studio di Maruki a Shujin Academy nelle prime fasi; in seguito anche Leblanc e altri luoghi su invito via messaggio",
+      "sbloccoData": "Inizio automatico: 13 maggio (Venerdì). Rango 9 deve essere raggiunto entro il 17 novembre. Rango 10 automatico il 18 novembre.",
+      "sbloccoRequisiti": "Nessuna Dote sociale richiesta per l'attivazione base; alcuni ranghi richiedono di avere equipaggiata/in squadra una Persona dell'Arcana Consigliere (rango 3 e 5). Contenuto ESCLUSIVO Royal: raggiungere il Rango 9 entro il 17/11 è condizione necessaria per accedere al Terzo Semestre e al finale completo del gioco.",
+      "note": {
+        "atteso": "Disponibile anche nei giorni di pioggia (eccetto il rango 3, che richiede l'edificio sportivo e NON è disponibile con la pioggia). Giorni di indisponibilità segnalati dalla fonte dopo il 20 settembre: 28/9, 4/10, 6/10, 1/11, 3/11, 8/11, 10/11, 15/11 (probabilmente occupati da altri eventi di trama). Bonus opzionale: la 'Lettura delle Affinità' di Chihaya (Shinjuku, richiede Dote della Fortuna a rango 5, costo 5.000 yen) accelera l'avanzamento del rango di Maruki. Nessun regalo d'addio il 19 marzo; le abilità vanno sbloccate di nuovo in New Game+.",
+        "nuovo": "Bonus opzionale: la 'Lettura delle Affinità' di Chihaya (Shinjuku, richiede Dote della Fortuna a rango 5, costo 5.000 yen) accelera l'avanzamento del rango di Maruki. Nessun regalo d'addio il 19 marzo; le abilità vanno sbloccate di nuovo in New Game+.",
+        "tolte": [
+          { "frase": "Disponibile anche nei giorni di pioggia (eccetto il rango 3, che richiede l'edificio sportivo e NON è disponibile con la pioggia).", "resaDa": "requisito di rango 3 «meteo non-piove», l'unico di pioggia del Confidente" },
+          { "frase": "Giorni di indisponibilità segnalati dalla fonte dopo il 20 settembre: 28/9, 4/10, 6/10, 1/11, 3/11, 8/11, 10/11, 15/11 (probabilmente occupati da altri eventi di trama).", "resaDa": "eccezione «date» della disponibilità con gli stessi otto giorni (306)" }
+        ]
+      },
+      "noteGenerali": {
+        "atteso": "ATTENZIONE - CONTENUTO ESCLUSIVO DI PERSONA 5 ROYAL: Maruki è un personaggio e un confidente introdotto solo nella versione Royal (assente nell'originale Persona 5). Precisazione importante sul calendario: il confidente di Maruki NON si svolge interamente 'nella Terza Semestre' in senso stretto, ma durante il normale calendario scolastico (da maggio a novembre, prima del Terzo Semestre), tramite Hangout con lui in qualità di consulente psicologico di Shujin; è tuttavia strettamente legato alla trama Royal perché: (a) è disponibile solo nei giorni di scuola diurni (lun/mar/mer/ven, anche con pioggia); (b) raggiungere il Rango 9 entro il 17 novembre è OBBLIGATORIO per sbloccare l'accesso al Terzo Semestre e al finale completo di Royal; (c) il Rango 10 scatta automaticamente il 18 novembre come parte della transizione narrativa verso il Terzo Semestre stesso. In questo senso il confidente 'prepara' e 'sblocca' la Terza Semestre più che svolgersi al suo interno. Non risulta romanzabile in nessuna fonte consultata (nessuna guida lo elenca tra le opzioni romantiche; il suo ruolo resta quello di consulente/alleato adulto). Non lascia regali d'addio il 19 marzo: le sue abilità vanno riacquisite in New Game+.",
+        "nuovo": "ATTENZIONE - CONTENUTO ESCLUSIVO DI PERSONA 5 ROYAL: Maruki è un personaggio e un confidente introdotto solo nella versione Royal (assente nell'originale Persona 5). Precisazione importante sul calendario: il confidente di Maruki NON si svolge interamente 'nella Terza Semestre' in senso stretto, ma durante il normale calendario scolastico (da maggio a novembre, prima del Terzo Semestre), tramite Hangout con lui in qualità di consulente psicologico di Shujin; è tuttavia strettamente legato alla trama Royal perché raggiungere il Rango 9 entro il 17 novembre è OBBLIGATORIO per sbloccare l'accesso al Terzo Semestre e al finale completo di Royal. In questo senso il confidente 'prepara' e 'sblocca' la Terza Semestre più che svolgersi al suo interno. Non risulta romanzabile in nessuna fonte consultata (nessuna guida lo elenca tra le opzioni romantiche; il suo ruolo resta quello di consulente/alleato adulto). Non lascia regali d'addio il 19 marzo: le sue abilità vanno riacquisite in New Game+.",
+        "tolte": [
+          { "frase": "(a) è disponibile solo nei giorni di scuola diurni (lun/mar/mer/ven, anche con pioggia);", "resaDa": "struttura della disponibilità (lunedì, martedì, mercoledì, venerdì, di giorno) e requisiti di pioggia (solo il rango 3)" },
+          { "frase": "(c) il Rango 10 scatta automaticamente il 18 novembre come parte della transizione narrativa verso il Terzo Semestre stesso.", "resaDa": "requisito di rango 10 «data dal 11-18», automatico se il rango 9 è fatto" }
+        ]
+      }
+    },
+    {
+      "confidente": "mishima",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Variabile a seconda del rango: Diner, Shibuya, Shinjuku, Akihabara, Parco Inokashira",
+      "sbloccoData": "Dal 6 maggio (data di gioco)",
+      "sbloccoRequisiti": "Completare le richieste Memento indicate prima di ogni incontro; massimo un incontro ogni 3 giorni",
+      "note": {
+        "atteso": "Mishima non è disponibile nei 2 giorni successivi a ogni salita di rango. Gli eventi dei ranghi 3, 6, 7, 8, 10 sono all'aperto e non disponibili con pioggia. Ai ranghi 6.5 e 7 NON bisogna avere equipaggiata una Persona di Arcano Luna (al contrario degli altri ranghi, dove va equipaggiata per il bonus punti). Mishima non accetta regali.",
+        "nuovo": "Ai ranghi 6.5 e 7 NON bisogna avere equipaggiata una Persona di Arcano Luna (al contrario degli altri ranghi, dove va equipaggiata per il bonus punti). Mishima non accetta regali.",
+        "tolte": [
+          { "frase": "Mishima non è disponibile nei 2 giorni successivi a ogni salita di rango.", "resaDa": "eccezione «dopo-rango», due giorni" },
+          { "frase": "Gli eventi dei ranghi 3, 6, 7, 8, 10 sono all'aperto e non disponibili con pioggia.", "resaDa": "requisiti «meteo non-piove» dei ranghi 3, 6, 7, 8 e 10" }
+        ]
+      }
+    },
+    {
+      "confidente": "morgana",
+      "giorni": { "atteso": "[\"15 aprile\",\"22 aprile\",\"1 giugno\",\"20 giugno\",\"27 giugno\",\"25 luglio\",\"29 agosto\",\"17 settembre\",\"6 ottobre\",\"23 dicembre\"]", "lettura": { "dateDeiRequisiti": ["04-15", "04-22", "06-01", "06-20", "06-27", "07-25", "08-29", "09-17", "10-06", "12-23"] } },
+      "fasce": { "atteso": "[\"variabile, sempre legato ad eventi di trama (soprattutto sera/notte al Leblanc)\"]", "lettura": { "modo": "trama" } },
+      "luogo": "Leblanc (soprattutto la mansarda/attico dove vive il gruppo), Metaverso",
+      "sbloccoData": "Rango 1: 15 aprile (dopo la liberazione di Morgana nel Palazzo di Kamoshida)",
+      "sbloccoRequisiti": "Nessuna Dote sociale richiesta. Morgana non accetta regali. Progressione interamente automatica legata alla trama principale."
+    },
+    {
+      "confidente": "ohya",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Bar Crossroads, Shinjuku",
+      "sbloccoData": "5 luglio",
+      "sbloccoRequisiti": "Avere equipaggiata una Persona dell'Arcano Diavolo",
+      "note": {
+        "atteso": "Non disponibile con pioggia per gli eventi di rango 4 e 10.",
+        "nuovo": "",
+        "tolte": [
+          { "frase": "Non disponibile con pioggia per gli eventi di rango 4 e 10.", "resaDa": "requisiti «meteo non-piove» dei ranghi 4 e 10" }
+        ]
+      }
+    },
+    {
+      "confidente": "ryuji",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"giorno (dopo scuola)\",\"sera (solo rango 7, evento specifico a Tsukishima; e nei giorni di pioggia)\"]", "diverso": "la sera «nei giorni di pioggia» non è nella struttura (che ha il giorno e la sera solo per il rango 7)" },
+      "luogo": "Corridoio/cortile davanti all'aula (giorni di scuola) o sala giochi di Shibuya (giorni senza scuola); luoghi specifici per rango: Ogikubo Ramen (rango 4), Protein Lovers gym (rango 5), Shujin Academy (rango 6 e 8), Tsukishima Monja (rango 7, serale)",
+      "sbloccoData": "Rango 1: 12 aprile (dopo il combattimento nel Palazzo di Kamoshida)",
+      "sbloccoRequisiti": "Nessuna Dote sociale esplicitamente richiesta secondo le fonti consultate. Il rango 7 richiede che Ryuji stesso inviti tramite messaggio serale in una lista di date specifiche. Gli eventi all'aperto (ranghi 2, 3, 6, 8) non sono disponibili nei giorni di pioggia."
+    },
+    {
+      "confidente": "sae",
+      "giorni": { "atteso": "[]", "lettura": { "modo": "trama" } },
+      "fasce": { "atteso": "[]", "lettura": { "modo": "trama" } },
+      "luogo": "Interrogatorio nel 'presente' (sala interrogatori) intervallato da scene nel passato legate alla trama principale",
+      "sbloccoData": "Inizio: 9 luglio (Rango 1); tappe automatiche 24 luglio, 22 agosto, 13 settembre, 12 ottobre, 28 ottobre; finale 20 novembre (Rango 10)",
+      "sbloccoRequisiti": "Nessun requisito di Dote sociale. Progressione automatica e obbligatoria legata al completamento di ogni Palazzo/evento di trama. Non richiede Hangout né regali.",
+      "note": {
+        "atteso": "Confidente non manabile liberamente: non si può 'far salire' di propria iniziativa, si sblocca da solo seguendo la trama principale. Dopo il 20 novembre e prima del rango 10 i benefici concreti (fusione Satana, prosecuzione calendario) non sono disponibili.",
+        "nuovo": "Dopo il 20 novembre e prima del rango 10 i benefici concreti (fusione Satana, prosecuzione calendario) non sono disponibili.",
+        "tolte": [
+          { "frase": "Confidente non manabile liberamente: non si può 'far salire' di propria iniziativa, si sblocca da solo seguendo la trama principale.", "resaDa": "modo «trama» della disponibilità e requisiti «data»/«palazzo» dei ranghi" }
+        ]
+      },
+      "noteGenerali": {
+        "atteso": "Confidente atipico e interamente guidato dalla trama: progredisce automaticamente in corrispondenza di eventi obbligatori (di norma subito dopo il completamento di ogni Palazzo/interrogatorio), non tramite Hangout liberi. Le scelte di dialogo NON influenzano l'avanzamento di rango (fanno eccezione solo quelle della sequenza finale rango 7->10, che determinano quale finale si ottiene). Sae non accetta regali. Non è romanzabile (nessuna fonte consultata la elenca tra le opzioni romantiche; il legame resta professionale/narrativo).",
+        "nuovo": "Le scelte di dialogo NON influenzano l'avanzamento di rango (fanno eccezione solo quelle della sequenza finale rango 7->10, che determinano quale finale si ottiene). Sae non accetta regali. Non è romanzabile (nessuna fonte consultata la elenca tra le opzioni romantiche; il legame resta professionale/narrativo).",
+        "tolte": [
+          { "frase": "Confidente atipico e interamente guidato dalla trama: progredisce automaticamente in corrispondenza di eventi obbligatori (di norma subito dopo il completamento di ogni Palazzo/interrogatorio), non tramite Hangout liberi.", "resaDa": "modo «trama» della disponibilità e requisiti «palazzo» dei ranghi 1, 3, 5, 7-10" }
+        ]
+      }
+    },
+    {
+      "confidente": "shinya",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Giovedì\",\"Sabato\"]", "lettura": { "settimanale": ["lun", "mar", "gio", "sab"] } },
+      "fasce": { "atteso": "[\"Giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Sala giochi di Akihabara (Shibuya in eventi specifici)",
+      "sbloccoData": "Dal 5 settembre (data di gioco)",
+      "sbloccoRequisiti": "Completare la richiesta Memento 'I vincenti non imbrogliano'",
+      "note": {
+        "atteso": "Fonti discordanti: AllGameStaff riporta i giorni lunedì/martedì/giovedì/sabato con indisponibilità in caso di pioggia ai ranghi 7-8-9; alcune guide inglesi (thegamer/dualshockers) riportano invece solo lunedì/giovedì/sabato e disponibilità anche con pioggia. Bonus 'Lettura delle affinità' da Chihaya (Dote Fortuna rango 5+, costo 5.000 yen) accelera la progressione.",
+        "nuovo": "Fonti discordanti: alcune guide inglesi (thegamer/dualshockers) riportano solo lunedì/giovedì/sabato e disponibilità anche con pioggia; vale la guida italiana. Bonus 'Lettura delle affinità' da Chihaya (Dote Fortuna rango 5+, costo 5.000 yen) accelera la progressione.",
+        "tolte": [
+          { "frase": "AllGameStaff riporta i giorni lunedì/martedì/giovedì/sabato con indisponibilità in caso di pioggia ai ranghi 7-8-9", "resaDa": "struttura della disponibilità (lunedì, martedì, giovedì, sabato) e requisiti «meteo non-piove» dei ranghi 7, 8 e 9; la variante inglese resta come nota storica" }
+        ]
+      }
+    },
+    {
+      "confidente": "sojiro",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Café Leblanc (principalmente); alcune uscite specifiche in altri luoghi (es. chiesa per il Rango 10)",
+      "sbloccoData": "23 aprile",
+      "sbloccoRequisiti": "Completare il Palazzo di Kamoshida",
+      "note": {
+        "atteso": "Disponibile anche in caso di pioggia. Preparare regolarmente caffè al Leblanc dà punti legame aggiuntivi (+2 per la preparazione, +1 quando Sojiro apprezza la bevanda). Completando il Rango 10 si ottengono gli 'Appunti della ricetta', che permettono di preparare caffè e curry fin dall'inizio in Nuova Partita+.",
+        "nuovo": "Preparare regolarmente caffè al Leblanc dà punti legame aggiuntivi (+2 per la preparazione, +1 quando Sojiro apprezza la bevanda). Completando il Rango 10 si ottengono gli 'Appunti della ricetta', che permettono di preparare caffè e curry fin dall'inizio in Nuova Partita+.",
+        "tolte": [
+          { "frase": "Disponibile anche in caso di pioggia.", "resaDa": "nessun requisito «meteo non-piove» del Confidente" }
+        ]
+      }
+    },
+    {
+      "confidente": "takemi",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"Giorno (normalmente)\",\"Sera (se relazione romantica avviata)\"]", "diverso": "la sera con la relazione romantica (la guida italiana: «solo di sera anziché di giorno») non è nella struttura, che ha solo il giorno" },
+      "luogo": "Clinica medica Takemi, Yongen-Jaya",
+      "sbloccoData": "18 aprile",
+      "sbloccoRequisiti": "Nessun requisito particolare al rango 1; rango 2 richiede Coraggio rango 2, rango 7.5 richiede Fascino rango 4",
+      "note": {
+        "atteso": "Disponibile anche con pioggia. Gli eventi di rango si possono attivare al massimo una volta ogni 3 giorni. I ranghi 6, 7.5 e 9 non sono disponibili nei giorni di pioggia.",
+        "nuovo": "L'evento del rango 7.5 non è disponibile nei giorni di pioggia.",
+        "tolte": [
+          { "frase": "Disponibile anche con pioggia.", "resaDa": "requisiti «meteo non-piove» solo dei ranghi 6 e 9 (la frase, così, contraddiceva i requisiti)" },
+          { "frase": "Gli eventi di rango si possono attivare al massimo una volta ogni 3 giorni.", "resaDa": "eccezione «dopo-rango», due giorni (306)" },
+          { "frase": "I ranghi 6 [...] e 9 non sono disponibili nei giorni di pioggia.", "resaDa": "requisiti «meteo non-piove» dei ranghi 6 e 9; il 7.5 resta nella nota (domanda 3 dell'ondata: non è un requisito)" }
+        ]
+      }
+    },
+    {
+      "confidente": "yoshida",
+      "giorni": { "atteso": "[\"Domenica\",\"festivi\"]", "lettura": { "settimanale": ["dom", "festivi"] } },
+      "fasce": { "atteso": "[\"Sera\"]", "lettura": { "settimanale": ["sera"] } },
+      "luogo": "Piazza della Stazione, Shibuya",
+      "sbloccoData": "Dall'inizio di maggio; occorre parlare con Yoshida in un giorno non piovoso prima della prima domenica utile",
+      "sbloccoRequisiti": "",
+      "note": {
+        "atteso": "Non disponibile in caso di pioggia. Il confidente ha una finestra temporale limitata: se non completato entro il 13 novembre arriva un messaggio di avviso il 1 novembre. La 'Lettura delle affinità' da Chihaya (Dote Fortuna 5, costo 5.000 yen) è consigliata per accelerare la progressione. Yoshida non accetta regali.",
+        "nuovo": "Il confidente ha una finestra temporale limitata: se non completato entro il 13 novembre arriva un messaggio di avviso il 1 novembre. La 'Lettura delle affinità' da Chihaya (Dote Fortuna 5, costo 5.000 yen) è consigliata per accelerare la progressione. Yoshida non accetta regali.",
+        "tolte": [
+          { "frase": "Non disponibile in caso di pioggia.", "resaDa": "requisiti «meteo non-piove» di tutti i ranghi, dall'1 al 10" }
+        ]
+      }
+    },
+    {
+      "confidente": "yusuke",
+      "giorni": { "atteso": "[\"Lunedì\",\"Martedì\",\"Mercoledì\",\"Giovedì\",\"Venerdì\",\"Sabato\",\"Domenica\"]", "lettura": { "settimanale": ["lun", "mar", "mer", "gio", "ven", "sab", "dom"] } },
+      "fasce": { "atteso": "[\"giorno\"]", "lettura": { "settimanale": ["giorno"] } },
+      "luogo": "Sottopasso Shibuya (principale); anche galleria di Ueno (rango 3), Chiesa di Kanda (rango 5), vecchia casa di Madarame (rango 6), Memento (rango 9)",
+      "sbloccoData": "18 giugno",
+      "sbloccoRequisiti": "Avere in inventario una Persona con Arcano Imperatore (es. Reggente o Eligor); al rango 4 la Persona Imperatore deve essere equipaggiata",
+      "note": {
+        "atteso": "I ranghi 4, 6 e 9 sono eventi all'aperto e NON disponibili se piove, tranne il rango 8 che invece richiede esplicitamente la pioggia. Nessuna diramazione romantica: Yusuke non è un interesse amoroso in P5R.",
+        "nuovo": "Il rango 8 richiede esplicitamente la pioggia. Nessuna diramazione romantica: Yusuke non è un interesse amoroso in P5R.",
+        "tolte": [
+          { "frase": "I ranghi 4, 6 e 9 sono eventi all'aperto e NON disponibili se piove", "resaDa": "requisiti «meteo non-piove» dei ranghi 4, 6 e 9; il rango 8 con la pioggia resta (non strutturato, la guida italiana non lo documenta)" }
+        ]
+      }
+    }
+  ]
+}

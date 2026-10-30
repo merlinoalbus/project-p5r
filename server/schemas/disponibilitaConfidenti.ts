@@ -1,13 +1,11 @@
 import { z } from 'zod';
 
-const informazioni = z.object({
-  giorni: z.array(z.string()), fasce: z.array(z.string()), luogo: z.string(),
-  sbloccoData: z.string(), sbloccoRequisiti: z.string(), note: z.string(), noteGenerali: z.string(), fonti: z.array(z.string()),
-}).strict();
+// L13 (ondata 6, lotto O6-2): le informazioni del Confidente sono solo note e fonti; giorni, fasce, luogo e sblocco si modificano dalla
+// disponibilità strutturata e dai requisiti di rango. Un campo in più (anche uno di prima) è un 400.
+const informazioni = z.object({ note: z.string(), noteGenerali: z.string(), fonti: z.array(z.string()) }).strict();
 const revisioneAttesa = z.string().regex(/^[a-f0-9]{64}$/);
 const motivo = z.string().refine(v => v.trim().length > 0, 'Indica il motivo della modifica.');
 const azioni = [
-  z.object({ azione: z.literal('applica-proposta'), proposta: z.literal('makoto-calendario-v1'), revisioneAttesa }).strict(),
   z.object({ azione: z.literal('modifica-manuale'), valori: informazioni.partial().refine(v => Object.keys(v).length > 0, 'Seleziona almeno un campo.'), motivo, revisioneAttesa }).strict(),
   z.object({ azione: z.literal('crea-informazioni'), valori: informazioni, motivo, revisioneAttesa }).strict(),
   z.object({ azione: z.literal('ripristina-versione'), versione: z.number().int().nonnegative(), revisioneAttesa }).strict(),
@@ -15,5 +13,5 @@ const azioni = [
 export const bodyAnteprimaInformazioniConfidente = z.discriminatedUnion('azione', azioni);
 const scrittura = { anteprimaAttesa: revisioneAttesa, operazioneId: z.string().uuid() };
 export const bodySalvaInformazioniConfidente = z.discriminatedUnion('azione', [
-  azioni[0].extend(scrittura), azioni[1].extend(scrittura), azioni[2].extend(scrittura), azioni[3].extend(scrittura),
+  azioni[0].extend(scrittura), azioni[1].extend(scrittura), azioni[2].extend(scrittura),
 ]);

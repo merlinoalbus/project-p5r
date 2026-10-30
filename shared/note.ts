@@ -30,6 +30,49 @@ export function noteAParole(n: number): string {
 /** «nessuna ♪»: zero note (a voce «nessuna nota», vedi `pezziTestoNote`). */
 export const NESSUNA_NOTA = `nessuna ${SIMBOLO_NOTA}`;
 
+// ---- Le scelte dei dialoghi di rango (L13, ondata 6, lotto O6-4, migrazione 309) ----
+//
+// I punti di una scelta sono SOLO numerici: `punti` (null = la guida non ne dà; 0 = nessun punto, detto dalla guida) e, dove la guida dà un
+// valore diverso nel ramo amore, `puntiAmore`. Prima accanto al numero c'era il testo della guida («+3», «♪♪», «+0 (amicizia) / +2 (amore)»)
+// e l'interfaccia decideva sul testo se una scelta si poteva toccare. Qui l'unica resa, usata dalla scheda del Confidente (`DialogoRango`),
+// dalla spunta della voce (`SceltaNote`) e dalle risposte migliori del Diario (`RisposteVoce`).
+
+/** I punti di una scelta di dialogo. */
+export interface PuntiScelta { punti: number | null; puntiAmore?: number | null }
+
+/** «nessun punto»: la scelta, secondo la guida, non dà punti al Confidente. */
+export const NESSUN_PUNTO = 'nessun punto';
+
+/** I punti di un ramo: ♪…♪♪♪, «nessun punto» per zero, niente se la guida non ne dà. */
+function resaPunti(n: number | null): string {
+  if (n === null) return '';
+  return n <= 0 ? NESSUN_PUNTO : simboliNote(n);
+}
+
+/** Vero se la guida dà, nel ramo amore, un valore diverso da quello del ramo amicizia. */
+export function puntiAmoreDiversi(s: PuntiScelta): boolean {
+  return typeof s.puntiAmore === 'number' && s.puntiAmore !== (s.punti ?? 0);
+}
+
+/** I punti di una scelta come si mostrano: «♪♪», «nessun punto», «nessun punto (amicizia) · ♪♪ (amore)»; «» se la guida non ne dà. */
+export function resaPuntiScelta(s: PuntiScelta): string {
+  if (puntiAmoreDiversi(s)) return `${resaPunti(s.punti ?? 0)} (amicizia) · ${resaPunti(s.puntiAmore ?? 0)} (amore)`;
+  return resaPunti(s.punti);
+}
+
+/**
+ * Vero se toccare la scelta alla spunta della voce dice da sé le note ottenute: il valore non dipende dal ramo (amicizia o amore) ed è
+ * nessuno o da una a tre note. Una scelta senza punti nella guida dà «nessun punto», come oggi.
+ */
+export function sceltaToccabile(s: PuntiScelta): boolean {
+  return !puntiAmoreDiversi(s) && (s.punti === null || (Number.isInteger(s.punti) && s.punti >= 0 && s.punti <= 3));
+}
+
+/** Le note che la scelta dà alla spunta (1–3; null = nessun punto). Solo per le scelte toccabili (`sceltaToccabile`). */
+export function noteDellaScelta(s: PuntiScelta): 1 | 2 | 3 | null {
+  return s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null;
+}
+
 /** «5 punti», «1 punto», «−3 punti»; `segno`: anche il «+» davanti ai punti in più. */
 export function testoPunti(n: number, opz: { segno?: boolean } = {}): string {
   const assoluto = Math.abs(n);

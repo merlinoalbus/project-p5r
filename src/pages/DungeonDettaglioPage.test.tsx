@@ -75,7 +75,7 @@ const areaPalazzo = (slug: string, nome: string, predefinita: string, infiltrazi
  *  spilli portano lo stato della partita (1 preso su 4), senza restano `null`. */
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
-  date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
+  date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: null }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 3, mappeComplete: partita ? 0 : null }, completato: null, concluso: null, atterraggio: null, atterraggi: [], illustrazione: { immagineUrl: null, asset: null }, personeCatturate: partita ? [] : null, note: '', fonti: [],
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)], area: 'dungeon/kamoshida/cancello' }],
@@ -857,33 +857,29 @@ it('i segni dei chip delle date («si apre», «furto», «scade») sono all’o
   for (const s of segni) expect(s.className).not.toMatch(/opacity-/);
 });
 
-// LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) non si tronca nel chip: da 1024 px il
-// chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida»; le date vere restano date
-it('una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4)', async () => {
-  const frase = 'Nella tabella di marcia ottimizzata della guida: invio della lettera di sfida il 12/12';
-  getDungeon.mockResolvedValue({ ...palazzo(true), date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: frase } });
+// L13 O6-3 (una fonte per le date del Palazzo): ogni tappa è una data di gioco, «22 apr», col nome e la data per esteso nel suggerimento e
+// per chi non vede; le frasi della guida non ci sono più (stanno nelle note), e i «Dettagli dalla guida» non ripetono le date
+it('le tappe sono date di gioco brevi, nell’ordine si apre, furto, lettera, scade; il nome e la data per esteso nel suggerimento (L13 O6-3)', async () => {
+  getDungeon.mockResolvedValue({ ...palazzo(true), date: { dal: '05-16', al: '06-05', letteraEntro: '06-02', furtoConsigliato: '06-01' } });
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  const chipFurto = screen.getByTitle(`Furto consigliato: ${frase}`);
-  // da 1024 px l'etichetta intera; sotto, un'etichetta breve che ha senso da sola, presa dal tipo della data e non dalla prima parola
-  // (UX3-12: «Si» per «Si apre» non si capiva); niente puntini
-  expect(within(chipFurto).getByText('Furto consigliato', { selector: '.hidden.lg\\:inline' })).toBeInTheDocument();
-  expect(within(chipFurto).getByText('Furto', { selector: '.lg\\:hidden' })).toBeInTheDocument();
-  expect(chipFurto.querySelector('.lg\\:truncate')).toBeNull();
-  // una data vera resta la data
-  expect(within(screen.getByTitle('Si apre: 12 Aprile')).getByText('12 Aprile')).toBeInTheDocument();
-  // la frase nei «Dettagli dalla guida» (testo ripiegabile: lunga, si apre intera col tocco)
-  expect(screen.getAllByText(/^Furto consigliato: Nella tabella di marcia/).length).toBeGreaterThan(0);
+  const linea = screen.getByRole('list', { name: 'Finestra del Palazzo' });
+  expect(within(linea).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Si apre16 mag', 'Furto consigliato1 giu', 'Lettera entro2 giu', 'Scade5 giu']);
+  expect(within(screen.getByTitle('Furto consigliato: 1 giugno')).getByText('1 giu')).toBeInTheDocument();
+  expect(screen.getByTitle('Lettera entro: 2 giugno')).toBeInTheDocument();
+  expect(screen.queryByText(/^(Si apre|Furto consigliato|Scade): /)).toBeNull();
 });
 
-it('«Si apre» che è una frase: sotto i 1024 px il chip dice «Si apre», mai «Si» (UX3-12)', async () => {
-  const frase = 'Il Palazzo diventa esplorabile per la prima volta il 2 gennaio';
-  getDungeon.mockResolvedValue({ ...palazzo(true), date: { sblocco: frase, scadenza: '2 maggio', furtoConsigliato: '' } });
+it('senza furto né lettera (la guida non li dà) le tappe sono due; senza scadenza una sola', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  const chip = screen.getByTitle(`Si apre: ${frase}`);
-  expect(within(chip).getByText('Si apre', { selector: '.lg\\:hidden' })).toBeInTheDocument();
-  expect(within(chip).queryByText('Si')).toBeNull();
+  expect(within(screen.getByRole('list', { name: 'Finestra del Palazzo' })).getAllByRole('listitem')).toHaveLength(2);
+  cleanup();
+  getDungeon.mockResolvedValue({ ...palazzo(true), date: { dal: '12-24', al: null, letteraEntro: null, furtoConsigliato: null } });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  expect(within(screen.getByRole('list', { name: 'Finestra del Palazzo' })).getAllByRole('listitem')).toHaveLength(1);
 });
 
 // LAY3-5 (regola dell'utente: intestazione al massimo il 30% della schermata). In jsdom `useMedia` è falso, cioè la scheda sotto i 1024 px:
@@ -1568,8 +1564,34 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   fireEvent.change(within(modulo).getByLabelText('Nome'), { target: { value: 'Castello' } });
   fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(aggiornaDungeon).toHaveBeenCalledWith('kamoshida', expect.objectContaining({ nome: 'Castello' })));
+  // L13 O6-3: le date non toccate non si mandano
+  expect(aggiornaDungeon.mock.calls[0]![1]).not.toHaveProperty('date');
   // la risposta del PUT non porta lo stato della partita: la scheda si rilegge con l'id
   await waitFor(() => expect(getDungeon).toHaveBeenCalledWith('kamoshida', 4));
+});
+
+// L13 O6-3: le date del Palazzo hanno un solo editor, «Correggi la scheda», con i giorni del calendario di gioco
+it('«Correggi la scheda» cambia le date del Palazzo coi selettori: rovesciate lo dice prima di salvare, giuste le manda tutte insieme', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  aggiornaDungeon.mockResolvedValue(palazzo(false));
+  monta('kamoshida');
+  expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+  apriMenuModifica();
+  fireEvent.click(screen.getByRole('button', { name: /^Correggi la scheda: il Palazzo/ }));
+  const modulo = screen.getByRole('form', { name: /Correggi il Palazzo/ });
+  const date = within(modulo).getByRole('group', { name: 'Date del Palazzo' });
+  // nessun campo di testo per le date; un Palazzo ha una scadenza: niente «Senza fine»
+  expect(within(modulo).queryByRole('textbox', { name: /Si apre|Furto consigliato|Scade/ })).toBeNull();
+  expect(within(date).queryByRole('checkbox', { name: 'Senza fine' })).toBeNull();
+  const furto = within(date).getByRole('group', { name: 'Furto consigliato' });
+  scegliVoce('Furto consigliato: mese', 'aprile', furto);
+  expect(within(modulo).getByRole('alert')).toHaveTextContent('Il furto consigliato (1 aprile) viene prima dell’apertura (12 aprile).');
+  scegliVoce('Furto consigliato: giorno', '22', furto);
+  expect(within(modulo).queryByRole('alert')).toBeNull();
+  fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
+  await waitFor(() => expect(aggiornaDungeon).toHaveBeenCalledWith('kamoshida', expect.objectContaining({
+    date: { dal: '04-12', al: '05-02', furtoConsigliato: '04-22', letteraEntro: null },
+  })));
 });
 
 it('la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni', async () => {

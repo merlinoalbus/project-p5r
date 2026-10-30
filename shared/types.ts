@@ -314,9 +314,10 @@ export interface ConfidenteDto {
 export interface SceltaDialogoDto {
   ordine: number | null;
   testo: string;
-  /** Note ♪ (1–3) secondo la guida; null se non indicato. */
+  /** Note ♪ (1–3) secondo la guida, 0 = nessun punto; null se la guida non ne dà. */
   punti: number | null;
-  puntiTesto: string | null;
+  /** Solo dove la guida dà un valore diverso nel ramo amore (migrazione 309); altrimenti null. */
+  puntiAmore: number | null;
   romantica: boolean;
   avviso: string | null;
 }
@@ -366,8 +367,9 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   regalabile: boolean;
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
-  disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
-  /** R9-01: la disponibilità come dato strutturato (la fonte di ciò che l'app valuta), con i luoghi per chiave; il testo di `disponibilita` resta nelle note. */
+  /** L13 (ondata 6, O6-2): solo le note sulla disponibilità; giorni, fasce, luoghi e sblocco sono in `disponibilitaStrutturata` e nei requisiti. */
+  disponibilita: { note: string };
+  /** R9-01: la disponibilità come dato strutturato (la fonte di ciò che l'app valuta), con i luoghi per chiave. */
   disponibilitaStrutturata?: DisponibilitaConfidenteDto;
   noteGenerali: string;
   fonti: string[];
@@ -1373,12 +1375,13 @@ export type GenereVoce = 'azione' | 'promemoria';
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
-/** Il dialogo di un rango di un Confidente (`confidente_dialogo`): le scelte con le note che danno (1-3; null = nessuna nota o non documentata). */
+/** Il dialogo di un rango di un Confidente (`confidente_dialogo`): le scelte con i punti che danno, come nella scheda del Confidente
+ *  (`punti` null = la guida non ne dà, 0 = nessun punto; `puntiAmore` solo dove il ramo amore dà altro). La resa è `resaPuntiScelta`. */
 export interface DialogoVoceDto {
   confidente: string;
   rango: number;
   note: string;
-  scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
+  scelte: Array<{ ordine: number; testo: string; punti: number | null; puntiAmore: number | null; romantica: boolean; avviso: string | null }>;
 }
 
 /** Una cosa che la spunta di una voce ha applicato e che togliendola si annulla: `testo` in parole, coi nomi («Persona registrata nel compendio:
@@ -2788,12 +2791,14 @@ export interface DungeonRiassuntoDto {
   sovrano: string;
   arcanaSovrano: string;
   arcanaSovranoNome: string;
-  date: { sblocco: string; scadenza: string; furtoConsigliato: string };
-  /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco. `date` qui sopra è
-   *  prosa — «12 Aprile (Martedì) – prima infiltrazione» — e da una frase non si ricava una data
-   *  senza sbagliarne qualcuna in silenzio: questa viene dalla voce `finestre-dungeon` di `dati_guida`, trascritta a
-   *  mano una volta. Serve a mostrare il Palazzo sulla mappa **solo quando c'è**. `al` manca dove
-   *  il gioco non fissa una scadenza: Iweleth e i Memento, una volta aperti, restano. */
+  /** L13 O6-3 (migrazione 308): le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
+   *  finestra (`dungeon.finestra_dal`/`finestra_al`), il termine della lettera di sfida (`lettera_entro`) e il furto consigliato
+   *  (`furto_consigliato_data`). Null dove la guida non le dà (Iweleth e i Memento non scadono, e non hanno furto né lettera). Prima
+   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. */
+  date: { dal: string | null; al: string | null; letteraEntro: string | null; furtoConsigliato: string | null };
+  /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco (le stesse date di `date.dal`/`date.al`): serve a mostrare
+   *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
+   *  aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
   livelloConsigliato: string;
   aree: number;

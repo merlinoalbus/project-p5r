@@ -162,7 +162,8 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
 }
 
 /** Le finestre dei Palazzi. L6 (§4.4): stanno nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118, un solo scrittore:
- *  `impostaFinestra`); il blocco `finestre-dungeon` della guida si legge solo su uno schema di prima della 118. Una trascrizione
+ *  `impostaFinestra`, che scrive anche furto consigliato e lettera e svuota questa copia; dalla 308 sono l'apertura e la scadenza della
+ *  scheda del Palazzo, senza più i testi in prosa accanto); il blocco `finestre-dungeon` della guida si legge solo su uno schema di prima della 118. Una trascrizione
  *  illeggibile vale «nessuna finestra»: non si indovina una data. */
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;

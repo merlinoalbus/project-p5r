@@ -3,12 +3,16 @@
 // ============================================================
 //
 // La disponibilità di un Confidente è un dato strutturato (migrazione 163, fonte G-036): come si incontra (`modo`), in quali giorni della settimana e
-// fasce, le eccezioni (pioggia per rango, due giorni dopo un rango, fascia diversa a un rango), da quando è disponibile e, se non ha un luogo, perché.
-// Il testo libero resta nelle note. Il valutatore dice se, in un dato momento, il Confidente è disponibile: lo usano la scheda, i semafori e il Diario.
+// fasce, le eccezioni (giorni dopo un rango, fascia o giorni diversi a un rango, giorni del calendario in cui non si incontra), da quando è disponibile
+// e, se non ha un luogo, perché. Il testo libero resta nelle note. Il valutatore dice se, in un dato momento, il Confidente è disponibile: lo usano la
+// scheda, i semafori e il Diario.
+// L13 (ondata 6, migrazione 306): la pioggia non è più un'eccezione della disponibilità. Ha una sola fonte, i requisiti di rango (`meteo non-piove`
+// in `confidente_requisito`, col «Ripristina» da `confidente_requisito_guida`): chi chiama dice nel contesto se l'incontro del rango successivo non si
+// fa con la pioggia (`nonConLaPioggia`), e il valutatore lo applica.
 // ============================================================
 
 import { giornoDellaSettimana } from './date.js';
-import { ordineGioco } from './condizioniSpillo.js';
+import { ordineGioco, type RequisitoSpillo } from './condizioniSpillo.js';
 
 export type ModoDisponibilita = 'settimanale' | 'su-messaggio' | 'stanza-velluto' | 'trama';
 export const MODI_DISPONIBILITA: readonly ModoDisponibilita[] = ['settimanale', 'su-messaggio', 'stanza-velluto', 'trama'];
@@ -18,9 +22,12 @@ export type FasciaDisponibilita = 'giorno' | 'sera';
 export const FASCE_DISPONIBILITA: readonly FasciaDisponibilita[] = ['giorno', 'sera'];
 
 export type EccezioneDisponibilita =
-  | { tipo: 'pioggia'; effetto: 'non-disponibile'; ranghi?: number[] }
   | { tipo: 'dopo-rango'; giorni: number; effetto: 'non-disponibile' }
-  | { tipo: 'fascia-rango'; rango: number; fasce: FasciaDisponibilita[] };
+  | { tipo: 'fascia-rango'; rango: number; fasce: FasciaDisponibilita[] }
+  /** Per l'incontro del rango indicato i giorni sono questi, al posto di quelli generali (come `fascia-rango` per le fasce). */
+  | { tipo: 'giorni-rango'; rango: number; giorni: GiornoDisponibilita[] }
+  /** I giorni del calendario di gioco («MM-GG») in cui non si incontra. */
+  | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' };
 
 export interface DisponibilitaStrutturata {
   modo: ModoDisponibilita;
@@ -42,6 +49,8 @@ export interface DisponibilitaConfidenteDto {
   luoghi: LuogoConfidente[];
   /** Vero se la struttura è stata cambiata rispetto alla fonte G-036: «Ripristina» la riporta com'era. */
   modificata: boolean;
+  /** I ranghi il cui incontro non si fa con la pioggia, letti dai requisiti di rango (la fonte unica della pioggia): solo da mostrare. */
+  ranghiNonConLaPioggia: number[];
   /** Presente se è stata indicata una partita: se il Confidente è disponibile adesso. */
   oggi?: EsitoDisponibilita;
 }
@@ -56,18 +65,44 @@ export interface ContestoDisponibilita {
   rango?: number | null;
   /** Quanti giorni di gioco sono passati dall'ultimo rango; null = non lo sappiamo. */
   giorniDallUltimoRango?: number | null;
+  /** Vero se fra i requisiti del rango successivo c'è «non deve piovere» (lo calcola `nonConLaPioggia` di disponibilitaStrutturataService); null o assente = non lo sappiamo, non si controlla. */
+  nonConLaPioggia?: boolean | null;
 }
 
 export interface EsitoDisponibilita {
   /** `disponibile`, `non-disponibile`, `su-messaggio` (si avanza su suo messaggio), `trama` (avanza da sola con la storia), `sconosciuto` (manca un dato). */
   stato: 'disponibile' | 'non-disponibile' | 'su-messaggio' | 'trama' | 'sconosciuto';
   motivo: string;
-  /** Perché non è disponibile (solo con `non-disponibile`): il giorno della settimana, la fascia, la data di inizio, la pioggia o i giorni dopo un rango. */
-  causa?: 'giorno' | 'fascia' | 'dal' | 'pioggia' | 'dopo-rango';
+  /** Perché non è disponibile (solo con `non-disponibile`): il giorno della settimana, un giorno del calendario escluso, la fascia, la data di inizio,
+   *  la pioggia o i giorni dopo un rango. */
+  causa?: 'giorno' | 'date' | 'fascia' | 'dal' | 'pioggia' | 'dopo-rango';
+}
+
+/** Vero se la condizione chiede che non piova: «non deve piovere», anche dentro un gruppo «tutte» (in un «almeno una» non è un obbligo). */
+export function richiedeNonPioggia(c: RequisitoSpillo): boolean {
+  if (c.tipo === 'meteo') return c.condizione === 'non-piove';
+  if (c.tipo === 'non') return c.condizione.tipo === 'piove';
+  if (c.tipo === 'gruppo') return c.modo === 'tutte' && c.condizioni.some(richiedeNonPioggia);
+  return false;
 }
 
 const SIGLE: Record<string, GiornoDisponibilita> = { Lunedì: 'lun', Martedì: 'mar', Mercoledì: 'mer', Giovedì: 'gio', Venerdì: 'ven', Sabato: 'sab', Domenica: 'dom' };
 const NOME_GIORNO: Record<GiornoDisponibilita, string> = { lun: 'lunedì', mar: 'martedì', mer: 'mercoledì', gio: 'giovedì', ven: 'venerdì', sab: 'sabato', dom: 'domenica', festivi: 'festivi' };
+/** «MM-GG» → «GG/MM». */
+const dataBreve = (mmgg: string): string => `${mmgg.slice(3)}/${mmgg.slice(0, 2)}`;
+
+/** Un'eccezione del vocabolario con i campi che il valutatore legge (un elenco che non è un elenco la renderebbe illeggibile): le altre si scartano. */
+function eccezioneLeggibile(e: unknown): e is EccezioneDisponibilita {
+  if (!e || typeof e !== 'object') return false;
+  const o = e as Record<string, unknown>;
+  switch (o.tipo) {
+    case 'dopo-rango': return typeof o.giorni === 'number';
+    case 'fascia-rango': return typeof o.rango === 'number' && Array.isArray(o.fasce);
+    case 'giorni-rango': return typeof o.rango === 'number' && Array.isArray(o.giorni);
+    case 'date': return Array.isArray(o.date) && o.date.every((d) => typeof d === 'string');
+    default: return false;
+  }
+}
 
 /** Legge la struttura dalle colonne della riga; una colonna illeggibile dà una struttura vuota di quel campo, mai un'eccezione. */
 export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; dal: string | null; motivo_senza_luogo: string; fonte: string | null }): DisponibilitaStrutturata {
@@ -77,8 +112,8 @@ export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: str
   let eccezioni: EccezioneDisponibilita[] = [];
   try {
     const v = JSON.parse(r.eccezioni_json) as unknown;
-    if (Array.isArray(v)) eccezioni = v.filter((e): e is EccezioneDisponibilita => !!e && typeof e === 'object'
-      && ((e as { tipo?: unknown }).tipo === 'pioggia' || (e as { tipo?: unknown }).tipo === 'dopo-rango' || (e as { tipo?: unknown }).tipo === 'fascia-rango'));
+    // le righe `pioggia` rimaste da prima della 306 non si leggono più: la pioggia sta nei requisiti di rango
+    if (Array.isArray(v)) eccezioni = v.filter(eccezioneLeggibile);
   } catch { /* eccezioni illeggibili: nessuna */ }
   return {
     modo: (MODI_DISPONIBILITA as readonly string[]).includes(r.modo) ? r.modo as ModoDisponibilita : 'settimanale',
@@ -88,11 +123,11 @@ export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: str
 }
 
 /** Il giorno è fra quelli ammessi? I «festivi» valgono dove il contesto dice che il giorno lo è. */
-function giornoAmmesso(s: DisponibilitaStrutturata, c: ContestoDisponibilita): boolean | null {
+function giornoAmmesso(giorni: readonly GiornoDisponibilita[], c: ContestoDisponibilita): boolean | null {
   const g = giornoDellaSettimana(c.data);
   if (g === null) return null;
-  if (s.giorni.includes(SIGLE[g]!)) return true;
-  return s.giorni.includes('festivi') && c.festivo === true;
+  if (giorni.includes(SIGLE[g]!)) return true;
+  return giorni.includes('festivi') && c.festivo === true;
 }
 
 /** Se, nel momento dato, il Confidente è disponibile e perché. Non legge né scrive niente: le eccezioni che dipendono da un dato mancante lo dicono. */
@@ -102,22 +137,29 @@ export function valutaDisponibilita(s: DisponibilitaStrutturata, c: ContestoDisp
   if (s.dal && c.data && ordineGioco(c.data) < ordineGioco(s.dal)) return { stato: 'non-disponibile', causa: 'dal', motivo: `Disponibile dal ${s.dal.slice(3)}/${s.dal.slice(0, 2)}.` };
   if (s.modo === 'stanza-velluto') return { stato: 'disponibile', motivo: 'Sempre accessibile, alla Stanza di Velluto.' };
   if (!c.data) return { stato: 'sconosciuto', motivo: 'Manca il giorno di gioco.' };
-  const giornoOk = giornoAmmesso(s, c);
-  if (giornoOk === null) return { stato: 'sconosciuto', motivo: 'Il giorno non è una data del calendario di gioco.' };
-  if (!giornoOk) return { stato: 'non-disponibile', causa: 'giorno', motivo: `Non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` };
   const prossimo = (c.rango ?? 0) + 1;
+  // un giorno del calendario escluso vale qualunque sia il giorno della settimana
+  if (s.eccezioni.some((e) => e.tipo === 'date' && e.date.includes(c.data!))) return { stato: 'non-disponibile', causa: 'date', motivo: `Il ${dataBreve(c.data)} non si incontra.` };
+  // i giorni del rango successivo, se ha i suoi, prendono il posto di quelli generali
+  const giorniRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'giorni-rango' }> => e.tipo === 'giorni-rango' && e.rango === prossimo);
+  const giornoOk = giornoAmmesso(giorniRango ? giorniRango.giorni : s.giorni, c);
+  if (giornoOk === null) return { stato: 'sconosciuto', motivo: 'Il giorno non è una data del calendario di gioco.' };
+  if (!giornoOk) return { stato: 'non-disponibile', causa: 'giorno', motivo: giorniRango ? `Per il rango ${prossimo} non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` : `Non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` };
   const fasceRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'fascia-rango' }> => e.tipo === 'fascia-rango' && e.rango === prossimo);
   const fasce = fasceRango ? fasceRango.fasce : s.fasce;
   if (c.fascia === null) return { stato: 'sconosciuto', motivo: 'Manca la fascia del giorno.' };
   if (fasce.length > 0 && !fasce.includes(c.fascia)) return { stato: 'non-disponibile', causa: 'fascia', motivo: `È disponibile ${fasce.join(' e ')}, non di ${c.fascia}.` };
+  // la pioggia: dai requisiti del rango successivo (fonte unica), che chi chiama riassume in `nonConLaPioggia`
+  if (c.nonConLaPioggia === true) {
+    if (c.piove === true) return { stato: 'non-disponibile', causa: 'pioggia', motivo: `L'incontro del rango ${prossimo} non si fa con la pioggia.` };
+    if (c.piove === null || c.piove === undefined) return { stato: 'sconosciuto', motivo: 'Manca il meteo: con la pioggia non è disponibile.' };
+  }
   for (const e of s.eccezioni) {
-    if (e.tipo === 'pioggia' && (!e.ranghi || e.ranghi.includes(prossimo))) {
-      if (c.piove === true) return { stato: 'non-disponibile', causa: 'pioggia', motivo: e.ranghi ? `L'incontro del rango ${prossimo} non si fa con la pioggia.` : 'Non è disponibile con la pioggia.' };
-      if (c.piove === null || c.piove === undefined) return { stato: 'sconosciuto', motivo: 'Manca il meteo: con la pioggia non è disponibile.' };
-    }
-    if (e.tipo === 'dopo-rango') {
+    // prima del primo incontro (rango 0) non c'è un rango dopo cui aspettare
+    if (e.tipo === 'dopo-rango' && c.rango !== 0) {
       if (c.giorniDallUltimoRango === null || c.giorniDallUltimoRango === undefined) return { stato: 'sconosciuto', motivo: `Non è disponibile nei ${e.giorni} giorni dopo un rango: manca il giorno dell'ultimo rango.` };
-      if (c.giorniDallUltimoRango < e.giorni) return { stato: 'non-disponibile', causa: 'dopo-rango', motivo: `Non è disponibile nei ${e.giorni} giorni dopo un rango.` };
+      // «nei 2 giorni dopo»: il giorno del rango e i 2 successivi; dal terzo sì («al massimo una volta ogni tre giorni»)
+      if (c.giorniDallUltimoRango <= e.giorni) return { stato: 'non-disponibile', causa: 'dopo-rango', motivo: `Non è disponibile nei ${e.giorni} giorni dopo un rango.` };
     }
   }
   return { stato: 'disponibile', motivo: 'Disponibile.' };
