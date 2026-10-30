@@ -5,7 +5,6 @@
 import { z } from 'zod';
 import { dataGioco, dote, idParam, livello, uidVoce } from './comuni.js';
 import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
-import { APERTURE_DEDALI } from '../../shared/condizioniSpillo.js';
 import { bodyRegistraAcquisto } from './acquisti.js';
 import { bodyRegistraSessionePesca } from './pesca.js';
 
@@ -203,11 +202,9 @@ export const bodyAzionePercorso = z.object({
   uid: uidVoce, fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
   acquisti: z.array(bodyRegistraAcquisto).max(100).optional(),
   pesche: z.array(bodyRegistraSessionePesca).max(100).optional(),
-  apertureDedali: z.array(z.string().refine((c) => APERTURE_DEDALI.some((a) => a.chiave === c), 'Apertura di dedalo non riconosciuta.'))
-    .max(APERTURE_DEDALI.length).refine((c) => new Set(c).size === c.length, 'Un dedalo si dichiara una sola volta nella visita.').optional(),
   /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto. */
   scelteEsito: z.array(sceltaEsitoSpunta).max(50).refine((s) => new Set(s.map((x) => x.effettoUid)).size === s.length, 'Ogni effetto ha una sola scelta.').optional(),
-}).strict().refine((d) => d.fatta || (!d.apertureDedali?.length && !d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length), 'Aperture, esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
+}).strict().refine((d) => d.fatta || (!d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length), 'Esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
 export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----

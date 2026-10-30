@@ -49,7 +49,6 @@ import { RicevuteVoce } from './RicevuteVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
-import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
 import { descriviOsservate, effettiDaOsservare, preparaOsservazioniVoce, richiesteOsservazioni, type OsservataSpunta, type OsservazioniVoce } from '../../services/osservazioniVoce';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -113,9 +112,9 @@ export function Azione(props: PropsAzione) {
 }
 function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
-  const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[]; esiti?: SceltaEsitoSpunta[] } | null>(null);
+  const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[] } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
-  const [chiediEsiti, setChiediEsiti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[] } | null>(null);
+  const [chiediEsiti, setChiediEsiti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean } | null>(null);
   const vivo = useRef(true);
   const scrittura = useRef(false);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
@@ -124,49 +123,41 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid, ...(a.effettiVoce?.effetti.some(e => e.effetto.tipo === 'pesca') ? { pesca: true } : {}) }) : null;
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
-  const [chiediAperture, setChiediAperture] = useState(false);
-  const [noteVisita, setNoteVisita] = useState<{ note?: 1 | 2 | 3; senzaPunti: boolean }>({ senzaPunti: false });
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: OsservataSpunta[] = [], automatica = false): Promise<void> => {
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: OsservataSpunta[] = [], automatica = false): Promise<void> => {
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
-    if (fatta && !a.fatta && a.apertureDedali?.length && aperture === undefined) {
-      setNoteVisita({ note: noteRisposta, senzaPunti });
-      setChiediNote(false);
-      setChiediAperture(true);
-      return;
-    }
+    // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi (migrazione 305)
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
-      setChiediNote(false); setChiediAperture(false); setChiediEsiti({ noteRisposta, senzaPunti, aperture }); return;
+      setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti }); return;
     }
     // 2026-10-28: consumazioni e visite di pesca si preparano da sole dalla voce e dallo stato della partita (`preparaOsservazioniVoce`): se
     // tutto è determinato la spunta registra senza finestra; la finestra compare solo con qualcosa di davvero aperto, e chiede solo quello
     if (fatta && !a.fatta && effettiDaOsservare(a).length && acquisti === undefined && pesche === undefined) {
-      setChiediNote(false); setChiediAperture(false); setChiediEsiti(null);
+      setChiediNote(false); setChiediEsiti(null);
       scrittura.current = true; setOccupato(true);
       let pronte: OsservazioniVoce | null;
       // una lettura fallita apre la finestra, che mostra l'errore e lascia rileggere
       try { pronte = await preparaOsservazioniVoce(partitaId, a, oggi); } catch { pronte = null; }
       finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
       if (!vivo.current) return;
-      if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, aperture, esiti }); return; }
+      if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, esiti }); return; }
       const r = richiesteOsservazioni(pronte);
-      return cambia(true, noteRisposta, senzaPunti, aperture, r.acquisti, r.pesche, esiti, r.osservate, true);
+      return cambia(true, noteRisposta, senzaPunti, r.acquisti, r.pesche, esiti, r.osservate, true);
     }
     setChiediNote(false);
     scrittura.current = true;
     setOccupato(true);
     try {
-      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(aperture ? { apertureDedali: aperture } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, aperture, undefined, undefined, esiti);
+      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
-      setChiediAperture(false);
       setChiediEsiti(null);
       setChiediAcquisti(null);
       onCambiata(agg);
@@ -225,13 +216,11 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
-        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti, osservate)} />}
+        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, richieste, pesche, chiediAcquisti.esiti, osservate)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
-        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
+        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
-        {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}
-        {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}
       </div>
       {/* la colonna dei comandi della voce: il menu e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari andrebbero
           visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono.
@@ -552,8 +541,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
                 ? <VoceEvento key={v.uid} e={v} gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} occupato={bloccata} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
-                    selezione={selezioneDi(v.uid)}
-                    dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={bloccata} /> : undefined} />
+                    selezione={selezioneDi(v.uid)} />
                 : <Azione key={`${partitaId}:${v.uid}`} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
                     gesti={IN_RILASCIO ? undefined : gesti(v, i, voci.length)} bloccata={bloccata} {...menuDi(v.uid)} {...(IN_RILASCIO ? {} : rigaRiordino(f, voci, v))}
                     selezione={selezioneDi(v.uid)}

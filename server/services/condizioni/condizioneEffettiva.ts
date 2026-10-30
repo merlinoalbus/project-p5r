@@ -88,6 +88,16 @@ export function condizioneEffettivaArea(a: { chiave?: string | null; quartiere_c
   return [...(quartiere ?? []), ...propria];
 }
 
+/** La condizione d'apertura di un Dedalo dei Memento (`dungeon_area.condizioni_json`, migrazione 305: il Palazzo concluso o la data della
+ *  guida), elenco in AND; null se il Dedalo non c'è, non ne ha una o lo schema è di prima della 305 (allora il fatto «aperto» non si dice). */
+export function condizioneAperturaDedalo(chiave: string): RequisitoSpillo[] | null {
+  let r: { condizioni_json: string | null } | undefined;
+  try { r = prepared("SELECT condizioni_json FROM dungeon_area WHERE chiave = ? AND dungeon_chiave = 'mementos'").get(chiave) as { condizioni_json: string | null } | undefined; }
+  catch { return null; } // uno schema di prima della 305: la colonna non c'è
+  const condizioni = leggiCondizioniSalvate(r?.condizioni_json ?? null);
+  return condizioni.length ? condizioni : null;
+}
+
 /** La condizione propria di un luogo (`luogo.condizioni_json`) in OR con gli inviti che lo aprono, e quella propria della sua Area (303):
  *  è quella che dice se il luogo è sbloccato (la condizione `luogo{}`), senza il quartiere. */
 export function condizioneDelLuogo(chiave: string, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {

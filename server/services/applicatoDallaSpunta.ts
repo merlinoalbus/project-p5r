@@ -91,7 +91,7 @@ function annullabile(p: number, r: ReceiptEffettoVoceDto, l: EffettiAzioneDto): 
     confidente: l.confidente && l.confidente.punti > 0 ? l.confidente : null,
     ...(l.turni?.length ? { turni: l.turni.map((t) => ({ ...t, doti: [] })) } : {}),
     ...(incontro ? { incontro } : {}),
-    ...(l.apertureDedali?.length ? { apertureDedali: l.apertureDedali } : {}),
+    // le aperture dei Dedali di una ricevuta di prima della 305 restano nella ricevuta ma non sono in vigore: si calcolano dai Palazzi
   };
 }
 

@@ -31,7 +31,6 @@ import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
-import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
@@ -215,7 +214,6 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
   /** Le voci spuntate con la ricevuta illeggibile, col motivo (F3-1): risultano «da correggere». */
   illeggibili: Map<string, string>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
   oggetti: ReturnType<typeof riferimentiOggettiPerFonti>;
-  aperture: ReturnType<typeof apertureDichiarabili>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
   partita?: number }
 
@@ -308,7 +306,6 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   if (ricevutaRotta !== undefined) fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: ricevutaRotta };
   const v = voceBase(r, fonte);
   const spuntabile = v.genere === 'azione';
-  const aperture = eVisitaMemento(v) ? ctx.aperture : apertureNegliEffetti(ctx.fatte.get(r.uid));
   const fonteOggetto = v.riferimento?.tipo === 'attivita' ? 'videogioco' : v.riferimento?.tipo;
   const oggettoRiferimento = fonteOggetto && v.riferimento ? ctx.oggetti.get(`${fonteOggetto}/${v.riferimento.chiave}`) ?? null : null;
   const oggettiCitati = new Map(oggettoRiferimento ? [[oggettoRiferimento.chiave, oggettoRiferimento]] : []);
@@ -339,7 +336,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
+    ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined, fasciaDi(r)) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
@@ -678,7 +675,6 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
     oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
-    aperture: apertureDichiarabili(),
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }
@@ -922,24 +918,16 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
   let avvisiSpunta: string[] = [];
   getDb().transaction(() => {
     const precedente = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
-    // Una voce storica riclassificata conserva l'accesso alla rimozione delle proprie dichiarazioni.
+    // Una voce storica riclassificata (non più un'azione) conserva l'accesso alla rimozione della propria spunta.
     if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
     if (fatta) {
-      const effettiPrima = leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null);
-      const aperture = opz.apertureDedali === undefined ? undefined : verificaApertureScelte(opz.apertureDedali,
-        eVisitaMemento(v) ? apertureDichiarabili() : apertureNegliEffetti(effettiPrima));
       if (precedente) {
         if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
-        if (aperture === undefined) return; // idempotente: non riapplica punti, letture o turni
-        // Mantiene tutti gli altri campi, anche quelli aggiunti da versioni successive. fatta_at e storico non cambiano.
-        const effetti = { ...(effettiPrima ?? { doti: [], confidente: null }), apertureDedali: aperture };
-        prepared('UPDATE spunta_voce_partita SET effetti_json = ? WHERE partita_id = ? AND voce_uid = ?').run(JSON.stringify(effetti), partitaId, uid);
-        prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-        return;
+        return; // idempotente: non riapplica punti, letture o turni (dalla 305 la visita ai Memento non dichiara più aperture)
       }
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti, avvisi } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
-        applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
+        applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
       }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso, scelteEsito: opz.scelteEsito }));
       avvisiSpunta = avvisi;

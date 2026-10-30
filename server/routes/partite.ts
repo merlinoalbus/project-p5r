@@ -240,7 +240,7 @@ router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePe
   const b = req.body as z.infer<typeof bodyAzionePercorso>;
   // la spunta e, se era l'ultima attività del giorno corrente, il passaggio al giorno dopo (togliere la spunta non torna indietro)
   // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
-  res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito }));
+  res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito }));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
