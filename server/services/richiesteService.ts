@@ -242,6 +242,22 @@ export function riepilogoRichieste(partitaId: number): RiepilogoRichiesteDto {
   return { accettate, inScadenza, giorniAvviso: GIORNI_AVVISO_SCADENZA };
 }
 
+/**
+ * O7-1: per le Richieste date, nella partita, perché oggi non si possono completare (le completabili non ci sono): la stessa lettura dello stato
+ * calcolato e del 409 di `impostaStatoRichiesta`, per i comandi che non leggono la Richiesta intera (l'elenco delle aree del dedalo).
+ */
+export function motiviCompletamentoRichieste(partitaId: number, chiavi: readonly string[]): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  if (!chiavi.length) return out;
+  const st = statoDisponibilitaPartita(partitaId);
+  const nomi = nomiCondizioniMemo();
+  for (const r of prepared(`${SQL} WHERE r.chiave IN (${chiavi.map(() => '?').join(', ')})`).all(...chiavi) as RigaRichiesta[]) {
+    const c = completamento(r, st, nomi, prorogaValida(r, st, nomi));
+    if (!c.completabile) out.set(r.chiave, c.motivi);
+  }
+  return out;
+}
+
 /** Tutti i dedali dei Memento, nell'ordine di percorrenza, con le loro aree (099): dove il modulo può mettere una Richiesta. */
 function collocazioni(): RichiesteDto['collocazioni'] {
   const dedali = (prepared("SELECT a.chiave, a.nome FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE d.tipo = 'mementos' ORDER BY a.ordine").all() as Array<{ chiave: string; nome: string }>)
@@ -358,10 +374,14 @@ function campiStrutturati(dati: DatiRichiesta): Record<string, unknown> {
     if (dati.proroga !== null && (!dataValida(dati.proroga.data) || !(dati.scadenzaData ?? null))) throw httpErrors.badRequest('proroga-non-valida', 'La proroga è una data di gioco e vale solo con una scadenza.');
     out.proroga_data = dati.proroga?.data ?? null;
     out.proroga_condizioni_json = dati.proroga ? condizioniValide(dati.proroga.condizioni) ?? null : null;
-    // L13 (ondata 7): l'area in cui il bersaglio si sposta durante la proroga (un'area dei dedali che c'è); senza proroga non c'è
-    const area = dati.proroga?.areaDedalo ?? null;
-    if (area !== null && !prepared('SELECT 1 FROM area_dedalo WHERE chiave = ?').get(area)) throw httpErrors.notFound('area-dedalo-non-trovata', `L'area del dedalo '${area}' non esiste.`);
-    out.proroga_area_dedalo_chiave = area;
+    // L13 (ondata 7): l'area in cui il bersaglio si sposta durante la proroga (un'area dei dedali che c'è); senza proroga non c'è. Con la proroga
+    // ma senza `areaDedalo` resta quella salvata (anche un'area nel cestino, che il DTO non dice: torna valida col ripristino, non si perde
+    // salvando la Richiesta per altro)
+    if (dati.proroga === null || dati.proroga.areaDedalo !== undefined) {
+      const area = dati.proroga?.areaDedalo ?? null;
+      if (area !== null && !prepared('SELECT 1 FROM area_dedalo WHERE chiave = ?').get(area)) throw httpErrors.notFound('area-dedalo-non-trovata', `L'area del dedalo '${area}' non esiste.`);
+      out.proroga_area_dedalo_chiave = area;
+    }
   }
   const completa = condizioniValide(dati.completamentoCondizioni);
   if (completa !== undefined) out.completamento_condizioni_json = completa;

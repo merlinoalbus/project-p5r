@@ -61,9 +61,15 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
   };
   return (
     <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
-      {richieste.map((r) => (
+      {richieste.map((r) => {
+        // O7-1: «Fatta» spento quando oggi non si può completare (il server la rifiuterebbe con 409): il perché sta nel titolo e nella descrizione
+        const motivi = r.stato !== 'completata' && r.motiviCompletamento?.length ? r.motiviCompletamento : null;
+        const spento = (s: StatoRichiesta | null) => s === 'completata' && motivi !== null;
+        const idMotivi = `fatta-${r.chiave}`;
+        return (
         <li key={r.chiave} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 testo-13">
           <Link to={`/guida/richieste?dedalo=${encodeURIComponent(dedalo)}`} className={`touch inline-flex min-w-[10rem] flex-1 items-center ${r.stato === 'completata' ? 'text-text-muted line-through' : ''}`}>{r.nome}</Link>
+          {partitaId && motivi && <span id={idMotivi} className="sr-only">Si completa dopo: {motivi.join('; ')}</span>}
           {partitaId && (
             // da tastiera come vuole il ruolo: Tab entra sullo stato scelto, le frecce scelgono il precedente o il seguente
             <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-border" role="radiogroup" aria-label={`Stato di «${r.nome}»`}
@@ -72,15 +78,21 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
                 if (!passo || occupata === r.chiave) return;
                 e.preventDefault();
                 const i = STATI.findIndex((s) => s.stato === (r.stato ?? null));
-                const prossimo = STATI[(i + passo + STATI.length) % STATI.length];
+                // le frecce saltano lo stato spento, come vuole il ruolo
+                let j = (i + passo + STATI.length) % STATI.length;
+                if (spento(STATI[j].stato)) j = (j + passo + STATI.length) % STATI.length;
+                if (j === i) return;
+                const prossimo = STATI[j];
                 (e.currentTarget.querySelectorAll<HTMLButtonElement>('[role=radio]')[STATI.indexOf(prossimo)])?.focus();
                 void esegui(r.chiave, async () => onRichiesta(r.chiave, (await impostaStatoRichiesta(partitaId, r.chiave, prossimo.stato)).stato), 'Stato non aggiornato.');
               }}>
               {STATI.map((s) => {
                 const scelto = (r.stato ?? null) === s.stato;
                 return (
-                  <button key={s.etichetta} type="button" role="radio" aria-checked={scelto} tabIndex={scelto ? 0 : -1} title={s.titolo} disabled={occupata === r.chiave}
-                    className={`touch min-w-11 border-l border-border px-2.5 testo-12 first:border-l-0 ${scelto ? (s.stato === 'completata' ? 'bg-success/25 font-semibold text-text' : s.stato ? 'bg-primary/25 font-semibold text-text' : 'bg-white/10 text-text') : 'text-text-muted hover:bg-white/5 hover:text-text'}`}
+                  <button key={s.etichetta} type="button" role="radio" aria-checked={scelto} tabIndex={scelto ? 0 : -1}
+                    title={spento(s.stato) && motivi ? `Si completa dopo: ${motivi.join('; ')}` : s.titolo} disabled={occupata === r.chiave || spento(s.stato)}
+                    aria-describedby={spento(s.stato) ? idMotivi : undefined}
+                    className={`touch min-w-11 border-l border-border px-2.5 testo-12 first:border-l-0 ${spento(s.stato) ? 'cursor-not-allowed opacity-50' : ''} ${scelto ? (s.stato === 'completata' ? 'bg-success/25 font-semibold text-text' : s.stato ? 'bg-primary/25 font-semibold text-text' : 'bg-white/10 text-text') : 'text-text-muted hover:bg-white/5 hover:text-text'}`}
                     onClick={() => { if (!scelto) void esegui(r.chiave, async () => onRichiesta(r.chiave, (await impostaStatoRichiesta(partitaId, r.chiave, s.stato)).stato), 'Stato non aggiornato.'); }}>
                     {s.etichetta}
                   </button>
@@ -99,7 +111,8 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
             </span>
           )}
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }

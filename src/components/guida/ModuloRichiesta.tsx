@@ -192,7 +192,9 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
         debolezze: voci(b.debolezze), resistenze: voci(b.resistenze), vulnerabileConfusione: b.confusione },
       ricompense: voci(b.ricompense), confidente: b.confidente || null, confidenteRango: null, note: b.note.trim(),
       condizioni: b.condizioni, scadenzaData: b.scadenzaData || null,
-      proroga: b.prorogaData ? { data: b.prorogaData, condizioni: b.prorogaCondizioni, areaDedalo: b.prorogaArea || null } : null,
+      // l'area della proroga solo se cambiata: una Richiesta salvata per altro non perde quella salvata (anche un'area nel cestino, che il
+      // modulo non vede e torna valida col ripristino)
+      proroga: b.prorogaData ? { data: b.prorogaData, condizioni: b.prorogaCondizioni, ...(b.prorogaArea === partenza.prorogaArea ? {} : { areaDedalo: b.prorogaArea || null }) } : null,
       completamentoCondizioni: b.completamento,
       ombra: b.ombra || null, yen: intero(b.yen, 1, 9_999_999, 'Yen'), esperienza: intero(b.esperienza, 1, 999_999, 'Esperienza (PE)'),
       // gli oggetti solo se cambiati: una Richiesta salvata per altro non tocca le sue ricompense (né le loro note)

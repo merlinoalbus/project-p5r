@@ -103,6 +103,11 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
     // dopo il cambio di stato il server ha mosso da solo gli yen (decisione 18) o, per una proposta nata prima, l'ha chiusa: tutto si rilegge subito
     try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); segnalaMutazioneEffetti(partitaId); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
+  /** O7-1: «Si completa dopo» solo dove completarla è il passo che resta (disponibile, da verificare, accettata): su una scaduta o bloccata
+   *  i motivi del suo stato dicono già perché, e i due messaggi insieme si contraddirebbero. */
+  const sp = r.statoPartita;
+  const mostraCompletaDopo = !!sp && !sp.completabile && sp.motiviCompletamento.length > 0
+    && (sp.stato === 'disponibile' || sp.stato === 'da-verificare' || sp.stato === 'accettata');
   return (
     <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
       <div className="flex items-start gap-2.5">
@@ -125,10 +130,10 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         </ul>
       )}
       {/* O7-1: accettata (o accettabile) ma non ancora completabile: il Dedalo del bersaglio chiuso nella partita o una condizione propria */}
-      {r.statoPartita && !r.statoPartita.completabile && r.statoPartita.motiviCompletamento.length > 0 && (
+      {mostraCompletaDopo && sp && (
         <div className="flex min-w-0 flex-col gap-0.5 testo-12 text-text-secondary" id={`completa-${r.chiave}`}>
           <span className="text-text-muted">Si completa dopo:</span>
-          <ul className="m-0 flex flex-col gap-0.5 pl-4">{r.statoPartita.motiviCompletamento.map((m) => <li key={m}>{m}</li>)}</ul>
+          <ul className="m-0 flex flex-col gap-0.5 pl-4">{sp.motiviCompletamento.map((m) => <li key={m}>{m}</li>)}</ul>
         </div>
       )}
       {r.statoPartita && r.statoPartita.giorniAllaScadenza !== null && r.statoPartita.giorniAllaScadenza <= GIORNI_AVVISO && r.statoPartita.stato !== 'completata' && r.statoPartita.stato !== 'bloccata' && (
@@ -209,7 +214,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           dettaglio={r.statoPartita?.stato === 'da-verificare' ? 'da verificare' : undefined} disabled={occupato} onClick={() => void cambia('accettata')} />}
         {/* O7-1: «Completata» solo col bersaglio raggiungibile (il server rifiuta il resto con 409); il motivo è qui sopra, «Si completa dopo» */}
         {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata"
-          disabled={occupato || r.statoPartita?.completabile === false} aria-describedby={r.statoPartita?.completabile === false && r.statoPartita.motiviCompletamento.length ? `completa-${r.chiave}` : undefined}
+          disabled={occupato || r.statoPartita?.completabile === false} aria-describedby={mostraCompletaDopo ? `completa-${r.chiave}` : undefined}
           onClick={() => void cambia('completata')} />}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
         {/* il Dedalo dove sta il bersaglio oggi: quello della proroga, se si è spostato */}

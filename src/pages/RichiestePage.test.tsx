@@ -132,7 +132,10 @@ describe('RichiestePage', () => {
       accettabile: false, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
     const spostata = ric('c', 'Il sadismo è un gesto d’amore', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { statoPartita: { stato: 'disponibile', motivi: [], scadenzaEffettiva: '02-01', giorniAllaScadenza: 7,
       accettabile: true, completabile: true, motiviCompletamento: [], doveOggi: { dedalo: 'mementos-09-daat', dedaloNome: 'Dedalo di Da’at', areaDedalo: 'd-1', areaDedaloNome: 'Piano 1', spostato: true } } });
-    getRichieste.mockReset().mockResolvedValue({ ...dati, richieste: [chiusa, spostata], totale: 2 });
+    // scaduta col Dedalo chiuso: dice solo che è scaduta, non anche «Si completa dopo» (i due messaggi si contraddirebbero)
+    const scaduta = ric('d', 'Il netturbino', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { statoPartita: { stato: 'scaduta', motivi: ['Scaduta il 23 dicembre'], scadenzaEffettiva: '12-23', giorniAllaScadenza: null,
+      accettabile: false, completabile: false, motiviCompletamento: ['Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame'], doveOggi: dove } });
+    getRichieste.mockReset().mockResolvedValue({ ...dati, richieste: [chiusa, spostata, scaduta], totale: 3 });
     render(<MemoryRouter><RichiestePage /></MemoryRouter>);
     const carta = within((await screen.findByText('Bullismo sui bulli')).closest('li')!);
     expect(carta.getByText('Si completa dopo:')).toBeInTheDocument();
@@ -142,5 +145,8 @@ describe('RichiestePage', () => {
     expect(altra.getByText('Durante la proroga il bersaglio è nel Dedalo di Da’at, Piano 1')).toBeInTheDocument();
     expect(altra.getByRole('button', { name: 'Completata' })).toBeEnabled();
     expect(altra.queryByText('Si completa dopo:')).toBeNull();
+    const terza = within(screen.getByText('Il netturbino').closest('li')!);
+    expect(terza.getByText('Scaduta il 23 dicembre')).toBeInTheDocument();
+    expect(terza.queryByText('Si completa dopo:')).toBeNull();
   });
 });

@@ -223,6 +223,9 @@ describe('le Richieste modificabili', () => {
     // la Richiesta citata dalle condizioni di completamento lo sa
     expect(((await request(app).get('/api/compendio/richieste/un-ex-piuttosto-appiccicoso/citazioni').expect(200)).body.data as CitazioniRichiestaDto).condizioni)
       .toContain('Richiesta: Un bullo che abbaia e morde (per completarla)');
+    // la proroga mandata senza `areaDedalo` (Richiesta salvata per altro) lascia l'area salvata
+    await request(app).put(`/api/compendio/richieste/${chiave}`).send({ scadenzaData: '12-23', proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }] } }).expect(200);
+    expect(prepared('SELECT proroga_area_dedalo_chiave FROM richiesta WHERE chiave = ?').pluck().get(chiave)).toBe(area);
     // un'area che non c'è, una condizione che non si riconosce: niente salvato
     expect((await request(app).put(`/api/compendio/richieste/${chiave}`).send({ scadenzaData: '12-23', proroga: { data: '02-01', condizioni: [], areaDedalo: 'nessuna' } })).body.error.code).toBe('area-dedalo-non-trovata');
     expect((await request(app).put(`/api/compendio/richieste/${chiave}`).send({ completamentoCondizioni: [{ tipo: 'boh' }] })).body.error.code).toBe('condizioni-non-valide');

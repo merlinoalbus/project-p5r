@@ -2765,7 +2765,11 @@ export interface SpilloRaccoltaDto {
 }
 
 /** Una Richiesta come elemento di un'area del dedalo (o da collocare), con il suo stato nella partita. */
-export interface RichiestaDelDedaloDto { chiave: string; nome: string; stato: StatoRichiesta | null }
+export interface RichiestaDelDedaloDto {
+  chiave: string; nome: string; stato: StatoRichiesta | null;
+  /** O7-1: con la partita, solo se oggi non si può completare (Dedalo del bersaglio chiuso, condizioni proprie false): perché. */
+  motiviCompletamento?: string[];
+}
 
 /**
  * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della

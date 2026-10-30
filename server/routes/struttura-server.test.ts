@@ -269,6 +269,9 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     const ordini = r.richieste.filter((x) => x.areaOrdine !== null).map((x) => x.areaOrdine as number);
     expect(ordini).toEqual([...ordini].sort((a, b) => a - b));
     expect(r.richieste[0].areaNome).toBeTruthy();
+    // O7-1: completare chiede il Dedalo aperto nella partita (305) e le condizioni proprie (310); qui si contano le completate, non quando si può
+    getDb().prepare("UPDATE dungeon_area SET condizioni_json = NULL WHERE dungeon_chiave = 'mementos'").run();
+    getDb().prepare('UPDATE richiesta SET completamento_condizioni_json = NULL').run();
     await request(app).put(`/api/partite/${id}/richieste`).send({ richiesta: r.richieste[0].chiave, stato: 'completata' });
     const dopo = (await request(app).get(`/api/compendio/richieste?partita=${id}`)).body.data as RichiesteDto;
     expect(dopo.dedali.find((d) => d.chiave === r.richieste[0].areaChiave)?.completate).toBe(1);

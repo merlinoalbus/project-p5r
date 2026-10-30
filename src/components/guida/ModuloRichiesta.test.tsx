@@ -172,6 +172,18 @@ it('O7-1: con la proroga si sceglie da elenco dove si sposta il bersaglio, e lo 
     scadenzaData: '12-23', proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }], areaDedalo: 'aiy-2' } })));
 });
 
+it('O7-1: salvata per altro, la Richiesta non manda l’area della proroga (quella salvata resta, anche se nel cestino)', async () => {
+  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, scadenzaData: '12-23',
+    proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato', testo: 'Terzo semestre avviato' }], areaDedalo: null, areaDedaloNome: null, dedaloNome: null } }] });
+  monta('bulli');
+  await screen.findByRole('dialog');
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '12' } });
+  api.aggiornaRichiesta.mockResolvedValue(richiesta);
+  fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+  await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({
+    proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }] } })));
+});
+
 it('O7-1: i testi della guida da convertire compaiono solo se non sono vuoti', async () => {
   api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, disponibileDal: '', scadenza: '', piano: '' }] });
   monta('bulli');

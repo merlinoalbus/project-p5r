@@ -37,6 +37,12 @@ const totaleTimbri = (area: string, totale: number | null) => request(app).put(`
 const raccolti = (partita: number, area: string, n: number) => request(app).put(`/api/partite/${partita}/timbri`).send({ area, raccolti: n });
 const q = (n: number) => `${QIMRANUT}-area-${n}`;
 const a = (n: number) => `${AIYATSBUS}-area-${n}`;
+/** O7-1: completare una Richiesta chiede il suo Dedalo aperto nella partita (305) e le sue condizioni proprie di completamento (310);
+ *  questi test parlano delle aree, non di quando si completa: Dedali senza condizione d'apertura e Richieste senza condizioni proprie. */
+const completabiliSempre = () => {
+  prepared("UPDATE dungeon_area SET condizioni_json = NULL WHERE dungeon_chiave = 'mementos'").run();
+  prepared('UPDATE richiesta SET completamento_condizioni_json = NULL').run();
+};
 
 describe('le aree dei dedali', () => {
   beforeEach(() => { dbDiProva(); });
@@ -77,6 +83,7 @@ describe('le aree dei dedali', () => {
     expect(prima.punti.some((p) => p.tipo === 'persona' && p.areeDedalo.includes(q(2)))).toBe(true);
     expect(area2.elementi).toEqual({ totale: trama.filter((p) => p.areaDedalo === q(2)).length + area2.richieste.length + 2, fatti: 0 });
     for (const [i, v] of trama.entries()) await segnaVoce(partita, v.chiave, i % 2 === 0 ? 'ottenuto' : 'esaurito');
+    completabiliSempre();
     for (const r of prima.dedalo.aree.flatMap((x) => x.richieste)) await request(app).put(`/api/partite/${partita}/richieste`).send({ richiesta: r.chiave, stato: 'completata' }).expect(200);
     let d = await dedalo(QIMRANUT, partita);
     // mancano i timbri dell'Area 2, che contano uno per timbro
@@ -204,6 +211,7 @@ describe('le aree dei dedali', () => {
     const partita = await nuovaPartita('Colloca');
     const prima = await dedalo(AIYATSBUS, partita);
     const richiesta = prima.dedalo.aree.flatMap((x) => x.richieste)[0].chiave;
+    completabiliSempre();
     await request(app).put(`/api/partite/${partita}/richieste`).send({ richiesta, stato: 'completata' }).expect(200);
     // fuori dall'area: da collocare, fuori dal conteggio
     expect((await request(app).put(`/api/compendio/richieste/${richiesta}/area`).send({ areaDedalo: null }).expect(200)).body.data).toMatchObject({ areaDedalo: null, areaChiave: AIYATSBUS });

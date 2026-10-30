@@ -37,6 +37,7 @@ import { areeDelPalazzo } from './mappe/areeService.js';
 import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
 import { elencaAtterraggi, impostaFinestra, type ConsigliPalazzo } from './atterraggioPalazziService.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
+import { motiviCompletamentoRichieste } from './richiesteService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
@@ -249,8 +250,13 @@ function lettureDedali(dungeonChiave: string, partitaId: number | undefined, sta
   const statiRichieste = partitaId === undefined ? new Map<string, StatoRichiesta>() : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
   const richieste = new Map<string, RichiestaDelDedaloDto[]>();
   const daCollocare = new Map<string, RichiestaDelDedaloDto[]>();
-  for (const r of prepared('SELECT r.chiave, r.nome, r.area_chiave, r.area_dedalo_chiave FROM richiesta r JOIN dungeon_area d ON d.chiave = r.area_chiave WHERE d.dungeon_chiave = ? ORDER BY d.ordine, r.ordine, r.chiave').all(dungeonChiave) as Array<{ chiave: string; nome: string; area_chiave: string; area_dedalo_chiave: string | null }>) {
-    const dto: RichiestaDelDedaloDto = { chiave: r.chiave, nome: r.nome, stato: statiRichieste.get(r.chiave) ?? null };
+  const righeRichieste = prepared('SELECT r.chiave, r.nome, r.area_chiave, r.area_dedalo_chiave FROM richiesta r JOIN dungeon_area d ON d.chiave = r.area_chiave WHERE d.dungeon_chiave = ? ORDER BY d.ordine, r.ordine, r.chiave').all(dungeonChiave) as Array<{ chiave: string; nome: string; area_chiave: string; area_dedalo_chiave: string | null }>;
+  // O7-1: con la partita, perché una Richiesta non ancora completata non si può completare oggi (il comando «Fatta» lo dice invece di dare 409)
+  const daCompletare = righeRichieste.filter((r) => statiRichieste.get(r.chiave) !== 'completata').map((r) => r.chiave);
+  const bloccate = partitaId === undefined ? new Map<string, string[]>() : motiviCompletamentoRichieste(partitaId, daCompletare);
+  for (const r of righeRichieste) {
+    const motivi = bloccate.get(r.chiave);
+    const dto: RichiestaDelDedaloDto = { chiave: r.chiave, nome: r.nome, stato: statiRichieste.get(r.chiave) ?? null, ...(motivi?.length ? { motiviCompletamento: motivi } : {}) };
     const [mappa, chiave] = r.area_dedalo_chiave ? [richieste, r.area_dedalo_chiave] : [daCollocare, r.area_chiave];
     mappa.set(chiave, [...(mappa.get(chiave) ?? []), dto]);
   }
