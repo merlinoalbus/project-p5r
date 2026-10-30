@@ -3,8 +3,8 @@
 // ============================================================
 //
 // Legge la struttura (modo, giorni, fasce, eccezioni, dal, motivo senza luogo) e i luoghi per chiave (L5: `luogo.confidenti_json`), dice se il
-// Confidente è disponibile adesso nella partita. Il testo libero della riga (`confidente_disponibilita.giorni_json`, `luogo`, note…) resta
-// com'è e si modifica dall'editor informativo (`disponibilitaConfidentiService`). Le scritture sono in `disponibilitaStrutturataScritture`: questo
+// Confidente è disponibile adesso nella partita: è l'unica fonte di giorni, fasce, eccezioni e luoghi. Della prosa della riga restano solo
+// note e fonti, dall'editor informativo (`disponibilitaConfidentiService`; L13, migrazione 307). Le scritture sono in `disponibilitaStrutturataScritture`: questo
 // modulo non dipende dal catalogo, così la scheda del Confidente e il Diario lo importano senza ciclo.
 // ============================================================
 

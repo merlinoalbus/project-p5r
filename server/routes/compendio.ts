@@ -451,7 +451,7 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
 });
-/** Editor informativo indipendente dal dettaglio, leggibile anche con elenchi JSON storici malformati. */
+/** Editor informativo (note, note generali, fonti: L13, migrazione 307) indipendente dal dettaglio, leggibile anche con fonti JSON storiche malformate. */
 router.get('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(informazioniConfidente(String(req.params.chiave)));

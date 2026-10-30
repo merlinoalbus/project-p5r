@@ -27,7 +27,9 @@ describe('API dettaglio Confidenti', () => {
       expect(d.abilita.length).toBeGreaterThan(0);
       expect(d.dialoghi.length).toBeGreaterThan(0);
       expect(d.fonti.length).toBeGreaterThan(0);
-      expect(d.disponibilita.luogo.length).toBeGreaterThan(0);
+      // L13 (O6-2, migrazione 307): quando e dove si incontra è la disponibilità strutturata; della prosa restano le note
+      expect(d.disponibilitaStrutturata).toBeDefined();
+      expect(Object.keys(d.disponibilita)).toEqual(['note']);
       dialoghi += d.dialoghi.length;
       for (const x of d.dialoghi) {
         scelte += x.scelte.length;

@@ -79,10 +79,10 @@ export function ConfidenteDettaglioPage() {
   const regaloConsegnato = (g: RegaloConfidenteDto): boolean => g.catalogo && mio?.regaliFattiCatalogo !== undefined
     ? regaliCatalogoFatti.has(g.catalogo.chiave) : regaliFatti.has(g.nomeStorico ?? g.nome);
   const prossimo = mio ? mio.rango + 1 : null;
-  // Il recupero informativo deve restare disponibile anche se un vecchio JSON è valido ma non è un elenco.
-  const erroreInformativo = c && [c.disponibilita.giorni, c.disponibilita.fasce, c.fonti]
-    .some(v => !Array.isArray(v) || !v.every(x => typeof x === 'string'))
-    ? 'Le informazioni della disponibilità contengono un elenco illeggibile. Apri «Modifica informazioni del Confidente» per correggere i soli campi interessati.' : null;
+  // Il recupero informativo deve restare disponibile anche se un vecchio JSON delle fonti è valido ma non è un elenco (L13, O6-2: le fonti sono
+  // l'unico elenco rimasto nelle informazioni; giorni e fasce sono la disponibilità strutturata).
+  const erroreInformativo = c && (!Array.isArray(c.fonti) || !c.fonti.every(x => typeof x === 'string'))
+    ? 'Le fonti del Confidente sono un elenco illeggibile. Apri «Modifica informazioni del Confidente» per correggerle.' : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
   // Lo stesso parametro apre «Correggi» dalla Partita e governa la finestra anche durante la navigazione.
@@ -217,10 +217,7 @@ export function ConfidenteDettaglioPage() {
               <div className="testo-13 text-text-secondary flex flex-col gap-1">
                 {c.disponibilitaStrutturata
                   ? <DisponibilitaStrutturataScheda chiave={c.chiave} partita={attiva?.id} versione={versioneDisponibilita} onModifica={() => setDisponibilitaAperta(true)} />
-                  : <>
-                    <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>
-                    <span><strong className="text-text">Quando:</strong> {c.disponibilita.giorni.join(', ') || '—'}{c.disponibilita.fasce.length ? ` · ${c.disponibilita.fasce.join(', ')}` : ''}</span>
-                  </>}
+                  : <span>Disponibilità non indicata.</span>}
                 <span><strong className="text-text">Sblocco:</strong> {requisiti.caricamento ? 'Caricamento…' : requisiti.errore ? 'Requisiti non disponibili' : requisiti.dati?.ranghi.find((r) => r.rango === 1)?.requisiti.map((r) => r.descrizione).join(' · ') || 'Disponibile dall’inizio'}</span>
                 {c.disponibilita.note && <span>{c.disponibilita.note}</span>}
               </div>
@@ -345,7 +342,9 @@ export function ConfidenteDettaglioPage() {
     {!IN_RILASCIO && c && erroreInformativo && <PulsanteVisivo tono="secondario" compatto className="mt-3" icona={<IconaAzione chiave="modifica" dimensione={20} />}
       titolo="Modifica informazioni del Confidente" onClick={() => setInformazioniAperte(true)} />}
     {!IN_RILASCIO && disponibilitaAperta && c && <EditorDisponibilitaStrutturata key={`struttura:${chiave}`} chiave={chiave} nome={c.nome} onChiudi={() => setDisponibilitaAperta(false)} onSalvato={async () => { setVersioneDisponibilita((v) => v + 1); await ricarica(); }} />}
-    {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica} />}
+    {/* dalle informazioni si passa all'editor strutturato (giorni, fasce, eccezioni, luoghi): una finestra alla volta */}
+    {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica}
+      onApriDisponibilita={c?.disponibilitaStrutturata ? () => { setInformazioniAperte(false); setDisponibilitaAperta(true); } : undefined} />}
     </>
   );
 }

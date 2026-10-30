@@ -129,15 +129,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave/disponibilita': {
     sommario: 'Informazioni del Confidente e storico, indipendenti dai requisiti operativi',
-    descrizione: 'Sola lettura, no-store. Gli otto campi informativi conservano i valori RAW: giorni/fasce/fonti illeggibili sono segnalati senza impedire l’accesso all’editor. Riporta proposta Makoto, esito della bonifica131, versioni ripristinabili e revisione CAS comprendente riga completa e registro. Registro malformato, identità o catena incoerente:409, nessun reset. Non legge o modifica la partita.',
+    descrizione: 'Sola lettura, no-store. I tre campi informativi (note sulla disponibilità, note generali, fonti) con la riga RAW completa: fonti illeggibili sono segnalate senza impedire l’accesso all’editor. Giorni, fasce, eccezioni, luoghi e sblocco non sono qui: sono la disponibilità strutturata e i requisiti di rango (migrazione 307). Riporta le versioni ripristinabili (anche le revisioni scritte dalle migrazioni 131 e 307) e la revisione CAS comprendente riga completa e registro. Registro malformato, identità o catena incoerente:409, nessun reset. Non legge o modifica la partita.',
     risposta: '`EditorInformazioniConfidenteDto`',
     errori: [[404, 'confidente-non-trovato'], [409, 'storico-disponibilita-incoerente'], [409, 'informazioni-confidente-illeggibili']],
   },
   'POST /api/compendio/confidenti/:chiave/disponibilita/anteprima': {
-    sommario: 'Anteprima della proposta, PATCH manuale, creazione o ripristino informativo',
-    descrizione: 'Sola lettura, no-store. Azioni strict:applica-proposta con ID makoto-calendario-v1; modifica-manuale con i soli valori selezionati e motivo; crea-informazioni con tutti gli otto campi e motivo; ripristina-versione con ID. Ogni azione richiede revisioneAttesa. La proposta conserva obbligatoriamente nelle note i valori correnti esatti di giorni/fasce/data/requisiti, anche sulle varianti, e non modifica i requisiti del rango1. La PATCH conserva i byte degli altri campi e non normalizza elenchi semanticamente invariati. Il ripristino RAW illeggibile è consentito ma segnalato come non validato.',
+    sommario: 'Anteprima della PATCH manuale, della creazione o del ripristino informativo',
+    descrizione: 'Sola lettura, no-store. Azioni strict: modifica-manuale con i soli valori selezionati (note, noteGenerali, fonti) e motivo; crea-informazioni con i tre campi e motivo; ripristina-versione con ID, che riporta solo note, note generali e fonti della versione (giorni, fasce, luogo e sblocco in prosa di una versione storica si segnalano nelle avvertenze come non più modificabili da qui, mai riscritti). Ogni azione richiede revisioneAttesa. La PATCH conserva i byte degli altri campi e non normalizza elenchi semanticamente invariati. Il ripristino di fonti RAW illeggibili è consentito ma segnalato come non validato.',
     risposta: '`AnteprimaInformazioniConfidenteDto`: prima/dopo RAW, campiCambiati, avvertenze e anteprimaAttesa',
-    errori: [[404, 'confidente-non-trovato'], [409, 'informazioni-confidente-obsolete'], [409, 'storico-disponibilita-incoerente'], [409, 'proposta-disponibilita-inapplicabile'], [409, 'versione-disponibilita-assente'], [409, 'informazioni-confidente-presenza-diversa']],
+    errori: [[404, 'confidente-non-trovato'], [409, 'informazioni-confidente-obsolete'], [409, 'storico-disponibilita-incoerente'], [409, 'versione-disponibilita-assente'], [409, 'informazioni-confidente-presenza-diversa']],
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita': {
     sommario: 'Salva la modifica informativa mostrata nell’anteprima, con storico e CAS',

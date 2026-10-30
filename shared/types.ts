@@ -366,8 +366,9 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   regalabile: boolean;
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
-  disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
-  /** R9-01: la disponibilità come dato strutturato (la fonte di ciò che l'app valuta), con i luoghi per chiave; il testo di `disponibilita` resta nelle note. */
+  /** L13 (ondata 6, O6-2): solo le note sulla disponibilità; giorni, fasce, luoghi e sblocco sono in `disponibilitaStrutturata` e nei requisiti. */
+  disponibilita: { note: string };
+  /** R9-01: la disponibilità come dato strutturato (la fonte di ciò che l'app valuta), con i luoghi per chiave. */
   disponibilitaStrutturata?: DisponibilitaConfidenteDto;
   noteGenerali: string;
   fonti: string[];

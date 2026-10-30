@@ -1,12 +1,24 @@
+// ============================================================
+// EditorDisponibilita — «Informazioni del Confidente»: note sulla disponibilità, note generali e fonti, con lo storico
+// ============================================================
+//
+// L13 (ondata 6, lotto O6-2): un dato in un solo punto. Giorni, fasce, eccezioni e luoghi si modificano da «Modifica disponibilità»
+// (l'editor strutturato, raggiungibile da qui), lo sblocco dai requisiti di rango; qui restano le note e le fonti. È la `FinestraModifica`
+// comune: corpo che scorre, piè fisso, conferma prima di chiudere con modifiche non salvate. «Salva» chiede l'anteprima al server (che
+// controlla che riga e storico non siano cambiati) e salva nello stesso gesto; il ripristino di una versione mostra prima che cosa riporta.
+// ============================================================
+
 import { useState } from 'react';
-import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { CampoTesto, SezioneCampi } from '../shared/Campo';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaInformazioniConfidente, getInformazioniConfidente, salvaInformazioniConfidente } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { CHIUDI_SENZA_SALVARE, conferma } from '../../stores/confermaStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
-import { CAMPI_INFORMAZIONI_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from '../../../shared/disponibilitaConfidenti';
-import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, CampoInformazioniConfidente, InformazioniConfidente, InformazioniConfidenteRaw, SalvaInformazioniConfidente } from '../../../shared/disponibilitaConfidenti';
+import { COLONNE_STORICHE_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from '../../../shared/disponibilitaConfidenti';
+import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, EditorInformazioniConfidenteDto, InformazioniConfidente, InformazioniConfidenteRaw } from '../../../shared/disponibilitaConfidenti';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
@@ -14,149 +26,191 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-const COLONNE: Record<CampoInformazioniConfidente, keyof InformazioniConfidenteRaw> = {
-  giorni: 'giorni_json', fasce: 'fasce_json', luogo: 'luogo', sbloccoData: 'sblocco_data', sbloccoRequisiti: 'sblocco_requisiti',
-  note: 'note', noteGenerali: 'note_generali', fonti: 'fonti_json',
-};
-const vuoti = (): InformazioniConfidente => ({ giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '', noteGenerali: '', fonti: [] });
-const comeTesto = (v: string | string[] | undefined) => Array.isArray(v) ? v.join('\n') : v ?? '';
+interface Props {
+  chiave: string;
+  onChiudi: () => void;
+  onSalvato: () => void | Promise<void>;
+  /** Apre l'editor strutturato della disponibilità (giorni, fasce, eccezioni, luoghi); chi lo usa chiude questa finestra. */
+  onApriDisponibilita?: () => void;
+}
 
 /** Legge il proprio endpoint: rimane accessibile anche quando il dettaglio non riesce a decodificare un vecchio JSON. */
 // L12 (passo 8): nel rilascio (sola lettura) l'editor non esiste; la condizione è costante di build, `EditorDisponibilitaReale` esce dal bundle
 export const EditorDisponibilita: StrumentoDiModifica<typeof EditorDisponibilitaReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaReale;
-function EditorDisponibilitaReale({ chiave, onChiudi, onSalvato }: { chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+function EditorDisponibilitaReale({ chiave, onChiudi, onSalvato, onApriDisponibilita }: Props) {
   const dati = useCarica(() => getInformazioniConfidente(chiave), [chiave]);
-  const [modalita, setModalita] = useState<'manuale' | 'storico'>('manuale');
-  const [patch, setPatch] = useState<Partial<InformazioniConfidente>>({});
-  const [creazione, setCreazione] = useState<InformazioniConfidente>(vuoti);
+  const c = dati.dati;
+  // il modulo si monta quando i dati ci sono: i valori iniziali sono quelli letti (e si rimonta dopo «salvato» o «rileggi», con la chiave)
+  const [versioneLetta, setVersioneLetta] = useState(0);
+  const titolo = `Informazioni di ${c?.confidente.nome ?? chiave}`;
+  if (!c) {
+    return <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={() => undefined} salvabile={false} caricamento={dati.caricamento} erroreCaricamento={dati.caricamento ? null : dati.errore ?? 'Informazioni non disponibili.'}>{null}</FinestraModifica>;
+  }
+  return <ModuloInformazioni key={`${c.revisioneAttesa}:${versioneLetta}`} chiave={chiave} titolo={titolo} c={c} onChiudi={onChiudi} onApriDisponibilita={onApriDisponibilita}
+    onSalvato={async (corrente) => { dati.imposta(corrente); setVersioneLetta((v) => v + 1); await onSalvato(); }}
+    onRileggi={async () => { await dati.ricarica(); setVersioneLetta((v) => v + 1); }} />;
+}
+
+const vuote = (): InformazioniConfidente => ({ note: '', noteGenerali: '', fonti: [] });
+const ugualiElenchi = (a: string[], b: string[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi, onApriDisponibilita }: {
+  chiave: string; titolo: string; c: EditorInformazioniConfidenteDto; onChiudi: () => void;
+  onSalvato: (corrente: EditorInformazioniConfidenteDto) => Promise<void>; onRileggi: () => Promise<void>; onApriDisponibilita?: () => void;
+}) {
+  const nuova = c.correnteRaw === null;
+  const fontiIlleggibili = !nuova && c.valori.fonti === undefined;
+  const iniziali: InformazioniConfidente = nuova ? vuote() : { note: c.valori.note ?? '', noteGenerali: c.valori.noteGenerali ?? '', fonti: c.valori.fonti ?? [] };
+  const [modalita, setModalita] = useState<'modifica' | 'storico'>('modifica');
+  const [valori, setValori] = useState<InformazioniConfidente>(iniziali);
+  const [fontiToccate, setFontiToccate] = useState(false);
   const [motivo, setMotivo] = useState('');
   const [versione, setVersione] = useState<number | null>(null);
+  const [ripristino, setRipristino] = useState<{ versione: number; anteprima: AnteprimaInformazioniConfidenteDto } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
-  const [preparata, setPreparata] = useState<{ input: SalvaInformazioniConfidente; anteprima: AnteprimaInformazioniConfidenteDto } | null>(null);
-  const c = dati.dati;
-  const nuova = c?.correnteRaw === null;
-  const invalidaAnteprima = () => { setPreparata(null); setErrore(null); };
-  const cambiaModalita = (m: typeof modalita) => { setModalita(m); invalidaAnteprima(); };
 
-  const seleziona = (campo: CampoInformazioniConfidente, incluso: boolean) => {
-    setPatch(p => {
-      const prossimo = { ...p };
-      if (!incluso) delete prossimo[campo];
-      else if (campo === 'giorni' || campo === 'fasce' || campo === 'fonti') prossimo[campo] = [...(c?.valori[campo] ?? [])];
-      else prossimo[campo] = c?.valori[campo] ?? '';
-      return prossimo;
-    });
-    invalidaAnteprima();
-  };
-  const cambia = (campo: CampoInformazioniConfidente, valore: string | string[]) => {
-    if (nuova) setCreazione(p => ({ ...p, [campo]: valore }));
-    else setPatch(p => ({ ...p, [campo]: valore }));
-    invalidaAnteprima();
-  };
-  const prepara = async () => {
-    if (!c || occupato) return;
-    let azione: AzioneInformazioniConfidente;
-    if (modalita === 'storico') {
-      if (versione === null) return;
-      azione = { azione: 'ripristina-versione', versione, revisioneAttesa: c.revisioneAttesa };
-    } else azione = nuova
-      ? { azione: 'crea-informazioni', valori: creazione, motivo, revisioneAttesa: c.revisioneAttesa }
-      : { azione: 'modifica-manuale', valori: patch, motivo, revisioneAttesa: c.revisioneAttesa };
-    setOccupato(true); setErrore(null); setPreparata(null);
-    try {
-      const anteprima = await anteprimaInformazioniConfidente(chiave, azione);
-      setPreparata({ anteprima, input: { ...azione, anteprimaAttesa: anteprima.anteprimaAttesa, operazioneId: crypto.randomUUID() } });
-    } catch (e) { setErrore(e instanceof Error ? e.message : 'Anteprima non disponibile.'); }
-    finally { setOccupato(false); }
-  };
-  const salva = async () => {
-    if (!preparata || occupato) return;
+  // solo i campi cambiati (le fonti illeggibili si riscrivono solo se l'utente le ha toccate)
+  const patch: Partial<InformazioniConfidente> = {};
+  if (valori.note !== iniziali.note) patch.note = valori.note;
+  if (valori.noteGenerali !== iniziali.noteGenerali) patch.noteGenerali = valori.noteGenerali;
+  if (!ugualiElenchi(valori.fonti, iniziali.fonti) || (fontiIlleggibili && fontiToccate)) patch.fonti = valori.fonti;
+  const sporca = modalita === 'modifica' && (nuova ? JSON.stringify(valori) !== JSON.stringify(vuote()) || motivo.trim() !== '' : Object.keys(patch).length > 0);
+  useBozzaSporca('editor-disponibilita', `informazioni di ${c.confidente.nome}`, sporca);
+
+  const cambiaFonti = (fonti: string[]) => { setValori((v) => ({ ...v, fonti })); setFontiToccate(true); setErrore(null); };
+  const cambiaModalita = (m: typeof modalita) => { setModalita(m); setErrore(null); };
+
+  /** Anteprima (il server rifiuta se riga o storico sono cambiati) e salvataggio nello stesso gesto, con lo stesso identificativo. */
+  const esegui = async (azione: AzioneInformazioniConfidente, anteprimaGiaFatta?: AnteprimaInformazioniConfidenteDto) => {
     setOccupato(true); setErrore(null);
     try {
-      // Un errore di rete mantiene questo stesso payload e UUID per una ripetizione idempotente.
-      const esito = await salvaInformazioniConfidente(chiave, preparata.input);
-      dati.imposta(esito.corrente);
-      setPreparata(null); setPatch({});
-      notifica('success', esito.esito === 'gia-eseguita' ? `Operazione già eseguita (versione ${esito.versione}). Le informazioni correnti non sono state riscritte.`
-        : esito.esito === 'invariata' ? 'Informazioni già coincidenti: nessuna modifica.' : 'Informazioni aggiornate. Requisiti e progressi invariati.');
-      await onSalvato();
+      const anteprima = anteprimaGiaFatta ?? await anteprimaInformazioniConfidente(chiave, azione);
+      const esito = await salvaInformazioniConfidente(chiave, { ...azione, anteprimaAttesa: anteprima.anteprimaAttesa, operazioneId: crypto.randomUUID() });
+      notifica('success', esito.esito === 'gia-eseguita' ? `Operazione già eseguita (versione ${esito.versione}).`
+        : esito.esito === 'invariata' ? 'Informazioni già coincidenti: nessuna modifica.' : 'Informazioni aggiornate.');
+      await onSalvato(esito.corrente);
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
-  // valori scelti e non ancora salvati (dopo il salvataggio `patch` si svuota e `nuova` diventa falso): per «Aggiorna» e la chiusura della scheda del browser
-  useBozzaSporca('editor-disponibilita', `informazioni di ${c?.confidente.nome ?? chiave}`,
-    !!c && modalita === 'manuale' && (nuova ? JSON.stringify(creazione) !== JSON.stringify(vuoti()) : Object.keys(patch).length > 0));
-  const ammessa = !!c && !dati.caricamento && !dati.errore && (modalita === 'storico' ? versione !== null : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0));
-  return <Modal aperta larga titolo={`Informazioni di ${c?.confidente.nome ?? chiave}`} onChiudi={() => { if (!occupato) onChiudi(); }} azioni={
-    <div className="flex flex-wrap justify-end gap-2 w-full">
-      <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={onChiudi} />
-      <PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi corrente" disabled={occupato || dati.caricamento} onClick={() => { invalidaAnteprima(); void dati.ricarica(); }} />
-      <PulsanteVisivo icona={<IconaAzione chiave="dettagli" dimensione={22} />} titolo="Mostra anteprima" disabled={occupato || !ammessa} onClick={() => void prepara()} />
-      {preparata && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={modalita === 'storico' ? 'riapri' : 'registra'} dimensione={22} />} titolo={modalita === 'storico' ? 'Ripristina questa versione' : nuova ? 'Crea informazioni' : 'Salva i campi selezionati'} disabled={occupato || preparata.input.revisioneAttesa !== c?.revisioneAttesa} onClick={() => void salva()} />}
-    </div>
-  }>
-    <div className="flex flex-col gap-3 min-w-0">
-      <p className="m-0 testo-13 text-text-secondary">Informazioni della guida, comuni alle partite. Non cambiano i requisiti operativi del rango 1, i semafori o i progressi.</p>
-      {dati.caricamento && <p role="status">Lettura delle informazioni…</p>}
-      {(errore || dati.errore) && <p className="m-0 text-error-testo whitespace-pre-wrap" role="alert">{errore || dati.errore} La bozza resta disponibile.</p>}
-      {c && <>
-        {c.errori.length > 0 && <ul className="text-warning m-0 pl-5">{c.errori.map(e => <li key={e}>{e}</li>)}</ul>}
-        {c.bonifica && <p className="m-0 testo-12 text-text-muted">Bonifica iniziale: {c.bonifica.esito}. {c.bonifica.motivo}</p>}
-        <div className="flex flex-wrap gap-2" aria-label="Tipo di modifica">
-          <PulsanteVisivo attivo={modalita === 'manuale'} icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={nuova ? 'Creazione esplicita' : 'Modifica manuale'} disabled={occupato} onClick={() => cambiaModalita('manuale')} />
-          <PulsanteVisivo attivo={modalita === 'storico'} icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Storico e ripristino" disabled={occupato} onClick={() => cambiaModalita('storico')} />
-        </div>
-        {modalita === 'manuale' && <>
-          <p className="m-0 testo-13">{nuova ? 'La riga non esiste: la creazione richiede una scelta esplicita per tutti gli otto campi, anche vuoti.' : 'Seleziona soltanto i campi da cambiare. Gli altri restano esattamente come sono, anche se contengono dati storici illeggibili.'}</p>
-          <label className="flex flex-col gap-1 testo-13">Motivo della modifica
-            <textarea className="form-input w-full min-h-[64px]" value={motivo} disabled={occupato} onChange={e => { setMotivo(e.target.value); invalidaAnteprima(); }} />
-          </label>
-          {CAMPI_INFORMAZIONI_CONFIDENTE.map(campo => {
-            const incluso = nuova || Object.hasOwn(patch, campo);
-            const valore = nuova ? creazione[campo] : patch[campo];
-            const valoriElenco = Array.isArray(valore) ? valore : [];
-            const elenco = campo === 'giorni' || campo === 'fasce' || campo === 'fonti';
-            return <fieldset key={campo} className="border border-border rounded p-2 min-w-0 flex flex-col gap-2" disabled={occupato}>
-              <legend className="testo-13 font-semibold">{ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]}</legend>
-              {!nuova && <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" checked={incluso} onChange={e => seleziona(campo, e.target.checked)} />Modifica questo campo</label>}
-              {!incluso && <p className="m-0 whitespace-pre-wrap break-words testo-12 text-text-secondary">{comeTesto(c.valori[campo]) || c.correnteRaw?.[COLONNE[campo]] || 'Vuoto'}</p>}
-              {incluso && (elenco ? <>
-                {valoriElenco.map((v, i) => <div key={i} className="flex items-start gap-2 min-w-0">
-                  <textarea className="form-input min-w-0 flex-1 min-h-[64px]" aria-label={`${ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]}, voce ${i + 1}`} value={v} onChange={e => cambia(campo, valoriElenco.map((x, j) => i === j ? e.target.value : x))} />
-                  <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" aria-label={`Togli voce ${i + 1} di ${ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]}`} onClick={() => cambia(campo, valoriElenco.filter((_, j) => i !== j))} />
-                </div>)}
-                {valoriElenco.length === 0 && <p className="m-0 testo-12">Elenco vuoto.</p>}
-                <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi voce" className="self-start" onClick={() => cambia(campo, [...valoriElenco, ''])} />
-              </> : <textarea className="form-input w-full min-h-[80px]" aria-label={ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]} value={typeof valore === 'string' ? valore : ''} onChange={e => cambia(campo, e.target.value)} />)}
-            </fieldset>;
-          })}
-        </>}
-        {modalita === 'storico' && <>
-          <p className="m-0 testo-13">Il ripristino recupera esattamente la versione scelta e aggiunge una revisione. Può riportare testi errati o JSON illeggibile: l’anteprima lo segnala e non li dichiara validati.</p>
-          {c.versioni.length === 0 ? <p className="m-0">Nessuna versione registrata.</p> : <Selettore etichetta="Versione da ripristinare"
-            valore={versione === null ? '' : String(versione)} disabilitato={occupato} vuoto="Scegli una versione"
-            opzioni={c.versioni.map(v => ({ chiave: String(v.id), nome: `Versione ${v.id} · ${v.azione}`, dettaglio: v.data ?? 'iniziale' }))}
-            onCambia={v => { setVersione(v === '' ? null : Number(v)); invalidaAnteprima(); }} />}
-          {c.versioni.filter(v => v.id === versione).map(v => <div key={v.id} className="flex flex-col gap-2"><p className="m-0 testo-13">{v.motivo}</p>
-            {v.errori.map(e => <p key={e} className="m-0 text-warning" role="alert">{e}</p>)}<ValoriRaw raw={v.raw} />
-          </div>)}
-        </>}
-        {preparata && <section className="border border-primary rounded p-3 flex flex-col gap-3 min-w-0" aria-label="Anteprima della modifica">
-          <h3 className="m-0 testo-15">Anteprima completa</h3>
-          <ul className="m-0 pl-5 testo-13">{preparata.anteprima.avvertenze.map(a => <li key={a}>{a}</li>)}</ul>
-          {preparata.anteprima.campiCambiati.length === 0 ? <p className="m-0">Nessuna differenza: non verrà creata una revisione.</p>
-            : <p className="m-0 testo-13">Campi modificati: {preparata.anteprima.campiCambiati.map(campo => ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]).join(', ')}.</p>}
-          <h4 className="m-0">Prima</h4>{preparata.anteprima.primaRaw ? <ValoriRaw raw={preparata.anteprima.primaRaw} /> : <p className="m-0">Riga assente.</p>}
-          <h4 className="m-0">Dopo</h4><ValoriRaw raw={preparata.anteprima.dopoRaw} />
-        </section>}
-      </>}
-    </div>
-  </Modal>;
+  const salva = () => {
+    if (occupato) return;
+    if (modalita === 'storico') {
+      if (ripristino) void esegui({ azione: 'ripristina-versione', versione: ripristino.versione, revisioneAttesa: c.revisioneAttesa }, ripristino.anteprima);
+      return;
+    }
+    void esegui(nuova ? { azione: 'crea-informazioni', valori, motivo, revisioneAttesa: c.revisioneAttesa }
+      : { azione: 'modifica-manuale', valori: patch, motivo, revisioneAttesa: c.revisioneAttesa });
+  };
+  /** Sceglie una versione e chiede subito al server che cosa riporterebbe il ripristino. */
+  const scegliVersione = async (v: number | null) => {
+    setVersione(v); setRipristino(null); setErrore(null);
+    if (v === null) return;
+    setOccupato(true);
+    try { setRipristino({ versione: v, anteprima: await anteprimaInformazioniConfidente(chiave, { azione: 'ripristina-versione', versione: v, revisioneAttesa: c.revisioneAttesa }) }); }
+    catch (e) { setErrore(e instanceof Error ? e.message : 'Anteprima non disponibile.'); }
+    finally { setOccupato(false); }
+  };
+  const apriDisponibilita = async () => {
+    if (!onApriDisponibilita || occupato) return;
+    if (sporca && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
+    onApriDisponibilita();
+  };
+
+  const salvabile = modalita === 'storico'
+    ? !!ripristino && ripristino.versione === versione && ripristino.anteprima.campiCambiati.length > 0
+    : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0);
+  const scelta = c.versioni.find((v) => v.id === versione);
+
+  return (
+    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={salvabile} occupato={occupato} sporca={sporca}
+      titoloSalva={modalita === 'storico' ? 'Ripristina' : nuova ? 'Crea' : 'Salva'}
+      azioniExtra={<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi" disabled={occupato} onClick={() => void onRileggi()} />}>
+      <div className="flex flex-col gap-3 min-w-0 testo-13">
+        {errore && <p className="m-0 text-error-testo whitespace-pre-wrap" role="alert">{errore} La bozza resta disponibile.</p>}
+        {c.errori.length > 0 && <ul className="m-0 pl-5 text-warning">{c.errori.map((e) => <li key={e}>{e}</li>)}</ul>}
+        {/* il rimando: quando e dove si incontra ha una sola sede, l'editor strutturato */}
+        {onApriDisponibilita && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-text-secondary">Giorni, fasce, eccezioni e luoghi:</span>
+            <PulsanteVisivo compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Modifica disponibilità" disabled={occupato} onClick={() => void apriDisponibilita()} />
+          </div>
+        )}
+        {c.versioni.length > 0 && (
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Che cosa fare">
+            <PulsanteVisivo attivo={modalita === 'modifica'} compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" disabled={occupato} onClick={() => cambiaModalita('modifica')} />
+            <PulsanteVisivo attivo={modalita === 'storico'} compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Storico e ripristino" disabled={occupato} onClick={() => cambiaModalita('storico')} />
+          </div>
+        )}
+
+        {modalita === 'modifica' && (
+          <SezioneCampi titolo={nuova ? 'Nuove informazioni' : 'Informazioni'}>
+            <CampoTesto tipo="lungo" righe={3} etichetta={ETICHETTE_INFORMAZIONI_CONFIDENTE.note} valore={valori.note} disabilitato={occupato} massimo={4000}
+              onCambia={(note) => { setValori((v) => ({ ...v, note })); setErrore(null); }} />
+            <CampoTesto tipo="lungo" righe={3} etichetta={ETICHETTE_INFORMAZIONI_CONFIDENTE.noteGenerali} valore={valori.noteGenerali} disabilitato={occupato} massimo={4000}
+              onCambia={(noteGenerali) => { setValori((v) => ({ ...v, noteGenerali })); setErrore(null); }} />
+            <fieldset className="campo campo--largo m-0 flex flex-col gap-2 border-0 p-0 min-w-0" disabled={occupato}>
+              <legend className="campo__etichetta p-0">{ETICHETTE_INFORMAZIONI_CONFIDENTE.fonti}</legend>
+              {fontiIlleggibili && !fontiToccate && (
+                <p className="m-0 text-warning break-words">Elenco salvato illeggibile: <span className="font-mono">{c.correnteRaw?.fonti_json}</span>. Resta com’è finché non aggiungi o togli una fonte qui sotto.</p>
+              )}
+              {valori.fonti.length === 0 && <span className="text-text-muted">Nessuna fonte.</span>}
+              {valori.fonti.map((f, i) => (
+                <div key={i} className="flex min-w-0 items-center gap-2">
+                  <input className="form-input min-w-0 flex-1" aria-label={`Fonte ${i + 1}`} value={f} maxLength={600}
+                    onChange={(e) => cambiaFonti(valori.fonti.map((x, j) => (j === i ? e.target.value : x)))} />
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la fonte ${i + 1}`}
+                    onClick={() => cambiaFonti(valori.fonti.filter((_, j) => j !== i))} />
+                </div>
+              ))}
+              <PulsanteVisivo compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una fonte" onClick={() => cambiaFonti([...valori.fonti, ''])} />
+            </fieldset>
+            <CampoTesto tipo="lungo" etichetta="Motivo della modifica" obbligatorio valore={motivo} disabilitato={occupato} massimo={1000}
+              aiuto="Resta nello storico, con i valori di prima." onCambia={(m) => { setMotivo(m); setErrore(null); }} />
+          </SezioneCampi>
+        )}
+
+        {modalita === 'storico' && (
+          <>
+            <p className="m-0 text-text-secondary">Il ripristino riporta le note e le fonti della versione scelta e aggiunge una revisione: le versioni precedenti restano.</p>
+            <Selettore etichettaSopra etichetta="Versione da ripristinare" valore={versione === null ? '' : String(versione)} disabilitato={occupato} vuoto="Scegli una versione"
+              opzioni={c.versioni.map((v) => ({ chiave: String(v.id), nome: `Versione ${v.id} · ${v.azione}`, dettaglio: v.data ? v.data.slice(0, 10) : 'iniziale' }))}
+              onCambia={(v) => void scegliVersione(v === '' ? null : Number(v))} />
+            {scelta && (
+              <section className="flex flex-col gap-2 min-w-0" aria-label={`Versione ${scelta.id}`}>
+                <p className="m-0">{scelta.motivo}</p>
+                {scelta.errori.map((e) => <p key={e} className="m-0 text-warning" role="alert">{e}</p>)}
+                <ValoriVersione raw={scelta.raw} />
+                {ripristino?.versione === scelta.id && (
+                  <>
+                    <ul className="m-0 pl-5">{ripristino.anteprima.avvertenze.map((a) => <li key={a}>{a}</li>)}</ul>
+                    <p className="m-0 font-semibold">{ripristino.anteprima.campiCambiati.length === 0 ? 'Coincide con le informazioni di adesso: niente da ripristinare.'
+                      : `Cambiano: ${ripristino.anteprima.campiCambiati.map((k) => ETICHETTE_INFORMAZIONI_CONFIDENTE[k].toLowerCase()).join(', ')}.`}</p>
+                  </>
+                )}
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </FinestraModifica>
+  );
 }
 
-function ValoriRaw({ raw }: { raw: InformazioniConfidenteRaw }) {
-  return <dl className="m-0 flex flex-col gap-2 testo-12 min-w-0">{CAMPI_INFORMAZIONI_CONFIDENTE.map(campo => <div key={campo}>
-    <dt className="font-semibold">{ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]}</dt><dd className="m-0 whitespace-pre-wrap break-words">{raw[COLONNE[campo]] || 'Vuoto'}</dd>
-  </div>)}</dl>;
+/** I campi di una versione: le note e le fonti (che il ripristino riporta) e, a parte, la prosa di prima che non si modifica più da qui. */
+function ValoriVersione({ raw }: { raw: InformazioniConfidenteRaw }) {
+  const storiche = COLONNE_STORICHE_CONFIDENTE.filter(({ colonna }) => raw[colonna] !== '' && raw[colonna] !== '[]');
+  return (
+    <dl className="m-0 flex flex-col gap-2 testo-12 min-w-0">
+      {([['note', 'note'], ['noteGenerali', 'note_generali'], ['fonti', 'fonti_json']] as const).map(([campo, colonna]) => (
+        <div key={campo}><dt className="font-semibold">{ETICHETTE_INFORMAZIONI_CONFIDENTE[campo]}</dt><dd className="m-0 whitespace-pre-wrap break-words">{raw[colonna] && raw[colonna] !== '[]' ? raw[colonna] : 'Vuoto'}</dd></div>
+      ))}
+      {storiche.length > 0 && (
+        <div className="flex flex-col gap-1 border-t border-border pt-2">
+          <dt className="font-semibold">Non più modificabili da qui (non si ripristinano)</dt>
+          {storiche.map(({ colonna, etichetta }) => <dd key={colonna} className="m-0 whitespace-pre-wrap break-words text-text-secondary"><span className="font-semibold">{etichetta}:</span> {raw[colonna]}</dd>)}
+        </div>
+      )}
+    </dl>
+  );
 }

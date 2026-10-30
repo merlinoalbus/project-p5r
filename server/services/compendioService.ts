@@ -541,7 +541,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   });
   const regalabile = (prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((x) => x.name === 'regalabile')
     ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
-  const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
+  // L13 (ondata 6, O6-2, migrazione 307): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
+  const disp = prepared('SELECT note, note_generali, fonti_json FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string; note_generali: string; fonti_json: string } | undefined;
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
     // ondata 5: dalla reazione più alta (a parità, l'ordine della guida); niente più «sconsigliati»: ogni regalo vale almeno +1
@@ -549,11 +550,11 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
     regalabile,
     oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
-    disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
+    disponibilita: { note: disp?.note ?? '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
     // L6: gli inviti del Confidente, con ciò che aprono (lo stato della partita lo dà `GET /api/compendio/inviti`)
     inviti: invitiDelConfidente(chiave),
-    // R9-01: la disponibilità strutturata (modo, giorni, fasce, eccezioni, luoghi per chiave); il testo sopra resta nelle note
+    // R9-01: la disponibilità strutturata (modo, giorni, fasce, eccezioni, luoghi per chiave): l'unica fonte di quando e dove si incontra
     ...(disp ? { disponibilitaStrutturata: disponibilitaConfidente(chiave) } : {}),
   };
 }
