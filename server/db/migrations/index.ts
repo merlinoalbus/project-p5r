@@ -369,6 +369,10 @@ import { migration316 } from './316_voci_risultati_esami.js';
 // testi del rango 1 di Takemi e Ohya dal dato, Futaba mai con la pioggia (requisito a ogni rango), l'evento 7.5 di Takemi con la pioggia
 // (requisito «almeno una» al rango 8), le frasi di note e fasce in prosa smentite dalla guida
 import { migration317 } from './317_confidenti_dalla_guida.js';
+// 2026-10-31 (L13, ondata 9, O9-1: «il 29 viene sbloccato e diventa gestibile a partire dal 30. nessuna incongruenza. per i punti dal 2 al 5
+// devi verificare nella guida e attenerti a quanto riportato su allgamestaff.it.» e «Ingresso nei Memento. Verifica la data nelle guide
+// online.»): le domande 1-5 dell'audit 310 sulle Richieste dei Memento chiuse dalla guida, l'ingresso nei Memento al 7 maggio
+import { migration318 } from './318_richieste_memento_e_ingresso_dalla_guida.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -392,5 +396,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317,
+  migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318,
 ];
