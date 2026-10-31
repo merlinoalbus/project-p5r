@@ -298,7 +298,7 @@ function raccoltaMementos(dungeonChiave: string, partitaId: number | undefined, 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, palazzi: Map<string, StatoPalazzo>,
   gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita; m?: ModelloAvanzamento } = {}): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
-  const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null }>;
+  const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave, p.carattere FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null; carattere: string | null }>;
   const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId, stati) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
   const palazzo = r.tipo === 'palazzo';
   const giorno = giornoDellaPartita(partitaId);
@@ -313,10 +313,10 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     disponibile: !concluso && (!giorno || !finestra || copreIlGiorno([finestra.al ? { tipo: 'intervallo', dal: finestra.dal, al: finestra.al } : { tipo: 'data', dal: finestra.dal }], giorno)),
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
-    // le voci descrittive della guida («Altro» fuori dalle aree dei dedali) non hanno stato (scelte dell'utente, 2026-10-01 e 2026-10-11): non contano.
-    // Nei Palazzi (L4, §8.11) una voce con pin è gestita quando lo sono tutti i suoi pin
+    // le voci descrittive della guida («Altro» fuori dalle aree dei dedali, senza un carattere con uno stato) non hanno stato (scelte
+    // dell'utente, 2026-10-01, 2026-10-11 e 2026-10-31): non contano. Nei Palazzi (L4, §8.11) una voce con pin è gestita quando lo sono tutti i suoi pin
     gestiti: !conPartita ? null : palazzo && sp ? punti.filter((p) => statoDellaVoce(sp.m, sp.s, p.chiave) !== null).length
-      : punti.filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) && stati.has(p.chiave)).length,
+      : punti.filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere) && stati.has(p.chiave)).length,
     raccolta,
     // solo i Palazzi si completano: i Memento, una volta aperti, restano un posto dove andare
     completato: palazzo ? palazzi.get(r.chiave)?.completato ?? null : null,
@@ -430,7 +430,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const avanzamento: AvanzamentoVoce | undefined = palazzo ? { m, s: segni?.s ?? null, pl: letturePlanimetrieDelleVoci(getDb()) } : undefined;
   /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
    *  Persona da catturare «ottenuto» se catturata; nei Palazzi (L4) quello con cui risulta (§8.11: dai suoi pin, se ne ha). */
-  const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
+  const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere) ? null
     : p.tipo === 'persona' && cattura.has(p.chiave) ? (catturate.has(p.chiave) ? 'ottenuto' : null)
     : avanzamento && !p.area_dedalo_chiave ? statoL4(avanzamento, p.chiave) : stati.get(p.chiave) ?? null);
   const areeToccate = palazzo ? areeDelleInfiltrazioni(chiave) : new Map<string, AreaDellInfiltrazione[]>();
@@ -493,7 +493,7 @@ export function guidaDellaPlanimetria(chiave: string, partitaId?: number): Guida
     let gruppo = infiltrazioni.at(-1);
     if (gruppo?.chiave !== r.area_chiave) infiltrazioni.push(gruppo = { chiave: r.area_chiave, nome: r.infiltrazione_nome, ordine: r.infiltrazione_ordine, voci: [] });
     // una Persona da catturare: lo stato è la cattura nel compendio (L8), come nella scheda del Palazzo
-    const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave) ? null : cattura.has(r.chiave) ? (catturate.has(r.chiave) ? 'ottenuto' as const : null) : statoL4(avanzamento, r.chiave);
+    const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave, r.carattere) ? null : cattura.has(r.chiave) ? (catturate.has(r.chiave) ? 'ottenuto' as const : null) : statoL4(avanzamento, r.chiave);
     gruppo.voci.push(puntoDto(r, stato, pinPunti.get(r.chiave) ?? [], letture, avanzamento));
   }
   return { mappa: chiaveMappa(mappa), palazzo: palazzoDellaMappa(mappa), infiltrazioni };
@@ -518,8 +518,9 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   const p = prepared('SELECT p.*, a.nome AS area_nome, d.nome AS dungeon_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?').get(puntoChiave) as (RigaPunto & { area_nome: string; dungeon_nome: string }) | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   // una voce descrittiva si legge, non si segna (scelta dell'utente, 2026-10-01); azzerarla resta possibile, per ripulire.
-  // Nelle aree dei dedali non ce ne sono: ogni elemento ha uno stato (099, scelta dell'utente del 2026-10-11)
-  if (stato !== null && puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: si legge, non si segna.`);
+  // Nelle aree dei dedali non ce ne sono: ogni elemento ha uno stato (099, scelta dell'utente del 2026-10-11); una voce «Altro» con
+  // il carattere «permanente» o «rigenerabile» si segna come le altre (2026-10-31)
+  if (stato !== null && puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: si legge, non si segna.`);
   // una Persona dei Memento si cattura nel compendio, non ha uno stato suo (2026-10-12, `catturePersona.ts`); azzerarla resta
   // possibile, per ripulire
   if (stato !== null && eVoceDiCattura(puntoChiave)) throw erroreCatturaNelCompendio(p.nome, 'segnare');
@@ -1172,8 +1173,13 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   // i dettagli scritti a mano (2026-10-18) prendono il posto dei vecchi; la `maschera` resta quella che c'era (la decide la Persona)
   const dettagliScritti = dati.dettagli === undefined ? p.dettagli_json : conMascheraDiPrima(dati.dettagli, p.dettagli_json);
   const dettagli = dati.persona === undefined ? dettagliScritti : dettagliDellaPersona(dati.persona, dati.tipo ?? p.tipo, dettagliScritti);
-  // una voce con pin non diventa descrittiva: le descrittive non hanno pin (si scollegano prima); nelle aree dei dedali non ce ne sono
-  if (dati.tipo && puntoDescrittivo(dati.tipo, areaPrima) && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
+  // una voce con pin non diventa descrittiva: le descrittive non hanno pin (si scollegano prima); nelle aree dei dedali non ce ne sono.
+  // Il carattere conta (2026-10-31): un «Altro» permanente o rigenerabile non è descrittivo; togliergli quel carattere («Ripristina» o
+  // «Racconto») con dei pin collegati lo farebbe descrittivo, e si rifiuta come il cambio di tipo
+  const carattereDopo = dati.carattere === undefined ? p.carattere ?? null : dati.carattere;
+  const diventaDescrittiva = puntoDescrittivo(dati.tipo ?? p.tipo, areaPrima, carattereDopo)
+    && (!!dati.tipo || (dati.carattere !== undefined && !puntoDescrittivo(p.tipo, areaPrima, p.carattere ?? null)));
+  if (diventaDescrittiva && pinDelPuntoGuida(getDb(), puntoChiave).length > 0) {
     throw httpErrors.conflict('punto-con-pin', `«${p.nome}» ha dei pin collegati: scollegali prima di farne una voce descrittiva.`);
   }
   // un Enigma con i suoi passi resta un Enigma: i passi tornerebbero orfani

@@ -42,8 +42,8 @@ export interface OpzioniValutazione { nomi?: NomiCondizioni; comeRequisito?: boo
 /** Stagioni del calendario di gioco per mese (aprile → marzo). */
 const STAGIONE_PER_MESE: Record<number, string> = { 4: 'primavera', 5: 'primavera', 6: 'estate', 7: 'estate', 8: 'estate', 9: 'autunno', 10: 'autunno', 11: 'autunno', 12: 'inverno', 1: 'inverno', 2: 'inverno', 3: 'primavera' };
 
-/** Una voce della guida citata da una condizione: il nome e il tipo (una descrittiva non ha stato). */
-interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null; di_cattura: number }
+/** Una voce della guida citata da una condizione: il nome, il tipo e il carattere scelto (una descrittiva non ha stato). */
+interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null; carattere: string | null; di_cattura: number }
 
 /** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
 function pinCitatoNelloStato(uid: string, st: StatoValutazione): ReturnType<typeof pinCitato> {
@@ -55,7 +55,7 @@ function pinCitatoNelloStato(uid: string, st: StatoValutazione): ReturnType<type
 /** La voce della guida citata da una condizione, con la memoria dello stato della richiesta se lo stato ce l'ha; null se non c'è. */
 function voceCitataNelloStato(chiave: string, st: StatoValutazione): VoceCitata | null {
   /** La voce dal database: nome e tipo, o null. */
-  const leggi = () => (prepared(`SELECT p.nome, p.tipo, p.area_dedalo_chiave, ${sqlVoceDiCattura('p')} AS di_cattura FROM punto_interesse p WHERE p.chiave = ?`).get(chiave) as VoceCitata | undefined) ?? null;
+  const leggi = () => (prepared(`SELECT p.nome, p.tipo, p.area_dedalo_chiave, p.carattere, ${sqlVoceDiCattura('p')} AS di_cattura FROM punto_interesse p WHERE p.chiave = ?`).get(chiave) as VoceCitata | undefined) ?? null;
   if (!st.vociCitate) return leggi();
   if (!st.vociCitate.has(chiave)) st.vociCitate.set(chiave, leggi());
   return st.vociCitate.get(chiave)!;
@@ -294,6 +294,18 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
         ? `Nessuna relazione romantica${quando(false)}`
         : `${contate.length === 1 ? 'Una relazione romantica' : `${contate.length} relazioni romantiche`}${quando(contate.length > 1)} (${contate.join(', ')}): al più ${r.al_piu === 0 ? 'nessuna' : r.al_piu}`);
     }
+    // le impostazioni della partita (finestra «Modifica» della partita): una risposta sì/no, mai grigia
+    case 'salvataggio-p5': return st.contenutiPartita?.salvataggioP5
+      ? esito('salvataggio-p5', 'verde', 'Salvataggio di Persona 5 presente')
+      : esito('salvataggio-p5', 'rosso', 'Salvataggio di Persona 5 non segnato (Partita → Modifica)');
+    case 'dlc-posseduto': {
+      // il set deve esistere (altrimenti grigio, da correggere); il nome è quello delle sue Persona
+      const nome = nomi().setDlc?.[String(r.set)];
+      if (!nome) return esito('dlc-posseduto', 'grigio', `Il contenuto scaricabile ${r.set} non c’è: correggi la condizione`);
+      return st.contenutiPartita?.dlcPosseduti.has(r.set)
+        ? esito('dlc-posseduto', 'verde', `Contenuto scaricabile «${nome}» posseduto`)
+        : esito('dlc-posseduto', 'rosso', `Contenuto scaricabile «${nome}» non segnato come posseduto (Partita → Modifica)`);
+    }
     case 'squadra': {
       // Il protagonista nel gruppo c'è sempre. **Due risposte, non tre** (2026-09-13): un Ladro che non risulta nel gruppo non c'è
       const dentro = r.membro === 'joker' || st.membriSquadra.has(r.membro);
@@ -406,7 +418,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       const v = voceCitataNelloStato(r.voce, st);
       if (!v) return esito('voce-guida', 'grigio', 'La voce della guida di questa condizione non c’è più: correggila nell’editor della mappa');
       // diventata descrittiva («Altro»): non ha più uno stato, quindi la condizione è grigia (da correggere nell'editor), non rossa
-      if (puntoDescrittivo(v.tipo, v.area_dedalo_chiave)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
+      if (puntoDescrittivo(v.tipo, v.area_dedalo_chiave, v.carattere)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
       const segnata = st.vociSegnate?.has(r.voce) ?? false;
       // una Persona da catturare (dedali e Palazzi) è «segnata» se è catturata, cioè registrata nel compendio della partita (2026-10-12; L8)
       const parola = v.di_cattura === 1 ? (segnata ? 'catturata (nel compendio)' : 'non catturata (non è nel compendio)') : segnata ? 'segnata' : 'non segnata';

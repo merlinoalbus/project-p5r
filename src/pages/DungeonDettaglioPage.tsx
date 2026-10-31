@@ -24,9 +24,11 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
 import { useNavigate, useParams, useSearchParams } from '../components/scheda/routerScheda';
-import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, impostaStatoPunto, riordinaAree, risolviMappa } from '../services/api';
+import { aggiornaArea, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, riordinaAree, ripristinaDungeon, risolviMappa } from '../services/api';
 import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
-import { enigmiCheSiRiaprono, righeRiapertura, testoVociDelGesto, vociDelPin } from '../utils/gestiVoce';
+import { enigmiCheSiRiaprono, righeRiapertura, vociDelPin } from '../utils/gestiVoce';
+import { personeRegistrate } from '../utils/piastrelleCattura';
+import { catturaNelCompendio, salvaStatoVoce } from '../services/gestiGuida';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
 import { SchedeDaSistemare } from '../components/guida/SchedeDaSistemare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
@@ -309,13 +311,11 @@ export function DungeonDettaglioPage() {
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null): Promise<boolean> => {
     if (!partitaId) return false;
     try {
-      const nuovo = await impostaStatoPunto(partitaId, p.chiave, stato);
+      // L4 §8.11: il gesto sulla voce tocca tutti i suoi pin, e con loro le altre voci che li condividono: il server dice quali (la rilettura
+      // sotto le aggiorna nella scheda), `salvaStatoVoce` le dice a parole (lo stesso salvataggio della guida del visore)
+      const nuovo = await salvaStatoVoce(partitaId, p.chiave, stato, d?.aree);
       aggiornaPunto(nuovo);
       setVersioneStati((v) => v + 1);
-      // L4 §8.11: il gesto sulla voce tocca tutti i suoi pin, e con loro le altre voci che li condividono: il server dice quali (la rilettura
-      // sotto le aggiorna nella scheda), qui si dicono a parole
-      if (nuovo.effetti?.segnate.length) notifica('info', `Segnate anche: ${testoVociDelGesto(nuovo.effetti.segnate, d?.aree)}.`);
-      if (nuovo.effetti?.riaperte.length) notifica('info', `Riaperte anche: ${testoVociDelGesto(nuovo.effetti.riaperte, d?.aree)}.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       return false;
@@ -333,9 +333,11 @@ export function DungeonDettaglioPage() {
   const cattura = async (personaId: number, catturata: boolean, ombra?: string): Promise<void> => {
     if (!partitaId) return;
     try {
-      const compendio = await aggiornaCompendio(partitaId, personaId, { registrata: catturata, ...(catturata && ombra ? { ombra } : {}) });
-      const registrate = compendio.filter((c) => c.registrata).map((c) => c.personaId);
+      // la chiamata unica della cattura (`catturaNelCompendio`), la stessa della guida del visore e delle piastrelle delle altre viste
+      const registrate = personeRegistrate(await catturaNelCompendio(partitaId, personaId, catturata, ombra));
       dati.imposta((attuale) => ({ ...attuale, personeCatturate: registrate }));
+      // la guida del visore incorporato rilegge le sue piastrelle (`versione` del visore, anche quando la mappa non cambia)
+      setVersioneStati((v) => v + 1);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.'); }
   };
   const catturate = useMemo(() => (d?.personeCatturate ? new Set(d.personeCatturate) : null), [d]);
@@ -481,6 +483,8 @@ export function DungeonDettaglioPage() {
   const [descrizioneAperta, setDescrizioneAperta] = useState<string | null>(null);
   // lotto B: il modulo della scheda del Palazzo, aperto dal menu «Modifica ⋯»
   const [correggendoPalazzo, setCorreggendoPalazzo] = useState(false);
+  // L4 §8.14: il modulo «Boss finale» del Palazzo, aperto dal menu «Modifica ⋯» o dal segno «Boss finale da dichiarare»
+  const [correggendoBoss, setCorreggendoBoss] = useState(false);
   const [occupato, setOccupato] = useState(false);
   // L4 §8.6 (O4-2): la conferma prima di togliere un segno che riapre un Enigma risolto («Riapre anche l'Enigma «…»»), dalla colonna «Da
   // raccogliere» e dal popup del pin; la promessa si risolve con la scelta («Annulla» = false)
@@ -675,6 +679,9 @@ export function DungeonDettaglioPage() {
       <MenuModifica cosa={`il Palazzo «${d.nome}»`} classePulsante={classePulsante}>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi la scheda" dettaglio="del Palazzo"
           aria-label={`Correggi la scheda: il Palazzo «${d.nome}»`} onClick={() => setCorreggendoPalazzo(true)} />
+        {/* L4 §8.14: la voce del boss finale (non per un Palazzo col boss dei Memento, Iweleth: il server lo rifiuta) */}
+        {d.regolaBoss !== 'memento' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Boss finale"
+          dettaglio={d.voceBossFinale?.nome ?? 'da dichiarare'} aria-label={`Boss finale: il Palazzo «${d.nome}»`} onClick={() => setCorreggendoBoss(true)} />}
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Modifica testo" dettaglio={area.nome}
           aria-label={`Modifica testo: l’infiltrazione «${area.nome}»`} onClick={() => setCorreggendoInfiltrazione(area.chiave)} />
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Modifica aree" dettaglio="toccate dall’infiltrazione"
@@ -708,6 +715,38 @@ export function DungeonDettaglioPage() {
       </>}
     </CorrezioneGuida>
   );
+
+  /** «Modifica › Boss finale» (L4 §8.14): la voce «Boss» del Palazzo che lo conclude, fra le voci «Boss» della sua guida (nell'ordine delle
+   *  infiltrazioni), «nessuna» per toglierla e «Ripristina» se l'utente l'ha cambiata. Senza voce il Palazzo non risulta mai concluso.
+   *  Si apre sotto l'intestazione, come la correzione della scheda. Nel rilascio non c'è (costante di build: il modulo esce dal bundle). */
+  const moduloBossFinale = IN_RILASCIO ? () => null : () => {
+    if (!d || memento) return null;
+    const vociBoss = d.aree.flatMap((a) => a.punti.filter((p) => p.tipo === 'boss').map((p) => ({ chiave: p.chiave, nome: p.nome, dettaglio: `${a.ordine + 1}. ${a.nome}` })));
+    // la voce dichiarata oggi resta fra le scelte anche se non è più «Boss» (cambiata di tipo dopo): l'utente vede che cosa sta togliendo
+    const attuale = d.voceBossFinale;
+    const opzioni = attuale && !vociBoss.some((o) => o.chiave === attuale.chiave)
+      ? [{ chiave: attuale.chiave, nome: attuale.nome, dettaglio: 'dichiarata, non è più una voce «Boss»' }, ...vociBoss]
+      : vociBoss;
+    const ripristina = async () => {
+      try { await ripristinaDungeon(d.chiave); setCorreggendoBoss(false); notifica('success', 'Boss finale riportato a quello della guida.'); await dati.ricarica(); }
+      catch (err) { notifica('error', err instanceof Error ? err.message : 'Boss finale non ripristinato.'); }
+    };
+    return (
+      <CorrezioneGuida aperta onChiudi={() => setCorreggendoBoss(false)} cosa={`il boss finale del Palazzo «${d.nome}»`} etichetta="Boss finale"
+        iniziale={() => ({ voce: d.voceBossFinale?.chiave ?? '' })}
+        onSalva={async (b) => { await aggiornaDungeon(d.chiave, { voceBossFinale: b.voce || null }); await dati.ricarica(); }}>
+        {(b, cambia) => <>
+          {/* sempre il selettore: «nessuna» resta raggiungibile anche senza voci «Boss» da scegliere */}
+          <span className="min-w-[220px] flex-1">
+            <Selettore etichetta="Voce del boss finale" valore={b.voce} vuoto="— nessuna: il Palazzo non si conclude —" opzioni={opzioni} onCambia={(v) => cambia({ voce: v })} />
+          </span>
+          {vociBoss.length === 0 && <p className="m-0 basis-full testo-13 text-text-secondary">La guida del Palazzo non ha voci «Boss»: aggiungine una in un’infiltrazione per sceglierla qui.</p>}
+          {d.bossFinaleCorretto && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina"
+            aria-label={`Ripristina il boss finale della guida: il Palazzo «${d.nome}»`} onClick={() => void ripristina()} />}
+        </>}
+      </CorrezioneGuida>
+    );
+  };
 
   /** R3-41 (decisione del PM, 2026-10-20), da 1024 px: la riga dell'infiltrazione è una sola — il selettore (il titolo), le aree toccate
    *  in una fila scorrevole (da 1280 i chip «Aree toccate»; da 1024 a 1279 la fila di tutte le aree, con le toccate evidenziate, che lì
@@ -907,8 +946,19 @@ export function DungeonDettaglioPage() {
               </div>
             </div>
           </header>}
+          {/* L4 §8.14 (condizione del PM sulla 112): un Palazzo con la regola della voce e senza voce del boss finale non si conclude mai.
+              Il segno lo dice e porta dritto a «Modifica › Boss finale». Sta sotto l'intestazione, non dentro: lì una riga in più l'avrebbe
+              portata oltre il 30% della schermata sul telefono. Solo nella preparazione (nel rilascio la voce non si dichiara). */}
+          {!IN_RILASCIO && !memento && !collegamento && d.bossFinaleDaDichiarare && !correggendoBoss && (
+            <div className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">
+              <button type="button" className="chip chip--oro touch" onClick={() => setCorreggendoBoss(true)}
+                aria-label={`Boss finale da dichiarare: scegli la voce del boss finale del Palazzo «${d.nome}»`}>Boss finale da dichiarare</button>
+              <span className="min-w-0 flex-1 text-pretty">Senza la sua voce il Palazzo non risulta mai concluso.</span>
+            </div>
+          )}
           {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯» */}
           {!IN_RILASCIO && !memento && correggendoPalazzo && <div className="shrink-0">{correzioneScheda(() => setCorreggendoPalazzo(false))}</div>}
+          {!IN_RILASCIO && !memento && correggendoBoss && <div className="shrink-0">{moduloBossFinale()}</div>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e

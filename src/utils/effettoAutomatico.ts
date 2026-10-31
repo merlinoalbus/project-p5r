@@ -213,7 +213,9 @@ const sessioni = (n: number, film: boolean) => (film ? (n === 1 ? 'visione o ser
 /** La frase che dice che cosa succede spuntando: mai chiavi, sempre nomi. */
 export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
   switch (e.tipo) {
-    case 'dote': return `${nomeDote(e.dote)} +${note(e.note)}: la Dote che dà il gioco, da segnare nelle Doti`;
+    // la Dote della spunta entra nelle ricevute e si applica dal pulsante «Applica» sulla voce (`motoreDiario.beneficiLegacy`, `DaApplicare`):
+    // mai in automatico (decisione 8), e mai più «da segnare nelle Doti», che non era più vero
+    case 'dote': return `${nomeDote(e.dote)} +${note(e.note)}: si applica con «Applica» sulla voce`;
     case 'lettura': {
       if (e.categoria === 'libro') { const nome = n.libri.get(e.chiave) ?? 'Libro'; return e.almeno === null ? `${nome}: lettura completata` : `${nome}: letto almeno ${e.almeno} ${sessioni(e.almeno, false)}`; }
       if (e.categoria === 'film') { const nome = n.film.get(e.chiave) ?? 'Film'; return e.almeno === null ? `${nome}: visione completata (al cinema: una visione)` : `${nome}: almeno ${e.almeno} ${sessioni(e.almeno, true)}`; }

@@ -113,7 +113,7 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 
 ## 8. Partita: Doti, Confidenti, Fortuna, denaro, avanzamento
 - **Doti sociali a note**: 1♪ = 2, 2♪ = 3, 3♪ = 5 punti (7 con un libro a resa maggiorata), Fortuna ×1,5 per difetto; soglie cumulative
-  del contatore. Le Doti si applicano **solo a mano**: le voci propongono «Applica», mai in automatico. Le «Dote +N» della guida sono
+  del contatore. Le Doti si applicano **solo a mano**: le voci e il + del contatore delle attività propongono «Applica», mai in automatico. Le «Dote +N» della guida sono
   note, non punti.
 - **Confidenti a note**: ♪ = 5, ♪♪ = 10, ♪♪♪ = 15 punti base; alla spunta di un incontro l'app chiede quante note (1–3). Moltiplicatori
   cumulativi (Persona dello stesso arcano ×1,5, invito ×1,2 legato all'effetto «invito» della voce, bonus degli esami solo per i 7
@@ -137,6 +137,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   sera, al giorno dopo (con la richiesta del meteo). Con decisioni aperte avanza alla chiusura dell'ultima. Togliere una spunta non
   riporta indietro.
 - Il meteo si segna per fascia nella partita e non blocca nulla.
+- Contenuti della partita: «Salvataggio di Persona 5 presente» e «Contenuti scaricabili posseduti» (i set di Persona del gioco) si segnano
+  nella finestra «Modifica» della partita. Un dato solo per i contenuti scaricabili: lo leggono la Fusione e le condizioni delle voci.
 - Lo storico della partita è scritto dal backend nella stessa transazione della modifica; ogni evento nato da una voce mostra la
   provenienza.
 
@@ -154,7 +156,20 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   la Richiesta.
 - Una voce può dichiarare quando è dovuta («Si fa solo se»): se la condizione è falsa la voce è «Non dovuta», non si spunta e non ferma
   la fascia.
-- La candidatura a un lavoro (voce del Cercalavoro) sblocca il lavoro: il lavoro è disponibile solo dopo la spunta.
+- Un effetto della voce può dichiarare quando vale («Vale solo se»), con lo stesso vocabolario e lo stesso valutatore, allo stato della
+  partita al giorno della voce: solo yen, oggetto ricevuto, Persona, trofeo e sblocco. Con la condizione falsa l'effetto non si applica, non
+  diventa proposta e nella partita non si mostra; fuori dalla partita «Il gioco dà» lo dice con «Solo se». La condizione si legge alla
+  spunta. Un effetto con condizioni diventato vero dopo la spunta (un'impostazione della partita accesa dopo) segue la via unica degli effetti
+  nati dopo la spunta: entra nell'elenco da approvare della partita, yen compresi («Applica», e approvandolo gli yen entrano da soli come alla
+  spunta); tornato falso, la sua proposta aperta si chiude. Ciò che è già applicato resta finché non si toglie la spunta.
+- Lo Scaffale con lo scatolone del Leblanc (12 aprile) dà le ricompense del salvataggio di Persona 5 (50.000 ¥, Catena di perline ×3,
+  Perlina rigenerante ×3, dall'elenco dei bonus della guida) solo con il salvataggio, e registra nel Compendio le Persona dei contenuti
+  scaricabili posseduti, set per set. La pagina «Oggetti» della guida cita invece Mela Hogyoku e Band-Ace come bonus del salvataggio, senza
+  quantità: resta nota, vale l'elenco dei bonus. Gli oggetti, i costumi e gli yen dei pacchetti a pagamento non hanno una fonte con nomi e
+  quantità: non sono effetti.
+- La candidatura a un lavoro (voce del Cercalavoro) sblocca il lavoro: il lavoro è disponibile solo dopo la spunta. Allo stesso modo la
+  Richiesta «Se scomparissero i gatti» si accetta solo dopo la spunta dell'indagine nei vicoli di Yongen-Jaya del 2 giugno, che ne
+  scopre il bersaglio.
 - Quantità negli acquisti facoltativa (1 se non indicata).
 - Copia, Taglia e Incolla delle voci con gli appunti di sistema, e appunti fissi delle voci che si ripetono: solo nella preparazione.
 - Gli oggetti citati da una voce si aprono in un pannello sopra il Diario, con ritorno alla stessa posizione.
@@ -178,6 +193,22 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **Palazzo «concluso» e «completato»**: concluso = Tesoro raccolto e boss finale sconfitto, e governa ingresso, presenza sulla mappa di
   Tokyo, requisiti e condizioni «dopo il Palazzo»; completato = concluso e tutti gli oggetti permanenti fatti, e vale solo per anello,
   percentuale e segno «Completato».
+- Un Palazzo senza la voce del boss finale dichiarata non può risultare concluso: nella preparazione la sua scheda lo segna «Boss
+  finale da dichiarare», con il collegamento che apre «Modifica › Boss finale»; nel rilascio il segno non c'è. **(31/10)**
+- **Voci descrittive della guida**: una voce «Altro» fuori dalle aree dei dedali si legge e basta (niente stato, niente pin, non conta nel
+  completamento). Se l'utente le dà il carattere «Permanente» o «Si ripropone» è una voce da segnare come le altre: ha la casella, i
+  pin, e conta negli oggetti dell'infiltrazione. Senza carattere, o con «Racconto», resta descrittiva. La regola è una sola per server e
+  interfaccia (`puntoDescrittivo` / `sqlVoceDescrittiva` in `shared/spilli.ts`); togliere quel carattere a un «Altro» con dei pin si
+  rifiuta come farne una voce descrittiva (409). **(31/10)**
+- **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
+  mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
+  voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 768 px, foglio dal basso sul
+  telefono. Si usa e basta: le voci si correggono nella scheda del Palazzo. La vecchia lista testuale dei contenuti non c'è più in
+  nessuna mappa; la radice dei Memento manda alla sua scheda, dove stanno i dedali, e una sezione chiesta con `?area=` si apre lì. Con la
+  scheda del Palazzo la guida del visore condivide, senza copie: il salvataggio dello stato con le notifiche delle voci toccate, la cattura
+  nel compendio, la conferma di «Riapri», le regole della voce (descrittiva, conteggio delle segnate, voce segnata in vista, passi sotto l'Enigma, voce da
+  catturare) e le piastrelle di cattura. Restano propri del visore la casella, il conteggio delle da segnare, i pin centrabili e la finestra; propri della scheda i filtri
+  per tipo, le planimetrie dell'elenco e la modifica. **(31/10)**
 - Nessuna immagine ufficiale nel repository: le planimetrie le carica l'utente nell'istanza. I pezzi delle planimetrie (zone
   dell'immagine posate sulla mappa con condizioni) si definiscono una volta e si posano più volte.
 - Il Cestino rimette le eliminazioni della guida e delle mappe.
@@ -200,8 +231,27 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Esiti delle attività in una colonna dell'attività; si scelgono alla spunta. Fabbricazione: lo strumento e la quantità stanno nella
   voce, alla spunta solo l'interruttore «Bonus» sì/no; ogni fabbricazione è uno strumento.
 - Lotteria: esito «vinto / non vinto» alla spunta e trofeo; gli yen della vincita a mano; un solo chiosco.
-- Doni dei Confidenti: arrivano da soli nella partita quando la loro regola vale (rango massimo, relazione romantica); le ricevute delle
-  partite già spuntate non si ricalcolano.
+- **Doti delle attività**: ogni attività che dà Doti le ha strutturate, fisse o negli esiti, e il turno le porta nel promemoria
+  «Applica»: con la spunta della voce sulla voce, con il + del contatore in Partita → Progressi sotto l'attività (lo stesso «Applica»).
+  Il − toglie il promemoria non ancora applicato; quello applicato resta e nasce la proposta inversa, come togliendo una spunta. L'avviso
+  «Da segnare nelle Doti» resta solo per un turno tolto con il − che non viene dal + (registrato da una voce o prima del registro). Biliardo e sala giochi Gun About: la
+  guida dice una Dote a caso esclusa la Gentilezza (per Gun About nessuna fonte), senza note: Dote e note si scelgono alla spunta.
+  Freccette: da 1 a 3 note di Perizia, scelte alla spunta. Frui-te al Diner: Fascino ♪ e Conoscenza ♪♪ come li dà la fonte, senza un
+  esito con la pioggia (nessuna fonte lo dice). La Dote dei test di Takemi è quella dei passaggi di rango del Confidente.
+  Bonus a caso o senza note documentate (bagno con la pioggia, Coraggio in biblioteca, Caffè bollente e Sandwich al Diner) restano in
+  parole; il bagno vale per giorno della settimana, salvo l'esito dichiarato dalla voce.
+- Voci del Diario e attività: una voce si collega all'attività quando ne nomina una sola; due attività in alternativa («X o Y») restano
+  senza collegamento, due fatte entrambe hanno un turno ciascuna. Delle 38 voci lasciate dalla 312: 7 collegate, 4 già collegate, 27
+  senza collegamento (gru, alternative, elementi che non sono attività), ognuna con il motivo nell'audit della migrazione 333.
+- Doni dei Confidenti: arrivano da soli nella partita quando la loro regola vale (rango massimo, relazione romantica), letti dalla regola
+  anche nelle partite già avviate. I doni «se fidanzata» (pegni del 24 dicembre, cioccolati del 14 febbraio, dolci) arrivano solo
+  con la relazione con quella Confidente; i giri choco del 15 febbraio con il rango massimo e senza relazione con lei («restare amici»).
+  Con chi si passa il 14 febbraio si sceglie alla spunta della voce di San Valentino, fra gli esiti possibili con le relazioni della partita
+  (con l'unica fidanzata, con una di più fidanzate, con nessuna ignorando le richieste della ragazza, senza fidanzata): dalla scelta arrivano,
+  come dice la guida Royal, il cioccolato di Ryuji (richieste della ragazza ignorate) e quello di Sojiro (almeno una fidanzata con cui non si è
+  passato del tempo). Il Rampino di Morgana arriva con il suo passo segnato nella guida del Palazzo di Kamoshida. Il Sacchetto di carta di
+  Iwai non è un dono che arriva da sé: la guida lo lega alla vendita della medaglia del 4 maggio e alla restituzione del 6 maggio, voci del
+  periodo validato.
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
 
 ## 12. Domande, esami, negoziazione, pesca

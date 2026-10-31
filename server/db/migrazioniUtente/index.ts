@@ -76,5 +76,11 @@ import { utente058 } from './058_appunti_fissi.js';
 import { utente059 } from './059_relazione_romantica.js';
 // 2026-10-31 (L13, ondata 11, O11-1: «Sì, in automatico», i doni «se fidanzata» dalla relazione della partita): il giorno d'inizio della relazione
 import { utente060 } from './060_relazione_romantica_dal.js';
+// 2026-10-31 (Scaffale con lo scatolone del Leblanc: impostazioni «Salvataggio di P5» e «Pacchetti DLC posseduti»): `partita.salvataggio_p5`
+import { utente061 } from './061_salvataggio_p5.js';
+// 2026-10-31 (R12-01/7: il turno del + di un'attività dà le sue Doti con il promemoria «Applica», come la spunta di una voce): la causa «turno»
+import { utente062 } from './062_proposte_dei_turni.js';
+// 2026-10-31 (provenienza dei turni in Partita → Progressi): il legame esplicito turno → voce del Diario
+import { utente063 } from './063_turno_della_voce.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053, utente054, utente055, utente056, utente057, utente058, utente059, utente060];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053, utente054, utente055, utente056, utente057, utente058, utente059, utente060, utente061, utente062, utente063];

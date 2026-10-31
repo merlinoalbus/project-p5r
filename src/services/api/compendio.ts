@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
+  CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SetDlcDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, apiGetGioco, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, ElenchiEffettiVoceDto,EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote, TipoAzione } from '../../../shared/effettiAzione';
@@ -59,6 +59,7 @@ export interface FiltriPersona {
 export const URL_GLOSSARIO = '/compendio/glossario';
 export const URL_TERMINI = '/compendio/termini';
 export const URL_REGOLE_FUSIONE = '/compendio/fusione/regole';
+export const URL_SET_DLC = '/compendio/set-dlc';
 export const URL_OGGETTI_GUIDA = '/compendio/oggetti-guida';
 export const URL_PERSONAGGI = '/compendio/personaggi';
 export const URL_SFIDE = '/compendio/sfide';
@@ -75,6 +76,8 @@ export const getTermini = (): Promise<TermineDto[]> => apiGetGioco(URL_TERMINI);
 
 /** Regole di fusione: tabella degli arcani, ricette speciali, modificatori dei tesori, eredità delle skill e gruppi DLC. */
 export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGetGioco(URL_REGOLE_FUSIONE);
+/** I set di contenuti scaricabili con le loro Persona (per le impostazioni della partita). */
+export const getSetDlc = (): Promise<SetDlcDto[]> => apiGetGioco(URL_SET_DLC);
 /** Elenco riassuntivo delle Persona, filtrato con i parametri della query. */
 export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGetGioco(urlPersone(f));
 /** Scheda completa di una Persona per id. */
@@ -182,7 +185,9 @@ export const getDungeon =(chiave: string, partita?: number): Promise<DungeonDett
 /** I campi della scheda di un Palazzo. `date` (L13 O6-3): apertura, scadenza, furto consigliato e termine della lettera, MM-GG del
  *  calendario di gioco (null = la guida non lo dà; `al` null = senza fine, solo Iweleth e i Memento): l'unico punto in cui si modificano. */
 export interface DatiDungeonApi { nome?: string; sovrano?: string; livelloConsigliato?: string; note?: string;
-  date?: { dal: string; al: string | null; furtoConsigliato: string | null; letteraEntro: string | null } }
+  date?: { dal: string; al: string | null; furtoConsigliato: string | null; letteraEntro: string | null };
+  /** L4 §8.14: la voce «Boss» che conclude il Palazzo («Modifica › Boss finale»); null = nessuna. */
+  voceBossFinale?: string | null }
 export interface DatiAreaApi { nome?: string; descrizione?: string }
 export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
@@ -204,8 +209,10 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
 /** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
 export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 
-/** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note); risponde con la scheda aggiornata. */
+/** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note) e la voce del boss finale; risponde con la scheda aggiornata. */
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
+/** «Ripristina» della scheda del Palazzo (L4 §8.14): la voce del boss finale torna quella della guida; risponde con la scheda. */
+export const ripristinaDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina`, {});
 /** Corregge nome e descrizione di un'area della guida del Palazzo; risponde con l'area aggiornata. */
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);
 /** Aggiunge una voce (punto di interesse) all'area; risponde con la voce creata. */

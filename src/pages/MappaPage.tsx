@@ -6,7 +6,6 @@ import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
 import { etichetteDistinte, nomePresentazioneMappa, nomeTecnicoMappa, pinDiContenuto, presentaMappa, testoPin } from '../utils/presentazioneMappa';
 import { IndiceLuoghi } from '../components/mappe/IndiceLuoghi';
-import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
 import { haPlanimetria } from '../utils/haPlanimetria';
 
@@ -252,6 +251,11 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
   const albero = useCarica(getAlberoMappe, [chiave]);
   const presentata = mappa ? presentaMappa(mappa, params.get('contesto')) : null;
   useDocumentTitle(presentata ? `${presentata.nome} — Mappe` : 'Mappa');
+  // Una sezione della guida chiesta alla radice di un Palazzo o dei Memento (`?area=`: un dedalo, un'infiltrazione; i vecchi indirizzi
+  // delle sezioni, `destinazioneGuida`) si apre nella sua scheda, dove la guida si usa: la lista testuale dei contenuti non c'è più
+  // (2026-10-31). La scheda apre la sezione chiesta (`?area=` vale per i dedali e per le infiltrazioni), o la prima se non è sua.
+  const sezione = params.get('area');
+  if (mappa?.radiceDi?.tipo === 'dungeon' && sezione) return <Navigate to={`${schedaAccessoMondo('dungeon', mappa.radiceDi.chiave)}?area=${encodeURIComponent(sezione)}`} replace />;
   return (
     <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica} scheda={{ titolo: 'Mappa', ripiego: '/guida/mappe' }}>
       {mappa && <div className="flex flex-col gap-4">
@@ -259,7 +263,9 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />
          : <><VisoreMappa
           key={`${mappa.chiave}-${spilloIniziale ?? ''}-${params.get('x') ?? ''}-${params.get('y') ?? ''}-${params.get('zoom') ?? ''}`}
-          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.area ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.area?.chiave === mappa.area!.chiave)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && haPlanimetria(m))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}{/* L3 RG-1: nelle planimetrie dei Palazzi la guida si usa dal pulsante «Guida» della barra: la lista testuale non c'è più */}{mappa.area?.contenitore.tipo !== 'dungeon' && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}</>}
+          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.area ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.area?.chiave === mappa.area!.chiave)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && haPlanimetria(m))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}</>}
+          // L3 RG-1 (2026-10-31: «il visore doveva già essere unico»): la guida, su ogni mappa che ha voci, si usa dal pulsante «Guida» della
+          // barra (`GuidaNelVisore`); la lista testuale dei contenuti non si monta più
           guida={{ onCambiato: () => { void ricarica(); } }}
           mappa={presentata!}
           partitaId={partitaId}
@@ -273,7 +279,6 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
           azioni={<>{mappa.radiceDi && <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} />}{!IN_RILASCIO && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />}</>}
         /></>}
-        {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}
       </div>}
     </PageState>
   );

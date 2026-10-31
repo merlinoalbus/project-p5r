@@ -398,6 +398,23 @@ import { migration326 } from './326_proposte_certe_periodo_validato.js';
 // registrata nella partita?»): i 9 pegni del 24 dicembre e i 10 cioccolati del 14 febbraio ricevono la regola [relazione romantica con il
 // Confidente entro il giorno, una sola relazione entro il giorno, dal giorno]; le note di Ryuji e Sojiro allineate alla guida (oggetti)
 import { migration327 } from './327_doni_con_la_relazione_romantica.js';
+// 2026-10-31 (la Richiesta «diventa gestibile dopo aver trovato il nome indagando nei vicoli di Yongen»; lo sblocco sulla voce del 2 giugno):
+// l'effetto «sblocco» sulla voce dell'indagine, la condizione «sblocco ricevuto» sulla Richiesta, la proposta della voce chiusa come applicata
+import { migration328 } from './328_sblocco_se_scomparissero_i_gatti.js';
+// 2026-10-31 (doni «se fidanzata», «Sì, in automatico»): le regole dei 10 dolci e degli 11 giri choco; Ryuji e Sojiro senza regola (guida Royal)
+import { migration329 } from './329_doni_dolci_e_giri_choco.js';
+// 2026-10-31 («Al Leblanc, esaminare lo Scaffale con lo scatolone in mansarda…»): gli effetti della voce con le condizioni delle impostazioni
+// della partita (salvataggio di Persona 5, contenuti scaricabili posseduti)
+import { migration330 } from './330_scaffale_con_lo_scatolone.js';
+// 2026-10-31 (doni «in automatico»: Ryuji e Sojiro secondo con chi si passa il 14 febbraio): l'attività `san-valentino` con gli esiti scelti alla
+// spunta della voce del 14 febbraio, che danno i cioccolatini di Ryuji e Sojiro secondo la guida
+import { migration331 } from './331_san_valentino_scelta_alla_spunta.js';
+// 2026-10-31 (doni rimasti senza regola): il Rampino di Morgana con il suo passo del Palazzo di Kamoshida; il Sacchetto di Iwai resta alle sue voci
+import { migration332 } from './332_doni_rampino_e_sacchetto.js';
+// 2026-10-31 (R9-10/2 e R12-01/7, «integrato senza ulteriori passaggi»; decisione dell'utente: la Dote di biliardo e Gun About si sceglie alla
+// spunta, con le note): esiti scelti alla spunta per biliardo, Gun About, freccette e Frui-te del Diner, prosa delle Doti di Takemi tolta (è nel
+// Confidente), voci del Diario lasciate dalla 312 collegate alle loro attività dove l'elemento è uno solo
+import { migration333 } from './333_effetti_attivita_e_voci_collegate.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -422,5 +439,6 @@ export const migrations: Migration[] = [
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
-  migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327,
+  migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
+  migration333,
 ];

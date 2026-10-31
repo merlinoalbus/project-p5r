@@ -27,7 +27,7 @@ import { voceConInvitoDi } from './inviti.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto } from '../../shared/types.js';
-import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
+import { attivitaConQuiz, costoDelTurno, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
@@ -51,7 +51,8 @@ import { applicatoDallaSpunta } from './applicatoDallaSpunta.js';
 import { yenDelDato } from './yenDeiDati.js';
 import { fasciaDellaVoce } from './prezziArticoli.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
-import { condizioniDaSalvare, condizioniDellaVoce, nonDovutePerGiorno, valutatoreVociDovute, verificaVoceDovuta } from './voceDovuta.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { condizioniDaSalvare, condizioniDellaVoce, nonDovutePerGiorno, valutatoreEffettiCondizionati, valutatoreVociDovute, verificaVoceDovuta } from './voceDovuta.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -110,19 +111,36 @@ const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT no
  */
 function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenGiaNelSaldo: ReadonlySet<string> = new Set(), fatta?: { comprati: ReadonlySet<string>; daScegliere: ReadonlySet<string> }, fascia?: FasciaPrezzo | null,
   /** L13 (O10-5): a voce spuntata, gli yen registrati di ogni turno per posizione (`pagheRegistrateDellaVoce`); assente prima della spunta. */
-  pagheRegistrate?: ReadonlyMap<number, number | null>): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
+  pagheRegistrate?: ReadonlyMap<number, number | null>,
+  /** Decisione 2 e 18: a voce spuntata, gli articoli i cui yen la spunta ha mosso (`articoliPagatiDellaVoce`); assente prima della spunta. */
+  articoliPagati?: ReadonlySet<string>,
+  /** Nella partita, gli effetti con condizioni che non valgono (uid → che cosa manca): il riepilogo non li mostra, né dice la condizione
+   *  degli altri (valgono). Assente senza partita: il riepilogo dice tutti gli effetti, con le loro condizioni («Solo se: …»). */
+  partita?: { fuori: ReadonlyMap<string, string> }): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
   // L13 (decisione 4): gli articoli in alternativa (Set A o Set B) e che cosa contengono; a voce fatta (`fatta.comprati`, gli articoli che la
   // spunta ha segnato) fra le alternative resta solo quella comprata, salvo quelle aggiunte dopo la spunta (`fatta.daScegliere`), da scegliere
   const contenuti = contenutoArticoli(fonte.effetti.flatMap(({ effetto: e }) => (e.tipo === 'articolo' ? [e.articolo] : [])));
   // Ondata 5 (lotto E, decisione 5): il prezzo di un articolo è quello della fascia della voce, lo stesso che la spunta scala
   // (`motoreDiario.yenDellEffetto`): di sera le sfide della Big Bang Burger costano 500 ¥
-  const nomiRiepilogo: NomiRiepilogoEffetti = { ...nomiDelRiepilogo(nomi, fascia), incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k) };
+  const nomiRiepilogo: NomiRiepilogoEffetti = { ...nomiDelRiepilogo(nomi, fascia), incompatibili: incompatibiliDi, contenuto: (k) => contenuti.get(k), condizioni: nomiCondizioniMemo() };
   // L13 (decisione 18): gli effetti i cui yen erano già nel saldo da prima (per posizione, come gli effetti del riepilogo)
   const vecchi = new Set(fonte.effetti.flatMap((x, i) => (yenGiaNelSaldo.has(x.uid) ? [i] : [])));
+  // gli effetti con condizioni che nella partita non valgono, per posizione (come gli altri insiemi del riepilogo)
+  const fuori = partita ? new Set(fonte.effetti.flatMap((x, i) => (partita.fuori.has(x.uid) ? [i] : []))) : undefined;
   return {
     testo: testoEffettiDellaFonte(fonte, nomi, nomiRiepilogo.frase, yenGiaNelSaldo),
-    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), nomiRiepilogo, { yenGiaNelSaldo: vecchi, ...(fatta ? { comprati: fatta.comprati, daScegliere: fatta.daScegliere } : {}), ...(pagheRegistrate ? { pagheRegistrate } : {}) }),
+    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), nomiRiepilogo, { yenGiaNelSaldo: vecchi, ...(fatta ? { comprati: fatta.comprati, daScegliere: fatta.daScegliere } : {}), ...(pagheRegistrate ? { pagheRegistrate } : {}),
+      ...(articoliPagati ? { articoliPagati } : {}), ...(partita ? { nellaPartita: true, fuoriCondizione: fuori } : {}) }),
   };
+}
+/**
+ * Decisione 2 e 18: a voce spuntata, gli articoli della voce i cui yen la spunta ha mosso e che sono ancora in vigore (causa `voce`,
+ * `<voce>:<effetto>`): la stessa lettura di `motoreDiario.scartaYenDeiTurni` (`yenAutomaticoAttivo`), così la frase della sfida di un turno
+ * dice ciò che il server ha fatto. `movimenti` sono quelli in vigore della voce (`yenAutomaticiDellaVoce`).
+ */
+function articoliPagatiDellaVoce(voceUid: string, fonte: StatoEffettiVoceDto, movimenti: ReadonlyArray<{ causa: string; chiave: string }>): Set<string> {
+  const mossi = new Set(movimenti.filter((m) => m.causa === 'voce').map((m) => m.chiave));
+  return new Set(fonte.effetti.flatMap(({ uid, effetto: e }) => (e.tipo === 'articolo' && mossi.has(`${voceUid}:${uid}`) ? [e.articolo] : [])));
 }
 /**
  * L13 (O10-5): a voce spuntata, per posizione di ogni turno della fonte, gli yen che la ricevuta della spunta ha registrato per quel turno
@@ -176,7 +194,8 @@ function cruciverbaDellaData(data: string): CruciverbaRiepilogoEffetti | undefin
 }
 /** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
 function nomiDelRiepilogo(nomi: NomiEffettiAzione, fascia?: FasciaPrezzo | null): NomiRiepilogoEffetti {
-  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, quesito: quesitoDellaDomanda, cruciverba: cruciverbaDellaData };
+  // decisione 18: il costo di un turno senza paga lo dice la regola che lo scala alla spunta, nella fascia della voce (`costoDelTurno`)
+  return { frase: nomiFraseEffetto(fascia), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno, costoTurno: (attivita, esito) => costoDelTurno(attivita, esito, fascia), quesito: quesitoDellaDomanda, cruciverba: cruciverbaDellaData };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
@@ -262,7 +281,10 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
   partita?: number;
   /** L13 (O9-3): il motivo per cui una voce non è dovuta nella partita (null = dovuta), con lo stato letto una volta per la giornata. */
-  nonDovuta?: (r: RigaVoce) => string | null }
+  nonDovuta?: (r: RigaVoce) => string | null;
+  /** Gli effetti con condizioni (`CondizioniEffetto`) che nella partita non valgono, al giorno della voce (uid → che cosa manca), con lo stato
+   *  letto una volta per la giornata e solo se un effetto ha condizioni. Assente senza partita. */
+  fuoriCondizione?: ReturnType<typeof valutatoreEffettiCondizionati> }
 
 /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
  *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
@@ -327,12 +349,13 @@ export function decisioniApertePerVoce(partitaId: number, voceUid: string): numb
  * («le etichette di testo devono essere visibili solo se hanno senso»: non informano), e gli articoli in alternativa (decisione 4,
  * `effettiInAlternativa`: senza riga non sono stati scelti, e il riepilogo della voce li dice comprati o da scegliere).
  */
-function statiNonApplicatiDellaVoce(p: number, fonte: StatoEffettiVoceDto): NonNullable<AzionePercorsoDto['statiNonApplicati']> {
+function statiNonApplicatiDellaVoce(p: number, fonte: StatoEffettiVoceDto, fuoriCondizione: ReadonlyMap<string, string>): NonNullable<AzionePercorsoDto['statiNonApplicati']> {
   // Ondata 5 (lotto E): il prezzo dell'articolo nella frase è quello della fascia della voce, lo stesso che la spunta scala
   const nomi = nomiFraseEffetto(fasciaDellaVoce(fonte.voceUid));
   const inAlternativa = effettiInAlternativa(fonte.effetti);
   return fonte.effetti.flatMap(({ uid, effetto: e }): NonNullable<AzionePercorsoDto['statiNonApplicati']> => {
-    if (!eEffettoDiStato(e) || inAlternativa.has(uid)) return [];
+    // un effetto con condizioni false nella partita non è dovuto: non si dice «non applicato»
+    if (!eEffettoDiStato(e) || inAlternativa.has(uid) || fuoriCondizione.has(uid)) return [];
     // la Persona «anche nella scorta» con il solo compendio segnato manca ancora della scorta (`statoSegnatoDallaVoce`)
     if (statoSegnatoDallaVoce(p, fonte.voceUid, uid, e)) return [];
     const testo = fraseEffettoConNomi(e, nomi);
@@ -384,7 +407,10 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid)), v) : [];
   // L13 (decisione 19): gli effetti di stato che nella partita non valgono (da approvare nell'elenco, o non applicati), a parte da ciò che la
   // spunta ha applicato: «era già vero» non si dice (non informa)
-  const statiNonApplicati = ctx.partita === undefined || !spuntabile || !ctx.fatte.has(r.uid) ? [] : statiNonApplicatiDellaVoce(ctx.partita, fonte);
+  // gli effetti con condizioni che nella partita non valgono (`CondizioniEffetto`): non si applicano, quindi non sono «non applicati» e il
+  // riepilogo della partita non li mostra (senza partita il riepilogo li dice tutti, con «Solo se»)
+  const fuoriCondizione = ctx.fuoriCondizione && spuntabile && fonte.stato === 'convertita' ? ctx.fuoriCondizione({ data: r.data, fascia: fasciaDi(r) }, fonte.effetti) : new Map<string, string>();
+  const statiNonApplicati = ctx.partita === undefined || !spuntabile || !ctx.fatte.has(r.uid) ? [] : statiNonApplicatiDellaVoce(ctx.partita, fonte, fuoriCondizione);
   // L13 (O9-3): «Si fa solo se» e, nella partita, la voce non spuntata le cui condizioni sono false al suo giorno (una spuntata resta storia)
   const condizioni = spuntabile ? condizioniDellaVoce(r) : [];
   const motivoNonDovuta = condizioni.length > 0 && ctx.nonDovuta && !ctx.fatte.has(r.uid) ? ctx.nonDovuta(r) : null;
@@ -396,7 +422,9 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     // L13 (O10-5): e gli yen registrati dei turni, perché la riga del turno dica la ricevuta e non l'istruzione della spunta
     ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined, fasciaDi(r),
-      ctx.partita !== undefined && ctx.fatte.has(r.uid) ? pagheRegistrateDellaVoce(fonte, ctx.fatte.get(r.uid), yenAutomatici, yenGiaNelSaldo) : undefined) : null),
+      ctx.partita !== undefined && ctx.fatte.has(r.uid) ? pagheRegistrateDellaVoce(fonte, ctx.fatte.get(r.uid), yenAutomatici, yenGiaNelSaldo) : undefined,
+      ctx.partita !== undefined && ctx.fatte.has(r.uid) ? articoliPagatiDellaVoce(r.uid, fonte, yenAutomatici) : undefined,
+      ctx.partita !== undefined ? { fuori: fuoriCondizione } : undefined) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
@@ -518,8 +546,8 @@ export function propostaInfiltrazioni(r: Pick<RigaVoce, 'uid' | 'data' | 'azione
 function infiltrazioniCompletate(chiavi: readonly string[], partitaId: number): Set<string> {
   const out = new Set<string>();
   for (const k of new Set(chiavi)) {
-    const voci = prepared('SELECT chiave, tipo, area_dedalo_chiave FROM punto_interesse WHERE area_chiave = ?').all(k) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string | null }>;
-    const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo, v.area_dedalo_chiave));
+    const voci = prepared('SELECT chiave, tipo, area_dedalo_chiave, carattere FROM punto_interesse WHERE area_chiave = ?').all(k) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string | null; carattere: string | null }>;
+    const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo, v.area_dedalo_chiave, v.carattere));
     if (daSegnare.length > 0 && daSegnare.every((v) => prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, v.chiave))) out.add(k);
   }
   return out;
@@ -733,7 +761,7 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
     oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
-    ...(partitaId !== undefined ? { nonDovuta: valutatoreVociDovute(partitaId) } : {}),
+    ...(partitaId !== undefined ? { nonDovuta: valutatoreVociDovute(partitaId), fuoriCondizione: valutatoreEffettiCondizionati(partitaId) } : {}),
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }

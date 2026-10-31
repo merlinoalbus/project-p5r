@@ -202,7 +202,9 @@ function EffettiStorici({ valore, onCambia, elenchi }: Props) {
   return (
     <div className="flex flex-col gap-2">
       {valore.produce.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto: la spunta segna solo che l’hai fatto.</p>}
-      {valore.produce.length > 0 && <p className="m-0 testo-12 text-text-muted">Le Doti te le ricorda e le segni tu nella scheda Doti; letture e turni li segna la spunta.</p>}
+      {/* 2026-10-27 («"Le Doti le segni tu nella scheda Doti." da togliere nelle voci del diario»): nessuna nota sulle Doti né su letture e
+          turni. Le Doti della spunta si applicano dal pulsante «Applica» sulla voce, che lo dice da solo, e che la spunta segni letture e
+          turni è il caso normale di ogni voce (la stessa regola di `shared/riepilogoEffetti.ts`) */}
       <ul className="flex flex-col gap-2 list-none m-0 p-0">
         {valore.produce.map((e, i) => (
           <RigaEffettoVoceLegacy key={i} numero={i + 1} effetto={e} elenchi={elenchi.azione}

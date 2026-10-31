@@ -84,6 +84,9 @@ function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: strin
                 contenuto lungo allargava le due colonne e allontanava il prezzo dal nome, rilievo della revisione UX) e lo stende sulla
                 larghezza che nome e prezzo danno alla riga */}
             {r.contenuto && <span className="min-w-0 break-words testo-12 text-text-muted text-pretty min-[641px]:col-span-2 min-[641px]:w-0 min-[641px]:min-w-full">{r.contenuto}</span>}
+            {/* quando vale un effetto con condizioni (solo fuori dalla partita: nella partita si mostrano solo quelli che valgono), sotto la riga
+                come il contenuto di un set, su tutta la larghezza e a capo, mai troncato */}
+            {r.condizione && <span className="min-w-0 break-words testo-12 text-text-muted text-pretty min-[641px]:col-span-2 min-[641px]:w-0 min-[641px]:min-w-full">{r.condizione}</span>}
           </li>
         ))}
       </ul>

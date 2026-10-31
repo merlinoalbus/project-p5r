@@ -21,6 +21,7 @@ import { valutazione } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { statoAlMomento } from './esitiAttivitaService.js';
 import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibilitaService.js';
+import { condizioniDellEffetto, type EffettoVoce } from '../../shared/effettiVoce.js';
 
 /** Quante condizioni di primo livello può avere una voce (lo stesso limite degli altri elementi con condizioni). */
 export const MASSIMO_CONDIZIONI_VOCE = 20;
@@ -88,6 +89,42 @@ export function valutatoreVociDovute(partitaId: number): (r: RigaVoceDovuta) => 
     return motivoNelloStato(condizioni, st);
   };
 }
+
+/**
+ * Gli effetti di una voce con condizioni (`condizioni` dell'effetto, `shared/effettiVoce.ts` → `CondizioniEffetto`) che NON valgono nella
+ * partita: le stesse regole di «Si fa solo se» della voce (lo stesso valutatore, allo stato della partita al giorno e alla fascia della voce;
+ * una condizione grigia non nega). Uid dell'effetto → che cosa manca, in parole. Lo stato si legge solo se un effetto ha condizioni, una volta
+ * per partita e per momento: chi non ne ha non lo paga. Lo usano la spunta, il salvataggio degli effetti di una voce già spuntata, l'elenco del
+ * passato e la lettura della voce nella partita.
+ */
+export function valutatoreEffettiCondizionati(partitaId: number): (voce: { data: string; fascia: string }, effetti: ReadonlyArray<{ uid: string; effetto: EffettoVoce }>) => Map<string, string> {
+  let base: StatoDisponibilita | null = null;
+  const perMomento = new Map<string, StatoDisponibilita>();
+  return (v, effetti) => {
+    const out = new Map<string, string>();
+    for (const { uid, effetto } of effetti) {
+      const condizioni = condizioniDellEffetto(effetto);
+      if (!condizioni.length) continue;
+      const fascia = v.fascia === 'sera' ? 'sera' : 'giorno';
+      const chiave = `${v.data}:${fascia}`;
+      let st = perMomento.get(chiave);
+      if (!st) { st = statoAlMomento(partitaId, { data: v.data, fascia }, base ??= statoDisponibilitaPartita(partitaId)); perMomento.set(chiave, st); }
+      const motivo = motivoNelloStato(condizioni, st);
+      if (motivo) out.set(uid, motivo);
+    }
+    return out;
+  };
+}
+
+/** Come `valutatoreEffettiCondizionati`, per una voce sola (la voce si legge dal file di gioco). Vuoto se nessun effetto ha condizioni. */
+export function effettiFuoriCondizione(partitaId: number, voceUid: string, effetti: ReadonlyArray<{ uid: string; effetto: EffettoVoce }>): Map<string, string> {
+  if (!effetti.some((e) => condizioniDellEffetto(e.effetto).length)) return new Map();
+  const v = prepared('SELECT data, fascia FROM voce_giornata WHERE uid = ?').get(voceUid) as { data: string; fascia: string } | undefined;
+  return v ? valutatoreEffettiCondizionati(partitaId)(v, effetti) : new Map();
+}
+
+/** La frase per chi vede un effetto con condizioni che nella partita non vale. */
+export const fraseEffettoFuoriCondizione = (motivo: string): string => `vale solo con «${motivo}», che in questa partita manca`;
 
 /** La frase per chi prova a spuntare una voce non dovuta, la stessa del 409. */
 export const fraseNonDovuta = (motivo: string): string => `Questa voce non è dovuta nella partita: manca «${motivo}».`;

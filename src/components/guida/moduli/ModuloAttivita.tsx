@@ -187,12 +187,14 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         </SezioneCampi>
       )}
       {campiPropri && <SezioneCampi titolo="Effetti ed esiti">
-        {/* contata per volte (un lavoro): ogni turno dice i suoi punti (da segnare a mano), il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
+        {/* contata per volte (un lavoro): ogni turno dice i suoi punti, il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in
+            poi». Le Doti di un turno dalla voce del Diario entrano nelle ricevute e si applicano con «Applica» (`motoreDiario.beneficiLegacy`);
+            quelle del + del contatore restano un promemoria da segnare a mano (`avvisaDotiDaSegnare` in Progressi) */}
         <Blocco largo>
           <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
             conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
             aiuto={testoDi(dati.tracciamento) === 'svolta'
-              ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
+              ? 'Il gioco dà questi punti a ogni turno: spuntando la voce della giornata si applicano con «Applica» sulla voce; col contatore in Partita → Progressi l\'app te li ricorda e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
               : undefined} />
         </Blocco>
         {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}

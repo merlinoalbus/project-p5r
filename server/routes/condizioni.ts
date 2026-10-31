@@ -22,12 +22,13 @@ import { giocabili } from '../services/squadraService.js';
 import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
-import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
+import { elementiDeiContatori, statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { esitoAperturaDedalo, valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
 import { verificaPartita } from '../services/verificaPartita.js';
+import { ricevuteAttive, vociDegliEventi, vociDeiContatori, vociDeiTurni } from '../services/vociDeiProgressi.js';
 import { dataGioco, idParam } from '../schemas/comuni.js';
 import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
@@ -36,6 +37,7 @@ import { esitiDto } from '../services/esitiAttivitaService.js';
 import { promemoriaLibriPerAttivita } from '../services/modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
 import { confidentiRomanzabili } from '../services/relazioneRomanticaService.js';
+import { setDlcConPersone } from '../services/setDlcService.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
 
@@ -92,6 +94,8 @@ router.get('/elenchi', (_req, res) => {
     quartieri: prepared("SELECT chiave, nome FROM quartiere WHERE chiave <> 'mementos' ORDER BY ordine").all() as NonNullable<ElenchiRegoleDto['quartieri']>,
     // L13 (O11-1): i Confidenti romanzabili, dal DB (`confidente.romanzabile`), per la condizione «Relazione romantica con»
     romanzabili: (() => { const r = confidentiRomanzabili(); return (prepared('SELECT chiave, nome FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).filter((c) => r.has(c.chiave)); })(),
+    // i set di contenuti scaricabili (chiave = id come testo), per la condizione «Contenuto scaricabile posseduto»
+    setDlc: setDlcConPersone().map((s) => ({ chiave: String(s.id), nome: s.nome })),
     inviti: (() => { const n = nomiCondizioniMemo(); return tuttiGliInviti().map((i) => ({ chiave: i.chiave, nome: n.inviti?.[i.chiave] ?? i.chiave, gruppo: n.confidenti?.[i.confidente_chiave] ?? i.confidente_chiave, confidente: i.confidente_chiave })); })(),
   };
   res.json(elenchi);
@@ -115,14 +119,16 @@ function progressi(id: number): ProgressiPartitaDto {
   const st = statoDisponibilitaPartita(id);
   const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
   const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?').all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
-  // R10-22/3: da quale voce del Diario viene un evento di storia (l'effetto «storia» della spunta, ancora attiva), e solo se la voce l'ha
-  // segnato davvero: se l'evento era già segnato prima della spunta (`prima.gia`) non è stata la voce
-
-  const dalleVoci = new Map<string, Array<{ uid: string; giorno: string; testo: string }>>();
-  for (const r of prepared("SELECT s.chiave, v.uid, v.data AS giorno, v.azione AS testo FROM effetto_stato_voce s JOIN main.voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND s.tipo = 'storia' AND json_extract(s.prima_json, '$.gia') = 0 ORDER BY v.data, v.fascia, v.ordine").all(id) as Array<{ chiave: string; uid: string; giorno: string; testo: string }>) {
-    dalleVoci.set(r.chiave, [...(dalleVoci.get(r.chiave) ?? []), { uid: r.uid, giorno: r.giorno, testo: r.testo }]);
-  }
+  // da quale voce del Diario viene ciò che si mostra (decisione 8): gli eventi di storia (R10-22/3), i turni delle attività e le letture dei
+  // contatori, ognuno solo se la spunta della voce, ancora attiva, l'ha prodotto davvero (`vociDeiProgressi.ts`)
+  // le ricevute delle spunte attive e gli elementi dei contatori si leggono una volta per richiesta (questi già con lo stato della partita)
+  const dalleVoci = vociDegliEventi(id);
+  const ricevute = ricevuteAttive(id);
+  const turniDalleVoci = vociDeiTurni(id);
+  const contatoriDalleVoci = vociDeiContatori(ricevute, st.elementiContatori ?? elementiDeiContatori(id));
   const svolte = new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(id) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte]));
+  // R12-01/7: le attività con proposte nate dai turni del + (causa «<attività>:<uid>»)
+  const conProposte = new Set((prepared("SELECT DISTINCT substr(causa_chiave, 1, instr(causa_chiave, ':') - 1) AS a FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'turno'").all(id) as Array<{ a: string }>).map((r) => r.a));
   const punti = new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(id) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti]));
   const negozi = negoziConProgramma();
   // a che cosa serve segnarlo: i ranghi dei Confidenti che lo chiedono (il caffè al Leblanc → Sojiro, rango 3)
@@ -145,9 +151,12 @@ function progressi(id: number): ProgressiPartitaDto {
     }),
     // L13: con gli esiti dichiarati il + apre la scelta dell'esito, valutata sullo stato della partita (il giorno corrente)
     // Ondata 5 (lotto F-bis): con la chiave dell'attività gli esiti portano i promemoria dei libri letti per la scelta del +; la riga li porta
-    // anche quando l'attività non ha esiti (biliardo, freccette, Fioraio Rafflesia, pesca)
+    // anche quando l'attività non ha esiti (Fioraio Rafflesia, pesca)
     attivita: attivitaConteggiabili().map(({ esitiDichiarati, confidente, ...a }) => ({ ...a, volte: svolte.get(a.chiave) ?? 0, esiti: esitiDichiarati ? esitiDto(esitiDichiarati, st, a.chiave) : null,
-      promemoria: confidente ? [] : promemoriaLibriPerAttivita(st.letture, { chiave: a.chiave, tipo: a.tipo }) })),
+      promemoria: confidente ? [] : promemoriaLibriPerAttivita(st.letture, { chiave: a.chiave, tipo: a.tipo }),
+      ...(turniDalleVoci.has(a.chiave) ? { daVoci: turniDalleVoci.get(a.chiave) } : {}),
+      // R12-01/7: i turni del + hanno proposte «Applica» (aperte o decise): la riga mostra `DaApplicare` dell'attività
+      conProposteDeiTurni: conProposte.has(a.chiave) })),
     puntiNegozio: negozi.filter((n) => n.programma?.calcolo === 'manuale').map((n) => ({ negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, unita: n.programma!.unita, punti: punti.get(n.chiave) ?? 0 })),
     rangoCliente: negozi.filter((n) => n.programma?.calcolo === 'rango-cliente').map((n) => {
       const spesa = st.spesaPerNegozio.get(n.chiave) ?? 0;
@@ -155,7 +164,8 @@ function progressi(id: number): ProgressiPartitaDto {
       const prossimo = RANGHI_CLIENTE.find((x) => x.spesa > spesa) ?? null;
       return { negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, spesa, rango: { chiave: attuale.chiave, nome: attuale.nome }, prossimo: prossimo ? { chiave: prossimo.chiave, nome: prossimo.nome, spesa: prossimo.spesa } : null };
     }),
-    contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome, valore: st.contatori.get(c.chiave) ?? 0 })),
+    contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome, valore: st.contatori.get(c.chiave) ?? 0,
+      ...(contatoriDalleVoci.has(c.chiave) ? { daVoci: contatoriDalleVoci.get(c.chiave) } : {}) })),
   };
 }
 
@@ -205,7 +215,8 @@ router.put('/partite/:partita/attivita/:chiave', validate({ params: z.object({ p
   // L13: l'esito del turno aggiunto per un'attività che dichiara esiti (null = «senza punti»)
   esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable().optional() }) }), (req, res) => {
   const id = Number(req.params.partita); verificaPartita(id);
-  // ogni turno aggiunto o tolto dice le Doti che dà (o dava), da segnare a mano: le Doti non si toccano
+  // R12-01/7: le Doti dei turni aggiunti diventano il promemoria «Applica» dell'attività (togliendo il turno si riallinea); `daSegnare` dice solo
+  // quelle dei turni tolti che non vengono dal + (registrati da una voce o prima del registro). Le Doti non si toccano
   const { volte, esito } = req.body as { volte: number; esito?: string | null };
   const daSegnare = impostaVolteAttivita(id, String(req.params.chiave), volte, esito);
   res.json({ ...progressi(id), daSegnare });

@@ -85,7 +85,6 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Aggiungi planimetria', cosa: 'finestra di aggiunta delle planimetrie' },
   { testo: 'Elimina area', cosa: 'eliminazione delle aree' },
   { testo: 'Sblocco dell’area', cosa: 'condizione propria delle aree (migrazione 303)' },
-  { testo: 'Salva contenuto', cosa: 'modulo del contenuto della guida' },
   { testo: 'Pacchetto di gioco', cosa: 'sezione del pacchetto di gioco' },
   { testo: 'Documentazione delle API', cosa: 'sezione della documentazione delle API' },
   { testo: 'Modifica la guida', cosa: 'modalità «Modifica la guida» dei dedali' },
@@ -96,7 +95,6 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Aggiungi una Richiesta', cosa: 'aggiunta di Richieste' },
   { testo: 'Modifica requisiti', cosa: 'editor dei requisiti dei Confidenti' },
   { testo: 'Carica file', cosa: 'caricamento di immagini' },
-  { testo: 'Rimuovi immagine', cosa: 'rimozione di immagini' },
   { testo: 'Modifica nota', cosa: 'editor delle note storiche' },
   { testo: 'Nuovo oggetto', cosa: 'creazione di oggetti del catalogo' },
   { testo: 'Correggi la regola comune', cosa: 'correzione della regola comune della pesca' },
@@ -109,7 +107,8 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },
   { testo: 'Senza condizioni la voce si fa sempre', cosa: 'riquadro «Si fa solo se» del modulo della voce del Diario (L13, O9-3)' },
   { testo: 'Incolla dagli appunti', cosa: 'finestra di caricamento delle miniature dei Luoghi (L13, O9-5, FinestraCaricaImmagine)' },
-  { testo: 'la miniatura di ', cosa: 'comando «Miniatura» delle carte dei Palazzi e delle aree dei Dedali (L13, O9-5)' },
+  { testo: 'la miniatura di ', cosa: 'comando «Miniatura» delle carte dei Palazzi, dei Dedali e delle loro aree (L13, O9-5)' },
+  { testo: 'Boss finale da dichiarare', cosa: 'segno e collegamento a «Modifica › Boss finale» della scheda del Palazzo (L4 §8.14)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

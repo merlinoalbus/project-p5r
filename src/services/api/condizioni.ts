@@ -23,7 +23,8 @@ export const getVociCitabili = (): Promise<VoceCitabileDto[]> => apiGet('/condiz
 export const getProgressiPartita = (id: number): Promise<ProgressiPartitaDto> => apiGet(`/condizioni/partite/${id}/progressi`);
 /** Segna (o toglie) un evento di storia come avvenuto nella partita; gli eventi calcolati dalla squadra sono rifiutati dal server. Risponde con i progressi aggiornati. */
 export const impostaEventoStoria = (id: number, evento: string, avvenuto: boolean): Promise<ProgressiPartitaDto> => apiPut(`/condizioni/partite/${id}/eventi/${encodeURIComponent(evento)}`, { avvenuto });
-/** Imposta quante volte un'attività è stata svolta nella partita; risponde con i progressi aggiornati (il server vi aggiunge le Doti da segnare a mano). */
+/** Imposta quante volte un'attività è stata svolta nella partita; risponde con i progressi aggiornati. Le Doti dei turni del + diventano il
+ *  promemoria «Applica» dell'attività; `daSegnare` dice solo quelle dei turni tolti che non vengono dal + (registrati da una voce). */
 /** `esito` (L13): l'esito del turno aggiunto per un'attività che dichiara esiti (null = «senza punti»); assente per le altre. */
 export const impostaAttivitaSvolta = (id: number, attivita: string, volte: number, esito?: string | null): Promise<ProgressiPartitaDto> => apiPut(`/condizioni/partite/${id}/attivita/${encodeURIComponent(attivita)}`, { volte, ...(esito !== undefined ? { esito } : {}) }, { maxRetries: 0 });
 /** Imposta i punti accumulati nel programma punti di un negozio (solo per i programmi a calcolo manuale); risponde con i progressi aggiornati. */

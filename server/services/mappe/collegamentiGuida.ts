@@ -32,9 +32,9 @@ export { allineaEnigma, allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, alli
  * Restituisce l'errore da lanciare, o `null` se il collegamento è ammesso (chi importa un pacchetto lo scarta e lo conta).
  */
 export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, puntoChiave: string): HttpError | null {
-  const p = prepared('SELECT p.nome, p.tipo, p.area_dedalo_chiave, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(puntoChiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null; dungeon_chiave: string } | undefined;
+  const p = prepared('SELECT p.nome, p.tipo, p.area_dedalo_chiave, p.carattere, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(puntoChiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null; carattere: string | null; dungeon_chiave: string } | undefined;
   if (!p) return httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) return httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+  if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere)) return httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
   // una Persona da catturare (dedali e Palazzi) si cattura nel compendio (2026-10-12; L8): un pin la segnerebbe in `punto_partita`, un secondo modo
   if (eVoceDiCattura(puntoChiave)) return erroreCatturaNelCompendio(p.nome, 'collegare');
   // un Enigma con i suoi passi non ha pin suoi: stanno sui passi (scelta dell'utente, 2026-10-01)

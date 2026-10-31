@@ -36,3 +36,17 @@ const ALIAS: Record<string, string> = {
 export function chiaveCategoria(categoria: string): string {
   return ALIAS[categoria] ?? categoria;
 }
+
+// Le figure proprie dei tipi di effetto della voce che prima ne condividevano una (consegnate il 2026-10-29): se la figura propria non
+// c'è o non si carica, la voce torna alla figura che mostrava prima (quella della famiglia), e solo dopo alla riserva SVG.
+const RIPIEGO: Record<string, string> = {
+  yen: 'acquisto', 'oggetto-ricevuto': 'acquisto', 'oggetto-uscito': 'acquisto',
+  'persona-tolta': 'velluto', 'punti-confidente': 'confidente', trofeo: 'trama',
+};
+
+/** Le chiavi da provare in ordine per una categoria: la sua, poi le figure di ripiego (nessuna per quasi tutte). */
+export function catenaCategoria(categoria: string): string[] {
+  const catena = [chiaveCategoria(categoria)];
+  for (let k = RIPIEGO[catena[0]]; k && !catena.includes(k); k = RIPIEGO[k]) catena.push(k);
+  return catena;
+}

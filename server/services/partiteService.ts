@@ -25,6 +25,7 @@ import { conCestinoPrivato } from './cestinoService.js';
 import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { confidentiRomanzabili, relazioniDellaPartita, richiediRomanzabile, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
+import { proponiStatiMancanti } from './statiMancantiService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, ConsegnaRegaloDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -34,7 +35,12 @@ import type {
 interface RigaPartita {
   id: number; nome: string; note: string; attiva: number; livello_protagonista: number; data_gioco: string | null; fascia_gioco: FasciaGioco; difficolta: Difficolta;
   nuova_partita_plus: number; dlc_posseduti_json: string; allarme_attivo: number; created_at: string; updated_at: string;
+  /** Dalla migrazione utente 061: il salvataggio di Persona 5 (0/1); assente su uno schema di prima (vale «no»). */
+  salvataggio_p5?: number;
 }
+
+/** La colonna del salvataggio di Persona 5 c'è (migrazione utente 061)? Su uno schema di prima il dato non si scrive e vale «no». */
+const conSalvataggioP5 = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
 
 /** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
@@ -42,6 +48,7 @@ function partitaDto(r: RigaPartita): PartitaDto {
     id: r.id, nome: r.nome, note: r.note, attiva: r.attiva === 1, livelloProtagonista: r.livello_protagonista, dataGioco: r.data_gioco,
     fasciaGioco: r.fascia_gioco === 'sera' ? 'sera' : 'giorno',
     difficolta: r.difficolta, nuovaPartitaPlus: r.nuova_partita_plus === 1, dlcPosseduti: JSON.parse(r.dlc_posseduti_json) as number[],
+    salvataggioP5: r.salvataggio_p5 === 1,
     allarmeAttivo: r.allarme_attivo === 1, createdAt: r.created_at, updatedAt: r.updated_at,
     meteoOra: meteoOra(r.id, r.data_gioco, r.fascia_gioco === 'sera' ? 'sera' : 'giorno')?.meteo ?? null,
   };
@@ -81,6 +88,8 @@ export interface DatiPartita {
   difficolta?: Difficolta;
   nuovaPartitaPlus?: boolean;
   dlcPosseduti?: number[];
+  /** Il salvataggio di Persona 5 presente (impostazione della partita: le ricompense dello Scaffale del Leblanc). */
+  salvataggioP5?: boolean;
   allarmeAttivo?: boolean;
 }
 
@@ -124,6 +133,8 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
       dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso, proprietario, getProprietarioEmail(),
     );
     const id = Number(info.lastInsertRowid);
+    // il salvataggio di Persona 5 (utente 061): «no» dal valore predefinito della colonna, si scrive solo se indicato
+    if (dati.salvataggioP5 && conSalvataggioP5()) prepared('UPDATE partita SET salvataggio_p5 = 1 WHERE id = ?').run(id);
     // Doti sociali a zero e Confidenti non sbloccati: righe esplicite così il tracking parte completo.
     for (const d of prepared('SELECT chiave FROM dote_sociale').all() as Array<{ chiave: string }>) {
       prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, 0, ?)').run(id, d.chiave, adesso);
@@ -142,6 +153,13 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
  */
 export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   const r = rigaPartita(id);
+  // i set di contenuti scaricabili: solo quelli del file di gioco (`dlc_set`), una volta sola e in ordine (la Fusione e le condizioni li leggono per id)
+  if (dati.dlcPosseduti) {
+    const esistenti = new Set(prepared('SELECT id FROM dlc_set').pluck().all() as number[]);
+    const ignoti = dati.dlcPosseduti.filter((x) => !esistenti.has(x));
+    if (ignoti.length) throw httpErrors.badRequest('dlc-sconosciuti', `Contenuti scaricabili che il gioco non ha: ${ignoti.join(', ')}.`);
+    dati = { ...dati, dlcPosseduti: [...new Set(dati.dlcPosseduti)].sort((a, b) => a - b) };
+  }
   return getDb().transaction(() => {
     // il giorno di gioco cambia solo dalla regola unica (R10-16): giorno esistente, fascia a «giorno», storico. Una fascia scelta
     // nella stessa richiesta vince sul ritorno a «giorno» del giorno nuovo.
@@ -155,6 +173,17 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
     );
+    // il salvataggio di Persona 5 (utente 061): solo se indicato; su uno schema senza la colonna non c'è dove scriverlo (409, mai in silenzio)
+    if (dati.salvataggioP5 !== undefined) {
+      if (!conSalvataggioP5()) throw httpErrors.conflict('schema-partite-vecchio', 'Il file delle partite non ha ancora il salvataggio di Persona 5: riavvia il server per applicare le migrazioni.');
+      prepared('UPDATE partita SET salvataggio_p5 = ? WHERE id = ?').run(dati.salvataggioP5 ? 1 : 0, id);
+    }
+    // le impostazioni dei contenuti cambiate: gli effetti con condizioni delle voci già spuntate diventati validi (o tornati non validi) seguono
+    // la via unica degli effetti nati dopo la spunta, l'elenco da approvare della partita (stati e yen, `proponiStatiMancanti`); niente si
+    // applica da solo
+    const contenutiCambiati = (dati.salvataggioP5 !== undefined && (dati.salvataggioP5 ? 1 : 0) !== (r.salvataggio_p5 ?? 0))
+      || (dati.dlcPosseduti !== undefined && JSON.stringify(dati.dlcPosseduti) !== JSON.stringify([...(JSON.parse(r.dlc_posseduti_json) as number[])].sort((a, b) => a - b)));
+    if (contenutiCambiati) proponiStatiMancanti();
     if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
       // la riga di Joker nella squadra ricopia lo stesso numero (la fonte resta la partita): mai due livelli diversi nel file
       prepared("UPDATE membro_squadra_partita SET livello = ? WHERE partita_id = ? AND personaggio_chiave = 'joker'").run(dati.livelloProtagonista, id);

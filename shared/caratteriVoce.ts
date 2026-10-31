@@ -8,6 +8,8 @@
 //   G-005): lo stato è quello della sua voce, che appartiene a una sola infiltrazione;
 // - **descrittiva**: racconto (storia, altro): tiene il segno, ma non conta nel completamento (decisione dell'utente, 2026-10-20).
 // Le voci dei dedali dei Memento e le Persona (L8) non hanno carattere (null): restano come sono.
+// Una voce «Altro» è descrittiva (si legge, non si segna) finché l'utente non le dà «permanente» o «rigenerabile» (`CARATTERI_CON_STATO`):
+// allora si segna e conta come le altre (2026-10-31), con la regola unica `puntoDescrittivo` di `shared/spilli.ts`.
 // Il carattere scelto dall'utente (`punto_interesse.carattere`, migrazione 111) vince sulla regola; NULL vuol dire «vale la regola»,
 // così una correzione della regola vale per tutte le voci non scelte a mano e «Ripristina» è rimettere NULL.
 // Server e interfaccia usano queste funzioni: nessuno ricalcola il carattere a modo suo.
@@ -33,6 +35,18 @@ export const TIPI_SENZA_CARATTERE: readonly string[] = ['persona'];
 /** Vero se il valore è un carattere ammesso. */
 export function eCarattere(v: unknown): v is CarattereVoce {
   return typeof v === 'string' && (CARATTERI as readonly string[]).includes(v);
+}
+
+/**
+ * I caratteri che danno uno stato a una voce di un tipo descrittivo («Altro», `puntoDescrittivo` in `shared/spilli.ts`): una voce «Altro»
+ * a cui l'utente ha dato «Permanente» o «Si ripropone» si segna e conta come le altre (2026-10-31). Senza carattere, o con «Racconto», resta
+ * descrittiva: si legge e basta. Il valore può essere la scelta dell'utente o il carattere effettivo: per «Altro» coincidono.
+ */
+export const CARATTERI_CON_STATO: readonly CarattereVoce[] = ['permanente', 'rigenerabile'];
+
+/** Vero se il carattere (scelto o effettivo) dà uno stato a una voce di tipo descrittivo (`CARATTERI_CON_STATO`). */
+export function carattereConStato(carattere: string | null | undefined): boolean {
+  return eCarattere(carattere) && CARATTERI_CON_STATO.includes(carattere);
 }
 
 /**

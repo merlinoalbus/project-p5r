@@ -33,6 +33,7 @@ import { uscitaDellaVoce } from './consumiOggettiService.js';
 import { effettiInAlternativa, risolviAlternativeAcquisti } from './alternativeAcquistiService.js';
 import { fasciaDellaVoce, prezzoDellArticolo } from './prezziArticoli.js';
 import { prodottiDelloStrumento, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
+import { effettiFuoriCondizione, fraseEffettoFuoriCondizione } from './voceDovuta.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
 interface Transizione {voce_uid:string;stato:StatoEffettiVoceDto['stato'];raw_json:string;motivo:string|null;impronta:string;aggiornata_il:string}
@@ -301,6 +302,8 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
   const esito=(effettoUid:string,e:ApplicazioneStatoPartitaDto['esito'],testo:string,motivo?:string,avvisi:readonly string[]=[])=>out.push({partitaId:p,partitaNome,effettoUid,esito:e,testo,...(motivo?{motivo}:{}),...(avvisi.length?{avvisi:[...avvisi]}:{})});
   // gli articoli tolti o cambiati che avevano mosso i loro yen: la sfida di un turno che pagavano torna al turno
   const articoliRestituiti=new Set<string>();
+  // le versioni nuove con condizioni false nella partita al giorno della voce (`CondizioniEffetto`): non si segnano, come alla spunta
+  const fuoriCondizione=effettiFuoriCondizione(p,uid,cambi.flatMap((c)=>c.nuovo?[{uid:c.effettoUid,effetto:c.nuovo.effetto}]:[]));
   for(const c of cambi){
     const causa={tipo:'voce' as const,chiave:`${uid}:${c.effettoUid}`},decisa={voce_uid:uid,causa_tipo:'voce',causa_chiave:causa.chiave};
     // la nozione unica degli yen già nel saldo, letta sulla versione di prima PRIMA di annullarla (dopo, la sua riga non c'è più)
@@ -327,7 +330,8 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       const vecchio=c.vecchio;
       // la versione nuova dello stesso effetto: le parti che dice ancora (la stessa Persona, lo stesso trofeo) restano com'erano, con il loro
       // «prima»; si annullano solo quelle superate (2026-10-26: l'Arsène di un effetto diventato Pixie, la scorta tornata «Solo nel Compendio»)
-      const resta=c.nuovo&&c.nuovo.effetto.tipo!=='fortuna'?c.nuovo.effetto:undefined;
+      // (una versione nuova con condizioni false nella partita non dice più niente: la vecchia si annulla per intero)
+      const resta=c.nuovo&&c.nuovo.effetto.tipo!=='fortuna'&&!fuoriCondizione.has(c.effettoUid)?c.nuovo.effetto:undefined;
       // c'era davvero qualcosa da annullare? (un effetto mai applicato, come un invito rifiutato o una Fortuna fuori giorno, non si «toglie»)
       const tolto=getDb().transaction(()=>conVoceDellaSpunta(uid,():boolean=>{
         let c1:boolean;
@@ -368,6 +372,8 @@ function riallineaStatiDellaVoce(p:number,uid:string,cambi:readonly CambioStato[
       else esito(c.effettoUid,'fortuna-non-valida',fraseEffettoConNomi(e,nomiFraseEffetto()),'la Fortuna vale solo il giorno della spunta, e in questa partita quel giorno è passato');
       continue;
     }
+    const motivoCondizione=fuoriCondizione.get(c.effettoUid);
+    if(motivoCondizione){esito(c.effettoUid,'non-applicato',fraseDelloStato(e,uid),fraseEffettoFuoriCondizione(motivoCondizione),avvisiAnnullo);continue;}
     if(e.tipo==='articolo'&&inAlternativa.has(c.effettoUid)){
       esito(c.effettoUid,'non-applicato',fraseDelloStato(e,uid),'è in alternativa con altri articoli della voce: quale hai comprato lo sceglie la spunta (toglila e rimettila), oppure segnane l’acquisto dalla pagina del negozio');
       continue;
@@ -660,6 +666,9 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   const v=voce(uid),momento={data:v.data,fascia:v.fascia};
   const scelteAlternative=(opz.scelteEsito??[]).filter((s):s is Extract<SceltaEsitoSpunta,{tipo:'alternativa'}>=>s.tipo==='alternativa'),scelteAltre=(opz.scelteEsito??[]).filter((s)=>s.tipo!=='alternativa');
   const alternative=risolviAlternativeAcquisti(stato.effetti,scelteAlternative,()=>statoAlMomento(p,momento));
+  // gli effetti con condizioni false nella partita al giorno della voce (`CondizioniEffetto`: lo Scaffale del Leblanc senza il salvataggio di
+  // Persona 5 o senza un contenuto scaricabile): non si applicano, quindi niente ricevuta, niente stato e niente yen da annullare togliendo la spunta
+  const fuoriCondizione=effettiFuoriCondizione(p,uid,stato.effetti);
   const consumi=stato.effetti.filter((e)=>e.effetto.tipo==='acquisto'),richieste=opz.acquisti??[];
   if(richieste.length!==consumi.length||new Set(richieste.map((r)=>r.fonte.tipo==='diario'?r.fonte.effettoUid:'')).size!==richieste.length||new Set(richieste.map((r)=>r.operazioneId)).size!==richieste.length)throw httpErrors.conflict('dati-acquisti-richiesti','Rivedi ogni consumazione della voce e invia variante osservata, Fortuna, eventuale raccordo e token insieme alla spunta, con operazioni distinte.');
   const receiptNuovi:ReceiptEffettoVoceDto[]=[],generazione=nuovoUid(),pesche=stato.effetti.filter(e=>e.effetto.tipo==='pesca'),richiestePesca=opz.pesche??[];
@@ -680,7 +689,7 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));yenDaMuovere.push(yenDellEffetto(p,uid,e,undefined,segmento));}
   // L13 (decisione 18): gli yen della voce entrano o si scalano da soli (mai sotto zero), con la ricevuta che lo dice; togliendo la spunta tornano.
   // Solo una causa con yen ancora proposti in sospeso (proposta di prima, aperta o applicata) resta alla proposta «Applica», com'era
-  for(const e of stato.effetti)if(e.effetto.tipo==='yen'){const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:true,spunta},false);receiptNuovi.push(y.ricevuta);yenDaMuovere.push(y.movimento);}
+  for(const e of stato.effetti)if(e.effetto.tipo==='yen'&&!fuoriCondizione.has(e.uid)){const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:true,spunta},false);receiptNuovi.push(y.ricevuta);yenDaMuovere.push(y.movimento);}
   // L13 (O10-2): anche la relazione romantica segnata dalla scelta alla spunta del rango 9 sta nel contesto della voce
   if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length||effettiLegacy.relazione)){
     const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{}),...(effettiLegacy.relazione?{relazione:effettiLegacy.relazione}:{})};
@@ -693,7 +702,7 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   // scelta è stata verificata lì: un set si compra solo la sua domenica); ogni altro articolo resta valutato sullo stato corrente della
   // partita, come prima (nessun cambiamento di comportamento fuori dalle alternative). Lo stato si rilegge qui, dopo consumi e turni
   // 2026-10-26: gli avvisi per chi spunta (la Persona aggiunta alla scorta oltre la sua capienza: la spunta non si ferma)
-  const avvisi=applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)&&!alternative.esclusi.has(e.uid)?[{uid:e.uid,effetto:e.effetto}]:[]),{st:alternative.scelti.size?statoAlMomento(p,momento):undefined,scelti:alternative.scelti});
+  const avvisi=applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)&&!alternative.esclusi.has(e.uid)&&!fuoriCondizione.has(e.uid)?[{uid:e.uid,effetto:e.effetto}]:[]),{st:alternative.scelti.size?statoAlMomento(p,momento):undefined,scelti:alternative.scelti});
   // gli articoli comprati: il loro prezzo, solo se l'acquisto è stato davvero segnato (un articolo non ancora disponibile resta da segnare dal negozio).
   // Decisione 4 con la 18: un set non scelto non si paga (escluso qui oltre che dalla mancanza della riga di stato, che `yenDellEffetto` richiede)
   for(const e of stato.effetti)if(e.effetto.tipo==='articolo'&&!alternative.esclusi.has(e.uid))yenDaMuovere.push(yenDellEffetto(p,uid,e));
@@ -730,6 +739,9 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   const uid=proposta.dati.voceUid,id=proposta.dati.effettoUid;
   if(proposta.partitaId!==p||proposta.tipo!=='effetto-voce'||typeof uid!=='string'||typeof id!=='string'||!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid))throw httpErrors.conflict('raccordo-non-valido','La proposta non appartiene a una spunta attiva di questa partita.');
   const e=leggiEffettiVoce(uid).effetti.find((x)=>x.uid===id);if(!e||jsonCanonico(e.effetto)!==jsonCanonico(proposta.dati.effetto))throw httpErrors.conflict('effetto-cambiato','L’effetto è cambiato dopo la proposta.');
+  // un effetto con condizioni che adesso nella partita non valgono non si applica (`CondizioniEffetto`): la proposta resta, con il motivo
+  const motivoCondizione=effettiFuoriCondizione(p,uid,[e]).get(e.uid);
+  if(motivoCondizione)throw httpErrors.conflict('effetto-fuori-condizione',`Questo effetto ${fraseEffettoFuoriCondizione(motivoCondizione)}.`);
   if(eEffettoDiStato(e.effetto)){applicaStatoDelPassato(p,uid,e as EffettoVoceDto&{effetto:EffettoDiStatoVoce},proposta);return;}
   const tutte=leggiRicevuteEffettiVoce(p,uid),attiva=tutte.find((r)=>r.effettoUid===id&&r.annullatoIl===null);
   if(proposta.dati.sostituzione===true&&(!attiva||attiva.id!==proposta.dati.ricevutaPrecedente))throw httpErrors.conflict('sostituzione-non-provata','La versione precedente non ha una ricevuta attribuibile: riconcilia prima, nessuna aggiunta viene inventata.');

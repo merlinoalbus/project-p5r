@@ -14,6 +14,7 @@ import { catalogoOggettiDisponibile } from '../catalogoOggettiLetture.js';
 import { dataLeggibile, type NomiCondizioni } from '../../../shared/condizioniSpillo.js';
 import { sqlVoceDescrittiva, statoCitabile } from '../../../shared/spilli.js';
 import { vociDelPinSql } from '../mappe/voceDelPin.js';
+import { setDlcConPersone } from '../setDlcService.js';
 
 /** Vero (1) se il pin `s` ha almeno una voce della guida non descrittiva (è quella che lo rende citabile), in SQL. */
 const VOCE_DA_SEGNARE = `EXISTS (SELECT 1 FROM punto_interesse pi WHERE pi.chiave IN ${vociDelPinSql('s')} AND NOT ${sqlVoceDescrittiva('pi')})`;
@@ -65,6 +66,8 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
       .map((r) => [r.chiave, `l’invito di ${r.nome}${r.data ? ` del ${dataLeggibile(r.data)}` : ''}`])),
     spilli: () => Object.fromEntries(pinConStato().map((p) => [p.uid, { nome: p.nome, tipo: p.tipo, mappa: p.mappa, parola: p.parola }])),
     voci: () => Object.fromEntries(vociCitabili().map((v) => [v.chiave, { nome: v.nome, posto: v.posto }])),
+    // i set di contenuti scaricabili per id: le loro Persona («Izanagi e Izanagi Picaro»), dal punto unico dell'elenco
+    setDlc: () => Object.fromEntries(setDlcConPersone().map((s) => [String(s.id), s.nome])),
   };
   const nomi: NomiCondizioni = {};
   for (const chiave of Object.keys(elenchi) as Array<keyof NomiCondizioni>) {

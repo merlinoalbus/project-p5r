@@ -144,6 +144,12 @@ export type RequisitoSpillo =
   | { tipo: 'relazione-romantica'; confidente: string; entro?: string }
   /** L13 (O11-1): le relazioni romantiche della partita (iniziate entro `entro`, se c'è) sono al più `al_piu` (0..9): 0 = «senza fidanzata». */
   | { tipo: 'relazioni-romantiche'; al_piu: number; entro?: string }
+  /** Nella partita c'è il salvataggio di Persona 5 (impostazione della partita, `utente.partita.salvataggio_p5`): le ricompense dello Scaffale
+   *  con lo scatolone del Leblanc. Un prerequisito, non una presenza. */
+  | { tipo: 'salvataggio-p5' }
+  /** La partita possiede il set di contenuti scaricabili `set` (`dlc_set.id`, impostazione della partita `utente.partita.dlc_posseduti_json`,
+   *  la stessa che legge la Fusione). Un prerequisito, non una presenza. */
+  | { tipo: 'dlc-posseduto'; set: number }
   /** Un Ladro Fantasma è in squadra: lo dice la partita (Partita → Denaro e squadra). */
   | { tipo: 'squadra'; membro: string }
   | { tipo: 'richiesta'; richiesta: string }
@@ -326,6 +332,8 @@ export interface NomiCondizioni {
   inviti?: Record<string, string>;
   /** Le voci della guida che si citano (non descrittive), per chiave: nome e posto («Palazzo di Kamoshida › 2. Sala Centrale»). */
   voci?: Record<string, { nome: string; posto: string }>;
+  /** I set di contenuti scaricabili, per id (come testo): le loro Persona («Izanagi e Izanagi Picaro»). */
+  setDlc?: Record<string, string>;
 }
 
 /** Il nome di un Palazzo per le frasi delle condizioni: dai nomi passati, poi dall'elenco `PALAZZI_CONDIZIONE`, infine la chiave stessa. */
@@ -364,6 +372,8 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
       if (r.al_piu === 0) return `nessuna relazione romantica${entro ? ` iniziata entro ${entro}` : ''}`;
       return `al più ${r.al_piu === 1 ? 'una relazione romantica' : `${r.al_piu} relazioni romantiche`}${entro ? ` (entro ${entro})` : ''}`;
     }
+    case 'salvataggio-p5': return 'salvataggio di Persona 5 presente';
+    case 'dlc-posseduto': return `contenuto scaricabile «${nomi.setDlc?.[String(r.set)] ?? `set ${r.set}`}» posseduto`;
     case 'squadra': return `${nomi.squadra?.[r.membro] ?? nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
     case 'sblocco': return r.bersaglio === 'richiesta'
@@ -470,6 +480,9 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
       if (alPiu === null || entro === null || (entro !== undefined && !dataValida(entro))) return null;
       return entro === undefined ? { tipo: 'relazioni-romantiche', al_piu: alPiu } : { tipo: 'relazioni-romantiche', al_piu: alPiu, entro };
     }
+    case 'salvataggio-p5': return { tipo: 'salvataggio-p5' };
+    // l'id del set come nella partita (`dlcPosseduti`, 1..50): la sua esistenza la dice il valutatore sul DB
+    case 'dlc-posseduto': { const set = intero(o.set, 1, 50); return set ? { tipo: 'dlc-posseduto', set } : null; }
     case 'squadra': { const membro = chiavePulita(o.membro, 60); return membro ? { tipo: 'squadra', membro } : null; }
     case 'richiesta': { const richiesta = testoPulito(o.richiesta, 200); return richiesta ? { tipo: 'richiesta', richiesta } : null; }
     case 'sblocco': { const chiave = chiavePulita(o.chiave, 120); return chiave && (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave } : null; }

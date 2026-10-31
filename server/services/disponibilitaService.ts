@@ -51,6 +51,9 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   /** «libro/chiave», «film/chiave». */
   letture: Set<string>;
   contatori: Map<ContatoreChiave, number>;
+  /** Che cosa conta ogni contatore (`elementiDeiContatori`), letto una volta con lo stato: lo riusa chi dice da quale voce vengono le letture
+   *  contate (Partita → Progressi). Assente negli stati costruiti altrove. */
+  elementiContatori?: Map<ContatoreChiave, Map<string, number>>;
   attivitaSvolte: Map<string, number>;
   /** Yen spesi in ciascun negozio: la somma dei prezzi degli articoli segnati come acquistati. */
   spesaPerNegozio: Map<string, number>;
@@ -73,7 +76,7 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
    *  uno stato a mano (test): senza, nessuna voce è segnata. */
   vociSegnate?: Set<string>;
   /** Le voci citate dalle condizioni già lette in questa richiesta (chiave → voce, null se non c'è), come `pinCitati`. */
-  vociCitate?: Map<string, { nome: string; tipo: string; area_dedalo_chiave: string | null; di_cattura: number } | null>;
+  vociCitate?: Map<string, { nome: string; tipo: string; area_dedalo_chiave: string | null; carattere: string | null; di_cattura: number } | null>;
   /** L6: gli inviti dei Confidenti (`confidente_invito`), letti la prima volta che una condizione li chiede. */
   inviti?: RigaInvito[];
   /** L6: gli esiti dei posti già valutati in questa richiesta («quartiere:harajuku», «luogo:harajuku/takenoko-street») e quelli in corso
@@ -107,6 +110,25 @@ function giornoDellaSettimana(data: string | null): string | null {
   return prepared('SELECT 1 FROM giorno WHERE data = ?').get(data) ? giornoDellaSettimanaPiatto(data) : null;
 }
 
+/**
+ * Che cosa conta ogni contatore della partita, in un punto solo: per ogni contatore le letture contate (chiave del libro, del film o del
+ * videogioco) con la soglia d'avanzamento che le fa contare (le sessioni del titolo, o 1 per «almeno una visione» e «giocato»). Il valore del
+ * contatore è quante sono (`statoDisponibilitaPartita`); da quale voce del Diario viene una lettura contata lo dice la soglia
+ * (`vociDeiProgressi.vociDeiContatori`). Un videogioco «giocato» per una sessione dichiarata ha soglia 1 come quello con un round.
+ */
+export function elementiDeiContatori(partitaId: number): Map<ContatoreChiave, Map<string, number>> {
+  /** Le chiavi della query con la loro soglia: la query riceve come unico parametro la partita. */
+  const elenco = (sql: string): Map<string, number> =>
+    new Map((prepared(sql).all(partitaId) as Array<{ chiave: string; soglia: number }>).map((r) => [r.chiave, r.soglia]));
+  return new Map<ContatoreChiave, Map<string, number>>([
+    ['videogiochi-giocati', new Map([...sessioniVideogioco(partitaId).giocate].map((k) => [k, 1]))],
+    ['film-con-una-visione', elenco('SELECT p.film_chiave AS chiave, 1 AS soglia FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= 1')],
+    ['film-completati', elenco('SELECT p.film_chiave AS chiave, f.sessioni AS soglia FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni')],
+    ['videogiochi-completati', elenco("SELECT p.videogioco_chiave AS chiave, a.sessioni AS soglia FROM progresso_videogioco_partita p JOIN attivita a ON a.chiave = p.videogioco_chiave WHERE p.partita_id = ? AND a.tipo = 'videogioco' AND p.avanzamento >= a.sessioni")],
+    ['libri-letti', elenco('SELECT p.libro_chiave AS chiave, l.sessioni AS soglia FROM progresso_libro_partita p JOIN libro l ON l.chiave = p.libro_chiave WHERE p.partita_id = ? AND p.avanzamento >= l.sessioni')],
+  ]);
+}
+
 /** Lo stato della partita che serve al valutatore: quello dei semafori (ranghi dei Confidenti, Doti, data di gioco…) più
  *  giorno della settimana normalizzato, contatori di film, videogiochi e libri completati (avanzamento al totale delle
  *  sessioni), articoli ottenuti, letture, volte delle attività, spesa e punti per negozio, sblocco dei quartieri, arco
@@ -124,22 +146,15 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const s = statiDellaPartita(getDb(), m, partitaId);
   const gestite = vociFatte(m, s);
   for (const voce of vociPersonaCatturate(partitaId)) gestite.add(voce);
-  /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
-  const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
-  const contatori = new Map<ContatoreChiave, number>([
-    ['videogiochi-giocati', sessioniVideogioco(partitaId).giocate.size],
-    ['film-con-una-visione', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= 1')],
-    ['film-completati', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni')],
-    ['videogiochi-completati', conta("SELECT COUNT(*) AS n FROM progresso_videogioco_partita p JOIN attivita a ON a.chiave = p.videogioco_chiave WHERE p.partita_id = ? AND a.tipo = 'videogioco' AND p.avanzamento >= a.sessioni")],
-    ['libri-letti', conta('SELECT COUNT(*) AS n FROM progresso_libro_partita p JOIN libro l ON l.chiave = p.libro_chiave WHERE p.partita_id = ? AND p.avanzamento >= l.sessioni')],
-  ]);
+  const elementiContatori = elementiDeiContatori(partitaId);
+  const contatori = new Map([...elementiContatori].map(([k, elementi]) => [k, elementi.size]));
   const acquisti = leggiAcquistiPartita(partitaId);
   return {
     ...st, partitaId, acquisti,
     articoliOttenuti: chiaviArticoliOttenuti(partitaId, acquisti),
     // R10-20: libri letti e film visti si calcolano dall'avanzamento (una sola definizione di «letto»)
     letture: lettureCompletate(partitaId),
-    contatori,
+    contatori, elementiContatori,
     attivitaSvolte: new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(partitaId) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte])),
     spesaPerNegozio: spesaAcquistiPerNegozio(partitaId, acquisti),
     puntiNegozio: new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(partitaId) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti])),

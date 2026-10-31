@@ -8,7 +8,8 @@ import { SelettoreData } from '../shared/SelettoreData';
 import { Campo, CampoTesto } from '../shared/Campo';
 import { Link } from 'react-router-dom';
 import { StoricoPartita } from './StoricoPartita';
-import { aggiornaPartita } from '../../services/api';
+import { aggiornaPartita, getSetDlc, URL_SET_DLC } from '../../services/api';
+import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import type { Difficolta, PartitaDto } from '../../types';
@@ -29,7 +30,8 @@ interface Props {
   onNaviga?: () => void;
 }
 
-/** Modulo di modifica: nome, livello del protagonista, data di gioco, difficoltà, NG+, Allarme, note.
+/** Modulo di modifica: nome, livello del protagonista, data di gioco, difficoltà, NG+, salvataggio di Persona 5, contenuti scaricabili
+ *  posseduti, Allarme, note.
  *  Il genitore lo rimonta (prop `key`) quando la partita cambia, così lo stato locale riparte dai dati aggiornati. */
 export function RiepilogoPartita({ partita, onNaviga }: Props) {
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
@@ -40,16 +42,25 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
   const [ngPlus, setNgPlus] = useState(partita.nuovaPartitaPlus);
   const [allarme, setAllarme] = useState(partita.allarmeAttivo);
   const [note, setNote] = useState(partita.note);
+  const [salvataggioP5, setSalvataggioP5] = useState(partita.salvataggioP5);
+  const [dlc, impostaDlc] = useState<readonly number[]>(partita.dlcPosseduti);
   const [occupato, setOccupato] = useState(false);
+  // i set di contenuti scaricabili del file di gioco, con le loro Persona (dato di gioco, con la cache delle letture di gioco)
+  const elencoDlc = useCarica(() => getSetDlc(), [], { cacheUrl: URL_SET_DLC });
+  /** Segna o toglie un set fra i posseduti (in ordine di id, come li salva il server). */
+  const alternaDlc = (id: number) => impostaDlc((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id].sort((a, b) => a - b)));
 
-  /** Salva insieme tutti i campi del modulo (data vuota come `null`) e aggiorna la partita nello store. */
+  /** Salva insieme i campi del modulo (data vuota come `null`) e aggiorna la partita nello store; i contenuti scaricabili partono solo se
+   *  sono cambiati, così il salvataggio degli altri campi non dipende dal loro controllo sul file di gioco. */
   const salva = async () => {
     // «Salva» resta abilitato durante il salvataggio (`aria-disabled`): un pulsante disabilitato perde il fuoco, che uscirebbe dalla
     // finestra; il secondo invio si ferma qui
     if (occupato) return;
     setOccupato(true);
     try {
-      const p = await aggiornaPartita(partita.id, { nome, livelloProtagonista: livello, dataGioco: dataGioco || null, difficolta, nuovaPartitaPlus: ngPlus, allarmeAttivo: allarme, note });
+      const ordinati = (l: readonly number[]) => [...l].sort((a, b) => a - b).join(',');
+      const dlcCambiati = ordinati(dlc) !== ordinati(partita.dlcPosseduti);
+      const p = await aggiornaPartita(partita.id, { nome, livelloProtagonista: livello, dataGioco: dataGioco || null, difficolta, nuovaPartitaPlus: ngPlus, allarmeAttivo: allarme, note, salvataggioP5, ...(dlcCambiati ? { dlcPosseduti: [...dlc] } : {}) });
       aggiornaLocale(p);
       notifica('success', 'Partita aggiornata.');
     } catch (err) {
@@ -89,6 +100,26 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
         <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +
         </label>
+        {/* le impostazioni dei contenuti: le leggono la Fusione e gli effetti con condizione delle voci (lo Scaffale con lo scatolone del Leblanc) */}
+        <label className="flex items-center gap-2 testo-13 touch">
+          <input type="checkbox" checked={salvataggioP5} onChange={(e) => setSalvataggioP5(e.target.checked)} /> Salvataggio di Persona 5 presente
+        </label>
+        <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
+          <legend className="form-label m-0 p-0">Contenuti scaricabili posseduti</legend>
+          <span className="testo-12 text-text-secondary text-pretty">Le Persona dei set segnati entrano nella Fusione e lo Scaffale con lo scatolone del Leblanc le registra nel Compendio.</span>
+          {elencoDlc.errore
+            ? <p role="alert" className="m-0 testo-13">{elencoDlc.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void elencoDlc.ricarica()} /></p>
+            : !elencoDlc.dati
+              ? <p className="m-0 testo-13 text-text-muted">Caricamento dei contenuti…</p>
+              : (
+                <div className="flex min-w-0 flex-wrap gap-1.5">
+                  {elencoDlc.dati.map((s) => {
+                    const dentro = dlc.includes(s.id);
+                    return <button key={s.id} type="button" className={`chip touch text-pretty ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} onClick={() => alternaDlc(s.id)}>{s.nome}</button>;
+                  })}
+                </div>
+              )}
+        </fieldset>
         <CampoTesto etichetta="Note" tipo="lungo" righe={4} valore={note} onCambia={setNote} massimo={2000} />
         <div className="flex justify-end">
           <PulsanteVisivo type="submit" tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" aria-disabled={occupato || undefined} />

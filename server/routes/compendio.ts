@@ -22,6 +22,7 @@ import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, a
 import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
+import { setDlcConPersone } from '../services/setDlcService.js';
 import type { Condizione } from '../../shared/condizioniSpillo.js';
 import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere, ripristinaSbloccoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
@@ -115,6 +116,11 @@ router.get('/termini', (_req, res) => {
 
 router.get('/fusione/regole', (_req, res) => {
   res.json(regoleFusione());
+});
+
+// i set di contenuti scaricabili, per le impostazioni della partita («Contenuti scaricabili posseduti»)
+router.get('/set-dlc', (_req, res) => {
+  res.json(setDlcConPersone());
 });
 
 router.get('/persona', validate({ query: queryPersona }), (req, res) => {

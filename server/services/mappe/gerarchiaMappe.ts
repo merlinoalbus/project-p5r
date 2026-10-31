@@ -17,8 +17,9 @@
 // Memento si possono rimuovere»). Iweleth (L8 B7) sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono
 // l'«Archivio del Palazzo» dentro il suo dedalo, perché non perdano il posto.
 //
-// Le carte dei Palazzi e delle aree dei Dedali (O9-5, 2026-10-31: «vorrei poterle inserire e/o modificare», «anche per i palazzi») portano
-// la miniatura caricata dall'utente nell'ambito `dungeon` (una lettura sola per tutti i nodi) e la chiave dove caricarla (`miniatura`).
+// Le carte dei Palazzi, dei Dedali dei Memento e delle aree dei Dedali (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini.
+// Ma io ho generato delle immagini da inserire. vorrei poterle inserire e/o modificare», «anche per i palazzi») portano la miniatura caricata
+// dall'utente nell'ambito `dungeon` (una lettura sola per tutti i nodi) e la chiave dove caricarla (`miniatura`).
 //
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
 // ============================================================
@@ -96,10 +97,10 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const ctx = contestoAree();
   const caricate = immaginiCaricateDelleMappe();
-  // le miniature delle carte dei Palazzi e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
+  // le miniature delle carte dei Palazzi, dei Memento, dei Dedali e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
   const miniatureLuoghi = immaginiCaricateDi(AMBITO_MINIATURA_LUOGO);
-  /** La miniatura caricata di un Palazzo o di un'area di un Dedalo come illustrazione (senza asset: senza caricata il Palazzo resta con il
-   *  suo emblema, l'area del Dedalo senza immagine), e dove caricarla. */
+  /** La miniatura caricata di un Palazzo, dei Memento, di un Dedalo o di un'area di un Dedalo come illustrazione (senza asset: senza caricata
+   *  Palazzo, Memento e Dedalo restano con il loro emblema, l'area del Dedalo senza immagine), e dove caricarla. */
   const miniaturaDelLuogo = (chiave: string): { immagine: IllustrazioneDto | null; miniatura: { ambito: typeof AMBITO_MINIATURA_LUOGO; chiave: string } } => {
     const url = urlCaricataDi(AMBITO_MINIATURA_LUOGO, chiave, miniatureLuoghi);
     return { immagine: url ? { immagineUrl: url, asset: null } : null, miniatura: { ambito: AMBITO_MINIATURA_LUOGO, chiave } };
@@ -258,7 +259,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const confluito = confluiti.find((c) => c.dedalo_chiave === d.chiave);
     const archivio = confluito ? nodoPalazzo(confluito, `Archivio del Palazzo di ${confluito.nome.replace(/^Dedalo di /, '')}`, false) : undefined;
     return {
-      tipo: 'dedalo', chiave: d.chiave, nome: d.nome, casa: casaDelDedalo(d.chiave), immagine: null,
+      tipo: 'dedalo', chiave: d.chiave, nome: d.nome, casa: casaDelDedalo(d.chiave), ...miniaturaDelLuogo(d.chiave),
       conteggi: {
         aree: figliAree.length, persone: personeDelDedalo.get(d.chiave) ?? 0, trame: trameDelDedalo.get(d.chiave) ?? 0, richieste: richiesteDelDedalo.get(d.chiave) ?? 0,
         pin: { ...(archivio?.conteggi.pin ?? vuoti()) },
@@ -279,7 +280,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const pinMemento = pinPropri('dungeon-mementos');
     for (const f of [...figliDedali, ...figliFogli]) somma(pinMemento, f.conteggi.pin);
     return {
-      tipo: 'memento', chiave: memento.chiave, nome: memento.nome, casa: casaDeiMemento(), immagine: null,
+      tipo: 'memento', chiave: memento.chiave, nome: memento.nome, casa: casaDeiMemento(), ...miniaturaDelLuogo(memento.chiave),
       conteggi: {
         dedali: figliDedali.length, aree: areeDedali.length, planimetrie: figliFogli.length, pin: pinMemento,
         persone: figliDedali.reduce((n, d) => n + (d.conteggi.persone ?? 0), 0), trame: figliDedali.reduce((n, d) => n + (d.conteggi.trame ?? 0), 0),

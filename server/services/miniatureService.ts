@@ -219,7 +219,7 @@ const MISURE_SCHEDE: readonly LarghezzaMiniatura[] = [160, 320];
 
 /**
  * Le immagini delle schede: l'illustrazione di Tokyo, dei quartieri e delle radici dei Palazzi e dei Memento (la caricata; per città
- * e quartieri senza caricata l'asset dichiarato), e le miniature caricate delle carte dei Palazzi e delle aree dei Dedali (O9-5), come
+ * e quartieri senza caricata l'asset dichiarato), e le miniature caricate delle carte dei Palazzi, dei Dedali e delle loro aree (O9-5), come
  * (ambito, chiave).
  */
 export function immaginiDelleSchede(db: AppDatabase = getDb()): Array<{ ambito: string; chiave: string }> {
@@ -234,7 +234,7 @@ export function immaginiDelleSchede(db: AppDatabase = getDb()): Array<{ ambito: 
     const i = r.asset ? r.asset.indexOf('/') : -1;
     if ((r.tipo === 'citta' || r.tipo === 'quartiere') && r.asset && i > 0) fuori.push({ ambito: r.asset.slice(0, i), chiave: r.asset.slice(i + 1) });
   }
-  // le miniature caricate delle carte dei Palazzi e delle aree dei Dedali nella pagina Luoghi (O9-5)
+  // le miniature caricate delle carte dei Palazzi, dei Dedali e delle loro aree nella pagina Luoghi (O9-5)
   for (const chiave of immaginiCaricateDi(AMBITO_MINIATURA_LUOGO, db).keys()) fuori.push({ ambito: AMBITO_MINIATURA_LUOGO, chiave });
   return fuori;
 }

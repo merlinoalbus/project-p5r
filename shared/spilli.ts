@@ -8,6 +8,8 @@
 // quelli dei Palazzi e dei Mementos seguono i punti della guida più i meccanismi, il rampino e le porte di Royal (15.24).
 // ============================================================
 
+import { CARATTERI_CON_STATO, carattereConStato } from './caratteriVoce.js';
+
 /** Ordine di presentazione (palette dell'editor, legenda): spostamenti, città, persone, Palazzi e Mementos, nota. */
 export const TIPI_SPILLO = [
   'passaggio', 'scala', 'uscita', 'treno',
@@ -320,15 +322,22 @@ export function puntoDaCollegare(tipoPunto: string): boolean {
  * niente pin»); Persona e Storia si collegano a qualunque pin e hanno lo stato.
  * Nelle aree dei dedali dei Memento (099) non ci sono voci descrittive: ogni elemento ha uno stato, anche «Altro» (scelta
  * dell'utente, 2026-10-11: «Tutti con stato»). Per questo conta anche l'area del dedalo della voce.
+ * Una voce «Altro» a cui l'utente ha dato un carattere con uno stato («Permanente» o «Si ripropone», `CARATTERI_CON_STATO`) non è
+ * descrittiva: si segna, ha i suoi pin e conta nel completamento come le altre (2026-10-31). Prima il carattere la metteva fra gli
+ * oggetti da completare mentre la regola la diceva da non segnare, e la sua infiltrazione non si chiudeva più.
+ * È la regola unica di server e interfaccia: chi decide «si legge e basta» passa da qui (o da `sqlVoceDescrittiva`).
  */
 export const TIPO_PUNTO_DESCRITTIVO = 'altro';
-/** Vero se il punto è descrittivo: del tipo «Altro» e fuori dalle aree dei dedali (`areaDedalo` nullo). L'area è obbligatoria: chi
- *  la dimenticasse ricadrebbe in silenzio nella regola dei Palazzi (rilievo del validatore, 2026-10-11). */
-export function puntoDescrittivo(tipoPunto: string, areaDedalo: string | null): boolean {
-  return tipoPunto === TIPO_PUNTO_DESCRITTIVO && !areaDedalo;
+/** Vero se il punto è descrittivo: del tipo «Altro», fuori dalle aree dei dedali (`areaDedalo` nullo) e senza un carattere con uno
+ *  stato (`carattere`: la scelta dell'utente o il carattere effettivo, per «Altro» coincidono). Area e carattere sono obbligatori: chi
+ *  li dimenticasse ricadrebbe in silenzio nella regola sbagliata (rilievo del validatore, 2026-10-11). */
+export function puntoDescrittivo(tipoPunto: string, areaDedalo: string | null, carattere: string | null | undefined): boolean {
+  return tipoPunto === TIPO_PUNTO_DESCRITTIVO && !areaDedalo && !carattereConStato(carattere);
 }
-/** La stessa regola in SQL, per la voce con l'alias dato: vera se è descrittiva. */
-export const sqlVoceDescrittiva = (alias: string): string => `(${alias}.tipo = '${TIPO_PUNTO_DESCRITTIVO}' AND ${alias}.area_dedalo_chiave IS NULL)`;
+/** La stessa regola in SQL, per la voce di `punto_interesse` con l'alias dato (colonne `tipo`, `area_dedalo_chiave`, `carattere`, 111):
+ *  vera se è descrittiva. */
+export const sqlVoceDescrittiva = (alias: string): string => `(${alias}.tipo = '${TIPO_PUNTO_DESCRITTIVO}' AND ${alias}.area_dedalo_chiave IS NULL
+  AND (${alias}.carattere IS NULL OR ${alias}.carattere NOT IN (${CARATTERI_CON_STATO.map((c) => `'${c}'`).join(', ')})))`;
 /** Un Enigma (2026-10-01): una voce che può contenere i passi che lo risolvono — voci di qualunque tipo, coi loro pin. */
 export function puntoEnigma(tipoPunto: string): boolean {
   return tipoPunto === 'puzzle';

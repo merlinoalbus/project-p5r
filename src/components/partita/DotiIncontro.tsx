@@ -92,9 +92,9 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
         {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />}
       </div>
       <p className="m-0 testo-12 text-text-muted">
-        Il gioco dà queste Doti quando si passa al rango indicato: l'app te le ricorda quando registri il passaggio — spuntando nella giornata
-        l'azione del passaggio o alzando il rango in Partita → Confidenti —, una volta sola, e le segni tu nella scheda Doti. Un'uscita che dà
-        solo punti non le ricorda.
+        Il gioco dà queste Doti quando si passa al rango indicato, una volta sola: spuntando nella giornata l'azione del passaggio si applicano
+        con «Applica» sulla voce; alzando il rango in Partita → Confidenti l'app te le ricorda e le segni tu nella scheda Doti. Un'uscita che dà
+        solo punti non le dà.
       </p>
       {conDoti.length === 0 ? <p className="m-0 testo-13 text-text-muted">Nessuna Dote dichiarata.</p> : (
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">

@@ -184,8 +184,9 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         titolo={titoloVisore}
         senzaVicine={senzaVicine}
         etichettaChiudi="Torna alla pagina"
-        // L3 RG-1: la guida della planimetria da usare (nelle planimetrie dei Palazzi): uno stato salvato rilegge la mappa e lo dice alla pagina
-        guida={{ onCambiato: () => { void ricarica(); onCambiato?.(); } }}
+        // L3 RG-1: la guida da usare (`GuidaNelVisore`): uno stato salvato rilegge la mappa e lo dice alla pagina; la `versione` della pagina
+        // (che cambia anche a ogni cattura con le piastrelle della scheda) fa rileggere la guida
+        guida={{ onCambiato: () => { void ricarica(); onCambiato?.(); }, versione }}
         azioni={<>
           {!intero && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" onClick={() => setIntero(true)} />}
           {conEditor && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica planimetria" />}

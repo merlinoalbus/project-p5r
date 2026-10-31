@@ -1,5 +1,5 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
-import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
+import { EVENTI_STORIA, dataLeggibile, descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from './condizioniSpillo.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
 import { fasceConPrezzoDiverso, type PrezzoPerFascia } from './catalogo.js';
 import { simboliNote, testoPunti } from './note.js';
@@ -34,7 +34,30 @@ export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
  * `utente.movimento_yen`) restano decidibili. Decisione 2: mai insieme a un dato che porta già il suo prezzo (articolo, consumazione, pesca,
  * Richiesta completata): il server rifiuta la lista.
  */
-export interface EffettoYenVoce { tipo: 'yen'; importo: number }
+export interface EffettoYenVoce { tipo: 'yen'; importo: number; condizioni?: RequisitoSpillo[] }
+/**
+ * Un effetto della voce che vale solo se: `condizioni`, con il vocabolario unico (`shared/condizioniSpillo.ts`, un TUTTE implicito), valutate
+ * con il valutatore unico allo stato della partita al giorno e alla fascia della voce (come «Si fa solo se» della voce, `voceDovuta.ts`), alla
+ * spunta (e quando la partita legge la voce, per mostrarla). Con le condizioni false l'effetto non si applica (niente da annullare togliendo la
+ * spunta) e nella partita non si mostra; una condizione grigia non nega. Solo per gli yen e per gli effetti di stato che si sommano o si segnano
+ * senza scelte (`TIPI_EFFETTO_CON_CONDIZIONE`); assente = vale sempre (tutti gli effetti di prima). Nato per lo Scaffale con lo scatolone del
+ * Leblanc: le ricompense del salvataggio di Persona 5 e le Persona dei contenuti scaricabili posseduti.
+ */
+export interface CondizioniEffetto { condizioni?: RequisitoSpillo[] }
+/** I tipi di effetto che possono avere `condizioni` (vedi `CondizioniEffetto`). */
+export const TIPI_EFFETTO_CON_CONDIZIONE = ['yen', 'oggetto', 'persona', 'trofeo', 'sblocco'] as const;
+export type TipoEffettoConCondizione = (typeof TIPI_EFFETTO_CON_CONDIZIONE)[number];
+/** Quante condizioni di primo livello può avere un effetto (lo stesso limite della voce). */
+export const MASSIMO_CONDIZIONI_EFFETTO = 20;
+export const ammetteCondizioni = (tipo: string): tipo is TipoEffettoConCondizione => (TIPI_EFFETTO_CON_CONDIZIONE as readonly string[]).includes(tipo);
+/** Le condizioni dell'effetto (vuoto = vale sempre). */
+export const condizioniDellEffetto = (e: EffettoVoce): readonly RequisitoSpillo[] => ('condizioni' in e && e.condizioni ? e.condizioni : []);
+/** «Solo se: salvataggio di Persona 5 presente»: le condizioni dell'effetto in parole, null senza condizioni. L'unica scrittura di questa frase
+ *  (riepilogo «Il gioco dà», editor della voce). */
+export function fraseCondizioniEffetto(e: EffettoVoce, nomi: NomiCondizioni = {}): string | null {
+  const c = condizioniDellEffetto(e);
+  return c.length ? `Solo se: ${c.map((x) => descriviRequisitoSpillo(x, nomi)).join(' e ')}` : null;
+}
 /** Il tetto degli yen di un effetto (lo stesso del denaro del gruppo, `bodyYen`). */
 export const YEN_MASSIMI_EFFETTO = 9_999_999;
 /** Il livello più alto di una Persona (quello del gioco): il livello con cui l'effetto «Persona registrata» la aggiunge alla scorta. */
@@ -64,14 +87,14 @@ export type EffettoDiStatoVoce =
    *  Richiesta dell'utente del 2026-10-26 («devo poter scegliere se l'effetto si fermi solo al Compendio o se quella persona viene anche aggiunta
    *  alla scorta»): `scorta: true` la aggiunge anche alla scorta della partita (`aggiungiPosseduta`, se non c'è già), al `livello` indicato o al
    *  suo livello base. Forma canonica unica: «solo nel Compendio» non scrive `scorta`; `livello` esiste solo con la scorta. */
-  | { tipo: 'persona'; persona: number; scorta?: true; livello?: number }
+  | ({ tipo: 'persona'; persona: number; scorta?: true; livello?: number } & CondizioniEffetto)
   /** L13 (decisione 1): un oggetto del catalogo ricevuto (`catalogo_oggetto.chiave`), `quantita` copie: va nel registro degli oggetti ottenuti
    *  della partita (`utente.oggetto_ottenuto_partita`), una riga per effetto spuntato; togliere la spunta la toglie. */
-  | { tipo: 'oggetto'; oggetto: string; quantita: number }
+  | ({ tipo: 'oggetto'; oggetto: string; quantita: number } & CondizioniEffetto)
   /** L13 (decisione 1): un trofeo ottenuto (`trofeo.chiave`), con lo stesso setter della pagina dei trofei (`impostaTrofeo`). */
-  | { tipo: 'trofeo'; trofeo: string }
+  | ({ tipo: 'trofeo'; trofeo: string } & CondizioniEffetto)
   /** L13 (decisioni 1 e 17): lo sblocco di una Richiesta o di un'attività (`utente.sblocco_partita`): la condizione «sblocco ricevuto» lo legge. */
-  | { tipo: 'sblocco'; bersaglio: BersaglioSblocco; chiave: string }
+  | ({ tipo: 'sblocco'; bersaglio: BersaglioSblocco; chiave: string } & CondizioniEffetto)
   /** 2026-10-28 (richiesta dell'utente: «manca la rimozione di una persona dalla scorta come possibile effetto»): la Persona (`persona` = id) esce
    *  dalla scorta della partita alla spunta, con l'esemplare ricordato com'era per rimetterlo togliendo la spunta. Se non è in scorta non c'è
    *  niente da togliere (e la spunta lo dice); le Persone del gruppo non si scelgono. */
@@ -187,8 +210,24 @@ export function notePossibili(x: unknown, proposta: 1 | 2 | 3): Array<1 | 2 | 3>
   if (!Array.isArray(x) || x.length < 2 || !x.every(nota) || new Set(x).size !== x.length || !x.includes(proposta)) return null;
   return [...x].sort((a, b) => a - b);
 }
+/**
+ * Un effetto della voce in forma canonica, o null se non si riconosce per intero. `condizioni` (vedi `CondizioniEffetto`) solo sui tipi che le
+ * ammettono, tutte riconosciute e senza doppioni (una scartata in silenzio cambierebbe quando vale l'effetto): altrimenti null. Una sola forma
+ * canonica: un elenco vuoto non si scrive.
+ */
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
+  if (!Object.hasOwn(o, 'condizioni')) return normalizzaEffettoBase(o);
+  const { condizioni: grezze, ...resto } = o;
+  const base = normalizzaEffettoBase(resto);
+  if (!base || grezze === undefined) return base;
+  if (!Array.isArray(grezze) || grezze.length > MASSIMO_CONDIZIONI_EFFETTO) return null;
+  if (grezze.length === 0) return base;
+  if (!ammetteCondizioni(base.tipo)) return null;
+  const condizioni = normalizzaCondizioniSpillo(grezze, MASSIMO_CONDIZIONI_EFFETTO);
+  return condizioni.length === grezze.length ? { ...base, condizioni } as EffettoVoce : null;
+}
+function normalizzaEffettoBase(o: Record<string, unknown>): EffettoVoce | null {
   const campi: Record<string, readonly string[]> = { persona: ['tipo','persona','scorta','livello'], dote: ['tipo','dote','note','possibili'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti','esito','quantita'], esame: ['tipo','esame'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo','quantita'], invito: ['tipo','invito'], yen: ['tipo','importo'], oggetto: ['tipo','oggetto','quantita'], trofeo: ['tipo','trofeo'], sblocco: ['tipo','bersaglio','chiave'],
     personaTolta: ['tipo','persona'], puntiConfidente: ['tipo','confidente','note','punti'], uscitaOggetto: ['tipo','oggetto','quantita','modo','prezzo'] };
   const chiaveOk = (v: unknown, n = 119): v is string => typeof v === 'string' && new RegExp(`^[a-z0-9][a-z0-9._:/-]{0,${n}}$`, 'i').test(v.trim());

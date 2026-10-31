@@ -30,7 +30,10 @@ export interface DatiPartita {
   fasciaGioco?: FasciaGioco;
   difficolta?: Difficolta;
   nuovaPartitaPlus?: boolean;
+  /** I set di contenuti scaricabili posseduti (`dlc_set.id`): li leggono la Fusione e gli effetti con la condizione «Contenuto scaricabile». */
   dlcPosseduti?: number[];
+  /** Il salvataggio di Persona 5 presente: lo leggono gli effetti con la condizione «Salvataggio di Persona 5». */
+  salvataggioP5?: boolean;
   allarmeAttivo?: boolean;
 }
 

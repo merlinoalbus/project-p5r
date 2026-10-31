@@ -1,6 +1,15 @@
 // ============================================================
-// GuidaNelVisore — la guida della planimetria da **usare** nel visore (L3 RG-1, decisione dell'utente del 2026-10-20)
+// GuidaNelVisore — la guida della mappa da **usare** nel visore, l'unica (L3 RG-1, decisione dell'utente del 2026-10-20)
 // ============================================================
+//
+// Una sola guida per tutti i visori, a schermo intero (`MappaPage`) e incorporati (`MappaIncorporata`), su ogni mappa che ha voci della
+// guida (`VisoreMappa`): le planimetrie dei Palazzi e ogni mappa con un pin collegato a una voce. «Il visore doveva già essere unico»
+// (2026-10-31): la vecchia lista testuale dei contenuti non si monta più. Le parti comuni con la scheda del Palazzo (`GuidaDellArea`) sono
+// condivise: il salvataggio dello stato con le notifiche delle voci toccate (`salvaStatoVoce`), la conferma di «Riapri»
+// (`useConfermaRiapertura`), i passi sotto il loro Enigma (`raggruppaPassi`), la descrittiva, il conteggio delle segnate e la voce segnata
+// in vista (`voceDescrittiva`, `quanteSegnate`, `segnataInVista`; `quanteDaSegnare` è solo del visore), i dettagli (`DettagliPunto`), le Persona da catturare con la loro
+// piastrella e la loro chiamata (`PersoneDelPalazzo`, `voceDaCatturare`, `catturaNelCompendio`); lo spostamento della finestra è quello delle
+// modali (`useSpostamentoFinestra`).
 //
 // «nel visore devono esserci solo le funzioni di utilizzo e non quelle di modifica... quindi solo dei checkpoint per segnare come fatto
 // il punto della guida... e tutti i dettagli informativi dentro la voce... riferimenti ai pin della mappa (il click su un pin deve
@@ -12,29 +21,30 @@
 // - aperta, la voce mostra testo, dettagli e i suoi pin: un pin di questa planimetria si tocca e il visore lo seleziona e lo centra;
 // - il tocco su un pin della mappa evidenzia le sue voci (e le porta in vista);
 // - niente modifica: le voci si correggono nella scheda del Palazzo.
-// Finestra fluttuante che si trascina dalla sua testata (da 768 px), foglio dal basso sotto i 768 px.
+// Finestra fluttuante che si sposta dalla sua testata o con le frecce sulla maniglia ⠿ (da 768 px), foglio dal basso sotto i 768 px.
 // ============================================================
 
-import { useEffect, useRef, useState, type PointerEvent as EventoPuntatore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getGuidaMappa, impostaStatoPunto } from '../../services/api';
+import { getGuidaMappa } from '../../services/api';
+import { catturaNelCompendio, salvaStatoVoce } from '../../services/gestiGuida';
 import { useCarica } from '../../hooks/useCarica';
 import { useMedia } from '../../hooks/useMedia';
+import { useSpostamentoFinestra } from '../../hooks/useSpostamentoFinestra';
 import { notifica } from '../../stores/notificationStore';
-import { puntoDescrittivo } from '../../../shared/spilli';
 import { NOME_TIPO, COLORE_TIPO } from '../../utils/dungeon';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
-import { enigmiCheSiRiaprono, righeRiapertura, testoVociDelGesto } from '../../utils/gestiVoce';
+import { raggruppaPassi } from '../../utils/passiEnigmi';
+import { quanteDaSegnare, quanteSegnate, segnataInVista, voceDescrittiva } from '../../utils/vociDellaGuida';
 import { DettagliPunto } from '../guida/DettagliPunto';
-import { Modal } from '../shared/Modal';
+import { useConfermaRiapertura } from '../guida/ConfermaRiapertura';
+import { PersoneDelPalazzo } from '../guida/PersoneDelPalazzo';
+import { voceDaCatturare } from '../../utils/piastrelleCattura';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { PuntoInteresseDto } from '../../types';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
-/** Larghezza della finestra fluttuante. */
-const LARGHEZZA = 340;
-/** Margine dai bordi dello schermo per la finestra trascinata. */
+/** Margine dai bordi dello schermo per la finestra. */
 const MARGINE = 8;
 /** L'altezza che la finestra si tiene comunque (testata e qualche voce): più in basso di così non si apre né si lascia. */
 const ALTEZZA_UTILE = 320;
@@ -65,7 +75,6 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
   const [mostraFatte, setMostraFatte] = useState(false);
   const [aperta, setAperta] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
-  const [riapertura, setRiapertura] = useState<{ voce: PuntoInteresseDto; righe: string[] } | null>(null);
 
   // gli stati cambiati altrove (il popup del pin, la scheda) si rileggono in silenzio, senza lo stato di caricamento
   const imposta = useRef(guida.imposta);
@@ -77,34 +86,17 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     getGuidaMappa(mappa, partitaId ?? undefined).then((g) => imposta.current(g)).catch(() => { /* resta quella di prima */ });
   }, [versione, mappa, partitaId]);
 
-  // la posizione della finestra trascinata (da 768 px): all'apertura in alto a destra della tela, poi dove la si lascia
-  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
-    const w = typeof window === 'undefined' ? 1280 : window.innerWidth;
+  // il posto della finestra (da 768 px): all'apertura in alto a destra della tela, ancorata al bordo destro dello schermo (così un
+  // ridimensionamento non la lascia fuori), abbastanza in alto da lasciare spazio a qualche voce (ALTEZZA_UTILE) anche se la tela sta in
+  // basso; da lì si sposta col gesto di tutte le finestre spostabili (`useSpostamentoFinestra`: barra trascinata o frecce sulla maniglia ⠿,
+  // sempre per intero nello schermo)
+  const [posto] = useState<{ destra: number; alto: number }>(() => {
+    const w = typeof document === 'undefined' ? 1280 : document.documentElement.clientWidth;
     const h = typeof window === 'undefined' ? 800 : window.innerHeight;
-    // abbastanza in alto da lasciare spazio a qualche voce (ALTEZZA_UTILE) anche se la tela sta in basso
-    return { x: Math.max(MARGINE, (ancora?.right ?? w - MARGINE) - LARGHEZZA - MARGINE), y: Math.max(MARGINE, Math.min((ancora?.top ?? 80) + MARGINE, h - ALTEZZA_UTILE - MARGINE)) };
+    return { destra: Math.max(MARGINE, w - (ancora?.right ?? w) + MARGINE), alto: Math.max(MARGINE, Math.min((ancora?.top ?? 80) + MARGINE, h - ALTEZZA_UTILE - MARGINE)) };
   });
-  const trascina = useRef<{ dx: number; dy: number } | null>(null);
   const finestra = useRef<HTMLElement | null>(null);
-  /** Tiene la finestra dentro lo schermo. */
-  const dentro = (x: number, y: number) => ({
-    x: Math.min(Math.max(MARGINE, x), window.innerWidth - LARGHEZZA - MARGINE),
-    y: Math.min(Math.max(MARGINE, y), Math.max(MARGINE, window.innerHeight - ALTEZZA_UTILE - MARGINE)),
-  });
-  const giu = (e: EventoPuntatore<HTMLElement>) => {
-    if (!largo || (e.target as Element).closest('button')) return;
-    trascina.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y };
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  };
-  const muovi = (e: EventoPuntatore<HTMLElement>) => { if (trascina.current) setPos(dentro(e.clientX - trascina.current.dx, e.clientY - trascina.current.dy)); };
-  const su = () => { trascina.current = null; };
-  // il ridimensionamento dello schermo non la lascia fuori
-  useEffect(() => {
-    if (!largo) return;
-    const ridimensiona = () => setPos((p) => dentro(p.x, p.y));
-    window.addEventListener('resize', ridimensiona);
-    return () => window.removeEventListener('resize', ridimensiona);
-  }, [largo]);
+  const sposta = useSpostamentoFinestra(finestra, { attivo: largo, aperta: true });
 
   // le voci dello spillo selezionato vengono in vista
   const elenco = useRef<HTMLDivElement | null>(null);
@@ -115,33 +107,47 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
   }, [spilloSelezionato, guida.dati]);
 
   const infiltrazioni = guida.dati?.infiltrazioni ?? [];
-  const tutte = infiltrazioni.flatMap((i) => i.voci);
-  const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
+  // L8 (R8-12, R8-29), come nella scheda del Palazzo: le voci Persona con la loro Persona e la loro Ombra non sono righe da segnare ma
+  // piastrelle di cattura (`PersoneDelPalazzo`), in cima alla loro infiltrazione; conteggi, «Anche le fatte» e conferme lavorano sulle altre
+  const gruppi = infiltrazioni.map((i) => ({ ...i, persone: i.voci.filter(voceDaCatturare), voci: i.voci.filter((p) => !voceDaCatturare(p)) }));
+  const tutte = gruppi.flatMap((i) => i.voci);
+  const conPersone = gruppi.some((i) => i.persone.length > 0);
+  // le regole comuni con la scheda del Palazzo (`utils/vociDellaGuida.ts`): la descrittiva (`voceDescrittiva`: un «Altro» permanente o
+  // rigenerabile ha la casella come le altre voci, 2026-10-31), i conteggi e la voce segnata in vista
   const evidenziata = (p: PuntoInteresseDto) => spilloSelezionato !== null && p.pin.some((x) => x.id === spilloSelezionato);
   /** Una voce si vede se non è fatta (o con «Anche le fatte»), se è quella aperta o se è dello spillo selezionato. */
-  const visibile = (p: PuntoInteresseDto) => mostraFatte || !p.stato || p.chiave === aperta || evidenziata(p);
-  const fatte = tutte.filter((p) => p.stato && !descrittiva(p)).length;
-  const daFare = tutte.filter((p) => !p.stato && !descrittiva(p)).length;
+  const visibile = (p: PuntoInteresseDto) => segnataInVista(p, { anche: mostraFatte, aperta, evidenziata: evidenziata(p) });
+  const fatte = quanteSegnate(tutte);
+  const daFare = quanteDaSegnare(tutte);
 
-  /** Salva lo stato della voce nella partita (null = riapri), notifica con le altre voci toccate e rilegge la guida e la mappa. */
+  /** Salva lo stato della voce nella partita (null = riapri) col salvataggio della scheda del Palazzo (`salvaStatoVoce`: le altre voci
+   *  toccate si dicono a parole), poi rilegge la guida e la mappa. */
   const salva = async (p: PuntoInteresseDto, stato: 'ottenuto' | null) => {
     if (!partitaId) return;
     setOccupato(true);
     try {
-      const nuovo = await impostaStatoPunto(partitaId, p.chiave, stato);
-      notifica('success', stato ? `«${p.nome}» segnato come ottenuto.` : `«${p.nome}» riaperto.`);
-      if (nuovo.effetti?.segnate.length) notifica('info', `Segnate anche: ${testoVociDelGesto(nuovo.effetti.segnate, infiltrazioni)}.`);
-      if (nuovo.effetti?.riaperte.length) notifica('info', `Riaperte anche: ${testoVociDelGesto(nuovo.effetti.riaperte, infiltrazioni)}.`);
+      await salvaStatoVoce(partitaId, p.chiave, stato, infiltrazioni, stato ? `«${p.nome}» segnato come ottenuto.` : `«${p.nome}» riaperto.`);
       guida.imposta(await getGuidaMappa(mappa, partitaId));
       onCambiato?.();
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { setOccupato(false); }
   };
+  // «Riapri» con la conferma della scheda del Palazzo quando si riaprono anche altre voci o un Enigma risolto (`useConfermaRiapertura`)
+  const riapertura = useConfermaRiapertura((v) => void salva(v, null));
+  /** La cattura di una Persona (o il suo annullo) con la chiamata della scheda del Palazzo (`catturaNelCompendio`); poi si rileggono la guida,
+   *  che ne ricava le catturate, e la mappa. */
+  const cattura = async (personaId: number, catturata: boolean, ombra?: string): Promise<void> => {
+    if (!partitaId) return;
+    try {
+      await catturaNelCompendio(partitaId, personaId, catturata, ombra);
+      guida.imposta(await getGuidaMappa(mappa, partitaId));
+      onCambiato?.();
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.'); }
+  };
   /** La casella: spuntata segna «Ottenuto»; tolta riapre, chiedendo prima se si riaprono anche altre voci o un Enigma risolto (come la scheda). */
   const casella = (p: PuntoInteresseDto, spuntata: boolean) => {
     if (spuntata) { void salva(p, 'ottenuto'); return; }
-    const righe = righeRiapertura((p.condivise ?? []).length > 0 ? testoVociDelGesto(p.condivise!, infiltrazioni) : null, enigmiCheSiRiaprono([p], tutte));
-    if (righe.length > 0) setRiapertura({ voce: p, righe }); else void salva(p, null);
+    riapertura.chiedi(p, infiltrazioni, tutte);
   };
 
   /** Una voce: casella (se si segna), nome con tipo e stato; aperta, testo, dettagli e pin. I passi di un Enigma stanno sotto di lui. */
@@ -151,7 +157,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     return (
       <li key={p.chiave} data-pin-evidenziato={ev ? 'sì' : undefined} className={`flex flex-col gap-1 rounded-md px-1 py-1 ${ev ? 'bg-primary-bg outline outline-1 outline-primary' : ''}`}>
         <div className="flex items-start gap-1">
-          {descrittiva(p)
+          {voceDescrittiva(p)
             ? <span className="touch flex w-11 shrink-0 items-center justify-center" aria-hidden="true"><span className="inline-block h-3 w-3 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} /></span>
             : <label className="touch flex w-11 shrink-0 cursor-pointer items-center justify-center">
               <input type="checkbox" className="h-5 w-5" checked={!!p.stato} disabled={!partitaId || occupato} onChange={(e) => casella(p, e.target.checked)}
@@ -166,7 +172,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
           <div className="flex flex-col gap-1.5 pb-1 pl-12 testo-12">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
-            {descrittiva(p) && <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna.</p>}
+            {voceDescrittiva(p) && <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna.</p>}
             {p.pin.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin di ${p.nome}`}>
                 {p.pin.map((x) => (
@@ -196,47 +202,47 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
       className={largo
         ? 'fixed z-[70] flex max-h-[min(70dvh,560px)] w-[340px] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
         : 'fixed inset-x-2 bottom-[calc(64px+env(safe-area-inset-bottom))] z-[70] flex max-h-[60dvh] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'}
-      // il fondo resta nello schermo: l'altezza massima è quella che la posizione lascia (e mai più di 560 px o del 70% dello schermo)
-      style={largo ? { left: pos.x, top: pos.y, maxHeight: `min(560px, 70dvh, ${Math.max(ALTEZZA_UTILE, (typeof window === 'undefined' ? 800 : window.innerHeight) - pos.y - MARGINE)}px)` } : undefined}>
-      <header className={`flex items-center gap-2 border-b border-border px-2 py-1 ${largo ? 'cursor-move touch-none select-none' : ''}`}
-        onPointerDown={giu} onPointerMove={muovi} onPointerUp={su} onPointerCancel={su}>
+      // l'altezza massima è quella che il posto lascia sotto di lei (mai meno di ALTEZZA_UTILE, mai più di 560 px o del 70% dello schermo):
+      // spostata, la finestra resta per intero nello schermo (`useSpostamentoFinestra`)
+      style={largo ? { right: posto.destra, top: posto.alto, maxHeight: `min(560px, 70dvh, max(${ALTEZZA_UTILE}px, calc(100dvh - ${posto.alto + MARGINE}px)))`, ...sposta.stile } : undefined}>
+      <header className={`flex items-center gap-2 border-b border-border px-2 py-1 ${largo ? `touch-none select-none ${sposta.trascina ? 'cursor-grabbing' : 'cursor-move'}` : ''}`}
+        onPointerDown={largo ? sposta.inizia : undefined} onPointerMove={largo ? sposta.muovi : undefined} onPointerUp={largo ? sposta.finisci : undefined} onPointerCancel={largo ? sposta.finisci : undefined}>
+        {/* la maniglia ⠿, come nelle finestre: sposta con le frecce (l'alternativa al trascinamento per la tastiera) */}
+        {largo && (
+          <button type="button" data-maniglia className="touch -ml-1 flex w-11 shrink-0 items-center justify-center bg-transparent text-text-muted hover:text-text"
+            aria-label="Sposta la guida (frecce)" title="Trascina la barra per spostare la guida, o usa le frecce" onKeyDown={sposta.frecce}>
+            <span aria-hidden="true" className="testo-18 leading-none">⠿</span>
+          </button>
+        )}
         <TitoloSezione variante="display" className="min-w-0 flex-1 leading-tight">Guida <span className="testo-12 normal-case text-text-muted">· {daFare} da fare{fatte > 0 ? ` · ${fatte} fatte` : ''}</span></TitoloSezione>
         <button type="button" className="touch flex w-11 items-center justify-center bg-transparent text-text-muted" aria-label="Chiudi la guida" onClick={onChiudi}><IconaAzione chiave="chiudi" dimensione={20} /></button>
       </header>
       <div ref={elenco} className="area-scorrevole min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5">
         {guida.caricamento && !guida.dati && <p className="m-0 py-2 testo-12 text-text-muted">Carico la guida…</p>}
         {guida.errore && <p className="m-0 py-2 testo-12 text-error-testo" role="alert">{guida.errore}</p>}
-        {guida.dati && tutte.length === 0 && <p className="m-0 py-2 testo-12 text-text-muted">Nessuna voce della guida su questa planimetria.</p>}
-        {!partitaId && tutte.length > 0 && <p className="m-0 pb-1 testo-12 text-text-muted">Attiva una partita per segnare quel che fai.</p>}
+        {guida.dati && tutte.length === 0 && !conPersone && <p className="m-0 py-2 testo-12 text-text-muted">Nessuna voce della guida su questa planimetria.</p>}
+        {!partitaId && (tutte.length > 0 || conPersone) && <p className="m-0 pb-1 testo-12 text-text-muted">Attiva una partita per segnare quel che fai.</p>}
         {fatte > 0 && (
           <button type="button" className={`chip touch mb-1 testo-12 ${mostraFatte ? 'chip--attivo' : ''}`} aria-pressed={mostraFatte} onClick={() => setMostraFatte((v) => !v)}>Anche le fatte ({fatte})</button>
         )}
-        {infiltrazioni.map((i) => {
-          const passiPer = new Map<string, PuntoInteresseDto[]>();
-          for (const p of i.voci) if (p.contenitore) passiPer.set(p.contenitore, [...(passiPer.get(p.contenitore) ?? []), p]);
-          // un passo il cui Enigma non è su questa planimetria sta da sé
-          const chiavi = new Set(i.voci.map((p) => p.chiave));
-          const radici = i.voci.filter((p) => !p.contenitore || !chiavi.has(p.contenitore));
+        {gruppi.map((i) => {
+          // i passi sotto il loro Enigma, come nella scheda del Palazzo; un passo il cui Enigma non è su questa planimetria sta da sé
+          const { inCima: radici, passiPer } = raggruppaPassi(i.voci);
           const inVista = radici.filter((p) => visibile(p) || (passiPer.get(p.chiave) ?? []).some(visibile));
-          if (inVista.length === 0) return null;
+          if (inVista.length === 0 && i.persone.length === 0) return null;
+          // le catturate: le Persona registrate nel compendio della partita, che il server dà come voci «ottenute» (senza partita, nessuna)
+          const catturate = partitaId ? new Set(i.persone.filter((p) => p.stato).map((p) => p.persona!.id)) : null;
           return (
             <section key={i.chiave} className="flex flex-col gap-0.5 pb-1.5" aria-label={`${i.ordine + 1}. ${i.nome}`}>
               {infiltrazioni.length > 1 && <h3 className="m-0 pt-1 testo-12 font-semibold uppercase tracking-wide text-text-muted">{i.ordine + 1}. {i.nome}</h3>}
-              <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{inVista.map((p) => voce(p, passiPer.get(p.chiave) ?? []))}</ul>
+              {i.persone.length > 0 && <PersoneDelPalazzo persone={i.persone} nomeArea={i.nome} partitaId={partitaId} catturate={catturate} onCattura={cattura} />}
+              {inVista.length > 0 && <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{inVista.map((p) => voce(p, passiPer.get(p.chiave) ?? []))}</ul>}
             </section>
           );
         })}
         {guida.dati && tutte.length > 0 && !mostraFatte && daFare === 0 && <p className="m-0 py-2 testo-12 text-text-muted">Tutto fatto su questa planimetria.</p>}
       </div>
-      {riapertura && (
-        <Modal titolo={`Riaprire «${riapertura.voce.nome}»?`} aperta onChiudi={() => setRiapertura(null)}
-          azioni={<>
-            <button type="button" className="btn btn-secondary touch" onClick={() => setRiapertura(null)}>Annulla</button>
-            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri" onClick={() => { const v = riapertura.voce; setRiapertura(null); void salva(v, null); }} />
-          </>}>
-          {riapertura.righe.map((r) => <p key={r} className="m-0 testo-14">{r}</p>)}
-        </Modal>
-      )}
+      {riapertura.finestra}
     </section>
   );
   return createPortal(corpo, document.body);

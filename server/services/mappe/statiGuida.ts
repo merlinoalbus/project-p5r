@@ -34,7 +34,7 @@ import { VOCI_GESTITE_SQL } from './voceDelPin.js';
 /** Una voce della guida per il modello: carattere effettivo, infiltrazione, Palazzo e se ha uno stato. */
 export interface VoceDelModello {
   chiave: string; carattere: CarattereVoce | null; infiltrazione: string; palazzo: string;
-  /** «Altro» fuori dai dedali: si legge e basta, nessuno stato (`puntoDescrittivo`). */
+  /** «Altro» fuori dai dedali senza un carattere con uno stato: si legge e basta, nessuno stato (`puntoDescrittivo`). */
   senzaStato: boolean; esauribile: boolean; tipo: string; nome: string; ordine: number;
 }
 /** Le voci di un pin, divise come le legge il modello. */
@@ -86,7 +86,7 @@ export function modelloAvanzamento(db: AppDatabase): ModelloAvanzamento {
     FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave`).all() as Array<{ chiave: string; tipo: string; nome: string; ordine: number; esauribile: number; area_chiave: string; dungeon_chiave: string; area_dedalo_chiave: string | null; carattere: string | null }>) {
     voci.set(r.chiave, {
       chiave: r.chiave, carattere: carattereDellaVoce({ tipo: r.tipo, areaDedalo: r.area_dedalo_chiave, carattere: r.carattere }), infiltrazione: r.area_chiave, palazzo: r.dungeon_chiave,
-      senzaStato: puntoDescrittivo(r.tipo, r.area_dedalo_chiave), esauribile: r.esauribile === 1, tipo: r.tipo, nome: r.nome, ordine: r.ordine,
+      senzaStato: puntoDescrittivo(r.tipo, r.area_dedalo_chiave, r.carattere), esauribile: r.esauribile === 1, tipo: r.tipo, nome: r.nome, ordine: r.ordine,
     });
   }
   const infiltrazioni = new Map<string, InfiltrazioneDelModello>();
@@ -442,9 +442,9 @@ export function passiDi(db: AppDatabase, enigma: string): Array<{ chiave: string
   return db.prepare('SELECT chiave, tipo, nome, area_dedalo_chiave FROM punto_interesse WHERE contenitore_chiave = ? ORDER BY ordine, chiave').all(enigma) as Array<{ chiave: string; tipo: string; nome: string; area_dedalo_chiave: string | null }>;
 }
 
-/** I passi che si segnano (le voci descrittive si leggono e basta): sono loro a risolvere l'Enigma. */
+/** I passi che si segnano (le voci descrittive si leggono e basta, `sqlVoceDescrittiva`): sono loro a risolvere l'Enigma. */
 export function passiDaSegnare(db: AppDatabase, enigma: string): string[] {
-  return passiDi(db, enigma).filter((p) => !puntoDescrittivo(p.tipo, p.area_dedalo_chiave)).map((p) => p.chiave);
+  return db.prepare(`SELECT p.chiave FROM punto_interesse p WHERE p.contenitore_chiave = ? AND NOT ${sqlVoceDescrittiva('p')} ORDER BY p.ordine, p.chiave`).pluck().all(enigma) as string[];
 }
 
 /** L'Enigma di cui una voce è un passo, o null. */
