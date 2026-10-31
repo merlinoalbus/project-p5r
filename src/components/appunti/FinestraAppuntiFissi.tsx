@@ -16,8 +16,12 @@
 //     la finestra è larga quanto lo schermo. Sempre dentro la finestra visibile, anche quando questa cambia (ridimensionamento, rotazione).
 //   - Un tocco su un appunto scrive il suo testo negli appunti di sistema (`copiaTesto`: `writeText` con il ripiego dell'evento `copy`) e
 //     dice «Copiato»; poi Ctrl+V nel Diario (o «Incolla qui» nel menu ⋯ di una voce) lo incolla come ogni blocco copiato dal Diario.
-//   - Gestione: «Aggiungi» (titolo e testo incollato), e per ogni appunto la matita: titolo, testo, sposta su/giù, elimina con conferma.
-//     Con molti appunti, la ricerca per titolo.
+//   - Gestione: «+» (richiesta dell'utente, 2026-10-31: «aggiungere agli appunti fissi un nuovo elemento cliccando su + (prende quello che
+//     attualmente ci sta in memoria) e mi fa indicare un breve testo di riferimento») legge gli appunti di sistema (`readText`, dentro il
+//     gesto) e apre il modulo con il solo titolo, già col fuoco, e l'anteprima del testo letto; se il browser non li lascia leggere
+//     (permesso negato, telefono senza l'API, contesto non sicuro) o sono vuoti, lo stesso modulo ha il campo del testo da incollare a mano e
+//     un avviso che dice perché. Per ogni appunto la matita: titolo, testo, sposta su/giù, elimina con conferma. Con molti appunti, la
+//     ricerca per titolo.
 // ============================================================
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as KeyboardEventReact, type PointerEvent as PointerEventReact, type ReactNode } from 'react';
@@ -107,13 +111,43 @@ function anteprima(testo: string): string {
   return (righe.find((r) => r.startsWith('• ')) ?? righe[0] ?? testo.trim()).slice(0, 160);
 }
 
+/** Che cosa ha dato la lettura degli appunti di sistema: il testo, o perché va incollato a mano. */
+type Lettura = { testo: string } | { avviso: string };
+/** Il motivo, uguale in coda a ogni avviso: che cosa fare adesso. */
+const A_MANO = 'incolla qui sotto il testo (tieni premuto nel campo, o Ctrl+V).';
+
+/**
+ * Gli appunti di sistema letti con `navigator.clipboard.readText`, dentro il gesto del «+». Non lancia mai: se la lettura non si può fare
+ * (contesto non sicuro, browser senza l'API, permesso negato, errore) o non c'è testo, dice perché, e il modulo chiede il testo a mano.
+ */
+async function leggiDagliAppunti(): Promise<Lettura> {
+  if (!window.isSecureContext) return { avviso: `Il browser lascia leggere gli appunti solo su una connessione sicura (https): ${A_MANO}` };
+  if (!navigator.clipboard?.readText) return { avviso: `Questo browser non lascia leggere gli appunti alla pagina: ${A_MANO}` };
+  let testo: string;
+  try {
+    testo = await navigator.clipboard.readText();
+  } catch (err) {
+    const negato = err instanceof DOMException && err.name === 'NotAllowedError';
+    return { avviso: negato ? `Lettura degli appunti non permessa: ${A_MANO}` : `Gli appunti non si sono potuti leggere: ${A_MANO}` };
+  }
+  if (!testo.trim()) return { avviso: `Negli appunti non c’è testo: ${A_MANO}` };
+  if (testo.length > LIMITE_TESTO_APPUNTO) return { avviso: `Il testo negli appunti supera i ${LIMITE_TESTO_APPUNTO.toLocaleString('it')} caratteri: ${A_MANO}` };
+  return { testo };
+}
+
+/** Quanti caratteri del testo letto mostra l'anteprima del modulo (il testo salvato è sempre intero). */
+const MAX_ANTEPRIMA = 4000;
+/** La riga del blocco delle voci del Diario in fondo al testo (illeggibile: non va nell'anteprima). */
+const RE_RIGA_BLOCCO = /P5R-DIARIO-VOCI\.\d+\./;
+
 // ---- la finestra ----
 
 /** La finestra degli appunti fissi e la sua icona (solo nella preparazione). */
 export const FinestraAppuntiFissi: StrumentoDiModifica<typeof FinestraAppuntiFissiReale> = IN_RILASCIO ? NienteInRilascio : FinestraAppuntiFissiReale;
 
-/** Che cosa sta facendo il corpo: niente, l'aggiunta (con la proposta del Diario o vuota), la modifica di un appunto. */
-type Modulo = { tipo: 'aggiungi'; titolo: string; testo: string; n: number } | { tipo: 'modifica'; id: number } | null;
+/** Che cosa sta facendo il corpo: niente, l'aggiunta (con la proposta del Diario, col testo letto dagli appunti di sistema — `daAppunti`: si
+ *  chiede solo il titolo — o col testo da incollare a mano e il perché in `avviso`), la modifica di un appunto. */
+type Modulo = { tipo: 'aggiungi'; titolo: string; testo: string; n: number; daAppunti?: boolean; avviso?: string } | { tipo: 'modifica'; id: number } | null;
 
 function FinestraAppuntiFissiReale() {
   const stato = useAppuntiFissiStore((s) => s.stato);
@@ -229,6 +263,24 @@ function FinestraAppuntiFissiReale() {
     return true;
   }, [modulo]);
 
+  /** «+»: legge gli appunti di sistema (prima di tutto, finché il gesto vale: una conferma in mezzo lo farebbe scadere) e apre l'aggiunta col
+   *  solo titolo, o col testo a mano e l'avviso. Una bozza non salvata si chiede prima di sostituirla. */
+  const [leggendo, setLeggendo] = useState(false);
+  /** Il segno sincrono della lettura in corso: un secondo tocco prima del nuovo disegno non ne apre un'altra. */
+  const leggendoRif = useRef(false);
+  const aggiungiDagliAppunti = async () => {
+    if (leggendoRif.current) return;
+    leggendoRif.current = true;
+    setLeggendo(true);
+    let lettura: Lettura;
+    try { lettura = await leggiDagliAppunti(); } finally { leggendoRif.current = false; setLeggendo(false); }
+    if (!(await lasciaModulo())) return;
+    const chiave = Date.now();
+    setModulo('testo' in lettura
+      ? { tipo: 'aggiungi', titolo: '', testo: lettura.testo, n: chiave, daAppunti: true }
+      : { tipo: 'aggiungi', titolo: '', testo: '', n: chiave, avviso: lettura.avviso });
+  };
+
   const chiudi = async () => { if (await lasciaModulo()) useAppuntiFissiStore.getState().chiudi(); };
   // la chiusura chiesta dal pulsante della barra superiore passa di qui (le bozze non salvate si chiedono prima)
   const richiestaChiusura = useAppuntiFissiStore((s) => s.richiestaChiusura);
@@ -310,12 +362,8 @@ function FinestraAppuntiFissiReale() {
           <h2 id={idTitolo} className="appunti-fissi__titolo font-display uppercase testo-17">
             Appunti fissi{n > 0 && <span className="testo-13 text-text-muted normal-case font-sans tabular-nums"> · {n}</span>}
           </h2>
-          <button type="button" data-non-trascina className={pulsante} aria-label="Aggiungi un appunto fisso" title="Aggiungi" aria-expanded={modulo?.tipo === 'aggiungi'}
-            onClick={async () => {
-              // già aperta l'aggiunta: la bozza resta, il fuoco torna sul titolo
-              if (modulo?.tipo === 'aggiungi') { finestra.current?.querySelector<HTMLInputElement>('form input')?.focus(); return; }
-              if (await lasciaModulo()) setModulo({ tipo: 'aggiungi', titolo: '', testo: '', n: Date.now() });
-            }}>
+          <button type="button" data-non-trascina className={pulsante} aria-label="Aggiungi dagli appunti" title="Aggiungi ciò che hai copiato, con un titolo"
+            aria-expanded={modulo?.tipo === 'aggiungi'} aria-busy={leggendo} aria-disabled={leggendo} onClick={() => void aggiungiDagliAppunti()}>
             <IconaAzione chiave="piu" dimensione={20} />
           </button>
           <button type="button" data-non-trascina className={pulsante} aria-label="Riduci a icona gli appunti fissi" aria-keyshortcuts="Escape" title="Riduci a icona (Esc)" onClick={riduci}>
@@ -329,6 +377,7 @@ function FinestraAppuntiFissiReale() {
         <div className="appunti-fissi__corpo">
           {modulo?.tipo === 'aggiungi' && (
             <ModuloAppunto key={modulo.n} titoloIniziale={modulo.titolo} testoIniziale={modulo.testo} etichetta="Nuovo appunto" onSporco={segnaSporco}
+              daAppunti={modulo.daAppunti} avviso={modulo.avviso}
               onAnnulla={() => void lasciaModulo()}
               onSalva={async (d) => {
                 const nuovo = await useAppuntiFissiStore.getState().aggiungi(d);
@@ -350,7 +399,7 @@ function FinestraAppuntiFissiReale() {
           {elenco === null && caricamento && <div className="flex justify-center py-6"><Spinner size={28} /></div>}
           {elenco !== null && elenco.length === 0 && modulo?.tipo !== 'aggiungi' && (
             <p className="m-0 testo-13 text-text-secondary">
-              Nessun appunto ancora. Con <strong>+</strong> incolla un testo con un titolo, oppure dal menu ⋯ di una voce del Diario scegli «Salva negli appunti fissi».
+              Nessun appunto ancora. Copia un testo e tocca <strong>+</strong> per salvarlo con un titolo, oppure dal menu ⋯ di una voce del Diario scegli «Salva negli appunti fissi».
             </p>
           )}
           {elenco !== null && elenco.length > 0 && visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun appunto con «{cerca.trim()}» nel titolo.</p>}
@@ -446,14 +495,30 @@ interface PropsModulo {
   onAnnulla: () => void;
   /** Altri comandi accanto a Salva e Annulla (sposta, elimina). */
   altri?: ReactNode;
+  /** Il testo è quello letto dagli appunti di sistema: si chiede solo il titolo, il testo si mostra in anteprima (non si modifica qui). */
+  daAppunti?: boolean;
+  /** Perché il testo va incollato a mano (gli appunti non si sono potuti leggere, o erano vuoti). */
+  avviso?: string;
 }
 
-function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onSalva, onAnnulla, altri }: PropsModulo) {
+function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onSalva, onAnnulla, altri, daAppunti = false, avviso }: PropsModulo) {
   const [titolo, setTitolo] = useState(titoloIniziale);
   const [testo, setTesto] = useState(testoIniziale);
   const [occupato, setOccupato] = useState(false);
   const [problema, setProblema] = useState<string | null>(null);
   const id = useId();
+  // l'anteprima del testo letto: senza la riga del blocco delle voci (illeggibile), al più MAX_ANTEPRIMA caratteri; e quante voci del Diario
+  // contiene, che Ctrl+V nel Diario incollerà come voci
+  const lettura = useMemo(() => {
+    if (!daAppunti) return null;
+    const leggibile = testoIniziale.split(/\r?\n/).filter((r) => !RE_RIGA_BLOCCO.test(r)).join('\n').trim();
+    const mostrato = leggibile || testoIniziale.trim();
+    return {
+      anteprima: mostrato.length > MAX_ANTEPRIMA ? `${mostrato.slice(0, MAX_ANTEPRIMA)}…` : mostrato,
+      caratteri: testoIniziale.length,
+      voci: leggiAppunti({ testo: testoIniziale })?.voci.length ?? 0,
+    };
+  }, [daAppunti, testoIniziale]);
   useEffect(() => { onSporco(titolo !== titoloIniziale || testo !== testoIniziale); }, [titolo, testo, titoloIniziale, testoIniziale, onSporco]);
   const salva = async () => {
     const t = titolo.trim();
@@ -471,13 +536,27 @@ function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onS
         <span className="campo__etichetta">Titolo</span>
         {/* il titolo prende il fuoco: dal Diario arriva proposto, e lo si cambia prima di salvare */}
         <input id={`${id}-t`} className="form-input" value={titolo} maxLength={LIMITE_TITOLO_APPUNTO} autoFocus onChange={(e) => setTitolo(e.target.value)}
-          placeholder="Per esempio DOMANDA IN CLASSE" />
+          placeholder="Per esempio DOMANDA IN CLASSE" enterKeyHint="done" aria-describedby={avviso ? `${id}-v` : lettura ? `${id}-a` : undefined} />
       </label>
-      <label className="campo" htmlFor={`${id}-x`}>
-        <span className="campo__etichetta">Testo</span>
-        <textarea id={`${id}-x`} className="form-input min-h-28 testo-13" value={testo} maxLength={LIMITE_TESTO_APPUNTO} rows={5} onChange={(e) => setTesto(e.target.value)}
-          placeholder="Incolla qui il testo copiato dal Diario" spellCheck={false} />
-      </label>
+      {avviso && <p id={`${id}-v`} className="m-0 testo-13 text-warning text-pretty">{avviso}</p>}
+      {lettura ? (
+        <div className="campo">
+          <span id={`${id}-a`} className="campo__etichetta">
+            Testo dagli appunti
+            <span className="font-normal text-text-muted tabular-nums">
+              {' · '}{lettura.caratteri.toLocaleString('it')} caratteri{lettura.voci > 0 && ` · ${lettura.voci === 1 ? '1 voce' : `${lettura.voci} voci`} del Diario`}
+            </span>
+          </span>
+          {/* raggiungibile da tastiera (Tab) per scorrere un testo lungo; non si modifica: per un testo diverso, copialo e tocca di nuovo + */}
+          <div role="region" aria-labelledby={`${id}-a`} tabIndex={0} className="appunti-fissi__anteprima testo-13">{lettura.anteprima}</div>
+        </div>
+      ) : (
+        <label className="campo" htmlFor={`${id}-x`}>
+          <span className="campo__etichetta">Testo</span>
+          <textarea id={`${id}-x`} className="form-input min-h-28 testo-13" value={testo} maxLength={LIMITE_TESTO_APPUNTO} rows={5} onChange={(e) => setTesto(e.target.value)}
+            placeholder="Incolla qui il testo copiato dal Diario" spellCheck={false} />
+        </label>
+      )}
       {problema && <p className="m-0 testo-13 text-error-testo" role="alert">{problema}</p>}
       <div className="flex flex-wrap gap-1.5">
         <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Salva" disabled={occupato} />

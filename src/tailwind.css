@@ -2746,6 +2746,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .appunti-fissi__copia:active { transform: scale(0.98); }
   .appunti-fissi__copia:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
   .appunti-fissi__copiato { color: var(--color-success); font-weight: 600; }
+  /* l'anteprima del testo letto dagli appunti nel modulo del «+»: a capo come nel testo, scorre da sé (fino a un terzo della vista) */
+  .appunti-fissi__anteprima { max-height: min(12rem, 33vh); overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere;
+    padding: 6px 8px; border: 1px solid var(--color-border-light); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text-secondary); }
+  .appunti-fissi__anteprima:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
   .appunti-fissi__icona { position: fixed; z-index: var(--z-appunti-fissi); width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
     border: 2px solid var(--color-primary); border-radius: var(--radius-full); background: var(--color-bg-secondary); color: var(--color-text);
     box-shadow: 0 8px 24px rgb(0 0 0 / .55); cursor: pointer; touch-action: none; transition-property: transform, box-shadow; transition-duration: .15s; }
