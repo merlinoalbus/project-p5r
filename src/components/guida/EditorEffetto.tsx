@@ -16,6 +16,7 @@ import { NOME_DOTE } from '../../utils/citta';
 import { BERSAGLI, FUNZIONI, GUADAGNI, MISURE, NOME_BERSAGLIO, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RESE, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import { OPZIONI_FAMIGLIA, effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
 import { TestoNote } from '../shared/TestoNote';
+import { TestoCheCresce } from '../shared/Campo';
 import { simboliNote } from '../../../shared/note';
 
 /** Le note di una Dote data da un oggetto: da ♪ a ♪♪♪♪ (il quarto scalino dei libri a resa maggiorata); il Selettore le dice a parole. */
@@ -96,7 +97,8 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, conNessun
       {valore?.famiglia === 'aumenta-punti' &&
         scelta('Dove si guadagna di più', valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove }))}
       {valore?.famiglia === 'descrittivo' &&
-        campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} disabled={disabilitato} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
+        // L13 (O7-5): l'area di testo comune, che si allunga col testo invece di scorrere dentro la finestra
+        campo('Descrizione', <TestoCheCresce valore={valore.testo} massimo={600} disabilitato={disabilitato} onCambia={(testo) => onCambia({ ...valore, testo })} />)}
       {valore && <p className="m-0 testo-12 text-text-muted" role="status">Verrà mostrato così: <strong><TestoNote testo={descriviEffetto(valore, nomiEffetto)} /></strong></p>}
     </div>
   );

@@ -37,6 +37,8 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
     // 2026-10-28 («i punti rango andavano gestiti come note»): un effetto nuovo dà note, come una risposta nei dialoghi
     case 'puntiConfidente': return { tipo: 'puntiConfidente', confidente: '', note: 1 };
     case 'uscitaOggetto': return { tipo: 'uscitaOggetto', oggetto: '', quantita: 1, modo: 'restituito' };
+    // L13 (ondata 7, O7-2): i risultati di un esame, con l'esame da scegliere
+    case 'esame': return { tipo: 'esame', esame: '' };
   }
 }
 
@@ -46,7 +48,7 @@ export const MENU_EFFETTI: ReadonlyArray<{ tipo: Tipo; categoria: string }> = [
   { tipo: 'articolo', categoria: 'acquisto' }, { tipo: 'yen', categoria: 'acquisto' }, { tipo: 'oggetto', categoria: 'acquisto' },
   { tipo: 'uscitaOggetto', categoria: 'acquisto' },
   { tipo: 'sblocco', categoria: 'richiesta' }, { tipo: 'richiesta', categoria: 'richiesta' }, { tipo: 'trofeo', categoria: 'trama' },
-  { tipo: 'storia', categoria: 'trama' }, { tipo: 'domanda', categoria: 'esame' }, { tipo: 'cruciverba', categoria: 'esame' },
+  { tipo: 'storia', categoria: 'trama' }, { tipo: 'domanda', categoria: 'esame' }, { tipo: 'esame', categoria: 'esame' }, { tipo: 'cruciverba', categoria: 'esame' },
   { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'confidente' },
   { tipo: 'persona', categoria: 'velluto' }, { tipo: 'personaTolta', categoria: 'velluto' }, { tipo: 'fortuna', categoria: 'dote' },
   { tipo: 'acquisto', categoria: 'acquisto' }, { tipo: 'pesca', categoria: 'attivita' },

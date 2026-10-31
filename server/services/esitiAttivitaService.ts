@@ -32,11 +32,15 @@ import { copieDellOggetto } from './copieOggetti.js';
 import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
 import { fortunaSu } from './fortunaService.js';
 import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
+import { piazzamentoDellEsame, premiDellEsame, premioDelPiazzamento } from './piazzamentoEsamiService.js';
+import { ePiazzamentoEsame, PIAZZAMENTI_ESAME, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
   | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null; doti: DoteEsito[] }
-  | { tipo: 'dote'; note: 0 | 1 | 2 | 3 };
+  | { tipo: 'dote'; note: 0 | 1 | 2 | 3 }
+  /** L13 (ondata 7, O7-2): il piazzamento scelto ai risultati dell'esame. */
+  | { tipo: 'esame'; piazzamento: PiazzamentoEsame };
 
 /** Gli esiti dichiarati da un'attività (null se non ne dichiara o se la colonna non c'è ancora) e il suo nome. */
 export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiAttivita | null } | null {
@@ -165,6 +169,8 @@ export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta
  *  quantità, e non c'è niente da chiedere (vale l'esito della voce, `risolviScelteSpunta`). */
 function richiedeScelta(e: EffettoVoceDto['effetto']): boolean {
   if (e.tipo === 'dote') return !!e.possibili;
+  // L13 (ondata 7, O7-2): i risultati di un esame chiedono sempre il piazzamento
+  if (e.tipo === 'esame') return true;
   if (e.tipo !== 'turno') return false;
   const esiti = esitiDellAttivita(e.attivita)?.esiti;
   return esiti?.modo === 'scelta' && !strumentoSenzaBonus(esiti, e.esito);
@@ -189,6 +195,19 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
       const origine = origineNoteDellaVoce(partitaId, voce);
       return { posizione, scelta: { effettoUid: uid, tipo: 'dote', dote: e.dote, doteNome: nomeDote(e.dote), possibili: e.possibili!, preselezionato: e.note,
         punti: e.possibili!.map((note) => ({ note, punti: puntiDote(partitaId, e.dote, note, origine) })) } };
+    }
+    if (e.tipo === 'esame') {
+      // L13 (ondata 7, O7-2): tutti i piazzamenti con il loro premio (Doti con i punti che la spunta proporrà, e il trofeo del primo posto);
+      // preselezionato quello già segnato da Partita per lo stesso esame
+      const esame = premiDellEsame(e.esame);
+      const origine = origineNoteDellaVoce(partitaId, voce);
+      const nomeTrofeo = prepared('SELECT nome FROM trofeo WHERE chiave = ?').pluck();
+      const opzioni = PIAZZAMENTI_ESAME.map(({ chiave, nome }) => {
+        const premio = premioDelPiazzamento(esame?.premi ?? [], chiave);
+        const trofeo = premio.trofeo ? { chiave: premio.trofeo, nome: (nomeTrofeo.get(premio.trofeo) as string | undefined) ?? 'Trofeo non più nell’elenco' } : null;
+        return { piazzamento: chiave, nome, doti: premio.doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note, punti: puntiDote(partitaId, d.dote, d.note, origine) })), trofeo };
+      });
+      return { posizione, scelta: { effettoUid: uid, tipo: 'esame', esame: e.esame, esameNome: esame?.nome ?? 'Esame non più nella guida', preselezionato: piazzamentoDellEsame(partitaId, e.esame), opzioni } };
     }
     const t = e as Extract<EffettoVoceDto['effetto'], { tipo: 'turno' }>;
     const a = esitiDellAttivita(t.attivita)!;
@@ -232,6 +251,15 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
       }
       if (s.note !== 0 && !e.possibili.includes(s.note)) throw httpErrors.badRequest('note-non-possibili', `${nomeDote(e.dote)}: le note possibili sono ${simboliPossibili(e.possibili)}.`);
       out.set(uid, { tipo: 'dote', note: s.note });
+    } else if (e.tipo === 'esame') {
+      // L13 (ondata 7, O7-2): senza il piazzamento la spunta non passa; nel raccordo di un effetto aggiunto a una voce già spuntata nessuno sceglie
+      const s = per.get(uid);
+      if (!s || s.tipo !== 'esame') {
+        if (opz.storico) throw httpErrors.conflict('piazzamento-da-scegliere', 'Il piazzamento all’esame si sceglie alla spunta. Togli e rimetti la spunta della voce per sceglierlo.');
+        throw httpErrors.conflict('piazzamento-da-scegliere', 'Scegli il piazzamento ottenuto all’esame prima di spuntare.');
+      }
+      if (!ePiazzamentoEsame(s.piazzamento)) throw httpErrors.badRequest('scelta-esito-non-valida', 'Il piazzamento scelto non è fra quelli possibili.');
+      out.set(uid, { tipo: 'esame', piazzamento: s.piazzamento });
     } else if (e.tipo === 'turno') {
       const a = esitiDellAttivita(e.attivita);
       if (!a?.esiti) continue;

@@ -16,8 +16,9 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: LibroDto = {
-  chiave: 'prova', nome: 'Libro di prova', dove: 'Libreria Taiheido', prezzo: 700,
-  disponibileDal: '18 aprile', dote: 'conoscenza', note: 3, sblocca: null, sbloccaLuogo: null, sbloccaLuogoNome: null, sessioni: 2,
+  // L13 (O7-4, migrazione 313): niente «dove», «disponibile dal», Dote e sblocco in prosa: li dicono negozi, ricompense, condizioni ed effetti
+  chiave: 'prova', nome: 'Libro di prova', prezzo: 700, ricompensaDi: [],
+  sbloccaLuogo: null, sbloccaLuogoNome: null, sessioni: 2,
   dettagli: null, effetti: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 3 }, testo: 'Conoscenza ♪♪♪' }], effettiTesto: ['Conoscenza ♪♪♪'],
   negozi: [{ articolo: 'libreria-taiheido/prova', negozio: 'libreria-taiheido', negozioNome: 'Libreria Taiheido', prezzo: 700 }],
   verificato: true,
@@ -69,6 +70,8 @@ describe('LibriPage', () => {
     expect(screen.getByRole('link', { name: 'Libreria Taiheido · 700 ¥' })).toHaveAttribute('href', '/guida/negozi/libreria-taiheido');
     expect(screen.getByText(conNote('Conoscenza ♪♪♪'))).toBeInTheDocument();
     expect(screen.queryByText('fonte')).toBeNull();
+    // senza condizioni la riga «Disponibile» non c'è (L13 O7-4: la dice solo la struttura)
+    expect(screen.queryByText('Disponibile')).toBeNull();
     // senza partita non c'è il «+», ma la posizione si guarda
     expect(screen.queryByRole('button', { name: /Aggiungi una sessione/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra posizione' }));
@@ -104,11 +107,18 @@ describe('LibriPage', () => {
     getLibri.mockResolvedValue(dto({ ...base, posizioni: [], negozi: [] }));
     const vista = render(<MemoryRouter><LibriPage /></MemoryRouter>);
     await screen.findByText('Libro di prova');
-    // senza negozi né posizioni resta il testo della guida
-    expect(screen.getByText('Libreria Taiheido')).toBeInTheDocument();
+    // senza negozi, ricompense né posizioni non si inventa niente (L13 O7-4: il testo «dove» della guida non è più una fonte)
+    expect(screen.getByText('Non indicato')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra posizione' }));
     expect(screen.getByText('Posizione non disponibile')).toBeInTheDocument();
     vista.unmount();
+
+    // la ricompensa di una Richiesta si dice dalla struttura (`ricompensaDi`), con il rimando alle Richieste
+    getLibri.mockResolvedValue(dto({ ...base, posizioni: [], negozi: [], ricompensaDi: [{ tipo: 'richiesta', chiave: 'un-part-time-infernale', nome: 'Un part-time infernale' }] }));
+    const conRicompensa = render(<MemoryRouter><LibriPage /></MemoryRouter>);
+    expect(await screen.findByRole('link', { name: 'Ricompensa di «Un part-time infernale»' })).toHaveAttribute('href', '/guida/richieste');
+    expect(screen.queryByText('Non indicato')).toBeNull();
+    conRicompensa.unmount();
 
     getLibri.mockResolvedValue(dto({ ...base, posizioni: [
       { tipo: 'luogo', chiave: 'yongen-jaya/leblanc', etichetta: 'Leblanc' },

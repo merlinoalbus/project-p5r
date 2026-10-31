@@ -25,7 +25,7 @@ const richiesta: RichiestaDto = {
   bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento'], vulnerabileConfusione: false },
   ricompense: ['485 PE', 'Pozione'], confidente: { chiave: 'ryuji', nome: 'Ryuji Sakamoto', rango: 2 }, areaNome: 'Dedalo di Aiyatsbus', areaOrdine: 1,
   areaDedalo: 'aiy-1', areaDedaloNome: 'Area 1', note: 'Facile.', fonte: '', stato: null,
-  condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null,
+  condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, completamentoCondizioni: [],
 };
 const elenco: RichiesteDto = {
   richieste: [richiesta], jose: null, dedali: [], completate: 0, totale: 1,
@@ -80,6 +80,8 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
     ricompense: ['485 PE', 'Pozione'], confidente: 'ryuji', confidenteRango: null, note: 'Facile.',
     // L13: gli oggetti della ricompensa non cambiati non si mandano (il server non tocca le righe né le loro note)
     condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 2 }], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null,
+    // O7-1: le condizioni proprie di completamento si mandano sempre (vuote = solo il Dedalo aperto)
+    completamentoCondizioni: [],
   }));
   await waitFor(() => expect(onCambiata).toHaveBeenCalled());
   expect(onChiudi).toHaveBeenCalled();
@@ -153,6 +155,42 @@ it('i comandi stanno nel piè fisso della finestra, non nel corpo che scorre', a
   const piede = finestra.querySelector('.modal-footer') as HTMLElement;
   for (const nome of ['Elimina', 'Annulla', 'Salva']) expect(within(piede).getByRole('button', { name: nome })).toBeInTheDocument();
   expect(within(finestra.querySelector('.modal-body') as HTMLElement).queryByRole('button', { name: 'Salva' })).toBeNull();
+});
+
+it('O7-1: con la proroga si sceglie da elenco dove si sposta il bersaglio, e lo si manda con la proroga', async () => {
+  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, scadenzaData: '12-23',
+    proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato', testo: 'Terzo semestre avviato' }], areaDedalo: null, areaDedaloNome: null, dedaloNome: null } }] });
+  monta('bulli');
+  await screen.findByRole('dialog');
+  expect(valoreSelettore('Durante la proroga il bersaglio è in')).toBe('— resta dov’è —');
+  // le aree di tutti i Dedali, raggruppate per Dedalo
+  expect(vociSelettore('Durante la proroga il bersaglio è in')).toEqual(['— resta dov’è —', 'Area 1', 'Area 1', 'Binari']);
+  scegliVoce('Durante la proroga il bersaglio è in', 'Binari');
+  api.aggiornaRichiesta.mockResolvedValue(richiesta);
+  fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+  await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({
+    scadenzaData: '12-23', proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }], areaDedalo: 'aiy-2' } })));
+});
+
+it('O7-1: salvata per altro, la Richiesta non manda l’area della proroga (quella salvata resta, anche se nel cestino)', async () => {
+  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, scadenzaData: '12-23',
+    proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato', testo: 'Terzo semestre avviato' }], areaDedalo: null, areaDedaloNome: null, dedaloNome: null } }] });
+  monta('bulli');
+  await screen.findByRole('dialog');
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '12' } });
+  api.aggiornaRichiesta.mockResolvedValue(richiesta);
+  fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+  await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({
+    proroga: { data: '02-01', condizioni: [{ tipo: 'evento', evento: 'terzo-semestre-avviato' }] } })));
+});
+
+it('O7-1: i testi della guida da convertire compaiono solo se non sono vuoti', async () => {
+  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, disponibileDal: '', scadenza: '', piano: '' }] });
+  monta('bulli');
+  await screen.findByRole('dialog');
+  expect(screen.queryByRole('textbox', { name: /Testo della guida da convertire/ })).toBeNull();
+  expect(screen.queryByRole('textbox', { name: /Scadenza scritta dalla guida/ })).toBeNull();
+  expect(screen.queryByRole('textbox', { name: /Piano scritto dalla guida/ })).toBeNull();
 });
 
 it('una Richiesta che non c’è più lo dice', async () => {

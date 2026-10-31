@@ -11,8 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { CampoCorrezione } from './CorrezioneGuida';
 import { Selettore } from '../shared/Selettore';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -51,13 +50,14 @@ function ModuloNuovaAreaReale({ aree, areePalazzo, nomeIniziale = '', dopoInizia
   const [toccate, setToccate] = useState<string[]>([]);
   const [descrizione, setDescrizione] = useState('');
   const [posto, setPosto] = useState(dopoIniziale && aree.some((a) => a.chiave === dopoIniziale) ? dopoIniziale : IN_FONDO);
-  // Nella scheda della planimetria il modulo si apre in fondo alla finestra, sotto la piega (verifica nel browser, 2026-10-01):
-  // lo si porta in vista e si comincia dal nome.
-  const modulo = useRef<HTMLFormElement | null>(null);
+  // il posto di partenza, per sapere se è stato cambiato (modifiche da confermare alla chiusura)
+  const [postoIniziale] = useState(posto);
+  // si comincia dal nome
+  const modulo = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    modulo.current?.scrollIntoView?.({ block: 'nearest' });
     modulo.current?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
   }, []);
+  const sporca = nome !== nomeIniziale || descrizione !== '' || toccate.length > 0 || posto !== postoIniziale;
   const opzioni = [
     { chiave: IN_FONDO, nome: 'In fondo al Palazzo' },
     { chiave: IN_CIMA, nome: 'All’inizio del Palazzo' },
@@ -71,30 +71,30 @@ function ModuloNuovaAreaReale({ aree, areePalazzo, nomeIniziale = '', dopoInizia
     const aree = areePalazzo ? areePalazzo.filter((a) => toccate.includes(a.slug)).map((a) => a.slug) : [];
     void onCrea({ nome: n, descrizione: descrizione.trim(), ...(posto === IN_FONDO ? {} : { dopo: posto === IN_CIMA ? null : posto }), ...(aree.length ? { areePalazzo: aree } : {}) });
   };
+  // L13 (O7-5, censimento del 25/10: «azioni nel corpo che scorre»): è la `FinestraModifica` comune — Annulla e «Crea l'infiltrazione»
+  // nel piè fisso (prima in fondo al corpo, sotto la piega sul telefono), Invio in un campo crea, conferma prima di chiudere con modifiche
   return (
-    <form ref={modulo} className="flex flex-col gap-2 rounded-md border border-border-light bg-white/[0.03] p-2" aria-label="Nuova infiltrazione"
-      onSubmit={(e) => { e.preventDefault(); invia(); }}>
-      <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={nome} massimo={LIMITI_GUIDA.area.nome} onCambia={setNome} />
-      <CampoCorrezione etichetta="Descrizione" valore={descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={setDescrizione} />
-      <Selettore etichetta="Dove va nella guida" valore={posto} opzioni={opzioni} onCambia={setPosto} />
-      {areePalazzo && areePalazzo.length > 0 && (
-        <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
-          <legend className="mb-1 testo-12 font-semibold text-text-secondary">Aree toccate</legend>
-          {areePalazzo.map((a) => (
-            <label key={a.slug} className="touch flex items-center gap-2 testo-13">
-              <input type="checkbox" className="h-5 w-5 shrink-0" checked={toccate.includes(a.slug)}
-                onChange={(e) => setToccate((x) => (e.target.checked ? [...x, a.slug] : x.filter((s) => s !== a.slug)))} />
-              <span>{a.nome}</span>
-            </label>
-          ))}
-        </fieldset>
-      )}
-      <span className="testo-12 text-text-muted">È un’infiltrazione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
-      {bloccato && <span className="testo-12 text-text-muted" role="status">{bloccato}</span>}
-      <div className="flex flex-wrap justify-end gap-1.5">
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
-        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea l’infiltrazione" disabled={occupato || !!bloccato || !nome.trim()} />
+    <FinestraModifica titolo="Nuova infiltrazione" stretta onChiudi={onAnnulla} onSalva={invia} titoloSalva="Crea l’infiltrazione"
+      salvabile={!!nome.trim() && !bloccato} occupato={occupato} sporca={sporca}>
+      <div ref={modulo} className="flex flex-col gap-3">
+        <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={nome} massimo={LIMITI_GUIDA.area.nome} onCambia={setNome} />
+        <CampoCorrezione etichetta="Descrizione" valore={descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={setDescrizione} />
+        <Selettore etichetta="Dove va nella guida" valore={posto} opzioni={opzioni} onCambia={setPosto} />
+        {areePalazzo && areePalazzo.length > 0 && (
+          <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
+            <legend className="campo__etichetta mb-1">Aree toccate</legend>
+            {areePalazzo.map((a) => (
+              <label key={a.slug} className="touch flex items-center gap-2 testo-13">
+                <input type="checkbox" className="h-5 w-5 shrink-0" checked={toccate.includes(a.slug)}
+                  onChange={(e) => setToccate((x) => (e.target.checked ? [...x, a.slug] : x.filter((s) => s !== a.slug)))} />
+                <span>{a.nome}</span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+        <span className="testo-12 text-text-muted">È un’infiltrazione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
+        {bloccato && <span className="testo-12 text-text-muted" role="status">{bloccato}</span>}
       </div>
-    </form>
+    </FinestraModifica>
   );
 }

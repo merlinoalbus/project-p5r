@@ -7,6 +7,7 @@ import { dataGioco, dote, idParam, livello, uidVoce } from './comuni.js';
 import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { bodyRegistraAcquisto } from './acquisti.js';
 import { bodyRegistraSessionePesca } from './pesca.js';
+import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
@@ -14,6 +15,8 @@ const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
   z.object({ effettoUid: uidVoce, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
   // L13 (decisione 4): fra gli articoli in alternativa della voce (il gruppo è l'UID del suo primo effetto), quello comprato o null = nessuno
   z.object({ effettoUid: uidVoce, tipo: z.literal('alternativa'), scelto: uidVoce.nullable() }).strict(),
+  // L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame
+  z.object({ effettoUid: uidVoce, tipo: z.literal('esame'), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME) }).strict(),
 ]);
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);

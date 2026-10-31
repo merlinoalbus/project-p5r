@@ -11,6 +11,7 @@ import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import type { SceltaEsitoSpunta } from '../../../shared/esitiAttivita';
+import type { PiazzamentoEsame } from '../../../shared/puntiConfidenti';
 
 /**
  * Le scritture la cui risposta dice che cosa la richiesta ha CAMBIATO (le Doti da segnare, il giorno avanzato) non si ripetono da sole:
@@ -84,7 +85,7 @@ export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaCon
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati, { maxRetries: 0 });
 
 /** Il piazzamento agli esami (R9-08): lo legge il server per i punti dei sette Confidenti; `null` lo toglie. Idempotente. */
-export const impostaPiazzamentoEsame = (id: number, esame: string, piazzamento: 'primo' | 'primi-10' | 'altro' | null): Promise<unknown> =>
+export const impostaPiazzamentoEsame = (id: number, esame: string, piazzamento: PiazzamentoEsame | null): Promise<unknown> =>
   apiPut(`/partite/${id}/esami/${encodeURIComponent(esame)}/piazzamento`, { piazzamento });
 
 /** Trofeo ottenuto (o tolto) nella partita. */

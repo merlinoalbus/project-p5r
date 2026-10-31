@@ -35,6 +35,14 @@ export function giorniDiGiocoFra(da: string | null | undefined, a: string | null
   return x === null || y === null ? null : Math.round((y - x) / 86_400_000);
 }
 
+/** L13 (ondata 7, O7-4): il periodo di una settimana della guida dal suo primo e ultimo giorno («MM-GG»), «09/04 - 10/04»: la sola resa,
+ *  letta dal Calendario e dalla migrazione 313 per confrontare il testo copiato. Null se manca una delle due date. */
+export function periodoDellaSettimana(dal: string | null | undefined, al: string | null | undefined): string | null {
+  const gm = (d: string | null | undefined): string | null => (giornoDellaSettimana(d) === null ? null : `${d!.slice(3, 5)}/${d!.slice(0, 2)}`);
+  const a = gm(dal), b = gm(al);
+  return a === null || b === null ? null : `${a} - ${b}`;
+}
+
 /** Lo stesso giorno in minuscolo e senza accenti («lunedi»), la forma che il valutatore delle condizioni confronta. */
 export function giornoDellaSettimanaPiatto(data: string | null | undefined): string | null {
   const g = giornoDellaSettimana(data);

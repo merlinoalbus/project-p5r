@@ -78,6 +78,8 @@ export function chiaveEffetto(e: EffettoVoce): string | null {
     case 'trofeo': return e.trofeo;
     case 'sblocco': return `${e.bersaglio}:${e.chiave}`;
     case 'turno': return e.attivita;
+    // L13 (ondata 7, O7-2, migrazione 311): i risultati di un esame, con la chiave dell'esame come il motore
+    case 'esame': return e.esame;
     default: return (e as { attivita?: string }).attivita ?? null;
   }
 }

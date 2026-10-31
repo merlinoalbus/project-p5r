@@ -18,7 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
-import type { ReazioneRegalo } from './puntiConfidenti.js';
+import type { PiazzamentoEsame, PremioPiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
@@ -275,6 +275,8 @@ export interface InvitoDto {
   /** Con partita: l'invito è registrato. */
   registrato: boolean | null;
   nota: string;
+  /** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (MM-GG e fascia), se la guida lo dice; la frase la genera la pagina. */
+  messaggio: { data: string; fascia: 'giorno' | 'sera' } | null;
   fonte: string;
   /** R9-07c: un invito della guida cambiato dall'utente (si può «Ripristinare»). */
   modificato: boolean;
@@ -726,7 +728,7 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** R10-11: i punti del motore contano per questo Confidente adesso (rango da 1 a 9 che sale a punti); altrove l'anteprima dà 0 e il server non somma. */
   contaPunti?: boolean;
   /** R10-11: l'esame che vale adesso (l'ultimo con i risultati usciti alla data di gioco) col piazzamento segnato nella partita, uguale per tutti i Confidenti; null prima del primo esame. Il server prende il piazzamento da qui, mai dal client. */
-  piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: 'primo' | 'primi-10' | 'altro' | null } | null;
+  piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: PiazzamentoEsame | null } | null;
   /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
   bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi, uno per consegna: dall'ondata 5 lo stesso oggetto si può ridare). */
@@ -1093,7 +1095,16 @@ export interface DomandaDto {
   fatta: boolean;
   /** La voce del Diario che segna questa domanda (una sola, con effetto «domanda»): la spunta dalla Guida passa dal suo stesso gesto, e la Conoscenza si applica da lì. Assente se non c'è. */
   voceUid?: string;
+  /** L13 (ondata 7, O7-2; decisione 9: la Dote la applica la voce): ciò che danno le voci del Diario che segnano la domanda, dai loro effetti
+   *  (le Doti, senza doppioni, e se una di loro chiede alla spunta il piazzamento di un esame). È la ricompensa che la pagina mostra; il testo
+   *  `ricompensa` resta solo dove la guida dice altro (da decidere) o non c'è una voce. Assente senza voce. */
+  premioVoce?: { doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; esameAllaSpunta: boolean };
 }
+
+/** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi, come lo mostra la pagina («Primi 10 · Fascino ♪♪♪»). */
+export interface PremioEsameDto { piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; trofeo: { chiave: string; nome: string } | null }
+/** I premi per piazzamento letti dalla colonna, prima dei nomi (per chi li applica). */
+export type PremiEsame = PremioPiazzamentoEsame[];
 
 export interface EsameDto {
   chiave: string;
@@ -1103,6 +1114,10 @@ export interface EsameDto {
   domande: Array<{ data: string; ordine: number; domanda: string; risposta: string }>;
   note: string;
   oggettiRicompensa?: RicompensaOggettoDto[];
+  /** L13 (ondata 7, O7-2): i premi per piazzamento (`esame.premi_json`), in ordine; vuoto se l'esame non ne dichiara. */
+  premi: PremioEsameDto[];
+  /** L13 (ondata 7, O7-2): il requisito di Conoscenza per il primo posto (`esame.requisito_conoscenza`); null se non dichiarato. */
+  requisitoConoscenza: RequisitoConoscenzaEsame | null;
 }
 
 /** Una Dote che il gioco dà (o, disfacendo un conseguimento, toglie): da segnare **a mano** nella scheda Doti — l'app non
@@ -1125,7 +1140,12 @@ export interface DomandeDto {
   fasciaAvanzata?: FasciaAvanzataDto;
   domande: DomandaDto[];
   esami: EsameDto[];
-  premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
+  /** Le note generali sugli esami (`esame_premi`, testo informativo). L13 (ondata 7, O7-2): premi, requisiti e trofeo stanno negli esami
+   *  (`EsameDto.premi`, `requisitoConoscenza`), il moltiplicatore nella regola del codice (`moltiplicatore`). */
+  premi: { fonte?: string; noteGenerali?: string } | null;
+  /** L13 (ondata 7, O7-2): il moltiplicatore dell'esame sui punti dei Confidenti, descritto dalla regola del codice (`shared/puntiConfidenti.ts`):
+   *  i Confidenti che lo ricevono e il valore di ogni piazzamento che lo dà (gli altri non moltiplicano). */
+  moltiplicatore: { confidenti: Array<{ chiave: string; nome: string }>; piazzamenti: Array<{ piazzamento: PiazzamentoEsame; nome: string; valore: number }> };
   dataGioco: string | null;
   /** Le domande non fatte della **prima** data da quella di gioco in poi (una o due): il prossimo appuntamento, non un elenco. */
   prossime: DomandaDto[];
@@ -1252,7 +1272,10 @@ export interface TrofeoDto {
   descrizione: string;
   come: string;
   mancabile: boolean | null;
+  /** Quando si ottiene: la frase generata dalle `condizioni` (L13 O7-4, migrazione 313); il testo della guida solo dove non ci sono. */
   quando: string | null;
+  /** Le condizioni del «quando», con la loro frase (vocabolario unico; non si valutano: nessuna assegnazione automatica). */
+  condizioni: CondizioneSpilloDto[];
   fonte: string;
   verificato: boolean;
   /** Ottenuto nella partita. */
@@ -1320,6 +1343,11 @@ export interface EffettiAzioneDto {
   /** Aperture dei Dedali dichiarate in una visita ai Memento, solo nelle ricevute di prima della 305: restano com'erano ma non decidono più
    *  nulla (le aperture si calcolano dai Palazzi conclusi, `condizioni/valutatore.ts`), e non si chiedono più. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
+  /** L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta (effetto «esame»): il piazzamento scelto, quello che c'era prima
+   *  nella partita (null = nessuno: togliendo la spunta si torna lì), le Doti del premio (da applicare con «Applica», come le altre Doti della
+   *  voce) e il trofeo del primo posto, solo se l'ha segnato questa spunta (togliendola si toglie, se nessun altro lo rivendica). */
+  esami?: Array<{ esame: string; nome: string; piazzamento: PiazzamentoEsame; prima: PiazzamentoEsame | null;
+    doti: Array<{ chiave: string; nome: string; delta: number; note: number }>; trofeo?: { chiave: string; nome: string } }>;
 }
 
 export interface RiferimentoAzioneDto {
@@ -1567,6 +1595,8 @@ export interface ElenchiEffettiVoceDto {
   /** 2026-10-28: `prestito` = un'offerta lo dà in prestito (regola «restituzione»: Biblioteca, DVD a noleggio), per l'effetto «Restituito». */
   oggetti?: Array<{ chiave: string; nome: string; categoria: string; prestito?: true }>;
   trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
+  /** L13 (ondata 7, O7-2): gli esami dell'effetto «esame» (i risultati, con il piazzamento scelto alla spunta), con la data dei risultati. */
+  esami?: Array<{ chiave: string; nome: string; dataRisultati: string | null }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
@@ -2251,12 +2281,11 @@ export interface LibroDto {
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
-  dove: string;
+  /** L13 (O7-4, migrazione 313): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
+   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo (con la nota della guida dove l'articolo non c'è). */
   prezzo: number | null;
-  disponibileDal: string | null;
-  dote: DoteChiave | null;
-  note: number | null;
-  sblocca: string | null;
+  /** Le Richieste che danno il libro in ricompensa (`ricompensa_oggetto`). */
+  ricompensaDi?: Array<{ tipo: 'richiesta'; chiave: string; nome: string }>;
   /** La **chiave del quartiere** che si apre finendolo, quando il libro ne apre uno: e' un
    *  riferimento, quindi la scheda ci puo' portare invece di limitarsi a nominarlo. */
   sbloccaLuogo: string | null;
@@ -2311,10 +2340,7 @@ export interface FilmDto {
   chiave: string;
   nome: string;
   dove: 'cinema' | 'dvd';
-  dote: DoteChiave | null;
-  note: number | null;
-  /** Quanto vale rivederlo: al cinema la guida lo dichiara riga per riga. Vuoto = niente. */
-  noteSuccessive: number | null;
+  /** L13 (O7-4, migrazione 313): Dote, note e «rivederlo» li dicono solo gli `effetti` (la prima visione e le voci `ripetuto`). */
   prezzo: number | null;
   dettagli: string | null;
   /** Gli effetti dichiarati (migrazione 074): la prima visione e, con `ripetuto`, quelle successive. */
@@ -2483,7 +2509,13 @@ export interface RichiestaDto {
   condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
   /** La scadenza come data di gioco (MM-GG) e la proroga, valida solo con le sue condizioni; null = non indicata (resta il testo `scadenza`). */
   scadenzaData: string | null;
-  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }> } | null;
+  /**
+   * La proroga, valida solo con le sue condizioni. L13 (ondata 7, O7-1): `areaDedalo` è l'area (di un altro Dedalo, il Da'at della guida) in cui
+   * il bersaglio si sposta finché vale la proroga, passata la scadenza; null = resta dov'è. `areaDedaloNome` e `dedaloNome` per mostrarla.
+   */
+  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>; areaDedalo: string | null; areaDedaloNome: string | null; dedaloNome: string | null } | null;
+  /** L13 (ondata 7, O7-1): le condizioni proprie per COMPLETARLA, oltre al Dedalo aperto (stesso vocabolario dello sblocco); vuoto = solo il Dedalo. */
+  completamentoCondizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
   /**
    * Il bersaglio come Ombra del compendio: livello e affinità si leggono da lì (null = i campi propri di `bersaglio`). Il server li risolve
    * dalla scheda dell'Ombra (livello, affinità della sua Persona con sopra le proprie: la stessa lettura del compendio delle Ombre) e li
@@ -2511,6 +2543,16 @@ export interface StatoCalcolatoRichiestaDto {
   giorniAllaScadenza: number | null;
   /** Vero se si può accettare adesso (da disponibile o da verificare). */
   accettabile: boolean;
+  /**
+   * L13 (ondata 7, O7-1): vero se si può segnare completata adesso: il Dedalo del bersaglio è aperto nella partita (quello della proroga, se il
+   * bersaglio si è spostato) e nessuna condizione propria di completamento è falsa. Accettarla non lo chiede: la guida fa ricevere Richieste
+   * prima che il loro Dedalo si apra. Una completata è sempre `true`.
+   */
+  completabile: boolean;
+  /** Perché non si può ancora completare («Il bersaglio è nel Dedalo di …: si apre dopo …», la condizione propria che manca); vuoto se completabile. */
+  motiviCompletamento: string[];
+  /** Il Dedalo e l'area dove sta il bersaglio oggi: quelli della proroga quando vale e la scadenza è passata (il bersaglio si è spostato). */
+  doveOggi: { dedalo: string | null; dedaloNome: string | null; areaDedalo: string | null; areaDedaloNome: string | null; spostato: boolean };
   /** L13 (decisione 18): vero se gli yen della ricompensa passano ancora da una proposta «Applica» nata prima (aperta, o applicata e non tornata
    *  a zero): allora non entrano da soli e vale quella proposta. Assente se entrano da soli. */
   yenDaProposta?: boolean;
@@ -2749,7 +2791,11 @@ export interface SpilloRaccoltaDto {
 }
 
 /** Una Richiesta come elemento di un'area del dedalo (o da collocare), con il suo stato nella partita. */
-export interface RichiestaDelDedaloDto { chiave: string; nome: string; stato: StatoRichiesta | null }
+export interface RichiestaDelDedaloDto {
+  chiave: string; nome: string; stato: StatoRichiesta | null;
+  /** O7-1: con la partita, solo se oggi non si può completare (Dedalo del bersaglio chiuso, condizioni proprie false): perché. */
+  motiviCompletamento?: string[];
+}
 
 /**
  * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
@@ -2953,7 +2999,11 @@ export interface GiornoCalendarioDto {
 export interface SettimanaGuidaDto {
   numero: number;
   titolo: string;
+  /** «09/04 - 10/04», generato dai giorni della settimana (`dal`, `al`; L13 O7-4); il testo della guida solo se la settimana non ha giorni. */
   periodo: string;
+  /** Primo e ultimo giorno della settimana (MM-GG), da `giorno.settimana`; null se nessun giorno è della settimana. */
+  dal: string | null;
+  al: string | null;
   url: string;
   riassunto: string;
   incertezze: string;

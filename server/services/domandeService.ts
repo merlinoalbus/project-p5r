@@ -9,7 +9,10 @@ import { registraEvento } from './storicoService.js';
 import { nomeDote } from './partiteService.js';
 import { puntiDote } from './puntiDoti.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
-import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
+import type { DomandaDto, DomandeDto, EsameDto, PremioEsameDto } from '../../shared/types.js';
+import { CONFIDENTI_CON_BONUS_ESAME, MOLTIPLICATORE_ESAME, nomePiazzamentoEsame, PIAZZAMENTI_ESAME, type PremioPiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { eDote } from '../../shared/doti.js';
+import { premiDellEsame } from './piazzamentoEsamiService.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { righePerEsame } from './esamiCollegamento.js';
 import { vociCollegate } from './vociDiStato.js';
@@ -28,11 +31,18 @@ export function indiceGiornoScolastico(data: string): number {
 }
 
 /** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
-function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>, voceUid?: string): DomandaDto {
-  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id), ...(voceUid ? { voceUid } : {}) };
+function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>, voceUid?: string, premioVoce?: DomandaDto['premioVoce']): DomandaDto {
+  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id), ...(voceUid ? { voceUid } : {}), ...(premioVoce ? { premioVoce } : {}) };
 }
 
-/** Gli esami in ordine, con giorni e domande composti dalle righe riassuntive di `domanda` (R9-18: la fonte unica); `ordine` corre su tutto l'esame. */
+/** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi (Doti e trofeo). */
+function premioEsameDto(p: PremioPiazzamentoEsame): PremioEsameDto {
+  const trofeo = p.trofeo ? { chiave: p.trofeo, nome: (prepared('SELECT nome FROM trofeo WHERE chiave = ?').pluck().get(p.trofeo) as string | undefined) ?? 'Trofeo non più nell’elenco' } : null;
+  return { piazzamento: p.piazzamento, nome: nomePiazzamentoEsame(p.piazzamento), doti: p.doti.map((d) => ({ dote: d.dote, nome: nomeDote(d.dote), note: d.note })), trofeo };
+}
+
+/** Gli esami in ordine, con giorni e domande composti dalle righe riassuntive di `domanda` (R9-18: la fonte unica); `ordine` corre su tutto l'esame.
+ *  L13 (ondata 7, O7-2): con i premi per piazzamento e il requisito di Conoscenza per il primo posto, dalle colonne dell'esame (`premiDellEsame`). */
 export function esami(): EsameDto[] {
   const premi = ricompensePerFonte('esame');
   const righe = (prepared("SELECT data, tipo, ordine, risposte_json FROM domanda WHERE tipo IN ('esame-medio', 'esame-finale') ORDER BY ordine").all() as Array<{ data: string; tipo: string; ordine: number; risposte_json: string }>)
@@ -45,8 +55,20 @@ export function esami(): EsameDto[] {
       const sue = righeDi.get(e.chiave) ?? [];
       const domande = sue.flatMap((r) => (JSON.parse(r.risposte_json) as Array<{ testo: string; domanda?: string }>).map((x) => ({ data: r.data, domanda: x.domanda ?? '', risposta: x.testo })))
         .map((d, i) => ({ ...d, ordine: i + 1 }));
-      return { chiave: e.chiave, nome: e.nome, date: [...new Set(sue.map((r) => r.data))], dataRisultati: e.data_risultati, domande, note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [] };
+      const p = premiDellEsame(e.chiave);
+      return { chiave: e.chiave, nome: e.nome, date: [...new Set(sue.map((r) => r.data))], dataRisultati: e.data_risultati, domande, note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [],
+        premi: (p?.premi ?? []).map(premioEsameDto), requisitoConoscenza: p?.requisito ?? null };
     });
+}
+
+/** L13 (ondata 7, O7-2): il moltiplicatore dell'esame come lo descrive la regola del codice (`shared/puntiConfidenti.ts`): i Confidenti che lo
+ *  ricevono, con il nome della guida, e i piazzamenti che moltiplicano (gli altri valgono ×1). */
+function moltiplicatoreDto(): DomandeDto['moltiplicatore'] {
+  const nome = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck();
+  return {
+    confidenti: CONFIDENTI_CON_BONUS_ESAME.flatMap((chiave) => { const n = nome.get(chiave) as string | undefined; return n ? [{ chiave, nome: n }] : []; }),
+    piazzamenti: PIAZZAMENTI_ESAME.flatMap(({ chiave, nome: n }) => MOLTIPLICATORE_ESAME[chiave] !== 1 ? [{ piazzamento: chiave, nome: n, valore: MOLTIPLICATORE_ESAME[chiave] }] : []),
+  };
 }
 
 /** Tutte le domande in ordine di data, con lo stato «fatta» della partita (se indicata) e le prossime rispetto alla data di gioco. */
@@ -65,13 +87,42 @@ export function domande(partitaId?: number): DomandeDto {
   const premiDomande = ricompensePerFonte('domanda', righe.flatMap((r) => r.chiave ? [r.chiave] : []));
   // la voce del Diario che segna la domanda (se una sola): la pagina ne mostra il «Applica» della Conoscenza (R12-01/5)
   const voci = vociCollegate('domanda');
-  const tutte = righe.map((r) => domandaDto(r, fatte, r.chiave ? premiDomande.get(r.chiave) ?? [] : [], voci.get(String(r.id))?.voceUid));
+  // L13 (ondata 7, O7-2): la ricompensa è ciò che danno le voci che segnano la domanda (decisione 9), dai loro effetti
+  const premiVoci = premiDalleVociDelleDomande();
+  const tutte = righe.map((r) => domandaDto(r, fatte, r.chiave ? premiDomande.get(r.chiave) ?? [] : [], voci.get(String(r.id))?.voceUid, premiVoci.get(r.id)));
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   // le domande non fatte della **prima** data da oggi in poi (una o due): il prossimo appuntamento
   const daFare = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi);
   const prossime = daFare.length ? daFare.filter((d) => d.data === daFare[0].data) : [];
+  // le note generali (testo informativo); i premi stanno negli esami, il moltiplicatore nella regola del codice
   const premi = prepared("SELECT json FROM esame_premi WHERE chiave = 'premi'").get() as { json: string } | undefined;
-  return { domande: tutte, esami: esami(), premi: premi ? (JSON.parse(premi.json) as DomandeDto['premi']) : null, dataGioco, prossime, fatte: fatte.size, totale: tutte.length };
+  const note = premi ? JSON.parse(premi.json) as { fonte?: unknown; noteGenerali?: unknown } : null;
+  const testo = (x: unknown): string | undefined => (typeof x === 'string' && x.trim() ? x : undefined);
+  return { domande: tutte, esami: esami(), premi: note ? { ...(testo(note.fonte) ? { fonte: testo(note.fonte) } : {}), ...(testo(note.noteGenerali) ? { noteGenerali: testo(note.noteGenerali) } : {}) } : null,
+    moltiplicatore: moltiplicatoreDto(), dataGioco, prossime, fatte: fatte.size, totale: tutte.length };
+}
+
+/**
+ * L13 (ondata 7, O7-2; decisione 9): per ogni domanda citata da almeno una voce del Diario (effetto «domanda»), ciò che le voci danno: le Doti
+ * dei loro effetti, una volta sola per Dote e note, e se una di loro chiede alla spunta il piazzamento di un esame. Tutte le voci che la citano,
+ * non solo la voce «collegata» (`vociCollegate`, che chiede un legame univoco per la spunta dalla Guida): qui si dice che cosa il Diario dà.
+ */
+export function premiDalleVociDelleDomande(): Map<number, NonNullable<DomandaDto['premioVoce']>> {
+  const righe = prepared(`SELECT d.chiave AS domanda, e.tipo AS tipo, e.dati_json AS dati
+      FROM main.voce_effetto d JOIN main.voce_effetto e ON e.voce_uid = d.voce_uid
+     WHERE d.tipo = 'domanda' AND e.tipo IN ('dote', 'esame') ORDER BY d.chiave, d.voce_uid, e.ordine`).all() as Array<{ domanda: string; tipo: string; dati: string }>;
+  const out = new Map<number, NonNullable<DomandaDto['premioVoce']>>();
+  for (const id of prepared("SELECT DISTINCT chiave FROM main.voce_effetto WHERE tipo = 'domanda'").pluck().all() as string[]) out.set(Number(id), { doti: [], esameAllaSpunta: false });
+  for (const r of righe) {
+    const p = out.get(Number(r.domanda));
+    if (!p) continue;
+    let e: unknown;
+    try { e = JSON.parse(r.dati); } catch { continue; }
+    const x = e as { dote?: unknown; note?: unknown };
+    if (r.tipo === 'esame') p.esameAllaSpunta = true;
+    else if (eDote(x.dote) && (x.note === 1 || x.note === 2 || x.note === 3) && !p.doti.some((d) => d.dote === x.dote && d.note === x.note)) p.doti.push({ dote: x.dote, nome: nomeDote(x.dote), note: x.note });
+  }
+  return out;
 }
 
 /**

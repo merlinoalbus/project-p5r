@@ -32,6 +32,7 @@ import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { SceltaRegalo } from '../catalogo/SceltaRegalo';
 import { esitoDelRegalo } from '../../../shared/regali';
+import type { PiazzamentoEsame } from '../../../shared/puntiConfidenti';
 import { RigaConfidente } from './RigaConfidente';
 import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
@@ -104,7 +105,9 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   // Il piazzamento agli esami sta nella partita (vale fino ai risultati dell'esame successivo): i pulsanti lo scrivono per l'esame che vale adesso.
   const [invito, setInvito] = useState(false);
   const piazzamentoEsame = dati?.[0]?.piazzamentoEsame ?? null;
-  const scegliPiazzamento = (p: 'primo' | 'primi-10') => {
+  // L13 (ondata 7, O7-2): la stessa riga che la spunta della voce dei risultati scrive («Sopra la media» compreso: lì il moltiplicatore non c'è,
+  // e nessuno dei due pulsanti risulta acceso); qui si scelgono i due piazzamenti che moltiplicano, o si tolgono
+  const scegliPiazzamento = (p: Extract<PiazzamentoEsame, 'primo' | 'primi-10'>) => {
     if (!piazzamentoEsame) return;
     void impostaPiazzamentoEsame(partitaId, piazzamentoEsame.esame, piazzamentoEsame.piazzamento === p ? null : p)
       .then(() => ricarica())

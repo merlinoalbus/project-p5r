@@ -7,6 +7,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { CampoTesto } from '../shared/Campo';
 import { GestiPartita } from '../partita/GestiPartita';
 import { PreparazioneSessionePesca } from './PreparazioneSessionePesca';
 import { MomentoPescaForm } from './MomentoPescaForm';
@@ -156,11 +157,11 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
         <Selettore etichetta="Fatto osservato" valore={valore} vuoto="Dichiara l’esito" opzioni={[{ chiave: 'avvenuto', nome: 'Avvenuto' }, { chiave: 'non-avvenuto', nome: 'Non avvenuto al momento indicato' }, { chiave: 'ignoto', nome: 'Ignoto' }]} onCambia={v => setValore(v as ValoreFattoPesca)} />
         <Selettore etichetta="Conosci il momento dell’osservazione?" valore={dataFatto} vuoto="Dichiara il rapporto con il tempo" opzioni={[{ chiave: 'nota', nome: 'Conosco giorno, fascia e ordine della visita' }, { chiave: 'ignota', nome: 'Non conosco il momento' }]} onCambia={setDataFatto} />
         {dataFatto === 'nota' && <MomentoPescaForm valore={momento} onCambia={setMomento} />}
-        <label className="flex min-w-0 flex-col gap-1">Nota facoltativa<textarea className="form-input" maxLength={2000} value={nota} onChange={e => setNota(e.target.value)} /></label>
+        <CampoTesto etichetta="Nota facoltativa" tipo="lungo" valore={nota} massimo={2000} onCambia={setNota} />
         <p className="m-0 text-text-secondary">La dichiarazione non fabbrica una visita o un turno. Boss non implica Guardiano; un fatto senza data non ricostruisce le condizioni del passato.</p>
       </>}
-      {editor.tipo === 'esca' && <><MomentoPescaForm valore={momento} onCambia={setMomento} /><label className="flex flex-col gap-1">Boilie sospetto effettivamente acquistate<input type="number" className="form-input" min={1} max={1_000_000} step={1} value={quantita} onChange={e => setQuantita(e.target.value)} /></label><p className="m-0">Costo per esca nella fonte letta: {stato.regola.dati?.costoEscaPunti.toLocaleString('it-IT') ?? 'non leggibile'} punti pesca. Il possesso o l’uso di un’esca non ne prova l’acquisto. La spesa resta una proposta da decidere.</p></>}
-      {editor.tipo === 'saldo' && <><p className="m-0">Saldo attualmente osservato: {stato.saldoPunti === null ? 'ignoto' : stato.saldoPunti.toLocaleString('it-IT')} punti pesca.</p><label className="flex flex-col gap-1">Saldo che hai osservato nel gioco<input type="number" className="form-input" min={0} max={999_999_999} step={1} value={quantita} onChange={e => setQuantita(e.target.value)} /></label><p className="m-0">Questa rettifica non riconosce singole spese come già conteggiate, non modifica le attribuzioni provate e non elimina proposte.</p></>}
+      {editor.tipo === 'esca' && <><MomentoPescaForm valore={momento} onCambia={setMomento} /><CampoTesto etichetta="Boilie sospetto effettivamente acquistate" tipo="numero" valore={quantita} aiuto="Da 1 a 1.000.000" onCambia={setQuantita} /><p className="m-0">Costo per esca nella fonte letta: {stato.regola.dati?.costoEscaPunti.toLocaleString('it-IT') ?? 'non leggibile'} punti pesca. Il possesso o l’uso di un’esca non ne prova l’acquisto. La spesa resta una proposta da decidere.</p></>}
+      {editor.tipo === 'saldo' && <><p className="m-0">Saldo attualmente osservato: {stato.saldoPunti === null ? 'ignoto' : stato.saldoPunti.toLocaleString('it-IT')} punti pesca.</p><CampoTesto etichetta="Saldo che hai osservato nel gioco" tipo="numero" valore={quantita} onCambia={setQuantita} /><p className="m-0">Questa rettifica non riconosce singole spese come già conteggiate, non modifica le attribuzioni provate e non elimina proposte.</p></>}
       </fieldset>{pendente && <p role="alert" className="m-0 text-warning">Il gesto originale resta da verificare nel registro. Nessuna nuova dichiarazione viene inviata.</p>}
       <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost touch" onClick={onChiudi}>Annulla</button><PulsanteVisivo type="submit" tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rivedi questa dichiarazione" disabled={!completo || !!pendente} /></div>
     </form>}

@@ -16,9 +16,9 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 const richieste: RichiestaDelDedaloDto[] = [{ chiave: 'r1', nome: 'Un ex appiccicoso', stato: 'accettata' }, { chiave: 'r2', nome: 'Il treno fantasma', stato: 'completata' }];
 
 /** Disegna l'elenco e restituisce i richiami. */
-function monta(partitaId: number | null = 4, modifica = false) {
+function monta(partitaId: number | null = 4, modifica = false, elenco: RichiestaDelDedaloDto[] = richieste) {
   const r = { onRichiesta: vi.fn(), onModifica: vi.fn(), onRicarica: vi.fn().mockResolvedValue(undefined) };
-  render(<MemoryRouter><ElencoRichieste richieste={richieste} dedalo="mementos-01-qimranut" area="q-1" aree={[{ chiave: 'q-1', nome: 'Banchina' }]} partitaId={partitaId} modifica={modifica} {...r} /></MemoryRouter>);
+  render(<MemoryRouter><ElencoRichieste richieste={elenco}dedalo="mementos-01-qimranut" area="q-1" aree={[{ chiave: 'q-1', nome: 'Banchina' }]} partitaId={partitaId} modifica={modifica} {...r} /></MemoryRouter>);
   return r;
 }
 
@@ -56,6 +56,21 @@ it('da tastiera: Tab entra sullo stato scelto, le frecce scelgono il seguente o 
   await waitFor(() => expect(api.impostaStatoRichiesta).toHaveBeenLastCalledWith(4, 'r2', null));
   fireEvent.keyDown(within(seconda).getByRole('radio', { name: 'Fatta' }), { key: 'Tab' });
   expect(api.impostaStatoRichiesta).toHaveBeenCalledTimes(2);
+});
+
+it('O7-1: col Dedalo del bersaglio chiuso «Fatta» è spento col perché, e le frecce lo saltano', async () => {
+  const motivo = 'Il bersaglio è nel Dedalo di Aiyatsbus: si apre dopo il Palazzo di Madarame';
+  const { onRichiesta } = monta(4, false, [{ chiave: 'r1', nome: 'Un bullo', stato: 'accettata', motiviCompletamento: [motivo] }]);
+  const gruppo = screen.getByRole('radiogroup', { name: 'Stato di «Un bullo»' });
+  const fatta = within(gruppo).getByRole('radio', { name: 'Fatta' });
+  expect(fatta).toBeDisabled();
+  expect(fatta).toHaveAttribute('title', `Si completa dopo: ${motivo}`);
+  expect(fatta).toHaveAccessibleDescription(`Si completa dopo: ${motivo}`);
+  // da «Accettata» la freccia avanti salta «Fatta» e torna a «—»
+  api.impostaStatoRichiesta.mockResolvedValue({ chiave: 'r1', stato: null });
+  fireEvent.keyDown(within(gruppo).getByRole('radio', { name: 'Accettata' }), { key: 'ArrowRight' });
+  await waitFor(() => expect(onRichiesta).toHaveBeenCalledWith('r1', null));
+  expect(api.impostaStatoRichiesta).toHaveBeenCalledWith(4, 'r1', null);
 });
 
 it('senza partita niente stati; in «Modifica la guida» «Modifica» e l\'area', () => {

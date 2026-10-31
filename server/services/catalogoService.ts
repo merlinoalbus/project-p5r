@@ -51,8 +51,10 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // statistiche vivono in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`). Restano scrivibili solo
   // senza il catalogo (pacchetti di prima di M7, `campiDisponibili`), dove la riga è l'unico punto.
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
-  libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
-  film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
+  // L13 (ondata 7, O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
+  // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense
+  libro: ['condizioni_json', 'nome', 'prezzo', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
+  film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
   // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
@@ -257,29 +259,21 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
 /** Le regole che valgono su ogni scrittura, prima di toccare la tabella.
  *
  * - **Invariante della sede** (072): con una sede, `luogo_chiave` è il quartiere della sede;
- * - **effetti dal modulo vecchio**: finché il modulo scrive `dote`/`note`/`note_successive` (libri,
- *   film), `effetto_json` (libri) o `doti_json` (attività) senza `effetti_json`, la dichiarazione
- *   strutturata si ricava da lì come ha fatto la migrazione 074 — ma **solo se quei campi cambiano
- *   davvero** rispetto alla riga, e conservando le voci che non vengono da lì (uno «sblocca un
- *   quartiere» letto dalla prosa, una voce «descrittivo», le voci con condizioni come lo studio
- *   con la pioggia): il modulo rimanda sempre tutti i campi, e ricostruire ogni volta cancellerebbe
- *   ciò che la migrazione aveva ricavato. Su una riga nuova non c'è niente da conservare;
+ * - **effetti dal modulo vecchio**: finché il modulo scrive `doti_json` (attività) senza `effetti_json`, la dichiarazione
+ *   strutturata si ricava da lì come ha fatto la migrazione 074 — ma **solo se quel campo cambia
+ *   davvero** rispetto alla riga, e conservando le voci che non vengono da lì (una voce «descrittivo», le voci con
+ *   condizioni come lo studio con la pioggia): il modulo rimanda sempre tutti i campi, e ricostruire ogni volta cancellerebbe
+ *   ciò che la migrazione aveva ricavato. Su una riga nuova non c'è niente da conservare. Libri e film non hanno più campi
+ *   vecchi (L13 O7-4, migrazione 313: `dote`, `note`, `note_successive`, `effetto_json` non si scrivono e non sono una fonte);
  * - **tracciamento** dal tipo, dove il modulo non lo dice. */
-const CAMPI_EFFETTI: Record<string, readonly string[]> = { libro: ['dote', 'note', 'effetto_json'], film: ['dote', 'note', 'note_successive'], attivita: ['doti_json'] };
+const CAMPI_EFFETTI: Record<string, readonly string[]> = { attivita: ['doti_json'] };
 
-/** Le voci di effetto ricavate dai campi del modulo vecchio: per libri e film la Dote con le sue note (e, per i film, la
- *  voce `ripetuto` con `note_successive`), per i libri anche `effetto_json`, per le attività ogni Dote di `doti_json`.
- *  Un JSON illeggibile non dà voci. */
+/** Le voci di effetto ricavate dai campi del modulo vecchio delle attività: ogni Dote di `doti_json`. Un JSON illeggibile non dà voci. */
 function vociDaiCampiVecchi(tipo: TipoCatalogo, d: Record<string, unknown>): VoceEffetto[] {
   /** Una voce «dote» se nome e note sono validi (nome non vuoto, note numeriche positive), con la chiave in minuscolo; altrimenti null. */
   const dote = (nome: unknown, note: unknown, extra: Partial<VoceEffetto> = {}): VoceEffetto | null =>
     typeof nome === 'string' && nome && typeof note === 'number' && note > 0 ? { effetto: { famiglia: 'dote', dote: nome.toLowerCase(), note }, ...extra } : null;
   const voci: VoceEffetto[] = [];
-  if (tipo === 'libro' || tipo === 'film') {
-    const prima = dote(d.dote, d.note); if (prima) voci.push(prima);
-    if (tipo === 'film') { const dopo = dote(d.dote, d.note_successive, { ripetuto: true }); if (dopo) voci.push(dopo); }
-    if (tipo === 'libro' && typeof d.effetto_json === 'string') { try { voci.push(...normalizzaVociEffetto([{ effetto: JSON.parse(d.effetto_json) }])); } catch { /* dichiarazione illeggibile: nessuna voce */ } }
-  }
   if (tipo === 'attivita' && typeof d.doti_json === 'string') {
     let doti: Array<{ dote?: string | null; note?: number | null }> = [];
     try { doti = JSON.parse(d.doti_json) as typeof doti; } catch { doti = []; }
@@ -338,7 +332,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     const cambiati = !esistente || campi.some((c) => c in d && (d[c] ?? null) !== (esistente[c] ?? null));
     if (cambiati) {
       const attuali = esistente ? normalizzaVociEffetto((() => { try { return JSON.parse(String(esistente.effetti_json ?? '[]')); } catch { return []; } })()) : [];
-      // i campi vecchi non inviati si leggono dalla riga: un PUT che tocca solo `note_successive` non deve perdere la voce della prima visione
+      // i campi vecchi non inviati si leggono dalla riga (oggi solo `doti_json` delle attività)
       const campiVecchi = Object.fromEntries(campi.map((c) => [c, c in d ? d[c] : (esistente?.[c] ?? null)]));
       d.effetti_json = JSON.stringify(normalizzaVociEffetto([...vociDaiCampiVecchi(tipo, campiVecchi), ...attuali.filter((v) => !eVoceDerivabile(v))]));
     }

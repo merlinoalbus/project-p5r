@@ -61,8 +61,11 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null;
   /** L13 (migrazione 233): gli esiti dichiarati; assente su uno schema di prima. */
   esiti_json?: string | null }
-interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+// L13 (ondata 7, O7-4, migrazione 313): disponibilità, Doti, sblocco e «dove» dei libri, periodo e Doti dei film non si leggono più dalle
+// colonne in prosa (`disponibile_dal`, `dote`, `note`, `sblocca`, `dove`, `periodo`, `note_successive`): le dicono condizioni, effetti,
+// articoli, posizioni e ricompense. Le colonne restano nello schema (vuote) e non sono una fonte.
+interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; prezzo: number | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate. La condizione non nasconde niente:
  *  dice «non ancora», che in una guida è un'informazione, non un ostacolo. */
@@ -97,6 +100,31 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
     out.set(a.oggetto_chiave, elenco);
   }
   return out;
+}
+
+/** L13 (O7-4): le Richieste che danno ciascun libro in ricompensa (`ricompensa_oggetto`, per l'oggetto del catalogo del libro), in ordine:
+ *  la scheda le dice al posto del vecchio testo «dove». Vuoto senza catalogo. */
+function ricompenseDeiLibri(): Map<string, NonNullable<LibroDto['ricompensaDi']>> {
+  const out = new Map<string, NonNullable<LibroDto['ricompensaDi']>>();
+  if (!catalogoOggettiDisponibile()) return out;
+  for (const r of prepared(`SELECT l.chiave AS libro, q.chiave, q.nome FROM ricompensa_oggetto ro
+      JOIN libro l ON l.catalogo_chiave = ro.catalogo_chiave JOIN richiesta q ON q.chiave = ro.fonte_chiave
+      WHERE ro.fonte_tipo = 'richiesta' ORDER BY l.ordine, q.ordine, ro.ordine`).all() as Array<{ libro: string; chiave: string; nome: string }>) {
+    const elenco = out.get(r.libro) ?? [];
+    elenco.push({ tipo: 'richiesta', chiave: r.chiave, nome: r.nome });
+    out.set(r.libro, elenco);
+  }
+  return out;
+}
+
+/** Da dove viene un libro, in parole, per il registro della partita: i negozi che lo vendono, altrimenti le Richieste che lo danno, altrimenti
+ *  le posizioni; «Provenienza non indicata» se nessuna. */
+function provenienzaDelLibro(chiave: string): string {
+  const negozi = [...new Set((articoliCollegati('libri').get(chiave) ?? []).map((n) => n.negozioNome))];
+  if (negozi.length) return negozi.join(', ');
+  const ricompense = ricompenseDeiLibri().get(chiave) ?? [];
+  if (ricompense.length) return ricompense.map((r) => `Ricompensa di «${r.nome}»`).join(', ');
+  return (posizioniLibri().get(chiave) ?? []).map((p) => p.etichetta).join(', ') || 'Provenienza non indicata';
 }
 
 /** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
@@ -166,7 +194,7 @@ function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
 
 /** Un libro come DTO con il suo stato nella partita: sessioni totali, avanzamento limitato fra 0 e il totale (pieno se il
  *  libro risulta letto), quartiere che apre, negozi che lo vendono, posizioni e disponibilità. */
-const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, apre: Map<string, NonNullable<LibroDto['apre']>> = new Map(), catalogo: CatalogoLetture = new Map()): LibroDto => {
+const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, apre: Map<string, NonNullable<LibroDto['apre']>> = new Map(), catalogo: CatalogoLetture = new Map(), ricompense: Map<string, NonNullable<LibroDto['ricompensaDi']>> = new Map()): LibroDto => {
   const oggetto = catalogo.get(r.chiave);
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
@@ -178,8 +206,8 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   // Compatibilità dei vecchi campi API: stessa fonte calcolata, mai l'effetto storico.
   const quartiere = posti.find((p) => p.tipo === 'quartiere');
   return {
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, dove: r.dove, ...datiCatalogoLettura(oggetto, r.prezzo), disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
-    ...effettiDto(r.effetti_json, true), negozi: negozi.get(r.chiave) ?? [],
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, r.prezzo), sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
+    ...effettiDto(r.effetti_json, true), negozi: negozi.get(r.chiave) ?? [], ricompensaDi: ricompense.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
     ...conDisponibilita(r.condizioni_json, st),
@@ -194,7 +222,7 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
   const iniziato = progresso > 0;
   return {
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, r.prezzo, r.dove === 'cinema'), negozi: negozi.get(r.chiave) ?? [], dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, dettagli: r.dettagli,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, r.prezzo, r.dove === 'cinema'), negozi: negozi.get(r.chiave) ?? [], dove: r.dove, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
     ...conDisponibilita(r.condizioni_json, st),
@@ -288,7 +316,8 @@ function elencoLibri(partitaId: number | undefined, stato: StatoLetture = lettur
   const negozi = articoliCollegati('libri');
   const apre = postiApertiDaiLibri();
   const catalogo = oggettiPerFonte('libro');
-  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st, apre, catalogo));
+  const ricompense = ricompenseDeiLibri();
+  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st, apre, catalogo, ricompense));
 }
 
 /** I libri non nascosti con i totali della partita: libri finiti, sessioni lette e da leggere, e se vale «Lettura rapida». */
@@ -503,7 +532,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       const dote = doti.length ? ` · Dote: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
-      const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
+      const dove = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
     }
     // ---- Il conseguimento dà le sue Doti: un libro finito, un film visto, un gioco completato ----
@@ -525,7 +554,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   // che cosa il conseguimento dà (o, disfatto, dava): da segnare a mano nelle Doti
   const daSegnare = daSegnareFra(registroPrima, puntiRegistrati(partitaId, tipo, chiave));
   const statoDopo = statoDisponibilitaPartita(partitaId);
-  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), statoDopo, postiApertiDaiLibri(), catalogo) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm(), statoDopo, catalogo, negoziPerFonte('film')) : videogiocoDto(riga as RigaAttivita, stato, sediAttivita(), articoliCollegati('videogiochi'), statoDopo, catalogo);
+  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), statoDopo, postiApertiDaiLibri(), catalogo, ricompenseDeiLibri()) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm(), statoDopo, catalogo, negoziPerFonte('film')) : videogiocoDto(riga as RigaAttivita, stato, sediAttivita(), articoliCollegati('videogiochi'), statoDopo, catalogo);
   return daSegnare.length ? { ...dto, daSegnare } : dto;
 }
 

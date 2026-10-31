@@ -16,7 +16,7 @@ import { conCestino } from './cestinoService.js';
 import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, RiepilogoRichiesteDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../../shared/types.js';
 import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibilitaService.js';
-import { valutaInsieme } from './condizioni/valutatore.js';
+import { esitoAperturaDelDedalo, valutaInsieme } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { slug } from '../../shared/slug.js';
 import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggettiLetture.js';
@@ -28,9 +28,14 @@ import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } 
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
 interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
-  condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null }
+  condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null;
+  /** L13 (ondata 7, migrazione 310): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
+  completamento_condizioni_json: string | null; proroga_area_dedalo_chiave: string | null; proroga_area_nome: string | null; proroga_dedalo_chiave: string | null; proroga_dedalo_nome: string | null }
 
-const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine, ad.nome AS area_dedalo_nome, o.nome AS ombra_nome FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave LEFT JOIN area_dedalo ad ON ad.chiave = r.area_dedalo_chiave LEFT JOIN ombra o ON o.chiave = r.ombra_chiave';
+const SQL = `SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordine AS area_ordine, ad.nome AS area_dedalo_nome, o.nome AS ombra_nome,
+  pa.nome AS proroga_area_nome, pd.chiave AS proroga_dedalo_chiave, pd.nome AS proroga_dedalo_nome
+  FROM richiesta r LEFT JOIN confidente c ON c.chiave = r.confidente_chiave LEFT JOIN dungeon_area a ON a.chiave = r.area_chiave LEFT JOIN area_dedalo ad ON ad.chiave = r.area_dedalo_chiave LEFT JOIN ombra o ON o.chiave = r.ombra_chiave
+  LEFT JOIN area_dedalo pa ON pa.chiave = r.proroga_area_dedalo_chiave LEFT JOIN dungeon_area pd ON pd.chiave = pa.dedalo_chiave`;
 
 /** Quanti giorni di gioco prima della scadenza una Richiesta è «in scadenza» (pagina, Home): una costante sola, condivisa col client. */
 const GIORNI_AVVISO_SCADENZA = GIORNI_AVVISO_SCADENZA_RICHIESTE;
@@ -84,6 +89,44 @@ function giornoDellAnno(d: string): number {
   return n + g - 1;
 }
 
+/** Vale la proroga della scadenza nella partita? Solo se c'è e le sue condizioni sono tutte vere. */
+function prorogaValida(r: RigaRichiesta, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>): boolean {
+  if (!r.proroga_data) return false;
+  return valutaInsieme(leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)), st).stato === 'disponibile';
+}
+
+/**
+ * L13 (ondata 7, O7-1): dove sta il bersaglio oggi e se la Richiesta si può COMPLETARE. Il bersaglio sta nel Dedalo della Richiesta; passata la
+ * scadenza, se la proroga vale e dice un'area (`proroga_area_dedalo_chiave`), si è spostato lì (la guida: «lo ritroverete nel Dedalo di Da'at
+ * durante il terzo semestre»). Si completa solo col Dedalo di oggi aperto nella partita (la sua condizione d'apertura, migrazione 305, con lo
+ * stesso valutatore) e senza condizioni proprie di completamento false (`completamento_condizioni_json`). Un Dedalo senza condizione d'apertura
+ * e una condizione grigia non bloccano: il dato che manca non impedisce di registrare quel che è successo nel gioco. Accettare non lo chiede.
+ */
+function completamento(r: RigaRichiesta, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>, prorogaVale: boolean):
+  { completabile: boolean; motivi: string[]; dedaloChiuso: boolean; doveOggi: StatoCalcolatoRichiestaDto['doveOggi'] } {
+  const oltreLaScadenza = !!st.dataGioco && !!r.scadenza_data && ordineGioco(st.dataGioco) > ordineGioco(r.scadenza_data);
+  const spostato = prorogaVale && oltreLaScadenza && !!r.proroga_area_dedalo_chiave && !!r.proroga_dedalo_chiave;
+  const doveOggi = spostato
+    ? { dedalo: r.proroga_dedalo_chiave, dedaloNome: r.proroga_dedalo_nome, areaDedalo: r.proroga_area_dedalo_chiave, areaDedaloNome: r.proroga_area_nome, spostato: true }
+    : { dedalo: r.area_chiave, dedaloNome: r.area_nome, areaDedalo: r.area_dedalo_chiave, areaDedaloNome: r.area_dedalo_nome, spostato: false };
+  const motivi: string[] = [];
+  let dedaloChiuso = false;
+  if (doveOggi.dedalo) {
+    const a = esitoAperturaDelDedalo(doveOggi.dedalo, st, nomi);
+    if (a.stato === 'rosso') {
+      dedaloChiuso = true;
+      const dove = `${doveOggi.dedaloNome ?? doveOggi.dedalo}${spostato && doveOggi.areaDedaloNome ? `, ${doveOggi.areaDedaloNome}` : ''}`;
+      motivi.push(`Il bersaglio è nel ${dove}: si apre ${a.condizione}`);
+    }
+  }
+  const proprie = leggiCondizioniSalvate(r.completamento_condizioni_json).map((x) => condizioneConTesto(x, nomi));
+  if (proprie.length) {
+    const v = valutaInsieme(proprie, st);
+    for (const q of v.requisiti) if (q.stato === 'rosso' && q.bloccante !== false) motivi.push(`Per completarla: ${q.dettaglio}`);
+  }
+  return { completabile: motivi.length === 0, motivi, dedaloChiuso, doveOggi };
+}
+
 /**
  * L13 (ondata 3): lo stato della Richiesta nella partita, calcolato (il client lo mostra, non lo valuta). Completata e accettata vengono
  * dallo stato segnato; poi la scadenza: passata la data (e la proroga, se c'è e le sue condizioni sono vere), è scaduta, salvo che sia già
@@ -94,12 +137,13 @@ function giornoDellAnno(d: string): number {
 function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>): StatoCalcolatoRichiestaDto {
   const oggi = st.dataGioco;
   const proroga = r.proroga_data ? leggiCondizioniSalvate(r.proroga_condizioni_json) : [];
-  const prorogaVale = !!r.proroga_data && valutaInsieme(proroga.map((c) => condizioneConTesto(c, nomi)), st).stato === 'disponibile';
+  const prorogaVale = prorogaValida(r, st, nomi);
   const scadenzaEffettiva = r.scadenza_data ? (prorogaVale ? r.proroga_data : r.scadenza_data) : null;
   const passata = !!oggi && !!scadenzaEffettiva && ordineGioco(oggi) > ordineGioco(scadenzaEffettiva);
   const giorni = oggi && scadenzaEffettiva && !passata ? giornoDellAnno(scadenzaEffettiva) - giornoDellAnno(oggi) : null;
-  const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false };
-  if (segnato === 'completata') return { ...base, stato: 'completata', motivi: [] };
+  const c = completamento(r, st, nomi, prorogaVale);
+  const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false, completabile: c.completabile, motiviCompletamento: c.motivi, doveOggi: c.doveOggi };
+  if (segnato === 'completata') return { ...base, completabile: true, motiviCompletamento: [], stato: 'completata', motivi: [] };
   if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta il ${dataLeggibile(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga al ${dataLeggibile(r.proroga_data)} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
   const daVerificare = testiDaVerificare(r);
   if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: daVerificare };
@@ -128,7 +172,10 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
   return {
     condizioni: leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi)),
     scadenzaData: r.scadenza_data,
-    proroga: r.proroga_data ? { data: r.proroga_data, condizioni: leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)) } : null,
+    proroga: r.proroga_data ? { data: r.proroga_data, condizioni: leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)),
+      // un'area eliminata (nel cestino) non si dice: la chiave resta salvata e torna valida col ripristino, senza spostare il bersaglio intanto
+      areaDedalo: r.proroga_area_nome !== null ? r.proroga_area_dedalo_chiave : null, areaDedaloNome: r.proroga_area_nome, dedaloNome: r.proroga_dedalo_nome } : null,
+    completamentoCondizioni: leggiCondizioniSalvate(r.completamento_condizioni_json).map((c) => condizioneConTesto(c, nomi)),
     ombra,
     yen: r.yen, esperienza: r.esperienza,
     ...(st ? { statoPartita: {
@@ -195,6 +242,22 @@ export function riepilogoRichieste(partitaId: number): RiepilogoRichiesteDto {
   return { accettate, inScadenza, giorniAvviso: GIORNI_AVVISO_SCADENZA };
 }
 
+/**
+ * O7-1: per le Richieste date, nella partita, perché oggi non si possono completare (le completabili non ci sono): la stessa lettura dello stato
+ * calcolato e del 409 di `impostaStatoRichiesta`, per i comandi che non leggono la Richiesta intera (l'elenco delle aree del dedalo).
+ */
+export function motiviCompletamentoRichieste(partitaId: number, chiavi: readonly string[]): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  if (!chiavi.length) return out;
+  const st = statoDisponibilitaPartita(partitaId);
+  const nomi = nomiCondizioniMemo();
+  for (const r of prepared(`${SQL} WHERE r.chiave IN (${chiavi.map(() => '?').join(', ')})`).all(...chiavi) as RigaRichiesta[]) {
+    const c = completamento(r, st, nomi, prorogaValida(r, st, nomi));
+    if (!c.completabile) out.set(r.chiave, c.motivi);
+  }
+  return out;
+}
+
 /** Tutti i dedali dei Memento, nell'ordine di percorrenza, con le loro aree (099): dove il modulo può mettere una Richiesta. */
 function collocazioni(): RichiesteDto['collocazioni'] {
   const dedali = (prepared("SELECT a.chiave, a.nome FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE d.tipo = 'mementos' ORDER BY a.ordine").all() as Array<{ chiave: string; nome: string }>)
@@ -214,11 +277,19 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
   getDb().transaction(() => {
     const rigaPrima = prepared('SELECT stato, updated_at FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta; updated_at: string } | undefined;
     const prima = rigaPrima?.stato ?? null;
-    // L13: «Accetta» solo da disponibile (bloccata o scaduta: 409 col motivo). Completarla resta sempre possibile (la spunta di una voce
-    // o chi gioca la segna fatta: un dato di sblocco sbagliato non deve impedire di registrare quel che è successo nel gioco)
+    // L13: «Accetta» solo da disponibile (bloccata o scaduta: 409 col motivo). Le condizioni di SBLOCCO non fermano il completamento (la spunta
+    // di una voce o chi gioca la segna fatta: un dato di sblocco sbagliato non deve impedire di registrare quel che è successo nel gioco)
     if (stato === 'accettata' && prima !== 'accettata') {
       const s = statoCalcolato(r, prima, statoDisponibilitaPartita(partitaId), nomiCondizioniMemo());
       if (!s.accettabile) throw httpErrors.conflict('richiesta-non-disponibile', `La Richiesta «${r.nome}» non si può accettare: ${s.stato === 'scaduta' ? 'è scaduta' : s.stato === 'completata' ? 'è già completata' : 'è bloccata'}${s.motivi.length ? ` (${s.motivi.join('; ')})` : ''}.`);
+    }
+    // L13 (ondata 7, O7-1): completarla chiede il bersaglio raggiungibile: il suo Dedalo aperto nella partita (409 `dedalo-non-aperto`) e le
+    // condizioni proprie di completamento non false (409 `richiesta-non-completabile`), col motivo. Toglierla da completata resta sempre possibile
+    if (stato === 'completata' && prima !== 'completata') {
+      const st = statoDisponibilitaPartita(partitaId);
+      const nomi = nomiCondizioniMemo();
+      const c = completamento(r, st, nomi, prorogaValida(r, st, nomi));
+      if (!c.completabile) throw httpErrors.conflict(c.dedaloChiuso ? 'dedalo-non-aperto' : 'richiesta-non-completabile', `La Richiesta «${r.nome}» non si può ancora completare: ${c.motivi.join('; ')}.`);
     }
     if (stato === null) prepared('DELETE FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').run(partitaId, chiave);
     // L13 (decisione 18): `updated_at` è il momento in cui la Richiesta ha preso il suo stato (per gli yen, il momento del completamento,
@@ -226,7 +297,10 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END').run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
-      registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${r.area}${r.piano ? ` (${r.piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
+      // il posto: il Dedalo e la sua area (310: il `piano` in testo resta solo dove non è il nome dell'area)
+      const dove = r.area_nome ?? r.area;
+      const piano = r.area_dedalo_nome || r.piano;
+      registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${dove}${piano ? ` (${piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
     }
     // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen (decisione 18): entrano da soli nel saldo
     // completandola e si tolgono (al più fino a zero) riaprendola (`riallineaYenRichiesta`); una proposta «Applica» nata prima resta al suo
@@ -274,8 +348,10 @@ export interface DatiRichiesta {
   bersaglio?: RichiestaDto['bersaglio'];
   ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
   /** L13 (ondata 3): sblocco, scadenza con proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
-  condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[] } | null;
+  condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[]; areaDedalo?: string | null } | null;
   ombra?: string | null; yen?: number | null; esperienza?: number | null; oggetti?: Array<{ chiave: string; quantita: number }>;
+  /** L13 (ondata 7, O7-1): le condizioni proprie per completarla (oltre al Dedalo aperto). */
+  completamentoCondizioni?: unknown[];
 }
 
 /** Le condizioni scritte dal modulo, valide e con i riferimenti esistenti (il vocabolario unico: stessa verifica degli altri editor). */
@@ -298,7 +374,17 @@ function campiStrutturati(dati: DatiRichiesta): Record<string, unknown> {
     if (dati.proroga !== null && (!dataValida(dati.proroga.data) || !(dati.scadenzaData ?? null))) throw httpErrors.badRequest('proroga-non-valida', 'La proroga è una data di gioco e vale solo con una scadenza.');
     out.proroga_data = dati.proroga?.data ?? null;
     out.proroga_condizioni_json = dati.proroga ? condizioniValide(dati.proroga.condizioni) ?? null : null;
+    // L13 (ondata 7): l'area in cui il bersaglio si sposta durante la proroga (un'area dei dedali che c'è); senza proroga non c'è. Con la proroga
+    // ma senza `areaDedalo` resta quella salvata (anche un'area nel cestino, che il DTO non dice: torna valida col ripristino, non si perde
+    // salvando la Richiesta per altro)
+    if (dati.proroga === null || dati.proroga.areaDedalo !== undefined) {
+      const area = dati.proroga?.areaDedalo ?? null;
+      if (area !== null && !prepared('SELECT 1 FROM area_dedalo WHERE chiave = ?').get(area)) throw httpErrors.notFound('area-dedalo-non-trovata', `L'area del dedalo '${area}' non esiste.`);
+      out.proroga_area_dedalo_chiave = area;
+    }
   }
+  const completa = condizioniValide(dati.completamentoCondizioni);
+  if (completa !== undefined) out.completamento_condizioni_json = completa;
   if (dati.ombra !== undefined) {
     if (dati.ombra !== null && !prepared('SELECT 1 FROM ombra WHERE chiave = ?').get(dati.ombra)) throw httpErrors.notFound('ombra-non-trovata', `L'Ombra '${dati.ombra}' non è nel compendio.`);
     out.ombra_chiave = dati.ombra;
@@ -464,7 +550,7 @@ function condizioneCita(nodo: unknown, chiave: string, nome: string): boolean {
 const TABELLE_CON_CONDIZIONI: ReadonlyArray<{ tabella: string; cosa: string; colonne?: readonly string[] }> = [
   { tabella: 'spillo', cosa: 'Pin' }, { tabella: 'negozio', cosa: 'Negozio' }, { tabella: 'articolo', cosa: 'Articolo' }, { tabella: 'libro', cosa: 'Libro' },
   { tabella: 'film', cosa: 'Film' }, { tabella: 'attivita', cosa: 'Attività' }, { tabella: 'luogo', cosa: 'Luogo' },
-  { tabella: 'richiesta', cosa: 'Richiesta', colonne: ['condizioni_json', 'proroga_condizioni_json'] },
+  { tabella: 'richiesta', cosa: 'Richiesta', colonne: ['condizioni_json', 'proroga_condizioni_json', 'completamento_condizioni_json'] },
 ];
 
 // Le azioni della giornata sono le righe di `voce_giornata` (migrazione 092): `giorno_percorso.azioni_json` era rimasta come copia
@@ -481,7 +567,7 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
       // la Richiesta stessa non si cita da sola (le sue condizioni se ne vanno con lei)
       const escludi = t.tabella === 'richiesta' ? ' AND chiave <> ?' : '';
       for (const riga of prepared(`SELECT nome, ${colonna} AS condizioni_json FROM ${t.tabella} WHERE ${colonna} LIKE '%richiesta%'${escludi}`).all(...(escludi ? [chiave] : [])) as Array<{ nome: string; condizioni_json: string }>) {
-        const testo = `${t.cosa}: ${riga.nome}${colonna === 'proroga_condizioni_json' ? ' (proroga)' : ''}`;
+        const testo = `${t.cosa}: ${riga.nome}${colonna === 'proroga_condizioni_json' ? ' (proroga)' : colonna === 'completamento_condizioni_json' ? ' (per completarla)' : ''}`;
         if (condizioneCita(JSON.parse(riga.condizioni_json), chiave, r.nome) && !condizioni.includes(testo)) condizioni.push(testo);
       }
     }

@@ -1,5 +1,5 @@
 // ============================================================
-// campi — i campi elementari dei moduli: testo, numero, testo lungo; la griglia; il blocco senza label
+// campi — i campi elementari dei moduli: testo, numero, testo lungo, data di gioco; l'elenco di voci; la griglia; il blocco senza label
 // ============================================================
 //
 // L13 (modelli comuni 1 e 5): `Campo` è un involucro sottile sul `CampoTesto` condiviso (etichetta sopra, 44 px, aiuto sotto), `Griglia`
@@ -11,7 +11,8 @@ import type { ReactNode } from 'react';
 import { testoDi, type Dati } from './base';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
-import { CampoTesto } from '../../shared/Campo';
+import { Campo as CampoComune, CampoTesto, TestoCheCresce } from '../../shared/Campo';
+import { SelettoreData } from '../../shared/SelettoreData';
 
 interface PropsCampo {
   nome: string;
@@ -32,6 +33,20 @@ export function Campo({ nome, etichetta, dati, imposta, tipo = 'testo', aiuto, d
   return (
     <CampoTesto etichetta={etichetta} valore={testoDi(dati[nome])} tipo={tipo === 'testolungo' ? 'lungo' : tipo} aiuto={aiuto} disabilitato={disabilitato} largo={largo} massimo={max} segnaposto={segnaposto}
       onCambia={(v) => imposta({ [nome]: tipo === 'numero' ? (v === '' ? null : Number(v)) : v })} />
+  );
+}
+
+/**
+ * L13 (O7-5): una data del calendario di gioco in un modulo, con `SelettoreData` (giorno e mese da scegliere, niente da digitare). Il valore
+ * resta quello di prima verso l'API: 'MM-GG', o '' finché non è scelta (`facoltativa` offre «nessuna»).
+ */
+export function CampoData({ nome, etichetta, dati, imposta, aiuto, disabilitato, obbligatorio, facoltativa }: {
+  nome: string; etichetta: string; dati: Dati; imposta: (patch: Dati) => void; aiuto?: string; disabilitato?: boolean; obbligatorio?: boolean; facoltativa?: boolean;
+}) {
+  return (
+    <CampoComune etichetta={etichetta} aiuto={aiuto} obbligatorio={obbligatorio} senzaGruppo>
+      <SelettoreData etichetta={etichetta} valore={testoDi(dati[nome])} facoltativa={facoltativa} disabilitato={disabilitato} onCambia={(v) => imposta({ [nome]: v })} />
+    </CampoComune>
   );
 }
 
@@ -60,12 +75,12 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
       {voci.map((v, i) => (
         <div key={i} className="flex flex-wrap items-start gap-2">
           <span className="chip mt-2 shrink-0" aria-hidden>{i + 1}</span>
-          <label className="editor-mappa__campo min-w-[200px] flex-[3]">
-            <span className="sr-only">{etichetta}: voce {i + 1}</span>
+          {/* L13 (O7-5): la voce parte alta quanto gli altri campi (una riga, 44 px) e si allunga col testo: prima due righe fisse */}
+          <div className="campo min-w-[200px] flex-[3]">
             {lungo
-              ? <textarea className="form-input min-h-11" rows={2} maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />
-              : <input className="form-input min-h-11" type="text" maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />}
-          </label>
+              ? <TestoCheCresce righe={1} massimo={max} valore={v} disabilitato={disabilitato} onCambia={(t) => cambia(i, t)} aria-label={`${etichetta}: voce ${i + 1}`} />
+              : <input className="form-input" type="text" maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />}
+          </div>
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => onCambia(voci.filter((_, j) => j !== i))} aria-label={`Togli la voce ${i + 1} di ${etichetta}`} />
         </div>
       ))}

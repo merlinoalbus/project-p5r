@@ -14,7 +14,7 @@
 // solo salvando: un dato cambiava senza che l'utente l'avesse toccato).
 // ============================================================
 
-import { RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione';
+import { descriviEffettoAzione, RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione';
 import { eDote, nomeDote } from '../../shared/doti';
 import { simboliNote } from '../../shared/note';
 import { fraseEffettoConNomi, type EffettoVoce, type NomiFraseEffetto, type RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
@@ -182,6 +182,8 @@ export interface NomiEffetti {
   esitiTurno?: Map<string, { nome: string; strumento?: string; senzaBonus?: true }>;
   /** 2026-10-28: i Confidenti per chiave (l'effetto «punti a un Confidente»). */
   confidenti?: Map<string, string>;
+  /** L13 (ondata 7, O7-2): gli esami per chiave (l'effetto «esame»). */
+  esami?: Map<string, string>;
 }
 
 const mappa = <T extends { chiave: string; nome: string }>(l: T[]): Map<string, string> => new Map(l.map((x) => [x.chiave, x.nome]));
@@ -198,7 +200,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto, fas
     libri: mappa(e.libri), film: mappa(e.film), videogiochi: mappa(e.videogiochi), attivita: mappa(e.attivita), richieste: mappa(e.richieste),
     articoli: new Map(x.articoli.map((a) => [a.chiave, nellaFascia(a)])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
-    oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []), confidenti: mappa(e.confidenti),
+    oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []), confidenti: mappa(e.confidenti), esami: mappa(x.esami ?? []),
     esitiTurno: new Map(e.attivita.flatMap((a) => (a.esiti?.elenco ?? []).map((x) => [`${a.chiave}/${x.chiave}`, { nome: x.nome, ...(x.strumento ? { strumento: x.strumento } : {}), ...(x.senzaBonus ? { senzaBonus: true as const } : {}) }] as const))),
   };
 }
@@ -231,6 +233,8 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
       return `Turno: ${nome} — ${e.doti?.length ? `Doti proprie di questo turno (${e.doti.map((d) => `${nomeDote(d.dote)} ${note(d.note)}`).join('; ')})` : 'le Doti sono quelle del lavoro'}`;
     }
     case 'acquisto': return `Acquisto Aojiru${e.variante ? `: ${nomeDote(e.variante)}` : ' (variante da osservare nella partita)'}`;
+    // L13 (ondata 7, O7-2): la frase condivisa col server (`descriviEffettoAzione`), con il nome dell'esame
+    case 'esame': return descriviEffettoAzione(e, { esami: Object.fromEntries(n.esami ?? []) });
     // gli effetti che citano l'oggetto per chiave, più pesca e Fortuna: la frase è quella condivisa col server (una sola scrittura)
     default: return fraseEffettoConNomi(e, nomiFrase(n));
   }
@@ -250,4 +254,5 @@ export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
   invito: 'Invito avvenuto', persona: 'Persona registrata',
   yen: 'Yen', oggetto: 'Oggetto ricevuto', trofeo: 'Trofeo ottenuto', sblocco: 'Sblocco',
   personaTolta: 'Persona tolta dalla scorta', puntiConfidente: 'Note di rango a un Confidente', uscitaOggetto: 'Oggetto restituito o venduto',
+  esame: 'Risultati di un esame',
 };

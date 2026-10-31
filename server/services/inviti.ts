@@ -61,6 +61,7 @@ function invitoDto(r: RigaInvito, st: StatoDisponibilita | null): InvitoDto {
     condizioni, condizioniTesto: condizioni.map((c) => descriviRequisitoSpillo(c, nomi)),
     possibile, manca, registrato: st ? (st.invitiRegistrati?.has(r.chiave) ?? false) : null,
     nota: r.nota, fonte: r.fonte,
+    messaggio: r.messaggio_data && (r.messaggio_fascia === 'giorno' || r.messaggio_fascia === 'sera') ? { data: r.messaggio_data, fascia: r.messaggio_fascia } : null,
     modificato: r.seed_json !== null && r.origine === 'utente', daUtente: r.seed_json === null,
   };
 }

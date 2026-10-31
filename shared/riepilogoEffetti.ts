@@ -101,6 +101,7 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   doti: { titolo: 'Doti sociali' },
   letture: { titolo: 'Letture e visioni' },
   turni: { titolo: 'Turni' },
+  esami: { titolo: 'Risultati degli esami' },
   yen: { titolo: 'Yen' },
   oggetti: { titolo: 'Oggetti ricevuti' },
   richieste: { titolo: 'Richieste completate' },
@@ -302,6 +303,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         conYen('turni', i);
         break;
       }
+      // L13 (ondata 7, O7-2): i risultati di un esame, con il piazzamento che si sceglie alla spunta (il premio lo dice la scelta)
+      case 'esame': { const p = partiEffettoAzione(e, n.azione); riga('esami', p.nome, p.dettaglio); break; }
       case 'yen': riga('yen', e.importo > 0 ? 'Ricevuti' : 'Spesi', yen(e.importo)); conYen('yen', i); break;
       case 'oggetto': riga('oggetti', n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo', e.quantita > 1 ? `×${e.quantita}` : undefined); break;
       case 'richiesta': riga('richieste', n.frase.richiesta(e.richiesta) ?? 'Richiesta'); conYen('richieste', i); break;

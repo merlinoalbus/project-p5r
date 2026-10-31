@@ -22,7 +22,9 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconMedaglia } from '../components/shared/iconeGuida';
-import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { ModificaGuida, type EditorCampoSpeciale } from '../components/guida/ModificaGuida';
+import { CondizioniEditor } from '../components/guida/CondizioniEditor';
+import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
 
@@ -40,6 +42,19 @@ const NOME_TIPO_TROFEO: Record<TrofeoDto['tipo'], string> = { bronzo: 'Bronzo', 
 /** Il colore del metallo: un trofeo si riconosce dal metallo prima che dal nome. */
 const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
   bronzo: '#c07a44', argento: '#c9ced8', oro: '#f5c542', platino: '#9fe8ff',
+};
+
+/** L13 (O7-4, migrazione 313): «Quando si ottiene» si scrive con l'editor unico delle condizioni (il campo porta il JSON; la frase «Quando»
+ *  della scheda la genera il server dalle condizioni). Nel rilascio (sola lettura) non c'è: la costante di build toglie l'editor dal bundle. */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+const CAMPI_TROFEO: Record<string, EditorCampoSpeciale> | undefined = IN_RILASCIO ? undefined : {
+  condizioni_json: {
+    disegna: (c, v, imposta, occupato) => (
+      <fieldset className="m-0 flex flex-col gap-1 border-0 p-0 sm:col-span-2"><legend className="p-0 testo-13 text-text-secondary">{c.etichetta}</legend>
+        <CondizioniEditor condizioni={leggiCondizioniSalvate(typeof v === 'string' ? v : '[]')} onCambia={(n) => imposta(JSON.stringify(n))} disabilitato={occupato} massimo={20} />
+      </fieldset>
+    ),
+  },
 };
 
 /** La scheda di un trofeo: **la medaglia, il nome, e come si prende**.
@@ -65,7 +80,7 @@ function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; part
           <strong className={`testo-15 leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
           {t.nomeEn && t.nomeEn !== t.nome && <span className="testo-12 text-text-muted">{t.nomeEn}</span>}
         </div>
-        <ModificaGuida tipo="trofeo" chiave={t.chiave} cosa={`il trofeo «${t.nome}»`} soloIcona onSalvato={onModificato} />
+        <ModificaGuida tipo="trofeo" chiave={t.chiave} cosa={`il trofeo «${t.nome}»`} soloIcona onSalvato={onModificato} campiSpeciali={CAMPI_TROFEO} />
         {partitaId && (
           <label className="touch flex shrink-0 items-center gap-1.5 testo-12" title={`Segna «${t.nome}» come ottenuto`}>
             <input type="checkbox" className="h-5 w-5" checked={t.ottenuto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Trofeo ${t.nome} ottenuto`} />

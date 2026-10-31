@@ -10,6 +10,8 @@
 // (R10-11), non di questo modulo.
 // ============================================================
 
+import type { DoteChiave } from './doti.js';
+
 /** Punti base di una risposta, per ogni nota (1-3). */
 export const PUNTI_PER_NOTA = 5;
 /** Punti base di un regalo gradito. */
@@ -29,12 +31,63 @@ export const MOLTIPLICATORE_INVITO = 1.2;
 
 /** I sette Confidenti che ricevono il moltiplicatore dell'esame (G-016c, corretta da G-020 con Ann): gli altri non lo hanno mai. */
 export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];
-/** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. */
-export type PiazzamentoEsame = 'primo' | 'primi-10' | 'altro';
+/** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. L13 (ondata 7, O7-2): anche «sopra la media», il
+ *  piazzamento che la guida premia con Fascino +2 (migrazione utente 057). */
+export type PiazzamentoEsame = 'primo' | 'primi-10' | 'sopra-media' | 'altro';
+/** I piazzamenti in ordine, con il nome che l'interfaccia mostra: l'unico elenco (scelta alla spunta, Partita, premi degli esami, zod). */
+export const PIAZZAMENTI_ESAME: ReadonlyArray<{ chiave: PiazzamentoEsame; nome: string }> = [
+  { chiave: 'primo', nome: 'Primo' }, { chiave: 'primi-10', nome: 'Primi 10' }, { chiave: 'sopra-media', nome: 'Sopra la media' }, { chiave: 'altro', nome: 'Nella media o sotto' },
+];
+export const CHIAVI_PIAZZAMENTO_ESAME = ['primo', 'primi-10', 'sopra-media', 'altro'] as const satisfies readonly PiazzamentoEsame[];
+export const ePiazzamentoEsame = (x: unknown): x is PiazzamentoEsame => typeof x === 'string' && (CHIAVI_PIAZZAMENTO_ESAME as readonly string[]).includes(x);
+/** Il nome di un piazzamento («Primi 10»). */
+export const nomePiazzamentoEsame = (p: PiazzamentoEsame): string => PIAZZAMENTI_ESAME.find((x) => x.chiave === p)!.nome;
 /** Un esame con il piazzamento segnato nella partita (null = non segnato). */
 export interface PiazzamentoEsameDto { esame: string; nome: string; dataRisultati: string | null; piazzamento: PiazzamentoEsame | null }
-/** Moltiplicatore per piazzamento: primo in classifica ×1,5, nei primi 10 ×1,2, altrove nessuno. */
-export const MOLTIPLICATORE_ESAME: Readonly<Record<PiazzamentoEsame, number>> = { primo: 1.5, 'primi-10': 1.2, altro: 1 };
+/** Moltiplicatore per piazzamento: primo in classifica ×1,5, nei primi 10 ×1,2, sopra la media e altrove nessuno. Insieme a
+ *  `CONFIDENTI_CON_BONUS_ESAME` è la regola che la pagina delle domande descrive (`DomandeDto.moltiplicatore`), mai un testo a parte. */
+export const MOLTIPLICATORE_ESAME: Readonly<Record<PiazzamentoEsame, number>> = { primo: 1.5, 'primi-10': 1.2, 'sopra-media': 1, altro: 1 };
+
+/**
+ * L13 (ondata 7, O7-2): il premio di un piazzamento a un esame (`esame.premi_json`, uno per piazzamento premiato): le Doti in note e, per il
+ * primo posto, il trofeo (`trofeo.chiave`) quando la scheda del trofeo lo conferma. Un piazzamento senza riga non dà niente («una prestazione
+ * insufficiente non comporta alcun bonus»). La spunta della voce con l'effetto «esame» li applica (`shared/effettiVoce.ts`).
+ */
+export interface PremioPiazzamentoEsame { piazzamento: PiazzamentoEsame; doti: Array<{ dote: DoteChiave; note: 1 | 2 | 3 }>; trofeo?: string }
+/** L13 (ondata 7, O7-2): il requisito di Conoscenza per il primo posto (`esame.requisito_conoscenza`): il rango minimo e se servono tutte le risposte giuste. */
+export interface RequisitoConoscenzaEsame { rango: number; tutteCorrette: boolean }
+
+const leggiJson = (raw: string | null | undefined): unknown => { if (!raw) return null; try { return JSON.parse(raw) as unknown; } catch { return undefined; } };
+/** I premi di un esame letti dalla colonna: null se la colonna è vuota o non riconoscibile (un dato storto non diventa un premio a caso). */
+export function leggiPremiEsame(raw: string | null | undefined, eDote: (x: unknown) => x is DoteChiave): PremioPiazzamentoEsame[] | null {
+  const x = leggiJson(raw);
+  if (!Array.isArray(x)) return null;
+  const out: PremioPiazzamentoEsame[] = [];
+  for (const r of x) {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return null;
+    const o = r as Record<string, unknown>;
+    if (Object.keys(o).some((k) => k !== 'piazzamento' && k !== 'doti' && k !== 'trofeo') || !ePiazzamentoEsame(o.piazzamento) || out.some((p) => p.piazzamento === o.piazzamento) || !Array.isArray(o.doti)) return null;
+    const doti: PremioPiazzamentoEsame['doti'] = [];
+    for (const d of o.doti) {
+      const v = d && typeof d === 'object' ? d as Record<string, unknown> : null;
+      if (!v || Object.keys(v).some((k) => k !== 'dote' && k !== 'note') || !eDote(v.dote) || (v.note !== 1 && v.note !== 2 && v.note !== 3) || doti.some((y) => y.dote === v.dote)) return null;
+      doti.push({ dote: v.dote, note: v.note });
+    }
+    if (o.trofeo !== undefined && (typeof o.trofeo !== 'string' || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(o.trofeo))) return null;
+    if (!doti.length && o.trofeo === undefined) return null;
+    out.push({ piazzamento: o.piazzamento, doti, ...(typeof o.trofeo === 'string' ? { trofeo: o.trofeo } : {}) });
+  }
+  // nell'ordine dei piazzamenti, una forma sola
+  return out.sort((a, b) => CHIAVI_PIAZZAMENTO_ESAME.indexOf(a.piazzamento) - CHIAVI_PIAZZAMENTO_ESAME.indexOf(b.piazzamento));
+}
+/** Il requisito di Conoscenza letto dalla colonna: null se vuoto o non riconoscibile. */
+export function leggiRequisitoConoscenza(raw: string | null | undefined): RequisitoConoscenzaEsame | null {
+  const x = leggiJson(raw);
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const o = x as Record<string, unknown>;
+  if (Object.keys(o).some((k) => k !== 'rango' && k !== 'tutteCorrette') || !Number.isSafeInteger(o.rango) || (o.rango as number) < 1 || (o.rango as number) > 5 || typeof o.tutteCorrette !== 'boolean') return null;
+  return { rango: o.rango as number, tutteCorrette: o.tutteCorrette };
+}
 
 /** Come si calcolano i punti di un incontro; `confidente` e `piazzamento` contano solo per il bonus degli esami. */
 export interface IngressoPuntiConfidente {

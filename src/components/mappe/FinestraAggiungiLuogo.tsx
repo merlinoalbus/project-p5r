@@ -15,12 +15,9 @@ import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
-import { SelettoreIcone, type OpzioneIcone } from '../shared/SelettoreIcone';
-import { IconaSpillo } from './IconaSpillo';
 import { SceltaPunto } from './SceltaPunto';
-import { OrariEditor } from '../guida/OrariEditor';
-import { TIPI_LUOGO } from '../../../shared/tipiLuogo';
-import { ORARI_SEMPRE, type OrariNegozio } from '../../../shared/orariNegozio';
+import { CampiLuogo } from '../guida/moduli/CampiLuogo';
+import type { OrariNegozio } from '../../../shared/orariNegozio';
 import type { PlanimetriaAreaDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -28,8 +25,6 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
-
-const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 
 interface Props {
   /** Il quartiere (chiave) e il suo nome: i luoghi che esistono si scelgono fra i suoi. */
@@ -100,15 +95,12 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onCh
           {modo === 'esistente'
             ? <Selettore className="selettore--in-linea" etichetta="Luogo" valore={esistente} segnaposto="Scegli il luogo…" ricerca="sempre" disabilitato={q.caricamento}
               opzioni={luoghi.map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: l.pin ? 'ha già un pin' : 'da posizionare' }))} onCambia={setEsistente} />
-            : <div className="flex flex-col gap-2">
-              <label className="editor-mappa__campo">Nome del luogo<input className="form-input" maxLength={160} value={nuovo.nome} onChange={(e) => setNuovo({ ...nuovo, nome: e.target.value })} /></label>
-              <SelettoreIcone compatto etichetta="Tipo" valore={nuovo.tipo} opzioni={OPZIONI_TIPO} onCambia={(tipo) => setNuovo({ ...nuovo, tipo })} />
-              <label className="editor-mappa__campo">Che cosa offre<textarea className="form-input" rows={2} maxLength={600} value={nuovo.cosaOffre} onChange={(e) => setNuovo({ ...nuovo, cosaOffre: e.target.value })} /></label>
-              <label className="flex items-center gap-2 testo-13 touch">
-                <input type="checkbox" className="h-5 w-5" checked={orari === null} onChange={(e) => setOrari(e.target.checked ? null : { ...ORARI_SEMPRE })} />
-                La guida non indica orari: vale la regola dell’app (giorno e sera)
-              </label>
-              {orari && <OrariEditor valore={orari} onCambia={setOrari} />}
+            // L13 (O7-5): i campi del luogo nuovo sono quelli del modulo del luogo (`CampiLuogo`), non una copia
+            : <div className="griglia-campi">
+              <CampiLuogo valore={{ ...nuovo, orari }} onCambia={(p) => {
+                if (p.orari !== undefined) setOrari(p.orari);
+                setNuovo((n) => ({ nome: p.nome ?? n.nome, tipo: p.tipo ?? n.tipo, cosaOffre: p.cosaOffre ?? n.cosaOffre }));
+              }} />
             </div>}
         </div>
       ) : (

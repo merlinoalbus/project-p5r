@@ -17,7 +17,8 @@ import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } fr
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote } from './partiteService.js';
 import { applicaEventoDiario } from './puntiCronologici.js';
-import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
+import { annullaPiazzamentoDallaSpunta, piazzamentoCorrente, premiDellEsame, premioDelPiazzamento, segnaPiazzamentoDallaSpunta } from './piazzamentoEsamiService.js';
+import { CHIAVI_PIAZZAMENTO_ESAME, nomePiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
@@ -46,6 +47,9 @@ const schemaRicevutaLegacy = z.object({
     rango: z.object({ da: z.number().int().min(0).max(10), a: z.number().int().min(1).max(10), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
   // le aperture dei Dedali dichiarate nelle visite di prima della 305: si leggono ancora (la ricevuta resta valida), non si scrivono più
   apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
+  // L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta, con il piazzamento di prima e le Doti del premio
+  esami: z.array(z.object({ esame: chiaveReceipt, nome: z.string(), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME), prima: z.enum(CHIAVI_PIAZZAMENTO_ESAME).nullable(),
+    doti: z.array(doteReceipt), trofeo: z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough().optional() }).passthrough()).optional(),
 }).passthrough();
 /** Valida senza ricostruire o scartare campi della fotografia storica. */
 export function leggiRicevutaEffettiAzione(raw: string | null): EffettiAzioneDto | null {
@@ -101,6 +105,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   const doti: EffettiAzioneDto['doti'] = [];
   const letture: NonNullable<EffettiAzioneDto['letture']> = [];
   const turni: NonNullable<EffettiAzioneDto['turni']> = [];
+  const esami: NonNullable<EffettiAzioneDto['esami']> = [];
   // le Doti di un'azione su un film o un DVD salgono di uno scalino con «Anima da cineasta», come i film stessi; quelle di un libro («Leggere
   // Donna nell'ombra»: Perizia ♪♪♪) valgono il quarto scalino, come la lettura del libro (`origineNoteDellaVoce`, la regola unica)
   const origine = origineNoteDellaVoce(partitaId, a);
@@ -123,6 +128,15 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       // che cosa ha dato lo dice il registro dei conseguimenti, non la differenza delle Doti (che la lettura non tocca)
       const dateDallaLettura = obiettivo > stato.avanzamento ? impostaLettura(partitaId, e.categoria, e.chiave, { avanzamento: obiettivo }).daSegnare ?? [] : [];
       letture.push({ categoria: e.categoria, chiave: e.chiave, nome: stato.nome, prima: stato.avanzamento, dopo: Math.max(obiettivo, stato.avanzamento), ...(dateDallaLettura.length ? { doti: dateDallaLettura } : {}), ...(visione ? { visione: true } : {}) });
+    } else if (e.tipo === 'esame') {
+      // L13 (ondata 7, O7-2): il piazzamento si sceglie alla spunta (ogni strada che arriva qui senza la scelta si ferma); la spunta lo segna con
+      // il «prima» e dice le Doti del premio (`esame.premi_json`), che si applicano con «Applica» come le altre Doti della voce
+      if (scelta?.tipo !== 'esame') throw httpErrors.conflict('piazzamento-da-scegliere', 'Scegli il piazzamento ottenuto all’esame prima di spuntare.');
+      const esame = premiDellEsame(e.esame);
+      if (!esame) throw httpErrors.badRequest('effetto-inesistente', 'L’esame della voce non esiste più nella guida: correggi gli effetti della voce.');
+      const segnato = segnaPiazzamentoDallaSpunta(partitaId, e.esame, scelta.piazzamento);
+      const dotiPremio = premioDelPiazzamento(esame.premi, scelta.piazzamento).doti.map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDote(partitaId, d.dote, d.note, origine), note: d.note }));
+      esami.push({ esame: e.esame, nome: esame.nome, piazzamento: scelta.piazzamento, prima: segnato.prima, doti: dotiPremio, ...(segnato.trofeo ? { trofeo: segnato.trofeo } : {}) });
     } else {
       // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno), e la ricevuta lo ricorda;
       // senza la scelta risolta il turno non si registra (sarebbe un turno vuoto: la regola vale per ogni strada che arriva qui)
@@ -166,16 +180,18 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }
-  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro) return null;
-  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}) };
+  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro && !esami.length) return null;
+  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(esami.length ? { esami } : {}) };
 }
 
-/** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati e l'incontro (le Doti no). */
+/** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati, l'incontro e il piazzamento agli esami (le Doti no). */
 export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): void {
   if (!schemaRicevutaLegacy.safeParse(e).success) throw httpErrors.conflict('ricevuta-spunta-illeggibile', 'La ricevuta storica non è riconoscibile: nessun annullo è stato eseguito.');
   annullaEffetti(partitaId, e);
   for (const t of e.turni ?? []) togliTurno(partitaId, t.attivita, t.ordine);
   if (e.incontro) annullaIncontro(partitaId, e.incontro);
+  // L13 (ondata 7, O7-2): il piazzamento torna quello di prima (se nessuno l'ha cambiato dopo), il trofeo segnato dalla spunta se ne va
+  for (const x of e.esami ?? []) annullaPiazzamentoDallaSpunta(partitaId, x);
 }
 
 /** Le Doti di un effetto per lo storico: note e punti insieme («Coraggio ♪ · 2 punti»), mai un «+N» nudo. */
@@ -204,6 +220,8 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
     parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? `${nomeEsito ? ` · ${nomeEsito}` : ''}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
   }
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
+  // L13 (ondata 7, O7-2): «Esame di metà semestre 1: Primi 10 (Fascino ♪♪♪ · 5 punti), trofeo Un travestimento sapiente»
+  for (const x of e.esami ?? []) parti.push(`${x.nome}: ${nomePiazzamentoEsame(x.piazzamento)}${x.doti.length ? ` (${frasiDoti(x.doti)} da segnare nelle Doti)` : ''}${x.trofeo ? `, trofeo ${x.trofeo.nome}` : ''}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   return parti.join(', ');

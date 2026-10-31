@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { z } from 'zod';
 import { CHIAVI_DOTI } from '../../shared/doti';
+import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto';
 import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
 import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
@@ -66,6 +67,8 @@ const effetto = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('articolo'), articolo: chiave, quantita: z.number().int().min(2).max(999).optional() }).strict(),
   z.object({ tipo: z.literal('persona'), persona: z.number().int().positive(), scorta: z.literal(true).optional(), livello: z.number().int().min(1).max(99).optional() }).strict(),
   z.object({ tipo: z.literal('invito'), invito: z.string().regex(/^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/) }).strict(),
+  // L13 (ondata 7, O7-2): i risultati di un esame
+  z.object({ tipo: z.literal('esame'), esame: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/) }).strict(),
 ]);
 const decisioneEffetto = z.object({ operazioneId: uid, decisione: z.enum(['conferma','scarta']), effetto: effetto.optional(), revisionePropostaAttesa: token }).strict()
   .refine(v => v.decisione === 'conferma' ? v.effetto !== undefined : v.effetto === undefined);
@@ -79,6 +82,8 @@ const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.
     z.object({ effettoUid: uid, tipo: z.literal('turno'), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable() }).strict(),
     z.object({ effettoUid: uid, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
     z.object({ effettoUid: uid, tipo: z.literal('alternativa'), scelto: uid.nullable() }).strict(),
+    // L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame
+    z.object({ effettoUid: uid, tipo: z.literal('esame'), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME) }).strict(),
   ])).min(1).max(50).refine(a => new Set(a.map(s => s.effettoUid)).size === a.length).optional(),
 }).strict().refine(v => ((v.acquisti?.length ?? 0) + (v.pesche?.length ?? 0) > 0) && [...(v.acquisti ?? []), ...(v.pesche ?? [])].every(r => r.fonte.tipo === 'diario' && r.fonte.voceUid === v.uid));
 const bersaglioSchema = z.object({ etichetta: z.string().min(1).max(500), articolo: chiave.optional(), voceUid: uid.optional(), effettoUid: uid.optional(), pesca: z.literal(true).optional(), sessionePesca: uid.optional(), fontePesca: uid.optional() }).strict();

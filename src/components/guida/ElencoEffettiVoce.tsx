@@ -72,6 +72,8 @@ function NotaVoceSpuntata({ righe }: { righe: readonly RigaEffetto[] }) {
     subito && `aggiungendo, cambiando o togliendo ${subito}, le partite che l’hanno spuntata si aggiornano subito (togliendo, torna com’era solo ciò che la spunta aveva aggiunto e che non hai modificato dopo)`,
     conApplica && `per ${conApplica} compare il pulsante «Applica» sulla voce`,
     presenti.has('fortuna') && 'la Fortuna vale solo se la partita è ancora a quel giorno',
+    // L13 (ondata 7, O7-2): il piazzamento si sceglie alla spunta; su una voce già spuntata nessuno l'ha scelto (il server lo chiede: 409)
+    presenti.has('esame') && 'per i risultati di un esame il piazzamento si sceglie togliendo e rimettendo la spunta',
   ].filter((x): x is string => !!x);
   // senza effetti di questi tipi la nota dice solo che cosa succede a ciò che si aggiunge
   const testo = frasi.length ? frasi.join('; ') : 'ciò che aggiungi vale anche per le partite che l’hanno spuntata (gli effetti di stato subito, gli altri come pulsante «Applica» sulla voce)';

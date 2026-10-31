@@ -67,6 +67,7 @@ function nomeElemento(e: EffettoVoce, chiave: string, n: NomiEffetti): string {
     case 'sblocco': return (e.bersaglio === 'richiesta' ? n.richieste : n.attivita).get(chiave) ?? chiave;
     case 'richiesta': return n.richieste.get(chiave) ?? chiave;
     case 'trofeo': return n.trofei?.get(chiave) ?? chiave;
+    case 'esame': return n.esami?.get(chiave) ?? chiave;
     default: return chiave;
   }
 }

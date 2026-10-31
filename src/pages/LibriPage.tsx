@@ -35,13 +35,14 @@ import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLet
 import { NOME_DOTE } from '../utils/citta';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
+import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo';
 import { TestoNote } from '../components/shared/TestoNote';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
 /**
  * Pagina dei libri: carica il catalogo per la partita attiva, mostra i conteggi di lettura,
  * l'avviso di «Lettura rapida» quando vale (allora «+» e «−» avanzano di due) e i filtri (testo
- * su titolo, negozi, «dove» della guida ed effetti; Dote; stato di lettura). Le schede sono
+ * su titolo, negozi, Richieste, posizioni ed effetti; Dote; stato di lettura). Le schede sono
  * divise fra da leggere e completati (questi ripiegati); le sessioni passano da una coda per
  * libro che invia una richiesta per volta e aggiorna i conteggi. «Mostra posizione» apre il
  * pannello con la mappa del luogo scelto e ci scorre.
@@ -89,8 +90,8 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     return (dati.dati?.libri ?? []).filter((l) => {
       if (soloChiave && l.chiave !== soloChiave) return false;
       const progresso = valoreDi(l);
-      // Nella ricerca entra anche il testo «dove» della guida: per i libri senza negozio né posizione (premi, eventi) è l'unica indicazione.
-      if (q && !`${l.nome} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
+      // Nella ricerca entrano negozi, Richieste che lo danno e posizioni (L13 O7-4: il vecchio testo «dove» non c'è più, lo dicono loro).
+      if (q && !`${l.nome} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${(l.ricompensaDi ?? []).map((r) => r.nome).join(' ')} ${l.posizioni.map((p) => p.etichetta).join(' ')} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });
@@ -115,6 +116,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     // Dove si compra: i negozi collegati (con il prezzo) e i luoghi che non sono negozi.
     const negoziCollegati = new Set(libro.negozi.map((n) => n.negozio));
     const altrePosizioni = libro.posizioni.filter((p) => !(p.tipo === 'negozio' && negoziCollegati.has(p.chiave)));
+    const quando = (libro.condizioni ?? []).map((c) => c.tipo === 'avviso' ? descriviRequisitoSpillo(c) : c.testo).join(' · ');
     return <li key={libro.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${libro.fatto ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
         <IconaCategoria categoria="libri" dimensione={44} />
@@ -130,9 +132,12 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
         <dt className="text-text-muted">Dove</dt>
         <dd className="m-0 flex flex-wrap gap-1">
           {libro.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}
+          {(libro.ricompensaDi ?? []).map((r) => <Link key={`${r.tipo}/${r.chiave}`} to="/guida/richieste" className="chip touch no-underline">Ricompensa di «{r.nome}»</Link>)}
           {altrePosizioni.map((p) => <span key={`${p.tipo}/${p.chiave}`} className="chip">{p.etichetta}</span>)}
-          {libro.negozi.length === 0 && altrePosizioni.length === 0 && <span>{libro.dove || 'Non indicato'}</span>}
+          {libro.negozi.length === 0 && altrePosizioni.length === 0 && !libro.ricompensaDi?.length && <span>Non indicato</span>}
         </dd>
+        {/* L13 (O7-4): da quando si legge, generato dalle condizioni (il vecchio «disponibile dal» in prosa non c'è più) */}
+        {quando && <><dt className="text-text-muted">Disponibile</dt><dd className="m-0">{quando}</dd></>}
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{libro.effettiTesto.length ? <TestoNote testo={libro.effettiTesto.join(' · ')} /> : 'Nessun effetto dichiarato'}</dd>
         {/* Il luogo sbloccato è un riferimento, quindi ci si va. */}

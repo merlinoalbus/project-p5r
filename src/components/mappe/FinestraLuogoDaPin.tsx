@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { AnteprimaLuogoDaPinDto, LuogoCreatoDaPinDto, LuogoNuovoDaPin } from '../../../shared/luogoDaPin';
-import { definizioneTipoLuogo, eTipoLuogo, TIPI_LUOGO, type TipoLuogo } from '../../../shared/tipiLuogo';
-import { descriviOrari, ORARI_SEMPRE, TESTO_REGOLA_APP, type OrariNegozio } from '../../../shared/orariNegozio';
+import { definizioneTipoLuogo, eTipoLuogo, type TipoLuogo } from '../../../shared/tipiLuogo';
+import { descriviOrari, TESTO_REGOLA_APP, type OrariNegozio } from '../../../shared/orariNegozio';
 import { anteprimaLuogoDaPin, creaLuogoDaPin, getLuogo, isApiError } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import type { LuogoDettaglioDto, MappaDto, SpilloDto } from '../../types';
 import { Modal } from '../shared/Modal';
-import { SelettoreIcone } from '../shared/SelettoreIcone';
-import { OrariEditor } from '../guida/OrariEditor';
-import { IconaSpillo } from './IconaSpillo';
+import { CampiLuogo } from '../guida/moduli/CampiLuogo';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -34,7 +32,6 @@ interface Props {
 interface Anteprima { dto: AnteprimaLuogoDaPinDto; bozza: string }
 interface Lettura { generazione: number; prima: MappaDto | null; completata: boolean }
 interface Riscontro { testo: string; libero: boolean; casa?: string }
-const opzioniTipo = TIPI_LUOGO.map(t => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 const casaLuogo = (chiave: string) => `/guida/luogo/${chiave.split('/').map(encodeURIComponent).join('/')}`;
 const messaggio = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 
@@ -214,12 +211,18 @@ function FinestraLuogoDaPinReale({ spillo, mappa, partita, mappaRiletta, caricam
       {occupato && <p role="status" className="m-0">{fase === 'salvataggio' ? 'Salvataggio in corso…' : lettura ? 'Rilettura in corso…' : 'Preparazione dell’anteprima…'}</p>}
       {!ricevuta && <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0" disabled={occupato || bloccoEsito}>
         <legend className="mb-2 font-semibold">Nuovo luogo</legend>
-        <label className="editor-mappa__campo">Nome del luogo<input className="form-input" value={nome} maxLength={160} required onChange={e => cambia(() => setNome(e.target.value))} /></label>
-        <SelettoreIcone compatto etichetta="Tipo del luogo" valore={tipo ?? ''} opzioni={opzioniTipo} disabilitato={occupato || bloccoEsito} onCambia={t => { if (eTipoLuogo(t)) cambia(() => setTipo(t)); }} />
-        <label className="editor-mappa__campo">Che cosa offre<textarea className="form-input" rows={2} maxLength={600} value={cosaOffre} onChange={e => cambia(() => setCosaOffre(e.target.value))} /></label>
-        <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={orari === null}
-          onChange={e => cambia(() => setOrari(e.target.checked ? null : { ...ORARI_SEMPRE }))} />Orari non indicati: vale la regola dell’app (giorno e sera)</label>
-        {orari && <OrariEditor valore={orari} disabilitato={occupato || bloccoEsito} onCambia={o => cambia(() => setOrari(o))} />}
+        {/* L13 (O7-5): i campi del luogo nuovo sono quelli del modulo del luogo (`CampiLuogo`); ogni cambio passa da `cambia` e annulla l'anteprima */}
+        <div className="griglia-campi">
+          <CampiLuogo valore={{ nome, tipo, cosaOffre, orari }} disabilitato={occupato || bloccoEsito} onCambia={(p) => {
+            if (p.tipo !== undefined && (p.tipo === null || !eTipoLuogo(p.tipo))) return;
+            cambia(() => {
+              if (p.nome !== undefined) setNome(p.nome);
+              if (p.tipo != null && eTipoLuogo(p.tipo)) setTipo(p.tipo);
+              if (p.cosaOffre !== undefined) setCosaOffre(p.cosaOffre);
+              if (p.orari !== undefined) setOrari(p.orari);
+            });
+          }} />
+        </div>
       </fieldset>}
       {anteprima && !ricevuta && <section className="flex min-w-0 flex-col gap-2" aria-label="Anteprima del luogo da creare">
         <h3 className="m-0 testo-16">Anteprima</h3>

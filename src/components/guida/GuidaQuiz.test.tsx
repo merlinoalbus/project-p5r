@@ -94,44 +94,54 @@ describe('PulsanteGuidaQuiz e cartellino della voce', () => {
   });
 });
 
-/** L'editor con il suo stato, come nel modulo (quiz e giorni scritti a mano). */
-function ConStato({ iniziale, giorni = '' }: { iniziale: QuizAttivita | null; giorni?: string }) {
-  const [d, setD] = useState<{ quiz_json: QuizAttivita | null; _giorniQuiz: string }>({ quiz_json: iniziale, _giorniQuiz: giorni });
-  return <><EditorQuiz quiz={d.quiz_json} giorni={d._giorniQuiz} onCambia={(p) => setD((x) => ({ ...x, ...p }))} /><output data-testid="stato">{JSON.stringify(d)}</output></>;
+/** L'editor con il suo stato, come nel modulo (i giorni del mese stanno nel quiz). */
+function ConStato({ iniziale }: { iniziale: QuizAttivita | null }) {
+  const [d, setD] = useState<{ quiz_json: QuizAttivita | null }>({ quiz_json: iniziale });
+  return <><EditorQuiz quiz={d.quiz_json} onCambia={(p) => setD((x) => ({ ...x, ...p }))} /><output data-testid="stato">{JSON.stringify(d)}</output></>;
 }
-const stato = () => JSON.parse(screen.getByTestId('stato').textContent!) as { quiz_json: QuizAttivita | null; _giorniQuiz: string };
+const stato = () => JSON.parse(screen.getByTestId('stato').textContent!) as { quiz_json: QuizAttivita | null };
 
 describe('EditorQuiz', () => {
-  it('senza guida offre di aggiungerla; con la guida si scrivono giorni, domanda, risposte e premi, e si toglie tutto', () => {
+  it('senza guida offre di aggiungerla; con la guida si scelgono i giorni a pulsanti e si scrivono domanda, risposte e premi, e si toglie tutto', () => {
     render(<ConStato iniziale={null} />);
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi la guida di un quiz/ }));
     expect(stato().quiz_json).toEqual({ giorni: [], spiegazione: '', domanda: '', voci: [{ oggetto: '', altroNome: null, risposta: '', nota: null }], esiti: [] });
-    fireEvent.change(screen.getByLabelText('Giorni del mese'), { target: { value: '7, 40' } });
-    expect(screen.getByText('Scrivi solo giorni del mese, da 1 a 31, separati da virgole.')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Giorni del mese'), { target: { value: '7, 17' } });
-    expect(screen.getByText('Vuoto se il quiz non ha giorni fissi')).toBeInTheDocument();
+    // L13 (O7-5): i giorni del mese a pulsanti 1–31, niente testo da interpretare; restano in ordine
+    const giorni = screen.getByRole('group', { name: 'Giorni del mese' });
+    expect(within(giorni).getAllByRole('button', { name: /^Giorno \d+$/ })).toHaveLength(31);
+    expect(screen.queryByRole('textbox', { name: 'Giorni del mese' })).toBeNull();
+    fireEvent.click(within(giorni).getByRole('button', { name: 'Giorno 17' }));
+    fireEvent.click(within(giorni).getByRole('button', { name: 'Giorno 7' }));
+    expect(within(giorni).getByRole('button', { name: 'Giorno 7' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('C’è il 7 e il 17 di ogni mese.')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Domanda'), { target: { value: 'Dove?' } });
-    fireEvent.change(screen.getByLabelText('Nome della risposta 1'), { target: { value: 'Panda Bread' } });
-    fireEvent.change(screen.getByLabelText('Altro nome della risposta 1'), { target: { value: 'BW Panda Pan' } });
-    fireEvent.change(screen.getByLabelText('Risposta 1'), { target: { value: 'Vicino alla coda' } });
-    fireEvent.change(screen.getByLabelText('Nota della risposta 1'), { target: { value: 'Sicura' } });
+    const risposta1 = within(screen.getByRole('group', { name: 'Risposta 1' }));
+    fireEvent.change(risposta1.getByLabelText('Nome'), { target: { value: 'Panda Bread' } });
+    fireEvent.change(risposta1.getByLabelText('Altro nome'), { target: { value: 'BW Panda Pan' } });
+    fireEvent.change(risposta1.getByLabelText('Risposta giusta'), { target: { value: 'Vicino alla coda' } });
+    fireEvent.change(risposta1.getByLabelText('Nota'), { target: { value: 'Sicura' } });
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi una risposta/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Togli la risposta 2' }));
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi un premio/ }));
-    fireEvent.change(screen.getByLabelText('Esito 1'), { target: { value: 'Perfetto' } });
-    fireEvent.change(screen.getByLabelText('Premio 1'), { target: { value: '7.400 ¥' } });
+    const premio1 = within(screen.getByRole('group', { name: 'Premio 1' }));
+    fireEvent.change(premio1.getByLabelText('Esito'), { target: { value: 'Perfetto' } });
+    fireEvent.change(premio1.getByLabelText('Che cosa dà'), { target: { value: '7.400 ¥' } });
     expect(stato()).toEqual({
-      _giorniQuiz: '7, 17',
-      quiz_json: { giorni: [], spiegazione: '', domanda: 'Dove?', voci: [{ oggetto: 'Panda Bread', altroNome: 'BW Panda Pan', risposta: 'Vicino alla coda', nota: 'Sicura' }], esiti: [{ esito: 'Perfetto', premio: '7.400 ¥' }] },
+      quiz_json: { giorni: [7, 17], spiegazione: '', domanda: 'Dove?', voci: [{ oggetto: 'Panda Bread', altroNome: 'BW Panda Pan', risposta: 'Vicino alla coda', nota: 'Sicura' }], esiti: [{ esito: 'Perfetto', premio: '7.400 ¥' }] },
     });
+    // un secondo tocco toglie il giorno; «Togli tutti i giorni» li toglie tutti
+    fireEvent.click(within(giorni).getByRole('button', { name: 'Giorno 7' }));
+    expect(stato().quiz_json!.giorni).toEqual([17]);
+    fireEvent.click(screen.getByRole('button', { name: /Togli tutti i giorni/ }));
+    expect(stato().quiz_json!.giorni).toEqual([]);
     // l'altro nome e la nota svuotati tornano null
-    fireEvent.change(screen.getByLabelText('Altro nome della risposta 1'), { target: { value: '' } });
-    fireEvent.change(screen.getByLabelText('Nota della risposta 1'), { target: { value: '' } });
+    fireEvent.change(risposta1.getByLabelText('Altro nome'), { target: { value: '' } });
+    fireEvent.change(risposta1.getByLabelText('Nota'), { target: { value: '' } });
     expect(stato().quiz_json!.voci[0]).toEqual({ oggetto: 'Panda Bread', altroNome: null, risposta: 'Vicino alla coda', nota: null });
     fireEvent.click(screen.getByRole('button', { name: 'Togli il premio 1' }));
     expect(stato().quiz_json!.esiti).toEqual([]);
     fireEvent.click(screen.getByRole('button', { name: /Togli la guida del quiz/ }));
-    expect(stato()).toEqual({ quiz_json: null, _giorniQuiz: '' });
+    expect(stato()).toEqual({ quiz_json: null });
     expect(screen.getByRole('button', { name: /Aggiungi la guida di un quiz/ })).toBeInTheDocument();
   });
 });

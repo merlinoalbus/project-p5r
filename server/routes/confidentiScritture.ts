@@ -63,6 +63,8 @@ const corpoInvito = z.object({
   apre: z.object({ tipo: z.enum(['quartiere', 'luogo', 'area']), chiave: z.string().min(1).max(200) }).strict(),
   condizioni: z.array(condizioneSpillo).max(20),
   nota: z.string().max(500),
+  // L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (giorno e fascia), se la guida lo dice; assente = resta com'è, null = nessuno
+  messaggio: z.object({ data: dataInvito, fascia: z.enum(['giorno', 'sera']) }).strict().nullable().optional(),
 }).strict();
 router.post('/confidenti/:chiave/inviti', validate({ params: paramsChiaveGuida, body: corpoInvito.extend({ data: dataInvito }).strict() }), (req, res) => {
   res.status(201).json(creaInvito(String(req.params.chiave), req.body as CorpoNuovoInvito));

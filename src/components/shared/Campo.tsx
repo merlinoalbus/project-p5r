@@ -18,7 +18,7 @@
 // `CampoTesto` è il caso di tutti i giorni: testo, numero o testo lungo che si allunga con quello che contiene.
 // ============================================================
 
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react';
 
 /** Le proprietà che il `Campo` consegna al controllo quando i figli sono una funzione. */
 export interface ProprietaControllo {
@@ -111,18 +111,33 @@ export function CampoTesto({ etichetta, valore, onCambia, tipo = 'testo', aiuto,
   );
 }
 
-/** Area di testo che si allunga con quello che contiene (nessun riquadro che scorre dentro la finestra) e non ha la maniglia di ridimensionamento. */
-function TestoCheCresce({ valore, onCambia, righe, massimo, disabilitato, segnaposto, ...p }: ProprietaControllo & {
-  valore: string; onCambia: (v: string) => void; righe: number; massimo: number; disabilitato?: boolean; segnaposto?: string;
+/**
+ * Area di testo che si allunga con quello che contiene (nessun riquadro che scorre dentro la finestra) e non ha la maniglia di
+ * ridimensionamento. L'altezza si ricalcola a ogni cambio del testo e della larghezza del campo (la finestra che si stringe manda a capo).
+ * L13 (O7-5): è l'unica area di testo dei moduli — la usano `CampoTesto`, le voci di `CampoElenco` (che partono da una riga sola, alte
+ * come gli altri campi) e la guida del quiz, che prima ne aveva una copia sua.
+ */
+export function TestoCheCresce({ valore, onCambia, righe = 2, massimo = 2000, disabilitato, segnaposto, ...p }: Partial<ProprietaControllo> & {
+  valore: string; onCambia: (v: string) => void; righe?: number; massimo?: number; disabilitato?: boolean; segnaposto?: string; 'aria-label'?: string;
 }) {
   const el = useRef<HTMLTextAreaElement | null>(null);
-  // a ogni cambio del testo l'altezza torna a «auto» e poi alla misura del contenuto; le righe minime le fissa `rows`
-  useEffect(() => {
+  /** L'altezza torna a «auto» e poi alla misura del contenuto (bordi compresi); le righe minime le fissa `rows`. */
+  const adatta = useCallback(() => {
     const t = el.current;
     if (!t) return;
     t.style.height = 'auto';
-    t.style.height = `${t.scrollHeight + 2}px`;
-  }, [valore]);
+    t.style.height = `${t.scrollHeight + t.offsetHeight - t.clientHeight}px`;
+  }, []);
+  useLayoutEffect(adatta, [adatta, valore]);
+  useEffect(() => {
+    const t = el.current;
+    if (!t || typeof ResizeObserver === 'undefined') return;
+    let larghezza = t.clientWidth;
+    // solo i cambi di larghezza: quelli d'altezza li fa `adatta`, e reagirvi farebbe un giro senza fine
+    const osservatore = new ResizeObserver(() => { if (t.clientWidth !== larghezza) { larghezza = t.clientWidth; adatta(); } });
+    osservatore.observe(t);
+    return () => osservatore.disconnect();
+  }, [adatta]);
   return <textarea {...p} ref={el} className="form-input campo__lungo" rows={righe} maxLength={massimo} value={valore} disabled={disabilitato} placeholder={segnaposto} onChange={(e) => onCambia(e.target.value)} />;
 }
 

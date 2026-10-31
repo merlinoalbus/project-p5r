@@ -8,7 +8,7 @@ import {
   type NuovaRegistrazioneAcquisto,
 } from '../../../shared/acquisti';
 import { eDote, nomeDote, type DoteChiave } from '../../../shared/doti';
-import { GIORNI_NEL_MESE, MESI_GIOCO } from '../../../shared/condizioniSpillo';
+import { dataValida } from '../../../shared/condizioniSpillo';
 import {
   anteprimaAnnullaProvenienzaAcquisto,
   anteprimaRegistrazioneAcquisto, anteprimaRimuoviPresenzaStoricaAcquisto,
@@ -22,6 +22,8 @@ import { dataGiocoTesto } from '../../utils/dateGioco';
 import { fortunaDelConsumo } from '../../utils/fortunaConsumo';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { SelettoreData } from '../shared/SelettoreData';
+import { Campo, CampoTesto } from '../shared/Campo';
 import { annullaFonteConRegistro, eseguiAcquistoConRegistro, gestoPendenteNelloScope, rimuoviLegacyConRegistro, useGestiPartita } from '../../services/gestiPartita';
 import { GestiPartita } from '../partita/GestiPartita';
 import type { ValutazionePresenza } from '../../../shared/valutazioneAcquisto';
@@ -109,13 +111,12 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
   const registrazioni = registro.dati?.registrazioni.filter((r) => r.identita.articolo === articolo) ?? [];
   const altreStessoGiorno = (anteprima?.acquisti.registrazioni ?? registrazioni).filter(r => r.attiva && r.momento.giorno === (anteprima?.nuovo.momento.giorno ?? campi.giorno)
     && r.id !== (anteprima?.nuovo.scelta.tipo === 'collega' ? anteprima.nuovo.scelta.acquistoId : campi.scelta));
-  const [mese = '', data = ''] = campi.giorno.split('-');
   const cambia = (delta: Partial<typeof campi>) => {
     setCampi((c) => ({ ...c, ...delta })); setAnteprima(null); setAttestato(false); setErrore(null);
   };
   // la Fortuna di quel consumo, dallo stato della partita (si rilegge a ogni anteprima)
   const fortunaCalcolata = fortunaDelConsumo(fortuna.dati, campi.giorno, campi.variante, oggi);
-  const valido = !!mese && !!data && eDote(campi.variante) && Number.isInteger(Number(campi.ordine)) && Number(campi.ordine) >= 1 && Number(campi.ordine) <= 1_000_001
+  const valido = dataValida(campi.giorno) && eDote(campi.variante) && Number.isInteger(Number(campi.ordine)) && Number(campi.ordine) >= 1 && Number(campi.ordine) <= 1_000_001
     && (!presenza || campi.rapporto === 'rappresenta' || campi.rapporto === 'ulteriore') && !!fortuna.dati;
   const prepara = async () => {
     if (blocco.current || !valido || !eDote(campi.variante)) return;
@@ -159,11 +160,13 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
           const r = registrazioni.find((x) => x.id === id);
           cambia(r ? { scelta: id, giorno: r.momento.giorno, fascia: r.momento.fascia, ordine: String(r.momento.ordine + 1), variante: r.consumo.variante, rapporto: presenza?.valutazione && r.legacyFirma === presenza.firma && r.legacyValutazioneId === presenza.valutazione.id ? 'rappresenta' : '' } : { scelta: '', variante: '', rapporto: '' });
         }} />
-      <div className="flex flex-wrap items-end gap-2">
-        <Selettore etichetta="Mese" valore={mese} opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={(m) => cambia({ giorno: `${m}-${data && Number(data) <= (GIORNI_NEL_MESE[m] ?? 31) ? data : ''}` })} />
-        <Selettore etichetta="Giorno" valore={data} disabilitato={!mese} opzioni={Array.from({ length: mese ? GIORNI_NEL_MESE[mese] ?? 31 : 0 }, (_, i) => ({ chiave: String(i + 1).padStart(2, '0'), nome: String(i + 1) }))} onCambia={(g) => cambia({ giorno: `${mese}-${g}` })} />
+      {/* L13 (O7-5): il giorno col selettore unico delle date di gioco (prima mese e giorno con due selettori propri); resta 'MM-GG' */}
+      <div className="griglia-campi">
+        <Campo etichetta="Giorno" senzaGruppo>
+          <SelettoreData etichetta="Giorno del consumo" valore={campi.giorno} onCambia={(giorno) => cambia({ giorno })} />
+        </Campo>
         <Selettore etichetta="Quando" valore={campi.fascia} opzioni={[{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }]} onCambia={(f) => cambia({ fascia: f as 'giorno' | 'sera' })} />
-        <label className="flex flex-col gap-1">Quale in quella fascia<input className="form-input w-24" type="number" min={1} max={1_000_001} step={1} value={campi.ordine} onChange={(e) => cambia({ ordine: e.target.value })} /></label>
+        <CampoTesto etichetta="Quale in quella fascia" tipo="numero" valore={campi.ordine} aiuto="1 se è il primo della fascia" onCambia={(ordine) => cambia({ ordine })} />
       </div>
       <Selettore etichetta="Che succo hai bevuto" valore={campi.variante} opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => cambia({ variante: d as DoteChiave })} />
       {!!campi.variante && <span className="testo-12 text-text-secondary">{fortunaCalcolata === null ? 'Di quel giorno la partita non ricorda la Fortuna: conto solo i 2 punti certi.' : fortunaCalcolata ? 'In quel giorno la Fortuna era accesa su questa Dote: 3 punti.' : 'In quel giorno la Fortuna non era accesa su questa Dote: 2 punti.'}</span>}

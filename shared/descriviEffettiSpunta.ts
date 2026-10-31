@@ -9,6 +9,7 @@
 
 import type { EffettiAzioneDto } from './types.js';
 import { NESSUNA_NOTA, testoDoteInPunti } from './note.js';
+import { nomePiazzamentoEsame } from './puntiConfidenti.js';
 
 /**
  * 2026-10-27 (revisione: «Grimaldello · creato · ricevuti Grimaldello ×3» ripeteva il nome): l'esito di un turno detto nel riepilogo. Per uno
@@ -48,5 +49,7 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
   }
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
+  // L13 (ondata 7, O7-2): «Esame di metà semestre 1: Primi 10 (Fascino ♪♪♪ · 5 punti) · trofeo Un travestimento sapiente»
+  for (const x of e.esami ?? []) parti.push(`${x.nome}: ${nomePiazzamentoEsame(x.piazzamento)}${doti(x.doti, ' (', ')')}${x.trofeo ? ` · trofeo ${x.trofeo.nome}` : ''}`);
   return parti.join(' · ');
 }

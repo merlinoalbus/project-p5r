@@ -6,7 +6,7 @@ import { Selettore } from '../../shared/Selettore';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 import { testoDi, type PropsModulo } from './base';
-import { Blocco, Campo, Griglia } from './campi';
+import { Blocco, Campo, CampoData, Griglia } from './campi';
 import { CAMPI_GENERICI, type Risposta } from './definizioni';
 
 /** Le risposte giuste come righe in ordine: certe domande d'esame si rispondono in più passaggi. */
@@ -49,7 +49,10 @@ function Generico({ tipo, dati, imposta, disabilitato }: PropsModulo & { tipo: '
   return (
     <div className="flex flex-col gap-3">
       <Griglia>
-        {CAMPI_GENERICI[tipo].map((c) => c.opzioni
+        {CAMPI_GENERICI[tipo].map((c) => c.tipo === 'data'
+          // L13 (O7-5): il giorno si sceglie (mese e giorno del calendario di gioco), non si digita; resta «MM-GG» verso l'API
+          ? <CampoData key={c.nome} nome={c.nome} etichetta={c.etichetta} aiuto={c.aiuto} obbligatorio={c.obbligatorio} dati={dati} imposta={imposta} disabilitato={disabilitato} />
+          : c.opzioni
           // un valore salvato fuori dall'elenco («Prof. Kawakami (bonus su Ann)») resta visibile e scelto, non sparisce
           ? <Blocco key={c.nome}><Selettore etichetta={c.etichetta} valore={testoDi(dati[c.nome])} vuoto={c.vuoto} ricerca="mai" disabilitato={disabilitato} opzioni={opzioniCon(c.opzioni, testoDi(dati[c.nome]))} onCambia={(k) => imposta({ [c.nome]: k })} /></Blocco>
           : <Campo key={c.nome} nome={c.nome} etichetta={c.etichetta} tipo={c.tipo} aiuto={c.aiuto} dati={dati} imposta={imposta} disabilitato={disabilitato} />)}

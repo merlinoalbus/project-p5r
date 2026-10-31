@@ -1189,12 +1189,10 @@ export function DungeonDettaglioPage() {
               <FinestraLegamiInfiltrazione infiltrazione={d.aree.find((a) => a.chiave === legami)!} aree={areePalazzo} partitaId={partitaId}
                 onChiudi={() => setLegami(null)} onSalvata={rileggiTutto} />
             )}
+            {/* di partenza subito dopo l'infiltrazione aperta, come proponeva la scheda della planimetria di prima; il modulo è la finestra (L13, O7-5) */}
             {!IN_RILASCIO && finestra === 'nuova-infiltrazione' && (
-              <Modal titolo="Nuova infiltrazione" aperta onChiudi={() => setFinestra(null)}>
-                {/* di partenza subito dopo l'infiltrazione aperta, come proponeva la scheda della planimetria di prima */}
-                <ModuloNuovaArea aree={infiltrazioniPalazzo} areePalazzo={areePalazzo.map((a) => ({ slug: a.slug, nome: a.nome }))} occupato={occupato} dopoIniziale={area.chiave}
-                  onCrea={nuovaInfiltrazione} onAnnulla={() => setFinestra(null)} />
-              </Modal>
+              <ModuloNuovaArea aree={infiltrazioniPalazzo} areePalazzo={areePalazzo.map((a) => ({ slug: a.slug, nome: a.nome }))} occupato={occupato} dopoIniziale={area.chiave}
+                onCrea={nuovaInfiltrazione} onAnnulla={() => setFinestra(null)} />
             )}
           </div>}
         </div>
