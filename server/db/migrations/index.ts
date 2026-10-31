@@ -390,6 +390,10 @@ import { migration323 } from './323_domanda_62_legame_ann.js';
 // Confidenti romanzabili dal dialogo del rango 9 con Takemi solo di sera con la relazione (325, dati)
 import { migration324 } from './324_confidenti_romanzabili_schema.js';
 import { migration325 } from './325_relazione_romantica_dalla_guida.js';
+// 2026-10-31 (L13, ondata 10, O10-4: risposta alla domanda 4, «ok tranne concimare la pianta che dipende dal tipo di bionutrimenti che si usano
+// quanta gentilezza si ottiene. Proposte da verificare lasciale proposte poi le vedo io...»): le proposte certe delle voci dal 04-01 al 06-01
+// applicate (44) o chiuse come già presenti (7); restano aperte concimare la pianta, il −500 ¥ del bagno del 26/5, le da verificare e le probabili
+import { migration326 } from './326_proposte_certe_periodo_validato.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -414,5 +418,5 @@ export const migrations: Migration[] = [
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
-  migration320, migration321, migration322, migration323, migration324, migration325,
+  migration320, migration321, migration322, migration323, migration324, migration325, migration326,
 ];
