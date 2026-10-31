@@ -12,6 +12,8 @@
 // Stati della targa: in corso (barra e «mancano»); Pronto (soglia raggiunta: il + diventa «Sali al rango N+1»); Bloccato (il + è spento,
 // accanto «Segna comunque»); solo trama / senza punti (testo breve); MAX. Dopo una salita (`appenaSalito`) le risposte mostrate sono quelle
 // dell'evento appena giocato: le note che dà si registrano subito e valgono già verso il rango successivo.
+// L13 (O10-3): fra «il resto» l'interruttore «Relazione romantica» della partita (solo un Confidente romanzabile, dal rango della scelta
+// romantica o con la relazione già segnata); la leggono disponibilità, semafori e Diario.
 // Questo componente è solo presentazione: le azioni restano in `ConfidentiPartita`, che le passa in `azioni`.
 // ============================================================
 
@@ -30,6 +32,7 @@ import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
 import { slug } from '../../../shared/slug';
 import { formattaPunti } from '../../utils/punti';
 import { noteAParole, simboliNote } from '../../../shared/note';
+import { RANGO_DELLA_SCELTA_ROMANTICA } from '../../../shared/puntiConfidenti';
 import type { ConfidentePartitaDto } from '../../types';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
@@ -49,6 +52,8 @@ export interface AzioniConfidente {
   sbloccato: () => void;
   apriNote: () => void;
   bonus: (valore: boolean) => void;
+  /** L13 (O10-3): segna o toglie la relazione romantica nella partita (solo un Confidente romanzabile). */
+  relazione: (valore: boolean) => void;
 }
 
 interface Props {
@@ -213,6 +218,13 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
           <InfoSalitaRango c={c} onApriScheda={azioni.apriScheda} />
           {c.rango === 0 && (
             <PulsanteVisivo className="self-start" attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : c.bloccato ? 'Bloccato' : 'Da sbloccare'} dettaglio={c.bloccato ? 'requisiti mancanti' : 'quando lo incontri in gioco'} disabled={occ || (!c.sbloccato && !!c.bloccato)} onClick={azioni.sbloccato} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : c.bloccato ? 'bloccato dai requisiti' : 'da sbloccare quando lo incontri'}`} />
+          )}
+          {/* L13 (O10-3, risposta «a» dell'utente del 31/10): la relazione romantica della partita, un interruttore come lo sblocco. C'è solo con
+              un Confidente romanzabile, dal rango della scelta romantica (o se la relazione è già segnata, per poterla togliere) */}
+          {c.romanzabile && (c.rango >= RANGO_DELLA_SCELTA_ROMANTICA || c.relazioneRomantica) && (
+            <PulsanteVisivo className="self-start" attivo={c.relazioneRomantica} compatto icona={<IconaAzione chiave={c.relazioneRomantica ? 'raggiunto' : 'aperti'} dimensione={20} />}
+              titolo="Relazione romantica" disabled={occ} onClick={() => azioni.relazione(!c.relazioneRomantica)}
+              aria-label={`${c.nome}: relazione romantica ${c.relazioneRomantica ? 'iniziata (tocca per toglierla)' : 'non iniziata (tocca per segnarla)'}`} />
           )}
           <div className="flex flex-col gap-1">
             <PulsanteVisivo className="self-start" tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={azioni.apriNote} />

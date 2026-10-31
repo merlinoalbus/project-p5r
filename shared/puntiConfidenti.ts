@@ -28,6 +28,9 @@ export const PUNTI_USCITA = 10;
 export const MOLTIPLICATORE_ARCANO = 1.5;
 /** Moltiplicatore dell'invito accettato subito (effetto «invito» della voce). */
 export const MOLTIPLICATORE_INVITO = 1.2;
+/** L13 (O10-2/O10-3): il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili, la regola
+ *  della migrazione 325). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
+export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
 
 /** I sette Confidenti che ricevono il moltiplicatore dell'esame (G-016c, corretta da G-020 con Ann): gli altri non lo hanno mai. */
 export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];

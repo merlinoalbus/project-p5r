@@ -236,6 +236,8 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       sbloccato: () => void salva(c.chiave, { sbloccato: !c.sbloccato }),
       apriNote: () => { setModifica(c); setNote(c.note); },
       bonus: (valore) => setBonusForzato((b) => ({ ...b, [c.chiave]: valore })),
+      // L13 (O10-3): la sola relazione romantica (PUT con il solo campo: niente incontri né punti, `impostaRelazioneRomantica`)
+      relazione: (valore) => void salva(c.chiave, { relazioneRomantica: valore }),
     };
   };
 

@@ -18,7 +18,9 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
+import { aggiornaVoceGiornata, eliminaVoceGiornata, getConfidentiPartita, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
+import { RANGO_DELLA_SCELTA_ROMANTICA } from '../../../shared/puntiConfidenti';
+import { fraseRelazione } from '../../../shared/descriviEffettiSpunta';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta, descriviEffetti } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSegnare';
@@ -127,6 +129,23 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid, ...(a.effettiVoce?.effetti.some(e => e.effetto.tipo === 'pesca') ? { pesca: true } : {}) }) : null;
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
+  // L13 (O10-3, risposta «a» dell'utente del 31/10): la voce del passaggio al rango della scelta romantica di un Confidente. Aperta la scelta
+  // delle note, si legge il Confidente nella partita: se è romanzabile la scelta mostra la casella della relazione, precompilata con il valore
+  // della partita. La scelta fatta lì vale per la spunta che segue (anche passando per esiti o acquisti); su ogni altra voce non c'è
+  const chiaveRomantica = chiediNote && partitaId !== null && a.rangoAtteso === RANGO_DELLA_SCELTA_ROMANTICA && a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;
+  const [relazionePartita, setRelazionePartita] = useState<{ chiave: string; valore: boolean } | null>(null);
+  const relazioneScelta = useRef<boolean | undefined>(undefined);
+  useEffect(() => {
+    if (chiaveRomantica === null || partitaId === null) return;
+    let attivo = true;
+    // una lettura fallita lascia la scelta senza casella: la relazione non cambia (si segna anche dalla scheda del Confidente)
+    getConfidentiPartita(partitaId).then((l) => {
+      const c = l.find((x) => x.chiave === chiaveRomantica);
+      if (attivo) setRelazionePartita(c?.romanzabile ? { chiave: c.chiave, valore: c.relazioneRomantica } : null);
+    }).catch(() => { if (attivo) setRelazionePartita(null); });
+    return () => { attivo = false; };
+  }, [chiaveRomantica, partitaId]);
+  const relazioneDaChiedere = chiaveRomantica !== null && relazionePartita?.chiave === chiaveRomantica ? { valore: relazionePartita.valore } : undefined;
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
@@ -159,7 +178,10 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     scrittura.current = true;
     setOccupato(true);
     try {
-      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti);
+      // L13 (O10-3): la scelta romantica fatta nella scelta delle note (solo spuntando; assente = la relazione non cambia)
+      const relazioneRomantica = fatta ? relazioneScelta.current : undefined;
+      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}), ...(relazioneRomantica !== undefined ? { relazioneRomantica } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti, relazioneRomantica);
+      relazioneScelta.current = undefined;
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
       setChiediEsiti(null);
@@ -175,7 +197,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const turniRegistrati = fatta && agg.effetti?.turni?.length ? descriviEffetti({ doti: [], confidente: null, turni: agg.effetti.turni }, { senzaDoti: true, senzaPaga: true }) : '';
       // 2026-10-28: e le consumazioni e le visite di pesca registrate con la spunta, con gli yen davvero mossi letti dalla risposta
       // («Succo Aojiru Perizia · ♪ · 2 punti, 3 con la Fortuna · scalati ¥5000 dal saldo»; mai sotto zero: «nessuno yen scalato: …»)
-      const registrati = [...(fatta ? descriviOsservate(osservate, a.uid, agg.yenAutomatici) : []), turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
+      // L13 (O10-3): e la relazione romantica, se la scelta alla spunta l'ha cambiata (la stessa frase delle ricevute)
+      const relazioneRegistrata = fatta && agg.effetti?.relazione ? fraseRelazione(agg.effetti.relazione) : '';
+      const registrati = [...(fatta ? descriviOsservate(osservate, a.uid, agg.yenAutomatici) : []), turniRegistrati, relazioneRegistrata, dotiRegistrate].filter(Boolean).join(' · ');
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${registrati ? `: ${registrati}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
@@ -230,7 +254,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
-        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
+        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} relazione={relazioneDaChiedere}
+          onScegli={(n, relazione) => { relazioneScelta.current = relazione; void cambia(true, n ?? undefined, n === null); }} onAnnulla={() => { relazioneScelta.current = undefined; setChiediNote(false); }} />}
       </div>
       {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra
           del testo, sul telefono in una fila a sé in fondo alla voce: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari

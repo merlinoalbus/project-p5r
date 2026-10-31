@@ -94,8 +94,9 @@ export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Pr
 export const confermaRequisitoConfidente = (id: number, chiave: string, rango: number, indice: number, confermato: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 /** Spunta (o riapre) una voce della giornata nella partita, per identità: applica i suoi effetti (con le note ottenute, se è un
- *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. */
-export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], scelteEsito?: SceltaEsitoSpunta[]): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti !== undefined ? { acquisti } : {}), ...(pesche !== undefined ? { pesche } : {}), ...(scelteEsito?.length ? { scelteEsito } : {}) }, { maxRetries: 0 });
+ *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. L13 (O10-3): `relazioneRomantica` è la scelta romantica alla spunta
+ *  del passaggio al rango 9 di un Confidente romanzabile (assente = la relazione non cambia; solo spuntando). */
+export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], scelteEsito?: SceltaEsitoSpunta[], relazioneRomantica?: boolean): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti !== undefined ? { acquisti } : {}), ...(pesche !== undefined ? { pesche } : {}), ...(scelteEsito?.length ? { scelteEsito } : {}), ...(fatta && relazioneRomantica !== undefined ? { relazioneRomantica } : {}) }, { maxRetries: 0 });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
 /** Il meteo di un giorno nella partita, di giorno e di sera. */

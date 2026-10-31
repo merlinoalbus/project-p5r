@@ -23,6 +23,8 @@ const api = vi.hoisted(() => ({
   getProposteConversione: vi.fn().mockResolvedValue([]),
   // la finestra della voce carica anche gli elenchi per gli effetti (articoli, domande, oggetti…)
   getElenchiEffettiVoce: vi.fn(),
+  // L13 (O10-3): alla spunta del passaggio al rango 9 si legge la relazione romantica del Confidente nella partita
+  getConfidentiPartita: vi.fn().mockResolvedValue([]),
 }));
 const ELENCHI_EFFETTI = { articoli: [], domande: [], cruciverba: [], inviti: [], persone: [], oggetti: [], trofei: [] };
 const ELENCHI = {
@@ -373,6 +375,28 @@ describe('GiornoGuida — la giornata canone', () => {
     // le Doti si segnano a mano: l'avviso le ricorda invece di dirle date
     // (resta 7 secondi, come per ogni spunta che ha Doti da segnare)
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', 'Da segnare nelle Doti: Coraggio ♪ · 2 punti', 7000));
+  });
+
+  it('L13 (O10-3): il passaggio al rango 9 di un Confidente romanzabile chiede solo «Ho scelto la relazione romantica», precompilata dalla partita', async () => {
+    api.getConfidentiPartita.mockResolvedValue([{ chiave: 'takemi', nome: 'Tae Takemi', romanzabile: true, relazioneRomantica: false }]);
+    api.impostaAzionePercorso.mockResolvedValue(voce({ uid: uid(12), azione: 'Clinica Takemi: rango 9', fatta: true, effetti: { doti: [], confidente: null, relazione: { confidente: 'takemi', nome: 'Tae Takemi', prima: false, dopo: true } } }));
+    disegna({ ...base, azioni: [voce({ uid: uid(12), azione: 'Clinica Takemi: rango 9', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 9 })] });
+    fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi: rango 9'));
+    const casella = await screen.findByRole('checkbox', { name: 'Ho scelto la relazione romantica' });
+    expect(casella).not.toBeChecked();
+    fireEvent.click(casella);
+    fireEvent.click(within(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).getByRole('button', { name: '3 note' }));
+    await waitFor(() => expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(12), true, 3, undefined, undefined, undefined, true));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Relazione romantica con Tae Takemi iniziata')));
+  });
+
+  it('L13 (O10-3): su un altro rango (o un Confidente non romanzabile) la scelta delle note non ha la casella della relazione', async () => {
+    api.getConfidentiPartita.mockResolvedValue([{ chiave: 'takemi', nome: 'Tae Takemi', romanzabile: true, relazioneRomantica: false }]);
+    disegna({ ...base, azioni: [voce({ uid: uid(13), azione: 'Clinica Takemi: rango 8', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 8 })] });
+    fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi: rango 8'));
+    expect(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Ho scelto la relazione romantica' })).toBeNull();
+    expect(api.getConfidentiPartita).not.toHaveBeenCalled();
   });
 
   it('un evento: modifica il genere (resta dov\'è), sposta di giorno', async () => {

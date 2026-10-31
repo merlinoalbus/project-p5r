@@ -17,6 +17,7 @@ import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { registraEvento } from './storicoService.js';
+import { RANGO_DELLA_SCELTA_ROMANTICA } from '../../shared/puntiConfidenti.js';
 
 /** I Confidenti romanzabili, letti una volta e svuotati quando il DB di gioco cambia; vuoto su un file di gioco senza la colonna (prima della 324). */
 let romanzabili: Set<string> | null = null;
@@ -42,8 +43,9 @@ export function relazioniDellaPartita(partitaId: number): ReadonlySet<string> {
 /** La relazione romantica con il Confidente nella partita: falsa se il Confidente non è romanzabile o non ha ancora una riga nella partita. */
 export const relazioneRomantica = (partitaId: number, chiave: string): boolean => eRomanzabile(chiave) && relazioniDellaPartita(partitaId).has(chiave);
 
-/** Il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili: la regola della 325). */
-export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
+/** Il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili: la regola della 325); il valore
+ *  sta in `shared/puntiConfidenti`, letto anche dall'interfaccia (O10-3). */
+export { RANGO_DELLA_SCELTA_ROMANTICA };
 
 /**
  * La relazione che vale per l'incontro verso `rangoAtteso` (una voce del Diario): fino al rango della scelta compreso la relazione non c'era
