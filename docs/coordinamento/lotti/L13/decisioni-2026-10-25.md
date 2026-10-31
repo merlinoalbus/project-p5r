@@ -88,6 +88,11 @@ verificati sulle copie in sola lettura dei dati reali.
     vale una nota; le righe d'esame nessuna Dote. Il premio vive negli effetti della voce del Diario che segna la domanda (una per domanda; il
     quiz TV nella sua voce della sera); le voci già spuntate nelle partite si convertono comunque (le ricevute restano); le domande senza voce
     la ricevono nel loro giorno e fascia; `ricompensa` si svuota dove coincide (migrazione 315, audit `audit-315-domande-premi-guida`).
+    Risultati degli esami (stessa risposta: «aggiungo le voci dei risultati d'esame del 19/7 e del 24/12? sì»): il 19 luglio (esame-2) e il
+    24 dicembre (esame-4) hanno la loro voce dei risultati, fascia «giorno», in cima (la guida: settimana 15, a scuola durante la giornata;
+    settimana 35, per prima, prima di negozi e Memento), con l'effetto «esame» come il 20 maggio e il 24 ottobre: il piazzamento si sceglie
+    alla spunta e dà il premio di `esame.premi_json`. Chiude il punto (2) dei «daDecidere» dell'audit-311 (migrazione 316, audit
+    `audit-316-voci-risultati-esami`).
 
 Fino al 28 ottobre le conversioni delle singole voci del periodo validato (fino al 05-31) restavano da approvare riga per riga. Dalla
 decisione 23 si applicano direttamente, salvo i casi (a), (b) e (c): la migrazione 302 applica le proposte aperte che non vi ricadono e

@@ -362,6 +362,9 @@ import { migration314 } from './314_chiusure_l13_esame_lavoro_studio_avvisi.js';
 // 2026-10-31 (L13, ondata 8, O8-1: «Il premio di queste domande deve essere corretto e allineato a quanto nel testo. […] Aggiungi le voci
 // mancanti.»): il premio della guida negli effetti delle voci delle domande in classe e dei quiz TV, quattro voci nuove, ricompense svuotate
 import { migration315 } from './315_domande_premi_della_guida.js';
+// 2026-10-31 (L13, ondata 8, O8-2: «aggiungo le voci dei risultati d'esame del 19/7 e del 24/12? sì»): le voci dei risultati di esame-2 e
+// esame-4 nel giorno dei risultati, in cima alla fascia del giorno, con l'effetto «esame» (piazzamento scelto alla spunta)
+import { migration316 } from './316_voci_risultati_esami.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -385,5 +388,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311, migration312, migration313, migration314, migration315,
+  migration310, migration311, migration312, migration313, migration314, migration315, migration316,
 ];
