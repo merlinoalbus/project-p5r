@@ -33,6 +33,10 @@ import { RicercaGlobale } from '../ricerca/RicercaGlobale';
 import { useScorciatoiaRicerca } from '../../hooks/useScorciatoiaRicerca';
 import { useBloccoStandby } from '../../hooks/useBloccoStandby';
 import { useFuocoNavigazione } from './useFuocoNavigazione';
+import { FinestraAppuntiFissi } from '../appunti/FinestraAppuntiFissi';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Struttura principale con navigazione adattiva, contenuto route e overlay globali. */
 export function MainLayout() {
@@ -129,6 +133,8 @@ export function MainLayout() {
       <HostConferma />
       {/* L11 B4: la ricerca globale, aperta dal pulsante della Topbar o dal tasto «/» */}
       <RicercaGlobale />
+      {/* C7 (2026-10-31): la finestra fluttuante degli appunti fissi del Diario, sopra ogni pagina (solo preparazione) */}
+      {!IN_RILASCIO && <FinestraAppuntiFissi />}
     </div>
   );
 }

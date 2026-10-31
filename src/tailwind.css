@@ -140,6 +140,9 @@
   /* ---- Z-index ---- */
   --z-dropdown: 10;
   --z-popover: 100;
+  /* C7: la finestra fluttuante degli appunti fissi e la sua icona: sopra pagine, schede, tendine e barra di navigazione, sotto le finestre
+     modali (una conferma d'eliminazione le sta sopra) e le notifiche */
+  --z-appunti-fissi: 1000;
   --z-modal-overlay: 5000;
   --z-modal-dialog: 5001;
   --z-toast: 9999;
@@ -2673,6 +2676,49 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Fuori da ogni @layer di proposito (lotto C): deve vincere sull'utility `min-w-[180px]` di `CampoRicerca`, che nella riga dei filtri
    lascerebbe la ricerca a 180 px e allargherebbe il selettore accanto (misurato su Domande, Libri e Richieste a 390 px). */
 .filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
+
+/* ============================================================
+   Appunti fissi del Diario (C7, 2026-10-31) — la finestra fluttuante e la sua icona
+   ============================================================
+   Posizione e dimensione le scrive il componente (`style`, in px, sempre dentro la finestra visibile); qui l'aspetto. Una sola area
+   scorre, il corpo (`overscroll-behavior: contain`: arrivato in fondo non trascina la pagina sotto). La barra del titolo e le maniglie
+   non scorrono la pagina col dito (`touch-action: none`): lì il dito sposta o ridimensiona. */
+@layer components {
+  .appunti-fissi { position: fixed; z-index: var(--z-appunti-fissi); display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+    background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+    box-shadow: 0 12px 32px rgb(0 0 0 / .55), 0 2px 6px rgb(0 0 0 / .4); }
+  /* ridotta a icona la finestra resta montata (le bozze dei moduli non si perdono) ma non si vede né si raggiunge */
+  .appunti-fissi[hidden] { display: none; }
+  .appunti-fissi:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
+  .appunti-fissi__barra { display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary); cursor: grab; touch-action: none; user-select: none; flex-shrink: 0; }
+  .appunti-fissi__barra--trascina { cursor: grabbing; }
+  .appunti-fissi__titolo { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* in fondo 44 px in più: l'ultima riga si porta sopra la maniglia di ridimensionamento, che sta nell'angolo */
+  .appunti-fissi__corpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px 8px 48px; display: flex; flex-direction: column; gap: 8px; }
+  .appunti-fissi__maniglia { position: absolute; right: 0; bottom: 0; width: 44px; height: 44px; display: flex; align-items: flex-end; justify-content: flex-end;
+    padding: 6px; border: 0; background: transparent; color: var(--color-text-muted); cursor: nwse-resize; touch-action: none; }
+  .appunti-fissi__maniglia--verticale { cursor: ns-resize; }
+  .appunti-fissi__maniglia:hover { color: var(--color-text); }
+  .appunti-fissi__maniglia:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
+  .appunti-fissi__voce { display: flex; align-items: stretch; gap: 4px; border: 1px solid var(--color-border-light); border-radius: var(--radius-md);
+    background: var(--color-surface); transition-property: border-color, background-color; transition-duration: .15s; }
+  .appunti-fissi__voce:hover { border-color: var(--color-border); }
+  .appunti-fissi__copia { flex: 1 1 auto; min-width: 0; min-height: 44px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    padding: 6px 10px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--color-text); text-align: left; cursor: copy;
+    transition-property: transform, background-color; transition-duration: .12s; }
+  .appunti-fissi__copia:hover { background: var(--color-bg-tertiary); }
+  .appunti-fissi__copia:active { transform: scale(0.98); }
+  .appunti-fissi__copia:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
+  .appunti-fissi__copiato { color: var(--color-success); font-weight: 600; }
+  .appunti-fissi__icona { position: fixed; z-index: var(--z-appunti-fissi); width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--color-primary); border-radius: var(--radius-full); background: var(--color-bg-secondary); color: var(--color-text);
+    box-shadow: 0 8px 24px rgb(0 0 0 / .55); cursor: pointer; touch-action: none; transition-property: transform, box-shadow; transition-duration: .15s; }
+  .appunti-fissi__icona:hover { transform: scale(1.05); }
+  .appunti-fissi__icona:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 3px; }
+  .appunti-fissi__numero { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--radius-full);
+    background: var(--color-primary-fondo); color: var(--color-text-on-primary); font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; }
+}
 
 /* ============================================================
    Accessibilità (WCAG 2.2) — fuoco nelle file che scorrono e movimento ridotto

@@ -457,6 +457,14 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         { chiave: 'incolla', titolo: 'Incolla qui', descrizione: 'Incolla dopo questa voce', icona: <IconaAzione chiave="incolla" dimensione={20} />, onClick: () => { setMenu(null); fuocoAlMenu(v.uid); appunti.incollaDagliAppunti(v.uid); } },
       ];
     })() : []),
+    // C7 (appunti fissi, 2026-10-31): accanto a Copia, su ogni dispositivo, il testo che Copia scriverebbe va nella finestra degli appunti
+    // fissi con un titolo proposto (la finestra prende il fuoco sul titolo, per cambiarlo prima di salvare)
+    (() => {
+      const gruppo = gruppoDi(v.uid);
+      const piu = gruppo.length > 1 ? ` (${gruppo.length})` : '';
+      return { chiave: 'fisso', titolo: `Salva negli appunti fissi${piu}`, descrizione: piu ? `Salva le ${gruppo.length} voci selezionate negli appunti fissi` : 'Salva questa voce negli appunti fissi, per incollarla di nuovo',
+        icona: <IconaAzione chiave="piano" dimensione={20} />, onClick: () => { setMenu(null); appunti.salvaFisso(gruppo); } };
+    })(),
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'voce', voce: v }) },
     ...(i > 0 ? [{ chiave: 'su', titolo: 'Sposta su', icona: <IconaAzione chiave="su" dimensione={20} />, onClick: () => sposta(v, -1) }] : []),
     ...(i < n - 1 ? [{ chiave: 'giu', titolo: 'Sposta giù', icona: <IconaAzione chiave="giu" dimensione={20} />, onClick: () => sposta(v, 1) }] : []),
@@ -582,7 +590,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       {/* la barra delle voci selezionate: in fondo, ferma sopra la barra di navigazione mentre si scorre (non sposta le righe in cima) */}
       {(caselle || selezionateAVista > 0) && (
         <BarraSelezioneVoci quante={sel.uid.length} caselle={caselle} occupato={bloccata} scorreDentro={scorreDentro}
-          onCopia={() => appunti.copia(sel.uid)} onTaglia={() => appunti.taglia(sel.uid)} onAltroGiorno={() => { setMenu(null); setTrasferimento('copia'); }}
+          onCopia={() => appunti.copia(sel.uid)} onTaglia={() => appunti.taglia(sel.uid)} onFisso={() => appunti.salvaFisso(sel.uid)} onAltroGiorno={() => { setMenu(null); setTrasferimento('copia'); }}
           onFine={() => { setCaselleDi(null); sel.svuota(); }} />
       )}
       {/* il conteggio per il lettore di schermo, in una regione sempre presente */}

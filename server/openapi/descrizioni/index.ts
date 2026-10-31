@@ -24,6 +24,7 @@ import { DESCRIZIONI_SISTEMA } from './sistema.js';
 import { DESCRIZIONI_TRADUZIONI } from './traduzioni.js';
 import { DESCRIZIONI_PESCA } from './pesca.js';
 import { DESCRIZIONI_CORREZIONI } from './correzioni.js';
+import { DESCRIZIONI_APPUNTI_FISSI } from './appuntiFissi.js';
 
 /** Le aree dell'API, per prefisso di montaggio (`sistema` per le rotte dell'app): diventano i tag del documento. */
 export const AREE: Readonly<Record<string, AreaApi>> = {
@@ -44,6 +45,7 @@ export const AREE: Readonly<Record<string, AreaApi>> = {
   '/api/pesca':{nome:'Regole della pesca',descrizione:'Regola della guida modificabile, profili sufficienti e fonti.'},
   '/api/partite/:id/pesca':{nome:'Pesca della partita',descrizione:'Visite, osservazioni, fatti temporali, fonti e contabilità esplicita della pesca.'},
   '/api/correzioni': { nome: 'Correzioni alla guida', descrizione: 'Modifica e ripristino dei dati della guida che non hanno una pagina di catalogo propria: quartieri, trofei, Doti, personaggi, sfide, completamento, testi degli oggetti, Jose.' },
+  '/api/appunti-fissi': { nome: 'Appunti fissi del Diario', descrizione: 'Le voci che si ripetono nel Diario, salvate con un titolo e il testo intero per incollarle di nuovo: non sono di una partita, solo nell’istanza di preparazione.' },
   sistema: { nome: 'Sistema', descrizione: 'Salute del server, configurazione pubblica, questa documentazione.' },
 };
 
@@ -65,5 +67,6 @@ export const DESCRIZIONI: DescrizioniArea = {
   ...DESCRIZIONI_LUOGHI,
   ...DESCRIZIONI_RICERCA,
   ...DESCRIZIONI_CORREZIONI,
+  ...DESCRIZIONI_APPUNTI_FISSI,
   ...DESCRIZIONI_SISTEMA,
 };

@@ -14,9 +14,13 @@ import { voceDelPercorso } from './navigazione';
 import { PartitaSelettore } from './PartitaSelettore';
 import { PulsanteCerca } from '../ricerca/PulsanteCerca';
 import { PulsanteStandby } from './PulsanteStandby';
+import { PulsanteAppuntiFissi } from '../appunti/PulsanteAppuntiFissi';
 import { IconGear } from '../shared/icons';
 import { AssetImg } from '../shared/AssetImg';
 import { useTitoloPaginaStore } from '../../stores/titoloPaginaStore';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** La seconda briciola: il titolo della pagina (la parte prima di « — », che nei titoli dice il contenitore), se non è la sezione stessa. */
 function briciolaPagina(titolo: string | null, sezione: string, pathname: string, inizioSezione: string): string | null {
@@ -81,6 +85,8 @@ export function Topbar() {
       <PartitaSelettore />
       {/* L11 B4 (R11-07/2): la ricerca si raggiunge da ogni pagina e a ogni larghezza; la barra in basso ha già il tetto di cinque voci */}
       <PulsanteCerca />
+      {/* C7 (2026-10-31): gli appunti fissi del Diario, una finestra fluttuante che si apre e si chiude da qui su ogni pagina (solo preparazione) */}
+      {!IN_RILASCIO && <PulsanteAppuntiFissi />}
       {/* L12 R12-03: «Schermo sempre acceso» durante la partita, su ogni pagina; nullo dove il browser non ha lo Screen Wake Lock */}
       <PulsanteStandby />
       <Link
