@@ -97,10 +97,10 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const ctx = contestoAree();
   const caricate = immaginiCaricateDelleMappe();
-  // le miniature delle carte dei Palazzi, dei Dedali e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
+  // le miniature delle carte dei Palazzi, dei Memento, dei Dedali e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
   const miniatureLuoghi = immaginiCaricateDi(AMBITO_MINIATURA_LUOGO);
-  /** La miniatura caricata di un Palazzo, di un Dedalo o di un'area di un Dedalo come illustrazione (senza asset: senza caricata il Palazzo
-   *  e il Dedalo restano con il loro emblema, l'area del Dedalo senza immagine), e dove caricarla. */
+  /** La miniatura caricata di un Palazzo, dei Memento, di un Dedalo o di un'area di un Dedalo come illustrazione (senza asset: senza caricata
+   *  Palazzo, Memento e Dedalo restano con il loro emblema, l'area del Dedalo senza immagine), e dove caricarla. */
   const miniaturaDelLuogo = (chiave: string): { immagine: IllustrazioneDto | null; miniatura: { ambito: typeof AMBITO_MINIATURA_LUOGO; chiave: string } } => {
     const url = urlCaricataDi(AMBITO_MINIATURA_LUOGO, chiave, miniatureLuoghi);
     return { immagine: url ? { immagineUrl: url, asset: null } : null, miniatura: { ambito: AMBITO_MINIATURA_LUOGO, chiave } };
@@ -280,7 +280,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const pinMemento = pinPropri('dungeon-mementos');
     for (const f of [...figliDedali, ...figliFogli]) somma(pinMemento, f.conteggi.pin);
     return {
-      tipo: 'memento', chiave: memento.chiave, nome: memento.nome, casa: casaDeiMemento(), immagine: null,
+      tipo: 'memento', chiave: memento.chiave, nome: memento.nome, casa: casaDeiMemento(), ...miniaturaDelLuogo(memento.chiave),
       conteggi: {
         dedali: figliDedali.length, aree: areeDedali.length, planimetrie: figliFogli.length, pin: pinMemento,
         persone: figliDedali.reduce((n, d) => n + (d.conteggi.persone ?? 0), 0), trame: figliDedali.reduce((n, d) => n + (d.conteggi.trame ?? 0), 0),

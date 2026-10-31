@@ -46,7 +46,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Visore ed editor delle mappe (`/guida/mappe`): spilli in quattro categorie, condizioni di visibilità, pezzi delle planimetrie,
   passaggi, esportazione e importazione; «Dove si trova» per ogni cosa del mondo. Una sola guida da usare in ogni visore, su ogni mappa
   con voci della guida (pulsante «Guida»).
-- Luoghi della guida (`/guida/mappe`): miniature delle carte dei Palazzi, dei Dedali dei Memento e delle loro aree, da inserire,
+- Luoghi della guida (`/guida/mappe`): miniature delle carte dei Palazzi, dei Memento, dei loro Dedali e delle loro aree, da inserire,
   cambiare o togliere nella preparazione (file, Ctrl+V, «Incolla dagli appunti»).
 - Cestino delle eliminazioni della guida e delle mappe.
 

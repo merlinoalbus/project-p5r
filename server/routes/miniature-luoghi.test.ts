@@ -39,8 +39,8 @@ describe('miniature delle carte dei Luoghi (O9-5)', () => {
     const a = await nodo('area-dedalo', 'mementos-02-aiyatsbus-area-2');
     expect(a?.immagine).toBeNull();
     expect(a?.miniatura).toEqual({ ambito: 'dungeon', chiave: 'mementos-02-aiyatsbus-area-2' });
-    // gli altri nodi non hanno il comando
-    expect((await nodo('memento', 'mementos'))?.miniatura).toBeUndefined();
+    // e anche la carta «Memento»
+    expect((await nodo('memento', 'mementos'))?.miniatura).toEqual({ ambito: 'dungeon', chiave: 'mementos' });
   });
 
   it('2 — PUT di un PNG per un Palazzo, un Dedalo e un’area del Dedalo: la gerarchia porta l’URL versionato, `l` dà la WebP', async () => {
@@ -61,12 +61,12 @@ describe('miniature delle carte dei Luoghi (O9-5)', () => {
     await request(app).delete('/api/immagini/dungeon/kamoshida').expect(404);
   });
 
-  it('4 — chiave inesistente 404 `luogo-non-trovato`; chiave di altro (Memento, infiltrazione di un Palazzo) 400 `luogo-senza-miniatura`; nulla si salva', async () => {
+  it('4 — chiave inesistente 404 `luogo-non-trovato`; chiave di altro (infiltrazione di un Palazzo) 400 `luogo-senza-miniatura`; nulla si salva', async () => {
     const corpo = await png(10, 10);
     const r404 = await request(app).put('/api/immagini/dungeon/non-esiste').set('Content-Type', 'image/png').send(corpo).expect(404);
     expect(r404.body.error.code).toBe('luogo-non-trovato');
-    // un Dedalo (`mementos-02-aiyatsbus`) dal 2026-10-31 ha la sua miniatura (test 2): qui la radice dei Memento e un'infiltrazione
-    for (const chiave of ['mementos', 'kamoshida-01-cancello-del-castello-ingresso']) {
+    // un Dedalo e la carta «Memento» dal 2026-10-31 hanno la loro miniatura: qui un'infiltrazione di un Palazzo
+    for (const chiave of ['kamoshida-01-cancello-del-castello-ingresso']) {
       const r400 = await request(app).put(`/api/immagini/dungeon/${chiave}`).set('Content-Type', 'image/png').send(corpo).expect(400);
       expect(r400.body.error.code).toBe('luogo-senza-miniatura');
     }

@@ -77,10 +77,10 @@ export function Infiltrazioni({ titolo, elenco }: { titolo: string; elenco: Nodo
   );
 }
 
-/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: la miniatura caricata di un Palazzo, di un Dedalo o di un'area di un
- *  Dedalo; senza, l'emblema grande per Palazzi, Memento e dedali (niente per l'area del Dedalo), altrimenti l'immagine del server. */
+/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: la miniatura caricata di un Palazzo, dei Memento, di un Dedalo o di
+ *  un'area di un Dedalo; senza, l'emblema grande per Palazzi, Memento e dedali (niente per l'area del Dedalo), altrimenti l'immagine del server. */
 function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
-  if ((nodo.tipo === 'palazzo' || nodo.tipo === 'dedalo' || nodo.tipo === 'area-dedalo') && nodo.immagine?.immagineUrl) {
+  if ((nodo.tipo === 'palazzo' || nodo.tipo === 'memento' || nodo.tipo === 'dedalo' || nodo.tipo === 'area-dedalo') && nodo.immagine?.immagineUrl) {
     return <AnteprimaMappa mappa={{ immagineUrl: nodo.immagine.immagineUrl, asset: null, nome: nodo.nome }} className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
   }
   if (nodo.tipo === 'palazzo' || nodo.tipo === 'memento' || nodo.tipo === 'dedalo') {
@@ -93,7 +93,7 @@ function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
     className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
 }
 
-/** «Miniatura» sulla carta di un Palazzo, di un Dedalo o di un'area di un Dedalo: apre la finestra per inserire, cambiare o togliere l'immagine. */
+/** «Miniatura» sulla carta di un Palazzo, dei Memento, di un Dedalo o di un'area di un Dedalo: apre la finestra per inserire, cambiare o togliere l'immagine. */
 function ComandoMiniaturaReale({ nodo }: { nodo: NodoGerarchiaDto }) {
   const [aperta, setAperta] = useState(false);
   const ricarica = useContext(RicaricaLuoghi);
