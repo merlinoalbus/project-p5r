@@ -209,8 +209,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   rifiuta come farne una voce descrittiva (409). **(31/10)**
 - **Una sola guida nel visore**: ogni visore (a schermo intero e incorporato) ha la stessa guida da usare, dal pulsante «Guida», su ogni
   mappa che può avere voci della guida: casella ottenuto/riapri con la conferma della scheda del Palazzo, dettagli e pin centrabili nella
-  voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 768 px, foglio dal basso sul
-  telefono. Si usa e basta: le voci si correggono nella scheda del Palazzo. La vecchia lista testuale dei contenuti non c'è più in
+  voce, voci fatte nascoste, le Persona da catturare con la piastrella della scheda, finestra spostabile da 1024 px, foglio dal basso su
+  telefono e tablet. Si usa e basta: le voci si correggono nella scheda del Palazzo. La vecchia lista testuale dei contenuti non c'è più in
   nessuna mappa; la radice dei Memento manda alla sua scheda, dove stanno i dedali, e una sezione chiesta con `?area=` si apre lì. Con la
   scheda del Palazzo la guida del visore condivide, senza copie: il salvataggio dello stato con le notifiche delle voci toccate, la cattura
   nel compendio, la conferma di «Riapri», le regole della voce (descrittiva, conteggio delle segnate, voce segnata in vista, passi sotto l'Enigma, voce da

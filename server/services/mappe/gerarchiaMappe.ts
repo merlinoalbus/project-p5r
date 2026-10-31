@@ -36,7 +36,7 @@ import { AMBITO_MINIATURA_LUOGO } from '../../../shared/immagini.js';
 import { chiaviPubblicheDelleMappe } from './percorsiMappe.js';
 import { radiceDelPalazzo } from './alberoMappe.js';
 import { infiltrazioniDelleAree, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
-import { mappeDaCollocare } from './areeService.js';
+import { mappeDaCollocare, sbloccoArea } from './areeService.js';
 
 /**
  * Il filtro dei Palazzi, in un solo punto (è quello di `utils/palazzi.ts`, `soloPalazzi`): quando Iweleth diventa solo un dedalo
@@ -195,7 +195,14 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const nodiQuartieri: NodoGerarchiaDto[] = quartieri.map((q) => {
     const disp = disponibilitaQuartiere(q.chiave, st);
     const stato = partitaId === undefined ? null : disp.disponibile;
-    const figliArea = areeDelQuartiere(q.chiave).map((a) => nodoArea(a, stato, disp.disponibile ? null : disp.bloccoMotivo));
+    // Le Aree di un quartiere possono avere una condizione propria (il Covo dei Ladri è un'Area di Yongen-Jaya: migrazione 303): con una partita
+    // si valuta con la funzione unica delle Aree (`sbloccoArea`, che mette in AND quartiere e Area), come nell'elenco `/api/aree`; senza partita
+    // resta «non valutata» (null), mai un `true` non calcolato.
+    const figliArea = areeDelQuartiere(q.chiave).map((a) => {
+      if (partitaId === undefined) return nodoArea(a, stato, disp.disponibile ? null : disp.bloccoMotivo);
+      const s = sbloccoArea(a, partitaId);
+      return nodoArea(a, s.disponibile ?? null, s.disponibile ? null : s.bloccoMotivo ?? null);
+    });
     // `mappa` solo se la mappa del quartiere esiste: «Colloca» non deve ricevere una chiave che non porta a nulla
     return {
       tipo: 'quartiere', chiave: q.chiave, nome: q.nome, casa: `/guida/citta/${encodeURIComponent(q.chiave)}`,
@@ -208,8 +215,14 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   });
 
   // ---- aree della città (lo staff di Tokyo) ----
-  // Le Aree della città e dei Palazzi non hanno una condizione di sblocco propria: `disponibile` resta «non valutata» (null), mai un `true` non calcolato.
-  const nodiAreeCitta = aree.filter((a) => a.citta_chiave).map((a) => nodoArea(a, null, null));
+  // Le Aree della città con una partita si valutano con la funzione unica delle Aree (`sbloccoArea`, quella dell'elenco `/api/aree`), così indice
+  // ed elenchi dicono la stessa cosa; senza partita restano «non valutate» (null), mai un `true` non calcolato. Il Covo dei Ladri non è qui:
+  // è un'Area del quartiere Yongen-Jaya (sopra). Le Aree dei Palazzi non hanno una condizione propria: null.
+  const nodiAreeCitta = aree.filter((a) => a.citta_chiave).map((a) => {
+    if (partitaId === undefined) return nodoArea(a, null, null);
+    const s = sbloccoArea(a, partitaId);
+    return nodoArea(a, s.disponibile ?? null, s.disponibile ? null : s.bloccoMotivo ?? null);
+  });
 
   // ---- Palazzi ----
   /** Il nodo di un Palazzo con le sue Aree e infiltrazioni; `nome` diverso per l'archivio di un Palazzo confluito in un dedalo, che non ha una mappa da collocare. */

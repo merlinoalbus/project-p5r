@@ -21,10 +21,10 @@
 // - aperta, la voce mostra testo, dettagli e i suoi pin: un pin di questa planimetria si tocca e il visore lo seleziona e lo centra;
 // - il tocco su un pin della mappa evidenzia le sue voci (e le porta in vista);
 // - niente modifica: le voci si correggono nella scheda del Palazzo.
-// Finestra fluttuante che si sposta dalla sua testata o con le frecce sulla maniglia ⠿ (da 768 px), foglio dal basso sotto i 768 px.
+// Finestra fluttuante che si sposta dalla sua testata o con le frecce sulla maniglia ⠿ (da 1024 px), foglio dal basso sotto i 1024 px.
 // ============================================================
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { getGuidaMappa } from '../../services/api';
 import { catturaNelCompendio, salvaStatoVoce } from '../../services/gestiGuida';
@@ -66,11 +66,16 @@ interface Props {
   ancora: { top: number; right: number } | null;
   /** Cambia quando gli stati della mappa cambiano altrove (popup, pagina): la guida si rilegge in silenzio. */
   versione: string;
+  /** Riceve l'elemento della guida quando è un foglio dal basso (sotto i 1024 px), `null` quando è la finestra o è chiusa: il visore ne
+   *  ricava la fascia libera della tela, dove centrare il pin che la guida gli indica. */
+  foglioRef?: RefObject<HTMLElement | null>;
 }
 
 /** La finestra (o il foglio) della guida della planimetria, da usare. */
-export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui, onCentra, onCambiato, onChiudi, ancora, versione }: Props) {
-  const largo = useMedia('(min-width: 768px)');
+export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui, onCentra, onCambiato, onChiudi, ancora, versione, foglioRef }: Props) {
+  // la finestra fluttuante (340 px) da 1024 px; sotto, anche sul tablet, il foglio dal basso: a 768–1023 px la finestra copriva il 70%
+  // della mappa. È lo stesso confine della barra inferiore, su cui il foglio si appoggia (64 px di stacco).
+  const largo = useMedia('(min-width: 1024px)');
   const guida = useCarica(() => getGuidaMappa(mappa, partitaId ?? undefined), [mappa, partitaId]);
   const [mostraFatte, setMostraFatte] = useState(false);
   const [aperta, setAperta] = useState<string | null>(null);
@@ -86,7 +91,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     getGuidaMappa(mappa, partitaId ?? undefined).then((g) => imposta.current(g)).catch(() => { /* resta quella di prima */ });
   }, [versione, mappa, partitaId]);
 
-  // il posto della finestra (da 768 px): all'apertura in alto a destra della tela, ancorata al bordo destro dello schermo (così un
+  // il posto della finestra (da 1024 px): all'apertura in alto a destra della tela, ancorata al bordo destro dello schermo (così un
   // ridimensionamento non la lascia fuori), abbastanza in alto da lasciare spazio a qualche voce (ALTEZZA_UTILE) anche se la tela sta in
   // basso; da lì si sposta col gesto di tutte le finestre spostabili (`useSpostamentoFinestra`: barra trascinata o frecce sulla maniglia ⠿,
   // sempre per intero nello schermo)
@@ -96,6 +101,11 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     return { destra: Math.max(MARGINE, w - (ancora?.right ?? w) + MARGINE), alto: Math.max(MARGINE, Math.min((ancora?.top ?? 80) + MARGINE, h - ALTEZZA_UTILE - MARGINE)) };
   });
   const finestra = useRef<HTMLElement | null>(null);
+  /** Aggancia l'elemento della guida: alla finestra (per lo spostamento) e, se è un foglio, al visore (`foglioRef`). */
+  const agganciaFinestra = useCallback((el: HTMLElement | null) => {
+    finestra.current = el;
+    if (foglioRef) foglioRef.current = largo ? null : el;
+  }, [foglioRef, largo]);
   const sposta = useSpostamentoFinestra(finestra, { attivo: largo, aperta: true });
 
   // le voci dello spillo selezionato vengono in vista
@@ -198,7 +208,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
   };
 
   const corpo = (
-    <section ref={finestra} role="dialog" aria-label="Guida della planimetria"
+    <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria"
       className={largo
         ? 'fixed z-[70] flex max-h-[min(70dvh,560px)] w-[340px] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
         : 'fixed inset-x-2 bottom-[calc(64px+env(safe-area-inset-bottom))] z-[70] flex max-h-[60dvh] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'}

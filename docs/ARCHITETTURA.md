@@ -167,9 +167,14 @@ partita sta in `utente` con `partita_id`.
   partita; l'informativo è solo un segno. I tipi della città seguono le etichette della mappa del gioco («Bevande», «Sigarette»,
   «Cercalavoro»…). L'icona è l'asset `ui/spillo-<tipo>` con riserva SVG in codice (`IconaSpillo`); i colori sono quelli del registro.
 - **Posizioni** in percentuale dell'immagine, valide a ogni zoom e schermo; cambiare l'immagine di base mantiene gli spilli.
-- **Visore** (`VisoreMappa`): zoom da «adatta» (calcolato dall'area visibile) fino a 8 volte, con rotellina, pulsanti, pinch e
-  doppio clic per tornare ad «adatta»; spilli a dimensione costante, raggruppati quando si sovrappongono, legenda con filtri per tipo e
-  ricerca. Un tocco apre il popup ancorato allo spillo, che diventa un foglio dal basso quando non c'è spazio (sempre sotto i 768 px).
+- **Visore** (`VisoreMappa`): zoom da «adatta» (calcolato dall'area visibile) fino a 8 volte, con rotellina, pulsanti, pinch (anche
+  con un dito su uno spillo; finito il pinch il dito rimasto sposta) e doppio clic sulla tela per tornare ad «adatta» (su spilli e
+  gruppi il doppio tocco non tocca la vista); durante trascinamento e pinch la vista si muove senza ridisegnare la mappa, e lo stato
+  si aggiorna a fine gesto; spilli a dimensione costante, raggruppati quando si sovrappongono, legenda con filtri per tipo e ricerca.
+  Sotto i 768 px il visore incorporato in una pagina, a vista «adatta», lascia scorrere la pagina al dito. Un tocco apre il popup
+  ancorato allo spillo, che diventa un foglio dal basso quando non c'è spazio (sempre sotto i 768 px); da 768 px il foglio sta nella
+  colonna del visore; lo spillo toccato si centra nella fascia libera sopra il foglio; con la Guida aperta come foglio il riquadro le
+  si impila sopra.
   I raccolti sono nascosti salvo «Mostra anche i raccolti». Le condizioni di visibilità sono assolute: con una partita attiva uno
   spillo con una condizione falsa sparisce (salvo «Mostra anche i non ancora disponibili»). In uso normale nessun tocco sulla mappa
   modifica dati.
@@ -177,8 +182,8 @@ partita sta in `utente` con `partita_id`.
   incorporato (`MappaIncorporata`), su ogni mappa che può avere voci della guida (una planimetria di un Palazzo, o una mappa con un pin
   collegato a una voce). Legge `GET /api/mappe/:chiave/guida` (le voci della planimetria per infiltrazione, con lo stato della partita) e
   segna con `PUT /api/partite/:id/punti` come la scheda del Palazzo: casella ottenuto/riapri, dettagli e pin centrabili nella voce
-  aperta, voci fatte nascoste salvo «Anche le fatte», le Persona da catturare come piastrelle; finestra spostabile da 768 px, foglio dal
-  basso sotto. Con la scheda del Palazzo (`GuidaDellArea`, `DungeonDettaglioPage`) condivide:
+  aperta, voci fatte nascoste salvo «Anche le fatte», le Persona da catturare come piastrelle; finestra spostabile da 1024 px, foglio dal
+  basso sotto (telefono e tablet); lo spillo scelto dalla Guida si centra sopra il foglio e il suo riquadro si apre al tocco. Con la scheda del Palazzo (`GuidaDellArea`, `DungeonDettaglioPage`) condivide:
   - il salvataggio dello stato con le notifiche delle altre voci toccate (`salvaStatoVoce`) e la cattura nel compendio
     (`catturaNelCompendio`), in `services/gestiGuida.ts` (la cattura anche con `useCatturaPersona`);
   - la conferma di «Riapri» (`useConfermaRiapertura`, `components/guida/ConfermaRiapertura.tsx`);
@@ -203,6 +208,8 @@ partita sta in `utente` con `partita_id`.
   non reggono.
 - **Mappa di Tokyo** (`MappaTokyo`, `collocazioneTokyo.ts`): le sagome dei quartieri vengono dagli originali del gioco; la
   collocazione dei Palazzi e dei luoghi senza un posto in città è calcolata per non sovrapporsi alle tre larghezze di verifica.
+  Gesti: pulsanti, pinch a due dita, rotellina solo con la mappa ingrandita o con Ctrl/Cmd; a ingrandimento 1 il dito e la rotellina
+  fanno scorrere la pagina.
 
 ### Pagine (tabella delle rotte del frontend, `src/router.tsx`)
 | Indirizzo | Pagina |

@@ -155,7 +155,9 @@ function TestataLivello({ nodo }: { nodo: NodoGerarchiaDto }) {
 export function IndiceLuoghi() {
   useDocumentTitle('Luoghi della guida');
   const attiva = usePartitaStore((s) => s.attiva);
-  const gerarchia = useCarica(() => getGerarchiaMappe(attiva?.id), [attiva?.id]);
+  // la data, la fascia e il meteo della partita decidono quali quartieri e Aree sono già aperti (`disponibile`): al cambio si rilegge (come `useMappaPartita`)
+  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  const gerarchia = useCarica(() => getGerarchiaMappe(attiva?.id), [attiva?.id, momento]);
   const g = gerarchia.dati;
   const [params, setParams] = useSearchParams();
   const [ricerca, setRicerca] = useState('');

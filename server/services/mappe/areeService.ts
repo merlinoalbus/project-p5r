@@ -146,7 +146,7 @@ function condizionePropriaSalvata(a: RigaArea): RequisitoSpillo[] {
   return leggiCondizioniSalvate(a.condizioni_json ?? null);
 }
 
-function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 'sblocco' | 'disponibile' | 'bloccoMotivo'> {
+export function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 'sblocco' | 'disponibile' | 'bloccoMotivo'> {
   const condizioni = condizioneArea(a);
   if (!condizioni) return { disponibile: true, bloccoMotivo: null };
   const nomi = nomiCondizioniMemo();

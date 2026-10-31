@@ -11,7 +11,7 @@
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
 import { areaConPezzi, copiePosate, mascheraZone, nomeCopia, posaDi, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
-import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
+import { ALTEZZA_GOCCIA, raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { testoAvanzamento } from '../../utils/gestiVoce';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
@@ -28,6 +28,7 @@ import type { DisponibilitaDto } from '../../types';
 import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
 import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
+import { useMedia } from '../../hooks/useMedia';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
@@ -200,6 +201,12 @@ const limita = (v: number, min: number, max: number) => Math.min(max, Math.max(m
 /** Larghezza del popup dello spillo sul desktop (`.spillo-popup`): serve a tenerlo dentro la tela. */
 const LARGHEZZA_POPUP = 260;
 const SCHERMO_STRETTO = '(max-width: 767px)';
+/** Sotto i 1024 px c'è la barra inferiore e la guida è un foglio dal basso (come `GuidaNelVisore`): il foglio del pin non può starle sotto. */
+const SOTTO_1024 = '(max-width: 1023px)';
+/** Traslazione nulla: il raggruppamento fuori dall'editor non dipende dallo spostamento (la traslazione non cambia le distanze). */
+const PAN_NULLO: Punto = { x: 0, y: 0 };
+/** Dopo un pinch il tocco che lo chiude non è un tocco sul pin sotto il dito: per questi ms i pin ignorano il clic. */
+const PAUSA_DOPO_PINCH = 350;
 
 /** Sotto i 768 px il popup è un foglio dal basso, fisso sullo schermo: deve stare **fuori** dal livello
  *  della mappa, che è trasformato (scala e traslazione) e renderebbe `position: fixed` relativo a sé. */
@@ -388,13 +395,61 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Rotellina non passiva (React registra `wheel` come passivo: `preventDefault` non avrebbe effetto).
   const stato = useRef({ zoom, pan, zoomMin, zoomMax });
   useEffect(() => { stato.current = { zoom, pan, zoomMin, zoomMax }; });
+  // L3-06: durante un gesto (trascinamento, pinch) la vista si applica al livello con un fotogramma per volta, senza passare dallo stato:
+  // un movimento del dito non ridisegna più tutto il visore. Lo stato (`zoomEsplicito`, `panEsplicito`) si aggiorna una volta sola, alla
+  // fine del gesto (`chiudiVista`). I pin e i riquadri nel livello seguono lo zoom vivo con `--zoom-mappa` (vedi `.visore-mappa__livello`).
+  const livello = useRef<HTMLDivElement | null>(null);
+  const vistaViva = useRef<{ zoom: number; pan: Punto } | null>(null);
+  const fotogramma = useRef(0);
+  /** Scrive nel livello la vista viva (un fotogramma). */
+  const disegnaVista = useCallback(() => {
+    fotogramma.current = 0;
+    const v = vistaViva.current;
+    const el = livello.current;
+    if (!v || !el) return;
+    el.style.transform = `translate(${v.pan.x}px, ${v.pan.y}px) scale(${v.zoom})`;
+    el.style.setProperty('--zoom-mappa', String(v.zoom));
+  }, []);
+  /** Il gesto in corso porta la vista qui: la si disegna al prossimo fotogramma. */
+  const mostraVista = useCallback((z: number, p: Punto) => {
+    vistaViva.current = { zoom: z, pan: p };
+    if (!fotogramma.current) fotogramma.current = requestAnimationFrame(disegnaVista);
+  }, [disegnaVista]);
+  /** Fine del gesto: la vista viva passa nello stato (un solo disegno dei componenti). */
+  const chiudiVista = useCallback(() => {
+    if (fotogramma.current) { cancelAnimationFrame(fotogramma.current); fotogramma.current = 0; }
+    const v = vistaViva.current;
+    vistaViva.current = null;
+    if (!v) return;
+    // un semplice trascinamento a vista «adatta» non fissa uno zoom esplicito: lo zoom resta null (e segue «adatta» alla rotazione o al
+    // caricamento dell'immagine vera) se lo zoom vivo è quello già disegnato
+    if (Math.abs(v.zoom - stato.current.zoom) > 1e-6) setZoomEsplicito(v.zoom);
+    setPanEsplicito(v.pan);
+  }, []);
+  /** Gesto annullato dal sistema (`pointercancel`: il dito è passato allo scorrimento della pagina): la vista viva si scarta e il livello
+   *  torna a quella dello stato, senza tenere lo spostamento dei primi movimenti arrivati prima dell'annullo. */
+  const scartaVista = useCallback(() => {
+    if (fotogramma.current) { cancelAnimationFrame(fotogramma.current); fotogramma.current = 0; }
+    const v = vistaViva.current;
+    vistaViva.current = null;
+    const el = livello.current;
+    if (!v || !el) return;
+    const { zoom: z, pan: p } = stato.current;
+    el.style.transform = `translate(${p.x}px, ${p.y}px) scale(${z})`;
+    el.style.setProperty('--zoom-mappa', String(z));
+  }, []);
+  useEffect(() => () => { if (fotogramma.current) cancelAnimationFrame(fotogramma.current); }, []);
   const applicaZoom = useCallback((nuovo: number, cx: number, cy: number) => {
-    const { zoom: z1, pan: p1, zoomMin: mn, zoomMax: mx } = stato.current;
+    const viva = vistaViva.current;
+    chiudiVista();
+    const { zoom: zs, pan: ps, zoomMin: mn, zoomMax: mx } = stato.current;
+    const z1 = viva?.zoom ?? zs;
+    const p1 = viva?.pan ?? ps;
     const z2 = limita(nuovo, mn, mx);
     const k = z2 / z1;
     setZoomEsplicito(z2);
     setPanEsplicito({ x: cx - (cx - p1.x) * k, y: cy - (cy - p1.y) * k });
-  }, []);
+  }, [chiudiVista]);
   useEffect(() => {
     const el = tela.current;
     if (!el) return;
@@ -414,7 +469,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   }, [applicaZoom]);
 
   /** Torna all'inquadratura «adatta» togliendo zoom e spostamento espliciti. */
-  const adatta = () => { setZoomEsplicito(null); setPanEsplicito(null); };
+  const adatta = () => { vistaViva.current = null; setZoomEsplicito(null); setPanEsplicito(null); };
   // L'inquadratura iniziale (spillo selezionato o punto d'arrivo) si applica **una volta** per mappa e per richiesta, quando l'area
   // è misurata, e ancora una volta quando l'immagine ha le sue dimensioni vere (`nat` parte dalla riserva o dalle dimensioni
   // dichiarate dalla mappa: finché l'immagine non è caricata non si sa dove cade il punto). Prima si
@@ -479,6 +534,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // sulla loro planimetria effettiva, che è sempre una planimetria del Palazzo) o qualunque mappa con un pin collegato a una voce
   const conGuida = !!guida && !editor && !scelta && (mappa.area?.contenitore.tipo === 'dungeon' || mappa.spilli.some((s) => s.voci.length > 0));
   const [guidaAperta, setGuidaAperta] = useState<{ top: number; right: number } | null>(null);
+  // la guida è un foglio dal basso sotto i 1024 px (`GuidaNelVisore`): `guidaFoglio` è il suo elemento, per il posto libero sopra di lei
+  const sotto1024 = useMedia(SOTTO_1024);
+  const guidaFoglio = useRef<HTMLElement | null>(null);
+  const guidaSuFoglio = guidaAperta !== null && sotto1024;
+  /** Quante volte si è scelto un pin dalla Guida: riporta nella fascia libera sopra il foglio anche lo stesso pin scelto di nuovo. */
+  const [richiesteGuida, setRichiesteGuida] = useState(0);
   /** Apre la guida in alto a destra della tela (o la chiude). */
   const apriGuida = () => {
     if (guidaAperta) { setGuidaAperta(null); return; }
@@ -494,7 +555,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     if (nascostoPerCondizioni(s)) setMostraNonDisponibili(true);
     setTipiNascosti((prev) => { if (!prev.has(s.tipo)) return prev; const n = new Set(prev); n.delete(s.tipo); return n; });
     seleziona(s.id);
+    // la guida è un foglio che copre il basso della tela (sotto i 1024 px): il pin si centra nella fascia libera sopra di lei (effetto
+    // «L3-05») e il suo riquadro non si apre sopra la guida mentre la si sta usando; si apre al tocco sul pin
+    if (guidaSuFoglio) setPopupSoppresso(s.id);
     centraSu(s);
+    setRichiesteGuida((n) => n + 1);
   };
   // gli stati della mappa (pin e voci): quando cambiano altrove, la guida si rilegge
   // (gli stati dei pin e delle loro voci, più la versione della pagina ospite: le catture fatte con le piastrelle della scheda non toccano i pin)
@@ -523,13 +588,17 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Puntatori: trascinamento, pinch, click sulla mappa (editor), trascinamento di uno spillo (editor), ritaglio di una zona e
   // trascinamento di un pezzo (editor, 102).
   const puntatori = useRef(new Map<number, Punto>());
-  const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number }
+  const gesto = useRef<{ tipo: 'trascina'; x: number; y: number; px: number; py: number; z: number; mosso: boolean } | { tipo: 'pinch'; d0: number; z0: number; cx: number; cy: number; px: number; py: number } | { tipo: 'spillo'; id: number; mosso: boolean; x: number; y: number }
     | { tipo: 'ritaglia'; x0: number; y0: number } | { tipo: 'pezzo'; id: number; mosso: boolean; x: number; y: number; px0: number; py0: number; w: number; h: number } | null>(null);
   const [trascinato, setTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
   /** Il rettangolo che si sta ritagliando e il pezzo che si sta trascinando (102), in pixel dell'immagine. */
   const [rettangolo, setRettangolo] = useState<{ x: number; y: number; larghezza: number; altezza: number } | null>(null);
   const [pezzoTrascinato, setPezzoTrascinato] = useState<{ id: number; x: number; y: number } | null>(null);
   const [trascinando, setTrascinando] = useState(false);
+  /** Quando è finito l'ultimo pinch (ms): il tocco che lo chiude non apre il pin sotto il dito (`PAUSA_DOPO_PINCH`). */
+  const ultimoPinch = useRef<number | null>(null);
+  /** Il clic (`istante` = `timeStamp` dell'evento, stessa scala dei puntatori) viene da un pinch appena finito. */
+  const pinchRecente = (istante: number) => ultimoPinch.current !== null && istante - ultimoPinch.current < PAUSA_DOPO_PINCH;
   const schermoStretto = useSchermoStretto();
   /** Dove va un pezzo trascinato: la posizione di partenza più lo spostamento a schermo diviso per lo zoom, in pixel interi e con
    *  l'ingombro tutto dentro l'immagine. */
@@ -544,20 +613,43 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * zoom e centro di partenza), col primo un trascinamento — o, con «ritaglia» nell'editor, il rettangolo del pezzo — se non c'è
    * già un gesto in corso. */
   const suPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const nuovo = !puntatori.current.has(e.pointerId);
     puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     e.currentTarget.setPointerCapture?.(e.pointerId);
     if (puntatori.current.size === 2) {
-      const [a, b] = [...puntatori.current.values()];
-      const r = e.currentTarget.getBoundingClientRect();
-      gesto.current = { tipo: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), z0: zoom, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, px: pan.x, py: pan.y };
-      setRettangolo(null);
+      // già avviato in cattura se il secondo dito è caduto su un pin (`suPointerDownCattura`)
+      if (nuovo) avviaPinch(e.timeStamp);
     } else if (puntatori.current.size === 1 && !gesto.current) {
       if (editor?.strumento === 'ritaglia' && editor.pezzi) {
         const p = pixel(e.clientX, e.clientY);
         gesto.current = { tipo: 'ritaglia', x0: p.x, y0: p.y };
         setRettangolo({ x: p.x, y: p.y, larghezza: 0, altezza: 0 });
-      } else gesto.current = { tipo: 'trascina', x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, mosso: false };
+      } else gesto.current = { tipo: 'trascina', x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, z: zoom, mosso: false };
     }
+  };
+  /** Inizia il pinch con i due puntatori registrati: distanza, zoom e centro di partenza (la vista di partenza è quella viva, se un gesto
+   *  precedente non è ancora nello stato). */
+  const avviaPinch = (istante: number) => {
+    const el = tela.current;
+    if (!el || puntatori.current.size < 2) return;
+    const [a, b] = [...puntatori.current.values()];
+    const r = el.getBoundingClientRect();
+    const v = vistaViva.current ?? { zoom, pan };
+    ultimoPinch.current = istante;
+    gesto.current = { tipo: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), z0: v.zoom, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, px: v.pan.x, py: v.pan.y };
+    setRettangolo(null);
+  };
+  /** L3-02: i pin fermano il `pointerdown` (il tocco è loro), e un dito caduto su un pin non entrava fra i puntatori: il pinch non partiva
+   *  se anche uno solo dei due cadeva su un pin. In fase di cattura, fuori dall'editor (dove il tocco e il trascinamento dei pin restano
+   *  quelli di sempre), si registra ogni dito: il pin riceve comunque il suo tocco, il pinch parte con due dita ovunque. Il primo dito di un
+   *  gesto nuovo (`isPrimary`) ripulisce i puntatori rimasti da un gesto che non ha chiuso (un pin tolto dal DOM sotto il dito). */
+  const suPointerDownCattura = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (editor) return;
+    if (e.isPrimary) { puntatori.current.clear(); gesto.current = null; }
+    if (e.pointerType === 'mouse') return;
+    const nuovo = !puntatori.current.has(e.pointerId);
+    puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (nuovo && puntatori.current.size === 2) avviaPinch(e.timeStamp);
   };
   /** Fa avanzare il gesto in corso: il pinch scala lo zoom col rapporto fra le distanze tenendo
    * fermo il centro iniziale; il trascinamento sposta la mappa dopo una soglia di 4 px; lo
@@ -571,13 +663,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       const d = Math.hypot(a.x - b.x, a.y - b.y);
       const z2 = limita(g.z0 * (d / Math.max(1, g.d0)), zoomMin, zoomMax);
       const k = z2 / g.z0;
-      setZoomEsplicito(z2);
-      setPanEsplicito({ x: g.cx - (g.cx - g.px) * k, y: g.cy - (g.cy - g.py) * k });
+      mostraVista(z2, { x: g.cx - (g.cx - g.px) * k, y: g.cy - (g.cy - g.py) * k });
     } else if (g.tipo === 'trascina') {
       const dx = e.clientX - g.x;
       const dy = e.clientY - g.y;
       if (Math.abs(dx) + Math.abs(dy) > 4 && !g.mosso) { g.mosso = true; setTrascinando(true); }
-      if (g.mosso) setPanEsplicito({ x: g.px + dx, y: g.py + dy });
+      if (g.mosso) mostraVista(g.z, { x: g.px + dx, y: g.py + dy });
     } else if (g.tipo === 'spillo') {
       if (Math.abs(e.clientX - g.x) + Math.abs(e.clientY - g.y) > 4) g.mosso = true;
       if (g.mosso) { const p = percentuali(e.clientX, e.clientY); if (p) setTrascinato({ id: g.id, x: p.x, y: p.y }); }
@@ -596,9 +687,22 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     puntatori.current.delete(e.pointerId);
     const g = gesto.current;
     if (!g) return;
-    if (g.tipo === 'pinch') { if (puntatori.current.size < 2) gesto.current = null; return; }
+    if (g.tipo === 'pinch') {
+      if (puntatori.current.size < 2) {
+        // L3-02: finito il pinch il dito rimasto continua a trascinare la mappa dal punto in cui la vista è arrivata (fuori dall'editor,
+        // dove il dito rimasto non ha un altro gesto da riprendere); la vista viva passa nello stato
+        ultimoPinch.current = e.timeStamp;
+        const v = vistaViva.current ?? { zoom, pan };
+        chiudiVista();
+        const resto = [...puntatori.current.values()][0];
+        if (resto && !editor) { gesto.current = { tipo: 'trascina', x: resto.x, y: resto.y, px: v.pan.x, py: v.pan.y, z: v.zoom, mosso: true }; setTrascinando(true); }
+        else { gesto.current = null; setTrascinando(false); }
+      }
+      return;
+    }
     gesto.current = null;
     setTrascinando(false);
+    if (g.tipo === 'trascina' && g.mosso) chiudiVista();
     if (g.tipo === 'ritaglia') {
       // un tocco senza rettangolo (meno di 2 × 2 px) non ritaglia niente
       const zona = rettangoloFra({ x: g.x0, y: g.y0 }, pixel(e.clientX, e.clientY));
@@ -628,7 +732,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     }
   };
   /** Puntatore annullato dal sistema: dimentica puntatori, gesto, spillo e pezzo trascinati e rettangolo senza salvare nulla. */
-  const annullaGesto = () => { puntatori.current.clear(); gesto.current = null; setTrascinato(null); setRettangolo(null); setPezzoTrascinato(null); setTrascinando(false); };
+  const annullaGesto = () => { scartaVista(); puntatori.current.clear(); gesto.current = null; setTrascinato(null); setRettangolo(null); setPezzoTrascinato(null); setTrascinando(false); };
 
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
@@ -697,13 +801,16 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const popupSotto = selezionato !== null && !staSopra && (staSotto || misuraPopup === null || dim.h === 0);
   // il foglio solo con l'altezza misurata e la tela misurata: una stima non basta a togliere il popup dal suo punto
   const popupFoglio = selezionato !== null && !schermoStretto && misuraPopup !== null && dim.h > 0 && !staSopra && !staSotto;
+  // L3-05: con la guida aperta come foglio dal basso (sotto i 1024 px) il riquadro del pin è anch'esso un foglio, impilato sopra di lei
+  // (altrimenti, ancorato al punto o sotto la guida, sparirebbe)
+  const popupSuFoglio = schermoStretto || popupFoglio || guidaSuFoglio;
   // misurato solo ancorato al punto (largo 260): nel foglio è più largo e più basso, e misurarlo lì lo farebbe saltare da un modo all'altro
   useLayoutEffect(() => {
     const el = popupRif.current;
-    if (!el || !selezionato || schermoStretto || popupFoglio) return;
+    if (!el || !selezionato || popupSuFoglio) return;
     const h = el.offsetHeight;
     if (h > 0 && (altezzaPopupMisurata?.id !== selezionato.id || altezzaPopupMisurata.h !== h)) setAltezzaPopupMisurata({ id: selezionato.id, h });
-  }, [selezionato, schermoStretto, popupFoglio, altezzaPopupMisurata]);
+  }, [selezionato, popupSuFoglio, altezzaPopupMisurata]);
   /** Di quanto far scorrere un riquadro ancorato a `x` (in percentuale) per tenerlo dentro la tela. */
   const scostamento = useCallback((x: number) => {
     if (dim.w === 0) return 0;
@@ -724,9 +831,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Rifatto solo quando cambia qualcosa che conta (P1"): prima girava a ogni disegno, anche per un popup che si apre. Le dipendenze
   // sono i numeri, non gli oggetti — `pan` e `nat` sono oggetti nuovi a ogni disegno anche quando i valori restano quelli.
   const inEditor = editor !== undefined;
+  // L3-06: lo spostamento non cambia le distanze fra i pin: il raggruppamento ne dipende solo nell'editor con un pin selezionato (dove
+  // `dentroTela` tiene le pastiglie spostate dentro la tela). Altrove si calcola con spostamento nullo e non si rifà a ogni pan.
+  const panRaggruppa = inEditor && selezionatoId !== null ? pan : PAN_NULLO;
   const { singoli, gruppi } = useMemo(
-    () => raggruppaSpilli(visibili, { pan: { x: pan.x, y: pan.y }, zoom, nat: { w: nat.w, h: nat.h }, dim: { w: dim.w, h: dim.h } }, { selezionatoId, editor: inEditor }),
-    [visibili, pan.x, pan.y, zoom, nat.w, nat.h, dim.w, dim.h, selezionatoId, inEditor],
+    () => raggruppaSpilli(visibili, { pan: { x: panRaggruppa.x, y: panRaggruppa.y }, zoom, nat: { w: nat.w, h: nat.h }, dim: { w: dim.w, h: dim.h } }, { selezionatoId, editor: inEditor }),
+    [visibili, panRaggruppa.x, panRaggruppa.y, zoom, nat.w, nat.h, dim.w, dim.h, selezionatoId, inEditor],
   );
   /** Se ingrandendo il gruppo si è sciolto, l'elenco sparisce da sé: nessun effetto da sincronizzare. */
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
@@ -738,7 +848,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // La stima delle voci serve solo a preferire il lato consueto — sopra — quando l'elenco ci sta
   // tutto; il resto lo fa `maxHeight`, che non stima niente.
   const elenco = (() => {
-    if (!gruppoScelto) return { sotto: false, dx: 0, altezzaVoci: undefined as number | undefined, foglio: schermoStretto };
+    if (!gruppoScelto) return { sotto: false, dx: 0, altezzaVoci: undefined as number | undefined, foglio: schermoStretto || guidaSuFoglio };
     // Il contorno attorno alle voci, contato e non stimato: 26 px di stacco dalla pastiglia, 8 di
     // respiro dal bordo, 2 di bordo e 16 di padding del riquadro, 44 d'intestazione (il tasto di
     // chiusura è alto 44), 44 di «Ingrandisci qui» e i due stacchi da 6 fra le tre parti.
@@ -751,7 +861,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     // Sul telefono è già un foglio dal basso, e lì il punto sulla mappa non c'entra: il tetto lo dà
     // il foglio (60dvh), non la tela. A schermo largo si passa al foglio solo quando nemmeno una
     // voce ci starebbe dal lato migliore — ancorarlo al punto vorrebbe dire tagliarlo comunque.
-    const foglio = schermoStretto || dim.h === 0 ? schermoStretto : capiente < CONTORNO + VOCE;
+    const foglio = guidaSuFoglio || (schermoStretto || dim.h === 0 ? schermoStretto : capiente < CONTORNO + VOCE);
     const verso = sopra >= naturale ? false : sotto >= naturale ? true : sotto > sopra;
     return {
       sotto: verso,
@@ -764,6 +874,43 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   })();
   const elencoSotto = elenco.sotto;
   const elencoDx = elenco.dx;
+
+  // L3-09: dal tablet in su il foglio non è largo quanto lo schermo (col visore incorporato basso, a 1280 px copriva anche la barra laterale):
+  // sta nella colonna del visore, dai bordi della tela, con gli stessi 8 px di margine. Sotto i 768 px il foglio è dello schermo.
+  const foglioInColonna = !schermoStretto && ((selezionato !== null && (popupFoglio || guidaSuFoglio)) || (gruppoScelto !== null && elenco.foglio));
+  const [colonnaFoglio, setColonnaFoglio] = useState<{ left: number; right: number } | null>(null);
+  useLayoutEffect(() => {
+    const t = tela.current;
+    if (!foglioInColonna || !t) return;
+    const r = t.getBoundingClientRect();
+    const left = Math.round(r.left) + 8;
+    const right = Math.round(document.documentElement.clientWidth - r.right) + 8;
+    setColonnaFoglio((c) => (c && c.left === left && c.right === right ? c : { left, right }));
+  }, [foglioInColonna, dim.w, dim.h, pannelloAperto]);
+  const stileFoglio: CSSProperties | undefined = foglioInColonna && colonnaFoglio ? { left: colonnaFoglio.left, right: colonnaFoglio.right } : undefined;
+
+  // L3-05: sotto i 1024 px un foglio dal basso (il riquadro del pin, la guida) copre la parte bassa della tela: il pin selezionato sta nella
+  // fascia libera sopra il foglio, centrato, invece di restare sotto. Solo se non c'è già (un pin visibile non si sposta) e a ogni nuova
+  // selezione, apertura della guida o cambio di misure; il pan scelto dopo a mano non si tocca.
+  useLayoutEffect(() => {
+    const t = tela.current;
+    if (!t || !selezionato || editor || scelta || dim.w === 0) return;
+    const riquadro = selezionato.id !== popupSoppresso && popupSuFoglio ? popupRif.current : null;
+    const fogli = [riquadro, guidaFoglio.current].filter((el): el is HTMLElement => el !== null);
+    if (fogli.length === 0) return;
+    const r = t.getBoundingClientRect();
+    const banda = Math.min(dim.h, Math.min(...fogli.map((f) => f.getBoundingClientRect().top)) - r.top);
+    if (banda >= dim.h - 1 || banda < 96) return;
+    const px = pan.x + (selezionato.x / 100) * nat.w * zoom;
+    const py = pan.y + (selezionato.y / 100) * nat.h * zoom;
+    const xBuona = px >= 22 && px <= dim.w - 22;
+    if (xBuona && py - ALTEZZA_GOCCIA >= 8 && py <= banda - 12) return;
+    // la goccia (alta 38 px, punta sul punto) al centro della fascia
+    const y = Math.max(ALTEZZA_GOCCIA + 12, Math.min(banda - 16, (banda + ALTEZZA_GOCCIA) / 2));
+    setPanEsplicito({ x: xBuona ? pan.x : dim.w / 2 - (selezionato.x / 100) * nat.w * zoom, y: y - (selezionato.y / 100) * nat.h * zoom });
+    // il pan e lo zoom correnti sono quelli di questo disegno; l'effetto riparte solo per selezione, foglio, guida e misure
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selezionato?.id, popupSoppresso, popupSuFoglio, guidaAperta, dim.w, dim.h, richiesteGuida]);
 
   /** Inoltra il cambio di stato dello spillo a `onRaccolto`, segnando il visore occupato finché dura. */
   const cambiaRaccolto = async (s: SpilloDto, raccolto: boolean) => {
@@ -797,8 +944,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     t.addEventListener('transitionend', fine);
     const tardi = window.setTimeout(fine, 400);
     return () => { t.removeEventListener('transitionend', fine); window.clearTimeout(tardi); };
-  });
-  const stileLivello: CSSProperties = { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: nat.w, height: nat.h, '--zoom-mappa': zoom } as CSSProperties;
+    // L3-06: si misura quando la vista o i pin cambiano davvero (fine di un gesto, zoom, misure, pin visibili, selezione, mappa), non a ogni
+    // disegno del visore: durante un gesto lo stato non cambia e le etichette non si rimisurano.
+  }, [singoli, zoom, pan.x, pan.y, dim.w, dim.h, selezionatoId, mappa.chiave, trascinato]);
+  const stileLivello: CSSProperties = { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: nat.w, height: nat.h, '--zoom-mappa': zoom, '--zoom-base': zoom } as CSSProperties;
+  // L3-04: il visore incorporato in una pagina che scorre, alla vista «adatta», lascia il dito scorrere la pagina (sotto i 768 px,
+  // `touch-action: pan-y` nel CSS); ingrandito, o nell'editor, il dito è della mappa
+  const paginaScorre = !!incorporato && !editor && zoom <= zoomMin + 1e-6;
   const cursore = editor && editor.strumento !== 'seleziona' ? 'cursor-crosshair' : 'cursor-grab';
   const percorsoTesto = mappa.percorso.map((p) => p.nome).join(' › ');
 
@@ -838,7 +990,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
 
   return (
     // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6)
-    <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${className ?? ''}`} data-testid="visore-mappa"
+    <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${paginaScorre ? 'visore-mappa--pagina-scorre' : ''} ${className ?? ''}`} data-testid="visore-mappa"
       style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}>
       {/* in modalità scelta la mappa sta dentro la voce della guida, che porta i comandi: la testata ruberebbe la tela */}
       {!scelta && <header className="visore-mappa__barra">
@@ -973,10 +1125,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           tabIndex={editor ? undefined : 0}
           aria-describedby={editor ? undefined : idIstruzioni}
           onKeyDown={suTasto}
-          onPointerDown={suPointerDown} onPointerMove={suPointerMove} onPointerUp={suPointerUp} onPointerCancel={annullaGesto} onDoubleClick={adatta}
+          onPointerDownCapture={suPointerDownCattura} onPointerDown={suPointerDown} onPointerMove={suPointerMove} onPointerUp={suPointerUp} onPointerCancel={annullaGesto} onDoubleClick={adatta}
         >
           {!editor && <span id={idIstruzioni} className="sr-only">Frecce per spostare la mappa, più e meno per ingrandire e ridurre, zero o Inizio per la vista intera. Tab per passare da uno spillo all'altro, Invio o Spazio per aprirlo, Esc per chiudere la scheda.{scelta ? '' : " L'elenco degli spilli è nel pannello."}</span>}
-          <div className="visore-mappa__livello" style={stileLivello}>
+          <div ref={livello} className="visore-mappa__livello" style={stileLivello}>
             {src ? (
               // le zone d'origine dei pezzi (102) sono cancellate sempre (scelta dell'utente): una maschera alfa sull'immagine di base
               <img src={src} alt={descrizioneImmagineMappa(mappa)} className="visore-mappa__immagine" draggable={false} style={stileImmagineMascherata(maschera)} data-zone-cancellate={zone.length || undefined}
@@ -1042,16 +1194,17 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       tela.current?.setPointerCapture?.(e.pointerId);
                     }
                   }}
-                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
-                  onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
+                  onClick={(e) => { e.stopPropagation(); if (pinchRecente(e.timeStamp)) return; if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
+                  // L3-01: il doppio tocco su un pin non arriva mai alla tela (dove azzererebbe zoom e posizione); nell'editor, su un passaggio, apre l'arrivo
+                  onDoubleClick={(e) => { e.stopPropagation(); if (!visitabile) return; e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
                   <span className="spillo-mappa__etichetta">{nomePin(s)}</span>
                 </button>
               );
             })}
-            {selezionato && !editor && selezionato.id !== popupSoppresso && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(schermoStretto || popupFoglio, (
-              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={schermoStretto || popupFoglio ? undefined : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+            {selezionato && !editor && selezionato.id !== popupSoppresso && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(popupSuFoglio, (
+              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio || guidaSuFoglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={popupSuFoglio ? stileFoglio : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
@@ -1157,7 +1310,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   aria-expanded={aperto}
                   title={g.spilli.map((s) => s.nome).join(', ')}
                   onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); seleziona(null); setGruppoAperto(aperto ? null : g.chiave); }}
+                  onClick={(e) => { e.stopPropagation(); if (pinchRecente(e.timeStamp)) return; seleziona(null); setGruppoAperto(aperto ? null : g.chiave); }}
+                  onDoubleClick={(e) => e.stopPropagation()}
                 >
                   <span className="spillo-mappa__gruppo">+{g.spilli.length}</span>
                 </button>
@@ -1169,8 +1323,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 ritaglio (rilievo del validatore, 2026-09-13). Quanto sia alto e da che parte stia
                 lo decide `elenco`, qui sopra, contando il contorno invece di stimarlo. */}
             {gruppoScelto && inPortale(elenco.foglio, (
-              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
-                style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx}px)` } as CSSProperties}
+              <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
+                style={elenco.foglio ? stileFoglio : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <strong className="flex-1 testo-13 leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
@@ -1211,7 +1365,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       {/* L3 RG-1: la guida da usare, fuori dal livello trasformato (finestra fissa sullo schermo, o foglio dal basso) */}
       {conGuida && guidaAperta && (
         <GuidaNelVisore mappa={mappa.chiave} partitaId={partitaId} spilloSelezionato={selezionatoId} spilliQui={spilliQui} onCentra={mostraDallaGuida}
-          onCambiato={guida?.onCambiato} onChiudi={() => setGuidaAperta(null)} ancora={guidaAperta} versione={versioneStati} />
+          onCambiato={guida?.onCambiato} onChiudi={() => setGuidaAperta(null)} ancora={guidaAperta} versione={versioneStati} foglioRef={guidaFoglio} />
       )}
     </div>
   );

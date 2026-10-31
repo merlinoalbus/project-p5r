@@ -78,8 +78,9 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   cambiano l'aspetto, L11 manutenibilità e documenti.
 - Fatti: L0 (misure di base sulla copia), L1 (difetti visibili mentre si gioca; L1-01 e L1-02 secondo lo schizzo approvato per D2) e
   L2 (scritture sicure: niente ripetizioni automatiche delle scritture, errori in italiano, guida del giorno tenuta senza rete,
-  «Applica» in un gesto unico).
-- Aperti: L3–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
+  «Applica» in un gesto unico) e L3 (mappe al tocco: doppio tocco e pinch sui pin, pagina che scorre col dito sulla mappa a vista
+  intera, foglio e Guida che non coprono il pin, trascinamento senza ridisegni, Covo chiuso nell'indice prima del 5 maggio).
+- Aperti: L4–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
   blocchi della guida in prosa. Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
 

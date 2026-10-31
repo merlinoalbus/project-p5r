@@ -271,9 +271,13 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
 const ZOOM_MAX = 4;
 const ZOOM_PASSO = 1.4;
 
+/** Lo spostamento della tela rispetto al centro del riquadro, in pixel; la vista è questo più l'ingrandimento. */
+type Spostamento = { x: number; y: number };
+interface Vista { zoom: number; pan: Spostamento }
+
 /** La mappa di viaggio: rete delle linee, cartellini dei luoghi aperti alla data della partita (più
- * il Covo), zoom con pulsanti, rotellina e doppio clic per adattare, trascinamento quando
- * ingrandita, e una legenda di collegamenti. I luoghi non ancora aperti si elencano sotto, in linea
+ * il Covo), zoom con pulsanti, rotellina (solo da ingrandita o con Ctrl/Cmd: a ingrandimento 1 la pagina scorre), pizzico a due dita e
+ * doppio clic per adattare, trascinamento quando ingrandita, e una legenda di collegamenti. I luoghi non ancora aperti si elencano sotto, in linea
  * o, con `riempi`, come conteggio con una finestra di dettaglio; senza `dataGioco` si mostra tutto e
  * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
  * `onApri` può intercettare il clic sui cartellini. */
@@ -283,9 +287,20 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
   const cornice = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const trascinamento = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+  // Zoom e spostamento in un solo valore, letto anche da un riferimento aggiornato **subito** a ogni scrittura: la rotellina e i
+  // gesti arrivano più volte fra un disegno e l'altro, e i loro gestori non devono né rileggere uno stato vecchio né
+  // ri-registrarsi a ogni cambio di vista.
+  const [vista, setVista] = useState<Vista>({ zoom: 1, pan: { x: 0, y: 0 } });
+  const vistaRef = useRef(vista);
+  const imposta = useCallback((v: Vista) => { vistaRef.current = v; setVista(v); }, []);
+  const { zoom, pan } = vista;
+  /** I puntatori appoggiati sulla mappa (un dito, o due per il pizzico) e il gesto in corso, con la vista di partenza. */
+  const puntatori = useRef(new Map<number, { x: number; y: number }>());
+  const gesto = useRef<
+    | { tipo: 'sposta'; x: number; y: number; pan: Spostamento }
+    | { tipo: 'pizzica'; distanza: number; zoom: number; pan: Spostamento; mx: number; my: number }
+    | null
+  >(null);
 
   /** Lo spostamento non può portare la tela fuori dal riquadro: a zoom 1 non c'è margine, a zoom
    *  maggiori il margine è quanto la tela sborda da ciascun lato. Senza questo, un trascinamento
@@ -298,45 +313,38 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
     return { x: Math.max(-mx, Math.min(mx, p.x)), y: Math.max(-my, Math.min(my, p.y)) };
   }, []);
 
-  /** Un solo calcolo, fuori dagli aggiornatori di stato.
-   *
-   * La prima stesura chiamava `setPan` **dentro** l'aggiornatore di `setZoom`, per avere lo zoom
-   * precedente a portata di mano. È una scrittura che sembra comoda e non lo è: React può
-   * eseguire un aggiornatore più di una volta — lo fa apposta in modalità severa — e ogni
-   * esecuzione in più rifà lo spostamento, che finisce moltiplicato due volte. Gli aggiornatori
-   * devono essere puri; il valore precedente si legge dallo stato, che qui basta e avanza. */
-  const cambiaZoom = useCallback((fattore: number) => {
-    const nuovo = Math.min(ZOOM_MAX, Math.max(1, zoom * fattore));
-    if (nuovo === zoom) return;
-    setZoom(nuovo);
-    setPan(limita({ x: pan.x * (nuovo / zoom), y: pan.y * (nuovo / zoom) }, nuovo));
-  }, [limita, zoom, pan]);
-
   /** Zoom attorno a un punto: quel punto resta fermo sotto il dito o sotto il cursore.
    *
    * La tela è trasformata con `translate(pan) scale(z)` e l'origine al centro, quindi un punto `p`
    * della tela finisce in `p·z + pan`. Perché il punto sotto il cursore non si muova mentre `z`
    * cambia in `z'`, lo spostamento deve diventare `s − (s − pan)·z'/z`, dove `s` è la posizione
    * del cursore rispetto al centro del riquadro. Senza questo conto lo zoom parte sempre dal
-   * centro, e ingrandire un cartellino ai bordi lo spinge fuori dal riquadro. */
+   * centro, e ingrandire un cartellino ai bordi lo spinge fuori dal riquadro.
+   *
+   * Un solo calcolo, fuori dagli aggiornatori di stato (React può eseguirli più volte: lo fa apposta in modalità severa, e
+   * lo spostamento finirebbe moltiplicato); la vista di partenza si legge dal riferimento, che è sempre l'ultima scritta.
+   * I pulsanti ingrandiscono attorno al centro: `sx = sy = 0`. */
   const zoomVerso = useCallback((fattore: number, sx: number, sy: number) => {
-    const nuovo = Math.min(ZOOM_MAX, Math.max(1, zoom * fattore));
-    if (nuovo === zoom) return;
-    const k = nuovo / zoom;
-    setZoom(nuovo);
-    setPan(limita({ x: sx - (sx - pan.x) * k, y: sy - (sy - pan.y) * k }, nuovo));
-  }, [limita, zoom, pan]);
+    const { zoom: z, pan: p } = vistaRef.current;
+    const nuovo = Math.min(ZOOM_MAX, Math.max(1, z * fattore));
+    if (nuovo === z) return;
+    const k = nuovo / z;
+    imposta({ zoom: nuovo, pan: limita({ x: sx - (sx - p.x) * k, y: sy - (sy - p.y) * k }, nuovo) });
+  }, [limita, imposta]);
+  const cambiaZoom = useCallback((fattore: number) => zoomVerso(fattore, 0, 0), [zoomVerso]);
 
-  const adatta = useCallback(() => { setZoom(1); setPan({ x: 0, y: 0 }); }, []);
+  const adatta = useCallback(() => imposta({ zoom: 1, pan: { x: 0, y: 0 } }), [imposta]);
 
   /** La rotellina, registrata a mano perché React la registra **passiva**: con un listener passivo
    *  `preventDefault` non ha effetto e la pagina scorre mentre si cerca di ingrandire la mappa.
-   *  È lo stesso motivo, e la stessa soluzione, del visore dell'atlante. */
+   *  È lo stesso motivo, e la stessa soluzione, del visore dell'atlante. Si registra una volta sola: la vista la legge dal riferimento. */
   useEffect(() => {
     const el = cornice.current;
     if (!el) return;
-    /** Blocca lo scorrimento della pagina e ingrandisce (rotella in su) o riduce attorno al cursore. */
+    /** Ingrandisce (rotella in su) o riduce attorno al cursore. A ingrandimento 1 la rotellina resta della pagina, che deve poter
+     *  scorrere con il mouse sopra la mappa: la si cattura solo con la mappa ingrandita o con Ctrl/Cmd (da lì arriva anche il pizzico del trackpad). */
     const suRotella = (e: WheelEvent) => {
+      if (vistaRef.current.zoom <= 1 && !e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       const r = el.getBoundingClientRect();
       zoomVerso(e.deltaY < 0 ? ZOOM_PASSO : 1 / ZOOM_PASSO, e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2);
@@ -345,24 +353,63 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
     return () => el.removeEventListener('wheel', suRotella);
   }, [zoomVerso]);
 
-  const iniziaTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    // Solo quando c'è qualcosa da spostare, e mai partendo da un cartellino: lì il gesto è un clic.
-    if (zoom <= 1 || (e.target as HTMLElement).closest('a')) return;
-    trascinamento.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }, [zoom, pan]);
+  /** La posizione di un punto dello schermo rispetto al centro del riquadro (l'origine della tela). */
+  const dalCentro = (x: number, y: number) => {
+    const r = cornice.current?.getBoundingClientRect();
+    return r ? { x: x - r.left - r.width / 2, y: y - r.top - r.height / 2 } : { x: 0, y: 0 };
+  };
 
-  const muoviTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    const t = trascinamento.current;
-    if (!t) return;
-    setPan(limita({ x: t.px + (e.clientX - t.x), y: t.py + (e.clientY - t.y) }, zoom));
-  }, [limita, zoom]);
+  /** Riparte dai puntatori appoggiati adesso: due o più sono un pizzico, uno solo uno spostamento (se la mappa è ingrandita e il dito
+   *  non è partito da un cartellino), nessuno niente. Si richiama a ogni dito che si appoggia o si alza, così il gesto riparte dalla vista di quel momento. */
+  const riparti = (spostaConsentito: boolean) => {
+    const dita = [...puntatori.current.values()];
+    const v = vistaRef.current;
+    if (dita.length >= 2) {
+      const [a, b] = dita;
+      const m = dalCentro((a.x + b.x) / 2, (a.y + b.y) / 2);
+      gesto.current = { tipo: 'pizzica', distanza: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), zoom: v.zoom, pan: v.pan, mx: m.x, my: m.y };
+    } else if (dita.length === 1 && v.zoom > 1 && spostaConsentito) {
+      gesto.current = { tipo: 'sposta', x: dita[0].x, y: dita[0].y, pan: v.pan };
+    } else gesto.current = null;
+  };
 
-  const fineTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    if (!trascinamento.current) return;
-    trascinamento.current = null;
+  const iniziaTrascinamento = (e: ReactPointerEvent<HTMLDivElement>) => {
+    // il mouse è un puntatore solo: un rilascio avvenuto fuori dal riquadro, senza cattura, non deve lasciare un «dito» fantasma
+    if (e.pointerType !== 'touch') puntatori.current.clear();
+    puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    // un dito partito da un cartellino o da un comando è un clic, non uno spostamento; un secondo dito è comunque un pizzico
+    riparti(!(e.target as HTMLElement).closest('a, button'));
+    if (!gesto.current) return;
+    // i puntatori del gesto restano della mappa anche fuori dal suo riquadro
+    for (const id of puntatori.current.keys()) {
+      try { e.currentTarget.setPointerCapture(id); } catch { /* il puntatore non c'è più */ }
+    }
+  };
+
+  const muoviTrascinamento = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!puntatori.current.has(e.pointerId)) return;
+    puntatori.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const g = gesto.current;
+    if (!g) return;
+    if (g.tipo === 'sposta') {
+      imposta({ zoom: vistaRef.current.zoom, pan: limita({ x: g.pan.x + (e.clientX - g.x), y: g.pan.y + (e.clientY - g.y) }, vistaRef.current.zoom) });
+      return;
+    }
+    // Il pizzico: lo zoom segue il rapporto fra le distanze dei due dita, e il punto della tela che stava sotto il loro centro
+    // all'inizio resta sotto il centro di adesso (così il pizzico ingrandisce attorno alle dita e due dita che scivolano insieme spostano).
+    const [a, b] = [...puntatori.current.values()];
+    const zoomNuovo = Math.min(ZOOM_MAX, Math.max(1, g.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / g.distanza)));
+    const m = dalCentro((a.x + b.x) / 2, (a.y + b.y) / 2);
+    const k = zoomNuovo / g.zoom;
+    imposta({ zoom: zoomNuovo, pan: limita({ x: m.x - (g.mx - g.pan.x) * k, y: m.y - (g.my - g.pan.y) * k }, zoomNuovo) });
+  };
+
+  const fineTrascinamento = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!puntatori.current.delete(e.pointerId)) return;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-  }, []);
+    // alzato un dito del pizzico, quello che resta sposta (se la mappa è ancora ingrandita)
+    riparti(true);
+  };
 
   // i segni dei posti (sagome, stemmi, il Covo) dal manifesto, anche con la grafica predefinita spenta: senza, la metro restava di
   // sole linee e nodi (UX-2, decisione del PM del 2026-10-20)

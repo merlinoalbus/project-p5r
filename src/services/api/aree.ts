@@ -22,8 +22,9 @@ const percorsoArea = (contenitore: RifContenitore, slug: string) => `/aree/${seg
 export const getArea = (contenitore: RifContenitore, slug: string, partita?: number): Promise<AreaDettaglioDto> =>
   apiGet(`${percorsoArea(contenitore, slug)}${queryString({ partita })}`);
 
-/** Le aree agganciate alla città (Tokyo): quelle che nessuna fonte colloca in un quartiere, come lo staff (da verificare). */
-export const getAreeCitta = (): Promise<AreaRiassuntoDto[]> => apiGet('/aree/citta/tokyo');
+/** Le aree agganciate alla città (Tokyo): quelle che nessuna fonte colloca in un quartiere, come lo staff (da verificare); con la
+ *  partita ognuna dice se è già nel mondo (`disponibile`, `bloccoMotivo`: il Covo dei Ladri prima del 5 maggio non lo è). */
+export const getAreeCitta = (partita?: number): Promise<AreaRiassuntoDto[]> => apiGet(`/aree/citta/tokyo${queryString({ partita })}`);
 
 /** Le aree di un quartiere nel loro ordine; con la partita ognuna dice se è già nel mondo (`disponibile`, `bloccoMotivo`). */
 export const getAreeDelQuartiere = (quartiere: string, partita?: number): Promise<AreaRiassuntoDto[]> =>

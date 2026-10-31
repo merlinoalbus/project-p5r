@@ -18,6 +18,7 @@ import { FinestraCollocaPlanimetria } from './FinestraCollocaPlanimetria';
 import { aggiornaAreaMondo, eliminaAreaMondo, getAreeCitta, getDaCollocare, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
+import { usePartitaStore } from '../../stores/partitaStore';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaRiassuntoDto, MappaDaCollocareDto, QuartiereRiassuntoDto } from '../../types';
 import { TitoloSezione } from '../shared/TitoloSezione';
@@ -27,7 +28,13 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Le due sezioni: «Aree della città» (se ce ne sono) e «Planimetrie da collocare» (se ce ne sono), richiudibile. */
 export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto[] }) {
-  const aree = useCarica(getAreeCitta, []);
+  // Le Aree della città (il Covo dei Ladri dal 5 maggio) hanno una condizione propria: si valutano per la partita attiva e si rileggono al
+  // cambio del giorno, della fascia o del meteo, come i quartieri (`useMappaPartita`); senza partita si vedono tutte.
+  const attiva = usePartitaStore((s) => s.attiva);
+  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  const aree = useCarica(() => getAreeCitta(attiva?.id), [attiva?.id, momento]);
+  // come `AreeDelQuartiere`: l'Area ancora chiusa nella partita non si propone (l'indirizzo diretto resta consultabile)
+  const navigabili = (aree.dati ?? []).filter((a) => a.disponibile !== false);
   // L12 (passo 8): le planimetrie da collocare sono una lettura diagnostica dell'editor, solo della preparazione: nel rilascio nessuna richiesta
   const sciolte = useCarica(IN_RILASCIO ? async (): Promise<MappaDaCollocareDto[]> => [] : getDaCollocare, []);
   const [daRimuovere, setDaRimuovere] = useState<AreaRiassuntoDto | null>(null);
@@ -58,11 +65,11 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
 
   return (
     <>
-      {(aree.dati?.length ?? 0) > 0 && <section className="flex flex-col gap-2" aria-label="Aree della città">
+      {navigabili.length > 0 && <section className="flex flex-col gap-2" aria-label="Aree della città">
         <TitoloSezione variante="display">Aree della città</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Posti di Tokyo che nessuna fonte colloca in un quartiere.</p>
         <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2">
-          {aree.dati!.map((a) => (
+          {navigabili.map((a) => (
             <li key={a.slug} className="card flex flex-wrap items-center gap-3 p-2">
               <AnteprimaMappa mappa={{ ...a.illustrazione, nome: a.nome }} className="h-[72px] w-24" sizes="96px" />
               {/* il testo non scende sotto i 10rem: dove non c'è posto «Tieni» e «Rimuovi» vanno a capo, sotto (UX2-7: a 768 e 375 il

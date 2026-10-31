@@ -19,7 +19,7 @@
 // spillo, che è dove si legge da lontano, e la figura resta leggibile su qualunque tinta.
 // ============================================================
 
-import type { CSSProperties, ReactNode } from 'react';
+import { memo, type CSSProperties, type ReactNode } from 'react';
 import { AssetImg } from '../shared/AssetImg';
 import { useAsset } from '../../stores/assetStore';
 import type { TipoSpillo } from '../../../shared/spilli';
@@ -110,20 +110,20 @@ function Dentro({ tipo, url, lato }: { tipo: TipoSpillo; url: string | null; lat
  * puntano a quel nome, e sono le stesse in tutti e quattro i casi. Rinominarla avrebbe voluto dire
  * riscriverle tutte per ottenere esattamente ciò che già facevano.
  */
-export function SpilloGrafico({ tipo, colore, altezza = 38 }: { tipo: TipoSpillo; colore: string; altezza?: number }) {
+export const SpilloGrafico = memo(function SpilloGrafico({ tipo, colore, altezza = 38 }: { tipo: TipoSpillo; colore: string; altezza?: number }) {
   const url = useAsset(`ui/spillo-${tipo}`);
   return (
     <span className="spillo-mappa__goccia" style={{ '--colore-spillo': colore, width: altezza, height: altezza } as CSSProperties}>
       <Dentro tipo={tipo} url={url} lato={Math.round(altezza * 0.76)} />
     </span>
   );
-}
+});
 
 /** Pallino di legenda, elenco e popup: lo stesso spillo senza la punta, perché lì non ancora niente.
  *
  * Il colore ci vuole anche qui: la legenda serve a dire «questo pallino è quel colore là sulla
  * mappa», e una figura senza colore non lo dice. */
-export function PuntoSpillo({ tipo, colore, grande }: { tipo: TipoSpillo; colore: string; grande?: boolean }) {
+export const PuntoSpillo = memo(function PuntoSpillo({ tipo, colore, grande }: { tipo: TipoSpillo; colore: string; grande?: boolean }) {
   const url = useAsset(`ui/spillo-${tipo}`);
   const lato = grande ? 34 : 22;
   return (
@@ -131,4 +131,4 @@ export function PuntoSpillo({ tipo, colore, grande }: { tipo: TipoSpillo; colore
       <Dentro tipo={tipo} url={url} lato={Math.round(lato * 0.78)} />
     </span>
   );
-}
+});

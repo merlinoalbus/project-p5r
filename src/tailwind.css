@@ -763,7 +763,15 @@
   .visore-mappa--incorporato .visore-mappa__corpo { min-height: var(--minimo-tela, 0px); }
   .visore-mappa--pannello-chiuso .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); }
   .visore-mappa__tela { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1b1b22 0, #0b0b0e 75%); touch-action: none; user-select: none; min-height: 0; }
+  /* L3-04: il visore incorporato in una pagina che scorre (Area, Partita), sotto i 768 px e alla vista «adatta», lascia il dito scorrere la
+     pagina (`pan-y`); la classe la toglie il visore appena la mappa è ingrandita, o nell'editor, dove il dito è della mappa (`none`). */
+  @media (max-width: 767px) {
+    .visore-mappa--pagina-scorre .visore-mappa__tela { touch-action: pan-y; }
+  }
   .visore-mappa__livello { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  /* L3-06: durante un gesto il visore sposta e scala il livello senza ridisegnarsi (`--zoom-mappa` è lo zoom vivo, `--zoom-base` quello
+     con cui i pin sono stati disegnati): pin e riquadri tengono la loro misura a schermo con la scala individuale, che a riposo vale 1. */
+  .visore-mappa__livello .spillo-mappa, .visore-mappa__livello .spillo-popup { scale: calc(var(--zoom-base, 1) / var(--zoom-mappa, 1)); }
   .visore-mappa__immagine { display: block; width: 100%; height: 100%; max-width: none; pointer-events: none; image-rendering: auto; }
   /* i pezzi delle planimetrie (102): ritagli posati sotto i pin; senza le loro condizioni, a richiesta, in trasparenza come i pin bloccati */
   .visore-mappa__pezzo { pointer-events: none; }
@@ -857,9 +865,10 @@
     /* la cornice non si schiaccia mai: stringerla in altezza romperebbe il 10:7, e con esso le posizioni in percentuale */
     .blocco-mappa-tokyo--riempi .blocco-mappa-tokyo__mappa, .blocco-mappa-tokyo--riempi .mappa-tokyo { flex-shrink: 0; }
   }
-  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: none; user-select: none; }
-  /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. */
-  .mappa-tokyo--spostabile { cursor: grab; }
+  .mappa-tokyo { position: relative; overflow: hidden; border: 1px solid var(--color-border); border-radius: 8px; background: #7d0010; aspect-ratio: 10 / 7; width: 100%; touch-action: pan-y; user-select: none; }
+  /* La mano compare solo quando c'e' davvero qualcosa da spostare: a zoom 1 la tela e' tutta li'. Il dito scorre la pagina finché la mappa è
+     intera (`pan-y`); ingrandita (`--spostabile`, la mappa si sposta) il dito è della mappa (`none`) (L3-03). */
+  .mappa-tokyo--spostabile { cursor: grab; touch-action: none; }
   .mappa-tokyo--spostabile:active { cursor: grabbing; }
   .mappa-tokyo__tela { position: absolute; inset: 0; background: #e2001a; transform-origin: 50% 50%; container-type: inline-size; }
   /* Le targhe sulla mappa valgono finché c'è tela per scriverle: sotto i 480 px si leggerebbero a
@@ -993,6 +1002,9 @@
      su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
   .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; background: rgb(11,11,14); }
   .spillo-popup--foglio::after { display: none; }
+  /* Con la guida aperta come foglio (sotto i 1024 px) il riquadro del pin o del gruppo le si impila sopra (la guida è a z 70): sotto di lei
+     sparirebbe. Il foglio da tablet in su sta nella colonna del visore (`left`/`right` dal componente). */
+  .spillo-popup.spillo-popup--sopra-guida { z-index: 75; }
   @media (max-width: 1023px) {
     .spillo-popup--foglio { bottom: calc(64px + env(safe-area-inset-bottom)); }
   }
