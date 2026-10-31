@@ -1,10 +1,11 @@
 # Semafori dei Confidenti — cosa l'app verifica da sola e cosa resta da confermare a mano
 
-> **Dove sono oggi** (verifica completa, 2026-10-04): i requisiti citati come `data/seed/confidenti-requisiti.json` stanno nella
-> tabella `confidente_requisito` di `gioco.db` e arrivano con il pacchetto di gioco; la valutazione è in
-> `server/services/semaforiService.ts` e `disponibilitaService.ts`.
+> **Dove vive il dato nell'app**: i requisiti stanno nella tabella `confidente_requisito` di `gioco.db` (copia della guida in
+> `confidente_requisito_guida`), la disponibilità strutturata in `confidente_disponibilita`; la valutazione è in
+> `server/services/semaforiService.ts`, `disponibilitaService.ts` e nel valutatore unico delle condizioni. I conteggi qui sotto sono
+> quelli del censimento iniziale: fa fede il database.
 
-Fonte: `data/seed/confidenti-requisiti.json` (146 ranghi, 177 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
+Fonte: censimento dei requisiti (146 ranghi, 177 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nei dati resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
 
 Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli della guida (data consigliata, Persona dello stesso arcano per il bonus punti, regali, risposte) e le descrizioni di eventi automatici di trama non sono semafori.
 
@@ -22,8 +23,8 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 | `avviso` | 1 | **non blocca**: grigio con l'icona di avvertenza, da controllare nel gioco; non si conferma e non conta in «n di m requisiti» |
 | `confidente` | 1 | automatica: rango dell'altro Confidente nella partita |
 
-`manuale` (grigio finché confermato a mano) resta valutato per i pacchetti che lo usano ancora, ma nel seed non c'è più:
-la migrazione 090 (2026-09-30) ha convertito le sei righe manuali, dopo che Sojiro era rimasto fermo al rango 3.
+`manuale` (grigio finché confermato a mano) resta valutato per i file che lo usano ancora, ma nei dati non c'è più: la
+migrazione 090 ha convertito le sei righe manuali in eventi della partita da segnare.
 
 ## Requisiti da segnare come eventi (migrazione 090)
 

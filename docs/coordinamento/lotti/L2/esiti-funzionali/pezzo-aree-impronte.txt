@@ -1,4 +1,0 @@
-DIVERSA area {"righe":23,"hash":"dff8d0832539d72b7ab800e70b4ff4539f2b9d27"} → {"righe":23,"hash":"b3dafe5a4898ea176740f9060396a26fa60dde02"}
-DIVERSA mappa {"righe":317,"hash":"428f54a3292f99782062e47d1792f5c8098a8aff"} → {"righe":317,"hash":"8be76a4cd955513d05a255888fb410294169930b"}
-2 tabelle diverse
-NESSUNA DIFFERENZA

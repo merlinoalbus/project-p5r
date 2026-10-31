@@ -1,9 +1,0 @@
-
- RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
-
-
- Test Files  1 passed (1)
-      Tests  24 passed (24)
-   Start at  07:31:54
-   Duration  2.82s (transform 456ms, setup 98ms, import 634ms, tests 1.20s, environment 765ms)
-

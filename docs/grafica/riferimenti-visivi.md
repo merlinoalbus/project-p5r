@@ -1,7 +1,7 @@
 # Riferimenti visivi — stile Persona 5 Royal
 
-Raccolta del 2026-09-03 (ricerca automatica con verifica di raggiungibilità). Serve come **fonte di ispirazione da citare
-nei prompt** di generazione degli asset (`prompt-immagini.md`, step 0.6). Nessuna di queste immagini va copiata nel
+Raccolta di riferimenti (con verifica di raggiungibilità al momento della raccolta). Serve come **fonte di ispirazione da citare
+nei prompt** di generazione degli asset (`prompt-immagini.md`). Nessuna di queste immagini va copiata nel
 repository: sono opere di Atlus/Sega; gli asset dell'app sono originali, generati da IA grafica, con ogni testo in italiano.
 
 Legenda: ✔ verificato (immagine caricata) · ✋ pagina pubblica ma non verificabile automaticamente (aprire a mano).

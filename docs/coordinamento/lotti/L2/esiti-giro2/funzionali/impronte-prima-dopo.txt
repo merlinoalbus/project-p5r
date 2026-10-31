@@ -1,7 +1,0 @@
-== gioco.db
-DIVERSA area {"righe":23,"hash":"2e45cbee63ade1f6ac08e5bdb1b803e488b0f35e"} → {"righe":23,"hash":"380e3b5717e32104ba9433a19eabf6de5bc03382"}
-1 tabelle diverse
-== partite.db
-DIVERSA partita {"righe":2,"hash":"1e0d541388a327e6ac61bf48646f06c6354c5bed"} → {"righe":2,"hash":"a67551cd8b9e376cdfd03bde842272ab17a59597"}
-1 tabelle diverse
-[{"id":1,"nome":"Partita Roberto","attiva":1,"updated_at":"2026-10-20T02:58:04.698Z"},{"id":2,"nome":"Tutorial","attiva":0,"updated_at":"2026-10-11T11:07:40.313Z"}]

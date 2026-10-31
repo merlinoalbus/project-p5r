@@ -1,12 +1,9 @@
 # Glossario della localizzazione italiana di Persona 5 Royal
 
-> **Dove è oggi** (verifica completa, 2026-10-04): le rese italiane citate come `data/seed/traduzioni.json` e
-> `scripts/seed/localizzazione-it.json` stanno nella tabella `traduzione` di `gioco.db` (ambiti `skill`, `persona`, `oggetto`,
-> `termine`…), modificabili da Impostazioni → Traduzioni; `scripts/seed/glossario.ts` era della pipeline del seed, dismessa il
-> 2026-09-12.
+> **Dove vive il dato nell'app**: nella tabella `traduzione` di `gioco.db` (ambiti `skill`, `persona`, `oggetto`, `termine`…),
+> letta da `server/services/traduzioniService.ts` e modificabile da Impostazioni → Traduzioni.
 
-Censimento (2026-09-03) dei termini ufficiali italiani dalla guida allgamestaff.it, integrato nell'app tramite
-`scripts/seed/localizzazione-it.json` → `data/seed/traduzioni.json` (`skill`, `persone`, `termini`) → tabella `traduzione`
+Censimento dei termini ufficiali italiani dalla guida allgamestaff.it, integrato nell'app nella tabella `traduzione`
 (ambiti `skill`, `persona`, `termine`). Nell'app: nomi italiani delle skill e delle Persona ovunque (con il nome canonico
 inglese in piccolo quando diverso), pagina Compendio → «Glossario dei termini», tutto modificabile in Impostazioni → Traduzioni.
 Integrate: 371 skill con nome diverso dall'inglese (438 alta + 34 media + 6 bassa affidabilità, meno quelle identiche), 58 Persona,
@@ -16,7 +13,7 @@ incluse e da verificare in gioco; le 47 skill non reperite restano con il nome c
 ## Rapporto del censimento
 
 Fonte: guida italiana [allgamestaff.it/persona-5-royal](https://www.allgamestaff.it/persona-5-royal/) (indice completo scorso interamente; 17 pagine analizzate in dettaglio, elencate in `pagine.json`).
-Dati canonici di confronto: `C:\Repository\project-p5r-main\data\seed\skill.json` (525 skill), `persona.json` (232 Persona), `traduzioni.json`, `scripts\seed\glossario.ts` — repository letto in sola lettura, nessun file del progetto è stato modificato.
+Dati canonici di confronto: il compendio dell'app (525 skill, 232 Persona) e le traduzioni già presenti.
 
 ## Metodo
 

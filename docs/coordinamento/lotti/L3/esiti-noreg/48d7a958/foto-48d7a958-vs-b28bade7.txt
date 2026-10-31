@@ -1,3 +1,0 @@
-versioni prima {"gioco.db":113,"partite.db":24} dopo {"gioco.db":113,"partite.db":24}
-
-tabelle invariate: 118 su 118

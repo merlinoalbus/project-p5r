@@ -1,5 +1,0 @@
-quando 2026-10-20T09:58:16.331Z · http://localhost:3301 · copia con backup API di C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/data/gioco.db
-radice API {"contenuto":767,"passaggi":747,"note":228} · radice SQL {"contenuto":767,"passaggi":747,"note":228} · uguali true
-nodi dell'albero 307 · uguali 307 · diversi 0
-radici (genitore nullo) API: tokyo=159/96/43 · palazzo-di-kamoshida=221/148/0 · palazzo-di-madarame=179/81/0 · palazzo-di-kaneshiro=26/54/13 · palazzo-di-futaba=30/35/6 · palazzo-di-okumura=32/80/36 · palazzo-di-niijima=31/65/20 · palazzo-di-shido=41/82/30 · dedalo-di-iweleth=14/35/6 · palazzo-di-maruki=34/71/74
-tipi dei pin (tutto il DB): passaggio 340, nota 230, porta 165, forziere 125, scala 118, nemico 117, oggetto 112, sicura 87, scorciatoia 57, rampino 49, punto-sensibile 46, negozio 43, dialogo 37, forziere-raro 32, seme-bramosia 26, meccanismo 26, distributore 25, attivita 16, uscita 13, miniboss 13, oggetto-chiave 12, confidente 11, ristorante 10, tesoro-palazzo 7, terme 7, infiltrazione 7, treno 5, timbro 4, velluto 3, cinema 3, boss 3, sala-giochi 2, ingresso-palazzo 2, culto 2, cercalavoro 2, casa 2, lavoro 1, lavanderia 1

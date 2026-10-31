@@ -1,8 +1,8 @@
-<!-- Chiusura 2026-09-06: le 2 icone §17.1 e i 14 spilli §18.1 sono consegnati e validati; i prompt restano come specifica e tracciabilità. -->
 # Prompt per la generazione degli asset grafici — stile Persona 5 Royal
 
-Versione 3 — 2026-09-04: questo documento elenca SOLO gli asset ancora da consegnare (le sezioni conservano la numerazione storica). Le
-specifiche degli asset già consegnati sono in `archivio-grafico.md`; i riferimenti di stile per il lavoro nuovo in `riferimenti-visivi.md`.
+Le regole comuni e i prompt degli asset dell'app, per generarli o rigenerarli. La numerazione delle sezioni è stabile e condivisa
+con `archivio-grafico.md`, che tiene le sezioni degli asset consegnati da tempo (per esempio §10, Persona del compendio, con la regola
+dei nomi dei file); i riferimenti di stile sono in `riferimenti-visivi.md`.
 
 Regole valide per TUTTI gli asset:
 - **Originali, ispirati allo stile**: nessuna copia delle illustrazioni ufficiali Atlus; i link servono all'IA grafica (o a chi la guida) come ispirazione di stile, palette e composizione.
@@ -377,10 +377,9 @@ Finché il file manca, la riserva SVG è l'imbuto di `iconeGuida.tsx` (`IconFilt
 
 Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente forbici, niente cestino, niente imbuto. → azione-scarta.png`
 
-> **Superato il 2026-10-29** (§29): la chiave `scarta` ha otto usi, fra cui «Scarta» una proposta intera e «Cancella
-> ricerca» del Diario, che vuole di proposito la figura del filtro (`RicercaDiario.tsx:62–63`). Il soggetto valido è
-> l'imbuto con un pezzetto espulso, nel prompt A3 di [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md).
-> Il prompt qui sopra resta solo come storico: non va generato.
+> **Superato** (§29): la chiave `scarta` ha otto usi, fra cui «Scarta» una proposta intera e «Cancella ricerca» del Diario,
+> che vuole di proposito la figura del filtro. Il soggetto valido, già consegnato, è l'imbuto con un pezzetto espulso: il
+> prompt qui sopra non va generato.
 
 ### Aggiunta del 2026-10-25 — ricevute della spunta (2) — stesse regole
 Richiesta dell'utente: le ricevute degli effetti della spunta di una voce del Diario non stanno più sempre aperte sotto la voce, ma dietro
@@ -817,13 +816,12 @@ La riesportazione corretta stava **non committata** nel worktree del generatore,
 dentro prima di chiuderlo sarebbe andata persa: 128×128 come le sorelle, 23% rosso / 19% chiaro /
 48% scuro, cioè in famiglia con `scheda-letture` (20/21/51). È quella che sta su `main` adesso.
 
-## 29. Asset mancanti dopo le ondate 5 e L13 (18) — richiesti il 2026-10-29
+## 29. Icone e illustrazioni degli effetti della voce, delle attività nuove e due riconsegne (18)
 
-Richiesta dell'utente: «ok se ci sono asset grafici da generare o altri elementi per i quali possiamo generare grafiche su
-codex prepara e aggiorna i prompt come fatto in passato e forniscimi i prompt per far generare gli asset grafici».
-Censimento, regole, blocco di stile, prompt negativo, **un prompt completo per ogni file**, istruzioni di consegna e criteri
-di accettazione: [consegna-2026-10-29-asset-mancanti.md](consegna-2026-10-29-asset-mancanti.md). Qui l'elenco, per la
-tracciabilità.
+Tutti i 18 file sono consegnati. I gruppi A e R sono in `public/asset/ui/` e in uso. Il gruppo B (illustrazioni delle attività) sta
+in `docs/grafica/asset-generati/2026-10-29/attivita/` finché non è caricato nel database con `PUT /api/immagini/attivita/<chiave>`
+(PNG come corpo, `Content-Type: image/png`). Il gruppo C è in `public/asset/ui/` ma si vede solo dopo l'aggancio nel codice, che
+chiede il sì dell'utente. Elenco e soggetti, per rigenerarli:
 
 **Gruppo A — icone con la chiave già nel codice** (`public/asset/ui/`, 128×128, trasparenti). Le prime cinque erano già
 in questa sezione (§21, aggiunte dell'1, 25 e 26 ottobre) ma non sono mai arrivate: la consegna del 29 ne riporta i prompt

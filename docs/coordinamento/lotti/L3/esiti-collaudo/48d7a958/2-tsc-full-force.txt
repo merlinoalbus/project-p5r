@@ -1,3 +1,0 @@
-### 2026-10-20T11:32:26Z HEAD 48d7a958ab072caeff5d6222118cd4ee0c01d5cc
-### npx tsc -b tsconfig.full.json --force
-EXIT=0

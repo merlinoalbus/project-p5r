@@ -1,9 +1,0 @@
-prima: aree 23 · planimetrie e mappe del mondo 54 · ingressi 2 · pin del mondo 298
-export 200 61 MB 731 ms · mappe 54 · aree 23 · ingressi 2 · immagini 22
-import con sovrascrivi 200 645 ms {"data":{"mappe":54,"spilli":298,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":22,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
-area: 23 → 23 · righe cambiate 0
-planimetrie: 54 → 54 · righe cambiate 8 (es. prima {"chiave":"citta-ikebukuro","nome":"Ikebukuro","tipo":"quartiere","genitore_chiave":"tokyo","ordine":7,"area_chiave":null,"versione_etichetta":null,"versione_ordine":null,"immagine_chiave":null,"asset":"mappe/citta-ikebu / dopo {"chiave":"citta-ikebukuro","nome":"Ikebukuro","tipo":"quartiere","genitore_chiave":"tokyo","ordine":7,"area_chiave":null,"versione_etichetta":null,"versione_ordine":null,"immagine_chiave":null,"asset":"mappe/citta-ikebu)
-ingressi: 2 → 2 · righe cambiate 0
-percorsi: 317 → 317 · righe cambiate 0
-alias: 690 → 690 · righe cambiate 0
-spilliMondo: 298 → 298 · righe cambiate 8 (es. prima {"id":208,"uid":"904ba928195188fe044c79d3c429ab12","mappa_chiave":"citta-shinjuku","nome":"Cinema \"Cult 9\"","tipo":"attivita","x":12.8,"y":83.6,"riferimento_tipo":"luogo","riferimento_chiave":"shinjuku/cinema-cult9","c / dopo {"id":2300,"uid":"97f69d29af86d55e65b00e2706af976e","mappa_chiave":"tokyo","nome":"Yongen-Jaya","tipo":"passaggio","x":10.9,"y":71.6,"riferimento_tipo":"mappa","riferimento_chiave":"citta-yongen-jaya","condizioni_json":n)

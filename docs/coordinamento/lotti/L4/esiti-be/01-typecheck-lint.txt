@@ -1,8 +1,0 @@
-# albero 0ede421d (L4 su d1664295), 2026-10-20T05:30:24Z
-## tsc -p tsconfig.server.json
-EXIT=0
-## tsc -b tsconfig.full.json
-EXIT=0
-## eslint server shared
-EXIT=0
-commit b83c30ac, albero 0ede421d, su d1664295

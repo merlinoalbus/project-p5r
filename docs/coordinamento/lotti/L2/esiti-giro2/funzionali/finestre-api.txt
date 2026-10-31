@@ -1,3 +1,0 @@
-API area {"chiave":"citta/shinjuku/prova-funzionali-l2-finestra","nome":"Prova funzionali L2 finestra","origine":"utente","predefinita":"shinjuku-prova-funzionali-l2-finestra-seconda","passaggio":{"spillo":2598,"x":29.93,"y":59.98},"planimetrie":[["shinjuku-prova-funzionali-l2-finestra","prima versione",0,false,"planimetria-nativa"],["shinjuku-prova-funzionali-l2-finestra-seconda","seconda",1,true,"planimetria-nativa"]]}
-aree di Shinjuku [["quartiere-a-luci-rosse",0,1],["prova-funzionali-l2-finestra",100,2]]
-fine 03:14:10

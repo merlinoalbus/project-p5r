@@ -1,5 +1,0 @@
-p1|kamoshida {"punti":169,"esauribili":0,"gestiti":133,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":null} voci 169 pin 369
-p1|madarame {"punti":225,"esauribili":10,"gestiti":221,"raccolta":{"totale":86,"presi":85,"mappe":17,"mappeComplete":16},"completato":null} voci 225 pin 258
-p2|kamoshida {"punti":169,"esauribili":0,"gestiti":169,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":"Tesoro, boss finale e tutti gli oggetti permanenti (71/71)"} voci 169 pin 369
-p2|madarame {"punti":225,"esauribili":10,"gestiti":0,"raccolta":{"totale":86,"presi":0,"mappe":17,"mappeComplete":3},"completato":null} voci 225 pin 258
-differenze di stato visibile: 0

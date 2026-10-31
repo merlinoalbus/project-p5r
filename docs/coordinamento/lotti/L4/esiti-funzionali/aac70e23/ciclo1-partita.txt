@@ -1,8 +1,0 @@
-2026-10-20T18:02:49.435Z POST /api/partite 201 {"id":3,"attiva":true,"dataGioco":"06-02"}
-partite [[3,"Prova funzionali L4",true,"06-02"],[1,"Partita Roberto",false,"06-02"],[2,"Tutorial",false,"04-29"]]
-2026-10-20T18:12:03.003Z POST /api/partite/1/attiva 200
-2026-10-20T18:12:03.007Z DELETE /api/partite/3 204
-partite [[1,"Partita Roberto",true,"06-02","giorno"],[2,"Tutorial",false,"04-29","giorno"]]
-p1 divergenze kamoshida 0
-p1 divergenze madarame 0
-p1 [["kamoshida","{\"oggetti\":72,\"fatti\":71,\"tesoro\":true,\"boss\":true,\"concluso\":true,\"completato\":false}"],["madarame","{\"oggetti\":82,\"fatti\":82,\"tesoro\":true,\"boss\":true,\"concluso\":true,\"completato\":true}"]]

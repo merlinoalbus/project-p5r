@@ -1,9 +1,0 @@
-### 2026-10-20T06:42:41Z rimozione della copia temporanea
-### junction node_modules staccata (Delete sul collegamento; node_modules della release intatto: 361 cartelle)
-EXIT=0
-ls: cannot access '~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-292a122e': No such file or directory
-0
-(0 = nessun worktree temporaneo)
-### checkout di rilascio
-292a122e7600ccbaaba68a06ab81e637a3dc452f
-EXIT=0 (vuoto = pulito)

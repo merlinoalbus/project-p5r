@@ -1,7 +1,0 @@
-### 2026-10-20T14:01:32Z cherry-pick su newreview-l3 (da db7d0423), server fermi; 4614c443 e le righe della Regia NON portate
-## 24b655cd base dei file modificati: IDENTICA
--> c2a75bc8
-## de06c8ad base dei file modificati: IDENTICA
--> 37f72c2b
-## b49c28b0 base dei file modificati: IDENTICA
--> 08da0557

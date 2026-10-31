@@ -1,8 +1,0 @@
-partite prima: 1:Partita Roberto:ATTIVA:06-01/giorno | 2:Tutorial:-:04-29/giorno
-crea partita di prova 201 id 3 · partite ora: 3:Prova funzionali L2:ATTIVA:06-01/giorno | 1:Partita Roberto:-:06-01/giorno | 2:Tutorial:-:04-29/giorno
-pin prima: prova Uomo Minaccioso: raccolto=false · partita 1 Uomo Minaccioso: raccolto=false
-PUT /api/partite/3/spilli/1750 {raccolto:true} 200 {"id":1750,"uid":"b8d0a80b93829c749e72e184c1fb9ee9","tipo":"dialogo","tipoNome":"Dialogo","colore":"#6366f1","nome":"Uomo Minaccioso","descrizione":"Offre un lavoro facile.","riferimento":null,"soloPo
-pin dopo: prova Uomo Minaccioso: raccolto=true · partita 1 Uomo Minaccioso: raccolto=false
-DB spillo_partita (pin, partita di prova): [{"partita_id":3,"spillo_uid":"b8d0a80b93829c749e72e184c1fb9ee9","raccolto":1,"updated_at":"2026-10-20T02:55:11.835Z"}]
-GET area Central Street (partita di prova): elemento del pin [] · chiavi chiave,contenitore,slug,nome,nomeRivisto,ordine,predefinita,illustrazione,numeroPlanimetrie,numeroSpilli,passaggio,ingresso,origine,modificata,daVerificare,casa,planimetrie,elementi,vicine
-ID_PROVA 3

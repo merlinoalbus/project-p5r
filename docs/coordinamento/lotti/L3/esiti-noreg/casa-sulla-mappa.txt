@@ -1,2 +1,0 @@
-{"giorni":54,"voci":254,"conMappa":75,"perMappa":{"citta-shujin-academy":6,"citta-ogikubo":9,"nativo-rmap-001-3-0":26,"nativo-rmap-152-1-0":3,"citta-tsukishima":9,"nativo-rmap-009-2-0":8,"nativo-rmap-001-4-0":1,"nativo-rmap-190-1-0":2,"nativo-rmap-002-0-0":4,"nativo-rmap-153-1-0":7},"spilloNonSullaMappa":0,"senzaSpillo":9}
-destinazioni diverse dalla base: 0

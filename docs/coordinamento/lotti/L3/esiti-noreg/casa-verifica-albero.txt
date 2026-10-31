@@ -1,3 +1,0 @@
-invariata (mondo/Memento/altro): 53
-radice → scheda del Palazzo: 9
-planimetria → Area giusta: 245
