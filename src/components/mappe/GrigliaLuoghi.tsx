@@ -7,17 +7,32 @@
 // (`nodo.casa`, calcolata dal server) ed è il principale; se il nodo ha figli, un secondo pulsante («Aree (n)», «Planimetrie (n)»,
 // «Dedali (n)») scende di livello. Casa e conteggi li calcola il server (`GET /api/mappe/gerarchia`): qui non si ricostruisce un indirizzo né
 // si somma un numero. Scorre solo la pagina: nessuna area scorrevole annidata. Le colonne le decide `.griglia-luoghi` (tailwind.css).
+//
+// Miniature dei Palazzi e delle aree dei Dedali (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini. Ma io ho generato delle
+// immagini da inserire. vorrei poterle inserire e/o modificare», «stessa funzione … anche per i palazzi»): con la miniatura caricata la carta
+// la mostra in 16:9 (miniature del server con `srcset`); senza, il Palazzo resta col suo emblema e l'area del Dedalo senza immagine. Il
+// comando «Miniatura» (solo nella preparazione: costante di build qui sotto) apre `FinestraCaricaImmagine` e dopo un cambio la pagina rilegge
+// la gerarchia (`RicaricaLuoghi`).
 // ============================================================
 
-import { Fragment } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnteprimaMappa } from './AnteprimaMappa';
 import { EmblemaDungeon } from '../guida/EmblemaDungeon';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { FinestraCaricaImmagine } from '../shared/FinestraCaricaImmagine';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { RicaricaLuoghi } from './ricaricaLuoghi';
 import { etichettaScendi, partiConteggi } from './paroleLuoghi';
 import { testoConteggiPin } from '../../utils/presentazioneMappa';
 import type { NodoGerarchiaDto } from '../../types';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** Quanto è larga una carta della griglia (`.griglia-luoghi`): l'attributo `sizes` delle sue immagini. */
+const SIZES_CARTA = '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw';
 
 /** Il suggerimento dei conteggi: i passaggi e le note che stanno accanto ai pin; per l'Area anche la regola del conteggio. */
 function suggerimentoConteggi(n: NodoGerarchiaDto): string | undefined {
@@ -61,8 +76,12 @@ export function Infiltrazioni({ titolo, elenco }: { titolo: string; elenco: Nodo
   );
 }
 
-/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: l'emblema grande per Palazzi, Memento e dedali, altrimenti l'immagine del server. */
+/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: la miniatura caricata di un Palazzo o di un'area di un Dedalo; senza,
+ *  l'emblema grande per Palazzi, Memento e dedali (niente per l'area del Dedalo), altrimenti l'immagine del server. */
 function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
+  if ((nodo.tipo === 'palazzo' || nodo.tipo === 'area-dedalo') && nodo.immagine?.immagineUrl) {
+    return <AnteprimaMappa mappa={{ immagineUrl: nodo.immagine.immagineUrl, asset: null, nome: nodo.nome }} className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
+  }
   if (nodo.tipo === 'palazzo' || nodo.tipo === 'memento' || nodo.tipo === 'dedalo') {
     return <div className="flex aspect-video w-full items-center justify-center bg-bg-tertiary"><EmblemaDungeon chiave={nodo.chiave} nome={nodo.nome} dimensione={96} /></div>;
   }
@@ -70,8 +89,26 @@ function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
   // la chiave serve solo allo stemma di riserva di Tokyo e del Covo (`AnteprimaMappa`)
   const chiave = nodo.tipo === 'citta' ? 'tokyo' : nodo.tipo === 'area' ? nodo.slug : nodo.tipo === 'planimetria' ? nodo.chiave : undefined;
   return <AnteprimaMappa mappa={{ immagineUrl: nodo.immagine?.immagineUrl ?? null, asset: nodo.immagine?.asset ?? null, nome: nodo.nome, chiave }}
-    className="aspect-video w-full rounded-none border-0" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" />;
+    className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
 }
+
+/** «Miniatura» sulla carta di un Palazzo o di un'area di un Dedalo: apre la finestra per inserire, cambiare o togliere l'immagine. */
+function ComandoMiniaturaReale({ nodo }: { nodo: NodoGerarchiaDto }) {
+  const [aperta, setAperta] = useState(false);
+  const ricarica = useContext(RicaricaLuoghi);
+  const dove = nodo.miniatura;
+  if (!dove) return null;
+  const attuale = nodo.immagine?.immagineUrl ?? null;
+  return <>
+    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Miniatura"
+      aria-label={`${attuale ? 'Cambia' : 'Inserisci'} la miniatura di ${nodo.nome}`} aria-haspopup="dialog" onClick={() => setAperta(true)} />
+    {aperta && <FinestraCaricaImmagine titolo={`Miniatura di ${nodo.nome}`} ambito={dove.ambito} chiave={dove.chiave} urlAttuale={attuale}
+      onChiudi={() => setAperta(false)} onCambiata={ricarica ?? undefined} />}
+  </>;
+}
+
+/** Il comando della miniatura (solo nella preparazione). */
+const ComandoMiniatura: StrumentoDiModifica<typeof ComandoMiniaturaReale> = IN_RILASCIO ? NienteInRilascio : ComandoMiniaturaReale;
 
 /** Una carta: immagine, nome (con il percorso in piccolo nei risultati di ricerca), segni, conteggi, infiltrazioni e i due gesti. */
 export function CartaLuogo({ nodo, percorso, onScendi }: { nodo: NodoGerarchiaDto; percorso?: string; onScendi?: () => void }) {
@@ -91,6 +128,7 @@ export function CartaLuogo({ nodo, percorso, onScendi }: { nodo: NodoGerarchiaDt
           <div className="mt-auto flex flex-wrap gap-2 pt-1">
             {nodo.casa && <CollegamentoVisivo to={nodo.casa} tono="primario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" aria-label={`Apri ${nodo.nome}`} />}
             {scendi && onScendi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="albero" dimensione={20} />} titolo={scendi} aria-label={`${scendi} di ${nodo.nome}`} onClick={onScendi} />}
+            {nodo.miniatura && <ComandoMiniatura nodo={nodo} />}
           </div>
         </div>
       </article>

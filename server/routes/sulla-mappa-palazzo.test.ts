@@ -10,7 +10,8 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { destinazioneDellaVoce, destinazionePalazzo, ingressoDelPalazzo, palazzoDiIngresso, palazzoDiOgniMappa } from '../services/palazziService.js';
+import { atterraggioDelPalazzo, destinazioneDellaVoce, destinazionePalazzo, ingressoDelPalazzo, palazzoDiIngresso, palazzoDiOgniMappa } from '../services/palazziService.js';
+import { chiaveMappa } from '../services/mappe/percorsiMappe.js';
 import type { PercorsoGiornoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -73,10 +74,25 @@ describe('«Sulla mappa» di un Palazzo', () => {
     expect(ingressoDelPalazzo('madarame')).toEqual({ chiave: attesa, spilloId: null });
   });
 
-  it('i Memento (le richieste) seguono la stessa regola; un dungeon senza mappe non porta da nessuna parte', () => {
+  // 2026-10-31 (O9-4, migrazione 322: «Planimetrie delle aree fisse dei Memento si possono rimuovere»): le otto strutture fisse non ci sono
+  // più; il ripiego dei Memento non ha una planimetria su cui cadere e resta sulla radice, mai su una mappa tolta. Un dungeon senza mappe non
+  // porta da nessuna parte
+  it('i Memento senza strutture fisse: il ripiego non cade su una mappa tolta; un dungeon senza mappe non porta da nessuna parte', () => {
+    const tolte = ['nativo-rmap-190-1-0', 'nativo-rmap-190-2-0', 'nativo-rmap-190-3-0', 'nativo-rmap-190-51-0', 'nativo-rmap-190-61-0', 'nativo-rmap-190-62-0', 'nativo-rmap-192-62-0', 'nativo-rmap-195-11-0'];
+    expect(prepared(`SELECT COUNT(*) FROM mappa WHERE chiave IN (${tolte.map(() => '?').join(',')})`).pluck().get(...tolte)).toBe(0);
     const memento = ingressoDelPalazzo('mementos')!;
-    expect(memento.chiave).not.toBe('dungeon-mementos');
+    expect(tolte).not.toContain(memento.chiave);
+    expect(prepared('SELECT 1 FROM mappa WHERE chiave = ?').pluck().get(memento.chiave)).toBe(1);
     expect(ingressoDelPalazzo('nessuno')).toBeNull();
+  });
+
+  // la mappa di Tokyo (`atterraggio` della scheda) segue la regola del Diario: i Memento senza una destinazione vera non atterrano
+  // da nessuna parte (si apre la scheda dei Memento); i Palazzi restano con la loro destinazione unica
+  it('atterraggio dalla mappa di Tokyo: la regola del Diario, per tipo di dungeon', () => {
+    const conIngresso = ingressoDelPalazzo('mementos', undefined, { ripiego: false });
+    if (!conIngresso) expect(atterraggioDelPalazzo('mementos', '05-09')).toBeNull();
+    const kamoshida = destinazionePalazzo('kamoshida', '04-11')!;
+    expect(atterraggioDelPalazzo('kamoshida', '04-11')).toEqual({ mappa: chiaveMappa(kamoshida.chiave), spillo: kamoshida.spilloId });
   });
 
   // 2026-10-30 («Memento - aree fisse — Strutture che i Memento riusano si può rimuovere»): nel Diario i Memento non ripiegano sulla

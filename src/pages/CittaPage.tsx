@@ -53,7 +53,7 @@ export function CittaPage() {
   // Le radici del Metaverso servono alla mappa disegnata: portano la finestra in cui esistono, ed
   // è quella a decidere se compaiono. Senza partita non decide nulla e si vedono tutte. Qui va
   // `radiciMetaverso` e non `soloPalazzi`, che è il filtro dell'*elenco* dei Palazzi: sulla mappa
-  // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 9 maggio sono un posto
+  // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 7 maggio sono un posto
   // dove si può andare quanto gli altri. Con la partita, perché un Palazzo completato sparisce.
   // Col giorno della partita, perché da quello dipende dove si atterra toccando un Palazzo (`atterraggio`, 2026-10-04).
   const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id]);

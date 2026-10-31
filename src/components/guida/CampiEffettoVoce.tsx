@@ -17,6 +17,10 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
+import { ORIGINE_ESITO_AUTOMATICO } from '../../../shared/esitiAttivita';
+
+/** «Dal giorno»: la voce dell'esito automatico senza esito dichiarato dalla voce (O9-2), con il testo condiviso. */
+const DAL_GIORNO = `${ORIGINE_ESITO_AUTOMATICO.giorno.charAt(0).toUpperCase()}${ORIGINE_ESITO_AUTOMATICO.giorno.slice(1)}`;
 import { noteAParole, SCELTE_NOTE, simboliNote, testoPunti } from '../../../shared/note';
 import { BERSAGLI_SBLOCCO, eInNote, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, MODI_USCITA_OGGETTO, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type ModoUscitaOggetto, type NotePuntiConfidente, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { Segmenti } from '../shared/Segmenti';
@@ -269,7 +273,10 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
           )}
           {!strumenti && esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
             opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
-          {esiti?.modo === 'automatico' && <p className="m-0 testo-13 text-text-secondary">L’esito si ricava dal giorno della voce: nessuna scelta da indicare.</p>}
+          {/* L13 (ondata 9, O9-2): nel modo automatico l'esito si ricava dal giorno (predefinito, nessun esito nella voce) o lo dichiara la voce,
+              e allora prevale sul calcolo del giorno («Per il momento vale quello che riporta il testo sul bagno») */}
+          {esiti?.modo === 'automatico' && <Selettore etichetta="Esito del turno" valore={e.esito ?? ''} vuoto={DAL_GIORNO} ricerca="mai"
+            opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
           {!esiti && <DotiProprieTurno effetto={e} onCambia={onCambia} />}
         </div>
       );

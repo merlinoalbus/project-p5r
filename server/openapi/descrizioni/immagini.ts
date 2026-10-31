@@ -6,7 +6,7 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /**
  * Le descrizioni delle rotte di `server/routes/immagini.ts` (servizio `immaginiService`). Due gruppi di ambiti (`shared/immagini.ts`):
- * quelli di caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, altro) e quelli della grafica predefinita
+ * quelli di caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, dungeon, altro) e quelli della grafica predefinita
  * (mappe, sfondi, confidenti…), tutti con il contenuto dentro il database di gioco.
  */
 export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
@@ -35,16 +35,16 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'PUT /api/immagini/:ambito/:chiave': {
     sommario: 'Carica o sostituisce l\'immagine di (ambito, chiave)',
-    descrizione: 'Il corpo è il file grezzo con `Content-Type` `image/*`: con un altro tipo il corpo non viene letto e la richiesta è rifiutata (`corpo-non-immagine`). Formati ammessi PNG, JPEG, WEBP, GIF e SVG, fino a 8 MB (oltre, 413 `corpo-troppo-grande`). Una sola immagine per (ambito, chiave): il caricamento sostituisce quella che c\'era, anche della grafica predefinita, e azzera l\'indirizzo d\'origine. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa, e l\'immagine di una mappa che esiste passa dalla stessa strada dell\'editor (`PUT /api/mappe/:chiave/immagine`): dimensioni, ruolo dedotto dalla gerarchia, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). Un\'immagine della grafica predefinita riallinea il ruolo delle mappe che la dichiarano.',
+    descrizione: 'Il corpo è il file grezzo con `Content-Type` `image/*`: con un altro tipo il corpo non viene letto e la richiesta è rifiutata (`corpo-non-immagine`). Formati ammessi PNG, JPEG, WEBP, GIF e SVG, fino a 8 MB (oltre, 413 `corpo-troppo-grande`). Una sola immagine per (ambito, chiave): il caricamento sostituisce quella che c\'era, anche della grafica predefinita, e azzera l\'indirizzo d\'origine. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa, e l\'immagine di una mappa che esiste passa dalla stessa strada dell\'editor (`PUT /api/mappe/:chiave/immagine`): dimensioni, ruolo dedotto dalla gerarchia, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). Un\'immagine della grafica predefinita riallinea il ruolo delle mappe che la dichiarano. L\'ambito `dungeon` (O9-5) è la miniatura delle carte della pagina Luoghi: la chiave deve essere un Palazzo (`dungeon.chiave`) o un\'area di un Dedalo dei Memento (`area_dedalo.chiave`); una chiave di altro (la radice dei Memento, un dedalo, un\'infiltrazione) è 400 `luogo-senza-miniatura`, una chiave che non c\'è 404 `luogo-non-trovato`.',
     risposta: 'I metadati dell\'immagine salvata, `ImmagineDto`',
     corpoBinario: 'image/*',
-    errori: [[400, 'corpo-non-immagine'], [400, 'formato-non-ammesso'], [400, 'immagine-vuota'], [400, 'immagine-troppo-grande'], [413, 'corpo-troppo-grande'], [409, 'mappa-con-pezzi']],
+    errori: [[400, 'corpo-non-immagine'], [400, 'formato-non-ammesso'], [400, 'immagine-vuota'], [400, 'immagine-troppo-grande'], [400, 'luogo-senza-miniatura'], [404, 'luogo-non-trovato'], [413, 'corpo-troppo-grande'], [409, 'mappa-con-pezzi']],
   },
   'POST /api/immagini/:ambito/:chiave/da-url': {
     sommario: 'Scarica un\'immagine da un indirizzo web e la salva per (ambito, chiave)',
-    descrizione: 'Il server scarica l\'indirizzo indicato (solo http/https, redirect seguiti, al più 20 secondi di attesa della risposta e 120 secondi di trasferimento fermo) con il tetto di 8 MB applicato mentre i dati arrivano, poi la salva come un caricamento: il tipo dichiarato dal sito deve essere PNG, JPEG, WEBP, GIF o SVG, e l\'immagine sostituisce quella che c\'era. L\'indirizzo indicato resta in `origineUrl`. Un sito che non risponde, risponde con un errore o senza contenuto dà 400 `download-fallito`. L\'immagine di una mappa che esiste segue la strada dell\'editor come il caricamento (L1): dimensioni, ruolo dedotto dalla gerarchia, la mappa diventa dell\'utente, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, controllato anche prima dello scarico; con `?eliminaPezzi=1` se ne vanno).',
+    descrizione: 'Il server scarica l\'indirizzo indicato (solo http/https, redirect seguiti, al più 20 secondi di attesa della risposta e 120 secondi di trasferimento fermo) con il tetto di 8 MB applicato mentre i dati arrivano, poi la salva come un caricamento: il tipo dichiarato dal sito deve essere PNG, JPEG, WEBP, GIF o SVG, e l\'immagine sostituisce quella che c\'era. L\'indirizzo indicato resta in `origineUrl`. Un sito che non risponde, risponde con un errore o senza contenuto dà 400 `download-fallito`. L\'immagine di una mappa che esiste segue la strada dell\'editor come il caricamento (L1): dimensioni, ruolo dedotto dalla gerarchia, la mappa diventa dell\'utente, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, controllato anche prima dello scarico; con `?eliminaPezzi=1` se ne vanno). Per l\'ambito `dungeon` la chiave si controlla prima dello scarico, come nel caricamento (400 `luogo-senza-miniatura`, 404 `luogo-non-trovato`).',
     risposta: 'I metadati dell\'immagine salvata, `ImmagineDto`',
-    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'fonte-rifiuta'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
+    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'fonte-rifiuta'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [400, 'luogo-senza-miniatura'], [404, 'luogo-non-trovato'], [409, 'mappa-con-pezzi']],
   },
   'DELETE /api/immagini/:ambito/:chiave': {
     sommario: 'Elimina l\'immagine di (ambito, chiave)',

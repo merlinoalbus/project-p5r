@@ -1334,7 +1334,8 @@ export interface EffettiAzioneDto {
     /** 2026-10-27 (revisione): `bonus` per gli strumenti (esiti con la versione con il bonus): vero se la versione con il bonus, falso se quella
      *  base; assente per gli altri esiti e nelle ricevute di prima. `creazione` (revisione): lo strumento non ha la versione con il bonus
      *  (Kawakami fabbrica al posto tuo): gli oggetti ricevuti dicono già che cosa, il nome dell'esito non si ripete. */
-    esito?: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null;
+    /** L13 (ondata 9, O9-2): `dallaVoce` — attività nel modo automatico, esito dichiarato dalla voce: vale quello, non il calcolo del giorno. */
+    esito?: { chiave: string; nome: string; automatico?: boolean; dallaVoce?: true; bonus?: boolean; creazione?: true } | null;
     /** 2026-10-27: le creazioni della voce (Grimaldello ×3), solo se più di una; assente nelle ricevute di prima. */
     quantita?: number;
     /** 2026-10-27: gli oggetti che il turno ha dato e consumato (con la quantità e il bonus), per dire alla spunta che cosa è stato applicato.
@@ -1425,6 +1426,11 @@ export interface AzionePercorsoDto {
   avvisiDisponibilita?: Array<{ tipo: 'fuori-giorno' | 'fuori-fascia'; testo: string }>;
   /** R9-06: il nome di adesso del Confidente, solo quando il testo salvato nella voce (`riferimentoTesto`) cita un nome diverso: da mostrare accanto al testo, che non si riscrive. */
   riferimentoNomeAttuale?: string;
+  /** L13 (ondata 9, O9-3, migrazione 320): quando la voce è dovuta («Si fa solo se»), solo se ne ha; senza, la voce si fa sempre. */
+  condizioni?: RequisitoSpillo[];
+  /** L13 (O9-3): nella partita la voce NON è dovuta (le sue condizioni sono false al suo giorno): non si spunta e non blocca l'avanzamento.
+   *  Solo su una voce non spuntata (una voce già spuntata resta com'è); `motivo` è la condizione che manca, in parole. */
+  nonDovuta?: { motivo: string };
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
@@ -1611,6 +1617,8 @@ export interface DatiVoceGiornata {
   /** Il collegamento (null = nessuno); il nome lo calcola il server dall'elemento. */
   riferimento?: RiferimentoAzioneDto | null;
   rangoAtteso?: number | null;
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»); vuoto = sempre. Solo per un'azione (un promemoria non ne ha). */
+  condizioni?: RequisitoSpillo[];
   /** Effetti della spunta (solo per un'azione). */
   produce?: EffettoAzione[];
   /** CAS della fonte unica, richiesto quando si modificano gli effetti di una voce già presente. */
@@ -2043,8 +2051,11 @@ export interface NodoGerarchiaDto {
   slug?: string;
   /** Solo città, quartiere, Palazzo: la chiave pubblica della mappa che li illustra (per «Colloca»). */
   mappa?: string;
-  /** La miniatura col risolutore unico di L1; null per il Palazzo (il segno lo disegna il FE) e per i contenitori. */
+  /** La miniatura col risolutore unico di L1; null per i contenitori. Palazzo e area di un Dedalo (O9-5): la miniatura caricata
+   *  dall'utente (ambito `dungeon`, URL versionato), altrimenti null (il Palazzo mostra il suo emblema, l'area del Dedalo niente). */
   immagine: IllustrazioneDto | null;
+  /** Solo Palazzo e area di un Dedalo dei Memento (O9-5): dove si carica la miniatura della carta (`PUT /api/immagini/<ambito>/<chiave>`). */
+  miniatura?: { ambito: 'dungeon'; chiave: string };
   conteggi: ConteggiNodoDto;
   /** Area in attesa della scelta dell'utente (lo staff di Tokyo). */
   daVerificare?: boolean;
@@ -2867,7 +2878,9 @@ export interface DungeonRiassuntoDto {
   concluso?: string | null;
   /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la
    *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04); L6 (R6-17) senza una regola che lo
-   *  copra, l'ingresso del Palazzo (`destinazionePalazzo`, la stessa del diario). Null se il Palazzo non ha mappe. */
+   *  copra, l'ingresso del Palazzo (`destinazionePalazzo`, la stessa del diario). Null se il Palazzo non ha mappe. Per i Memento (O9-4,
+   *  2026-10-31) solo una regola o uno spillo d'ingresso veri (`destinazioneDellaVoce`), mai una planimetria di ripiego: senza, null e la
+   *  mappa di Tokyo apre la scheda dei Memento. */
   atterraggio: { mappa: string; spillo: number | null } | null;
   /** L4 (§1.5): il completamento con la funzione unica — oggetti permanenti, Tesoro, boss finale (`shared/completamentoGuida.ts`); i
    *  campi della partita null senza partita. Per i Palazzi; assente per i Memento. `raccolta` resta l'elenco dei collezionabili, con lo

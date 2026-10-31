@@ -20,6 +20,7 @@ import { simboliNote } from '../../shared/note';
 import { fraseEffettoConNomi, type EffettoVoce, type NomiFraseEffetto, type RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
 import type { ElenchiAzioneDto, ElenchiEffettiVoceDto, FasciaGioco } from '../types';
 import { prezzoNellaFascia } from '../../shared/catalogo';
+import { ORIGINE_ESITO_AUTOMATICO } from '../../shared/esitiAttivita';
 import type { CampiStrutturati } from './azioneStrutturata';
 
 export type RigaEffetto = RichiestaSalvaEffettiVoce['effetti'][number];
@@ -179,7 +180,8 @@ export interface NomiEffetti {
   /** L13: oggetti del catalogo e trofei, per chiave (assenti finché il server non li serve). */
   oggetti?: Map<string, string>; trofei?: Map<string, string>;
   /** 2026-10-27: gli esiti dei turni per «attività/esito»: il nome e, per gli esiti con la versione con il bonus, lo strumento («Grimaldello»). */
-  esitiTurno?: Map<string, { nome: string; strumento?: string; senzaBonus?: true }>;
+  /** `automatico` (O9-2): l'attività è nel modo automatico, e l'esito scritto nella voce vale da solo (nessuna conferma alla spunta). */
+  esitiTurno?: Map<string, { nome: string; strumento?: string; senzaBonus?: true; automatico?: true }>;
   /** 2026-10-28: i Confidenti per chiave (l'effetto «punti a un Confidente»). */
   confidenti?: Map<string, string>;
   /** L13 (ondata 7, O7-2): gli esami per chiave (l'effetto «esame»). */
@@ -201,7 +203,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto, fas
     articoli: new Map(x.articoli.map((a) => [a.chiave, nellaFascia(a)])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
     oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []), confidenti: mappa(e.confidenti), esami: mappa(x.esami ?? []),
-    esitiTurno: new Map(e.attivita.flatMap((a) => (a.esiti?.elenco ?? []).map((x) => [`${a.chiave}/${x.chiave}`, { nome: x.nome, ...(x.strumento ? { strumento: x.strumento } : {}), ...(x.senzaBonus ? { senzaBonus: true as const } : {}) }] as const))),
+    esitiTurno: new Map(e.attivita.flatMap((a) => (a.esiti?.elenco ?? []).map((x) => [`${a.chiave}/${x.chiave}`, { nome: x.nome, ...(x.strumento ? { strumento: x.strumento } : {}), ...(x.senzaBonus ? { senzaBonus: true as const } : {}), ...(a.esiti?.modo === 'automatico' ? { automatico: true as const } : {}) }] as const))),
   };
 }
 
@@ -225,6 +227,8 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
         const x = n.esitiTurno?.get(`${e.attivita}/${e.esito}`);
         const quanti = e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : '';
         // (revisione) uno strumento senza versione con il bonus (la fabbricazione di Kawakami) non chiede niente alla spunta: niente frase sul bonus
+        // L13 (ondata 9, O9-2): nel modo automatico l'esito della voce prevale sul calcolo del giorno e non si conferma
+        if (x?.automatico) return `Turno: ${nome} — esito ${x.nome} (${ORIGINE_ESITO_AUTOMATICO.voce})`;
         return x?.strumento ? `Turno: ${nome} — ${x.strumento}${quanti}${x.senzaBonus ? '' : ', bonus sì o no alla spunta'}` : `Turno: ${nome} — esito atteso: ${x?.nome ?? 'esito non più dichiarato'}${quanti}, lo confermi alla spunta`;
       }
       // (revisione) solo per le attività di soli strumenti (`soloStrumenti` del server): con esiti misti l'esito si sceglie alla spunta

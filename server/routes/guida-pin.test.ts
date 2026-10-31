@@ -629,10 +629,15 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
   });
 
   it('reseed del seed: un pin invariato tiene id e voce; cambiato, torna con la voce; un pacchetto di prima (riferimento «punto») la dà nel campo suo', async () => {
-    // i Memento: le sole planimetrie di un Palazzo ancora d'origine «seed» nel canone
-    const mappa = 'nativo-rmap-190-2-0';
-    const pin = prepared("SELECT id, uid FROM spillo WHERE mappa_chiave = ? AND origine = 'seed' AND tipo = 'porta'").get(mappa) as { id: number; uid: string };
-    const [v, w] = prepared("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'mementos' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 2").pluck().all() as string[];
+    // una planimetria d'origine «seed» di un Palazzo, con una porta del gioco (fino al 2026-10-31 erano le strutture fisse dei Memento,
+    // `nativo-rmap-190-2-0`, tolte dalla migrazione 322): Madarame, la prima in ordine di chiave; le due voci fra quelle che il pin accetta
+    const palazzi = palazzoDiOgniMappa();
+    const mappa = (prepared("SELECT m.chiave FROM mappa m WHERE m.origine = 'seed' AND EXISTS (SELECT 1 FROM spillo s WHERE s.mappa_chiave = m.chiave AND s.origine = 'seed' AND s.tipo = 'porta') ORDER BY m.chiave").pluck().all() as string[])
+      .find((k) => palazzi.get(k) === 'madarame')!;
+    expect(mappa).toBeTruthy();
+    const pin = prepared("SELECT id, uid FROM spillo WHERE mappa_chiave = ? AND origine = 'seed' AND tipo = 'porta' ORDER BY id").get(mappa) as { id: number; uid: string };
+    const [v, w] = ((await request(app).get(`/api/mappe/spilli/${pin.id}/voci-collegabili`).expect(200)).body.data as Array<{ chiave: string }>).map((x) => x.chiave);
+    expect(w).toBeTruthy();
     await collega(v, pin.id).expect(200);
     /** Esporta la planimetria dei Memento e toglie da ogni spillo il campo `voci`, come un pacchetto che non lo porta. */
     const muto = () => { const x = esportaMappe(mappa); for (const s of x.mappe.flatMap((m) => m.spilli)) delete s.voci; return x; };

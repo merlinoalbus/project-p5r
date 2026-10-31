@@ -12,6 +12,7 @@
 import { useMemo, useState } from 'react';
 import { GrigliaLuoghi, ChipConteggi, Infiltrazioni, SegniNodo, type VoceLuogo } from './GrigliaLuoghi';
 import { etichettaScendi, parola } from './paroleLuoghi';
+import { RicaricaLuoghi } from './ricaricaLuoghi';
 import { PlanimetrieDaCollocare } from './PlanimetrieDaCollocare';
 import type { ContenitoreColloca } from './FinestraCollocaPlanimetria';
 import { PageState } from '../shared/PageState';
@@ -194,7 +195,8 @@ export function IndiceLuoghi() {
     <IntestazionePagina compatta titolo="Luoghi della guida"
       azioni={g && <div className="flex w-full min-w-[220px] md:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
     <PageState isLoading={gerarchia.inPrimoCaricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
-      {g && <>
+      {/* la miniatura di una carta (O9-5) cambiata dalla sua finestra fa rileggere la gerarchia */}
+      {g && <RicaricaLuoghi.Provider value={gerarchia.ricarica}>
         <FilaScorrevole {...schedeLuoghi.lista} aria-label="Sezioni dei luoghi" title={testoConteggiPin(g.totali.pin)}>
           {schede.map((s) => <button key={s.chiave} type="button" {...schedeLuoghi.scheda(s.chiave)}
             className={`chip touch ${schedeLuoghi.aperta === s.chiave ? 'chip--attivo' : ''}`}>{s.etichetta}</button>)}
@@ -202,7 +204,7 @@ export function IndiceLuoghi() {
         {testoCercato !== ''
           ? <Risultati trovati={trovati} testo={testoCercato} scendi={(t) => { setRicerca(''); vai(t.sezione, t.ramo); }} />
           : <div {...schedeLuoghi.pannello(sezione)} className="min-w-0"><Scheda g={g} sezione={sezione} ramo={ramo} tokyo={tokyo} memento={memento} daCollocare={daCollocare} vai={vai} onRicarica={gerarchia.ricarica} /></div>}
-      </>}
+      </RicaricaLuoghi.Provider>}
     </PageState>
   </div>;
 }

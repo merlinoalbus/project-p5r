@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { boolQuery, dataGioco, dote, idParam, livello, testoRicerca, uidVoce } from './comuni.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
 import { bodySalvaEffettiVoce } from './acquisti.js';
+import { condizioneSpillo as condizioneDellaVoce } from './catalogo.js';
 import { MASSIMO_VOCI_APPUNTI } from '../../shared/appuntiDiario.js';
 import { MASSIMO_CARATTERI_RICERCA_DIARIO, MINIMO_CARATTERI_RICERCA_DIARIO } from '../../shared/ricercaDiario.js';
 
@@ -44,6 +45,8 @@ const campiAzioneStrutturata = {
   tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
   riferimento: z.object({ tipo: z.enum(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave) as [TipoRiferimentoAzione, ...TipoRiferimentoAzione[]]), chiave: z.string().trim().min(1).max(200) }).nullable().optional(),
   rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»), le condizioni del catalogo; vuoto = sempre. */
+  condizioni: z.array(condizioneDellaVoce).max(20).optional(),
   // la descrizione è solo documentazione (OpenAPI): ogni voce la normalizza il servizio con le regole di shared/effettiAzione.ts
   produce: z.array(z.unknown().meta({ description: 'Un effetto `EffettoAzione` (shared/effettiAzione.ts): `{ tipo: "dote", dote, note }`, `{ tipo: "lettura", categoria, chiave, almeno }` oppure `{ tipo: "turno", attivita, doti? }`.' })).max(20).optional(),
   revisioneEffettiAttesa: z.string().regex(/^[0-9a-f]{64}$/).optional(),
@@ -85,7 +88,7 @@ export const bodyAggiornaVoce = z.object({
 })
   .refine(b => b.produce === undefined || b.effettiVoce === undefined, 'Invia un’unica fonte degli effetti.')
   .refine(b => b.effettiVoce === undefined || !!b.effettiVoce.revisioneEffettiAttesa, 'Ricarica la revisione della fonte prima di modificarla.')
-  .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso, effetti o infiltrazioni).' });
+  .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso, «Si fa solo se», effetti o infiltrazioni).' });
 /** L3 §1.4: l'esito di «da rivedere» su una voce. */
 export const bodyRivistaVoce = z.object({ esito: z.enum(['tieni', 'rimetti', 'fatto']) });
 export const bodySpostaVoce = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
@@ -121,6 +124,8 @@ const voceAppunti = z.object({
   riferimento: z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).strict().nullable(),
   riferimentoTesto: z.string().max(400).nullable(),
   rangoAtteso: z.number().int().min(1).max(10).nullable(),
+  /** L13 (O9-3): «Si fa solo se»; assente negli appunti di prima (= nessuna condizione). Le riconosce il servizio. */
+  condizioni: z.array(z.unknown()).max(20).optional(),
   effetti: z.object({
     stato: z.enum(['convertita', 'legacy-da-correggere']),
     elementi: z.array(effettoAppunti).max(60),

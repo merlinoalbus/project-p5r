@@ -9,7 +9,8 @@
 //     fermano con 409 `esito-da-scegliere` (una decisione aperta non lascia passare: decisione A1 dell'utente, 2026-10-25);
 //     un esito le cui condizioni sono rosse è rifiutato (409 `esito-non-disponibile`), come un libro non ancora disponibile;
 //   - modo «automatico»: vale l'unico esito con le condizioni vere al giorno della voce (o della partita, per il contatore); se non ce
-//     n'è uno solo, 409 `esito-automatico-incerto` con il motivo, mai un valore inventato;
+//     n'è uno solo, 409 `esito-automatico-incerto` con il motivo, mai un valore inventato. Se la voce DICHIARA l'esito (ondata 9, O9-2),
+//     vale quello della voce, senza valutarne le condizioni (`dallaVoce`);
 //   - una Dote a valori possibili (`possibili` dell'effetto `dote`, la fabbricazione) chiede le note fra quelle dichiarate, o «nessuna».
 // La spunta porta le scelte (`OpzioniSpunta.scelteEsito`), la ricevuta le ricorda (`turni[].esito`, `doti[].scelta`), togliere la spunta
 // toglie il turno con le sue Doti (`annullaEffettiAzione`). Nessuna Dote si applica da sola: restano le proposte «Applica».
@@ -38,7 +39,7 @@ import { ePiazzamentoEsame, PIAZZAMENTI_ESAME, type PiazzamentoEsame } from '../
 
 /** La scelta già risolta per un effetto della voce: le Doti dell'esito del turno, o le note della Dote a valori possibili (0 = nessuna). */
 export type SceltaRisolta =
-  | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null; doti: DoteEsito[] }
+  | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean; dallaVoce?: true; bonus?: boolean; creazione?: true } | null; doti: DoteEsito[] }
   | { tipo: 'dote'; note: 0 | 1 | 2 | 3 }
   /** L13 (ondata 7, O7-2): il piazzamento scelto ai risultati dell'esame. */
   | { tipo: 'esame'; piazzamento: PiazzamentoEsame }
@@ -158,10 +159,19 @@ export function statoAlMomento(partitaId: number, momento: { data: string; fasci
 /**
  * Risolve l'esito di UN turno dell'attività che dichiara esiti. `scelta`: la chiave scelta, null = «senza punti», undefined = nessuna
  * scelta arrivata (nel modo «scelta» ferma il gesto). Nel modo automatico la scelta non serve e, se arriva diversa, è rifiutata.
+ * `esitoDellaVoce` (L13, ondata 9, O9-2: «Per il momento vale quello che riporta il testo sul bagno. A meno di modifiche successive.»):
+ * l'esito che la voce del Diario DICHIARA per un'attività nel modo automatico. Prevale sul calcolo del giorno: vale quello, senza valutarne
+ * le condizioni e senza chiedere niente, ed è registrato come `dallaVoce`. Il contatore della Partita non ha voce e non lo passa.
  */
-export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta: string | null | undefined, st: StatoDisponibilita): Extract<SceltaRisolta, { tipo: 'turno' }> {
-  const elenco = esiti.esiti.map((e) => esitoDisponibile(e, st));
+export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta: string | null | undefined, st: StatoDisponibilita, esitoDellaVoce?: string): Extract<SceltaRisolta, { tipo: 'turno' }> {
   const nomeAttivita = esitiDellAttivita(attivita)?.nome ?? attivita;
+  if (esiti.modo === 'automatico' && esitoDellaVoce) {
+    const e = esiti.esiti.find((x) => x.chiave === esitoDellaVoce);
+    if (!e) throw httpErrors.badRequest('esito-sconosciuto', `«${nomeAttivita}» non dichiara l'esito indicato dalla voce: correggi la voce.`);
+    if (scelta !== undefined && scelta !== e.chiave) throw httpErrors.conflict('esito-automatico', `«${nomeAttivita}»: l'esito lo dice la voce (${e.nome}) e non si sceglie.`);
+    return { tipo: 'turno', esito: { chiave: e.chiave, nome: e.nome, dallaVoce: true }, doti: e.doti };
+  }
+  const elenco = esiti.esiti.map((e) => esitoDisponibile(e, st));
   if (esiti.modo === 'automatico') {
     const vale = automatico(elenco);
     if (!vale) throw httpErrors.conflict('esito-automatico-incerto', `«${nomeAttivita}»: l'esito si ricava dalle condizioni, ma in questo momento ${elenco.some((e) => e.disponibile) ? 'ne valgono più d’uno' : 'non ne vale nessuno'}. Correggi gli esiti dell'attività.`);
@@ -316,7 +326,8 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
       if (coppia && scelta !== undefined && scelta !== coppia.base.chiave && scelta !== coppia.bonus.chiave) throw httpErrors.badRequest('esito-fuori-strumento', `«${a.nome}»: la voce indica ${nomeStrumento(coppia.base)}; alla spunta si sceglie solo se con il bonus o no.`);
       if (!coppia && !e.esito && soloStrumenti(a.esiti) && !opz.storico) throw httpErrors.conflict('strumento-da-scegliere', `«${a.nome}»: la voce non dice che cosa si crea. Scegli strumento e quantità nell’editor della voce, poi spunta.`);
       if (opz.storico && a.esiti.modo === 'scelta' && scelta === undefined) throw httpErrors.conflict('esito-da-scegliere', `«${a.nome}»: l'esito si sceglie alla spunta. Togli e rimetti la spunta della voce per sceglierlo.`);
-      out.set(uid, risolviEsitoTurno(e.attivita, a.esiti, scelta, stato()));
+      // L13 (ondata 9, O9-2): nel modo automatico l'esito dichiarato dalla voce prevale sul calcolo del giorno (anche nel raccordo storico)
+      out.set(uid, risolviEsitoTurno(e.attivita, a.esiti, scelta, stato(), a.esiti.modo === 'automatico' ? e.esito : undefined));
     }
   }
   return out;

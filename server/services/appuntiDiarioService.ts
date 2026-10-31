@@ -35,6 +35,7 @@ import { improntaDato } from './propostePartitaService.js';
 import { normalizzaEffettoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
 import { TIPI_RIFERIMENTO_AZIONE } from '../../shared/effettiAzione.js';
 import { dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { condizioniDaSalvare, condizioniDellaVoce } from './voceDovuta.js';
 import {
   FORMATO_APPUNTI_DIARIO, VERSIONE_APPUNTI_DIARIO, type AppuntiDiario, type EsitoAnnulloIncollaDto, type EsitoIncollaDto, type PianoIncollaDto,
   type RichiestaEseguiIncolla, type RichiestaIncollaVoci, type RilievoIncolla, type StatoVoceIncolla, type VoceAppunti, type VoceSaltataIncolla,
@@ -82,6 +83,8 @@ function istantaneaVoce(r: RigaVoce): VoceAppunti {
     genere: r.genere, azione: r.azione, note: r.note, tipo: r.tipo,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave } : null,
     riferimentoTesto: r.riferimento_testo, rangoAtteso: r.rango_atteso,
+    // L13 (O9-3): «Si fa solo se», solo se la voce ne ha
+    ...(condizioniDellaVoce(r).length ? { condizioni: condizioniDellaVoce(r) } : {}),
     effetti: { stato: fonte.stato, elementi: fonte.effetti.map((e) => ({ uid: e.uid, effetto: e.effetto, origine: e.origine })), rawLegacy: fonte.rawLegacy, motivo: fonte.motivo },
     infiltrazioni: infiltrazioniDellaVoce(r.uid),
     daRivedere: r.da_rivedere === 1,
@@ -339,6 +342,9 @@ function inserisciCopia(v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltra
   prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, giorno, fascia, ordine, v.genere, v.azione.trim(), v.note === null || v.note.trim() === '' ? null : v.note,
     v.genere === 'azione' ? v.tipo : 'altro', riferimento?.tipo ?? null, riferimento?.chiave ?? null, v.riferimentoTesto, v.rangoAtteso, adesso, adesso);
+  // L13 (O9-3): la copia porta «Si fa solo se» (le stesse verifiche del modulo della voce: 400 se una condizione non si riconosce)
+  const condizioni = condizioniDaSalvare(v.condizioni, v.genere);
+  if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
   const mappa = scriviEffettiDaIstantanea(uid, effetti, { verifica: opz.verifica, registro: { origine: 'copia-voce', operazione: opz.operazione, daVoce: v.uid } });
   if (infiltrazioni.length && conLegami()) infiltrazioni.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
   return { uid, mappaEffetti: Object.fromEntries(mappa) };

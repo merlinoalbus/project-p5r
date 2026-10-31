@@ -231,7 +231,8 @@ export function destinazionePalazzo(dungeon: string, giorno?: string | null): { 
  * Strutture che i Memento riusano si può rimuovere»): per un dungeon di altro tipo (i Memento, i cui piani si generano a ogni discesa:
  * le strutture fisse che riusano non sono un posto dove si arriva) vale solo una destinazione vera — la regola d'atterraggio del giorno
  * o uno spillo d'ingresso —, mai il ripiego sulla prima planimetria; senza, `null` e la voce non mostra «Sulla mappa». La regola è il
- * tipo del dungeon, non il nome delle planimetrie.
+ * tipo del dungeon, non il nome delle planimetrie. Dal 2026-10-31 le strutture fisse non ci sono più (migrazione 322) e la stessa regola
+ * vale per l'atterraggio dalla mappa di Tokyo (`atterraggioDelPalazzo`).
  */
 export function destinazioneDellaVoce(dungeon: string, giorno?: string | null): { chiave: string; spilloId: number | null } | null {
   const d = prepared('SELECT tipo FROM dungeon WHERE chiave = ?').get(dungeon) as { tipo: string } | undefined;
@@ -241,9 +242,15 @@ export function destinazioneDellaVoce(dungeon: string, giorno?: string | null): 
   return ingressoDelPalazzo(dungeon, giorno ?? undefined, { ripiego: false });
 }
 
-/** La stessa destinazione nella forma del campo `atterraggio` (metro, cartellino del diario): la chiave pubblica della mappa e il pin. */
+/**
+ * La stessa destinazione nella forma del campo `atterraggio` (metro, mappa di Tokyo, cartellino del diario): la chiave pubblica della mappa e
+ * il pin. La regola è quella del Diario (`destinazioneDellaVoce`), una sola per tipo di dungeon: un Palazzo la sua destinazione unica; i
+ * Memento solo una destinazione vera (regola d'atterraggio del giorno o spillo d'ingresso), mai il ripiego su una planimetria. Dal 2026-10-31
+ * (O9-4, «Planimetrie delle aree fisse dei Memento si possono rimuovere») il ripiego dei Memento cadeva su una delle strutture fisse tolte, e
+ * poi sulla radice `dungeon-mementos`: senza destinazione vera, null, e la mappa di Tokyo apre la scheda dei Memento.
+ */
 export function atterraggioDelPalazzo(dungeon: string, giorno?: string | null): { mappa: string; spillo: number | null } | null {
-  const d = destinazionePalazzo(dungeon, giorno);
+  const d = destinazioneDellaVoce(dungeon, giorno);
   return d ? { mappa: chiaveMappa(d.chiave), spillo: d.spilloId } : null;
 }
 

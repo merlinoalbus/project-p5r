@@ -12,8 +12,21 @@
 //   `mappe/lmap/tokyo/akasaka`): il frontend le risolve con lo stesso `useAsset` di prima.
 // ============================================================
 
-/** Ambiti delle immagini caricate dall'utente per un'entità. */
-export const AMBITI_CARICAMENTO = ['arcana', 'confidente', 'personaggio', 'persona', 'skill', 'mappa', 'spillo', 'altro'] as const;
+/** Ambiti delle immagini caricate dall'utente per un'entità. `dungeon` (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini.
+ *  Ma io ho generato delle immagini da inserire», «stessa funzione … anche per i palazzi») è la miniatura della carta nella pagina Luoghi:
+ *  chiave = `dungeon.chiave` di un Palazzo o `area_dedalo.chiave` di un'area di un Dedalo dei Memento (`AMBITO_MINIATURA_LUOGO`). */
+export const AMBITI_CARICAMENTO = ['arcana', 'confidente', 'personaggio', 'persona', 'skill', 'mappa', 'spillo', 'dungeon', 'altro'] as const;
+
+/** L'ambito della miniatura delle carte dei Palazzi e delle aree dei Dedali nella pagina Luoghi (O9-5): non `mappa`, perché la chiave di
+ *  un'area di un Palazzo in «mappa» è già la sua pianta. */
+export const AMBITO_MINIATURA_LUOGO = 'dungeon' as const;
+
+/** I formati che una miniatura (e ogni immagine caricata) può avere, come li accetta il server (`immaginiService`): il client li usa per
+ *  rifiutare subito un file sbagliato, il server resta l'arbitro (controlla i byte). */
+export const MIME_IMMAGINE_AMMESSI = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'] as const;
+
+/** La dimensione massima di un'immagine caricata, in byte (8 MB): la stessa del server (`MAX_BYTE_IMMAGINE`). */
+export const MAX_BYTE_IMMAGINE_CARICATA = 8 * 1024 * 1024;
 
 /** Le famiglie della grafica predefinita che vivono nel database (tutto ciò che non è compendio né `ui/`). */
 export const AMBITI_PREDEFINITI = ['affinita', 'attivita', 'confidenti', 'decori', 'doti', 'elementi', 'guida', 'identita', 'illustrazioni', 'mappe', 'meteo', 'palazzi', 'persona-gruppo', 'personaggi', 'sfondi', 'spilli'] as const;

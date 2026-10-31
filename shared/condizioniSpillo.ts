@@ -78,6 +78,10 @@ export const EVENTI_STORIA = [
   { chiave: 'pietra-sacra-comprata', nome: 'Pietra Sacra comprata da Chihaya' },
   { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
   { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
+  // L13 (ondata 9, O9-1, migrazione 318): la prima visita a Nejima nei Memento, che fallisce da copione e fa emergere Shinya (guida: «per
+  // affrontarlo davvero serve prima un legame con Shinya Oda»; il Confidente si avvia «solo dopo aver portato avanti la richiesta»). Il rango 1
+  // della Torre lo chiede al posto della Richiesta completata, che a sua volta chiede il rango 1: niente più giro chiuso.
+  { chiave: 'vincenti-prima-visita', nome: 'Prima visita a Nejima nei Memento (I vincenti non imbrogliano)' },
   // Le aperture dei Dedali dei Memento **si calcolano** (migrazione 305, richiesta dell'utente del 2026-10-30: «le aperture dovrebbero dipendere
   // dai palazzi affrontati»): `dedalo` è il Dedalo (`dungeon_area`), e il fatto vale quanto la sua condizione d'apertura (`condizioni_json`: il
   // Palazzo concluso o la data della guida). Non si dichiarano nelle visite né si segnano a mano. Jose usa sette di questi nove fatti.

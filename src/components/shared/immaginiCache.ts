@@ -54,3 +54,21 @@ export function urlImmagineVersionata(ambito: AmbitoImmagine, chiave: string): s
 export function registraImmagine(ambito: AmbitoImmagine, chiave: string, createdAt: string): void {
   datazioni.set(`${ambito}/${chiave}`, createdAt);
 }
+
+/**
+ * Dopo un caricamento (`createdAt` della nuova immagine) o una rimozione (`null`) fatti fuori da un riquadro `ImmagineEntita` (la finestra
+ * della miniatura dei Luoghi, O9-5): l'insieme delle chiavi presenti già in cache, la data e la versione dell'URL si allineano come dopo un
+ * cambio nel riquadro, così ogni vista dell'immagine chiede il file nuovo.
+ */
+export async function segnaImmagineCambiata(ambito: AmbitoImmagine, chiave: string, createdAt: string | null): Promise<void> {
+  const id = `${ambito}/${chiave}`;
+  if (createdAt) datazioni.set(id, createdAt);
+  else datazioni.delete(id);
+  versioniImmagini.set(id, (versioniImmagini.get(id) ?? 0) + 1);
+  // l'insieme si aggiorna solo se l'elenco dell'ambito è già stato chiesto: altrimenti la prima lettura lo porterà già giusto
+  const elenco = elenchi.get(ambito);
+  if (!elenco) return;
+  const set = await elenco;
+  if (createdAt) set.add(chiave);
+  else set.delete(chiave);
+}

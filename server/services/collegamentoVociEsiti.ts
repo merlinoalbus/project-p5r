@@ -14,7 +14,8 @@
 // `salvaEffettiVoce` accetta (stessa revisione, stessi uid per gli effetti che restano) — più l'elenco di ciò che toglie, da mostrare.
 // La regola: gli effetti `dote` sulle Doti che gli esiti dell'attività dichiarano escono (le darà l'esito scelto alla spunta: un solo
 // punto); restano gli altri (la Coraggio della pioggia al bagno, per esempio); si aggiunge un effetto `turno` con l'esito atteso
-// (solo nel modo «scelta»; nel modo automatico l'esito si ricava dal giorno). Chi applica dopo il sì dell'utente passa il piano a
+// (nel modo automatico, senza esito atteso, l'esito si ricava dal giorno; con l'esito atteso vale quello della voce: ondata 9, O9-2, il bagno
+// del 9, 13 e 16 giugno, migrazione 319). Chi applica dopo il sì dell'utente passa il piano a
 // `salvaEffettiVoce` e a `aggiornaVoceGiornata` (tipo e collegamento): le partite già spuntate ricevono le loro proposte storiche dal
 // motore, come per ogni correzione di una voce.
 // ============================================================
@@ -25,15 +26,17 @@ import { leggiEffettiVoce } from './motoreDiario.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce.js';
 
-/** Le voci dopo il 05-31 collegate dalla migrazione 234, con l'esito atteso deciso dalla regola dell'utente (null = da scegliere o automatico). */
+/** Le voci dopo il 05-31 collegate dalla migrazione 234, con l'esito atteso deciso dalla regola dell'utente (null = da scegliere o automatico).
+ *  Ondata 9 (O9-2, «Per il momento vale quello che riporta il testo sul bagno. A meno di modifiche successive.»): il bagno del 9, 13 e 16
+ *  giugno (lunedì e giovedì, ma il testo dice Fascino ♪♪) ha l'esito della voce «bagno-normale», scritto dalla migrazione 319. */
 export const CANDIDATI_COLLEGAMENTO_ESITI: ReadonlyArray<{ voce: string; giorno: string; attivita: string; esitoAtteso: string | null; nota: string }> = [
   { voce: '0f629a255e9feeca0d339f8f92f9e9b0', giorno: '06-04', attivita: 'sfida-big-bang-burger', esitoAtteso: null, nota: '«affrontare la sfida del Gravity Burger»: vinta o persa non è scritto (Coraggio ♪♪ fisso): da scegliere alla spunta' },
   { voce: '3e5106dec8bfe998093d39a88dbc301b', giorno: '06-07', attivita: 'sfida-big-bang-burger', esitoAtteso: 'gravity-persa', nota: '«Non si vince, ma si ottiene Coraggio +2»: persa, e ♪♪ alla sconfitta è solo la Gravity' },
   { voce: 'fb0ac49af6e48c2172f4250626e1c521', giorno: '08-14', attivita: 'sfida-big-bang-burger', esitoAtteso: 'gravity-vinta', nota: '«completarla con 2.000 yen»: oggi ♪♪ alle quattro Doti fisse (la vittoria della Gravity)' },
   { voce: '3c0edc3d0692f34375c5db5c718248d0', giorno: '08-15', attivita: 'sfida-big-bang-burger', esitoAtteso: 'cosmo-tower-vinta', nota: '«consumare il panino (2.500 yen)», «Distintivo del capitano»: oggi nessun effetto' },
-  { voce: '29c27bf247246474df1dfca749d0daad', giorno: '06-09', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ fisso; l’esito si ricava dal giorno' },
-  { voce: '2bfee883c4f851300607c11ac6ba07c4', giorno: '06-13', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio)' },
-  { voce: 'b33c622e3fa9d0bd032837a040dcd2bb', giorno: '06-16', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio)' },
+  { voce: '29c27bf247246474df1dfca749d0daad', giorno: '06-09', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: 'bagno-normale', nota: 'Fascino ♪♪ fisso; giovedì, ma vale il testo della voce: bagno normale (O9-2, migrazione 319)' },
+  { voce: '2bfee883c4f851300607c11ac6ba07c4', giorno: '06-13', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: 'bagno-normale', nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio); lunedì, ma vale il testo della voce: bagno normale (O9-2, migrazione 319)' },
+  { voce: 'b33c622e3fa9d0bd032837a040dcd2bb', giorno: '06-16', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: 'bagno-normale', nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio); giovedì, ma vale il testo della voce: bagno normale (O9-2, migrazione 319)' },
   { voce: '995d18392fe29fc99f144b22dbde8708', giorno: '06-21', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio)' },
   { voce: '817e560d8cb82f8b861a01329b11aa9c', giorno: '07-06', attivita: 'bagno-pubblico-yongen-jaya', esitoAtteso: null, nota: 'Fascino ♪♪ e Coraggio ♪ (la pioggia: resta come effetto proprio)' },
 ];
@@ -55,7 +58,8 @@ export function pianoCollegamentoVoceEsiti(voceUid: string, attivita: string, es
   if (v.data <= '05-31') throw httpErrors.conflict('voce-validata', 'Le voci fino al 31 maggio sono validate dall’utente: non si convertono.');
   const a = esitiDellAttivita(attivita);
   if (!a?.esiti) throw httpErrors.conflict('attivita-senza-esiti', 'L’attività non dichiara esiti: non c’è niente a cui collegare la voce.');
-  if (esitoAtteso !== null && (a.esiti.modo !== 'scelta' || !a.esiti.esiti.some((e) => e.chiave === esitoAtteso))) throw httpErrors.badRequest('esito-sconosciuto', 'L’esito atteso non è fra quelli che l’attività lascia scegliere.');
+  // ondata 9 (O9-2): anche nel modo automatico la voce può dichiarare l'esito, che prevale sul calcolo del giorno
+  if (esitoAtteso !== null && !a.esiti.esiti.some((e) => e.chiave === esitoAtteso)) throw httpErrors.badRequest('esito-sconosciuto', 'L’esito atteso non è fra quelli che l’attività dichiara.');
   const fonte = leggiEffettiVoce(voceUid);
   if (fonte.stato !== 'convertita') throw httpErrors.conflict('effetti-da-correggere', 'La voce ha effetti da correggere prima di qualunque collegamento.');
   const doteDegliEsiti = new Set(a.esiti.esiti.flatMap((e) => e.doti.map((d) => d.dote)));

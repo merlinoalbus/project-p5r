@@ -49,6 +49,7 @@ import { applicatoDallaSpunta } from './applicatoDallaSpunta.js';
 import { yenDelDato } from './yenDeiDati.js';
 import { fasciaDellaVoce } from './prezziArticoli.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
+import { condizioniDaSalvare, condizioniDellaVoce, nonDovutePerGiorno, valutatoreVociDovute, verificaVoceDovuta } from './voceDovuta.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -56,6 +57,8 @@ export interface RigaVoce {
   produce_json: string; indice_guida: number | null; created_at: string; updated_at: string;
   /** L3 §1.4 (migrazione 110; assenti su uno schema di prima): voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
   da_rivedere?: number; aggiunta_da?: string | null; testo_precedente_json?: string | null; motivo_revisione?: string | null;
+  /** L13 (O9-3, migrazione 320; assente su uno schema di prima): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
+  condizioni_json?: string | null;
 }
 
 const TIPI = new Set<string>(TIPI_AZIONE.map((t) => t.chiave));
@@ -228,7 +231,9 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
   illeggibili: Map<string, string>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
   oggetti: ReturnType<typeof riferimentiOggettiPerFonti>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
-  partita?: number }
+  partita?: number;
+  /** L13 (O9-3): il motivo per cui una voce non è dovuta nella partita (null = dovuta), con lo stato letto una volta per la giornata. */
+  nonDovuta?: (r: RigaVoce) => string | null }
 
 /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
  *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
@@ -347,8 +352,11 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // L13 (decisione 19): gli effetti di stato che nella partita non valgono (da approvare nell'elenco, o non applicati), a parte da ciò che la
   // spunta ha applicato: «era già vero» non si dice (non informa)
   const statiNonApplicati = ctx.partita === undefined || !spuntabile || !ctx.fatte.has(r.uid) ? [] : statiNonApplicatiDellaVoce(ctx.partita, fonte);
+  // L13 (O9-3): «Si fa solo se» e, nella partita, la voce non spuntata le cui condizioni sono false al suo giorno (una spuntata resta storia)
+  const condizioni = spuntabile ? condizioniDellaVoce(r) : [];
+  const motivoNonDovuta = condizioni.length > 0 && ctx.nonDovuta && !ctx.fatte.has(r.uid) ? ctx.nonDovuta(r) : null;
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
+    ...v, effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}), ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => ((s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
     ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
@@ -689,6 +697,7 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
     oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
+    ...(partitaId !== undefined ? { nonDovuta: valutatoreVociDovute(partitaId) } : {}),
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }
@@ -702,6 +711,8 @@ export function conteggiGiornate(partitaId?: number): Map<string, { azioni: numb
   const conteggi = new Map(righe.map((r) => [r.data, { azioni: r.azioni, fatte: r.fatte }]));
   // R10-28c/2: le voci d'ingresso nascoste dall'elenco non contano fra le azioni del giorno (non sono mai fatte)
   if (partitaId !== undefined) for (const v of ingressiConclusiNascosti(partitaId)) { const c = conteggi.get(v.data); if (c && c.azioni > 0) c.azioni -= 1; }
+  // L13 (O9-3): le voci non dovute nella partita (e non spuntate) non sono cose da fare del giorno
+  if (partitaId !== undefined) for (const [data, n] of nonDovutePerGiorno(partitaId)) { const c = conteggi.get(data); if (c) c.azioni = Math.max(c.fatte, c.azioni - n); }
   return conteggi;
 }
 
@@ -792,6 +803,8 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
   const genere: GenereVoce = d.genere ?? 'azione';
   const fascia: FasciaGioco = d.fascia ?? 'giorno';
   const { riferimento, produce } = struttura(d);
+  // L13 (O9-3): «Si fa solo se» (solo per un'azione; vuoto = sempre)
+  const condizioni = condizioniDaSalvare(d.condizioni, genere);
   const uid = randomBytes(16).toString('hex');
   const adesso = nowIso();
   getDb().transaction(() => {
@@ -803,6 +816,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
     prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
       VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
       riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, adesso, adesso);
+    if (condizioni) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
     inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
@@ -817,6 +831,8 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
   const genere: GenereVoce = d.genere ?? genereDi(r);
   const fascia: FasciaGioco = d.fascia ?? fasciaDi(r);
   const { riferimento } = struttura(d, r);
+  // L13 (O9-3): «Si fa solo se» cambia solo se arriva; una cosa da fare che diventa promemoria le perde (un promemoria non si spunta)
+  const condizioni = condizioniDaSalvare(d.condizioni ?? (genere !== 'azione' && r.condizioni_json ? [] : undefined), genere);
   // L13 (decisione 19): che cosa hanno fatto gli effetti di stato cambiati nelle partite che hanno già spuntato la voce, per la risposta
   const applicazioniEffetti = getDb().transaction((): AzionePercorsoDto['applicazioniEffetti'] => {
     let applicazioni: AzionePercorsoDto['applicazioniEffetti'] = undefined;
@@ -840,6 +856,7 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
       riferimento === undefined ? r.riferimento_tipo : riferimento?.tipo ?? null, riferimento === undefined ? r.riferimento_chiave : riferimento?.chiave ?? null,
       riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, d.rangoAtteso === undefined ? r.rango_atteso : d.rangoAtteso,
       nowIso(), uid);
+    if (condizioni !== undefined) prepared('UPDATE voce_giornata SET condizioni_json = ? WHERE uid = ?').run(condizioni, uid);
     // L13 (decisione 2): con il collegamento ormai scritto, un effetto «yen» non sta accanto a un film, un'attività o una Richiesta che porta già i suoi yen
     if (riferimento !== undefined) verificaYenVoce(uid);
     if (fascia !== fasciaDi(r)) {
@@ -939,6 +956,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
         if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
         return; // idempotente: non riapplica punti, letture o turni (dalla 305 la visita ai Memento non dichiara più aperture)
       }
+      // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita non si spunta (409 `voce-non-dovuta`, col motivo);
+      // una già spuntata resta (sopra), e togliendole la spunta si annulla come sempre
+      verificaVoceDovuta(partitaId, r);
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti, avvisi } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
         applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),

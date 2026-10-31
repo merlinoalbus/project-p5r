@@ -25,6 +25,7 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
 import { notePossibili } from './effettiVoce.js';
 import { simboliNote, simboliPossibili } from './note.js';
+import { ORIGINE_ESITO_AUTOMATICO } from './esitiAttivita.js';
 
 /** I tipi di un'azione della giornata (`AzionePercorsoDto.tipo`), con il nome che l'interfaccia mostra. */
 export const TIPI_AZIONE = [
@@ -175,9 +176,11 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
   // 2026-10-27: un esito con la versione con il bonus è lo strumento della voce, con le creazioni; il bonus lo dice l'interruttore alla spunta
   const strumento = e.esito ? nomi.strumenti?.[`${e.attivita}/${e.esito}`] : undefined;
   const esito = strumento ? `${strumento}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}${nomi.senzaBonus?.[`${e.attivita}/${e.esito}`] ? '' : ', bonus sì o no alla spunta'}`
-    : e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, lo confermi alla spunta`
-      : nomi.conBonus?.[e.attivita] ? 'strumento e quantità da scegliere nell’editor della voce'
-        : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? 'esito automatico secondo il giorno' : '';
+    // L13 (ondata 9, O9-2): nel modo automatico l'esito dichiarato dalla voce vale da solo, senza conferma alla spunta
+    : e.esito && modo === 'automatico' ? `esito ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'non più dichiarato dall’attività'} (${ORIGINE_ESITO_AUTOMATICO.voce})`
+      : e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, lo confermi alla spunta`
+        : nomi.conBonus?.[e.attivita] ? 'strumento e quantità da scegliere nell’editor della voce'
+          : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? `esito automatico ${ORIGINE_ESITO_AUTOMATICO.giorno}` : '';
   const doti = e.doti?.length ? e.doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join('; ') : '';
   return { nome, dettaglio: [doti, esito].filter(Boolean).join(' · '), doti, esito };
 }

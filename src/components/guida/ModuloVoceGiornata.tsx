@@ -14,6 +14,8 @@
 // proposta da completare, parte con la proposta già applicata e salvando la proposta risulta applicata (stessa scrittura della voce).
 // Ogni voce ha anche il suo **posto** nella fascia (richiesta dell'utente: «devo fare un ordinamento esatto»), che si cambia
 // trascinando o con ↑ / ↓. Ogni modifica vale per tutte le partite ed entra nel pacchetto di gioco che si esporta.
+// L13 (ondata 9, O9-3): «Si fa solo se», le condizioni che dicono quando la voce è dovuta (l'editor unico `CondizioniEditor`; vuoto = sempre):
+// con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta» (la consegna delle televendite senza nessun set comprato).
 // ============================================================
 
 import { useMemo, useRef, useState } from 'react';
@@ -33,6 +35,8 @@ import type { AzionePercorsoDto, DatiVoceGiornata, FasciaGioco, GenereVoce } fro
 import type { PropostaConversioneDto } from '../../../shared/proposteConversione';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { CondizioniEditor } from './CondizioniEditor';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -86,6 +90,8 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     return {
       genere: (voce?.genere ?? 'azione') as GenereVoce, testo: voce?.azione ?? '', note: voce?.note ?? '', fascia,
       posizione: postoIniziale(fascia), struttura: proposta ? strutturaConProposta(salvata, proposta) : salvata,
+      // L13 (O9-3): quando la voce è dovuta («Si fa solo se»); vuoto = sempre
+      condizioni: (voce?.condizioni ?? []) as RequisitoSpillo[],
     };
   });
   const [campi, setCampi] = useState(iniziali);
@@ -126,12 +132,15 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
     const produceModificato = !s.fonteEffetti && s.effettiVoce === undefined && (!voce || JSON.stringify(s.produce) !== JSON.stringify(voce.produce));
     // da cosa da fare a promemoria: il collegamento e gli effetti salvati si tolgono (il server rifiuta se una partita li ha già spuntati)
     const effettiSalvati = s.fonteEffetti?.stato === 'convertita' && s.fonteEffetti.effetti.length > 0;
+    // «Si fa solo se» si manda solo se è cambiato (una voce nuova: solo se ne ha); un promemoria lo perde dal server
+    const condizioniCambiate = JSON.stringify(campi.condizioni) !== JSON.stringify(iniziali.condizioni);
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
       // tipo, collegamento e rango così come li mostra la finestra: L13 (ondata 4a) niente si ricava in silenzio all'apertura, un
       // collegamento nuovo è solo quello che l'utente ha scelto (in «Quale» o con «Collega»). Gli effetti salvati restano intatti.
       ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
+        ...(condizioniCambiate ? { condizioni: campi.condizioni } : {}),
         ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
         ...(produceModificato ? { produce: s.produce } : {}),
       } : perdeEffetti ? { tipo: 'altro' as const, riferimento: null, rangoAtteso: null,
@@ -187,6 +196,15 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
+      {/* L13 (O9-3, «in tal caso viene meno la consegna»): quando la voce è dovuta, con l'editor unico delle condizioni; senza, si fa sempre.
+          Con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta»: non si spunta e non ferma la giornata */}
+      {azione && (
+        <section className="flex min-w-0 flex-col gap-1" aria-label="Si fa solo se">
+          <h3 className="m-0 testo-13 font-semibold text-text">Si fa solo se</h3>
+          <span className="testo-12 text-text-muted text-pretty">Senza condizioni la voce si fa sempre. Con condizioni false al giorno della voce, nella partita è «Non dovuta» e non ferma la giornata.</span>
+          <CondizioniEditor condizioni={campi.condizioni} onCambia={(c) => imposta({ condizioni: c })} disabilitato={occupato} massimo={20} />
+        </section>
+      )}
       <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
       <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
         onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
