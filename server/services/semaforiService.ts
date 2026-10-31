@@ -21,7 +21,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente, type StatoDelRamo } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
-import { relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
+import { relazioneAlRango, relazioneRomantica, relazioniConGiorno } from './relazioneRomanticaService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -72,6 +72,9 @@ export interface StatoPartitaSemafori {
   conferme?: Set<string>;
   /** La partita dello stato: il semaforo della disponibilità legge da qui il giorno dell'ultimo rango (registro degli incontri). Assente = non si sa. */
   partitaId?: number;
+  /** L13 (O11-1, risposta dell'utente «Sì, in automatico»): le relazioni romantiche della partita con il giorno d'inizio (null = non registrato),
+   *  dal punto unico `relazioniConGiorno`; le leggono le condizioni `relazione-romantica` e `relazioni-romantiche`. Assente = nessuna relazione. */
+  relazioniRomantiche?: ReadonlyMap<string, string | null>;
 }
 
 /** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
@@ -109,7 +112,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca };
+  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
+    relazioniRomantiche: relazioniConGiorno(partitaId) };
 }
 
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */

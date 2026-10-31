@@ -52,7 +52,9 @@ const schemaRicevutaLegacy = z.object({
   esami: z.array(z.object({ esame: chiaveReceipt, nome: z.string(), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME), prima: z.enum(CHIAVI_PIAZZAMENTO_ESAME).nullable(),
     doti: z.array(doteReceipt), trofeo: z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough().optional() }).passthrough()).optional(),
   // L13 (O10-2): la relazione romantica segnata dalla scelta alla spunta del passaggio al rango 9, com'era e com'è diventata
-  relazione: z.object({ confidente: chiaveReceipt, nome: z.string(), prima: z.boolean(), dopo: z.boolean() }).passthrough().optional(),
+  // L13 (O11-1): `primaDal`, il giorno d'inizio di prima (null senza); manca nelle ricevute scritte prima della 060
+  relazione: z.object({ confidente: chiaveReceipt, nome: z.string(), prima: z.boolean(), dopo: z.boolean(),
+    primaDal: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/).nullable().optional() }).passthrough().optional(),
 }).passthrough();
 /** Valida senza ricostruire o scartare campi della fotografia storica. */
 export function leggiRicevutaEffettiAzione(raw: string | null): EffettiAzioneDto | null {
@@ -189,8 +191,9 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       throw httpErrors.conflict('relazione-non-prevista', `La relazione romantica si sceglie solo alla spunta dell’evento del rango ${RANGO_DELLA_SCELTA_ROMANTICA} di un Confidente.`);
     }
     const nome = confidenteDellaPartita(partitaId, chiave).nome;
-    const r = scriviRelazioneRomantica(partitaId, chiave, nome, opz.relazioneRomantica, 'diario');
-    if (r.prima !== r.dopo) relazione = { confidente: chiave, nome, prima: r.prima, dopo: r.dopo };
+    // L13 (O11-1): il giorno d'inizio della relazione è il giorno della voce spuntata; la ricevuta ricorda anche il giorno di prima (`primaDal`)
+    const r = scriviRelazioneRomantica(partitaId, chiave, nome, opz.relazioneRomantica, 'diario', a.momento.data);
+    if (r.prima !== r.dopo) relazione = { confidente: chiave, nome, prima: r.prima, dopo: r.dopo, primaDal: r.primaDal };
   }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {

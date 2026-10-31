@@ -35,6 +35,7 @@ import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { esitiDto } from '../services/esitiAttivitaService.js';
 import { promemoriaLibriPerAttivita } from '../services/modificatoriLibri.js';
 import { httpErrors } from '../utils/httpError.js';
+import { confidentiRomanzabili } from '../services/relazioneRomanticaService.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
 
@@ -89,6 +90,8 @@ router.get('/elenchi', (_req, res) => {
     // L6: luoghi, tutti i quartieri e gli inviti (questi ultimi si leggono soltanto)
     luoghi: prepared('SELECT l.chiave, l.nome, q.nome AS gruppo FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as NonNullable<ElenchiRegoleDto['luoghi']>,
     quartieri: prepared("SELECT chiave, nome FROM quartiere WHERE chiave <> 'mementos' ORDER BY ordine").all() as NonNullable<ElenchiRegoleDto['quartieri']>,
+    // L13 (O11-1): i Confidenti romanzabili, dal DB (`confidente.romanzabile`), per la condizione «Relazione romantica con»
+    romanzabili: (() => { const r = confidentiRomanzabili(); return (prepared('SELECT chiave, nome FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).filter((c) => r.has(c.chiave)); })(),
     inviti: (() => { const n = nomiCondizioniMemo(); return tuttiGliInviti().map((i) => ({ chiave: i.chiave, nome: n.inviti?.[i.chiave] ?? i.chiave, gruppo: n.confidenti?.[i.confidente_chiave] ?? i.confidente_chiave, confidente: i.confidente_chiave })); })(),
   };
   res.json(elenchi);

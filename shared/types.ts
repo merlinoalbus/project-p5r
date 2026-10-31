@@ -1362,7 +1362,10 @@ export interface EffettiAzioneDto {
     doti: Array<{ chiave: string; nome: string; delta: number; note: number }>; trofeo?: { chiave: string; nome: string } }>;
   /** L13 (O10-2): la relazione romantica segnata dalla spunta del passaggio al rango 9 (la scelta alla spunta), com'era (`prima`) e com'è
    *  diventata (`dopo`): togliendo la spunta torna `prima`, solo se nella partita vale ancora `dopo`. Assente se la spunta non l'ha cambiata. */
-  relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean };
+  relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean;
+    /** L13 (O11-1): il giorno d'inizio della relazione di prima (MM-GG, null senza relazione o senza giorno), per rimetterlo togliendo la spunta;
+     *  manca nelle ricevute scritte prima della migrazione utente 060 (vale null). */
+    primaDal?: string | null };
 }
 
 export interface RiferimentoAzioneDto {
@@ -3661,6 +3664,8 @@ export interface ElenchiRegoleDto {
   quartieri?: Array<{ chiave: string; nome: string }>;
   /** L6: gli inviti dei Confidenti (in sola lettura nell'editor: si cambiano dalla pagina del Confidente), col Confidente come gruppo. */
   inviti?: Array<{ chiave: string; nome: string; gruppo: string; confidente: string }>;
+  /** L13 (O11-1): i Confidenti romanzabili (`confidente.romanzabile`), per la condizione «Relazione romantica con». */
+  romanzabili?: Array<{ chiave: string; nome: string }>;
 }
 
 /** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
