@@ -21,6 +21,10 @@ import { testoOrigineEsito } from './esitiAttivita.js';
 export const nomeEsitoDelTurno = (esito: { nome: string; bonus?: boolean; creazione?: true }, conOggettiRicevuti: boolean): string | null =>
   !conOggettiRicevuti ? esito.nome : esito.creazione ? null : esito.bonus === undefined ? esito.nome : esito.bonus ? 'con il bonus' : 'senza bonus';
 
+/** L13 (O10-2): la relazione romantica segnata dalla spunta, in parole («Relazione romantica con Tae Takemi iniziata»). Una sola frase per il
+ *  chip della voce, le ricevute e lo storico. */
+export const fraseRelazione = (r: NonNullable<EffettiAzioneDto['relazione']>): string => `Relazione romantica con ${r.nome} ${r.dopo ? 'iniziata' : 'tolta'}`;
+
 /** Testo breve degli effetti della spunta (es. «Perizia ♪ · 2 punti · Zorro, il fuorilegge 1 → 2 · Fioraio Rafflesia: turno 1 (Gentilezza ♪♪ · 3 punti) · Ryuji Sakamoto +15 punti»).
  *  Le Doti sono ciò che il gioco dà (l'app non le tocca: si segnano a mano); `senzaDoti` le lascia fuori, per metterle nel
  *  promemoria «Da segnare nelle Doti» (`utils/dotiDaSegnare`). `senzaPaga` lascia fuori la paga dei turni: le ricevute della spunta
@@ -53,5 +57,6 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   // L13 (ondata 7, O7-2): «Esame di metà semestre 1: Primi 10 (Fascino ♪♪♪ · 5 punti) · trofeo Un travestimento sapiente»
   for (const x of e.esami ?? []) parti.push(`${x.nome}: ${nomePiazzamentoEsame(x.piazzamento)}${doti(x.doti, ' (', ')')}${x.trofeo ? ` · trofeo ${x.trofeo.nome}` : ''}`);
+  if (e.relazione) parti.push(fraseRelazione(e.relazione));
   return parti.join(' · ');
 }

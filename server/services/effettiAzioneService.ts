@@ -28,7 +28,8 @@ import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import { testoOrigineEsito, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
 import { NESSUNA_NOTA, simboliNote, testoDoteInPunti } from '../../shared/note.js';
-import { nomeEsitoDelTurno } from '../../shared/descriviEffettiSpunta.js';
+import { fraseRelazione, nomeEsitoDelTurno } from '../../shared/descriviEffettiSpunta.js';
+import { annullaRelazioneDallaSpunta, RANGO_DELLA_SCELTA_ROMANTICA, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
 import { fasciaDellaVoce } from './prezziArticoli.js';
 
 const numeroReceipt = z.number().finite();
@@ -50,6 +51,8 @@ const schemaRicevutaLegacy = z.object({
   // L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta, con il piazzamento di prima e le Doti del premio
   esami: z.array(z.object({ esame: chiaveReceipt, nome: z.string(), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME), prima: z.enum(CHIAVI_PIAZZAMENTO_ESAME).nullable(),
     doti: z.array(doteReceipt), trofeo: z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough().optional() }).passthrough()).optional(),
+  // L13 (O10-2): la relazione romantica segnata dalla scelta alla spunta del passaggio al rango 9, com'era e com'è diventata
+  relazione: z.object({ confidente: chiaveReceipt, nome: z.string(), prima: z.boolean(), dopo: z.boolean() }).passthrough().optional(),
 }).passthrough();
 /** Valida senza ricostruire o scartare campi della fotografia storica. */
 export function leggiRicevutaEffettiAzione(raw: string | null): EffettiAzioneDto | null {
@@ -68,6 +71,8 @@ export interface OpzioniSpunta {
   noteRisposta?: 1 | 2 | 3;
   /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto (`risolviScelteSpunta`). */
   scelteEsito?: SceltaEsitoSpunta[];
+  /** L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 di un Confidente romanzabile; assente = la relazione non cambia. */
+  relazioneRomantica?: boolean;
 }
 
 /** Ciò che serve dell'azione: il tipo e il collegamento dicono se è un incontro, `produce` il resto. `momento` (giorno, fascia,
@@ -170,6 +175,18 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       }
     }
   }
+  // L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 (rango atteso della voce o passaggio registrato verso il 9) segna la
+  // relazione nella partita; la ricevuta ricorda com'era, per tornarci togliendo la spunta. Fuori da quel passaggio la scelta non c'è (409)
+  let relazione: EffettiAzioneDto['relazione'];
+  if (opz.relazioneRomantica !== undefined) {
+    const chiave = a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;
+    if (!chiave || !a.momento || (a.rangoAtteso !== RANGO_DELLA_SCELTA_ROMANTICA && incontro?.verso !== RANGO_DELLA_SCELTA_ROMANTICA)) {
+      throw httpErrors.conflict('relazione-non-prevista', `La relazione romantica si sceglie solo alla spunta del passaggio al rango ${RANGO_DELLA_SCELTA_ROMANTICA} di un Confidente.`);
+    }
+    const nome = confidenteDellaPartita(partitaId, chiave).nome;
+    const r = scriviRelazioneRomantica(partitaId, chiave, nome, opz.relazioneRomantica, 'diario');
+    if (r.prima !== r.dopo) relazione = { confidente: chiave, nome, prima: r.prima, dopo: r.dopo };
+  }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
     // solo quel Confidente, non tutti (rilievo P1' della verifica); un riferimento a un Confidente che non c'è non dà punti
@@ -184,8 +201,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }
-  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro && !esami.length) return null;
-  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(esami.length ? { esami } : {}) };
+  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro && !esami.length && !relazione) return null;
+  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(esami.length ? { esami } : {}), ...(relazione ? { relazione } : {}) };
 }
 
 /** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati, l'incontro e il piazzamento agli esami (le Doti no). */
@@ -196,6 +213,8 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
   if (e.incontro) annullaIncontro(partitaId, e.incontro);
   // L13 (ondata 7, O7-2): il piazzamento torna quello di prima (se nessuno l'ha cambiato dopo), il trofeo segnato dalla spunta se ne va
   for (const x of e.esami ?? []) annullaPiazzamentoDallaSpunta(partitaId, x);
+  // L13 (O10-2): la relazione romantica torna com'era, solo se nella partita vale ancora quella della spunta
+  if (e.relazione) annullaRelazioneDallaSpunta(partitaId, e.relazione);
 }
 
 /** Le Doti di un effetto per lo storico: note e punti insieme («Coraggio ♪ · 2 punti»), mai un «+N» nudo. */
@@ -228,5 +247,6 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   for (const x of e.esami ?? []) parti.push(`${x.nome}: ${nomePiazzamentoEsame(x.piazzamento)}${x.doti.length ? ` (${frasiDoti(x.doti)} da segnare nelle Doti)` : ''}${x.trofeo ? `, trofeo ${x.trofeo.nome}` : ''}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${simboliNote(e.confidente.noteRisposta)}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
+  if (e.relazione) parti.push(fraseRelazione(e.relazione));
   return parti.join(', ');
 }

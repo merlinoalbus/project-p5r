@@ -37,6 +37,7 @@ import { effettiDiStatoApplicati } from './effettiDiStatoService.js';
 import { fortunaAccesaDallaVoce } from './fortunaService.js';
 import { incontroSiAnnulla } from './incontriService.js';
 import { piazzamentoDellEsame, trofeoSiToglie } from './piazzamentoEsamiService.js';
+import { relazioneSiAnnulla } from './relazioneRomanticaService.js';
 import { descriviEffetti } from '../../shared/descriviEffettiSpunta.js';
 import { nomeDote } from '../../shared/doti.js';
 import { fraseEffettoConNomi, normalizzaEffettoVoce, type EffettoConNomiVoce, type NomiFraseEffetto, type ReceiptEffettoVoceDto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
@@ -100,6 +101,8 @@ function annullabile(p: number, r: ReceiptEffettoVoceDto, l: EffettiAzioneDto): 
       return esami.length ? { esami } : {};
     })(),
     // le aperture dei Dedali di una ricevuta di prima della 305 restano nella ricevuta ma non sono in vigore: si calcolano dai Palazzi
+    // L13 (O10-2): la relazione romantica torna com'era solo se nella partita vale ancora quella della spunta (`annullaRelazioneDallaSpunta`)
+    ...(l.relazione && relazioneSiAnnulla(p, l.relazione) ? { relazione: l.relazione } : {}),
   };
 }
 

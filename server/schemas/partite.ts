@@ -75,6 +75,8 @@ export const bodyConfidente = z
     bonusArcano: z.boolean().optional(),
     invito: z.boolean().optional(),
     note: z.string().max(2000).optional(),
+    /** L13 (O10-2): la relazione romantica nella partita (solo per un Confidente romanzabile: 409 altrimenti). */
+    relazioneRomantica: z.boolean().optional(),
   })
   // il bonus dell'esame non arriva più dal client (R9-08): una richiesta con `esame` è un errore 400, non un campo ignorato
   .strict()
@@ -211,7 +213,9 @@ export const bodyAzionePercorso = z.object({
   pesche: z.array(bodyRegistraSessionePesca).max(100).optional(),
   /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto. */
   scelteEsito: z.array(sceltaEsitoSpunta).max(50).refine((s) => new Set(s.map((x) => x.effettoUid)).size === s.length, 'Ogni effetto ha una sola scelta.').optional(),
-}).strict().refine((d) => d.fatta || (!d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length), 'Esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
+  /** L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 di un Confidente romanzabile (assente = la relazione non cambia). */
+  relazioneRomantica: z.boolean().optional(),
+}).strict().refine((d) => d.fatta || (!d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length&&d.relazioneRomantica === undefined), 'Esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
 export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----

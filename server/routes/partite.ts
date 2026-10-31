@@ -37,7 +37,7 @@ import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProven
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { annullaRegalo, regala } from '../services/regaloAzioneService.js';
-import type { RichiestaRegalo } from '../../shared/types.js';
+import type { ModificaConfidente, RichiestaRegalo } from '../../shared/types.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
@@ -54,7 +54,7 @@ import { eliminaEventi, eliminaEvento, storico } from '../services/storicoServic
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
   aggiornaCompendio, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
-  confidente, confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, personePossedute, rimuoviPosseduta,
+  confidente, confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, impostaRelazioneRomantica, leggiPartita, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
 const router = Router();
@@ -198,6 +198,12 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
   // ondata 5 (revisione dei lotti D e D2): il regalo senza oggetto (+50 di ripiego) non c'è più: ogni regalo è l'azione «Regala», che sa
   // quale oggetto, con la sua reazione, la copia usata e l'annullo
   if ((req.body as { regalo?: boolean }).regalo === true) throw httpErrors.badRequest('usa-regala', 'Il regalo si registra con l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
+  // L13 (O10-2): la sola relazione romantica non è una correzione di punti o di rango: niente incontri né nuova base del registro cronologico
+  const { relazioneRomantica, ...resto } = req.body as ModificaConfidente;
+  if (relazioneRomantica !== undefined && Object.values(resto).every((v) => v === undefined)) {
+    res.json(impostaRelazioneRomantica(Number(req.params.id), String(req.params.chiave), relazioneRomantica));
+    return;
+  }
   res.json(aggiornaConfidenteDallaPagina(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
@@ -241,7 +247,7 @@ router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePe
   const b = req.body as z.infer<typeof bodyAzionePercorso>;
   // la spunta e, se era l'ultima attività del giorno corrente, il passaggio al giorno dopo (togliere la spunta non torna indietro)
   // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
-  res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito }));
+  res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito, relazioneRomantica: b.relazioneRomantica }));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));

@@ -19,6 +19,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce, revocaEventiDellaVoceInOgniPartita } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
+import { relazioneAlRango } from './relazioneRomanticaService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEffetto, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
@@ -250,13 +251,17 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
 /**
  * R9-03: l'avviso di disponibilità di una voce d'incontro. Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
  * porta (`rango_atteso`); il meteo non c'è (la voce non è un momento della partita), quindi la pioggia non produce avvisi. Solo un avviso,
- * mai un blocco; le voci non si spostano né si riscrivono.
+ * mai un blocco; le voci non si spostano né si riscrivono. L13 (O10-2): `relazioneRomantica` è quella della partita, dalla mappa dei suoi
+ * Confidenti (`ConfidentePartitaDto.relazioneRomantica`); vale solo per gli incontri dopo il rango della scelta romantica (`relazioneAlRango`);
+ * senza partita non la sappiamo (null) e una fascia che dipende dalla relazione non avvisa.
  */
-export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
+export function avvisiDisponibilitaDellaVoce(r: Pick<RigaVoce, 'genere' | 'riferimento_tipo' | 'riferimento_chiave' | 'data' | 'fascia' | 'rango_atteso'>, relazioneRomantica: boolean | null = null): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
   if (r.genere !== 'azione' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
   // la pioggia dei requisiti del rango la legge il verdetto (fonte unica, migrazione 306), ma senza meteo non produce avvisi; un giorno del
   // calendario escluso (`date`) è un avviso di giorno come quello della settimana
-  const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null });
+  const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null,
+    // fino al rango della scelta romantica la relazione non c'era ancora; dopo, quella della partita (`relazioneAlRango`)
+    relazioneRomantica: relazioneAlRango(relazioneRomantica, r.rango_atteso) });
   if (!esito || esito.stato !== 'non-disponibile' || (esito.causa !== 'giorno' && esito.causa !== 'date' && esito.causa !== 'fascia' && esito.causa !== 'dal')) return {};
   return { avvisiDisponibilita: [{ tipo: esito.causa === 'fascia' ? 'fuori-fascia' : 'fuori-giorno', testo: esito.motivo }] };
 }
@@ -359,7 +364,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...v, effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}), ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
     ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => ((s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
-    ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
+    ...avvisiDisponibilitaDellaVoce(r, r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined, fasciaDi(r)) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
@@ -953,7 +958,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
     if (fatta) {
       if (precedente) {
-        if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
+        if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length||opz.relazioneRomantica !== undefined) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
         return; // idempotente: non riapplica punti, letture o turni (dalla 305 la visita ai Memento non dichiara più aperture)
       }
       // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita non si spunta (409 `voce-non-dovuta`, col motivo);

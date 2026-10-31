@@ -153,7 +153,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
-    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date: una per tipo, o per rango; le date sono giorni del calendario di gioco), dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
     risposta: '`DisponibilitaConfidenteDto` aggiornato',
     errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [400, 'eccezione-doppia'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
   },

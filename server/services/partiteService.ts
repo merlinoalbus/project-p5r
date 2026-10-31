@@ -24,6 +24,7 @@ import { regaliConYenGiaNelSaldo } from './yenAutomaticiService.js';
 import { conCestinoPrivato } from './cestinoService.js';
 import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
+import { confidentiRomanzabili, relazioniDellaPartita, richiediRomanzabile, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, ConsegnaRegaloDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -355,6 +356,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   const regalabili = new Set<string>(confidentiRegalabili());
   // L13 (decisione 18): gli oggetti che regalati adesso non scalano il prezzo (consegna di prima ridata nello stesso momento), letti una volta
   const regaliGiaNelSaldo = regaliConYenGiaNelSaldo(partitaId);
+  const romanzabili = confidentiRomanzabili();
+  const relazioni = relazioniDellaPartita(partitaId);
   return righe.map((c) => {
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {
@@ -366,6 +369,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
       regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], consegne: regali.get(c.chiave)?.consegne ?? [], regalabile: regalabili.has(c.chiave),
       ...(regaliGiaNelSaldo.has(c.chiave) ? { regaliYenGiaNelSaldo: regaliGiaNelSaldo.get(c.chiave) } : {}),
+      // L13 (O10-2): la relazione romantica, solo per un Confidente romanzabile (lo stesso punto che leggono semafori e disponibilità)
+      romanzabile: romanzabili.has(c.chiave), relazioneRomantica: relazioni.has(c.chiave),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
     };
@@ -431,6 +436,8 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   const attuale = confidente(partitaId, chiave);
   // ondata 5 (RG-11): il regalo esiste solo per chi riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae)
   if (dati.regalo && !attuale.regalabile) throw httpErrors.conflict('confidente-non-regalabile', `${attuale.nome} non riceve regali.`);
+  // L13 (O10-2): la relazione romantica esiste solo con un Confidente romanzabile (409 `confidente-non-romanzabile`)
+  if (dati.relazioneRomantica !== undefined) richiediRomanzabile(chiave, attuale.nome);
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
@@ -475,8 +482,17 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
         `Da rango ${attuale.rango}.${origine ? ` ${TESTO_ORIGINE_RANGO[origine.origine]}` : ''}${riporto > 0 ? ` Riporto di ${riporto} punti sul rango successivo.` : ''}${quando}`,
         { confidente: chiave, da: attuale.rango, a: rango, ...(riporto > 0 ? { riporto } : {}), ...(origine ? { origine: origine.origine, ...(origine.voce ? { voce: origine.voce } : {}) } : {}), ...(momento?.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
     }
+    if (dati.relazioneRomantica !== undefined) scriviRelazioneRomantica(partitaId, chiave, attuale.nome, dati.relazioneRomantica, origine?.origine ?? 'pagina');
     return confidente(partitaId, chiave);
   })();
+}
+
+/** L13 (O10-2): segna o toglie dalla scheda del Confidente la relazione romantica, senza altro (punti, rango e registro cronologico restano
+ *  com'erano). 404 per partita o Confidente che non esistono, 409 `confidente-non-romanzabile`. */
+export function impostaRelazioneRomantica(partitaId: number, chiave: string, valore: boolean): ConfidentePartitaDto {
+  const attuale = confidente(partitaId, chiave);
+  getDb().transaction(() => { scriviRelazioneRomantica(partitaId, chiave, attuale.nome, valore, 'pagina'); })();
+  return confidente(partitaId, chiave);
 }
 
 /** Annulla esattamente i punti del Confidente applicati spuntando un'azione (della guida o dell'utente). Le Doti no: si

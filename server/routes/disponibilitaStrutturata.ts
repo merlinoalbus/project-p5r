@@ -20,12 +20,14 @@ const eccezione = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('fascia-rango'), rango: z.number().int().min(1).max(10), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),
   z.object({ tipo: z.literal('giorni-rango'), rango: z.number().int().min(1).max(10), giorni: z.array(z.enum(GIORNI_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(8) }).strict(),
   z.object({ tipo: z.literal('date'), date: z.array(z.string().regex(/^\d{2}-\d{2}$/)).min(1).max(120), effetto: z.literal('non-disponibile') }).strict(),
+  // L13 (O10-2): le fasce con la relazione romantica iniziata nella partita (solo per un Confidente romanzabile: 409 altrimenti)
+  z.object({ tipo: z.literal('con-relazione'), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),
 ]);
 const bodyDisponibilita = z.object({
   modo: z.enum(MODI_DISPONIBILITA as unknown as [string, ...string[]]).optional(),
   giorni: z.array(z.enum(GIORNI_DISPONIBILITA as unknown as [string, ...string[]])).max(8).optional(),
   fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).max(2).optional(),
-  eccezioni: z.array(eccezione).max(20).optional(),
+  eccezioni: z.array(eccezione).max(20).refine((l) => l.filter((e) => e.tipo === 'con-relazione').length <= 1, 'Al massimo un’eccezione «con la relazione romantica».').optional(),
   dal: z.string().regex(/^\d{2}-\d{2}$/).nullable().optional(),
   motivoSenzaLuogo: z.string().max(500).optional(),
   luoghi: z.array(z.string().min(1).max(200)).max(60).optional(),

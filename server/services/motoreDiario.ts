@@ -681,8 +681,9 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   // L13 (decisione 18): gli yen della voce entrano o si scalano da soli (mai sotto zero), con la ricevuta che lo dice; togliendo la spunta tornano.
   // Solo una causa con yen ancora proposti in sospeso (proposta di prima, aperta o applicata) resta alla proposta «Applica», com'era
   for(const e of stato.effetti)if(e.effetto.tipo==='yen'){const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:true,spunta},false);receiptNuovi.push(y.ricevuta);yenDaMuovere.push(y.movimento);}
-  if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length)){
-    const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{})};
+  // L13 (O10-2): anche la relazione romantica segnata dalla scelta alla spunta del rango 9 sta nel contesto della voce
+  if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length||effettiLegacy.relazione)){
+    const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{}),...(effettiLegacy.relazione?{relazione:effettiLegacy.relazione}:{})};
     receiptNuovi.push(registraRicevuta(p,uid,{uid:createHash('sha256').update(`contesto-voce\0${uid}`).digest('hex').slice(0,32),ordine:stato.effetti.length,effetto:null},{benefici:beneficiLegacy(contesto,false),legacy:contesto,gestitaDaSpunta:true,contesto:true,spunta},true));
   }
   // la lettura della buona sorte: la spunta accende la Fortuna sulla Dote dell'effetto (si spegne togliendo la spunta o al cambio di giorno)

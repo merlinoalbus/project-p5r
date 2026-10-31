@@ -21,6 +21,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente, type StatoDelRamo } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
+import { relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -179,6 +180,8 @@ function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoVa
     data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),
     piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale,
     giorniDallUltimoRango: st.partitaId === undefined ? null : giorniDalGiorno(giornoDellUltimoRango(st.partitaId, chiave, rangoAttuale), st.dataGioco),
+    // L13 (O10-2): la relazione romantica della partita, dal punto unico, per l'incontro successivo (senza partita non la sappiamo)
+    relazioneRomantica: relazioneAlRango(st.partitaId === undefined ? null : relazioneRomantica(st.partitaId, chiave), rangoAttuale + 1),
   }, valutatoreDelloStato(st));
   if (!esito) return null;
   return { indice: 900, tipo: 'disponibilita', testo: 'Giorno e fascia dell’incontro', stato: esito.stato === 'disponibile' ? 'verde' : esito.stato === 'non-disponibile' ? 'rosso' : 'grigio',
