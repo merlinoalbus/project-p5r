@@ -17,11 +17,18 @@
 // pagina sotto; alla chiusura torna all'elemento che l'aveva aperta (se non c'è più, alla finestra rimasta sotto o al contenuto
 // della pagina, L13). Prima restava sulla pagina, e con
 // la tastiera o un lettore di schermo la finestra si raggiungeva solo per caso.
+//
+// Spostabile (richiesta dell'utente, 2026-10-31: «rendi spostabile nello schermo anche la schermata "Modifica la voce della giornata"»,
+// «in generale tutte le modali che si possono chiudere e hanno annulla/salva»): da 768 px in su ogni finestra (non il cassetto né le
+// domande di conferma) si sposta trascinando la barra del titolo (eventi pointer: mouse, penna e dito) o con le frecce sulla maniglia ⠿,
+// sempre per intero dentro lo schermo (anche quando la finestra o il suo contenuto cambiano misura). A ogni apertura riparte dal centro.
+// Sul telefono resta il foglio dal basso, largo e alto quanto lo schermo: non c'è dove spostarlo.
 // ============================================================
 
-import { useEffect, useRef, type KeyboardEvent as KeyboardEventReact, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as KeyboardEventReact, type PointerEvent as PointerEventReact, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { IconClose } from './icons';
+import { useMedia } from '../../hooks/useMedia';
 
 interface ModalProps {
   titolo: string;
@@ -75,10 +82,114 @@ function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null
   return candidato && !finestra?.contains(candidato) ? candidato : null;
 }
 
+// ---- Lo spostamento ----
+
+/** Lo spostamento della finestra dal posto in cui la mette il layout (centrata), in pixel. */
+interface Spostamento { x: number; y: number }
+const FERMA: Spostamento = { x: 0, y: 0 };
+/** Il margine dal bordo dello schermo. */
+const MARGINE = 8;
+/** Il passo delle frecce sulla maniglia (con Maiusc, quattro volte tanto). */
+const PASSO = 24;
+/** Da quanti pixel un gesto sulla barra è un trascinamento e non un tocco. */
+const SOGLIA_TRASCINAMENTO = 4;
+/** Da dove la finestra si sposta: sotto (il foglio dal basso del telefono) resta ferma. */
+const SPOSTABILE_DA = '(min-width: 768px)';
+
+/** Il valore fra due estremi, in qualunque ordine (una finestra più grande dello schermo resta con l'angolo in alto a sinistra in vista). */
+const tra = (v: number, a: number, b: number) => Math.min(Math.max(v, Math.min(a, b)), Math.max(a, b));
+
+/**
+ * Lo spostamento che la finestra ha adesso nel documento, letto dal suo stile: è quello dentro il rettangolo che si misura (lo stato di React
+ * può essere già più avanti, durante un trascinamento veloce, finché il disegno nuovo non arriva).
+ */
+function applicato(el: HTMLElement): Spostamento {
+  const [x = 0, y = 0] = el.style.translate.split(' ').map((v) => Number.parseFloat(v) || 0);
+  return { x, y };
+}
+
+/**
+ * Lo spostamento `voluto` corretto perché la finestra stia per intero nello schermo: togliendo dal suo rettangolo lo spostamento applicato
+ * si ottiene il posto del layout. Lo schermo è quello dell'overlay (`position: fixed; inset: 0`), senza la barra di scorrimento.
+ */
+function nelloSchermo(el: HTMLElement, voluto: Spostamento): Spostamento {
+  const r = el.getBoundingClientRect();
+  const ora = applicato(el);
+  const sinistra = r.left - ora.x;
+  const alto = r.top - ora.y;
+  const { clientWidth: vw, clientHeight: vh } = document.documentElement;
+  const x = tra(sinistra + voluto.x, MARGINE, vw - r.width - MARGINE) - sinistra;
+  const y = tra(alto + voluto.y, MARGINE, vh - r.height - MARGINE) - alto;
+  return { x: Math.round(x), y: Math.round(y) };
+}
+
 /** Finestra modale con intestazione, corpo scorrevole e piè di pagina opzionale. */
 export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto, ruolo = 'dialog', idDescrizione }: ModalProps) {
   const finestra = useRef<HTMLDivElement | null>(null);
   const sfondo = useRef<HTMLDivElement | null>(null);
+
+  // lo spostamento: solo le finestre (non il cassetto né le domande di conferma), da 768 px in su
+  const largaAbbastanza = useMedia(SPOSTABILE_DA);
+  const spostabile = largaAbbastanza && !cassetto && ruolo === 'dialog';
+  const [spostamento, setSpostamento] = useState<Spostamento>(FERMA);
+  type Gesto = { id: number; px: number; py: number; da: Spostamento; mosso: boolean };
+  const gesto = useRef<Gesto | null>(null);
+  const [trascina, setTrascina] = useState(false);
+  // a ogni apertura la finestra riparte dal centro (lo stato si azzera durante il disegno, alla chiusura, anche a metà di un trascinamento)
+  const [eraAperta, setEraAperta] = useState(aperta);
+  if (eraAperta !== aperta) {
+    setEraAperta(aperta);
+    if (!aperta) { setSpostamento(FERMA); setTrascina(false); }
+  }
+  // sempre per intero nello schermo: quando cambiano lo schermo (ridimensionamento, rotazione) o la finestra (il contenuto cresce o cala)
+  useEffect(() => {
+    const el = finestra.current;
+    if (!aperta || !spostabile || !el) return;
+    const rimetti = () => setSpostamento((s) => {
+      if (s.x === 0 && s.y === 0) return s;
+      const n = nelloSchermo(el, s);
+      return n.x === s.x && n.y === s.y ? s : n;
+    });
+    window.addEventListener('resize', rimetti);
+    const osservatore = typeof ResizeObserver === 'function' ? new ResizeObserver(rimetti) : null;
+    osservatore?.observe(el);
+    return () => { window.removeEventListener('resize', rimetti); osservatore?.disconnect(); };
+  }, [aperta, spostabile]);
+
+  /** L'inizio del trascinamento dalla barra del titolo: non dai suoi comandi («Chiudi»). */
+  const inizia = (e: PointerEventReact<HTMLDivElement>) => {
+    const el = finestra.current;
+    if (!spostabile || e.button !== 0 || !el) return;
+    if ((e.target as Element).closest('button:not([data-maniglia]), a, input, select, textarea')) return;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    gesto.current = { id: e.pointerId, px: e.clientX, py: e.clientY, da: applicato(el), mosso: false };
+  };
+  const muovi = (e: PointerEventReact<HTMLDivElement>) => {
+    const g = gesto.current;
+    const el = finestra.current;
+    if (!g || g.id !== e.pointerId || !el) return;
+    const dx = e.clientX - g.px, dy = e.clientY - g.py;
+    if (!g.mosso && Math.hypot(dx, dy) < SOGLIA_TRASCINAMENTO) return;
+    if (!g.mosso) { g.mosso = true; setTrascina(true); }
+    e.preventDefault();
+    setSpostamento(nelloSchermo(el, { x: g.da.x + dx, y: g.da.y + dy }));
+  };
+  const finisci = (e: PointerEventReact<HTMLDivElement>) => {
+    const g = gesto.current;
+    if (!g || g.id !== e.pointerId) return;
+    gesto.current = null;
+    setTrascina(false);
+  };
+  /** Le frecce sulla maniglia ⠿: spostano di un passo (con Maiusc di quattro). */
+  const frecce = (e: KeyboardEventReact<HTMLButtonElement>) => {
+    const passo = e.shiftKey ? PASSO * 4 : PASSO;
+    const d = ({ ArrowLeft: [-passo, 0], ArrowRight: [passo, 0], ArrowUp: [0, -passo], ArrowDown: [0, passo] } as Record<string, [number, number]>)[e.key];
+    const el = finestra.current;
+    if (!d || !el) return;
+    e.preventDefault();
+    const s = applicato(el);
+    setSpostamento(nelloSchermo(el, { x: s.x + d[0], y: s.y + d[1] }));
+  };
   // `onChiudi` è spesso una funzione scritta al volo: la si legge da un ref, così gli effetti dipendono solo da `aperta`
   // e il fuoco non viene rimesso a posto a ogni render della pagina che apre la finestra
   const chiudi = useRef(onChiudi);
@@ -152,9 +263,20 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
         aria-describedby={idDescrizione}
         tabIndex={-1}
         onKeyDown={tieniIlFuoco}
+        style={spostabile && (spostamento.x !== 0 || spostamento.y !== 0) ? { translate: `${spostamento.x}px ${spostamento.y}px` } : undefined}
       >
-        <div className="modal-header">
-          <h2 className="m-0 testo-17 font-semibold">{titolo}</h2>
+        <div className={`modal-header ${spostabile ? 'modal-header--spostabile' : ''} ${trascina ? 'modal-header--trascina' : ''}`}
+          onPointerDown={spostabile ? inizia : undefined} onPointerMove={spostabile ? muovi : undefined}
+          onPointerUp={spostabile ? finisci : undefined} onPointerCancel={spostabile ? finisci : undefined}>
+          <div className="flex min-w-0 items-center gap-1">
+            {spostabile && (
+              <button type="button" data-maniglia className="touch shrink-0 flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text rounded-md -ml-2"
+                aria-label="Sposta la finestra (frecce)" title="Trascina la barra per spostare la finestra, o usa le frecce" onKeyDown={frecce}>
+                <span aria-hidden="true" className="testo-18 leading-none">⠿</span>
+              </button>
+            )}
+            <h2 className="m-0 testo-17 font-semibold">{titolo}</h2>
+          </div>
           <button type="button" className="touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md" onClick={onChiudi} aria-label="Chiudi">
             <IconClose size={20} />
           </button>

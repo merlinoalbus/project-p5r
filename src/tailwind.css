@@ -390,6 +390,9 @@
     padding: 16px 20px;
     border-bottom: 1px solid var(--color-border);
   }
+  /* da 768 px la barra del titolo sposta la finestra (Modal.tsx): il dito che la trascina non fa scorrere la pagina né seleziona il titolo */
+  .modal-header--spostabile { cursor: grab; touch-action: none; user-select: none; gap: 8px; }
+  .modal-header--trascina { cursor: grabbing; }
   .modal-body {
     padding: 20px;
     overflow-y: auto;
