@@ -21,8 +21,8 @@ const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.
 
 /** Le condizioni del catalogo (articoli, negozi, letture, attività, e i loro effetti): quelle dei pin senza lo stato di un altro
  *  pin (2026-10-03) né quello di una voce della guida (2026-10-11), che valgono solo nelle condizioni dei pin delle mappe, a
- *  qualunque profondità di TUTTE / ALMENO UNA / NON. */
-const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo' || f.tipo === 'voce-guida'), 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.');
+ *  qualunque profondità di TUTTE / ALMENO UNA / NON. L13 (O9-3): le stesse valgono per «Si fa solo se» delle voci del Diario (`compendio.ts`). */
+export const condizioneSpillo = condizioneDiUnPin.refine((c) => !foglieCondizione(c).some((f) => f.tipo === 'spillo' || f.tipo === 'voce-guida'), 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.');
 
 /** Gli orari di un negozio come valori (shared/orariNegozio). */
 export const orariNegozio = z.object({

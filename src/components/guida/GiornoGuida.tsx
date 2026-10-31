@@ -191,16 +191,22 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
     } finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
   };
   const stato = a.fatta ? null : a.stato;
+  // L13 (O9-3, «in tal caso viene meno la consegna»): le condizioni «Si fa solo se» della voce sono false al suo giorno (solo su una voce non spuntata)
+  const nonDovuta = !a.fatta && !!a.nonDovuta;
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
     <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} aria-current={evidenziata ? 'true' : undefined}
       {...selezione?.gestori}>
       {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
-      {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
+      {/* L13 (O9-3): una voce non dovuta nella partita non si spunta (il server risponde 409): la casella è spenta e il motivo sta sotto il testo */}
+      {partitaId && <label className={`touch flex items-start justify-center shrink-0 -my-1 pr-1 ${nonDovuta ? 'cursor-not-allowed' : 'cursor-pointer'}`}><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || nonDovuta || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)}
+        aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={nonDovuta ? `non-dovuta-${a.uid}` : undefined} /></label>}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}<TestoSelezioneRiga s={selezione} />{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
+        {/* a pieno contrasto: dice perché la casella è spenta e che la giornata va avanti lo stesso */}
+        {nonDovuta && <span id={`non-dovuta-${a.uid}`} className="testo-12 text-text text-pretty break-words"><strong>Non dovuta:</strong> manca «{a.nonDovuta!.motivo}»</span>}
         {!IN_RILASCIO && daCompletare && <span className="flex"><SegnoDaCompletare n={daCompletare.n} voce={a.azione} onApri={daCompletare.onApri} /></span>}
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}
@@ -568,7 +574,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     };
   };
 
-  const azioni = g.azioni.filter((a) => a.genere === 'azione');
+  // L13 (O9-3): una voce non dovuta nella partita (non spuntata) non è una cosa da fare: non si conta, come nell'indice dei giorni
+  const azioni = g.azioni.filter((a) => a.genere === 'azione' && (a.fatta || !a.nonDovuta));
   const totali = { fatte: azioni.filter((a) => a.fatta).length, tutte: azioni.length };
   const consigliate = azioni.filter((a) => !a.fatta && a.stato?.tipo === 'consigliata').length;
   const bloccate = azioni.filter((a) => !a.fatta && a.stato?.tipo === 'bloccata').length;
@@ -579,7 +586,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
    */
   const sezione = (f: FasciaGioco) => {
     const voci = g.azioni.filter((a) => a.fascia === f);
-    const daFare = voci.filter((a) => a.genere === 'azione');
+    const daFare = voci.filter((a) => a.genere === 'azione' && (a.fatta || !a.nonDovuta));
     const fatte = daFare.filter((a) => a.fatta).length;
     const tutteScelte = !!scelte && voci.length > 0 && voci.every((v) => scelte.has(v.uid));
     const vista = aperta(f);

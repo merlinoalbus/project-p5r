@@ -1426,6 +1426,11 @@ export interface AzionePercorsoDto {
   avvisiDisponibilita?: Array<{ tipo: 'fuori-giorno' | 'fuori-fascia'; testo: string }>;
   /** R9-06: il nome di adesso del Confidente, solo quando il testo salvato nella voce (`riferimentoTesto`) cita un nome diverso: da mostrare accanto al testo, che non si riscrive. */
   riferimentoNomeAttuale?: string;
+  /** L13 (ondata 9, O9-3, migrazione 320): quando la voce è dovuta («Si fa solo se»), solo se ne ha; senza, la voce si fa sempre. */
+  condizioni?: RequisitoSpillo[];
+  /** L13 (O9-3): nella partita la voce NON è dovuta (le sue condizioni sono false al suo giorno): non si spunta e non blocca l'avanzamento.
+   *  Solo su una voce non spuntata (una voce già spuntata resta com'è); `motivo` è la condizione che manca, in parole. */
+  nonDovuta?: { motivo: string };
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
@@ -1612,6 +1617,8 @@ export interface DatiVoceGiornata {
   /** Il collegamento (null = nessuno); il nome lo calcola il server dall'elemento. */
   riferimento?: RiferimentoAzioneDto | null;
   rangoAtteso?: number | null;
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»); vuoto = sempre. Solo per un'azione (un promemoria non ne ha). */
+  condizioni?: RequisitoSpillo[];
   /** Effetti della spunta (solo per un'azione). */
   produce?: EffettoAzione[];
   /** CAS della fonte unica, richiesto quando si modificano gli effetti di una voce già presente. */

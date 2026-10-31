@@ -107,6 +107,7 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Riduci a icona gli appunti fissi', cosa: 'finestra fluttuante degli appunti fissi (C7)' },
   { testo: 'p5r.appuntiFissi', cosa: 'stato e posto della finestra degli appunti fissi (C7)' },
   { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },
+  { testo: 'Senza condizioni la voce si fa sempre', cosa: 'riquadro «Si fa solo se» del modulo della voce del Diario (L13, O9-3)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

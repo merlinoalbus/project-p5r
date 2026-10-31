@@ -20,7 +20,8 @@
 //
 // Casi limite: se il giorno ha attività solo di giorno (o solo di sera) e sono tutte fatte, la partita passa direttamente al giorno dopo (non c'è
 // una sera da spuntare); se le attività sono tutte fatte fuori ordine, idem. Senza attività spuntabili non scatta niente. Nell'ultimo giorno
-// del percorso il giorno non avanza (non c'è un giorno dopo).
+// del percorso il giorno non avanza (non c'è un giorno dopo). L13 (O9-3): una voce non dovuta nella partita (`voceDovuta`: le sue condizioni
+// «Si fa solo se» sono false al suo giorno, per esempio la consegna delle televendite senza nessun set comprato) vale come fatta.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
@@ -29,6 +30,7 @@ import { decisioniApertePerVoce, righeDelGiorno, spuntePartita } from './giornat
 import { leggiPartita } from './partiteService.js';
 import { prelevaAvanzamentoRichiesta, registraAvanzamentoRichiesta } from '../middleware/requestContext.js';
 import type { AvanzamentoGiornataDto } from '../../shared/types.js';
+import { vociNonDovute } from './voceDovuta.js';
 
 /** Le decisioni aperte di tutte le voci date. */
 const decisioniAperteDelleVoci = (partitaId: number, uids: readonly string[]): number => uids.reduce((n, uid) => n + decisioniApertePerVoce(partitaId, uid), 0);
@@ -47,7 +49,11 @@ export function avanzaSeFasciaCompleta(partitaId: number, data: string): Avanzam
     const righe = righeDelGiorno(data);
     const azioni = righe.filter((v) => v.genere === 'azione');
     if (azioni.length === 0) return null;
-    const fatte = spuntePartita(partitaId, data);
+    const spuntate = spuntePartita(partitaId, data);
+    // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita (le sue condizioni sono false al suo giorno) non è
+    // una cosa da fare: per l'avanzamento vale come fatta (`voceDovuta`)
+    const nonDovute = vociNonDovute(partitaId, azioni, spuntate);
+    const fatte = { has: (uid: string) => spuntate.has(uid) || nonDovute.has(uid) };
     const tutteFatte = azioni.every((a) => fatte.has(a.uid));
 
     // 2. il giorno intero è fatto e senza decisioni aperte: giorno dopo, di giorno (la regola unica del cambio giorno, R10-16)

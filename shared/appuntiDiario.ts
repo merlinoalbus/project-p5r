@@ -17,6 +17,7 @@
 // ============================================================
 
 import type { FasciaGioco } from './types.js';
+import type { RequisitoSpillo } from './condizioniSpillo.js';
 
 /** Il nome del formato: lo riconosce chi legge gli appunti, mai un testo qualsiasi. */
 export const FORMATO_APPUNTI_DIARIO = 'p5r-diario-voci';
@@ -72,6 +73,8 @@ export interface VoceAppunti {
   /** Il nome del collegamento com'è scritto nella voce (la guida lo scrive a modo suo). */
   riferimentoTesto: string | null;
   rangoAtteso: number | null;
+  /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»); assente negli appunti di prima e per una voce senza (= sempre). */
+  condizioni?: RequisitoSpillo[];
   effetti: EffettiAppunti;
   /** L'insieme ordinato delle infiltrazioni della voce (chiavi di `dungeon_area`). */
   infiltrazioni: string[];

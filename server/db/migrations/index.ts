@@ -376,6 +376,11 @@ import { migration318 } from './318_richieste_memento_e_ingresso_dalla_guida.js'
 // 2026-10-31 (L13, ondata 9, O9-2: «Per il momento vale quello che riporta il testo sul bagno. A meno di modifiche successive.»): il bagno del
 // 9, 13 e 16 giugno con l'esito dichiarato dalla voce («Bagno normale»), che prevale sul calcolo del giorno
 import { migration319 } from './319_bagno_esito_dalla_voce.js';
+// 2026-10-31 (L13, ondata 9, O9-3: «Televendite. é possibile non venga acquistato nessun set. in tal caso viene meno la consegna. Aggiungi le voci
+// di acquisto. Applica le 6 proposte.»): la colonna «Si fa solo se» delle voci del Diario (320, solo DDL), poi le 6 proposte delle televendite
+// del periodo validato applicate e le 4 consegne dovute solo con un set comprato (321)
+import { migration320 } from './320_voce_condizioni.js';
+import { migration321 } from './321_televendite_proposte_e_consegne.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -400,4 +405,5 @@ export const migrations: Migration[] = [
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
+  migration320, migration321,
 ];
