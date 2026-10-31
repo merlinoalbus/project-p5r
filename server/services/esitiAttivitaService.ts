@@ -19,7 +19,8 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { coppiaBonus, dotiEsitoConPunti, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
-import { nomeDote } from '../../shared/doti.js';
+import { CHIAVI_DOTI, eDote, nomeDote, type DoteChiave } from '../../shared/doti.js';
+import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { simboliPossibili } from '../../shared/note.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -40,7 +41,23 @@ export type SceltaRisolta =
   | { tipo: 'turno'; esito: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null; doti: DoteEsito[] }
   | { tipo: 'dote'; note: 0 | 1 | 2 | 3 }
   /** L13 (ondata 7, O7-2): il piazzamento scelto ai risultati dell'esame. */
-  | { tipo: 'esame'; piazzamento: PiazzamentoEsame };
+  | { tipo: 'esame'; piazzamento: PiazzamentoEsame }
+  /** L13 (31/10): gli yen ricevuti e le Doti ottenute in un turno di lavoro senza esiti, detti alla spunta. */
+  | { tipo: 'lavoro'; yen: number; doti: DoteEsito[] };
+
+/** Il lavoro senza esiti il cui turno, alla spunta, chiede yen ricevuti e note ottenute (L13, 31/10): `tipo` «lavoro», nessun esito dichiarato
+ *  (con gli esiti, come Ore no Beko, paga e note le dice l'esito), né Confidente né pesca. Null per ogni altra attività. */
+export function lavoroAScelta(chiave: string): { nome: string; paga: { base: number; massima: number | null } | null; doti: DoteChiave[] } | null {
+  const r = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; tipo: string; paga_yen: number | null; paga_massima: number | null; effetti_json: string | null; esiti_json?: string | null; confidente_chiave?: string | null; pesca_regola_chiave?: string | null } | undefined;
+  if (!r || r.tipo !== 'lavoro' || leggiEsitiAttivita(r.esiti_json ?? null) || r.confidente_chiave != null || r.pesca_regola_chiave != null) return null;
+  const doti: DoteChiave[] = [];
+  try {
+    for (const v of JSON.parse(r.effetti_json ?? '[]') as Array<{ effetto?: { famiglia?: unknown; dote?: unknown } }>) {
+      if (v.effetto?.famiglia === 'dote' && eDote(v.effetto.dote) && !doti.includes(v.effetto.dote)) doti.push(v.effetto.dote);
+    }
+  } catch { /* effetti illeggibili: nessuna Dote proposta, si sceglie a mano */ }
+  return { nome: r.nome, paga: r.paga_yen != null && r.paga_yen > 0 ? { base: r.paga_yen, massima: r.paga_massima != null && r.paga_massima > r.paga_yen ? r.paga_massima : null } : null, doti };
+}
 
 /** Gli esiti dichiarati da un'attività (null se non ne dichiara o se la colonna non c'è ancora) e il suo nome. */
 export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiAttivita | null } | null {
@@ -175,7 +192,9 @@ function richiedeScelta(e: EffettoVoceDto['effetto']): boolean {
   if (e.tipo === 'esame') return true;
   if (e.tipo !== 'turno') return false;
   const esiti = esitiDellAttivita(e.attivita)?.esiti;
-  return esiti?.modo === 'scelta' && !strumentoSenzaBonus(esiti, e.esito);
+  if (esiti) return esiti.modo === 'scelta' && !strumentoSenzaBonus(esiti, e.esito);
+  // L13 (31/10): il turno di un lavoro senza esiti chiede gli yen ricevuti e le note ottenute
+  return lavoroAScelta(e.attivita) !== null;
 }
 
 /** Le scelte che la spunta di una voce chiede, con gli esiti disponibili al giorno della voce (per il Diario). L13 (decisione 4): anche
@@ -212,6 +231,14 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
       return { posizione, scelta: { effettoUid: uid, tipo: 'esame', esame: e.esame, esameNome: esame?.nome ?? 'Esame non più nella guida', preselezionato: piazzamentoDellEsame(partitaId, e.esame), opzioni } };
     }
     const t = e as Extract<EffettoVoceDto['effetto'], { tipo: 'turno' }>;
+    // L13 (31/10): il lavoro senza esiti: paga base e massima, e ogni Dote con i punti per ♪, ♪♪, ♪♪♪; per prime le Doti del turno della voce
+    // (il Diario prevale) o quelle del lavoro
+    const lavoro = lavoroAScelta(t.attivita);
+    if (lavoro && !esitiDellAttivita(t.attivita)?.esiti) {
+      const proposte = t.doti?.length ? [...new Set(t.doti.map((d) => d.dote))] : lavoro.doti;
+      const doti = CHIAVI_DOTI.map((dote) => ({ dote, doteNome: nomeDote(dote), punti: ([1, 2, 3] as const).map((note) => ({ note, punti: puntiDote(partitaId, dote, note) })) }));
+      return { posizione, scelta: { effettoUid: uid, tipo: 'lavoro', attivita: t.attivita, attivitaNome: lavoro.nome, paga: lavoro.paga, doti, proposte } };
+    }
     const a = esitiDellAttivita(t.attivita)!;
     const dto = esitiDto(a.esiti!, st, t.attivita);
     const elenco = dto.esiti;
@@ -238,7 +265,8 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
   const per = new Map<string, SceltaEsitoSpunta>();
   for (const s of scelte ?? []) {
     const e = effetti.find((x) => x.uid === s.effettoUid);
-    if (per.has(s.effettoUid) || !e || e.effetto.tipo !== s.tipo || !richiedeScelta(e.effetto)) throw httpErrors.badRequest('scelta-esito-non-valida', 'Una scelta d’esito non appartiene a un effetto della voce che la chiede, oppure è ripetuta.');
+    // L13 (31/10): la scelta «lavoro» appartiene a un effetto «turno»
+    if (per.has(s.effettoUid) || !e || e.effetto.tipo !== (s.tipo === 'lavoro' ? 'turno' : s.tipo) || !richiedeScelta(e.effetto)) throw httpErrors.badRequest('scelta-esito-non-valida', 'Una scelta d’esito non appartiene a un effetto della voce che la chiede, oppure è ripetuta.');
     per.set(s.effettoUid, s);
   }
   const out = new Map<string, SceltaRisolta>();
@@ -264,7 +292,21 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
       out.set(uid, { tipo: 'esame', piazzamento: s.piazzamento });
     } else if (e.tipo === 'turno') {
       const a = esitiDellAttivita(e.attivita);
-      if (!a?.esiti) continue;
+      if (!a?.esiti) {
+        // L13 (31/10): il turno di un lavoro senza esiti si spunta con gli yen ricevuti e le note ottenute; nel raccordo di un effetto aggiunto a
+        // una voce già spuntata nessuno sceglie: vale il turno come prima (Doti della voce o del lavoro, paga base)
+        const lavoro = lavoroAScelta(e.attivita);
+        if (!lavoro) continue;
+        const s = per.get(uid);
+        if (!s || s.tipo !== 'lavoro') {
+          if (opz.storico) continue;
+          throw httpErrors.conflict('lavoro-da-indicare', `«${lavoro.nome}»: indica gli yen ricevuti e le note ottenute prima di spuntare.`);
+        }
+        if (!Number.isInteger(s.yen) || s.yen < 0 || s.yen > YEN_MASSIMI_LAVORO) throw httpErrors.badRequest('yen-non-validi', `«${lavoro.nome}»: gli yen ricevuti vanno da 0 a ${YEN_MASSIMI_LAVORO.toLocaleString('it-IT')}.`);
+        if (new Set(s.doti.map((d) => d.dote)).size !== s.doti.length || s.doti.some((d) => !eDote(d.dote) || ![1, 2, 3].includes(d.note))) throw httpErrors.badRequest('doti-non-valide', `«${lavoro.nome}»: ogni Dote una volta sola, con da una a tre note.`);
+        out.set(uid, { tipo: 'lavoro', yen: s.yen, doti: s.doti.map((d) => ({ dote: d.dote, note: d.note })) });
+        continue;
+      }
       const s = per.get(uid);
       // (revisione) lo strumento senza versione con il bonus non chiede niente: vale l'esito della voce, con le sue condizioni
       const scelta = s?.tipo === 'turno' ? s.esito : strumentoSenzaBonus(a.esiti, e.esito) ? e.esito : opz.storico && a.esiti.modo === 'scelta' && e.esito ? e.esito : undefined;

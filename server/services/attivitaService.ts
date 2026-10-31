@@ -641,7 +641,10 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
   /** Revisione della chiusura dell'ondata 5 (N1): la voce del Diario che lo registra, per lo sconto del negozio del suo momento (`scontoAllaVoce`). */
   voceUid?: string | null,
   /** 2026-10-27: le creazioni dello strumento dichiarate dalla voce (l'effetto `turno`): moltiplicano gli oggetti dati e consumati dall'esito. */
-  quantita?: number): TurnoRegistrato {
+  quantita?: number,
+  /** L13 (31/10): gli yen ricevuti detti alla spunta per un turno di lavoro (la paga variabile): entrano tutti da soli al posto della paga base
+   *  (0 = nessuno). Assente = la regola di sempre (`yenDelTurno`). */
+  pagaRicevuta?: number): TurnoRegistrato {
   const riga = attivitaConTurni(chiave,false,interno?.pescaAutorizzata===true);
   const adesso = nowIso();
   return getDb().transaction(() => {
@@ -674,7 +677,8 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
     // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
     if (!interno?.pescaAutorizzata) {
-      const y = yenDelTurno(riga, esito ?? undefined, fascia ?? fasciaDellaPartita(partitaId), partitaId, voceUid), causa = { tipo: 'turno' as const, chiave: `${chiave}:${ordine}` };
+      const y = pagaRicevuta !== undefined ? (pagaRicevuta > 0 ? { importo: pagaRicevuta, motivo: `Paga del turno: ${riga.nome}` } : null)
+        : yenDelTurno(riga, esito ?? undefined, fascia ?? fasciaDellaPartita(partitaId), partitaId, voceUid), causa = { tipo: 'turno' as const, chiave: `${chiave}:${ordine}` };
       restituisciYenAutomatico(partitaId, causa, 'turno-non-piu-presente');
       if (y) muoviYenAutomatico(partitaId, causa, y.importo, y.motivo);
     }
@@ -684,7 +688,9 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const conPagaPropria = esitiDellAttivita(chiave)?.esiti?.esiti;
     const pagaEsito = esito ? conPagaPropria?.find((x) => x.chiave === esito.chiave)?.paga : undefined;
     const senzaMassima = !!esito && !!conPagaPropria?.some((x) => x.paga);
-    const paga = pagaEsito ? { yen: pagaEsito, massima: null } : riga.paga_yen != null ? { yen: riga.paga_yen, massima: senzaMassima ? null : riga.paga_massima ?? null } : null;
+    // L13 (31/10): gli yen ricevuti detti alla spunta sono la paga del turno (tutta nel saldo: nessun «fino a»)
+    const paga = pagaRicevuta !== undefined ? (pagaRicevuta > 0 || riga.paga_yen != null ? { yen: pagaRicevuta, massima: null } : null)
+      : pagaEsito ? { yen: pagaEsito, massima: null } : riga.paga_yen != null ? { yen: riga.paga_yen, massima: senzaMassima ? null : riga.paga_massima ?? null } : null;
     return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga, ...(esito !== undefined ? { esito } : {}),
       ...(esito && quantita && quantita > 1 ? { quantita } : {}), ...(oggetti.length ? { oggetti } : {}), ...(consumati.length ? { consumati } : {}) };
   })();

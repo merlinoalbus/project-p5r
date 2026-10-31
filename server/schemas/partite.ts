@@ -8,6 +8,7 @@ import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { bodyRegistraAcquisto } from './acquisti.js';
 import { bodyRegistraSessionePesca } from './pesca.js';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
+import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
@@ -17,6 +18,9 @@ const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
   z.object({ effettoUid: uidVoce, tipo: z.literal('alternativa'), scelto: uidVoce.nullable() }).strict(),
   // L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame
   z.object({ effettoUid: uidVoce, tipo: z.literal('esame'), piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME) }).strict(),
+  // L13 (31/10): il turno di un lavoro senza esiti, con gli yen ricevuti e le note ottenute per Dote (Doti distinte, verificate dal servizio)
+  z.object({ effettoUid: uidVoce, tipo: z.literal('lavoro'), yen: z.number().int().min(0).max(YEN_MASSIMI_LAVORO),
+    doti: z.array(z.object({ dote, note: z.union([z.literal(1), z.literal(2), z.literal(3)]) }).strict()).max(5) }).strict(),
 ]);
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
