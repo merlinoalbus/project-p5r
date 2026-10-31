@@ -3,7 +3,7 @@
 // Test ConfidentiPartita — note della risposta, bonus arcano dalla scorta, soglie, annulla ultimo
 // ============================================================
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
@@ -33,7 +33,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
-    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], regalabile: true, personaArcanoInScorta: false, note: '', semafori: [], bloccato: null, updatedAt: null,
+    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], regalabile: true, romanzabile: false, relazioneRomantica: false, personaArcanoInScorta: false, note: '', semafori: [], bloccato: null, updatedAt: null,
     ...sovrascrivi,
   };
 }
@@ -105,6 +105,24 @@ describe('ConfidentiPartita', () => {
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (15 punti)')).toBeInTheDocument();
     await act(async () => { chip.click(); });
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (22,5 punti)')).toBeInTheDocument();
+  });
+
+  it('L13 (O10-3): «Relazione romantica» solo per un Confidente romanzabile dal rango 9 (o con la relazione già segnata), con il solo campo', async () => {
+    getConfidentiPartita.mockResolvedValue([
+      confidente({ chiave: 'takemi', nome: 'Tae Takemi', arcana: 'Death', arcanaNome: 'Morte', rango: 9, romanzabile: true }),
+      confidente({ chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers', arcanaNome: 'Amanti', rango: 8, romanzabile: true }),
+      confidente({ rango: 9 }),
+    ]);
+    aggiornaConfidente.mockResolvedValue(confidente({ chiave: 'takemi', nome: 'Tae Takemi', arcana: 'Death', arcanaNome: 'Morte', rango: 9, romanzabile: true, relazioneRomantica: true }));
+    render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
+    const interruttore = await screen.findByRole('button', { name: 'Tae Takemi: relazione romantica' });
+    expect(interruttore).toHaveAttribute('aria-pressed', 'false');
+    // prima del rango 9 e per chi non è romanzabile nessun interruttore
+    expect(screen.queryByRole('button', { name: /Ann Takamaki: relazione romantica/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Ryuji Sakamoto: relazione romantica/ })).toBeNull();
+    await act(async () => { interruttore.click(); });
+    expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'takemi', { relazioneRomantica: true } satisfies ModificaConfidente);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tae Takemi: relazione romantica' })).toHaveAttribute('aria-pressed', 'true'));
   });
 
   it('distingue passaggi non a punti, Confidenti senza soglie e rango massimo', async () => {

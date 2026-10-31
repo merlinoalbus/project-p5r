@@ -15,6 +15,7 @@ import { catalogoOggettiDisponibile, effettiDegliOggetti, effettoDellaFonte, mat
 import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
+import { eRomanzabile } from './relazioneRomanticaService.js';
 import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
@@ -551,6 +552,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }))
       .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
     regalabile,
+    // L13 (O10-2): con il Confidente si può iniziare una relazione romantica (migrazioni 324-325)
+    romanzabile: eRomanzabile(chiave),
     oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
     disponibilita: { note: disp?.note ?? '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],

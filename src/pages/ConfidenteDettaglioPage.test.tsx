@@ -33,11 +33,12 @@ const dettaglio: ConfidenteDettaglioDto = {
   ],
   regali: [{ ordine: 1, modificato: false, nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', reazione: 2 }, { ordine: 2, modificato: false, nome: 'Mini cactus', dove: null, costo: null, reazione: 3 }],
   regalabile: true,
+  romanzabile: true,
   // L13 (O6-2): della prosa restano solo le note; senza struttura la scheda dice «Disponibilità non indicata»
   disponibilita: { note: 'Gli eventi di rango si attivano una volta ogni tre giorni.' },
   noteGenerali: '', fonti: ['https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/'],
 };
-const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, bloccato: null, semafori: [], regaliFatti: ['Castella'], regalabile: true, note: '', updatedAt: null };
+const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, bloccato: null, semafori: [], regaliFatti: ['Castella'], regalabile: true, romanzabile: true, relazioneRomantica: false, note: '', updatedAt: null };
 
 describe('ConfidenteDettaglioPage', () => {
   it('mostra prossimo rango, abilità sbloccate, scelte migliori/romantiche e regali con spunta per la partita', async () => {

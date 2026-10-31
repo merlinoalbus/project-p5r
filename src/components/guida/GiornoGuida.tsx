@@ -18,7 +18,9 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
+import { aggiornaVoceGiornata, eliminaVoceGiornata, getConfidentiPartita, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
+import { giocaLaSceltaRomantica } from '../../../shared/puntiConfidenti';
+import { fraseRelazione } from '../../../shared/descriviEffettiSpunta';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta, descriviEffetti } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSegnare';
@@ -116,9 +118,10 @@ export function Azione(props: PropsAzione) {
 }
 function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga, daCompletare, selezione }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
-  const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[] } | null>(null);
+  // con la scelta romantica fatta nella scelta delle note (L13, O10-3), che arriva così fino al salvataggio
+  const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; esiti?: SceltaEsitoSpunta[]; relazioneRomantica?: boolean } | null>(null);
   // L13: la scelta dell'esito (turno di un'attività con esiti, note di una Dote a valori possibili) prima di salvare la spunta
-  const [chiediEsiti, setChiediEsiti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean } | null>(null);
+  const [chiediEsiti, setChiediEsiti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; relazioneRomantica?: boolean } | null>(null);
   const vivo = useRef(true);
   const scrittura = useRef(false);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
@@ -127,19 +130,39 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid, ...(a.effettiVoce?.effetti.some(e => e.effetto.tipo === 'pesca') ? { pesca: true } : {}) }) : null;
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
+  // L13 (O10-3, risposta «a» dell'utente del 31/10): la voce che fa giocare l'evento del rango della scelta romantica di un Confidente (lo
+  // stesso evento di cui la scelta mostra il dialogo e lo stesso criterio del server: `giocaLaSceltaRomantica`). Aperta la scelta delle note,
+  // si legge il Confidente nella partita: se è romanzabile la scelta mostra la casella della relazione, precompilata con il valore della
+  // partita. La scelta fatta lì passa alla spunta come argomento (anche attraverso esiti o acquisti); su ogni altra voce nessuna scelta nuova.
+  const chiaveRomantica = chiediNote && partitaId !== null && a.riferimento?.tipo === 'confidente' && giocaLaSceltaRomantica(a.rangoAtteso, a.rangoPartita) ? a.riferimento.chiave : null;
+  // azzerata a ogni apertura della scelta delle note (`apriSceltaNote`): la casella compare solo con la lettura fresca, mai col valore di prima
+  const [relazionePartita, setRelazionePartita] = useState<{ chiave: string; valore: boolean } | null>(null);
+  const apriSceltaNote = () => { setRelazionePartita(null); setChiediNote(true); };
+  useEffect(() => {
+    if (chiaveRomantica === null || partitaId === null) return;
+    let attivo = true;
+    // una lettura fallita lascia la scelta senza casella: la relazione non cambia (si segna anche dalla scheda del Confidente)
+    getConfidentiPartita(partitaId).then((l) => {
+      const c = l.find((x) => x.chiave === chiaveRomantica);
+      if (attivo) setRelazionePartita(c?.romanzabile ? { chiave: c.chiave, valore: c.relazioneRomantica } : null);
+    }).catch(() => { if (attivo) setRelazionePartita(null); });
+    return () => { attivo = false; };
+  }, [chiaveRomantica, partitaId]);
+  const relazioneDaChiedere = chiaveRomantica !== null && relazionePartita?.chiave === chiaveRomantica ? { valore: relazionePartita.valore } : undefined;
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: OsservataSpunta[] = [], automatica = false): Promise<void> => {
+  // `relazioneRomantica`: la scelta romantica fatta nella scelta delle note (L13, O10-3; solo spuntando; assente = la relazione non cambia)
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[], esiti?: SceltaEsitoSpunta[], osservate: OsservataSpunta[] = [], automatica = false, relazioneRomantica?: boolean): Promise<void> => {
     if (!partitaId || scrittura.current) return;
     if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
-    if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
+    if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { apriSceltaNote(); return; }
     // 2026-10-30: la visita ai Memento non chiede più quali Dedali hai aperto: le aperture si calcolano dai Palazzi conclusi (migrazione 305)
     // L13: l'esito ottenuto (o «senza punti») si sceglie prima di salvare: una scelta non fatta non lascia la spunta (decisione A1)
     if (fatta && !a.fatta && a.scelteEsito?.length && esiti === undefined) {
-      setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti }); return;
+      setChiediNote(false); setChiediEsiti({ noteRisposta, senzaPunti, relazioneRomantica }); return;
     }
     // 2026-10-28: consumazioni e visite di pesca si preparano da sole dalla voce e dallo stato della partita (`preparaOsservazioniVoce`): se
     // tutto è determinato la spunta registra senza finestra; la finestra compare solo con qualcosa di davvero aperto, e chiede solo quello
@@ -151,15 +174,16 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       try { pronte = await preparaOsservazioniVoce(partitaId, a, oggi); } catch { pronte = null; }
       finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
       if (!vivo.current) return;
-      if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, esiti }); return; }
+      if (!pronte?.complete) { setChiediAcquisti({ noteRisposta, senzaPunti, esiti, relazioneRomantica }); return; }
       const r = richiesteOsservazioni(pronte);
-      return cambia(true, noteRisposta, senzaPunti, r.acquisti, r.pesche, esiti, r.osservate, true);
+      return cambia(true, noteRisposta, senzaPunti, r.acquisti, r.pesche, esiti, r.osservate, true, relazioneRomantica);
     }
     setChiediNote(false);
     scrittura.current = true;
     setOccupato(true);
     try {
-      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti);
+      const relazione = fatta ? relazioneRomantica : undefined;
+      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}), ...(esiti?.length ? { scelteEsito: esiti } : {}), ...(relazione !== undefined ? { relazioneRomantica: relazione } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, undefined, undefined, esiti, relazione);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
       setChiediEsiti(null);
@@ -175,7 +199,9 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       const turniRegistrati = fatta && agg.effetti?.turni?.length ? descriviEffetti({ doti: [], confidente: null, turni: agg.effetti.turni }, { senzaDoti: true, senzaPaga: true }) : '';
       // 2026-10-28: e le consumazioni e le visite di pesca registrate con la spunta, con gli yen davvero mossi letti dalla risposta
       // («Succo Aojiru Perizia · ♪ · 2 punti, 3 con la Fortuna · scalati ¥5000 dal saldo»; mai sotto zero: «nessuno yen scalato: …»)
-      const registrati = [...(fatta ? descriviOsservate(osservate, a.uid, agg.yenAutomatici) : []), turniRegistrati, dotiRegistrate].filter(Boolean).join(' · ');
+      // L13 (O10-3): e la relazione romantica, se la scelta alla spunta l'ha cambiata (la stessa frase delle ricevute)
+      const relazioneRegistrata = fatta && agg.effetti?.relazione ? fraseRelazione(agg.effetti.relazione) : '';
+      const registrati = [...(fatta ? descriviOsservate(osservate, a.uid, agg.yenAutomatici) : []), turniRegistrati, relazioneRegistrata, dotiRegistrate].filter(Boolean).join(' · ');
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? `Spunta ed effetti registrati${registrati ? `: ${registrati}` : ''}. I punti si applicano dal pulsante sulla voce.` :'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // 2026-10-26: ciò che chi gioca deve sapere si dice, non succede in silenzio: spuntando, la Persona entrata nella scorta oltre la capienza;
@@ -226,11 +252,12 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}><TestoNote testo={a.produceTesto[i]} /></span> : null)}
-        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, richieste, pesche, chiediAcquisti.esiti, osservate)} />}
+        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(richieste, pesche, osservate) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, richieste, pesche, chiediAcquisti.esiti, osservate, false, chiediAcquisti.relazioneRomantica)} />}
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
-        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
+        {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
-        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
+        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} relazione={relazioneDaChiedere}
+          onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => setChiediNote(false)} />}
       </div>
       {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra
           del testo, sul telefono in una fila a sé in fondo alla voce: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari

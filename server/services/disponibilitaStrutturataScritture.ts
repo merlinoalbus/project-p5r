@@ -15,6 +15,7 @@ import { CHIAVE_SEED_DISPONIBILITA, disponibilitaConfidente, luoghiDelConfidente
 import { MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata, EccezioneDisponibilita } from '../../shared/disponibilitaStrutturata.js';
 import { dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { richiediRomanzabile } from './relazioneRomanticaService.js';
 
 export interface ModificaDisponibilita {
   modo?: DisponibilitaStrutturata['modo'];
@@ -50,6 +51,8 @@ export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilit
   if (mod.modo !== undefined && !MODI_DISPONIBILITA.includes(mod.modo)) throw httpErrors.badRequest('modo-non-valido', `Il modo '${mod.modo}' non esiste.`);
   if (mod.dal !== undefined && mod.dal !== null && !/^\d{2}-\d{2}$/.test(mod.dal)) throw httpErrors.badRequest('data-non-valida', 'La data «dal» è nel formato MM-GG.');
   const eccezioni = mod.eccezioni ? normalizzaEccezioni(mod.eccezioni) : undefined;
+  // L13 (O10-2): le fasce con la relazione romantica hanno senso solo per un Confidente romanzabile
+  if (eccezioni?.some((e) => e.tipo === 'con-relazione')) richiediRomanzabile(confidente);
   const nuova: RigaStruttura = {
     modo: mod.modo ?? prima.modo,
     giorni_settimana_json: mod.giorni ? JSON.stringify(mod.giorni) : prima.giorni_settimana_json,

@@ -7,6 +7,7 @@
 // continua a scrivere solo il testo e le note. Mai un blocco: l'esito «oggi» è un'informazione.
 // L13 (ondata 6, migrazione 306): la pioggia non si modifica qui, sta nei requisiti di rango (fonte unica); la scheda la elenca accanto alle
 // eccezioni, letta da lì. Eccezioni nuove: i giorni di un rango (al posto di quelli generali) e i giorni del calendario in cui non si incontra.
+// L13 (ondata 10, O10-2): le fasce con la relazione romantica (solo per i Confidenti romanzabili).
 // ============================================================
 
 import { useState } from 'react';
@@ -47,6 +48,8 @@ function testoEccezione(e: EccezioneDisponibilita): string {
   if (e.tipo === 'dopo-rango') return `Non è disponibile nei ${e.giorni} giorni dopo un rango`;
   if (e.tipo === 'fascia-rango') return `Al rango ${e.rango} solo ${elenco(e.fasce.map((f) => NOME_FASCIA[f]))}`;
   if (e.tipo === 'giorni-rango') return `Al rango ${e.rango} ${SETTE_GIORNI.every((g) => e.giorni.includes(g)) ? 'tutti i giorni' : `solo ${elenco(e.giorni.map((g) => NOME_GIORNO[g]))}`}`;
+  // L13 (O10-2): le fasce con la relazione romantica iniziata nella partita (Takemi: solo di sera)
+  if (e.tipo === 'con-relazione') return `Con la relazione romantica solo ${elenco(e.fasce.map((f) => NOME_FASCIA[f]))}`;
   return e.date.length ? `Non si incontra ${elenco(e.date.map(conArticolo))}` : 'Nessun giorno escluso';
 }
 
@@ -213,6 +216,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
               <Selettore compatto ricerca="mai" etichetta="Rango" valore={String(e.rango)} opzioni={RANGHI.filter((r) => r === e.rango || rangoLibero('giorni-rango', r)).map((r) => ({ chiave: String(r), nome: `rango ${r}` }))} onCambia={(v) => modificaEccezione(i, { ...e, rango: Number(v) })} disabilitato={occupato} />
               {GIORNI_DISPONIBILITA.map((g) => <button key={g} type="button" aria-pressed={e.giorni.includes(g)} disabled={occupato} className={`chip touch ${e.giorni.includes(g) ? 'chip--attivo' : ''}`} onClick={() => { const prossimi = ordinati(alterna(e.giorni, g), GIORNI_DISPONIBILITA); if (prossimi.length > 0) modificaEccezione(i, { ...e, giorni: prossimi }); }}>{NOME_GIORNO[g]}</button>)}
             </>}
+            {e.tipo === 'con-relazione' && FASCE_DISPONIBILITA.map((f) => <button key={f} type="button" aria-pressed={e.fasce.includes(f)} disabled={occupato} className={`chip touch ${e.fasce.includes(f) ? 'chip--attivo' : ''}`} onClick={() => { const prossime = ordinati(alterna(e.fasce, f), FASCE_DISPONIBILITA); if (prossime.length > 0) modificaEccezione(i, { ...e, fasce: prossime }); }}>{NOME_FASCIA[f]}</button>)}
             {e.tipo === 'date' && <DateEscluse date={e.date} disabilitato={occupato} onCambia={(date) => modificaEccezione(i, { ...e, date })} />}
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setEccezioni((l) => l.filter((_, j) => j !== i))} />
           </div>
@@ -222,6 +226,8 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: fascia a un rango" disabled={occupato || primoRangoLibero('fascia-rango') === null} onClick={() => setEccezioni((l) => [...l, { tipo: 'fascia-rango', rango: primoRangoLibero('fascia-rango') ?? 1, fasce: ['sera'] }])} />
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: giorni a un rango" disabled={occupato || primoRangoLibero('giorni-rango') === null} onClick={() => setEccezioni((l) => [...l, { tipo: 'giorni-rango', rango: primoRangoLibero('giorni-rango') ?? 1, giorni: [...SETTE_GIORNI] }])} />
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: giorni in cui non si incontra" disabled={occupato || eccezioni.some((e) => e.tipo === 'date')} onClick={() => setEccezioni((l) => [...l, { tipo: 'date', date: [], effetto: 'non-disponibile' }])} />
+          {/* L13 (O10-2): solo per un Confidente con cui si può iniziare una relazione romantica */}
+          {dati?.romanzabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: fasce con la relazione romantica" disabled={occupato || eccezioni.some((e) => e.tipo === 'con-relazione')} onClick={() => setEccezioni((l) => [...l, { tipo: 'con-relazione', fasce: ['sera'] }])} />}
         </div>
         <span className="text-text-muted">La pioggia si indica nei requisiti di rango («Non deve piovere»).</span>
       </fieldset>

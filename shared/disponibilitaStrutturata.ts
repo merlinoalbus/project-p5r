@@ -9,6 +9,8 @@
 // L13 (ondata 6, migrazione 306): la pioggia non è più un'eccezione della disponibilità. Ha una sola fonte, i requisiti di rango (`meteo non-piove`
 // in `confidente_requisito`, col «Ripristina» da `confidente_requisito_guida`): chi chiama dice nel contesto se l'incontro del rango successivo non si
 // fa con la pioggia (`nonConLaPioggia`), e il valutatore lo applica.
+// L13 (ondata 10, O10-2, migrazione 325): l'eccezione `con-relazione` dà le fasce con la relazione romantica iniziata nella partita; chi chiama
+// dice nel contesto se la relazione c'è (`relazioneRomantica`, letta in un punto solo: `relazioneRomanticaService`).
 // ============================================================
 
 import { giornoDellaSettimana } from './date.js';
@@ -27,7 +29,10 @@ export type EccezioneDisponibilita =
   /** Per l'incontro del rango indicato i giorni sono questi, al posto di quelli generali (come `fascia-rango` per le fasce). */
   | { tipo: 'giorni-rango'; rango: number; giorni: GiornoDisponibilita[] }
   /** I giorni del calendario di gioco («MM-GG») in cui non si incontra. */
-  | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' };
+  | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' }
+  /** L13 (ondata 10, O10-2): con la relazione romantica iniziata nella partita le fasce sono queste, al posto delle generali e di quelle di un
+   *  rango (`fascia-rango`). Una sola per Confidente; ha senso per un Confidente romanzabile (Takemi: «solo di sera», migrazione 325). */
+  | { tipo: 'con-relazione'; fasce: FasciaDisponibilita[] };
 
 export interface DisponibilitaStrutturata {
   modo: ModoDisponibilita;
@@ -51,6 +56,9 @@ export interface DisponibilitaConfidenteDto {
   modificata: boolean;
   /** I ranghi il cui incontro non si fa con la pioggia, letti dai requisiti di rango (la fonte unica della pioggia): solo da mostrare. */
   ranghiNonConLaPioggia: number[];
+  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`): solo allora l'eccezione «con la relazione»
+   *  ha senso. Assente su un file di gioco senza la colonna. */
+  romanzabile?: boolean;
   /** Presente se è stata indicata una partita: se il Confidente è disponibile adesso. */
   oggi?: EsitoDisponibilita;
 }
@@ -68,6 +76,10 @@ export interface ContestoDisponibilita {
   /** Vero se fra i requisiti del rango successivo c'è «non deve piovere», o un «almeno una» con la pioggia i cui altri rami sono falsi nella partita
    *  (lo calcola `nonConLaPioggia` di disponibilitaStrutturataService); null o assente = non lo sappiamo, non si controlla. */
   nonConLaPioggia?: boolean | null;
+  /** L13 (O10-2): la relazione romantica con il Confidente nella partita (`confidente_partita.relazione_romantica`): vero = valgono le fasce
+   *  dell'eccezione `con-relazione`, falso = quelle senza; null o assente (il Diario senza partita) = non lo sappiamo: una fascia che vale in
+   *  un caso solo dà «sconosciuto». Senza l'eccezione non conta. */
+  relazioneRomantica?: boolean | null;
 }
 
 export interface EsitoDisponibilita {
@@ -112,6 +124,7 @@ function eccezioneLeggibile(e: unknown): e is EccezioneDisponibilita {
     case 'fascia-rango': return typeof o.rango === 'number' && Array.isArray(o.fasce);
     case 'giorni-rango': return typeof o.rango === 'number' && Array.isArray(o.giorni);
     case 'date': return Array.isArray(o.date) && o.date.every((d) => typeof d === 'string');
+    case 'con-relazione': return Array.isArray(o.fasce);
     default: return false;
   }
 }
@@ -158,9 +171,20 @@ export function valutaDisponibilita(s: DisponibilitaStrutturata, c: ContestoDisp
   if (giornoOk === null) return { stato: 'sconosciuto', motivo: 'Il giorno non è una data del calendario di gioco.' };
   if (!giornoOk) return { stato: 'non-disponibile', causa: 'giorno', motivo: giorniRango ? `Per il rango ${prossimo} non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` : `Non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` };
   const fasceRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'fascia-rango' }> => e.tipo === 'fascia-rango' && e.rango === prossimo);
-  const fasce = fasceRango ? fasceRango.fasce : s.fasce;
+  const senzaRelazione = fasceRango ? fasceRango.fasce : s.fasce;
   if (c.fascia === null) return { stato: 'sconosciuto', motivo: 'Manca la fascia del giorno.' };
-  if (fasce.length > 0 && !fasce.includes(c.fascia)) return { stato: 'non-disponibile', causa: 'fascia', motivo: `È disponibile ${fasce.join(' e ')}, non di ${c.fascia}.` };
+  const fascia = c.fascia;
+  const vale = (f: readonly FasciaDisponibilita[]): boolean => f.length === 0 || f.includes(fascia);
+  // L13 (O10-2): con la relazione romantica le fasce dell'eccezione prendono il posto delle generali e di quelle del rango
+  const conRelazione = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'con-relazione' }> => e.tipo === 'con-relazione');
+  if (conRelazione && c.relazioneRomantica === true) {
+    if (!vale(conRelazione.fasce)) return { stato: 'non-disponibile', causa: 'fascia', motivo: `Con la relazione romantica è disponibile ${conRelazione.fasce.join(' e ')}, non di ${fascia}.` };
+  } else if (conRelazione && c.relazioneRomantica !== false) {
+    // non sappiamo se la relazione c'è (il Diario senza partita): decide solo una fascia che vale, o non vale, in entrambi i casi
+    const conVale = vale(conRelazione.fasce), senzaVale = vale(senzaRelazione);
+    if (!conVale && !senzaVale) return { stato: 'non-disponibile', causa: 'fascia', motivo: `Non è disponibile di ${fascia}, con o senza la relazione romantica.` };
+    if (conVale !== senzaVale) return { stato: 'sconosciuto', motivo: `Dipende dalla relazione romantica: con la relazione è disponibile ${conRelazione.fasce.join(' e ')}${senzaRelazione.length ? `, senza ${senzaRelazione.join(' e ')}` : ''}.` };
+  } else if (!vale(senzaRelazione)) return { stato: 'non-disponibile', causa: 'fascia', motivo: `È disponibile ${senzaRelazione.join(' e ')}, non di ${fascia}.` };
   // la pioggia: dai requisiti del rango successivo (fonte unica), che chi chiama riassume in `nonConLaPioggia`
   if (c.nonConLaPioggia === true) {
     if (c.piove === true) return { stato: 'non-disponibile', causa: 'pioggia', motivo: `L'incontro del rango ${prossimo} non si fa con la pioggia.` };

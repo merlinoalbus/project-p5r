@@ -367,6 +367,8 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   regali: RegaloConfidenteDto[];
   /** Ondata 5: il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae). */
   regalabile: boolean;
+  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (scelta romantica nel dialogo del rango 9, migrazioni 324-325). */
+  romanzabile: boolean;
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   /** L13 (ondata 6, O6-2): solo le note sulla disponibilità; giorni, fasce, luoghi e sblocco sono in `disponibilitaStrutturata` e nei requisiti. */
@@ -744,6 +746,12 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Ondata 5 (RG-11): il Confidente riceve regali (la guida esclude Yoshida, Mishima, Morgana, Igor, Gemelle e Sae): solo allora c'è «Regala».
    *  Si regala un qualunque oggetto regalo del catalogo, con la reazione della guida (+1 se non è nell'elenco del Confidente). */
   regalabile: boolean;
+  /** L13 (O10-2): con il Confidente si può iniziare una relazione romantica (`confidente.romanzabile`, migrazioni 324-325): solo allora
+   *  `relazioneRomantica` si segna (dalla scheda o con la scelta romantica alla spunta del rango 9). */
+  romanzabile: boolean;
+  /** L13 (O10-2): la relazione romantica iniziata in questa partita (sempre falsa per un Confidente non romanzabile). La leggono scheda,
+   *  semafori e Diario per la disponibilità (Takemi con la relazione: solo di sera). */
+  relazioneRomantica: boolean;
   note: string;
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];
@@ -773,6 +781,8 @@ export interface ModificaConfidente {
   bonusArcano?: boolean;
   invito?: boolean;
   note?: string;
+  /** L13 (O10-2): segna o toglie la relazione romantica nella partita; solo per un Confidente romanzabile (409 `confidente-non-romanzabile`). */
+  relazioneRomantica?: boolean;
 }
 
 /** R10-18: l'azione unica «Regala». Si sceglie l'oggetto del catalogo (per chiave); dà i punti (la base della reazione, con i moltiplicatori,
@@ -1350,6 +1360,9 @@ export interface EffettiAzioneDto {
    *  voce) e il trofeo del primo posto, solo se l'ha segnato questa spunta (togliendola si toglie, se nessun altro lo rivendica). */
   esami?: Array<{ esame: string; nome: string; piazzamento: PiazzamentoEsame; prima: PiazzamentoEsame | null;
     doti: Array<{ chiave: string; nome: string; delta: number; note: number }>; trofeo?: { chiave: string; nome: string } }>;
+  /** L13 (O10-2): la relazione romantica segnata dalla spunta del passaggio al rango 9 (la scelta alla spunta), com'era (`prima`) e com'è
+   *  diventata (`dopo`): togliendo la spunta torna `prima`, solo se nella partita vale ancora `dopo`. Assente se la spunta non l'ha cambiata. */
+  relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean };
 }
 
 export interface RiferimentoAzioneDto {

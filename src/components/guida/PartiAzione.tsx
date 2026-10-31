@@ -182,10 +182,23 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
 }
 
 /** «Quante note hai ottenuto?»: ♪, ♪♪, ♪♪♪, nessun punto, annulla. Con il dialogo del rango (R10-11/C) le scelte stanno sopra: toccarne una
- *  dà le sue note (o nessun punto), come toccare le note; le scelte dal valore incerto (amicizia/amore) si leggono soltanto. */
-export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null) => void; onAnnulla: () => void; dialogo?: DialogoVoceDto }) {
+ *  dà le sue note (o nessun punto), come toccare le note; le scelte dal valore incerto (amicizia/amore) si leggono soltanto.
+ *  L13 (O10-3, risposta «a» dell'utente del 31/10): con `relazione` (solo la voce del passaggio al rango della scelta romantica di un Confidente
+ *  romanzabile) una sola casella in più, «Ho scelto la relazione romantica», precompilata con la relazione della partita: il suo valore parte
+ *  con la scelta delle note (`onScegli`). Senza `relazione`, nessuna scelta nuova. */
+export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo, relazione }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null, relazioneRomantica?: boolean) => void; onAnnulla: () => void; dialogo?: DialogoVoceDto; relazione?: { valore: boolean } }) {
+  // la casella toccata vince sul valore della partita (che può arrivare dopo l'apertura della scelta)
+  const [sceltaRelazione, setSceltaRelazione] = useState<boolean | null>(null);
+  const relazioneScelta = relazione ? sceltaRelazione ?? relazione.valore : undefined;
+  const scegli = (note: 1 | 2 | 3 | null) => onScegli(note, relazioneScelta);
   return (
     <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente">
+      {relazione && (
+        <label className="touch flex w-full items-center gap-2 cursor-pointer text-text">
+          <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} disabled={occupato} onChange={(e) => setSceltaRelazione(e.target.checked)} />
+          Ho scelto la relazione romantica
+        </label>
+      )}
       {dialogo && (
         <span className="flex w-full flex-col gap-1" role="group" aria-label={`Scelte del dialogo, rango ${dialogo.rango}`}>
           <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
@@ -196,7 +209,7 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupat
               const etichetta = `${s.testo}${valore ? ` ${valore}` : ''}`;
               const note = noteDellaScelta(s);
               return sceltaToccabile(s)
-                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${note !== null ? noteAParole(note) : NESSUN_PUNTO}`}><TestoNote testo={etichetta} /></button>
+                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => scegli(note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${note !== null ? noteAParole(note) : NESSUN_PUNTO}`}><TestoNote testo={etichetta} /></button>
                 : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}><TestoNote testo={etichetta} /></span>;
             })}
           </span>
@@ -204,9 +217,9 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupat
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
-        <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => onScegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
+        <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
       ))}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => onScegli(null)} />
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => scegli(null)} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
     </span>
   );

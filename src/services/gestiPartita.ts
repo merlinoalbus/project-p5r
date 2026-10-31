@@ -88,6 +88,8 @@ const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.
     // L13 (31/10): il turno di lavoro, con gli yen ricevuti e le note ottenute
     z.object({ effettoUid: uid, tipo: z.literal('lavoro'), yen: z.number().int().min(0).max(YEN_MASSIMI_LAVORO), doti: z.array(doteNote).max(5) }).strict(),
   ])).min(1).max(50).refine(a => new Set(a.map(s => s.effettoUid)).size === a.length).optional(),
+  // L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 (stesso corpo della rotta)
+  relazioneRomantica: z.boolean().optional(),
 }).strict().refine(v => ((v.acquisti?.length ?? 0) + (v.pesche?.length ?? 0) > 0) && [...(v.acquisti ?? []), ...(v.pesche ?? [])].every(r => r.fonte.tipo === 'diario' && r.fonte.voceUid === v.uid));
 const bersaglioSchema = z.object({ etichetta: z.string().min(1).max(500), articolo: chiave.optional(), voceUid: uid.optional(), effettoUid: uid.optional(), pesca: z.literal(true).optional(), sessionePesca: uid.optional(), fontePesca: uid.optional() }).strict();
 export type BersaglioGestoPartita = z.infer<typeof bersaglioSchema>;

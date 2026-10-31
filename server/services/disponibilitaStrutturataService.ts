@@ -17,6 +17,7 @@ import type { ContestoDisponibilita, DisponibilitaConfidenteDto, DisponibilitaSt
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { giorniDiGiocoFra } from '../../shared/date.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { eRomanzabile, relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
 
 export const CHIAVE_SEED_DISPONIBILITA = (confidente: string) => `disponibilita-struttura-seed-v1:${confidente}`;
 export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; dal: string | null; motivo_senza_luogo: string; fonte: string | null }
@@ -66,6 +67,8 @@ function contestoDellaPartita(partitaId: number, confidente: string, stato?: Sta
     data: p.data_gioco, fascia: p.data_gioco ? fascia : null, festivo, piove: meteo ? meteo.meteo === 'pioggia' : null, rango,
     giorniDallUltimoRango: giorniDalGiorno(giornoDellUltimoRango(partitaId, confidente, rango), p.data_gioco),
     nonConLaPioggia: nonConLaPioggia(confidente, rango, stato),
+    // L13 (O10-2): la relazione romantica della partita, dal punto unico (falsa per un Confidente non romanzabile), per l'incontro successivo
+    relazioneRomantica: relazioneAlRango(relazioneRomantica(partitaId, confidente), rango + 1),
   };
 }
 
@@ -76,6 +79,7 @@ export function disponibilitaConfidente(confidente: string, partitaId?: number, 
   const dto: DisponibilitaConfidenteDto = {
     confidente, struttura, luoghi: luoghiDelConfidente(confidente), modificata: !!prepared('SELECT 1 FROM dati_guida WHERE chiave = ?').get(CHIAVE_SEED_DISPONIBILITA(confidente)),
     ranghiNonConLaPioggia: ranghiSenzaPioggiaDi(confidente),
+    romanzabile: eRomanzabile(confidente),
   };
   // «oggi» sulla struttura effettiva (con il «dal» del requisito di rango 1 dove la struttura non ne ha uno), la stessa del Diario e dei semafori
   if (partitaId !== undefined) {
