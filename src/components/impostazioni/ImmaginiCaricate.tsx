@@ -23,6 +23,8 @@ const AMBITI: Array<{ chiave: AmbitoImmagine; nome: string }> = [
   { chiave: 'arcana', nome: 'Arcani' },
   { chiave: 'skill', nome: 'Skill' },
   { chiave: 'mappa', nome: 'Mappe scaricate' },
+  // O9-5: le miniature delle carte dei Palazzi e delle aree dei Dedali nella pagina Luoghi
+  { chiave: 'dungeon', nome: 'Miniature dei Palazzi e dei Memento' },
   { chiave: 'altro', nome: 'Altro' },
 ];
 

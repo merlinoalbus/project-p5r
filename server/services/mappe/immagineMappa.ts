@@ -20,9 +20,22 @@ import type { IllustrazioneDto } from '../../../shared/types.js';
 /** Un'immagine caricata nell'istanza per una mappa: la chiave nella tabella e la data, che versiona l'URL. */
 export interface ImmagineCaricata { chiave: string; createdAt: string }
 
+/** Le immagini caricate di un ambito con contenuto (chiave → data di caricamento), lette una volta per una risposta che descrive molti
+ *  oggetti (nessuna query per nodo). Lo usano le mappe (`mappa`) e le miniature delle carte dei Luoghi (`dungeon`, O9-5). */
+export function immaginiCaricateDi(ambito: string, db: AppDatabase = getDb()): Map<string, string> {
+  return new Map((db.prepare('SELECT chiave, created_at FROM immagine WHERE ambito = ?').all(ambito) as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at]));
+}
+
 /** Le immagini dell'ambito «mappa» (chiave → data di caricamento), lette una volta per una risposta che descrive molte mappe. */
 export function immaginiCaricateDelleMappe(db: AppDatabase = getDb()): Map<string, string> {
-  return new Map((db.prepare("SELECT chiave, created_at FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at]));
+  return immaginiCaricateDi('mappa', db);
+}
+
+/** L'URL versionato (data e generazione delle miniature, come `urlCaricata`) dell'immagine caricata di (ambito, chiave), o null se
+ *  l'ambito non ne ha una per quella chiave: la lettura è la mappa di `immaginiCaricateDi`. */
+export function urlCaricataDi(ambito: string, chiave: string, caricate: Map<string, string>): string | null {
+  const createdAt = caricate.get(chiave);
+  return createdAt === undefined ? null : urlVersionato(ambito, chiave, createdAt);
 }
 
 /**
@@ -43,7 +56,12 @@ export function caricataDellaMappa(r: { chiave: string; immagine_chiave: string 
  *  calcolare le miniature, che le viste chiedono aggiungendo `l` a questo URL) cambia l'indirizzo, e ogni vista la vede subito
  *  anche col file in cache immutabile nel browser. */
 export function urlCaricata(c: ImmagineCaricata): string {
-  return `/api/immagini/mappa/${encodeURIComponent(c.chiave)}/file?v=${encodeURIComponent(versioneImmagine(c.createdAt))}`;
+  return urlVersionato('mappa', c.chiave, c.createdAt);
+}
+
+/** L'URL del file di (ambito, chiave) con la versione `?v=` della data e della generazione delle miniature: la forma unica. */
+function urlVersionato(ambito: string, chiave: string, createdAt: string): string {
+  return `/api/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file?v=${encodeURIComponent(versioneImmagine(createdAt))}`;
 }
 
 /**

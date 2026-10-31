@@ -108,6 +108,8 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'p5r.appuntiFissi', cosa: 'stato e posto della finestra degli appunti fissi (C7)' },
   { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },
   { testo: 'Senza condizioni la voce si fa sempre', cosa: 'riquadro «Si fa solo se» del modulo della voce del Diario (L13, O9-3)' },
+  { testo: 'Incolla dagli appunti', cosa: 'finestra di caricamento delle miniature dei Luoghi (L13, O9-5, FinestraCaricaImmagine)' },
+  { testo: 'la miniatura di ', cosa: 'comando «Miniatura» delle carte dei Palazzi e delle aree dei Dedali (L13, O9-5)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

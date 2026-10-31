@@ -17,17 +17,21 @@
 // Memento si possono rimuovere»). Iweleth (L8 B7) sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono
 // l'«Archivio del Palazzo» dentro il suo dedalo, perché non perdano il posto.
 //
+// Le carte dei Palazzi e delle aree dei Dedali (O9-5, 2026-10-31: «vorrei poterle inserire e/o modificare», «anche per i palazzi») portano
+// la miniatura caricata dall'utente nell'ambito `dungeon` (una lettura sola per tutti i nodi) e la chiave dove caricarla (`miniatura`).
+//
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
 import { GRUPPI_CONTEGGIO_SPILLO, gruppoConteggioSpillo } from '../../../shared/spilli.js';
-import type { ConteggiNodoDto, ConteggiPinDto, GerarchiaMappeDto, NodoGerarchiaDto } from '../../../shared/types.js';
+import type { ConteggiNodoDto, ConteggiPinDto, GerarchiaMappeDto, IllustrazioneDto, NodoGerarchiaDto } from '../../../shared/types.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { statoDisponibilitaPartita } from '../disponibilitaService.js';
 import { disponibilitaQuartiere } from '../cittaService.js';
 import { casaDeiMemento, casaDelDedalo, casaDelPalazzo, casaDellArea, casaDellaMappa, conAree, contestoAree, type RigaArea } from './casaMappa.js';
-import { illustrazioneDaRiga, immaginiCaricateDelleMappe, type RigaPerIllustrazione } from './immagineMappa.js';
+import { illustrazioneDaRiga, immaginiCaricateDelleMappe, immaginiCaricateDi, urlCaricataDi, type RigaPerIllustrazione } from './immagineMappa.js';
+import { AMBITO_MINIATURA_LUOGO } from '../../../shared/immagini.js';
 import { chiaviPubblicheDelleMappe } from './percorsiMappe.js';
 import { radiceDelPalazzo } from './alberoMappe.js';
 import { infiltrazioniDelleAree, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
@@ -92,6 +96,14 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const ctx = contestoAree();
   const caricate = immaginiCaricateDelleMappe();
+  // le miniature delle carte dei Palazzi e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
+  const miniatureLuoghi = immaginiCaricateDi(AMBITO_MINIATURA_LUOGO);
+  /** La miniatura caricata di un Palazzo o di un'area di un Dedalo come illustrazione (senza asset: senza caricata il Palazzo resta con il
+   *  suo emblema, l'area del Dedalo senza immagine), e dove caricarla. */
+  const miniaturaDelLuogo = (chiave: string): { immagine: IllustrazioneDto | null; miniatura: { ambito: typeof AMBITO_MINIATURA_LUOGO; chiave: string } } => {
+    const url = urlCaricataDi(AMBITO_MINIATURA_LUOGO, chiave, miniatureLuoghi);
+    return { immagine: url ? { immagineUrl: url, asset: null } : null, miniatura: { ambito: AMBITO_MINIATURA_LUOGO, chiave } };
+  };
 
   // ---- letture, una volta per richiesta ----
   const quartieri = (conAree() ? prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.chiave AS mappa_presente, m.immagine_chiave, m.asset, m.ruolo_immagine
@@ -209,7 +221,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const nodo: NodoGerarchiaDto = {
       tipo: 'palazzo', chiave: d.chiave, nome, casa: casaDelPalazzo(d.chiave),
       ...(collocabile && mappeEsistenti.has(radice) ? { mappa: chiaveMappa(radice) } : {}),
-      immagine: null,
+      ...miniaturaDelLuogo(d.chiave),
       conteggi: { ...conteggiContenitore(radice, figliArea), infiltrazioni: proprie.length },
       figli: figliArea,
     };
@@ -237,7 +249,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   // Un'area del dedalo non ha planimetrie: è una foglia, e la sua casa apre il dedalo con quella zona. Il dedalo confluito (Iweleth) porta in
   // più l'archivio del suo vecchio Palazzo. Le mappe senza Area (oggi l'entrata) sono foglie del Memento, col visore (l'unica pagina che le mostra).
   const nodoAreaDedalo = (a: RigaAreaDedaloG): NodoGerarchiaDto => ({
-    tipo: 'area-dedalo', chiave: a.chiave, nome: a.nome, casa: casaDelDedalo(a.dedalo_chiave, a.chiave), immagine: null,
+    tipo: 'area-dedalo', chiave: a.chiave, nome: a.nome, casa: casaDelDedalo(a.dedalo_chiave, a.chiave), ...miniaturaDelLuogo(a.chiave),
     conteggi: { persone: personeDellArea.get(a.chiave) ?? 0, trame: trameDellArea.get(a.chiave) ?? 0, richieste: richiesteDellArea.get(a.chiave) ?? 0, pin: vuoti() },
     figli: [],
   });

@@ -2051,8 +2051,11 @@ export interface NodoGerarchiaDto {
   slug?: string;
   /** Solo città, quartiere, Palazzo: la chiave pubblica della mappa che li illustra (per «Colloca»). */
   mappa?: string;
-  /** La miniatura col risolutore unico di L1; null per il Palazzo (il segno lo disegna il FE) e per i contenitori. */
+  /** La miniatura col risolutore unico di L1; null per i contenitori. Palazzo e area di un Dedalo (O9-5): la miniatura caricata
+   *  dall'utente (ambito `dungeon`, URL versionato), altrimenti null (il Palazzo mostra il suo emblema, l'area del Dedalo niente). */
   immagine: IllustrazioneDto | null;
+  /** Solo Palazzo e area di un Dedalo dei Memento (O9-5): dove si carica la miniatura della carta (`PUT /api/immagini/<ambito>/<chiave>`). */
+  miniatura?: { ambito: 'dungeon'; chiave: string };
   conteggi: ConteggiNodoDto;
   /** Area in attesa della scelta dell'utente (lo staff di Tokyo). */
   daVerificare?: boolean;

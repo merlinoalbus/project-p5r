@@ -4,7 +4,7 @@
 //
 // Decisione dell'utente (2026-09-12, migrazione 079): il contenuto delle immagini sta nella colonna
 // `contenuto` di `immagine`, non su disco. Due gruppi di ambiti (`shared/immagini.ts`):
-// - caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, altro): una sola
+// - caricamento (arcana, confidente, personaggio, persona, skill, mappa, spillo, dungeon, altro): una sola
 //   immagine per (ambito, chiave), il caricamento successivo sostituisce; precedenza sulla grafica
 //   predefinita; è ciò che «Immagini caricate» elenca e rimuove;
 // - predefiniti (mappe, confidenti, sfondi, illustrazioni…): la grafica di gioco che stava in
@@ -16,7 +16,7 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
+import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, AMBITO_MINIATURA_LUOGO, MAX_BYTE_IMMAGINE_CARICATA, type AmbitoImmagine } from '../../shared/immagini.js';
 import { versioneImmagine } from '../../shared/miniature.js';
 import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
@@ -35,8 +35,24 @@ const ESTENSIONE_PER_MIME: Record<string, string> = {
   'image/svg+xml': 'svg',
 };
 
-/** Dimensione massima accettata (byte). */
-export const MAX_BYTE_IMMAGINE = 8 * 1024 * 1024;
+/** Dimensione massima accettata (byte): quella condivisa col client (`shared/immagini.ts`), un numero solo. */
+export const MAX_BYTE_IMMAGINE = MAX_BYTE_IMMAGINE_CARICATA;
+
+/**
+ * L'entità a cui va un'immagine dell'ambito `dungeon` (O9-5, la miniatura delle carte della pagina Luoghi) deve esistere ed essere una di
+ * quelle che la carta mostra: un Palazzo (`dungeon.chiave`, tipo `palazzo`) o un'area di un Dedalo dei Memento (`area_dedalo.chiave`).
+ * Una chiave che esiste ma è di altro (la radice dei Memento, un dedalo, un'infiltrazione di un Palazzo) è 400 `luogo-senza-miniatura`;
+ * una chiave che non c'è è 404 `luogo-non-trovato`. Gli altri ambiti non si controllano qui (come prima).
+ */
+function verificaEntitaDellImmagine(ambito: string, chiave: string): void {
+  if (ambito !== AMBITO_MINIATURA_LUOGO) return;
+  if (prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(chiave)) return;
+  if (prepared('SELECT 1 FROM area_dedalo WHERE chiave = ?').get(chiave)) return;
+  if (prepared('SELECT 1 FROM dungeon WHERE chiave = ? UNION ALL SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave, chiave)) {
+    throw httpErrors.badRequest('luogo-senza-miniatura', `«${chiave}» non è un Palazzo né un'area di un Dedalo dei Memento: la miniatura si carica solo per quelle carte.`);
+  }
+  throw httpErrors.notFound('luogo-non-trovato', `Nessun Palazzo né area di un Dedalo dei Memento con la chiave «${chiave}».`);
+}
 
 interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string; origine_url: string | null; presente: number }
 /** Le colonne senza il contenuto: gli elenchi non trasportano i byte. */
@@ -122,6 +138,7 @@ function formatoDelContenuto(b: Buffer): string | null {
 /** Salva (o sostituisce) l'immagine di un'entità; `origineUrl` è l'indirizzo da cui è stata scaricata (null per i file caricati). */
 export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer, origineUrl: string | null = null): ImmagineDto {
   chiave = chiaveDi(ambito, chiave);
+  verificaEntitaDellImmagine(ambito, chiave);
   if (!ESTENSIONE_PER_MIME[mime]) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
   if (contenuto.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Il contenuto dell\'immagine è vuoto.');
   // Il contenuto dev'essere davvero un'immagine di un formato ammesso (difetto FUN2-3, L2): un file di testo spedito come image/png,
@@ -145,9 +162,9 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
     if (ambito === 'mappa') dopoImmagineMappa(getDb(), chiave, contenuto);
     else if ((AMBITI_PREDEFINITI as readonly string[]).includes(ambito)) allineaRuoliImmagine(getDb());
   })();
-  // l'illustrazione di una scheda (quartiere, città, radice di un Palazzo) ha subito le sue miniature, fuori dalla transazione e
-  // senza far aspettare chi ha caricato
-  if (ambito === 'mappa' && eDelleSchede(ambito, chiave)) setImmediate(() => { void riscaldaMiniature([{ ambito, chiave }]); });
+  // l'illustrazione di una scheda (quartiere, città, radice di un Palazzo) e la miniatura di una carta dei Luoghi (O9-5) hanno subito le
+  // loro miniature, fuori dalla transazione e senza far aspettare chi ha caricato
+  if ((ambito === 'mappa' || ambito === AMBITO_MINIATURA_LUOGO) && eDelleSchede(ambito, chiave)) setImmediate(() => { void riscaldaMiniature([{ ambito, chiave }]); });
   return leggiImmagine(ambito, chiave)!;
 }
 
@@ -181,6 +198,8 @@ export const USER_AGENT = `project-p5r/${VERSIONE_APP} (guida personale di gioco
 /** Scarica un'immagine da un URL indicato dall'utente e la salva, con l'indirizzo d'origine. Per l'immagine di una mappa che
  *  esiste c'è la strada dell'editor (`scaricaImmagineMappa` in mappeService), che chiede conferma dei pezzi. */
 export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> {
+  // prima dello scarico: una chiave che non porta a nessuna entità non fa scaricare niente
+  verificaEntitaDellImmagine(ambito, chiaveDi(ambito, chiave));
   const { contenuto, mime, url: u } = await scaricaImmagine(url);
   return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
