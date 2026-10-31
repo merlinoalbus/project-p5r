@@ -37,7 +37,7 @@ export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferi
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
-  if (a.riferimento?.tipo === 'confidente') return <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} adatta="copri" />;
+  if (a.riferimento?.tipo === 'confidente') return <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />;
   if (a.riferimento?.tipo === 'dungeon') return <EmblemaDungeon chiave={a.riferimento.chiave} nome={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />;
   return <IconaCategoria categoria={a.tipo} dimensione={40} />;
 }
@@ -217,7 +217,7 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo, relazione }
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
-        <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
+        <button key={n} type="button" className="chip touch" disabled={occupato} onClick={() => scegli(n)} aria-label={noteAParole(n)}>{simboliNote(n)}</button>
       ))}
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => scegli(null)} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />

@@ -110,8 +110,8 @@ export function DotiSociali({ partitaId }: Props) {
       <p className="sr-only" role="status" aria-live="polite"><span key={annuncio.n}>{annuncio.testo}</span></p>
       <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] lg:grid-cols-[minmax(400px,540px)_minmax(0,680px)] lg:justify-center md:h-full md:min-h-0 md:items-stretch">
-          <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
-            <div className="w-full flex justify-center px-[12%]">
+          <section className="stella-doti card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
+            <div className="stella-doti__riquadro w-full flex justify-center px-[12%]">
               <StellaCinque
                 assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
                 dimensione={540}

@@ -22,7 +22,7 @@ export function DialogoRango({ d, aperto, onToggle, azioni }: { d: DialogoConfid
       <div className="flex items-center gap-1 pr-2">
       <button type="button" className="min-w-0 flex-1 text-left px-3 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 touch" onClick={onToggle} aria-expanded={aperto}>
         <span className="font-semibold shrink-0 whitespace-nowrap">Rango {d.etichetta}</span>
-        <span className="min-w-0 flex-1 testo-12 text-text-muted">{d.note}</span>
+        <span className="min-w-0 flex-[1_1_10rem] testo-12 text-text-muted">{d.note}</span>
         <span className="shrink-0 whitespace-nowrap testo-12 text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
       </button>
       {azioni && <div className="flex shrink-0 items-center gap-1">{azioni}</div>}

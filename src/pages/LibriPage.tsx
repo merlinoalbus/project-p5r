@@ -118,10 +118,11 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     const altrePosizioni = libro.posizioni.filter((p) => !(p.tipo === 'negozio' && negoziCollegati.has(p.chiave)));
     const quando = (libro.condizioni ?? []).map((c) => c.tipo === 'avviso' ? descriviRequisitoSpillo(c) : c.testo).join(' · ');
     return <li key={libro.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${libro.fatto ? 'border-success/50' : ''}`}>
-      <div className="flex items-start gap-3">
+      {/* `flex-wrap` e base minima del titolo, come nella scheda dei videogiochi: se accanto non c'è posto per 9 rem di testo, i cartellini vanno sotto */}
+      <div className="flex flex-wrap items-start gap-3">
         <IconaCategoria categoria="libri" dimensione={44} />
-        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{libro.catalogo ? <Link className="touch inline-flex items-center" to={libro.catalogo.casa}>{titolo}</Link> : titolo}</h2></div>
-        <span className="flex flex-col items-end gap-1">
+        <div className="min-w-0 flex-[1_1_9rem]"><h2 className="m-0 text-lg leading-tight">{libro.catalogo ? <Link className="touch inline-flex items-center" to={libro.catalogo.casa}>{titolo}</Link> : titolo}</h2></div>
+        <span className="ml-auto flex max-w-full flex-col items-end gap-1">
           <span className={`chip ${libro.fatto ? 'chip--attivo' : ''}`}>{libro.fatto ? 'Completato' : progresso ? 'In corso' : 'Da leggere'}</span>
           <ChipDisponibilita disponibilita={libro.disponibilita ?? undefined} compatto />
         </span>

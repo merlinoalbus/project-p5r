@@ -101,7 +101,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/skill/:id': {
     sommario: 'Scheda di una skill',
-    descrizione: 'Riassunto della skill con le Persona che la imparano (livello della Persona e livello di apprendimento, in ordine di livello), le Persona da cui si ottiene la carta con l\'esecuzione, la fonte della carta, la negoziazione (titolo tradotto con la Persona fra parentesi) e l\'eventuale esclusività.',
+    descrizione: 'Riassunto della skill con le Persona che la imparano (livello della Persona, livello o modo di apprendimento e nome italiano, in ordine di livello; per un tratto, le Persona che lo hanno come tratto con `modo: tratto`), le Persona da cui si ottiene la carta con l\'esecuzione, la fonte della carta, la negoziazione (titolo tradotto con la Persona fra parentesi) e l\'eventuale esclusività.',
     risposta: '`SkillDettaglioDto`',
     errori: [[404, 'skill-non-trovata']],
   },

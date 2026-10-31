@@ -1197,6 +1197,26 @@ export function DungeonDettaglioPage() {
           </div>}
         </div>
       )}
+      {/* L1-13: un Palazzo (o un Memento) senza infiltrazioni non ha area da mostrare: lo dice, invece di una pagina bianca; nella preparazione
+          un comando proprio aggiunge la prima infiltrazione (senza area il menu «Modifica ⋯» non c'è) */}
+      {d && !area && (
+        <div className="card flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <IndietroScheda ripiego="/guida/dungeon" />
+            <TitoloScheda>{d.nome}</TitoloScheda>
+          </div>
+          <p className="m-0 testo-13 text-text-secondary" role="status">{memento ? 'Questo Memento non ha ancora aree nella guida.' : 'Questo Palazzo non ha ancora infiltrazioni nella guida.'}</p>
+          {!IN_RILASCIO && !memento && (
+            <span className="flex flex-wrap gap-2">
+              <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi infiltrazione" onClick={() => setFinestra('nuova-infiltrazione')} />
+            </span>
+          )}
+          {!IN_RILASCIO && !memento && finestra === 'nuova-infiltrazione' && (
+            <ModuloNuovaArea aree={infiltrazioniPalazzo} areePalazzo={areePalazzo.map((a) => ({ slug: a.slug, nome: a.nome }))} occupato={occupato}
+              onCrea={nuovaInfiltrazione} onAnnulla={() => setFinestra(null)} />
+          )}
+        </div>
+      )}
     </PageState>
   );
 }

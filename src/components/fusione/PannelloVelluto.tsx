@@ -12,12 +12,19 @@ import { IconaAzione } from '../shared/IconaAzione';
 interface Props {
   velluto: VellutoDto | null;
   onCambiaAllarme?: (attivo: boolean) => void;
+  /** C'è una partita (o le partite non sono ancora arrivate) ma i dati della Stanza di Velluto no: non è «nessuna partita». */
+  inCaricamento?: boolean;
+  /** La lettura della Stanza di Velluto della partita non è riuscita: lo si dice, invece di un pannello vuoto. */
+  errore?: string | null;
 }
 
 /** Riassunto compatto con dettagli espandibili. */
-export function PannelloVelluto({ velluto, onCambiaAllarme }: Props) {
+export function PannelloVelluto({ velluto, onCambiaAllarme, inCaricamento = false, errore = null }: Props) {
   const [aperto, setAperto] = useState(false);
   if (!velluto) {
+    if (errore) return <p role="alert" className="m-0 testo-12 text-error-testo">Stanza di Velluto non letta: {errore}</p>;
+    // «Nessuna partita attiva» solo se davvero non c'è: mentre i dati arrivano non si dice niente
+    if (inCaricamento) return null;
     return <p className="m-0 testo-12 text-text-muted">Nessuna partita attiva: prezzi pieni, nessun bonus del Confidente, Allarme spento.</p>;
   }
   const v = velluto;

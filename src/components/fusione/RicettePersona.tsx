@@ -35,13 +35,14 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
   const { dati, caricamento, errore } = useCarica(
     () => {
       if (!scelta) return Promise.resolve(null);
-      const opz = { partita: partitaId ?? undefined, livelloMax, limite };
+      const opz = { partita: partitaId ?? undefined, livelloMax, limite, soloPronte: soloPronte && partitaId !== null ? true : undefined };
       return modalita === 'per' ? getRicettePer(scelta.id, opz) : getFusioniCon(scelta.id, opz);
     },
-    [scelta?.id, partitaId, livelloMax, limite, modalita],
+    [scelta?.id, partitaId, livelloMax, limite, soloPronte, modalita],
   );
 
-  const ricette = (dati?.ricette ?? []).filter((r) => !soloPronte || r.ingredienti.every((i) => inScorta.has(i.id)));
+  // «solo pronte» lo decide il server prima del limite: filtrare qui le sole prime ricette scaricate ne perderebbe molte
+  const ricette = dati?.ricette ?? [];
 
   return (
     <div className="flex flex-col gap-3">
@@ -66,8 +67,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
             </button>
             {dati && (
               <span className="text-text-muted ml-auto">
-                {dati.totale} {modalita === 'per' ? 'ricette' : 'fusioni'}{dati.livelloMax !== null && dati.totaleSenzaFiltri !== dati.totale ? ` (${dati.totaleSenzaFiltri} senza limite di livello)` : ''}
-                {soloPronte ? ` · ${ricette.length} pronte` : ''}
+                {dati.totale} {modalita === 'per' ? 'ricette' : 'fusioni'}{dati.soloPronte ? ' pronte con la scorta' : ''}{dati.livelloMax !== null && !dati.soloPronte && dati.totaleSenzaFiltri !== dati.totale ? ` (${dati.totaleSenzaFiltri} senza limite di livello)` : ''}
                 {dati.sconto > 0 ? ` · costi con sconto Registro ${dati.sconto}%` : ''}
               </span>
             )}
@@ -76,7 +76,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
             <p className="m-0 testo-13 text-error-testo">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
-          ) : dati && dati.totale === 0 ? (
+          ) : dati && dati.totale === 0 && !dati.soloPronte ? (
             <p className="m-0 testo-13 text-text-muted">
               {scelta.rara ? 'I Demoni del Tesoro non si ottengono per fusione: si incontrano nei Palazzi e nei Mementos.' : modalita === 'per' ? 'Nessuna ricetta disponibile con i contenuti considerati.' : 'Nessuna fusione disponibile con questa Persona.'}
             </p>

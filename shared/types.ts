@@ -181,8 +181,9 @@ export interface SkillDettaglioDto extends SkillRiassuntoDto {
   negoziazioneNome: string | null;
   unica: string | null;
   unicaNome: string | null;
-  persone: Array<{ id: number; nome: string; arcana: string; arcanaNome: string; livelloPersona: number; livello: number | null }>;
-  fontiEsecuzione: Array<{ id: number; nome: string }>;
+  /** Le Persona che hanno la skill: la imparano (`livello`, o `modo` se non a un livello) oppure, per un tratto, ce l'hanno come tratto (`modo: 'tratto'`). */
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; arcanaNome: string; livelloPersona: number; livello: number | null; modo: ModoApprendimento | 'tratto' }>;
+  fontiEsecuzione: Array<{ id: number; nome: string; nomeIt: string }>;
 }
 
 /** Ruoli tipografici dell'interfaccia: titoli/numeri, menu/pulsanti, tasselli decorativi. */
@@ -461,6 +462,8 @@ export interface RicetteFusioneDto {
   ricette: RicettaFusioneDto[];
   dlcPosseduti: number[];
   livelloMax: number | null;
+  /** Vero se l'elenco è ristretto alle ricette con tutti gli ingredienti nella scorta della partita (`totale` e `ricette` parlano delle sole pronte). */
+  soloPronte?: boolean;
   /** Sconto del Registro applicato ai costi (dalla partita), 0 senza partita. */
   sconto: number;
 }

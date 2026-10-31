@@ -33,7 +33,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
   return (
     <article className={`card flex flex-col gap-2 ${av.completato ? 'border-primary' : ''}`}>
       <div className="flex items-center gap-3 flex-wrap">
-        <ImmagineEntita ambito="persona" chiave={piano.nome} etichetta={piano.nomeIt} dimensione={72} adatta="copri" />
+        <ImmagineEntita ambito="persona" chiave={piano.nome} etichetta={piano.nomeIt} dimensione={72} />
         <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{piano.nomeIt}</Link>
         <span className="testo-12 text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
         {modificaTitolo ? (

@@ -22,6 +22,8 @@ export interface OpzioniContesto {
   dlc?: number[];
   livelloMax?: number;
   limite?: number;
+  /** Solo le ricette i cui ingredienti sono tutti nella scorta della partita (senza partita non filtra). Si applica prima del limite: totale e elenco parlano delle sole pronte. */
+  soloPronte?: boolean;
 }
 
 /**
@@ -152,17 +154,25 @@ function arcanaSenzaRisultato(a: string, b: string): boolean {
   return coppie.has(`${a}|${b}`) || coppie.has(`${b}|${a}`);
 }
 
-/** Ricette che producono la Persona, filtrate per livello massimo e limitate in numero (totale sempre riportato). */
+/** Le ricette i cui ingredienti sono tutti nella scorta della partita (basta un esemplare per Persona, come nel Calcolatore). */
+function conIngredientiInScorta(ricette: RicettaFusione[], partitaId: number): RicettaFusione[] {
+  const scorta = disponibilitaDi(partitaId).scorta;
+  return ricette.filter((r) => r.ingredienti.every((i) => scorta.has(i.id)));
+}
+
+/** Ricette che producono la Persona, filtrate per livello massimo e (con una partita) per scorta, e limitate in numero (totale sempre riportato). */
 export function ricettePerDto(personaId: number, opz: OpzioniContesto): RicetteFusioneDto {
   const { ctx, dlcPosseduti } = contestoDa(opz);
   const target = personaOErrore(personaId);
   let ricette = ricettePer(target, ctx);
   const totaleSenzaFiltri = ricette.length;
   if (opz.livelloMax !== undefined) ricette = ricette.filter((r) => r.risultato.livello <= opz.livelloMax! && r.ingredienti.every((i) => i.livello <= opz.livelloMax!));
+  const soloPronte = opz.soloPronte === true && opz.partitaId !== undefined;
+  if (soloPronte) ricette = conIngredientiInScorta(ricette, opz.partitaId!);
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
   const sconto = scontoPartita(opz.partitaId).sconto;
-  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, sconto };
+  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
 }
 
 /** Scorta (esemplari per Persona) e Registro (Persona registrate) della partita; vuoti senza partita. */
@@ -418,8 +428,10 @@ export function fusioniConDto(personaId: number, opz: OpzioniContesto): RicetteF
   let ricette = fusioniCon(persona, ctx);
   const totaleSenzaFiltri = ricette.length;
   if (opz.livelloMax !== undefined) ricette = ricette.filter((r) => r.risultato.livello <= opz.livelloMax! && r.ingredienti.every((i) => i.livello <= opz.livelloMax!));
+  const soloPronte = opz.soloPronte === true && opz.partitaId !== undefined;
+  if (soloPronte) ricette = conIngredientiInScorta(ricette, opz.partitaId!);
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
   const sconto = scontoPartita(opz.partitaId).sconto;
-  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, sconto };
+  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
 }

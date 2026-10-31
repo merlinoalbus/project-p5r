@@ -62,7 +62,9 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
   const extraValide = extra && extra.chiave === chiave ? extra : null;
   const eventi = prima.dati ? [...prima.dati.eventi, ...(extraValide?.eventi ?? [])].filter((e) => !eliminati[e.id]) : null;
   const prossimo = extraValide ? extraValide.prossimo : prima.dati?.prossimo ?? null;
-  const totale = prima.dati ? Math.max(0, prima.dati.totale - Object.keys(eliminati).length) : 0;
+  // si sottraggono solo le eliminazioni che la lettura corrente ancora contiene: dopo un cambio di filtro (o una rilettura) le altre sono già fuori dal totale del server
+  const eliminatiNellaLettura = prima.dati ? [...prima.dati.eventi, ...(extraValide?.eventi ?? [])].filter((e) => eliminati[e.id]).length : 0;
+  const totale = prima.dati ? Math.max(0, prima.dati.totale - eliminatiNellaLettura) : 0;
 
   /** Chiede la pagina che segue l'ultima caricata e la accoda a quelle extra dello stesso filtro
    * (quelle di un filtro precedente si scartano). */
@@ -145,7 +147,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
               {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 */}
               {!compatto && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} /></label>}
               <time dateTime={e.createdAt} className="max-sm:flex-1 sm:shrink-0 sm:w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
-              {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
+              {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} />}
               <div className="max-sm:order-last max-sm:basis-full flex-1 min-w-0">
                 {/* «conteggi»: lo storico vecchio «+1 nota» diventa «♪», ma «Fascino +3 (♪♪) da segnare nelle Doti» resta: lì +3 sono punti */}
                 <div className="font-semibold break-words"><TestoNote testo={e.titolo} daParole="conteggi" /></div>

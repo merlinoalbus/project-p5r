@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react';
 import { getCruciverba, impostaCruciverba } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { ordineGioco } from '../../shared/condizioniSpillo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -124,7 +125,7 @@ export function CruciverbaPage() {
   // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
   const aggiorna = (c: CruciverbaDto) => dati.imposta((attuale) => {
     const lista = attuale.cruciverba.map((x) => (x.giorno === c.giorno ? c : x));
-    return { ...attuale, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: attuale.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && attuale.dataGioco !== null && x.giorno >= attuale.dataGioco) ?? null) : attuale.prossimo };
+    return { ...attuale, cruciverba: lista, risolti: lista.filter((x) => x.fatto).length, prossimo: attuale.prossimo?.giorno === c.giorno && c.fatto ? (lista.find((x) => !x.fatto && attuale.dataGioco !== null && ordineGioco(x.giorno) >= ordineGioco(attuale.dataGioco)) ?? null) : attuale.prossimo };
   });
   const prossimo = d?.prossimo ?? null;
   // Il rimando azzera i filtri e scorre alla riga evidenziata al giro successivo, quando esiste.

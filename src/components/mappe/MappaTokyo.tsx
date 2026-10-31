@@ -38,6 +38,7 @@ import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere, useRiso
 import { PAGINA_COVO } from '../../utils/covo';
 import type { CovoNellaPartita } from '../../hooks/useCovoNellaPartita';
 import { Modal } from '../shared/Modal';
+import { usePartitaStore } from '../../stores/partitaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { contornoSagoma } from '../../utils/contornoSagoma';
@@ -214,11 +215,11 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
         misura fissa la targa cresceva *in proporzione* quando la tela si stringeva, e a 780 px
         tornavano dodici sovrapposizioni che a 1020 px non c'erano: una collocazione buona a una
         larghezza e sbagliata all'altra. Legandola alla tela, le proporzioni non cambiano più e una
-        sola tabella di posizioni vale a ogni larghezza. **Con un minimo di 9 px**: sul telefono la
+        sola tabella di posizioni vale a ogni larghezza. **Con un minimo di 12 px** (il testo minimo dell'app: le targhe non sono fra i quattro segni fitti da 11 px): sul telefono la
         tela scende a 343 px e l'1,65% erano 5,4 px, un testo che non si legge — e una targa che non
         si legge è solo rumore sopra la mappa (misurato il 2026-09-13). Sotto quella soglia le targhe
         smettono di rimpicciolire e si distanziano da sole, perché il minimo vale per tutte. */}
-    <span className={`mappa-tokyo__targa -mt-[6%] w-max max-w-[7em] text-center rounded-[2px] border-[max(1px,0.19cqw)] px-[0.5em] py-[0.12em] font-display text-[max(9px,1.65cqw)] uppercase leading-[1.05] tracking-[0.05em] shadow-[0_2px_6px_rgba(0,0,0,0.7)] group-hover:border-mappa-oro group-hover:text-mappa-oro ${
+    <span className={`mappa-tokyo__targa -mt-[6%] w-max max-w-[7em] text-center rounded-[2px] border-[max(1px,0.19cqw)] px-[0.5em] py-[0.12em] font-display text-[max(12px,1.65cqw)] uppercase leading-[1.05] tracking-[0.05em] shadow-[0_2px_6px_rgba(0,0,0,0.7)] group-hover:border-mappa-oro group-hover:text-mappa-oro ${
       s.palazzo ? 'bg-mappa-palazzo' : 'bg-black'} ${
       acceso ? 'border-mappa-oro text-mappa-oro' : 'border-white text-white'}`}>{s.targa}</span>
   </Link>;
@@ -277,6 +278,8 @@ const ZOOM_PASSO = 1.4;
  * lo si dice. `evidenziato`/`onEvidenzia` condividono la selezione con le schede dell'ospite e
  * `onApri` può intercettare il clic sui cartellini. */
 export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenziato, onEvidenzia, onApri, className = '', riempi = false }: Props) {
+  // «Nessuna partita attiva» solo quando l'elenco delle partite è arrivato (L1-07): mentre arriva non è vero
+  const partiteCaricate = usePartitaStore((s) => s.caricata);
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
   const cornice = useRef<HTMLDivElement>(null);
@@ -538,7 +541,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
         </ul>
       </Modal>
     )}
-    {!dataGioco && <p className="m-0 testo-12 text-text-muted">
+    {!dataGioco && partiteCaricate && <p className="m-0 testo-12 text-text-muted">
       Nessuna partita attiva: la mappa mostra il mondo intero, quartieri e Palazzi compresi.
     </p>}
   </div>;

@@ -20,6 +20,7 @@ import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { PageState } from '../shared/PageState';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
+import { RANGHI_CLIENTE } from '../../../shared/condizioniSpillo';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
@@ -132,10 +133,13 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const volteTotali = p?.attivita.reduce((s, a) => s + a.volte, 0) ?? 0;
   const visitePesca = p?.attivita.find((a) => a.chiave === ATTIVITA_PESCA)?.volte ?? 0;
 
+  // solo i negozi con un progresso vero: il server elenca ogni negozio con un programma, anche a partita vuota
+  const negoziConGrado = p?.rangoCliente.filter((r) => r.spesa > 0 || r.rango.chiave !== RANGHI_CLIENTE[0].chiave).length ?? 0;
+  const negoziConPunti = p?.puntiNegozio.filter((n) => n.punti > 0).length ?? 0;
   const tessere: Record<Sezione, { valore: string; dettaglio: string }> = {
     storia: { valore: `${eventiAvvenuti} di ${eventiTot}`, dettaglio: daSegnare.length ? `eventi avvenuti · ${daSegnare.length} da segnare` : 'eventi avvenuti · nulla da segnare' },
     attivita: { valore: `${volteTotali}`, dettaglio: volteTotali === 1 ? 'volta o turno registrato' : 'volte e turni registrati' },
-    negozi: { valore: `${p?.rangoCliente.length ?? 0} ${p?.rangoCliente.length === 1 ? 'grado' : 'gradi'}`, dettaglio: `grado cliente · ${p?.puntiNegozio.length ?? 0} con punti` },
+    negozi: { valore: `${negoziConGrado} ${negoziConGrado === 1 ? 'grado' : 'gradi'}`, dettaglio: `grado cliente · ${negoziConPunti} con punti` },
     pesca: { valore: `${visitePesca} ${visitePesca === 1 ? 'visita' : 'visite'}`, dettaglio: 'al laghetto di Ichigaya' },
   };
 

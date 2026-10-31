@@ -1921,6 +1921,24 @@
   @media (max-width: 639px) {
     .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
   }
+  /* L1-01 (schizzo approvato il 31/10): la stessa fila a sé quando è stretta la COLONNA delle voci, non lo schermo (Partita/Oggi e Home
+     mettono il Diario in mezza larghezza da 768 px, e il testo scendeva fino a 5 px). Soglia 460 px: la riga più carica ha 301 px fissi
+     (maniglia 44, casella 44, immagine 40, comandi 132, spazi), e al testo ne restano almeno 160 */
+  ul:has(> li.azione) { container: voci-giorno / inline-size; }
+  @container voci-giorno (max-width: 460px) {
+    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
+  }
+  /* L1-02 (schizzo approvato il 31/10): da 768 px la griglia delle Doti ha l'altezza della pagina, e la stella a misura fissa usciva dalla
+     card (sopra le schede e con la barra di pagina). La card è contenitore in larghezza; il riquadro della stella prende l'altezza che
+     resta (fino al lato naturale: 540 px, o la larghezza meno il margine del 12% per lato) e la stella è il quadrato più grande che ci
+     sta. Niente lato minimo: con la scelta della Fortuna aperta un minimo di 200 px la spingeva fuori dalla card di 41 px, sopra le
+     schede (misurato a 1366×657); senza, sborda di 13 px solo in quello stato, come nello schizzo. `StellaCinque` legge il lato da
+     `--stella-lato` */
+  @media (min-width: 768px) {
+    .stella-doti { container-type: inline-size; }
+    .stella-doti__riquadro { flex: 1 1 0; min-height: 0; max-height: min(540px, 76cqw); container-type: size; align-items: center;
+      --stella-lato: min(100cqw, 100cqh); }
+  }
   .btn-ghost.comandi-voce__elimina, .btn-ghost.comandi-voce__elimina:hover:not(:disabled) { color: var(--color-error-testo); }
   /* il menu a tendina del «⋯»: in un portale a posizione fissa, ancorato al pulsante (top/left li scrive `collocaMenu`); scorre al suo
      interno solo se non ci sta nemmeno dalla parte con più spazio, senza trascinare la pagina */

@@ -15,7 +15,7 @@
 // pagine della Guida, e qui conta ancora di più, perché in partita si guarda «cosa mi manca».
 // ============================================================
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { getFilm, getLibri, getVideogiochi, impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -143,7 +143,11 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   // dentro. Copiare gli elenchi in uno stato e risincronizzarli con un effetto significa scrivere
   // stato dentro un effetto — cascata di render, e la regola `react-hooks/set-state-in-effect` lo
   // dice — e soprattutto significa avere due verita' che possono divergere.
-  const [toccate, setToccate] = useState<Record<string, Voce>>({});
+  // La toppa ricorda su quale lettura (l'oggetto dei dati del suo gruppo) è stata fatta: riletto l'elenco la lettura è un'altra e la toppa non
+  // si applica più, così non resta sopra i dati ricaricati; se la rilettura fallisce i dati sono gli stessi e la toppa resta.
+  const [toccate, setToccate] = useState<Record<string, { voce: Voce; base: unknown }>>({});
+  const lette = useRef<Record<Gruppo, unknown>>({ libri: null, film: null, videogiochi: null });
+  useLayoutEffect(() => { lette.current = { libri: libri.dati, film: film.dati, videogiochi: giochi.dati }; }, [libri.dati, film.dati, giochi.dati]);
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   // categoria mostrata sotto i 1024 px, ricordata per visitatore
   const [categoria, setCategoria] = useState<Gruppo>(categoriaRicordata);
@@ -163,15 +167,15 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita), passo: 1 });
 
   /** La versione aggiornata qui della voce, se c'è; altrimenti quella caricata. */
-  const conToppa = (v: Voce): Voce => {
+  const conToppa = (v: Voce, base: unknown): Voce => {
     const t = toccate[v.chiave];
     // il passo è quello di adesso (Lettura rapida può essere stata finita dopo la toppa)
-    return t ? { ...t, passo: v.passo } : v;
+    return t && t.base === base ? { ...t.voce, passo: v.passo } : v;
   };
   const locali: Record<Gruppo, Voce[]> = {
-    libri: (libri.dati?.libri ?? []).map(daLibro).map(conToppa),
-    film: (film.dati?.film ?? []).map(daFilm).map(conToppa),
-    videogiochi: (giochi.dati?.videogiochi ?? []).map(daGioco).map(conToppa),
+    libri: (libri.dati?.libri ?? []).map(daLibro).map((v) => conToppa(v, libri.dati)),
+    film: (film.dati?.film ?? []).map(daFilm).map((v) => conToppa(v, film.dati)),
+    videogiochi: (giochi.dati?.videogiochi ?? []).map(daGioco).map((v) => conToppa(v, giochi.dati)),
   };
 
   const caricamento = (libri.caricamento && !libri.dati) || (film.caricamento && !film.dati) || (giochi.caricamento && !giochi.dati);
@@ -186,7 +190,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
         : gruppo === 'film' ? await impostaProgressoFilm(partitaId, v.chiave, avanzamento)
           : await impostaProgressoVideogioco(partitaId, v.chiave, avanzamento);
       const agg = gruppo === 'libri' ? daLibro(esito as LibroDto) : gruppo === 'film' ? daFilm(esito as FilmDto) : daGioco(esito as VideogiocoDto);
-      setToccate((t) => ({ ...t, [agg.chiave]: agg }));
+      setToccate((t) => ({ ...t, [agg.chiave]: { voce: agg, base: lette.current[gruppo] } }));
       // il conseguimento dà le sue Doti: si segnano a mano, l'avviso le ricorda
       avvisaDotiDaSegnare(esito.daSegnare, v.nome);
       // Ondata 5 (lotto F-bis): un libro finito (o riaperto) cambia i promemoria dei libri letti nei tre gruppi: si rileggono, con la toppa sopra

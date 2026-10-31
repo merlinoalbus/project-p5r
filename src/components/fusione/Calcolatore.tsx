@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getFondi } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
+import { usePartitaStore } from '../../stores/partitaStore';
 import { SelettorePersona } from './SelettorePersona';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { formattaYen } from '../../utils/punti';
@@ -36,6 +37,8 @@ interface Props {
  */
 export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB, scorta, onScortaCambiata }: Props) {
   const [esecuzione, setEsecuzione] = useState(false);
+  // «Nessuna partita attiva» solo quando l'elenco delle partite è arrivato (L1-07): mentre arriva non è vero
+  const partiteCaricate = usePartitaStore((s) => s.caricata);
   const [a, setA] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeA) ?? null);
   const [b, setB] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeB) ?? null);
   const { dati: esito, caricamento, errore } = useCarica(
@@ -100,7 +103,7 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
           <PannelloEredita a={a.id} b={b.id} partitaId={partitaId} />
         </div>
       )}
-      {!partitaId && <p className="m-0 testo-12 text-text-muted">Nessuna partita attiva: le Persona DLC sono considerate non possedute.</p>}
+      {!partitaId && partiteCaricate && <p className="m-0 testo-12 text-text-muted">Nessuna partita attiva: le Persona DLC sono considerate non possedute.</p>}
     </div>
   );
 }

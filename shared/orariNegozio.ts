@@ -46,7 +46,7 @@ export function orariDelLuogo(json: string | null | undefined): OrariDelLuogo {
   return json ? { ...leggiOrari(json), origine: 'guida' } : { ...ORARI_REGOLA_APP, origine: 'regola-app' };
 }
 
-/** Il testo della regola dell'app (R5-12c): si dice sempre che non è un dato della guida. */
+/** Il testo della regola dell'app (R5-12c): dice che non è un dato della guida. La pagina del luogo non lo mostra nell'intestazione (L1-21). */
 export const TESTO_REGOLA_APP = 'Giorno e sera · regola dell’app: la guida non indica orari';
 
 /** Gli orari di un luogo in parole (L5): la regola dell'app detta come tale; un orario della guida senza limiti è «Giorno e sera». */

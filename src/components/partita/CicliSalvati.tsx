@@ -71,7 +71,7 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
   return (
     <article className="card flex flex-col gap-2">
       <div className="flex items-center gap-3 flex-wrap">
-        <ImmagineEntita ambito="persona" chiave={ciclo.nome} etichetta={ciclo.nomeIt} dimensione={72} adatta="copri" />
+        <ImmagineEntita ambito="persona" chiave={ciclo.nome} etichetta={ciclo.nomeIt} dimensione={72} />
         <Link to={`/compendio/persona/${ciclo.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{ciclo.nomeIt}</Link>
         <span className="testo-12 text-text-muted">{ciclo.arcanaNome}</span>
         <span className="chip">{ciclo.titolo}</span>

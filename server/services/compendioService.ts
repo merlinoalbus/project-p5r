@@ -441,9 +441,17 @@ export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
 export function dettaglioSkill(id: number): SkillDettaglioDto {
   const r = prepared('SELECT * FROM skill WHERE id = ?').get(id) as RigaSkill | undefined;
   if (!r) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
-  const persone = (prepared('SELECT p.id, p.nome, p.arcana, p.livello AS livello_persona, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY p.livello, p.nome').all(id) as Array<{ id: number; nome: string; arcana: string; livello_persona: number; livello: number | null }>)
-    .map((p) => ({ id: p.id, nome: p.nome, arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livelloPersona: p.livello_persona, livello: p.livello }));
-  const fonti = prepared('SELECT p.id, p.nome FROM skill_fonte_esecuzione f JOIN persona p ON p.id = f.persona_id WHERE f.skill_id = ? ORDER BY p.nome').all(id) as Array<{ id: number; nome: string }>;
+  const persone: SkillDettaglioDto['persone'] = (prepared('SELECT p.id, p.nome, p.arcana, p.livello AS livello_persona, ps.livello, ps.modo FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY p.livello, p.nome').all(id) as Array<{ id: number; nome: string; arcana: string; livello_persona: number; livello: number | null; modo: ModoApprendimento }>)
+    .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livelloPersona: p.livello_persona, livello: p.livello, modo: p.modo }));
+  // un tratto non sta in `persona_skill`: la Persona lo ha in `persona.tratto` (per nome), com'è per l'eredità
+  if (r.elemento === 'trait') {
+    const contratto = prepared('SELECT id, nome, arcana, livello FROM persona WHERE tratto = ? ORDER BY livello, nome').all(r.nome) as Array<{ id: number; nome: string; arcana: string; livello: number }>;
+    for (const p of contratto) persone.push({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livelloPersona: p.livello, livello: null, modo: 'tratto' });
+    // l'elenco resta in ordine di livello della Persona, come promette la documentazione dell'API
+    persone.sort((a, b) => a.livelloPersona - b.livelloPersona || a.nome.localeCompare(b.nome));
+  }
+  const fonti = (prepared('SELECT p.id, p.nome FROM skill_fonte_esecuzione f JOIN persona p ON p.id = f.persona_id WHERE f.skill_id = ? ORDER BY p.nome').all(id) as Array<{ id: number; nome: string }>)
+    .map((f) => ({ id: f.id, nome: f.nome, nomeIt: t('persona', f.nome) }));
   const titoloNegoz = r.negoziazione ? r.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') : null;
   const personaNegoz = r.negoziazione ? r.negoziazione.match(/\(([^)]*)\)\s*$/)?.[1] ?? null : null;
   const unicaNome = r.unica ? (tOpz('fonteEsclusiva', r.unica) ?? r.unica) : null;

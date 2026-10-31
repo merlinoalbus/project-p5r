@@ -7,6 +7,7 @@ import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconChevronLeft, IconChevronRight } from '../shared/icons';
 import { MeteoGiornata } from './MeteoGiornata';
+import { GestiPartita } from './GestiPartita';
 import { ProviderPannelloScheda } from '../scheda/PannelloScheda';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { Oggi } from '../../hooks/useOggi';
@@ -39,6 +40,8 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
         {indice.dataCorrente && indice.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => oggi.vaiAlGiorno(indice.dataCorrente)} />}
         <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa" />
       </div>
+      {/* L1-08: le operazioni senza conferma sicura (che spengono la casella di una voce) si completano da qui, come nella guida completa */}
+      <GestiPartita partitaId={oggi.partitaId} contestoChiave={`${oggi.partitaId}:${g.giorno}`} onCambiato={() => oggi.ricarica()} />
       {!indice.dataCorrente && <p className="m-0 testo-12 text-text-muted shrink-0">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
       {/* Una riga sola (richiesta dell'utente, 2026-09-30): «Giorno», «Sera» e le quattro icone del meteo della fascia
           attiva — passando a «Sera» le icone dicono e segnano il meteo della sera; un tocco salva. Niente etichetta sopra e

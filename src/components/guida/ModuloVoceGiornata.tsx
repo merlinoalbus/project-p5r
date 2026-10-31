@@ -23,6 +23,7 @@ import { Segmenti } from '../shared/Segmenti';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { aggiornaVoceGiornata, applicaPropostaConversione, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
+import { useMedia } from '../../hooks/useMedia';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_GENERE } from '../../utils/percorso';
 import { SceltaTipoQuale, SpuntandoSuccede } from './EditorAzioneStrutturata';
@@ -71,6 +72,9 @@ interface Props {
 // L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il modulo non esiste; la condizione è costante di build, `ModuloVoceGiornataReale` esce dal bundle
 export const ModuloVoceGiornata: StrumentoDiModifica<typeof ModuloVoceGiornataReale> = IN_RILASCIO ? NienteInRilascio : ModuloVoceGiornataReale;
 function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
+  // come nella finestra (`Modal`): il fuoco sul campo apre la tastiera, e su tablet e telefono la tastiera copre metà del foglio;
+  // il campo prende il fuoco solo da desktop (≥ 1024 px, la soglia della barra laterale)
+  const largo = useMedia('(min-width: 1024px)');
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   const proposta = soggetto.tipo === 'voce' ? soggetto.proposta ?? null : null;
   /** Le altre voci di una fascia, nel loro ordine (senza quella che si modifica). */
@@ -181,7 +185,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
         <span className="testo-12 text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
       </div>
       <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
-        <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus onChange={(e) => imposta({ testo: e.target.value })}
+        <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>
       <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}

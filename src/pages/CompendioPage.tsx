@@ -51,7 +51,7 @@ const RigaPersonaElenco = memo(function RigaPersonaElenco({ p, evidenziata, onAp
   return (
     <li id={`persona-${p.id}`}>
       <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile flex items-center gap-3 no-underline text-text ${evidenziata ? 'card--evidenza' : ''}`} onClick={() => onApri(p.id)}>
-        <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} adatta="copri" /></span>
+        <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} /></span>
         <LivelloBadge livello={p.livello} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">

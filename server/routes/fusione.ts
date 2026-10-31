@@ -21,13 +21,13 @@ router.get('/fondi', validate({ query: queryFondi }), (req, res) => {
 });
 
 router.get('/ricette/:personaId', validate({ params: paramsPersonaId, query: queryRicette }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
-  res.json(ricettePerDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number; soloPronte?: boolean };
+  res.json(ricettePerDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite, soloPronte: q.soloPronte }));
 });
 
 router.get('/con/:personaId', validate({ params: paramsPersonaId, query: queryRicette }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
-  res.json(fusioniConDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number; soloPronte?: boolean };
+  res.json(fusioniConDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite, soloPronte: q.soloPronte }));
 });
 
 router.get('/piani/:personaId', validate({ params: paramsPersonaId, query: queryPiani }), (req, res) => {

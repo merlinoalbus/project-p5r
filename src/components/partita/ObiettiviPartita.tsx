@@ -95,7 +95,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Obiettivi">
           {visibili.map((o) => (
             <li key={o.id} className={`card flex gap-3 ${o.stato !== 'aperto' ? 'opacity-80' : ''}`}>
-              <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" adatta="copri" />
+              <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" />
               <div className="flex-1 min-w-0 flex flex-col gap-1 testo-13">
                 <div className="flex items-center gap-2 flex-wrap">
                   <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{o.nomeIt}</Link>

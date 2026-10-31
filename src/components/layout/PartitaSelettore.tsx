@@ -11,7 +11,7 @@ import { notifica } from '../../stores/notificationStore';
 /** Menu a tendina con le partite; "Nuova partita…" porta alle impostazioni. */
 export function PartitaSelettore() {
   // solo quel che serve (P4"): senza selettore si ridisegnava a ogni cambio dello store, caricamenti compresi
-  const { partite, attiva, rendiAttiva } = usePartitaStore(useShallow((s) => ({ partite: s.partite, attiva: s.attiva, rendiAttiva: s.rendiAttiva })));
+  const { partite, attiva, caricata, rendiAttiva } = usePartitaStore(useShallow((s) => ({ partite: s.partite, attiva: s.attiva, caricata: s.caricata, rendiAttiva: s.rendiAttiva })));
   const navigate = useNavigate();
 
   /** «Nuova partita…» porta alle impostazioni; un'altra partita diventa attiva (con notifica), la stessa o un valore vuoto non fa nulla. */
@@ -36,7 +36,8 @@ export function PartitaSelettore() {
       className="min-w-0 shrink max-w-[160px] sm:max-w-[240px]"
       etichetta="Partita attiva"
       valore={attiva ? String(attiva.id) : ''}
-      segnaposto="Nessuna partita"
+      // «Nessuna partita» solo quando l'elenco è arrivato (L1-07): mentre arriva non è vero
+      segnaposto={caricata ? 'Nessuna partita' : 'Un attimo…'}
       opzioni={[...partite.map((p) => ({ chiave: String(p.id), nome: p.nome, dettaglio: `Liv. ${p.livelloProtagonista}` })), { chiave: '__nuova', nome: 'Nuova partita…' }]}
       onCambia={(k) => void cambia(k)}
     />

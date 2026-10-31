@@ -91,7 +91,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
       <header className="testata-confidente relative overflow-hidden">
         <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa dimensione={96} className="poster__filigrana" fallback={null} />
         <div className="testata-confidente__ritratto">
-          <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={96} forma="carta" adatta="copri" modificabile />
+          <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={96} forma="carta" modificabile />
         </div>
         <div className="testata-confidente__info flex flex-col gap-2">
           <div className="flex items-center gap-2 flex-wrap">

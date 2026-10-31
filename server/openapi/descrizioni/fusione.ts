@@ -18,14 +18,14 @@ export const DESCRIZIONI_FUSIONE: DescrizioniArea = {
   },
   'GET /api/fusione/ricette/:personaId': {
     sommario: 'Fusione inversa: le ricette che producono una Persona',
-    descrizione: 'Tutte le coppie (o la ricetta speciale) che danno la Persona nel contesto dei DLC. `livelloMax` tiene solo le ricette con risultato e ingredienti entro quel livello; `limite` (predefinito 500) taglia l\'elenco restituito, mentre `totale` (dopo il filtro) e `totaleSenzaFiltri` contano sempre tutto. Con una partita i costi sono scontati secondo il Registro.',
-    risposta: '`RicetteFusioneDto` (persona, totale, totaleSenzaFiltri, ricette, dlcPosseduti, livelloMax, sconto)',
+    descrizione: 'Tutte le coppie (o la ricetta speciale) che danno la Persona nel contesto dei DLC. `livelloMax` tiene solo le ricette con risultato e ingredienti entro quel livello; `soloPronte` (booleano, richiede `partita`) tiene solo le ricette con tutti gli ingredienti nella scorta della partita, prima del limite; `limite` (predefinito 500) taglia l\'elenco restituito, mentre `totale` (dopo i filtri) e `totaleSenzaFiltri` contano sempre tutto. Con una partita i costi sono scontati secondo il Registro.',
+    risposta: '`RicetteFusioneDto` (persona, totale, totaleSenzaFiltri, ricette, dlcPosseduti, livelloMax, soloPronte, sconto)',
     errori: [[404, 'persona-non-trovata'], [404, 'partita-non-trovata']],
   },
   'GET /api/fusione/con/:personaId': {
     sommario: 'Le fusioni in cui una Persona fa da ingrediente',
-    descrizione: 'Tutte le fusioni a due che usano la Persona come ingrediente, con il risultato, nel contesto dei DLC. Stessi filtri delle ricette: `livelloMax` su risultato e ingredienti, `limite` (predefinito 500) sull\'elenco restituito, con i totali prima e dopo il filtro. Con una partita i costi sono scontati secondo il Registro.',
-    risposta: '`RicetteFusioneDto` (persona, totale, totaleSenzaFiltri, ricette, dlcPosseduti, livelloMax, sconto)',
+    descrizione: 'Tutte le fusioni a due che usano la Persona come ingrediente, con il risultato, nel contesto dei DLC. Stessi filtri delle ricette: `livelloMax` su risultato e ingredienti, `soloPronte` (con `partita`) tiene solo le fusioni con tutti gli ingredienti nella scorta, `limite` (predefinito 500) sull\'elenco restituito, con i totali prima e dopo i filtri. Con una partita i costi sono scontati secondo il Registro.',
+    risposta: '`RicetteFusioneDto` (persona, totale, totaleSenzaFiltri, ricette, dlcPosseduti, livelloMax, soloPronte, sconto)',
     errori: [[404, 'persona-non-trovata'], [404, 'partita-non-trovata']],
   },
   'GET /api/fusione/piani/:personaId': {

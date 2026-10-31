@@ -21,6 +21,7 @@ import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { notifica } from '../../stores/notificationStore';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { NOME_FASCIA_METEO } from '../../utils/meteoFascia';
+import { ordineGioco } from '../../../shared/condizioniSpillo';
 import type { FasciaGioco, MeteoGiornoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 
@@ -44,7 +45,8 @@ export function MeteoAlCambioGiorno() {
   useEffect(() => {
     const prima = ultima.current;
     ultima.current = id === null ? null : { id, data };
-    if (id !== null && data && prima && prima.id === id && prima.data !== data) chiedi(id, data);
+    // solo quando la data avanza nell'ordine di gioco: tornando indietro o correggendola a mano la scelta del meteo non si riapre
+    if (id !== null && data && prima && prima.id === id && (!prima.data || ordineGioco(data) > ordineGioco(prima.data))) chiedi(id, data);
   }, [id, data, chiedi]);
 
   useEffect(() => {

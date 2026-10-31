@@ -223,8 +223,8 @@ const inPortale = (fuori: boolean, nodo: ReactNode): ReactNode => (fuori ? creat
 export function ImmagineRiferimento({ immagine, nome, dimensione = 56 }: { immagine: { url: string | null; asset: string | null } | null | undefined; nome: string; dimensione?: number }) {
   if (!immagine || (!immagine.url && !immagine.asset)) return null;
   const stile = { width: dimensione, height: dimensione };
-  if (immagine.url) return <img src={immagine.url} alt={`Immagine: ${nome}`} className="object-cover border border-border shrink-0" style={stile} draggable={false} />;
-  return <AssetImg nome={immagine.asset} alt={`Immagine: ${nome}`} className="object-cover border border-border shrink-0" style={stile} fallback={null} />;
+  if (immagine.url) return <img src={immagine.url} alt={`Immagine: ${nome}`} className="object-contain border border-border shrink-0" style={stile} draggable={false} />;
+  return <AssetImg nome={immagine.asset} alt={`Immagine: ${nome}`} className="object-contain border border-border shrink-0" style={stile} fallback={null} />;
 }
 
 /** Galleria delle schermate di riferimento dello spillo: miniature, ingrandimento in finestra. */
@@ -238,7 +238,7 @@ export function GalleriaSpillo({ immagini, nome, compatta }: { immagini: Immagin
         {immagini.map((i, n) => (
           <li key={i.id}>
             <button type="button" className="p-0 border border-border bg-bg-tertiary block" style={{ width: d, height: d }} onClick={() => setAperta(i)} title={i.didascalia || `Schermata ${n + 1}`} aria-label={`Ingrandisci: ${i.didascalia || `schermata ${n + 1}`}`}>
-              {i.url ? <img src={i.url} alt="" className="w-full h-full object-cover" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-cover" fallback={<span className="testo-12 text-text-muted">asset</span>} />}
+              {i.url ? <img src={i.url} alt="" className="w-full h-full object-contain" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-contain" fallback={<span className="testo-12 text-text-muted">asset</span>} />}
             </button>
           </li>
         ))}
@@ -1468,7 +1468,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="testo-12 font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
             {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
-            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="testo-12 text-primary-testo">{negozio.nome}</Link>
+            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="touch inline-flex items-center testo-12 text-primary-testo">{negozio.nome}</Link>
           </div>
           {/* seconda revisione della chiusura dell'ondata 5: lo sconto che non vale adesso si dice con la sua regola, come in «Dove si compra» */}
           {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}

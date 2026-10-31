@@ -14,6 +14,7 @@ import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { etichettaApprendimento } from '../utils/apprendimentoSkill';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -51,25 +52,25 @@ export function SkillDettaglioPage() {
               {s.fontiEsecuzione.length > 0 && (
                 <>
                   <dt className="text-text-muted">Carta da esecuzione di</dt>
-                  <dd className="m-0 flex flex-wrap gap-1">{s.fontiEsecuzione.map((p) => <Link key={p.id} to={`/compendio/persona/${p.id}`} className="chip no-underline">{p.nome}</Link>)}</dd>
+                  <dd className="m-0 flex flex-wrap gap-1">{s.fontiEsecuzione.map((p) => <Link key={p.id} to={`/compendio/persona/${p.id}`} className="chip no-underline">{p.nomeIt}</Link>)}</dd>
                 </>
               )}
             </dl>
           </div>}
 
           <section className="card">
-            <TitoloSezione className="mb-2">Persona che la imparano ({s.persone.length})</TitoloSezione>
+            <TitoloSezione className="mb-2">{s.elemento === 'trait' ? 'Persona che hanno il tratto' : 'Persona che la imparano'} ({s.persone.length})</TitoloSezione>
             {s.persone.length === 0 ? (
-              <p className="m-0 testo-13 text-text-muted">Nessuna Persona del compendio la apprende per livello.</p>
+              <p className="m-0 testo-13 text-text-muted">{s.elemento === 'trait' ? 'Nessuna Persona del compendio ha questo tratto.' : 'Nessuna Persona del compendio la apprende per livello.'}</p>
             ) : (
               <ul className="m-0 p-0 list-none grid gap-1 grid-cols-1 sm:grid-cols-2">
                 {s.persone.map((p) => (
                   <li key={p.id}>
                     <Link to={`/compendio/persona/${p.id}`} className="flex items-center gap-2 py-1.5 no-underline text-text hover:text-primary-testo">
                       <span className="w-9 text-right testo-12 text-text-muted">Liv. {p.livelloPersona}</span>
-                      <span className="font-semibold">{p.nome}</span>
+                      <span className="font-semibold">{p.nomeIt}</span>
                       <span className="chip">{p.arcanaNome}</span>
-                      <span className="testo-12 text-text-secondary ml-auto">{p.livello === 0 ? 'innata' : `a liv. ${p.livello}`}</span>
+                      <span className="testo-12 text-text-secondary ml-auto">{p.livello === null ? etichettaApprendimento(p) : p.livello === 0 ? 'innata' : `a liv. ${p.livello}`}</span>
                     </Link>
                   </li>
                 ))}

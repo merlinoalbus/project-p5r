@@ -64,6 +64,16 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Punti aperti
 
+**Piano di intervento del 31 ottobre (approvato)**
+- Analisi ECC dell'intera app (codice, dati su una copia, 55 rotte misurate in cinque formati) ordinata in dodici lotti: L0 base di
+  misura, L1 difetti visibili mentre si gioca, L2 scritture sicure, L3 mappe al tocco, L4 navigazione verso l'elemento, L5
+  prestazioni, L6 accessibilità, L7 testi che informano, L8 coerenza dei dati, L9 sicurezza delle due istanze, L10 miglioramenti che
+  cambiano l'aspetto, L11 manutenibilità e documenti.
+- Fatti: L0 (misure di base sulla copia) e L1 (difetti visibili mentre si gioca; L1-01 e L1-02 secondo lo schizzo approvato per D2).
+- Aperti: L2–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
+  blocchi della guida in prosa. Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+  immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
+
 **Lavori aperti**
 - **Effetti strutturati delle attività.** Non tutte le attività che dichiarano Doti hanno effetti strutturati: all'ultimo
   censimento (14 attività su 30 con effetti) bagno pubblico di Yongen-Jaya, centro battute, studio in biblioteca, caffè del Leblanc,

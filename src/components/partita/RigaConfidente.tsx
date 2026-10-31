@@ -60,7 +60,7 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
   return (
     <li className={`riga-confidente ${pronto ? 'riga-confidente--pronta' : ''} ${selezionata ? 'riga-confidente--scelta' : ''} ${c.bloccato && c.rango === 0 ? 'poster--bloccato' : ''} ${classiSuggerito(oggi, 'riga')}`}>
       <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa dimensione={96} className="poster__filigrana" fallback={null} />
-      <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" adatta="copri" />
+      <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" />
       {/* il nome accessibile è il contenuto stesso (nome, Oggi, arcano, stato, rango): niente aria-label che lo nasconda */}
       <button type="button" className="riga-confidente__scelta touch" onClick={onScegli} aria-current={selezionata ? 'true' : undefined}>
         {/* il nome va a capo (al massimo due righe) invece di essere troncato; OGGI sta sulla riga dell'arcano, dove c'è spazio, e non si

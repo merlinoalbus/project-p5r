@@ -40,6 +40,7 @@ export function FusionePage() {
   useDocumentTitle('Fusione');
   const glossario = useGlossarioStore((s) => s.glossario);
   const attiva = usePartitaStore((s) => s.attiva);
+  const partiteCaricate = usePartitaStore((s) => s.caricata);
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [params, setParams] = useSearchParams();
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), [], { cacheUrl: URL_REGOLE_FUSIONE });
@@ -98,8 +99,8 @@ export function FusionePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.</>} />
-      <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
+      <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : partiteCaricate ? ' (nessuna: solo contenuti base)' : ''}. Le Persona nella scorta sono evidenziate.</>} />
+      <PannelloVelluto velluto={velluto.dati ?? null} inCaricamento={!partiteCaricate || (attiva !== null && !velluto.dati)} errore={velluto.dati ? null : velluto.errore} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       <FilaScorrevole role="group" aria-label="Sezioni della fusione">
         {visteMostrate.map(([k, l, icona]) => (
           // L'immagine sopra la parola, come nelle schede della Partita: l'iconcina da 16 px

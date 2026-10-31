@@ -10,6 +10,8 @@ export interface OpzioniFusione {
   partita?: number;
   livelloMax?: number;
   limite?: number;
+  /** Solo le ricette con tutti gli ingredienti nella scorta della partita (il server filtra prima del limite). */
+  soloPronte?: boolean;
 }
 
 /** Fusione diretta di due Persona per id: il risultato, o il motivo per cui non è possibile (DLC della partita se indicata). */
@@ -18,7 +20,7 @@ export const getFondi =(a: number, b: number, opz: Pick<OpzioniFusione, 'partita
 
 /** Fusione inversa: le ricette che producono la Persona, filtrate per livello massimo e limitate in numero. */
 export const getRicettePer =(personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
-  apiGet(`/fusione/ricette/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);
+  apiGet(`/fusione/ricette/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite, soloPronte: opz.soloPronte })}`);
 
 export interface OpzioniPiani {
   partita?: number;
@@ -52,4 +54,4 @@ export const getCicliFusione = (id: number, opz: { partita?: number; lunghezza?:
 
 /** Le fusioni in cui la Persona è ingrediente, filtrate per livello massimo e limitate in numero. */
 export const getFusioniCon =(personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
-  apiGet(`/fusione/con/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);
+  apiGet(`/fusione/con/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite, soloPronte: opz.soloPronte })}`);

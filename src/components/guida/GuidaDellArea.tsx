@@ -359,9 +359,11 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     return (
       <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 testo-13 ${aperto ? 'bg-primary-bg' : ''}`}>
         {/* segnata e chiusa, la riga si attenua: «esaurito» più di «ottenuto» (§4.1, R4-34: si distinguono a colpo d'occhio) */}
-        <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? (p.stato === 'esaurito' ? 'opacity-40' : 'opacity-60') : ''}`} onClick={() => { apri(aperto ? null : p.chiave, pl); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
+        <button type="button" className={`touch flex flex-wrap items-start gap-2 text-left ${p.stato && !aperto ? (p.stato === 'esaurito' ? 'opacity-40' : 'opacity-60') : ''}`} onClick={() => { apri(aperto ? null : p.chiave, pl); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
-          <span className="min-w-0 flex-1">
+          {/* `flex-wrap` e base minima del titolo: con tre cartellini accanto (Da verificare, avanzamento, pin) il titolo restava largo 0 px
+              a 375; ora, se non c'è posto per almeno 10 rem di testo, i cartellini vanno sotto */}
+          <span className="min-w-0 flex-[1_1_10rem]">
             <span className="font-semibold">{p.nome}</span>
             <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
             {/* L4 §4.1: il carattere accanto al tipo (assente per le voci dei dedali e per le Persona); nel testo, così va a capo con lui */}

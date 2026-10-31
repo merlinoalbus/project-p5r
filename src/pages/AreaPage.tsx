@@ -16,6 +16,8 @@ import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { eliminaAreaMondo, getArea, isApiError, ripristinaAreaMondo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useMedia } from '../hooks/useMedia';
+import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -57,7 +59,9 @@ function schedaElemento(e: ElementoAreaDto): string {
 export function AreaPage() {
   const { chiave: contenitore = '', area: slug = '' } = useParams();
   const attiva = usePartitaStore((s) => s.attiva);
-  const dati = useCarica(() => getArea(contenitore, slug, attiva?.id), [contenitore, slug, attiva]);
+  // Dipende dall'**id** della partita; ai suoi cambi di stato (giorno, fascia, meteo…) si rilegge con `ricarica()`, che tiene a schermo pin, pannello e finestre
+  const dati = useCarica(() => getArea(contenitore, slug, attiva?.id), [contenitore, slug, attiva?.id]);
+  useRileggiAlCambio(dati.ricarica, attiva);
   const a = dati.dati;
   // il titolo della scheda del browser dice il posto e dove sta (L2, M8): «Central Street — Shibuya»
   useDocumentTitle(a ? `${a.nome} — ${a.contenitore.tipo === 'citta' ? 'Tokyo' : a.contenitore.nome}` : 'Area');
@@ -99,7 +103,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
   // pannello chiuso, che ruberebbe la tela; sul telefono **sotto il visore, nella pagina**: dentro il visore il pannello stringeva la
   // tela a 240 px e scorreva dentro la pagina che scorre (LAY2-4). Se l'utente apre o chiude il pannello la scelta resta finché resta
   // sulla pagina, anche cambiando versione o pin (il visore si rimonta), senza salvarla.
-  const [telefono] = useState(() => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 767.98px)').matches);
+  const telefono = useMedia('(max-width: 767.98px)');
   const [pannello, setPannello] = useState(() => typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(min-width: 1280px)').matches);
   /** Il visore, per riportarlo in vista sul telefono quando si sceglie un luogo dall'elenco sotto. */
   const visore = useRef<HTMLDivElement | null>(null);

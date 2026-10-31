@@ -19,7 +19,8 @@ import { campiPersona } from '../components/compendio/campiPersona';
 import { DoveSiIncontra } from '../components/compendio/DoveSiIncontra';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
-import type { RicettaSpecialeDto, SkillAppresaDto } from '../types';
+import type { RicettaSpecialeDto } from '../types';
+import { etichettaApprendimento } from '../utils/apprendimentoSkill';
 import { CHIAVI_STATISTICHE, MASSIMO_STATISTICA, NOMI_STATISTICHE, statistichePerLivello } from '../../shared/statistiche';
 import { slug } from '../../shared/slug';
 import { useAsset } from '../stores/assetStore';
@@ -39,14 +40,6 @@ import { MenuModifica } from '../components/shared/MenuModifica';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
-
-
-/** Come si impara una skill: «Innata», «Liv. N», oppure — per le forme del gruppo — con il risveglio, i ranghi del Confidente o la 3ª forma. */
-function etichettaApprendimento(s: SkillAppresaDto): string {
-  if (s.livello === 0) return 'Innata';
-  if (s.livello !== null) return `Liv. ${s.livello}`;
-  return s.modo === 'risveglio' ? 'Risveglio' : s.modo === 'terza-forma' ? '3ª forma' : 'Rango';
-}
 
 /** Ricetta speciale come riga di tasselli (stessa resa delle ricette di fusione: 14.10). */
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
@@ -109,8 +102,14 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
   );
 }
 
-/** Scheda Persona: identità, statistiche, affinità, skill, tratto, fusioni, esecuzione, Mementos. */
+/** Scheda Persona: si rimonta a ogni Persona (come `OggettoPage`), così livello scelto, scala della stella e stella ingrandita non passano alla Persona successiva. */
 export function PersonaDettaglioPage() {
+  const { id } = useParams();
+  return <SchedaPersona key={id} />;
+}
+
+/** Identità, statistiche, affinità, skill, tratto, fusioni, esecuzione, Mementos. */
+function SchedaPersona() {
   const { id } = useParams();
   const personaId = Number(id);
   const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId], { cacheUrl: urlPersona(personaId) });

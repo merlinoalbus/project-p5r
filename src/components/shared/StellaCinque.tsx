@@ -94,7 +94,7 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
   const sovrapposizione = (SOVRAPPOSIZIONE / dimensione) * 100;
 
   return (
-    <div className={`relative select-none ${className ?? ''}`} style={{ width: dimensione, maxWidth: '100%', aspectRatio: '1 / 1', containerType: 'inline-size' }}>
+    <div className={`relative select-none ${className ?? ''}`} style={{ width: `var(--stella-lato, ${dimensione}px)`, maxWidth: '100%', aspectRatio: '1 / 1', containerType: 'inline-size' }}>
       <svg viewBox="0 0 100 100" className="block w-full h-full overflow-visible" role="img" aria-label={`${etichettaAria}: ${descrizione}`}>
         {anelli.map((p, k) => (
           <polygon key={k} points={p} fill={k === livelli - 1 ? 'rgba(255,255,255,0.03)' : 'none'} stroke={k === livelli - 1 ? 'var(--color-text-muted)' : 'var(--color-border)'} strokeWidth={k === livelli - 1 ? 0.6 : 0.35} />

@@ -66,8 +66,9 @@ export function PartitaPage() {
   const [giornoOggi, setGiornoOggi] = useState<string | null>(null);
   const giornoScuola = (scheda === 'oggi' ? giornoOggi : null) ?? attiva?.dataGioco ?? null;
 
+  // finché l'elenco delle partite non è arrivato (anche prima che la lettura parta) non si dice «Nessuna partita attiva» (L1-07)
   return (
-    <PageState isLoading={caricamento && !caricata} error={attiva ? null : errore} onRetry={() => void carica()}>
+    <PageState isLoading={!caricata && (caricamento || !errore)} error={attiva ? null : errore} onRetry={() => void carica()}>
       {!attiva ? (
         <EmptyState
           title="Nessuna partita attiva"
@@ -115,13 +116,13 @@ export function PartitaPage() {
             if (richiesta === 'riepilogo') { setParams({ scheda: 'oggi' }, { replace: true }); requestAnimationFrame(() => document.getElementById('modifica-dati-partita')?.focus()); }
           }} />
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi onGiorno={setGiornoOggi} /></div>}
-          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
+          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali key={attiva.id} partitaId={attiva.id} /></div>}
           {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
+          {scheda === 'confidenti' && <ConfidentiPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi key={attiva.id} partitaId={attiva.id} /></div>}
           {scheda === 'progressi' && <ProgressiPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
-          {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
+          {scheda === 'scorta' && <ScortaPersona key={attiva.id} partitaId={attiva.id} />}
+          {scheda === 'compendio' && <CompendioPersonale key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'persona-partita' && <PersonaDellaPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'piani' && <PianiSalvati key={attiva.id} partitaId={attiva.id} />}

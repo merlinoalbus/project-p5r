@@ -137,12 +137,14 @@ export function LuogoPage() {
                     <CorreggiElemento tipo="luogo" chiave={l.chiave} titolo="Correggi il luogo" onSalvato={() => void dati.ricarica()} />
                   </MenuModifica>}
                 </>}>
-                {/* gli orari del luogo (o la regola dell'app), poi le eccezioni dei negozi della sede */}
-                <p className="m-0 testo-13 text-text-secondary"><strong className="text-text">Orari:</strong> {l.orariTesto ?? 'Orari non indicati'}</p>
+                {/* gli orari del luogo, poi le eccezioni dei negozi della sede; quando vale la regola predefinita dell'app («giorno e sera, tutti i
+                    giorni») la riga non dice niente di più della presenza e non si mostra: l'intestazione resta entro il 30% */}
+                {l.orari?.origine !== 'regola-app' && <p className="m-0 testo-13 text-text-secondary"><strong className="text-text">Orari:</strong> {l.orariTesto ?? 'Orari non indicati'}</p>}
                 {eccezioni.map((n) => <p key={n.chiave} className="m-0 testo-13 text-text-secondary">Il negozio {n.nome}: {descriviOrari(n.eccezioneOrari!)}</p>)}
                 {l.soloEventiConfidente && <p className="m-0 testo-13 text-text-secondary">Ci si va solo durante gli eventi di {l.soloEventiConfidente.nome}.</p>}
-                {/* R5-20e: lo sblocco generato dalla condizione, mai scritto a mano; i requisiti mancanti della partita */}
-                {nonAncora && l.sbloccoTesto && <p className="m-0 testo-13 text-text-secondary">Si apre {l.sbloccoTesto}.</p>}
+                {/* R5-20e: lo sblocco generato dalla condizione, mai scritto a mano; i requisiti mancanti della partita. Se la lista dei requisiti
+                    mancanti (sotto l'intestazione) lo dice già, qui non si ripete */}
+                {nonAncora && l.sbloccoTesto && requisiti.length === 0 && <p className="m-0 testo-13 text-text-secondary">Si apre {l.sbloccoTesto}.</p>}
               </IntestazioneScheda>
               {/* i requisiti mancanti della partita fuori dall'intestazione, che resta entro il 30% della schermata: possono essere lunghi */}
               {nonAncora && requisiti.length > 0 && <ul className="card order-1 m-0 pl-8 testo-12 text-text-secondary xl:order-none" aria-label="Requisiti mancanti">{requisiti.map((r, i) => <li key={i}>{r.testo}{r.dettaglio ? ` — ${r.dettaglio}` : ''}</li>)}</ul>}

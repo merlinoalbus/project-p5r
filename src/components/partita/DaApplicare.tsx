@@ -54,11 +54,12 @@ const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v
  */
 /** Le proposte di una voce del Diario (`voceUid`) o, L13 (decisione 3), gli yen di una Richiesta completata (`richiesta`, sulla sua carta), o,
  *  L13 (decisione 19), l'elenco del passato della partita (`passati`: gli effetti di stato mai applicati di tutte le voci spuntate, per giorno). */
-type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined; passati?: undefined } | { richiesta: string; voceUid?: undefined; passati?: undefined } | { passati: true; voceUid?: undefined; richiesta?: undefined });
+/** `gestiNellaColonna`: chi la monta mostra già `GestiPartita` della stessa partita (la giornata del Diario e Oggi): qui non si ripete. */
+type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void>; gestiNellaColonna?: boolean } & ({ voceUid: string; richiesta?: undefined; passati?: undefined } | { richiesta: string; voceUid?: undefined; passati?: undefined } | { passati: true; voceUid?: undefined; richiesta?: undefined });
 export function DaApplicare(props: PropsDaApplicare) {
   return <DaApplicareNelContesto key={`${props.partitaId}:${props.passati ? 'passati' : props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
 }
-function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCambiato }: PropsDaApplicare) {
+function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCambiato, gestiNellaColonna = false }: PropsDaApplicare) {
   const gesti = useGestiPartita();
   const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
@@ -170,7 +171,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
   return <section ref={sezione} tabIndex={-1} className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
-    <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
+    {!gestiNellaColonna && <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />}
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
     {!!aperte.length && <>

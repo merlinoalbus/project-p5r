@@ -28,6 +28,7 @@ import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
+import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraLuogo, urlLuogo } from '../utils/citta';
@@ -158,7 +159,9 @@ export function QuartierePage() {
   const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
-  const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva]);
+  // Dipende dall'**id** della partita; ai suoi cambi di stato (giorno, fascia, meteo…) si rilegge con `ricarica()`, che tiene a schermo pin, pannello e finestre
+  const dati = useCarica(() => getQuartiere(chiave, attiva?.id), [chiave, attiva?.id]);
+  useRileggiAlCambio(dati.ricarica, attiva);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
   const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | null>(null);

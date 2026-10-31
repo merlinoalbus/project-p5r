@@ -26,6 +26,7 @@ export const queryRicette = z.object({
   dlc: elencoDlc,
   livelloMax,
   limite: z.coerce.number().int().min(1).max(5000).optional(),
+  soloPronte: boolQuery,
 });
 
 export const paramsPersonaId = z.object({ personaId: idParam });
