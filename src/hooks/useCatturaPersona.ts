@@ -8,7 +8,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { aggiornaCompendio, getCompendioPartita } from '../services/api';
+import { getCompendioPartita } from '../services/api';
+import { catturaNelCompendio } from '../services/gestiGuida';
 import { notifica } from '../stores/notificationStore';
 import { useCarica } from './useCarica';
 import type { PiastrellaCatturabile } from '../components/guida/PiastrelleCattura';
@@ -36,7 +37,8 @@ export function useCatturaPersona(partitaId: number | null): CatturaPersona {
     if (!partitaId || !v.persona || occupata !== null) return;
     setOccupata(v.persona.id);
     try {
-      registrate.imposta(await aggiornaCompendio(partitaId, v.persona.id, registrata ? { registrata, ...(v.ombra ? { ombra: v.ombra } : {}) } : { registrata }));
+      // la chiamata unica della cattura (`catturaNelCompendio`), la stessa della scheda del Palazzo e della guida del visore
+      registrate.imposta(await catturaNelCompendio(partitaId, v.persona.id, registrata, v.ombra));
       setDaTogliere(null);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.');

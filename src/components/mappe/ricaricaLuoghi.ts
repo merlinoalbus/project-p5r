@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La pagina `/guida/mappe` (`IndiceLuoghi`) legge la gerarchia una volta e la passa alle griglie; la finestra della miniatura di una carta
-// (Palazzo, area di un Dedalo) dopo «Salva» o «Rimuovi» la fa rileggere, così la carta mostra subito l'URL nuovo. Un contesto invece di
+// (Palazzo, Dedalo, area di un Dedalo) dopo «Salva» o «Rimuovi» la fa rileggere, così la carta mostra subito l'URL nuovo. Un contesto invece di
 // una prop in ogni griglia e gruppo: senza fornitore la carta non rilegge niente.
 // ============================================================
 

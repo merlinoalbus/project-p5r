@@ -447,16 +447,10 @@ it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessib
   getAlberoMappe.mockResolvedValue([{...albero[3],genitore:'citta-shibuya'}]);
   getMappa.mockResolvedValue({...dettaglio,nome:'Palazzo di Kamoshida',tipo:'palazzo',immagineUrl:null,asset:'palazzi/kamoshida',larghezza:null,altezza:null,spilli:[],figli:[albero[3]]});
   monta('/guida/mappe/citta-shibuya?area=biblioteca');
-  const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
-  expect(guida).toBeVisible();
-  expect(within(guida).getByText('Contenuto conservato')).toBeVisible();
-  expect(screen.getByRole('link',{name:/^Ingresso/})).toBeVisible();
+  // 2026-10-31 («il visore doveva già essere unico»): la lista testuale dei contenuti non si monta più; le planimetrie restano accessibili
+  expect(await screen.findByRole('link',{name:/^Ingresso/})).toBeVisible();
+  expect(screen.queryByRole('region',{name:'Contenuti della guida'})).not.toBeInTheDocument();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
-  const summary=within(guida).getByText('Biblioteca');
-  fireEvent.click(summary);
-  expect(summary.closest('details')).not.toHaveAttribute('open');
-  fireEvent.click(summary);
-  expect(summary.closest('details')).toHaveAttribute('open');
 });
 it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
@@ -464,18 +458,18 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/native/RMAP_153_1_0':'/asset/mappe/native/RMAP_153_1_0.png'}},caricato:true,mancanti:{}});
   getMappa.mockResolvedValue({...dettaglio,immagineUrl:null,asset:'mappe/native/RMAP_153_1_0',larghezza:1536,altezza:1536,spilli:[],contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2}]});
   monta('/guida/mappe/citta-shibuya?contesto=a&area=biblioteca');
-  const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
-  const visore=screen.getByTestId('visore-mappa');
+  const visore=await screen.findByTestId('visore-mappa');
   const pannello=within(visore).getByRole('complementary',{name:'Pannello della mappa'});
-  expect(pannello).toContainElement(guida);
-  expect(within(pannello).getByText('Contenuto conservato')).toBeVisible();
+  // 2026-10-31 («il visore doveva già essere unico»): nel pannello non c'è più la lista testuale dei contenuti; la guida è quella del pulsante «Guida»
+  expect(within(pannello).queryByRole('region',{name:'Contenuti della guida'})).not.toBeInTheDocument();
   scegliVoce('Nome secondo il contesto','Museo, 2P',pannello);
   expect(await within(visore).findByRole('img',{name:'Illustrazione di Museo, 2P'})).toBeInTheDocument();
-  expect(within(pannello).getByRole('navigation',{name:'Altri quartieri'})).toBeVisible();
+  const sorelle=within(pannello).getByRole('navigation',{name:'Altri quartieri'});
+  expect(sorelle).toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Nascondi pannello'}));
-  expect(guida).not.toBeVisible();
+  expect(sorelle).not.toBeVisible();
   fireEvent.click(within(visore).getByRole('button',{name:'Pannello'}));
-  expect(guida).toBeVisible();
+  expect(sorelle).toBeVisible();
 });
 
 it('una mappa con asset originale e dimensioni non registrate mantiene la planimetria',async()=>{

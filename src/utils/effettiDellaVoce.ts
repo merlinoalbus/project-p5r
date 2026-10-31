@@ -42,15 +42,17 @@ export function effettoNuovo(t: Tipo): EffettoVoce {
   }
 }
 
-/** Tutti i tipi di effetto, nell'ordine del menu «Aggiungi un effetto» (prima «Avanzate» ne nascondeva sei), con l'icona della categoria. */
+/** Tutti i tipi di effetto, nell'ordine del menu «Aggiungi un effetto» (prima «Avanzate» ne nascondeva sei), con l'icona della categoria.
+ *  Yen, oggetto ricevuto, oggetto uscito, Persona tolta, punti a un Confidente e trofeo hanno una figura propria (`ui/categoria-<chiave>`,
+ *  consegnate il 2026-10-29); se non si carica, `catenaCategoria` torna alla figura della famiglia che mostravano prima. */
 export const MENU_EFFETTI: ReadonlyArray<{ tipo: Tipo; categoria: string }> = [
   { tipo: 'dote', categoria: 'dote' }, { tipo: 'lettura', categoria: 'libro' }, { tipo: 'turno', categoria: 'lavoro' },
-  { tipo: 'articolo', categoria: 'acquisto' }, { tipo: 'yen', categoria: 'acquisto' }, { tipo: 'oggetto', categoria: 'acquisto' },
-  { tipo: 'uscitaOggetto', categoria: 'acquisto' },
-  { tipo: 'sblocco', categoria: 'richiesta' }, { tipo: 'richiesta', categoria: 'richiesta' }, { tipo: 'trofeo', categoria: 'trama' },
+  { tipo: 'articolo', categoria: 'acquisto' }, { tipo: 'yen', categoria: 'yen' }, { tipo: 'oggetto', categoria: 'oggetto-ricevuto' },
+  { tipo: 'uscitaOggetto', categoria: 'oggetto-uscito' },
+  { tipo: 'sblocco', categoria: 'richiesta' }, { tipo: 'richiesta', categoria: 'richiesta' }, { tipo: 'trofeo', categoria: 'trofeo' },
   { tipo: 'storia', categoria: 'trama' }, { tipo: 'domanda', categoria: 'esame' }, { tipo: 'esame', categoria: 'esame' }, { tipo: 'cruciverba', categoria: 'esame' },
-  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'confidente' },
-  { tipo: 'persona', categoria: 'velluto' }, { tipo: 'personaTolta', categoria: 'velluto' }, { tipo: 'fortuna', categoria: 'dote' },
+  { tipo: 'invito', categoria: 'confidente' }, { tipo: 'puntiConfidente', categoria: 'punti-confidente' },
+  { tipo: 'persona', categoria: 'velluto' }, { tipo: 'personaTolta', categoria: 'persona-tolta' }, { tipo: 'fortuna', categoria: 'dote' },
   { tipo: 'acquisto', categoria: 'acquisto' }, { tipo: 'pesca', categoria: 'attivita' },
 ];
 /** La categoria (l'icona) di ogni tipo di effetto. */

@@ -20,7 +20,8 @@ import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
-import { puntoDaCollegare, puntoDescrittivo, puntoEnigma } from '../../../shared/spilli';
+import { puntoDaCollegare, puntoEnigma } from '../../../shared/spilli';
+import { quanteSegnate, segnataInVista, voceDescrittiva } from '../../utils/vociDellaGuida';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import type { AreaDungeonDto, DivergenzaDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
 import type { DivergenzaDaVerificare } from './FinestraDaVerificare';
@@ -35,8 +36,10 @@ import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { PersoneDelPalazzo } from './PersoneDelPalazzo';
 import { NEL_CESTINO } from '../../utils/cestino';
-import { Modal } from '../shared/Modal';
-import { enigmiCheSiRiaprono, inCorso, righeRiapertura, testoAvanzamento, testoVociDelGesto } from '../../utils/gestiVoce';
+import { inCorso, testoAvanzamento } from '../../utils/gestiVoce';
+import { raggruppaPassi } from '../../utils/passiEnigmi';
+import { voceDaCatturare } from '../../utils/piastrelleCattura';
+import { useConfermaRiapertura } from './ConfermaRiapertura';
 import { CARATTERI, NOME_CARATTERE, carattereDaTipo, type CarattereVoce } from '../../../shared/caratteriVoce';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -132,10 +135,10 @@ interface Props {
 export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare, onApriInfiltrazione, planimetriaMostrata = null, catturate = null, onCattura }: Props) {
   // L8 (R8-12, R8-29): le voci Persona di un Palazzo con la loro Persona e la loro Ombra non sono righe dell'elenco ma piastrelle di cattura (sopra);
   // il resto della guida lavora sulle altre voci, quindi conteggi, filtri e «segnate» non le contano (la cattura sta nel compendio)
-  const daCatturare = useMemo(() => (!areaDedalo && onCattura ? areaIntera.punti.filter((p) => p.tipo === 'persona' && !!p.persona && !!p.ombra) : []), [areaIntera.punti, areaDedalo, onCattura]);
+  const daCatturare = useMemo(() => (!areaDedalo && onCattura ? areaIntera.punti.filter(voceDaCatturare) : []), [areaIntera.punti, areaDedalo, onCattura]);
   const area = useMemo(() => (daCatturare.length === 0 ? areaIntera : { ...areaIntera, punti: areaIntera.punti.filter((p) => !daCatturare.includes(p)) }), [areaIntera, daCatturare]);
-  /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
-  const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
+  // Una voce descrittiva si legge e basta (`voceDescrittiva`, la regola del server condivisa con la guida del visore): nelle aree dei dedali
+  // non ce ne sono (099, scelta dell'utente: «Tutti con stato»); un «Altro» «Permanente» o «Si ripropone» si segna come le altre (2026-10-31).
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
   const nomeArea = areaDedalo?.nome ?? area.nome;
   /** I tipi che una voce può avere qui (2026-10-11): fuori dai dedali tutti tranne Trama, che è solo dei Memento (lo stesso
@@ -150,9 +153,9 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
   // (UX3-14) `dove`: la planimetria dell'elenco in cui la si aggiunge, che la voce prende (null senza planimetria mostrata)
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null; dove: string | null } | null>(null);
-  // L4 §8.11 e §8.6: la voce da riaprire, in attesa della conferma, con le righe di quel che si riapre con lei («Riapre anche: …», «Riapre
-  // anche l'Enigma «…»»)
-  const [riapertura, setRiapertura] = useState<{ voce: PuntoInteresseDto; righe: string[] } | null>(null);
+  // L4 §8.11 e §8.6: «Riapri» con la conferma quando si riapre anche altro («Riapre anche: …», «Riapre anche l'Enigma «…»»), la stessa della
+  // guida del visore
+  const riapertura = useConfermaRiapertura((v) => void cambiaStato(v, null));
   /** La voce a cui si stanno collegando i pin (sulla mappa della pagina). */
   const [collegando, setCollegando] = useState<{ punto: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -169,14 +172,11 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     return { area: area.chiave, chiavi: n };
   });
 
-  // I passi di ogni Enigma (095), nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area.
-  const passiPer = useMemo(() => {
-    const m = new Map<string, PuntoInteresseDto[]>();
-    for (const p of area.punti) if (p.contenitore) m.set(p.contenitore, [...(m.get(p.contenitore) ?? []), p]);
-    return m;
-  }, [area]);
+  // I passi di ogni Enigma (095), nel loro ordine: stanno dentro l'Enigma, non nell'elenco dell'area (la regola della guida del visore,
+  // `raggruppaPassi`: in cima le voci fuori da ogni Enigma)
+  const { inCima: vociDellArea, passiPer } = useMemo(() => raggruppaPassi(area.punti), [area]);
   /** Una voce si vede se passa il filtro per tipo (nessun filtro = tutti) e se non è segnata, salvo con «Anche le segnate» o se è quella aperta. */
-  const voceVisibile = (p: PuntoInteresseDto) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato || p.chiave === selezionato);
+  const voceVisibile = (p: PuntoInteresseDto) => (filtro.size === 0 || filtro.has(p.tipo)) && segnataInVista(p, { anche: mostraGestiti, aperta: selezionato });
   // L3 UX3-14 (RG-5), regola dell'utente: «NIENTE PIN: Vale la planimetria dove è stata inserita la voce. Con almeno un PIN la voce si vede
   // nella planimetria di tutti i PIN». Con una planimetria mostrata ogni voce ha la sua posizione nell'elenco: quella mostrata se ci sta (un
   // suo pin è lì, o senza pin la sua planimetria effettiva, calcolata dal server con la stessa regola del visore: `planimetria`), altrimenti
@@ -197,15 +197,14 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   const passiSu = (p: PuntoInteresseDto, pl: string | null) => (passiPer.get(p.chiave) ?? []).filter((x) => sta(x, pl));
   /** Una voce in elenco sotto `pl`: visibile lei, o un suo passo di lì (una nota descrittiva fra i passi non ha stato: senza filtri non basta a
    *  tenere in vista un Enigma segnato — rilievo del validatore). */
-  const inVistaSu = (p: PuntoInteresseDto, pl: string | null) => voceVisibile(p) || passiSu(p, pl).some((x) => voceVisibile(x) && (filtro.size > 0 || !descrittiva(x)));
-  // in cima le voci fuori da ogni Enigma; un Enigma si vede anche quando i filtri prendono solo qualche suo passo
-  const vociDellArea = area.punti.filter((p) => !p.contenitore);
+  const inVistaSu = (p: PuntoInteresseDto, pl: string | null) => voceVisibile(p) || passiSu(p, pl).some((x) => voceVisibile(x) && (filtro.size > 0 || !voceDescrittiva(x)));
+  // in cima le voci fuori da ogni Enigma (`vociDellArea`, sopra); un Enigma si vede anche quando i filtri prendono solo qualche suo passo
   const puntiVisibili = vociDellArea.filter((p) => sta(p, qui) && inVistaSu(p, qui));
   // i conteggi dell'intestazione sono quelli della planimetria mostrata
   const puntiQui = area.punti.filter((p) => sta(p, qui));
-  const gestitiArea = puntiQui.filter((p) => p.stato && !descrittiva(p)).length;
+  const gestitiArea = quanteSegnate(puntiQui);
   // «Anche le segnate» vale per tutti gli elenchi, anche quelli delle altre planimetrie
-  const gestitiTutti = area.punti.filter((p) => p.stato && !descrittiva(p)).length;
+  const gestitiTutti = quanteSegnate(area.punti);
   /** Le altre planimetrie dell'infiltrazione con le loro voci, nell'ordine delle planimetrie del Palazzo. */
   const altrePlanimetrie = qui
     ? planimetrie.filter((m) => m.chiave !== qui).map((m) => ({ chiave: m.chiave, nome: nomePlanimetria(m), voci: vociDellArea.filter((p) => sta(p, m.chiave)) })).filter((g) => g.voci.length > 0)
@@ -240,7 +239,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     // (UX3-14) la successiva nello stesso elenco: quello della planimetria in cui si sta segnando
     const ordine = vociDellArea.filter((v) => sta(v, pl)).flatMap((v) => [v, ...passiSu(v, pl)]);
     const dopo = ordine.slice(ordine.indexOf(p) + 1);
-    const successiva = dopo.find((q) => !q.stato && !descrittiva(q) && q.contenitore !== p.chiave && (filtro.size === 0 || filtro.has(q.tipo))) ?? null;
+    const successiva = dopo.find((q) => !q.stato && !voceDescrittiva(q) && q.contenitore !== p.chiave && (filtro.size === 0 || filtro.has(q.tipo))) ?? null;
     if (!(await cambiaStato(p, stato))) return;
     setCollegando(null);
     apri(successiva?.chiave ?? null, pl);
@@ -338,14 +337,14 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     const passi = passiPer.get(p.chiave) ?? [];
     const conPassi = passi.length > 0;
     // l'Enigma è risolto quando i passi che si segnano sono fatti: qui quanti
-    const passiDaSegnare = passi.filter((x) => !descrittiva(x));
+    const passiDaSegnare = passi.filter((x) => !voceDescrittiva(x));
     const passiFatti = passiDaSegnare.filter((x) => x.stato).length;
     const puoAccogliere = puntoEnigma(p.tipo) && !p.contenitore;
     // gli Enigmi di cui la voce può diventare un passo (non sé stessa; un Enigma coi suoi passi non entra in un altro; un Enigma con
     // pin non accoglie passi, come dice il server)
     const enigmiPossibili = conPassi ? [] : enigmi.filter((e) => e.chiave !== p.chiave && (e.pin.length === 0 || e.chiave === p.contenitore));
     // L4 §4.1: un Racconto (descrittiva con stato, cioè una Storia) si segna come «Letto» e non conta; la riga dice «letto»
-    const racconto = p.carattere === 'descrittiva' && !descrittiva(p);
+    const racconto = p.carattere === 'descrittiva' && !voceDescrittiva(p);
     // «esaurito» non sta nel testo: ha il suo chip (§4.1, R4-34)
     const statoTesto = p.stato && p.stato !== 'esaurito' ? (racconto ? 'letto' : p.stato) : null;
     // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
@@ -420,7 +419,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
               </ul>
             )}
             {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
-            {descrittiva(p)
+            {voceDescrittiva(p)
               ? <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
               : <div className="flex flex-wrap items-center gap-1.5">
                 {partitaId && p.stato !== 'ottenuto' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={racconto ? 'Letto' : 'Ottenuto'} onClick={() => void segnaEPassaOltre(p, 'ottenuto', pl)} />}
@@ -428,16 +427,13 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                 {/* L4 §8.11: «Riapri» toglie il segno a tutti i suoi pin; se altre voci li condividono si riaprono anche loro, e prima lo si dice.
                     §8.6: se la voce è un passo di un Enigma risolto, l'Enigma si riapre: anche questo si dice prima */}
                 {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri"
-                  onClick={() => {
-                    const righe = righeRiapertura((p.condivise ?? []).length > 0 ? testoVociDelGesto(p.condivise!, areePalazzo) : null, enigmiCheSiRiaprono([p], area.punti));
-                    if (righe.length > 0) setRiapertura({ voce: p, righe }); else void cambiaStato(p, null);
-                  }} />}
+                  onClick={() => riapertura.chiedi(p, areePalazzo, area.punti)} />}
               </div>}
             {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5">
               {/* nei dedali niente pin da collegare: i piani si generano a caso (2026-10-11) */}
               {/* i pin si scelgono sulla mappa della pagina (2026-10-18), anche in un'area senza planimetria propria: la pagina mostra quella
                   del collegamento, scelta fra le planimetrie del Palazzo */}
-              {!areaDedalo && onCollegamento && !descrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Fatto' : 'Collega pin'}
+              {!areaDedalo && onCollegamento && !voceDescrittiva(p) && !conPassi && <PulsanteVisivo tono={scelta ? 'primario' : 'secondario'} compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo={scelta ? 'Fatto' : 'Collega pin'}
                 aria-pressed={!!scelta} disabled={planimetrie.length === 0}
                 onClick={() => (scelta ? void fineCollegamento() : setCollegando({ punto: p.chiave }))} />}
               {puoAccogliere && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un passo" aria-label={`Aggiungi un passo a ${p.nome}`}
@@ -652,15 +648,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
           </details>
         )}
         {/* L4 §8.11 e §1.6: la conferma di «Riapri» quando si riaprono anche altre voci */}
-        {riapertura && (
-          <Modal titolo={`Riaprire «${riapertura.voce.nome}»?`} aperta onChiudi={() => setRiapertura(null)}
-            azioni={<>
-              <button type="button" className="btn btn-secondary touch" onClick={() => setRiapertura(null)}>Annulla</button>
-              <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri" onClick={() => { const v = riapertura.voce; setRiapertura(null); void cambiaStato(v, null); }} />
-            </>}>
-            {riapertura.righe.map((r) => <p key={r} className="m-0 testo-14">{r}</p>)}
-          </Modal>
-        )}
+        {riapertura.finestra}
       </div>
     </details>
     </>

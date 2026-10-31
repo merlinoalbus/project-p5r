@@ -5,8 +5,8 @@
 import type { ReactNode } from 'react';
 import { IconBolt, IconFusion, IconHome, IconMask, IconStar } from '../shared/icons';
 import { IconAltro, IconAppunti, IconBersaglio, IconBussola, IconChiave, IconCuore, IconFilm, IconGioca, IconGioco, IconGoccia, IconLibro, IconMaschera, IconMessaggio, IconNegozio, IconPersone, IconScudo, IconStella, IconValigetta } from '../shared/iconeGuida';
-import { useAsset } from '../../stores/assetStore';
-import { chiaveCategoria } from '../../utils/categorie';
+import { useAssetMulti, useAssetStore } from '../../stores/assetStore';
+import { catenaCategoria } from '../../utils/categorie';
 
 const ICONE: Record<string, (size: number) => ReactNode> = {
   // negozi
@@ -55,19 +55,27 @@ interface Props {
  * Quindi: quando l'asset `ui/categoria-<chiave>` c'è, **è lui l'icona**, mostrata intera e senza
  * fondo, come le piastrelle della Guida; quando non c'è, resta il cartiglio con l'SVG in codice,
  * che per un segno a un tratto è il vestito giusto. Le due misure sono uguali, quindi il giorno in
- * cui una figura arriva non si sposta niente.
+ * cui una figura arriva non si sposta niente. Un'illustrazione che non si carica si segna mancante e lascia il posto alla figura di
+ * ripiego (`catenaCategoria`: per i tipi di effetto con una figura propria, quella della famiglia che mostravano prima) o al cartiglio.
  *
  * Le chiavi sono il censimento: aggiungerne una qui vuol dire aggiungere una riga a
  * `docs/grafica/fabbisogno.md`. */
 export function IconaCategoria({ categoria, dimensione = 28, etichetta, className }: Props) {
-  const chiave = chiaveCategoria(categoria);
-  const icona = ICONE[chiave] ?? ICONE[categoria] ?? ICONE.altro;
-  const url = useAsset(`ui/categoria-${chiave}`);
+  // la catena delle figure: quella della categoria e, per i tipi di effetto con una figura propria, quella che mostravano prima
+  // (`catenaCategoria`); vince la prima presente, e una che non si carica si segna mancante e lascia il posto alla successiva
+  const catena = catenaCategoria(categoria);
+  const nomi = catena.map((k) => `ui/categoria-${k}`);
+  const urls = useAssetMulti(nomi);
+  const segnaMancante = useAssetStore((s) => s.segnaMancante);
+  const scelta = urls.findIndex((u) => u !== null);
+  const url = scelta >= 0 ? urls[scelta] : null;
+  const chiaveSvg = catena.find((k) => ICONE[k]);
+  const icona = (chiaveSvg ? ICONE[chiaveSvg] : undefined) ?? ICONE[categoria] ?? ICONE.altro;
   const comune = { role: etichetta ? ('img' as const) : undefined, 'aria-label': etichetta, 'aria-hidden': etichetta ? undefined : true };
   if (url) {
     return (
       <span className={`inline-flex shrink-0 items-center justify-center ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} {...comune}>
-        <img src={url} alt="" aria-hidden draggable={false} className="h-full w-full object-contain" />
+        <img src={url} alt="" aria-hidden draggable={false} className="h-full w-full object-contain" onError={() => segnaMancante(nomi[scelta])} />
       </span>
     );
   }

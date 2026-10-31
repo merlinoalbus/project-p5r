@@ -42,6 +42,6 @@ export function fonteConfidenteAttivita(r: Record<string, unknown>, st: StatoDis
       ...avvisiFonte,
       ...(campiIncompatibili.length ? ['L’attività conserva campi autonomi incompatibili: correggili esplicitamente dal modulo.'] : []),
       'I semafori riguardano i requisiti del rango, non garantiscono la disponibilità di un incontro. Consulta il passo, le fasce e le avvertenze del Confidente.',
-      'Le Doti indicate spettano ai passaggi di rango, non automaticamente alle uscite semplici o intermedie. Si segnano a mano nelle Doti.',
+      'Le Doti indicate spettano ai passaggi di rango, non automaticamente alle uscite semplici o intermedie. Con la spunta della voce del passaggio nel Diario arrivano nel promemoria «Applica»; alzando il rango da Partita → Confidenti un avviso le ricorda, da segnare nelle Doti.',
     ] };
 }

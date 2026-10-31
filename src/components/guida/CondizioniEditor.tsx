@@ -27,7 +27,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import type { ElenchiRegoleDto as ElenchiRegole, PinConStatoDto as PinConStato, VoceCitabileDto as VoceCitabile } from '../../types';
 import { DEFINIZIONI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { NOME_TIPO } from '../../utils/dungeon';
-import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
+import { nomiDelleCondizioni, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
 import { SelettoreData } from '../shared/SelettoreData';
@@ -60,6 +60,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'confidente': return e.base.confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcana }));
     // L13 (O11-1): i soli Confidenti romanzabili, dal DB (`GET /condizioni/elenchi` → `romanzabili`)
     case 'confidente-romanzabile': return e.extra.romanzabili ?? [];
+    // i set di contenuti scaricabili, dal DB (`GET /condizioni/elenchi` → `setDlc`)
+    case 'set-dlc': return e.extra.setDlc ?? [];
     case 'membro': return e.extra.squadra;
     case 'richiesta': return e.base.richieste.map((r) => ({ chiave: r.chiave, nome: r.nome }));
     case 'libro': return e.extra.letture.filter((l) => l.categoria === 'libro');
@@ -278,15 +280,7 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
     return { extra, base, spilli, voci } as Elenchi;
   }, [perSpillo, elenchi]);
   const [aperto, setAperto] = useState(condizioni.length > 0);
-  const nomi = useMemo<NomiCondizioni>(() => {
-    if (!dati.dati) return {};
-    const e = dati.dati;
-    /** Da un elenco di voci a un dizionario chiave → nome. */
-    const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
-    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), allerte: mappa(e.extra.allerte ?? []), luoghi: mappa(e.extra.luoghi ?? []), inviti: mappa(e.extra.inviti ?? []), persone: mappa(e.extra.persone), abilita: mappa(e.extra.abilita), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
-      spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])),
-      voci: Object.fromEntries(e.voci.map((v) => [v.chiave, { nome: v.nome, posto: v.gruppo }])) };
-  }, [dati.dati]);
+  const nomi = useMemo<NomiCondizioni>(() => (dati.dati ? nomiDelleCondizioni(dati.dati) : {}), [dati.dati]);
   // fra i pin offerti non c'è quello che si sta modificando (i nomi sì: una condizione vecchia su se stesso si legge)
   const offerti = useMemo(() => (dati.dati ? { ...dati.dati, spilli: dati.dati.spilli.filter((p) => p.chiave !== pinCorrente) } : null), [dati.dati, pinCorrente]);
   return (

@@ -10,6 +10,7 @@
 // un'attività dove si svolge (sede, 072).
 // ============================================================
 
+import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -37,6 +38,7 @@ import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
 import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
+import { riconciliaBeneficiTurno, turnoConProposte } from './propostePartitaService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import { testoDoteInPunti } from '../../shared/note.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
@@ -139,8 +141,8 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const esiti = !fonteConfidente && !r.pesca_regola_chiave ? leggiEsitiAttivita(r.esiti_json) : null;
   const dto = {
     esiti: esiti ? esitiDto(esiti, st, r.chiave) : null,
-    // Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano l'attività, anche senza esiti (biliardo, freccette,
-    // Fioraio Rafflesia, pesca); mai per una fonte Confidente, che rimanda alla sua scheda
+    // Ondata 5 (lotto F-bis): con una partita, gli effetti dei libri letti che riguardano l'attività, anche senza esiti (Fioraio Rafflesia,
+    // pesca); mai per una fonte Confidente, che rimanda alla sua scheda
     promemoria: st && !fonteConfidente ? promemoriaLibriPerAttivita(st.letture, { chiave: r.chiave, tipo: r.tipo }) : [],
     // R10-27/3: lo stato della partita nella scheda, come nelle schede di Confidente e Palazzo (volte svolte, dal contatore unico)
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
@@ -655,6 +657,9 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const ordine = Math.max(ultimo, prima) + 1;
     scriviVolte(partitaId, chiave, prima + 1, adesso);
     prepared('INSERT INTO turno_partita (partita_id, attivita_chiave, ordine, created_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, ordine, adesso);
+    // utente 063: il turno registrato dalla spunta di una voce del Diario porta il legame con la voce, con la stessa `created_at` del turno; il +
+    // del contatore e la pesca non ne hanno (Partita → Progressi non li attribuisce a nessuna voce, `vociDeiProgressi.vociDeiTurni`)
+    if (voceUid) prepared('INSERT INTO utente.turno_voce_partita (partita_id, attivita_chiave, ordine, voce_uid, created_at) VALUES (?, ?, ?, ?, ?)').run(partitaId, chiave, ordine, voceUid, adesso);
     // che cosa dà il turno: si registra e si ricorda, le Doti si segnano a mano (`aggiornaDote`)
     // lo stato si legge dopo aver scritto le volte, come quando si ricalcolava qui: quello passato si aggiorna allo stesso punto
     st?.attivitaSvolte.set(chiave, prima + 1);
@@ -738,6 +743,28 @@ export function yenDellaSfidaDelTurno(attivita: string, esito: { chiave: string;
   const y = riga ? yenDelTurno(riga, esito, fascia, partitaId, voceUid) : null;
   return y?.articolo ? { importo: y.importo, motivo: y.motivo, articolo: y.articolo } : null;
 }
+/**
+ * Decisione 18: che cosa la spunta può scalare dal saldo registrando un turno di `attivita` nella fascia della voce, con la stessa regola di
+ * `yenDelTurno` (che è quella che scala davvero): `costo` se si scala il costo dell'attività, `sfide` gli articoli delle sfide che si pagano.
+ * Con l'esito dichiarato dalla voce vale quello; senza, e con l'attività che dichiara esiti, l'esito si sceglie alla spunta e contano tutti
+ * (anche «senza punti»). Null se il turno non costa niente (un lavoro pagato, una fabbricazione, un'attività gratuita), così il riepilogo della
+ * voce dice che il prezzo si scala solo dove c'è un prezzo. Il prezzo è quello pieno: lo sconto di un negozio non lo porta mai a zero.
+ */
+export function costoDelTurno(attivita: string, esito?: string, fascia?: FasciaPrezzo | null): { costo: boolean; sfide: string[] } | null {
+  const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
+  if (!riga) return null;
+  const dichiarati = esitiDellAttivita(attivita)?.esiti?.esiti;
+  const possibili: Array<{ chiave: string; nome: string } | undefined> = esito !== undefined ? [{ chiave: esito, nome: '' }]
+    : dichiarati?.length ? [...dichiarati.map((e) => ({ chiave: e.chiave, nome: '' })), undefined] : [undefined];
+  let costo = false;
+  const sfide = new Set<string>();
+  for (const x of possibili) {
+    const y = yenDelTurno(riga, x, fascia);
+    if (!y || y.importo >= 0) continue;
+    if (y.articolo) sfide.add(y.articolo); else costo = true;
+  }
+  return costo || sfide.size ? { costo, sfide: [...sfide] } : null;
+}
 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
  *  ancora — il contatore può averlo già tolto, e `volte` non deve scendere due volte —, oppure l'ultimo (il contatore):
@@ -746,6 +773,7 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
   if(!interno?.pescaAutorizzata)attivitaConTurni(chiave, true);
   const adesso = nowIso();
   getDb().transaction(() => {
+    let turnoDaRiallineare: string | null = null;
     const prima = volteSvolte(partitaId, chiave);
     const bersaglio = ordine !== undefined
       ? (prepared('SELECT ordine FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').get(partitaId, chiave, ordine) as { ordine: number } | undefined)?.ordine ?? null
@@ -755,6 +783,9 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       const collegata=prepared('SELECT s.* FROM utente.pesca_sessione s JOIN utente.turno_partita t ON t.uid=s.turno_uid WHERE t.partita_id=? AND t.attivita_chiave=? AND t.ordine=?').get(partitaId,chiave,bersaglio) as {id:string;origine_turno:string}|undefined;
       if(collegata&&collegata.origine_turno==='creato'&&!interno?.pescaAutorizzata)throw httpErrors.conflict('pesca-turno-posseduto','Il turno è posseduto dal registro della pesca: rimuovi la fonte o la sessione con la relativa anteprima.');
       if(collegata)prepared('UPDATE utente.pesca_sessione SET turno_revocato_il=? WHERE partita_id=? AND id=?').run(adesso,partitaId,collegata.id);
+      // R12-01/7: il turno del + con le sue proposte «Applica» (causa `turno`): tolto, il registro delle proposte si riallinea qui sotto
+      const uidTurno = (prepared('SELECT uid FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').get(partitaId, chiave, bersaglio) as { uid: string | null } | undefined)?.uid ?? null;
+      if (uidTurno && turnoConProposte(partitaId, chiave, uidTurno)) turnoDaRiallineare = uidTurno;
       // il turno esce dal registro; le Doti restano come sono (si segnano a mano). L13 (decisione 18): gli yen che il turno aveva mosso da
       // soli tornano (la spesa restituita com'era stata scalata, la paga tolta al più fino a zero). Un turno registrato prima degli yen automatici
       // non ha movimento (il saldo di allora lo contava già) e non restituisce niente. Non si segna: il + del contatore è sempre un turno nuovo,
@@ -768,6 +799,10 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       togliConsumiDelTurno(partitaId, chiave, bersaglio);
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
+      // utente 063: con il turno se ne va il suo legame con la voce, così un turno rifatto con lo stesso numero non lo eredita
+      prepared('DELETE FROM utente.turno_voce_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
+      // R12-01/7: le Doti non ancora applicate escono dal promemoria; quelle applicate hanno la proposta inversa, come togliendo una spunta
+      if (turnoDaRiallineare) riconciliaBeneficiTurno(partitaId, chiave, turnoDaRiallineare);
     }
     // un turno contato prima del registro dei turni (nessuna riga, ben prima degli yen automatici) non ha movimento: il − non restituisce niente
     if (prima > 0) scriviVolte(partitaId, chiave, prima - 1, adesso);
@@ -775,12 +810,30 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
   })();
 }
 
-/** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni. Dice che cosa danno i turni
- *  aggiunti (o davano quelli tolti), da segnare a mano nelle Doti.
+/**
+ * R12-01/7: il turno appena registrato con il + che dà Doti riceve la sua identità (`turno_partita.uid`, 32 esadecimali) e le sue Doti diventano
+ * il promemoria «Applica» (causa `turno` di `utente.da_applicare`, lo stesso registro e lo stesso componente `DaApplicare` delle voci). Le Doti
+ * restano manuali: la proposta non tocca la scheda finché non la si applica. Le Doti passate al promemoria si sommano in `coperte` (fuori dall'avviso).
+ */
+function promemoriaDelTurno(partitaId: number, chiave: string, t: TurnoRegistrato, coperte: Map<string, { punti: number; note: number }>): void {
+  const doti = t.doti.filter((d) => d.delta !== 0);
+  if (!doti.length) return;
+  const uid = randomBytes(16).toString('hex');
+  if (prepared('UPDATE turno_partita SET uid = ? WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ? AND uid IS NULL').run(uid, partitaId, chiave, t.ordine).changes !== 1)
+    throw httpErrors.conflict('turno-gia-identificato', 'Il turno appena registrato ha già un’identità: nessun promemoria duplicato.');
+  riconciliaBeneficiTurno(partitaId, chiave, uid);
+  for (const d of doti) { const c = coperte.get(d.chiave) ?? { punti: 0, note: 0 }; coperte.set(d.chiave, { punti: c.punti + d.delta, note: c.note + d.note }); }
+}
+
+/** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni. R12-01/7: le Doti dei turni aggiunti diventano il
+ *  promemoria «Applica» (`promemoriaDelTurno`) e togliendo uno di quei turni il promemoria si riallinea (`togliTurno`); ritorna solo le Doti
+ *  che restano da segnare a mano, cioè quelle dei turni tolti che non vengono dal + (registrati da una voce o prima del registro).
  *  L13: un'attività che dichiara esiti aggiunge un turno alla volta, con l'esito scelto (`esito`: la chiave, null = «senza punti»;
  *  nel modo automatico si ricava dal giorno della partita): senza scelta il + si ferma (409) e non registra un turno vuoto. */
 export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number, esito?: string | null): DoteDaSegnareDto[] {
   const prima = puntiRegistrati(partitaId, 'attivita', chiave);
+  // le Doti che passano dal promemoria (in più per i turni aggiunti, in meno per quelli tolti che ne avevano uno): fuori dall'avviso
+  const coperte = new Map<string, { punti: number; note: number }>();
   getDb().transaction(() => {
     // lo stato della partita si calcola una volta per tutti i turni da aggiungere, non una per turno (P5')
     const da = volteSvolte(partitaId, chiave);
@@ -790,14 +843,26 @@ export function impostaVolteAttivita(partitaId: number, chiave: string, volte: n
     if (esiti) {
       if (volte - da !== 1) throw httpErrors.badRequest('esito-un-turno-alla-volta', 'Questa attività dichiara i suoi esiti: aggiungi un turno alla volta, scegliendo l’esito.');
       const r = risolviEsitoTurno(chiave, esiti, esito, st!);
-      registraTurno(partitaId, chiave, r.doti, st, undefined, r.esito);
+      promemoriaDelTurno(partitaId, chiave, registraTurno(partitaId, chiave, r.doti, st, undefined, r.esito), coperte);
       return;
     }
     if (esito !== undefined && da < volte) throw httpErrors.badRequest('esito-non-dichiarato', 'Questa attività non dichiara esiti da scegliere.');
-    for (let v = da; v < volte; v++) registraTurno(partitaId, chiave, undefined, st);
-    for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);
+    for (let v = da; v < volte; v++) promemoriaDelTurno(partitaId, chiave, registraTurno(partitaId, chiave, undefined, st), coperte);
+    for (let v = volteSvolte(partitaId, chiave); v > volte; v--) {
+      // il turno che il − toglie (l'ultimo registrato): se le sue Doti stavano nel promemoria, lo riallinea `togliTurno` e l'avviso non le dice
+      const ultimo = prepared('SELECT ordine, uid FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? ORDER BY ordine DESC LIMIT 1').get(partitaId, chiave) as { ordine: number; uid: string | null } | undefined;
+      if (ultimo?.uid && turnoConProposte(partitaId, chiave, ultimo.uid)) {
+        for (const d of prepared("SELECT dote_chiave, punti, note FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").all(partitaId, chiave, ultimo.ordine) as Array<{ dote_chiave: string; punti: number; note: number }>) {
+          const c = coperte.get(d.dote_chiave) ?? { punti: 0, note: 0 };
+          coperte.set(d.dote_chiave, { punti: c.punti - d.punti, note: c.note - d.note });
+        }
+      }
+      togliTurno(partitaId, chiave);
+    }
   })();
-  return daSegnareFra(prima, puntiRegistrati(partitaId, 'attivita', chiave));
+  const dopo = puntiRegistrati(partitaId, 'attivita', chiave);
+  for (const [dote, c] of coperte) { const x = dopo.get(dote) ?? { punti: 0, note: 0 }; dopo.set(dote, { punti: x.punti - c.punti, note: x.note - c.note }); }
+  return daSegnareFra(prima, dopo);
 }
 
 /** Che cosa dà un turno dell'attività, in parole: le voci del primo turno e quelle dal secondo in poi. */

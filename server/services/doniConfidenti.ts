@@ -25,6 +25,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
 import { bastaLoStatoEssenziale, statoPartitaEssenziale, statoPartitaSemafori } from './semaforiService.js';
 import { dotiSociali, ranghiConfidenti } from './partiteService.js';
+import { statoDisponibilitaPartita } from './disponibilitaService.js';
 
 export interface DonoConfidenteOttenuto { catalogo: string; quantita: number; confidente: string; nota: string | null }
 
@@ -33,6 +34,11 @@ const haColonnaCondizioni = (): boolean => !!prepared("SELECT 1 FROM pragma_tabl
 /** Vero se una condizione (anche dentro `gruppo` e `non`) legge le Doti: solo allora lo stato essenziale le legge (sono la lettura più costosa). */
 function usaLeDoti(condizioni: readonly RequisitoSpillo[]): boolean {
   return condizioni.some((c) => c.tipo === 'dote' || (c.tipo === 'gruppo' && usaLeDoti(c.condizioni)) || (c.tipo === 'non' && usaLeDoti([c.condizione])));
+}
+
+/** Vero se una condizione (anche dentro `gruppo` e `non`) cita una voce della guida di un Palazzo (`voce-guida`). */
+function usaLeVociDellaGuida(condizioni: readonly RequisitoSpillo[]): boolean {
+  return condizioni.some((c) => c.tipo === 'voce-guida' || (c.tipo === 'gruppo' && usaLeVociDellaGuida(c.condizioni)) || (c.tipo === 'non' && usaLeVociDellaGuida([c.condizione])));
 }
 
 type RigaDono = { fonte_chiave: string; catalogo_chiave: string; quantita: number; nota: string | null; condizioni_json: string };
@@ -55,7 +61,10 @@ export function doniConfidentiOttenuti(partitaId: number, catalogo?: string): Do
   const essenziale = regole.every((x) => bastaLoStatoEssenziale(x.regola));
   const usaDoti = regole.some((x) => usaLeDoti(x.regola));
   const doti = !essenziale || usaDoti ? new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango])) : new Map<string, number>();
-  const st = essenziale ? statoPartitaEssenziale(partitaId, ranghiConfidenti(partitaId), doti) : statoPartitaSemafori(partitaId, ranghiConfidenti(partitaId), doti);
+  // una regola che cita una voce della guida (il rampino che Morgana dà nel Palazzo di Kamoshida, migrazione 332) vuole le voci segnate della
+  // partita, che stanno solo nello stato completo della disponibilità
+  const st = essenziale ? statoPartitaEssenziale(partitaId, ranghiConfidenti(partitaId), doti)
+    : regole.some((x) => usaLeVociDellaGuida(x.regola)) ? statoDisponibilitaPartita(partitaId) : statoPartitaSemafori(partitaId, ranghiConfidenti(partitaId), doti);
   const nomi = nomiCondizioniMemo();
   return regole
     .filter(({ regola }) => valutaInsieme(regola.map((c) => condizioneConTesto(c, nomi)), st, { nomi }).requisiti.every((q) => q.stato === 'verde'))

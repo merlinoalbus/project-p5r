@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio } from '../../services/api';
-import type { ProgressiPartitaDto as Progressi } from '../../types';
+import type { ProgressiPartitaDto as Progressi, VoceDiProvenienzaDto } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
@@ -31,6 +31,7 @@ import { SceltaEsitoTurno } from '../guida/SceltaEsito';
 import { TestoNote } from '../shared/TestoNote';
 import { eCreazione, fraseDotiEsito } from '../../../shared/esitiAttivita';
 import { PromemoriaLibri } from '../shared/PromemoriaLibri';
+import { DaApplicare } from './DaApplicare';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -63,6 +64,17 @@ function Automatico() {
   return <span className="progressi-auto">automatico</span>;
 }
 
+/** Da quale voce del Diario viene un elemento dei progressi (decisione 8): una riga per voce, con il giorno, l'inizio del testo e il
+ *  collegamento alla voce; niente se l'elemento non nasce da una voce spuntata (segnato a mano). La stessa riga per eventi, letture e attività. */
+function VociDiProvenienza({ voci, className }: { voci: readonly VoceDiProvenienzaDto[] | undefined; className?: string }) {
+  if (!voci?.length) return null;
+  return (
+    <span className={`flex flex-wrap items-center gap-x-2 testo-12 text-text-secondary ${className ?? ''}`}>
+      {voci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
+    </span>
+  );
+}
+
 /** Un evento di storia da segnare: casella grande, a che cosa serve e da quale voce del Diario viene. */
 function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; onCambia: (avvenuto: boolean) => void }) {
   return (
@@ -75,9 +87,8 @@ function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; o
         </span>
         <span className={`shrink-0 testo-12 ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
       </label>
-      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 testo-12 text-text-secondary">
-        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
-      </div>}
+      {/* fuori dall'etichetta della casella: un collegamento dentro un'etichetta la spunterebbe */}
+      <VociDiProvenienza voci={e.daVoci} className="pl-9" />
     </li>
   );
 }
@@ -114,7 +125,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
     return azione().then((nuovo) => {
       setStato(nuovo);
       useSuggerimentiStore.getState().invalida();
-      // un turno aggiunto (o tolto) dice le Doti che dà (o dava): da segnare a mano, l'app non le tocca
+      // R12-01/7: le Doti dei turni del + stanno nel promemoria «Applica» della riga; l'avviso dice solo quelle dei turni tolti che non vengono
+      // dal + (registrati da una voce o prima del registro), da segnare a mano. L'app non tocca le Doti
       avvisaDotiDaSegnare(nuovo.daSegnare);
     }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
@@ -228,7 +240,10 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.contatori.map((c) => (
                         <li key={c.chiave} className="progressi-partita__riga">
-                          <span className="min-w-0 flex-1">{c.nome}</span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block">{c.nome}</span>
+                            <VociDiProvenienza voci={c.daVoci} />
+                          </span>
                           <span className="font-display testo-17 tabular-nums">{c.valore}</span>
                         </li>
                       ))}
@@ -242,7 +257,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
                 <div className="flex flex-col gap-1">
                   <TitoloSezione variante="display" id="progressi-attivita">Attività svolte</TitoloSezione>
-                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare; dove l’attività ha più esiti, il + ti chiede quale hai ottenuto. La paga di un lavoro entra da sola nel saldo e il costo di un’attività (o della sfida) se ne scala, mai sotto zero; il − restituisce quanto aveva mosso il suo turno. Un turno segnato prima che gli yen si muovessero da soli era già nel saldo: il − non lo restituisce.</p>
+                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: le Doti di ogni + compaiono sotto l’attività con «Applica», e il − toglie quelle non ancora applicate; dove l’attività ha più esiti, il + ti chiede quale hai ottenuto. La paga di un lavoro entra da sola nel saldo e il costo di un’attività (o della sfida) se ne scala, mai sotto zero; il − restituisce quanto aveva mosso il suo turno. Un turno segnato prima che gli yen si muovessero da soli era già nel saldo: il − non lo restituisce.</p>
                 </div>
                 <div className="progressi-attivita">
                   {gruppiAttivita.map(([tipo, righe]) => (
@@ -278,6 +293,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                                     : `Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
                                 {/* Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività, con o senza esiti; niente se nessuno */}
                                 <PromemoriaLibri promemoria={a.promemoria} compatto />
+                                <VociDiProvenienza voci={a.daVoci} />
                               </span>
                               {pesca && <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Registra nella scheda Pesca" onClick={() => scegli('pesca')} />}
                               <span className="condizione-numero shrink-0" role="group" aria-label={`Volte: ${a.nome}`}>
@@ -289,6 +305,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                                 <SceltaEsitoTurno nome={a.nome} esiti={esiti.esiti} occupato={occupato === a.chiave} onAnnulla={() => setSceltaEsito(null)}
                                   onScegli={(esito) => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1, esito)).then(() => setSceltaEsito(null))} />
                               )}
+                              {/* R12-01/7: le Doti dei turni segnati con il + hanno il promemoria «Applica», come la spunta di una voce; si rilegge a ogni + o − */}
+                              {a.conProposteDeiTurni && <div className="w-full min-w-0"><DaApplicare partitaId={partitaId} attivita={a.chiave} versione={a.volte} /></div>}
                             </li>
                           );
                         })}

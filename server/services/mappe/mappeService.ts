@@ -274,7 +274,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
-      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; dungeon_chiave: string; area_chiave: string; area_nome: string } | undefined;
+      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, p.carattere, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; carattere: string | null; dungeon_chiave: string; area_chiave: string; area_nome: string } | undefined;
       if (!p) return null;
       const base = { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, areaDedalo: p.area_dedalo_chiave };
       // L4 (§3.1): una voce dei Palazzi porta carattere, infiltrazione e «da verificare», e lo stato con cui risulta (§8.11: dai suoi
@@ -289,7 +289,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
           avanzamento: sv && sv.totale > 0 ? { fatti: sv.fatti, totale: sv.totale } : null } };
       }
       // una voce descrittiva non ha stato: uno rimasto da prima si ignora, come nella scheda del Palazzo (2026-10-01)
-      const stato = partitaId && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
+      const stato = partitaId && !puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere) ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
       return { tipo: 'punto', punto: { ...base, stato } };
     }
     case 'attivita':
@@ -1148,8 +1148,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
   // Un collegamento **nuovo** a una voce descrittiva della guida si rifiuta, come da `collegaPinAlPunto` (2026-10-01): le
   // descrittive non hanno pin. Quello che c'è già (gli elementi della guida senza mappa di prima) resta: nessuna riconciliazione.
   if (rif.tipo === 'punto' && !(attuale?.tipo === 'punto' && attuale.chiave === rif.chiave)) {
-    const p = prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null };
-    if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
+    const p = prepared('SELECT nome, tipo, area_dedalo_chiave, carattere FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null; carattere: string | null };
+    if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave, p.carattere)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
     // una Persona da catturare (dedali e Palazzi) si cattura nel compendio (2026-10-12, `catturePersona.ts`; L8)
     if (eVoceDiCattura(rif.chiave)) throw erroreCatturaNelCompendio(p.nome, 'collegare');
   }

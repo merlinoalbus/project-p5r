@@ -75,6 +75,25 @@ export interface StatoPartitaSemafori {
   /** L13 (O11-1, risposta dell'utente «Sì, in automatico»): le relazioni romantiche della partita con il giorno d'inizio (null = non registrato),
    *  dal punto unico `relazioniConGiorno`; le leggono le condizioni `relazione-romantica` e `relazioni-romantiche`. Assente = nessuna relazione. */
   relazioniRomantiche?: ReadonlyMap<string, string | null>;
+  /** Le impostazioni della partita sui contenuti (`contenutiDellaPartita`): il salvataggio di Persona 5 e i set di contenuti scaricabili
+   *  posseduti (gli stessi che legge la Fusione); le leggono le condizioni `salvataggio-p5` e `dlc-posseduto`. Assente = nessuno dei due. */
+  contenutiPartita?: ContenutiPartita;
+}
+
+/** Le impostazioni della partita sui contenuti: il salvataggio di Persona 5 e i set di contenuti scaricabili posseduti (`dlc_set.id`). */
+export interface ContenutiPartita { salvataggioP5: boolean; dlcPosseduti: ReadonlySet<number> }
+
+/**
+ * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`, migrazione utente 061) e i set di contenuti scaricabili posseduti
+ * (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Su uno schema senza la colonna del
+ * salvataggio (prima della 061) il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
+ */
+export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
+  const conSalvataggio = !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
+  const r = prepared(`SELECT dlc_posseduti_json${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; salvataggio_p5?: number } | undefined;
+  let set: unknown;
+  try { set = JSON.parse(r?.dlc_posseduti_json ?? '[]'); } catch { set = []; }
+  return { salvataggioP5: r?.salvataggio_p5 === 1, dlcPosseduti: new Set(Array.isArray(set) ? set.filter((x): x is number => Number.isSafeInteger(x)) : []) };
 }
 
 /** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
@@ -113,7 +132,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
   return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
-    relazioniRomantiche: relazioniConGiorno(partitaId) };
+    relazioniRomantiche: relazioniConGiorno(partitaId), contenutiPartita: contenutiDellaPartita(partitaId) };
 }
 
 /** I tipi di condizione che leggono SOLO ranghi dei Confidenti, Doti, giorno e fascia di gioco e relazioni romantiche (più i contenitori

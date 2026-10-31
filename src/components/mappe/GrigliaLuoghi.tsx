@@ -8,9 +8,10 @@
 // «Dedali (n)») scende di livello. Casa e conteggi li calcola il server (`GET /api/mappe/gerarchia`): qui non si ricostruisce un indirizzo né
 // si somma un numero. Scorre solo la pagina: nessuna area scorrevole annidata. Le colonne le decide `.griglia-luoghi` (tailwind.css).
 //
-// Miniature dei Palazzi e delle aree dei Dedali (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini. Ma io ho generato delle
-// immagini da inserire. vorrei poterle inserire e/o modificare», «stessa funzione … anche per i palazzi»): con la miniatura caricata la carta
-// la mostra in 16:9 (miniature del server con `srcset`); senza, il Palazzo resta col suo emblema e l'area del Dedalo senza immagine. Il
+// Miniature dei Palazzi, dei Dedali e delle aree dei Dedali (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini. Ma io ho
+// generato delle immagini da inserire. vorrei poterle inserire e/o modificare», «stessa funzione … anche per i palazzi»): con la miniatura
+// caricata la carta la mostra in 16:9 (miniature del server con `srcset`); senza, Palazzo e Dedalo restano col loro emblema (la lettera
+// grande del Dedalo) e l'area del Dedalo senza immagine. Il
 // comando «Miniatura» (solo nella preparazione: costante di build qui sotto) apre `FinestraCaricaImmagine` e dopo un cambio la pagina rilegge
 // la gerarchia (`RicaricaLuoghi`).
 // ============================================================
@@ -76,10 +77,10 @@ export function Infiltrazioni({ titolo, elenco }: { titolo: string; elenco: Nodo
   );
 }
 
-/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: la miniatura caricata di un Palazzo o di un'area di un Dedalo; senza,
- *  l'emblema grande per Palazzi, Memento e dedali (niente per l'area del Dedalo), altrimenti l'immagine del server. */
+/** L'immagine in alto della carta, sempre 16:9 a tutta larghezza: la miniatura caricata di un Palazzo, di un Dedalo o di un'area di un
+ *  Dedalo; senza, l'emblema grande per Palazzi, Memento e dedali (niente per l'area del Dedalo), altrimenti l'immagine del server. */
 function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
-  if ((nodo.tipo === 'palazzo' || nodo.tipo === 'area-dedalo') && nodo.immagine?.immagineUrl) {
+  if ((nodo.tipo === 'palazzo' || nodo.tipo === 'dedalo' || nodo.tipo === 'area-dedalo') && nodo.immagine?.immagineUrl) {
     return <AnteprimaMappa mappa={{ immagineUrl: nodo.immagine.immagineUrl, asset: null, nome: nodo.nome }} className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
   }
   if (nodo.tipo === 'palazzo' || nodo.tipo === 'memento' || nodo.tipo === 'dedalo') {
@@ -92,7 +93,7 @@ function ImmagineCarta({ nodo }: { nodo: NodoGerarchiaDto }) {
     className="aspect-video w-full rounded-none border-0" sizes={SIZES_CARTA} />;
 }
 
-/** «Miniatura» sulla carta di un Palazzo o di un'area di un Dedalo: apre la finestra per inserire, cambiare o togliere l'immagine. */
+/** «Miniatura» sulla carta di un Palazzo, di un Dedalo o di un'area di un Dedalo: apre la finestra per inserire, cambiare o togliere l'immagine. */
 function ComandoMiniaturaReale({ nodo }: { nodo: NodoGerarchiaDto }) {
   const [aperta, setAperta] = useState(false);
   const ricarica = useContext(RicaricaLuoghi);

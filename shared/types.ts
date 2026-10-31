@@ -593,7 +593,10 @@ export interface PartitaDto {
   fasciaGioco: FasciaGioco;
   difficolta: Difficolta;
   nuovaPartitaPlus: boolean;
+  /** I set di contenuti scaricabili posseduti (`dlc_set.id`): li leggono la Fusione e le condizioni `dlc-posseduto`. */
   dlcPosseduti: number[];
+  /** C'è il salvataggio di Persona 5 (`partita.salvataggio_p5`, utente 061): lo legge la condizione `salvataggio-p5`. */
+  salvataggioP5: boolean;
   allarmeAttivo: boolean;
   createdAt: string;
   updatedAt: string;
@@ -601,6 +604,9 @@ export interface PartitaDto {
    *  disponibilità lo usano per sapere quando ricaricarsi. `null` = nessuno dei due lo dice. */
   meteoOra: MeteoPartita | null;
 }
+
+/** Un set di contenuti scaricabili (`dlc_set`): l'id che la partita segna fra i posseduti, le sue Persona e il nome che le dice. */
+export interface SetDlcDto { id: number; persone: string[]; nome: string }
 
 /** Il meteo di una fascia del giorno: quello che vale (`meteo`), da dove viene, e quello della guida per confronto. */
 export interface MeteoFasciaDto {
@@ -2067,10 +2073,10 @@ export interface NodoGerarchiaDto {
   slug?: string;
   /** Solo città, quartiere, Palazzo: la chiave pubblica della mappa che li illustra (per «Colloca»). */
   mappa?: string;
-  /** La miniatura col risolutore unico di L1; null per i contenitori. Palazzo e area di un Dedalo (O9-5): la miniatura caricata
-   *  dall'utente (ambito `dungeon`, URL versionato), altrimenti null (il Palazzo mostra il suo emblema, l'area del Dedalo niente). */
+  /** La miniatura col risolutore unico di L1; null per i contenitori. Palazzo, Dedalo e area di un Dedalo (O9-5): la miniatura caricata
+   *  dall'utente (ambito `dungeon`, URL versionato), altrimenti null (Palazzo e Dedalo mostrano il loro emblema, l'area del Dedalo niente). */
   immagine: IllustrazioneDto | null;
-  /** Solo Palazzo e area di un Dedalo dei Memento (O9-5): dove si carica la miniatura della carta (`PUT /api/immagini/<ambito>/<chiave>`). */
+  /** Solo Palazzo, Dedalo dei Memento e area di un Dedalo (O9-5): dove si carica la miniatura della carta (`PUT /api/immagini/<ambito>/<chiave>`). */
   miniatura?: { ambito: 'dungeon'; chiave: string };
   conteggi: ConteggiNodoDto;
   /** Area in attesa della scelta dell'utente (lo staff di Tokyo). */
@@ -3666,6 +3672,8 @@ export interface ElenchiRegoleDto {
   inviti?: Array<{ chiave: string; nome: string; gruppo: string; confidente: string }>;
   /** L13 (O11-1): i Confidenti romanzabili (`confidente.romanzabile`), per la condizione «Relazione romantica con». */
   romanzabili?: Array<{ chiave: string; nome: string }>;
+  /** I set di contenuti scaricabili (chiave = id del set come testo), per la condizione «Contenuto scaricabile posseduto». */
+  setDlc?: Array<{ chiave: string; nome: string }>;
 }
 
 /** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
@@ -3688,6 +3696,10 @@ export interface ManifestImmaginiDto {
   file: Record<string, string>;
 }
 
+/** Una voce del Diario la cui spunta (ancora attiva) ha prodotto un elemento dei progressi: giorno «MM-GG» e testo, per la riga «Già nel
+ *  Diario: voce del 09/04 · …» con il collegamento alla voce. */
+export interface VoceDiProvenienzaDto { uid: string; giorno: string; testo: string }
+
 /** Gli stati di una partita per le condizioni: calcolati dalla partita e da segnare a mano (Partita → Progressi). */
 export interface ProgressiPartitaDto {
   /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato) o, per le aperture dei Dedali dei Memento, dalla condizione d'apertura del
@@ -3695,21 +3707,27 @@ export interface ProgressiPartitaDto {
   /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
   eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[];
     apertura?: string | null;
-    /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
-    daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
+    /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «Già nel Diario: voce del 09/04 · …». */
+    daVoci?: VoceDiProvenienzaDto[] }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza ♪♪»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[];
     /** L13: gli esiti dichiarati dall'attività con la disponibilità nella partita: il + apre la scelta dell'esito (null se non ne dichiara). */
     esiti: EsitiAttivitaDto | null;
     /** Ondata 5 (lotto F-bis): gli effetti dei libri letti che riguardano l'attività (anche senza esiti); assente nelle risposte precedenti. */
-    promemoria?: string[] }>;
-  /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
+    promemoria?: string[];
+    /** Le voci del Diario la cui spunta, ancora attiva, ha registrato un turno ancora presente; assente se nessuno (i turni del contatore). */
+    daVoci?: VoceDiProvenienzaDto[];
+    /** R12-01/7: i turni del + hanno proposte «Applica» (aperte o decise): la riga mostra il promemoria dell'attività. Assente = nessuna. */
+    conProposteDeiTurni?: boolean }>;
+  /** Dopo un + o − del contatore: le Doti da segnare a mano nelle Doti, cioè solo quelle dei turni tolti che non vengono dal + (registrati da
+   *  una voce o prima del registro); quelle dei turni del + stanno nel promemoria «Applica» dell'attività (R12-01/7). */
   daSegnare?: DoteDaSegnareDto[];
   /** I negozi con programma punti manuale. */
   puntiNegozio: Array<{ negozio: string; nome: string; programma: string; unita: string; punti: number }>;
   /** I negozi con il grado cliente: dalla spesa segnata, con la prossima soglia. */
   rangoCliente: Array<{ negozio: string; nome: string; programma: string; spesa: number; rango: { chiave: string; nome: string }; prossimo: { chiave: string; nome: string; spesa: number } | null }>;
-  contatori: Array<{ chiave: string; nome: string; valore: number }>;
+  /** `daVoci`: le voci del Diario la cui spunta, ancora attiva, ha portato una lettura contata oltre la soglia del contatore; assente se nessuna. */
+  contatori: Array<{ chiave: string; nome: string; valore: number; daVoci?: VoceDiProvenienzaDto[] }>;
 }
 
 /** I timbri raccolti in un'area di un dedalo dei Memento (099; `area` è la chiave dell'area del dedalo), per partita. */

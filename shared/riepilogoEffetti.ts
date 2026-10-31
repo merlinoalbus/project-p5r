@@ -15,10 +15,10 @@
 // (`partiEffettoAzione`, `contoArticoli`, i nomi di `NomiFraseEffetto`): nessuna chiave grezza, mai testo troncato.
 // ============================================================
 
-import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
+import { EVENTI_STORIA, dataLeggibile, type NomiCondizioni } from './condizioniSpillo.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
-import { contoArticoli, eInNote, formatoYen, gruppiAlternativi, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
+import { contoArticoli, eInNote, formatoYen, fraseCondizioniEffetto, gruppiAlternativi, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
 import { testoPunti } from './note.js';
 
 /** Una risposta giusta di una domanda del gioco: il testo e, se la riga ne raccoglie più d'una (gli esami), il quesito a cui risponde. */
@@ -31,7 +31,9 @@ export interface RispostaRiepilogoEffettiDto { testo: string; domanda?: string }
  * domande in classe»): la riga di un cruciverba ha per nome l'indizio e in `risposte` la soluzione (`cruciverba.risposta`), con la stessa resa.
  * `contenuto` (L13, decisione 4): che cosa contiene un set, in una riga («Cerotto alla caffeina · Gocce per occhioni ×10»), se il catalogo lo dice.
  */
-export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string; risposte?: RispostaRiepilogoEffettiDto[]; contenuto?: string }
+export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string; risposte?: RispostaRiepilogoEffettiDto[]; contenuto?: string;
+  /** Fuori dalla partita, quando l'effetto vale («Solo se: salvataggio di Persona 5 presente», `fraseCondizioniEffetto`). */
+  condizione?: string }
 /** Una domanda del gioco come la legge il riepilogo: il testo, il tipo (classe, esame, quiz in TV) e le risposte giuste in ordine. */
 export interface QuesitoRiepilogoEffetti { domanda: string; tipo: string; risposte: RispostaRiepilogoEffettiDto[] }
 /** Un cruciverba del gioco come lo legge il riepilogo: l'indizio e la soluzione (la riga della tabella `cruciverba`, la sola fonte). */
@@ -56,6 +58,9 @@ export interface NomiRiepilogoEffetti {
   /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno);
    *  `esito` (L13, chiusure del 31/10): quello dichiarato dalla voce, per gli esiti con la paga propria. */
   pagaTurno: (attivita: string, esito?: string) => { yen: number; massima: number | null; allaSpunta?: true } | undefined;
+  /** Decisione 18: che cosa la spunta scala dal saldo per un turno senza paga, con la regola che lo scala davvero (`attivitaService.costoDelTurno`):
+   *  `costo` per il costo dell'attività, `sfide` gli articoli delle sfide che si pagano; null se il turno non costa niente. */
+  costoTurno: (attivita: string, esito?: string) => { costo: boolean; sfide: readonly string[] } | null;
   /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
   quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
   /** Il cruciverba del gioco dalla sua data «MM-GG», con l'indizio e la soluzione (2026-10-27, «Aggiungere la visualizzazione della
@@ -65,6 +70,8 @@ export interface NomiRiepilogoEffetti {
   incompatibili?: (articolo: string) => readonly string[] | undefined;
   /** L13 (decisione 4): che cosa contiene un articolo (un set delle televendite): gli oggetti con le copie. */
   contenuto?: (articolo: string) => ReadonlyArray<{ nome: string; quantita: number | null }> | undefined;
+  /** I nomi per dire le condizioni di un effetto («Solo se: contenuto scaricabile «Izanagi e Izanagi Picaro» posseduto»). */
+  condizioni?: NomiCondizioni;
 }
 
 /** Il gruppo di una domanda secondo il suo tipo: le domande in classe, i quiz del game show in TV, gli esami (di metà semestre e finali). */
@@ -177,6 +184,15 @@ export interface OpzioniRiepilogoEffetti {
    *  gli yen già nel saldo). La presenza dice che la voce è spuntata: allora la
    *  nota non dà più l'istruzione «si dicono alla spunta» e la riga dice ciò che è stato registrato, mai base e massima. Assente prima della spunta. */
   pagheRegistrate?: ReadonlyMap<number, number | null>;
+  /** Decisione 2 e 18: a voce spuntata, gli articoli della voce i cui yen la spunta ha mosso e che sono ancora in vigore (movimento della causa
+   *  `voce:<uid>:<effetto>`, la regola di `motoreDiario.scartaYenDeiTurni`): solo la sfida di uno di questi non la paga il turno. Assente prima
+   *  della spunta: allora la pagano gli articoli della voce che non sono in alternativa (quelli in alternativa possono non essere comprati). */
+  articoliPagati?: ReadonlySet<string>;
+  /** Il riepilogo è quello di una partita: le condizioni degli effetti mostrati valgono, quindi non si ripetono. Assente = la guida, senza
+   *  partita: ogni effetto con condizioni dice quando vale («Solo se: …»). */
+  nellaPartita?: boolean;
+  /** Nella partita, le posizioni (in `effetti`) degli effetti con condizioni che non valgono (`CondizioniEffetto`): non si mostrano. */
+  fuoriCondizione?: ReadonlySet<number>;
 }
 
 /**
@@ -215,9 +231,20 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
     const y = yenDelGruppo.get(chiave) ?? { effetti: 0, giaNelSaldo: [] };
     yenDelGruppo.set(chiave, { effetti: y.effetti + 1, giaNelSaldo: giaNelSaldo(indice) ? [...y.giaNelSaldo, nomeEffettoConYen(effetti[indice]!, n)] : y.giaNelSaldo });
   };
-  /** I turni della voce i cui yen la spunta muove (non quelli già nel saldo da prima), per la loro nota: con paga (e se variabile), senza paga
-   *  (costo dell'attività o della sfida). Un turno già nel saldo non entra qui: la nota non promette per lui un movimento che non ci sarà. */
-  const turni = { conPaga: false, pagaVariabile: false, senzaPaga: false, pagaAllaSpunta: false };
+  /** I turni della voce i cui yen la spunta muove (non quelli già nel saldo da prima), per la loro nota: con paga (e se variabile), con il costo
+   *  dell'attività, con il prezzo della sfida. Un turno già nel saldo non entra qui: la nota non promette per lui un movimento che non ci sarà;
+   *  e nemmeno uno che non costa niente (la fabbricazione di un Grimaldello): la frase del prezzo compare solo dove c'è un prezzo. */
+  const turni = { conPaga: false, pagaVariabile: false, costo: false, sfida: false, pagaAllaSpunta: false };
+  /** Gli articoli della voce che pagano già la sfida di un turno, che allora il turno non paga (`motoreDiario.scartaYenDeiTurni`, lo stesso
+   *  acquisto non si conta due volte) e i cui yen li dice la nota degli acquisti: a voce spuntata quelli i cui yen la spunta ha mosso
+   *  (`opz.articoliPagati`); prima della spunta quelli che non sono in alternativa, gli unici di cui si sa che si compreranno. */
+  const articoliCheLaPagano = opz.articoliPagati ?? (() => {
+    const articoli = effetti.flatMap((x) => (x.tipo === 'articolo' ? [x.articolo] : []));
+    // le alternative si contano per negozio, come i gruppi «Uno a scelta» più sotto
+    const inAlternativa = new Set(n.incompatibili ? [...new Set(articoli.map(negozioDellArticolo))].flatMap((neg) =>
+      gruppiAlternativi(articoli.filter((a) => negozioDellArticolo(a) === neg), n.incompatibili!).flat()) : []);
+    return new Set(articoli.filter((a) => !inAlternativa.has(a)));
+  })();
   /** Il gruppo `chiave`, creato al primo effetto che lo usa. */
   const gruppo = (chiave: string, titolo?: string): GruppoRiepilogoEffettiDto => {
     let g = gruppi.get(chiave);
@@ -228,9 +255,16 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
     }
     return g;
   };
-  const riga = (chiave: string, nome: string, dettaglio?: string) => { gruppo(chiave).righe.push(dettaglio ? { nome, dettaglio } : { nome }); };
+  /** La condizione dell'effetto che si sta scrivendo, detta solo fuori dalla partita (`CondizioniEffetto`). */
+  let condizione: string | null = null;
+  const riga = (chiave: string, nome: string, dettaglio?: string) => {
+    gruppo(chiave).righe.push({ nome, ...(dettaglio ? { dettaglio } : {}), ...(condizione ? { condizione } : {}) });
+  };
 
   for (const [i, e] of effetti.entries()) {
+    // un effetto con condizioni che nella partita non valgono non si mostra: non è una cosa che il gioco darà
+    if (opz.fuoriCondizione?.has(i)) continue;
+    condizione = opz.nellaPartita ? null : fraseCondizioniEffetto(e, n.condizioni);
     switch (e.tipo) {
       case 'articolo': {
         // gli articoli di un negozio si contano insieme, una volta sola per negozio (al primo articolo): le righe e il totale vengono da `contoArticoli`
@@ -311,7 +345,14 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         if (!giaNelSaldo(i)) {
           // L13 (31/10): gli yen di un lavoro senza esiti si dicono alla spunta ed entrano tutti; a voce spuntata (O10-5) l'istruzione non serve più
           if (paga?.allaSpunta) { if (!registrata) turni.pagaAllaSpunta = true; }
-          else if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
+          else if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; }
+          else {
+            // senza paga, la frase del prezzo solo se la spunta scala davvero qualcosa: il costo dell'attività o una sfida che nessun articolo
+            // della voce paga già
+            const c = n.costoTurno(e.attivita, e.esito);
+            if (c?.costo) turni.costo = true;
+            if (c?.sfide.some((a) => !articoliCheLaPagano.has(a))) turni.sfida = true;
+          }
         }
         conYen('turni', i);
         break;
@@ -379,7 +420,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
   const notaTurni = [
     ...(turni.conPaga ? [`La paga base di un lavoro entra da sola nel saldo.${turni.pagaVariabile ? ' Il di più che il gioco può dare, fino alla paga massima, non entra da solo.' : ''}`] : []),
     ...(turni.pagaAllaSpunta ? ['Gli yen ricevuti al lavoro si dicono alla spunta ed entrano da soli nel saldo.'] : []),
-    ...(turni.senzaPaga ? ['Se un’attività o la sfida scelta costa, il prezzo si scala da solo dal saldo, mai sotto zero.'] : []),
+    ...(turni.costo || turni.sfida ? [`${turni.costo && turni.sfida ? 'Il costo dell’attività o il prezzo della sfida scelta' : turni.costo ? 'Il costo dell’attività' : 'Il prezzo della sfida scelta'} si scala da solo dal saldo, mai sotto zero.`] : []),
   ].join(' ');
   for (const [chiave, y] of yenDelGruppo) {
     const g = gruppi.get(chiave);

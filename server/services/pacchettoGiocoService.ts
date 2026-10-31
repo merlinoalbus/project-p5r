@@ -97,6 +97,9 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'effetto_lettura_partita', colonna: 'chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtro: "tipo = 'attivita'" },
   { tabella: 'effetto_lettura_partita', colonna: 'dote_chiave', entita: 'Dote sociale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
   { tabella: 'turno_partita', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
+  // il legame del turno con la voce del Diario che l'ha registrato (utente 063): un'attività o una voce che spariscono lo lasciano orfano
+  { tabella: 'turno_voce_partita', colonna: 'attivita_chiave', entita: 'attività del turno della voce', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
+  { tabella: 'turno_voce_partita', colonna: 'voce_uid', entita: 'voce del turno', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'dote_sociale_partita', colonna: 'dote_chiave', entita: 'Dote sociale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
   { tabella: 'attivita_svolta_partita', colonna: 'attivita_chiave', entita: 'attività', tabellaGioco: 'attivita', colonnaGioco: 'chiave' },
   { tabella: 'spillo_partita', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },

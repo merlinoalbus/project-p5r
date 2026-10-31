@@ -3,7 +3,8 @@
 // ============================================================
 //
 // Regola scelta dall'utente (2026-10-04): un'area è completata quando **tutte le sue voci da segnare** sono segnate, cioè
-// Ottenute o Esaurite. Le voci descrittive («Altro») non hanno uno stato e non contano; un'area che non ha voci da segnare
+// Ottenute o Esaurite. Le voci descrittive («Altro» senza il carattere «Permanente» o «Si ripropone», `puntoDescrittivo`) non hanno
+// uno stato e non contano; un'area che non ha voci da segnare
 // non è mai completata (non c'è niente da completare). Gli Enigmi non chiedono un caso a parte: quando i passi sono fatti è
 // il server a segnare l'Enigma (`allineaEnigma`), quindi lo stato dell'Enigma è già quello dei suoi passi.
 //
@@ -18,7 +19,7 @@ import type { AreaDungeonDto } from '../types';
  *  L4 (§1.5, segnalazione D): quando il server manda `completamento` (le infiltrazioni dei Palazzi), «completata» è la sua — la
  *  funzione unica, sugli oggetti permanenti — e qui non si ricalcola; senza (dati di prima) vale la regola di prima. */
 export function completamentoArea(area: Pick<AreaDungeonDto, 'punti'> & Partial<Pick<AreaDungeonDto, 'completamento'>>): { daSegnare: number; segnate: number; completata: boolean } {
-  const voci = area.punti.filter((p) => !puntoDescrittivo(p.tipo, p.areaDedalo));
+  const voci = area.punti.filter((p) => !puntoDescrittivo(p.tipo, p.areaDedalo, p.carattere));
   const segnate = voci.filter((p) => p.stato !== null).length;
   if (area.completamento) return { daSegnare: voci.length, segnate, completata: area.completamento.completata === true };
   return { daSegnare: voci.length, segnate, completata: voci.length > 0 && segnate === voci.length };

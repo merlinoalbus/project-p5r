@@ -12,7 +12,11 @@
 // ============================================================
 
 import { useState } from 'react';
-import { motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
+import { ammetteCondizioni, condizioniDellEffetto, fraseCondizioniEffetto, MASSIMO_CONDIZIONI_EFFETTO, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { CondizioniEditor } from './CondizioniEditor';
+import { useCarica } from '../../hooks/useCarica';
+import { caricaElenchiNomiCondizioni, nomiDelleCondizioni } from '../../utils/condizioniSpillo';
 import { CATEGORIA_EFFETTO, MENU_EFFETTI as MENU, effettoNuovo } from '../../utils/effettiDellaVoce';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -39,6 +43,18 @@ const idRiga = (r: RigaEffetto): string => {
   if (!c) { prossimoCodice += 1; c = `nuovo-${prossimoCodice}`; CODICI.set(r, c); }
   return c;
 };
+
+/** L'effetto `dopo` con le condizioni (`CondizioniEffetto`) di `prima`, se l'editor del tipo l'ha riscritto senza e il tipo le ammette. */
+function conCondizioniDi(prima: EffettoVoce, dopo: EffettoVoce): EffettoVoce {
+  const c = condizioniDellEffetto(prima);
+  return c.length && ammetteCondizioni(dopo.tipo) && !('condizioni' in dopo) ? conCondizioniNuove(dopo, [...c]) : dopo;
+}
+/** L'effetto con queste condizioni; con l'elenco vuoto, senza la chiave. */
+function conCondizioniNuove(e: EffettoVoce, condizioni: RequisitoSpillo[]): EffettoVoce {
+  const resto: Record<string, unknown> = { ...e };
+  delete resto.condizioni;
+  return (condizioni.length ? { ...resto, condizioni } : resto) as unknown as EffettoVoce;
+}
 
 /** Gli yen che film, attività e Richieste portano già, dagli elenchi dell'editor (il server li calcola con `yenDeiDati`). */
 const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
@@ -104,11 +120,24 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
    */
   const [inModifica, setInModifica] = useState<string | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
+  // i nomi per leggere le condizioni degli effetti (mai chiavi), letti solo se un effetto della voce ne ha
+  const conCondizioni = righe.some((r) => condizioniDellEffetto(r.effetto).length > 0);
+  const nomiCondizioni = useCarica(() => (conCondizioni ? caricaElenchiNomiCondizioni().then(nomiDelleCondizioni) : Promise.resolve(null)), [conCondizioni]);
+  /** «Solo se: …» dell'effetto, o null (senza condizioni, o finché i nomi non sono arrivati: una chiave grezza non compare mai). */
+  const fraseCondizione = (e: EffettoVoce): string | null => (nomiCondizioni.dati ? fraseCondizioniEffetto(e, nomiCondizioni.dati) : null);
+  /** Le condizioni dell'effetto `i` («Vale solo se»): vuote = vale sempre (la chiave non si scrive, una sola forma canonica). */
+  const impostaCondizioni = (i: number, condizioni: RequisitoSpillo[]) => imposta(righe.map((r, j) => {
+    if (j !== i) return r;
+    const nuova = { ...r, effetto: conCondizioniNuove(r.effetto, condizioni) };
+    if (!r.uid) CODICI.set(nuova, idRiga(r));
+    return nuova;
+  }));
 
   const imposta = (effettiVoce: RigaEffetto[]) => { setErrore(null); onCambia({ ...valore, effettiVoce }); };
+  // le condizioni dell'effetto («Vale solo se») non sono dei campi del suo tipo: l'editor del tipo che riscrive l'effetto le conserva qui
   const cambia = (i: number, effetto: EffettoVoce) => imposta(righe.map((r, j) => {
     if (j !== i) return r;
-    const nuova = { ...r, effetto };
+    const nuova = { ...r, effetto: conCondizioniDi(r.effetto, effetto) };
     if (!r.uid) CODICI.set(nuova, idRiga(r)); // la riga nuova modificata resta la stessa scheda
     return nuova;
   }));
@@ -167,7 +196,16 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli: ${nomeAccessibile}`} onClick={() => togli(i)} />
                   </span>
                 </div>
+                {!editing && fraseCondizione(r.effetto) && <p className="m-0 testo-12 text-text-secondary text-pretty">{fraseCondizione(r.effetto)}</p>}
                 {editing && <CampiEffettoVoce effetto={r.effetto} elenchi={elenchi} righe={righe} onCambia={(e) => cambia(i, e)} />}
+                {/* «Vale solo se»: le condizioni dell'effetto, con l'editor unico delle condizioni (vuoto = vale sempre), solo per i tipi che le ammettono */}
+                {editing && completo && ammetteCondizioni(r.effetto.tipo) && (
+                  <div className="flex flex-col gap-1">
+                    <span className="form-label m-0">Vale solo se</span>
+                    <span className="testo-12 text-text-muted text-pretty">Senza condizioni l’effetto vale sempre. Con condizioni false al giorno della voce, nella partita non si applica.</span>
+                    <CondizioniEditor condizioni={[...condizioniDellEffetto(r.effetto)]} onCambia={(c) => impostaCondizioni(i, c)} massimo={MASSIMO_CONDIZIONI_EFFETTO} />
+                  </div>
+                )}
               </li>
             );
           })}

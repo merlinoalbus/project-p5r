@@ -22,16 +22,21 @@
 // Il registro (`utente.censimento_stato_voce`, utente 050) tiene l'esito per coppia, ed è una decisione presa una volta sola: una coppia trovata
 // «già vera» (con lo stesso effetto: tipo e chiave) non si rivaluta più, così uno stato che l'utente toglie dopo (una Persona consumata in una
 // fusione, un trofeo tolto a mano) non torna nell'elenco a ogni avvio. Idempotente: un secondo giro non aggiunge niente.
+// Gli effetti con condizioni (`CondizioniEffetto`): con le condizioni false non mancano (non si propongono, non si registrano); diventate vere
+// dopo la spunta (un'impostazione della partita accesa dopo) entrano come gli altri. Gli yen con condizioni senza la ricevuta della spunta
+// seguono la stessa via, con la proposta «Applica» della voce (quella di un effetto Yen aggiunto a una voce già spuntata). Gira anche quando
+// cambiano le impostazioni dei contenuti della partita (`partiteService.aggiornaPartita`).
 // Gira a ogni avvio (dopo le migrazioni e le regole) e dopo l'importazione di un gioco.db: copre anche le migrazioni di gioco che aggiungono
 // effetti a voci già spuntate. Non è un gesto dell'utente: una proposta che si chiude qui non fa avanzare la partita (`senzaAvanzamento`).
 // Nel log solo i conteggi per partita (l'id), mai nomi né email; gli effetti non riconoscibili si contano (`nonRiconosciuti`), non si saltano in silenzio.
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { normalizzaEffettoVoce, eEffettoCheSomma, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
+import { condizioniDellEffetto, normalizzaEffettoVoce, eEffettoCheSomma, eEffettoDiStato, fraseEffettoConNomi, type EffettoDiStatoVoce, type EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { copiePerUscita, fraseMotivoDelPassato, mancaPersonaConScorta, statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { chiudiPropostePassato, creaPropostaEffettoStorico } from './propostePartitaService.js';
 import { effettiInAlternativa } from './alternativeAcquistiService.js';
+import { valutatoreEffettiCondizionati } from './voceDovuta.js';
 import { nomiFraseEffetto } from './azioniStrutturateService.js';
 // Ondata 5 (lotto E): la frase dell'articolo dice il prezzo della fascia della voce, lo stesso che la spunta scala
 import { fasciaDellaVoce } from './prezziArticoli.js';
@@ -51,6 +56,12 @@ export interface CensimentoPartita {
   invariate: number;
   /** Articoli in alternativa con altri della voce (decisione 4) senza riga: non scelti alla spunta, quindi non mancano e non entrano nell'elenco. */
   inAlternativa: number;
+  /** Effetti con condizioni false nella partita al giorno della voce (`CondizioniEffetto`) senza riga: non dovuti, non entrano nell'elenco. */
+  fuoriCondizione: number;
+  /** Gli yen con condizioni delle voci spuntate, senza ricevuta: proposte «Applica» nuove, chiuse (condizioni tornate false), invariate. */
+  yenProposti: number;
+  yenChiusi: number;
+  yenInvariati: number;
   /** Oggetti restituiti o venduti senza copie abbastanza nella partita: nulla da togliere, non entrano (e una loro proposta aperta si chiude). */
   nullaDaTogliere: number;
   /** Di quelle, le proposte aperte di prima chiuse in questo giro con la nota «nulla-da-togliere» (per il log). */
@@ -63,7 +74,7 @@ export interface CensimentoPartita {
   primoErrore?: string;
 }
 
-interface RigaCandidato { partita_id: number; voce_uid: string; effetto_uid: string; tipo: string; chiave: string | null; dati_json: string; fatta_at: string; data: string; azione: string }
+interface RigaCandidato { partita_id: number; voce_uid: string; effetto_uid: string; tipo: string; chiave: string | null; dati_json: string; fatta_at: string; data: string; fascia: string; azione: string }
 
 const leggi = (json: string): unknown => { try { return JSON.parse(json) as unknown; } catch { return null; } };
 
@@ -74,7 +85,7 @@ const leggi = (json: string): unknown => { try { return JSON.parse(json) as unkn
  */
 export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
   return getDb().transaction(() => {
-    const righe = prepared(`SELECT s.partita_id, s.voce_uid, e.uid AS effetto_uid, e.tipo, e.chiave, e.dati_json, s.fatta_at, v.data, v.azione
+    const righe = prepared(`SELECT s.partita_id, s.voce_uid, e.uid AS effetto_uid, e.tipo, e.chiave, e.dati_json, s.fatta_at, v.data, v.fascia, v.azione
       FROM utente.spunta_voce_partita s
       JOIN main.voce_giornata v ON v.uid = s.voce_uid
       JOIN main.voce_effetto_transizione t ON t.voce_uid = s.voce_uid AND t.stato = 'convertita'
@@ -84,7 +95,7 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     const perPartita = new Map<number, CensimentoPartita>();
     const conta = (p: number): CensimentoPartita => {
       let c = perPartita.get(p);
-      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, inAlternativa: 0, nullaDaTogliere: 0, chiuseNullaDaTogliere: 0, nonRiconosciuti: 0, errori: 0 }; perPartita.set(p, c); }
+      if (!c) { c = { partitaId: p, spunteConStati: 0, conRiga: 0, giaPresenti: 0, proposte: 0, invariate: 0, inAlternativa: 0, fuoriCondizione: 0, yenProposti: 0, yenChiusi: 0, yenInvariati: 0, nullaDaTogliere: 0, chiuseNullaDaTogliere: 0, nonRiconosciuti: 0, errori: 0 }; perPartita.set(p, c); }
       return c;
     };
     // decisione 4: gli articoli in alternativa di ogni voce (le righe portano tutti i suoi effetti «articolo»): quale si è comprato lo sceglie solo
@@ -100,6 +111,9 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
     }
     const inAlternativa = new Map([...articoliPerVoce].map(([voce, m]) => [voce, effettiInAlternativa([...m.values()])]));
     const nomi = nomiFraseEffetto(), adesso = nowIso();
+    // il valutatore delle condizioni degli effetti, uno per partita (lo stato si legge una volta, e solo se un effetto ha condizioni)
+    const valutatori = new Map<number, ReturnType<typeof valutatoreEffettiCondizionati>>();
+    const fuoriCondizione = (p: number) => { let v = valutatori.get(p); if (!v) { v = valutatoreEffettiCondizionati(p); valutatori.set(p, v); } return v; };
     const registra = (r: RigaCandidato, esito: 'proposta' | 'gia-presente' | 'nulla-da-togliere'): void => {
       prepared(`INSERT INTO utente.censimento_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, esito, rilevato_il) VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(partita_id, voce_uid, effetto_uid) DO UPDATE SET tipo = excluded.tipo, chiave = excluded.chiave, esito = excluded.esito,
@@ -119,6 +133,10 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           if (statoSegnatoDallaVoce(r.partita_id, r.voce_uid, r.effetto_uid, e)) { c.conRiga += 1; return; }
           // un articolo in alternativa non scelto: niente da proporre, e una sua proposta aperta di prima non è più dovuta
           if (inAlternativa.get(r.voce_uid)?.has(r.effetto_uid)) { chiudiPropostePassato(r.partita_id, r.voce_uid, r.effetto_uid); c.inAlternativa += 1; return; }
+          // un effetto con condizioni false nella partita al giorno della voce (`CondizioniEffetto`: lo Scaffale del Leblanc senza il salvataggio di
+          // Persona 5 o senza quel contenuto scaricabile) non manca: non è dovuto. Non si registra (le impostazioni della partita possono cambiare:
+          // il giro dopo lo rivaluta) e una sua proposta aperta di prima si chiude
+          if (condizioniDellEffetto(e).length && fuoriCondizione(r.partita_id)({ data: r.data, fascia: r.fascia }, [{ uid: r.effetto_uid, effetto: e }]).size) { chiudiPropostePassato(r.partita_id, r.voce_uid, r.effetto_uid); c.fuoriCondizione += 1; return; }
           // già trovata vera da un censimento di prima, con lo stesso effetto: la decisione è presa, anche se poi lo stato è cambiato nella partita
           // (togliendo la spunta della voce il registro della coppia se ne va: `giornataService`, la spunta rifatta si rivaluta)
           if (prepared("SELECT 1 FROM utente.censimento_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND esito = 'gia-presente' AND tipo = ? AND chiave IS ?")
@@ -142,6 +160,30 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
           if (aperteDopo > 0) registra(r, 'proposta');
           if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;
+        })();
+      } catch (err) {
+        c.errori += 1;
+        c.primoErrore ??= err instanceof Error ? err.message : String(err);
+      }
+    }
+    // gli yen con condizioni (`CondizioniEffetto`) delle voci spuntate, senza la ricevuta della spunta: con le condizioni diventate vere dopo la
+    // spunta (un'impostazione della partita accesa dopo) diventano la proposta «Applica» della voce, la stessa di un effetto Yen aggiunto a una
+    // voce già spuntata (`creaPropostaEffettoStorico`: approvandola gli yen entrano da soli, decisione 18, `motoreDiario.applicaEffettoStorico`);
+    // con le condizioni false la proposta aperta di prima si chiude come non più dovuta (la guardia di `creaPropostaEffettoStorico`)
+    const yen = prepared(`SELECT s.partita_id, s.voce_uid, e.uid AS effetto_uid, e.dati_json FROM utente.spunta_voce_partita s
+      JOIN main.voce_effetto_transizione t ON t.voce_uid = s.voce_uid AND t.stato = 'convertita'
+      JOIN main.voce_effetto e ON e.voce_uid = s.voce_uid
+      WHERE e.tipo = 'yen' AND json_extract(e.dati_json, '$.condizioni') IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM utente.effetto_applicato a WHERE a.partita_id = s.partita_id AND a.voce_uid = s.voce_uid AND a.effetto_uid = e.uid AND a.annullato_il IS NULL)
+      ORDER BY s.partita_id, s.voce_uid`).all() as Array<{ partita_id: number; voce_uid: string; effetto_uid: string; dati_json: string }>;
+    for (const r of yen) {
+      const c = conta(r.partita_id);
+      try {
+        getDb().transaction(() => {
+          const prima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
+          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { senzaAvanzamento: true });
+          const dopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
+          if (dopo > prima) c.yenProposti += 1; else if (dopo < prima) c.yenChiusi += 1; else c.yenInvariati += 1;
         })();
       } catch (err) {
         c.errori += 1;

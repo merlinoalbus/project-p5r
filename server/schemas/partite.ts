@@ -34,6 +34,7 @@ const campiPartita = {
   difficolta,
   nuovaPartitaPlus: z.boolean(),
   dlcPosseduti: z.array(z.number().int().min(1).max(50)).max(50),
+  salvataggioP5: z.boolean(),
   allarmeAttivo: z.boolean(),
 };
 

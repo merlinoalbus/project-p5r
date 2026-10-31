@@ -30,7 +30,9 @@ export type TipoCampo =
   // L6: un luogo (scelto per nome, salvato per chiave), un invito di un Confidente, il testo di un avviso
   | 'luogo' | 'invito' | 'testo'
   // L13 (O11-1): un Confidente romanzabile (elenco dal DB, `confidente.romanzabile`) e il numero massimo di relazioni romantiche (0..9)
-  | 'confidente-romanzabile' | 'relazioni';
+  | 'confidente-romanzabile' | 'relazioni'
+  // un set di contenuti scaricabili (elenco dal DB, `dlc_set`, per id)
+  | 'set-dlc';
 
 export interface CampoCondizione { nome: string; tipo: TipoCampo; etichetta: string }
 export interface OperatoreCondizione { chiave: string; nome: string; campi: CampoCondizione[] }
@@ -95,6 +97,9 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
     { chiave: 'al-piu-entro', nome: 'al più, iniziate entro', campi: [campo('al_piu', 'relazioni', 'Relazioni'), campo('entro', 'data', 'Entro il')] },
   ] },
   { chiave: 'squadra', nome: 'Ladro Fantasma', gruppo: 'Storia e progressi', origine: 'Partita → Denaro e squadra', operatori: [{ chiave: 'in-squadra', nome: 'in squadra', campi: [campo('membro', 'membro', 'Ladro')] }] },
+  // le impostazioni della partita (finestra «Modifica» della partita): il salvataggio di Persona 5 e i contenuti scaricabili posseduti
+  { chiave: 'salvataggio-p5', nome: 'Salvataggio di Persona 5', gruppo: 'Storia e progressi', origine: 'Partita → Modifica («Salvataggio di Persona 5 presente»)', operatori: [{ chiave: 'presente', nome: 'presente', campi: [] }] },
+  { chiave: 'dlc-posseduto', nome: 'Contenuto scaricabile', gruppo: 'Storia e progressi', origine: 'Partita → Modifica («Contenuti scaricabili posseduti»)', operatori: [{ chiave: 'posseduto', nome: 'posseduto', campi: [campo('set', 'set-dlc', 'Contenuto')] }] },
   { chiave: 'richiesta', nome: 'Richiesta dei Mementos', gruppo: 'Storia e progressi', origine: 'Guida → Richieste', operatori: [{ chiave: 'completata', nome: 'completata', campi: [campo('richiesta', 'richiesta', 'Richiesta')] }] },
   { chiave: 'evento', nome: 'Evento di storia', gruppo: 'Storia e progressi', origine: 'Partita → Progressi', operatori: [{ chiave: 'avvenuto', nome: 'avvenuto', campi: [campo('evento', 'evento', 'Evento')] }] },
   // L13 (decisioni 1 e 17): lo sblocco dato da un effetto «sblocco» di una voce del Diario spuntata
@@ -133,7 +138,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
   data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
   stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
-  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', 'relazione-romantica': 'relazione-romantica', 'relazioni-romantiche': 'relazione-romantica', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
+  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', 'relazione-romantica': 'relazione-romantica', 'relazioni-romantiche': 'relazione-romantica', 'salvataggio-p5': 'salvataggio-p5', 'dlc-posseduto': 'dlc-posseduto', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
   attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
   'pesca-sessione':'pesca-sessione',
   'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
@@ -222,6 +227,9 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
       }
       return null;
     }
+    case 'salvataggio-p5': return { tipo: 'salvataggio-p5' };
+    // il set si sceglie da un elenco (chiave testuale = id del set)
+    case 'dlc-posseduto': { const set = Number(s(v.set)); return Number.isInteger(set) && set >= 1 && set <= 50 ? { tipo: 'dlc-posseduto', set } : null; }
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;
     case 'sblocco': return s(v.chiave) && (scelta.operatore === 'richiesta' || scelta.operatore === 'attivita') ? { tipo: 'sblocco', bersaglio: scelta.operatore, chiave: s(v.chiave) } : null;
@@ -270,6 +278,8 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'relazioni-romantiche': return c.entro !== undefined
       ? { stato: 'relazione-romantica', operatore: 'al-piu-entro', valori: { al_piu: c.al_piu, entro: c.entro } }
       : { stato: 'relazione-romantica', operatore: 'al-piu', valori: { al_piu: c.al_piu } };
+    case 'salvataggio-p5': return { stato: 'salvataggio-p5', operatore: 'presente', valori: {} };
+    case 'dlc-posseduto': return { stato: 'dlc-posseduto', operatore: 'posseduto', valori: { set: String(c.set) } };
     case 'squadra': return { stato: 'squadra', operatore: 'in-squadra', valori: { membro: c.membro } };
     case 'richiesta': return { stato: 'richiesta', operatore: 'completata', valori: { richiesta: c.richiesta } };
     case 'sblocco': return { stato: 'sblocco', operatore: c.bersaglio, valori: { chiave: c.chiave } };

@@ -13,6 +13,7 @@ import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca
 import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
 import { yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { yenPrevistiApprovando } from './sfideDellaVoce.js';
+import { effettiFuoriCondizione } from './voceDovuta.js';
 
 export const nuovoUid = (): string => randomBytes(16).toString('hex');
 export function jsonCanonico(v: unknown): string {
@@ -41,7 +42,8 @@ export function leggiOggettoRegistro(raw:string,contesto='registro'):Record<stri
 }
 
 /** L13 (decisione 3, utente 047): `richiesta` = gli yen di una Richiesta completata, `chiave` = la chiave della Richiesta. */
-type Causa = { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta'; chiave: string };
+/** R12-01/7 (utente 062): `turno` = le Doti di un turno registrato con il + del contatore, `chiave` = «<attività>:<uid del turno>». */
+type Causa = { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta' | 'turno'; chiave: string };
 /** La chiave di una Richiesta come la scrive `richiesteService` (slug, al più 200 caratteri). */
 const CHIAVE_RICHIESTA = /^[a-z0-9][a-z0-9._-]{0,199}$/i;
 /** `note`: per una Dote, le note (1–3) da cui vengono i punti, quando il beneficio viene da una fonte sola (`noteDellaRicevuta`): solo per
@@ -56,7 +58,16 @@ interface RigaProposta {
   applicazione_json: string | null; creata_il: string; decisa_il: string | null;
 }
 const righeCausa = (p: number, c: Causa): RigaProposta[] => prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? ORDER BY id').all(p,c.tipo,c.chiave) as RigaProposta[];
-const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(['acquisto','pesca'].includes(r.causa_tipo)&&!/^[0-9a-f]{32}$/.test(r.causa_chiave))||(r.causa_tipo==='richiesta'&&!CHIAVE_RICHIESTA.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
+/** La chiave della causa di un turno: «<attività>:<uid del turno>» (la chiave dell'attività come in `attivita.chiave`). */
+const CHIAVE_TURNO = /^([a-z0-9][a-z0-9-]{0,99}):([0-9a-f]{32})$/;
+function parteTurno(chiave: string): { attivita: string; uid: string } {
+  const m = CHIAVE_TURNO.exec(chiave);
+  if (!m) throw httpErrors.conflict('causa-incoerente', 'Il registro contiene un’identità di turno non riconoscibile.');
+  return { attivita: m[1]!, uid: m[2]! };
+}
+/** La causa delle Doti di un turno registrato con il + (vedi `Causa`). */
+export const causaDelTurno = (attivita: string, uid: string): Causa => ({ tipo: 'turno', chiave: `${attivita}:${uid}` });
+const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='turno'&&!CHIAVE_TURNO.test(r.causa_chiave))||(r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(['acquisto','pesca'].includes(r.causa_tipo)&&!/^[0-9a-f]{32}$/.test(r.causa_chiave))||(r.causa_tipo==='richiesta'&&!CHIAVE_RICHIESTA.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
 export const verificaBeneficio = (v: unknown): Beneficio => {
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw httpErrors.conflict('beneficio-non-valido', 'La ricevuta del beneficio non è valida.');
   const b = v as Record<string, unknown>;
@@ -84,6 +95,21 @@ function noteDellaRicevuta(legacy: unknown, chiave: string, delta: number): 1 | 
 }
 
 function targetCausa(partita: number, causa: Causa): Target[] {
+  if(causa.tipo==='turno'){
+    // R12-01/7 (utente 062): le Doti del turno registrato con il + del contatore, attive finché il turno c'è (`turno_partita.uid` della causa):
+    // i punti sono quelli che il turno ha registrato (`effetto_lettura_partita`, con la Fortuna del momento). Tolto il turno con il −, i benefici
+    // restano descritti dalle righe di prima, non più attivi: la proposta non decisa si chiude, quella applicata ha la sua inversa (come le voci)
+    const {attivita,uid}=parteTurno(causa.chiave);
+    const turno=prepared('SELECT ordine FROM utente.turno_partita WHERE partita_id=? AND attivita_chiave=? AND uid=?').get(partita,attivita,uid) as {ordine:number}|undefined;
+    const insieme=new Map<string,Target>();
+    for(const x of righeCausa(partita,causa))if(x.tipo==='dote'){const b=verificaBeneficio(leggiOggettoRegistro(x.dati_json,'proposta del turno').beneficio);insieme.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
+    if(turno){
+      const nome=(prepared('SELECT nome FROM main.attivita WHERE chiave=?').get(attivita) as {nome:string}|undefined)?.nome??attivita;
+      const doti=prepared("SELECT dote_chiave,punti,note FROM utente.effetto_lettura_partita WHERE partita_id=? AND tipo='attivita' AND chiave=? AND ordine=? ORDER BY dote_chiave").all(partita,attivita,turno.ordine) as Array<{dote_chiave:string;punti:number;note:number}>;
+      for(const d of doti)if(eDote(d.dote_chiave)&&Number.isSafeInteger(d.punti)&&d.punti!==0)insieme.set(`dote\0${d.dote_chiave}`,{tipo:'dote',chiave:d.dote_chiave,delta:d.punti,motivo:`Dote del turno di «${nome}» segnato con il +: applicala quando la ottieni nel gioco.`,fortunaIgnota:false,storica:false,attiva:true,...(d.note===1||d.note===2||d.note===3?{note:d.note}:{})});
+    }
+    return [...insieme.values()];
+  }
   if(causa.tipo==='richiesta'){
     // L13 (decisione 3): gli yen della Richiesta li applica solo la Richiesta completata (`richiesta.yen`): beneficio attivo finché è completata
     // nella partita; tolto il completamento (o eliminata la Richiesta) il beneficio resta descritto dalle righe di prima, non più attivo.
@@ -273,6 +299,10 @@ export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
 export const riconciliaBeneficiAcquisto = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'acquisto',chiave:id});
 export const riconciliaBeneficiVoce = (p:number,voce:string,effetto:string):void => riconciliaBeneficiCausa(p,{tipo:'voce',chiave:`${voce}:${effetto}`});
 export const riconciliaBeneficiPesca = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'pesca',chiave:id});
+/** R12-01/7: riallinea le Doti di un turno del + (registrato: la proposta «Applica»; tolto: la chiusura o l'inversa, come per le voci). */
+export const riconciliaBeneficiTurno = (p:number,attivita:string,uid:string):void => riconciliaBeneficiCausa(p,causaDelTurno(attivita,uid));
+/** R12-01/7: il turno ha proposte nate dal + (quindi il suo annullo passa dal registro delle proposte, non dall'avviso)? */
+export const turnoConProposte = (p:number,attivita:string,uid:string):boolean => !!prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='turno' AND causa_chiave=? LIMIT 1").get(p,`${attivita}:${uid}`);
 /** L13 (decisione 3): riallinea gli yen di una Richiesta nella partita (completata: la proposta «Applica»; non più: la chiusura o l'inversa). */
 export const riconciliaBeneficiRichiesta = (p:number,chiave:string):void => riconciliaBeneficiCausa(p,{tipo:'richiesta',chiave});
 export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.js').BeneficioPescaDto[] {
@@ -311,6 +341,12 @@ function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:st
   // L13 (ondata 7, O7-2): il piazzamento all'esame si sceglie solo alla spunta: su una spunta già fatta nessuno l'ha scelto, e una proposta
   // «Applica» si fermerebbe (409 `piazzamento-da-scegliere`). La voce si toglie e si rispunta (lo dice la nota dell'editor della voce)
   if (tipoEffetto === 'esame') return false;
+  // un effetto con condizioni false nella partita al giorno della voce (`CondizioniEffetto`) non è dovuto: niente proposta, e una sua proposta
+  // aperta di prima (yen o elenco del passato) si chiude come non più dovuta
+  const conCondizioni = normalizzaEffettoVoce(leggiJsonRegistro(e.dati_json, 'configurazione effetto'));
+  if (conCondizioni && effettiFuoriCondizione(partita, voce, [{ uid: effetto, effetto: conCondizioni }]).has(effetto)) {
+    return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(), partita, `${voce}:${effetto}`).changes > 0;
+  }
   // gli stati: decisione 19, al salvataggio si applicano da soli (`motoreDiario.riallineaStatiDellaVoce`); diventano proposta solo per l'elenco del passato
   const diStato = tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona' || tipoEffetto === 'oggetto' || tipoEffetto === 'trofeo' || tipoEffetto === 'sblocco'
     || tipoEffetto === 'personaTolta' || tipoEffetto === 'puntiConfidente' || tipoEffetto === 'uscitaOggetto';
@@ -418,12 +454,16 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       orfana=orfana||!a||!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave);
     } else if(causa.tipo==='voce')orfana=orfana||!prepared('SELECT 1 FROM main.voce_giornata WHERE uid=?').get(r.voce_uid);
     else if(causa.tipo==='richiesta')orfana=orfana||!prepared('SELECT 1 FROM main.richiesta WHERE chiave=?').get(causa.chiave);
+    // R12-01/7: il turno del + resta la causa anche tolto (la proposta inversa ne nasce); orfana solo se l'attività non c'è più
+    else if(causa.tipo==='turno')orfana=orfana||!prepared('SELECT 1 FROM main.attivita WHERE chiave=?').get(parteTurno(causa.chiave).attivita);
     else orfana=orfana||!prepared('SELECT 1 FROM utente.pesca_sessione WHERE partita_id=? AND id=? UNION ALL SELECT 1 FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave,r.partita_id,causa.chiave);
   }
   // R10-10/4: il testo della voce del Diario da cui nasce la proposta, per dirlo all'utente in parole (non solo il suo identificativo)
   // L13: per gli yen di una Richiesta completata, la frase che la nomina (non c'è una voce)
   const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null)
-    :causa.tipo==='richiesta'?`Richiesta «${(prepared('SELECT nome FROM main.richiesta WHERE chiave=?').get(causa.chiave) as {nome:string}|undefined)?.nome??causa.chiave}» completata`:null;
+    :causa.tipo==='richiesta'?`Richiesta «${(prepared('SELECT nome FROM main.richiesta WHERE chiave=?').get(causa.chiave) as {nome:string}|undefined)?.nome??causa.chiave}» completata`
+    // R12-01/7: per il turno del + la frase che nomina l'attività (non c'è una voce)
+    :causa.tipo==='turno'?(()=>{const a=parteTurno(causa.chiave).attivita;return `Turno di «${(prepared('SELECT nome FROM main.attivita WHERE chiave=?').get(a) as {nome:string}|undefined)?.nome??a}» segnato con il +`;})():null;
   // BON-12: la spesa del consumo non è una proposta; la proposta Dote la porta come dato (decisione 18: dal Diario si scala da sola)
   const promemoriaYen=r.tipo==='dote'&&causa.tipo==='acquisto'?((prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {prezzo_yen:number}|undefined)?.prezzo_yen??null):null;
   // BON-01: la voce del Diario a cui il pulsante «Applica» si aggancia (quella della proposta, o quella che ha confermato il consumo)

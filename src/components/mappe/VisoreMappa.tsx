@@ -140,9 +140,11 @@ interface Props {
    *  sbiaditi). Resta la sola mappa: la testata no, i comandi (planimetria, ricerca, «Fatto») li porta chi la apre — dal
    *  2026-10-18 la barra del collegamento sopra la mappa principale della scheda del Palazzo —, e la ricerca arriva da lì. */
   scelta?: SceltaPin;
-  /** L3 RG-1: la guida della planimetria da usare (pulsante «Guida» nella barra), nelle planimetrie dei Palazzi; `onCambiato` avvisa chi
-   *  ospita il visore di uno stato salvato dalla guida (rilegge la mappa). Senza, il pulsante non c'è. */
-  guida?: { onCambiato?: () => void };
+  /** L3 RG-1: la guida da usare (pulsante «Guida» nella barra, `GuidaNelVisore`), su ogni mappa che può avere voci della guida (le planimetrie
+   *  dei Palazzi, le mappe con pin collegati a voci); `onCambiato` avvisa chi ospita il visore di uno stato salvato dalla guida (rilegge la
+   *  mappa). `versione`: cambia quando la pagina ospite salva qualcosa che la guida mostra e che i pin non dicono (una cattura con le piastrelle
+   *  della scheda): la guida si rilegge in silenzio. Senza, il pulsante non c'è. */
+  guida?: { onCambiato?: () => void; versione?: string | number };
   /** Falso: la selezione iniziale evidenzia e centra il pin senza aprirne il popup, che si apre al primo tocco (la pagina del luogo, L5:
    *  la pagina dice già tutto quel che il popup direbbe, e su una tela bassa il popup diventava un foglio sopra la pagina). */
   popupIniziale?: boolean;
@@ -472,8 +474,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const a = arrivoSpillo(s);
     if (a) onNaviga(a.mappa, a.spillo ? { spillo: a.spillo } : undefined);
   };
-  // L3 RG-1: la guida della planimetria da usare, nelle planimetrie dei Palazzi, fuori dall'editor e dalla scelta dei pin
-  const conGuida = !!guida && !editor && !scelta && mappa.area?.contenitore.tipo === 'dungeon';
+  // L3 RG-1: la guida da usare, l'unica del visore (2026-10-31: «il visore doveva già essere unico»), fuori dall'editor e dalla scelta dei pin,
+  // su ogni mappa che può avere voci della guida (`GET /api/mappe/:chiave/guida`): una planimetria di un Palazzo (le voci senza pin stanno
+  // sulla loro planimetria effettiva, che è sempre una planimetria del Palazzo) o qualunque mappa con un pin collegato a una voce
+  const conGuida = !!guida && !editor && !scelta && (mappa.area?.contenitore.tipo === 'dungeon' || mappa.spilli.some((s) => s.voci.length > 0));
   const [guidaAperta, setGuidaAperta] = useState<{ top: number; right: number } | null>(null);
   /** Apre la guida in alto a destra della tela (o la chiude). */
   const apriGuida = () => {
@@ -493,7 +497,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     centraSu(s);
   };
   // gli stati della mappa (pin e voci): quando cambiano altrove, la guida si rilegge
-  const versioneStati = conGuida ? mappa.spilli.map((s) => `${s.id}:${s.raccolto ? 1 : 0}:${s.voci.map((v) => v.stato ?? '').join(',')}`).join('|') : '';
+  // (gli stati dei pin e delle loro voci, più la versione della pagina ospite: le catture fatte con le piastrelle della scheda non toccano i pin)
+  const versioneStati = conGuida ? `${guida?.versione ?? ''}#${mappa.spilli.map((s) => `${s.id}:${s.raccolto ? 1 : 0}:${s.voci.map((v) => v.stato ?? '').join(',')}`).join('|')}` : '';
   const spilliQui = useMemo(() => new Set(mappa.spilli.map((s) => s.id)), [mappa.spilli]);
 
   // Coordinate in percentuale dell'immagine a partire da un punto dello schermo.
@@ -1348,13 +1353,13 @@ function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boo
   return cose.join(' e ');
 }
 
-/** Una voce descrittiva della guida («Altro» fuori dalle aree dei dedali: lì ogni voce ha uno stato, 099) si legge, non si segna (scelta
- *  dell'utente, 2026-10-01): come nella scheda del Palazzo. */
+/** Una voce descrittiva della guida («Altro» fuori dalle aree dei dedali: lì ogni voce ha uno stato, 099; senza il carattere «Permanente»
+ *  o «Si ripropone», 2026-10-31) si legge, non si segna (scelta dell'utente, 2026-10-01): come nella scheda del Palazzo. */
 const VOCE_DESCRITTIVA = <span className="testo-12 text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
 
 /** I pulsanti di una voce della guida: «Ottenuto», «Esaurito» (se esauribile), «Riapri» (se segnata); una descrittiva si legge e basta. */
 function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, voce, occupato, onStatoPunto }: { spillo: T; voce: VoceDelPinDto; occupato: boolean; onStatoPunto: (spillo: T, voce: string, stato: StatoPuntoMappa) => Promise<void> }) {
-  if (puntoDescrittivo(voce.tipo, voce.areaDedalo)) return VOCE_DESCRITTIVA;
+  if (puntoDescrittivo(voce.tipo, voce.areaDedalo, voce.carattere)) return VOCE_DESCRITTIVA;
   return (
     <>
       {voce.stato !== 'ottenuto' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Ottenuto" onClick={() => void onStatoPunto(s, voce.chiave, 'ottenuto')} disabled={occupato} />}
@@ -1369,7 +1374,7 @@ function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, 
  *  con la parola del tipo («Raccolto», «Aperto», «Parlato», «Incontrato», «Sconfitto», «Azionato»…: `statoDelPin`) e, per toglierlo,
  *  «Richiudi» per porta e forzieri, «Annulla» per gli altri (`ritornoDelloStato`). */
 export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
-  if (s.voci.length === 1 && puntoDescrittivo(s.voci[0].tipo, s.voci[0].areaDedalo)) return VOCE_DESCRITTIVA;
+  if (s.voci.length === 1 && puntoDescrittivo(s.voci[0].tipo, s.voci[0].areaDedalo, s.voci[0].carattere)) return VOCE_DESCRITTIVA;
   if (s.voci.length === 1 && onStatoPunto) return <AzioniVoce spillo={s} voce={s.voci[0]} occupato={occupato} onStatoPunto={onStatoPunto} />;
   if (s.voci.length > 1 && onStatoPunto) {
     return (

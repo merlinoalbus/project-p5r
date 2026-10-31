@@ -40,18 +40,20 @@ export const MAX_BYTE_IMMAGINE = MAX_BYTE_IMMAGINE_CARICATA;
 
 /**
  * L'entità a cui va un'immagine dell'ambito `dungeon` (O9-5, la miniatura delle carte della pagina Luoghi) deve esistere ed essere una di
- * quelle che la carta mostra: un Palazzo (`dungeon.chiave`, tipo `palazzo`) o un'area di un Dedalo dei Memento (`area_dedalo.chiave`).
- * Una chiave che esiste ma è di altro (la radice dei Memento, un dedalo, un'infiltrazione di un Palazzo) è 400 `luogo-senza-miniatura`;
- * una chiave che non c'è è 404 `luogo-non-trovato`. Gli altri ambiti non si controllano qui (come prima).
+ * quelle che la carta mostra: un Palazzo (`dungeon.chiave`, tipo `palazzo`), un Dedalo dei Memento (`dungeon_area.chiave` di un dungeon di
+ * tipo `mementos`: i dedali sono le righe di `dungeon_area` dei Memento) o un'area di un Dedalo (`area_dedalo.chiave`).
+ * Una chiave che esiste ma è di altro (la radice dei Memento, un'infiltrazione di un Palazzo) è 400 `luogo-senza-miniatura`; una chiave
+ * che non c'è è 404 `luogo-non-trovato`. Gli altri ambiti non si controllano qui (come prima).
  */
 function verificaEntitaDellImmagine(ambito: string, chiave: string): void {
   if (ambito !== AMBITO_MINIATURA_LUOGO) return;
   if (prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(chiave)) return;
+  if (prepared("SELECT 1 FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ? AND d.tipo = 'mementos'").get(chiave)) return;
   if (prepared('SELECT 1 FROM area_dedalo WHERE chiave = ?').get(chiave)) return;
   if (prepared('SELECT 1 FROM dungeon WHERE chiave = ? UNION ALL SELECT 1 FROM dungeon_area WHERE chiave = ?').get(chiave, chiave)) {
-    throw httpErrors.badRequest('luogo-senza-miniatura', `«${chiave}» non è un Palazzo né un'area di un Dedalo dei Memento: la miniatura si carica solo per quelle carte.`);
+    throw httpErrors.badRequest('luogo-senza-miniatura', `«${chiave}» non è un Palazzo, un Dedalo dei Memento né una sua area: la miniatura si carica solo per quelle carte.`);
   }
-  throw httpErrors.notFound('luogo-non-trovato', `Nessun Palazzo né area di un Dedalo dei Memento con la chiave «${chiave}».`);
+  throw httpErrors.notFound('luogo-non-trovato', `Nessun Palazzo, Dedalo dei Memento o area di un Dedalo con la chiave «${chiave}».`);
 }
 
 interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string; origine_url: string | null; presente: number }

@@ -1,6 +1,6 @@
 // ============================================================
-// L13, O9-5 (2026-10-31) — le miniature delle carte dei Palazzi e delle aree dei Dedali nella pagina Luoghi: ambito `dungeon`,
-// entità verificata (400/404), URL versionato nella gerarchia, miniatura WebP con `l`, rimozione che riporta all'emblema
+// L13, O9-5 (2026-10-31) — le miniature delle carte dei Palazzi, dei Dedali dei Memento e delle loro aree nella pagina Luoghi: ambito
+// `dungeon`, entità verificata (400/404), URL versionato nella gerarchia, miniatura WebP con `l`, rimozione che riporta all'emblema
 // Scritto per la verifica; non eseguito (zero test nella ripresa corrente).
 // ============================================================
 
@@ -29,10 +29,13 @@ describe('miniature delle carte dei Luoghi (O9-5)', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
-  it('1 — senza caricata: il Palazzo e l’area del Dedalo hanno `immagine` null e la chiave dove caricarla', async () => {
+  it('1 — senza caricata: il Palazzo, il Dedalo e l’area del Dedalo hanno `immagine` null e la chiave dove caricarla', async () => {
     const k = await nodo('palazzo', 'kamoshida');
     expect(k?.immagine).toBeNull();
     expect(k?.miniatura).toEqual({ ambito: 'dungeon', chiave: 'kamoshida' });
+    const dd = await nodo('dedalo', 'mementos-02-aiyatsbus');
+    expect(dd?.immagine).toBeNull();
+    expect(dd?.miniatura).toEqual({ ambito: 'dungeon', chiave: 'mementos-02-aiyatsbus' });
     const a = await nodo('area-dedalo', 'mementos-02-aiyatsbus-area-2');
     expect(a?.immagine).toBeNull();
     expect(a?.miniatura).toEqual({ ambito: 'dungeon', chiave: 'mementos-02-aiyatsbus-area-2' });
@@ -40,8 +43,8 @@ describe('miniature delle carte dei Luoghi (O9-5)', () => {
     expect((await nodo('memento', 'mementos'))?.miniatura).toBeUndefined();
   });
 
-  it('2 — PUT di un PNG per un Palazzo e per un’area del Dedalo: la gerarchia porta l’URL versionato, `l` dà la WebP', async () => {
-    for (const [tipo, chiave] of [['palazzo', 'kamoshida'], ['area-dedalo', 'mementos-02-aiyatsbus-area-2']] as const) {
+  it('2 — PUT di un PNG per un Palazzo, un Dedalo e un’area del Dedalo: la gerarchia porta l’URL versionato, `l` dà la WebP', async () => {
+    for (const [tipo, chiave] of [['palazzo', 'kamoshida'], ['dedalo', 'mementos-02-aiyatsbus'], ['area-dedalo', 'mementos-02-aiyatsbus-area-2']] as const) {
       await request(app).put(`/api/immagini/dungeon/${chiave}`).set('Content-Type', 'image/png').send(await png(1600, 900)).expect(201);
       const n = await nodo(tipo, chiave);
       expect(n?.immagine?.immagineUrl).toMatch(new RegExp(`^/api/immagini/dungeon/${chiave}/file\\?v=`));
@@ -58,11 +61,12 @@ describe('miniature delle carte dei Luoghi (O9-5)', () => {
     await request(app).delete('/api/immagini/dungeon/kamoshida').expect(404);
   });
 
-  it('4 — chiave inesistente 404 `luogo-non-trovato`; chiave di altro (Memento, dedalo) 400 `luogo-senza-miniatura`; nulla si salva', async () => {
+  it('4 — chiave inesistente 404 `luogo-non-trovato`; chiave di altro (Memento, infiltrazione di un Palazzo) 400 `luogo-senza-miniatura`; nulla si salva', async () => {
     const corpo = await png(10, 10);
     const r404 = await request(app).put('/api/immagini/dungeon/non-esiste').set('Content-Type', 'image/png').send(corpo).expect(404);
     expect(r404.body.error.code).toBe('luogo-non-trovato');
-    for (const chiave of ['mementos', 'mementos-02-aiyatsbus']) {
+    // un Dedalo (`mementos-02-aiyatsbus`) dal 2026-10-31 ha la sua miniatura (test 2): qui la radice dei Memento e un'infiltrazione
+    for (const chiave of ['mementos', 'kamoshida-01-cancello-del-castello-ingresso']) {
       const r400 = await request(app).put(`/api/immagini/dungeon/${chiave}`).set('Content-Type', 'image/png').send(corpo).expect(400);
       expect(r400.body.error.code).toBe('luogo-senza-miniatura');
     }

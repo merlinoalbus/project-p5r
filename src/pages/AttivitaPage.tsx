@@ -77,6 +77,7 @@ function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']>
   const conDoti = esiti.esiti.some((e) => e.doti.length > 0), conTrofeo = esiti.esiti.some((e) => e.trofeo), conOggetti = esiti.esiti.some((e) => e.oggetti.length > 0);
   // Ondata 5 (lotto F-bis): gli oggetti consumati (il concime, i materiali) escono dalle copie
   const conConsumi = esiti.esiti.some((e) => (e.consuma ?? []).length > 0);
+  // R12-01/7: le Doti vanno nel promemoria «Applica», sulla voce spuntata o, con il + del contatore, sotto l'attività in Partita → Progressi
   const cosaSegna = [conDoti ? 'le sue Doti diventano il promemoria «Applica»' : null, conTrofeo ? 'il trofeo che dà si segna da solo' : null,
     conOggetti ? 'gli oggetti che dà entrano fra quelli ottenuti' : null, conConsumi ? 'gli oggetti che usa escono dalle copie possedute' : null].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1');
   return (

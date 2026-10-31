@@ -22,7 +22,7 @@ import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
-import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { fraseDellaRegola } from './condizioni/fraseCondizioni.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
@@ -516,8 +516,10 @@ function regaloModificato(r: { catalogo_chiave: string | null; dove: string | nu
  * la regola non si legge (vuota o non valida): resta la nota della guida.
  */
 function condizioneDelDono(condizioniJson: string): string | null {
-  const nomi = nomiCondizioniMemo();
-  return fraseDellaRegola(leggiCondizioniSalvate(condizioniJson).map((c) => condizioneConTesto(c, nomi)));
+  const regola = leggiCondizioniSalvate(condizioniJson);
+  // una regola che cita una voce della guida di un Palazzo (il rampino di Morgana) vuole anche i nomi delle voci, che la memoria non legge
+  const nomi = JSON.stringify(regola).includes('"voce-guida"') ? nomiCondizioni() : nomiCondizioniMemo();
+  return fraseDellaRegola(regola.map((c) => condizioneConTesto(c, nomi)));
 }
 
 export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {

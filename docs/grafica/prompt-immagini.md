@@ -851,9 +851,9 @@ della §26, prompt costruiti dal testo della scheda).
 `ui/allerta-polline`, `ui/allerta-stagione-influenzale` e `attivita/videogioco-golfer-sarutahiko` hanno solo un alone con
 alfa ≤ 4 che non si vede: con quella soglia sono accettati e non vanno rifatti.
 
-**Gruppo C — proposte, da agganciare nel codice** (`public/asset/ui/`, 128×128): figure distinte per i tipi di effetto
-della voce che oggi ne condividono una (`MENU_EFFETTI` in `src/utils/effettiDellaVoce.ts`). Senza l'aggancio i file non si
-vedono.
+**Gruppo C — figure dei tipi di effetto della voce** (`public/asset/ui/`, 128×128): una figura propria per i tipi di effetto
+che prima condividevano quella della famiglia, agganciate in `MENU_EFFETTI` (`src/utils/effettiDellaVoce.ts`); senza il file
+resta la figura della famiglia (`catenaCategoria` in `src/utils/categorie.ts`).
 
 | File | Tipo di effetto | Soggetto |
 |---|---|---|

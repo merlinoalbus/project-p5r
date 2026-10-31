@@ -14,11 +14,12 @@
 
 /** Ambiti delle immagini caricate dall'utente per un'entità. `dungeon` (O9-5, 2026-10-31: «l'area Memento riporta le voci senza immagini.
  *  Ma io ho generato delle immagini da inserire», «stessa funzione … anche per i palazzi») è la miniatura della carta nella pagina Luoghi:
- *  chiave = `dungeon.chiave` di un Palazzo o `area_dedalo.chiave` di un'area di un Dedalo dei Memento (`AMBITO_MINIATURA_LUOGO`). */
+ *  chiave = `dungeon.chiave` di un Palazzo, `dungeon_area.chiave` di un Dedalo dei Memento o `area_dedalo.chiave` di un'area di un Dedalo
+ *  (`AMBITO_MINIATURA_LUOGO`). */
 export const AMBITI_CARICAMENTO = ['arcana', 'confidente', 'personaggio', 'persona', 'skill', 'mappa', 'spillo', 'dungeon', 'altro'] as const;
 
-/** L'ambito della miniatura delle carte dei Palazzi e delle aree dei Dedali nella pagina Luoghi (O9-5): non `mappa`, perché la chiave di
- *  un'area di un Palazzo in «mappa» è già la sua pianta. */
+/** L'ambito della miniatura delle carte dei Palazzi, dei Dedali e delle aree dei Dedali nella pagina Luoghi (O9-5): non `mappa`, perché la
+ *  chiave di un'area di un Palazzo in «mappa» è già la sua pianta. */
 export const AMBITO_MINIATURA_LUOGO = 'dungeon' as const;
 
 /** I formati che una miniatura (e ogni immagine caricata) può avere, come li accetta il server (`immaginiService`): il client li usa per

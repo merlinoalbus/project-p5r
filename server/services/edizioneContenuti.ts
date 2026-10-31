@@ -366,6 +366,7 @@ function chiaveMancante(c: RequisitoSpillo, e: Esistenze): string | null {
     case 'voce-guida': return manca('punto_interesse', 'chiave', c.voce, 'La voce della guida');
     case 'persona-abilita': return manca('persona', 'id', c.persona, 'La Persona (id)') ?? manca('skill', 'id', c.abilita, 'L\'abilità (id)');
     case 'meteo': return c.condizione === 'senza-allerta' ? manca('allerta_meteo', 'chiave', c.allerta, 'L\'allerta meteo') : null;
+    case 'dlc-posseduto': return manca('dlc_set', 'id', String(c.set), 'Il set di contenuti scaricabili (id)');
     default: return null;
   }
 }

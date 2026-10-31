@@ -54,13 +54,19 @@ const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v
  */
 /** Le proposte di una voce del Diario (`voceUid`) o, L13 (decisione 3), gli yen di una Richiesta completata (`richiesta`, sulla sua carta), o,
  *  L13 (decisione 19), l'elenco del passato della partita (`passati`: gli effetti di stato mai applicati di tutte le voci spuntate, per giorno). */
-type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined; passati?: undefined } | { richiesta: string; voceUid?: undefined; passati?: undefined } | { passati: true; voceUid?: undefined; richiesta?: undefined });
+/** R12-01/7: `attivita` = le Doti dei turni registrati con il + del contatore di quell'attività (in Partita → Progressi); `versione` cambia
+ *  quando il contatore registra o toglie un turno, così l'elenco si rilegge. */
+type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined; passati?: undefined; attivita?: undefined }
+  | { richiesta: string; voceUid?: undefined; passati?: undefined; attivita?: undefined } | { passati: true; voceUid?: undefined; richiesta?: undefined; attivita?: undefined }
+  | { attivita: string; versione?: number; voceUid?: undefined; richiesta?: undefined; passati?: undefined });
 export function DaApplicare(props: PropsDaApplicare) {
-  return <DaApplicareNelContesto key={`${props.partitaId}:${props.passati ? 'passati' : props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
+  return <DaApplicareNelContesto key={`${props.partitaId}:${props.passati ? 'passati' : props.attivita !== undefined ? `attivita:${props.attivita}` : props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
 }
-function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCambiato }: PropsDaApplicare) {
+function DaApplicareNelContesto(props: PropsDaApplicare) {
+  const { partitaId, voceUid, richiesta, passati, attivita, onCambiato } = props;
+  const versione = props.attivita !== undefined ? props.versione ?? 0 : 0;
   const gesti = useGestiPartita();
-  const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
+  const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida, versione]);
   // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
   const doti = useCarica(() => getDoti(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const puntiDote = (chiave: string | null): number | null => (chiave ? doti.dati?.find((d) => d.chiave === chiave)?.punti ?? null : null);
@@ -76,7 +82,8 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
   // l'elenco del passato: solo le proposte aperte (quelle decise escono dall'elenco), in ordine di giorno e di voce
   const dellaVoce = passati
     ? (elenco.dati ?? []).filter((p) => delPassato(p) && p.stato === 'aperta').sort((a, b) => String(a.dati.giorno ?? '').localeCompare(String(b.dati.giorno ?? '')) || (a.voceTesto ?? '').localeCompare(b.voceTesto ?? '') || a.id - b.id)
-    : (elenco.dati ?? []).filter((p) => (richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
+    : (elenco.dati ?? []).filter((p) => (attivita !== undefined ? p.causa.tipo === 'turno' && p.causa.chiave.startsWith(`${attivita}:`)
+      : richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
   const aperte = dellaVoce.filter((p) => p.stato === 'aperta');
   // L13 (revisione R2, WCAG 2.4.3): decisa una proposta, la sua riga esce dall'elenco con il pulsante che aveva aperto «Confermi?», e il fuoco
   // finiva su <body> (fuori anche dalla finestra «Da approvare nella partita»). Quando l'elenco cambia dopo una decisione e il fuoco è andato
@@ -169,7 +176,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
   const uidVoce = consumo && typeof consumo.dati.voceUid === 'string' ? consumo.dati.voceUid : null;
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
-  return <section ref={sezione} tabIndex={-1} className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
+  return <section ref={sezione} tabIndex={-1} className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={passati ? 'Effetti delle voci già spuntate da approvare' : attivita !== undefined ? 'Punti da applicare per i turni di questa attività' : richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
@@ -201,7 +208,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, passati, onCamb
           {/* 2026-10-26: la Persona «anche nella scorta» con la scorta piena entra lo stesso; lo si dice prima di approvare (solo se è così) */}
           {delPassato(p) && typeof p.dati.avvisoScorta === 'string' && <span className="testo-12 text-warning text-pretty tabular-nums">{p.dati.avvisoScorta}</span>}
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Costo del consumo: ¥{p.promemoriaYen.toLocaleString('it-IT')}</span>}
-          {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
+          {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : p.causa.tipo === 'turno' ? 'L’attività da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {
             // «Applica» non chiede più «già nel saldo?»: premerlo dice che i punti non sono ancora contati; chi li ha già contati lo dice a parte
             const soloVerifica = p.impedimenti.every((i) => i.startsWith('Prima indica'));
