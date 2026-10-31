@@ -356,6 +356,9 @@ import { migration312 } from './312_voci_attivita_collegate.js';
 // 2026-10-31 (L13 ondata 7, lotto O7-4): i testi copiati tolti da libri, film, settimane della guida e note dei regali; i «quando» dei trofei
 // in condizioni (`trofeo.condizioni_json`), il messaggio degli inviti in struttura (`messaggio_data`, `messaggio_fascia`), un evento legato alla fonte
 import { migration313 } from './313_testi_copiati_letture_trofei_calendario.js';
+// 2026-10-31 (L13, risposte dell'utente alle domande aperte): il 20 maggio col premio del piazzamento, gli esiti del quiz di Ore no Beko con
+// la loro paga, la Dote doppia dello studio e del Triple Seven, i due avvisi «consiglio» del 19 agosto e del 17 dicembre tolti
+import { migration314 } from './314_chiusure_l13_esame_lavoro_studio_avvisi.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -379,5 +382,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311, migration312, migration313,
+  migration310, migration311, migration312, migration313, migration314,
 ];

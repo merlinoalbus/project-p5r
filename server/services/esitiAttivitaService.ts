@@ -105,6 +105,8 @@ function esitoDisponibile(e: EsitoAttivita, st: StatoDisponibilita | null): Esit
     oggetti: oggettiEsito(e.oggetti),
     consuma: consumaEsito(e.consuma, st?.partitaId),
     bonusDi: e.bonusDi ?? null,
+    // L13 (chiusure del 31/10): la paga dell'esito (il quiz di Ore no Beko), che registrando il turno entra al posto di quella base
+    paga: e.paga ?? null,
     disponibile: esito ? esito.stato !== 'bloccato' : true,
     condizioniTesto: condizioni.length ? condizioni.map((c) => c.testo).join(' · ') : null,
   };

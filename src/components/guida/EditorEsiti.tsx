@@ -11,6 +11,7 @@
 // turno con quell'esito il trofeo si segna da solo, e togliendolo torna com'era. E gli oggetti del catalogo che dà, con le copie (la Comet
 // Burger vinta → «Distintivo numero due» e 3 «Big Bang Burger»): registrando il turno entrano fra quelli ottenuti, togliendolo se ne vanno.
 // Ondata 5 (lotto F-bis): e gli oggetti che CONSUMA (concimare la pianta → 1 «Bionutrienti»): registrando il turno escono dalle copie possedute.
+// L13 (chiusure del 31/10): e la paga del turno con quell'esito, se diversa da quella base del lavoro (il quiz di Ore no Beko).
 // ============================================================
 
 import { useState } from 'react';
@@ -28,6 +29,7 @@ import { LIMITI_ESITI, MODI_ESITI, chiaveEsitoDaNome, fraseDotiEsito, normalizza
 import { SceltaNelCatalogo } from '../catalogo/SceltaCatalogoOggetto';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
 import { CampoQuantita } from './CampiEffettoVoce';
+import { formattaYen } from '../../utils/letture';
 
 const NOTE: Array<{ chiave: string; nome: string }> = SCELTE_NOTE.map((s) => ({ chiave: s.chiave, nome: s.simboli }));
 
@@ -119,6 +121,14 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
     delete resto.bonusDi;
     return bonusDi ? { ...resto, bonusDi } : resto;
   }) });
+  // L13 (chiusure del 31/10): la paga dell'esito è facoltativa come il trofeo: vuota toglie il campo (vale la paga base del lavoro)
+  const cambiaPaga = (i: number, testo: string) => esiti && onCambia({ ...esiti, esiti: elenco.map((x, j) => {
+    if (j !== i) return x;
+    const resto: EsitoAttivita = { ...x };
+    delete resto.paga;
+    const n = Math.trunc(Number(testo));
+    return testo.trim() && Number.isFinite(n) && n >= 1 ? { ...resto, paga: Math.min(LIMITI_ESITI.paga, n) } : resto;
+  }) });
   /** Togliendo un esito, le versioni con il bonus che lo citavano tornano esiti a sé (nessun riferimento resta a un esito che non c'è). */
   const togliEsito = (i: number) => {
     const via = elenco[i]!.chiave;
@@ -152,7 +162,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
             // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
             <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
-                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}{e.bonusDi ? ` · con il bonus di «${elenco.find((x) => x.chiave === e.bonusDi)?.nome ?? 'esito non più nell’elenco'}»` : ''}</span>
+                <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.paga ? ` · paga ${formattaYen(e.paga)}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}{e.bonusDi ? ` · con il bonus di «${elenco.find((x) => x.chiave === e.bonusDi)?.nome ?? 'esito non più nell’elenco'}»` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato}
                   onClick={() => togliEsito(i)} />
@@ -174,6 +184,8 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
                     <Selettore etichetta="Articolo che l’esito fa pagare" valore={e.articolo ?? ''} vuoto="Nessun articolo" disabilitato={disabilitato || elenchi.caricamento}
                       opzioni={(elenchi.dati?.articoli ?? []).map((a) => ({ chiave: a.chiave, nome: `${a.nome}${a.gruppo ? ` · ${a.gruppo}` : ''}` }))} onCambia={(v) => cambiaEsito(i, { articolo: v || null })} />
                   </div>
+                  <CampoTesto etichetta="Paga del turno con questo esito, in yen" tipo="numero" valore={e.paga != null ? String(e.paga) : ''} massimo={7}
+                    aiuto="Solo se diversa dalla paga base del lavoro (il quiz con tutte le risposte giuste): vuota, vale la paga base" disabilitato={disabilitato} onCambia={(v) => cambiaPaga(i, v)} />
                   <div className="campo campo--largo">
                     <Selettore etichetta="Trofeo che l’esito fa ottenere" valore={e.trofeo ?? ''} vuoto="Nessun trofeo" disabilitato={disabilitato || elenchi.caricamento}
                       opzioni={[...(elenchi.dati?.trofei ?? []), ...(e.trofeo && !elenchi.dati?.trofei.some((t) => t.chiave === e.trofeo) ? [{ chiave: e.trofeo, nome: 'Trofeo non più nell’elenco' }] : [])]}
