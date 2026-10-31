@@ -106,21 +106,29 @@ export function domande(partitaId?: number): DomandeDto {
  * L13 (ondata 7, O7-2; decisione 9): per ogni domanda citata da almeno una voce del Diario (effetto «domanda»), ciò che le voci danno: le Doti
  * dei loro effetti, una volta sola per Dote e note, e se una di loro chiede alla spunta il piazzamento di un esame. Tutte le voci che la citano,
  * non solo la voce «collegata» (`vociCollegate`, che chiede un legame univoco per la spunta dalla Guida): qui si dice che cosa il Diario dà.
+ * L13 (ondata 8, O8-1): anche i punti dei Confidenti in note (effetto «puntiConfidente», come «2 Punti nel legame con Ann» della guida = ♪♪),
+ * una volta sola per Confidente e note, con il nome del Confidente. La forma con i punti fissi non è una nota e qui non si dice.
  */
 export function premiDalleVociDelleDomande(): Map<number, NonNullable<DomandaDto['premioVoce']>> {
   const righe = prepared(`SELECT d.chiave AS domanda, e.tipo AS tipo, e.dati_json AS dati
       FROM main.voce_effetto d JOIN main.voce_effetto e ON e.voce_uid = d.voce_uid
-     WHERE d.tipo = 'domanda' AND e.tipo IN ('dote', 'esame') ORDER BY d.chiave, d.voce_uid, e.ordine`).all() as Array<{ domanda: string; tipo: string; dati: string }>;
+     WHERE d.tipo = 'domanda' AND e.tipo IN ('dote', 'esame', 'puntiConfidente') ORDER BY d.chiave, d.voce_uid, e.ordine`).all() as Array<{ domanda: string; tipo: string; dati: string }>;
   const out = new Map<number, NonNullable<DomandaDto['premioVoce']>>();
-  for (const id of prepared("SELECT DISTINCT chiave FROM main.voce_effetto WHERE tipo = 'domanda'").pluck().all() as string[]) out.set(Number(id), { doti: [], esameAllaSpunta: false });
+  for (const id of prepared("SELECT DISTINCT chiave FROM main.voce_effetto WHERE tipo = 'domanda'").pluck().all() as string[]) out.set(Number(id), { doti: [], confidenti: [], esameAllaSpunta: false });
+  const nomeConfidente = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck();
   for (const r of righe) {
     const p = out.get(Number(r.domanda));
     if (!p) continue;
     let e: unknown;
     try { e = JSON.parse(r.dati); } catch { continue; }
-    const x = e as { dote?: unknown; note?: unknown };
+    const x = e as { dote?: unknown; note?: unknown; confidente?: unknown };
+    const note = x.note === 1 || x.note === 2 || x.note === 3 ? x.note : null;
     if (r.tipo === 'esame') p.esameAllaSpunta = true;
-    else if (eDote(x.dote) && (x.note === 1 || x.note === 2 || x.note === 3) && !p.doti.some((d) => d.dote === x.dote && d.note === x.note)) p.doti.push({ dote: x.dote, nome: nomeDote(x.dote), note: x.note });
+    else if (r.tipo === 'puntiConfidente') {
+      if (typeof x.confidente !== 'string' || note === null || p.confidenti.some((c) => c.confidente === x.confidente && c.note === note)) continue;
+      const nome = nomeConfidente.get(x.confidente) as string | undefined;
+      if (nome) p.confidenti.push({ confidente: x.confidente, nome, note });
+    } else if (eDote(x.dote) && note !== null && !p.doti.some((d) => d.dote === x.dote && d.note === note)) p.doti.push({ dote: x.dote, nome: nomeDote(x.dote), note });
   }
   return out;
 }

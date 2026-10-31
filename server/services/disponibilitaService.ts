@@ -20,7 +20,8 @@ import { getDb, prepared } from '../db/dbService.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { dotiSociali, ranghiConfidenti } from './partiteService.js';
 import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
-import { statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
+import { statoPartitaSemafori, valutatoreDelloStato, type StatoPartitaSemafori } from './semaforiService.js';
+import type { StatoDelRamo } from './disponibilitaStrutturataService.js';
 import { ARCHI_STORIA, ordineGioco, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni } from '../../shared/condizioniSpillo.js';
 import { modelloAvanzamento, statiDellaPartita, statoDelPin, vociFatte, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { vociPersonaCatturate } from './catturePersona.js';
@@ -150,6 +151,13 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     vociSegnate: gestite,
     vociCitate: new Map(),
   };
+}
+
+/** L13 (ondata 8, migrazione 317): il valutatore unico sullo stato della partita per i rami di un requisito «almeno una» con la pioggia (la scheda
+ *  del Confidente, `disponibilitaConfidente`). Lo stato si legge alla prima condizione da valutare, una volta sola: chi non ne ha bisogno non lo paga. */
+export function valutatoreDellaPartita(partitaId: number): StatoDelRamo {
+  let valuta: StatoDelRamo | null = null;
+  return (c) => (valuta ??= valutatoreDelloStato(statoDisponibilitaPartita(partitaId)))(c);
 }
 
 /** Lo stesso stato a un altro giorno di gioco (l'anteprima dell'editor, `POST /api/condizioni/valuta` con `giorno`): data, giorno della

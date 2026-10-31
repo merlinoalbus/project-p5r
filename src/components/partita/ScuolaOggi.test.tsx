@@ -26,7 +26,7 @@ const DOMANDE: DomandeDto = {
   domande: [
     // L13 (ondata 7, O7-2): la ricompensa la dice la voce del Diario che segna la domanda (`premioVoce`), il testo della guida è vuoto
     { id: 1, data: '05-11', tipo: 'classe', chi: 'Prof. Ushimaru', domanda: 'Domanda di oggi in classe?', risposte: [{ ordine: 1, testo: 'Risposta giusta' }], ricompensa: '', note: '',
-      premioVoce: { doti: [{ dote: 'conoscenza', nome: 'Conoscenza', note: 1 }], esameAllaSpunta: false } },
+      premioVoce: { doti: [{ dote: 'conoscenza', nome: 'Conoscenza', note: 1 }], confidenti: [], esameAllaSpunta: false } },
     { id: 2, data: '05-12', tipo: 'classe', chi: 'Prof. Kawakami', domanda: 'Domanda di domani?', risposte: [{ ordine: 1, testo: 'Altra' }], ricompensa: '', note: '' },
     // voce riassuntiva della giornata d'esame, come nei dati veri: non è una delle domande numerate
     { id: 3, data: '05-11', tipo: 'esame-medio', chi: 'Esame', domanda: 'Serie di domande su Minamoto no Yoshitsune.', risposte: [{ ordine: 1, testo: 'Minamoto no Yoshitsune' }, { ordine: 2, testo: 'Minamoto no Yoritomo' }], ricompensa: '', note: '' },

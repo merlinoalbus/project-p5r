@@ -80,6 +80,11 @@ export function chiaveEffetto(e: EffettoVoce): string | null {
     case 'turno': return e.attivita;
     // L13 (ondata 7, O7-2, migrazione 311): i risultati di un esame, con la chiave dell'esame come il motore
     case 'esame': return e.esame;
+    // L13 (ondata 8, O8-1, migrazione 315): gli effetti di stato con la chiave del motore (`motoreDiario.chiaveEffetto`); prima della 315
+    // nessuna migrazione li scriveva (nessuna riga di questi tipi sulla copia dei dati del 31/10)
+    case 'personaTolta': return String(e.persona);
+    case 'puntiConfidente': return e.confidente;
+    case 'uscitaOggetto': return e.oggetto;
     default: return (e as { attivita?: string }).attivita ?? null;
   }
 }

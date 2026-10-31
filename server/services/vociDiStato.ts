@@ -13,7 +13,9 @@
 //   - la voce non segna altro dello stesso genere (le date con due domande: spuntare una segnerebbe anche l'altra);
 //   - gli effetti della voce sono soltanto Dote, domanda e cruciverba, e la voce non è un incontro con un Confidente né una visita
 //     ai Palazzi: la spunta dalla Guida non ha scelte da chiedere (note di risposta, aperture dei dedali, acquisti, pesca) né Doti
-//     o rango da toccare oltre a ciò che la voce già dichiara.
+//     o rango da toccare oltre a ciò che la voce già dichiara. L13 (ondata 8, O8-1): anche le note di rango fisse della voce
+//     («puntiConfidente», come Ann ♪♪ delle domande del 25 aprile, 20 giugno e 7 luglio) sono dichiarate dalla voce e alla spunta entrano
+//     senza scelte (`effettiDiStatoService.applicaPunti`): la voce resta collegabile.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -27,7 +29,7 @@ interface RigaLegame { chiave: string; voce_uid: string; segnati: number; conosc
  *  L'unicità si conta su TUTTE le voci che citano l'oggetto, senza alcun filtro: una seconda voce che lo cita (anche un incontro, o una
  *  voce con effetti d'altro tipo) resterebbe non spuntata nel Diario mentre la domanda risulta fatta, ed è esattamente la
  *  contraddizione che il legame evita. Solo dopo, sulla voce unica, la colonna `idonea` (azione, non un Confidente né un Palazzo,
- *  effetti soltanto Dote/domanda/cruciverba) decide se è collegabile. */
+ *  effetti soltanto Dote/domanda/cruciverba e note di rango fisse) decide se è collegabile. */
 export function vociCollegate(tipo: StatoCollegabile): Map<string, { voceUid: string; conoscenza: boolean }> {
   const righe = prepared(`
     SELECT e.chiave AS chiave, e.voce_uid AS voce_uid,
@@ -35,7 +37,7 @@ export function vociCollegate(tipo: StatoCollegabile): Map<string, { voceUid: st
            (SELECT COUNT(*) FROM main.voce_effetto k WHERE k.voce_uid = e.voce_uid AND k.tipo = 'dote' AND k.chiave = 'conoscenza') AS conoscenza,
            CASE WHEN v.genere = 'azione'
                  AND COALESCE(v.tipo, '') <> 'confidente' AND COALESCE(v.riferimento_tipo, '') NOT IN ('confidente', 'dungeon')
-                 AND NOT EXISTS (SELECT 1 FROM main.voce_effetto y WHERE y.voce_uid = e.voce_uid AND y.tipo NOT IN ('dote', 'domanda', 'cruciverba'))
+                 AND NOT EXISTS (SELECT 1 FROM main.voce_effetto y WHERE y.voce_uid = e.voce_uid AND y.tipo NOT IN ('dote', 'domanda', 'cruciverba', 'puntiConfidente'))
                 THEN 1 ELSE 0 END AS idonea
       FROM main.voce_effetto e
       LEFT JOIN main.voce_giornata v ON v.uid = e.voce_uid
