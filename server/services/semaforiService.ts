@@ -19,7 +19,7 @@ import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
-import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
+import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente, type StatoDelRamo } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
@@ -140,6 +140,15 @@ export function valuta(r: RigaRequisito, st: StatoValutazione): SemaforoRequisit
   return valutaCondizione(condizioneConTesto(c, nomi), r.indice, st, { comeRequisito: true, nomi });
 }
 
+/** Lo stato di una condizione sullo stato della partita, col valutatore unico letto «come requisito»: lo usa la disponibilità per i rami di un
+ *  requisito «almeno una» con la pioggia (L13, ondata 8, migrazione 317), così semafori, scheda e requisiti dicono la stessa cosa. */
+export function valutatoreDelloStato(st: StatoValutazione): StatoDelRamo {
+  return (c) => {
+    const nomi = nomiCondizioniMemo();
+    return valutaCondizione(condizioneConTesto(c, nomi), 0, st, { comeRequisito: true, nomi }).stato;
+  };
+}
+
 /** Il requisito conta per sapere se il rango è raggiungibile: le avvertenze no. */
 export const requisitoBloccante = (r: SemaforoRequisitoDto): boolean => r.bloccante !== false;
 
@@ -164,12 +173,13 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
  */
 function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoValutazione): SemaforoRequisitoDto | null {
   if (!st.dataGioco) return null;
-  // la pioggia la legge il verdetto dai requisiti del rango successivo (fonte unica, migrazione 306); i giorni dall'ultimo rango dal registro degli incontri
+  // la pioggia la legge il verdetto dai requisiti del rango successivo (fonte unica, migrazione 306; i rami «almeno una» sullo stato della partita,
+  // 317); i giorni dall'ultimo rango dal registro degli incontri
   const esito = verdettoDelConfidente(chiave, {
     data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),
     piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale,
     giorniDallUltimoRango: st.partitaId === undefined ? null : giorniDalGiorno(giornoDellUltimoRango(st.partitaId, chiave, rangoAttuale), st.dataGioco),
-  });
+  }, valutatoreDelloStato(st));
   if (!esito) return null;
   return { indice: 900, tipo: 'disponibilita', testo: 'Giorno e fascia dell’incontro', stato: esito.stato === 'disponibile' ? 'verde' : esito.stato === 'non-disponibile' ? 'rosso' : 'grigio',
     dettaglio: esito.motivo, manuale: false, confermato: false, bloccante: false };

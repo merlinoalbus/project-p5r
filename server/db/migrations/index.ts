@@ -365,6 +365,10 @@ import { migration315 } from './315_domande_premi_della_guida.js';
 // 2026-10-31 (L13, ondata 8, O8-2: «aggiungo le voci dei risultati d'esame del 19/7 e del 24/12? sì»): le voci dei risultati di esame-2 e
 // esame-4 nel giorno dei risultati, in cima alla fascia del giorno, con l'effetto «esame» (piazzamento scelto alla spunta)
 import { migration316 } from './316_voci_risultati_esami.js';
+// 2026-10-31 (L13, ondata 8, O8-3: «3 per i punti a,b,c,d,e,f fai riferimento alla guida su https://www.allgamestaff.it/persona-5-royal/»): i
+// testi del rango 1 di Takemi e Ohya dal dato, Futaba mai con la pioggia (requisito a ogni rango), l'evento 7.5 di Takemi con la pioggia
+// (requisito «almeno una» al rango 8), le frasi di note e fasce in prosa smentite dalla guida
+import { migration317 } from './317_confidenti_dalla_guida.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -388,5 +392,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311, migration312, migration313, migration314, migration315, migration316,
+  migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317,
 ];

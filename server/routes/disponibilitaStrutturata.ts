@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { paramsChiaveGuida } from '../schemas/guidaDungeon.js';
 import { disponibilitaConfidente } from '../services/disponibilitaStrutturataService.js';
+import { valutatoreDellaPartita } from '../services/disponibilitaService.js';
 import { ripristinaDisponibilita, salvaDisponibilita, type ModificaDisponibilita } from '../services/disponibilitaStrutturataScritture.js';
 import { FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
 
@@ -33,7 +34,7 @@ const bodyDisponibilita = z.object({
 /** La disponibilità del Confidente, con i luoghi per chiave; con `?partita=` anche se è disponibile adesso. */
 router.get('/confidenti/:chiave/disponibilita-strutturata', validate({ params: paramsChiaveGuida, query: queryPartita }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json(disponibilitaConfidente(String(req.params.chiave), (req.query as { partita?: number }).partita));
+  res.json(disponibilitaConfidente(String(req.params.chiave), (req.query as { partita?: number }).partita, valutatoreDellaPartita));
 });
 router.put('/confidenti/:chiave/disponibilita-strutturata', validate({ params: paramsChiaveGuida, body: bodyDisponibilita }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');

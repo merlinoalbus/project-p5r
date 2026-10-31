@@ -12,9 +12,9 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { meteoOra } from './meteoService.js';
 import { verificaPartita } from './verificaPartita.js';
-import { richiedeNonPioggia, strutturaDaColonne, valutaDisponibilita } from '../../shared/disponibilitaStrutturata.js';
+import { alternativeAllaPioggia, richiedeNonPioggia, strutturaDaColonne, valutaDisponibilita } from '../../shared/disponibilitaStrutturata.js';
 import type { ContestoDisponibilita, DisponibilitaConfidenteDto, DisponibilitaStrutturata, EsitoDisponibilita, LuogoConfidente } from '../../shared/disponibilitaStrutturata.js';
-import { normalizzaRequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { giorniDiGiocoFra } from '../../shared/date.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 
@@ -52,8 +52,9 @@ export function giorniDalGiorno(giornoRango: string | null, oggi: string | null)
   return n === null || n < 0 ? null : n;
 }
 
-/** Il momento della partita per il valutatore: data, fascia, meteo, rango, giorni dall'ultimo rango (dal registro degli incontri). */
-function contestoDellaPartita(partitaId: number, confidente: string): ContestoDisponibilita {
+/** Il momento della partita per il valutatore: data, fascia, meteo, rango, giorni dall'ultimo rango (dal registro degli incontri) e la pioggia del
+ *  rango successivo (con lo stato della partita, se chi chiama lo dà, per i requisiti «almeno una»). */
+function contestoDellaPartita(partitaId: number, confidente: string, stato?: StatoDelRamo): ContestoDisponibilita {
   verificaPartita(partitaId); // solo le partite del proprietario della richiesta
   const p = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string } | undefined;
   if (!p) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
@@ -64,19 +65,24 @@ function contestoDellaPartita(partitaId: number, confidente: string): ContestoDi
   return {
     data: p.data_gioco, fascia: p.data_gioco ? fascia : null, festivo, piove: meteo ? meteo.meteo === 'pioggia' : null, rango,
     giorniDallUltimoRango: giorniDalGiorno(giornoDellUltimoRango(partitaId, confidente, rango), p.data_gioco),
-    nonConLaPioggia: nonConLaPioggia(confidente, rango),
+    nonConLaPioggia: nonConLaPioggia(confidente, rango, stato),
   };
 }
 
-/** La disponibilità del Confidente; con la partita, anche se è disponibile adesso. */
-export function disponibilitaConfidente(confidente: string, partitaId?: number): DisponibilitaConfidenteDto {
+/** La disponibilità del Confidente; con la partita, anche se è disponibile adesso. `statoDellaPartita` dà il valutatore sullo stato della partita
+ *  (`valutatoreDellaPartita` di disponibilitaService), chiesto solo dopo la verifica della partita. */
+export function disponibilitaConfidente(confidente: string, partitaId?: number, statoDellaPartita?: (partitaId: number) => StatoDelRamo): DisponibilitaConfidenteDto {
   const struttura = strutturaDaColonne(rigaStruttura(confidente));
   const dto: DisponibilitaConfidenteDto = {
     confidente, struttura, luoghi: luoghiDelConfidente(confidente), modificata: !!prepared('SELECT 1 FROM dati_guida WHERE chiave = ?').get(CHIAVE_SEED_DISPONIBILITA(confidente)),
-    ranghiNonConLaPioggia: [...(ranghiSenzaPioggia().get(confidente) ?? [])].sort((a, b) => a - b),
+    ranghiNonConLaPioggia: ranghiSenzaPioggiaDi(confidente),
   };
   // «oggi» sulla struttura effettiva (con il «dal» del requisito di rango 1 dove la struttura non ne ha uno), la stessa del Diario e dei semafori
-  if (partitaId !== undefined) dto.oggi = verdettoDelConfidente(confidente, contestoDellaPartita(partitaId, confidente)) ?? valutaDisponibilita(struttura, contestoDellaPartita(partitaId, confidente));
+  if (partitaId !== undefined) {
+    verificaPartita(partitaId); // prima dello stato: solo le partite del proprietario della richiesta
+    const contesto = contestoDellaPartita(partitaId, confidente, statoDellaPartita?.(partitaId));
+    dto.oggi = verdettoDelConfidente(confidente, contesto) ?? valutaDisponibilita(struttura, contesto);
+  }
   return dto;
 }
 
@@ -102,40 +108,72 @@ export function eGiornoFestivo(data: string): boolean {
   return festivi.has(data);
 }
 
+/** La pioggia di un rango dai suoi requisiti: un obbligo («non deve piovere», anche in un gruppo «tutte») o, per ogni gruppo «almeno una» con la
+ *  pioggia, gli altri rami (la pioggia blocca solo se sono tutti falsi; L13, ondata 8, migrazione 317: l'evento 7.5 di Takemi). */
+interface PioggiaDelRango { obbligo: boolean; alternative: RequisitoSpillo[][] }
+
+/** Lo stato di un ramo letto col valutatore unico sullo stato della partita (`valutatoreDelloStato` di semaforiService): lo passa chi ha la partita. */
+export type StatoDelRamo = (c: RequisitoSpillo) => 'verde' | 'rosso' | 'grigio';
+
 /**
- * L13 (ondata 6, migrazione 306): i ranghi di ogni Confidente il cui incontro non si fa con la pioggia, dalla sola fonte della pioggia, i requisiti
- * di rango (`meteo non-piove`, anche in un gruppo «tutte»). Letti una volta e svuotati quando il DB di gioco cambia (anche le scritture dei
- * requisiti lo dicono, `requisitiConfidentiService`).
+ * L13 (ondata 6, migrazione 306): la pioggia di ogni rango di ogni Confidente, dalla sola fonte della pioggia, i requisiti di rango. Letta una
+ * volta e svuotata quando il DB di gioco cambia (anche le scritture dei requisiti lo dicono, `requisitiConfidentiService`).
  */
-let senzaPioggia: Map<string, Set<number>> | null = null;
-registraCacheDiGioco(() => { senzaPioggia = null; });
-function ranghiSenzaPioggia(): Map<string, Set<number>> {
-  if (!senzaPioggia) {
-    const m = new Map<string, Set<number>>();
+let pioggiaPerRango: Map<string, Map<number, PioggiaDelRango>> | null = null;
+registraCacheDiGioco(() => { pioggiaPerRango = null; });
+function pioggiaDeiRanghi(): Map<string, Map<number, PioggiaDelRango>> {
+  if (!pioggiaPerRango) {
+    const m = new Map<string, Map<number, PioggiaDelRango>>();
     for (const r of prepared('SELECT confidente_chiave, rango, tipo, dati_json FROM confidente_requisito').all() as Array<{ confidente_chiave: string; rango: number; tipo: string; dati_json: string }>) {
       let dati: unknown;
       try { dati = JSON.parse(r.dati_json); } catch { continue; }
       const c = dati && typeof dati === 'object' ? normalizzaRequisitoSpillo({ ...(dati as Record<string, unknown>), tipo: r.tipo }) : null;
-      if (!c || !richiedeNonPioggia(c)) continue;
-      const l = m.get(r.confidente_chiave) ?? new Set<number>();
-      l.add(Number(r.rango));
-      m.set(r.confidente_chiave, l);
+      if (!c) continue;
+      const obbligo = richiedeNonPioggia(c);
+      const alternative = alternativeAllaPioggia(c);
+      if (!obbligo && alternative === null) continue;
+      const ranghi = m.get(r.confidente_chiave) ?? new Map<number, PioggiaDelRango>();
+      const p = ranghi.get(Number(r.rango)) ?? { obbligo: false, alternative: [] };
+      // un «almeno una» in cui ogni ramo chiede che non piova è un obbligo
+      ranghi.set(Number(r.rango), { obbligo: p.obbligo || obbligo || alternative?.length === 0, alternative: alternative?.length ? [...p.alternative, alternative] : p.alternative });
+      m.set(r.confidente_chiave, ranghi);
     }
-    senzaPioggia = m;
+    pioggiaPerRango = m;
   }
-  return senzaPioggia;
+  return pioggiaPerRango;
 }
 
-/** Vero se l'incontro del rango successivo a `rango` (0 = il primo) non si fa con la pioggia, secondo i requisiti di rango. */
-export function nonConLaPioggia(confidente: string, rango: number | null | undefined): boolean {
-  return ranghiSenzaPioggia().get(confidente)?.has((rango ?? 0) + 1) ?? false;
+/** I ranghi del Confidente il cui incontro non si fa mai con la pioggia (gli obblighi; gli «almeno una» dipendono dalla partita), in ordine. */
+function ranghiSenzaPioggiaDi(confidente: string): number[] {
+  return [...(pioggiaDeiRanghi().get(confidente) ?? new Map<number, PioggiaDelRango>())].flatMap(([rango, p]) => (p.obbligo ? [rango] : [])).sort((a, b) => a - b);
+}
+
+/**
+ * Se l'incontro del rango successivo a `rango` (0 = il primo) non si fa con la pioggia, secondo i requisiti di rango: vero con un obbligo; con un
+ * «almeno una» vero solo se, col valutatore unico sullo stato della partita (`stato`), gli altri rami sono tutti falsi, falso se uno è vero.
+ * Senza lo stato, o con un ramo che non si sa (grigio), un «almeno una» non lo sappiamo: null, nessun controllo.
+ */
+export function nonConLaPioggia(confidente: string, rango: number | null | undefined, stato?: StatoDelRamo): boolean | null {
+  const p = pioggiaDeiRanghi().get(confidente)?.get((rango ?? 0) + 1);
+  if (!p) return false;
+  if (p.obbligo) return true;
+  if (!stato) return null;
+  let ignoto = false;
+  for (const rami of p.alternative) {
+    const stati = rami.map(stato);
+    if (stati.some((s) => s === 'verde')) continue;
+    if (stati.every((s) => s === 'rosso')) return true;
+    ignoto = true;
+  }
+  return ignoto ? null : false;
 }
 
 /** Il verdetto per un Confidente in un momento dato, per chi non ha bisogno del resto (il Diario); null se il Confidente non ha una riga.
- *  Se il contesto non dice se l'incontro si fa con la pioggia, lo si legge qui dai requisiti del rango successivo: ogni chiamante usa la stessa fonte. */
-export function verdettoDelConfidente(confidente: string, contesto: ContestoDisponibilita): EsitoDisponibilita | null {
+ *  Se il contesto non dice se l'incontro si fa con la pioggia, lo si legge qui dai requisiti del rango successivo (con lo stato della partita, se
+ *  chi chiama lo ha): ogni chiamante usa la stessa fonte. */
+export function verdettoDelConfidente(confidente: string, contesto: ContestoDisponibilita, stato?: StatoDelRamo): EsitoDisponibilita | null {
   const s = tutteLeStrutture().get(confidente);
   if (!s) return null;
-  return valutaDisponibilita(s, contesto.nonConLaPioggia === undefined ? { ...contesto, nonConLaPioggia: nonConLaPioggia(confidente, contesto.rango) } : contesto);
+  return valutaDisponibilita(s, contesto.nonConLaPioggia === undefined ? { ...contesto, nonConLaPioggia: nonConLaPioggia(confidente, contesto.rango, stato) } : contesto);
 }
 

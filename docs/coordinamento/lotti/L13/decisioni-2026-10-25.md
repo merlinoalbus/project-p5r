@@ -21,7 +21,7 @@ verificati sulle copie in sola lettura dei dati reali.
 13. **Destinatari dei 42 regali senza elenco**: ricavati da `confidente_regalo`, con le chiavi dei Confidenti.
 14. **Requisiti dei Confidenti**: (a) Hifumi rango 1 dal 06-25 e Shinya dal 09-04 confermati; (b) Takemi e Ohya rango 1: il dato si
     allinea alla data che il testo attribuisce all'utente (15 aprile, 18 giugno); (c) Kawakami rango 4 e (d) pioggia di Futaba: nessuna
-    modifica finché l'utente non li verifica.
+    modifica finché l'utente non li verifica. *I punti (b) e (d) sono superati dalla decisione 24 (31 ottobre, guida italiana; migrazione 317).*
 15. **Power Intuition 1/3 del 12 dicembre**: da verificare in partita; nessuna modifica.
 16. **Quiz TV collegati alla voce di classe** (domande 68, 69, 71, 74, 75): si spostano sulla voce TV della stessa data; per la 74
     (29 settembre) non esiste una voce TV: decide l'utente. Nel periodo validato (68 e 69) lo spostamento si applica solo con il sì
@@ -93,6 +93,16 @@ verificati sulle copie in sola lettura dei dati reali.
     settimana 35, per prima, prima di negozi e Memento), con l'effetto «esame» come il 20 maggio e il 24 ottobre: il piazzamento si sceglie
     alla spunta e dà il premio di `esame.premi_json`. Chiude il punto (2) dei «daDecidere» dell'audit-311 (migrazione 316, audit
     `audit-316-voci-risultati-esami`).
+    Confidenti (stessa risposta: «3 per i punti a,b,c,d,e,f fai riferimento alla guida su https://www.allgamestaff.it/persona-5-royal/»;
+    supera la decisione 14 (b) e (d)): dove la guida dice si struttura o si corregge, dove tace si lascia e lo si scrive. (a) Takemi e Ohya
+    rango 1: vale la guida («Giorno consigliato: 18 aprile» / «5 luglio»; il 18 giugno è il rango 1 di Yusuke): il dato resta (04-18, 07-05)
+    e il testo diventa quello generato dal dato; (b) Futaba «non è mai disponibile anche in caso di pioggia»: «non deve piovere» a ogni rango,
+    la riga `pioggia` delle eccezioni esce; (c) Takemi 7.5 non si fa con la pioggia: al rango 8 «almeno una» fra lo sblocco di «Medicina
+    amara» (che arriva nel 7.5) e «non deve piovere», letto sullo stato della partita; (d) Yusuke rango 8 non richiede la pioggia (la guida
+    esclude solo i ranghi 4, 6 e 9): la frase esce dalla nota; (e) date di sblocco in prosa: la guida dà solo il giorno consigliato, nessuna
+    modifica; (f) Kasumi «sera presunta» esce (incontri su messaggio anche dopo le lezioni); Takemi di sera con la relazione romantica (manca lo
+    stato nell'app: domanda all'utente), Ryuji «nei giorni di pioggia» (senza fonte) e Igor «notte» (reso dal modo `trama`) restano (migrazione
+    317, audit `audit-317-confidenti-guida`).
 
 Fino al 28 ottobre le conversioni delle singole voci del periodo validato (fino al 05-31) restavano da approvare riga per riga. Dalla
 decisione 23 si applicano direttamente, salvo i casi (a), (b) e (c): la migrazione 302 applica le proposte aperte che non vi ricadono e

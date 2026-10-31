@@ -65,7 +65,8 @@ export interface ContestoDisponibilita {
   rango?: number | null;
   /** Quanti giorni di gioco sono passati dall'ultimo rango; null = non lo sappiamo. */
   giorniDallUltimoRango?: number | null;
-  /** Vero se fra i requisiti del rango successivo c'è «non deve piovere» (lo calcola `nonConLaPioggia` di disponibilitaStrutturataService); null o assente = non lo sappiamo, non si controlla. */
+  /** Vero se fra i requisiti del rango successivo c'è «non deve piovere», o un «almeno una» con la pioggia i cui altri rami sono falsi nella partita
+   *  (lo calcola `nonConLaPioggia` di disponibilitaStrutturataService); null o assente = non lo sappiamo, non si controlla. */
   nonConLaPioggia?: boolean | null;
 }
 
@@ -84,6 +85,17 @@ export function richiedeNonPioggia(c: RequisitoSpillo): boolean {
   if (c.tipo === 'non') return c.condizione.tipo === 'piove';
   if (c.tipo === 'gruppo') return c.modo === 'tutte' && c.condizioni.some(richiedeNonPioggia);
   return false;
+}
+
+/**
+ * L13 (ondata 8, migrazione 317): un gruppo «almeno una» con «non deve piovere» fra i suoi rami dice che la pioggia blocca solo quando gli altri
+ * rami sono falsi (Takemi: l'evento 7.5, prima dello sblocco di «Medicina amara», non si fa con la pioggia; il rango 8 sì). Restituisce gli altri
+ * rami (vuoto = tutti i rami chiedono che non piova: è un obbligo), o null se la condizione non è un gruppo così. Chi valuta i rami è chi ha lo
+ * stato della partita (`nonConLaPioggia` di disponibilitaStrutturataService).
+ */
+export function alternativeAllaPioggia(c: RequisitoSpillo): RequisitoSpillo[] | null {
+  if (c.tipo !== 'gruppo' || c.modo !== 'almeno-una' || !c.condizioni.some(richiedeNonPioggia)) return null;
+  return c.condizioni.filter((x) => !richiedeNonPioggia(x));
 }
 
 const SIGLE: Record<string, GiornoDisponibilita> = { Lunedì: 'lun', Martedì: 'mar', Mercoledì: 'mer', Giovedì: 'gio', Venerdì: 'ven', Sabato: 'sab', Domenica: 'dom' };
