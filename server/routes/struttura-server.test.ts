@@ -138,19 +138,21 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     }
     expect((await request(app).put('/api/catalogo/film/cinema-le-sedici-domande').send({ sessioni: 3 })).status).toBe(400);
     expect((await request(app).put('/api/catalogo/attivita/freccette').send({ paga_yen: 100 })).status).toBe(400);
-    // il modulo rimanda tutti i campi vecchi (dote, note, effetto_json nullo, sblocca nullo): gli effetti ricavati dalla prosa restano
+    // L13 (O7-4, migrazione 313): libri e film non hanno più campi vecchi (dote, note, note_successive, sblocca, effetto_json, dove): mandati,
+    // si scartano e gli effetti restano quelli della riga; l'unico punto è `effetti_json`
     const yoncha = (await request(app).put('/api/catalogo/libro/esplorando-yoncha-4').send({ nome: 'Esplorando Yoncha 4', dote: null, note: null, sblocca: null, effetto_json: null, condizioni_json: [] })).body.data as ElementoCatalogoDto;
     expect(JSON.parse(String(yoncha.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'sblocca-luogo', luogo: 'yongen-jaya' } }]);
+    expect('dote' in yoncha.dati || 'sblocca' in yoncha.dati || 'dove' in yoncha.dati).toBe(false);
     const studio = (await request(app).put('/api/catalogo/attivita/studio-leblanc').send({ nome: 'Studio al Leblanc', doti_json: [{ dote: 'conoscenza', note: null, condizione: '2 punti, 3 con la pioggia' }] })).body.data as ElementoCatalogoDto;
     expect((JSON.parse(String(studio.dati.effetti_json)) as unknown[]).length).toBe(2);
-    // se la Dote cambia davvero, la voce semplice si rifà e le altre restano
     const ladro = (await request(app).put('/api/catalogo/libro/il-magnifico-ladro').send({ dote: 'coraggio', note: 2 })).body.data as ElementoCatalogoDto;
-    expect(JSON.parse(String(ladro.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 2 } }]);
-    const vague = (await request(app).put('/api/catalogo/libro/vague').send({ dote: 'fascino', note: 1, effetto_json: null })).body.data as ElementoCatalogoDto;
+    expect(JSON.parse(String(ladro.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 3 } }]);
+    // la Dote si cambia dagli effetti
+    const vague = (await request(app).put('/api/catalogo/libro/vague').send({ effetti_json: [{ effetto: { famiglia: 'dote', dote: 'fascino', note: 1 } }, { effetto: { famiglia: 'sblocca-luogo', luogo: 'harajuku' } }] })).body.data as ElementoCatalogoDto;
     expect(JSON.parse(String(vague.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'dote', dote: 'fascino', note: 1 } }, { effetto: { famiglia: 'sblocca-luogo', luogo: 'harajuku' } }]);
-    // un PUT che tocca un solo campo vecchio legge gli altri dalla riga: la prima visione resta
+    // un film: `note_successive` mandato da solo non tocca la voce «ripetuto»
     const sedici = (await request(app).put('/api/catalogo/film/cinema-le-sedici-domande').send({ note_successive: 0 })).body.data as ElementoCatalogoDto;
-    expect(JSON.parse(String(sedici.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 3 } }]);
+    expect(JSON.parse(String(sedici.dati.effetti_json))).toEqual([{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 3 } }, { effetto: { famiglia: 'dote', dote: 'coraggio', note: 1 }, ripetuto: true }]);
     // il negozio non accetta più condizioni: la sua presenza sono gli orari
     const n = (await request(app).put('/api/catalogo/negozio/untouchable').send({ condizioni_json: [{ tipo: 'data', dal: '12-01' }] })).body.data as ElementoCatalogoDto;
     expect('condizioni_json' in n.dati).toBe(false);

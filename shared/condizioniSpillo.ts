@@ -278,6 +278,19 @@ export function dataLeggibile(d: string): string {
   return `${Number(m[2])} ${NOMI_MESI[m[1]]}`;
 }
 
+/** L13 (O7-4, migrazione 313): «Il messaggio arriva la sera del 28 luglio» / «… dell’8 ottobre», dal messaggio strutturato di un invito: la sola resa. */
+export function fraseMessaggioInvito(m: { data: string; fascia: 'giorno' | 'sera' }): string {
+  const giorno = dataLeggibile(m.data);
+  return `Il messaggio arriva ${m.fascia === 'sera' ? 'la sera' : 'di giorno'} ${eliso(giorno) ? 'dell’' : 'del '}${giorno}.`;
+}
+
+/** «8 ottobre» e «11 aprile» vogliono l'articolo eliso («l’8 ottobre», «dell’11 aprile»). */
+function eliso(giornoLeggibile: string): boolean { return /^(8|11) /.test(giornoLeggibile); }
+/** «il 2 maggio», «l’11 aprile»: un giorno leggibile con l'articolo. */
+function conArticolo(giornoLeggibile: string): string {
+  return `${eliso(giornoLeggibile) ? 'l’' : 'il '}${giornoLeggibile}`;
+}
+
 /** Nomi da mostrare al posto delle chiavi: chi li ha li passa, altrimenti resta la chiave. */
 export interface NomiCondizioni {
   allerte?: Record<string, string>;
@@ -317,7 +330,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     // L13 (decisione 4): «non: articolo ottenuto X» è l'alternativa d'acquisto (Set A o Set B delle televendite): si legge come tale
     case 'non': return r.condizione.tipo === 'articolo' ? `Non insieme a «${nomi.articoli?.[r.condizione.articolo] ?? 'un altro articolo'}»` : 'Non: ' + descriviRequisitoSpillo(r.condizione, nomi);
     case 'data': return `dal ${dataLeggibile(r.dal)}`;
-    case 'intervallo': return r.dal === r.al ? `solo il ${dataLeggibile(r.dal)}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
+    case 'intervallo': return r.dal === r.al ? `solo ${conArticolo(dataLeggibile(r.dal))}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
     case 'fascia': return `solo di ${r.fascia}`;
     case 'piove': return 'solo nei giorni di pioggia';
     case 'meteo': return r.condizione === 'senza-allerta' ? `non disponibile con ${nomi.allerte?.[r.allerta] ?? r.allerta}` : 'non disponibile in caso di pioggia';

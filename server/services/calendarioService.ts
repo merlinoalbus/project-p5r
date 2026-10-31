@@ -8,7 +8,7 @@ import { indiceGiornoScolastico } from './domandeService.js';
 import { risolutoreFonti } from './calendarioFonti.js';
 import { allerteDiOgniGiorno, testoMeteo } from './meteoService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
-import { giornoDellaSettimana } from '../../shared/date.js';
+import { giornoDellaSettimana, periodoDellaSettimana } from '../../shared/date.js';
 import { eventoProprio } from './ripristino/righeCalendario.js';
 
 interface RigaGiorno { data: string; ordine: number; meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null; tempo_libero_json: string | null; settimana: number | null }
@@ -49,9 +49,14 @@ function giornoDto(g: RigaGiorno, eventi: RigaEvento[], allerte: GiornoCalendari
   };
 }
 
-/** I riassunti delle settimane della guida, in ordine di numero. */
+/** I riassunti delle settimane della guida, in ordine di numero. L13 (O7-4, migrazione 313): il periodo viene dai giorni della settimana
+ *  (`giorno.settimana`, primo e ultimo), con la sola resa `periodoDellaSettimana`; il testo `periodo` solo per una settimana senza giorni. */
 function settimaneGuida():SettimanaGuidaDto[] {
-  return prepared('SELECT numero, titolo, periodo, url, riassunto, incertezze FROM settimana_guida ORDER BY numero').all() as SettimanaGuidaDto[];
+  return (prepared(`SELECT s.numero, s.titolo, s.periodo, s.url, s.riassunto, s.incertezze,
+      (SELECT g.data FROM giorno g WHERE g.settimana = s.numero ORDER BY g.ordine LIMIT 1) AS dal,
+      (SELECT g.data FROM giorno g WHERE g.settimana = s.numero ORDER BY g.ordine DESC LIMIT 1) AS al
+    FROM settimana_guida s ORDER BY s.numero`).all() as Array<Omit<SettimanaGuidaDto, 'dal' | 'al'> & { dal: string | null; al: string | null }>)
+    .map((s) => ({ ...s, periodo: periodoDellaSettimana(s.dal, s.al) ?? s.periodo }));
 }
 
 /** Calendario completo (o di un mese «MM») con, se c'è la partita, il giorno corrente e le prossime scadenze. */

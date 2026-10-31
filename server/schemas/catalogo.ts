@@ -133,27 +133,15 @@ export const datiArticolo = z.object({
   nota: testo(600).nullable().optional(),
 });
 
-/** Campi di un libro scrivibili dall'utente. */
+/** Campi di un libro scrivibili dall'utente. L13 (O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca` ed `effetto_json` non ci sono
+ *  più (come ogni chiave sconosciuta, si scartano): che cosa dà e che cosa apre lo dicono gli effetti, dove si ottiene articoli e posizioni. */
 const datiLibro = z.object({
-  /** **Che cosa apre leggerlo**, dichiarato invece che raccontato.
-   *
-   * Da non confondere con `condizioni_json`, che e' il verso opposto: quelle dicono quando il
-   * libro e' disponibile, questa che cosa il libro sblocca. Per `sblocca-luogo` il luogo e' la
-   * chiave di un quartiere, cosi' l'app ci puo' portare. */
-  effetto_json: effettoJson,
-  // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
-  // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
+  // Le condizioni sono la disponibilità, «dal 18 aprile» (migrazione 052).
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  dove: testo(300).default(''),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
-  dote: dote.nullable().optional(),
-  // «note» qui e' il numero di note musicali della Dote (1-3), non un testo: e' la colonna del
-  // catalogo dei libri e si chiama cosi' da sempre.
-  note: z.number().int().min(0).max(9).nullable().optional(),
-  sblocca: testo(300).nullable().optional(),
-  /** Gli effetti dichiarati (migrazione 074): la Dote che alza, che cosa apre. Senza, si derivano da dote/note. */
+  /** Gli effetti dichiarati (migrazione 074): la Dote che alza, che cosa apre. L'unico punto. */
   effetti_json: effettiJson,
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
   dettagli: testo(2000).nullable().optional(),
@@ -175,12 +163,8 @@ const datiFilmBase = z.object({
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
-  dote: dote.nullable().optional(),
-  note: z.number().int().min(0).max(9).nullable().optional(),
-  // Quanto vale **rivedere** un titolo: al cinema la guida lo dichiara riga per riga («prima
-  // visione: +3; visioni successive: +1»), e senza questo campo quella distinzione viveva solo
-  // nella prosa dei dettagli, dove l'app non poteva applicarla. Vuoto = rivederlo non da' niente.
-  note_successive: z.number().int().min(0).max(9).nullable().optional(),
+  // L13 (O7-4, migrazione 313): la prima visione e quanto vale rivederlo (voci `ripetuto`) le dicono solo gli effetti;
+  // `dote`, `note` e `note_successive` non ci sono più
   effetti_json: effettiJson,
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   sessioni: z.number().int().min(1).max(9).nullable().optional(),

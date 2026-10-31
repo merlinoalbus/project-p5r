@@ -12,7 +12,9 @@
 import { prepared } from '../../db/dbService.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 
-export interface RigaInvito { chiave: string; confidente_chiave: string; data: string | null; apre_tipo: 'quartiere' | 'luogo' | 'area'; apre_chiave: string; condizioni_json: string | null; nota: string; fonte: string; origine: string; seed_json: string | null }
+export interface RigaInvito { chiave: string; confidente_chiave: string; data: string | null; apre_tipo: 'quartiere' | 'luogo' | 'area'; apre_chiave: string; condizioni_json: string | null; nota: string; fonte: string; origine: string; seed_json: string | null;
+  /** L13 (O7-4, migrazione 313): quando arriva il messaggio; assenti su uno schema di prima. */
+  messaggio_data?: string | null; messaggio_fascia?: string | null }
 
 /** Vero se la tabella c'è (uno schema di prima della migrazione 118 non ha inviti). */
 function conInviti(): boolean {

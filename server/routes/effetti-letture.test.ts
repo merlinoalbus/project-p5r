@@ -38,10 +38,17 @@ describe('API — il conseguimento dice le Doti, non le tocca', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
+  // L13 (O7-4, migrazione 313): Dote e note di libri e film le dicono solo gli effetti (prima volta e voci `ripetuto`)
+  type ConEffetti = { effetti: Array<{ effetto: { famiglia: string; dote?: string; note?: number }; ripetuto?: boolean }> };
+  const doteDi = (x: ConEffetti, ripetuto = false) => {
+    const v = x.effetti.find((e) => e.effetto.famiglia === 'dote' && !!e.ripetuto === ripetuto);
+    return v ? { dote: v.effetto.dote!, note: v.effetto.note! } : null;
+  };
+
   it('un libro finito dice i suoi punti, col bonus del libro sulle tre note; disfarlo dice di toglierli', async () => {
     const id = await nuovaPartita('Effetti libro');
     const libri = (await request(app).get('/api/compendio/libri')).body.data as LibriDto;
-    const l = libri.libri.find((x) => x.dote === 'conoscenza' && x.note === 3)!;
+    const l = libri.libri.find((x) => doteDi(x)?.dote === 'conoscenza' && doteDi(x)?.note === 3)!;
 
     // A metà non è ancora un conseguimento: niente da segnare.
     if (l.totaleSessioni > 1) expect(await segna(id, 'libro', l.chiave, l.totaleSessioni - 1)).toEqual([]);
@@ -56,37 +63,39 @@ describe('API — il conseguimento dice le Doti, non le tocca', () => {
   it('al cinema la prima visione vale più delle successive, e si disfa l’ultima', async () => {
     const id = await nuovaPartita('Effetti cinema');
     const film = (await request(app).get('/api/compendio/film')).body.data as FilmDvdDto;
-    const f = film.film.find((x) => x.dove === 'cinema' && x.dote && x.note === 3 && x.noteSuccessive === 1)!;
+    const f = film.film.find((x) => x.dove === 'cinema' && doteDi(x)?.note === 3 && doteDi(x, true)?.note === 1)!;
     expect(f, 'serve almeno un film al cinema con le visioni successive dichiarate').toBeTruthy();
+    const dote = doteDi(f)!.dote;
 
     // 3 note = 5 punti la prima volta; 1 nota = 2 punti ognuna delle due dopo.
-    expect(delta(await segna(id, 'film', f.chiave, 3), f.dote!)).toBe(9);
+    expect(delta(await segna(id, 'film', f.chiave, 3), dote)).toBe(9);
     // Tolte due visioni successive: si tolgono i loro 2 + 2, non i 5 della prima.
-    expect(delta(await segna(id, 'film', f.chiave, 1), f.dote!)).toBe(-4);
-    expect(delta(await segna(id, 'film', f.chiave, 0), f.dote!)).toBe(-5);
-    expect(await punti(id, f.dote!)).toBe(0);
+    expect(delta(await segna(id, 'film', f.chiave, 1), dote)).toBe(-4);
+    expect(delta(await segna(id, 'film', f.chiave, 0), dote)).toBe(-5);
+    expect(await punti(id, dote)).toBe(0);
   });
 
   it('un film che non dichiara le visioni successive non ne dà', async () => {
     const id = await nuovaPartita('Effetti senza successive');
     const film = (await request(app).get('/api/compendio/film')).body.data as FilmDvdDto;
-    const f = film.film.find((x) => x.dove === 'cinema' && x.dote && x.note && !x.noteSuccessive);
+    const f = film.film.find((x) => x.dove === 'cinema' && doteDi(x) && !doteDi(x, true));
     if (!f) return; // se un giorno tutti li dichiarano, questa prova non ha più un caso da coprire
-    expect(delta(await segna(id, 'film', f.chiave, 1), f.dote!)).toBeGreaterThan(0);
+    expect(delta(await segna(id, 'film', f.chiave, 1), doteDi(f)!.dote)).toBeGreaterThan(0);
     expect(await segna(id, 'film', f.chiave, 4)).toEqual([]);
   });
 
   it('ciò che è stato registrato resta quello anche se il mondo cambia in mezzo', async () => {
     const id = await nuovaPartita('Effetti stabili');
     const film = (await request(app).get('/api/compendio/film')).body.data as FilmDvdDto;
-    const f = film.film.find((x) => x.dove === 'dvd' && x.dote && x.note)!;
-    const dati = delta(await segna(id, 'film', f.chiave, f.totaleSessioni), f.dote!);
+    const f = film.film.find((x) => x.dove === 'dvd' && doteDi(x))!;
+    const dote = doteDi(f)!.dote;
+    const dati = delta(await segna(id, 'film', f.chiave, f.totaleSessioni), dote);
     expect(dati).toBeGreaterThan(0);
     // «Anima da cineasta» alza di uno scalino film e DVD da qui in avanti, non all'indietro: disfare
     // dice di togliere quel che era stato detto, non un ricalcolo più alto.
     getDb().prepare("INSERT INTO lettura_partita (partita_id, tipo, chiave, updated_at) VALUES (?, 'libro', 'anima-da-cineasta', ?)").run(id, new Date().toISOString());
-    expect(delta(await segna(id, 'film', f.chiave, 0), f.dote!)).toBe(-dati);
-    expect(await punti(id, f.dote!)).toBe(0);
+    expect(delta(await segna(id, 'film', f.chiave, 0), dote)).toBe(-dati);
+    expect(await punti(id, dote)).toBe(0);
   });
 });
 

@@ -16,7 +16,8 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: FilmDto = {
-  chiave: 'dvd-prova', nome: 'DVD di prova', dove: 'dvd', dote: 'coraggio', note: 2, noteSuccessive: null, prezzo: null,
+  // L13 (O7-4, migrazione 313): Dote e note del film le dicono solo gli effetti
+  chiave: 'dvd-prova', nome: 'DVD di prova', dove: 'dvd', prezzo: null,
   dettagli: 'Due sessioni.', effetti: [{ effetto: { famiglia: 'dote', dote: 'coraggio', note: 2 }, testo: 'Coraggio ♪♪' }], effettiTesto: ['Coraggio ♪♪'], verificato: true,
   posizioni: [{ tipo: 'luogo', chiave: 'shibuya/scarlet', etichetta: 'Scarlet', ruolo: 'noleggio' }, { tipo: 'luogo', chiave: 'yongen-jaya/leblanc', etichetta: 'Leblanc', ruolo: 'visione' }],
   totaleSessioni: 2, progresso: 0, iniziato: false, fatto: false, condizioni: null, disponibilita: null,

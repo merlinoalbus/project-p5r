@@ -91,7 +91,9 @@ describe('API città e attività', () => {
     expect(a.film).toHaveLength(30);
     expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
     expect(a.lavori.every((x) => x.tipo === 'lavoro' && x.doti.length > 0)).toBe(true);
-    expect(a.libri.filter((l) => l.dote !== null).length).toBeGreaterThanOrEqual(20);
+    // L13 (O7-4, migrazione 313): la Dote di un libro la dicono gli effetti
+    const conDote = (l: LibroDto) => l.effetti.some((e) => e.effetto.famiglia === 'dote');
+    expect(a.libri.filter(conDote).length).toBeGreaterThanOrEqual(20);
     expect(a.libri.every((l) => !l.fatto)).toBe(true);
     expect(a.film.filter((f) => f.dove === 'dvd')).toHaveLength(12);
     expect(a.film.filter((f) => f.dove === 'cinema')).toHaveLength(18);
@@ -99,7 +101,7 @@ describe('API città e attività', () => {
     expect((await request(app).get('/api/compendio/attivita?partita=99999')).status).toBe(404);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Letture', dataGioco: '12-15' })).body.data as { id: number }).id;
-    const libro = a.libri.find((l) => l.dote !== null)!;
+    const libro = a.libri.find(conDote)!;
     let r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: true })).body.data as LibroDto;
     expect(r.fatto).toBe(true);
     r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: true })).body.data as LibroDto; // idempotente

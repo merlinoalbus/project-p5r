@@ -12,6 +12,8 @@ import { getDb, prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { chiaveImmagineQuartiere } from '../cittaService.js';
 import { sincronizzaPercorsiMappe } from '../mappe/percorsiMappe.js';
+import { verificaCondizioni } from '../mappe/mappeService.js';
+import { normalizzaCondizioniSpillo } from '../../../shared/condizioniSpillo.js';
 import type { CampoDef } from './registro.js';
 import { DEFINIZIONI_CALENDARIO } from './righeCalendario.js';
 import { DEFINIZIONI_CONFIDENTI } from './righeConfidenti.js';
@@ -102,26 +104,45 @@ const quartiere: DefRiga = {
 
 const TIPI_TROFEO = [{ chiave: 'bronzo', nome: 'Bronzo' }, { chiave: 'argento', nome: 'Argento' }, { chiave: 'oro', nome: 'Oro' }, { chiave: 'platino', nome: 'Platino' }];
 const MANCABILE = [{ chiave: '', nome: 'Non detto' }, { chiave: '1', nome: 'Sì, si può perdere' }, { chiave: '0', nome: 'No, non si perde' }];
-interface RigaTrofeo { nome: string; nome_en: string | null; tipo: string; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
+interface RigaTrofeo { nome: string; nome_en: string | null; tipo: string; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+
+/** L13 (O7-4, migrazione 313): le condizioni del «quando» di un trofeo, come testo JSON del campo («[]» = nessuna). Lancia 400 se non è un
+ *  elenco di condizioni valide del vocabolario unico (chiavi comprese, come ogni altro editor di condizioni). */
+function condizioniTrofeo(v: ValoreCampoCorrezione): string | null {
+  let grezze: unknown;
+  try { grezze = JSON.parse(typeof v === 'string' && v.trim() !== '' ? v : '[]'); } catch { grezze = null; }
+  const valide = Array.isArray(grezze) ? normalizzaCondizioniSpillo(grezze) : null;
+  if (!valide || !Array.isArray(grezze) || valide.length !== grezze.length) throw httpErrors.badRequest('condizioni-non-valide', 'Le condizioni del trofeo non sono valide.', { campo: 'condizioni_json' });
+  verificaCondizioni(valide);
+  return valide.length ? JSON.stringify(valide) : null;
+}
 
 const trofeo: DefRiga = {
   modalita: 'riga', etichetta: 'Trofeo', tabella: 'trofeo', colonnaChiave: 'chiave',
   chiavi: () => (prepared('SELECT chiave FROM trofeo ORDER BY ordine').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM trofeo WHERE chiave = ?').get(chiave),
-  campi: () => [
+  // «Quando» si scrive con le condizioni (la frase la genera la pagina); il testo della guida resta un campo solo dove c'è ancora
+  campi: (chiave) => [
     T('nome', 'Nome'), T('nome_en', 'Nome inglese', { nullable: true }),
     { p: 'tipo', e: 'Tipo', t: 'scelta', opzioni: TIPI_TROFEO },
     L('descrizione', 'Descrizione'), L('come', 'Come si ottiene'),
     { p: 'mancabile', e: 'Si può perdere', t: 'scelta', opzioni: MANCABILE },
-    T('quando', 'Quando', { nullable: true }), L('fonte', 'Fonte'), B('verificato', 'Verificato'),
+    L('condizioni_json', 'Quando si ottiene', { nullable: true }),
+    ...((prepared('SELECT quando FROM trofeo WHERE chiave = ?').pluck().get(chiave) as string | null | undefined)?.trim()
+      ? [T('quando', 'Quando: testo della guida da convertire', { nullable: true })] : []),
+    L('fonte', 'Fonte'), B('verificato', 'Verificato'),
   ],
   leggi: (chiave) => {
-    const r = prepared('SELECT nome, nome_en, tipo, descrizione, come, mancabile, quando, fonte, verificato FROM trofeo WHERE chiave = ?').get(chiave) as RigaTrofeo;
-    return { nome: r.nome, nome_en: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? '' : String(r.mancabile), quando: r.quando, fonte: r.fonte, verificato: r.verificato === 1 };
+    const r = prepared('SELECT nome, nome_en, tipo, descrizione, come, mancabile, quando, fonte, verificato, condizioni_json FROM trofeo WHERE chiave = ?').get(chiave) as RigaTrofeo;
+    return { nome: r.nome, nome_en: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? '' : String(r.mancabile), quando: r.quando,
+      condizioni_json: r.condizioni_json ?? '[]', fonte: r.fonte, verificato: r.verificato === 1 };
   },
+  // una fotografia di prima della 313 non ha le condizioni: nessuna
+  normalizzaGuida: (guida) => ({ condizioni_json: '[]', ...guida }),
   scrivi: (chiave, v) => {
     for (const col of ['nome', 'tipo', 'descrizione', 'come', 'fonte'] as const) if (v[col] !== undefined) prepared(`UPDATE trofeo SET ${col} = ? WHERE chiave = ?`).run(str(v[col]) ?? '', chiave);
     for (const col of ['nome_en', 'quando'] as const) if (v[col] !== undefined) prepared(`UPDATE trofeo SET ${col} = ? WHERE chiave = ?`).run(str(v[col]), chiave);
+    if (v.condizioni_json !== undefined) prepared('UPDATE trofeo SET condizioni_json = ? WHERE chiave = ?').run(condizioniTrofeo(v.condizioni_json), chiave);
     if (v.mancabile !== undefined) prepared('UPDATE trofeo SET mancabile = ? WHERE chiave = ?').run(v.mancabile === '' ? null : Number(v.mancabile), chiave);
     if (v.verificato !== undefined) prepared('UPDATE trofeo SET verificato = ? WHERE chiave = ?').run(bool(v.verificato), chiave);
   },

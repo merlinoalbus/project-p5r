@@ -304,7 +304,9 @@ export const salvaDialogoConfidente = (chiave: string, id: number, dati: { note?
 export const ripristinaDialogoConfidente = (chiave: string, id: number): Promise<DialogoModificatoDto> =>
   apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/dialoghi/${id}/ripristina`, {}, { maxRetries: 0 });
 /** R9-07c: gli inviti del Confidente; la data (MM-GG) è la chiave, quindi sta nel percorso e non si cambia. */
-export interface CorpoInvitoConfidente { apre: { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string }; condizioni: Condizione[]; nota: string }
+export interface CorpoInvitoConfidente { apre: { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string }; condizioni: Condizione[]; nota: string;
+  /** L13 (O7-4): quando arriva il messaggio dell'invito; null = nessuno, assente = invariato. */
+  messaggio?: { data: string; fascia: 'giorno' | 'sera' } | null }
 export const creaInvitoConfidente = (chiave: string, dati: CorpoInvitoConfidente & { data: string }): Promise<InvitoDto> =>
   apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti`, dati, { maxRetries: 0 });
 export const modificaInvitoConfidente = (chiave: string, data: string, dati: CorpoInvitoConfidente): Promise<InvitoDto> =>

@@ -8,7 +8,8 @@
 //   - `esame-premi` (1, chiave «premi»): le note generali sugli esami, un JSON di testi in `esame_premi.json`; ogni testo è un campo. La struttura non cambia.
 //     L13 (ondata 7, O7-2): dalla 311 premi per piazzamento, requisito di Conoscenza e trofeo stanno nelle colonne dell'esame (`righeScuola`) e qui
 //     restano fonte e note generali; le etichette dei campi di prima servono solo a una riga che la 311 non ha ridotto (corretta dall'utente).
-//   - `settimana-guida` (42, chiave = numero): titolo, periodo, riassunto e incertezze della settimana. L'indirizzo della fonte (`url`) non si corregge.
+//   - `settimana-guida` (42, chiave = numero): titolo, riassunto e incertezze della settimana. L'indirizzo della fonte (`url`) non si corregge; il
+//     periodo nemmeno (L13 O7-4: lo dicono i giorni della settimana).
 //   - `evento-voce` (135, chiave «<id evento>:<uid voce>»): la certezza del collegamento fra un evento del Calendario e una voce del Diario. Il collegamento
 //     stesso (quale evento, quale voce) è l'identità della riga e non si corregge.
 // ============================================================
@@ -97,7 +98,7 @@ const settimanaGuida = rigaDaColonne({
   etichetta: 'Settimana della guida', tabella: 'settimana_guida', colonnaChiave: 'CAST(numero AS TEXT)', ordine: 'numero',
   colonne: [
     colonna({ p: 'titolo', e: 'Titolo', t: 'testo', max: 160 }, 'titolo', 'testo'),
-    colonna({ p: 'periodo', e: 'Periodo', t: 'testo', nullable: true, max: 80 }, 'periodo', 'testoVuoto'),
+    // L13 (O7-4, migrazione 313): il periodo non si scrive: lo dicono i giorni della settimana (`giorno.settimana`)
     colonna({ p: 'riassunto', e: 'Riassunto', t: 'testolungo', nullable: true }, 'riassunto', 'testoVuoto'),
     colonna({ p: 'incertezze', e: 'Incertezze', t: 'testolungo', nullable: true }, 'incertezze', 'testoVuoto'),
   ],

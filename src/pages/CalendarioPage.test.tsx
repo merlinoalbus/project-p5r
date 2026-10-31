@@ -23,7 +23,7 @@ const dati: CalendarioDto = {
     giorno('05-01', 'Domenica'),
     giorno('05-11', 'Mercoledì', { eventi: [{ id: 2, tipo: 'esame', titolo: 'Esame di metà semestre', dettaglio: '', fonte: 'https://www.allgamestaff.it/y', voci: [], modificabile: false, modificato: false }] }),
   ],
-  settimane: [{ numero: 4, titolo: 'Settimana 4', periodo: '01/05 - 08/05', url: 'https://www.allgamestaff.it/s4', riassunto: 'Consigli della settimana quattro.', incertezze: '' }],
+  settimane: [{ numero: 4, titolo: 'Settimana 4', periodo: '01/05 - 08/05', dal: '05-01', al: '05-08', url: 'https://www.allgamestaff.it/s4', riassunto: 'Consigli della settimana quattro.', incertezze: '' }],
   dataGioco: '05-01',
   oggi: giorno('05-01', 'Domenica'),
   prossimeScadenze: [{ data: '05-11', tipo: 'esame', titolo: 'Esame di metà semestre', dettaglio: '', giorniMancanti: 10 }],

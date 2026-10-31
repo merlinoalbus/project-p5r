@@ -9,12 +9,23 @@ import { registraEvento } from './storicoService.js';
 import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
 import { effettiDegliOggetti, effettoDellaFonte, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 
-interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
+interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number;
+  /** L13 (O7-4, migrazione 313): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
+  condizioni_json?: string | null }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
-/** Un trofeo come DTO; `mancabile` resta null quando la guida non lo dice, `ottenuto` viene dall'insieme dato. */
-const dto = (r: RigaTrofeo, ottenuti: Set<string>): TrofeoDto => ({ chiave: r.chiave, nome: r.nome, nomeEn: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? null : r.mancabile === 1, quando: r.quando, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) });
+/** Un trofeo come DTO; `mancabile` resta null quando la guida non lo dice, `ottenuto` viene dall'insieme dato. «Quando» è la frase generata
+ *  dalle condizioni (L13 O7-4: una sola fonte, nessuna assegnazione automatica: le condizioni non si valutano); il testo `quando` resta solo
+ *  dove la 313 non l'ha convertito e le condizioni non ci sono. */
+const dto = (r: RigaTrofeo, ottenuti: Set<string>, nomi = nomiCondizioniMemo()): TrofeoDto => {
+  const condizioni = leggiCondizioniSalvate(r.condizioni_json ?? null).map((c) => condizioneConTesto(c, nomi));
+  return { chiave: r.chiave, nome: r.nome, nomeEn: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? null : r.mancabile === 1,
+    quando: fraseDelleCondizioni(condizioni) ?? (r.quando?.trim() || null), condizioni, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) };
+};
 
 /** Le chiavi dei trofei ottenuti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function ottenutiPartita(partitaId: number | undefined): Set<string> {
@@ -28,7 +39,8 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   const seed = datiGuidaCorretti<SeedCompletamento>('completamento');
   if (!seed) throw httpErrors.notFound('completamento-non-disponibile', 'I dati di completamento non sono caricati.');
   const ottenuti = ottenutiPartita(partitaId);
-  const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti));
+  const nomi = nomiCondizioniMemo();
+  const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti, nomi));
   const premi = ricompensePerFonte('covo');
   // ondata 5 (decisione 21 b, migrazione 258): la sfida che conta i regali dice a che punto è la partita chiesta
   const regali = partitaId === undefined ? null : regaliConsegnati(partitaId);

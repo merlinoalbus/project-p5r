@@ -20,7 +20,7 @@ getAreeDelQuartiere.mockResolvedValue([{ chiave: COVO_AREA.chiave, disponibile: 
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Costruisce un trofeo verificato, non ancora ottenuto, con chiave, nome e tipo dati. */
-const trofeo = (chiave: string, nome: string, tipo: TrofeoDto['tipo']): TrofeoDto => ({ chiave, nome, nomeEn: null, tipo, descrizione: 'Descrizione', come: 'Come si ottiene', mancabile: null, quando: null, fonte: 'https://www.allgamestaff.it/t', verificato: true, ottenuto: false });
+const trofeo = (chiave: string, nome: string, tipo: TrofeoDto['tipo']): TrofeoDto => ({ chiave, nome, nomeEn: null, tipo, descrizione: 'Descrizione', come: 'Come si ottiene', mancabile: null, quando: null, condizioni: [], fonte: 'https://www.allgamestaff.it/t', verificato: true, ottenuto: false });
 const dati: CompletamentoDto = {
   trofei: [trofeo('assedio', 'Assedio al castello della lussuria', 'bronzo'), trofeo('platino', 'Il ladro fantasma definitivo', 'platino')], ottenuti: 0,
   finali: [{ chiave: 'vero', nome: 'Finale perfetto (Royal)', condizioni: ['Maruki rango 9 entro il 17 novembre'], date: ['17 novembre'], descrizione: 'Terzo semestre.', fonte: 'https://www.allgamestaff.it/f' }],

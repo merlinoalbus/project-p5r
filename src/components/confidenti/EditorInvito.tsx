@@ -1,5 +1,5 @@
 // ============================================================
-// EditorInvito — creare o cambiare un invito del Confidente: giorno, posto che apre, condizioni, nota (R9-07c, R11-15/2)
+// EditorInvito — creare o cambiare un invito del Confidente: giorno, posto che apre, condizioni, giorno e fascia del messaggio (L13 O7-4), nota (R9-07c, R11-15/2)
 // ============================================================
 //
 // Il giorno (mese e giorno del calendario di gioco) è la chiave dell'invito: si sceglie alla creazione e dopo non si cambia. Il posto che apre è un
@@ -19,6 +19,7 @@ import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
+import { Segmenti } from '../shared/Segmenti';
 import { Campo, CampoTesto } from '../shared/Campo';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -55,12 +56,17 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
   const [posto, setPosto] = useState(invito?.apre.chiave ?? '');
   const [condizioni, setCondizioni] = useState<Condizione[]>(invito?.condizioni ?? []);
   const [nota, setNota] = useState(invito?.nota ?? '');
+  // L13 (O7-4): quando arriva il messaggio dell'invito, se la guida lo dice ('' = nessun giorno)
+  const [messaggioData, setMessaggioData] = useState(invito?.messaggio?.data ?? '');
+  const [messaggioFascia, setMessaggioFascia] = useState<'giorno' | 'sera'>(invito?.messaggio?.fascia ?? 'sera');
   const [occupato, setOccupato] = useState(false);
   const data = invito?.data ?? dataNuova;
   const dataOk = data !== '' && dataValida(data);
+  const messaggio = messaggioData !== '' && dataValida(messaggioData) ? { data: messaggioData, fascia: messaggioFascia } : null;
+  const messaggioCambiato = JSON.stringify(messaggio) !== JSON.stringify(invito?.messaggio ?? null);
   const sporca = invito
-    ? tipo !== invito.apre.tipo || posto !== invito.apre.chiave || nota !== invito.nota || JSON.stringify(condizioni) !== JSON.stringify(invito.condizioni)
-    : dataNuova !== '' || posto !== '' || nota !== '' || condizioni.length > 0;
+    ? tipo !== invito.apre.tipo || posto !== invito.apre.chiave || nota !== invito.nota || messaggioCambiato || JSON.stringify(condizioni) !== JSON.stringify(invito.condizioni)
+    : dataNuova !== '' || posto !== '' || nota !== '' || messaggio !== null || condizioni.length > 0;
   useBozzaSporca(`invito:${confidente.chiave}:${invito?.data ?? 'nuovo'}`, `l’invito di ${confidente.nome}`, sporca);
 
   // Il posto di un invito della guida che non sta negli elenchi (per esempio un'Area fuori dalla città) resta scelto, col suo nome.
@@ -78,7 +84,7 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
     finally { setOccupato(false); }
   };
-  const corpo = { apre: { tipo, chiave: posto }, condizioni, nota };
+  const corpo = { apre: { tipo, chiave: posto }, condizioni, nota, messaggio };
   const salva = () => invito?.data
     ? esegui(() => modificaInvitoConfidente(confidente.chiave, invito.data!, corpo), 'Invito salvato: vale per tutte le partite.')
     : esegui(() => creaInvitoConfidente(confidente.chiave, { ...corpo, data }), 'Invito creato.');
@@ -104,6 +110,12 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
         <fieldset className="m-0 flex flex-col gap-1 border-0 p-0"><legend className="p-0 text-text-secondary">Condizioni (vuote = sempre)</legend>
           <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato} massimo={20} />
         </fieldset>
+        <Campo etichetta="Il messaggio arriva" aiuto="Il giorno in cui arriva il messaggio dell’invito, se la guida lo dice: «nessuna» se non lo dice." senzaGruppo>
+          <div className="flex flex-wrap items-end gap-2">
+            <SelettoreData etichetta="Giorno del messaggio" valore={messaggioData} onCambia={setMessaggioData} disabilitato={occupato} facoltativa />
+            {messaggioData !== '' && <Segmenti etichetta="Fascia del messaggio" valore={messaggioFascia} opzioni={[{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'La sera' }]} onCambia={setMessaggioFascia} />}
+          </div>
+        </Campo>
         <CampoTesto etichetta="Nota" tipo="lungo" valore={nota} massimo={500} disabilitato={occupato} onCambia={setNota} />
       </div>
     </Modal>

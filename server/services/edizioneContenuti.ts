@@ -129,6 +129,8 @@ const ANAGRAFICA: Record<string, Anagrafica> = {
   allerta_meteo: paginaDi('Allerta meteo', '/guida/calendario'),
   giorno_calendario: paginaDi('Giorno del calendario', '/guida/calendario'),
   evento_calendario: paginaDi('Evento del calendario', '/guida/calendario'),
+  // L13 (O7-4, migrazione 313): il «quando» dei trofei è nelle condizioni (`trofeo.condizioni_json`), controllate come le altre
+  trofeo: paginaDi('Trofeo', '/guida/completamento'),
   giorno_percorso: paginaDi('Giorno del percorso', '/guida/percorso'),
   voce_giornata: paginaDi('Voce del diario', '/guida/percorso'),
   voce_effetto: paginaDi('Effetto di una voce del diario', '/guida/percorso'),

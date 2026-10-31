@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { dataLeggibile, fraseMessaggioInvito } from '../../../shared/condizioniSpillo';
 import { eliminaInvitoConfidente, getInviti, impostaInvitoAvvenuto } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -71,6 +71,7 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
           </div>
           {invito.condizioniTesto.length > 0 && <p className="m-0 text-text-secondary">Condizioni: {invito.condizioniTesto.join(' · ')}.</p>}
           {attiva && !invito.registrato && invito.possibile === false && <p className="m-0 text-text-secondary">Non ancora possibile: manca {invito.manca ?? 'una delle condizioni dell’invito'}.</p>}
+          {invito.messaggio && <p className="m-0 text-text-secondary">{fraseMessaggioInvito(invito.messaggio)}</p>}
           {invito.nota && <p className="m-0 text-text-muted">{invito.nota}</p>}
           {attiva ? <PulsanteVisivo tono={invito.registrato ? 'fantasma' : 'secondario'} compatto className="self-start"
             icona={<IconaAzione chiave={invito.registrato ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />}

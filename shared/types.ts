@@ -275,6 +275,8 @@ export interface InvitoDto {
   /** Con partita: l'invito è registrato. */
   registrato: boolean | null;
   nota: string;
+  /** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (MM-GG e fascia), se la guida lo dice; la frase la genera la pagina. */
+  messaggio: { data: string; fascia: 'giorno' | 'sera' } | null;
   fonte: string;
   /** R9-07c: un invito della guida cambiato dall'utente (si può «Ripristinare»). */
   modificato: boolean;
@@ -1270,7 +1272,10 @@ export interface TrofeoDto {
   descrizione: string;
   come: string;
   mancabile: boolean | null;
+  /** Quando si ottiene: la frase generata dalle `condizioni` (L13 O7-4, migrazione 313); il testo della guida solo dove non ci sono. */
   quando: string | null;
+  /** Le condizioni del «quando», con la loro frase (vocabolario unico; non si valutano: nessuna assegnazione automatica). */
+  condizioni: CondizioneSpilloDto[];
   fonte: string;
   verificato: boolean;
   /** Ottenuto nella partita. */
@@ -2276,12 +2281,11 @@ export interface LibroDto {
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
-  dove: string;
+  /** L13 (O7-4, migrazione 313): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
+   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo (con la nota della guida dove l'articolo non c'è). */
   prezzo: number | null;
-  disponibileDal: string | null;
-  dote: DoteChiave | null;
-  note: number | null;
-  sblocca: string | null;
+  /** Le Richieste che danno il libro in ricompensa (`ricompensa_oggetto`). */
+  ricompensaDi?: Array<{ tipo: 'richiesta'; chiave: string; nome: string }>;
   /** La **chiave del quartiere** che si apre finendolo, quando il libro ne apre uno: e' un
    *  riferimento, quindi la scheda ci puo' portare invece di limitarsi a nominarlo. */
   sbloccaLuogo: string | null;
@@ -2336,10 +2340,7 @@ export interface FilmDto {
   chiave: string;
   nome: string;
   dove: 'cinema' | 'dvd';
-  dote: DoteChiave | null;
-  note: number | null;
-  /** Quanto vale rivederlo: al cinema la guida lo dichiara riga per riga. Vuoto = niente. */
-  noteSuccessive: number | null;
+  /** L13 (O7-4, migrazione 313): Dote, note e «rivederlo» li dicono solo gli `effetti` (la prima visione e le voci `ripetuto`). */
   prezzo: number | null;
   dettagli: string | null;
   /** Gli effetti dichiarati (migrazione 074): la prima visione e, con `ripetuto`, quelle successive. */
@@ -2998,7 +2999,11 @@ export interface GiornoCalendarioDto {
 export interface SettimanaGuidaDto {
   numero: number;
   titolo: string;
+  /** «09/04 - 10/04», generato dai giorni della settimana (`dal`, `al`; L13 O7-4); il testo della guida solo se la settimana non ha giorni. */
   periodo: string;
+  /** Primo e ultimo giorno della settimana (MM-GG), da `giorno.settimana`; null se nessun giorno è della settimana. */
+  dal: string | null;
+  al: string | null;
   url: string;
   riassunto: string;
   incertezze: string;

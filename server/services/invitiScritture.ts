@@ -19,12 +19,20 @@ import { normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/c
 import type { InvitoDto } from '../../shared/types.js';
 
 export type TipoPostoInvito = 'quartiere' | 'luogo' | 'area';
-export interface CorpoInvito { apre: { tipo: TipoPostoInvito; chiave: string }; condizioni: RequisitoSpillo[]; nota: string }
+/** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito; assente = invariato, null = nessuno. */
+export type MessaggioInvito = { data: string; fascia: 'giorno' | 'sera' };
+export interface CorpoInvito { apre: { tipo: TipoPostoInvito; chiave: string }; condizioni: RequisitoSpillo[]; nota: string; messaggio?: MessaggioInvito | null }
 export interface CorpoNuovoInvito extends CorpoInvito { data: string }
 
 interface RigaInvitoCompleta {
   chiave: string; confidente_chiave: string; data: string | null; apre_tipo: TipoPostoInvito; apre_chiave: string;
   condizioni_json: string | null; nota: string; fonte: string; origine: string; seed_json: string | null;
+  messaggio_data?: string | null; messaggio_fascia?: 'giorno' | 'sera' | null;
+}
+
+/** Il giorno del messaggio deve esistere nel calendario di gioco (400). */
+function verificaMessaggio(m: MessaggioInvito | null | undefined): void {
+  if (m && !dataValida(m.data)) throw httpErrors.badRequest('data-non-valida', 'Il giorno del messaggio è nel formato MM-GG e deve esistere nel calendario del gioco.');
 }
 
 const DATA_GIOCO = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
@@ -112,9 +120,11 @@ export function creaInvito(confidente: string, corpo: CorpoNuovoInvito): InvitoD
   const chiave = `${confidente}/${corpo.data}`;
   if (prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('invito-esistente', `Il Confidente ha già un invito per il ${corpo.data}: modificalo.`);
   verificaPosto(corpo.apre);
+  verificaMessaggio(corpo.messaggio);
   const condizioni = condizioniVerificate(chiave, corpo.condizioni);
-  prepared(`INSERT INTO confidente_invito (chiave, confidente_chiave, data, apre_tipo, apre_chiave, condizioni_json, nota, fonte, origine, seed_json, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'Aggiunto dall’utente', 'utente', NULL, ?)`).run(chiave, confidente, corpo.data, corpo.apre.tipo, corpo.apre.chiave, condizioni, corpo.nota, nowIso());
+  prepared(`INSERT INTO confidente_invito (chiave, confidente_chiave, data, apre_tipo, apre_chiave, condizioni_json, nota, messaggio_data, messaggio_fascia, fonte, origine, seed_json, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aggiunto dall’utente', 'utente', NULL, ?)`).run(chiave, confidente, corpo.data, corpo.apre.tipo, corpo.apre.chiave, condizioni, corpo.nota,
+    corpo.messaggio?.data ?? null, corpo.messaggio?.fascia ?? null, nowIso());
   invalidaCacheDiGioco();
   return dtoDi(chiave);
 }
@@ -123,14 +133,17 @@ export function creaInvito(confidente: string, corpo: CorpoNuovoInvito): InvitoD
 export function modificaInvito(confidente: string, data: string, corpo: CorpoInvito): InvitoDto {
   const r = rigaDelConfidente(confidente, data);
   verificaPosto(corpo.apre);
+  verificaMessaggio(corpo.messaggio);
   const condizioni = condizioniVerificate(r.chiave, corpo.condizioni);
-  prepared("UPDATE confidente_invito SET apre_tipo = ?, apre_chiave = ?, condizioni_json = ?, nota = ?, origine = 'utente', updated_at = ? WHERE chiave = ?")
-    .run(corpo.apre.tipo, corpo.apre.chiave, condizioni, corpo.nota, nowIso(), r.chiave);
+  // il messaggio non mandato resta quello della riga
+  const messaggio = corpo.messaggio === undefined ? { data: r.messaggio_data ?? null, fascia: r.messaggio_fascia ?? null } : { data: corpo.messaggio?.data ?? null, fascia: corpo.messaggio?.fascia ?? null };
+  prepared("UPDATE confidente_invito SET apre_tipo = ?, apre_chiave = ?, condizioni_json = ?, nota = ?, messaggio_data = ?, messaggio_fascia = ?, origine = 'utente', updated_at = ? WHERE chiave = ?")
+    .run(corpo.apre.tipo, corpo.apre.chiave, condizioni, corpo.nota, messaggio.data, messaggio.fascia, nowIso(), r.chiave);
   invalidaCacheDiGioco();
   return dtoDi(r.chiave);
 }
 
-interface FotografiaInvito { apre_tipo?: unknown; apre_chiave?: unknown; condizioni?: unknown; nota?: unknown }
+interface FotografiaInvito { apre_tipo?: unknown; apre_chiave?: unknown; condizioni?: unknown; nota?: unknown; messaggio_data?: unknown; messaggio_fascia?: unknown }
 
 /** «Ripristina»: rimette posto, condizioni e nota com'erano nella guida. 409 se l'invito non è della guida o non è stato modificato. */
 export function ripristinaInvito(confidente: string, data: string): InvitoDto {
@@ -146,8 +159,11 @@ export function ripristinaInvito(confidente: string, data: string): InvitoDto {
   }
   verificaPosto({ tipo: f.apre_tipo as TipoPostoInvito, chiave: f.apre_chiave });
   const condizioni = condizioniVerificate(r.chiave, f.condizioni as RequisitoSpillo[]);
-  prepared("UPDATE confidente_invito SET apre_tipo = ?, apre_chiave = ?, condizioni_json = ?, nota = ?, origine = 'seed', updated_at = ? WHERE chiave = ?")
-    .run(f.apre_tipo, f.apre_chiave, condizioni, f.nota, nowIso(), r.chiave);
+  // una fotografia di prima della 313 non ha il messaggio: nessuno
+  const messaggioData = typeof f.messaggio_data === 'string' && dataValida(f.messaggio_data) ? f.messaggio_data : null;
+  const messaggioFascia = messaggioData && (f.messaggio_fascia === 'giorno' || f.messaggio_fascia === 'sera') ? f.messaggio_fascia : null;
+  prepared("UPDATE confidente_invito SET apre_tipo = ?, apre_chiave = ?, condizioni_json = ?, nota = ?, messaggio_data = ?, messaggio_fascia = ?, origine = 'seed', updated_at = ? WHERE chiave = ?")
+    .run(f.apre_tipo, f.apre_chiave, condizioni, f.nota, messaggioFascia ? messaggioData : null, messaggioFascia, nowIso(), r.chiave);
   invalidaCacheDiGioco();
   return dtoDi(r.chiave);
 }
