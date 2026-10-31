@@ -167,7 +167,8 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
       const esiti = leggiEsitiAttivita((prepared('SELECT * FROM attivita WHERE chiave = ?').get(e.attivita) as { esiti_json?: string | null }).esiti_json);
       if (esiti && e.doti?.length) throw httpErrors.badRequest('turno-doti-con-esiti', `L'attività «${e.attivita}» dichiara i suoi esiti: le Doti del turno vengono dall'esito scelto, non si scrivono nella voce.`);
       if (e.esito && !esiti?.esiti.some((x) => x.chiave === e.esito)) throw httpErrors.badRequest('esito-sconosciuto', `L'attività «${e.attivita}» non dichiara l'esito «${e.esito}».`);
-      if (e.esito && esiti?.modo === 'automatico') throw httpErrors.badRequest('esito-automatico', `L'attività «${e.attivita}» ricava l'esito dal giorno: la voce non ne indica uno.`);
+      // L13 (ondata 9, O9-2): anche nel modo automatico la voce può dichiarare l'esito (prevale sul calcolo del giorno, `risolviEsitoTurno`);
+      // resta rifiutato solo un esito che l'attività non dichiara (qui sopra)
       // 2026-10-27: la quantità (le creazioni) ha senso solo per uno strumento scelto nella voce (`strumentoDi`: con la versione con il bonus o,
       // revisione, una creazione senza, come la fabbricazione di Kawakami)
       if (e.quantita !== undefined && !strumentoDi(esiti, e.esito)) throw httpErrors.badRequest('quantita-senza-strumento', `La quantità del turno vale solo per uno strumento di «${e.attivita}» (un esito che crea un oggetto dai materiali).`);

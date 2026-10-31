@@ -623,7 +623,8 @@ export interface TurnoRegistrato {
   paga: { yen: number; massima: number | null } | null;
   /** L13: l'esito ottenuto (null = «senza punti»), per le attività che dichiarano esiti; assente per le altre. */
   /** 2026-10-27 (revisione): `bonus` per gli strumenti (esiti con la versione con il bonus): vero se è la versione con il bonus. */
-  esito?: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean } | null;
+  /** L13 (ondata 9, O9-2): `dallaVoce` per l'esito dichiarato dalla voce nel modo automatico (prevale sul calcolo del giorno). */
+  esito?: { chiave: string; nome: string; automatico?: boolean; dallaVoce?: true; bonus?: boolean } | null;
   /** 2026-10-27: le creazioni della voce (solo se più di una) e gli oggetti dati e consumati dal turno, per dire alla spunta che cosa ha applicato. */
   quantita?: number;
   oggetti?: Array<{ nome: string; quantita: number }>;

@@ -373,6 +373,9 @@ import { migration317 } from './317_confidenti_dalla_guida.js';
 // devi verificare nella guida e attenerti a quanto riportato su allgamestaff.it.» e «Ingresso nei Memento. Verifica la data nelle guide
 // online.»): le domande 1-5 dell'audit 310 sulle Richieste dei Memento chiuse dalla guida, l'ingresso nei Memento al 7 maggio
 import { migration318 } from './318_richieste_memento_e_ingresso_dalla_guida.js';
+// 2026-10-31 (L13, ondata 9, O9-2: «Per il momento vale quello che riporta il testo sul bagno. A meno di modifiche successive.»): il bagno del
+// 9, 13 e 16 giugno con l'esito dichiarato dalla voce («Bagno normale»), che prevale sul calcolo del giorno
+import { migration319 } from './319_bagno_esito_dalla_voce.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -396,5 +399,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318,
+  migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
 ];

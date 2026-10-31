@@ -10,6 +10,7 @@
 import type { EffettiAzioneDto } from './types.js';
 import { NESSUNA_NOTA, testoDoteInPunti } from './note.js';
 import { nomePiazzamentoEsame } from './puntiConfidenti.js';
+import { testoOrigineEsito } from './esitiAttivita.js';
 
 /**
  * 2026-10-27 (revisione: «Grimaldello · creato · ricevuti Grimaldello ×3» ripeteva il nome): l'esito di un turno detto nel riepilogo. Per uno
@@ -41,7 +42,8 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean;
     const elenco = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');
     const ricevuti = elenco(t.oggetti), usati = elenco(t.consumati);
     const nomeEsito = t.esito ? nomeEsitoDelTurno(t.esito, !!ricevuti) : null;
-    parti.push(`${t.nome}: turno ${t.ordine}${nomeEsito ? ` · ${nomeEsito}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${ricevuti ? ` · ricevuti ${ricevuti}` : ''}${usati ? ` · usati ${usati}` : ''}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
+    // L13 (ondata 9, O9-2): nel modo automatico l'esito dice da dove viene («dal giorno» o «dalla voce», `testoOrigineEsito`)
+    parti.push(`${t.nome}: turno ${t.ordine}${nomeEsito ? ` · ${nomeEsito}${t.esito ? testoOrigineEsito(t.esito) : ''}` : t.esito === null ? ' · senza punti' : ''}${doti(t.doti, ' (', ')')}${ricevuti ? ` · ricevuti ${ricevuti}` : ''}${usati ? ` · usati ${usati}` : ''}${t.paga && !opz.senzaPaga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${variabile}` : ''}`);
   }
   if (e.incontro) {
     const rango = e.incontro.rango ? ` · rango ${e.incontro.rango.da} → ${e.incontro.rango.a}` : '';

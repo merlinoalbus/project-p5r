@@ -1334,7 +1334,8 @@ export interface EffettiAzioneDto {
     /** 2026-10-27 (revisione): `bonus` per gli strumenti (esiti con la versione con il bonus): vero se la versione con il bonus, falso se quella
      *  base; assente per gli altri esiti e nelle ricevute di prima. `creazione` (revisione): lo strumento non ha la versione con il bonus
      *  (Kawakami fabbrica al posto tuo): gli oggetti ricevuti dicono già che cosa, il nome dell'esito non si ripete. */
-    esito?: { chiave: string; nome: string; automatico?: boolean; bonus?: boolean; creazione?: true } | null;
+    /** L13 (ondata 9, O9-2): `dallaVoce` — attività nel modo automatico, esito dichiarato dalla voce: vale quello, non il calcolo del giorno. */
+    esito?: { chiave: string; nome: string; automatico?: boolean; dallaVoce?: true; bonus?: boolean; creazione?: true } | null;
     /** 2026-10-27: le creazioni della voce (Grimaldello ×3), solo se più di una; assente nelle ricevute di prima. */
     quantita?: number;
     /** 2026-10-27: gli oggetti che il turno ha dato e consumato (con la quantità e il bonus), per dire alla spunta che cosa è stato applicato.

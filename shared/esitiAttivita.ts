@@ -85,6 +85,17 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
   { chiave: 'scelta', nome: 'Lo sceglie chi gioca, alla spunta' },
   { chiave: 'automatico', nome: 'Automatico: vale l’esito con le condizioni vere in quel momento' },
 ];
+
+/**
+ * L13 (ondata 9, O9-2, 2026-10-31: «Per il momento vale quello che riporta il testo sul bagno. A meno di modifiche successive.»): da dove
+ * viene l'esito di un turno di un'attività nel modo automatico. Di norma dal giorno (le condizioni dell'esito); se la voce ne DICHIARA uno,
+ * vale quello della voce, senza valutarne le condizioni (la voce prevale). Un solo testo per l'editor della voce, la frase dell'effetto e
+ * le ricevute della spunta.
+ */
+export const ORIGINE_ESITO_AUTOMATICO = { giorno: 'dal giorno', voce: 'dalla voce' } as const;
+/** « (dalla voce)» o « (dal giorno)» per l'esito registrato con un turno (ricevuta della spunta); vuoto per un esito scelto. */
+export const testoOrigineEsito = (esito: { automatico?: boolean; dallaVoce?: boolean }): string =>
+  esito.dallaVoce ? ` (${ORIGINE_ESITO_AUTOMATICO.voce})` : esito.automatico ? ` (${ORIGINE_ESITO_AUTOMATICO.giorno})` : '';
 /** `quantita`: le copie di un oggetto, come l'effetto «oggetto ricevuto» delle voci (`QUANTITA_MASSIMA_EFFETTO` di `effettiVoce.ts`). */
 /** `esiti` (2026-10-27, revisione): 50, perché la fabbricazione della guida ha 19 ricette, ognuna con la versione base e quella con il bonus
  *  (38 esiti); prima 20 bastavano alle 10 ricette senza le bombe. */

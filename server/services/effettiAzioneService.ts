@@ -25,7 +25,7 @@ import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incon
 import { z } from 'zod';
 import { httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
-import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
+import { testoOrigineEsito, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
 import { NESSUNA_NOTA, simboliNote, testoDoteInPunti } from '../../shared/note.js';
 import { nomeEsitoDelTurno } from '../../shared/descriviEffettiSpunta.js';
@@ -138,7 +138,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const dotiPremio = premioDelPiazzamento(esame.premi, scelta.piazzamento).doti.map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDote(partitaId, d.dote, d.note, origine), note: d.note }));
       esami.push({ esame: e.esame, nome: esame.nome, piazzamento: scelta.piazzamento, prima: segnato.prima, doti: dotiPremio, ...(segnato.trofeo ? { trofeo: segnato.trofeo } : {}) });
     } else {
-      // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno), e la ricevuta lo ricorda;
+      // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno, o dichiarato dalla voce nel modo
+      // automatico: ondata 9, O9-2), e la ricevuta lo ricorda;
       // senza la scelta risolta il turno non si registra (sarebbe un turno vuoto: la regola vale per ogni strada che arriva qui)
       if (scelta?.tipo !== 'turno' && esitiDellAttivita(e.attivita)?.esiti) throw httpErrors.conflict('esito-da-scegliere', 'Questa attività dichiara i suoi esiti: scegli l’esito ottenuto prima di registrare il turno.');
       // Ondata 5 (lotto E, decisione 5): il turno si svolge nella fascia della voce, che decide il prezzo della sfida (500 ¥ di sera)
@@ -220,7 +221,7 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
     (x.bonus !== undefined || x.creazione) && oggettiRicevuti ? nomeEsitoDelTurno(x, true) : `esito ${x.nome}`;
   for (const t of e.turni ?? []) {
     const nomeEsito = t.esito ? esitoDi(t.esito, !!t.oggetti?.length) : null;
-    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? `${nomeEsito ? ` · ${nomeEsito}` : ''}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
+    parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? `${nomeEsito ? ` · ${nomeEsito}` : ''}${testoOrigineEsito(t.esito)}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${frasiDoti(t.doti)})` : ''}${t.oggetti?.length ? ` · ricevuti ${oggetti(t.oggetti)}` : ''}${t.consumati?.length ? ` · usati ${oggetti(t.consumati)}` : ''}`);
   }
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   // L13 (ondata 7, O7-2): «Esame di metà semestre 1: Primi 10 (Fascino ♪♪♪ · 5 punti), trofeo Un travestimento sapiente»
