@@ -4,10 +4,10 @@
 //
 // Decisione 9 dell'utente: la Dote di una domanda la applica la voce del Diario che la segna. La ricompensa che la pagina mostra si genera
 // quindi dagli effetti delle voci (`DomandaDto.premioVoce`, dal server; le parole in `utils/ricompensaDomanda.ts`): le Doti («Conoscenza ♪»),
-// per una riga d'esame senza Doti «conta per il piazzamento», e se una voce chiede alla spunta il piazzamento di un esame lo dice. Il testo
-// della guida (`ricompensa`) resta solo dove dice altro da quel che le voci danno (da decidere: decisione 10) o dove nessuna voce segna la
-// domanda; accanto alle Doti delle voci si mostra come «Per la guida: …», l'unica etichetta che serve (avvisa di una differenza). Una sola
-// resa per DomandePage e ScuolaOggi.
+// le note di rango di un Confidente («Ann Takamaki ♪♪», L13 ondata 8), per una riga d'esame senza Doti «conta per il piazzamento», e se una
+// voce chiede alla spunta il piazzamento di un esame lo dice. Il testo della guida (`ricompensa`) resta solo dove dice altro da quel che le voci
+// danno o dove nessuna voce segna la domanda (dalla migrazione 315 nessuna, con i dati della guida); accanto al premio delle voci si mostra
+// come «Per la guida: …», l'unica etichetta che serve (avvisa di una differenza). Una sola resa per DomandePage e ScuolaOggi.
 // ============================================================
 
 import type { DomandaDto } from '../../types';

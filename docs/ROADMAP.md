@@ -1831,6 +1831,18 @@ cambiarli se dovessero esserci discrepanze nel gioco.»
 | C5 | Aree del Dedalo di Da'at delle 6 Richieste: restano; si cambiano da «Modifica» della Richiesta → «Durante la proroga il bersaglio è in» (già presente, O7-1c) | nessun lavoro |
 | — | Restano aperte: domande in classe con la ricompensa in testo diversa dalla voce (23, 26, 30, 62, 63, 66, 79) o senza voce (4, 6, 17, 36, 44, 70, 72); domande dell'ondata 6 (1-6); le 289 scelte senza punti; avviso del 1/5; Richieste O7-1 (1-5); voci dei risultati del 19/7 e 24/12; planimetrie delle aree fisse, bagno del 9/13/16 giugno, televendite, ingresso Memento | da decidere dall'utente |
 
+### Ondata 8 — risposte dell'utente del 31 ottobre
+
+Risposta dell'utente (2026-10-31): «2 Domande in classe. Il premio di queste domande deve essere corretto e allineato a quanto nel testo.
+Verifica tutte le domande anche quelle antecedenti al 20 giugno. Aggiungi le voci mancanti. 3 per i punti a,b,c,d,e,f fai riferimento alla
+guida su https://www.allgamestaff.it/persona-5-royal/ 4 Le 289 risposte senza punti vanno mantenute e danno 0 punti. 5 l'avviso del 1/5 su
+Kamoshida [...] no lascialo; aggiungo le voci dei risultati d'esame del 19/7 e del 24/12? sì» (decisione 24 per il punto 2).
+
+| # | Voce | Stato |
+|---|---|---|
+| O8-1 | Domande in classe e quiz TV (decisione 24; fonte https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/ e le pagine «Soluzione settimana N», lette il 31/10). Gioco 315 (audit `audit-315-domande-premi-guida`, con prima e dopo di ognuna delle 79 domande, la frase della guida e l'URL della settimana): 14 voci allineate con `convertiVoce` (anche le spuntate: decisione dell'utente) — i quiz TV 68, 69, 71, 74, 75 escono dalla voce di classe dello stesso giorno, 68/69/70 entrano nella voce TV, 4/6/17 ricevono l'effetto «domanda», Ann ♪♪ (`puntiConfidente`) sulle voci del 25/4, 20/6 e 7/7, la Conoscenza ♪ sul quiz TV del 10/11; 5 note che ripetevano solo il premio tolte col testo di prima conservato; 4 voci nuove in cima alla fascia (4/8 giorno quiz 72, 6/9 giorno domanda 36, 29/9 sera quiz 74, 6/10 giorno domanda 44); `ricompensa` svuotata sulle 14 righe 4, 6, 17, 23, 26, 30, 36, 44, 62, 63, 66, 70, 72, 79 (ora 0 in testo). `premioVoce.confidenti` (nome dal Confidente) e «Ann Takamaki ♪♪» accanto a «Fascino ♪» in DomandePage e ScuolaOggi; le voci con le note di rango fisse restano collegabili alla spunta dalla Guida (`vociDiStato`); `chiaveEffetto` delle migrazioni allineata al motore per `puntiConfidente`, `personaTolta`, `uscitaOggetto`. Prove su copie nuove della 314: `up()` due volte (la seconda senza scritture, audit invariato), 0 voci con due «domanda», ogni domanda con una sola voce, 3 effetti Ann ♪♪, `partite.db` identico (schema e righe); pacchetto iniziale 93 → 315 senza errori (le voci si saltano: schema delle partite non ancora creato); su un'altra copia, partita di prova: la domanda 23 dalla Guida spunta la voce, Fascino da applicare e Ann ♪♪ nel registro; typecheck, lint, build e bundle di rilascio verdi; test adeguati nel testo, non eseguiti | fatto nel codice, non visto nel browser |
+| — | Da fare nella partita 1 (dall'utente): le ricevute non cambiano; Ann ♪♪ del 25/4 entra togliendo e rimettendo la spunta della voce 5fc91cc4; togliendo la spunta del 19/5 (6be2c902) o del 26/5 (b8096fe6) la ricevuta di allora toglie anche il quiz TV 68 o 69 | da fare dall'utente |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

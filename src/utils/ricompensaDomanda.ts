@@ -10,12 +10,14 @@ import { simboliNote } from '../../shared/note';
 
 const eEsame = (t: DomandaDto['tipo']): boolean => t === 'esame-medio' || t === 'esame-finale';
 
-/** Le parti della ricompensa dalle voci, in parole: «Conoscenza ♪», «conta per il piazzamento», «premio dell’esame alla spunta». */
+/** Le parti della ricompensa dalle voci, in parole: «Fascino ♪», «Ann Takamaki ♪♪» (note di rango di un Confidente, L13 ondata 8),
+ *  «conta per il piazzamento», «premio dell’esame alla spunta». I simboli li legge `TestoNote` a parole per i lettori di schermo. */
 export function partiRicompensaDallaVoce(d: Pick<DomandaDto, 'tipo' | 'premioVoce'>): string[] {
   const p = d.premioVoce;
   if (!p) return [];
   return [
     ...p.doti.map((x) => `${x.nome} ${simboliNote(x.note)}`),
+    ...p.confidenti.map((x) => `${x.nome} ${simboliNote(x.note)}`),
     ...(eEsame(d.tipo) && !p.doti.length ? ['conta per il piazzamento'] : []),
     ...(p.esameAllaSpunta ? ['premio dell’esame alla spunta'] : []),
   ];

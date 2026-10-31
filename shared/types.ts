@@ -1097,8 +1097,9 @@ export interface DomandaDto {
   voceUid?: string;
   /** L13 (ondata 7, O7-2; decisione 9: la Dote la applica la voce): ciò che danno le voci del Diario che segnano la domanda, dai loro effetti
    *  (le Doti, senza doppioni, e se una di loro chiede alla spunta il piazzamento di un esame). È la ricompensa che la pagina mostra; il testo
-   *  `ricompensa` resta solo dove la guida dice altro (da decidere) o non c'è una voce. Assente senza voce. */
-  premioVoce?: { doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; esameAllaSpunta: boolean };
+   *  `ricompensa` resta solo dove la guida dice altro (da decidere) o non c'è una voce. Assente senza voce. L13 (ondata 8, O8-1): con i punti
+   *  dei Confidenti in note (effetto «puntiConfidente»: «2 Punti nel legame con Ann» = ♪♪), una volta per Confidente e note. */
+  premioVoce?: { doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3 }>; confidenti: Array<{ confidente: string; nome: string; note: 1 | 2 | 3 }>; esameAllaSpunta: boolean };
 }
 
 /** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi, come lo mostra la pagina («Primi 10 · Fascino ♪♪♪»). */

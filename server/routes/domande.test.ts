@@ -43,8 +43,8 @@ describe('API domande', () => {
     // la ricompensa dalle voci del Diario: la prima domanda in classe dà Conoscenza ♪ (testo della guida svuotato dalla 311), la prima riga
     // d'esame nessuna Dote (conta per il piazzamento). Nel pacchetto iniziale la voce del 24 ottobre non si converte (la 311 gira prima dello
     // schema delle partite: spunte non verificabili) e la domanda 50 tiene il suo testo
-    expect(d.domande[0]).toMatchObject({ ricompensa: '', premioVoce: { doti: [{ dote: 'conoscenza', nome: 'Conoscenza', note: 1 }], esameAllaSpunta: false } });
-    expect(d.domande.find((x) => x.tipo === 'esame-medio')).toMatchObject({ ricompensa: '', premioVoce: { doti: [], esameAllaSpunta: false } });
+    expect(d.domande[0]).toMatchObject({ ricompensa: '', premioVoce: { doti: [{ dote: 'conoscenza', nome: 'Conoscenza', note: 1 }], confidenti: [], esameAllaSpunta: false } });
+    expect(d.domande.find((x) => x.tipo === 'esame-medio')).toMatchObject({ ricompensa: '', premioVoce: { doti: [], confidenti: [], esameAllaSpunta: false } });
     expect(d.prossime).toEqual([]);
     expect(d.fatte).toBe(0);
     expect(d.dataGioco).toBeNull();

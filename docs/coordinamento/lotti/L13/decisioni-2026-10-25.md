@@ -15,7 +15,7 @@ verificati sulle copie in sola lettura dei dati reali.
 8. **Voce collegata a un elemento che porta già una Dote**: vale la Dote della voce; il collegamento non la raddoppia.
 9. **Dote delle domande in classe**: la applica la voce; la domanda segna solo che si è risposto (`domanda.ricompensa` resta testo).
 10. **Domande con ricompensa diversa dalla voce** (domande 4, 6, 30, 66): vale la voce; il testo della domanda si corregge solo dopo il
-    sì dell'utente; la voce TV del 10 novembre senza Dote va verificata in gioco.
+    sì dell'utente; la voce TV del 10 novembre senza Dote va verificata in gioco. *Superata dalla decisione 24 (31 ottobre).*
 11. **Vino della grazia e Soma**: vale il catalogo e l'articolo lo legge da lì; il bersaglio va confermato in gioco.
 12. **Braccialetto d'argento**: il prezzo vive solo negli articoli (68.000) e i regali lo leggono da lì; il valore va verificato in gioco.
 13. **Destinatari dei 42 regali senza elenco**: ricavati da `confidente_regalo`, con le chiavi dei Confidenti.
@@ -25,7 +25,7 @@ verificati sulle copie in sola lettura dei dati reali.
 15. **Power Intuition 1/3 del 12 dicembre**: da verificare in partita; nessuna modifica.
 16. **Quiz TV collegati alla voce di classe** (domande 68, 69, 71, 74, 75): si spostano sulla voce TV della stessa data; per la 74
     (29 settembre) non esiste una voce TV: decide l'utente. Nel periodo validato (68 e 69) lo spostamento si applica solo con il sì
-    riga per riga.
+    riga per riga. *La riserva (68, 69 e 74) è superata dalla decisione 24 (31 ottobre).*
 
 17. **Candidatura a un lavoro = sblocco del lavoro** (risposta dell'utente: «approvo»). La voce del Cercalavoro (18 aprile Triple Seven,
     26 aprile Rafflesia, 6 maggio Ore no Beko) è collegata all'attività del lavoro, non al negozio, e ha un solo effetto «sblocca il
@@ -79,6 +79,15 @@ verificati sulle copie in sola lettura dei dati reali.
     scelta che solo l'utente conosce (quale set, quale esito, quale succo…); (c) quelle che cambierebbero ciò che è già registrato nelle
     partite (yen scalati, Doti applicate, spunte da ricalcolare). Vale anche per le proposte già aperte. Supera la regola «nel periodo
     validato solo con il sì riga per riga».
+
+24. **Premio delle domande in classe e dei quiz TV** (31 ottobre; risposta dell'utente: «Il premio di queste domande deve essere corretto e
+    allineato a quanto nel testo. Verifica tutte le domande anche quelle antecedenti al 20 giugno. Aggiungi le voci mancanti.»). Supera la
+    decisione 10 e la riserva della decisione 16 (quiz TV 68 e 69 nel periodo validato, 74 senza voce TV). Il premio di ogni domanda è quello
+    della guida (https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/ e le pagine «Soluzione settimana N»): Conoscenza ♪,
+    tranne 25 aprile, 20 giugno e 7 luglio (Fascino ♪ e «2 Punti» nel legame con Ann = ♪♪) e 11 gennaio (Fascino ♪); una catena di Morgana
+    vale una nota; le righe d'esame nessuna Dote. Il premio vive negli effetti della voce del Diario che segna la domanda (una per domanda; il
+    quiz TV nella sua voce della sera); le voci già spuntate nelle partite si convertono comunque (le ricevute restano); le domande senza voce
+    la ricevono nel loro giorno e fascia; `ricompensa` si svuota dove coincide (migrazione 315, audit `audit-315-domande-premi-guida`).
 
 Fino al 28 ottobre le conversioni delle singole voci del periodo validato (fino al 05-31) restavano da approvare riga per riga. Dalla
 decisione 23 si applicano direttamente, salvo i casi (a), (b) e (c): la migrazione 302 applica le proposte aperte che non vi ricadono e
