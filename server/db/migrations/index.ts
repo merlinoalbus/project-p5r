@@ -350,6 +350,9 @@ import { migration310 } from './310_richieste_memento_dedali_e_proroghe.js';
 // 2026-10-31 (L13 ondata 7, lotto O7-2): i premi degli esami per piazzamento e il requisito di Conoscenza nelle colonne dell'esame, la voce
 // dei risultati del 24 ottobre con l'effetto «esame», le ricompense delle domande dette dalle voci
 import { migration311 } from './311_premi_esami_e_ricompense_domande.js';
+// 2026-10-31 (L13 ondata 7, lotto O7-3): le voci di attività del Diario collegate dove l'elemento è univoco (Sakai, freccette, biliardo,
+// videogiochi, Chihaya, Super Baron, palestra, due libri), i nomi dei collegamenti presi dall'elemento, le Doti in prosa delle attività tolte
+import { migration312 } from './312_voci_attivita_collegate.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -373,5 +376,5 @@ export const migrations: Migration[] = [
   migration280, migration281, migration282, migration283, migration284, migration285, migration286, migration287, migration288, migration289,
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
-  migration310, migration311,
+  migration310, migration311, migration312,
 ];

@@ -33,7 +33,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { anteprimaIncollaVoci, annullaOperazioneVoci, esportaAppuntiDiario, incollaVociDiario, isApiError } from '../services/api';
 import { notifica, useNotificationStore, type AzioneNotifica } from '../stores/notificationStore';
 import { useAppuntiDiarioStore } from '../stores/appuntiDiarioStore';
-import { comeTaglio, leggiAppunti, scriviAppunti, type ContenutoAppunti, type FrasiDelleVoci } from '../utils/appuntiDiario';
+import { comeTaglio, leggiAppunti, scriviAppunti, type ContenutoAppunti, type FrasiDelleVoci, type NomiDelleVoci } from '../utils/appuntiDiario';
 import { eInCampoDiTesto } from '../utils/campiModificabili';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import type { AppuntiDiario, EsitoAnnulloIncollaDto, PianoIncollaDto, RichiestaEseguiIncolla } from '../../shared/appuntiDiario';
@@ -242,9 +242,11 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
   useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
 
   const frasi: FrasiDelleVoci = useMemo(() => new Map(voci.map((v) => [v.uid, v.produceTesto ?? []])), [voci]);
+  // L13 (O7-3): il nome del collegamento come la voce lo mostra (quello scritto o, se manca, quello dell'elemento), per il testo leggibile
+  const nomi: NomiDelleVoci = useMemo(() => new Map(voci.map((v) => [v.uid, v.riferimentoTesto])), [voci]);
   // i riferimenti che i gestori dei tasti (montati una volta) leggono sempre aggiornati
-  const ultimi = useRef({ giorno, voci, selezione, frasi, onModificata, chiudiMenu, fuoco });
-  useLayoutEffect(() => { ultimi.current = { giorno, voci, selezione, frasi, onModificata, chiudiMenu, fuoco }; });
+  const ultimi = useRef({ giorno, voci, selezione, frasi, nomi, onModificata, chiudiMenu, fuoco });
+  useLayoutEffect(() => { ultimi.current = { giorno, voci, selezione, frasi, nomi, onModificata, chiudiMenu, fuoco }; });
 
   // ---- i blocchi pronti per l'evento `copy` / `cut`: per gruppo di voci, validi finché la giornata non si ricarica ----
   const pronti = useRef<{ voci: readonly AzionePercorsoDto[]; blocchi: Map<string, AppuntiDiario> }>({ voci, blocchi: new Map() });
@@ -301,16 +303,16 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
   /** Scrive negli appunti dal menu o dalla barra (o se il browser non manda l'evento): col blocco pronto nel gesto, se no mentre arriva. */
   const scriviAsincrono = useCallback((uid: readonly string[], modo: 'copia' | 'taglia') => {
     if (!uid.length) return;
-    const f = ultimi.current.frasi;
+    const f = ultimi.current.frasi, nomi = ultimi.current.nomi;
     const gia = bloccoPronto(uid);
     if (gia) {
       const a = modo === 'taglia' ? comeTaglio(gia) : gia;
-      const c = scriviAppunti(a, f);
+      const c = scriviAppunti(a, f, { nomi });
       if (scriviConEvento(c)) { scritto(a, c); return; }
     }
     const blocco = (gia ? Promise.resolve(gia) : esportaAppuntiDiario([...uid])).then((a) => (modo === 'taglia' ? comeTaglio(a) : a));
     // l'HTML scritto con l'API il browser può ripulirlo: il blocco va anche nel testo, perché l'incolla lo ritrovi comunque
-    const contenuto = blocco.then((a) => ({ a, c: scriviAppunti(a, f, { bloccoNelTesto: true }) }));
+    const contenuto = blocco.then((a) => ({ a, c: scriviAppunti(a, f, { bloccoNelTesto: true, nomi }) }));
     const scrivi = async (): Promise<{ a: AppuntiDiario; c: ContenutoAppunti }> => {
       if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
         // l'oggetto si crea subito (dentro il gesto: Safari lo pretende), il contenuto arriva con la promessa
@@ -444,7 +446,7 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
       const blocco = bloccoPronto(uid);
       if (blocco && e.clipboardData) {
         const a = modo === 'taglia' ? comeTaglio(blocco) : blocco;
-        const c = scriviAppunti(a, ultimi.current.frasi);
+        const c = scriviAppunti(a, ultimi.current.frasi, { nomi: ultimi.current.nomi });
         e.clipboardData.setData('text/plain', c.testo);
         e.clipboardData.setData('text/html', c.html);
         scritto(a, c);

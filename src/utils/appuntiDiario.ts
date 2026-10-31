@@ -61,14 +61,21 @@ function gruppi(a: AppuntiDiario): Array<{ giorno: string; fascia: 'giorno' | 's
 
 /** Le frasi di «Spuntando succede» di ogni voce (dal server, `produceTesto` della voce), per il testo leggibile; facoltative. */
 export type FrasiDelleVoci = ReadonlyMap<string, readonly string[]>;
+/** L13 (ondata 7, O7-3): il nome del collegamento di ogni voce come la voce lo mostra (`riferimentoTesto` del Diario: il nome scritto o, se
+ *  manca, quello dell'elemento). Il blocco degli appunti porta il solo nome scritto, che la migrazione 312 svuota dove ripeteva l'elemento. */
+export type NomiDelleVoci = ReadonlyMap<string, string | null>;
+
+/** Il nome del collegamento della voce nel testo leggibile: quello scritto, altrimenti quello che la voce mostra. */
+const nomeCollegamento = (v: AppuntiDiario['voci'][number], nomi?: NomiDelleVoci): string | null => v.riferimentoTesto ?? (v.riferimento ? nomi?.get(v.uid) ?? null : null);
 
 /** Il testo leggibile: un titolo, poi per giorno e fascia una riga per voce (testo · collegamento), le note e che cosa succede spuntando. */
-export function testoLeggibile(a: AppuntiDiario, frasi?: FrasiDelleVoci): string {
+export function testoLeggibile(a: AppuntiDiario, frasi?: FrasiDelleVoci, nomi?: NomiDelleVoci): string {
   const righe: string[] = [`Diario P5R · ${a.voci.length === 1 ? '1 voce' : `${a.voci.length} voci`}`];
   for (const g of gruppi(a)) {
     righe.push('', `${dataGiocoTesto(g.giorno)} · ${g.fascia === 'sera' ? 'di sera' : 'di giorno'}`);
     for (const v of g.voci) {
-      righe.push(`• ${v.azione}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`);
+      const nome = nomeCollegamento(v, nomi);
+      righe.push(`• ${v.azione}${nome ? ` · ${nome}` : ''}`);
       if (v.note) righe.push(`  ${v.note}`);
       const f = frasi?.get(v.uid) ?? [];
       if (f.length) righe.push(`  Spuntando: ${f.join('; ')}`);
@@ -78,10 +85,11 @@ export function testoLeggibile(a: AppuntiDiario, frasi?: FrasiDelleVoci): string
 }
 
 /** La lista leggibile in HTML (la stessa del testo), dentro il contenitore marcato; `commento`: il blocco anche nel commento finale. */
-function htmlLeggibile(a: AppuntiDiario, frasi: FrasiDelleVoci | undefined, codice: string, commento: boolean): string {
+function htmlLeggibile(a: AppuntiDiario, frasi: FrasiDelleVoci | undefined, codice: string, commento: boolean, nomi?: NomiDelleVoci): string {
   const parti = gruppi(a).map((g) => `<p><strong>${html(dataGiocoTesto(g.giorno))} · ${g.fascia === 'sera' ? 'di sera' : 'di giorno'}</strong></p><ul>${g.voci.map((v) => {
     const f = frasi?.get(v.uid) ?? [];
-    return `<li>${html(v.azione)}${v.riferimentoTesto ? ` · <em>${html(v.riferimentoTesto)}</em>` : ''}${v.note ? `<br>${html(v.note)}` : ''}${f.length ? `<br>Spuntando: ${html(f.join('; '))}` : ''}</li>`;
+    const nome = nomeCollegamento(v, nomi);
+    return `<li>${html(v.azione)}${nome ? ` · <em>${html(nome)}</em>` : ''}${v.note ? `<br>${html(v.note)}` : ''}${f.length ? `<br>Spuntando: ${html(f.join('; '))}` : ''}</li>`;
   }).join('')}</ul>`).join('');
   return `<meta charset="utf-8"><div data-p5r-diario="1" data-versione="${a.versione}" data-p5r-payload="${codice}">${parti}</div>${commento ? `<!--${MARCA}.${a.versione}.${codice}.FINE-->` : ''}`;
 }
@@ -108,13 +116,13 @@ export interface ContenutoAppunti {
  * commento) finché il peso resta sotto la soglia della cronologia di Windows; oltre, una volta sola, nell'attributo (`data-*` resta anche
  * negli HTML ripuliti, il commento no), per restare nella cronologia il più possibile (rilievo del revisore, 2026-10-26).
  */
-export function scriviAppunti(a: AppuntiDiario, frasi?: FrasiDelleVoci, opz: { bloccoNelTesto?: boolean } = {}): ContenutoAppunti {
+export function scriviAppunti(a: AppuntiDiario, frasi?: FrasiDelleVoci, opz: { bloccoNelTesto?: boolean; nomi?: NomiDelleVoci } = {}): ContenutoAppunti {
   const codice = inBase64Url(JSON.stringify(a));
-  const leggibile = testoLeggibile(a, frasi);
+  const leggibile = testoLeggibile(a, frasi, opz.nomi);
   const testo = SCRIVI_BLOCCO_NEL_TESTO || opz.bloccoNelTesto ? `${leggibile}\n\n[${MARCA}.${a.versione}.${codice}.FINE]` : leggibile;
-  let h = htmlLeggibile(a, frasi, codice, true);
+  let h = htmlLeggibile(a, frasi, codice, true, opz.nomi);
   let peso = pesoDi(testo, h);
-  if (peso > SOGLIA_CRONOLOGIA_WINDOWS) { h = htmlLeggibile(a, frasi, codice, false); peso = pesoDi(testo, h); }
+  if (peso > SOGLIA_CRONOLOGIA_WINDOWS) { h = htmlLeggibile(a, frasi, codice, false, opz.nomi); peso = pesoDi(testo, h); }
   return { testo, html: h, peso, troppoPerLaCronologia: peso > SOGLIA_CRONOLOGIA_WINDOWS };
 }
 

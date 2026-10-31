@@ -14,7 +14,7 @@ import { dbDiProva } from '../../test/dbDiProva.js';
 import { statoDisponibilitaPartita, valutaRequisiti } from '../services/disponibilitaService.js';
 import { semaforiConfidente, statoPartitaSemafori } from '../services/semaforiService.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
-import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../shared/types.js';
+import type { CitazioniRichiestaDto, PercorsoGiornoDto, RichiestaDto, RichiesteDto } from '../../shared/types.js';
 
 const app = createApp();
 const QIMRANUT = 'mementos-01-qimranut';
@@ -102,9 +102,18 @@ describe('le Richieste modificabili', () => {
   it('cambiando nome le voci della giornata che la indicano mostrano il nome nuovo', async () => {
     const chiave = 'un-intruso-a-yongen-jaya';
     const testo = () => prepared("SELECT riferimento_testo FROM voce_giornata WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").pluck().all(chiave);
-    expect(testo()).toEqual(['Un intruso a Yongen-Jaya']);
+    // L13 (O7-3, migrazione 312): il nome scritto uguale a quello della Richiesta si è svuotato, la voce lo legge dalla Richiesta (`nomeDi`)
+    const voce = prepared("SELECT uid, data FROM voce_giornata WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").get(chiave) as { uid: string; data: string };
+    const mostrato = async () => ((await request(app).get(`/api/compendio/percorso/${voce.data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === voce.uid)!.riferimentoTesto;
+    expect(testo()).toEqual([null]);
+    expect(await mostrato()).toBe('Un intruso a Yongen-Jaya');
     await request(app).put(`/api/compendio/richieste/${chiave}`).send({ nome: 'Un intruso al Leblanc' }).expect(200);
-    expect(testo()).toEqual(['Un intruso al Leblanc']);
+    expect(await mostrato()).toBe('Un intruso al Leblanc');
+    expect(testo()).toEqual([null]);
+    // un nome scritto diverso segue la rinomina (`richiesteService`, solo dove il nome scritto c'è)
+    prepared("UPDATE voce_giornata SET riferimento_testo = 'Un intruso al Leblanc' WHERE riferimento_chiave = ?").run(chiave);
+    await request(app).put(`/api/compendio/richieste/${chiave}`).send({ nome: 'Un intruso a Yongen-Jaya' }).expect(200);
+    expect(testo()).toEqual(['Un intruso a Yongen-Jaya']);
     // un'altra correzione, senza cambiare nome, non le tocca
     prepared("UPDATE voce_giornata SET riferimento_testo = 'Testo a mano' WHERE riferimento_chiave = ?").run(chiave);
     await request(app).put(`/api/compendio/richieste/${chiave}`).send({ note: 'Nota' }).expect(200);
