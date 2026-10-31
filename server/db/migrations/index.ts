@@ -385,6 +385,7 @@ import { migration321 } from './321_televendite_proposte_e_consegne.js';
 // possono proprio rimuovere»): le 8 planimetrie «Memento - aree fisse — Strutture che i Memento riusano» e i loro 19 pin, con asset e
 // miniature, tolte nel Cestino (una riga per mappa, ripristinabile)
 import { migration322 } from './322_memento_aree_fisse_rimosse.js';
+import { migration323 } from './323_domanda_62_legame_ann.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -409,5 +410,5 @@ export const migrations: Migration[] = [
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
-  migration320, migration321, migration322,
+  migration320, migration321, migration322, migration323,
 ];
