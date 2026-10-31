@@ -390,6 +390,22 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', expect.stringContaining('Relazione romantica con Tae Takemi iniziata')));
   });
 
+  it('L13 (O10-3): la casella segue l\'evento che si gioca davvero (`rangoDellEventoGiocato`), non il solo rango atteso', async () => {
+    api.getConfidentiPartita.mockResolvedValue([{ chiave: 'takemi', nome: 'Tae Takemi', romanzabile: true, relazioneRomantica: false }]);
+    disegna({ ...base, azioni: [
+      // rango atteso 9 ma nella partita al 5: si gioca l'evento del 6, nessuna casella
+      voce({ uid: uid(14), azione: 'Clinica Takemi: rango 9 (partita al 5)', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 9, rangoPartita: 5 }),
+      // rango atteso 7 ma nella partita all'8: si gioca l'evento del 9, la casella c'è
+      voce({ uid: uid(15), azione: 'Clinica Takemi: rango 7 (partita all\'8)', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 7, rangoPartita: 8 }),
+    ] });
+    fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi: rango 9 (partita al 5)'));
+    expect(screen.getByRole('group', { name: 'Note ottenute con il Confidente' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Ho scelto la relazione romantica' })).toBeNull();
+    expect(api.getConfidentiPartita).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi: rango 7 (partita all\'8)'));
+    expect(await screen.findByRole('checkbox', { name: 'Ho scelto la relazione romantica' })).not.toBeChecked();
+  });
+
   it('L13 (O10-3): su un altro rango (o un Confidente non romanzabile) la scelta delle note non ha la casella della relazione', async () => {
     api.getConfidentiPartita.mockResolvedValue([{ chiave: 'takemi', nome: 'Tae Takemi', romanzabile: true, relazioneRomantica: false }]);
     disegna({ ...base, azioni: [voce({ uid: uid(13), azione: 'Clinica Takemi: rango 8', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 8 })] });

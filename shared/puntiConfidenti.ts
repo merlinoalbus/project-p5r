@@ -32,6 +32,23 @@ export const MOLTIPLICATORE_INVITO = 1.2;
  *  della migrazione 325). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
 export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
 
+/**
+ * L13 (O10-3, rilievo del revisore): il rango dell'evento che una voce di Confidente con rango atteso fa giocare davvero nella partita. È
+ * quello del rango atteso, salvo quando il Confidente nella partita è altrove: allora è il suo prossimo (rango della partita + 1), non
+ * oltre il 10, e non quando è già al rango atteso (l'evento appena giocato è quello della voce). Senza rango atteso la voce non prevede
+ * una salita di rango: null. Un solo criterio per il dialogo della voce (`giornataService.campoDialogo`, `dialogoPartita`), per la casella
+ * della relazione alla spunta (`GiornoGuida`) e per il server che la accetta (`effettiAzioneService`).
+ */
+export function rangoDellEventoGiocato(rangoAtteso: number | null, rangoPartita: number | null | undefined): number | null {
+  if (rangoAtteso === null) return null;
+  if (rangoPartita === null || rangoPartita === undefined || rangoPartita >= 10 || rangoPartita === rangoAtteso) return rangoAtteso;
+  return rangoPartita + 1;
+}
+
+/** La voce fa giocare l'evento del rango della scelta romantica: lì, e solo lì, alla spunta si sceglie la relazione romantica. */
+export const giocaLaSceltaRomantica = (rangoAtteso: number | null, rangoPartita: number | null | undefined): boolean =>
+  rangoDellEventoGiocato(rangoAtteso, rangoPartita) === RANGO_DELLA_SCELTA_ROMANTICA;
+
 /** I sette Confidenti che ricevono il moltiplicatore dell'esame (G-016c, corretta da G-020 con Ann): gli altri non lo hanno mai. */
 export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];
 /** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. L13 (ondata 7, O7-2): anche «sopra la media», il

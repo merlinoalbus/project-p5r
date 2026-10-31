@@ -220,11 +220,12 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
             <PulsanteVisivo className="self-start" attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : c.bloccato ? 'Bloccato' : 'Da sbloccare'} dettaglio={c.bloccato ? 'requisiti mancanti' : 'quando lo incontri in gioco'} disabled={occ || (!c.sbloccato && !!c.bloccato)} onClick={azioni.sbloccato} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : c.bloccato ? 'bloccato dai requisiti' : 'da sbloccare quando lo incontri'}`} />
           )}
           {/* L13 (O10-3, risposta «a» dell'utente del 31/10): la relazione romantica della partita, un interruttore come lo sblocco. C'è solo con
-              un Confidente romanzabile, dal rango della scelta romantica (o se la relazione è già segnata, per poterla togliere) */}
+              un Confidente romanzabile, dal rango della scelta romantica (o se la relazione è già segnata, per poterla togliere). Lo stato
+              (iniziata o no) lo dice `aria-pressed` del pulsante: il nome non lo ripete, un lettore di schermo lo direbbe due volte */}
           {c.romanzabile && (c.rango >= RANGO_DELLA_SCELTA_ROMANTICA || c.relazioneRomantica) && (
             <PulsanteVisivo className="self-start" attivo={c.relazioneRomantica} compatto icona={<IconaAzione chiave={c.relazioneRomantica ? 'raggiunto' : 'aperti'} dimensione={20} />}
               titolo="Relazione romantica" disabled={occ} onClick={() => azioni.relazione(!c.relazioneRomantica)}
-              aria-label={`${c.nome}: relazione romantica ${c.relazioneRomantica ? 'iniziata (tocca per toglierla)' : 'non iniziata (tocca per segnarla)'}`} />
+              aria-label={`${c.nome}: relazione romantica`} />
           )}
           <div className="flex flex-col gap-1">
             <PulsanteVisivo className="self-start" tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={azioni.apriNote} />

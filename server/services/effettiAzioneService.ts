@@ -18,7 +18,7 @@ import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote } from './partiteService.js';
 import { applicaEventoDiario } from './puntiCronologici.js';
 import { annullaPiazzamentoDallaSpunta, piazzamentoCorrente, premiDellEsame, premioDelPiazzamento, segnaPiazzamentoDallaSpunta } from './piazzamentoEsamiService.js';
-import { CHIAVI_PIAZZAMENTO_ESAME, nomePiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { CHIAVI_PIAZZAMENTO_ESAME, giocaLaSceltaRomantica, nomePiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
@@ -160,6 +160,10 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   }
   // un incontro con un Confidente: la sua Dote a ogni incontro, una volta per incontro (anche senza note di risposta)
   let incontro: IncontroConfidenteDto | undefined;
+  // L13 (O10-3): il rango del Confidente nella partita prima della spunta (che può alzarlo), per sapere quale evento la voce fa giocare
+  const chiaveRomantica = opz.relazioneRomantica !== undefined && a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente'
+    && prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? a.riferimento.chiave : null;
+  const rangoPrimaDellaSpunta = chiaveRomantica !== null ? confidenteDellaPartita(partitaId, chiaveRomantica).rango : null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && a.momento && prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave)) {
     incontro = registraIncontro(partitaId, a.riferimento.chiave, a.momento, a.rangoAtteso ?? null);
     // R10-17: il passaggio spuntato nel Diario porta il rango del Confidente al rango atteso (senza abbassarlo mai). Il blocco dei
@@ -175,13 +179,14 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       }
     }
   }
-  // L13 (O10-2): la scelta romantica alla spunta del passaggio al rango 9 (rango atteso della voce o passaggio registrato verso il 9) segna la
-  // relazione nella partita; la ricevuta ricorda com'era, per tornarci togliendo la spunta. Fuori da quel passaggio la scelta non c'è (409)
+  // L13 (O10-2/O10-3): la scelta romantica alla spunta della voce che fa giocare l'evento del rango 9 (`giocaLaSceltaRomantica`, lo stesso
+  // criterio del dialogo della voce e della casella dell'interfaccia) segna la relazione nella partita; la ricevuta ricorda com'era, per
+  // tornarci togliendo la spunta. Fuori da quell'evento la scelta non c'è (409)
   let relazione: EffettiAzioneDto['relazione'];
   if (opz.relazioneRomantica !== undefined) {
-    const chiave = a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;
-    if (!chiave || !a.momento || (a.rangoAtteso !== RANGO_DELLA_SCELTA_ROMANTICA && incontro?.verso !== RANGO_DELLA_SCELTA_ROMANTICA)) {
-      throw httpErrors.conflict('relazione-non-prevista', `La relazione romantica si sceglie solo alla spunta del passaggio al rango ${RANGO_DELLA_SCELTA_ROMANTICA} di un Confidente.`);
+    const chiave = chiaveRomantica;
+    if (!chiave || !a.momento || !giocaLaSceltaRomantica(a.rangoAtteso ?? null, rangoPrimaDellaSpunta)) {
+      throw httpErrors.conflict('relazione-non-prevista', `La relazione romantica si sceglie solo alla spunta dell’evento del rango ${RANGO_DELLA_SCELTA_ROMANTICA} di un Confidente.`);
     }
     const nome = confidenteDellaPartita(partitaId, chiave).nome;
     const r = scriviRelazioneRomantica(partitaId, chiave, nome, opz.relazioneRomantica, 'diario');

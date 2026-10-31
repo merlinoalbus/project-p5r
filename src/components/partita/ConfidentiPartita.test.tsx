@@ -3,7 +3,7 @@
 // Test ConfidentiPartita — note della risposta, bonus arcano dalla scorta, soglie, annulla ultimo
 // ============================================================
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
@@ -115,14 +115,14 @@ describe('ConfidentiPartita', () => {
     ]);
     aggiornaConfidente.mockResolvedValue(confidente({ chiave: 'takemi', nome: 'Tae Takemi', arcana: 'Death', arcanaNome: 'Morte', rango: 9, romanzabile: true, relazioneRomantica: true }));
     render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
-    const interruttore = await screen.findByRole('button', { name: 'Tae Takemi: relazione romantica non iniziata (tocca per segnarla)' });
+    const interruttore = await screen.findByRole('button', { name: 'Tae Takemi: relazione romantica' });
     expect(interruttore).toHaveAttribute('aria-pressed', 'false');
     // prima del rango 9 e per chi non è romanzabile nessun interruttore
     expect(screen.queryByRole('button', { name: /Ann Takamaki: relazione romantica/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /Ryuji Sakamoto: relazione romantica/ })).toBeNull();
     await act(async () => { interruttore.click(); });
     expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'takemi', { relazioneRomantica: true } satisfies ModificaConfidente);
-    expect(await screen.findByRole('button', { name: 'Tae Takemi: relazione romantica iniziata (tocca per toglierla)' })).toHaveAttribute('aria-pressed', 'true');
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Tae Takemi: relazione romantica' })).toHaveAttribute('aria-pressed', 'true'));
   });
 
   it('distingue passaggi non a punti, Confidenti senza soglie e rango massimo', async () => {

@@ -36,6 +36,7 @@ import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizia
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
+import { rangoDellEventoGiocato } from '../../shared/puntiConfidenti.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -402,9 +403,10 @@ function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | nul
   // 2026-10-24 (progetto dei Confidenti approvato dall'utente): con una partita, anche il rango del Confidente nella partita e, se il
   // prossimo evento non è quello del rango atteso della voce, il suo dialogo: la voce mostra le risposte di ciò che si gioca davvero
   const c = conf?.get(chiave);
-  const prossimo = c && c.rango < 10 ? c.rango + 1 : null;
-  // già al rango atteso (per esempio salito dal cassetto del Confidente): l'evento appena giocato è quello della voce, non il successivo
-  const dialogoPartita = c && prossimo !== null && prossimo !== v.rangoAtteso && c.rango !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
+  // il prossimo evento della partita, non oltre il 10; già al rango atteso (per esempio salito dal cassetto del Confidente) l'evento appena
+  // giocato è quello della voce, non il successivo. Lo stesso criterio della casella della relazione alla spunta (`rangoDellEventoGiocato`)
+  const evento = c ? rangoDellEventoGiocato(v.rangoAtteso, c.rango) : v.rangoAtteso;
+  const dialogoPartita = c && evento !== null && evento !== v.rangoAtteso ? dialogoDelRango(chiave, evento) : null;
   return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
 }
 
