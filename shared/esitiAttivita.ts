@@ -318,7 +318,13 @@ export type SceltaEsitoSpunta =
    *  `effettoUid` è l'UID del primo effetto del gruppo (il gruppo non ha un'identità sua: lo calcola il catalogo). */
   | { effettoUid: string; tipo: 'alternativa'; scelto: string | null }
   /** L13 (ondata 7, O7-2): il piazzamento ottenuto all'esame dell'effetto «esame» (sempre uno: «Nella media o sotto» è `altro`). */
-  | { effettoUid: string; tipo: 'esame'; piazzamento: PiazzamentoEsame };
+  | { effettoUid: string; tipo: 'esame'; piazzamento: PiazzamentoEsame }
+  /** L13 (31/10, richiesta dell'utente: «se una paga è variabile la voce nel diario deve far inserire il valore di denaro ricevuto e poi aggiornare
+   *  il denaro direttamente… anche il numero di note ottenute dal lavoro… deve essere selezionabile»): il turno di un lavoro senza esiti dice gli
+   *  yen ricevuti (entrano tutti da soli nel saldo; 0 = nessuno) e le note ottenute per ogni Dote (le Doti senza note non si mandano). */
+  | { effettoUid: string; tipo: 'lavoro'; yen: number; doti: Array<{ dote: DoteChiave; note: 1 | 2 | 3 }> };
+/** Gli yen ricevuti al massimo in un turno di lavoro scelto alla spunta (come la paga di un esito). */
+export const YEN_MASSIMI_LAVORO = 9_999_999;
 
 /** Un esito come lo vede la scelta: Doti con i punti, prezzo e nome dell'articolo, e se è possibile in quel momento (con il motivo). */
 export interface EsitoDisponibileDto {
@@ -393,4 +399,14 @@ export type SceltaEsitoVoceDto =
    *  premio e i punti che la spunta proporrà (vuote = nessun premio) e il trofeo del primo posto se c'è; `preselezionato`: il piazzamento già
    *  segnato nella partita per quell'esame (da Partita), null se nessuno: senza scelta la spunta non passa. */
   | { effettoUid: string; tipo: 'esame'; esame: string; esameNome: string; preselezionato: PiazzamentoEsame | null;
-    opzioni: Array<{ piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }>; trofeo: { chiave: string; nome: string } | null }> };
+    opzioni: Array<{ piazzamento: PiazzamentoEsame; nome: string; doti: Array<{ dote: DoteChiave; nome: string; note: 1 | 2 | 3; punti: number }>; trofeo: { chiave: string; nome: string } | null }> }
+  /** L13 (31/10): il turno di un lavoro senza esiti (Triple Seven, Rafflesia, Crossroads): la paga e le note cambiano col turno (quiz, clienti
+   *  speciali), e alla spunta chi gioca dice gli yen ricevuti e le note ottenute. `paga`: la base del lavoro (già scritta nel campo) e la massima
+   *  della guida, null se il lavoro non paga. `doti`: ogni Dote con i punti che la spunta proporrà per ♪, ♪♪, ♪♪♪ (regola unica `puntiDote`);
+   *  `proposte`: le Doti che il lavoro dà (o quelle scritte nel turno della voce), mostrate per prime; le altre si aggiungono a mano (la
+   *  domenica al Crossroads i clienti speciali danno note a un'altra Dote). Le note partono senza scelta: le tocca chi gioca. */
+  | { effettoUid: string; tipo: 'lavoro'; attivita: string; attivitaNome: string; paga: { base: number; massima: number | null } | null;
+    doti: Array<{ dote: DoteChiave; doteNome: string; punti: Array<{ note: 1 | 2 | 3; punti: number }> }>; proposte: DoteChiave[];
+    /** Come per il turno: la voce spuntata prima che gli yen si muovessero da soli ha la paga già nel saldo; la spunta non chiede gli yen
+     *  (si muoverebbero due volte, e il server li scarterebbe) e manda la paga base, che la ricevuta dice. */
+    yenGiaNelSaldo?: true };

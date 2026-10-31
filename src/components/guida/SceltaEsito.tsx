@@ -24,7 +24,8 @@
 // ============================================================
 
 import { useId, useState } from 'react';
-import { eCreazione, fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito, nomeStrumento, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import { eCreazione, fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito, nomeStrumento, YEN_MASSIMI_LAVORO, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
+import type { DoteChiave } from '../../../shared/doti';
 import { noteAParole, simboliNote, testoNoteAParole, testoPunti } from '../../../shared/note';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -169,7 +170,75 @@ export function SceltaEsitoTurno({ nome, esiti, occupato, onScegli, onAnnulla, p
   );
 }
 
-type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null } | { tipo: 'esame'; piazzamento: PiazzamentoEsame };
+/** L13 (31/10): il turno di lavoro: gli yen ricevuti come scritti nel campo, le note toccate per Dote (assenti = non ancora scelte) e le Doti
+ *  mostrate (quelle del lavoro, più quelle aggiunte a mano). */
+type ValoreLavoro = { tipo: 'lavoro'; yen: string; note: Partial<Record<DoteChiave, 0 | 1 | 2 | 3>>; mostrate: DoteChiave[] };
+type Valore = { tipo: 'turno'; esito: string | null } | { tipo: 'dote'; note: 0 | 1 | 2 | 3 } | { tipo: 'alternativa'; scelto: string | null } | { tipo: 'esame'; piazzamento: PiazzamentoEsame } | ValoreLavoro;
+
+/** Gli yen scritti nel campo, se sono un importo valido (intero da 0 al massimo); null altrimenti. */
+const yenValidi = (testo: string): number | null => {
+  if (!/^\d+$/.test(testo.trim())) return null;
+  const n = Number(testo.trim());
+  return Number.isSafeInteger(n) && n <= YEN_MASSIMI_LAVORO ? n : null;
+};
+/** Il turno di lavoro è pronto da spuntare: yen validi (se il lavoro paga) e le note scelte per ogni Dote mostrata. */
+const lavoroCompleto = (s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>, v: ValoreLavoro): boolean =>
+  (!chiedeYen(s) || yenValidi(v.yen) !== null) && v.mostrate.every((d) => v.note[d] !== undefined);
+/** Gli yen si chiedono se il lavoro paga e la paga non è già nel saldo da prima (voce spuntata prima degli yen automatici). */
+const chiedeYen = (s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>): boolean => !!s.paga && !s.yenGiaNelSaldo;
+
+/**
+ * L13 (31/10, richiesta dell'utente: «se una paga è variabile la voce nel diario deve far inserire il valore di denaro ricevuto e poi aggiornare
+ * il denaro direttamente… anche il numero di note ottenute dal lavoro… deve essere selezionabile»): gli yen ricevuti (già scritta la paga base,
+ * entrano tutti da soli nel saldo) e, per ogni Dote del lavoro, le note ottenute a pulsanti (≥ 44 px) con i punti, o «Nessuna». Un'altra Dote si
+ * aggiunge a mano (i clienti speciali del Crossroads la domenica). Le note partono senza scelta: le tocca chi gioca.
+ */
+function SceltaLavoro({ s, v, occupato, onCambia }: { s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>; v: ValoreLavoro; occupato: boolean; onCambia: (v: ValoreLavoro) => void }) {
+  const idYen = useId();
+  const altre = s.doti.filter((d) => !v.mostrate.includes(d.dote));
+  // anche il campo vuoto (o un testo che il browser rende vuoto) dice perché «Spunta» resta spento
+  const yenScritti = yenValidi(v.yen) === null;
+  return (
+    <span className="flex w-full flex-col gap-2" role="group" aria-label={`Turno: ${s.attivitaNome}`}>
+      <span className="text-text-secondary">{s.attivitaNome}: {chiedeYen(s) ? 'quanto hai ricevuto e quante note hai ottenuto?' : 'quante note hai ottenuto?'}</span>
+      {s.paga && s.yenGiaNelSaldo && <span className="text-text-muted text-pretty">La paga di questo turno è già nel saldo da prima: non si muove di nuovo.</span>}
+      {chiedeYen(s) && s.paga && (
+        <span className="flex flex-col gap-1">
+          <label htmlFor={idYen} className="testo-13">Yen ricevuti</label>
+          <input id={idYen} className="form-input min-h-11 w-40 tabular-nums" type="number" inputMode="numeric" min={0} max={YEN_MASSIMI_LAVORO} step={1} value={v.yen} disabled={occupato}
+            aria-describedby={`${idYen}-aiuto`} aria-invalid={yenScritti ? true : undefined} onChange={(ev) => onCambia({ ...v, yen: ev.target.value })} />
+          <span id={`${idYen}-aiuto`} aria-live="polite" className={yenScritti ? 'text-error-testo' : 'text-text-muted text-pretty'}>
+            {yenScritti ? `Un importo intero da 0 a ${formattaYen(YEN_MASSIMI_LAVORO)}.` : `Paga base ${formattaYen(s.paga.base)}${s.paga.massima ? `, fino a ${formattaYen(s.paga.massima)} con i bonus` : ''}: entrano tutti da soli nel saldo.`}
+          </span>
+        </span>
+      )}
+      {v.mostrate.map((dote) => {
+        const d = s.doti.find((x) => x.dote === dote)!;
+        const scelta = v.note[dote];
+        const imposta = (note: 0 | 1 | 2 | 3) => onCambia({ ...v, note: { ...v.note, [dote]: note } });
+        return (
+          <span key={dote} className="flex flex-wrap items-center gap-1.5" role="group" aria-label={`Note di ${d.doteNome}`}>
+            <span className="w-full text-text-secondary">{d.doteNome}</span>
+            {d.punti.map(({ note, punti }) => (
+              <button key={note} type="button" className={`chip touch ${scelta === note ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={scelta === note}
+                onClick={() => imposta(note)} aria-label={`${d.doteNome}: ${noteAParole(note)}, ${testoPunti(punti)}`}>{simboliNote(note)} · {testoPunti(punti)}</button>
+            ))}
+            <button type="button" className={`chip touch ${scelta === 0 ? 'chip--attivo' : ''}`} disabled={occupato} aria-pressed={scelta === 0} aria-label={`${d.doteNome}: nessuna nota`} onClick={() => imposta(0)}>Nessuna</button>
+            {/* una Dote aggiunta a mano si toglie; quelle del lavoro restano («Nessuna» se il turno non le ha date) */}
+            {!s.proposte.includes(dote) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli ${d.doteNome}`} disabled={occupato}
+              onClick={() => { const note = { ...v.note }; delete note[dote]; onCambia({ ...v, note, mostrate: v.mostrate.filter((x) => x !== dote) }); }} />}
+          </span>
+        );
+      })}
+      {altre.length > 0 && (
+        <span className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Note anche in un’altra Dote">
+          <span className="w-full text-text-muted">Note anche in un’altra Dote:</span>
+          {altre.map((d) => <button key={d.dote} type="button" className="chip touch" disabled={occupato} onClick={() => onCambia({ ...v, mostrate: [...v.mostrate, d.dote] })}>+ {d.doteNome}</button>)}
+        </span>
+      )}
+    </span>
+  );
+}
 
 /** L13 (ondata 7, O7-2): il premio di un piazzamento in breve, con i punti che la spunta proporrà: «Fascino ♪♪♪ · 5 punti · trofeo «…»». */
 const premioTesto = (o: Extract<SceltaEsitoVoceDto, { tipo: 'esame' }>['opzioni'][number]): string =>
@@ -207,6 +276,8 @@ function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore 
     if (s.tipo === 'alternativa') return [s.effettoUid, s.preselezionato && s.opzioni.some((o) => o.effettoUid === s.preselezionato && o.disponibile) ? { tipo: 'alternativa', scelto: s.preselezionato } : undefined];
     // L13 (ondata 7, O7-2): il piazzamento già segnato da Partita per lo stesso esame (è un dato della partita, non un valore proposto)
     if (s.tipo === 'esame') return [s.effettoUid, s.preselezionato ? { tipo: 'esame', piazzamento: s.preselezionato } : undefined];
+    // L13 (31/10): il turno di lavoro parte con la paga base scritta e le Doti del lavoro mostrate, senza note scelte
+    if (s.tipo === 'lavoro') return [s.effettoUid, { tipo: 'lavoro', yen: s.paga ? String(s.paga.base) : '0', note: {}, mostrate: [...s.proposte] }];
     // 2026-10-27: lo strumento della voce parte dalla versione base (interruttore «Bonus» spento); senza strumento nella voce non c'è scelta
     if (s.bonus) return [s.effettoUid, { tipo: 'turno', esito: s.bonus.base }];
     if (s.strumentoDaScegliere) return [s.effettoUid, undefined];
@@ -226,10 +297,14 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
   // con UNA sola scelta un tocco basta (come le note di un Confidente e il + di Progressi): il tocco registra subito;
   // con più scelte insieme si fanno tutte e poi si conferma. 2026-10-27: l'interruttore «Bonus» non spunta da solo (si accende e si spegne),
   // e lo strumento da scegliere nell'editor non ha tocchi: con loro serve il pulsante «Spunta»
-  const conInterruttore = scelte.some((s) => s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere));
+  // L13 (31/10): anche il turno di lavoro (yen e note insieme) si conferma con «Spunta»
+  const conInterruttore = scelte.some((s) => (s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere)) || s.tipo === 'lavoro');
   const unica = scelte.length === 1 && !conInterruttore;
   const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
     const x = v[s.effettoUid]!;
+    // con la paga già nel saldo si manda la base (la ricevuta la dice; il server non la muove di nuovo)
+    if (x.tipo === 'lavoro') return { effettoUid: s.effettoUid, tipo: 'lavoro', yen: s.tipo === 'lavoro' && s.paga ? (s.yenGiaNelSaldo ? s.paga.base : yenValidi(x.yen) ?? 0) : 0,
+      doti: x.mostrate.flatMap((dote) => { const n = x.note[dote]; return n ? [{ dote, note: n }] : []; }) };
     if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
     if (x.tipo === 'alternativa') return { effettoUid: s.effettoUid, tipo: 'alternativa', scelto: x.scelto };
     if (x.tipo === 'esame') return { effettoUid: s.effettoUid, tipo: 'esame', piazzamento: x.piazzamento };
@@ -240,7 +315,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
     setValori((x) => ({ ...x, [uid]: v }));
     if (unica) onConferma(costruisci({ [uid]: v }));
   };
-  const complete = scelte.every((s) => valori[s.effettoUid] !== undefined);
+  const complete = scelte.every((s) => { const v = valori[s.effettoUid]; return v !== undefined && (s.tipo !== 'lavoro' || (v.tipo === 'lavoro' && lavoroCompleto(s, v))); });
   // rilievo L3 della revisione UX: con un acquisto fra le scelte (Set A o Set B) «esiti» non è la parola giusta. Solo acquisti: «acquisti»;
   // acquisti con esiti o note: «scelte»; senza acquisti resta «esiti», come prima
   const acquisti = scelte.filter((s) => s.tipo === 'alternativa').length;
@@ -248,7 +323,10 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
   const esami = scelte.filter((s) => s.tipo === 'esame').length;
   // 2026-10-27: solo interruttori «Bonus»: il pulsante dice soltanto «Spunta» (gli esiti non si scelgono qui)
   const soloBonus = scelte.every((s) => s.tipo === 'turno' && (s.bonus || s.strumentoDaScegliere));
+  // L13 (31/10): con soli turni di lavoro le scelte sono paga e note
+  const soloLavoro = scelte.every((s) => s.tipo === 'lavoro');
   const parola = soloBonus ? { gruppo: 'Spunta della voce', pulsante: 'Spunta' }
+    : soloLavoro ? { gruppo: 'Paga e note del turno da indicare per la spunta', pulsante: 'Spunta con questi valori' }
     : esami === scelte.length ? { gruppo: 'Piazzamento da scegliere per la spunta', pulsante: 'Spunta con questo piazzamento' }
     : esami > 0 ? { gruppo: 'Scelte da fare per la spunta', pulsante: 'Spunta con queste scelte' }
     : acquisti === 0 ? { gruppo: 'Esiti da scegliere per la spunta', pulsante: 'Spunta con questi esiti' }
@@ -280,6 +358,11 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
         // L13 (decisione 4): fra gli articoli in alternativa (Set A o Set B) quello comprato, o «Nessuno»
         if (s.tipo === 'alternativa') return (
           <SceltaAcquistoAlternativo key={s.effettoUid} s={s} scelto={v?.tipo === 'alternativa' ? v.scelto : undefined} occupato={occupato} onScegli={(uid) => imposta(s.effettoUid, { tipo: 'alternativa', scelto: uid })} />
+        );
+        // L13 (31/10): il turno di lavoro, con gli yen ricevuti e le note ottenute
+        if (s.tipo === 'lavoro') return (
+          <SceltaLavoro key={s.effettoUid} s={s} v={v?.tipo === 'lavoro' ? v : { tipo: 'lavoro', yen: s.paga ? String(s.paga.base) : '0', note: {}, mostrate: [...s.proposte] }} occupato={occupato}
+            onCambia={(x) => setValori((y) => ({ ...y, [s.effettoUid]: x }))} />
         );
         // L13 (ondata 7, O7-2): il piazzamento ai risultati di un esame, col premio di ciascuno
         if (s.tipo === 'esame') return (

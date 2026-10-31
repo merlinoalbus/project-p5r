@@ -55,7 +55,7 @@ export interface NomiRiepilogoEffetti {
   negozio: (chiave: string) => string | undefined;
   /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno);
    *  `esito` (L13, chiusure del 31/10): quello dichiarato dalla voce, per gli esiti con la paga propria. */
-  pagaTurno: (attivita: string, esito?: string) => { yen: number; massima: number | null } | undefined;
+  pagaTurno: (attivita: string, esito?: string) => { yen: number; massima: number | null; allaSpunta?: true } | undefined;
   /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
   quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
   /** Il cruciverba del gioco dalla sua data «MM-GG», con l'indizio e la soluzione (2026-10-27, «Aggiungere la visualizzazione della
@@ -211,7 +211,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
   };
   /** I turni della voce i cui yen la spunta muove (non quelli già nel saldo da prima), per la loro nota: con paga (e se variabile), senza paga
    *  (costo dell'attività o della sfida). Un turno già nel saldo non entra qui: la nota non promette per lui un movimento che non ci sarà. */
-  const turni = { conPaga: false, pagaVariabile: false, senzaPaga: false };
+  const turni = { conPaga: false, pagaVariabile: false, senzaPaga: false, pagaAllaSpunta: false };
   /** Il gruppo `chiave`, creato al primo effetto che lo usa. */
   const gruppo = (chiave: string, titolo?: string): GruppoRiepilogoEffettiDto => {
     let g = gruppi.get(chiave);
@@ -299,7 +299,9 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         // zero. La nota guarda tutti i turni della voce i cui yen la spunta muove (un lavoro pagato e un'attività a pagamento nella stessa voce:
         // tutte e due le frasi); un turno già nel saldo da prima lo nomina la frase «in parte», mai la promessa della paga o del costo
         if (!giaNelSaldo(i)) {
-          if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
+          // L13 (31/10): gli yen di un lavoro senza esiti si dicono alla spunta ed entrano tutti
+          if (paga?.allaSpunta) turni.pagaAllaSpunta = true;
+          else if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
         }
         conYen('turni', i);
         break;
@@ -366,6 +368,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
   // della promessa di un movimento (in parte: la promessa per gli altri e l'eccezione, con i nomi degli effetti già nel saldo)
   const notaTurni = [
     ...(turni.conPaga ? [`La paga base di un lavoro entra da sola nel saldo.${turni.pagaVariabile ? ' Il di più che il gioco può dare, fino alla paga massima, non entra da solo.' : ''}`] : []),
+    ...(turni.pagaAllaSpunta ? ['Gli yen ricevuti al lavoro si dicono alla spunta ed entrano da soli nel saldo.'] : []),
     ...(turni.senzaPaga ? ['Se un’attività o la sfida scelta costa, il prezzo si scala da solo dal saldo, mai sotto zero.'] : []),
   ].join(' ');
   for (const [chiave, y] of yenDelGruppo) {

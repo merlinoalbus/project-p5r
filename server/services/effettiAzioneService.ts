@@ -145,7 +145,10 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const fascia = a.voceUid ? fasciaDellaVoce(a.voceUid) : null;
       // revisione della chiusura dell'ondata 5 (N1): con la voce, lo sconto del negozio che valeva nel suo momento
       // 2026-10-27: la quantità della voce (le creazioni dello strumento) vale con l'esito scelto, base o con il bonus
-      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia, a.voceUid ?? null, scelta.esito ? e.quantita : undefined) : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null);
+      // L13 (31/10): il turno di lavoro con gli yen ricevuti e le note ottenute detti alla spunta (gli yen entrano tutti da soli)
+      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito, fascia, a.voceUid ?? null, scelta.esito ? e.quantita : undefined)
+        : scelta?.tipo === 'lavoro' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null, undefined, scelta.yen)
+        : registraTurno(partitaId, e.attivita, e.doti, undefined, undefined, undefined, fascia, a.voceUid ?? null);
       turni.push(t);
     }
   }
