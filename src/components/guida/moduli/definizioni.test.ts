@@ -92,18 +92,20 @@ describe('attività e videogioco', () => {
     expect(def.attivita.prepara({ ...base, nome: 'A', tipo: 'studio', paga_yen: 100 })).toMatchObject({ paga_yen: null, paga_massima: null });
     expect(def.attivita.prepara({ ...base, nome: 'A', tipo: 'lavoro', paga_yen: 3500, paga_massima: 7400, tracciamento: 'svolta' })).toMatchObject({ paga_yen: 3500, paga_massima: 7400, tracciamento: 'svolta' });
   });
-  it('la guida del quiz: si legge dalla riga con i giorni come testo, si salva con i giorni scritti a mano; giorni sbagliati non si salvano', () => {
+  it('la guida del quiz: i giorni del mese stanno nel quiz (scelti a pulsanti) e partono senza doppioni e in ordine (L13, O7-5)', () => {
     const quiz = { giorni: [7, 17, 27], spiegazione: 'S', domanda: 'D?', voci: [{ oggetto: 'A', altroNome: 'B', risposta: 'R', nota: null }], esiti: [{ esito: 'E', premio: 'P' }] };
     const d = def.attivita.iniziali(riga('attivita', { nome: 'Lavoro', tipo: 'lavoro', quiz_json: JSON.stringify(quiz) }));
-    expect(d).toMatchObject({ quiz_json: quiz, _giorniQuiz: '7, 17, 27' });
+    expect(d).toMatchObject({ quiz_json: quiz });
+    expect(d).not.toHaveProperty('_giorniQuiz');
     expect(def.attivita.valido(d)).toBe(true);
-    expect(def.attivita.prepara({ ...d, _giorniQuiz: '27 3' }).quiz_json).toEqual({ ...quiz, giorni: [3, 27] });
-    expect(def.attivita.prepara(d)).not.toHaveProperty('_giorniQuiz');
-    expect(def.attivita.valido({ ...d, _giorniQuiz: '7, 40' })).toBe(false);
-    // senza guida: null, e i giorni non contano
+    // invariato: lo stesso corpo di prima
+    expect(def.attivita.prepara(d).quiz_json).toEqual(quiz);
+    // i giorni toccati in un altro ordine (27 poi 3) partono ordinati
+    expect(def.attivita.prepara({ ...d, quiz_json: { ...quiz, giorni: [27, 3, 27] } }).quiz_json).toEqual({ ...quiz, giorni: [3, 27] });
+    // senza guida: null
     const senza = def.attivita.iniziali(riga('attivita', { nome: 'Studio', tipo: 'studio', quiz_json: null }));
-    expect(senza).toMatchObject({ quiz_json: null, _giorniQuiz: '' });
-    expect(def.attivita.valido({ ...senza, _giorniQuiz: 'x' })).toBe(true);
+    expect(senza).toMatchObject({ quiz_json: null });
+    expect(def.attivita.valido(senza)).toBe(true);
     expect(def.attivita.prepara(senza).quiz_json).toBeNull();
   });
   it('il videogioco ha il tipo fissato, un round almeno e il conteggio per sessioni', () => {
@@ -127,13 +129,27 @@ describe('domanda e cruciverba', () => {
     expect(def.domanda.valido({ ...def.domanda.iniziali(null), data: '04-12' })).toBe(false);
     expect(def.cruciverba.valido({ ...def.cruciverba.iniziali(null), data: '04-18', indizio: 'I', risposta: 'R' })).toBe(true);
   });
+  it('il giorno è una data del calendario di gioco scelta col selettore: parte vuoto, si manda «MM-GG» come prima (L13, O7-5)', () => {
+    expect(def.CAMPI_GENERICI.domanda.find((c) => c.nome === 'data')?.tipo).toBe('data');
+    expect(def.CAMPI_GENERICI.cruciverba.find((c) => c.nome === 'data')?.tipo).toBe('data');
+    expect(def.domanda.iniziali(null).data).toBe('');
+    const salvata = def.domanda.iniziali(riga('domanda', { data: '05-09', tipo: 'classe', domanda: 'Q', ricompensa: '', note: '', risposte_json: '[]' }));
+    expect(salvata.data).toBe('05-09');
+    expect(def.domanda.prepara(salvata)).toMatchObject({ data: '05-09' });
+    // senza giorno non si salva; un giorno che il calendario non ha (31 aprile) nemmeno
+    expect(def.domanda.valido({ ...salvata, data: '' })).toBe(false);
+    expect(def.domanda.valido({ ...salvata, data: '04-31' })).toBe(false);
+    expect(def.domanda.valido(salvata)).toBe(true);
+  });
 });
 
 describe('luogo', () => {
-  it('legge i giorni salvati come JSON (solo chiavi) e li riscrive come elenco', () => {
-    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: 'altro', giorni_json: [] });
-    const d = def.luogo.iniziali(riga('luogo', { nome: 'X', quartiere_chiave: 'shibuya', giorni_json: '["domenica","giovedi",7]' }));
-    expect(d.giorni_json).toEqual(['domenica', 'giovedi']);
-    expect(def.luogo.prepara({ ...d, nome: ' X ' })).toMatchObject({ nome: 'X', giorni_json: ['domenica', 'giovedi'] });
+  it('legge orari, Confidenti e piatti salvati come JSON e li rimanda; senza orari vale la regola dell’app (null)', () => {
+    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: 'altro', orari_json: null, confidenti_json: [], piatti_json: null });
+    const d = def.luogo.iniziali(riga('luogo', { nome: 'X', quartiere_chiave: 'shibuya', orari_json: '{"giorni":["domenica"],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', confidenti_json: '["iwai",7]', piatti_json: '[{"nome":" Curry ","prezzo":800,"effetto":" PS "}]' }));
+    expect(d.orari_json).toEqual({ giorni: ['domenica'], fasce: ['sera'], chiusoConPioggia: false, nota: null });
+    expect(d.confidenti_json).toEqual(['iwai']);
+    expect(def.luogo.prepara({ ...d, nome: ' X ' })).toMatchObject({ nome: 'X', confidenti_json: ['iwai'], piatti_json: [{ nome: 'Curry', prezzo: 800, effetto: 'PS' }] });
+    expect(def.luogo.valido({ ...d, piatti_json: [{ nome: ' ', prezzo: null, effetto: '' }] })).toBe(false);
   });
 });

@@ -1614,14 +1614,16 @@ it('«Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il
   creaArea.mockResolvedValue({ chiave: 'kamoshida-torre-di-guardia', nome: 'Torre di guardia', ordine: 1 });
   apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
-  const modulo = within(within(await screen.findByRole('dialog', { name: 'Nuova infiltrazione' })).getByRole('form', { name: 'Nuova infiltrazione' }));
+  const dialogo = await screen.findByRole('dialog', { name: 'Nuova infiltrazione' });
+  const modulo = within(within(dialogo).getByRole('form', { name: 'Nuova infiltrazione' }));
   // il modulo si apre dal nome
   expect(modulo.getByLabelText('Nome dell’infiltrazione')).toHaveFocus();
   fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre di guardia' } });
   fireEvent.change(modulo.getByLabelText('Descrizione'), { target: { value: 'In cima alle scale.' } });
   // le Aree del Palazzo fra cui scegliere quelle toccate
   fireEvent.click(modulo.getByRole('checkbox', { name: 'Torre alta' }));
-  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’infiltrazione' }));
+  // L13 (O7-5): «Crea l'infiltrazione» sta nel piè fisso della finestra, fuori dal corpo che scorre
+  fireEvent.click(within(dialogo).getByRole('button', { name: 'Crea l’infiltrazione' }));
   // di partenza dopo l'infiltrazione aperta (Cancello)
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Torre di guardia', descrizione: 'In cima alle scale.', dopo: 'k-01', areePalazzo: ['torre-alta'] }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
@@ -1633,10 +1635,11 @@ it('l’infiltrazione nuova propone il posto subito dopo quella aperta; senza ar
   creaArea.mockResolvedValue({ chiave: 'kamoshida-garitta', nome: 'Garitta', ordine: 1 });
   apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
-  const modulo = within(within(await screen.findByRole('dialog', { name: 'Nuova infiltrazione' })).getByRole('form', { name: 'Nuova infiltrazione' }));
+  const dialogo = await screen.findByRole('dialog', { name: 'Nuova infiltrazione' });
+  const modulo = within(within(dialogo).getByRole('form', { name: 'Nuova infiltrazione' }));
   expect(modulo.getByText('Dopo «1. Cancello»')).toBeInTheDocument();
   fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Garitta' } });
-  fireEvent.click(modulo.getByRole('button', { name: 'Crea l’infiltrazione' }));
+  fireEvent.click(within(dialogo).getByRole('button', { name: 'Crea l’infiltrazione' }));
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Garitta', descrizione: '', dopo: 'k-01' }));
 });
 
@@ -1645,8 +1648,7 @@ it('senza nome l’infiltrazione nuova non si crea', async () => {
   apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
   const dialogo = await screen.findByRole('dialog', { name: 'Nuova infiltrazione' });
-  const modulo = within(within(dialogo).getByRole('form', { name: 'Nuova infiltrazione' }));
-  expect(modulo.getByRole('button', { name: 'Crea l’infiltrazione' })).toBeDisabled();
+  expect(within(dialogo).getByRole('button', { name: 'Crea l’infiltrazione' })).toBeDisabled();
   fireEvent.submit(within(dialogo).getByRole('form', { name: 'Nuova infiltrazione' }));
   expect(creaArea).not.toHaveBeenCalled();
 });

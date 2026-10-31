@@ -16,6 +16,8 @@ import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
+import { FinestraModifica } from '../shared/FinestraModifica';
+import { SezioneCampi } from '../shared/Campo';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
@@ -175,26 +177,30 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
   const titolo = nuovo ? nome.nuovo : `${nome.singolare}: ${elemento.nome}`;
   const Componente = modulo.Componente;
 
+  const eliminabile = !nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata));
+
+  // L13 (O7-5, censimento del 25/10): la finestra è la `FinestraModifica` comune — corpo che scorre da solo, piè fisso con «Elimina» a
+  // sinistra, «Ripristina» e «Nascondi» accanto (prima «Nascondi» stava in fondo al corpo che scorre), «Annulla» e «Salva» a destra, e la
+  // conferma prima di chiudere con modifiche non salvate (X, Esc, «Annulla»). Gesti, rotte e corpi sono quelli di prima.
   return (
-    <Modal
+    <FinestraModifica
       titolo={titolo}
-      aperta
       onChiudi={onChiudi}
-      larga
-      azioni={
-        <>
-          <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          {!nuovo && elemento.modificata && (
-            <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo={lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'} disabled={occupato} onClick={() => void ripristina()} />
-          )}
-          {!nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata)) && (
-            <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())} />
-          )}
-          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !regoleValide || !modulo.valido(datiModulo)} onClick={() => void salva()} />
-        </>
-      }
+      onSalva={salva}
+      salvabile={regoleValide && modulo.valido(datiModulo)}
+      occupato={occupato}
+      sporca={statoModulo !== statoIniziale}
+      onElimina={eliminabile ? () => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina()) : undefined}
+      azioniExtra={<>
+        {!nuovo && elemento.modificata && (
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'} disabled={occupato} onClick={() => void ripristina()} />
+        )}
+        {!nuovo && elemento.origine === 'seed' && (
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={elemento.nascosta ? 'sbloccato' : 'bloccato'} dimensione={20} />} titolo={elemento.nascosta ? 'Mostra di nuovo' : 'Nascondi dagli elenchi'} disabled={occupato} onClick={() => void nascondi()} />
+        )}
+      </>}
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-5">
         {!nuovo && (
           <p className="m-0 testo-12 text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
@@ -210,7 +216,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
             domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
             condizione; il negozio ha gli orari, e lo sblocco della merce sta sugli articoli. */}
-        {modulo.conCondizioni && <>
+        {modulo.conCondizioni && <SezioneCampi titolo="Condizioni"><div className="campo--largo flex min-w-0 flex-col gap-2">
           {condizioniDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Le condizioni salvate contengono parti che l’editor non sa rappresentare. Il salvataggio resta bloccato finché non scegli esplicitamente come risolverle.</p>
             <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
@@ -224,21 +230,15 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
             <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
             {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
           </div>}
-        </>}
+        </div></SezioneCampi>}
         {/* TestoNote: il messaggio del server può portare note come ♪ («Doti da ♪ a ♪♪♪»), da leggere a parole */}
         {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error-testo"><TestoNote testo={erroreSalvataggio} /> La finestra resta aperta.</p>}
         {!regoleValide && <p role="alert" className="m-0 testo-13 text-error-testo">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {modulo.conVerificato
-            ? <label className="flex items-center gap-2 testo-13 touch" title="Il dato è confermato: senza la spunta compare come «da fonte secondaria»">
-              <input type="checkbox" className="h-5 w-5" checked={dati.verificato === true} disabled={occupato} onChange={(e) => imposta({ verificato: e.target.checked })} />
-              Confermato
-            </label>
-            : <span />}
-          {!nuovo && elemento.origine === 'seed' && (
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={elemento.nascosta ? 'sbloccato' : 'bloccato'} dimensione={20} />} titolo={elemento.nascosta ? 'Mostra di nuovo' : 'Nascondi dagli elenchi'} disabled={occupato} onClick={() => void nascondi()} />
-          )}
-        </div>
+        {/* «Confermato» è un dato della riga: resta nel corpo, col suo perché scritto (prima era solo nel suggerimento) */}
+        {modulo.conVerificato && <label className="flex items-start gap-2 testo-13 touch">
+          <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={dati.verificato === true} disabled={occupato} onChange={(e) => imposta({ verificato: e.target.checked })} />
+          <span>Confermato <span className="text-text-muted">· senza la spunta compare come «da fonte secondaria»</span></span>
+        </label>}
       </div>
       {/* L5 (R5-21): l'eliminazione di un luogo o di un negozio, nel cestino, con quel che porta con sé */}
       {eliminazione && elemento && (
@@ -253,7 +253,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
           </div>
         </Modal>
       )}
-    </Modal>
+    </FinestraModifica>
   );
 }
 

@@ -5,6 +5,11 @@
 // I tipi e le fasce sono quelli di `shared/attivita.ts`; la paga in yen è dei lavori (075); che
 // cosa alza è l'elenco degli effetti (074), con le condizioni per voce (lo studio al Leblanc: 3
 // note se piove). «Videogioco» è lo stesso modulo con il tipo fissato e il conteggio per round.
+//
+// L13 (O7-5, censimento del 25/10: «ModuloAttivita sovraccarico»): i campi stanno nelle sezioni comuni delle finestre di modifica
+// (`SezioneCampi`, una colonna sotto 768 px, due da lì): Attività, Confidente e Pesca (solo se collegati), Dove e quando, Costo e paga,
+// Effetti ed esiti, Guida del quiz (solo per i lavori o se c'è già). Il guscio (`ModuloCatalogo`) è la `FinestraModifica` comune:
+// piè fisso con Salva e Annulla, conferma alla chiusura con modifiche. Valori, regole e corpo verso l'API sono quelli di prima.
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
@@ -27,7 +32,8 @@ import { REGOLA_PESCA, type RegolaPescaDto } from '../../../../shared/pesca';
 import type { FonteConfidenteAttivitaDto } from '../../../../shared/types';
 import { FonteConfidenteAttivita } from '../../confidenti/FonteConfidenteAttivita';
 import { FontePescaAttivita } from '../../pesca/FontePescaAttivita';
-import { Blocco, Campo, Griglia } from './campi';
+import { Blocco, Campo } from './campi';
+import { SezioneCampi } from '../../shared/Campo';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
@@ -82,7 +88,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
   const normalizzaFonte = () => {
     if (pesca) return;
     imposta({ fascia: null, tracciamento: 'nessuno', sessioni: 1, costo: null, paga_yen: null, paga_massima: null,
-      effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false,
+      effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false,
       ...(!giaCollegata ? { doti_json: [] } : {}) });
     impostaCondizioni?.([]);
   };
@@ -90,20 +96,42 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
     if (!pesca || confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi') || confermaPesca !== firmaPesca || !impostaCondizioni) return;
     imposta({ fascia: 'entrambe', tracciamento: ruoloPesca === 'visita' ? 'svolta' : 'nessuno', sessioni: 1,
       costo: null, paga_yen: null, paga_massima: null,
-      doti_json: [], effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
+      doti_json: [], effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
     impostaCondizioni([]);
     setConfermaPesca(null);
   };
   /** Cambia tipo impostando il conteggio predefinito per quel tipo; uscendo dai lavori azzera le paghe. */
   const cambiaTipo = (nuovo: string) => imposta({ tipo: nuovo, tracciamento: tracciamentoPerTipo(nuovo), ...(nuovo === 'lavoro' ? {} : { paga_yen: null, paga_massima: null }) });
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-5">
       {/* un avviso solo per i nomi che non si sono caricati (Confidenti del selettore, quartieri e attività degli effetti) */}
       <AvvisoNomiPerEffetti errore={nomi.erroreNomi} riprova={nomi.riprovaNomi} disabilitato={disabilitato} />
-      {(!videogioco || !!confidente) && <div className="flex flex-col gap-2">
-        <Selettore etichetta="Progressione del Confidente" valore={confidente} opzioni={opzioniConfidenti} vuoto="Attività autonoma"
-          disabilitato={disabilitato} onCambia={(chiave) => imposta({ confidente_chiave: chiave || null })} />
-        {confidente && <>
+      {/* le parti salvate che l'editor non sa rappresentare: in testa, prima delle sezioni, perché bloccano il salvataggio */}
+      {(['effetti', 'quiz'] as const).filter((c) => dati[`_${c}DaRisolvere`]).map((c) => <div key={c} className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
+        <p role="alert" className="m-0">{c === 'effetti' ? 'Gli effetti salvati contengono' : 'Il quiz salvato contiene'} parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
+        <p className="m-0 whitespace-pre-wrap break-all">{typeof dati[`_${c}Raw`] === 'string' ? String(dati[`_${c}Raw`]) : JSON.stringify(dati[`_${c}Raw`])}</p>
+        <PulsanteVisivo icona={<IconaAzione chiave={(c === 'quiz' && !dati.quiz_json) || (c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0) ? 'elimina' : 'scarta'} dimensione={22} />} titolo={c === 'quiz' && !dati.quiz_json ? 'Rimuovi il quiz non leggibile' : c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0 ? 'Sostituisci con nessun effetto' : `Usa ${c === 'effetti' ? 'gli effetti leggibili dell’editor' : 'il quiz leggibile dell’editor'} e scarta le altre parti`} className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ [`_${c}DaRisolvere`]: false })} />
+      </div>)}
+      <SezioneCampi titolo={videogioco ? 'Videogioco' : 'Attività'}>
+        <Campo nome="nome" etichetta={videogioco ? 'Nome del videogioco' : 'Nome dell’attività'} dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
+        {!videogioco && (
+          <Blocco largo>
+            <SelettoreIcone compatto etichetta="Tipo" valore={tipo} opzioni={OPZIONI_TIPO} disabilitato={disabilitato} onCambia={cambiaTipo} />
+          </Blocco>
+        )}
+        {(!videogioco || !!confidente) && <Blocco>
+          <Selettore etichetta="Progressione del Confidente" valore={confidente} opzioni={opzioniConfidenti} vuoto="Attività autonoma"
+            disabilitato={disabilitato} onCambia={(chiave) => imposta({ confidente_chiave: chiave || null })} />
+        </Blocco>}
+        <Blocco>
+          <Selettore etichetta="Fonte della pesca" valore={pesca} vuoto="Nessuna fonte pesca: rimuovi il collegamento" disabilitato={disabilitato}
+            opzioni={[{ chiave: REGOLA_PESCA, nome: 'Ichigaya · Persona 5 Royal' }, ...(pesca && pesca !== REGOLA_PESCA ? [{ chiave: pesca, nome: `${pesca} · riferimento conservato` }] : [])]}
+            onCambia={v => { setConfermaPesca(null); imposta(v ? { pesca_regola_chiave: v } : { pesca_regola_chiave: null, pesca_ruolo: null }); }} />
+        </Blocco>
+        <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
+      </SezioneCampi>
+      {confidente && <SezioneCampi titolo="Confidente">
+        <div className="campo--largo flex min-w-0 flex-col gap-2">
           <p className="m-0 text-sm">La guida degli incontri e delle Doti viene dal Confidente. Cambiare questa scelta conserva i campi: risolvi quelli incompatibili prima di salvare. Rimuovere il collegamento conserva i valori attuali.</p>
           {fonte?.chiave === confidente ? <div className="flex flex-col gap-1"><p className="m-0 text-xs text-text-muted">Guida attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FonteConfidenteAttivita fonte={fonte} /></div> : <Link className="touch inline-flex self-start items-center text-primary-testo" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}
           {incompatibiliConfidente.length > 0 && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
@@ -113,13 +141,10 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
             <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la progressione del Confidente e rimuovi i campi propri elencati"
               disabled={disabilitato || !impostaCondizioni || !!pesca} onClick={normalizzaFonte} />
           </div>}
-        </>}
-      </div>}
-      <div className="flex min-w-0 flex-col gap-2">
-        <Selettore etichetta="Fonte della pesca" valore={pesca} vuoto="Nessuna fonte pesca: rimuovi il collegamento" disabilitato={disabilitato}
-          opzioni={[{ chiave: REGOLA_PESCA, nome: 'Ichigaya · Persona 5 Royal' }, ...(pesca && pesca !== REGOLA_PESCA ? [{ chiave: pesca, nome: `${pesca} · riferimento conservato` }] : [])]}
-          onCambia={v => { setConfermaPesca(null); imposta(v ? { pesca_regola_chiave: v } : { pesca_regola_chiave: null, pesca_ruolo: null }); }} />
-        {pesca && <>
+        </div>
+      </SezioneCampi>}
+      {pesca && <SezioneCampi titolo="Pesca">
+        <div className="campo--largo flex min-w-0 flex-col gap-2">
           <Selettore etichetta="Ruolo nella pesca" valore={testoDi(ruoloPesca)} vuoto="Scegli il ruolo" disabilitato={disabilitato}
             opzioni={[{ chiave: 'visita', nome: 'Visita: un solo turno' }, { chiave: 'obiettivi', nome: 'Obiettivi della stessa visita: nessun turno aggiuntivo' }]}
             onCambia={v => { setConfermaPesca(null); imposta({ pesca_ruolo: v || null }); }} />
@@ -135,20 +160,9 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
             <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la fonte pesca e rimuovi i campi propri dichiarati"
               disabled={disabilitato || !!confidente || videogioco || !impostaCondizioni || confermaPesca !== firmaPesca || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onClick={normalizzaPesca} />
           </div>}
-        </>}
-      </div>
-      {(['effetti', 'quiz'] as const).filter((c) => dati[`_${c}DaRisolvere`]).map((c) => <div key={c} className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
-        <p role="alert" className="m-0">{c === 'effetti' ? 'Gli effetti salvati contengono' : 'Il quiz salvato contiene'} parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
-        <p className="m-0 whitespace-pre-wrap break-all">{typeof dati[`_${c}Raw`] === 'string' ? String(dati[`_${c}Raw`]) : JSON.stringify(dati[`_${c}Raw`])}</p>
-        <PulsanteVisivo icona={<IconaAzione chiave={(c === 'quiz' && !dati.quiz_json) || (c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0) ? 'elimina' : 'scarta'} dimensione={22} />} titolo={c === 'quiz' && !dati.quiz_json ? 'Rimuovi il quiz non leggibile' : c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0 ? 'Sostituisci con nessun effetto' : `Usa ${c === 'effetti' ? 'gli effetti leggibili dell’editor' : 'il quiz leggibile dell’editor'} e scarta le altre parti`} className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ [`_${c}DaRisolvere`]: false })} />
-      </div>)}
-      <Griglia>
-        <Campo nome="nome" etichetta={videogioco ? 'Nome del videogioco' : 'Nome dell’attività'} dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
-        {!videogioco && (
-          <Blocco largo>
-            <SelettoreIcone compatto etichetta="Tipo" valore={tipo} opzioni={OPZIONI_TIPO} disabilitato={disabilitato} onCambia={cambiaTipo} />
-          </Blocco>
-        )}
+        </div>
+      </SezioneCampi>}
+      <SezioneCampi titolo="Dove e quando">
         {campiPropri && <Blocco largo>
           <SelettoreIcone compatto etichetta="Quando" valore={testoDi(dati.fascia)} opzioni={OPZIONI_FASCIA} disabilitato={disabilitato} onCambia={(fascia) => imposta({ fascia })} />
           {confidente && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Usa le fasce del Confidente" disabled={disabilitato} onClick={() => imposta({ fascia: null })} />}
@@ -156,9 +170,6 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         </Blocco>}
         <SceltaLuogo etichetta="Dove si svolge" valore={{ sede: (dati.sede_chiave as string | null) ?? null, quartiere: (dati.luogo_chiave as string | null) ?? null }} disabilitato={disabilitato}
           onCambia={(v) => imposta({ sede_chiave: v.sede, luogo_chiave: v.quartiere })} />
-        {campiPropri && !videogioco && tipo !== 'videogioco' && <Campo nome="costo" etichetta="Costo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto se è gratis" />}
-        {campiPropri && (lavoro || incompatibili.includes('paga_yen')) && <Campo nome="paga_yen" etichetta="Paga in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="A turno" />}
-        {campiPropri && (lavoro || incompatibili.includes('paga_massima')) && <Campo nome="paga_massima" etichetta="Paga massima in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Con i bonus, se la guida la dichiara" />}
         {campiPropri && <Campo nome="sessioni" etichetta={videogioco ? 'Round per finirlo' : 'Sessioni'} tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto={videogioco ? 'Quanti round servono per completarlo' : 'Se si completa in più volte'} />}
         {campiPropri && !videogioco && (
           <Blocco>
@@ -166,27 +177,40 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
               opzioni={TRACCIAMENTI_ATTIVITA.map((t) => ({ chiave: t.chiave, nome: t.nome }))} onCambia={(tracciamento) => imposta({ tracciamento })} />
           </Blocco>
         )}
-        <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
-      </Griglia>
-      {/* contata per volte (un lavoro): ogni turno dice i suoi punti (da segnare a mano), il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
-      {campiPropri && <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
-        conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
-        aiuto={testoDi(dati.tracciamento) === 'svolta'
-          ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
-          : undefined} />}
-      {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}
-      {campiPropri && !videogioco && !confidente && !pesca && (testoDi(dati.tracciamento) === 'svolta' || dati.esiti_json != null) && <>
-        {!!dati._esitiDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
-          <p role="alert" className="m-0">Gli esiti salvati contengono parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
-          <p className="m-0 whitespace-pre-wrap break-all">{typeof dati._esitiRaw === 'string' ? dati._esitiRaw : JSON.stringify(dati._esitiRaw)}</p>
-          <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Sostituisci con gli esiti dell’editor" className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ _esitiDaRisolvere: false })} />
-        </div>}
-        <EditorEsiti esiti={(dati.esiti_json as EsitiAttivita | null) ?? null} onCambia={(esiti_json) => imposta({ esiti_json })} disabilitato={disabilitato || !!dati._esitiDaRisolvere}
-          chiaviSalvate={new Set((normalizzaEsitiAttivita(jsonDi<unknown>(dati._esitiRaw, null))?.esiti ?? []).map((e) => e.chiave))} />
-      </>}
+      </SezioneCampi>
+      {/* il costo per tutti (non per i videogiochi), la paga solo per i lavori: senza nessuno dei due la sezione non c'è */}
+      {campiPropri && ((!videogioco && tipo !== 'videogioco') || lavoro || incompatibili.includes('paga_yen') || incompatibili.includes('paga_massima')) && (
+        <SezioneCampi titolo={lavoro || incompatibili.includes('paga_yen') || incompatibili.includes('paga_massima') ? 'Costo e paga' : 'Costo'}>
+          {!videogioco && tipo !== 'videogioco' && <Campo nome="costo" etichetta="Costo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto se è gratis" />}
+          {(lavoro || incompatibili.includes('paga_yen')) && <Campo nome="paga_yen" etichetta="Paga in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="A turno" />}
+          {(lavoro || incompatibili.includes('paga_massima')) && <Campo nome="paga_massima" etichetta="Paga massima in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Con i bonus, se la guida la dichiara" />}
+        </SezioneCampi>
+      )}
+      {campiPropri && <SezioneCampi titolo="Effetti ed esiti">
+        {/* contata per volte (un lavoro): ogni turno dice i suoi punti (da segnare a mano), il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
+        <Blocco largo>
+          <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
+            conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
+            aiuto={testoDi(dati.tracciamento) === 'svolta'
+              ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
+              : undefined} />
+        </Blocco>
+        {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}
+        {!videogioco && !confidente && !pesca && (testoDi(dati.tracciamento) === 'svolta' || dati.esiti_json != null) && <>
+          {!!dati._esitiDaRisolvere && <div className="campo--largo flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
+            <p role="alert" className="m-0">Gli esiti salvati contengono parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
+            <p className="m-0 whitespace-pre-wrap break-all">{typeof dati._esitiRaw === 'string' ? dati._esitiRaw : JSON.stringify(dati._esitiRaw)}</p>
+            <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Sostituisci con gli esiti dell’editor" className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ _esitiDaRisolvere: false })} />
+          </div>}
+          <EditorEsiti esiti={(dati.esiti_json as EsitiAttivita | null) ?? null} onCambia={(esiti_json) => imposta({ esiti_json })} disabilitato={disabilitato || !!dati._esitiDaRisolvere}
+            chiaviSalvate={new Set((normalizzaEsitiAttivita(jsonDi<unknown>(dati._esitiRaw, null))?.esiti ?? []).map((e) => e.chiave))} />
+        </>}
+      </SezioneCampi>}
       {/* la guida del quiz è dei lavori (generica per tutti, scelta dell'utente 2026-10-17); un'altra attività che ne ha già una la tiene */}
       {campiPropri && (lavoro || !!dati.quiz_json) && (
-        <EditorQuiz quiz={(dati.quiz_json as QuizAttivita | null) ?? null} giorni={testoDi(dati._giorniQuiz)} onCambia={imposta} disabilitato={disabilitato || !!dati._quizDaRisolvere} />
+        <SezioneCampi titolo="Guida del quiz">
+          <EditorQuiz quiz={(dati.quiz_json as QuizAttivita | null) ?? null} onCambia={imposta} disabilitato={disabilitato || !!dati._quizDaRisolvere} />
+        </SezioneCampi>
       )}
     </div>
   );

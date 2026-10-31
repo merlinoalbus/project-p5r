@@ -51,8 +51,13 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       <p className="m-0 testo-12 text-text-muted">Nome, categoria ed effetto si modificano nel catalogo dell’oggetto. Qui cambi solo la sua offerta nel negozio.</p>
       {aMano && (
         <Griglia>
-          <Blocco largo><p className="m-0 testo-13">Questa offerta non ha un oggetto collegato. Puoi conservarne i dati storici o scegliere un’identità dal catalogo; scollegare non copia il nome dell’oggetto.</p></Blocco>
-          <Campo nome="nome" etichetta="Nome dell’offerta non collegata" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
+          {/* L13 (O7-5, regola 3): il nome scritto a mano è un dato storico non collegato: si legge col suo motivo e non si riscrive — l'oggetto
+              si sceglie dal catalogo qui sopra. Il corpo verso l'API non cambia: parte il nome salvato */}
+          <Blocco largo>
+            <span className="campo__etichetta">Nome dell’offerta non collegata</span>
+            <p className="m-0 testo-14 break-words">{testoDi(dati.nome) || '—'}</p>
+            <p className="m-0 testo-12 text-text-muted text-pretty">Dato storico: questa offerta non ha un oggetto del catalogo, e il nome resta com’era scritto. Per correggerlo scegli l’oggetto dal catalogo qui sopra; scollegare non copia il nome dell’oggetto.</p>
+          </Blocco>
           <Blocco largo>
             <SelettoreIcone compatto etichetta="Categoria" valore={testoDi(dati.categoria) || 'altro'} opzioni={OPZIONI_CATEGORIA} disabilitato={disabilitato} onCambia={(categoria) => imposta({ categoria })} />
           </Blocco>

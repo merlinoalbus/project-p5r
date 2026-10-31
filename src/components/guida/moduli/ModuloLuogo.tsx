@@ -1,55 +1,73 @@
 // ============================================================
-// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, note, orari
+// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), che cosa offre, orari, note; quartiere e area;
+// Confidenti; piatti
+// ============================================================
+//
+// L13 (O7-5, censimento del 25/10: «tre moduli diversi per creare un luogo»): i campi del luogo nuovo — nome, tipo, che cosa offre,
+// orari — sono UNO, `CampiLuogo` (file suo), e li usano tutti e tre i punti d'ingresso: questo modulo (Aggiungi un luogo dal quartiere,
+// Correggi il luogo), «Aggiungi luogo» della planimetria e «Crea un luogo da questo pin». Il modulo è a sezioni come le altre finestre
+// di modifica.
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
 import { getConfidenti, getQuartiere, getQuartieri } from '../../../services/api';
 import type { PiattoLuogo } from './definizioni';
 import { Selettore } from '../../shared/Selettore';
-import { IconaSpillo } from '../../mappe/IconaSpillo';
-import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';
-import { TIPI_LUOGO } from '../../../../shared/tipiLuogo';
 import { testoDi, type PropsModulo } from './base';
-import { OrariEditor } from '../OrariEditor';
-import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio';
-import { Blocco, Campo, Griglia } from './campi';
+import type { OrariNegozio } from '../../../../shared/orariNegozio';
+import { Blocco, Campo } from './campi';
+import { CampiLuogo, type ValoriLuogo } from './CampiLuogo';
+import { CampoTesto, SezioneCampi } from '../../shared/Campo';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 
-const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
-
 /**
- * I campi di un luogo: nome, tipo a tessere, quartiere (dai quartieri caricati; un valore salvato sconosciuto resta
- * in testa all'elenco, con «Riprova» se il caricamento fallisce), che cosa offre e note; i giorni sono nel blocco degli orari.
+ * I campi di un luogo: quelli comuni (`CampiLuogo`) e le note; quartiere (dai quartieri caricati; un valore salvato sconosciuto resta
+ * in testa all'elenco, con «Riprova» se il caricamento fallisce) e area; i Confidenti che si incontrano qui; i piatti.
  */
 export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
   const quartieri = useCarica(() => getQuartieri(), []);
   const attuale = testoDi(dati.quartiere_chiave);
   const opzioniQuartiere = [...(attuale && !quartieri.dati?.some((q) => q.chiave === attuale) ? [{ chiave: attuale, nome: attuale }] : []), ...(quartieri.dati ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))];
+  const valori: ValoriLuogo = { nome: testoDi(dati.nome), tipo: testoDi(dati.tipo) || 'altro', cosaOffre: testoDi(dati.cosa_offre), orari: (dati.orari_json as OrariNegozio | null) ?? null };
+  /** I campi comuni scrivono le colonne del luogo con i loro nomi (`cosa_offre`, `orari_json`). */
+  const cambiaComuni = (p: Partial<ValoriLuogo>) => imposta({
+    ...(p.nome !== undefined ? { nome: p.nome } : {}), ...(p.tipo !== undefined ? { tipo: p.tipo } : {}),
+    ...(p.cosaOffre !== undefined ? { cosa_offre: p.cosaOffre } : {}), ...(p.orari !== undefined ? { orari_json: p.orari } : {}),
+  });
   return (
-    <Griglia>
-      <Campo nome="nome" etichetta="Nome del luogo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
-      <Blocco largo>
-        <SelettoreIcone compatto etichetta="Tipo" valore={testoDi(dati.tipo) || 'altro'} opzioni={OPZIONI_TIPO} disabilitato={disabilitato} onCambia={(tipo) => imposta({ tipo })} />
-      </Blocco>
-      <Blocco>
-        <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
-        {quartieri.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
-      </Blocco>
-      <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
-      <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
-      {/* ---- L5 (R5-07): un modulo solo per tutto il luogo: orari, area, sblocco, Confidenti, piatti ---- */}
-      <Blocco largo><CampiLuogoL5 dati={dati} imposta={imposta} disabilitato={disabilitato} /></Blocco>
-    </Griglia>
+    <div className="flex flex-col gap-5">
+      <SezioneCampi titolo="Luogo">
+        <CampiLuogo valore={valori} onCambia={cambiaComuni} disabilitato={disabilitato} />
+        <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
+      </SezioneCampi>
+      <SezioneCampi titolo="Dove">
+        <Blocco>
+          <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
+          {quartieri.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
+        </Blocco>
+        <AreaDelLuogo dati={dati} imposta={imposta} disabilitato={disabilitato} />
+      </SezioneCampi>
+      <ConfidentiEPiatti dati={dati} imposta={imposta} disabilitato={disabilitato} />
+    </div>
   );
 }
 
-/** Gli orari del luogo (o la regola dell'app), l'area del quartiere, lo sblocco come lo dice la guida, i Confidenti e i piatti. */
-function CampiLuogoL5({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' | 'imposta' | 'disabilitato'>) {
+/** L'area del quartiere in cui sta il luogo (le aree del quartiere scelto). */
+function AreaDelLuogo({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' | 'imposta' | 'disabilitato'>) {
   const quartiere = testoDi(dati.quartiere_chiave);
   const q = useCarica(() => (quartiere ? getQuartiere(quartiere) : Promise.resolve(null)), [quartiere]);
+  return (
+    <Blocco>
+      <Selettore etichetta="Area" valore={testoDi(dati.area_chiave)} vuoto="Da collocare" disabilitato={disabilitato || q.caricamento || !quartiere}
+        opzioni={(q.dati?.aree ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => imposta({ area_chiave: k || null })} />
+    </Blocco>
+  );
+}
+
+/** I Confidenti che si incontrano nel luogo (scelti dall'elenco dei Confidenti) e i piatti del menu. */
+function ConfidentiEPiatti({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' | 'imposta' | 'disabilitato'>) {
   const confidenti = useCarica(() => getConfidenti(), []);
-  const orari = (dati.orari_json as OrariNegozio | null) ?? null;
   const scelti = Array.isArray(dati.confidenti_json) ? (dati.confidenti_json as string[]) : [];
   const piatti = (dati.piatti_json as PiattoLuogo[] | null) ?? [];
   /** Cambia un piatto (o lo toglie con `null`). */
@@ -57,44 +75,32 @@ function CampiLuogoL5({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' 
     const n = p ? piatti.map((x, j) => (j === i ? p : x)) : piatti.filter((_, j) => j !== i);
     imposta({ piatti_json: n.length > 0 ? n : null });
   };
-  return (
-    <div className="flex flex-col gap-3">
-      <fieldset className="regole-editor flex flex-col gap-2">
-        <legend>Orari del luogo</legend>
-        <label className="flex items-center gap-2 testo-13 touch">
-          <input type="checkbox" className="h-5 w-5" checked={orari === null} disabled={disabilitato} onChange={(e) => imposta({ orari_json: e.target.checked ? null : { ...ORARI_SEMPRE } })} />
-          La guida non indica orari: vale la regola dell’app (giorno e sera)
-        </label>
-        {orari && <OrariEditor valore={orari} onCambia={(o) => imposta({ orari_json: o })} disabilitato={disabilitato} />}
-      </fieldset>
-      <Griglia>
-        <Blocco>
-          <Selettore etichetta="Area" valore={testoDi(dati.area_chiave)} vuoto="Da collocare" disabilitato={disabilitato || q.caricamento || !quartiere}
-            opzioni={(q.dati?.aree ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => imposta({ area_chiave: k || null })} />
-        </Blocco>
-      </Griglia>
-      <fieldset className="regole-editor flex flex-col gap-2">
-        <legend>Confidenti che si incontrano qui</legend>
-        {scelti.length > 0 && <div className="flex flex-wrap gap-1.5">
-          {scelti.map((c) => <button key={c} type="button" className="chip chip--attivo touch" disabled={disabilitato} aria-label={`Togli ${confidenti.dati?.find((x) => x.chiave === c)?.nome ?? c}`}
-            onClick={() => imposta({ confidenti_json: scelti.filter((x) => x !== c) })}>{confidenti.dati?.find((x) => x.chiave === c)?.nome ?? c} ×</button>)}
-        </div>}
+  return <>
+    <SezioneCampi titolo="Confidenti che si incontrano qui">
+      {scelti.length > 0 && <div className="campo--largo flex flex-wrap gap-1.5">
+        {scelti.map((c) => <button key={c} type="button" className="chip chip--attivo touch" disabled={disabilitato} aria-label={`Togli ${confidenti.dati?.find((x) => x.chiave === c)?.nome ?? c}`}
+          onClick={() => imposta({ confidenti_json: scelti.filter((x) => x !== c) })}>{confidenti.dati?.find((x) => x.chiave === c)?.nome ?? c} ×</button>)}
+      </div>}
+      <Blocco>
         <Selettore etichetta="Aggiungi un Confidente" valore="" vuoto="— scegli —" disabilitato={disabilitato || confidenti.caricamento}
           opzioni={(confidenti.dati ?? []).filter((c) => !scelti.includes(c.chiave)).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))}
           onCambia={(k) => { if (k) imposta({ confidenti_json: [...scelti, k] }); }} />
-      </fieldset>
-      <fieldset className="regole-editor flex flex-col gap-2">
-        <legend>Piatti</legend>
-        {piatti.map((p, i) => (
-          <div key={i} className="flex flex-wrap items-end gap-2" role="group" aria-label={`Piatto ${i + 1}`}>
-            <label className="editor-mappa__campo min-w-[160px] flex-1">Nome<input className="form-input" maxLength={160} value={p.nome} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, nome: e.target.value })} /></label>
-            <label className="editor-mappa__campo w-[110px]">Prezzo (¥)<input className="form-input" type="number" min={0} value={p.prezzo ?? ''} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, prezzo: e.target.value === '' ? null : Math.max(0, Math.round(Number(e.target.value))) })} /></label>
-            <label className="editor-mappa__campo min-w-[180px] flex-[2]">Effetto<input className="form-input" maxLength={400} value={p.effetto} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, effetto: e.target.value })} /></label>
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} aria-label={`Togli il piatto ${p.nome || i + 1}`} onClick={() => piatto(i, null)} />
+      </Blocco>
+    </SezioneCampi>
+    <SezioneCampi titolo="Piatti">
+      {piatti.map((p, i) => (
+        <fieldset key={i} className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
+          <legend>Piatto {i + 1}</legend>
+          <div className="griglia-campi">
+            <CampoTesto etichetta="Nome" valore={p.nome} massimo={160} obbligatorio disabilitato={disabilitato} onCambia={(nome) => piatto(i, { ...p, nome })} />
+            <CampoTesto etichetta="Prezzo in yen" tipo="numero" valore={p.prezzo === null ? '' : String(p.prezzo)} disabilitato={disabilitato}
+              onCambia={(v) => piatto(i, { ...p, prezzo: v === '' ? null : Math.max(0, Math.round(Number(v))) })} />
+            <CampoTesto etichetta="Effetto" valore={p.effetto} massimo={400} largo disabilitato={disabilitato} onCambia={(effetto) => piatto(i, { ...p, effetto })} />
           </div>
-        ))}
-        <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un piatto" className="self-start" disabled={disabilitato} onClick={() => imposta({ piatti_json: [...piatti, { nome: '', prezzo: null, effetto: '' }] })} />
-      </fieldset>
-    </div>
-  );
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="self-start" disabled={disabilitato} aria-label={`Togli il piatto ${p.nome || i + 1}`} onClick={() => piatto(i, null)} />
+        </fieldset>
+      ))}
+      <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un piatto" className="campo--largo self-start justify-self-start" disabled={disabilitato} onClick={() => imposta({ piatti_json: [...piatti, { nome: '', prezzo: null, effetto: '' }] })} />
+    </SezioneCampi>
+  </>;
 }

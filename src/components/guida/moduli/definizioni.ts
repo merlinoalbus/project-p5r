@@ -3,12 +3,12 @@
 // ============================================================
 
 import { ORARI_SEMPRE, normalizzaOrari } from '../../../../shared/orariNegozio';
-import { normalizzaRequisitoSpillo } from '../../../../shared/condizioniSpillo';
+import { dataValida, normalizzaRequisitoSpillo } from '../../../../shared/condizioniSpillo';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effettiCatalogo';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
 import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
-import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
+import { normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
 import { normalizzaCostoScambio, normalizzaPrezzoPerFascia, type PrezzoPerFascia } from '../../../../shared/catalogo';
 import { normalizzaEsitiAttivita } from '../../../../shared/esitiAttivita';
 import { normalizzaRifornimento, type RegolaRifornimento } from '../../../../shared/rifornimento';
@@ -145,11 +145,16 @@ export const film: DefinizioneModulo = {
   },
 };
 
+/** I giorni del mese del quiz senza doppioni, fra 1 e 31, in ordine crescente (la forma che il server salva, `normalizzaQuiz`). */
+export const giorniDelMeseOrdinati = (giorni: readonly number[]): number[] =>
+  [...new Set(giorni.filter((g) => Number.isInteger(g) && g >= 1 && g <= 31))].sort((a, b) => a - b);
+
 /**
  * La definizione del modulo delle attività; con `tipoFisso` = 'videogioco' il tipo resta fissato (segnato nel campo
  * temporaneo `_tipoFisso`), le sessioni partono da 1 e devono essere almeno 1, e il conteggio salvato è per sessioni.
- * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo. La guida del quiz (105) si
- * modifica con i giorni scritti a mano (campo temporaneo `_giorniQuiz`): salvabile solo se sono giorni del mese.
+ * Paga e paga massima si salvano solo per i lavori; il conteggio mancante si deduce dal tipo. La guida del quiz (105) ha i
+ * giorni del mese nel quiz stesso (`quiz_json.giorni`), scelti a pulsanti da 1 a 31 (L13, O7-5: prima un testo «7, 17, 27»
+ * da interpretare): al salvataggio si mandano senza doppioni e in ordine, come li dava la lettura del testo.
  */
 function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
   return {
@@ -180,16 +185,15 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),
         tracciamento: testoDi(e?.dati.tracciamento) || tracciamentoPerTipo(tipo),
         dettagli: testoDi(e?.dati.dettagli), effetti_json: normalizzaVociEffetto(jsonDi(e?.dati.effetti_json, [])),
-        // la guida del quiz (105) e i suoi giorni come testo da scrivere a mano («7, 17, 27»)
-        quiz_json: quiz, _giorniQuiz: quiz ? quiz.giorni.join(', ') : '',
+        // la guida del quiz (105), con i suoi giorni del mese dentro (scelti a pulsanti)
+        quiz_json: quiz,
         verificato: verificatoDi(e), _tipoFisso: tipoFisso ?? null,
       };
     },
-    // con la guida del quiz i giorni devono essere giorni del mese
+    // i giorni del quiz sono sempre giorni del mese: si scelgono a pulsanti fra 1 e 31
     valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1)
       && !d._effettiDaRisolvere && !d._quizDaRisolvere && !d._esitiDaRisolvere
       && (d.esiti_json == null || normalizzaEsitiAttivita(d.esiti_json) !== null)
-      && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null)
       && (!testoOnull(d.pesca_regola_chiave) ? !testoOnull(d.pesca_ruolo) : (d.tipo !== 'videogioco' && !testoOnull(d.confidente_chiave) && (d.pesca_ruolo === 'visita' || d.pesca_ruolo === 'obiettivi')
         && campiAutonomiAttivitaPesca({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche }).length === 0))
       && (!testoOnull(d.confidente_chiave) || campiAutonomiAttivitaConfidente({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche },
@@ -203,7 +207,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         paga_yen: d.tipo === 'lavoro' ? numeroDi(d.paga_yen) : null, paga_massima: d.tipo === 'lavoro' ? numeroDi(d.paga_massima) : null,
         tracciamento: d.tipo === 'videogioco' ? 'sessioni' : testoDi(d.tracciamento) || tracciamentoPerTipo(testoDi(d.tipo)),
         // righe vuote e spazi li toglie il server (normalizzaQuiz); un quiz senza domanda né elementi vale «nessun quiz»
-        quiz_json: quiz ? { ...quiz, giorni: leggiGiorniQuiz(testoDi(d._giorniQuiz)) ?? [] } : null,
+        quiz_json: quiz ? { ...quiz, giorni: giorniDelMeseOrdinati(quiz.giorni) } : null,
       };
     },
   };
@@ -236,13 +240,16 @@ export const luogo: DefinizioneModulo = {
   },
 };
 
-/** `nullable`: vuoto = null (lo schema lo ammette); altrimenti vuoto = '' (lo schema vuole una stringa, come `ricompensa` e `note` della domanda). */
-export interface CampoGenerico { nome: string; etichetta: string; tipo: 'testo' | 'testolungo'; opzioni?: Record<string, string>; aiuto?: string; obbligatorio?: boolean; nullable?: boolean; /** L'etichetta della scelta vuota: il campo a opzioni parte vuoto invece che dalla prima voce. */ vuoto?: string }
+/**
+ * `nullable`: vuoto = null (lo schema lo ammette); altrimenti vuoto = '' (lo schema vuole una stringa, come `ricompensa` e `note` della domanda).
+ * `data` (L13, O7-5): un giorno del calendario di gioco scelto con `SelettoreData` ('MM-GG'), non più digitato.
+ */
+export interface CampoGenerico { nome: string; etichetta: string; tipo: 'testo' | 'testolungo' | 'data'; opzioni?: Record<string, string>; aiuto?: string; obbligatorio?: boolean; nullable?: boolean; /** L'etichetta della scelta vuota: il campo a opzioni parte vuoto invece che dalla prima voce. */ vuoto?: string }
 
 /** I campi di domande e cruciverba, nell'ordine. La risposta non è qui: sta in «Risposte giuste», l'editor a righe. */
 export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverba'>, CampoGenerico[]> = {
   domanda: [
-    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-12»', obbligatorio: true },
+    { nome: 'data', etichetta: 'Giorno', tipo: 'data', obbligatorio: true },
     { nome: 'tipo', etichetta: 'Quando', tipo: 'testo', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', tv: 'Quiz in TV', altro: 'Altro' } },
     { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', vuoto: 'Non indicato', opzioni: { 'Prof. Ushimaru': 'Prof. Ushimaru', 'Prof. Kawakami': 'Prof. Kawakami', 'Prof. Hiruta': 'Prof. Hiruta', 'Prof. Inui': 'Prof. Inui', 'Prof. Chuono': 'Prof. Chuono', 'Prof. Maruki': 'Prof. Maruki', 'Prof. Usami': 'Prof. Usami', 'Game show in TV': 'Game show in TV' } },
     { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo', obbligatorio: true },
@@ -250,7 +257,7 @@ export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverb
     { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
   ],
   cruciverba: [
-    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-18»', obbligatorio: true },
+    { nome: 'data', etichetta: 'Giorno', tipo: 'data', obbligatorio: true },
     { nome: 'indizio', etichetta: 'Indizio', tipo: 'testolungo', obbligatorio: true },
     { nome: 'risposta', etichetta: 'Risposta', tipo: 'testo', obbligatorio: true },
     { nome: 'risposta_en', etichetta: 'Risposta in inglese', tipo: 'testo', aiuto: 'Solo se ti serve: è la parola con cui la risolve chi gioca in inglese', nullable: true },
@@ -273,7 +280,8 @@ function generico(tipo: 'domanda' | 'cruciverba'): DefinizioneModulo {
       if (tipo === 'domanda') d.risposte_json = jsonDi<Risposta[]>(e?.dati.risposte_json, []);
       return d;
     },
-    valido: (d) => campi.every((c) => !c.obbligatorio || testoDi(d[c.nome]).trim().length > 0),
+    // una data (vuota o scelta) va bene solo se è un giorno del calendario: il selettore non ne dà altre, una riga storica scritta male resta da correggere
+    valido: (d) => campi.every((c) => (!c.obbligatorio || testoDi(d[c.nome]).trim().length > 0) && (c.tipo !== 'data' || !testoDi(d[c.nome]).trim() || dataValida(testoDi(d[c.nome]).trim()))),
     prepara: (d) => {
       const out = senzaTemporanei(d);
       for (const c of campi) {
