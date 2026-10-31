@@ -66,7 +66,7 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
         )}
       </div>
       <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
-        <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} scorreDentro={!!riempi} />
+        <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} richiestaEvidenziata={oggi.mappa.richiesta} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} scorreDentro={!!riempi} />
       </div>
     </div>
   );

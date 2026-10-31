@@ -9,7 +9,7 @@
 
 import { IconaCategoria } from './IconaCategoria';
 import type { ReactNode } from 'react';
-import { GestiVoce, PulsanteMenuVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
+import { ComandiVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
 import { classeSelezioneRiga } from '../../utils/selezioneRiga';
 import { NOME_TIPO_EVENTO } from '../../utils/percorso';
 import { TestoNote } from '../shared/TestoNote';
@@ -46,8 +46,8 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, maniglia, r
           {e.note && <span className="testo-12 text-text-secondary"><TestoNote testo={e.note} daParole="guida" /></span>}
         </span>
       </div>
-      {gesti && <PulsanteMenuVoce voce={e.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato} />}
-      {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato} etichetta={`Gesti per: ${e.azione.slice(0, 60)}`} voce={e.uid} />}
+      {/* C9: Modifica ed Elimina a vista, gli altri gesti nel menu a tendina del «⋯» (MenuVoce); sul telefono in una fila a sé in fondo alla voce */}
+      {gesti && <span className="comandi-voce__posto"><ComandiVoce voce={e.azione} uid={e.uid} gesti={gesti} aperto={menuAperto} onCambia={onMenu} disabled={occupato} /></span>}
     </li>
   );
 }

@@ -1,11 +1,11 @@
 // ============================================================
-// BarraSelezioneVoci — la barra delle voci selezionate del Diario: conteggio, Copia, Taglia, In un altro giorno…, Fine (2026-10-26)
+// BarraSelezioneVoci — la barra delle voci selezionate del Diario: conteggio, Copia, Taglia, Fissa… (appunti fissi, C7), In un altro giorno…, Fine (2026-10-26)
 // ============================================================
 //
 // Compare solo con voci selezionate (o nella scelta a caselle di «Copia o sposta voci»), ferma in fondo alla vista sopra la barra di
 // navigazione del telefono: in fondo e non in cima, così comparendo non sposta le righe sotto il puntatore durante Maiusc+clic. Le
 // scorciatoie stanno nel suggerimento e in `aria-keyshortcuts` dei pulsanti, non in un testo sempre a schermo: su tablet e telefono la
-// tastiera non c'è. Sul telefono resta di due righe: il conteggio con «Fine», poi i tre comandi. La coda delle notifiche le sta sopra
+// tastiera non c'è. Sul telefono resta di due righe: il conteggio con «Fine», poi i quattro comandi (vanno a capo da soli). La coda delle notifiche le sta sopra
 // (`utils/postoCoda`, classe `barra-selezione-voci`).
 // ============================================================
 
@@ -26,12 +26,14 @@ interface Props {
   scorreDentro?: boolean;
   onCopia: () => void;
   onTaglia: () => void;
+  /** C7: le voci selezionate negli appunti fissi (lo stesso testo di Copia, con un titolo proposto). */
+  onFisso: () => void;
   onAltroGiorno: () => void;
   onFine: () => void;
 }
 
 export const BarraSelezioneVoci: StrumentoDiModifica<typeof BarraSelezioneVociReale> = IN_RILASCIO ? NienteInRilascio : BarraSelezioneVociReale;
-function BarraSelezioneVociReale({ quante, caselle, occupato, scorreDentro = false, onCopia, onTaglia, onAltroGiorno, onFine }: Props) {
+function BarraSelezioneVociReale({ quante, caselle, occupato, scorreDentro = false, onCopia, onTaglia, onFisso, onAltroGiorno, onFine }: Props) {
   const nessuna = quante === 0;
   return (
     // sotto i 1024 px la barra di navigazione (64 px) copre il fondo della vista: la barra si ferma appena sopra. Se da 768 px la giornata
@@ -50,6 +52,9 @@ function BarraSelezioneVociReale({ quante, caselle, occupato, scorreDentro = fal
           aria-label="Copia negli appunti le voci selezionate" aria-keyshortcuts="Control+C" disabled={nessuna || occupato} onClick={onCopia} />
         <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="taglia" dimensione={20} />} titolo="Taglia" title="Taglia negli appunti (Ctrl+X)"
           aria-label="Taglia negli appunti le voci selezionate" aria-keyshortcuts="Control+X" disabled={nessuna || occupato} onClick={onTaglia} />
+        {/* C7: negli appunti fissi, per incollarle di nuovo in altri giorni (lo stesso testo di Copia, con un titolo da scegliere) */}
+        <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Fissa…" title="Salva negli appunti fissi"
+          aria-label="Fissa…: salva negli appunti fissi le voci selezionate" disabled={nessuna || occupato} onClick={onFisso} />
         <PulsanteVisivo tono="secondario" compatto className="shrink-0" icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Altro giorno…"
           aria-label="Copia o sposta le voci selezionate in un altro giorno" disabled={nessuna || occupato} onClick={onAltroGiorno} />
       </div>

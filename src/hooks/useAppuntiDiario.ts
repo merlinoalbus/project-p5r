@@ -34,6 +34,9 @@ import { anteprimaIncollaVoci, annullaOperazioneVoci, esportaAppuntiDiario, inco
 import { notifica, useNotificationStore, type AzioneNotifica } from '../stores/notificationStore';
 import { useAppuntiDiarioStore } from '../stores/appuntiDiarioStore';
 import { comeTaglio, leggiAppunti, scriviAppunti, type ContenutoAppunti, type FrasiDelleVoci, type NomiDelleVoci } from '../utils/appuntiDiario';
+import { scriviConEvento as scriviTipiConEvento } from '../utils/scritturaAppunti';
+import { useAppuntiFissiStore } from '../stores/appuntiFissiStore';
+import { LIMITE_TITOLO_APPUNTO } from '../../shared/appuntiFissi';
 import { eInCampoDiTesto } from '../utils/campiModificabili';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import type { AppuntiDiario, EsitoAnnulloIncollaDto, PianoIncollaDto, RichiestaEseguiIncolla } from '../../shared/appuntiDiario';
@@ -103,21 +106,9 @@ const messaggio = (err: unknown, riserva: string) => (err instanceof Error && er
 /**
  * Scrive negli appunti con l'evento `copy` del browser, dentro il gesto dell'utente (menu, barra): lo stesso percorso di Ctrl+C, che
  * mette testo e HTML così come sono (`navigator.clipboard.write` può ripulire l'HTML e togliere il blocco). Falso se il browser non lo fa.
+ * La scrittura è quella comune (`utils/scritturaAppunti`), usata anche dagli appunti fissi.
  */
-function scriviConEvento(c: ContenutoAppunti): boolean {
-  let fatto = false;
-  const h = (e: ClipboardEvent) => {
-    if (!e.clipboardData) return;
-    e.preventDefault();
-    // è nostro: i gestori della pagina (Ctrl+C delle voci) non lo vedono
-    e.stopImmediatePropagation();
-    e.clipboardData.setData('text/plain', c.testo);
-    e.clipboardData.setData('text/html', c.html);
-    fatto = true;
-  };
-  document.addEventListener('copy', h, true);
-  try { return document.execCommand('copy') && fatto; } catch { return false; } finally { document.removeEventListener('copy', h, true); }
-}
+const scriviConEvento = (c: ContenutoAppunti): boolean => scriviTipiConEvento({ 'text/plain': c.testo, 'text/html': c.html });
 
 /** Gli appunti letti con l'API del browser (testo e HTML), o null se il browser non la offre. Può fallire (permesso negato). */
 async function leggiConApi(): Promise<{ testo: string; html: string } | null> {
@@ -196,6 +187,9 @@ export interface AppuntiDelGiorno {
   taglia: (uid: readonly string[]) => void;
   /** Prepara il blocco di queste voci (all'apertura del menu di una voce), così Copia e Taglia lo scrivono subito, nel gesto. */
   prepara: (uid: readonly string[]) => void;
+  /** C7: «Salva negli appunti fissi»: lo stesso testo che «Copia» scriverebbe per queste voci, nella finestra degli appunti fissi, con un
+   *  titolo proposto da cambiare prima di salvare. */
+  salvaFisso: (uid: readonly string[]) => void;
   /** Incolla dagli appunti (menu «Incolla qui» o barra): dopo la voce `dopoUid`, o ognuna nella sua fascia in fondo. */
   incollaDagliAppunti: (dopoUid: string | null) => void;
   /** Incolla un contenuto letto altrove (il riquadro d'incolla manuale); falso se non sono voci del Diario. */
@@ -226,7 +220,7 @@ interface Opzioni {
 }
 
 const NESSUNO: AppuntiDelGiorno = {
-  copia: () => undefined, taglia: () => undefined, prepara: () => undefined, incollaDagliAppunti: () => undefined, incollaContenuto: () => false,
+  copia: () => undefined, taglia: () => undefined, prepara: () => undefined, salvaFisso: () => undefined, incollaDagliAppunti: () => undefined, incollaContenuto: () => false,
   inAttesa: null, conferma: () => undefined, chiudiAttesa: () => undefined, manuale: null, chiudiManuale: () => undefined, occupato: false,
 };
 
@@ -331,6 +325,23 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
     };
     void scrivi().then(({ a, c }) => scritto(a, c)).catch((err: unknown) => notifica('error', `Appunti non scritti: ${messaggio(err, 'il browser non lo permette')}.`));
   }, [bloccoPronto, scritto]);
+
+  /**
+   * C7 (appunti fissi): «Salva negli appunti fissi» delle voci. Il testo è quello che «Copia» scriverebbe negli appunti di sistema (un solo
+   * produttore, `scriviAppunti`: testo leggibile con il blocco delle voci in fondo, che Ctrl+V nel Diario riconosce); il titolo proposto è il
+   * testo della prima voce (con «(+N)» per le altre), da cambiare nella finestra prima di salvare. Non scrive nulla negli appunti di sistema.
+   */
+  const salvaFisso = useCallback((uid: readonly string[]) => {
+    if (!uid.length) return;
+    const { frasi: f, nomi, voci: v } = ultimi.current;
+    const prima = v.find((x) => x.uid === uid[0]);
+    const altre = uid.length > 1 ? ` (+${uid.length - 1})` : '';
+    const titolo = `${(prima?.azione ?? 'Voci del Diario').trim().slice(0, LIMITE_TITOLO_APPUNTO - altre.length).trim()}${altre}`;
+    const gia = bloccoPronto(uid);
+    void (gia ? Promise.resolve(gia) : esportaAppuntiDiario([...uid]))
+      .then((a) => useAppuntiFissiStore.getState().proponi({ titolo, testo: scriviAppunti(a, f, { nomi }).testo }))
+      .catch((err: unknown) => notifica('error', `Voci non preparate per gli appunti fissi: ${messaggio(err, 'riprova')}.`));
+  }, [bloccoPronto]);
 
   /** Esegue l'incolla, ricarica la giornata, seleziona le voci arrivate e notifica con «Annulla». */
   const esegui = useCallback(async (r: RichiestaEseguiIncolla, conFuoco: boolean) => {
@@ -545,6 +556,7 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
     copia: (uid) => scriviAsincrono(uid, 'copia'),
     taglia: (uid) => scriviAsincrono(uid, 'taglia'),
     prepara,
+    salvaFisso,
     incollaDagliAppunti, incollaContenuto,
     inAttesa, conferma, chiudiAttesa: () => setInAttesa(null),
     manuale, chiudiManuale: () => setManuale(null),

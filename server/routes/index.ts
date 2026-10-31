@@ -28,6 +28,7 @@ import ricercaRouter from './ricerca.js';
 import regolePescaRouter from './regolePesca.js';
 import pescaRouter from './pesca.js';
 import correzioniRouter from './correzioni.js';
+import appuntiFissiRouter from './appuntiFissi.js';
 
 /** I router di area con il loro prefisso, nell'ordine di montaggio. */
 export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
@@ -50,4 +51,6 @@ export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/pesca', regolePescaRouter],
   ['/api/partite/:id/pesca', pescaRouter],
   ['/api/correzioni', correzioniRouter],
+  // C7 (2026-10-31): gli appunti fissi del Diario, solo preparazione
+  ['/api/appunti-fissi', appuntiFissiRouter],
 ];

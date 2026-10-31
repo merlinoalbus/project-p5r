@@ -72,6 +72,8 @@ const PERCORSI_VIETATI: readonly Vietata[] = [
   { testo: '/pesca/regola', cosa: 'scrittura delle regole di pesca' },
   { testo: '/legacy/rimozione', cosa: 'rimozione del vecchio segno «Acquistato» (rotte /partite/:id/acquisti/legacy, escluse dal rilascio)' },
   { testo: '/compendio/proposte-conversione', cosa: 'proposte «da completare» delle voci del Diario (L13, ondata 4a)' },
+  // C7 (2026-10-31): gli appunti fissi del Diario, solo nella preparazione
+  { testo: '/appunti-fissi', cosa: 'API degli appunti fissi del Diario' },
   { testo: '/api/docs', cosa: 'documentazione delle API' },
   { testo: '/api/openapi.json', cosa: 'documento OpenAPI' },
 ];
@@ -101,6 +103,10 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Togli solo il vecchio segno', cosa: 'rimozione del vecchio segno «Acquistato» (rotte legacy)' },
   { testo: 'Luoghi da collocare', cosa: 'sezione dei luoghi da collocare con «Colloca»' },
   { testo: 'Proposte da completare', cosa: 'elenco e finestra delle proposte «da completare» (L13, ondata 4a)' },
+  { testo: 'Salva negli appunti fissi', cosa: 'salvataggio delle voci del Diario negli appunti fissi (C7)' },
+  { testo: 'Riduci a icona gli appunti fissi', cosa: 'finestra fluttuante degli appunti fissi (C7)' },
+  { testo: 'p5r.appuntiFissi', cosa: 'stato e posto della finestra degli appunti fissi (C7)' },
+  { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];
