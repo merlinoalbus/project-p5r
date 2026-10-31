@@ -71,8 +71,9 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
  *  mostrare la barra delle voci selezionate. */
 const ATTESA_DOPPIO_CLIC = 400;
 
-/** I comandi dentro una riga: il clic lì è loro, non seleziona la voce. */
-const INTERATTIVI = 'a, button, input, label, select, textarea, summary, details, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="menuitem"], [role="dialog"], [contenteditable=""], [contenteditable="true"]';
+/** I comandi dentro una riga: il clic lì è loro, non seleziona la voce. Il menu a tendina della voce (C9) sta in un portale ma i suoi clic
+ *  risalgono nell'albero di React fino alla riga: anche il suo fondo (bordo, spazi fra le voci) è un comando, non la riga. */
+const INTERATTIVI = 'a, button, input, label, select, textarea, summary, details, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="menu"], [role="menuitem"], [role="menuitemcheckbox"], [role="dialog"], [contenteditable=""], [contenteditable="true"]';
 
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
@@ -225,13 +226,13 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
       </div>
-      {/* la colonna dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; in fila da 640 px, impilati
-          sul telefono, dove non tolgono larghezza al testo) e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
+      {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra
+          del testo, sul telefono in una fila a sé in fondo alla voce: `.comandi-voce__posto`) e le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
           andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili»).
           2026-10-26: solo ciò che la spunta ha applicato ed è in vigore (`applicatoDallaSpunta`), non le ricevute annullate o tecniche; L13
           (decisione 19), a parte nella stessa finestra, gli effetti di stato che nella partita non valgono (`statiNonApplicati`) */}
       {((gesti && onMenu) || !!a.applicatoDallaSpunta?.length || !!a.statiNonApplicati?.length) && (
-        <span className="flex shrink-0 flex-col items-end self-start">
+        <span className="comandi-voce__posto">
           {gesti && onMenu && <ComandiVoce voce={a.azione} uid={a.uid} gesti={gesti} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
           <RicevuteVoce applicato={a.applicatoDallaSpunta} nonApplicati={a.statiNonApplicati} voce={a.azione} />
         </span>
@@ -249,6 +250,9 @@ interface Props {
   onSullaMappa?: SullaMappa;
   /** L'identità della voce da evidenziare (quella che ha scelto la mappa). */
   azioneEvidenziata?: string | null;
+  /** Il numero della richiesta che ha evidenziato la voce (scheda «Oggi»: `StatoMappaOggi.richiesta`, cresce a ogni «Sulla mappa»): la
+   *  stessa voce evidenziata di nuovo è una richiesta nuova e riapre la sua fascia anche se chi gioca l'aveva richiusa (C9). */
+  richiestaEvidenziata?: number;
   /** Nella scheda «Oggi»: intestazione più compatta. */
   compatto?: boolean;
   /** Momento della giornata della partita per QUESTO giorno (solo se è il giorno corrente): la sezione «Di giorno» o «Di sera» viene evidenziata con «Adesso» (15.27). */
@@ -268,7 +272,7 @@ interface Props {
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, richiestaEvidenziata = 0, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash, search, key: chiaveNavigazione } = useLocation();
@@ -281,7 +285,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const cercata = hash.startsWith('#voce-') ? hash.slice('#voce-'.length) : new URLSearchParams(search).get('voce');
   const daMostrare = [
     cercata ? { chiave: `indirizzo:${chiaveNavigazione}:${g.giorno}:${cercata}`, uid: cercata } : null,
-    azioneEvidenziata ? { chiave: `mappa:${g.giorno}:${azioneEvidenziata}`, uid: azioneEvidenziata } : null,
+    // una richiesta per ogni «Sulla mappa» (scheda «Oggi»: `richiestaEvidenziata` cresce ogni volta, anche per la stessa voce); nel Diario
+    // la voce evidenziata è quella dell'indirizzo (`?voce=`), già richiesta una volta per navigazione dalla riga qui sopra
+    azioneEvidenziata ? { chiave: `mappa:${richiestaEvidenziata}:${g.giorno}:${azioneEvidenziata}`, uid: azioneEvidenziata } : null,
   ].flatMap((r) => {
     const fascia = r && !mostrate[r.chiave] ? g.azioni.find((v) => v.uid === r.uid)?.fascia : undefined;
     return r && fascia ? [{ chiave: r.chiave, fascia }] : [];

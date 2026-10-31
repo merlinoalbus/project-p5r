@@ -158,6 +158,9 @@ function collocaMenu(menu: HTMLElement | null, ancora: HTMLElement | null) {
   const r = ancora.getBoundingClientRect();
   const larghezzaVista = document.documentElement.clientWidth || window.innerWidth;
   const altezzaVista = window.visualViewport?.height ?? window.innerHeight;
+  // l'altezza naturale si misura togliendo il limite, che riporterebbe in cima lo scorrimento interno del menu: lo si conserva e lo si
+  // rimette dopo aver riapplicato il limite (rilievo della verifica: altrimenti le voci in fondo di un menu che scorre non si raggiungono)
+  const scorrimento = menu.scrollTop;
   menu.style.maxHeight = '';
   const altezza = menu.offsetHeight;
   const larghezza = menu.offsetWidth;
@@ -170,6 +173,7 @@ function collocaMenu(menu: HTMLElement | null, ancora: HTMLElement | null) {
   menu.style.top = `${Math.max(MARGINE, giu ? r.bottom + STACCO : r.top - STACCO - finale)}px`;
   menu.style.left = `${Math.max(MARGINE, Math.min(r.right - larghezza, larghezzaVista - larghezza - MARGINE))}px`;
   menu.dataset.verso = giu ? 'giu' : 'su';
+  if (scorrimento) menu.scrollTop = scorrimento;
 }
 
 interface PropsMenu {
@@ -193,10 +197,14 @@ function MenuGesti({ id, uid, gesti, etichetta, ancora, disabled, fuocoIniziale,
   // a ogni disegno (la voce si è spostata, un gesto è cambiato) il menu si rimette al suo posto, prima che si veda
   useLayoutEffect(() => { collocaMenu(menu.current, ancora.current); });
 
-  // la pagina (o l'area interna) che scorre, la finestra che cambia misura o la tastiera del telefono: il menu segue il pulsante
+  // la pagina (o l'area interna) che scorre, la finestra che cambia misura o la tastiera del telefono: il menu segue il pulsante.
+  // Lo scorrimento del menu stesso (in cattura arriva anche quello) non sposta il pulsante: si ignora
   useEffect(() => {
     let attesa = 0;
-    const segui = () => { if (!attesa) attesa = requestAnimationFrame(() => { attesa = 0; collocaMenu(menu.current, ancora.current); }); };
+    const segui = (e?: Event) => {
+      if (e?.type === 'scroll' && e.target instanceof Node && menu.current?.contains(e.target)) return;
+      if (!attesa) attesa = requestAnimationFrame(() => { attesa = 0; collocaMenu(menu.current, ancora.current); });
+    };
     window.addEventListener('scroll', segui, { capture: true, passive: true });
     window.addEventListener('resize', segui);
     window.visualViewport?.addEventListener('resize', segui);

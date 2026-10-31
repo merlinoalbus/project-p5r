@@ -1908,10 +1908,16 @@
   .menu-modifica__voci--sinistra { right: auto; left: 0; }
   .menu-modifica__voci[hidden] { display: none; }
   .menu-modifica__voci > .btn, .menu-modifica__voci > * > .btn { width: 100%; justify-content: flex-start; }
-  /* C9: i comandi di una voce del Diario (MenuVoce): Modifica, Elimina e «⋯». In fila da 640 px; sul telefono impilati, così non tolgono
-     al testo la larghezza di tre pulsanti (la riga ha già maniglia, casella e immagine) */
-  .comandi-voce { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-  @media (min-width: 640px) { .comandi-voce { flex-direction: row; } }
+  /* C9: i comandi di una voce del Diario (MenuVoce): Modifica, Elimina e «⋯», sempre in fila. Il loro posto nella riga (`.comandi-voce__posto`,
+     con sotto le ricevute della spunta): da 640 px una colonna a destra del testo; sul telefono, se ci sono i comandi, una fila a sé in fondo
+     alla voce, allineata a destra (la riga va già a capo, `flex-wrap`). Così sul telefono i tre pulsanti non tolgono al testo la loro
+     larghezza (la riga ha già maniglia, casella e immagine) e la voce cresce di una fila sola da 44 px, non di tre impilate (rilievo della
+     verifica: impilati, anche una voce di una riga arrivava a 132 px). Senza comandi (rilascio: solo le ricevute) il posto resta a destra */
+  .comandi-voce { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
+  .comandi-voce__posto { display: flex; flex-direction: column; align-items: flex-end; align-self: flex-start; flex-shrink: 0; }
+  @media (max-width: 639px) {
+    .comandi-voce__posto:has(> .comandi-voce) { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; margin-top: -4px; }
+  }
   .btn-ghost.comandi-voce__elimina, .btn-ghost.comandi-voce__elimina:hover:not(:disabled) { color: var(--color-error-testo); }
   /* il menu a tendina del «⋯»: in un portale a posizione fissa, ancorato al pulsante (top/left li scrive `collocaMenu`); scorre al suo
      interno solo se non ci sta nemmeno dalla parte con più spazio, senza trascinare la pagina */

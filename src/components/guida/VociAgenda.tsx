@@ -46,8 +46,8 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, maniglia, r
           {e.note && <span className="testo-12 text-text-secondary"><TestoNote testo={e.note} daParole="guida" /></span>}
         </span>
       </div>
-      {/* C9: Modifica ed Elimina a vista, gli altri gesti nel menu a tendina del «⋯» (MenuVoce) */}
-      {gesti && <span className="flex shrink-0 self-start"><ComandiVoce voce={e.azione} uid={e.uid} gesti={gesti} aperto={menuAperto} onCambia={onMenu} disabled={occupato} /></span>}
+      {/* C9: Modifica ed Elimina a vista, gli altri gesti nel menu a tendina del «⋯» (MenuVoce); sul telefono in una fila a sé in fondo alla voce */}
+      {gesti && <span className="comandi-voce__posto"><ComandiVoce voce={e.azione} uid={e.uid} gesti={gesti} aperto={menuAperto} onCambia={onMenu} disabled={occupato} /></span>}
     </li>
   );
 }

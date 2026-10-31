@@ -106,7 +106,8 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Salva negli appunti fissi', cosa: 'salvataggio delle voci del Diario negli appunti fissi (C7)' },
   { testo: 'Riduci a icona gli appunti fissi', cosa: 'finestra fluttuante degli appunti fissi (C7)' },
   { testo: 'p5r.appuntiFissi', cosa: 'stato e posto della finestra degli appunti fissi (C7)' },
-  { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },];
+  { testo: 'Altre azioni per: ', cosa: 'menu a tendina dei gesti di una voce del Diario (C9, MenuVoce)' },
+];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];
 
