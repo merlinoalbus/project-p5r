@@ -171,6 +171,12 @@ export interface OpzioniRiepilogoEffetti {
    *  effetti): la spunta non ha potuto chiedere quale si è comprato, quindi il riepilogo non dice «nessuno» (sarebbe falso) ma che resta da
    *  scegliere, togliendo e rimettendo la spunta. */
   daScegliere?: ReadonlySet<string>;
+  /** L13 (O10-5): a voce spuntata, per posizione (in `effetti`) di ogni turno di un lavoro i cui yen si dicono alla spunta (`pagaTurno` con
+   *  `allaSpunta`), gli yen che la ricevuta della spunta ha registrato per quel turno; null quando la riga non deve dire una cifra (la ricevuta
+   *  non la porta, come quelle di prima, o la dice già un'altra parte della voce: il chip del movimento degli yen, la paga di un turno con
+   *  gli yen già nel saldo). La presenza dice che la voce è spuntata: allora la
+   *  nota non dà più l'istruzione «si dicono alla spunta» e la riga dice ciò che è stato registrato, mai base e massima. Assente prima della spunta. */
+  pagheRegistrate?: ReadonlyMap<number, number | null>;
 }
 
 /**
@@ -293,14 +299,18 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'turno': {
         const p = partiEffettoAzione(e, n.azione);
         const paga = n.pagaTurno(e.attivita, e.esito);
-        const testoPaga = paga ? `paga ${yen(paga.yen)}${paga.massima && paga.massima > paga.yen ? ` (fino a ${yen(paga.massima)})` : ''}` : '';
+        // L13 (O10-5): a voce spuntata il turno di un lavoro i cui yen si dicono alla spunta dice gli yen registrati dalla ricevuta («ricevuti
+        // ¥X», «nessuno yen ricevuto»), non base e massima, che erano un'indicazione per la scelta; senza una cifra da dire, il solo nome
+        const registrata = paga?.allaSpunta && opz.pagheRegistrate ? { yen: opz.pagheRegistrate.get(i) ?? null } : null;
+        const testoPaga = registrata ? (registrata.yen === null ? '' : registrata.yen > 0 ? `ricevuti ${yen(registrata.yen)}` : 'nessuno yen ricevuto')
+          : paga ? `paga ${yen(paga.yen)}${paga.massima && paga.massima > paga.yen ? ` (fino a ${yen(paga.massima)})` : ''}` : '';
         riga('turni', p.nome, [p.dettaglio, testoPaga].filter(Boolean).join(' · ') || undefined);
         // decisione 18: la paga base entra da sola con il turno; il costo di un'attività a pagamento (o della sfida scelta) si scala, mai sotto
         // zero. La nota guarda tutti i turni della voce i cui yen la spunta muove (un lavoro pagato e un'attività a pagamento nella stessa voce:
         // tutte e due le frasi); un turno già nel saldo da prima lo nomina la frase «in parte», mai la promessa della paga o del costo
         if (!giaNelSaldo(i)) {
-          // L13 (31/10): gli yen di un lavoro senza esiti si dicono alla spunta ed entrano tutti
-          if (paga?.allaSpunta) turni.pagaAllaSpunta = true;
+          // L13 (31/10): gli yen di un lavoro senza esiti si dicono alla spunta ed entrano tutti; a voce spuntata (O10-5) l'istruzione non serve più
+          if (paga?.allaSpunta) { if (!registrata) turni.pagaAllaSpunta = true; }
           else if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
         }
         conYen('turni', i);

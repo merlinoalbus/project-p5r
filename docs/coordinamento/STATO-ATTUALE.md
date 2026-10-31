@@ -1,5 +1,17 @@
 # Stato attuale del lavoro — lotto L12 «Verso il rilascio» (aggiornato 2026-10-25)
 
+## 31 OTTOBRE 2026 — L13, Ondata 10 (risposte dell'utente del 31/10, terza tornata)
+Ramo `lavoro-ondata10` (da `integrazione-24`), non unito né pubblicato. Dettaglio voce per voce in `docs/ROADMAP.md`, sezione L13 → «Ondata 10».
+- **O10-1** (gioco 323): l'11 gennaio la domanda 62 dà anche Ann ♪♪, come il 25/4, il 20/6 e il 7/7.
+- **O10-2 / O10-3** (gioco 324-325, utente 059): la relazione romantica è un dato della partita per i Confidenti romanzabili. Si segna con la
+  scelta al rango 9 nella spunta del Diario o dall'interruttore in «Gestione del Confidente». Takemi con la relazione è disponibile solo di sera.
+- **O10-4** (gioco 326): applicate le proposte «certe» del periodo validato, tranne «Concimare la pianta…»; le «da verificare» e le
+  «probabili» restano aperte per l'utente.
+- **O10-5** (solo codice): su un turno di lavoro già spuntato il riepilogo dice ciò che la ricevuta ha registrato, mai più l'istruzione
+  «si dicono alla spunta».
+- **Da fare nella partita dell'utente:** togliere e rimettere la spunta alle voci spuntate convertite dalla 326 (`daFareNellaPartita` nell'audit).
+  Restano da provare nel browser, nei tre formati.
+
 ## 26 OTTOBRE 2026 — Appunti del Diario (Copia, Taglia, Incolla con gli appunti di sistema)
 Ramo `lavoro-copia-incolla` (da `integrazione-24`), non unito né pubblicato: selezione delle voci (clic, Ctrl+clic, Maiusc+clic, Esc; menu «⋯» su
 touch), Ctrl+C / Ctrl+X / Ctrl+V con gli appunti di sistema (testo + HTML col blocco versionato, sopravvive a Win+V), piano dei rilievi e
