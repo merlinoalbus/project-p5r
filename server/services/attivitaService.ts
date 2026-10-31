@@ -679,7 +679,13 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
       if (y) muoviYenAutomatico(partitaId, causa, y.importo, y.motivo);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null, ...(esito !== undefined ? { esito } : {}),
+    // L13 (chiusure del 31/10): con l'esito che ha la sua paga la ricevuta dice quella (già tutta nel saldo: nessun «fino a»)
+    // (anche l'esito senza paga propria di un'attività che ne ha: la paga è quella detta dall'esito, il «fino a» non vale)
+    const conPagaPropria = esitiDellAttivita(chiave)?.esiti?.esiti;
+    const pagaEsito = esito ? conPagaPropria?.find((x) => x.chiave === esito.chiave)?.paga : undefined;
+    const senzaMassima = !!esito && !!conPagaPropria?.some((x) => x.paga);
+    const paga = pagaEsito ? { yen: pagaEsito, massima: null } : riga.paga_yen != null ? { yen: riga.paga_yen, massima: senzaMassima ? null : riga.paga_massima ?? null } : null;
+    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga, ...(esito !== undefined ? { esito } : {}),
       ...(esito && quantita && quantita > 1 ? { quantita } : {}), ...(oggetti.length ? { oggetti } : {}), ...(consumati.length ? { consumati } : {}) };
   })();
 }
@@ -691,9 +697,12 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
  * `articolo`: l'articolo della sfida che il turno paga, perché lo stesso acquisto non si conti due volte (`articoloPagatoDalTurno`).
  */
 function yenDelTurno(riga: Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'>, esito?: { chiave: string; nome: string }, fascia?: FasciaPrezzo | null, partitaId?: number | null, voceUid?: string | null): { importo: number; motivo: string; articolo?: string } | null {
-  if (riga.paga_yen != null && riga.paga_yen > 0) return { importo: riga.paga_yen, motivo: `Paga del turno: ${riga.nome}` };
   const dichiarati = esitiDellAttivita(riga.chiave)?.esiti;
-  const articolo = esito ? dichiarati?.esiti.find((e) => e.chiave === esito.chiave)?.articolo ?? null : null;
+  const dichiarato = esito ? dichiarati?.esiti.find((e) => e.chiave === esito.chiave) : undefined;
+  // L13 (chiusure del 31/10): l'esito con la sua paga (il quiz di Ore no Beko: tutti gli ordini giusti 8.800 ¥) paga quella, non la base
+  if (dichiarato?.paga) return { importo: dichiarato.paga, motivo: `Paga del turno: ${riga.nome} · ${dichiarato.nome}` };
+  if (riga.paga_yen != null && riga.paga_yen > 0) return { importo: riga.paga_yen, motivo: `Paga del turno: ${riga.nome}` };
+  const articolo = dichiarato?.articolo ?? null;
   if (articolo) {
     // Ondata 5 (lotto E, decisione 5): il prezzo della fascia in cui si svolge il turno (la sera le sfide costano 500 ¥); con la partita anche
     // lo sconto del negozio legato al rango di un Confidente (chiusura dell'ondata 5), come la spunta della voce: con la voce che registra il

@@ -128,6 +128,11 @@ export interface ConversioneVoce {
   motivo: string;
   /** Il lotto nel registro delle operazioni sugli effetti (e nel seme del suo id); senza, quello del lotto F-bis (`LOTTO_FBIS`), come per 288-297. */
   lotto?: string;
+  /** L13 (chiusure del 31/10, migrazione 314): la voce si converte anche se una partita la cita, perché l'utente l'ha deciso per QUESTA voce
+   *  (decisione 23, caso c, risolto: `decisione` cita le sue parole). Le ricevute della partita non si toccano: l'annullo della spunta legge le
+   *  ricevute, mai gli effetti di oggi (`motoreDiario.annullaEffettiVoce`), e rimettendo la spunta valgono gli effetti nuovi. Mai senza il sì
+   *  dell'utente sulla voce. */
+  ancheSpuntata?: { decisione: string };
 }
 
 interface RigaEffetto { uid: string; ordine: number; tipo: string; chiave: string | null; dati_json: string; origine: string }
@@ -166,7 +171,7 @@ function motivoPerSaltare(db: AppDatabase, c: ConversioneVoce, partite: string[]
   // effetti di oggi sono già confrontati uno per uno qui sopra, e la conversione si aggiunge al registro (`convertiVoce`)
   if (esisteTabella(db, 'proposta_effetto_voce') && db.prepare("SELECT 1 FROM main.proposta_effetto_voce WHERE voce_uid = ? AND stato = 'aperta' LIMIT 1").get(c.uid)) return 'ha un raccordo degli effetti ancora aperto (proposta_effetto_voce): decisione in sospeso';
   const citata = partite.filter((tabella) => db.prepare(`SELECT 1 FROM utente."${tabella}" WHERE voce_uid = ? LIMIT 1`).get(c.uid));
-  if (citata.length) return `citata nelle partite (${citata.join(', ')}): spuntata o con effetti registrati, non si riscrive`;
+  if (citata.length && !c.ancheSpuntata) return `citata nelle partite (${citata.join(', ')}): spuntata o con effetti registrati, non si riscrive`;
   return null;
 }
 
@@ -225,7 +230,7 @@ export function convertiVoce(db: AppDatabase, c: ConversioneVoce, partite: strin
     const lotto = c.lotto ?? LOTTO_FBIS;
     const id = uidDa(`${lotto}:operazione:${c.uid}:${canonico(dopo.map((e) => e.uid))}`);
     db.prepare('INSERT OR IGNORE INTO main.operazione_effetti_voce (id, voce_uid, payload_json, prima_json, dopo_json, creata_il) VALUES (?, ?, ?, ?, ?, ?)')
-      .run(id, c.uid, canonico({ lotto, motivo: c.motivo, ...(c.collega ? { collegamento: c.collega.riferimento } : {}) }), canonico({ effetti: attesi }), canonico({ effetti: dopo }), adesso);
+      .run(id, c.uid, canonico({ lotto, motivo: c.motivo, ...(c.collega ? { collegamento: c.collega.riferimento } : {}), ...(c.ancheSpuntata ? { decisioneUtente: c.ancheSpuntata.decisione } : {}) }), canonico({ effetti: attesi }), canonico({ effetti: dopo }), adesso);
   }
   if (c.collega) {
     if (db.prepare('UPDATE main.voce_giornata SET tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = NULL WHERE uid = ?')

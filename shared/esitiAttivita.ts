@@ -73,6 +73,10 @@ export interface EsitoAttivita {
   consuma?: OggettoEsito[];
   /** 2026-10-27: questo esito è la versione con il bonus dell'esito con questa chiave (alla spunta: l'interruttore «Bonus»). Assente = esito a sé. */
   bonusDi?: string;
+  /** L13 (chiusure del 31/10): la paga del turno con questo esito, in yen, al posto della paga base del lavoro (`attivita.paga_yen`): il
+   *  quiz di Ore no Beko con tutti gli ordini giusti paga 8.800 ¥ invece di 3.600. Entra da sola nel saldo registrando il turno, come la
+   *  paga base (`yenDelTurno`). Assente = la paga base. */
+  paga?: number;
 }
 export type ModoEsiti = 'scelta' | 'automatico';
 export interface EsitiAttivita { modo: ModoEsiti; esiti: EsitoAttivita[] }
@@ -84,7 +88,7 @@ export const MODI_ESITI: ReadonlyArray<{ chiave: ModoEsiti; nome: string }> = [
 /** `quantita`: le copie di un oggetto, come l'effetto «oggetto ricevuto» delle voci (`QUANTITA_MASSIMA_EFFETTO` di `effettiVoce.ts`). */
 /** `esiti` (2026-10-27, revisione): 50, perché la fabbricazione della guida ha 19 ricette, ognuna con la versione base e quella con il bonus
  *  (38 esiti); prima 20 bastavano alle 10 ricette senza le bombe. */
-export const LIMITI_ESITI = { esiti: 50, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999 } as const;
+export const LIMITI_ESITI = { esiti: 50, nome: 120, gruppo: 80, premi: 300, doti: 5, oggetti: 5, quantita: 999, paga: 9_999_999 } as const;
 const CHIAVE_ESITO = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const CHIAVE_ARTICOLO = /^[a-z0-9][a-z0-9._:/-]{0,119}$/i;
 /** La chiave di un oggetto del catalogo («consumabile/big-bang-burger»), con la stessa forma di quella di un articolo. */
@@ -108,7 +112,7 @@ export function chiaveEsitoDaNome(nome: string): string {
 /** Un esito valido o null: campi sconosciuti, chiavi storte, Doti ripetute o note fuori 1–3 non entrano (un dato storto non diventa punti). */
 function normalizzaEsito(x: unknown): EsitoAttivita | null {
   const o = oggetto(x);
-  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti', 'consuma', 'bonusDi'].includes(k))) return null;
+  if (!o || Object.keys(o).some((k) => !['chiave', 'nome', 'gruppo', 'articolo', 'condizioni', 'doti', 'premi', 'trofeo', 'oggetti', 'consuma', 'bonusDi', 'paga'].includes(k))) return null;
   const chiave = typeof o.chiave === 'string' && CHIAVE_ESITO.test(o.chiave) ? o.chiave : null;
   const nome = testo(o.nome, LIMITI_ESITI.nome);
   if (!chiave || !nome) return null;
@@ -142,7 +146,10 @@ function normalizzaEsito(x: unknown): EsitoAttivita | null {
   // 2026-10-27: la versione con il bonus di un altro esito (la chiave; se l'esito esiste lo verifica l'elenco intero)
   const bonusDi = o.bonusDi == null || o.bonusDi === '' ? undefined : typeof o.bonusDi === 'string' && CHIAVE_ESITO.test(o.bonusDi) ? o.bonusDi : null;
   if (bonusDi === null) return null;
-  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}), ...(consuma ? { consuma } : {}), ...(bonusDi ? { bonusDi } : {}) };
+  // la paga dell'esito: assente o null = la paga base (il campo non si scrive); un importo non intero o fuori 1–9.999.999 non entra
+  const paga = o.paga == null ? undefined : typeof o.paga === 'number' && Number.isInteger(o.paga) && o.paga >= 1 && o.paga <= LIMITI_ESITI.paga ? o.paga : null;
+  if (paga === null) return null;
+  return { chiave, nome, gruppo, articolo, condizioni, doti, premi, ...(trofeo ? { trofeo } : {}), ...(oggetti ? { oggetti } : {}), ...(consuma ? { consuma } : {}), ...(bonusDi ? { bonusDi } : {}), ...(paga ? { paga } : {}) };
 }
 
 /** Un elenco di oggetti per chiave e copie (`oggetti` e `consuma` di un esito): undefined se assente, null o vuoto (il campo non si scrive);
@@ -330,6 +337,8 @@ export interface EsitoDisponibileDto {
   consuma: Array<{ chiave: string; nome: string; quantita: number; disponibili: number | null }>;
   /** 2026-10-27: la chiave dell'esito base di cui questo è la versione con il bonus (al contatore: lo strumento con l'interruttore «Bonus»); null se nessuna. */
   bonusDi: string | null;
+  /** L13 (chiusure del 31/10): la paga del turno con questo esito, al posto di quella base del lavoro; null = la paga base. */
+  paga: number | null;
   /** Falso se le condizioni (dell'esito o dell'articolo) non valgono: la scelta lo mostra e il server lo rifiuta. Senza partita: vero. */
   disponibile: boolean;
   /** Le condizioni in parole («Coraggio al rango 3, solo lunedì e giovedì»), null se non ce ne sono. */

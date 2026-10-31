@@ -46,7 +46,8 @@ function prezzoEsito(e: EsitoDisponibileDto, prezzoGiaNelSaldo: boolean): string
 /** Che cosa dà l'esito oltre al nome, in parole: Doti (se gli esiti ne parlano), prezzo (se l'intestazione non lo dice), trofeo, oggetti, oggetti
  *  usati, premi. Vuoto se niente. */
 function dettaglioEsito(e: EsitoDisponibileDto, doti: boolean, prezzoGiaNelSaldo: boolean): string {
-  return [doti ? dotiTesto(e) : null, prezzoEsito(e, prezzoGiaNelSaldo), e.trofeo ? `trofeo «${e.trofeo.nome}»` : null, fraseOggettiEsito(e.oggetti), fraseConsumaEsito(e.consuma), e.premi]
+  // L13 (chiusure del 31/10): la paga dell'esito, che registrando il turno entra da sola al posto di quella base
+  return [doti ? dotiTesto(e) : null, e.paga ? `paga ${formattaYen(e.paga)}` : null, prezzoEsito(e, prezzoGiaNelSaldo), e.trofeo ? `trofeo «${e.trofeo.nome}»` : null, fraseOggettiEsito(e.oggetti), fraseConsumaEsito(e.consuma), e.premi]
     .filter((x): x is string => !!x).join(' · ');
 }
 
@@ -82,7 +83,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli, prezzoGiaNelSaldo = fa
                   aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
                   aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
                   title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
-                  aria-label={`${e.nome}${doti ? `: ${testoNoteAParole(dotiTesto(e))}` : ''}${prezzo ? `; ${prezzo}` : ''}${e.trofeo ? `; segna il trofeo ${e.trofeo.nome}` : ''}${oggetti ? `; ricevi ${oggetti}` : ''}${usa ? `; ${usa}` : ''}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
+                  aria-label={`${e.nome}${doti ? `: ${testoNoteAParole(dotiTesto(e))}` : ''}${e.paga ? `; paga ${formattaYen(e.paga)}` : ''}${prezzo ? `; ${prezzo}` : ''}${e.trofeo ? `; segna il trofeo ${e.trofeo.nome}` : ''}${oggetti ? `; ricevi ${oggetti}` : ''}${usa ? `; ${usa}` : ''}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
                   <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
                   {dettaglio && <span className="testo-12 text-text-secondary text-pretty">{dettaglio}</span>}
                   {!e.disponibile && <span id={idMotivo} className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
