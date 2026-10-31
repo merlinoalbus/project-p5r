@@ -190,9 +190,13 @@ export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
  * di `partite.db`: il vincolo di `gioco.db` non le elimina in cascata, e l'uid di un pin è l'impronta della sua identità (se si
  * ricrea un elemento identico, uno stato rimasto orfano ricomparirebbe). `uidDaTogliere` è una sottoselezione di uid
  * («SELECT uid FROM main.spillo WHERE … AND uid IS NOT NULL», o «SELECT ?» se l'uid è già noto) da valutare PRIMA di cancellare i pin.
+ * Senza lo schema delle partite (una migrazione di gioco sul pacchetto iniziale, che gira prima di quelle delle partite: O9-4, 322) non
+ * c'è nessuno stato da togliere, come per `riallineaStati` (`conPartite`).
  */
 export function togliStatiDeiPin(db: AppDatabase, uidDaTogliere: string, parametri: ReadonlyArray<string | number>): void {
-  db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
+  const conRaccolti = !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
+    && !!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'spillo_partita'").get();
+  if (conRaccolti) db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
   if (conDivergenze(db)) db.prepare(`DELETE FROM utente.divergenza_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
   if (conStatoPerInfiltrazione(db)) db.prepare(`DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
 }

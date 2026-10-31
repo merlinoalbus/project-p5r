@@ -2875,7 +2875,9 @@ export interface DungeonRiassuntoDto {
   concluso?: string | null;
   /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la
    *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04); L6 (R6-17) senza una regola che lo
-   *  copra, l'ingresso del Palazzo (`destinazionePalazzo`, la stessa del diario). Null se il Palazzo non ha mappe. */
+   *  copra, l'ingresso del Palazzo (`destinazionePalazzo`, la stessa del diario). Null se il Palazzo non ha mappe. Per i Memento (O9-4,
+   *  2026-10-31) solo una regola o uno spillo d'ingresso veri (`destinazioneDellaVoce`), mai una planimetria di ripiego: senza, null e la
+   *  mappa di Tokyo apre la scheda dei Memento. */
   atterraggio: { mappa: string; spillo: number | null } | null;
   /** L4 (§1.5): il completamento con la funzione unica — oggetti permanenti, Tesoro, boss finale (`shared/completamentoGuida.ts`); i
    *  campi della partita null senza partita. Per i Palazzi; assente per i Memento. `raccolta` resta l'elenco dei collezionabili, con lo

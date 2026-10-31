@@ -381,6 +381,10 @@ import { migration319 } from './319_bagno_esito_dalla_voce.js';
 // del periodo validato applicate e le 4 consegne dovute solo con un set comprato (321)
 import { migration320 } from './320_voce_condizioni.js';
 import { migration321 } from './321_televendite_proposte_e_consegne.js';
+// 2026-10-31 (L13, ondata 9, O9-4: «Planimetrie delle aree fisse dei Memento si possono rimuovere» e «Vanno tolte le seguenti: [...] si
+// possono proprio rimuovere»): le 8 planimetrie «Memento - aree fisse — Strutture che i Memento riusano» e i loro 19 pin, con asset e
+// miniature, tolte nel Cestino (una riga per mappa, ripristinabile)
+import { migration322 } from './322_memento_aree_fisse_rimosse.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -405,5 +409,5 @@ export const migrations: Migration[] = [
   migration290, migration291, migration292, migration293, migration294, migration295, migration296, migration297, migration298, migration299,
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
-  migration320, migration321,
+  migration320, migration321, migration322,
 ];

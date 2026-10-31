@@ -10,9 +10,11 @@
 // deduplicazione) né la posizione (le versioni sono ritagli diversi: stessa cosa, posizioni diverse).
 //
 // Il ramo dei Memento (L11 B6) è una radice accanto a Tokyo: Memento › dedali › aree del dedalo (senza planimetrie). Ogni dedalo porta
-// per casa il suo menù nella scheda dei Memento (`?area=`), ogni area del dedalo anche la zona (`&zona=`). Le dieci mappe dei Memento che
-// non hanno un'Area (l'entrata e i fogli delle strutture fisse) sono foglie del nodo Memento, con il visore per casa: per quelle mappe il
-// visore è l'unica pagina. Iweleth (L8 B7) sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono
+// per casa il suo menù nella scheda dei Memento (`?area=`), ogni area del dedalo anche la zona (`&zona=`). Le mappe dei Memento che non
+// hanno un'Area (l'entrata, `citta-mementos`, e ogni mappa figlia della radice `dungeon-mementos` senza Area) sono foglie del nodo Memento,
+// con il visore per casa: per quelle mappe il visore è l'unica pagina. La regola è strutturale (genitore e Area), mai il nome: gli otto fogli
+// delle strutture fisse («Memento - aree fisse — …») sono stati tolti il 2026-10-31 (O9-4, migrazione 322, «Planimetrie delle aree fisse dei
+// Memento si possono rimuovere»). Iweleth (L8 B7) sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono
 // l'«Archivio del Palazzo» dentro il suo dedalo, perché non perdano il posto.
 //
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
@@ -52,8 +54,6 @@ interface RigaAreaDedaloG { chiave: string; nome: string; dedalo_chiave: string 
 interface RigaFoglioG extends RigaPerIllustrazione { nome: string; versione_etichetta: string | null; versione_ordine: number | null }
 /** Il conteggio di qualcosa per chiave (di dedalo o di area del dedalo). */
 interface RigaConteggioG { chiave: string; n: number }
-/** Il prefisso che l'estrattore ha dato ai fogli delle strutture fisse dei Memento: il nome utile è quel che segue. */
-const PREFISSO_FOGLIO = /^Memento - aree fisse — Strutture che i Memento riusano(?: — )?/;
 interface RigaPlanimetriaG extends RigaPerIllustrazione {
   nome: string; area_chiave: string; versione_etichetta: string | null; versione_ordine: number;
 }
@@ -111,7 +111,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const conInfiltrazioni = [...palazzi, ...confluiti];
   const infiltrazioniDeiPalazzi = (conInfiltrazioni.length === 0 ? [] : prepared(`SELECT chiave, nome, ordine, dungeon_chiave FROM dungeon_area
       WHERE dungeon_chiave IN (${conInfiltrazioni.map(() => '?').join(',')}) ORDER BY ordine, chiave`).all(...conInfiltrazioni.map((p) => p.chiave))) as Array<InfiltrazioneDellArea & { dungeon_chiave: string }>;
-  // il ramo dei Memento: dedali, aree dei dedali, conteggi per chiave e i fogli senza Area (una lettura ciascuno, nessuna query per nodo)
+  // il ramo dei Memento: dedali, aree dei dedali, conteggi per chiave e le mappe senza Area (una lettura ciascuno, nessuna query per nodo)
   const memento = (conAree() ? prepared("SELECT chiave, nome FROM dungeon WHERE tipo = 'mementos' ORDER BY ordine, chiave LIMIT 1").get() : undefined) as RigaPalazzoG | undefined;
   const dedali = (memento ? prepared('SELECT chiave, nome FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(memento.chiave) : []) as RigaDedaloG[];
   const areeDedali = (memento ? prepared(`SELECT ad.chiave, ad.nome, ad.dedalo_chiave FROM area_dedalo ad JOIN dungeon_area a ON a.chiave = ad.dedalo_chiave
@@ -235,7 +235,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
 
   // ---- Memento › dedali › aree del dedalo (L11 B6) ----
   // Un'area del dedalo non ha planimetrie: è una foglia, e la sua casa apre il dedalo con quella zona. Il dedalo confluito (Iweleth) porta in
-  // più l'archivio del suo vecchio Palazzo. I fogli senza Area sono foglie del Memento, col visore (l'unica pagina che li mostra).
+  // più l'archivio del suo vecchio Palazzo. Le mappe senza Area (oggi l'entrata) sono foglie del Memento, col visore (l'unica pagina che le mostra).
   const nodoAreaDedalo = (a: RigaAreaDedaloG): NodoGerarchiaDto => ({
     tipo: 'area-dedalo', chiave: a.chiave, nome: a.nome, casa: casaDelDedalo(a.dedalo_chiave, a.chiave), immagine: null,
     conteggi: { persone: personeDellArea.get(a.chiave) ?? 0, trame: trameDellArea.get(a.chiave) ?? 0, richieste: richiesteDellArea.get(a.chiave) ?? 0, pin: vuoti() },
@@ -254,14 +254,13 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
       figli: archivio ? [...figliAree, archivio] : figliAree,
     };
   };
-  const nodoFoglio = (f: RigaFoglioG, indice: number): NodoGerarchiaDto => {
-    const dalNome = f.nome.replace(PREFISSO_FOGLIO, '').trim();
-    return {
-      tipo: 'planimetria', chiave: chiaveMappa(f.chiave), nome: f.versione_etichetta?.trim() || dalNome || `Struttura fissa ${indice + 1}`,
-      casa: casaDellaMappa({ chiave: f.chiave, tipo: 'luogo', area_chiave: null }, ctx), immagine: illustrazioneDaRiga(f, caricate),
-      conteggi: { pin: pinPropri(f.chiave) }, figli: [],
-    };
-  };
+  // il nome della foglia: l'etichetta della versione se c'è, altrimenti il nome della mappa (nessuna regola sul nome: dal 2026-10-31,
+  // O9-4, i fogli delle strutture fisse con il loro prefisso non ci sono più, migrazione 322)
+  const nodoFoglio = (f: RigaFoglioG): NodoGerarchiaDto => ({
+    tipo: 'planimetria', chiave: chiaveMappa(f.chiave), nome: f.versione_etichetta?.trim() || f.nome,
+    casa: casaDellaMappa({ chiave: f.chiave, tipo: 'luogo', area_chiave: null }, ctx), immagine: illustrazioneDaRiga(f, caricate),
+    conteggi: { pin: pinPropri(f.chiave) }, figli: [],
+  });
   const nodoMemento: NodoGerarchiaDto | undefined = memento ? (() => {
     const figliDedali = dedali.map(nodoDedalo);
     const figliFogli = fogli.map(nodoFoglio);
