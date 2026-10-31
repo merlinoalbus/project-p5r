@@ -331,6 +331,16 @@ class Esistenze {
     const s = this.insiemi.get(k);
     return s ? s.has(valore) : null;
   }
+  /** L13 (O11-1): il Confidente è romanzabile (`confidente.romanzabile = 1`); null se la colonna non c'è (prima della 324: non si può dire). */
+  private romanzabili: Set<string> | null | undefined;
+  romanzabile(chiave: string): boolean | null {
+    if (this.romanzabili === undefined) {
+      this.romanzabili = haTabella(this.db, 'confidente') && haColonna(this.db, 'confidente', 'romanzabile')
+        ? new Set(this.db.prepare('SELECT chiave FROM main.confidente WHERE romanzabile = 1').pluck().all() as string[])
+        : null;
+    }
+    return this.romanzabili ? this.romanzabili.has(chiave) : null;
+  }
 }
 
 /** Una chiave citata da una condizione che non esiste: il posto dove andrebbe cercata e la frase che lo dice; null se c'è (o non si può dire). */
@@ -341,6 +351,9 @@ function chiaveMancante(c: RequisitoSpillo, e: Esistenze): string | null {
     case 'luogo': return manca('luogo', 'chiave', c.luogo, 'Il luogo');
     case 'quartiere': return manca('quartiere', 'chiave', c.quartiere, 'Il quartiere');
     case 'confidente': return manca('confidente', 'chiave', c.confidente, 'Il Confidente');
+    // L13 (O11-1): la relazione romantica vuole un Confidente che c'è e che sia romanzabile (`confidente.romanzabile`)
+    case 'relazione-romantica': return manca('confidente', 'chiave', c.confidente, 'Il Confidente')
+      ?? (e.romanzabile(c.confidente) === false ? `Il Confidente «${c.confidente}» non è romanzabile` : null);
     case 'invito': return manca('confidente_invito', 'chiave', c.invito, 'L\'invito');
     case 'richiesta': return manca('richiesta', 'chiave', c.richiesta, 'La richiesta');
     case 'sblocco': return c.bersaglio === 'richiesta' ? manca('richiesta', 'chiave', c.chiave, 'La richiesta') : manca('attivita', 'chiave', c.chiave, 'L\'attività');

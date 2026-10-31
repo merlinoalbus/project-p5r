@@ -21,7 +21,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { eGiornoFestivo, giornoDellUltimoRango, giorniDalGiorno, verdettoDelConfidente, type StatoDelRamo } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
-import { relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
+import { relazioneAlRango, relazioneRomantica, relazioniConGiorno } from './relazioneRomanticaService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -72,6 +72,9 @@ export interface StatoPartitaSemafori {
   conferme?: Set<string>;
   /** La partita dello stato: il semaforo della disponibilità legge da qui il giorno dell'ultimo rango (registro degli incontri). Assente = non si sa. */
   partitaId?: number;
+  /** L13 (O11-1, risposta dell'utente «Sì, in automatico»): le relazioni romantiche della partita con il giorno d'inizio (null = non registrato),
+   *  dal punto unico `relazioniConGiorno`; le leggono le condizioni `relazione-romantica` e `relazioni-romantiche`. Assente = nessuna relazione. */
+  relazioniRomantiche?: ReadonlyMap<string, string | null>;
 }
 
 /** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,
@@ -109,7 +112,32 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca };
+  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
+    relazioniRomantiche: relazioniConGiorno(partitaId) };
+}
+
+/** I tipi di condizione che leggono SOLO ranghi dei Confidenti, Doti, giorno e fascia di gioco e relazioni romantiche (più i contenitori
+ *  `gruppo` e `non`, che valutano quel che hanno dentro): per questi lo stato essenziale dà lo stesso esito dello stato completo. */
+export const TIPI_DELLO_STATO_ESSENZIALE: ReadonlySet<RequisitoSpillo['tipo']> = new Set<RequisitoSpillo['tipo']>(
+  ['da-subito', 'data', 'intervallo', 'dote', 'confidente', 'relazione-romantica', 'relazioni-romantiche', 'gruppo', 'non']);
+
+/** Vero se ogni condizione (anche dentro `gruppo` e `non`) è di un tipo che lo stato essenziale sa valutare. */
+export function bastaLoStatoEssenziale(condizioni: readonly RequisitoSpillo[]): boolean {
+  return condizioni.every((c) => TIPI_DELLO_STATO_ESSENZIALE.has(c.tipo)
+    && (c.tipo !== 'gruppo' || bastaLoStatoEssenziale(c.condizioni))
+    && (c.tipo !== 'non' || bastaLoStatoEssenziale([c.condizione])));
+}
+
+/** L13 (O11-1, revisione: prestazioni dei doni dei Confidenti, letti per ogni oggetto): lo stato della partita ridotto a ranghi, Doti, giorno e
+ *  fascia di gioco e relazioni romantiche (dal punto unico `relazioniConGiorno`), senza Palazzi, scorta, Richieste, pesca e meteo. Vale SOLO per
+ *  condizioni che `bastaLoStatoEssenziale` accetta: per quelle il valutatore unico dà lo stesso esito di `statoPartitaSemafori`; ogni altra
+ *  condizione va valutata sullo stato completo. Ranghi e Doti li passa chi chiama, come per lo stato completo. */
+export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
+  const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
+  return { partitaId, doti, ranghiConfidenti, dataGioco: partita?.data_gioco ?? null, fasciaGioco: partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null,
+    relazioniRomantiche: relazioniConGiorno(partitaId),
+    arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziConclusi: new Map(), richiesteCompletate: new Set(), membriSquadra: new Set(), membriFuoriSquadra: new Set(),
+    meteoOra: null, eventi: new Set() };
 }
 
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */

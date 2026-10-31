@@ -58,6 +58,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'palazzo': { const p = e.base.dungeon.filter((d) => d.tipo === 'palazzo' && d.regolaBoss !== 'memento'); return (p.length ? p : PALAZZI_CONDIZIONE.filter((d) => d.chiave !== 'iweleth')).map((d) => ({ chiave: d.chiave, nome: d.nome })); }
     case 'dote': return DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome }));
     case 'confidente': return e.base.confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcana }));
+    // L13 (O11-1): i soli Confidenti romanzabili, dal DB (`GET /condizioni/elenchi` → `romanzabili`)
+    case 'confidente-romanzabile': return e.extra.romanzabili ?? [];
     case 'membro': return e.extra.squadra;
     case 'richiesta': return e.base.richieste.map((r) => ({ chiave: r.chiave, nome: r.nome }));
     case 'libro': return e.extra.letture.filter((l) => l.categoria === 'libro');
@@ -133,6 +135,7 @@ function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: Camp
     case 'rango5': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={5} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'rango10': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'volte': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'relazioni': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 0} min={0} max={9} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'almeno': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={9999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'punti': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 50} min={10} max={999990} passo={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     default: return <Selettore ricerca="sempre" etichetta={campo.etichetta} valore={typeof v === 'string' ? v : ''} opzioni={opzioniPer(campo.tipo, elenchi)} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;

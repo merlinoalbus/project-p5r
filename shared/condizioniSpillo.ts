@@ -138,6 +138,12 @@ export type RequisitoSpillo =
   | { tipo: 'palazzo'; dungeon: string }
   | { tipo: 'dote'; dote: string; rango: number }
   | { tipo: 'confidente'; confidente: string; rango: number }
+  /** L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» sui doni «se fidanzata»): nella partita c'è la relazione
+   *  romantica con quel Confidente (romanzabile, `confidente.romanzabile`) e, se c'è `entro` (MM-GG), è iniziata entro quel giorno
+   *  (`utente.confidente_partita.relazione_romantica_dal`). Un prerequisito, non una presenza. */
+  | { tipo: 'relazione-romantica'; confidente: string; entro?: string }
+  /** L13 (O11-1): le relazioni romantiche della partita (iniziate entro `entro`, se c'è) sono al più `al_piu` (0..9): 0 = «senza fidanzata». */
+  | { tipo: 'relazioni-romantiche'; al_piu: number; entro?: string }
   /** Un Ladro Fantasma è in squadra: lo dice la partita (Partita → Denaro e squadra). */
   | { tipo: 'squadra'; membro: string }
   | { tipo: 'richiesta'; richiesta: string }
@@ -350,6 +356,14 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'palazzo': return `dopo il ${nomePalazzo(r.dungeon, nomi)}`;
     case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
+    // L13 (O11-1): «relazione romantica con Ann, iniziata entro il 24 dicembre»
+    case 'relazione-romantica': return `relazione romantica con ${nomi.confidenti?.[r.confidente] ?? r.confidente}${r.entro ? `, iniziata entro ${conArticolo(dataLeggibile(r.entro))}` : ''}`;
+    // L13 (O11-1): «nessuna relazione romantica», «al più una relazione romantica (entro il 24 dicembre)»
+    case 'relazioni-romantiche': {
+      const entro = r.entro ? conArticolo(dataLeggibile(r.entro)) : null;
+      if (r.al_piu === 0) return `nessuna relazione romantica${entro ? ` iniziata entro ${entro}` : ''}`;
+      return `al più ${r.al_piu === 1 ? 'una relazione romantica' : `${r.al_piu} relazioni romantiche`}${entro ? ` (entro ${entro})` : ''}`;
+    }
     case 'squadra': return `${nomi.squadra?.[r.membro] ?? nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
     case 'sblocco': return r.bersaglio === 'richiesta'
@@ -443,6 +457,19 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }
     case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
+    // L13 (O11-1): `entro` assente o una data valida (un valore presente ma non valido rende la condizione non valida)
+    case 'relazione-romantica': {
+      const confidente = chiavePulita(o.confidente, 60);
+      const entro = o.entro === undefined ? undefined : testoPulito(o.entro, 5);
+      if (!confidente || entro === null || (entro !== undefined && !dataValida(entro))) return null;
+      return entro === undefined ? { tipo: 'relazione-romantica', confidente } : { tipo: 'relazione-romantica', confidente, entro };
+    }
+    case 'relazioni-romantiche': {
+      const alPiu = intero(o.al_piu, 0, 9);
+      const entro = o.entro === undefined ? undefined : testoPulito(o.entro, 5);
+      if (alPiu === null || entro === null || (entro !== undefined && !dataValida(entro))) return null;
+      return entro === undefined ? { tipo: 'relazioni-romantiche', al_piu: alPiu } : { tipo: 'relazioni-romantiche', al_piu: alPiu, entro };
+    }
     case 'squadra': { const membro = chiavePulita(o.membro, 60); return membro ? { tipo: 'squadra', membro } : null; }
     case 'richiesta': { const richiesta = testoPulito(o.richiesta, 200); return richiesta ? { tipo: 'richiesta', richiesta } : null; }
     case 'sblocco': { const chiave = chiavePulita(o.chiave, 120); return chiave && (o.bersaglio === 'richiesta' || o.bersaglio === 'attivita') ? { tipo: 'sblocco', bersaglio: o.bersaglio, chiave } : null; }

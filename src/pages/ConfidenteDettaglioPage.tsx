@@ -320,7 +320,7 @@ export function ConfidenteDettaglioPage() {
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">
             <TitoloSezione>Oggetti ricevuti</TitoloSezione>
-            <p className="m-0 testo-12 text-text-muted">Doni del Confidente secondo la guida, con le rispettive condizioni. Non sono i regali da consegnargli e non risultano automaticamente ottenuti.</p>
+            <p className="m-0 text-pretty testo-12 text-text-muted">Doni del Confidente secondo la guida. Quelli con la regola («Dal …») arrivano da soli nella partita quando la regola vale (Partita → Denaro e squadra); non sono i regali da consegnargli.</p>
             <OggettiCollegati oggetti={c.oggettiRicompensa} />
           </section>}
 

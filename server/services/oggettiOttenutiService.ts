@@ -52,6 +52,8 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
       Array<{ catalogo_chiave: string; quantita: number; attivita_chiave: string; ordine: number; esito_chiave: string; attivita_nome: string | null; nome: string | null; categoria: string | null }>
     : [];
   const nomeEsito = (attivita: string, esito: string): string => esitiDellAttivita(attivita)?.esiti?.esiti.find((e) => e.chiave === esito)?.nome ?? esito;
+  // i doni dei Confidenti valutati una volta sola per tutta la lettura: le righe e le copie di ogni oggetto (revisione di O11-1, prestazioni)
+  const doni = doniConfidentiOttenuti(partitaId);
   const righe: OggettoOttenutoDto[] = [
     ...daVoci.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
       origine: { tipo: 'voce', voceUid: o.voce_uid, giorno: o.data, testo: o.azione } })),
@@ -60,7 +62,7 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
     ...daTurni.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
       origine: { tipo: 'turno', attivita: o.attivita_chiave, attivitaNome: o.attivita_nome ?? o.attivita_chiave, ordine: o.ordine, esitoNome: nomeEsito(o.attivita_chiave, o.esito_chiave) } })),
     // Ondata 5 (lotto F-bis): i doni dei Confidenti meritati adesso (rango e giorno)
-    ...doniConfidentiOttenuti(partitaId).map((d): OggettoOttenutoDto => {
+    ...doni.map((d): OggettoOttenutoDto => {
       const s = scheda(d.catalogo);
       return { catalogoChiave: d.catalogo, nome: s.nome, categoria: s.categoria, quantita: d.quantita, origine: { tipo: 'confidente', confidente: d.confidente, nome: nomeConfidente(d.confidente) } };
     }),
@@ -90,7 +92,7 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
   // Rilievo della revisione (R2): le cifre di ogni oggetto vengono dalla stessa lettura delle copie della scelta dell'esito e di «Regala»
   // (`dettaglioCopie`): comprate, regalate, cedute negli scambi e quelle che restano; mai un «×0» accanto a una copia usata che si era comprata
   for (const t of totali.values()) {
-    const d = dettaglioCopie(partitaId, t.catalogoChiave);
+    const d = dettaglioCopie(partitaId, t.catalogoChiave, doni);
     t.comprate = d.comprate; t.regalate = d.regalate; t.cedute = d.cedute; t.disponibili = d.disponibili;
   }
   return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')), consumi };

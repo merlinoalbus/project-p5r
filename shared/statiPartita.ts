@@ -28,7 +28,9 @@ export type TipoCampo =
   | 'arcano' | 'persona' | 'abilita'
   | 'spillo' | 'voce-guida'
   // L6: un luogo (scelto per nome, salvato per chiave), un invito di un Confidente, il testo di un avviso
-  | 'luogo' | 'invito' | 'testo';
+  | 'luogo' | 'invito' | 'testo'
+  // L13 (O11-1): un Confidente romanzabile (elenco dal DB, `confidente.romanzabile`) e il numero massimo di relazioni romantiche (0..9)
+  | 'confidente-romanzabile' | 'relazioni';
 
 export interface CampoCondizione { nome: string; tipo: TipoCampo; etichetta: string }
 export interface OperatoreCondizione { chiave: string; nome: string; campi: CampoCondizione[] }
@@ -85,6 +87,13 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   { chiave: 'avviso', nome: 'Avviso', gruppo: 'Storia e progressi', origine: 'da controllare nel gioco: non blocca mai', operatori: [{ chiave: 'testo', nome: 'da controllare', campi: [campo('testo', 'testo', 'Testo')] }] },
   { chiave: 'dote', nome: 'Dote sociale', gruppo: 'Storia e progressi', origine: 'Partita → Doti sociali', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('dote', 'dote', 'Dote'), campo('rango', 'rango5', 'Rango')] }] },
   { chiave: 'confidente', nome: 'Confidente', gruppo: 'Storia e progressi', origine: 'Partita → Confidenti', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('confidente', 'confidente', 'Confidente'), campo('rango', 'rango10', 'Rango')] }] },
+  // L13 (O11-1, risposta dell'utente «Sì, in automatico»): la relazione romantica della partita, con il giorno d'inizio facoltativo («entro»)
+  { chiave: 'relazione-romantica', nome: 'Relazione romantica', gruppo: 'Storia e progressi', origine: 'scheda del Confidente o scelta alla spunta del rango 9', operatori: [
+    { chiave: 'con', nome: 'con', campi: [campo('confidente', 'confidente-romanzabile', 'Confidente')] },
+    { chiave: 'con-entro', nome: 'con, iniziata entro', campi: [campo('confidente', 'confidente-romanzabile', 'Confidente'), campo('entro', 'data', 'Entro il')] },
+    { chiave: 'al-piu', nome: 'al più', campi: [campo('al_piu', 'relazioni', 'Relazioni')] },
+    { chiave: 'al-piu-entro', nome: 'al più, iniziate entro', campi: [campo('al_piu', 'relazioni', 'Relazioni'), campo('entro', 'data', 'Entro il')] },
+  ] },
   { chiave: 'squadra', nome: 'Ladro Fantasma', gruppo: 'Storia e progressi', origine: 'Partita → Denaro e squadra', operatori: [{ chiave: 'in-squadra', nome: 'in squadra', campi: [campo('membro', 'membro', 'Ladro')] }] },
   { chiave: 'richiesta', nome: 'Richiesta dei Mementos', gruppo: 'Storia e progressi', origine: 'Guida → Richieste', operatori: [{ chiave: 'completata', nome: 'completata', campi: [campo('richiesta', 'richiesta', 'Richiesta')] }] },
   { chiave: 'evento', nome: 'Evento di storia', gruppo: 'Storia e progressi', origine: 'Partita → Progressi', operatori: [{ chiave: 'avvenuto', nome: 'avvenuto', campi: [campo('evento', 'evento', 'Evento')] }] },
@@ -124,7 +133,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
   data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
   stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
-  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
+  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', 'relazione-romantica': 'relazione-romantica', 'relazioni-romantiche': 'relazione-romantica', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
   attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
   'pesca-sessione':'pesca-sessione',
   'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
@@ -159,6 +168,7 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
     case 'dato-pesca': return 'esca-speciale';
     case 'contatore': return CONTATORI[0].chiave;
     case 'almeno': return 1;
+    case 'relazioni': return 0;
     case 'testo': return 'Da controllare nel gioco';
     default: return '';
   }
@@ -201,6 +211,17 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
     case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
     case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= 10 ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
+    case 'relazione-romantica': {
+      const entro = scelta.operatore === 'con-entro' || scelta.operatore === 'al-piu-entro' ? s(v.entro) : undefined;
+      if (entro !== undefined && !dataValida(entro)) return null;
+      if (scelta.operatore === 'con' || scelta.operatore === 'con-entro') {
+        return s(v.confidente) ? { tipo: 'relazione-romantica', confidente: s(v.confidente), ...(entro !== undefined ? { entro } : {}) } : null;
+      }
+      if (scelta.operatore === 'al-piu' || scelta.operatore === 'al-piu-entro') {
+        return n(v.al_piu) >= 0 && n(v.al_piu) <= 9 ? { tipo: 'relazioni-romantiche', al_piu: n(v.al_piu), ...(entro !== undefined ? { entro } : {}) } : null;
+      }
+      return null;
+    }
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;
     case 'sblocco': return s(v.chiave) && (scelta.operatore === 'richiesta' || scelta.operatore === 'attivita') ? { tipo: 'sblocco', bersaglio: scelta.operatore, chiave: s(v.chiave) } : null;
@@ -243,6 +264,12 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'palazzo': return { stato: 'palazzo', operatore: 'completato', valori: { dungeon: c.dungeon } };
     case 'dote': return { stato: 'dote', operatore: 'almeno', valori: { dote: c.dote, rango: c.rango } };
     case 'confidente': return { stato: 'confidente', operatore: 'almeno', valori: { confidente: c.confidente, rango: c.rango } };
+    case 'relazione-romantica': return c.entro !== undefined
+      ? { stato: 'relazione-romantica', operatore: 'con-entro', valori: { confidente: c.confidente, entro: c.entro } }
+      : { stato: 'relazione-romantica', operatore: 'con', valori: { confidente: c.confidente } };
+    case 'relazioni-romantiche': return c.entro !== undefined
+      ? { stato: 'relazione-romantica', operatore: 'al-piu-entro', valori: { al_piu: c.al_piu, entro: c.entro } }
+      : { stato: 'relazione-romantica', operatore: 'al-piu', valori: { al_piu: c.al_piu } };
     case 'squadra': return { stato: 'squadra', operatore: 'in-squadra', valori: { membro: c.membro } };
     case 'richiesta': return { stato: 'richiesta', operatore: 'completata', valori: { richiesta: c.richiesta } };
     case 'sblocco': return { stato: 'sblocco', operatore: c.bersaglio, valori: { chiave: c.chiave } };

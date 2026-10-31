@@ -27,6 +27,7 @@ import type { DisponibilitaDto, EsitoCondizione, RequisitoRango, SemaforoRequisi
 import type { StatoDisponibilita } from '../disponibilitaService.js';
 import type { StatoPartitaSemafori } from '../semaforiService.js';
 import { EVENTI_PESCA } from '../../../shared/pesca.js';
+import { confidentiRomanzabili } from '../relazioneRomanticaService.js';
 
 /** Lo stato che il valutatore legge: quello dei semafori, con quel che serve alle condizioni del catalogo e dei pin quando c'è (chi valuta
  *  solo requisiti di rango può passare lo stato dei semafori: quel che manca vale «niente», mai un errore). */
@@ -265,6 +266,33 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     case 'confidente': {
       const attuale = st.ranghiConfidenti.get(r.confidente) ?? 0;
       return esito('confidente', attuale >= r.rango ? 'verde' : 'rosso', `${t('confidente', r.confidente)}: rango ${attuale} di ${r.rango}`);
+    }
+    // L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» sui doni «se fidanzata»): la relazione romantica della
+    // partita (`relazioniConGiorno`, nello stato) con il giorno d'inizio. Un `entro` senza giorno registrato non si può dire: grigio, bloccante
+    case 'relazione-romantica': {
+      const nome = nomi().confidenti?.[r.confidente] ?? t('confidente', r.confidente);
+      if (!confidentiRomanzabili().has(r.confidente)) return esito('relazione-romantica', 'grigio', `Con ${nome} non si può iniziare una relazione romantica: correggi la condizione`);
+      const relazioni = st.relazioniRomantiche;
+      if (!relazioni?.has(r.confidente)) return esito('relazione-romantica', 'rosso', `Nessuna relazione romantica con ${nome} (scheda del Confidente o scelta alla spunta del rango 9)`);
+      const dal = relazioni.get(r.confidente) ?? null;
+      if (!r.entro) return esito('relazione-romantica', 'verde', `Relazione romantica con ${nome}${dal ? ` dal ${dataLeggibile(dal)}` : ''}`);
+      if (dal === null) return esito('relazione-romantica', 'grigio', `Relazione romantica con ${nome}: giorno d’inizio della relazione non registrato: segnala di nuovo dalla scheda`);
+      const inTempo = ordineGioco(dal) <= ordineGioco(r.entro);
+      return esito('relazione-romantica', inTempo ? 'verde' : 'rosso', inTempo
+        ? `Relazione romantica con ${nome} dal ${dataLeggibile(dal)} (entro il ${dataLeggibile(r.entro)})`
+        : `Relazione romantica con ${nome} iniziata il ${dataLeggibile(dal)}, dopo il ${dataLeggibile(r.entro)}`);
+    }
+    case 'relazioni-romantiche': {
+      // una relazione senza giorno d'inizio conta come presente anche con `entro` (prudente: «senza fidanzata» non si dà per vero senza saperlo)
+      const n = nomi();
+      const contate = [...(st.relazioniRomantiche ?? new Map<string, string | null>())]
+        .filter(([, dal]) => !r.entro || dal === null || ordineGioco(dal) <= ordineGioco(r.entro))
+        .map(([c]) => n.confidenti?.[c] ?? t('confidente', c));
+      const ok = contate.length <= r.al_piu;
+      const quando = (plurale: boolean) => (r.entro ? ` ${plurale ? 'iniziate' : 'iniziata'} entro il ${dataLeggibile(r.entro)}` : '');
+      return esito('relazioni-romantiche', ok ? 'verde' : 'rosso', contate.length === 0
+        ? `Nessuna relazione romantica${quando(false)}`
+        : `${contate.length === 1 ? 'Una relazione romantica' : `${contate.length} relazioni romantiche`}${quando(contate.length > 1)} (${contate.join(', ')}): al più ${r.al_piu === 0 ? 'nessuna' : r.al_piu}`);
     }
     case 'squadra': {
       // Il protagonista nel gruppo c'è sempre. **Due risposte, non tre** (2026-09-13): un Ladro che non risulta nel gruppo non c'è

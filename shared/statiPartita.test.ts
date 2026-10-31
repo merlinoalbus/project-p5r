@@ -9,7 +9,11 @@ const CAMPIONE: RequisitoSpillo[] = [
   { tipo: 'data', dal: '04-18' }, { tipo: 'intervallo', dal: '04-24', al: '04-24' }, { tipo: 'intervallo', dal: '07-26', al: '07-30' },
   { tipo: 'fascia', fascia: 'sera' }, { tipo: 'piove' }, { tipo: 'meteo', condizione: 'non-piove' }, { tipo: 'giorno-settimana', giorni: ['lunedi', 'domenica'] },
   { tipo: 'stagione', stagione: 'estate' }, { tipo: 'quartiere', quartiere: 'akihabara' }, { tipo: 'arco', dungeon: 'madarame' }, { tipo: 'palazzo', dungeon: 'kamoshida' },
-  { tipo: 'dote', dote: 'coraggio', rango: 3 }, { tipo: 'confidente', confidente: 'sojiro', rango: 4 }, { tipo: 'squadra', membro: 'ann' }, { tipo: 'richiesta', richiesta: 'lo-zio-ingordo' },
+  { tipo: 'dote', dote: 'coraggio', rango: 3 }, { tipo: 'confidente', confidente: 'sojiro', rango: 4 },
+  // L13 (O11-1): la relazione romantica, con e senza il giorno «entro», e il numero massimo di relazioni (0 = senza fidanzata)
+  { tipo: 'relazione-romantica', confidente: 'ann' }, { tipo: 'relazione-romantica', confidente: 'makoto', entro: '12-24' },
+  { tipo: 'relazioni-romantiche', al_piu: 0 }, { tipo: 'relazioni-romantiche', al_piu: 1, entro: '02-14' },
+  { tipo: 'squadra', membro: 'ann' }, { tipo: 'richiesta', richiesta: 'lo-zio-ingordo' },
   { tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'contatore', cosa: 'film-completati', almeno: 2 }, { tipo: 'lettura', categoria: 'libro', chiave: 'x' }, { tipo: 'lettura', categoria: 'film', chiave: 'y' },
   { tipo: 'attivita', attivita: 'biliardo', volte: 3 }, { tipo: 'articolo', articolo: 'a/b' }, { tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'nero' }, { tipo: 'punti-negozio', negozio: 'v', punti: 50 },
   { tipo: 'persona-arcano', arcano: 'Fool' }, { tipo: 'persona-abilita', persona: 'Pixie', abilita: 'Dia' },
@@ -43,6 +47,9 @@ describe('costruisciCondizione / scomponiCondizione', () => {
     expect(costruisciCondizione({ stato: 'giorno-settimana', operatore: 'in', valori: { giorni: [] } })).toBeNull();
     expect(costruisciCondizione({ stato: 'evento', operatore: 'avvenuto', valori: { evento: 'inventato' } })).toBeNull();
     expect(costruisciCondizione({ stato: 'inesistente', operatore: 'x', valori: {} })).toBeNull();
+    // L13 (O11-1)
+    expect(costruisciCondizione({ stato: 'relazione-romantica', operatore: 'al-piu', valori: { al_piu: 10 } })).toBeNull();
+    expect(costruisciCondizione({ stato: 'relazione-romantica', operatore: 'con-entro', valori: { confidente: 'ann', entro: '02-30' } })).toBeNull();
   });
 
   it('i valori predefiniti di ogni campo fisso producono subito una condizione valida', () => {

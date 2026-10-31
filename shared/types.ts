@@ -1362,7 +1362,10 @@ export interface EffettiAzioneDto {
     doti: Array<{ chiave: string; nome: string; delta: number; note: number }>; trofeo?: { chiave: string; nome: string } }>;
   /** L13 (O10-2): la relazione romantica segnata dalla spunta del passaggio al rango 9 (la scelta alla spunta), com'era (`prima`) e com'è
    *  diventata (`dopo`): togliendo la spunta torna `prima`, solo se nella partita vale ancora `dopo`. Assente se la spunta non l'ha cambiata. */
-  relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean };
+  relazione?: { confidente: string; nome: string; prima: boolean; dopo: boolean;
+    /** L13 (O11-1): il giorno d'inizio della relazione di prima (MM-GG, null senza relazione o senza giorno), per rimetterlo togliendo la spunta;
+     *  manca nelle ricevute scritte prima della migrazione utente 060 (vale null). */
+    primaDal?: string | null };
 }
 
 export interface RiferimentoAzioneDto {
@@ -3661,6 +3664,8 @@ export interface ElenchiRegoleDto {
   quartieri?: Array<{ chiave: string; nome: string }>;
   /** L6: gli inviti dei Confidenti (in sola lettura nell'editor: si cambiano dalla pagina del Confidente), col Confidente come gruppo. */
   inviti?: Array<{ chiave: string; nome: string; gruppo: string; confidente: string }>;
+  /** L13 (O11-1): i Confidenti romanzabili (`confidente.romanzabile`), per la condizione «Relazione romantica con». */
+  romanzabili?: Array<{ chiave: string; nome: string }>;
 }
 
 /** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
@@ -3743,7 +3748,11 @@ export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisi
 export interface RiferimentoOggettoDto { chiave: string; nome: string; casa: string }
 export interface ContenutoOggettoDto extends RiferimentoOggettoDto { quantita: number; nota: string | null }
 /** La guida può nominare il prodotto di una ricetta senza dichiararne la resa. Non equivale a una unità. */
-export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null }
+export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null;
+  /** L13 (ondata 11, O11-3): solo nei doni della scheda del Confidente, la regola con cui il dono arriva da solo nella partita, in parole
+   *  generate dal dato (`ricompensa_oggetto.condizioni_json`: «Dal 24 dicembre · relazione romantica con Ann Takamaki, …»); null senza regola,
+   *  assente nelle altre fonti. */
+  condizione?: string | null }
 export type CostoOggettoDto = { tipo: TipoCostoAImporto; importo: number }
   | { tipo: 'oggetti'; oggetti: Array<{ chiave: string; quantita: number; nome?: string; casa?: string }> };
 

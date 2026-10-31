@@ -221,16 +221,23 @@ export function contenutiDelleVoci(voci?: Iterable<string>): Map<string, Contenu
   return out;
 }
 
-export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>): Map<string, RicompensaOggettoDto[]> {
+/** L13 (ondata 11, O11-3): come leggere la regola di una ricompensa (`ricompensa_oggetto.condizioni_json`, colonna della 295) in parole. */
+export interface OpzioniRicompense { condizione?: (condizioniJson: string) => string | null }
+
+/** Le ricompense per fonte. Con `opzioni.condizione` (solo chi la chiede: la scheda del Confidente) ogni ricompensa porta `condizione`, la
+ *  lettura della sua regola (null senza regola); senza, il DTO resta quello di sempre. */
+export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzioni: OpzioniRicompense = {}): Map<string, RicompensaOggettoDto[]> {
   const out = new Map<string, RicompensaOggettoDto[]>();
   const chiavi = fonti === undefined ? undefined : [...new Set(fonti)];
   if (chiavi?.length === 0 || !catalogoOggettiDisponibile()) return out;
-  const righe = prepared(`SELECT r.fonte_chiave,c.chiave,c.nome,r.quantita,r.nota FROM ricompensa_oggetto r
+  const descrivi = opzioni.condizione && prepared("SELECT 1 FROM pragma_table_info('ricompensa_oggetto') WHERE name = 'condizioni_json'").get() ? opzioni.condizione : null;
+  const righe = prepared(`SELECT r.fonte_chiave,c.chiave,c.nome,r.quantita,r.nota${descrivi ? ',r.condizioni_json' : ''} FROM ricompensa_oggetto r
     JOIN catalogo_oggetto c ON c.chiave = r.catalogo_chiave WHERE r.fonte_tipo = ? ${chiavi ? 'AND r.fonte_chiave IN (SELECT value FROM json_each(?))' : ''}
-    ORDER BY r.fonte_chiave,r.ordine,c.chiave`).all(tipo, ...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<RicompensaOggettoDto & { fonte_chiave: string }>;
+    ORDER BY r.fonte_chiave,r.ordine,c.chiave`).all(tipo, ...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<RicompensaOggettoDto & { fonte_chiave: string; condizioni_json?: string | null }>;
   for (const r of righe) {
     const v = out.get(r.fonte_chiave) ?? [];
-    v.push({ chiave: r.chiave, nome: r.nome, quantita: r.quantita, nota: r.nota, casa: casaOggetto(r.chiave) });
+    v.push({ chiave: r.chiave, nome: r.nome, quantita: r.quantita, nota: r.nota, casa: casaOggetto(r.chiave),
+      ...(descrivi ? { condizione: r.condizioni_json ? descrivi(r.condizioni_json) : null } : {}) });
     out.set(r.fonte_chiave, v);
   }
   return out;
