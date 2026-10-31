@@ -406,4 +406,7 @@ export type SceltaEsitoVoceDto =
    *  `proposte`: le Doti che il lavoro dà (o quelle scritte nel turno della voce), mostrate per prime; le altre si aggiungono a mano (la
    *  domenica al Crossroads i clienti speciali danno note a un'altra Dote). Le note partono senza scelta: le tocca chi gioca. */
   | { effettoUid: string; tipo: 'lavoro'; attivita: string; attivitaNome: string; paga: { base: number; massima: number | null } | null;
-    doti: Array<{ dote: DoteChiave; doteNome: string; punti: Array<{ note: 1 | 2 | 3; punti: number }> }>; proposte: DoteChiave[] };
+    doti: Array<{ dote: DoteChiave; doteNome: string; punti: Array<{ note: 1 | 2 | 3; punti: number }> }>; proposte: DoteChiave[];
+    /** Come per il turno: la voce spuntata prima che gli yen si muovessero da soli ha la paga già nel saldo; la spunta non chiede gli yen
+     *  (si muoverebbero due volte, e il server li scarterebbe) e manda la paga base, che la ricevuta dice. */
+    yenGiaNelSaldo?: true };

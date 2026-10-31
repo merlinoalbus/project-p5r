@@ -183,7 +183,9 @@ const yenValidi = (testo: string): number | null => {
 };
 /** Il turno di lavoro è pronto da spuntare: yen validi (se il lavoro paga) e le note scelte per ogni Dote mostrata. */
 const lavoroCompleto = (s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>, v: ValoreLavoro): boolean =>
-  (!s.paga || yenValidi(v.yen) !== null) && v.mostrate.every((d) => v.note[d] !== undefined);
+  (!chiedeYen(s) || yenValidi(v.yen) !== null) && v.mostrate.every((d) => v.note[d] !== undefined);
+/** Gli yen si chiedono se il lavoro paga e la paga non è già nel saldo da prima (voce spuntata prima degli yen automatici). */
+const chiedeYen = (s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>): boolean => !!s.paga && !s.yenGiaNelSaldo;
 
 /**
  * L13 (31/10, richiesta dell'utente: «se una paga è variabile la voce nel diario deve far inserire il valore di denaro ricevuto e poi aggiornare
@@ -194,16 +196,18 @@ const lavoroCompleto = (s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>, v: V
 function SceltaLavoro({ s, v, occupato, onCambia }: { s: Extract<SceltaEsitoVoceDto, { tipo: 'lavoro' }>; v: ValoreLavoro; occupato: boolean; onCambia: (v: ValoreLavoro) => void }) {
   const idYen = useId();
   const altre = s.doti.filter((d) => !v.mostrate.includes(d.dote));
-  const yenScritti = v.yen.trim() !== '' && yenValidi(v.yen) === null;
+  // anche il campo vuoto (o un testo che il browser rende vuoto) dice perché «Spunta» resta spento
+  const yenScritti = yenValidi(v.yen) === null;
   return (
     <span className="flex w-full flex-col gap-2" role="group" aria-label={`Turno: ${s.attivitaNome}`}>
-      <span className="text-text-secondary">{s.attivitaNome}: {s.paga ? 'quanto hai ricevuto e quante note hai ottenuto?' : 'quante note hai ottenuto?'}</span>
-      {s.paga && (
+      <span className="text-text-secondary">{s.attivitaNome}: {chiedeYen(s) ? 'quanto hai ricevuto e quante note hai ottenuto?' : 'quante note hai ottenuto?'}</span>
+      {s.paga && s.yenGiaNelSaldo && <span className="text-text-muted text-pretty">La paga di questo turno è già nel saldo da prima: non si muove di nuovo.</span>}
+      {chiedeYen(s) && s.paga && (
         <span className="flex flex-col gap-1">
           <label htmlFor={idYen} className="testo-13">Yen ricevuti</label>
           <input id={idYen} className="form-input min-h-11 w-40 tabular-nums" type="number" inputMode="numeric" min={0} max={YEN_MASSIMI_LAVORO} step={1} value={v.yen} disabled={occupato}
             aria-describedby={`${idYen}-aiuto`} aria-invalid={yenScritti ? true : undefined} onChange={(ev) => onCambia({ ...v, yen: ev.target.value })} />
-          <span id={`${idYen}-aiuto`} className={yenScritti ? 'text-error-testo' : 'text-text-muted text-pretty'}>
+          <span id={`${idYen}-aiuto`} aria-live="polite" className={yenScritti ? 'text-error-testo' : 'text-text-muted text-pretty'}>
             {yenScritti ? `Un importo intero da 0 a ${formattaYen(YEN_MASSIMI_LAVORO)}.` : `Paga base ${formattaYen(s.paga.base)}${s.paga.massima ? `, fino a ${formattaYen(s.paga.massima)} con i bonus` : ''}: entrano tutti da soli nel saldo.`}
           </span>
         </span>
@@ -298,7 +302,8 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla, onMod
   const unica = scelte.length === 1 && !conInterruttore;
   const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
     const x = v[s.effettoUid]!;
-    if (x.tipo === 'lavoro') return { effettoUid: s.effettoUid, tipo: 'lavoro', yen: s.tipo === 'lavoro' && s.paga ? yenValidi(x.yen) ?? 0 : 0,
+    // con la paga già nel saldo si manda la base (la ricevuta la dice; il server non la muove di nuovo)
+    if (x.tipo === 'lavoro') return { effettoUid: s.effettoUid, tipo: 'lavoro', yen: s.tipo === 'lavoro' && s.paga ? (s.yenGiaNelSaldo ? s.paga.base : yenValidi(x.yen) ?? 0) : 0,
       doti: x.mostrate.flatMap((dote) => { const n = x.note[dote]; return n ? [{ dote, note: n }] : []; }) };
     if (x.tipo === 'dote') return { effettoUid: s.effettoUid, tipo: 'dote', note: x.note };
     if (x.tipo === 'alternativa') return { effettoUid: s.effettoUid, tipo: 'alternativa', scelto: x.scelto };
