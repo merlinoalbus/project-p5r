@@ -3748,7 +3748,11 @@ export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisi
 export interface RiferimentoOggettoDto { chiave: string; nome: string; casa: string }
 export interface ContenutoOggettoDto extends RiferimentoOggettoDto { quantita: number; nota: string | null }
 /** La guida può nominare il prodotto di una ricetta senza dichiararne la resa. Non equivale a una unità. */
-export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null }
+export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null;
+  /** L13 (ondata 11, O11-3): solo nei doni della scheda del Confidente, la regola con cui il dono arriva da solo nella partita, in parole
+   *  generate dal dato (`ricompensa_oggetto.condizioni_json`: «Dal 24 dicembre · relazione romantica con Ann Takamaki, …»); null senza regola,
+   *  assente nelle altre fonti. */
+  condizione?: string | null }
 export type CostoOggettoDto = { tipo: TipoCostoAImporto; importo: number }
   | { tipo: 'oggetti'; oggetti: Array<{ chiave: string; quantita: number; nome?: string; casa?: string }> };
 

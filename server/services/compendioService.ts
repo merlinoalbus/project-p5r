@@ -21,6 +21,9 @@ import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
+import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { fraseDellaRegola } from './condizioni/fraseCondizioni.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -507,6 +510,16 @@ function regaloModificato(r: { catalogo_chiave: string | null; dove: string | nu
 }
 
 /** Scheda completa di un Confidente: abilità, dialoghi, regali, disponibilità (dal seed allgamestaff). */
+/**
+ * L13 (ondata 11, O11-3; risposta dell'utente del 31/10 «Sì, in automatico»): la regola di un dono del Confidente in parole, generata dal dato
+ * (`ricompensa_oggetto.condizioni_json`) con le frasi del vocabolario unico e i nomi del DB: nessun testo scritto a mano per Confidente. Null se
+ * la regola non si legge (vuota o non valida): resta la nota della guida.
+ */
+function condizioneDelDono(condizioniJson: string): string | null {
+  const nomi = nomiCondizioniMemo();
+  return fraseDellaRegola(leggiCondizioniSalvate(condizioniJson).map((c) => condizioneConTesto(c, nomi)));
+}
+
 export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const c = prepared('SELECT chiave, nome, arcana, ordine FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string; ordine: number } | undefined;
   if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
@@ -554,7 +567,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     regalabile,
     // L13 (O10-2): con il Confidente si può iniziare una relazione romantica (migrazioni 324-325)
     romanzabile: eRomanzabile(chiave),
-    oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
+    // L13 (ondata 11, O11-3): ogni dono con la sua regola in parole, generate dal dato (la scheda la mostra al posto della prosa della guida)
+    oggettiRicompensa: ricompensePerFonte('confidente', [chiave], { condizione: condizioneDelDono }).get(chiave) ?? [],
     disponibilita: { note: disp?.note ?? '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
     // L6: gli inviti del Confidente, con ciò che aprono (lo stato della partita lo dà `GET /api/compendio/inviti`)
