@@ -151,7 +151,7 @@ export function avviaPreparazioneEdizione(): { operazione: string } {
   contatore += 1;
   const operazione = `${AVVIO}-${contatore}`;
   inCorso = { operazione, iniziataIl: new Date().toISOString(), fase: 'copia', avanzamento: null };
-  void lavora(operazione);
+  lavora(operazione).catch((err: unknown) => logger.error({ err, operazione }, 'edizione: il lavoro in background è uscito con un errore imprevisto'));
   return { operazione };
 }
 

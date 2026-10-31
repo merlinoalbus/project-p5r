@@ -90,3 +90,5 @@ function arresta(segnale: NodeJS.Signals): void {
 
 process.on('SIGINT', () => arresta('SIGINT'));
 process.on('SIGTERM', () => arresta('SIGTERM'));
+// una promessa rifiutata e mai gestita non deve passare in silenzio: si registra con lo stack; il processo non cade (le richieste in corso continuano)
+process.on('unhandledRejection', (motivo) => logger.error({ err: motivo }, 'promessa rifiutata e non gestita'));

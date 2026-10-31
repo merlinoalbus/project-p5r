@@ -148,7 +148,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   for (const voce of vociPersonaCatturate(partitaId)) gestite.add(voce);
   const elementiContatori = elementiDeiContatori(partitaId);
   const contatori = new Map([...elementiContatori].map(([k, elementi]) => [k, elementi.size]));
-  const acquisti = leggiAcquistiPartita(partitaId);
+  const acquisti = leggiAcquistiPartita(partitaId, true);
   return {
     ...st, partitaId, acquisti,
     articoliOttenuti: chiaviArticoliOttenuti(partitaId, acquisti),

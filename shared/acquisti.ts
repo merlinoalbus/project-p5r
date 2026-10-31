@@ -50,6 +50,8 @@ export interface StatoAcquistiDto {
   partitaId: number; presenzeStoriche: PresenzaStoricaAcquistoDto[];
   registrazioni: RegistrazioneAcquistoDto[]; articoliOttenuti: string[];
   spesaPerNegozio: Array<{ negozio: string; spesa: number }>; revisione: string;
+  /** Quante righe dello storico la lettura tollerante ha escluso perché incoerenti (restano nel registro e nel log del server); assente nella lettura rigorosa. */
+  righeEscluse?: number;
 }
 export interface DisponibilitaMomentoAcquistoDto {
   tipo: 'corrente' | 'osservazione'; calendario: 'compatibile' | 'incompatibile';

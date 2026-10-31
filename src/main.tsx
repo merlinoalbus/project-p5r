@@ -2,7 +2,7 @@
 // Entry point frontend — monta React, router e gestione errori iniziali
 // ============================================================
 //
-// Boot bloccante su /api/config: se il backend non risponde si mostra
+// Boot bloccante su /api/config: se il server non risponde si mostra
 // una schermata d'errore in HTML puro (funziona anche se il bundle
 // React ha problemi) e l'App NON viene montata.
 // Nell'attesa `#root` contiene l'anteprima statica di `index.html` (logo e «Caricamento…»): la sostituiscono il montaggio di
@@ -18,6 +18,8 @@ import { tuttePrecarica } from './router';
 import { precaricaPagineScheda } from './components/scheda/pagineScheda';
 import { avviaControlloVersione } from './utils/versioneApp';
 import { registraEdizione } from './services/api/cacheGioco';
+import { impostaGestoreAvanzamento } from './services/api/_helpers';
+import { seAvanzamentoInIntestazione } from './utils/giornoAvanzato';
 import { precaricaInBackground } from './utils/pagineLazy';
 import { verificaCoerenzaModalita } from './utils/modalita';
 import type { AppConfigDto } from './types';
@@ -31,14 +33,14 @@ const BOOT_CONFIG_TIMEOUT_MS = 15_000;
  */
 function renderBootErrorScreen(
   reason: string,
-  suggerimento = 'Verifica che il backend sia in esecuzione e raggiungibile, poi ricarica.',
+  suggerimento = 'Controlla la connessione e ricarica la pagina. Se il problema resta, il server potrebbe essere spento.',
 ): void {
   const root = document.getElementById('root');
   if (!root) return;
   // HTML statico — nessun valore controllato dall'utente interpolato (motivo e suggerimento sono testi scritti nel codice).
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b0b0e;color:#ececf1;padding:20px;box-sizing:border-box;">
-      <div style="max-width:560px;padding:40px;text-align:center;background:#14141a;border-radius:12px;border:1px solid #34343f;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+      <div role="alert" style="max-width:560px;padding:40px;text-align:center;background:#14141a;border-radius:12px;border:1px solid #34343f;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
         <h1 style="color:#e5352b;margin:0 0 16px 0;font-size:1.5rem;">Impossibile avviare l'app</h1>
         <p style="margin:0 0 8px 0;line-height:1.5;color:#a3a3b3;">${reason}.</p>
         <p style="margin:0 0 24px 0;line-height:1.5;color:#8e8ea0;font-size:0.9rem;">${suggerimento}</p>
@@ -56,7 +58,8 @@ function renderBootErrorScreen(
  */
 async function boot(): Promise<void> {
   let configOk = false;
-  let configErrorReason = 'Impossibile contattare il backend';
+  let configErrorReason = 'Non riesco a raggiungere il server';
+  let configSuggerimento: string | undefined;
   try {
     const res = await fetch('/api/config', {
       signal: AbortSignal.timeout(BOOT_CONFIG_TIMEOUT_MS),
@@ -69,29 +72,36 @@ async function boot(): Promise<void> {
       const incoerenza = verificaCoerenzaModalita(config);
       if (incoerenza) {
         console.error('[boot] modalità incoerente:', incoerenza);
-        renderBootErrorScreen(incoerenza, 'Frontend e backend non appartengono alla stessa istanza: contatta chi gestisce l\'installazione.');
+        renderBootErrorScreen(incoerenza, 'L\'app e il server non appartengono alla stessa istanza: contatta chi gestisce l\'installazione.');
         return;
       }
       useConfigStore.getState().setConfig(config);
       registraEdizione(config.edizione);
       configOk = true;
     } else {
-      configErrorReason = `Il backend ha risposto con status ${res.status}`;
+      configErrorReason = 'Il server ha un problema in questo momento';
+      configSuggerimento = 'Riprova tra poco: se il problema resta, avvisa chi gestisce l\'installazione.';
       console.error('[boot] /api/config fallita, status:', res.status);
     }
   } catch (err) {
     const isTimeout = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError');
-    configErrorReason = isTimeout
-      ? `Timeout: il backend non ha risposto entro ${BOOT_CONFIG_TIMEOUT_MS / 1000}s`
-      : 'Impossibile contattare il backend';
-    console.error('[boot] Backend non raggiungibile:', err);
+    console.error('[boot] Server non raggiungibile:', err);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      configErrorReason = 'Sei offline';
+      configSuggerimento = 'Riconnetti la rete e ricarica la pagina.';
+    } else if (isTimeout) {
+      configErrorReason = `Il server non ha risposto entro ${BOOT_CONFIG_TIMEOUT_MS / 1000} secondi`;
+      configSuggerimento = 'Riprova tra poco: se il problema resta, il server potrebbe essere spento.';
+    }
   }
 
   if (!configOk) {
-    renderBootErrorScreen(configErrorReason);
+    renderBootErrorScreen(configErrorReason, configSuggerimento);
     return;
   }
 
+  // un gesto fuori da `/partite/:id` (o con un corpo che non può portarlo) che ha fatto avanzare la partita lo dice nell'intestazione della risposta
+  impostaGestoreAvanzamento((esiti) => esiti.forEach((e) => void seAvanzamentoInIntestazione(e)));
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

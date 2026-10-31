@@ -17,7 +17,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as TastoReact, type MouseEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { cercaGlobale } from '../../services/api';
+import { cercaGlobale, ErroreRete, isApiError } from '../../services/api';
 import { useRicercaStore } from '../../stores/ricercaStore';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
@@ -69,7 +69,11 @@ const ICONE_TIPO: Readonly<Record<TipoRicerca, (dimensione: number) => ReactNode
 const ATTIVABILI = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** Quel che il server ha risposto (o l'errore) per una ricerca, con la chiave della ricerca a cui appartiene. */
-interface Esito { chiave: string; dati: RicercaGlobaleDto | null; errore: boolean }
+interface Esito {
+  chiave: string; dati: RicercaGlobaleDto | null;
+  /** `rete`: nessuna risposta; `server`: un 5xx o un errore imprevisto; `rifiutata`: un 4xx, di cui `messaggio` è il testo del server. */
+  errore: false | 'rete' | 'server' | 'rifiutata'; messaggio?: string;
+}
 
 /** I gruppi richiesti per intero con «Mostra tutti», validi solo per la ricerca di `chiave`. */
 interface Estesi { chiave: string; gruppi: Partial<Record<TipoRicerca, GruppoRicercaDto>> }
@@ -128,7 +132,12 @@ function FinestraRicerca() {
     const timer = window.setTimeout(() => {
       cercaGlobale(testo, { partita }).then(
         (dati) => { if (attuale) setEsito({ chiave, dati, errore: false }); },
-        () => { if (attuale) setEsito({ chiave, dati: null, errore: true }); },
+        (e: unknown) => {
+          if (!attuale) return;
+          if (e instanceof ErroreRete) setEsito({ chiave, dati: null, errore: 'rete' });
+          else if (isApiError(e) && e.status >= 400 && e.status < 500) setEsito({ chiave, dati: null, errore: 'rifiutata', messaggio: e.message });
+          else setEsito({ chiave, dati: null, errore: 'server' });
+        },
       );
     }, ATTESA_MS);
     return () => { attuale = false; window.clearTimeout(timer); };
@@ -149,7 +158,7 @@ function FinestraRicerca() {
   }, [chiudi]);
 
   const inCorso = valida && esito?.chiave !== chiave;
-  const errore = valida && esito?.chiave === chiave && esito.errore;
+  const errore = valida && esito?.chiave === chiave ? esito.errore : false;
   // finché la ricerca nuova non arriva resta la lista di prima (attenuata): niente salti di contenuto a ogni lettera
   const dati = valida && !errore ? esito?.dati ?? null : null;
   const gruppi = useMemo<GruppoRicercaDto[]>(() => {
@@ -235,7 +244,7 @@ function FinestraRicerca() {
           </p>
           {valida && errore && (
             <div className="flex flex-col items-start gap-2" role="alert">
-              <p className="m-0 testo-13">Non riesco a raggiungere la ricerca. Controlla la connessione e riprova.</p>
+              <p className="m-0 testo-13">{errore === 'rete' ? 'Non riesco a raggiungere la ricerca. Controlla la connessione e riprova.' : errore === 'rifiutata' ? esito?.messaggio ?? 'La ricerca non è stata accettata dal server.' : 'La ricerca ha avuto un problema sul server. Riprova tra poco.'}</p>
               <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => setTentativo((n) => n + 1)} />
             </div>
           )}

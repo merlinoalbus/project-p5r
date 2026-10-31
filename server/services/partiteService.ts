@@ -346,12 +346,10 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
 
 /** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna della 255 quelli con un elenco di regali. */
 export function confidentiRegalabili(): string[] {
-  try {
-    if ((prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile')) {
-      return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
-    }
-    return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
-  } catch { return []; }
+  if ((prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile')) {
+    return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
+  }
+  return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
 }
 
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */

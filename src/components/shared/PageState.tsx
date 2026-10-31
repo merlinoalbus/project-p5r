@@ -7,6 +7,7 @@ import { AssetImg } from './AssetImg';
 import { useAssetMulti } from '../../stores/assetStore';
 import { AzioneHome, AzioneRiprova, TITOLO_ERRORE, VistaErrore } from './VistaErrore';
 import { IntestazioneScheda } from './IntestazioneScheda';
+import type { CausaErrore } from '../../hooks/useCarica';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -38,14 +39,24 @@ interface PageStateProps {
   isLoading: boolean;
   error: string | null;
   onRetry?: () => void;
+  /** Il genere dell'errore (`causaErrore` di `useCarica`): il titolo dice «Sei offline» solo se offline, «Server non raggiungibile» se la rete cade o il
+   *  server non risponde in tempo, altrimenti «Qualcosa è andato storto». */
+  causa?: CausaErrore;
   /** Le schede di dettaglio (lotto C): in errore resta l'intestazione con «Indietro» e un h1 col nome generico della scheda («Skill»,
    *  «Palazzo»), e l'errore sta sotto come h2. Senza, l'errore sarebbe un h2 senza h1 e senza modo di tornare se non dal menu. */
   scheda?: { titolo: string; ripiego: string };
   children: ReactNode;
 }
 
+/** Il titolo vero dell'errore: offline è solo il dispositivo senza rete; se la rete cade o il server tace, il server non si raggiunge. */
+function titoloPerCausa(causa: CausaErrore): string {
+  if (causa === 'offline') return 'Sei offline';
+  if (causa === 'rete' || causa === 'timeout') return 'Server non raggiungibile';
+  return TITOLO_ERRORE;
+}
+
 /** Switch uniforme caricamento / errore / contenuto per ogni pagina. */
-export function PageState({ isLoading, error, onRetry, scheda, children }: PageStateProps) {
+export function PageState({ isLoading, error, onRetry, causa = null, scheda, children }: PageStateProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -57,7 +68,7 @@ export function PageState({ isLoading, error, onRetry, scheda, children }: PageS
     // un solo aspetto per gli errori (VistaErrore); h2: sta sotto l'h1 dell'intestazione della pagina
     const vista = (
       <VistaErrore
-        titolo={TITOLO_ERRORE}
+        titolo={titoloPerCausa(causa)}
         spiegazione={error}
         azioni={<>
           {onRetry && <AzioneRiprova onClick={onRetry} />}

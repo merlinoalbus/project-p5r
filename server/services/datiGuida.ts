@@ -15,6 +15,7 @@
 
 import { prepared, type AppDatabase } from '../db/dbService.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { logger } from '../utils/logger.js';
 import { analizzaPercorso, generePrimitivo, impostaImmutabile, risolvi } from '../../shared/percorsoGuida.js';
 
 const cache = new Map<string, unknown>();
@@ -167,15 +168,18 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
  *  illeggibile vale «nessuna finestra»: non si indovina una data. */
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;
-  try {
+  // le colonne della 118 ci sono (sempre, dopo le migrazioni): un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra»
+  if (prepared("SELECT 1 FROM pragma_table_info('dungeon', 'main') WHERE name = 'finestra_dal'").get()) {
     const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
     finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
     return finestre;
-  } catch { /* uno schema di prima della 118: le colonne non ci sono */ }
+  }
+  // uno schema di prima della 118: le colonne non ci sono
   let dati: unknown;
   try {
     dati = datiGuida('finestre-dungeon');
-  } catch {
+  } catch (err) {
+    logger.warn({ err }, 'Finestre dei Palazzi: il blocco «finestre-dungeon» della guida non si legge, nessuna finestra.');
     dati = null;
   }
   finestre = finestreDaDati(dati);

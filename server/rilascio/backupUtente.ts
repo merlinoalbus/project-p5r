@@ -63,8 +63,9 @@ export function avviaCopieUtente(cartella: string = config.backupDir): () => voi
     incorso = true;
     try { await copiaUtente(cartella); } finally { incorso = false; }
   };
-  void giro();
-  const timer = setInterval(() => { void giro(); }, INTERVALLO_COPIA_MS);
+  const lanciaGiro = (): void => { giro().catch((err: unknown) => logger.error({ err }, 'giro della copia dell\'avanzamento non riuscito')); };
+  lanciaGiro();
+  const timer = setInterval(lanciaGiro, INTERVALLO_COPIA_MS);
   timer.unref();
   return () => clearInterval(timer);
 }

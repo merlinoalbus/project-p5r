@@ -12,24 +12,42 @@
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { dataGiocoConArticolo } from './dateGioco';
-import type { AvanzamentoGiornataDto } from '../types';
+import type { AvanzamentoGiornataDto, AvanzamentoInIntestazioneDto } from '../types';
 
 /** Il pezzo di avviso sulle decisioni ancora aperte («Restano 2 decisioni aperte»), o stringa vuota. */
 const restano = (n: number | undefined): string => (n && n > 0 ? ` Resta ${n === 1 ? '1 decisione aperta' : `${n} decisioni aperte`}: decidila dal giorno.` : '');
 
+/** L'avanzamento senza la partita (quello dell'intestazione `X-Avanzamento-Partita`) o con (quello del corpo): basta all'avviso. */
+type EsitoPerAvviso = Pick<AvanzamentoInIntestazioneDto, 'giornoAvanzato' | 'fasciaAvanzata'>;
+
 /** Da chiamare con la risposta di ogni spunta e di ogni decisione sulle proposte; non fa niente se la partita non è avanzata. */
 export function seGiornoAvanzato(esito: AvanzamentoGiornataDto): void {
+  if (esito.giornoAvanzato) usePartitaStore.getState().aggiornaLocale(esito.giornoAvanzato.partita);
+  else if (esito.fasciaAvanzata) usePartitaStore.getState().aggiornaLocale(esito.fasciaAvanzata.partita);
+  avvisaAvanzamento(esito);
+}
+
+/** Un avanzamento arrivato nell'intestazione, senza la partita: si rilegge l'elenco dal server (non lancia: un fallimento si legge
+ *  nell'errore dello store) e poi si avvisa, così «Oggi», mappe e negozi vedono già il giorno nuovo. */
+export async function seAvanzamentoInIntestazione(esito: AvanzamentoInIntestazioneDto): Promise<void> {
+  if (!esito.giornoAvanzato && !esito.fasciaAvanzata) return;
+  await usePartitaStore.getState().carica();
+  // senza la rilettura lo store resta al giorno di prima: l'avviso direbbe un passaggio che la pagina non mostra (l'errore lo dice lo store)
+  if (usePartitaStore.getState().errore) return;
+  avvisaAvanzamento(esito);
+}
+
+/** L'avviso (e basta) di un avanzamento: la partita dello store si allinea prima, da chi lo chiama. */
+function avvisaAvanzamento(esito: EsitoPerAvviso): void {
   const g = esito.giornoAvanzato;
   const f = esito.fasciaAvanzata;
   if (g) {
-    usePartitaStore.getState().aggiornaLocale(g.partita);
     notifica(g.decisioniAperte ? 'warning' : 'success',
       `Giornata ${dataGiocoConArticolo(g.da, 'di')} completata: la partita passa ${dataGiocoConArticolo(g.a, 'a')}, di giorno.${restano(g.decisioniAperte)}`,
       g.decisioniAperte ? 0 : 6000, g.decisioniAperte ? { collegamento: { etichetta: `Vai ${dataGiocoConArticolo(g.da, 'a')}`, verso: `/guida/percorso/${g.da}` } } : undefined);
     return;
   }
   if (f) {
-    usePartitaStore.getState().aggiornaLocale(f.partita);
     notifica(f.decisioniAperte ? 'warning' : 'success',
       `Attività di giorno ${dataGiocoConArticolo(f.giorno, 'di')} completate: la partita passa alla sera.${restano(f.decisioniAperte)}`,
       f.decisioniAperte ? 0 : 6000, f.decisioniAperte ? { collegamento: { etichetta: `Vai ${dataGiocoConArticolo(f.giorno, 'a')}`, verso: `/guida/percorso/${f.giorno}` } } : undefined);

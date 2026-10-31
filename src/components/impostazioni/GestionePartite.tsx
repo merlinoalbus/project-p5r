@@ -12,10 +12,11 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaScheda } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { AzioneRiprova } from '../shared/VistaErrore';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
-  const { partite, rendiAttiva, elimina } = usePartitaStore(useShallow((s) => ({ partite: s.partite, rendiAttiva: s.rendiAttiva, elimina: s.elimina })));
+  const { partite, caricata, caricamento, errore, carica, rendiAttiva, elimina } = usePartitaStore(useShallow((s) => ({ partite: s.partite, caricata: s.caricata, caricamento: s.caricamento, errore: s.errore, carica: s.carica, rendiAttiva: s.rendiAttiva, elimina: s.elimina })));
   const [nuova, setNuova] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
   /** La partita di cui si stanno modificando i dati (finestra aperta), se c'è. */
@@ -35,9 +36,9 @@ export function GestionePartite() {
     }
   };
 
-  /** Elimina la partita dopo la conferma (DialogoConferma: l'eliminazione porta via tutto il suo stato e non è reversibile). */
+  /** Elimina la partita dopo la conferma (DialogoConferma: l'eliminazione porta tutto il suo stato nel Cestino, da cui si rimette). */
   const rimuovi = async (id: number, nome: string) => {
-    if (!(await conferma({ titolo: 'Eliminare la partita?', testo: `La partita «${nome}» se ne va con tutto il suo stato (Doti, Confidenti, scorta, compendio). L'operazione non è reversibile.`, etichetta: 'Elimina la partita' }))) return;
+    if (!(await conferma({ titolo: 'Eliminare la partita?', testo: `La partita «${nome}» esce dall'elenco con tutto il suo stato (Doti, Confidenti, scorta, compendio) e finisce nel Cestino: da Impostazioni la puoi rimettere.`, etichetta: 'Elimina la partita' }))) return;
     setOccupato(id);
     try {
       await elimina(id);
@@ -56,7 +57,13 @@ export function GestionePartite() {
         <PulsanteVisivo tono="primario" compatto icona={<IconaScheda chiave="nuova-partita" dimensione={20} />} titolo="Nuova partita" onClick={() => setNuova(true)} />
       </div>
       {partite.length === 0 ? (
-        <p className="m-0 testo-13 text-text-muted">Nessuna partita ancora.</p>
+        // finché le partite non sono lette (o la lettura è fallita: `caricata` vale anche dopo un errore) l'elenco è vuoto solo perché manca: «nessuna partita» sarebbe falso
+        errore ? (
+          <div className="flex flex-wrap items-center gap-2" role="alert">
+            <span className="flex-1 min-w-0 break-words testo-13 text-error-testo">{errore}</span>
+            <AzioneRiprova tono="secondario" inCorso={caricamento} onClick={() => { if (!caricamento) void carica(); }} />
+          </div>
+        ) : caricata && <p className="m-0 testo-13 text-text-muted">Nessuna partita ancora.</p>
       ) : (
         <ul className="m-0 p-0 list-none divide-y divide-border-light">
           {partite.map((p) => (

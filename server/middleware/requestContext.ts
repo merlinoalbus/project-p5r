@@ -31,8 +31,9 @@ export interface RequestContext {
   proprietarioEmail: string | null;
   /**
    * Gli avanzamenti automatici (alla sera, al giorno dopo: decisione A1 del 2026-10-25) provocati da questa richiesta senza che la sua rotta
-   * li sapesse, per partita: li registra `avanzaDopoChiusuraAutomatica` quando una decisione si chiude da sola; il corpo della risposta li porta
-   * (`responseShape`), così il client si allinea. Per richiesta: niente può passare da una richiesta all'altra.
+   * li sapesse, per partita: li registra `avanzaDopoChiusuraAutomatica` quando una decisione si chiude da sola; la risposta li porta
+   * (`responseShape`: nel corpo, o nell'intestazione `X-Avanzamento-Partita`), così il client si allinea. Il contesto vale una sola richiesta:
+   * niente può passare da una richiesta all'altra.
    */
   avanzamenti?: Map<number, AvanzamentoGiornataDto>;
 }
@@ -77,6 +78,11 @@ export function registraAvanzamentoRichiesta(partitaId: number, esito: Avanzamen
   const ctx = storage.getStore();
   if (!ctx) return;
   (ctx.avanzamenti ??= new Map()).set(partitaId, esito);
+}
+
+/** Le partite per cui la richiesta in corso ha ricordato un avanzamento (da prelevare con `prelevaAvanzamentoRichiesta`). */
+export function partiteConAvanzamentoRichiesta(): number[] {
+  return [...(storage.getStore()?.avanzamenti?.keys() ?? [])];
 }
 
 /** L'avanzamento ricordato per la partita nella richiesta in corso (e lo toglie), o undefined. */

@@ -23,6 +23,24 @@ interface Props {
   partitaId: number;
 }
 
+/** Dove era il ciclo quando la fusione dell'anello è stata eseguita senza che l'avanzamento si registrasse. */
+interface PuntoCiclo { anello: number; iterazioni: number }
+const chiaveDaRegistrare = (partitaId: number, cicloId: number | string) => `p5r:ciclo-da-registrare:${partitaId}:${cicloId}`;
+/** Il punto conservato per la scheda del browser, o `null` (il browser può rifiutare l'archivio: la scheda funziona lo stesso). */
+function leggiDaRegistrare(partitaId: number, cicloId: number | string): PuntoCiclo | null {
+  try {
+    const grezzo = sessionStorage.getItem(chiaveDaRegistrare(partitaId, cicloId));
+    const v: unknown = grezzo ? JSON.parse(grezzo) : null;
+    return v && typeof v === 'object' && typeof (v as PuntoCiclo).anello === 'number' && typeof (v as PuntoCiclo).iterazioni === 'number' ? { anello: (v as PuntoCiclo).anello, iterazioni: (v as PuntoCiclo).iterazioni } : null;
+  } catch { return null; }
+}
+function ricordaDaRegistrare(partitaId: number, cicloId: number | string, punto: PuntoCiclo | null): void {
+  try {
+    if (punto) sessionStorage.setItem(chiaveDaRegistrare(partitaId, cicloId), JSON.stringify(punto));
+    else sessionStorage.removeItem(chiaveDaRegistrare(partitaId, cicloId));
+  } catch { /* archivio non disponibile: lo stato resta solo in questa schermata */ }
+}
+
 /** La scheda di un ciclo salvato: Persona di partenza, giri completati e costo per giro, gli anelli
  * (ognuno impostabile come corrente), lo stato in scorta di ingrediente e partner dell'anello
  * corrente con i comandi per procurare il partner o esplorare come ottenere l'ingrediente, e
@@ -31,6 +49,15 @@ interface Props {
 function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo: CicloSalvatoDto; partitaId: number; onCambiato: (c: CicloSalvatoDto) => void; onElimina: () => void }) {
   const [esecuzione, setEsecuzione] = useState(false);
   const [occupato, setOccupato] = useState(false);
+  // la fusione dell'anello è stata eseguita ma l'avanzamento del ciclo no: il giro non si conta finché non lo si registra. Il punto in cui era il
+  // ciclo si conserva per la scheda del browser (`sessionStorage`), così sopravvive alla navigazione; se il ciclo risulta già avanzato si toglie
+  const [daRegistrare, impostaDaRegistrare] = useState<PuntoCiclo | null>(() => {
+    const punto = leggiDaRegistrare(partitaId, ciclo.id);
+    if (punto && (punto.anello !== ciclo.anelloCorrente || punto.iterazioni !== ciclo.iterazioni)) { ricordaDaRegistrare(partitaId, ciclo.id, null); return null; }
+    return punto;
+  });
+  const avanzamentoDaRegistrare = daRegistrare !== null;
+  const segnaDaRegistrare = (punto: PuntoCiclo | null) => { impostaDaRegistrare(punto); ricordaDaRegistrare(partitaId, ciclo.id, punto); };
   const a = ciclo.anelli[ciclo.anelloCorrente];
   const av = ciclo.avanzamento;
 
@@ -55,17 +82,36 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
   const impostaAnello = async (n: number) => {
     try { onCambiato(await aggiornaCiclo(partitaId, ciclo.id, { anelloCorrente: n })); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
   };
-  /** Dopo una fusione eseguita chiude la finestra e fa avanzare il ciclo all'anello successivo;
-   * quando torna al primo anello annuncia l'iterazione completata. */
-  const dopoEsecuzione = async () => {
-    setEsecuzione(false);
+  /** Fa avanzare il ciclo all'anello successivo (la fusione è già stata eseguita); quando torna al primo anello annuncia l'iterazione
+   * completata. Se la registrazione non riesce la fusione resta fatta: `avanzamentoDaRegistrare` offre di riprovare SOLO l'avanzamento. */
+  const registraAvanzamento = async () => {
+    setOccupato(true);
     try {
+      // nel riprovare, la prima richiesta potrebbe essere arrivata al server con la risposta persa: se il ciclo risulta già avanzato non si avanza due volte
+      if (daRegistrare) {
+        const attuale = await ricaricaUno();
+        if (attuale.anelloCorrente !== daRegistrare.anello || attuale.iterazioni !== daRegistrare.iterazioni) {
+          segnaDaRegistrare(null);
+          onCambiato(attuale);
+          notifica('info', 'Il ciclo risultava già avanzato.');
+          return;
+        }
+      }
       const agg = await avanzaCiclo(partitaId, ciclo.id);
+      segnaDaRegistrare(null);
       onCambiato(agg);
       if (agg.anelloCorrente === 0) notifica('success', `Iterazione ${agg.iterazioni} del ciclo «${ciclo.titolo}» completata: ${ciclo.nomeIt} è di nuovo nella scorta.`);
     } catch (err) {
+      segnaDaRegistrare(daRegistrare ?? { anello: ciclo.anelloCorrente, iterazioni: ciclo.iterazioni });
       notifica('error', err instanceof Error ? err.message : 'Avanzamento non registrato.');
+    } finally {
+      setOccupato(false);
     }
+  };
+  /** Dopo una fusione eseguita chiude la finestra e registra l'avanzamento del ciclo. */
+  const dopoEsecuzione = async () => {
+    setEsecuzione(false);
+    await registraAvanzamento();
   };
 
   return (
@@ -101,6 +147,12 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
           {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="testo-12 text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}
           <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo={`Esegui anello ${ciclo.anelloCorrente + 1}`} disabled={!av.eseguibile} onClick={() => setEsecuzione(true)} />
         </div>
+        {avanzamentoDaRegistrare && (
+          <div className="flex flex-wrap items-center gap-2" role="alert">
+            <span className="testo-12 text-warning">La fusione è stata eseguita, ma il ciclo non è avanzato: il giro non è ancora contato.</span>
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Registra l'avanzamento" disabled={occupato} onClick={() => void registraAvanzamento()} />
+          </div>
+        )}
       </div>
       {ciclo.note && <div className="testo-13 text-text-secondary">{ciclo.note}</div>}
       <div className="flex flex-wrap gap-1.5">

@@ -21,6 +21,9 @@ export interface Notification {
   collegamento?: CollegamentoNotifica;
   /** Un gesto da fare dalla notifica, come pulsante (es. «Annulla» dopo aver incollato voci del Diario): premuto, la notifica si chiude. */
   azione?: AzioneNotifica;
+  /** Vero per l'errore di una lettura causato dalla rete o dal server (offline, server irraggiungibile, timeout, 5xx): quando la
+   *  connessione torna `chiudiErroriDiRete` lo toglie, perché non è più vero. */
+  daRete?: boolean;
 }
 
 /** Il pulsante d'azione di una notifica: il testo e che cosa fa. */
@@ -51,6 +54,8 @@ export interface OpzioniNotifica {
   collegamento?: CollegamentoNotifica;
   /** Vedi `Notification.azione`. */
   azione?: AzioneNotifica;
+  /** Vedi `Notification.daRete`. */
+  daRete?: boolean;
 }
 
 interface NotificationState {
@@ -60,6 +65,8 @@ interface NotificationState {
   clearAll: () => void;
   /** Chiude tutti gli errori e gli avvisi rimasti a schermo (quelli senza chiusura automatica); conferme e informazioni seguono il loro timer. */
   chiudiPersistenti: () => void;
+  /** Chiude gli errori dovuti alla rete o al server (`daRete`) ancora a schermo: la connessione è tornata, chi fallisce ancora li ripropone. */
+  chiudiErroriDiRete: () => void;
   /** Ferma il conto alla rovescia di una notifica (puntatore sopra o fuoco dentro: WCAG 2.2.1), e lo fa ripartire da dove era. */
   pausa: (id: string) => void;
   riprendi: (id: string) => void;
@@ -117,7 +124,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return;
     }
     const id = `notif-${++counter}-${Date.now()}`;
-    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}), ...(opzioni?.collegamento ? { collegamento: opzioni.collegamento } : {}), ...(opzioni?.azione ? { azione: opzioni.azione } : {}) };
+    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}), ...(opzioni?.collegamento ? { collegamento: opzioni.collegamento } : {}), ...(opzioni?.azione ? { azione: opzioni.azione } : {}), ...(opzioni?.daRete ? { daRete: true } : {}) };
     set((s) => {
       let notifications = [...s.notifications, notification];
       if (duration <= 0) {
@@ -145,6 +152,13 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   chiudiPersistenti: () => set((s) => ({ notifications: s.notifications.filter((n) => (n.duration ?? 0) > 0) })),
+
+  chiudiErroriDiRete: () => {
+    const daChiudere = get().notifications.filter((n) => n.daRete).map((n) => n.id);
+    if (daChiudere.length === 0) return;
+    for (const id of daChiudere) { annullaTimer(id); inPausa.delete(id); }
+    set((s) => ({ notifications: s.notifications.filter((n) => !n.daRete) }));
+  },
 
   pausa: (id) => {
     if (inPausa.has(id)) return;

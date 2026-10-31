@@ -8,14 +8,36 @@
 // ============================================================
 
 import path from 'node:path';
+import { z } from 'zod';
+
+/** I livelli di log che pino conosce (`silent` spegne il log). */
+const LIVELLI_DI_LOG = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
+
+/** Le variabili d'ambiente che un valore sbagliato rende pericolose (porta, livello di log): validate una volta, all'avvio. */
+const schemaAmbiente = z.object({
+  // BE_PORT ha precedenza su PORT: gli ambienti dev possono iniettare PORT
+  // per il dev server Vite e l'ambiente esterno vince su --env-file.
+  porta: z.string().regex(/^\d+$/, 'deve essere un numero intero (cifre soltanto)').transform(Number).pipe(z.number().int().min(0).max(65535, 'deve stare fra 0 e 65535')),
+  logLevel: z.enum(LIVELLI_DI_LOG, { error: `deve essere uno fra: ${LIVELLI_DI_LOG.join(', ')}` }),
+});
+
+/** Legge e valida porta e livello di log; un valore sbagliato ferma l'avvio con un messaggio che dice quale variabile e che cosa si aspetta. */
+function leggiAmbiente(): { porta: number; logLevel: (typeof LIVELLI_DI_LOG)[number] } {
+  const nomePorta = process.env.BE_PORT ? 'BE_PORT' : process.env.PORT ? 'PORT' : 'BE_PORT/PORT';
+  const esito = schemaAmbiente.safeParse({ porta: process.env.BE_PORT || process.env.PORT || '3101', logLevel: process.env.LOG_LEVEL || 'info' });
+  if (!esito.success) {
+    const dettagli = esito.error.issues.map((i) => `${i.path[0] === 'porta' ? nomePorta : 'LOG_LEVEL'} ${i.message}`).join('; ');
+    throw new Error(`Configurazione non valida: ${dettagli}. Correggi il file .env o l'ambiente e riavvia.`);
+  }
+  return esito.data;
+}
+const ambiente = leggiAmbiente();
 
 /** Configurazione runtime letta una sola volta all'avvio del processo. */
 export const config = {
-  // BE_PORT ha precedenza su PORT: gli ambienti dev possono iniettare PORT
-  // per il dev server Vite e l'ambiente esterno vince su --env-file.
-  port: parseInt(process.env.BE_PORT || process.env.PORT || '3101', 10),
+  port: ambiente.porta,
   dataDir: path.resolve(process.env.DATA_DIR || './data'),
-  logLevel: process.env.LOG_LEVEL || 'info',
+  logLevel: ambiente.logLevel,
 
   /**
    * Dove vive `gioco.db` (e la cartella dei caratteri). Senza `EDIZIONE_DIR` coincide con `dataDir`: la preparazione non cambia.

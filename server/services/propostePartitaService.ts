@@ -397,6 +397,11 @@ function propostaPassato(partita:number,voce:string,effetto:string,datiJson:stri
   return chiusa;
 }
 
+const IMPEDIMENTO_VERIFICA='Prima indica se questi punti sono già nel saldo.';
+/** Una proposta il cui UNICO impedimento è la dichiarazione della verifica: «Applica» la dichiara da sé («non conteggiata», nella stessa
+ *  transazione dell'applicazione) invece di chiedere un gesto a parte. Orfana o con altri impedimenti no. */
+function soloDaDichiarare(p:PropostaPartitaDto):boolean {return p.stato==='aperta'&&!p.orfana&&p.impedimenti.length>0&&p.impedimenti.every((i)=>i===IMPEDIMENTO_VERIFICA);}
+
 function dto(r:RigaProposta):PropostaPartitaDto {
   const causa=causaDi(r), dati=leggiOggettoRegistro(r.dati_json,'proposta');
   const impedimenti:string[]=[];
@@ -448,7 +453,7 @@ function dto(r:RigaProposta):PropostaPartitaDto {
     s=saldo(r.partita_id,causa,target);
     if(s.differenza!==r.delta || r.revisione_causa!==firmaTarget(target)) impedimenti.push('La causa o il saldo sono cambiati: rivedere la proposta.');
     if(r.tipo==='dote'&&!prepared('SELECT 1 FROM main.dote_sociale WHERE chiave=?').get(r.chiave)) {orfana=true;impedimenti.push('La Dote destinataria non esiste.');}
-    if(r.verifica!=='non-conteggiata') impedimenti.push('Prima indica se questi punti sono già nel saldo.');
+    if(r.verifica!=='non-conteggiata') impedimenti.push(IMPEDIMENTO_VERIFICA);
     if(causa.tipo==='acquisto') {
       const a=prepared('SELECT articolo_chiave FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {articolo_chiave:string}|undefined;
       orfana=orfana||!a||!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave);
@@ -504,7 +509,7 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
       // applicavano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`); così quelli di una Richiesta
       // completata (decisione 3). Dalla decisione 18 si muovono da soli (`yenAutomaticiService`): qui passano solo le proposte nate prima, ancora aperte
       if(p.tipo==='yen'&&p.causa.tipo!=='voce'&&p.causa.tipo!=='richiesta')throw httpErrors.conflict('yen-a-mano','Gli yen non si applicano da qui: non c’è niente da applicare.');
-      if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
+      if(p.tipo==='effetto-voce'||!(p.applicabile||soloDaDichiarare(p)))throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;
       if(v.dopo<0||v.dopo>(p.tipo==='punti-pesca'?999_999_999:p.tipo==='yen'?9_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
@@ -550,6 +555,8 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     const adesso=nowIso();
     if(r.decisione.tipo==='applica') {
       if(!porte)throw httpErrors.conflict('dominio-non-collegato','Il mutatore canonico non è disponibile.');
+      // gesto unico: chi preme «Applica» dice che i punti non sono ancora nel saldo; la dichiarazione si registra qui, con l'applicazione
+      for(const q of p.proposte)if(q.verifica!=='non-conteggiata')prepared("UPDATE utente.da_applicare SET verifica='non-conteggiata' WHERE partita_id=? AND id=? AND uid=? AND stato='aperta'").run(partita,q.id,q.uid);
       for(const m of p.movimenti){if(m.tipo==='yen')porte.applicaYen(partita,m.delta);else if(m.tipo==='punti-pesca'){if(!porte.applicaPuntiPesca)throw httpErrors.conflict('dominio-non-collegato','Il saldo punti pesca non è collegato.');porte.applicaPuntiPesca(partita,m.delta);}else {if(!eDote(m.chiave))throw httpErrors.conflict('dote-non-valida','Dote non valida.');porte.applicaDote(partita,m.chiave,m.delta);}if(valore(partita,m.tipo,m.chiave)!==m.dopo)throw httpErrors.conflict('delta-non-applicato','Il dominio non ha applicato il delta esatto approvato.');}
     }
     const cause=new Map<string,Causa>(),cursori=new Map(p.movimenti.map((m)=>[`${m.tipo}\0${m.chiave}`,m.prima])),decise:RigaProposta[]=[];

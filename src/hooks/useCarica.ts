@@ -3,8 +3,10 @@
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { notifica } from '../stores/notificationStore';
+import { notifica, useNotificationStore } from '../stores/notificationStore';
 import { cacheFresca, leggiCacheGioco } from '../services/api/cacheGioco';
+import { ErroreRete, type MotivoErroreRete } from '../services/api/_httpClient';
+import { isApiError } from '../services/api/_helpers';
 
 /** Nel rilascio i contenuti sono fissi (condizione costante nello stesso modulo, come negli altri file: vedi progetto delle due istanze §7). */
 const CONTENUTI_FISSI = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -28,6 +30,8 @@ interface Stato<T> {
   /** Errore di una **rilettura** fallita mentre i dati già mostrati restano: la pagina non sparisce, il messaggio è anche
    *  notificato (resta finché non lo si chiude). Si azzera alla rilettura riuscita. */
   erroreRilettura: string | null;
+  /** Il genere dell'errore corrente (`errore` o `erroreRilettura`): serve a titolare l'errore («Sei offline» solo se offline) e a decidere se mostrare l'ultima lettura buona. */
+  causaErrore: CausaErrore;
   /** Rilegge i dati; la promessa si risolve quando la rilettura è arrivata (riuscita o fallita), non prima. */
   ricarica: () => Promise<void>;
   /** Sostituisce i dati in locale (dopo una scrittura riuscita). Con una funzione si parte dai dati **correnti**, non da quelli
@@ -44,6 +48,46 @@ interface Esito<T> {
   dati: T | null;
   errore: string | null;
   erroreRilettura: string | null;
+  /** Da dove viene l'errore (di `errore` o di `erroreRilettura`): la rete, un 5xx del server, altro. */
+  causa?: CausaErrore;
+}
+
+/** Il genere di un errore di caricamento: il motivo di un `ErroreRete` (`offline`: il dispositivo è senza rete; `rete`: il server non si raggiunge;
+ *  `timeout`: non risponde in tempo), `server` (5xx), `null` per ogni altro caso (un 4xx, un errore di codice). */
+export type CausaErrore = MotivoErroreRete | 'server' | null;
+
+function causaDi(err: unknown): CausaErrore {
+  if (err instanceof ErroreRete) return err.motivo;
+  return isApiError(err) && err.status >= 500 ? 'server' : null;
+}
+
+// Le letture montate la cui ultima lettura è fallita per la rete o per il server, con la loro `ricarica`: quando la connessione torna
+// si rileggono tutte insieme (evento `online`, o una qualunque lettura che torna riuscita), non solo quella su cui si preme «Riprova».
+const fallitePerRete = new Map<object, () => Promise<void>>();
+/** Quando è partita l'ultima rilettura innescata da una lettura riuscita: ne passa una ogni tanto, così un endpoint che fallisce
+ *  sempre (un 5xx fisso) non viene riletto a ogni lettura riuscita delle altre. */
+let ultimaRilettura = 0;
+const PAUSA_RILETTURA_MS = 3000;
+
+/**
+ * Rilegge tutte le letture ferme per un guasto di rete o del server e toglie i toast d'errore di rete ancora a schermo (chi fallisce
+ * ancora li ripropone). Ognuna si rilegge come con la propria `ricarica()`: i dati già mostrati restano. Con `daLettura` (innesco da una
+ * lettura riuscita) vale una pausa fra due rilletture di questo tipo; l'evento `online` la salta.
+ */
+export function rileggiDopoRete(daLettura = false): void {
+  if (fallitePerRete.size === 0) return;
+  const adesso = Date.now();
+  if (daLettura && adesso - ultimaRilettura < PAUSA_RILETTURA_MS) return;
+  ultimaRilettura = adesso;
+  const ricariche = [...fallitePerRete.values()];
+  // tolte prima di rileggere: chi fallisce ancora si riscrive da sé, chi riesce non innesca altro
+  fallitePerRete.clear();
+  useNotificationStore.getState().chiudiErroriDiRete();
+  for (const r of ricariche) void r();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => rileggiDopoRete());
 }
 
 /** Quante volte di fila una lettura in volo può essere scartata perché nel frattempo è arrivato un `imposta`: oltre, la risposta
@@ -82,6 +126,10 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
   const versioneRef = useRef(0);
   const riaviRef = useRef(0);
 
+  // l'identità di questa istanza nel registro delle letture ferme per la rete, e la sua `ricarica` più recente
+  const [istanza] = useState<object>(() => ({}));
+  const ricaricaRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
   useEffect(() => {
     caricaRef.current = carica;
     daCacheRef.current = daCache;
@@ -100,10 +148,11 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
     smontato.current = false;
     return () => {
       smontato.current = true;
+      fallitePerRete.delete(istanza);
       for (const a of attese.current) a.risolvi();
       attese.current = [];
     };
-  }, []);
+  }, [istanza]);
 
   useEffect(() => {
     let attivo = true;
@@ -120,6 +169,14 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       }
       riaviRef.current = 0;
       scrivi(e);
+      // registro delle letture ferme per la rete: ci entra chi ha fallito per rete o server, ne esce chi è riuscito (e allora la
+      // connessione c'è: le altre ferme si rileggono, così basta un «Riprova» qualsiasi)
+      if (e.causa && (e.errore !== null || e.erroreRilettura !== null)) {
+        fallitePerRete.set(istanza, () => ricaricaRef.current());
+      } else {
+        fallitePerRete.delete(istanza);
+        if (e.errore === null && e.erroreRilettura === null) rileggiDopoRete(true);
+      }
       const pronte = attese.current.filter((a) => a.tick <= tick);
       attese.current = attese.current.filter((a) => a.tick > tick);
       for (const a of pronte) a.risolvi();
@@ -134,27 +191,28 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       .then((d) => concludi({ chiave, tick, dati: d, errore: null, erroreRilettura: null }))
       .catch((err: unknown) => {
         const messaggio = err instanceof Error ? err.message : 'Errore di caricamento';
+        const causa = causaDi(err);
         const prima = esitoRef.current;
         // rilettura fallita con dati già mostrati per le stesse dipendenze: restano al loro posto, l'errore si dichiara a parte
         // (anche se i dati mostrati sono quelli della cache: la pagina non sparisce per una rilettura silenziosa andata male)
         if ((!prima || prima.chiave !== chiave) && dallaCache !== undefined) {
-          if (attivo) notifica('error', messaggio);
-          concludi({ chiave, tick, dati: dallaCache, errore: null, erroreRilettura: messaggio });
+          if (attivo) notifica('error', messaggio, undefined, causa ? { daRete: true } : undefined);
+          concludi({ chiave, tick, dati: dallaCache, errore: null, erroreRilettura: messaggio, causa });
           return;
         }
         if (prima && prima.chiave === chiave && prima.dati !== null && prima.dati !== undefined) {
           // lo stesso messaggio che il client HTTP ha già notificato (se non era una lettura silenziosa) non si duplica: la coda
           // scarta le notifiche identiche ancora a schermo
-          if (attivo) notifica('error', messaggio);
-          concludi({ chiave, tick, dati: prima.dati, errore: null, erroreRilettura: messaggio });
+          if (attivo) notifica('error', messaggio, undefined, causa ? { daRete: true } : undefined);
+          concludi({ chiave, tick, dati: prima.dati, errore: null, erroreRilettura: messaggio, causa });
           return;
         }
-        concludi({ chiave, tick, dati: null, errore: messaggio, erroreRilettura: null });
+        concludi({ chiave, tick, dati: null, errore: messaggio, erroreRilettura: null, causa });
       });
     return () => {
       attivo = false;
     };
-  }, [chiave, tick, scrivi, cacheUrl]);
+  }, [chiave, tick, scrivi, cacheUrl, istanza]);
 
   const ricarica = useCallback(() => {
     if (smontato.current) return Promise.resolve();
@@ -162,6 +220,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
     setTick(t);
     return new Promise<void>((risolvi) => { attese.current.push({ tick: t, risolvi }); });
   }, []);
+  useEffect(() => { ricaricaRef.current = ricarica; }, [ricarica]);
   const imposta = useCallback((d: T | ((attuali: NonNullable<T>) => T)) => {
     versioneRef.current += 1;
     const e = esitoRef.current;
@@ -186,6 +245,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
     inPrimoCaricamento: !aggiornato && (dati === null || dati === undefined),
     errore: aggiornato ? esito.errore : null,
     erroreRilettura: aggiornato ? esito.erroreRilettura : null,
+    causaErrore: aggiornato && (esito.errore !== null || esito.erroreRilettura !== null) ? esito.causa ?? null : null,
     ricarica,
     imposta,
   };

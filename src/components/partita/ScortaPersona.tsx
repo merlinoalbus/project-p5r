@@ -427,13 +427,25 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
 
 // ---- Modale: modifica livello, statistiche, skill, squadra, note ----
 
+/** Il testo di un campo numerico come intero da 1 a 99, o `null` se è vuoto, a metà (decimali, lettere) o fuori misura. */
+function numeroIntero1a99(testo: string): number | null {
+  const t = testo.trim();
+  if (!/^\d{1,2}$/.test(t)) return null;
+  const n = Number(t);
+  return n >= 1 && n <= 99 ? n : null;
+}
+
 /**
  * Finestra di modifica di una Persona posseduta: livello, presenza in squadra, note, bonus alle statistiche, valori reali letti
  * nel gioco (o il loro oblio) e skill, cercate nel catalogo escludendo i tratti e quelle già presenti. Tutto si salva insieme.
  */
 function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: { posseduta: PersonaPossedutaDto; partitaId: number; onChiudi: () => void; onSalvata: (p: PersonaPossedutaDto) => void }) {
   const { dati: tutteSkill } = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
+  // `livello` è sempre un valore valido (1–99) e alimenta i calcoli; `livelloTesto` è quello che si sta scrivendo: un campo svuotato o a
+  // metà non viene riportato a 1 a ogni tasto, si controlla all'uscita dal campo
   const [livello, setLivello] = useState(posseduta.livello);
+  const [livelloTesto, setLivelloTesto] = useState(String(posseduta.livello));
+  const [bozzaReale, setBozzaReale] = useState<{ k: keyof StatisticheDto; testo: string } | null>(null);
   const [inSquadra, setInSquadra] = useState(posseduta.inSquadra);
   const [note, setNote] = useState(posseduta.note);
   const [bonus, setBonus] = useState<StatisticheDto>(posseduta.bonus);
@@ -500,7 +512,14 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-3">
           <label className="form-label">Livello
-            <input type="number" min={1} max={99} className="form-input" value={livello} onFocus={(e) => e.target.select()} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
+            <input type="number" min={1} max={99} className="form-input" value={livelloTesto} onFocus={(e) => e.target.select()}
+              onChange={(e) => { setLivelloTesto(e.target.value); const n = numeroIntero1a99(e.target.value); if (n !== null) setLivello(n); }}
+              onBlur={() => {
+                // all'uscita: un numero fuori misura si porta a 1–99, un campo vuoto o senza numero torna all'ultimo valore valido
+                const grezzo = livelloTesto.trim() === '' ? Number.NaN : Number(livelloTesto);
+                const dentro = Number.isFinite(grezzo) ? Math.min(99, Math.max(1, Math.trunc(grezzo))) : livello;
+                setLivello(dentro); setLivelloTesto(String(dentro));
+              }} />
           </label>
           <label className="flex items-center gap-2 testo-13 touch">
             <input type="checkbox" checked={inSquadra} onChange={(e) => setInSquadra(e.target.checked)} /> In squadra (non in deposito)
@@ -511,7 +530,9 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               {CHIAVI_STATISTICHE.map((k) => (
                 <label key={k} className="testo-12 text-text-muted text-center">
                   {SIGLA_STATISTICA[k]}
-                  <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={realeMostrato(k)} onFocus={(e) => e.target.select()} onChange={(e) => impostaReale(k, Number(e.target.value))} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
+                  <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={bozzaReale?.k === k ? bozzaReale.testo : realeMostrato(k)} onFocus={(e) => e.target.select()}
+                    onChange={(e) => { setBozzaReale({ k, testo: e.target.value }); const n = numeroIntero1a99(e.target.value); if (n !== null) impostaReale(k, n); }}
+                    onBlur={() => setBozzaReale(null)} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
                 </label>
               ))}
             </div>

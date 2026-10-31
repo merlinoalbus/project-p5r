@@ -61,7 +61,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Documentazione dell'API generata (OpenAPI 3.1 dagli schemi zod, descrizioni in italiano in un registro), servita dall'istanza senza
   CDN; «Prova» spenta per i metodi che scrivono.
 - Errori 4xx di Express e del body-parser resi nell'envelope in italiano (413, 400); mai un 500 in inglese per un caso ordinario.
-- Il client ripete solo i metodi idempotenti; POST, PATCH e i PUT relativi non si ripetono.
+- Il client ripete da solo solo le letture (GET, HEAD, OPTIONS); nessuna scrittura si ripete in automatico, salvo `maxRetries`
+  esplicito dove il servizio è provato idempotente (31/10: un acquisto ripetuto dopo una risposta persa si registrava due volte).
+- Gli errori arrivano all'utente in italiano e senza codici tecnici (offline, server che non risponde, errore del server); il dettaglio
+  resta nella console e nel log.
 - I test restano nel repository ma girano solo su richiesta, sul percorso indicato; non girano nella pipeline a ogni push.
 - Il numero di una migrazione non si riserva: si prende il primo libero al momento del commit. I test che chiamano funzioni tolte su
   decisione dell'utente diventano `it.skip` con un commento, non si cancellano. **(24/10)**
@@ -115,6 +118,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **Doti sociali a note**: 1♪ = 2, 2♪ = 3, 3♪ = 5 punti (7 con un libro a resa maggiorata), Fortuna ×1,5 per difetto; soglie cumulative
   del contatore. Le Doti si applicano **solo a mano**: le voci e il + del contatore delle attività propongono «Applica», mai in automatico. Le «Dote +N» della guida sono
   note, non punti.
+- **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
+  «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.
+- Alla spunta di un incontro si chiede solo «Quante note hai ottenuto?» (le note dell'ultima risposta dopo il passaggio di rango): le
+  risposte migliori stanno già sulla voce, non si ripetono come scorciatoie (31/10).
 - **Confidenti a note**: ♪ = 5, ♪♪ = 10, ♪♪♪ = 15 punti base; alla spunta di un incontro l'app chiede quante note (1–3). Moltiplicatori
   cumulativi (Persona dello stesso arcano ×1,5, invito ×1,2 legato all'effetto «invito» della voce, bonus degli esami solo per i 7
   Confidenti documentati), troncati all'intero a ogni passaggio. I punti si calcolano in ordine cronologico del Diario solo dalle

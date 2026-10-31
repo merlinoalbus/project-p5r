@@ -76,7 +76,12 @@ docs/                 documentazione di bordo e riferimenti di dominio
 1. `requestContextMiddleware`: genera/propaga `X-Request-Id`, crea child logger, access log a fine risposta.
 2. `responseShapeMiddleware`: monkey-patch di `res.json` → `{ data }` per **ogni** corpo, anche un DTO con un campo `data` o
    `error` (es. `DomandaDto.data`); solo l'`errorHandler`, con `segnaRispostaFormata`, scrive il corpo senza busta. Il client
-   (`payloadDellaBusta`) legge la chiave `data`, non il suo valore: `{ data: null }` vale `null`.
+   (`payloadDellaBusta`) legge la chiave `data`, non il suo valore: `{ data: null }` vale `null`. Gli avanzamenti di fascia o di
+   giorno avvenuti durante la richiesta (registrati nel contesto, `partiteConAvanzamentoRichiesta`) viaggiano nel corpo per
+   `/api/partite/:id` con un corpo oggetto (l'esito completo, con la partita); per le altre rotte e i corpi che non sono oggetti
+   nell'intestazione `X-Avanzamento-Partita`, ridotti (`AvanzamentoInIntestazioneDto`: id della partita, giorno e fascia, decisioni
+   aperte, senza la partita, così l'intestazione resta piccola). Il client la legge in `_helpers.ts` e la passa al gestore registrato in
+   `main.tsx` (`impostaGestoreAvanzamento` → `seAvanzamentoInIntestazione`), che rilegge l'elenco delle partite e avvisa.
 3. `express.json({ limit: '5mb' })` (64 MB solo per `POST /api/mappe/importa`). **Niente CORS** (DECISIONI 2026-10-03): il
    frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha autenticazione, quindi un'altra
    origine non deve poterla chiamare dal browser dell'utente.
@@ -85,11 +90,12 @@ docs/                 documentazione di bordo e riferimenti di dominio
 5. `/api/health` (stato DB + `user_version`; **503** se il DB non risponde, perché l'HEALTHCHECK di Docker guarda solo il codice),
    `/api/config` (valori pubblici per il boot FE), `/api/openapi.json` e `/api/docs` (documentazione, §5 bis).
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) e di `sendFile`/`download` (404 `not-found`, 403, 416) → envelope in italiano, con le intestazioni di una risposta JSON anche se la rotta stava per mandare un file; altro → 500 `internal-error` con un **messaggio fisso** (il dettaglio resta nel log, col `requestId`).
-7. Client (`src/services/api/_httpClient.ts`): timeout e tentativi sui 5xx e sugli errori di rete **solo per i metodi
-   idempotenti**; POST e PATCH non si ripetono (una scrittura già avvenuta verrebbe raddoppiata), salvo `maxRetries` esplicito.
-   Anche un PUT **relativo** non si ripete, con `{ maxRetries: 0 }` nella sua funzione: lo spostamento di una voce della giornata
-   (`spostaVoceGiornata`) o di un punto (`spostaPunto`) di un posto e i punti di un Confidente (`aggiornaConfidente`, che li somma)
-   ripetuti dopo una risposta persa sposterebbero o sommerebbero due volte.
+7. Client (`src/services/api/_httpClient.ts`): timeout e tentativi sui 5xx e sugli errori di rete **solo per le letture** (GET,
+   HEAD, OPTIONS); ogni scrittura (POST, PATCH, PUT, DELETE) parte con 0 tentativi in più, salvo `maxRetries` esplicito dove il
+   servizio è provato idempotente: una PUT può aggiungere una riga al registro (`PUT /acquisti`), una DELETE ripetuta risponde 404 su
+   un'azione riuscita, una PUT in ritardo sovrascrive un valore più nuovo. I guasti di rete diventano `ErroreRete` (offline, rete,
+   tempo scaduto) con un messaggio in italiano; le risposte senza busta d'errore diventano `http-error` con un messaggio in italiano e
+   il dettaglio tecnico in `details.dettaglioTecnico`; una risposta 200 che non è JSON diventa `risposta-non-valida`.
 
 ## 5. Persistenza
 - **Due file, una connessione**: `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le tabelle delle partite: DDL di base in `server/db/schemaUtente.ts`, le successive nelle migrazioni utente). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
@@ -436,7 +442,7 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
 - Il livello del protagonista ha una sola fonte: `partita.livello_protagonista`.
 
 **Frontend**
-- Client HTTP: tentativi solo sui metodi idempotenti (§4); gli invii di file passano da `inviaFile` (`src/services/api/_helpers.ts`),
+- Client HTTP: tentativi solo sulle letture (§4); gli invii di file passano da `inviaFile` (`src/services/api/_helpers.ts`),
   che trasforma un rifiuto del proxy in HTML in un `ApiError` leggibile.
 - `useCarica`: un aggiornamento locale dopo un `await` usa la forma con funzione (`imposta(d => …)`), mai i dati del render.
 - Store con richieste che si sovrappongono (`partitaStore`, `suggerimentiStore`): vale solo la risposta dell'ultima richiesta.

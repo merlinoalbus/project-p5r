@@ -40,12 +40,15 @@ const YEN_MASSIMI = 9_999_999;
  */
 function CampoEsperienza({ valore, nome, disabilitato, onSalva }: { valore: number; nome: string; disabilitato: boolean; onSalva: (v: number) => Promise<unknown> }) {
   const [bozza, setBozza] = useState<string | null>(null);
-  /** All'uscita dal campo: normalizza la bozza a intero non negativo (testo non numerico vale 0),
-   * la salva solo se diversa dal valore attuale e poi torna a mostrare il valore della scheda. */
+  /** All'uscita dal campo: normalizza la bozza a intero non negativo, la salva solo se diversa dal valore attuale e poi torna a
+   * mostrare il valore della scheda. Un campo vuoto o senza un numero vero NON vale 0: non si salva niente e resta il valore di prima. */
   const conferma = async () => {
     if (bozza === null) return;
-    const v = Math.max(0, Math.trunc(Number(bozza) || 0));
-    if (v !== valore) await onSalva(v);
+    const numero = bozza.trim() === '' ? Number.NaN : Number(bozza);
+    if (Number.isFinite(numero)) {
+      const v = Math.max(0, Math.trunc(numero));
+      if (v !== valore) await onSalva(v);
+    }
     // finita la modifica il campo torna a mostrare il valore della scheda: quello nuovo se salvato, quello di prima se no
     setBozza(null);
   };

@@ -3,6 +3,7 @@
 // ============================================================
 
 export { ApiError, isApiError, apiGet, apiPost, apiPut, apiPatch, apiDelete, queryString } from './_helpers';
+export { ErroreRete } from './_httpClient';
 export * from './compendio';
 export * from './traduzioni';
 export * from './partite';

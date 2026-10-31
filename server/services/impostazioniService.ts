@@ -74,13 +74,9 @@ export function statoIstanza(): StatoIstanzaDto {
   const partitePath = resolvePartitePath();
   const inMemoria = !fs.existsSync(dbPath);
   // le immagini stanno nel database (079): si contano le righe con contenuto
-  const immagini = (() => {
-    try { return getDb().prepare('SELECT COUNT(*) AS file, COALESCE(SUM(byte), 0) AS byte FROM immagine WHERE contenuto IS NOT NULL').get() as { file: number; byte: number }; } catch { return { file: 0, byte: 0 }; }
-  })();
+  const immagini = getDb().prepare('SELECT COUNT(*) AS file, COALESCE(SUM(byte), 0) AS byte FROM immagine WHERE contenuto IS NOT NULL').get() as { file: number; byte: number };
   const caratteri = fileDellaCartella(cartella('font'));
-  const partite = (() => {
-    try { return (getDb().prepare('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n; } catch { return 0; }
-  })();
+  const partite = (getDb().prepare('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n;
   // snapshot di avvio (file .db) e copie di ripristino (cartelle): l'utente le vede come un'unica riserva
   const copie = fs.existsSync(cartella('backups')) ? fs.readdirSync(cartella('backups'), { withFileTypes: true }).filter((v) => (v.isFile() && v.name.endsWith('.db') && !v.name.endsWith('.partite.db')) || (v.isDirectory() && v.name.startsWith('prima-del-ripristino-'))).length : 0;
   return {
@@ -93,7 +89,7 @@ export function statoIstanza(): StatoIstanzaDto {
     caratteri: { file: caratteri.length, byte: caratteri.reduce((s, f) => s + f.byte, 0) },
     partite,
     copieDiSicurezza: copie,
-    vuota: (() => { try { return (getDb().prepare('SELECT COUNT(*) AS n FROM persona').get() as { n: number }).n === 0; } catch { return true; } })(),
+    vuota: (getDb().prepare('SELECT COUNT(*) AS n FROM persona').get() as { n: number }).n === 0,
     completo: immagini.file > 0,
   };
 }

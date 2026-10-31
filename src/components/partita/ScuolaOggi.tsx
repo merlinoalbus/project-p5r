@@ -98,8 +98,12 @@ export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Prop
   // «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno si scrive la data
   const quando = giorno === partita.dataGioco ? 'Oggi' : `Il ${dataTesto}`;
 
+  // una lettura fallita (senza dati da mostrare) non è «nessuna domanda»: si dice, con «Riprova», e non si afferma che non c'è niente
+  const letturaFallita = Boolean(domande.errore ?? cruciverba.errore);
+  const rileggi = () => { void Promise.all([domande.errore ? domande.ricarica() : null, cruciverba.errore ? cruciverba.ricarica() : null]); };
+
   // nella Home, senza domande né cruciverba quel giorno non c'è nulla da mostrare e nulla occupa la riga
-  if (soloDelGiorno && niente && !domande.caricamento && !cruciverba.caricamento) return null;
+  if (soloDelGiorno && niente && !letturaFallita && !domande.caricamento && !cruciverba.caricamento) return null;
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
@@ -114,7 +118,11 @@ export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Prop
         {cruciOggi && (
           <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
         )}
-        {!soloDelGiorno && niente && !domande.caricamento && !cruciverba.caricamento && (
+        {letturaFallita && (
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Domande e cruciverba non letti: riprova"
+            aria-label="Le domande e il cruciverba non si sono potuti leggere: riprova" onClick={rileggi} />
+        )}
+        {!soloDelGiorno && niente && !letturaFallita && !domande.caricamento && !cruciverba.caricamento && (
           <span className="testo-12 text-text-muted">{quando} nessuna domanda in classe né cruciverba.</span>
         )}
       </div>

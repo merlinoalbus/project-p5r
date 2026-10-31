@@ -18,6 +18,7 @@ export function RegistroAcquistiPartita({ partitaId, onCambiato }: { partitaId: 
       {registro.caricamento && <p role="status" className="m-0">Caricamento del registro…</p>}
       {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}</p>}
       {registro.dati && !articoli.length && <p className="m-0">Nessun acquisto registrato.</p>}
+      {!!registro.dati?.righeEscluse && <p role="status" className="m-0 text-warning">{registro.dati.righeEscluse === 1 ? '1 acquisto registrato non si legge: è nel log del server.' : `${registro.dati.righeEscluse} acquisti registrati non si leggono: sono nel log del server.`}</p>}
       {articoli.map(articolo => {
         const registrazioni = registro.dati!.registrazioni.filter(r => r.identita.articolo === articolo);
         const presenzaStorica = registro.dati!.presenzeStoriche.find(p => p.articolo === articolo) ?? null;

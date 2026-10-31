@@ -40,7 +40,8 @@
 // ============================================================
 
 import { nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
+import { logger } from '../utils/logger.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { chiaveSblocco, eInNote, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
 import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
@@ -262,8 +263,20 @@ export interface EsitoStato { esito: 'segnato' | 'gia-presente' | 'non-disponibi
 
 const SQL_RIGA_STATO = 'SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?';
 const SQL_NUOVA_RIGA = 'INSERT INTO utente.effetto_stato_voce (partita_id, voce_uid, effetto_uid, tipo, chiave, prima_json, applicato_il) VALUES (?, ?, ?, ?, ?, ?, ?)';
-/** Il «prima» di una riga, o null se non si legge (la riga resta com'è e decide la lettura di adesso). */
-const primaDellaRiga = <T>(json: string): T | null => { try { return JSON.parse(json) as T; } catch { return null; } };
+/**
+ * L'UNICA lettura del «prima» di una riga di `effetto_stato_voce`. Un «prima» illeggibile (JSON rotto o che non è un oggetto) non ha un
+ * ripiego sicuro (lo stato di adesso non è quello di prima della voce): si registra nel log, con partita, voce ed effetto, e si lancia un
+ * conflitto con codice esplicito, così nessun chiamante decide da sé che cosa fare di un dato incomprensibile.
+ */
+function primaDellaRiga<T>(p: number, voceUid: string, effettoUid: string, json: string): T {
+  let valore: unknown;
+  try { valore = JSON.parse(json); } catch (err) { valore = undefined; logger.error({ err, partita: p, voce: voceUid, effetto: effettoUid }, 'Effetto di stato: il «prima» della riga non è un JSON leggibile.'); }
+  if (valore === null || typeof valore !== 'object' || Array.isArray(valore)) {
+    if (valore !== undefined) logger.error({ partita: p, voce: voceUid, effetto: effettoUid }, 'Effetto di stato: il «prima» della riga non è un oggetto.');
+    throw httpErrors.conflict('prima-illeggibile', 'Lo stato salvato prima della spunta di questa voce non si legge: la voce non si può annullare né rileggere da qui.', { voce: voceUid, effetto: effettoUid });
+  }
+  return valore as T;
+}
 
 /** La prima parte di ogni effetto di stato: lo stato dell'effetto (per la Persona, il compendio), con gli avvisi per chi spunta. */
 function applicaStato(p: number, voceUid: string, uid: string, e: EffettoDiStatoVoce, opz: OpzioniStato): EsitoStato {
@@ -272,7 +285,7 @@ function applicaStato(p: number, voceUid: string, uid: string, e: EffettoDiStato
   // l'esito lo dice lui (lo stato è della voce, non «c'era già» per colpa della voce stessa)
   const vecchio = prepared(SQL_RIGA_STATO).get(p, voceUid, uid) as { prima_json: string } | undefined;
   if (!vecchio) prepared(SQL_NUOVA_RIGA).run(p, voceUid, uid, e.tipo, chiaveDi(e), JSON.stringify(ora), new Date().toISOString());
-  const ricordato = vecchio ? primaDellaRiga<StatoPrima>(vecchio.prima_json) ?? ora : ora;
+  const ricordato = vecchio ? primaDellaRiga<StatoPrima>(p, voceUid, uid, vecchio.prima_json) : ora;
   const solo = (esito: EsitoStato['esito']): EsitoStato => ({ esito, avvisi: [] });
   if (e.tipo === 'oggetto') { scriviOggetto(p, voceUid, uid, e); return solo('segnato'); }
   if (e.tipo === 'puntiConfidente') return applicaPunti(p, voceUid, uid, e);
@@ -411,7 +424,7 @@ function applicaScorta(p: number, voceUid: string, uid: string, e: EffettoPerson
   if (inScorta(p, e.persona)) {
     if (!vecchio) prepared(SQL_NUOVA_RIGA).run(p, voceUid, riga, TIPO_SCORTA, String(e.persona), JSON.stringify({ gia: true } satisfies PrimaScorta), new Date().toISOString());
     // l'esemplare c'è: se l'aveva aggiunto questa voce resta suo, altrimenti c'era già
-    return { esito: vecchio && primaDellaRiga<PrimaScorta>(vecchio.prima_json)?.gia === false ? 'segnato' : 'gia-presente', avvisi: [] };
+    return { esito: vecchio && primaDellaRiga<PrimaScorta>(p, voceUid, riga, vecchio.prima_json).gia === false ? 'segnato' : 'gia-presente', avvisi: [] };
   }
   // l'esemplare nuovo è quello da ricordare (anche al posto di uno di prima, tolto a mano dopo la spunta)
   const aperto = prepared("SELECT id FROM obiettivo_partita WHERE partita_id = ? AND persona_id = ? AND stato = 'aperto'").get(p, e.persona) as { id: number } | undefined;
@@ -519,8 +532,8 @@ export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArti
   const scorte = new Map<string, { intatta: boolean; livello?: number }>();
   for (const r of righe) {
     if (r.tipo !== TIPO_SCORTA) continue;
-    const prima = primaDellaRiga<PrimaScorta>(r.prima_json);
-    if (!prima || prima.gia || altraVoce(r)) continue;
+    const prima = primaDellaRiga<PrimaScorta>(p, voceUid, r.effetto_uid, r.prima_json);
+    if (prima.gia || altraVoce(r)) continue;
     const x = esemplareDellaSpunta(p, Number(r.chiave), prima);
     if (x) scorte.set(r.effetto_uid.slice(0, -':scorta'.length), { intatta: x.intatta, ...(prima.livello !== undefined ? { livello: prima.livello } : {}) });
   }
@@ -548,8 +561,8 @@ export function effettiDiStatoApplicati(p: number, voceUid: string, quantitaArti
       if (u) out.push({ effettoUid: r.effetto_uid, effetto: { tipo: 'uscitaOggetto', oggetto: u.catalogo, quantita: u.quantita, modo: u.modo, ...(u.modo === 'venduto' && u.prezzo ? { prezzo: u.prezzo } : {}) }, applicatoIl: r.applicato_il });
       continue;
     }
-    const prima = primaDellaRiga<StatoPrima>(r.prima_json);
-    if (!prima || prima.gia || altraVoce(r)) continue;
+    const prima = primaDellaRiga<StatoPrima>(p, voceUid, r.effetto_uid, r.prima_json);
+    if (prima.gia || altraVoce(r)) continue;
     const e = effettoDaRiga(r.tipo, r.chiave);
     // la Persona tolta torna togliendo la spunta solo se non è rientrata nella scorta nel frattempo (`rimettiInScorta`)
     if (e.tipo === 'personaTolta' && inScorta(p, e.persona)) continue;
@@ -601,7 +614,7 @@ type DecisioneAnnullo = { modo: 'registro' | 'gia' | 'scorta-assente' | 'persona
   | { modo: 'scorta-tolta' | 'scorta-modificata'; nome: string };
 function decidiAnnullo(p: number, voceUid: string, r: RigaStato, restanoInScorta: ReadonlySet<string>): DecisioneAnnullo {
   if (r.tipo === 'oggetto' || r.tipo === 'puntiConfidente' || r.tipo === 'uscitaOggetto') return { modo: 'registro' };
-  const prima = JSON.parse(r.prima_json) as StatoPrima & PrimaScorta;
+  const prima = primaDellaRiga<StatoPrima & PrimaScorta>(p, voceUid, r.effetto_uid, r.prima_json);
   // Lo stato lo rivendicano tutte le voci spuntate con lo stesso effetto (le righe esistono solo per le spunte attive): si revoca solo
   // se nessun'altra lo rivendica. Se un'altra lo rivendica, il «prima» originale (non ancora segnato) passa a lei, così lo revoca
   // l'ultima voce che toglie la spunta.
@@ -648,7 +661,7 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
   for (const r of scortaPerPrima(righe)) {
     const d = decidiAnnullo(p, voceUid, r, restanoInScorta);
     if (d.modo === 'scorta-tolta' || (d.modo === 'torna' && r.tipo !== 'personaTolta')) tornato = true;
-    const prima = JSON.parse(r.prima_json) as StatoPrima & PrimaScorta & PrimaTolta;
+    const prima = primaDellaRiga<StatoPrima & PrimaScorta & PrimaTolta>(p, voceUid, r.effetto_uid, r.prima_json);
     if (d.modo === 'registro') {
       // l'oggetto ricevuto se ne va con la sua riga; i punti escono dal registro (il Confidente si ricalcola, se sono della generazione
       // corrente: dopo una correzione a mano dalla pagina restano); le copie restituite o vendute tornano
@@ -693,7 +706,12 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
       prepared("UPDATE utente.evento_partita SET voce_uid = NULL WHERE partita_id = ? AND voce_uid = ? AND persona_id = ? AND tipo = 'compendio-registrata'").run(p, voceUid, Number(r.chiave));
     } else if (d.modo === 'torna') {
       // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
-      try { scrivi(p, effettoDaRiga(r.tipo, r.chiave), false, prima.stato ?? null, voceUid, {}, r.effetto_uid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
+      try { scrivi(p, effettoDaRiga(r.tipo, r.chiave), false, prima.stato ?? null, voceUid, {}, r.effetto_uid); }
+      catch (err) {
+        // benigno è solo il 404 dell'oggetto sparito dalla guida (si riconosce dallo status, non dal testo del messaggio): ogni altro errore risale
+        if (!(err instanceof HttpError) || err.status !== 404) throw err;
+        logger.warn({ partita: p, voce: voceUid, effetto: r.effetto_uid, tipo: r.tipo, chiave: r.chiave, codice: err.code }, 'Annullo della spunta: l’oggetto dell’effetto non c’è più nella guida, lo stato non si riporta indietro.');
+      }
       if (revocaEventi) revocaEventiDelloStato(p, voceUid, r);
     }
     // Ondata 5: la copia della voce lascia il registro in ogni caso (anche quando lo stato «ottenuto» resta: c'era già o lo tiene un'altra voce)

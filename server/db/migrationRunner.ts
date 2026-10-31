@@ -58,7 +58,10 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
         // chiavi esterne fra due file): una violazione che c'era già non è colpa della migrazione e non deve bloccare ogni avvio
         // per sempre — si scrive nel log.
         const prima = violazioni(db, schema);
-        m.up(db);
+        try { m.up(db); } catch (cause) {
+          // l'errore di una migrazione dice quale era: schema, id e nome (la causa originale resta in `cause`)
+          throw new Error(`Migrazione ${schema} ${m.id} (${m.name}): ${cause instanceof Error ? cause.message : String(cause)}`, { cause });
+        }
         const nuove = [...violazioni(db, schema)].filter((v) => !prima.has(v));
         if (nuove.length > 0) {
           throw new Error(`Migrazione ${schema} ${m.id} (${m.name}): violazioni di integrità referenziale: ${nuove.slice(0, 5).join(', ')}`);

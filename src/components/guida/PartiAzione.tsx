@@ -17,7 +17,7 @@ import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
 import { useApriPannello } from '../scheda/contestoScheda';
-import type { AzionePercorsoDto, DialogoVoceDto } from '../../types';
+import type { AzionePercorsoDto } from '../../types';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
@@ -27,7 +27,7 @@ import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
 import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
 import { fraseYenInParteNelSaldo } from '../../../shared/riepilogoEffetti';
-import { NESSUN_PUNTO, noteAParole, noteDellaScelta, resaPuntiScelta, sceltaToccabile, simboliNote } from '../../../shared/note';
+import { noteAParole, simboliNote } from '../../../shared/note';
 import { TestoNote } from '../shared/TestoNote';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
@@ -181,12 +181,13 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
   );
 }
 
-/** «Quante note hai ottenuto?»: ♪, ♪♪, ♪♪♪, nessun punto, annulla. Con il dialogo del rango (R10-11/C) le scelte stanno sopra: toccarne una
- *  dà le sue note (o nessun punto), come toccare le note; le scelte dal valore incerto (amicizia/amore) si leggono soltanto.
+/** «Quante note hai ottenuto?»: ♪, ♪♪, ♪♪♪, nessun punto, annulla: le note dell'ultima risposta dopo il passaggio di rango (di solito la
+ *  telefonata). Le scelte del dialogo non si ripetono qui come scorciatoie (31/10, richiesta dell'utente): le risposte migliori stanno già sulla
+ *  voce (`RisposteVoce`), e sono tutte scelte valide del dialogo.
  *  L13 (O10-3, risposta «a» dell'utente del 31/10): con `relazione` (solo la voce del passaggio al rango della scelta romantica di un Confidente
  *  romanzabile) una sola casella in più, «Ho scelto la relazione romantica», precompilata con la relazione della partita: il suo valore parte
  *  con la scelta delle note (`onScegli`). Senza `relazione`, nessuna scelta nuova. */
-export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo, relazione }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null, relazioneRomantica?: boolean) => void; onAnnulla: () => void; dialogo?: DialogoVoceDto; relazione?: { valore: boolean } }) {
+export function SceltaNote({ occupato, onScegli, onAnnulla, relazione }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null, relazioneRomantica?: boolean) => void; onAnnulla: () => void; relazione?: { valore: boolean } }) {
   // la casella toccata vince sul valore della partita (che può arrivare dopo l'apertura della scelta)
   const [sceltaRelazione, setSceltaRelazione] = useState<boolean | null>(null);
   const relazioneScelta = relazione ? sceltaRelazione ?? relazione.valore : undefined;
@@ -198,22 +199,6 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo, relazione }
           <input type="checkbox" className="w-5 h-5 shrink-0" checked={relazioneScelta} disabled={occupato} onChange={(e) => setSceltaRelazione(e.target.checked)} />
           Ho scelto la relazione romantica
         </label>
-      )}
-      {dialogo && (
-        <span className="flex w-full flex-col gap-1" role="group" aria-label={`Scelte del dialogo, rango ${dialogo.rango}`}>
-          <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
-          <span className="flex flex-wrap gap-1.5">
-            {dialogo.scelte.map((s) => {
-              // migrazione 309: i punti sono numeri (con il ramo amore dove la guida lo dà); la resa e la regola «si tocca» sono una sola (`shared/note`)
-              const valore = resaPuntiScelta(s);
-              const etichetta = `${s.testo}${valore ? ` ${valore}` : ''}`;
-              const note = noteDellaScelta(s);
-              return sceltaToccabile(s)
-                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => scegli(note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${note !== null ? noteAParole(note) : NESSUN_PUNTO}`}><TestoNote testo={etichetta} /></button>
-                : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}><TestoNote testo={etichetta} /></span>;
-            })}
-          </span>
-        </span>
       )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (

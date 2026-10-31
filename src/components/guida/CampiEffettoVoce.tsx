@@ -83,10 +83,28 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
 /** L13: quante copie (1–999; decisione 6: facoltativa, 1 se non indicata). `etichetta`: «Copie» se non detta (2026-10-27: «Quantità» per le
  *  creazioni dello strumento di un turno). */
 export function CampoQuantita({ valore, disabilitato, onCambia, etichetta = 'Copie' }: { valore: number; disabilitato?: boolean; onCambia: (q: number) => void; etichetta?: string }) {
+  // il campo si può svuotare e riscrivere: il testo grezzo resta com'è finché si scrive, la quantità cambia solo con un numero valido e
+  // all'uscita dal campo si porta nei limiti (prima un campo vuoto tornava subito a 1 a ogni tasto)
+  const [testo, setTesto] = useState(String(valore));
+  // se la quantità cambia da fuori (un'altra riga dell'elenco scorre al suo posto) il testo la segue, a meno che già la dica
+  const [valoreVisto, setValoreVisto] = useState(valore);
+  if (valore !== valoreVisto) {
+    setValoreVisto(valore);
+    if (!/^\d+$/.test(testo.trim()) || Number(testo) !== valore) setTesto(String(valore));
+  }
   return (
     <label className="flex flex-col gap-1 testo-13">{etichetta}
-      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={valore} disabled={disabilitato}
-        onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia(Number.isFinite(n) ? Math.min(QUANTITA_MASSIMA_EFFETTO, Math.max(1, n)) : 1); }} />
+      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={testo} disabled={disabilitato}
+        onChange={(ev) => {
+          setTesto(ev.target.value);
+          const n = /^\d+$/.test(ev.target.value.trim()) ? Number(ev.target.value) : 0;
+          if (n >= 1 && n <= QUANTITA_MASSIMA_EFFETTO) onCambia(n);
+        }}
+        onBlur={() => {
+          const dentro = /^\d+$/.test(testo.trim()) ? Math.min(QUANTITA_MASSIMA_EFFETTO, Math.max(1, Number(testo))) : valore;
+          setTesto(String(dentro));
+          if (dentro !== valore) onCambia(dentro);
+        }} />
     </label>
   );
 }

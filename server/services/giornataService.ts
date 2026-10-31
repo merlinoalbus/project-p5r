@@ -380,7 +380,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   // F3-1: la ricevuta storica della spunta illeggibile isola la voce, non la giornata
   const ricevutaRotta = ctx.illeggibili.get(r.uid);
   if (ricevutaRotta !== undefined) fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: ricevutaRotta };
-  const v = voceBase(r, fonte);
+  let v = voceBase(r, fonte);
   const spuntabile = v.genere === 'azione';
   const fonteOggetto = v.riferimento?.tipo === 'attivita' ? 'videogioco' : v.riferimento?.tipo;
   const oggettoRiferimento = fonteOggetto && v.riferimento ? ctx.oggetti.get(`${fonteOggetto}/${v.riferimento.chiave}`) ?? null : null;
@@ -394,7 +394,16 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const yenAutomatici = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : yenAutomaticiDellaVoce(ctx.partita, r.uid);
   // 2026-10-26: ciò che la spunta ha applicato ed è ancora in vigore (quello che togliendola si annulla), per la finestra delle ricevute; le
   // ricevute annullate e quelle tecniche restano nel database e in `ricevuteEffetti`, non qui
-  const applicato = ctx.partita === undefined || !spuntabile || !ctx.fatte.has(r.uid) ? [] : applicatoDallaSpunta(ctx.partita, r.uid, fonte, ricevuteEffetti, yenAutomatici);
+  // F3-1: anche il «prima» illeggibile di un effetto di stato (`prima-illeggibile`) isola la sola voce, non la giornata
+  let applicato: ReturnType<typeof applicatoDallaSpunta> = [];
+  if (ctx.partita !== undefined && spuntabile && ctx.fatte.has(r.uid)) {
+    try { applicato = applicatoDallaSpunta(ctx.partita, r.uid, fonte, ricevuteEffetti, yenAutomatici); }
+    catch (e) {
+      if (!(e instanceof HttpError) || e.status !== 409 || e.code !== 'prima-illeggibile') throw e;
+      fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: e.message };
+      v = voceBase(r, fonte);
+    }
+  }
   // gli effetti con yen il cui denaro era già nel saldo da prima che gli yen si muovessero da soli (la nozione unica,
   // `yenAutomaticiService.effettiConYenGiaNelSaldo`: applicati da una spunta di prima senza movimento per la loro causa, o segnati togliendola):
   // la spunta non li muove. Le frasi e le note della voce lo dicono effetto per effetto, invece di promettere un movimento che non c'è

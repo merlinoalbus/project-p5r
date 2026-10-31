@@ -111,18 +111,11 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
     const primo = s.querySelector<HTMLElement>('[data-elenco-proposte] > li button:not([disabled])');
     if (primo && document.activeElement === r.dove) primo.focus();
   }, [chiaveAperte, occupato]);
-  /** Annulla il non ancora contato e applica: chi preme «Applica» dice implicitamente che i punti non sono ancora nel saldo. */
-  const applica = async (p: PropostaPartitaDto) => {
+  /** «Applica»: chi lo preme dice implicitamente che i punti non sono ancora nel saldo. Il server ne fa l'anteprima (lettura) anche se la
+   *  verifica non è ancora dichiarata, e la conferma, con una sola decisione `applica`, registra la dichiarazione insieme all'applicazione;
+   *  «Annulla» non scrive niente. */
+  const applica = (p: PropostaPartitaDto) => {
     if (blocco.current) return;
-    if (p.verifica !== 'non-conteggiata') {
-      blocco.current = true; setOccupato(true); setErrore(null); setRicevuta(null);
-      try {
-        const a = await anteprimaDecisioneProposte(partitaId, { operazioneId: crypto.randomUUID().replaceAll('-', ''), decisione: { tipo: 'non-conteggiata', proposte: [riferimento(p)] } });
-        await decidiProposteConRegistro(partitaId, { ...a.richiesta, revisioneProposteAttesa: a.revisioneProposteAttesa }, { etichetta: titolo(p).slice(0, 300) });
-        await elenco.ricarica();
-      } catch (e) { if (vivo.current) setErrore(testoErrore(e)); return; }
-      finally { blocco.current = false; if (vivo.current) setOccupato(false); }
-    }
     chiedi({ tipo: 'applica', proposte: [riferimento(p)] });
   };
   const prepara = async (decisione: DecisioneProposte) => {
@@ -145,10 +138,14 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
   const conferma = async () => {
     if (!anteprima || blocco.current) return;
     blocco.current = true; setOccupato(true); setErrore(null);
+    await decidi(anteprima);
+  };
+  /** Registra la decisione dell'anteprima `ant`. Chi la chiama ha già preso `blocco` e acceso `occupato`: qui si liberano a fine gesto. */
+  const decidi = async (ant: AnteprimaDecisioneProposteDto) => {
     let registrata = false;
     try {
-      const riguardaPesca = anteprima.proposte.some(p => p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca');
-      const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: anteprima.proposte.length === 1 ? `Decisione su 1 proposta: ${titolo(anteprima.proposte[0]!).slice(0, 300)}` : `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
+      const riguardaPesca = ant.proposte.some(p => p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca');
+      const r = await decidiProposteConRegistro(partitaId, { ...ant.richiesta, revisioneProposteAttesa: ant.revisioneProposteAttesa }, { etichetta: ant.proposte.length === 1 ? `Decisione su 1 proposta: ${titolo(ant.proposte[0]!).slice(0, 300)}` : `Decisione su ${ant.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
       registrata = true;
       fuoco.current = { fase: 'decisa', elenco: aperte.map((p) => p.uid).join(',') };
       // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
@@ -166,7 +163,9 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
       if (vivo.current) {
         setErrore(registrata ? `Decisione registrata; aggiornamento della pagina non riuscito: ${testoErrore(e)}` : testoErrore(e));
         if (!registrata) {
-          const dubbio = !!gestoPendenteNelloScope(partitaId, { proposte: anteprima.proposte.map(riferimento) });
+          const dubbio = !!gestoPendenteNelloScope(partitaId, { proposte: ant.proposte.map(riferimento) });
+          // nel dubbio la finestra «Confermi?» con «Riprova» deve esserci anche se l'anteprima non era ancora stata mostrata (viene da «Applica»)
+          if (dubbio) setAnteprima(ant);
           setIncerto(dubbio);
           if (!dubbio) { setAnteprima(null); await elenco.ricarica(); }
         }

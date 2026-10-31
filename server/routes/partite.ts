@@ -62,7 +62,7 @@ const porteAcquisti = { valutaCorrente: disponibilitaAcquistoCorrente };
 
 router.get('/:id/acquisti', validate({ params: paramsPartita }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json(leggiAcquistiPartita(Number(req.params.id)));
+  res.json(leggiAcquistiPartita(Number(req.params.id), true));
 });
 router.post('/:id/acquisti/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaAcquisto }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');

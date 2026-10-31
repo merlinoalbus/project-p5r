@@ -24,6 +24,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { useRileggiAlCambio } from '../../hooks/useRileggiAlCambio';
 import { getRiepilogoRichieste } from '../../services/api';
 import { IconaAzione } from '../shared/IconaAzione';
+import { AvvisoGuidaVecchia } from './AvvisoGuidaVecchia';
 import { OggiGuida } from './OggiGuida';
 import { OggiMappa } from './OggiMappa';
 import { ScuolaOggi } from './ScuolaOggi';
@@ -111,7 +112,8 @@ export function OggiHome({ partita, testa }: Props) {
           </FilaScorrevole>
           {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza; altrove la guida cresce con la pagina */}
           <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>
-            <PageState isLoading={oggi.caricamento} error={oggi.errore} onRetry={() => void oggi.ricarica()}>
+            {oggi.lettaAlle !== null && <AvvisoGuidaVecchia alle={oggi.lettaAlle} causa={oggi.causaLettura} onRiprova={() => void oggi.ricarica()} />}
+            <PageState isLoading={oggi.caricamento} error={oggi.errore} causa={oggi.causaErrore} onRetry={() => void oggi.ricarica()}>
               {/* R10-27: nella Home la scheda di un oggetto citato dalla voce si apre in un pannello sopra il diario */}
               {guidaPronta && <OggiGuida oggi={oggiHome} riempi={riempi} pannello />}
             </PageState>

@@ -103,7 +103,7 @@ const server = app.listen(config.port, () => {
     `Backend in ascolto su http://localhost:${config.port}`,
   );
   // le miniature delle schede (L1): in background, mai bloccante; il log dice quante e in quanto tempo
-  setImmediate(() => { void riscaldaMiniature(); });
+  setImmediate(() => { riscaldaMiniature().catch((err: unknown) => logger.error({ err }, 'riscaldamento delle miniature non riuscito')); });
 });
 server.requestTimeout = RICEZIONE_MAX_MS;
 
@@ -134,3 +134,5 @@ function arresta(segnale: NodeJS.Signals): void {
 
 process.on('SIGINT', () => arresta('SIGINT'));
 process.on('SIGTERM', () => arresta('SIGTERM'));
+// una promessa rifiutata e mai gestita non deve passare in silenzio: si registra con lo stack; il processo non cade (le richieste in corso continuano)
+process.on('unhandledRejection', (motivo) => logger.error({ err: motivo }, 'promessa rifiutata e non gestita'));

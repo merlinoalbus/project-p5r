@@ -257,7 +257,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* (revisione) lo strumento da scegliere si sceglie nell'editor della voce: la scelta offre di aprirlo (il gesto «Modifica», se la riga lo ha) */}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onModifica={gesti?.find((g) => g.chiave === 'modifica')?.onClick} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, undefined, undefined, s, [], false, chiediEsiti.relazioneRomantica)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
-        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} relazione={relazioneDaChiedere}
+        {chiediNote && <SceltaNote occupato={occupato} relazione={relazioneDaChiedere}
           onScegli={(n, relazione) => void cambia(true, n ?? undefined, n === null, undefined, undefined, undefined, [], false, relazione)} onAnnulla={() => setChiediNote(false)} />}
       </div>
       {/* il posto dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; da 640 px in una colonna a destra

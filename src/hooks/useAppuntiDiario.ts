@@ -255,7 +255,8 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
       if (p.voci !== v) return;
       p.blocchi.set(k, a);
       if (p.blocchi.size > BLOCCHI_TENUTI) p.blocchi.delete(p.blocchi.keys().next().value!);
-    }).catch(() => undefined);
+    // è solo un anticipo del blocco da copiare: se non arriva, `scriviAsincrono` lo chiede da sé al gesto e lì notifica l'errore
+    }).catch((err: unknown) => console.warn('[appunti] blocco non preparato in anticipo', err));
   }, []);
   /** Il blocco già pronto per queste voci e per la giornata di adesso, o null. */
   const bloccoPronto = useCallback((uid: readonly string[]): AppuntiDiario | null => {
@@ -482,7 +483,9 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
      *  permesso a ogni Ctrl+V); un contenuto che non è un blocco di voci non fa niente. */
     const incollaDaTastiera = () => {
       if (!store().scrittoInSessione) return;
-      void leggiConApi().then((c) => { const a = c ? leggiAppunti(c) : null; if (a) void avvia(a, ultimi.current.selezione.ancora); }).catch(() => undefined);
+      void leggiConApi().then((c) => { const a = c ? leggiAppunti(c) : null; if (a) void avvia(a, ultimi.current.selezione.ancora); })
+        // Ctrl+V che non fa niente sarebbe un silenzio: lo si dice e si indica la via che funziona sempre
+        .catch(() => notifica('info', 'Il browser non permette di leggere gli appunti con Ctrl+V: usa «Incolla qui» dal menu della voce.'));
     };
     const suTasto = (e: KeyboardEvent) => {
       if (!mia() || e.isComposing || e.repeat) return;
@@ -533,7 +536,8 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
         const c = await leggiConApi();
         const a = c ? leggiAppunti(c) : null;
         if (!(a?.modo === 'taglia' && a.taglio === t.id)) via();
-      }).catch(() => undefined);
+      // al rientro in primo piano: un controllo di fondo, senza gesto dell'utente. Se non riesce il segno resta (vedi sopra); niente notifica a ogni ritorno
+      }).catch((err: unknown) => console.warn('[appunti] appunti non riletti al ritorno', err));
     };
     document.addEventListener('copy', suCopia);
     document.addEventListener('cut', suTaglia);

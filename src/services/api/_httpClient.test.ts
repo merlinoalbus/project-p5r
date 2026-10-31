@@ -27,18 +27,18 @@ describe('httpFetch — tentativi', () => {
   it('POST su errore di rete: un solo tentativo, l\'errore arriva al chiamante', async () => {
     const fetchFinto = vi.fn(async () => { throw new TypeError('rete giù'); });
     vi.stubGlobal('fetch', fetchFinto);
-    await expect(httpFetch('/api/x', { method: 'POST' }, { silent: true })).rejects.toThrow('rete giù');
+    await expect(httpFetch('/api/x', { method: 'POST' }, { silent: true })).rejects.toThrow('Non riesco a raggiungere il server');
     expect(fetchFinto).toHaveBeenCalledTimes(1);
   });
 
-  it('GET, PUT e DELETE si ritentano (tre chiamate col default di 2 tentativi in più)', async () => {
-    for (const method of [undefined, 'PUT', 'DELETE']) {
+  it('GET si ritenta (tre chiamate col default di 2 tentativi in più); PUT e DELETE no (una sola chiamata)', async () => {
+    for (const [method, chiamate] of [[undefined, 3], ['PUT', 1], ['DELETE', 1]] as const) {
       const fetchFinto = vi.fn(async () => risposta500());
       vi.stubGlobal('fetch', fetchFinto);
       const p = httpFetch('/api/x', method ? { method } : {});
       await vi.runAllTimersAsync();
       expect((await p).status).toBe(500);
-      expect(fetchFinto).toHaveBeenCalledTimes(3);
+      expect(fetchFinto).toHaveBeenCalledTimes(chiamate);
     }
   });
 
@@ -83,7 +83,7 @@ describe('B8": inviaFile', () => {
     const errore = await inviaFile('PUT', '/mappe/x/immagine', file).catch((e: unknown) => e);
     expect(errore).toBeInstanceOf(ApiError);
     expect(errore).toMatchObject({ status: 413, code: 'http-error' });
-    expect((errore as Error).message).toMatch(/413/);
+    expect((errore as ApiError).details?.dettaglioTecnico).toMatch(/413/);
     expect(fetchFinto).toHaveBeenCalledTimes(1);
   });
 
@@ -99,7 +99,7 @@ describe('F7 (validazione voce 2): le PUT relative non si ripetono', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
-  it('spostamenti e punti dei Confidenti: un solo tentativo dopo un 5xx; una PUT assoluta si ritenta', async () => {
+  it('spostamenti e punti dei Confidenti: un solo tentativo dopo un 5xx; anche una PUT assoluta non si ripete', async () => {
     const { spostaVoceGiornata, spostaPunto, aggiornaPunto } = await import('./compendio');
     const { aggiornaConfidente } = await import('./partite');
     for (const chiamata of [() => spostaVoceGiornata('u1', 1), () => spostaPunto('p1', -1), () => aggiornaConfidente(1, 'sojiro', { noteRisposta: 3 })]) {
@@ -110,12 +110,12 @@ describe('F7 (validazione voce 2): le PUT relative non si ripetono', () => {
       expect(await p).toBeInstanceOf(ApiError);
       expect(fetchFinto).toHaveBeenCalledTimes(1);
     }
-    // controllo: una PUT assoluta (il testo di un punto) resta ripetibile
+    // controllo: neanche una PUT assoluta (il testo di un punto) si ripete da sola
     const fetchFinto = vi.fn(async () => risposta500());
     vi.stubGlobal('fetch', fetchFinto);
     const p = aggiornaPunto('p1', { descrizione: 'x' }).catch(() => null);
     await vi.runAllTimersAsync();
     await p;
-    expect(fetchFinto).toHaveBeenCalledTimes(3);
+    expect(fetchFinto).toHaveBeenCalledTimes(1);
   });
 });

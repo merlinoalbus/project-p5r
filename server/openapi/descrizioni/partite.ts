@@ -92,12 +92,12 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'POST /api/partite/:id/da-applicare/anteprima': {
     sommario: 'Rivedi una decisione esplicita e i movimenti esatti',
-    descrizione: 'Corpo strict RichiestaAnteprimaDecisioneProposte con ID operazione e decisione discriminata. Per gruppi Dote o yen mostra prima/delta/dopo, senza saturazione e senza scritture. Già conteggiato, non conteggiato e ignoto sono dichiarazioni diverse.',
+    descrizione: 'Corpo strict RichiestaAnteprimaDecisioneProposte con ID operazione e decisione discriminata. Per gruppi Dote o yen mostra prima/delta/dopo, senza saturazione e senza scritture. Già conteggiato, non conteggiato e ignoto sono dichiarazioni diverse. «Applica» è un gesto unico: accetta anche una proposta il cui solo impedimento è la dichiarazione di verifica («Prima indica…»), che la decisione stessa registra come «non conteggiata»; l\'anteprima non scrive niente.',
     risposta: '`AnteprimaDecisioneProposteDto`', errori: [PARTITA, [409,'proposta-non-applicabile']],
   },
   'POST /api/partite/:id/da-applicare/decisioni': {
     sommario: 'Registra una decisione con CAS e ricevuta idempotente',
-    descrizione: 'Corpo dell’anteprima più revisioneProposteAttesa. Replay ID/payload prima del CAS. Applica usa esclusivamente i mutatori canonici Doti/yen e registra il delta effettivo; scarta conserva la scelta umana. Un raccordo storico usa il motore Diario, senza rieseguire la spunta. Nessun aggiornamento automatico dei progressi dal solo GET. Chiusa l\'ultima decisione aperta di una fascia o giornata già spuntata per intero, la partita avanza nella stessa transazione (alla sera o al giorno dopo, decisione A1 del 2026-10-25) e la risposta lo dice; una ripetizione dello stesso gesto restituisce la ricevuta salvata, senza l\'avanzamento.',
+    descrizione: 'Corpo dell’anteprima più revisioneProposteAttesa. Replay ID/payload prima del CAS. Applica usa esclusivamente i mutatori canonici Doti/yen e registra il delta effettivo (e, nella stessa transazione, la verifica «non conteggiata» delle proposte che non l\'avevano ancora); scarta conserva la scelta umana. Un raccordo storico usa il motore Diario, senza rieseguire la spunta. Nessun aggiornamento automatico dei progressi dal solo GET. Chiusa l\'ultima decisione aperta di una fascia o giornata già spuntata per intero, la partita avanza nella stessa transazione (alla sera o al giorno dopo, decisione A1 del 2026-10-25) e la risposta lo dice; una ripetizione dello stesso gesto restituisce la ricevuta salvata, senza l\'avanzamento.',
     risposta: '`RicevutaDecisioneProposteDto`; con `fasciaAvanzata` (`FasciaAvanzataDto`) o `giornoAvanzato` (`GiornoAvanzatoDto`) quando la decisione ha fatto avanzare la partita', errori: [PARTITA, [409,'proposte-cambiate'], [409,'operazione-diversa']],
   },
   // ---- Partite ----

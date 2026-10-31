@@ -1,6 +1,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { collegaGenerazioneLegacy, fotoLegacy, generazioneRappresentata, valutazioniLegacyPartita } from '../db/acquistiLegacy.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
+import { logger } from '../utils/logger.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento, annullaEventiFonteAcquistoNellaTransazione } from './storicoService.js';
 import { eDote, puntiDaNote } from '../../shared/doti.js';
@@ -47,24 +48,37 @@ function registrazioneDto(a:RigaAcquisto,fonti:RigaFonte[]):RegistrazioneAcquist
   if(legacyValutazioneId){const f=fotoLegacy(getDb(),legacyValutazioneId);if(f.riga.presenza_firma!==a.legacy_firma||jsonCanonico(f.presenza)!==jsonCanonico(leggiOggettoRegistro(a.legacy_raw_json??'','tuple legacy')))throw httpErrors.conflict('generazione-acquisto-diversa','Il fatto non coincide con la generazione della presenza rappresentata.');}
   return {id:a.id,partitaId:a.partita_id,identita,momento:{giorno:a.giorno,fascia:a.fascia,ordine:a.ordine},prezzoYen:a.prezzo_yen,consumo,legacyFirma:a.legacy_firma,legacyValutazioneId,attiva:provenienze.length>0,provenienze,creataIl:a.created_at,orfana:!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave)};
 }
-export function leggiAcquistiPartita(partita:number):StatoAcquistiDto {
+/** Nelle LETTURE tolleranti un'incoerenza dello storico (409) non ferma la lettura: si registra nel log con partita e contesto e la voce incoerente resta fuori dallo stato. Ogni altro errore risale. */
+function anomaliaLetta(partita:number,err:unknown,contesto:Record<string,unknown>):void {
+  if(!(err instanceof HttpError)||err.status!==409)throw err;
+  logger.warn({partita,codice:err.code,...contesto},`Acquisti: incoerenza nello storico, esclusa dalla lettura (il registro resta intatto): ${err.message}`);
+}
+/** `tollerante`: per le sole letture (la pagina, la disponibilità, gli insiemi derivati); le scritture e le anteprime usano la lettura rigorosa, che si ferma alla prima incoerenza. */
+export function leggiAcquistiPartita(partita:number,tollerante=false):StatoAcquistiDto {
   verificaPartita(partita);
   const acquisti=righeAcquisti(partita),fonti=righeFonti(partita),legacy=righeLegacy(partita);
-  if(fonti.some((f)=>!acquisti.some((a)=>a.id===f.acquisto_id)))throw httpErrors.conflict('fonti-orfane-interne','Una provenienza non ha più il proprio acquisto: registro conservato.');
-  const registrazioni=acquisti.map((a)=>registrazioneDto(a,fonti));
+  let escluse=0;
+  if(fonti.some((f)=>!acquisti.some((a)=>a.id===f.acquisto_id))){
+    const orfane=httpErrors.conflict('fonti-orfane-interne','Una provenienza non ha più il proprio acquisto: registro conservato.');
+    if(!tollerante)throw orfane;
+    const senzaAcquisto=fonti.filter((f)=>!acquisti.some((a)=>a.id===f.acquisto_id));
+    anomaliaLetta(partita,orfane,{provenienze:senzaAcquisto.map((f)=>f.id)});
+    escluse+=senzaAcquisto.length;
+  }
+  const registrazioni=acquisti.flatMap((a)=>{try{return [registrazioneDto(a,fonti)];}catch(err){if(!tollerante)throw err;anomaliaLetta(partita,err,{acquisto:a.id,articolo:a.articolo_chiave});escluse++;return [];}});
   const fotografie=valutazioniLegacyPartita(getDb(),partita);
-  const presenzeStoriche:PresenzaStoricaAcquistoDto[]=fotografie.map((f)=>{
+  const presenzeStoriche:PresenzaStoricaAcquistoDto[]=fotografie.flatMap((f)=>{try{
     const r=f.presenza,firma=improntaDato(r),rappresentanti=registrazioni.filter((x)=>x.attiva&&x.legacyFirma===firma&&x.legacyValutazioneId===f.riga.id&&x.identita.articolo===r.articolo_chiave);
     if(registrazioni.some(x=>x.legacyFirma===firma&&x.identita.articolo===r.articolo_chiave&&!x.legacyValutazioneId))throw httpErrors.conflict('generazione-legacy-da-riconciliare','Il fatto precedente richiede il raccordo esplicito alla generazione della presenza.');
     if(rappresentanti.length>1)throw httpErrors.conflict('legacy-duplicata','Più fatti rappresentano la stessa presenza legacy.');
-    return {articolo:r.articolo_chiave,negozioNome:f.identita.negozioNome,firma,rappresentataDa:rappresentanti[0]?.id??null,orfana:!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(r.articolo_chiave),
-      valutazione:{id:f.riga.id,generazione:f.riga.generazione,nome:f.identita.nome,negozio:f.identita.negozio,contributoYen:f.riga.contributo_yen,prezzoCatalogoYen:f.riga.prezzo_catalogo,statoPrezzo:f.riga.stato_prezzo,origine:f.riga.origine}};
-  });
+    return [{articolo:r.articolo_chiave,negozioNome:f.identita.negozioNome,firma,rappresentataDa:rappresentanti[0]?.id??null,orfana:!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(r.articolo_chiave),
+      valutazione:{id:f.riga.id,generazione:f.riga.generazione,nome:f.identita.nome,negozio:f.identita.negozio,contributoYen:f.riga.contributo_yen,prezzoCatalogoYen:f.riga.prezzo_catalogo,statoPrezzo:f.riga.stato_prezzo,origine:f.riga.origine}}];
+  }catch(err){if(!tollerante)throw err;anomaliaLetta(partita,err,{valutazione:f.riga.id,articolo:f.presenza.articolo_chiave});escluse++;return [];}});
   const spesa=new Map<string,number>(),ottenuti=new Set(legacy.map((r)=>r.articolo_chiave));
   for(const l of presenzeStoriche)if(!l.rappresentataDa&&l.valutazione?.negozio!==null&&l.valutazione?.negozio!==undefined){const k=l.valutazione.negozio;spesa.set(k,(spesa.get(k)??0)+l.valutazione.contributoYen);}
   for(const a of registrazioni)if(a.attiva){ottenuti.add(a.identita.articolo);if(a.identita.negozio)spesa.set(a.identita.negozio,(spesa.get(a.identita.negozio)??0)+a.prezzoYen);}
   if([...spesa.values()].some(n=>!Number.isSafeInteger(n)))throw httpErrors.conflict('spesa-non-rappresentabile','Il totale della spesa non è rappresentabile senza perdita di precisione.');
-  return {partitaId:partita,presenzeStoriche,registrazioni,articoliOttenuti:[...ottenuti].sort(),spesaPerNegozio:[...spesa].sort(([a],[b])=>a.localeCompare(b)).map(([negozio,spesa])=>({negozio,spesa})),revisione:improntaDato({acquisti,fonti,legacy,fotografie,raccordi:registrazioni.map(a=>[a.id,a.legacyValutazioneId])})};
+  return {partitaId:partita,presenzeStoriche,registrazioni,articoliOttenuti:[...ottenuti].sort(),spesaPerNegozio:[...spesa].sort(([a],[b])=>a.localeCompare(b)).map(([negozio,spesa])=>({negozio,spesa})),revisione:improntaDato({acquisti,fonti,legacy,fotografie,raccordi:registrazioni.map(a=>[a.id,a.legacyValutazioneId])}),...(escluse>0?{righeEscluse:escluse}:{})};
 }
 export function acquistiArticolo(partita:number,articolo:string,precaricato?:StatoAcquistiDto):StatoAcquistiArticoloDto {
   const stato=precaricato??leggiAcquistiPartita(partita);if(stato.partitaId!==partita)throw httpErrors.conflict('partita-diversa','Il riepilogo appartiene a un’altra partita.');
@@ -74,8 +88,8 @@ export function acquistiArticolo(partita:number,articolo:string,precaricato?:Sta
   return {articolo,acquistato:stato.articoliOttenuti.includes(articolo),presenzaStorica:stato.presenzeStoriche.find((l)=>l.articolo===articolo)??null,registrazioni,
     aojiru:articolo===ARTICOLO_AOJIRU?{confermate:attive.length,varianteAttesa:attive.length?prossimaVarianteAojiru(attive[attive.length-1]!.consumo.variante):null,incongruenze,nota:'Atteso secondo le consumazioni registrate; eventuali consumi mancanti non sono dedotti dalle date o dal segno storico.'}:null};
 }
-export const chiaviArticoliOttenuti=(p:number,stato?:StatoAcquistiDto):Set<string>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Set((stato??leggiAcquistiPartita(p)).articoliOttenuti);};
-export const spesaAcquistiPerNegozio=(p:number,stato?:StatoAcquistiDto):Map<string,number>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Map((stato??leggiAcquistiPartita(p)).spesaPerNegozio.map((x)=>[x.negozio,x.spesa]));};
+export const chiaviArticoliOttenuti=(p:number,stato?:StatoAcquistiDto):Set<string>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Set((stato??leggiAcquistiPartita(p,true)).articoliOttenuti);};
+export const spesaAcquistiPerNegozio=(p:number,stato?:StatoAcquistiDto):Map<string,number>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Map((stato??leggiAcquistiPartita(p,true)).spesaPerNegozio.map((x)=>[x.negozio,x.spesa]));};
 
 function offerta(chiave:string):{identita:IdentitaAcquisto;raw:Record<string,unknown>} {
   const r=prepared('SELECT a.*,n.nome AS negozio_nome,c.nome AS catalogo_nome FROM main.articolo a LEFT JOIN main.negozio n ON n.chiave=a.negozio_chiave LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?').get(chiave) as Record<string,unknown>|undefined;

@@ -1753,6 +1753,14 @@ export interface AvanzamentoGiornataDto {
   fasciaAvanzata?: FasciaAvanzataDto;
 }
 
+/** L'avanzamento nell'intestazione `X-Avanzamento-Partita`, senza la `PartitaDto` (le note possono essere lunghe e le intestazioni
+ *  hanno un tetto): l'id della partita e quanto basta all'avviso; il client rilegge la partita dal server. */
+export interface AvanzamentoInIntestazioneDto {
+  partitaId: number;
+  giornoAvanzato?: Omit<GiornoAvanzatoDto, 'partita'>;
+  fasciaAvanzata?: Omit<FasciaAvanzataDto, 'partita'>;
+}
+
 export interface PercorsoGiornoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;

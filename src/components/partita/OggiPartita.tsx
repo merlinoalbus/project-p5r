@@ -10,6 +10,7 @@
 import { useEffect, useRef } from 'react';
 import { useOggi } from '../../hooks/useOggi';
 import { PageState } from '../shared/PageState';
+import { AvvisoGuidaVecchia } from './AvvisoGuidaVecchia';
 import { OggiGuida } from './OggiGuida';
 import { OggiMappa } from './OggiMappa';
 import type { PartitaDto } from '../../types';
@@ -39,13 +40,16 @@ export function OggiPartita({ partita, riempi, onGiorno }: Props) {
   // la scheda si chiude (altra scheda, altra partita): l'intestazione torna alla data di gioco
   useEffect(() => () => avvisa.current?.(null), []);
   return (
-    <PageState isLoading={oggi.caricamento} error={oggi.errore} onRetry={() => void oggi.ricarica()}>
-      {oggi.indice && oggi.giorno && (
-        <div className={`grid grid-cols-1 gap-4 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
-          <OggiGuida oggi={oggi} riempi={riempi} />
-          <OggiMappa oggi={oggi} riempi={riempi} />
-        </div>
-      )}
-    </PageState>
+    <>
+      {oggi.lettaAlle !== null && <AvvisoGuidaVecchia alle={oggi.lettaAlle} causa={oggi.causaLettura} onRiprova={() => void oggi.ricarica()} />}
+      <PageState isLoading={oggi.caricamento} error={oggi.errore} causa={oggi.causaErrore} onRetry={() => void oggi.ricarica()}>
+        {oggi.indice && oggi.giorno && (
+          <div className={`grid grid-cols-1 gap-4 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
+            <OggiGuida oggi={oggi} riempi={riempi} />
+            <OggiMappa oggi={oggi} riempi={riempi} />
+          </div>
+        )}
+      </PageState>
+    </>
   );
 }

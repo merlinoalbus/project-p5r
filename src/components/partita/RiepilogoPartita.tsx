@@ -2,13 +2,13 @@
 // RiepilogoPartita — dati generali della partita attiva (modificabili)
 // ============================================================
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
 import { Campo, CampoTesto } from '../shared/Campo';
 import { Link } from 'react-router-dom';
 import { StoricoPartita } from './StoricoPartita';
-import { aggiornaPartita, getSetDlc, URL_SET_DLC } from '../../services/api';
+import { aggiornaPartita, getSetDlc, URL_SET_DLC, type DatiPartita } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
@@ -24,6 +24,16 @@ const DIFFICOLTA: Array<{ v: Difficolta; l: string }> = [
   { v: 'spietata', l: 'Spietata' },
 ];
 
+/** Il livello scritto nel campo come intero fra 1 e 99; `null` se il campo è vuoto o non è un numero (allora vale quello di prima, mai 0). */
+function livelloValido(testo: string): number | null {
+  if (testo.trim() === '') return null;
+  const n = Number(testo);
+  return Number.isFinite(n) ? Math.min(99, Math.max(1, Math.trunc(n))) : null;
+}
+
+/** I set di contenuti scaricabili in ordine di id, come testo confrontabile (il server li salva così). */
+const listaOrdinata = (l: readonly number[]): string => [...l].sort((a, b) => a - b).join(',');
+
 interface Props {
   partita: PartitaDto;
   /** Chiamata quando si segue un collegamento verso un'altra scheda (dentro una finestra: la chiude). */
@@ -36,7 +46,8 @@ interface Props {
 export function RiepilogoPartita({ partita, onNaviga }: Props) {
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [nome, setNome] = useState(partita.nome);
-  const [livello, setLivello] = useState(partita.livelloProtagonista);
+  // il livello si tiene come testo mentre si scrive (un campo vuoto non vale 0) e si valida all'uscita dal campo e al salvataggio
+  const [livelloTesto, setLivelloTesto] = useState(String(partita.livelloProtagonista));
   const [dataGioco, setDataGioco] = useState(partita.dataGioco ?? '');
   const [difficolta, setDifficolta] = useState<Difficolta>(partita.difficolta);
   const [ngPlus, setNgPlus] = useState(partita.nuovaPartitaPlus);
@@ -45,6 +56,13 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
   const [salvataggioP5, setSalvataggioP5] = useState(partita.salvataggioP5);
   const [dlc, impostaDlc] = useState<readonly number[]>(partita.dlcPosseduti);
   const [occupato, setOccupato] = useState(false);
+  // i valori con cui il modulo è partito (poi, dopo ogni salvataggio, quelli salvati): «Salva» invia SOLO i campi cambiati rispetto a
+  // questi. Reinviare anche gli altri riporterebbe indietro quello che nel frattempo è cambiato altrove (il giorno spostato da una spunta
+  // del Diario, il livello di Joker) con i valori che il modulo si era portato dietro dall'apertura.
+  const base = useRef({
+    nome: partita.nome, livello: partita.livelloProtagonista, dataGioco: partita.dataGioco ?? '', difficolta: partita.difficolta, ngPlus: partita.nuovaPartitaPlus,
+    allarme: partita.allarmeAttivo, note: partita.note, salvataggioP5: partita.salvataggioP5, dlc: listaOrdinata(partita.dlcPosseduti),
+  });
   // i set di contenuti scaricabili del file di gioco, con le loro Persona (dato di gioco, con la cache delle letture di gioco)
   const elencoDlc = useCarica(() => getSetDlc(), [], { cacheUrl: URL_SET_DLC });
   /** Segna o toglie un set fra i posseduti (in ordine di id, come li salva il server). */
@@ -58,9 +76,24 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
     if (occupato) return;
     setOccupato(true);
     try {
-      const ordinati = (l: readonly number[]) => [...l].sort((a, b) => a - b).join(',');
-      const dlcCambiati = ordinati(dlc) !== ordinati(partita.dlcPosseduti);
-      const p = await aggiornaPartita(partita.id, { nome, livelloProtagonista: livello, dataGioco: dataGioco || null, difficolta, nuovaPartitaPlus: ngPlus, allarmeAttivo: allarme, note, salvataggioP5, ...(dlcCambiati ? { dlcPosseduti: [...dlc] } : {}) });
+      const b = base.current;
+      const livello = livelloValido(livelloTesto) ?? b.livello;
+      setLivelloTesto(String(livello));
+      const dati: DatiPartita = {
+        ...(nome !== b.nome ? { nome } : {}),
+        ...(livello !== b.livello ? { livelloProtagonista: livello } : {}),
+        ...(dataGioco !== b.dataGioco ? { dataGioco: dataGioco || null } : {}),
+        ...(difficolta !== b.difficolta ? { difficolta } : {}),
+        ...(ngPlus !== b.ngPlus ? { nuovaPartitaPlus: ngPlus } : {}),
+        ...(allarme !== b.allarme ? { allarmeAttivo: allarme } : {}),
+        ...(note !== b.note ? { note } : {}),
+        ...(salvataggioP5 !== b.salvataggioP5 ? { salvataggioP5 } : {}),
+        // i contenuti scaricabili partono solo se sono cambiati, così il salvataggio degli altri campi non dipende dal loro controllo sul file di gioco
+        ...(listaOrdinata(dlc) !== b.dlc ? { dlcPosseduti: [...dlc] } : {}),
+      };
+      if (Object.keys(dati).length === 0) { notifica('info', 'Non ci sono modifiche da salvare.'); return; }
+      const p = await aggiornaPartita(partita.id, dati);
+      base.current = { nome, livello, dataGioco, difficolta, ngPlus, allarme, note, salvataggioP5, dlc: listaOrdinata(dlc) };
       aggiornaLocale(p);
       notifica('success', 'Partita aggiornata.');
     } catch (err) {
@@ -71,12 +104,16 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
   };
 
   /** Cambia subito lo stato dell'Allarme, senza aspettare «Salva»: aggiorna il campo locale e salva
-   * il solo Allarme; in caso di errore notifica e lascia il campo come scelto. */
+   * il solo Allarme; in caso di errore notifica e ripristina il valore di prima. */
   const cambiaAllarme = async (attivo: boolean) => {
+    const prima = allarme;
     setAllarme(attivo);
     try {
       aggiornaLocale(await aggiornaPartita(partita.id, { allarmeAttivo: attivo }));
+      base.current = { ...base.current, allarme: attivo };
     } catch (err) {
+      // il salvataggio non è avvenuto: il pulsante torna a dire com'è davvero la partita
+      setAllarme(prima);
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     }
   };
@@ -89,7 +126,8 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <label className="form-label">Livello del protagonista
-            <input type="number" min={1} max={99} className="form-input" value={livello} onChange={(e) => setLivello(Number(e.target.value))} />
+            <input type="number" min={1} max={99} className="form-input" value={livelloTesto} onChange={(e) => setLivelloTesto(e.target.value)}
+              onBlur={() => setLivelloTesto(String(livelloValido(livelloTesto) ?? base.current.livello))} />
           </label>
           {/* L13: la data di gioco si sceglie (mese e giorno), non si digita; si salva come «MM-GG» o `null` («nessuna») come prima */}
           <Campo etichetta="Data di gioco" senzaGruppo>

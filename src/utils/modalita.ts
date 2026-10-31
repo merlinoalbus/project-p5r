@@ -63,16 +63,16 @@ export const CAPACITA_BUILD: Readonly<Capacita> = capacitaDi(MODALITA_BUILD);
  */
 export function verificaCoerenzaModalita(config: { modalita?: unknown; capacita?: unknown }): string | null {
   const dichiarata = config.modalita ?? MODALITA_PREDEFINITA;
-  if (!eModalita(dichiarata)) return 'Il backend dichiara una modalità che questa versione dell\'app non riconosce';
+  if (!eModalita(dichiarata)) return 'Il server dichiara una modalità che questa versione dell\'app non riconosce';
   if (dichiarata !== MODALITA_BUILD) {
-    return `Questa app è stata costruita per l'istanza di ${MODALITA_BUILD}, ma il backend risponde come istanza di ${dichiarata}`;
+    return `Questa app è stata costruita per l'istanza di ${MODALITA_BUILD}, ma il server risponde come istanza di ${dichiarata}`;
   }
   // stessa modalità, ma il codice dei due lati potrebbe essere di versioni diverse: contano anche i singoli flag
   const capacitaBackend = config.capacita;
   if (capacitaBackend !== undefined) {
-    if (typeof capacitaBackend !== 'object' || capacitaBackend === null) return 'Il backend dichiara capacità illeggibili';
+    if (typeof capacitaBackend !== 'object' || capacitaBackend === null) return 'Il server dichiara capacità illeggibili';
     if (!capacitaUguali(CAPACITA_BUILD, capacitaBackend as Capacita)) {
-      return `Le funzioni dell'istanza di ${MODALITA_BUILD} dichiarate dal backend non coincidono con quelle di questa app (versioni diverse)`;
+      return `Le funzioni dell'istanza di ${MODALITA_BUILD} dichiarate dal server non coincidono con quelle di questa app (versioni diverse)`;
     }
   }
   return null;

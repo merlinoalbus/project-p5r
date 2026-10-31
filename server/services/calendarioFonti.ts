@@ -51,8 +51,8 @@ export function risolutoreFonti(): (chiave: string | null | undefined) => FonteE
     if ((p[0] === 'furto' || p[0] === 'lettera') && p.length === 2) {
       const { colonna, tipo } = DATE_PALAZZO[p[0]];
       // la colonna del furto arriva con la 308: su uno schema di prima la chiave non si risolve
-      let d: string | null | undefined;
-      try { d = prepared(`SELECT ${colonna} FROM dungeon WHERE chiave = ?`).pluck().get(p[1]) as string | null | undefined; } catch { return null; }
+      if (!prepared("SELECT 1 FROM pragma_table_info('dungeon', 'main') WHERE name = ?").get(colonna)) return null;
+      const d = prepared(`SELECT ${colonna} FROM dungeon WHERE chiave = ?`).pluck().get(p[1]) as string | null | undefined;
       return d ? { data: d, tipo } : null;
     }
     if (p[0] === 'sblocco' && p[1] === 'confidente' && p.length === 4 && p[3] === '1') {
