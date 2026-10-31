@@ -16,7 +16,11 @@
 //       (`EVENTI_STORIA`, come i fatti della 090) lo dà la voce del 6 settembre «Ombra Nejima, boss invincibile con ritirata automatica»; il
 //       rango 1 della Torre chiede quel fatto invece della Richiesta (nelle due tabelle); il completamento chiede anche il rango 1 della Torre;
 //       la sala giochi di Akihabara (luogo dell'incontro del 19 settembre) chiedeva la Richiesta completata: chiede la prima visita; l'attività
-//       Gun About, che chiede già il rango 1, perde la Richiesta completata (il rango 1 la comprendeva in un giro);
+//       Gun About, che chiede già il rango 1, perde la Richiesta completata (il rango 1 la comprendeva in un giro). Tutto legato alla voce:
+//       se la voce non porta il fatto (spuntata o cambiata prima della migrazione), Torre, sala giochi e completamento restano com'erano
+//       (altrimenti il rango 1 resterebbe irraggiungibile); il completamento chiede il rango 1 solo se il rango 1 non chiede più la Richiesta.
+//       La data del rango 1 della Torre in `confidente_requisito` (4/9, dalla 182) passa al 5/9 della guida, come la copia della guida; la
+//       sala giochi e Gun About seguono (5/9); la Richiesta resta al 4/9 («Disponibile da: 4 settembre»);
 //   (3) «L'idol e l'unicorno» e «Falsità in scena»: `disponibile_dal` in prosa («Il giorno dopo aver completato il Palazzo finale…») si svuota:
 //       la condizione è lo sblocco dalle voci del 28 e del 29 gennaio, che vengono dopo il Corridoio del Crepuscolo (26/1). Il Corridoio non è
 //       un dato della partita: nelle note di L'idol la frase della guida, nessuna condizione inventata;
@@ -93,12 +97,22 @@ const DI_CONDIZIONI: ReadonlySet<string> = new Set(['condizioni_json', 'completa
 const TORRE = { confidente: 'shinya', rango: 1, tipo: 'richiesta', dati: j({ richiesta: VINCENTI }), testo: 'Completare la richiesta dei Mementos "I vincenti non imbrogliano"' };
 const TABELLE_REQUISITI = ['confidente_requisito', 'confidente_requisito_guida'] as const;
 
-/** Le condizioni di luogo e attività della sala giochi di Akihabara che chiedevano la Richiesta completata. */
+/**
+ * La data del rango 1 della Torre: la guida dice «a partire dal 5 SETTEMBRE (Lunedì 9/5)» e la copia della guida (`confidente_requisito_guida`)
+ * lo dice già; `confidente_requisito` (scritta dalla 182) diceva il 4. Un solo valore: il 5, sulla riga letta. La Richiesta resta al 4/9
+ * (la pagina delle Richieste: «Disponibile da: 4 settembre»): arriva prima del Confidente, che si avvia «dopo aver portato avanti la richiesta».
+ */
+const DATA_TORRE = { prima: { dati: j({ dal: '09-04' }), testo: 'Disponibile dal 4 settembre' }, dopo: { dati: j({ dal: '09-05' }), testo: 'Disponibile dal 5 settembre' } };
+
+/**
+ * Le condizioni di luogo e attività della sala giochi di Akihabara che chiedevano la Richiesta completata. La loro data era quella del
+ * rango 1 della Torre (4/9: il luogo è quello di Shinya, l'attività chiede il rango 1): segue la data della guida, il 5/9.
+ */
 const SALA_GIOCHI: ReadonlyArray<{ tabella: 'luogo' | 'attivita'; chiave: string; prima: unknown[]; dopo: unknown[]; perche: string }> = [
-  { tabella: 'luogo', chiave: 'akihabara/sala-giochi-akihabara', prima: [RICHIESTA_COMPLETATA, { tipo: 'data', dal: '09-04' }], dopo: [CONDIZIONE_EVENTO, { tipo: 'data', dal: '09-04' }],
-    perche: 'il rango 1 si fa qui il 19/9 («Sala giochi ad Akihabara»), prima di completare la Richiesta (6/11): la sala chiede la prima visita, non la Richiesta completata' },
-  { tabella: 'attivita', chiave: 'sala-giochi-gun-about-akihabara', prima: [{ tipo: 'confidente', confidente: 'shinya', rango: 1 }, { tipo: 'data', dal: '09-04' }, RICHIESTA_COMPLETATA], dopo: [{ tipo: 'confidente', confidente: 'shinya', rango: 1 }, { tipo: 'data', dal: '09-04' }],
-    perche: 'chiede già il rango 1 della Torre, che ora viene prima della Richiesta completata: la Richiesta completata restava solo come giro' },
+  { tabella: 'luogo', chiave: 'akihabara/sala-giochi-akihabara', prima: [RICHIESTA_COMPLETATA, { tipo: 'data', dal: '09-04' }], dopo: [CONDIZIONE_EVENTO, { tipo: 'data', dal: '09-05' }],
+    perche: 'il rango 1 si fa qui il 19/9 («Sala giochi ad Akihabara»), prima di completare la Richiesta (6/11): la sala chiede la prima visita, non la Richiesta completata; la data è quella del Confidente nella guida (5/9)' },
+  { tabella: 'attivita', chiave: 'sala-giochi-gun-about-akihabara', prima: [{ tipo: 'confidente', confidente: 'shinya', rango: 1 }, { tipo: 'data', dal: '09-04' }, RICHIESTA_COMPLETATA], dopo: [{ tipo: 'confidente', confidente: 'shinya', rango: 1 }, { tipo: 'data', dal: '09-05' }],
+    perche: 'chiede già il rango 1 della Torre, che ora viene prima della Richiesta completata: la Richiesta completata restava solo come giro; la data è quella del Confidente nella guida (5/9)' },
 ];
 
 /** La voce del 6 settembre che dà la prima visita. */
@@ -121,7 +135,7 @@ const INGRESSO = { dungeon: 'mementos', prima: '05-09', dopo: '05-07', testoPrim
 /** Le citazioni delle fonti (lette il 2026-10-31). */
 const CITAZIONI = {
   1: { fonte: FONTI.richieste, frase: 'la pagina delle Richieste non dà la data di «Un intruso a Yongen-Jaya» (solo l’elenco delle richieste obbligatorie per il Confidente della Luna); decide la risposta dell’utente' },
-  2: { fonte: [FONTI.richieste, FONTI.shinya], frase: 'Richieste: alla prima visita «tutti gli attacchi mancano», «per affrontarlo davvero serve prima un legame con Shinya Oda (Rango Confidente Torre)»; Shinya: «Possiamo avviare questo Confidente a partire dal 5 SETTEMBRE (Lunedì 9/5)», «ma solo dopo aver portato avanti la richiesta», incontro alla «Sala giochi ad Akihabara», giorno consigliato «19 SETTEMBRE»' },
+  2: { fonte: [FONTI.richieste, FONTI.shinya], frase: 'Richieste: «I vincenti non imbrogliano» «Disponibile da: 4 settembre»; alla prima visita «tutti gli attacchi mancano», «per affrontarlo davvero serve prima un legame con Shinya Oda (Rango Confidente Torre)»; Shinya: «Possiamo avviare questo Confidente a partire dal 5 SETTEMBRE (Lunedì 9/5)», «ma solo dopo aver portato avanti la richiesta», incontro alla «Sala giochi ad Akihabara», giorno consigliato «19 SETTEMBRE»' },
   3: { fonte: [FONTI.richieste, FONTI.daat, FONTI.settimana39], frase: 'Richieste: L’idol e Falsità «Dopo il Palazzo finale»; Da’at: L’idol richiede di «essersi infiltrati nel Corridoio del Crepuscolo» del Palazzo di Maruki (Piano 13), Falsità (Piano 15) nessun requisito; settimana 39: 26/1 infiltrazione nel Corridoio del Crepuscolo, 27/1 arriva «Falsità in scena», 28/1 «L’idol e l’unicorno», «l’ultima del gioco»' },
   4: { fonte: [FONTI.daat, FONTI.richieste], frase: 'il titolo «Il finto spettacolo dell’uomo» non compare in nessuna delle due pagine; le richieste finali del Da’at sono solo «L’idol e l’unicorno» e «Falsità in scena»; Falsità: «bisogna uscire e rientrare in classe», altrimenti si attiva automaticamente il giorno successivo' },
   5: { fonte: [FONTI.richieste, FONTI.settimana5], frase: 'Richieste: «Un bullo che abbaia e morde» disponibile dal 9 maggio, nessun input di avvio («–»); settimana 5: il 9/5 la prima Richiesta dei Memento arriva con l’aprirsi della giornata' },
@@ -155,8 +169,10 @@ function inSql(colonna: string, v: unknown, nuovo: boolean): ValoreSql {
 
 // ---- (1)-(3) le Richieste ----
 
-function richieste(db: AppDatabase): Esito[] {
-  return RICHIESTE.map((r): Esito => {
+type RichiestaLetta = typeof RICHIESTE[number];
+
+function richieste(db: AppDatabase, elenco: readonly RichiestaLetta[]): Esito[] {
+  return elenco.map((r): Esito => {
     const colonne = Object.keys(r.campi) as ColonnaRichiesta[];
     for (const c of colonne) if (!COLONNE_RICHIESTA.has(c)) errore(`colonna «${c}» non prevista`);
     const chiave = `richiesta:${r.chiave}`;
@@ -222,6 +238,55 @@ function vocePrimaVisita(db: AppDatabase, partite: string[] | null, adesso: stri
     motivo: `la prima visita a Nejima, che fallisce da copione, è il fatto che il rango 1 della Torre chiede (${FONTI.richieste}; ${FONTI.shinya})`,
   }, partite, adesso);
   return { punto: 2, ...e };
+}
+
+/** La voce del 6/9 porta davvero il fatto (letto dal database, non dall'esito): solo allora la Torre e la sala giochi possono chiederlo. */
+function voceDaIlFatto(db: AppDatabase): boolean {
+  return (db.prepare("SELECT dati_json FROM main.voce_effetto WHERE voce_uid = ? AND tipo = 'storia'").pluck().all(VOCE_PRIMA_VISITA.uid) as string[]).some((d) => {
+    try { const v = JSON.parse(d) as { tipo?: unknown; evento?: unknown }; return v.tipo === 'storia' && v.evento === EVENTO; } catch { return false; }
+  });
+}
+
+/** Il rango 1 della Torre di `confidente_requisito` (quella che l'app valuta) chiede la prima visita e non più la Richiesta completata. */
+function torreConPrimaVisita(db: AppDatabase): boolean {
+  const righe = db.prepare('SELECT tipo, dati_json FROM main.confidente_requisito WHERE confidente_chiave = ? AND rango = ?').all(TORRE.confidente, TORRE.rango) as Array<{ tipo: string; dati_json: string }>;
+  return righe.some((r) => r.tipo === 'evento' && r.dati_json === j({ evento: EVENTO })) && !righe.some((r) => r.tipo === TORRE.tipo && r.dati_json === TORRE.dati);
+}
+
+/** La data del rango 1 della Torre in `confidente_requisito`: dal 4 al 5 settembre, sulla riga letta, se la copia della guida dice già il 5. */
+function dataTorre(db: AppDatabase): Esito {
+  const chiave = `confidente_requisito:${TORRE.confidente}:${TORRE.rango}:data`;
+  if (!esisteTabella(db, 'confidente_requisito')) return { punto: 2, chiave, esito: 'tabella assente: niente da fare' };
+  const leggi = (t: string) => db.prepare(`SELECT indice, dati_json, testo FROM main.${t} WHERE confidente_chiave = ? AND rango = ? AND tipo = 'data' ORDER BY indice`).all(TORRE.confidente, TORRE.rango) as Array<{ indice: number; dati_json: string; testo: string }>;
+  const righe = leggi('confidente_requisito');
+  if (righe.length === 1 && righe[0]!.dati_json === DATA_TORRE.dopo.dati && righe[0]!.testo === DATA_TORRE.dopo.testo) return { punto: 2, chiave, esito: 'già al 5 settembre' };
+  if (righe.length !== 1 || righe[0]!.dati_json !== DATA_TORRE.prima.dati || righe[0]!.testo !== DATA_TORRE.prima.testo) return { punto: 2, chiave, esito: 'saltata: data diversa da quella letta (cambiata dall’utente o già toccata), non toccata', prima: righe };
+  const guida = esisteTabella(db, 'confidente_requisito_guida') ? leggi('confidente_requisito_guida') : [];
+  if (guida.length !== 1 || guida[0]!.dati_json !== DATA_TORRE.dopo.dati || guida[0]!.testo !== DATA_TORRE.dopo.testo) return { punto: 2, chiave, esito: 'saltata: la copia della guida non dice il 5 settembre, non toccata', prima: { requisito: righe, guida } };
+  const v = righe[0]!;
+  if (db.prepare("UPDATE main.confidente_requisito SET dati_json = ?, testo = ? WHERE confidente_chiave = ? AND rango = ? AND indice = ? AND tipo = 'data' AND dati_json = ? AND testo = ?")
+    .run(DATA_TORRE.dopo.dati, DATA_TORRE.dopo.testo, TORRE.confidente, TORRE.rango, v.indice, DATA_TORRE.prima.dati, DATA_TORRE.prima.testo).changes !== 1) errore('la data del rango 1 della Torre non si aggiorna');
+  return { punto: 2, chiave, esito: 'scritta (la data della guida, uguale a quella della copia della guida)', prima: v, dopo: { indice: v.indice, dati_json: DATA_TORRE.dopo.dati, testo: DATA_TORRE.dopo.testo } };
+}
+
+/**
+ * Il punto 2 tutto insieme, legato alla voce del 6/9: la Torre e la sala giochi chiedono la prima visita solo se la voce la dà (altrimenti il
+ * rango 1 resterebbe irraggiungibile senza forzare: voce spuntata o cambiata prima della migrazione), e il completamento chiede il rango 1
+ * solo se il rango 1 non chiede più la Richiesta completata (altrimenti il giro tornerebbe). Ciò che non si può fare resta com'era e l'audit lo dice.
+ */
+function puntoDue(db: AppDatabase, partite: string[] | null, adesso: string): Esito[] {
+  const voce = vocePrimaVisita(db, partite, adesso);
+  const esiti: Esito[] = [voce, dataTorre(db)];
+  const vincenti = RICHIESTE.filter((r) => r.punto === 2);
+  const salta = (perche: string): Esito[] => [
+    ...TABELLE_REQUISITI.map((t): Esito => ({ punto: 2, chiave: `${t}:${TORRE.confidente}:${TORRE.rango}`, esito: `saltata: ${perche}, requisito lasciato com’era` })),
+    ...SALA_GIOCHI.map((s): Esito => ({ punto: 2, chiave: `${s.tabella}:${s.chiave}`, esito: `saltata: ${perche}, condizioni lasciate com’erano` })),
+    ...vincenti.map((r): Esito => ({ punto: 2, chiave: `richiesta:${r.chiave}`, esito: `saltata: ${perche}, completamento lasciato com’era` })),
+  ];
+  if (!voceDaIlFatto(db)) return [...esiti, ...salta(`la voce del 6/9 non dà il fatto «${EVENTO}» (${voce.esito})`)];
+  esiti.push(...torre(db), ...salaGiochi(db));
+  if (!torreConPrimaVisita(db)) return [...esiti, ...vincenti.map((r): Esito => ({ punto: 2, chiave: `richiesta:${r.chiave}`, esito: 'saltata: il rango 1 della Torre chiede ancora la Richiesta completata (riga non toccata), completamento lasciato com’era per non chiudere il giro' }))];
+  return [...esiti, ...richieste(db, vincenti)];
 }
 
 // ---- (4) le proposte della voce del 29/1, come la 310 ----
@@ -359,13 +424,13 @@ function scriviAudit(db: AppDatabase, esecuzione: Record<string, unknown>, cambi
       regola: 'ogni scrittura sul valore letto il 2026-10-31 (righe diverse: saltate e dette); condizioni nella forma dell’app; proposte con la funzione della pagina «Da completare» e le verifiche della 310; le partite non si scrivono mai',
       domande310: {
         1: 'Un intruso a Yongen-Jaya: risolta dall’utente («il 29 viene sbloccato e diventa gestibile a partire dal 30»): condizione di sblocco accanto al «dal 30/8», la voce resta al 29',
-        2: 'I vincenti non imbrogliano: giro chiuso tolto col fatto «Prima visita a Nejima» (voce del 6/9); il rango 1 della Torre chiede la prima visita, il completamento chiede il rango 1; sala giochi di Akihabara e Gun About senza la Richiesta completata',
+        2: 'I vincenti non imbrogliano: giro chiuso tolto col fatto «Prima visita a Nejima» (voce del 6/9); il rango 1 della Torre chiede la prima visita, il completamento chiede il rango 1; sala giochi di Akihabara e Gun About senza la Richiesta completata. Tutto legato alla voce: se la voce non dà il fatto, Torre, sala giochi e completamento restano com’erano. La data del rango 1 della Torre e della sala giochi è quella della guida, il 5/9, come nella copia della guida; la Richiesta resta al 4/9',
         3: 'L’idol e Falsità: «dopo il Palazzo finale» non è il Palazzo concluso; disponibile_dal svuotato, vale lo sblocco dalle voci del 28/1 e 29/1; il Corridoio del Crepuscolo nelle note di L’idol (non è un dato della partita)',
         4: '«Il finto spettacolo dell’uomo» è «Falsità in scena»: le due proposte applicate. La data della voce resta il 29/1: la soluzione della settimana 39 dà l’arrivo il 27/1 e le due Richieste fatte il 28/1, il Diario le fa il 30/1 (domanda all’utente)',
         5: 'Un bullo che abbaia e morde: la guida conferma «dal 9 maggio» senza input di avvio; la proposta di sblocco chiusa come superata, la voce spuntata non si tocca',
       },
       lasciati: [
-        { chiave: 'confidente_requisito shinya 1 (data)', che: 'resta al 4 settembre: lo ha scritto la 182 (fonti Royal, 24/10); la guida italiana e la copia della guida (`confidente_requisito_guida`) dicono 5 settembre. Con la prima visita del 6/9 la data non decide più nulla: domanda all’utente se allinearla', fonte: FONTI.shinya },
+        { chiave: 'richiesta i-vincenti-non-imbrogliano (data)', che: 'resta al 4 settembre: la pagina delle Richieste dice «Disponibile da: 4 settembre» e la voce del 4/9 la sblocca; il Confidente (5/9) viene dopo la Richiesta', fonte: FONTI.richieste },
         { chiave: 'richiesta i-vincenti-non-imbrogliano (note)', che: 'la frase sul legame con la Torre resta: spiega le due parti del combattimento, la condizione di completamento la rende' },
       ],
       datiDellIngresso: datiDellIngresso(db),
@@ -386,7 +451,7 @@ export const migration318: Migration = {
     const partitePrima = partiteAttaccate ? improntaPartite(db) : null;
     const partite = tabellePartiteConVoce(db);
     const esiti: Esito[] = [
-      ...richieste(db), ...torre(db), ...salaGiochi(db), vocePrimaVisita(db, partite, adesso),
+      ...richieste(db, RICHIESTE.filter((r) => r.punto !== 2)), ...puntoDue(db, partite, adesso),
       ...proposteFalsita(db, partite), propostaBullo(db, adesso), ...ingresso(db),
     ];
     if (partiteAttaccate && improntaPartite(db) !== partitePrima) errore('le partite risultano cambiate');
