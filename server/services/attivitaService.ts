@@ -680,8 +680,11 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     // L13 (chiusure del 31/10): con l'esito che ha la sua paga la ricevuta dice quella (già tutta nel saldo: nessun «fino a»)
-    const pagaEsito = esito ? esitiDellAttivita(chiave)?.esiti?.esiti.find((x) => x.chiave === esito.chiave)?.paga : undefined;
-    const paga = pagaEsito ? { yen: pagaEsito, massima: null } : riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null;
+    // (anche l'esito senza paga propria di un'attività che ne ha: la paga è quella detta dall'esito, il «fino a» non vale)
+    const conPagaPropria = esitiDellAttivita(chiave)?.esiti?.esiti;
+    const pagaEsito = esito ? conPagaPropria?.find((x) => x.chiave === esito.chiave)?.paga : undefined;
+    const senzaMassima = !!esito && !!conPagaPropria?.some((x) => x.paga);
+    const paga = pagaEsito ? { yen: pagaEsito, massima: null } : riga.paga_yen != null ? { yen: riga.paga_yen, massima: senzaMassima ? null : riga.paga_massima ?? null } : null;
     return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga, ...(esito !== undefined ? { esito } : {}),
       ...(esito && quantita && quantita > 1 ? { quantita } : {}), ...(oggetti.length ? { oggetti } : {}), ...(consumati.length ? { consumati } : {}) };
   })();

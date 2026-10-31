@@ -42,7 +42,7 @@ import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riallineaVoceNelReg
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
-import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
+import { esitiDellAttivita, scelteEsitoDellaVoce } from './esitiAttivitaService.js';
 import { alternativeDellaVoceFatta, contenutoArticoli, effettiInAlternativa, incompatibiliDi } from './alternativeAcquistiService.js';
 import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce, type EffettoPerYen } from './yenAutomaticiService.js';
 import { applicatoDallaSpunta } from './applicatoDallaSpunta.js';
@@ -81,8 +81,15 @@ function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
 }
 /** La paga di un turno dell'attività, se ne ha una: mai una proposta (R10-06). L13 (decisione 18): la paga base entra da sola nel saldo quando
  *  il turno si registra (`attivitaService.registraTurno`); qui resta il dato da mostrare. */
-function pagaDelTurno(attivita: string): { yen: number; massima: number | null } | undefined {
+function pagaDelTurno(attivita: string, esito?: string): { yen: number; massima: number | null } | undefined {
   const paga = prepared('SELECT paga_yen, paga_massima FROM attivita WHERE chiave = ?').get(attivita) as { paga_yen: number | null; paga_massima: number | null } | undefined;
+  // L13 (chiusure del 31/10): con gli esiti a paga propria (il quiz di Ore no Beko) la paga la dice l'esito, e il di più entra con lui: niente
+  // «fino a … il di più no». L'esito della voce dà la sua paga (o la base); senza esito nella voce la paga si sceglie alla spunta
+  const esiti = esitiDellAttivita(attivita)?.esiti?.esiti;
+  if (esiti?.some((e) => e.paga)) {
+    const propria = esito ? esiti.find((e) => e.chiave === esito)?.paga : undefined;
+    return propria ? { yen: propria, massima: null } : paga?.paga_yen ? { yen: paga.paga_yen, massima: null } : undefined;
+  }
   return paga?.paga_yen ? { yen: paga.paga_yen, massima: paga.paga_massima } : undefined;
 }
 /** Il nome di un negozio dalla sua chiave (anche nascosto: la voce che lo cita ne tiene il nome). */
@@ -180,7 +187,7 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
     // R10-06: la paga del turno non è mai una proposta (decisione 18: entra da sola nel saldo registrando il turno). Il di più di una paga
     // variabile non entra da solo, e la frase lo dice; non per un turno di prima, la cui paga era già nel saldo (lo dice la nota del riepilogo)
     if (e.tipo === 'turno') {
-      const paga = pagaDelTurno(e.attivita);
+      const paga = pagaDelTurno(e.attivita, e.esito);
       if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')}${yenGiaNelSaldo.has(uid) ? '' : ': entra da sola la paga base, il di più no'})` : ''}`;
     }
     return testo;
