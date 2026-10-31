@@ -1,4 +1,0 @@
-mappa 200 {"chiave":"shibuya-central-street","genitore":"shibuya","area":{"chiave":"citta/shibuya/central-street","slug":"central-street","versioneEtichetta":null,"predefinita":true,"casa":"/guida/citta/shibuya/central-street"},"spilli":24}
-casa /guida/citta/shibuya/central-street
-risolvi {"tipo":"mappa","mappa":"shibuya-central-street","casa":"/guida/citta/shibuya/central-street"}
-da-collocare {"data":[]}

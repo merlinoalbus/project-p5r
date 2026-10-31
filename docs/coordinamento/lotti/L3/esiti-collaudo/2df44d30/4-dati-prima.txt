@@ -1,4 +1,0 @@
-### 2026-10-20T15:09:04Z dati prima del cambio (foto L3-prima-UX3-12-13, server fermi) contro la base 0948Z
-gioco.db.immagine_miniatura: righe 93 → 94, contenuto diverso
-### scritture nel BE.log su 08da0557 (metodi diversi da GET)
-(vuoto = nessuna)

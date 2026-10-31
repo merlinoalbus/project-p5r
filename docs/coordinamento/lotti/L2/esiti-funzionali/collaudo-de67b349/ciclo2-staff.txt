@@ -1,4 +1,0 @@
-02:23:15
-cestino staff ["area-fisica","mappa_alias:4,mappa_percorso:2,mappa:2,mappa_presentazione:2,area:1"]
-ripristino staff 19 200
-staff rimessa: daVerificare true [["porzione occidentale",true],["planimetria completa",false]]

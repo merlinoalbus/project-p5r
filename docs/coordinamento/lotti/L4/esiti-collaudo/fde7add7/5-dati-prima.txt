@@ -1,4 +1,0 @@
-### 2026-10-20T18:20:00Z dati prima del cambio (foto L4-prima-FUN4-1, server fermi) contro la base 1741Z
-IDENTICHE
-### scritture nel BE.log su aac70e23 dopo il ciclo 1 (metodi diversi da GET)
-(vuoto = nessuna)

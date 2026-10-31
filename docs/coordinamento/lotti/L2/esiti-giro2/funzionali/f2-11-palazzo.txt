@@ -1,5 +1,0 @@
-POST /api/mappe sotto dungeon-okumura 201 {"chiave":"palazzo-di-okumura-prova-funzionali-l2-palazzo","genitore":"palazzo-di-okumura","casa":"/guida/mappe/palazzo-di-okumura-prova-funzionali-l2-palazzo"}
-POST /api/mappe sotto citta-shinjuku (confronto) 409 usa-aggiungi-area
-DELETE della mappa di prova 204
-tolta dal cestino 17 204
-mappe con «prova» nel DB: [] · cestino []

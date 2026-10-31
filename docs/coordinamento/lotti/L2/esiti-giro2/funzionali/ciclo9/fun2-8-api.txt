@@ -1,6 +1,0 @@
-== prova · 2026-10-20T05:22:48.532Z
-POST /api/mappe senza genitore → 201 {"chiave":"prova-funzionali-fun2-8","genitore":null,"area":null}
-PUT genitore citta-kichijoji → 409 {"code":"usa-aggiungi-area","message":"Nel mondo una planimetria sta in un’area: aggiungila con «Aggiungi area» nel quartiere (o «Aggiungi planimetria» in un’area), o collocala dall’elenco «Da collocare»."}
-PUT genitore tokyo → 409 {"code":"usa-aggiungi-area","message":"Nel mondo una planimetria sta in un’area: aggiungila con «Aggiungi area» nel quartiere (o «Aggiungi planimetria» in un’area), o collocala dall’elenco «Da collocare»."}
-la mappa dopo: 200 {"chiave":"prova-funzionali-fun2-8","genitore":null,"area":null}
-da-collocare: ["shibuya-central-street"]

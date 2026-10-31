@@ -1,5 +1,0 @@
-partite prima [[1,true],[2,false]]
-partita 3
-pin 758 PUT 200 · voce dopo null · punto_partita [] · spillo_partita [{"spillo_uid":"064de49a654b6e7decffd55a301c9b0e","raccolto":1}]
-pin 757 PUT 200 · voce dopo null · punto_partita [] · spillo_partita [{"spillo_uid":"064de49a654b6e7decffd55a301c9b0e","raccolto":1},{"spillo_uid":"4f802fd2c0d787e0c81097e6ca809f2a","raccolto":1}]
-DELETE 204 · partite dopo [[1,true],[2,false]]

@@ -1,11 +1,11 @@
-# Bonus della Stanza di Velluto — regole numeriche (Fase 4.2, integrate in 5.4)
+# Bonus della Stanza di Velluto — regole numeriche
 
-> **Dove sono oggi** (verifica completa, 2026-10-04): le regole stanno in codice, in `shared/bonusVelluto.ts` (sconto del Registro
-> `scontoRegistro`, moltiplicatore dei Confidenti, Gemelle, incensi e Forca) e nel motore di fusione. Le tabelle proposte in questo
-> documento e mai create (`confidente_bonus_fusione`) e il nome `scontoCompendio` (realizzato come `scontoRegistro`) sono storia
-> del progetto. I percorsi `data/seed/…` sono del seed JSON, dismesso il 2026-09-12.
+> **Dove vive la regola nell'app**: in `shared/bonusVelluto.ts` (sconto del Registro `scontoRegistro`, moltiplicatore dei
+> Confidenti, Gemelle, incensi `INCENSI` e `INCENSI_DEL_CATALOGO`, Forca, Allarme) e nel motore di fusione
+> (`server/services/fusione/`). Le proposte di modellazione qui sotto descrivono il ragionamento: dove citano tabelle o percorsi che
+> l'app non ha (per esempio `confidente_bonus_fusione`, `scontoCompendio`, `data/seed/…`), vale il codice.
 
-## Integrazione 2026-09-03 sera (Fase 5.4) — fusione, materiali e Allarme
+## Fusione, materiali e Allarme
 - **La fusione non trasferisce livelli né statistiche dei materiali**: il livello del risultato si calcola sui livelli base delle specie
   («使用するのは現在Lvではなく、各ペルソナに設定されている初期Lv», wikiwiki.jp/persona5r ベルベットルーム; kamigame 合体の法則; guide EN).
   Eccezione: la fusione con Demone del Tesoro legge il livello attuale del Tesoro (kamigame 宝魔合体). Il carry-over per giri successivi esiste
@@ -28,7 +28,7 @@ Nell'app: sconto del Registro applicato ai costi di ricette e piani; bonus EXP d
 calcolatori «Forca e Isolamento»; interruttore dell'Allarme salvato nella partita; sblocchi delle Gemelle.
 
 
-Documento di riferimento per l'ottimizzatore dei bonus di fusione (Fase 4). Copre 9 argomenti; per ognuno: regola/numeri, condizioni ed eccezioni Royal, fonti, affidabilità, e un paragrafo su come modellarlo nell'app `project-p5r-main`. Gli estratti grezzi sono in `raw/`. Dove le fonti divergono, sono riportate **entrambe le versioni**, senza sceglierne una.
+Documento di riferimento per l'ottimizzatore dei bonus di fusione. Copre 9 argomenti; per ognuno: regola/numeri, condizioni ed eccezioni Royal, fonti, affidabilità, e un paragrafo su come modellarlo nell'app. Gli estratti grezzi sono in `raw/`. Dove le fonti divergono, sono riportate **entrambe le versioni**, senza sceglierne una.
 
 Legenda affidabilità: **alta** = confermata da 2+ fonti indipendenti (idealmente EN + JP) o da codice/dati primari; **media** = una fonte primaria solida o due fonti che si limitano a citarsi a vicenda; **bassa** = una sola fonte debole, o dato dedotto/non isolato.
 

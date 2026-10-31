@@ -1,6 +1,0 @@
-nativo-rmap-022-1-0 genitore_chiave null → "citta-yongen-jaya"
-nativo-rmap-022-1-1 genitore_chiave null → "citta-yongen-jaya"
-nativo-rmap-022-1-2 genitore_chiave null → "citta-yongen-jaya"
-nativo-rmap-022-1-3 genitore_chiave null → "citta-yongen-jaya"
-nativo-rmap-022-1-4 genitore_chiave null → "citta-yongen-jaya"
-campi di prima cambiati in mappa: 5

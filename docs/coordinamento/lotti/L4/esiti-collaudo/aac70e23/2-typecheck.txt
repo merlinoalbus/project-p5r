@@ -1,7 +1,0 @@
-### 2026-10-20T17:53:53Z HEAD aac70e2376b795e9aa4811833338432f46d590f2
-### npm run typecheck
-
-> project-p5r@0.1.0 typecheck
-> tsc -b tsconfig.full.json
-
-EXIT=0

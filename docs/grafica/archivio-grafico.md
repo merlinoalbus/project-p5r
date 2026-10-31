@@ -1,8 +1,7 @@
-# Archivio grafico — prompt, riferimenti e registro degli asset già consegnati
+# Archivio grafico — prompt degli asset già consegnati
 
-Materiale spostato qui il 2026-09-04 su richiesta dell'utente: i documenti operativi (`prompt-immagini.md`, `riferimenti-visivi.md`,
-`stato-generazione-asset.md`) contengono solo il lavoro ancora da fare. Qui restano, per storia e per rigenerazioni, le specifiche
-degli asset consegnati e approvati.
+Le specifiche e i prompt degli asset consegnati e in uso, da riprendere per rigenerarli. I prompt degli altri asset e le regole comuni
+stanno in `prompt-immagini.md`, i riferimenti di stile in `riferimenti-visivi.md`.
 
 
 ## Prompt degli asset consegnati (da `prompt-immagini.md`)
@@ -493,7 +492,7 @@ attuali (`src/components/shared/icons.tsx`) man mano che arrivano.
 - Screenshot con la tabella statistiche FR/MA/RS/AG/FO ben leggibile: solo nella Game UI Database (✋).
 
 
-## Registro degli asset consegnati (da `stato-generazione-asset.md`)
+## Registro degli asset consegnati
 
 ### persona
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/arsene.png` — 768×768

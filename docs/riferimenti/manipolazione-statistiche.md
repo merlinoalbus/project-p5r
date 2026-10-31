@@ -1,7 +1,7 @@
 # Riferimento — Manipolazione delle statistiche (P5R)
 
 Fonte: guida fornita dall'utente (pixelflood.it, "Persona 5 Royal: guida alla manipolazione delle statistiche").
-Terminologia italiana ufficiale del gioco riportata fedelmente. Usata per le fasi 4 (catene/bonus) e 5 (tracking).
+Terminologia italiana ufficiale del gioco riportata fedelmente. Usata per i bonus di fusione e il tracciamento della scorta.
 
 ## Statistiche
 

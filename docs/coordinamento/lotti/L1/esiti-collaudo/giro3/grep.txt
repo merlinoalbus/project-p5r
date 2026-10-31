@@ -1,3 +1,0 @@
-### base e9fb48719bcf1be6a85529c202e8e066654284cb + modifiche del terzo verdetto (non ancora committate)
-### grep -rn "2026-10-21" src/ server/ shared/ docs/DECISIONI.md docs/ROADMAP.md
-EXIT=1 (1 = nessuna occorrenza)

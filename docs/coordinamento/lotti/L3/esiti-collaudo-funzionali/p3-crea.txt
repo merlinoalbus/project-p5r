@@ -1,5 +1,0 @@
-2026-10-20T05:32:25.016Z partite prima [[1,"Partita Roberto",true,"06-02","giorno"],[2,"Tutorial",false,"04-29","giorno"]]
-crea 201 {"id":3,"attiva":true,"data":"04-15","fascia":"giorno"}
-atterraggio {"mappa":"palazzo-di-kamoshida-cancello-del-castello-nativo-rmap-151-1-0","spillo":null} atterraggi [{"dal":"04-11","al":"04-11","mappa":"palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-2-0","mappaNome":"Palazzo di Kamoshida › Prigione sotterranea - Tutorial","spillo":1657,"spilloNome":"Boss"},{"dal":"04-12","al":"04-12","mappa":"palazzo-di-kamoshida-sala-centrale","mappaNome":"Palazzo di Kamoshida › Sala Centrale","spillo":null,"spilloNome":null},{"dal":"04-15","al":null,"map
-accesso mondo 200 {"entita":{"tipo":"dungeon","chiave":"kamoshida"},"esito":"unica","destinazioni":[{"mappa":"palazzo-di-kamoshida","nomeMappa":"Palazzo di Kamoshida","spillo":null,"nomeSpillo":null,"centro":null,"provenienze":[{"tipo":"dungeon","chiave":"kamoshida","criterio":"entita-mappa"}]}]}
-partite ora [[3,true,"04-15"],[1,false,"06-02"],[2,false,"04-29"]]

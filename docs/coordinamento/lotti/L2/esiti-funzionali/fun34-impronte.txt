@@ -1,4 +1,0 @@
-DIVERSA immagine_miniatura {"righe":103,"hash":"f9cd8199d12aa8b5fddeacd85b6c255decbec43d"} → {"righe":108,"hash":"cbab762a4fab70e1591067c79acee5f154dd7e0e"}
-DIVERSA mappa {"righe":317,"hash":"8be76a4cd955513d05a255888fb410294169930b"} → {"righe":317,"hash":"d887ed71ab1bc6c802e40368d47cc47acab5bd5e"}
-2 tabelle diverse
-NESSUNA DIFFERENZA

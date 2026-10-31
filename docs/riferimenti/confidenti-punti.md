@@ -1,8 +1,7 @@
 # Punti dei Confidenti e note delle Doti sociali — Persona 5 Royal
 
-> **Dove sono oggi** (verifica completa, 2026-10-04): i dati citati come `data/seed/confidenti.json` e `data/seed/doti.json` stanno
-> nelle tabelle `confidente`, `confidente_rango`, `dote_sociale` e `dote_sociale_rango` di `gioco.db`, e arrivano con il pacchetto
-> di gioco; `scripts/seed/…` era la pipeline del seed JSON, dismessa il 2026-09-12 insieme al seed.
+> **Dove vive il dato nell'app**: nelle tabelle `confidente`, `confidente_rango`, `dote_sociale` e `dote_sociale_rango` di
+> `gioco.db`; il calcolo dei punti dei Confidenti è in `shared/puntiConfidenti.ts`, i nomi e l'ordine delle Doti in `shared/doti.ts`.
 
 Riferimento di gioco usato dal tracker della partita (scheda Doti e scheda Confidenti).
 Le fonti sono comunitarie e non ufficiali: dove due fonti indipendenti concordano il dato è
@@ -30,8 +29,7 @@ Ogni azione mostra da 1 a 3 note (♪). Le note corrispondono a punti interni:
 | Perizia | Incapace 0 | Decente 12 | Bravo 34 | Asso 60 | Migliore 87 |
 
 Fonti: https://www.allgamestaff.it/persona-5-royal/ (guida alle doti sociali) e Megami Tensei Wiki, pagina
-"Social Stats" (tabella P5R). Dati nel seed: `scripts/seed/glossario.ts` (`DOTI_SOCIALI`, `PUNTI_PER_NOTE`,
-`PUNTI_TRE_NOTE_LIBRO`, `MOLTIPLICATORE_FORTUNA`) → `data/seed/doti.json` → tabella `dote_sociale_rango`.
+"Social Stats" (tabella P5R). Nell'app: tabella `dote_sociale_rango`.
 
 ## 2. Confidenti: meccanica dei punti
 
@@ -87,7 +85,7 @@ fonte B = walkthrough datamined megaten-database (aqiu384, "x/y to rank up").
 
 Uno "0" intermedio indica un passaggio legato a storia, richiesta di Mementos o dote sociale, non ai punti.
 
-Confidenti senza progressione a punti (nessuna soglia nel seed):
+Confidenti senza progressione a punti (nessuna soglia nei dati):
 
 | Confidente | Progressione |
 |---|---|
@@ -95,8 +93,7 @@ Confidenti senza progressione a punti (nessuna soglia nel seed):
 | Mishima (Luna) | richieste di Mementos completate: r3=1, r4=2, r5=3, r6=4, r7=5, r8=7, r9=8, r10=10 |
 | Gemelle Custodi (Forza) | fusioni di Persona con le skill richieste |
 
-Dati nel seed: `scripts/seed/glossario.ts` (`CONFIDENTI[].puntiPerRango`, indice 0 = 1→2) → `data/seed/confidenti.json`
-→ tabella `confidente_rango` (rango N, punti necessari per N→N+1; 0 = non legato ai punti).
+Nell'app: tabella `confidente_rango` (rango N, punti necessari per N→N+1; 0 = non legato ai punti).
 
 ## 4. Fonti
 
@@ -106,8 +103,8 @@ Dati nel seed: `scripts/seed/glossario.ts` (`CONFIDENTI[].puntiPerRango`, indice
 - Walkthrough datamined megaten-database (aqiu384): https://aqiu384.github.io/megaten-database/p5r/ace-walkthrough.html
 - allgamestaff.it, guide ai ranghi dei Confidenti (solo note, senza soglie numeriche): https://www.allgamestaff.it/persona-5-royal/indice/
 
-## 5. Evoluzioni previste
+## 5. Calcolo dei punti nell'app
 
-Le "risposte migliori" per evento (testo, punti base, telefonata, prerequisiti) verranno modellate nella Fase 3
-(modulo Confidenti) con struttura `evento{confidente, rango, risposte[{testo, puntiBase}], telefonata}` e calcolo
-`punti = base × (Persona arcano 1,5) × (esame 1,5|1,2) × (invito 1,2)`.
+`punti = base × (Persona dello stesso arcano 1,5) × (esame 1,5 | 1,2) × (invito 1,2)`, con i moltiplicatori che si moltiplicano e il
+troncamento all'intero a ogni passaggio (`shared/puntiConfidenti.ts`). Il bonus degli esami vale solo per i Confidenti documentati;
+le regole complete sono in `docs/DECISIONI.md`, «Partita».

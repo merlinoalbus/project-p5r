@@ -1,9 +1,0 @@
-IMPRONTA IDENTICA alla base
-ESTESA IDENTICA (tolti updated_at/created_at)
-fotografia contro il collaudo 8e75abbb (l2c): tabelle identiche 111 diverse ["gioco.db:area"]
-differenze di stato visibile: 0
-destinazioni diverse dalla base: 0
-indirizzi che portano a una mappa diversa da prima: 0
-errori: 0
-38 endpoint; non 200: 0
-area, campi diversi fra i due collaudi: {"updated_at":23}

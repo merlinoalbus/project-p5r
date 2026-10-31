@@ -1,3 +1,0 @@
-attiva 1 200
-DELETE 3 204
-2026-10-20T05:33:57.124Z partite [[1,"Partita Roberto",true,"06-02","giorno"],[2,"Tutorial",false,"04-29","giorno"]]

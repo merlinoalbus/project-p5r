@@ -1,7 +1,0 @@
-
-> project-p5r@0.1.0 typecheck
-> tsc -b tsconfig.full.json
-
-src/pages/CittaPage.test.tsx(176,11): error TS2741: Property 'illustrazione' is missing in type '{ chiave: string; nome: string; mappaChiave: string; sblocco: null; fonte: string; descrizione: string; mappa: true; pianta: null; piantaAssente: null; luoghi: LuogoDto[]; }' but required in type 'QuartiereDettaglioDto'.
-src/pages/DungeonDettaglioPage.test.tsx(41,61): error TS2741: Property 'illustrazione' is missing in type '{ chiave: string; tipo: "palazzo"; ordine: number; nome: string; sovrano: string; arcanaSovrano: string; arcanaSovranoNome: string; date: { sblocco: string; scadenza: string; furtoConsigliato: string; }; ... 13 more ...; planimetrie: { ...; }[]; }' but required in type 'DungeonDettaglioDto'.
-EXIT=2
