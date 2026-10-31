@@ -14,29 +14,48 @@
 // valutatore proprio che conosceva solo rango e giorno. Così una regola può dire anche «relazione romantica con Ann, iniziata entro il 24
 // dicembre» o «nessuna relazione romantica» (le condizioni `relazione-romantica` e `relazioni-romantiche`): i doni «se fidanzata» le
 // riceveranno con la loro migrazione (O11-2). Un dono vale solo se ogni condizione della regola è verde; una regola vuota non vale. Sola lettura.
+// Revisione di O11-1 (prestazioni: le copie di un oggetto si leggono per ogni oggetto di un elenco): chi legge le copie di un oggetto chiede
+// solo i suoi doni (`catalogo`), e le regole fatte solo di ranghi, Doti, giorno e relazioni si valutano sullo stato essenziale
+// (`statoPartitaEssenziale`), non su quello completo con Palazzi, scorta, pesca e meteo; il valutatore resta quello unico.
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
-import { statoPartitaSemafori } from './semaforiService.js';
+import { bastaLoStatoEssenziale, statoPartitaEssenziale, statoPartitaSemafori } from './semaforiService.js';
 import { dotiSociali, ranghiConfidenti } from './partiteService.js';
 
 export interface DonoConfidenteOttenuto { catalogo: string; quantita: number; confidente: string; nota: string | null }
 
 const haColonnaCondizioni = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('ricompensa_oggetto') WHERE name = 'condizioni_json'").get();
 
-/** I doni dei Confidenti che la partita ha meritato adesso, in ordine di catalogo. Vuoto se la colonna della regola non c'è ancora. */
-export function doniConfidentiOttenuti(partitaId: number): DonoConfidenteOttenuto[] {
+/** Vero se una condizione (anche dentro `gruppo` e `non`) legge le Doti: solo allora lo stato essenziale le legge (sono la lettura più costosa). */
+function usaLeDoti(condizioni: readonly RequisitoSpillo[]): boolean {
+  return condizioni.some((c) => c.tipo === 'dote' || (c.tipo === 'gruppo' && usaLeDoti(c.condizioni)) || (c.tipo === 'non' && usaLeDoti([c.condizione])));
+}
+
+type RigaDono = { fonte_chiave: string; catalogo_chiave: string; quantita: number; nota: string | null; condizioni_json: string };
+
+/** I doni dei Confidenti che la partita ha meritato adesso, in ordine di catalogo; con `catalogo`, solo quelli di quell'oggetto (chi legge le
+ *  copie di un oggetto non paga la valutazione degli altri doni, e un oggetto senza doni non legge la partita). Vuoto se la colonna della regola
+ *  non c'è ancora. */
+export function doniConfidentiOttenuti(partitaId: number, catalogo?: string): DonoConfidenteOttenuto[] {
   if (!haColonnaCondizioni()) return [];
-  const righe = prepared("SELECT fonte_chiave, catalogo_chiave, COALESCE(quantita, 1) AS quantita, nota, condizioni_json FROM ricompensa_oggetto WHERE fonte_tipo = 'confidente' AND condizioni_json IS NOT NULL ORDER BY ordine, catalogo_chiave")
-    .all() as Array<{ fonte_chiave: string; catalogo_chiave: string; quantita: number; nota: string | null; condizioni_json: string }>;
+  const base = "SELECT fonte_chiave, catalogo_chiave, COALESCE(quantita, 1) AS quantita, nota, condizioni_json FROM ricompensa_oggetto WHERE fonte_tipo = 'confidente' AND condizioni_json IS NOT NULL";
+  const righe = (catalogo === undefined
+    ? prepared(`${base} ORDER BY ordine, catalogo_chiave`).all()
+    : prepared(`${base} AND catalogo_chiave = ? ORDER BY ordine, catalogo_chiave`).all(catalogo)) as RigaDono[];
   const regole = righe.map((r) => ({ riga: r, regola: leggiCondizioniSalvate(r.condizioni_json) })).filter((x) => x.regola.length > 0);
   // una partita che non c'è non ha meritato niente (come prima: nessun errore da chi legge le copie di un oggetto)
   if (!regole.length || !prepared('SELECT 1 FROM utente.partita WHERE id = ?').get(partitaId)) return [];
-  // lo stato leggero della partita, letto una volta per tutti i doni (lo stesso dei semafori dei Confidenti)
-  const st = statoPartitaSemafori(partitaId, ranghiConfidenti(partitaId), new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango])));
+  // lo stato della partita, letto una volta per tutti i doni. Revisione di O11-1 (prestazioni): se le regole usano solo ranghi, Doti, giorno e
+  // relazioni romantiche basta lo stato essenziale (stesso esito del valutatore unico, senza Palazzi, scorta, pesca e meteo); una regola con un
+  // altro tipo di condizione si valuta sullo stato completo dei semafori, mai su uno stato che non la sa dire
+  const essenziale = regole.every((x) => bastaLoStatoEssenziale(x.regola));
+  const usaDoti = regole.some((x) => usaLeDoti(x.regola));
+  const doti = !essenziale || usaDoti ? new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango])) : new Map<string, number>();
+  const st = essenziale ? statoPartitaEssenziale(partitaId, ranghiConfidenti(partitaId), doti) : statoPartitaSemafori(partitaId, ranghiConfidenti(partitaId), doti);
   const nomi = nomiCondizioniMemo();
   return regole
     .filter(({ regola }) => valutaInsieme(regola.map((c) => condizioneConTesto(c, nomi)), st, { nomi }).requisiti.every((q) => q.stato === 'verde'))

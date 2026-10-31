@@ -28,7 +28,7 @@
 import { prepared } from '../db/dbService.js';
 import { articoloDelListino, lettureListiniCondivisi } from './listiniCondivisi.js';
 import type { CopieOggettoDto } from '../../shared/types.js';
-import { doniConfidentiOttenuti } from './doniConfidenti.js';
+import { doniConfidentiOttenuti, type DonoConfidenteOttenuto } from './doniConfidenti.js';
 
 const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 const colonnaUtente = (tabella: string, colonna: string): boolean => !!prepared('SELECT 1 FROM pragma_table_info(?, \'utente\') WHERE name = ?').get(tabella, colonna);
@@ -60,8 +60,10 @@ export function copieDellOggetto(partitaId: number, catalogo: string): CopieOgge
  *  negli scambi, usate (turni e Isolamento) e quelle che restano (mai sotto zero). */
 export interface DettaglioCopie { comprate: number; ricevute: number; regalate: number; cedute: number; usate: number; disponibili: number }
 
-/** Le copie dell'oggetto del catalogo `catalogo` nella partita, per provenienza (la base di `copieDellOggetto`). */
-export function dettaglioCopie(partitaId: number, catalogo: string): DettaglioCopie {
+/** Le copie dell'oggetto del catalogo `catalogo` nella partita, per provenienza (la base di `copieDellOggetto`). `doni`: i doni dei Confidenti
+ *  della partita già letti da chi chiama per molti oggetti (`doniConfidentiOttenuti(partitaId)`, revisione di O11-1: una sola valutazione per
+ *  elenco); senza, si leggono i soli doni di questo oggetto. */
+export function dettaglioCopie(partitaId: number, catalogo: string, doni?: readonly DonoConfidenteOttenuto[]): DettaglioCopie {
   const letture = lettureListiniCondivisi();
   const oggettoDi = prepared('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck();
   const nelSet = prepared("SELECT quantita FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ? AND catalogo_chiave = ?").pluck();
@@ -98,7 +100,7 @@ export function dettaglioCopie(partitaId: number, catalogo: string): DettaglioCo
     ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
   // Ondata 5 (lotto F-bis): i doni dei Confidenti già meritati (il rango e il giorno della partita lo dicono)
-  ricevute += doniConfidentiOttenuti(partitaId).filter((d) => d.catalogo === catalogo).reduce((n, d) => n + d.quantita, 0);
+  ricevute += (doni ?? doniConfidentiOttenuti(partitaId, catalogo)).filter((d) => d.catalogo === catalogo).reduce((n, d) => n + d.quantita, 0);
   // Ondata 5 (lotto F-bis): le ricompense delle Richieste completate, una volta per Richiesta (la lettura di `oggettiOttenutiPartita`)
   if (tabellaUtente('richiesta_partita')) {
     ricevute += (prepared(`SELECT COALESCE(SUM(COALESCE(ro.quantita, 1)), 0) FROM utente.richiesta_partita rp

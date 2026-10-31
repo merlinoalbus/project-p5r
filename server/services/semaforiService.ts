@@ -116,6 +116,30 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
     relazioniRomantiche: relazioniConGiorno(partitaId) };
 }
 
+/** I tipi di condizione che leggono SOLO ranghi dei Confidenti, Doti, giorno e fascia di gioco e relazioni romantiche (più i contenitori
+ *  `gruppo` e `non`, che valutano quel che hanno dentro): per questi lo stato essenziale dà lo stesso esito dello stato completo. */
+export const TIPI_DELLO_STATO_ESSENZIALE: ReadonlySet<RequisitoSpillo['tipo']> = new Set<RequisitoSpillo['tipo']>(
+  ['da-subito', 'data', 'intervallo', 'dote', 'confidente', 'relazione-romantica', 'relazioni-romantiche', 'gruppo', 'non']);
+
+/** Vero se ogni condizione (anche dentro `gruppo` e `non`) è di un tipo che lo stato essenziale sa valutare. */
+export function bastaLoStatoEssenziale(condizioni: readonly RequisitoSpillo[]): boolean {
+  return condizioni.every((c) => TIPI_DELLO_STATO_ESSENZIALE.has(c.tipo)
+    && (c.tipo !== 'gruppo' || bastaLoStatoEssenziale(c.condizioni))
+    && (c.tipo !== 'non' || bastaLoStatoEssenziale([c.condizione])));
+}
+
+/** L13 (O11-1, revisione: prestazioni dei doni dei Confidenti, letti per ogni oggetto): lo stato della partita ridotto a ranghi, Doti, giorno e
+ *  fascia di gioco e relazioni romantiche (dal punto unico `relazioniConGiorno`), senza Palazzi, scorta, Richieste, pesca e meteo. Vale SOLO per
+ *  condizioni che `bastaLoStatoEssenziale` accetta: per quelle il valutatore unico dà lo stesso esito di `statoPartitaSemafori`; ogni altra
+ *  condizione va valutata sullo stato completo. Ranghi e Doti li passa chi chiama, come per lo stato completo. */
+export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
+  const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
+  return { partitaId, doti, ranghiConfidenti, dataGioco: partita?.data_gioco ?? null, fasciaGioco: partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null,
+    relazioniRomantiche: relazioniConGiorno(partitaId),
+    arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziConclusi: new Map(), richiesteCompletate: new Set(), membriSquadra: new Set(), membriFuoriSquadra: new Set(),
+    meteoOra: null, eventi: new Set() };
+}
+
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
 export function sblocchiDellaPartita(partitaId: number): string[] {
   if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sblocco_partita'").get()) return [];
