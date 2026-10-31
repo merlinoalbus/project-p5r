@@ -53,8 +53,8 @@ export interface NomiRiepilogoEffetti {
   azione: NomiEffettiAzione;
   /** Il nome del negozio dalla sua chiave (la chiave di un articolo è «negozio/articolo»). */
   negozio: (chiave: string) => string | undefined;
-  /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno). */
-  /** La paga del turno; `esito` (L13, chiusure del 31/10): quello dichiarato dalla voce, per gli esiti con la paga propria. */
+  /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno);
+   *  `esito` (L13, chiusure del 31/10): quello dichiarato dalla voce, per gli esiti con la paga propria. */
   pagaTurno: (attivita: string, esito?: string) => { yen: number; massima: number | null } | undefined;
   /** La domanda del gioco dal suo id, con il tipo e le risposte giuste (la riga della tabella `domanda`, la sola fonte). */
   quesito: (id: number) => QuesitoRiepilogoEffetti | undefined;
