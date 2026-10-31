@@ -7,6 +7,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GiornoGuida } from './GiornoGuida';
+import { useFasceDiarioStore } from '../../stores/fasceDiarioStore';
 import { scegliVoce, selettore } from '../../../test/selettore';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 import type { EffettoVoce, StatoEffettiVoceDto } from '../../../shared/effettiVoce';
@@ -67,10 +68,14 @@ const disegna = (g: PercorsoGiornoDto = base, partitaId: number | null = 3) => {
 };
 /** La regione della giornata con il nome dato («Di giorno» o «Di sera»). */
 const sezione = (nome: 'Di giorno' | 'Di sera') => screen.getByRole('region', { name: nome });
-/** Clicca il pulsante «Modifica, sposta o elimina» della voce il cui testo comincia con `testo`, aprendone il menu. */
-const apriMenu = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Modifica, sposta o elimina: ${testo}`) }));
-/** Il gruppo «Gesti per» della voce il cui testo comincia con `testo`, per cercarci dentro i pulsanti. */
-const gestiDi = (testo: string) => within(screen.getByRole('group', { name: new RegExp(`^Gesti per: ${testo}`) }));
+/** Clicca il «⋯» «Altre azioni per» della voce il cui testo comincia con `testo`, aprendone (o chiudendone) il menu a tendina (C9). */
+const apriMenu = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Altre azioni per: ${testo}`) }));
+/** Il menu a tendina della voce il cui testo comincia con `testo`, per cercarci dentro le voci (`menuitem`). */
+const gestiDi = (testo: string) => within(screen.getByRole('menu', { name: new RegExp(`^Altre azioni per: ${testo}`) }));
+/** C9: la matita a vista della voce il cui testo comincia con `testo` (stesso gesto che stava nel menu). */
+const modificaDi = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Modifica: ${testo}`) }));
+/** C9: il cestino a vista della voce il cui testo comincia con `testo` (stessa conferma che dava il menu). */
+const eliminaDi = (testo: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Elimina: ${testo}`) }));
 
 describe('GiornoGuida — la giornata canone', () => {
   beforeEach(() => {
@@ -177,11 +182,14 @@ describe('GiornoGuida — la giornata canone', () => {
   it('modifica una voce: finestra precompilata col suo posto; cambiando fascia va in fondo all\'altra; il posto si manda solo se cambia', async () => {
     api.aggiornaVoceGiornata.mockResolvedValue({});
     const ricarica = disegna();
+    // C9: Modifica ed Elimina sono fuori dal menu, a vista accanto al «⋯»
     apriMenu('Palazzo di Kamoshida');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    expect(gestiDi('Palazzo di Kamoshida').queryByRole('menuitem', { name: 'Modifica' })).toBeNull();
+    expect(gestiDi('Palazzo di Kamoshida').queryByRole('menuitem', { name: 'Elimina' })).toBeNull();
+    modificaDi('Palazzo di Kamoshida');
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     // aprendo la finestra il menu della voce si chiude
-    expect(screen.queryByRole('group', { name: /^Gesti per:/ })).toBeNull();
+    expect(screen.queryByRole('menu', { name: /^Altre azioni per:/ })).toBeNull();
     expect(within(finestra).getByLabelText('Che cosa fare')).toHaveValue('Palazzo di Kamoshida: infiltrazione');
     expect(within(finestra).getByLabelText('Note')).toHaveValue('Oggetti principali');
     expect(within(finestra).getByText('Posto nella giornata (di giorno): 3 di 3')).toBeInTheDocument();
@@ -193,8 +201,7 @@ describe('GiornoGuida — la giornata canone', () => {
     }, 3));
     await waitFor(() => expect(ricarica).toHaveBeenCalled());
 
-    apriMenu('Palazzo di Kamoshida');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Palazzo di Kamoshida');
     const di_nuovo = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     fireEvent.click(within(di_nuovo).getByRole('radio', { name: 'Di sera' }));
     // di sera c'è la scadenza: in fondo è il secondo posto
@@ -206,8 +213,7 @@ describe('GiornoGuida — la giornata canone', () => {
   it('modifica una voce spostandola nella stessa fascia: il posto nuovo si manda; una voce spuntata lo dice', async () => {
     api.aggiornaVoceGiornata.mockResolvedValue({});
     disegna();
-    apriMenu('Biblioteca');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Biblioteca');
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     // Zorro è spuntata: L13 (decisione 19), la nota dice che cosa succede alle partite che l'hanno spuntata, solo con i tipi che la voce ha
     expect(within(finestra).getByText(/^Questa voce è già spuntata: /)).toBeInTheDocument();
@@ -233,8 +239,7 @@ describe('GiornoGuida — la giornata canone', () => {
     });
     disegna({ ...base, azioni: [rafflesia] });
     expect(within(screen.getByRole('region', { name: 'Il gioco dà' })).getByText('Turno: Fioraio Rafflesia')).toBeInTheDocument();
-    apriMenu('Sbloccare il lavoro');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Sbloccare il lavoro');
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     const tipi = await waitFor(() => within(finestra).getByRole('radiogroup', { name: 'Tipo della voce' }));
     // l'effetto del turno è una scheda dell'elenco; «Togli» lo toglie (nessuno lo cita come sostituito)
@@ -259,8 +264,7 @@ describe('GiornoGuida — la giornata canone', () => {
 
   it('un turno si sceglie solo fra le attività contate per volte; una lettura va completata prima di salvare', async () => {
     disegna({ ...base, azioni: [voce({ uid: uid(9), azione: 'Qualcosa', effettiVoce: fonteEffetti(uid(9), []) })] });
-    apriMenu('Qualcosa');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Qualcosa');
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' })).toBeInTheDocument());
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
@@ -278,26 +282,32 @@ describe('GiornoGuida — la giornata canone', () => {
     api.aggiornaVoceGiornata.mockResolvedValue({});
     disegna();
     apriMenu('Biblioteca');
-    expect(gestiDi('Biblioteca').queryByRole('button', { name: 'Sposta su' })).toBeNull();
-    fireEvent.click(gestiDi('Biblioteca').getByRole('button', { name: 'Sposta giù' }));
+    // C9: il «⋯» dice che apre un menu, e il menu a tendina prende il fuoco sulla prima voce
+    expect(screen.getByRole('button', { name: /^Altre azioni per: Biblioteca/ })).toHaveAttribute('aria-haspopup', 'menu');
+    expect(screen.getByRole('button', { name: /^Altre azioni per: Biblioteca/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(gestiDi('Biblioteca').getByRole('menuitemcheckbox', { name: 'Seleziona' })).toHaveFocus();
+    expect(gestiDi('Biblioteca').queryByRole('menuitem', { name: 'Sposta su' })).toBeNull();
+    fireEvent.click(gestiDi('Biblioteca').getByRole('menuitem', { name: 'Sposta giù' }));
     await waitFor(() => expect(api.spostaVoceGiornata).toHaveBeenCalledWith(uid(1), 1, 3));
     // il menu è ancora aperto sulla stessa voce, con il fuoco sul gesto appena usato
-    await waitFor(() => expect(screen.getByRole('group', { name: /^Gesti per: Biblioteca/ })).toBeInTheDocument());
-    await waitFor(() => expect(gestiDi('Biblioteca').getByRole('button', { name: 'Sposta giù' })).toHaveFocus());
-    apriMenu('Biblioteca');
+    await waitFor(() => expect(screen.getByRole('menu', { name: /^Altre azioni per: Biblioteca/ })).toBeInTheDocument());
+    await waitFor(() => expect(gestiDi('Biblioteca').getByRole('menuitem', { name: 'Sposta giù' })).toHaveFocus());
+    // Esc chiude il menu e ridà il fuoco al «⋯»
+    fireEvent.keyDown(gestiDi('Biblioteca').getByRole('menuitem', { name: 'Sposta giù' }), { key: 'Escape' });
+    expect(screen.queryByRole('menu', { name: /^Altre azioni per: Biblioteca/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /^Altre azioni per: Biblioteca/ })).toHaveFocus();
     apriMenu('Palazzo di Kamoshida');
-    expect(gestiDi('Palazzo').queryByRole('button', { name: 'Sposta giù' })).toBeNull();
-    fireEvent.click(gestiDi('Palazzo').getByRole('button', { name: 'Sposta su' }));
+    expect(gestiDi('Palazzo').queryByRole('menuitem', { name: 'Sposta giù' })).toBeNull();
+    fireEvent.click(gestiDi('Palazzo').getByRole('menuitem', { name: 'Sposta su' }));
     await waitFor(() => expect(api.spostaVoceGiornata).toHaveBeenCalledWith(uid(3), -1, 3));
-    fireEvent.click(gestiDi('Palazzo').getByRole('button', { name: 'Sposta di sera' }));
+    fireEvent.click(gestiDi('Palazzo').getByRole('menuitem', { name: 'Sposta di sera' }));
     await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(3), { fascia: 'sera' }, 3));
   });
 
   it('eliminare una voce non spuntata chiede conferma e la toglie dalla guida', async () => {
     api.eliminaVoceGiornata.mockResolvedValue(undefined);
     const ricarica = disegna();
-    apriMenu('Comprare i Bionutrienti');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    eliminaDi('Comprare i Bionutrienti');
     expect(api.eliminaVoceGiornata).not.toHaveBeenCalled();
     const finestra = screen.getByRole('dialog', { name: 'Eliminare la voce?' });
     expect(within(finestra).getByText(/esce dalla guida per tutte le partite/)).toBeInTheDocument();
@@ -310,8 +320,7 @@ describe('GiornoGuida — la giornata canone', () => {
     api.impostaAzionePercorso.mockResolvedValue({});
     api.eliminaVoceGiornata.mockResolvedValue(undefined);
     disegna();
-    apriMenu('Biblioteca');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    eliminaDi('Biblioteca');
     const finestra = screen.getByRole('dialog', { name: 'Eliminare una voce già spuntata?' });
     expect(within(finestra).getByText(/Coraggio ♪♪ · 3 punti/)).toBeInTheDocument();
     fireEvent.click(within(finestra).getByRole('button', { name: 'Togli la spunta ed elimina' }));
@@ -324,8 +333,7 @@ describe('GiornoGuida — la giornata canone', () => {
     api.impostaAzionePercorso.mockResolvedValue({});
     api.eliminaVoceGiornata.mockRejectedValue(new Error('Questa voce è spuntata con effetti in una partita («Altra»): togli prima la spunta in ciascuna per annullarne gli effetti, poi eliminala.'));
     const ricarica = disegna();
-    apriMenu('Biblioteca');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    eliminaDi('Biblioteca');
     fireEvent.click(within(screen.getByRole('dialog', { name: 'Eliminare una voce già spuntata?' })).getByRole('button', { name: 'Togli la spunta ed elimina' }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringMatching(/^Spunta tolta e punti annullati in questa partita, ma la voce non è stata eliminata: .*«Altra»/)));
     expect(api.impostaAzionePercorso).toHaveBeenCalledWith(3, uid(1), false);
@@ -335,8 +343,7 @@ describe('GiornoGuida — la giornata canone', () => {
   it('se il server rifiuta l\'eliminazione (spuntata con effetti in un\'altra partita) lo dice', async () => {
     api.eliminaVoceGiornata.mockRejectedValue(new Error('Questa voce è spuntata con effetti in una partita («Altra»): togli prima la spunta in ciascuna per annullarne gli effetti, poi eliminala.'));
     disegna();
-    apriMenu('Comprare i Bionutrienti');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    eliminaDi('Comprare i Bionutrienti');
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Elimina' }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('«Altra»')));
   });
@@ -372,10 +379,9 @@ describe('GiornoGuida — la giornata canone', () => {
     api.aggiornaVoceGiornata.mockResolvedValue({});
     disegna();
     apriMenu('Consegna del Palazzo');
-    fireEvent.click(screen.getByRole('button', { name: 'Sposta di giorno' }));
+    fireEvent.click(gestiDi('Consegna del Palazzo').getByRole('menuitem', { name: 'Sposta di giorno' }));
     await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenCalledWith(uid(4), { fascia: 'giorno' }, 3));
-    apriMenu('Consegna del Palazzo');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Consegna del Palazzo');
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
     expect(within(finestra).getByRole('radio', { name: 'Scadenza' })).toHaveAttribute('aria-checked', 'true');
     // un evento non ha tipo, collegamento ed effetti
@@ -385,16 +391,14 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(api.aggiornaVoceGiornata).toHaveBeenLastCalledWith(uid(4), { genere: 'promemoria', azione: 'Consegna del Palazzo', note: null, fascia: 'sera' }, 3));
     // la conferma dice che cosa si elimina: qui una scadenza
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    apriMenu('Consegna del Palazzo');
-    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    eliminaDi('Consegna del Palazzo');
     expect(screen.getByRole('dialog', { name: 'Eliminare la scadenza?' })).toBeInTheDocument();
   });
 
   it('un errore del server resta visibile e la finestra non si chiude', async () => {
     api.aggiornaVoceGiornata.mockRejectedValue(new Error('Il testo della voce non può essere vuoto.'));
     disegna();
-    apriMenu('Palazzo di Kamoshida');
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+    modificaDi('Palazzo di Kamoshida');
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Salva' }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Il testo della voce non può essere vuoto.'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -453,7 +457,8 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     expect(within(barra).getByRole('button', { name: 'Copia o sposta le voci selezionate in un altro giorno' })).toBeDisabled();
     // le righe della scelta al posto delle azioni: niente «Fatto», niente menu dei gesti, niente «Aggiungi»
     expect(screen.queryByRole('checkbox', { name: /^Fatto:/ })).toBeNull();
-    expect(screen.queryByRole('button', { name: /^Modifica, sposta o elimina/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Altre azioni per/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^(Modifica|Elimina): / })).toBeNull();
     expect(screen.queryByRole('button', { name: /^Aggiungi di/ })).toBeNull();
     expect(within(screen.getByRole('list', { name: 'Voci di sera da scegliere' })).getByText('Consegna del Palazzo')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
@@ -521,5 +526,50 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     fireEvent.click(screen.getByRole('checkbox', { name: /Comprare i Bionutrienti/ }));
     rerender(<MemoryRouter><GiornoGuida g={{ ...base, giorno: '04-13' }} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
     expect(screen.queryByRole('region', { name: 'Voci selezionate' })).toBeNull();
+  });
+});
+
+describe('GiornoGuida — «Di giorno» e «Di sera» richiudibili (C9, 2026-10-31)', () => {
+  beforeEach(() => { vi.clearAllMocks(); useFasceDiarioStore.setState({ chiuse: {}, mostrate: {} }); });
+  afterEach(() => { useFasceDiarioStore.setState({ chiuse: {}, mostrate: {} }); });
+  /** Il pulsante che apre e chiude la fascia data. */
+  const interruttore = (nome: 'Di giorno' | 'Di sera') => within(sezione(nome)).getByRole('button', { name: nome });
+
+  it('aperte per impostazione; il nome della fascia la chiude e la riapre, il conto resta a vista, i dati non cambiano', () => {
+    disegna();
+    expect(interruttore('Di giorno')).toHaveAttribute('aria-expanded', 'true');
+    expect(interruttore('Di sera')).toHaveAttribute('aria-expanded', 'true');
+    expect(document.getElementById(interruttore('Di giorno').getAttribute('aria-controls')!)).not.toBeNull();
+    fireEvent.click(interruttore('Di giorno'));
+    expect(interruttore('Di giorno')).toHaveAttribute('aria-expanded', 'false');
+    // le voci restano montate ma nascoste: niente spunte né comandi a vista; il conto e «Aggiungi» restano
+    expect(screen.queryByRole('checkbox', { name: /^Fatto: Comprare i Bionutrienti/ })).toBeNull();
+    expect(document.getElementById(`voce-${uid(2)}`)).not.toBeNull();
+    expect(within(sezione('Di giorno')).getByText('1 su 3')).toBeInTheDocument();
+    expect(within(sezione('Di giorno')).getByRole('button', { name: 'Aggiungi di giorno' })).toBeInTheDocument();
+    // l'altra fascia non cambia
+    expect(within(sezione('Di sera')).getByText('Consegna del Palazzo')).toBeVisible();
+    fireEvent.click(interruttore('Di giorno'));
+    expect(screen.getByRole('checkbox', { name: /^Fatto: Comprare i Bionutrienti/ })).toBeInTheDocument();
+    expect(api.aggiornaVoceGiornata).not.toHaveBeenCalled();
+  });
+
+  it('una voce cercata (#voce-…) in una fascia chiusa la riapre una volta; richiusa resta chiusa', () => {
+    useFasceDiarioStore.setState({ chiuse: { '04-12/giorno': true } });
+    render(<MemoryRouter initialEntries={[`/guida/percorso/04-12#voce-${uid(2)}`]}><GiornoGuida g={base} partitaId={3} onAggiorna={vi.fn()} onGiornataModificata={vi.fn()} /></MemoryRouter>);
+    expect(interruttore('Di giorno')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('checkbox', { name: /^Fatto: Comprare i Bionutrienti/ })).toBeInTheDocument();
+    fireEvent.click(interruttore('Di giorno'));
+    expect(interruttore('Di giorno')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('una voce che entra nella selezione in una fascia chiusa la riapre («Tutte» della scelta)', () => {
+    disegna();
+    fireEvent.click(interruttore('Di sera'));
+    expect(interruttore('Di sera')).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli voci da copiare o spostare in un altro giorno' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Scegli tutte le voci di sera' }));
+    expect(interruttore('Di sera')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('checkbox', { name: /Consegna del Palazzo/ })).toBeChecked();
   });
 });

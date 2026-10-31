@@ -7,14 +7,16 @@
 //
 // La giornata è canone (richieste dell'utente, 2026-09-30): le voci — azioni della guida, cose da fare ed eventi aggiunti — sono
 // una lista sola per fascia, nel loro ordine esatto, e ogni modifica cambia la guida per tutte le partite (e il pacchetto che si
-// esporta). Ogni voce ha i suoi gesti: Modifica, Sposta su, Sposta giù, Sposta di giorno/di sera, Elimina. Le due sezioni ci sono
-// sempre, anche vuote, perché è lì che si aggiunge; il posto esatto della voce nuova si sceglie nella finestra.
+// esporta). Ogni voce ha i suoi gesti: Modifica, Sposta su, Sposta giù, Sposta di giorno/di sera, Elimina (C9, 2026-10-31: Modifica
+// ed Elimina a vista accanto al «⋯», gli altri nel suo menu a tendina, `ComandiVoce`). Le due sezioni ci sono sempre, anche vuote,
+// perché è lì che si aggiunge; il posto esatto della voce nuova si sceglie nella finestra. Dal C9 ognuna si chiude e si riapre dal suo
+// nome (aperte per impostazione, per la sessione: `fasceDiarioStore`).
 // Dal 2026-10-12 («copiare elementi del diario... e poterli inserire in un altro giorno o nella parte giorno o nella parte notte
 // a scelta»; scelte «Una o più insieme» e «Sì, anche spostare») «Copia o sposta voci» apre la scelta: le voci di giorno e di sera
 // diventano righe da spuntare, e «Copia in…» / «Sposta in…» le mandano in un altro giorno e fascia (`TrasferisciVoci`).
 // ============================================================
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -32,7 +34,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { Modal } from '../shared/Modal';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
-import { GestiVoce, PulsanteMenuVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
+import { ComandiVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
+import { chiaveFascia, useFasceDiarioStore } from '../../stores/fasceDiarioStore';
 import { classeSelezioneRiga } from '../../utils/selezioneRiga';
 import { useSelezioneVoci } from '../../hooks/useSelezioneVoci';
 import { useAppuntiDiario } from '../../hooks/useAppuntiDiario';
@@ -222,17 +225,17 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
         {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
       </div>
-      {/* la colonna dei comandi della voce: il menu e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari andrebbero
-          visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono.
+      {/* la colonna dei comandi della voce: Modifica, Elimina e il «⋯» del menu a tendina (C9, `ComandiVoce`; in fila da 640 px, impilati
+          sul telefono, dove non tolgono larghezza al testo) e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari
+          andrebbero visualizzati con un pulsantino e non restando la sotto sempre visibili»).
           2026-10-26: solo ciò che la spunta ha applicato ed è in vigore (`applicatoDallaSpunta`), non le ricevute annullate o tecniche; L13
           (decisione 19), a parte nella stessa finestra, gli effetti di stato che nella partita non valgono (`statiNonApplicati`) */}
       {((gesti && onMenu) || !!a.applicatoDallaSpunta?.length || !!a.statiNonApplicati?.length) && (
-        <span className="flex shrink-0 flex-col self-start">
-          {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
+        <span className="flex shrink-0 flex-col items-end self-start">
+          {gesti && onMenu && <ComandiVoce voce={a.azione} uid={a.uid} gesti={gesti} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
           <RicevuteVoce applicato={a.applicatoDallaSpunta} nonApplicati={a.statiNonApplicati} voce={a.azione} />
         </span>
       )}
-      {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}
     </li>
   );
 }
@@ -268,7 +271,32 @@ interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: s
 export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
-  const { hash } = useLocation();
+  const { hash, search, key: chiaveNavigazione } = useLocation();
+  // C9 (2026-10-31): «Di giorno» e «Di sera» si chiudono e si riaprono dall'intestazione, aperte per impostazione, per la sessione
+  // (`fasceDiarioStore`). Una voce cercata (l'indirizzo `#voce-…` o `?voce=…` di una ricerca, di un ritorno) o evidenziata dalla mappa in
+  // una fascia chiusa la riapre, una volta per richiesta: già in questo disegno (`forzate`), così chi la porta in vista (qui sotto, e
+  // PercorsoPage che le dà anche il fuoco) la trova visibile; l'effetto poi la segna aperta nello store.
+  const chiuse = useFasceDiarioStore((s) => s.chiuse);
+  const mostrate = useFasceDiarioStore((s) => s.mostrate);
+  const cercata = hash.startsWith('#voce-') ? hash.slice('#voce-'.length) : new URLSearchParams(search).get('voce');
+  const daMostrare = [
+    cercata ? { chiave: `indirizzo:${chiaveNavigazione}:${g.giorno}:${cercata}`, uid: cercata } : null,
+    azioneEvidenziata ? { chiave: `mappa:${g.giorno}:${azioneEvidenziata}`, uid: azioneEvidenziata } : null,
+  ].flatMap((r) => {
+    const fascia = r && !mostrate[r.chiave] ? g.azioni.find((v) => v.uid === r.uid)?.fascia : undefined;
+    return r && fascia ? [{ chiave: r.chiave, fascia }] : [];
+  });
+  const forzate = new Set(daMostrare.map((r) => r.fascia));
+  /** La fascia è aperta: non chiusa da chi gioca, o con una voce da mostrare. */
+  const aperta = (f: FasciaGioco) => !chiuse[chiaveFascia(g.giorno, f)] || forzate.has(f);
+  const firmaDaMostrare = JSON.stringify(daMostrare);
+  useEffect(() => {
+    const richieste = JSON.parse(firmaDaMostrare) as Array<{ chiave: string; fascia: FasciaGioco }>;
+    if (richieste.length === 0) return;
+    const store = useFasceDiarioStore.getState();
+    store.apri(g.giorno, richieste.map((r) => r.fascia));
+    for (const r of richieste) store.segnaMostrata(r.chiave);
+  }, [firmaDaMostrare, g.giorno]);
   useEffect(() => {
     if (!hash.startsWith('#voce-')) return;
     const el = document.getElementById(hash.slice(1));
@@ -283,6 +311,24 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   // e la finestra «Copia in…» / «Sposta in…» la manda in un altro giorno.
   const ordineVisivo = useMemo(() => [...g.azioni.filter((a) => a.fascia === 'giorno'), ...g.azioni.filter((a) => a.fascia === 'sera')].map((a) => a.uid), [g.azioni]);
   const sel = useSelezioneVoci(g.giorno, ordineVisivo);
+  // C9: le voci che entrano nella selezione (Maiusc+clic che scavalca una fascia chiusa, voci incollate e selezionate, «Tutte» della
+  // scelta) si vedono: la loro fascia chiusa si riapre. Solo le nuove: richiudere una fascia con voci selezionate la lascia chiusa (Copia,
+  // Taglia e «Copia in…» continuano ad agire su tutta la selezione, anche nascosta). Una voce non ancora nella giornata (incollata, prima
+  // che la giornata si rilegga) resta «nuova» finché non c'è.
+  const selezioneVista = useRef<readonly string[]>([]);
+  useEffect(() => {
+    const viste = selezioneVista.current;
+    const fasce = new Set<FasciaGioco>();
+    const conosciute: string[] = [];
+    for (const uid of sel.uid) {
+      const fascia = g.azioni.find((v) => v.uid === uid)?.fascia;
+      if (!fascia) continue;
+      conosciute.push(uid);
+      if (!viste.includes(uid)) fasce.add(fascia);
+    }
+    selezioneVista.current = conosciute;
+    if (fasce.size) useFasceDiarioStore.getState().apri(g.giorno, [...fasce]);
+  }, [sel.uid, g.azioni, g.giorno]);
   const [caselleDi, setCaselleDi] = useState<string | null>(null);
   const caselle = !IN_RILASCIO && caselleDi === g.giorno;
   const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
@@ -308,6 +354,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   /** Rimette il fuoco sul pulsante «⋯» della voce (dopo un gesto del menu che lo chiude: chi usa un lettore di schermo resta lì). */
   const fuocoAlMenu = (uid: string) => setTimeout(() => document.getElementById(`voce-${uid}`)?.querySelector<HTMLButtonElement>('button[data-menu-voce]')?.focus());
   const radice = useRef<HTMLDivElement | null>(null);
+  /** C9: la radice degli id dei contenuti delle due fasce (`aria-controls` del pulsante che le apre e chiude). */
+  const idGiorno = useId();
   /** Il posto del fuoco nel giorno dopo un incolla o un annullo (WCAG 2.4.3): il «⋯» della voce `uid`, se c'è; altrimenti il primo «⋯»
    *  attivo del giorno; altrimenti il giorno stesso. Null se il giorno non è più a schermo (e nel rilascio, dove non si incolla).
    *  `attendi` (chi riprova al frame dopo, `rimettiFuoco`): finché la riga di `uid` non è ancora disegnata o dei «⋯» sono disattivati
@@ -317,9 +365,16 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     const r = radice.current;
     if (!r?.isConnected) return null;
     const suo = uid ? r.querySelector<HTMLButtonElement>(`[id="voce-${uid}"] button[data-menu-voce]`) : null;
-    if (suo && !suo.disabled) return suo;
+    // C9: la voce sta in una fascia chiusa: la fascia si riapre (la voce va dove sta il fuoco) e chi riprova la trova al frame dopo
+    const nascosto = (el: Element) => !!el.closest('[hidden]');
+    const suoNascosto = !!suo && nascosto(suo);
+    if (suoNascosto && uid) {
+      const fascia = g.azioni.find((v) => v.uid === uid)?.fascia;
+      if (fascia) useFasceDiarioStore.getState().apri(g.giorno, [fascia]);
+    }
+    if (suo && !suoNascosto && !suo.disabled) return suo;
     if (attendi && (suo || (uid && !r.querySelector(`[id="voce-${uid}"]`)) || r.querySelector('button[data-menu-voce]:disabled'))) return null;
-    const primo = r.querySelector<HTMLElement>('button[data-menu-voce]:not(:disabled)');
+    const primo = [...r.querySelectorAll<HTMLElement>('button[data-menu-voce]:not(:disabled)')].find((b) => !nascosto(b));
     if (primo) return primo;
     // il giorno stesso prende il fuoco solo per questo (un `tabIndex` fisso gli darebbe il fuoco a ogni clic sulle righe), e lo perde uscendo
     if (!r.hasAttribute('tabindex')) { r.setAttribute('tabindex', '-1'); r.addEventListener('blur', () => r.removeAttribute('tabindex'), { once: true }); }
@@ -437,7 +492,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
 
   /** Un passo su o giù dal menu: il menu resta sulla voce, e il fuoco sul gesto (o sull'opposto, se al bordo il gesto sparisce). */
   const sposta = (v: AzionePercorsoDto, verso: -1 | 1) => void esegui(() => spostaVoceGiornata(v.uid, verso, partita), null, true).then(() => setTimeout(() => {
-    const fila = [...document.querySelectorAll<HTMLElement>('[role="group"][data-voce]')].find((el) => el.dataset.voce === v.uid);
+    // il menu a tendina della voce (C9, `MenuGesti` in un portale): lo ritrova la sua identità
+    const fila = [...document.querySelectorAll<HTMLElement>('[role="menu"][data-voce]')].find((el) => el.dataset.voce === v.uid);
     const pulsanti = [...(fila?.querySelectorAll<HTMLButtonElement>('button') ?? [])];
     (pulsanti.find((b) => b.textContent?.trim() === (verso === -1 ? 'Sposta su' : 'Sposta giù')) ?? pulsanti.find((b) => b.textContent?.trim() === (verso === -1 ? 'Sposta giù' : 'Sposta su')))?.focus();
   }));
@@ -468,7 +524,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     { chiave: 'modifica', titolo: 'Modifica', icona: <IconaAzione chiave="modifica" dimensione={20} />, onClick: () => apri({ tipo: 'voce', voce: v }) },
     ...(i > 0 ? [{ chiave: 'su', titolo: 'Sposta su', icona: <IconaAzione chiave="su" dimensione={20} />, onClick: () => sposta(v, -1) }] : []),
     ...(i < n - 1 ? [{ chiave: 'giu', titolo: 'Sposta giù', icona: <IconaAzione chiave="giu" dimensione={20} />, onClick: () => sposta(v, 1) }] : []),
-    { chiave: 'fascia', titolo: `Sposta ${nomeFascia(altraFascia(v.fascia))}`, icona: <IconaFascia fascia={altraFascia(v.fascia)} />, onClick: () => void esegui(() => aggiornaVoceGiornata(v.uid, { fascia: altraFascia(v.fascia) }, partita), `Spostata ${nomeFascia(altraFascia(v.fascia))}, in fondo, per tutte le partite.`) },
+    // C9: la fascia d'arrivo, se chiusa, si riapre: la voce spostata resta a vista
+    { chiave: 'fascia', titolo: `Sposta ${nomeFascia(altraFascia(v.fascia))}`, icona: <IconaFascia fascia={altraFascia(v.fascia)} />, onClick: () => { useFasceDiarioStore.getState().apri(g.giorno, [altraFascia(v.fascia)]); void esegui(() => aggiornaVoceGiornata(v.uid, { fascia: altraFascia(v.fascia) }, partita), `Spostata ${nomeFascia(altraFascia(v.fascia))}, in fondo, per tutte le partite.`); } },
+    // C9: Modifica ed Elimina stanno a vista accanto al «⋯» (`ComandiVoce`), con questi stessi gesti; fuori dal menu
     { chiave: 'elimina', titolo: 'Elimina', tono: 'pericolo', icona: <IconaAzione chiave="elimina" dimensione={20} />, onClick: () => elimina(v) },
   ];
 
@@ -482,6 +540,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       const f: FasciaGioco = lista === 'sera' ? 'sera' : 'giorno';
       const v = g.azioni.find((a) => a.uid === uid);
       if (!v) return undefined;
+      // C9: rilasciata in una fascia chiusa (in fondo), la fascia si riapre e la voce si vede dov'è andata
+      useFasceDiarioStore.getState().apri(g.giorno, [f]);
       return esegui(() => aggiornaVoceGiornata(uid, { fascia: f, posizione }, partita), f !== v.fascia ? `Spostata ${nomeFascia(f)}, per tutte le partite.` : null);
     },
   );
@@ -516,17 +576,30 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     const daFare = voci.filter((a) => a.genere === 'azione');
     const fatte = daFare.filter((a) => a.fatta).length;
     const tutteScelte = !!scelte && voci.length > 0 && voci.every((v) => scelte.has(v.uid));
-    // fascia di arrivo vuota: non ha righe su cui mostrare la linea, quindi è lei a evidenziarsi
-    const bersagloVuoto = riordino.trascinato !== null && riordino.rilascio?.lista === f && voci.length === 0;
+    const vista = aperta(f);
+    // fascia di arrivo vuota o chiusa: non ha righe su cui mostrare la linea, quindi è lei a evidenziarsi (in una chiusa la voce va in fondo)
+    const bersagloVuoto = riordino.trascinato !== null && riordino.rilascio?.lista === f && (voci.length === 0 || !vista);
+    const idCorpo = `${idGiorno}-${f}`;
     return (
       <section key={f} ref={riordino.lista(f)} className={`card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''} ${bersagloVuoto ? 'ring-2 ring-primary' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <FasciaGiornata fascia={f} attiva={fasciaCorrente === f} dettaglio={partitaId && daFare.length > 0 ? `${fatte} su ${daFare.length}` : undefined} />
+          {/* C9: il nome della fascia apre e chiude le sue voci; il conto «fatte su tutte» e «Adesso» restano a vista anche a fascia chiusa */}
+          <FasciaGiornata fascia={f} attiva={fasciaCorrente === f} dettaglio={partitaId && daFare.length > 0 ? `${fatte} su ${daFare.length}` : undefined}
+            apertura={{ aperta: vista, controlla: idCorpo, onAlterna: () => {
+              // chiudere una fascia aperta solo per una voce cercata la chiude davvero (la richiesta è servita)
+              const store = useFasceDiarioStore.getState();
+              for (const r of daMostrare) if (r.fascia === f) store.segnaMostrata(r.chiave);
+              if (vista && chiuse[chiaveFascia(g.giorno, f)]) return;
+              store.alterna(g.giorno, f);
+            } }} />
           {scelte
             ? voci.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
                 aria-label={`${tutteScelte ? 'Togli dalla scelta' : 'Scegli'} tutte le voci ${nomeFascia(f)}`} onClick={() => scegli(voci.map((v) => v.uid), !tutteScelte)} />
-            : !IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => apri({ tipo: 'nuova', fascia: f })} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
+            // C9: aggiungendo in una fascia chiusa la fascia si riapre, così la voce nuova si vede al suo posto
+            : !IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => { useFasceDiarioStore.getState().apri(g.giorno, [f]); apri({ tipo: 'nuova', fascia: f }); }} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
         </div>
+        {/* le voci restano montate anche a fascia chiusa (`hidden`): spunte in corso, finestre aperte dalla riga, selezione e incolla non si perdono */}
+        <div id={idCorpo} hidden={!vista} className="flex flex-col gap-1">
         {/* nella scelta le voci sono righe da spuntare per copiarle o spostarle: niente spunta di partita né gesti, per non confonderle */}
         {scelte && voci.length > 0 && (
           <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={`Voci ${nomeFascia(f)} da scegliere`}>
@@ -556,6 +629,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
                     daCompletare={IN_RILASCIO || !proposte.perVoce.get(v.uid)?.length ? undefined : { n: proposte.perVoce.get(v.uid)!.length, onApri: () => { setMenu(null); setProposteDi(v.uid); } }} />)}
             </ul>
           )}
+        </div>
       </section>
     );
   };

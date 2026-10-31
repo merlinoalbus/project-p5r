@@ -70,7 +70,7 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
     // distinguono dai cartellini pieni accanto (tipo, Palazzo, area), e si vedono anche al tocco, dove il suggerimento non compare; il
     // nome dell'elenco resta per i lettori di schermo. Il numero d'ordine serve solo con più infiltrazioni; la matita sta da sola (44 px)
     // accanto ai chip che modifica, senza la parola «Modifica». Con l'insieme vuoto la riga è il pulsante che dice che cosa manca. I nomi
-    // accessibili dei due pulsanti portano il testo della voce, come il menu «⋯» (`PulsanteMenuVoce`): in un giorno con più voci di Palazzo
+    // accessibili dei due pulsanti portano il testo della voce, come il menu «⋯» (`ComandiVoce`): in un giorno con più voci di Palazzo
     // non si chiamano tutti uguali; il suggerimento resta corto.
     <div className="flex flex-wrap items-center gap-1 testo-12">
       {insieme.length > 0 && (

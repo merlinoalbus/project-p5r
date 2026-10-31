@@ -17,7 +17,7 @@
 // la data e l'ora sotto, separate (prima uscivano attaccate); lo stato «attiva» non si scrive più: sono tutte in vigore.
 //
 // Sul tocco non c'è il suggerimento al passaggio, quindi il pulsante si riconosce da solo: l'icona è uno scontrino e il numero sta in un
-// distintivo. Il nome accessibile porta il testo della voce, come il menu «⋯» accanto (`PulsanteMenuVoce`). Il titolo della finestra è
+// distintivo. Il nome accessibile porta il testo della voce, come il menu «⋯» accanto (`ComandiVoce`). Il titolo della finestra è
 // «Applicato dalla spunta» (prima «Ricevute della spunta»: il contenuto ora è ciò che la spunta ha applicato) con i primi 60 caratteri della
 // voce (intestazione ≤ 30% sul telefono); il testo intero, solo se troncato, è il primo paragrafo del corpo e descrive la finestra per i
 // lettori di schermo (`aria-describedby`). L'elenco ha `role="list"`: con `list-none` Safari lo toglierebbe ai lettori di schermo.
