@@ -25,6 +25,8 @@ import { IconMedaglia } from '../components/shared/iconeGuida';
 import { SegnoStato } from '../components/shared/SegnoStato';
 import { ModificaGuida, type EditorCampoSpeciale } from '../components/guida/ModificaGuida';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
+import { CondizioniGuida, ScadenzaNellaPartita } from '../components/guida/CondizioniNellaPartita';
+import { useEsitiNellaPartita } from '../hooks/useEsitiNellaPartita';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
@@ -136,6 +138,8 @@ export function CompletamentoPage() {
   // L11 B4 (R11-07/3): `?elemento=<chiave>` (la «casa» di un trofeo nella ricerca globale) porta in vista il trofeo e lo evidenzia
   useElementoDaIndirizzo(!!d && scheda === 'trofei', scheda);
   const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true }) });
+  const gruppiFinali = useMemo(() => (d?.finali ?? []).map((f) => ({ chiave: f.chiave, condizioni: f.requisiti ?? [] })), [d]);
+  const esitiFinali = useEsitiNellaPartita(gruppiFinali);
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
   // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
   const aggiorna = (t: TrofeoDto) => dati.imposta((attuale) => { const trofei = attuale.trofei.map((x) => (x.chiave === t.chiave ? t : x)); return { ...attuale, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto; });
@@ -195,6 +199,11 @@ export function CompletamentoPage() {
                   </div>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
                   {f.condizioni.length > 0 && <ul className="m-0 pl-4">{f.condizioni.map((c) => <li key={c}>{c}</li>)}</ul>}
+                  {/* L8-03 (migrazione 340): con una partita, i requisiti che l'app sa leggere e i giorni che restano alla scadenza */}
+                  {esitiFinali.has(f.chiave) && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
+                    <CondizioniGuida titolo="Nella partita" condizioni={f.requisiti ?? []} esito={esitiFinali.get(f.chiave)} />
+                    <ScadenzaNellaPartita entro={f.entro} giorni={f.giorniAllEntro} />
+                  </div>}
                   {f.date.length > 0 && <VoceTesto titolo="Date chiave">{f.date.join(' · ')}</VoceTesto>}
                   <Fonte url={f.fonte} />
                 </li>

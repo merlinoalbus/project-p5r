@@ -21,6 +21,7 @@ import type { ConfidenteDettaglioDto } from '../../types';
 import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 import { TestoNote } from '../shared/TestoNote';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -42,7 +43,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   const [partenza, setPartenza] = useState('');
   useBozzaSporca('doti-incontro', `Doti al passaggio di rango di ${confidente.nome}`, aperta && JSON.stringify(bozza) !== partenza);
   const [occupato, setOccupato] = useState(false);
-  const verso = rangoPartita === null ? null : Math.min(10, rangoPartita + 1);
+  const verso = rangoPartita === null ? null : Math.min(RANGO_MASSIMO_CONFIDENTE, rangoPartita + 1);
   const conDoti = confidente.dotiIncontro.filter((r) => r.doti.length > 0);
 
   /** Apre la finestra con una bozza copiata dai dati del Confidente, così le modifiche non toccano l'originale finché non si salva. */

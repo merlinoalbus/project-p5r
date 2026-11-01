@@ -3,10 +3,11 @@
 // ============================================================
 
 import type { ConfidentePartitaDto } from '../../types';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 /** Se il passaggio al rango successivo si fa a punti (note, regali, uscite). */
 export function aPuntiDi(c: ConfidentePartitaDto): boolean {
-  return c.rango < 10 && c.puntiNecessari !== null && c.puntiNecessari > 0;
+  return c.rango < RANGO_MASSIMO_CONFIDENTE && c.puntiNecessari !== null && c.puntiNecessari > 0;
 }
 
 /** Se la soglia di punti del rango successivo è raggiunta. */

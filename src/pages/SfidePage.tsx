@@ -22,6 +22,8 @@ import { AssetImg } from '../components/shared/AssetImg';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { CondizioniGuida, LivelloNellaPartita } from '../components/guida/CondizioniNellaPartita';
+import { useEsitiNellaPartita } from '../hooks/useEsitiNellaPartita';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
@@ -55,6 +57,7 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
       {b.elenco.map((s) => (
         <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><TitoloSezione>{s.nomeIt ?? s.nome}</TitoloSezione>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!IN_RILASCIO && !s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <LivelloNellaPartita minimo={s.livelloMinimo} />
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
@@ -70,6 +73,9 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
 
 /** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
 function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
+  // L8-03 (migrazione 340): i requisiti che la partita sa valutare, accanto ai testi dei requisiti, in una richiesta sola
+  const gruppi = useMemo(() => d.bossSegreti.map((b) => ({ chiave: b.chiave, condizioni: b.condizioni ?? [] })), [d.bossSegreti]);
+  const esiti = useEsitiNellaPartita(gruppi);
   return (
     <div className="flex flex-col gap-2 testo-13">
       {d.bossSegreti.map((b) => (
@@ -78,6 +84,9 @@ function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />
+          {/* Con una partita: lo stato dei requisiti che l'app sa leggere e il livello; senza, i testi bastano (le condizioni li ripetono) */}
+          {esiti.has(b.chiave) && <CondizioniGuida titolo="Nella partita" condizioni={b.condizioni ?? []} esito={esiti.get(b.chiave)} />}
+          <LivelloNellaPartita minimo={b.livelloMinimo} />
           <Elenco titolo="Mosse" voci={b.mosse} />
           {b.debolezze.length > 0 && <VoceTesto titolo="Debolezze">{b.debolezze.join(', ')}</VoceTesto>}
           {b.resistenze.length > 0 && <VoceTesto titolo="Resistenze">{b.resistenze.join(', ')}</VoceTesto>}

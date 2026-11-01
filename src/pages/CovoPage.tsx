@@ -72,6 +72,14 @@ function conti(covo: Covo) {
   };
 }
 
+/** La riga del progresso di una sfida nella partita: «7 di 15 cruciverba risolti in questa partita», «Persona più alta: livello 23 di 99
+ *  in questa partita». Le parole vengono dal server (`unita`); senza, sono regali (il conteggio della migrazione 258). */
+function rigaProgresso(p: NonNullable<CompletamentoDto['covo']['sfide'][number]['progresso']>): string {
+  const u = p.unita ?? { una: 'regalo', tante: 'regali' };
+  const dopo = p.obiettivo === 1 ? u.una : u.tante;
+  return [u.prima, `${p.fatti.toLocaleString('it-IT')} di ${p.obiettivo.toLocaleString('it-IT')}`, dopo, 'in questa partita'].filter(Boolean).join(' ');
+}
+
 /** Il prezzo di una voce, o la fascia dei prezzi: sempre con l'unità scritta per esteso. */
 function medaglie(n: number): string {
   return `${n} ${n === 1 ? 'medaglia' : 'medaglie'}`;
@@ -179,7 +187,7 @@ export function CovoPage() {
                           <span className="text-text-secondary text-pretty">{s.requisito}</span>
                           {s.progresso && (s.progresso.raggiunta
                             ? <span className="chip chip--attivo self-start">Raggiunta in questa partita</span>
-                            : <span className="testo-12 text-text-muted tabular-nums">{s.progresso.fatti} di {s.progresso.obiettivo} regali in questa partita</span>)}
+                            : <span className="testo-12 text-text-muted tabular-nums">{rigaProgresso(s.progresso)}</span>)}
                         </span>
                         {/* Il valore compare solo se c'è: oggi la guida non lo dichiara per
                             nessuna sfida, e una colonna di 52 trattini è rumore, non un dato. */}

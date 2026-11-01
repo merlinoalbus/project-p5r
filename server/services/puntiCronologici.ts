@@ -16,7 +16,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
-import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { puntiConfidente as puntiDelModulo, RANGO_MASSIMO_CONFIDENTE, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import type { ConfidentePartitaDto, EffettiAzioneDto } from '../../shared/types.js';
 import { aggiornaConfidente, confidente as leggiConfidente, sogliaAPunti } from './partiteService.js';
 import { registraEvento } from './storicoService.js';
@@ -106,7 +106,7 @@ export function applicaEventoDiario(partitaId: number, chiave: string, e: Evento
   if (sonoFissi(e.parametri)) {
     // la stessa regola del ricalcolo: i punti contano solo dove il rango sale a punti (rango 1–9 con una soglia), altrimenti niente cambia
     const s = statoDi(partitaId, chiave);
-    return s.rango > 0 && s.rango < 10 && sogliaAPunti(chiave, s.rango) > 0
+    return s.rango > 0 && s.rango < RANGO_MASSIMO_CONFIDENTE && sogliaAPunti(chiave, s.rango) > 0
       ? aggiornaConfidente(partitaId, chiave, { deltaPunti: e.parametri.fissi })
       : leggiConfidente(partitaId, chiave);
   }
@@ -168,7 +168,7 @@ export function ricalcola(partitaId: number, chiave: string): ConfidentePartitaD
       let riporto = punti;
       for (let k = rango; k < verso && riporto > 0; k++) { const soglia = sogliaAPunti(chiave, k); riporto = soglia > 0 ? Math.max(0, riporto - soglia) : 0; }
       punti = round2(riporto); rango = verso;
-    } else if (rango > 0 && rango < 10 && sogliaAPunti(chiave, rango) > 0) {
+    } else if (rango > 0 && rango < RANGO_MASSIMO_CONFIDENTE && sogliaAPunti(chiave, rango) > 0) {
       const par = JSON.parse(r.parametri_json) as ParametriPunti | ParametriPuntiFissi;
       // i punti di un effetto valgono così come scritti; le note passano dal calcolo del modulo, come sempre
       const delta = sonoFissi(par) ? par.fissi : puntiDelModulo({ confidente: chiave, noteRisposta: par.noteRisposta, bonusArcano: par.bonusArcano, invito: par.invito, piazzamento: par.piazzamento });
@@ -186,7 +186,7 @@ export function ricalcola(partitaId: number, chiave: string): ConfidentePartitaD
   const dopo = leggiConfidente(partitaId, chiave);
   if (sbloccato === 1 && prima.sbloccato === 0) registraEvento(partitaId, 'confidente-sbloccato', `${dopo.nome} (${dopo.arcanaNome}) sbloccato`, 'Ricalcolo in ordine cronologico del Diario.', { confidente: chiave });
   if (rango !== prima.rango) {
-    registraEvento(partitaId, 'confidente-rango', `${dopo.nome} (${dopo.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`,
+    registraEvento(partitaId, 'confidente-rango', `${dopo.nome} (${dopo.arcanaNome}): rango ${rango}${rango === RANGO_MASSIMO_CONFIDENTE ? ' — massimo' : ''}`,
       `Da rango ${prima.rango}. Ricalcolo in ordine cronologico del Diario.`, { confidente: chiave, da: prima.rango, a: rango, origine: 'diario' });
   }
   return dopo;

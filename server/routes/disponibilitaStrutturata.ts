@@ -10,6 +10,7 @@ import { disponibilitaConfidente } from '../services/disponibilitaStrutturataSer
 import { valutatoreDellaPartita } from '../services/disponibilitaService.js';
 import { ripristinaDisponibilita, salvaDisponibilita, type ModificaDisponibilita } from '../services/disponibilitaStrutturataScritture.js';
 import { FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 const router = Router();
 
@@ -17,8 +18,8 @@ const queryPartita = z.object({ partita: z.coerce.number().int().positive().opti
 // L13 (ondata 6, migrazione 306): la pioggia non è un'eccezione della disponibilità, sta nei requisiti di rango (fonte unica)
 const eccezione = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('dopo-rango'), giorni: z.number().int().min(1).max(30), effetto: z.literal('non-disponibile') }).strict(),
-  z.object({ tipo: z.literal('fascia-rango'), rango: z.number().int().min(1).max(10), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),
-  z.object({ tipo: z.literal('giorni-rango'), rango: z.number().int().min(1).max(10), giorni: z.array(z.enum(GIORNI_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(8) }).strict(),
+  z.object({ tipo: z.literal('fascia-rango'), rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),
+  z.object({ tipo: z.literal('giorni-rango'), rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), giorni: z.array(z.enum(GIORNI_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(8) }).strict(),
   z.object({ tipo: z.literal('date'), date: z.array(z.string().regex(/^\d{2}-\d{2}$/)).min(1).max(120), effetto: z.literal('non-disponibile') }).strict(),
   // L13 (O10-2): le fasce con la relazione romantica iniziata nella partita (solo per un Confidente romanzabile: 409 altrimenti)
   z.object({ tipo: z.literal('con-relazione'), fasce: z.array(z.enum(FASCE_DISPONIBILITA as unknown as [string, ...string[]])).min(1).max(2) }).strict(),

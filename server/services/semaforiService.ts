@@ -75,25 +75,31 @@ export interface StatoPartitaSemafori {
   /** L13 (O11-1, risposta dell'utente «Sì, in automatico»): le relazioni romantiche della partita con il giorno d'inizio (null = non registrato),
    *  dal punto unico `relazioniConGiorno`; le leggono le condizioni `relazione-romantica` e `relazioni-romantiche`. Assente = nessuna relazione. */
   relazioniRomantiche?: ReadonlyMap<string, string | null>;
-  /** Le impostazioni della partita sui contenuti (`contenutiDellaPartita`): il salvataggio di Persona 5 e i set di contenuti scaricabili
-   *  posseduti (gli stessi che legge la Fusione); le leggono le condizioni `salvataggio-p5` e `dlc-posseduto`. Assente = nessuno dei due. */
+  /** Le impostazioni della partita sui contenuti (`contenutiDellaPartita`): il salvataggio di Persona 5, la Nuova Partita+ e i set di contenuti
+   *  scaricabili posseduti (gli stessi che legge la Fusione); le leggono le condizioni `salvataggio-p5`, `nuova-partita-plus` e `dlc-posseduto`.
+   *  Assente = nessuno dei tre. */
   contenutiPartita?: ContenutiPartita;
 }
 
-/** Le impostazioni della partita sui contenuti: il salvataggio di Persona 5 e i set di contenuti scaricabili posseduti (`dlc_set.id`). */
-export interface ContenutiPartita { salvataggioP5: boolean; dlcPosseduti: ReadonlySet<number> }
+/** Le impostazioni della partita sui contenuti: il salvataggio di Persona 5, la Nuova Partita+ e i set di contenuti scaricabili posseduti
+ *  (`dlc_set.id`). */
+export interface ContenutiPartita {
+  salvataggioP5: boolean; dlcPosseduti: ReadonlySet<number>;
+  /** L8-03: la partita è una Nuova Partita+ (`utente.partita.nuova_partita_plus`); la legge la condizione `nuova-partita-plus`. */
+  nuovaPartitaPlus?: boolean;
+}
 
 /**
- * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`, migrazione utente 061) e i set di contenuti scaricabili posseduti
- * (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Su uno schema senza la colonna del
+ * Il salvataggio di Persona 5 (`utente.partita.salvataggio_p5`, migrazione utente 061), la Nuova Partita+ (`utente.partita.nuova_partita_plus`)
+ * e i set di contenuti scaricabili posseduti (`utente.partita.dlc_posseduti_json`, lo stesso dato della Fusione), dal punto unico della partita. Su uno schema senza la colonna del
  * salvataggio (prima della 061) il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
  */
 export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
   const conSalvataggio = !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
-  const r = prepared(`SELECT dlc_posseduti_json${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; salvataggio_p5?: number } | undefined;
+  const r = prepared(`SELECT dlc_posseduti_json, nuova_partita_plus${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; nuova_partita_plus: number; salvataggio_p5?: number } | undefined;
   let set: unknown;
   try { set = JSON.parse(r?.dlc_posseduti_json ?? '[]'); } catch { set = []; }
-  return { salvataggioP5: r?.salvataggio_p5 === 1, dlcPosseduti: new Set(Array.isArray(set) ? set.filter((x): x is number => Number.isSafeInteger(x)) : []) };
+  return { salvataggioP5: r?.salvataggio_p5 === 1, nuovaPartitaPlus: r?.nuova_partita_plus === 1, dlcPosseduti: new Set(Array.isArray(set) ? set.filter((x): x is number => Number.isSafeInteger(x)) : []) };
 }
 
 /** Lo stato della partita che serve ai semafori: ranghi e Doti li passa chi chiama; qui si leggono arcani in scorta,

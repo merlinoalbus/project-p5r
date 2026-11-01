@@ -21,6 +21,7 @@ import type { ProgrammaPunti } from './definizioni';
 import { erroriSconto, type ScontoNegozio } from '../../../../shared/scontiNegozi';
 import { CondizioniEditor } from '../CondizioniEditor';
 import type { RequisitoSpillo } from '../../../../shared/condizioniSpillo';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../../shared/puntiConfidenti';
 
 const OPZIONI_TIPO = Object.entries(NOME_TIPO_NEGOZIO).map(([chiave, nome]) => ({ chiave, nome }));
 
@@ -88,7 +89,7 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
       <SezioneCampi titolo="Sconto dal rango di un Confidente">
         <label className="campo--largo flex items-start gap-2 testo-13 touch">
           <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={sconto !== null} disabled={disabilitato}
-            onChange={(e) => imposta({ sconto_json: e.target.checked ? { confidente: testoDi(dati.confidente_chiave), rango: 10, percentuale: 50 } : null })} />
+            onChange={(e) => imposta({ sconto_json: e.target.checked ? { confidente: testoDi(dati.confidente_chiave), rango: RANGO_MASSIMO_CONFIDENTE, percentuale: 50 } : null })} />
           <span>Il negozio fa uno sconto quando un Confidente arriva a un rango</span>
         </label>
         {sconto && (
@@ -102,7 +103,7 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
             </Blocco>
             {/* il campo comune: errore sotto il controllo come descrizione accessibile (aria-describedby, aria-invalid) */}
             <CampoComune etichetta="Dal rango" errore={erroriDelloSconto.rango}>
-              {(p) => <input {...p} className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={10} value={sconto.rango > 0 ? sconto.rango : ''} disabled={disabilitato}
+              {(p) => <input {...p} className="form-input tabular-nums" type="number" inputMode="numeric" min={1} max={RANGO_MASSIMO_CONFIDENTE} value={sconto.rango > 0 ? sconto.rango : ''} disabled={disabilitato}
                 onChange={(e) => imposta({ sconto_json: { ...sconto, rango: e.target.value === '' ? 0 : Number(e.target.value) } })} />}
             </CampoComune>
             <CampoComune etichetta="Sconto in percentuale" errore={erroriDelloSconto.percentuale}>

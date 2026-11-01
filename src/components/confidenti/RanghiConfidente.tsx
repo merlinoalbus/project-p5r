@@ -20,6 +20,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -32,7 +33,7 @@ const NOME_MODO: Record<ModoRango, string> = {
   velluto: 'Con la fusione alla Stanza di Velluto',
 };
 
-const passaggio = (rango: number): string => (rango >= 10 ? 'Rango 10' : `Dal rango ${rango} al rango ${rango + 1}`);
+const passaggio = (rango: number): string => (rango >= RANGO_MASSIMO_CONFIDENTE ? `Rango ${RANGO_MASSIMO_CONFIDENTE}` : `Dal rango ${rango} al rango ${rango + 1}`);
 const descrizione = (r: RangoConfidenteDto): string => (r.modo === 'punti' ? `${NOME_MODO.punti}: ${formattaPunti(r.puntiNecessari)} punti` : NOME_MODO[r.modo]);
 
 /** La scheda: i ranghi con il loro modo; la matita di ogni riga apre l'editor di quel rango. */

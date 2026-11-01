@@ -14,7 +14,7 @@ import {
   FORCA_ALLARME, FORCA_INCIDENTE_BONUS, FORCA_PENALITA_LIVELLO, FORCA_SKILL_TRASFERITE, FORCA_STESSO_ARCANO, FORCA_TESORO, GIORNI_PER_APPLICAZIONE, INCENSI, INCENSO_ALLARME,
   ISOLAMENTO_AVVISO, LIVELLO_RESISTENZA_COPRE, RANGO_GEMELLE_ISOLAMENTO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza,
 } from '../../../shared/bonusVelluto';
-import { testoMoltiplicatore } from '../../../shared/puntiConfidenti';
+import { RANGO_MASSIMO_CONFIDENTE, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { IncensoIsolamentoDto, PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 import { SelettorePosseduta } from './SelettorePosseduta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -34,13 +34,13 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
   const ricevente = scorta.find((p) => p.id === riceventeId) ?? null;
   /** Rango del Confidente dell'arcano indicato secondo i dati del Velluto della partita (0 se assenti). */
   const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
-  const igorMax = rangoDi('Fool') >= 10;
+  const igorMax = rangoDi('Fool') >= RANGO_MASSIMO_CONFIDENTE;
   const allarme = velluto?.allarmeAttivo ?? false;
   const candidati = useMemo(() => {
     if (!ricevente) return [];
     /** Stessa lettura del rango di sopra, definita dentro il memo così che il calcolo dei candidati usi solo le dipendenze dichiarate (fra cui `velluto`). */
     const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
-    const igorMax = rangoDi('Fool') >= 10;
+    const igorMax = rangoDi('Fool') >= RANGO_MASSIMO_CONFIDENTE;
     const allarme = velluto?.allarmeAttivo ?? false;
     return scorta
       .filter((p) => p.id !== ricevente.id)

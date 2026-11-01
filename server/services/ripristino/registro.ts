@@ -15,7 +15,8 @@
 // `persona` dei personaggi (l'ha in carico il lotto L8) e le strutture annidate (membri dei gruppi, tabelle, scambi).
 // ============================================================
 
-import type { TipoCampoCorrezione, TipoModificabile } from '../../../shared/types.js';
+import type { FormatoCampoCorrezione, TipoCampoCorrezione, TipoModificabile } from '../../../shared/types.js';
+import { YEN_MASSIMI_EFFETTO } from '../../../shared/effettiVoce.js';
 
 /** Limiti dei valori accettati (le guide hanno voci di elenco lunghe quasi 750 caratteri: i nemici delle Battaglie Sfida). */
 export const LIMITE_TESTO = 600;
@@ -35,6 +36,8 @@ export interface CampoDef {
   /** Lunghezza massima di un testo (default: 600 per `testo`, 6000 per `testolungo`) o valore massimo di un numero (default 1000000). */
   max?: number;
   opzioni?: Array<{ chiave: string; nome: string }>;
+  /** L8-03: un testo con una forma propria (`condizioni`: JSON di un elenco di condizioni; `giorno`: «MM-GG»), ricontrollata al salvataggio. */
+  formato?: FormatoCampoCorrezione;
 }
 
 /** Un oggetto che sta in un blocco JSON di `dati_guida`. */
@@ -70,6 +73,10 @@ const L = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e
 const E = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e, t: 'elenco', ...o });
 const N = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e, t: 'numero', ...o });
 const B = (p: string, e: string, o: Partial<CampoDef> = {}): CampoDef => ({ p, e, t: 'booleano', ...o });
+/** L8-03 (D4, «Solo i campi che l'app può usare: requisiti, date, prezzi»): le condizioni strutturate di un elemento della guida, come JSON
+ *  di un elenco del vocabolario unico (lo stesso modo dei trofei, migrazione 313); il giorno «MM-GG» di una scadenza. */
+const C = (p: string, e: string): CampoDef => ({ p, e, t: 'testolungo', formato: 'condizioni' });
+const G = (p: string, e: string): CampoDef => ({ p, e, t: 'testo', formato: 'giorno', nullable: true, max: 5 });
 const FONTE = L('fonte', 'Fonte');
 const VERIFICATO = B('verificato', 'Verificato');
 
@@ -102,13 +109,15 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [
       T('nome', 'Nome'), T('nomeIt', 'Nome italiano', { nullable: true }), L('regole', 'Regole'), E('nemici', 'Nemici'),
       L('punteggi', 'Punteggi', { nullable: true }), E('ricompense', 'Ricompense'), L('strategia', 'Strategia'),
-      T('livelloConsigliato', 'Livello consigliato', { nullable: true }), FONTE, VERIFICATO,
+      T('livelloConsigliato', 'Livello consigliato', { nullable: true }), N('livelloMinimo', 'Livello consigliato: il più basso, come numero', { nullable: true, max: 99 }),
+      FONTE, VERIFICATO,
     ],
   },
   'boss-segreto': {
     modalita: 'blocco', blocco: 'sfide', etichetta: 'Boss segreto', radice: ['bossSegreti'], sel: 'chiave',
     campi: [
-      T('nome', 'Nome'), L('dove', 'Dove'), L('quando', 'Quando'), E('requisiti', 'Requisiti'), T('livelloConsigliato', 'Livello consigliato', { nullable: true }),
+      T('nome', 'Nome'), L('dove', 'Dove'), L('quando', 'Quando'), E('requisiti', 'Requisiti'), C('condizioniJson', 'Condizioni nella partita'),
+      T('livelloConsigliato', 'Livello consigliato', { nullable: true }), N('livelloMinimo', 'Livello consigliato come numero', { nullable: true, max: 99 }),
       E('mosse', 'Mosse'), E('resistenze', 'Resistenze'), E('debolezze', 'Debolezze'), E('strategia', 'Strategia'), E('ricompense', 'Ricompense'),
       N('statistiche/hp', 'HP', { gruppo: 'Statistiche', nullable: true }), N('statistiche/sp', 'SP', { gruppo: 'Statistiche', nullable: true }),
       T('statistiche/pe', 'PE', { gruppo: 'Statistiche', nullable: true }), T('statistiche/denaro', 'Denaro', { gruppo: 'Statistiche', nullable: true }),
@@ -148,7 +157,8 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
   // ---- Completamento e Covo ----
   finale: {
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Finale', radice: ['finali'], sel: 'chiave',
-    campi: [T('nome', 'Nome'), E('condizioni', 'Condizioni'), E('date', 'Date'), L('descrizione', 'Descrizione'), FONTE],
+    campi: [T('nome', 'Nome'), E('condizioni', 'Condizioni'), C('condizioniJson', 'Requisiti nella partita'), G('entro', 'Requisiti: entro il giorno (MM-GG)'),
+      E('date', 'Date'), L('descrizione', 'Descrizione'), FONTE],
   },
   covo: {
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Covo dei Ladri', radice: ['covo'], chiaveFissa: 'covo',
@@ -156,7 +166,10 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
   },
   'covo-sfida': {
     modalita: 'blocco', blocco: 'completamento', etichetta: 'Sfida del Covo', radice: ['covo', 'sfide'], sel: 'nome',
-    campi: [T('nome', 'Nome'), L('requisito', 'Requisito'), N('medaglie', 'Medaglie', { nullable: true })],
+    // L8-03: il tipo di `conteggio` (che cosa la sfida conta) è l'identità del dato e non si corregge; l'obiettivo sì. Il limite è quello degli
+    // yen del gioco (`YEN_MASSIMI_EFFETTO`, 9.999.999, il tetto degli yen già usato dagli effetti): le spese da Takemi e da Untouchable chiedono
+    // 500.000 e 1.000.000. Il server lo ricontrolla e la finestra «Modifica» lo legge dalla scheda (`max` del campo, `ModificaGuida.validoCampo`)
+    campi: [T('nome', 'Nome'), L('requisito', 'Requisito'), N('medaglie', 'Medaglie', { nullable: true }), N('conteggio/obiettivo', 'Obiettivo da contare nella partita', { max: YEN_MASSIMI_EFFETTO })],
   },
   'covo-premio': {
     // Ondata 5, lotto F (decisione 21, migrazione 279): il premio che è un oggetto del catalogo (Velo invisibile, Lettera dei Reali) ne legge
@@ -190,7 +203,7 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
   ricetta: {
     // Ondata 5, lotto F (decisione 21, migrazione 279): l'effetto della ricetta è quello del prodotto e si corregge sull'oggetto del catalogo
     modalita: 'blocco', blocco: 'oggetti-guida', etichetta: 'Ricetta', radice: ['fabbricazione', 'ricette'], sel: 'attrezzo', campoTitolo: 'attrezzo',
-    campi: [L('sblocco', 'Come si sblocca', { nullable: true }), FONTE, VERIFICATO],
+    campi: [L('sblocco', 'Come si sblocca', { nullable: true }), C('condizioniJson', 'Quando si può fabbricare'), FONTE, VERIFICATO],
   },
   armi: {
     modalita: 'blocco', blocco: 'oggetti-guida', etichetta: 'Personalizzazione delle armi', radice: ['personalizzazioneArmi'], chiaveFissa: 'armi',
@@ -218,7 +231,8 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [L('dove', 'Dove si ottiene')],
   },
 
-  // ---- Aiuto in battaglia (R11-15/4): le sezioni di testo della guida; le tabelle (stati alterati, ranghi, coppie degli Speciali, Demoni del Tesoro) e gli URL delle fonti non si correggono ----
+  // ---- Aiuto in battaglia (R11-15/4): le sezioni di testo della guida; le tabelle (stati alterati, ranghi, coppie degli Speciali, Demoni del Tesoro) e gli URL delle fonti non si correggono
+  // (dello Speciale si corregge solo lo sblocco, tipo `speciale`, L8-03) ----
   'battaglia-sezione': {
     modalita: 'blocco', blocco: 'battaglia', etichetta: 'Sezione dell’Aiuto in battaglia', radice: [], campi: [],
     varianti: {
@@ -257,7 +271,7 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
       mietitore: {
         etichetta: 'Mietitore', radice: ['mietitore'],
         campi: [
-          T('categoria', 'Nome'), L('dove', 'Dove e quando'), L('comeSiManifesta', 'Segnali'), T('livelloConsigliato', 'Livello consigliato'), E('abilita', 'Abilità'), E('immunita', 'Immunità'),
+          T('categoria', 'Nome'), L('dove', 'Dove e quando'), L('comeSiManifesta', 'Segnali'), T('livelloConsigliato', 'Livello consigliato'), N('livelloMinimo', 'Livello consigliato come numero', { nullable: true, max: 99 }), E('abilita', 'Abilità'), E('immunita', 'Immunità'),
           E('debolezze', 'Debolezze', { nullable: true }), E('strategia', 'Strategia'), L('ricompense', 'Ricompense'),
         ],
       },
@@ -269,6 +283,13 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
         ],
       },
     },
+  },
+
+  // L8-03 (D4): uno Speciale della tabella, per lo sblocco: le condizioni (la pagina ne genera la frase) e il testo della guida, che si vede
+  // solo senza condizioni (come il «quando» dei trofei). Nome e coppia restano della tabella e non si correggono.
+  speciale: {
+    modalita: 'blocco', blocco: 'battaglia', etichetta: 'Speciale', radice: ['speciali', 'elenco'], sel: 'nome',
+    campi: [C('condizioniJson', 'Quando si sblocca'), L('sblocco', 'Sblocco: testo della guida (si vede solo senza condizioni)')],
   },
 
   // ---- Jose ----

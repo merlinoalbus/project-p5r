@@ -23,6 +23,8 @@ import { correzioniOrfane, datiGuida, datiGuidaCorretti } from './datiGuida.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { DEFINIZIONI_BLOCCO, LIMITE_NUMERO, LIMITE_TESTO, LIMITE_TESTO_LUNGO, LIMITE_VOCE_ELENCO, LIMITE_VOCI, type CampoDef, type DefBlocco } from './ripristino/registro.js';
 import { DEFINIZIONI_RIGA, type DefRiga, type Valori } from './ripristino/righe.js';
+import { verificaCondizioni } from './mappe/mappeService.js';
+import { dataValida, normalizzaCondizioniSpillo } from '../../shared/condizioniSpillo.js';
 
 export { TIPI_MODIFICABILI };
 
@@ -94,6 +96,18 @@ function tipoEffettivo(def: CampoDef, guida: unknown): TipoCampoCorrezione {
 
 const invalido = (def: CampoDef, motivo: string) => httpErrors.badRequest('valore-non-valido', `${def.e}: ${motivo}`, { campo: def.p });
 
+/** L8-03: le condizioni di un elemento della guida, come JSON del campo («[]» = nessuna, anche dal vuoto). Lancia 400 se non è un elenco di
+ *  condizioni valide del vocabolario unico (chiavi comprese: `verificaCondizioni`, come ogni altro editor di condizioni e come i trofei). */
+function condizioniDelCampo(def: CampoDef, testo: string): string {
+  let grezze: unknown;
+  try { grezze = JSON.parse(testo === '' ? '[]' : testo); } catch { grezze = null; }
+  const valide = Array.isArray(grezze) ? normalizzaCondizioniSpillo(grezze) : null;
+  if (!valide || !Array.isArray(grezze) || valide.length !== grezze.length) throw invalido(def, 'le condizioni non sono valide.');
+  if (valide.length > 20) throw invalido(def, 'troppe condizioni (al più 20).');
+  verificaCondizioni(valide);
+  return JSON.stringify(valide);
+}
+
 /** Controlla e porta in forma il valore inviato per un campo (testi senza spazi ai capi, il vuoto dei campi che lo ammettono diventa null, elenchi senza voci vuote). */
 function normalizza(def: CampoDef, tipo: TipoCampoCorrezione, valore: unknown, guida: unknown): ValoreCampoCorrezione {
   if (valore === null) {
@@ -106,11 +120,13 @@ function normalizza(def: CampoDef, tipo: TipoCampoCorrezione, valore: unknown, g
       const t = valore.trim();
       const massimo = def.max ?? (tipo === 'testolungo' ? LIMITE_TESTO_LUNGO : LIMITE_TESTO);
       if (t.length > massimo) throw invalido(def, `è troppo lungo (al più ${massimo} caratteri).`);
+      if (def.formato === 'condizioni') return condizioniDelCampo(def, t);
       if (t === '') {
         if (def.nullable) return null;
         if (guida === '') return '';
         throw invalido(def, 'non può essere vuoto.');
       }
+      if (def.formato === 'giorno' && !(/^\d{2}-\d{2}$/.test(t) && dataValida(t))) throw invalido(def, 'serve un giorno del calendario di gioco nella forma MM-GG.');
       return t;
     }
     case 'numero': {
@@ -156,7 +172,7 @@ function campoDto(def: CampoDef, valore: ValoreCampoCorrezione, guida: ValoreCam
   return {
     percorso: def.p, etichetta: def.e, ...(def.gruppo ? { gruppo: def.gruppo } : {}), tipo,
     ...(def.nullable ? { nullable: true } : {}), ...(massimo !== undefined && tipo !== 'elenco' ? { max: massimo } : {}),
-    ...(def.opzioni ? { opzioni: def.opzioni } : {}),
+    ...(def.opzioni ? { opzioni: def.opzioni } : {}), ...(def.formato ? { formato: def.formato } : {}),
     valore, valoreGuida: guida, modificato: !uguali(valore, guida),
   };
 }

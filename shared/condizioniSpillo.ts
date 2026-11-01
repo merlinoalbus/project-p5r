@@ -22,6 +22,7 @@
 import { statoDelTipo, uidValido } from './spilli.js';
 import { congiunzione } from './testo.js';
 import { eDote, nomeDote } from './doti.js';
+import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
 
 /** I Palazzi che una condizione può citare. `iweleth` resta per leggere e validare le condizioni già scritte (`finestra-palazzo`, l'apertura del dedalo), ma
  *  dal lotto L8 è un dedalo dei Memento: l'editor non lo propone più come «Palazzo concluso» (nessun effetto di Palazzo dipende da lui, R8-19b). */
@@ -147,6 +148,9 @@ export type RequisitoSpillo =
   /** Nella partita c'è il salvataggio di Persona 5 (impostazione della partita, `utente.partita.salvataggio_p5`): le ricompense dello Scaffale
    *  con lo scatolone del Leblanc. Un prerequisito, non una presenza. */
   | { tipo: 'salvataggio-p5' }
+  /** L8-03 (D4): la partita è una Nuova Partita+ (impostazione della partita, `utente.partita.nuova_partita_plus`): i boss segreti delle
+   *  Gemelle Custodi e di Lavenza. Un prerequisito, non una presenza. */
+  | { tipo: 'nuova-partita-plus' }
   /** La partita possiede il set di contenuti scaricabili `set` (`dlc_set.id`, impostazione della partita `utente.partita.dlc_posseduti_json`,
    *  la stessa che legge la Fusione). Un prerequisito, non una presenza. */
   | { tipo: 'dlc-posseduto'; set: number }
@@ -391,6 +395,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
       return `al più ${r.al_piu === 1 ? 'una relazione romantica' : `${r.al_piu} relazioni romantiche`}${entro ? ` (entro ${entro})` : ''}`;
     }
     case 'salvataggio-p5': return 'salvataggio di Persona 5 presente';
+    case 'nuova-partita-plus': return 'Nuova Partita+';
     case 'dlc-posseduto': return `contenuto scaricabile «${nomi.setDlc?.[String(r.set)] ?? `set ${r.set}`}» posseduto`;
     case 'squadra': return `${nomi.squadra?.[r.membro] ?? nomi.confidenti?.[r.membro] ?? r.membro} in squadra`;
     case 'richiesta': return `richiesta «${nomi.richieste?.[r.richiesta] ?? r.richiesta}» completata`;
@@ -484,7 +489,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'finestra-palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && PALAZZI_CONDIZIONE.some((p) => p.chiave === dungeon) ? { tipo: 'finestra-palazzo', dungeon } : null; }
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }
-    case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
+    case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, RANGO_MASSIMO_CONFIDENTE); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }
     // L13 (O11-1): `entro` assente o una data valida (un valore presente ma non valido rende la condizione non valida)
     case 'relazione-romantica': {
       const confidente = chiavePulita(o.confidente, 60);
@@ -499,6 +504,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
       return entro === undefined ? { tipo: 'relazioni-romantiche', al_piu: alPiu } : { tipo: 'relazioni-romantiche', al_piu: alPiu, entro };
     }
     case 'salvataggio-p5': return { tipo: 'salvataggio-p5' };
+    case 'nuova-partita-plus': return { tipo: 'nuova-partita-plus' };
     // l'id del set come nella partita (`dlcPosseduti`, 1..50): la sua esistenza la dice il valutatore sul DB
     case 'dlc-posseduto': { const set = intero(o.set, 1, 50); return set ? { tipo: 'dlc-posseduto', set } : null; }
     case 'squadra': { const membro = chiavePulita(o.membro, 60); return membro ? { tipo: 'squadra', membro } : null; }

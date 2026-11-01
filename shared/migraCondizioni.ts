@@ -21,6 +21,7 @@
 // ============================================================
 
 import { ARCHI_STORIA, GIORNI_SETTIMANA, dataValida, type RequisitoSpillo } from './condizioniSpillo.js';
+import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
 
 /** Quello che il convertitore deve chiedere ai dati: nomi → chiavi, e la finestra di un arco. */
 export interface ContestoConversione {
@@ -172,11 +173,11 @@ function regola(t: string, ctx: ContestoConversione): RequisitoSpillo[] | null {
   // — doti, confidenti, richieste —
   if ((m = t.match(/^(?:richiede )?(conoscenza|coraggio|perizia|gentilezza|fascino) rango ([1-5])$/))) return [{ tipo: 'dote', dote: m[1], rango: Number(m[2]) }];
   if ((m = t.match(/^(?:richiede )?(?:le tre statistiche|coraggio, conoscenza e perizia|coraggio\/conoscenza\/perizia)(?: almeno)?(?: al livello| rango) ([1-5])$/))) return ['coraggio', 'conoscenza', 'perizia'].map((d) => ({ tipo: 'dote', dote: d, rango: Number(m![1]) }));
-  if ((m = t.match(/^(?:richiede )?(?:il )?rango confidente ([a-z ]+?) (\d{1,2})(?:, rango massimo)?(?: \(.*\))?$/)) && Number(m[2]) >= 1 && Number(m[2]) <= 10) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[2]) }] : null; }
-  if ((m = t.match(/^(?:richiede )?(?:il )?rango confidente (\d{1,2})$/)) && ctx.confidenteNegozio && Number(m[1]) >= 1 && Number(m[1]) <= 10) return [{ tipo: 'confidente', confidente: ctx.confidenteNegozio, rango: Number(m[1]) }];
-  if ((m = t.match(/^(?:richiede )?rango massimo del confidente ([a-z ]+?)(?:, [a-z ]+)?$/))) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: 10 }] : null; }
-  if ((m = t.match(/^rango (\d{1,2}) (?:di|del confidente di|del confidente) ([a-z ]+)$/)) && Number(m[1]) >= 1 && Number(m[1]) <= 10) { const c = confidenteDa(m[2]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[1]) }] : null; }
-  if ((m = t.match(/^rango confidente (\d{1,2}) con ([a-z ]+)$/)) && Number(m[1]) >= 1 && Number(m[1]) <= 10) { const c = confidenteDa(m[2]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[1]) }] : null; }
+  if ((m = t.match(/^(?:richiede )?(?:il )?rango confidente ([a-z ]+?) (\d{1,2})(?:, rango massimo)?(?: \(.*\))?$/)) && Number(m[2]) >= 1 && Number(m[2]) <= RANGO_MASSIMO_CONFIDENTE) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[2]) }] : null; }
+  if ((m = t.match(/^(?:richiede )?(?:il )?rango confidente (\d{1,2})$/)) && ctx.confidenteNegozio && Number(m[1]) >= 1 && Number(m[1]) <= RANGO_MASSIMO_CONFIDENTE) return [{ tipo: 'confidente', confidente: ctx.confidenteNegozio, rango: Number(m[1]) }];
+  if ((m = t.match(/^(?:richiede )?rango massimo del confidente ([a-z ]+?)(?:, [a-z ]+)?$/))) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: RANGO_MASSIMO_CONFIDENTE }] : null; }
+  if ((m = t.match(/^rango (\d{1,2}) (?:di|del confidente di|del confidente) ([a-z ]+)$/)) && Number(m[1]) >= 1 && Number(m[1]) <= RANGO_MASSIMO_CONFIDENTE) { const c = confidenteDa(m[2]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[1]) }] : null; }
+  if ((m = t.match(/^rango confidente (\d{1,2}) con ([a-z ]+)$/)) && Number(m[1]) >= 1 && Number(m[1]) <= RANGO_MASSIMO_CONFIDENTE) { const c = confidenteDa(m[2]); return c ? [{ tipo: 'confidente', confidente: c, rango: Number(m[1]) }] : null; }
   if ((m = t.match(/^con l'avvio del confidente di ([a-z ]+?)(?: \(.*\))?$/))) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: 1 }] : null; }
   if ((m = t.match(/^confidente di ([a-z ]+) avviato$/))) { const c = confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: 1 }] : null; }
   if ((m = t.match(/^legato al confidente (?:del(?:la)? |dell')?([a-z ]+?)(?: \(([a-z ]+)\))?$/))) { const c = confidenteDa(m[2] ?? m[1]) ?? confidenteDa(m[1]); return c ? [{ tipo: 'confidente', confidente: c, rango: 1 }] : null; }

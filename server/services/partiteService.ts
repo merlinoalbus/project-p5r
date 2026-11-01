@@ -22,7 +22,7 @@ import { meteoOra } from './meteoService.js';
 import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
 import { regaliConYenGiaNelSaldo } from './yenAutomaticiService.js';
 import { conCestinoPrivato } from './cestinoService.js';
-import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { puntiConfidente as puntiDelModulo, RANGO_MASSIMO_CONFIDENTE, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { confidentiRomanzabili, relazioniDellaPartita, richiediRomanzabile, scriviRelazioneRomantica } from './relazioneRomanticaService.js';
 import { proponiStatiMancanti } from './statiMancantiService.js';
@@ -316,7 +316,7 @@ export function sogliaAPunti(chiave: string, rango: number): number {
 /** Il rango sale a punti? Una sola regola per il server (che somma i punti) e per l'anteprima (`contaPunti`): rango da 1 a 9 con una soglia in punti. Il rango 0 (non
  *  ancora incontrato) e il 10 (massimo) non contano mai, qualunque riga ci sia. */
 function rangoAPunti(chiave: string, rango: number): boolean {
-  return rango > 0 && rango < 10 && sogliaAPunti(chiave, rango) > 0;
+  return rango > 0 && rango < RANGO_MASSIMO_CONFIDENTE && sogliaAPunti(chiave, rango) > 0;
 }
 
 interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }
@@ -392,8 +392,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {
       chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango,
-      punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
-      mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
+      punti: c.punti, puntiNecessari: c.rango >= RANGO_MASSIMO_CONFIDENTE ? null : c.punti_necessari,
+      mancanti: c.rango >= RANGO_MASSIMO_CONFIDENTE || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
       // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
       contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
@@ -509,7 +509,7 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
       // R10-17/4: l'evento dice anche da dove viene il cambio e in quale giorno di gioco è stato segnato (dettaglio e dati)
       const momento = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
       const quando = momento?.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
-      registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`,
+      registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === RANGO_MASSIMO_CONFIDENTE ? ' — massimo' : ''}`,
         `Da rango ${attuale.rango}.${origine ? ` ${TESTO_ORIGINE_RANGO[origine.origine]}` : ''}${riporto > 0 ? ` Riporto di ${riporto} punti sul rango successivo.` : ''}${quando}`,
         { confidente: chiave, da: attuale.rango, a: rango, ...(riporto > 0 ? { riporto } : {}), ...(origine ? { origine: origine.origine, ...(origine.voce ? { voce: origine.voce } : {}) } : {}), ...(momento?.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
     }

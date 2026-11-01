@@ -1,5 +1,13 @@
 // Lo sblocco di un'attività o di un luogo in parole, generato dalle sue condizioni (R11-02/9: la frase scritta a mano non c'è più).
 
+import { condizioneConTesto, leggiCondizioniSalvate, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+
+/** L8-03: le condizioni salvate come JSON in un elemento della guida (`condizioniJson` dei blocchi, migrazione 340), ognuna con la sua frase.
+ *  Un JSON assente o rotto vale «nessuna». */
+export function condizioniDellaGuida(json: unknown, nomi: NomiCondizioni): Array<RequisitoSpillo & { testo: string }> {
+  return leggiCondizioniSalvate(typeof json === 'string' ? json : null).map((c) => condizioneConTesto(c, nomi));
+}
+
 /** Le frasi delle condizioni unite da « · »; null senza condizioni. */
 export function fraseDelleCondizioni(condizioni: ReadonlyArray<{ testo: string }> | null | undefined): string | null {
   const frasi = (condizioni ?? []).map((c) => c.testo.trim()).filter(Boolean);

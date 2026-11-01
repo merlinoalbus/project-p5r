@@ -7,6 +7,8 @@
 // Modulo puro condiviso da backend (costi scontati, DTO) e frontend (calcolatori della Forca e dell'Isolamento).
 // ============================================================
 
+import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
+
 export type Affidabilita = 'alta' | 'media' | 'bassa';
 
 // ---- Registro del Prigioniero: sconto per completamento del compendio ----
@@ -55,7 +57,7 @@ const MOLTIPLICATORE_EXP_CONFIDENTE: Readonly<Record<number, number>> = { 0: 1.0
 
 /** Moltiplicatore EXP della Persona fusa in base al rango del Confidente del suo arcano (0–10). */
 export function moltiplicatoreExpConfidente(rango: number): number {
-  const r = Math.max(0, Math.min(10, Math.floor(rango)));
+  const r = Math.max(0, Math.min(RANGO_MASSIMO_CONFIDENTE, Math.floor(rango)));
   return MOLTIPLICATORE_EXP_CONFIDENTE[r] ?? 1;
 }
 
@@ -67,9 +69,9 @@ export function moltiplicatoreExpConfidente(rango: number): number {
  * Il bonus vale solo per la Persona creata: usata come materiale conta di nuovo il livello base della sua specie.
  */
 export function bonusLivelliFusione(rangoMatto: number, rangoArcano: number): { min: number; max: number; affidabilita: Affidabilita } {
-  const r = Math.max(0, Math.min(10, Math.floor(rangoArcano)));
+  const r = Math.max(0, Math.min(RANGO_MASSIMO_CONFIDENTE, Math.floor(rangoArcano)));
   if (r === 0) return { min: 0, max: 0, affidabilita: 'media' };
-  const m = Math.max(0, Math.min(10, Math.floor(rangoMatto)));
+  const m = Math.max(0, Math.min(RANGO_MASSIMO_CONFIDENTE, Math.floor(rangoMatto)));
   let min: number;
   let max: number;
   if (m <= 5) {
@@ -152,7 +154,7 @@ export function moltiplicatoreForca(o: OpzioniForca): EsitoForca {
     fattori.push({ nome: `Allarme delle fusioni (${o.tesoro ? 'Demone del Tesoro' : 'Persona normale'}, ${o.stessaArcana ? 'stesso arcano' : 'arcano diverso'})`, valore: base, affidabilita: 'alta' });
     m = base;
   } else {
-    const r = Math.max(0, Math.min(10, o.rangoConfidente));
+    const r = Math.max(0, Math.min(RANGO_MASSIMO_CONFIDENTE, o.rangoConfidente));
     if (r >= 1) {
       const chiave = o.igorMax ? 'igorMax' : 'igorNonMax';
       const doc = FORCA_RANGHI_DOCUMENTATI.find((x) => x.rango === r);

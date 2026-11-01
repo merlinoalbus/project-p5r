@@ -39,7 +39,7 @@ import { muoviYenAutomatico, usaRegaloDiPrima } from './yenAutomaticiService.js'
 import { copieDellOggetto } from './copieOggetti.js';
 import { meteoOra } from './meteoService.js';
 import { REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, eReazione, modoDelRegalo, testoReazione } from '../../shared/regali.js';
-import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
+import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
 /** Il Confidente riceve regali: la colonna della 255, o (su un file di gioco più vecchio) un elenco di regali. */
@@ -85,7 +85,7 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
   if (prima.rango === 0) throw httpErrors.conflict('confidente-non-incontrato', `${conf.nome} non è ancora stato incontrato: si regala durante un ritrovo.`);
   const momento = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null };
   if (modo === 'cartolina') {
-    if (prima.rango >= 10) throw httpErrors.conflict('cartolina-al-massimo', `${conf.nome} è al rango massimo: la Cartolina non si spedisce.`);
+    if (prima.rango >= RANGO_MASSIMO_CONFIDENTE) throw httpErrors.conflict('cartolina-al-massimo', `${conf.nome} è al rango massimo: la Cartolina non si spedisce.`);
     if (meteoOra(partitaId, momento.data_gioco, momento.fascia_gioco === 'sera' ? 'sera' : momento.fascia_gioco ? 'giorno' : null)?.meteo === 'pioggia')
       throw httpErrors.conflict('cartolina-con-pioggia', 'Piove: la Cartolina non si spedisce nei giorni di pioggia.');
   }
@@ -115,7 +115,7 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     const copiaConsumata = articolo !== null || copie.disponibili > 0;
 
     // i punti contano dove il Confidente li conta (rango 1–9 con punti necessari): altrove il regalo si registra e basta
-    const conPunti = prima.rango > 0 && prima.rango < 10 && prima.puntiNecessari !== null && prima.puntiNecessari > 0;
+    const conPunti = prima.rango > 0 && prima.rango < RANGO_MASSIMO_CONFIDENTE && prima.puntiNecessari !== null && prima.puntiNecessari > 0;
     let punti = 0;
     let puntiDopo = prima.punti;
     if (conPunti) {

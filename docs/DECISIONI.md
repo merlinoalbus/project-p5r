@@ -54,6 +54,21 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   intero ciò che la scheda del giorno mostra (voci con il rango atteso, effetti, trama e vincoli, «Giorno non coperto») sono tolti (181, con
   archivio), quelli che ne ripetevano una parte riscritti col resto (11); restano gli avvisi con un'informazione propria, i casi in dubbio e
   quelli coperti solo da trama o vincoli, che aspettano una decisione a parte.
+- **Requisiti, date e prezzi della guida (L8-03, D4 di Roberto: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
+  liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare
+  (migrazione 340): lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
+  sono), le condizioni dei boss segreti (Nuova Partita+, una nuova condizione del vocabolario letta da Partita → Modifica), i requisiti dei
+  finali con il giorno entro cui valgono (il finale Royal chiede il rango 9 di Maruki entro il 17 novembre; il rango 8 di Akechi non è un
+  requisito, perché la guida dice che aggiunge solo una scena), le ricette con l'arco dei Palazzi, il livello consigliato come numero (confrontato col livello della
+  partita) e le sfide del Covo che contano uno stato della partita (attività, lavori, contatori, cruciverba risolti, timbri, yen spesi in un
+  negozio, Confidenti al rango massimo, Richieste completate, Compendio, livello di una Persona). Dove la guida dice «tutti» (videogiochi,
+  Confidenti, Richieste, Persona del Compendio senza DLC) il conteggio non ha un numero scritto: il totale si conta nel DB a ogni lettura. Ogni
+  campo si corregge e si ripristina dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
+  stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Il rango 8 di
+  Akechi entro il 17 novembre non è un requisito del finale Royal (né il suo contrario del finale standard): il testo della guida dice che
+  aggiunge solo una scena, e il coordinatore ha accolto questa lettura sulla base del testo (non è una decisione di Roberto). I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
+  loro punto unico; i testi della guida restano. I prezzi non diventano campi nuovi: hanno già il loro punto unico nel catalogo e nei listini,
+  e i prezzi della pagina Oggetti diversi dal listino restano note, in attesa di Roberto (ROADMAP).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
   attribuzioni in `NOTICE`. Il foglio Royal della negoziazione (raccolta joyce-chen, senza licenza dichiarata) è copiato nel
   repository per scelta dell'utente, con attribuzione in `NOTICE`.

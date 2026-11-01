@@ -6,6 +6,8 @@ import { httpErrors } from '../utils/httpError.js';
 import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { indiceMaschere, personaDellaMaschera } from './maschere.js';
 import type { BattagliaDto, OmbraDto } from '../../shared/types.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { condizioniDellaGuida, fraseDellaRegola } from './condizioni/fraseCondizioni.js';
 
 type SeedBattaglia = Omit<BattagliaDto, 'ombre'> & { ombre: Array<Omit<OmbraDto, 'personaCollegata'>> };
 
@@ -18,5 +20,11 @@ export function battaglia(): Congelato<BattagliaDto> {
   if (!seed) throw httpErrors.notFound('battaglia-non-disponibile', 'I dati della guida alla battaglia non sono caricati.');
   const idx = indiceMaschere();
   const ombre: Array<Congelato<OmbraDto>> = seed.ombre.map((o) => ({ ...o, personaCollegata: o.persona ? personaDellaMaschera(idx, o.persona) : null }));
-  return { ...seed, ombre };
+  // L8-03 (migrazione 340): lo sblocco degli Speciali è nelle condizioni; la frase la genera il server, il testo della guida resta dove mancano
+  const nomi = nomiCondizioniMemo();
+  const speciali = { ...seed.speciali, elenco: seed.speciali.elenco.map((e) => {
+    const condizioni = condizioniDellaGuida(e.condizioniJson, nomi);
+    return { ...e, condizioni, sbloccoFrase: fraseDellaRegola(condizioni) ?? e.sblocco };
+  }) };
+  return { ...seed, speciali, ombre };
 }

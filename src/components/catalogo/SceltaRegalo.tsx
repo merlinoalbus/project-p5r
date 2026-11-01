@@ -24,7 +24,7 @@ import { getCatalogoOggetti, getOggettoCatalogo } from '../../services/api/catal
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaPunti, formattaPunti, formattaYen } from '../../utils/punti';
 import { AVVISO_CARTOLINA, CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO, fraIGraditi, testoReazione } from '../../../shared/regali';
-import type { ReazioneRegalo } from '../../../shared/puntiConfidenti';
+import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../../shared/puntiConfidenti';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -118,8 +118,8 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
   const segna = (vuoleAcquisto ?? !conCopia) && !!offerta;
 
   const nonIncontrato = !!sc && sc.rango === 0;
-  const cartolinaAlMassimo = cartolina && !!sc && sc.rango >= 10;
-  const conPunti = !!sc && sc.rango > 0 && sc.rango < 10 && (sc.puntiNecessari ?? 0) > 0;
+  const cartolinaAlMassimo = cartolina && !!sc && sc.rango >= RANGO_MASSIMO_CONFIDENTE;
+  const conPunti = !!sc && sc.rango > 0 && sc.rango < RANGO_MASSIMO_CONFIDENTE && (sc.puntiNecessari ?? 0) > 0;
   const bonus = bonusArcano ?? sc?.personaArcanoInScorta ?? false;
   // il piazzamento agli esami lo dà la partita (stesso calcolo del server), non una scelta di questa finestra
   const piazzamento = sc?.piazzamentoEsame?.piazzamento ?? null;

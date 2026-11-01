@@ -18,6 +18,7 @@ import { classiSuggerito } from '../../utils/suggerimenti';
 import { slug } from '../../../shared/slug';
 import type { ConfidentePartitaDto } from '../../types';
 import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 interface Props {
   c: ConfidentePartitaDto;
@@ -30,7 +31,7 @@ interface Props {
 
 /** Lo stato sintetico della scheda: una sola indicazione per Confidente, nell'ordine di priorità del progetto. */
 function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
-  if (c.rango === 10) return <span className="riga-confidente__stato text-primary-testo font-semibold">Rango massimo</span>;
+  if (c.rango === RANGO_MASSIMO_CONFIDENTE) return <span className="riga-confidente__stato text-primary-testo font-semibold">Rango massimo</span>;
   if (c.bloccato) {
     return (
       <span className="riga-confidente__stato line-clamp-2" title={c.bloccato.motivi.join(' · ')}>
@@ -55,7 +56,7 @@ function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
 /** Una scheda della griglia: `li` con filigrana, ritratto, testi e il rango nell'anello; il pulsante di scelta copre tutta la scheda. */
 export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: Props) {
   const aPunti = aPuntiDi(c);
-  const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === 10 ? 1 : 0;
+  const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === RANGO_MASSIMO_CONFIDENTE ? 1 : 0;
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
   return (
     <li className={`riga-confidente ${pronto ? 'riga-confidente--pronta' : ''} ${selezionata ? 'riga-confidente--scelta' : ''} ${c.bloccato && c.rango === 0 ? 'poster--bloccato' : ''} ${classiSuggerito(oggi, 'riga')}`}>
@@ -75,10 +76,10 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
         <span className="riga-confidente__rango">
           <AnelloAvanzamento quota={quota} dimensione={54} spessore={4} etichetta={aPunti ? `Progresso di ${c.nome} verso il rango ${c.rango + 1}` : undefined}>
             <AssetImg
-              nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
-              alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
+              nome={c.rango === 0 ? null : c.rango === RANGO_MASSIMO_CONFIDENTE ? 'ui/rango-max' : `ui/rango-${c.rango}`}
+              alt={c.rango === RANGO_MASSIMO_CONFIDENTE ? 'Rango MAX' : `Rango ${c.rango}`}
               className="h-9 w-9 object-contain"
-              fallback={<span className={`font-display testo-24 leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+              fallback={<span className={`font-display testo-24 leading-none tabular-nums ${c.rango === RANGO_MASSIMO_CONFIDENTE ? 'text-primary-testo' : ''}`}>{c.rango === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : c.rango}</span>}
             />
           </AnelloAvanzamento>
         </span>

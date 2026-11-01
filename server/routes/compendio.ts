@@ -56,6 +56,7 @@ import type { RichiestaAppuntiDiario, RichiestaEseguiIncolla, RichiestaIncollaVo
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 import {
   dettaglioPersona, dettaglioSkill, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, oggettiGuida, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
@@ -479,7 +480,7 @@ router.put('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveG
 router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(requisitiDelConfidente(String(req.params.chiave)));
 });
-const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(10) });
+const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE) });
 /** L6: i requisiti di un rango al posto di quelli di adesso (condizioni del vocabolario unico, con la frase facoltativa). */
 router.put('/confidenti/:chiave/requisiti/:rango', validate({ params: paramsRangoConfidente, body: z.object({ requisiti: z.array(z.object({ condizione: condizioneSpillo, testo: z.string().max(500).nullable().optional() })).max(10) }) }), (req, res) => {
   const p = req.params as unknown as { chiave: string; rango: number };

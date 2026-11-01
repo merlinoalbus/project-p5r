@@ -3,12 +3,16 @@
 // ============================================================
 
 import { apiGet, apiPost, apiPut } from './_helpers';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../types';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, RispostaValutaGruppiDto, VoceCitabileDto } from '../../types';
 import type { Condizione } from '../../../shared/condizioniSpillo';
 
 /** Anteprima delle condizioni: il client mostra l'esito del valutatore unico del server. */
 export const valutaCondizioni = (condizioni: Condizione[], partita: number, giorno?: string): Promise<RispostaValutaCondizioniDto> =>
   apiPost('/condizioni/valuta', { condizioni, partita, ...(giorno ? { giorno } : {}) });
+
+/** L8-03: gli esiti di più gruppi di condizioni sulla partita, in una richiesta (lo stato nella partita delle pagine della guida). */
+export const valutaGruppiCondizioni = (gruppi: Array<{ chiave: string; condizioni: Condizione[] }>, partita: number): Promise<RispostaValutaGruppiDto> =>
+  apiPost('/condizioni/valuta-gruppi', { gruppi, partita });
 
 /** Gli elenchi chiusi da cui l'editor delle condizioni prende i valori. */
 export const getElenchiRegole = (): Promise<ElenchiRegoleDto> => apiGet('/condizioni/elenchi');

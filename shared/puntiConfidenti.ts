@@ -33,6 +33,9 @@ export const testoMoltiplicatore = (n: number): string => `×${n.toLocaleString(
 /** L13 (O10-2/O10-3): il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili, la regola
  *  della migrazione 325). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
 export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
+/** L8-03 (G2): il rango massimo di un Confidente, lo stesso per tutti (lo schema della partita: `confidente_partita.rango` fra 0 e 10; le
+ *  abilità arrivano a 10 per ognuno). Un solo punto, letto dal server, dalle regole condivise e dai conteggi del Covo. */
+export const RANGO_MASSIMO_CONFIDENTE = 10;
 
 /**
  * L13 (O10-3, rilievo del revisore): il rango dell'evento che una voce di Confidente con rango atteso fa giocare davvero nella partita. È
@@ -43,7 +46,7 @@ export const RANGO_DELLA_SCELTA_ROMANTICA = 9;
  */
 export function rangoDellEventoGiocato(rangoAtteso: number | null, rangoPartita: number | null | undefined): number | null {
   if (rangoAtteso === null) return null;
-  if (rangoPartita === null || rangoPartita === undefined || rangoPartita >= 10 || rangoPartita === rangoAtteso) return rangoAtteso;
+  if (rangoPartita === null || rangoPartita === undefined || rangoPartita >= RANGO_MASSIMO_CONFIDENTE || rangoPartita === rangoAtteso) return rangoAtteso;
   return rangoPartita + 1;
 }
 

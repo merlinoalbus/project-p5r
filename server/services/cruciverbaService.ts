@@ -19,8 +19,9 @@ interface Riga { data: string; chiave: string | null; ordine: number; indizio: s
 /** Un cruciverba come DTO: il giorno è la data della riga, ed è fatto se quella data è fra quelle risolte. */
 const dto = (r: Riga, fatti: Set<string>, voceUid?: string): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fatto: fatti.has(r.data), ...(voceUid ? { voceUid } : {}) });
 
-/** Le date dei cruciverba risolti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
-function fattiPartita(partitaId: number | undefined): Set<string> {
+/** Le date dei cruciverba risolti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). La legge anche il
+ *  conteggio della sfida del Covo «Mago delle parole» (L8-03). */
+export function fattiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
   verificaPartita(partitaId);
   return new Set((prepared('SELECT data FROM cruciverba_partita WHERE partita_id = ?').all(partitaId) as Array<{ data: string }>).map((r) => r.data));

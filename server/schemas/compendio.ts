@@ -9,6 +9,7 @@ import { bodySalvaEffettiVoce } from './acquisti.js';
 import { condizioneSpillo as condizioneDellaVoce } from './catalogo.js';
 import { MASSIMO_VOCI_APPUNTI } from '../../shared/appuntiDiario.js';
 import { MASSIMO_CARATTERI_RICERCA_DIARIO, MINIMO_CARATTERI_RICERCA_DIARIO } from '../../shared/ricercaDiario.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -44,7 +45,7 @@ export const paramsGiornoGuida = z.object({ data: dataGioco });
 const campiAzioneStrutturata = {
   tipo: z.enum(TIPI_AZIONE.map((t) => t.chiave) as [TipoAzione, ...TipoAzione[]]).optional(),
   riferimento: z.object({ tipo: z.enum(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave) as [TipoRiferimentoAzione, ...TipoRiferimentoAzione[]]), chiave: z.string().trim().min(1).max(200) }).nullable().optional(),
-  rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
+  rangoAtteso: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE).nullable().optional(),
   /** L13 (O9-3): quando la voce è dovuta («Si fa solo se»), le condizioni del catalogo; vuoto = sempre. */
   condizioni: z.array(condizioneDellaVoce).max(20).optional(),
   // la descrizione è solo documentazione (OpenAPI): ogni voce la normalizza il servizio con le regole di shared/effettiAzione.ts
@@ -123,7 +124,7 @@ const voceAppunti = z.object({
   tipo: z.string().min(1).max(40),
   riferimento: z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).strict().nullable(),
   riferimentoTesto: z.string().max(400).nullable(),
-  rangoAtteso: z.number().int().min(1).max(10).nullable(),
+  rangoAtteso: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE).nullable(),
   /** L13 (O9-3): «Si fa solo se»; assente negli appunti di prima (= nessuna condizione). Le riconosce il servizio. */
   condizioni: z.array(z.unknown()).max(20).optional(),
   effetti: z.object({
@@ -158,7 +159,8 @@ export const paramsOperazioneVoci = z.object({ id: z.string().regex(/^[0-9a-f]{3
 /** La Dote a ogni incontro di un Confidente, rango per rango: Doti chiuse, note 1–3, al massimo cinque per rango. */
 export const bodyDotiIncontro = z.object({
   ranghi: z.array(z.object({
-    rango: z.number().int().min(1).max(10),
+    rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE),
     doti: z.array(z.object({ dote, note: z.union([z.literal(1), z.literal(2), z.literal(3)]) })).max(5),
-  })).min(1).max(10),
+    // al più un elemento per rango
+  })).min(1).max(RANGO_MASSIMO_CONFIDENTE),
 });

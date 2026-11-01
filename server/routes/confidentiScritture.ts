@@ -10,10 +10,11 @@ import { abilitaDelConfidente, impostaAbilita, impostaDialogo, impostaRango, MOD
 import { dettaglioConfidente } from '../services/compendioService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { creaInvito, eliminaInvito, modificaInvito, ripristinaInvito, type CorpoInvito, type CorpoNuovoInvito } from '../services/invitiScritture.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 const router = Router();
 
-const rango = z.coerce.number().int().min(1).max(10);
+const rango = z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE);
 const paramsRango = z.object({ chiave: z.string().min(1).max(200), rango });
 const paramsDialogo = z.object({ chiave: z.string().min(1).max(200), id: z.coerce.number().int().positive() });
 

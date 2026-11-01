@@ -17,7 +17,7 @@ import { conElemento, fontiRicompenseOggetti } from './fontiRicompenseOggetti.js
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { copieDellOggetto } from './copieOggetti.js';
-import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
+import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { CARTOLINA, REAZIONE_CARTOLINA, REAZIONE_FUORI_ELENCO } from '../../shared/regali.js';
 import { confidentiRegalabili, ranghiConfidenti } from './partiteService.js';
 import { reazioneInElenco } from './regaloAzioneService.js';
@@ -173,7 +173,7 @@ function consegneEDestinatari(partita: number, chiave: string, categoria: string
   const regalabili = new Set(confidentiRegalabili());
   const cartolina = chiave === CARTOLINA;
   // nell'ordine del gioco (quello dei ranghi); la reazione la calcola la stessa funzione dell'azione, così la scheda dice ciò che il regalo darà
-  const destinatari = [...ranghi].filter(([c, rango]) => regalabili.has(c) && (categoria === 'regalo' || inElenco.has(c)) && rango >= 1 && !(cartolina && rango >= 10))
+  const destinatari = [...ranghi].filter(([c, rango]) => regalabili.has(c) && (categoria === 'regalo' || inElenco.has(c)) && rango >= 1 && !(cartolina && rango >= RANGO_MASSIMO_CONFIDENTE))
     .map(([c, rango]) => ({ confidente: c, nome: nomi.get(c) ?? c, rango,
       reazione: cartolina ? REAZIONE_CARTOLINA : reazioneInElenco(c, chiave) ?? REAZIONE_FUORI_ELENCO }));
   return {

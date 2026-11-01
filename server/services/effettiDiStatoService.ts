@@ -65,6 +65,7 @@ import { capienzaScorta } from './capienzaScortaService.js';
 import { cediTrofeoAUnTurno } from './trofeiDegliEsitiService.js';
 import { t } from './traduzioniService.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 type StatoPrima = { gia: boolean; stato?: string | null };
 type EffettoPersona = Extract<EffettoDiStatoVoce, { tipo: 'persona' }>;
@@ -342,8 +343,8 @@ function applicaPunti(p: number, voceUid: string, uid: string, e: EffettoPuntiCo
     ? { noteRisposta: e.note, bonusArcano: c.personaArcanoInScorta, invito: voceConInvitoDi(voceUid, e.confidente), piazzamento: piazzamentoCorrente(p), effetto: uid }
     : { fissi: e.punti, effetto: uid };
   applicaEventoDiario(p, e.confidente, { tipo: 'punti', voceUid, data: v.data, fascia: v.fascia, ordineVoce: v.ordine, parametri });
-  const aPunti = c.rango > 0 && c.rango < 10 && sogliaAPunti(e.confidente, c.rango) > 0;
-  return { esito: 'segnato', avvisi: aPunti ? [] : [`${c.nome}: ${c.rango === 0 ? 'non ancora incontrato' : c.rango === 10 ? 'al rango massimo' : `il rango ${c.rango} non sale a punti`}, i punti dell’effetto adesso non contano.`] };
+  const aPunti = c.rango > 0 && c.rango < RANGO_MASSIMO_CONFIDENTE && sogliaAPunti(e.confidente, c.rango) > 0;
+  return { esito: 'segnato', avvisi: aPunti ? [] : [`${c.nome}: ${c.rango === 0 ? 'non ancora incontrato' : c.rango === RANGO_MASSIMO_CONFIDENTE ? 'al rango massimo' : `il rango ${c.rango} non sale a punti`}, i punti dell’effetto adesso non contano.`] };
 }
 
 /**

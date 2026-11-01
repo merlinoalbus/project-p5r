@@ -111,7 +111,17 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
   D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
   D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
-- L8 (coerenza dei dati), stato attuale (migrazioni 335–339):
+- L8 (coerenza dei dati), stato attuale (migrazioni 335–340):
+  - Requisiti, date e livelli della guida che l'app sa usare (D4, 340): sblocco degli 8 Speciali, condizioni delle Gemelle e di Lavenza,
+    rango 9 di Maruki entro il 17 novembre per tre finali (Royal, standard come negazione, negativo 3), arco dei Palazzi di 3 ricette, livello consigliato come numero (6 Battaglie Sfida,
+    2 boss, Mietitore), 17 sfide del Covo che contano uno stato della partita (attività, lavori, contatori, cruciverba, timbri, yen spesi,
+    Confidenti al rango massimo, Richieste, Compendio, livello di una Persona; i totali «tutti» contati nel DB); con lo stato nella partita.
+    I testi della guida restano; i prezzi hanno già il loro punto unico (catalogo e listini).
+  - Sfide del Covo senza conteggio perché la partita non tiene lo stato che contano (lacune aperte, elenco con i motivi nel censimento di
+    L8-03): le scelte degli esiti dei turni non si registrano se non danno oggetti o trofei (Big Bang Burger, fuoricampo, miglior caffè e
+    curry), i punti della pesca sono un saldo senza il guadagnato, i punti del negozio dei vestiti usati sono un saldo, le statistiche delle
+    Persona sono stime salvo i valori osservati, i fiori dei Memento e le statistiche di battaglia non si tengono; Maid Café e gioco
+    dell'artiglio non sono attività del DB, il Jazz Club non si conta.
   - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339).
   - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo (335).
   - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
@@ -131,8 +141,14 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida (la scheda le mostra tutte e due);
   - alberi di fusione: le Persona DLC dei pacchetti posseduti non sono più proposte «da catturare», ma solo se in scorta o nel Registro
     (come già facevano Compendio e cicli);
-  - «Anima da cineasta» si può accendere anche senza il libro letto: appare attivo ma non cambia i punti.
-- L8, ancora da fare: L8-01 (D1: non toccare), L8-03; i gradini della capienza non hanno un editor (si correggono con una migrazione).
+  - attività Biliardo: la guida delle sfide del Covo la dice «sbloccata al Rango 2 con Akechi», ma l'attività non ha condizioni;
+  - prezzi dei consumabili diversi fra la pagina Oggetti della guida e il listino (nessuno corretto, il listino resta com'è): Dango lunare
+    640 ¥ (allgamestaff, Oggetti) contro 800 ¥ (allgamestaff, elenco dei negozi, Super Muramasa); Agodashi Oden 800 ¥ (Oggetti) contro
+    900 ¥ (elenco dei negozi, Triple Seven); Homunculus 120.000 ¥ (Oggetti) contro 5.000 ¥ (listino di Tanaka, samurai-gamers); per questi
+    tre c'è la nota storica sulla fonte, sull'offerta e sull'oggetto. Daifuku alla fragola 29.800 ¥ (Oggetti) contro il baratto con una
+    Cartolina del Mercante Sakai (allgamestaff, scambi): i 29.800 ¥ sono il prezzo del «Set della dolce delizia» delle Televendite del
+    22 gennaio, che è nel listino con lo stesso prezzo.
+- L8, ancora da fare: L8-01 (D1: non toccare); i gradini della capienza non hanno un editor (si correggono con una migrazione).
 - L9 fatto: gli SVG caricati non eseguono script se aperti da soli (CSP `sandbox` e allegato, nell'app si vedono come prima); «Scarica da
   URL» non raggiunge la rete interna né con un IP nell'URL, né con un nome, né con un redirect (al più 5, solo http e https); i collegamenti
   alle fonti passano tutti da `urlHttp`; la CSP completa del rilascio è attiva in solo rapporto accanto a quella applicata di prima; limiti di
@@ -141,7 +157,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   righe nel rilascio. Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
 - L10-05, prima parte fatta (D6): «Annulla ultimo» del cassetto del Confidente letto dallo storico, resta dopo un ricaricamento. Da fare la
   seconda parte (un segno ben visibile quando l'invito ×1,2 è acceso), dopo lo schizzo approvato.
-- Aperti: L8 (le voci sopra), L10–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Aperti: L8 (le voci sopra), L10 (le proposte con schizzo approvato, D20, e la seconda parte di L10-05) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

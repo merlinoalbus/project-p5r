@@ -18,6 +18,12 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
     risposta: '`RispostaValutaCondizioniDto`',
     errori: [[400, 'giorno-non-valido'], [404, 'partita-non-trovata']],
   },
+  'POST /api/condizioni/valuta-gruppi': {
+    sommario: 'Valuta più gruppi di condizioni sulla partita, in una richiesta',
+    descrizione: 'Come `/valuta`, sul giorno della partita, per al più 200 gruppi di al più 20 condizioni ciascuno, identificati da `chiave` (diverse fra loro: una chiave ripetuta, una condizione non valida o troppi gruppi rispondono 400 `validation-error`): lo stato della partita si legge una volta e ogni gruppo ha l’esito dell’insieme (in AND) e quello di ogni condizione. Lo usano le pagine della guida (Speciali, boss segreti, finali, ricette, ranghi del Confidente della personalizzazione delle armi) per lo stato nella partita.',
+    risposta: '`RispostaValutaGruppiDto`',
+    errori: [[400, 'validation-error'], [404, 'partita-non-trovata']],
+  },
   'GET /api/condizioni/elenchi': {
     sommario: 'Elenchi chiusi da cui l\'editor delle condizioni sceglie i valori',
     descrizione: 'Articoli (con il nome del negozio come gruppo), libri e film, arcani, Persona, abilità, Ladri giocabili, attività che si contano per volte svolte, negozi con il tipo di programma punti (`manuale`, `rango-cliente` o null), eventi di storia (con `calcolato` vero per quelli «entra in squadra», che non si segnano a mano), contatori e allerte meteo effettivamente presenti nel calendario; i trofei, per il trofeo che un esito di un\'attività fa ottenere (Ondata 5, lotto G); i Confidenti romanzabili (`romanzabili`, da `confidente.romanzabile`), per la condizione «Relazione romantica con» (L13, O11-1); i set di contenuti scaricabili (`setDlc`, chiave = id del set, nome = le sue Persona), per la condizione «Contenuto scaricabile posseduto». Righe nascoste di articoli, negozi, letture e attività escluse: nell\'editor non si scrive, si sceglie.',

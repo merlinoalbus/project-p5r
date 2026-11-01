@@ -10,7 +10,7 @@
 // La bozza non salvata si segnala con `useBozzaSporca`.
 // ============================================================
 
-import { Fragment, useState, type ReactNode } from 'react';
+import { Fragment, lazy, Suspense, useState, type ReactNode } from 'react';
 import { uguali } from '../../../shared/percorsoGuida';
 import { correggiGuida, getSchedaCorrezione, ripristinaGuida } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -27,8 +27,13 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { Selettore } from '../shared/Selettore';
 import { Blocco, CampoElenco, Griglia } from './moduli/campi';
+import { dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../../shared/condizioniSpillo';
 
 type Bozza = Record<string, ValoreCampoCorrezione>;
+
+/** L8-03: l'editor delle condizioni si carica solo quando un campo lo chiede (`formato: 'condizioni'`): importarlo qui direttamente lo
+ *  porterebbe, con le sue dipendenze, nel pezzo principale dell'applicazione. */
+const CondizioniEditor = lazy(() => import('./CondizioniEditor').then((m) => ({ default: m.CondizioniEditor })));
 
 /** Il valore come testo per «Guida: …» e per la conferma del ripristino (le frasi lunghe si accorciano). */
 function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione): string {
@@ -37,6 +42,11 @@ function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione): string {
   // le voci di un elenco da opzioni sono chiavi: si mostrano i nomi
   if (Array.isArray(v)) return v.length === 0 ? '(elenco vuoto)' : v.map((x) => c.opzioni?.find((o) => o.chiave === x)?.nome ?? x).join(' · ');
   if (c.tipo === 'scelta') return c.opzioni?.find((o) => o.chiave === v)?.nome ?? String(v);
+  // L8-03: le condizioni a parole, non il JSON (senza i nomi degli elenchi: le chiavi bastano a riconoscerle)
+  if (c.formato === 'condizioni') {
+    const elenco = leggiCondizioniSalvate(String(v));
+    return elenco.length ? elenco.map((x) => descriviRequisitoSpillo(x)).join(' · ') : '(nessuna condizione)';
+  }
   const t = String(v);
   return t.length > 200 ? `${t.slice(0, 200)}…` : t;
 }
@@ -45,7 +55,9 @@ function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione): string {
 function validoCampo(c: CampoCorrezioneDto, v: ValoreCampoCorrezione | undefined): boolean {
   if (v === undefined) return false;
   switch (c.tipo) {
-    case 'testo': case 'testolungo': return typeof v === 'string' && (v.trim() !== '' || !!c.nullable || c.valoreGuida === '');
+    case 'testo': case 'testolungo':
+      if (c.formato === 'giorno' && typeof v === 'string' && v.trim() !== '') return /^\d{2}-\d{2}$/.test(v.trim()) && dataValida(v.trim());
+      return typeof v === 'string' && (v.trim() !== '' || !!c.nullable || c.valoreGuida === '' || c.formato === 'condizioni');
     case 'numero': return v === null ? !!c.nullable : typeof v === 'number' && Number.isInteger(v) && v >= 0 && (c.max === undefined || v <= c.max);
     case 'booleano': return typeof v === 'boolean';
     case 'elenco': return Array.isArray(v);
@@ -198,6 +210,14 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
           </label>
         );
       case 'testolungo':
+        // L8-03: le condizioni di un elemento della guida si scrivono con l'editor unico (il campo porta il JSON, come i trofei)
+        if (c.formato === 'condizioni') return (
+          <fieldset key={c.percorso} className="m-0 flex flex-col gap-1 border-0 p-0 sm:col-span-2"><legend className="p-0 testo-13 text-text-secondary">{c.etichetta}</legend>
+            <Suspense fallback={<p className="m-0 testo-13 text-text-muted">Caricamento dell'editor delle condizioni…</p>}>
+              <CondizioniEditor condizioni={leggiCondizioniSalvate(typeof v === 'string' ? v : '[]')} onCambia={(n) => imposta(c.percorso, JSON.stringify(n))} disabilitato={occupato} massimo={20} />
+            </Suspense>
+          </fieldset>
+        );
         return (
           <label key={c.percorso} className="editor-mappa__campo sm:col-span-2">
             {c.etichetta}
@@ -208,7 +228,8 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
         return (
           <label key={c.percorso} className="editor-mappa__campo">
             {c.etichetta}
-            <input className="form-input min-h-11" type="text" maxLength={c.max ?? 600} disabled={occupato} value={typeof v === 'string' ? v : ''} onChange={(e) => imposta(c.percorso, e.target.value)} />
+            <input className="form-input min-h-11" type="text" maxLength={c.max ?? 600} disabled={occupato} value={typeof v === 'string' ? v : ''} onChange={(e) => imposta(c.percorso, e.target.value)}
+              {...(c.formato === 'giorno' ? { placeholder: 'MM-GG', inputMode: 'numeric' as const, pattern: '\\d{2}-\\d{2}' } : {})} />
           </label>
         );
     }

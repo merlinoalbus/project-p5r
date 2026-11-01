@@ -45,6 +45,7 @@ import { ChipReazione } from '../components/catalogo/ChipReazione';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -91,7 +92,7 @@ export function ConfidenteDettaglioPage() {
   // Una copia in useState resterebbe aperta dopo un collegamento al Confidente senza il parametro.
   const rangoChiesto = Number(params.get('requisiti'));
   // L12 (passo 8): nel rilascio (sola lettura) i requisiti, le informazioni e la disponibilità del Confidente non si correggono: nessun editor, neanche da indirizzo
-  const rangoDaModificare = !IN_RILASCIO && Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= 10 ? rangoChiesto : null;
+  const rangoDaModificare = !IN_RILASCIO && Number.isInteger(rangoChiesto) && rangoChiesto >= 1 && rangoChiesto <= RANGO_MASSIMO_CONFIDENTE ? rangoChiesto : null;
   const setRangoDaModificare = (rango: number | null) => {
     const p = new URLSearchParams(params);
     if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
@@ -203,7 +204,7 @@ export function ConfidenteDettaglioPage() {
             figura={<ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" modificabile />}
             chip={<>
               <span className="chip chip--attivo">{c.arcanaNome}</span>
-              {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
+              {mio && <span className="chip">Rango {mio.rango === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : mio.rango} nella partita</span>}
             </>}
             azioni={<>
               {/* il cassetto del Confidente nella Partita, già aperto su di lui: lì si segnano punti e rango */}
@@ -229,7 +230,7 @@ export function ConfidenteDettaglioPage() {
               {c.noteGenerali && <p className="m-0 testo-13 text-text-secondary whitespace-pre-wrap">{c.noteGenerali}</p>}
           </section>
 
-          {prossimo !== null && prossimo <= 10 && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
+          {prossimo !== null && prossimo <= RANGO_MASSIMO_CONFIDENTE && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
             <section className="card flex flex-col gap-2 border-primary">
               <TitoloSezione>Prossimo passo: rango {prossimo}</TitoloSezione>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
@@ -265,7 +266,7 @@ export function ConfidenteDettaglioPage() {
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
                 {c.abilita.map((a, i) => (
                   <li key={i} className={`py-1.5 flex gap-3 testo-13 ${mio && a.rango <= mio.rango ? '' : 'text-text-secondary'}`}>
-                    <span className={`chip shrink-0 ${mio && a.rango <= mio.rango ? 'chip--attivo' : ''}`}>{a.rango === 10 ? 'MAX' : a.rango}</span>
+                    <span className={`chip shrink-0 ${mio && a.rango <= mio.rango ? 'chip--attivo' : ''}`}>{a.rango === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : a.rango}</span>
                     <div><strong className="text-text">{a.nome}</strong>{a.descrizione && <span> — {a.descrizione}</span>}</div>
                   </li>
                 ))}

@@ -10,6 +10,7 @@
 import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 import { leggiScelteDialogo, MODI_RANGO, type AbilitaRangoDto, type DialogoModificatoDto, type ModoRango, type RangoConfidenteDto, type SceltaDialogo } from '../../shared/confidentiScritture.js';
 export { MODI_RANGO };
@@ -86,7 +87,7 @@ export function abilitaDelConfidente(chiave: string): AbilitaRangoDto[] {
 /** Sostituisce l'elenco delle abilità di un rango (0-20), nell'ordine dato. */
 export function impostaAbilita(chiave: string, rango: number, abilita: Array<{ nome: string; descrizione: string }>): AbilitaRangoDto[] {
   esisteConfidente(chiave);
-  if (!Number.isInteger(rango) || rango < 1 || rango > 10) throw httpErrors.badRequest('rango-non-valido', 'Il rango va da 1 a 10.');
+  if (!Number.isInteger(rango) || rango < 1 || rango > RANGO_MASSIMO_CONFIDENTE) throw httpErrors.badRequest('rango-non-valido', `Il rango va da 1 a ${RANGO_MASSIMO_CONFIDENTE}.`);
   const pulite = abilita.map((a) => ({ nome: a.nome.trim(), descrizione: a.descrizione.trim() }));
   if (pulite.length > 20 || pulite.some((a) => a.nome === '')) throw httpErrors.badRequest('abilita-non-valide', 'Fino a 20 abilità, ciascuna con un nome.');
   const prima = abilitaDelRango(chiave, rango);

@@ -17,6 +17,7 @@ import { condizioneDelRequisito } from './semaforiService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviRequisitoSpillo, type Condizione } from '../../shared/condizioniSpillo.js';
 import type { RequisitiConfidenteDto } from '../../shared/types.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 interface RigaRequisito { tipo: string; dati_json: string; testo: string }
 interface RigaRequisitoRango extends RigaRequisito { rango: number; indice: number }
@@ -82,7 +83,7 @@ export function requisitiDelConfidente(confidente: string): RequisitiConfidenteD
   const attuali = righe('confidente_requisito', confidente);
   const guida = conGuida() ? righe('confidente_requisito_guida', confidente) : null;
   const ranghi: RequisitiConfidenteDto['ranghi'] = [];
-  for (let rango = 1; rango <= 10; rango++) {
+  for (let rango = 1; rango <= RANGO_MASSIMO_CONFIDENTE; rango++) {
     const qui = attuali.filter((r) => r.rango === rango);
     const requisiti = qui.flatMap((r) => {
       const c = condizioneDelRequisito(r as RigaRequisito & { tipo: Condizione['tipo'] });

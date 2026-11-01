@@ -265,6 +265,10 @@ export interface RispostaValutaCondizioniDto {
   /** Una valutazione per condizione, nello stesso ordine della richiesta. */
   condizioni: ValutazioneCondizioneDto[];
 }
+/** L8-03: gli esiti di più gruppi di condizioni (`POST /api/condizioni/valuta-gruppi`), per chiave del gruppo. */
+export interface RispostaValutaGruppiDto {
+  gruppi: Record<string, RispostaValutaCondizioniDto>;
+}
 
 /** L6: il posto che un invito apre, con il nome e la pagina («Harajuku», `/guida/luogo/harajuku/harajuku-hangout`). */
 export interface PostoApertoDto { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string; nome: string; casa: string | null }
@@ -1234,8 +1238,13 @@ export interface OggettiGuidaDto {
    *  di `negozi` (la sede, altrimenti il nome del negozio), per il gesto che li apre. Assenti valgono come «nessun nome». */
   consumabili: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
   chiaveEMateriali: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
-  fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean; prodottiCatalogo?: RicompensaOggettoDto[]; materialiCatalogo?: ContenutoOggettoDto[] }> };
-  personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string };
+  fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean; prodottiCatalogo?: RicompensaOggettoDto[]; materialiCatalogo?: ContenutoOggettoDto[];
+    /** L8-03 (migrazione 340): quando l'attrezzo si può fabbricare, nel vocabolario unico (JSON, «[]» = nessuna); con la frase in `condizioni`. */
+    condizioniJson?: string; condizioni?: CondizioneSpilloDto[] }> };
+  /** L8-03: `confidente` è il Confidente della personalizzazione (Iwai) letto dal DB, con le condizioni del suo rango 1 (`confidente_requisito`,
+   *  il punto unico dei requisiti dei Confidenti) e la condizione di ogni rango della progressione, per lo stato nella partita. */
+  personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string;
+    confidente?: { chiave: string; nome: string; avvio: CondizioneSpilloDto[]; ranghi: Array<{ rango: number; condizione: CondizioneSpilloDto }> } | null };
   abiti: { introduzione: string; elenco: Array<IdentitaOggettoGuida & { nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
   scambi: Array<{ venditore: string; dove: string; quando: string; offerte: Array<{ ricevi: string; dai: string; note: string | null }>; fonte: string; verificato: boolean }>;
   /** Dopo M7 gli scambi aprono il listino esistente, non una seconda tabella commerciale. Testi precedenti nelle note del negozio. */
@@ -1286,6 +1295,8 @@ export interface BattagliaSfidaDto {
   oggettiRicompensa?: RicompensaOggettoDto[];
   strategia: string;
   livelloConsigliato: string | null;
+  /** L8-03 (migrazione 340): il livello consigliato più basso, come numero, da confrontare col livello della partita; null se la guida non lo dà. */
+  livelloMinimo?: number | null;
   fonte: string;
   verificato: boolean;
 }
@@ -1296,7 +1307,13 @@ export interface BossSegretoDto {
   dove: string;
   quando: string;
   requisiti: string[];
+  /** L8-03 (migrazione 340): i requisiti che la partita sa valutare, nel vocabolario unico (JSON; «[]» = nessuno). I testi `requisiti` restano. */
+  condizioniJson?: string;
+  /** Le stesse condizioni con la loro frase, lette dal server. */
+  condizioni?: CondizioneSpilloDto[];
   livelloConsigliato: string | null;
+  /** L8-03: il livello consigliato come numero (null se la guida non lo dà). */
+  livelloMinimo?: number | null;
   mosse: string[];
   resistenze: string[];
   debolezze: string[];
@@ -1322,14 +1339,41 @@ export interface SfideDto {
 
 // ---- Completamento: trofei, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo (Fase 9.1) ----
 
+/** L8-03: i conteggi delle sfide del Covo. `obiettivo` assente = tutti quelli che il DB conosce (videogiochi, Confidenti, Richieste, Persona). */
+export type ConteggioSfidaCovo =
+  | { tipo: 'regali-consegnati'; obiettivo: number }
+  /** Le volte che l'attività è stata svolta (Partita → Progressi). */
+  | { tipo: 'attivita'; attivita: string; obiettivo: number }
+  /** La somma delle volte delle attività di un tipo (`attivita.tipo`, per esempio `lavoro`). */
+  | { tipo: 'attivita-del-tipo'; tipoAttivita: string; obiettivo: number }
+  /** Un contatore della partita; senza obiettivo solo `videogiochi-completati`, con il totale delle attività `videogioco`. */
+  | { tipo: 'contatore'; contatore: 'film-completati' | 'videogiochi-completati' | 'libri-letti' | 'film-con-una-visione' | 'videogiochi-giocati'; obiettivo?: number }
+  /** I Confidenti al loro rango massimo (il più alto di `confidente_abilita`): tutti, o i romanzabili con la relazione, o senza. */
+  | { tipo: 'confidenti-al-massimo'; quali: 'tutti' | 'in-relazione' | 'amici' }
+  /** Le Richieste dei Memento completate, su tutte quelle del DB. */
+  | { tipo: 'richieste-completate' }
+  /** Le Persona registrate nel Compendio della partita, su quelle del Compendio senza DLC e senza le Persona del gruppo. */
+  | { tipo: 'compendio-registrato' }
+  | { tipo: 'cruciverba-risolti'; obiettivo: number }
+  /** I timbri raccolti nei dedali dei Memento (somma di `timbri_dedalo_partita`). */
+  | { tipo: 'timbri-raccolti'; obiettivo: number }
+  /** Gli yen spesi in un negozio con gli acquisti registrati (gli stessi del grado cliente). */
+  | { tipo: 'spesa-negozio'; negozio: string; obiettivo: number }
+  /** Il livello della Persona posseduta più alta. */
+  | { tipo: 'persona-livello'; obiettivo: number };
+
 /** Una sfida del Covo dei Ladri. `conteggio` (ondata 5, migrazione 258): quello che la sfida conta, se l'app lo sa contare; `progresso`: a
  *  che punto è la partita chiesta (solo con una partita). */
 export interface SfidaCovoDto {
   nome: string;
   requisito: string;
   medaglie: number | null;
-  conteggio?: { tipo: 'regali-consegnati'; obiettivo: number };
-  progresso?: { fatti: number; obiettivo: number; raggiunta: boolean };
+  /** L8-03 (migrazione 340): che cosa la sfida conta, dagli stati che la partita tiene. Senza `obiettivo` (dove la guida dice «tutti») il totale
+   *  lo ricava il server dal DB a ogni lettura (`completamentoService.progressoDelConteggio`). */
+  conteggio?: ConteggioSfidaCovo;
+  /** `unita`: che cosa si conta, al plurale e al singolare («regali», «volte», «libri letti»…), dopo i numeri; `prima`, se c'è, va davanti
+   *  («Persona più alta: livello 23 di 99»). */
+  progresso?: { fatti: number; obiettivo: number; raggiunta: boolean; unita?: { una: string; tante: string; prima?: string } };
 }
 
 export interface TrofeoDto {
@@ -1353,7 +1397,10 @@ export interface TrofeoDto {
 export interface CompletamentoDto {
   trofei: TrofeoDto[];
   ottenuti: number;
-  finali: Array<{ chiave: string; nome: string; condizioni: string[]; date: string[]; descrizione: string; fonte: string }>;
+  /** L8-03 (migrazione 340): `condizioniJson` sono i requisiti che la partita sa valutare (vocabolario unico; «[]» = nessuno) ed `entro` il giorno
+   *  «MM-GG» entro cui devono valere; `requisiti` le stesse condizioni con la frase, lette dal server; `giorniAllEntro` (solo con la partita
+   *  e con `entro`) i giorni di gioco che restano, negativo se il giorno è passato. I testi `condizioni` e `date` restano. */
+  finali: Array<{ chiave: string; nome: string; condizioni: string[]; condizioniJson?: string; entro?: string | null; requisiti?: CondizioneSpilloDto[]; giorniAllEntro?: number | null; date: string[]; descrizione: string; fonte: string }>;
   covo: { introduzione: string; medaglie: string; sfide: Array<SfidaCovoDto>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null; oggettiRicompensa?: RicompensaOggettoDto[] }>; fonte: string };
   dlc: Array<{ nome: string; contenuto: string; note: string | null; fonte: string }>;
   meteo: Array<{ condizione: string; effetti: string[]; fonte: string }>;
@@ -2549,7 +2596,9 @@ export interface BattagliaDto {
   assaltoEHoldUp: { urlFonte: string; rapina: string; assalto: string; holdUp: string };
   tecnico: { urlFonte: string; stati: Array<{ stato: string; elementi: string[] }> };
   staffetta: { urlFonte: string; cosaE: string; disponibilita: string; effetto: string; livelli: string; indicatoriVisivi: string; ranghi: Array<{ rango: number; bonus: string }>; moltiplicatori: string; effettoSpeciale: string };
-  speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string }> };
+  /** L8-03 (migrazione 340): lo sblocco di uno Speciale nel vocabolario unico (`condizioniJson`, con la frase in `condizioni`); `sbloccoFrase` è
+   *  la frase generata dalle condizioni, o il testo della guida `sblocco` dove le condizioni non ci sono. */
+  speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string; condizioniJson?: string; condizioni?: CondizioneSpilloDto[]; sbloccoFrase?: string }> };
   negoziazione: {
     urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string;
     personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string;
@@ -2561,7 +2610,8 @@ export interface BattagliaDto {
     domande?: NegoziazioneDomandaDto[];
   };
   ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
-  mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
+  /** `livelloMinimo` (L8-03, migrazione 340): il livello consigliato più basso come numero, da confrontare col livello della partita. */
+  mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; livelloMinimo?: number | null; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
   ombre: OmbraDto[];
 }
@@ -4043,7 +4093,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'sfide-battaglie', 'battaglia-sfida', 'boss-segreto', 'sfide-magnate', 'magnate-sfida', 'tratto', 'sfide-tratti', 'sfide-quiz-tv',
   'finale', 'covo', 'covo-sfida', 'covo-premio', 'dlc', 'meteo', 'completamento-sezione',
   'fabbricazione', 'ricetta', 'armi', 'arma-effetto', 'arma-progressione', 'abiti', 'abito', 'jose',
-  'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'regalo', 'persona', 'skill',
+  'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'speciale', 'regalo', 'persona', 'skill',
   // R11-17/1: i dati veri che prima si cambiavano solo nel pacchetto
   'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set',
   'confidente', 'esame-premi', 'settimana-guida', 'evento-voce',
@@ -4055,6 +4105,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];
+export type FormatoCampoCorrezione = 'condizioni' | 'giorno';
 export interface CampoCorrezioneDto {
   /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione e di `campi` nel ripristino. */
   percorso: string;
@@ -4065,6 +4116,9 @@ export interface CampoCorrezioneDto {
   /** Lunghezza massima di un testo o valore massimo di un numero, quando c'è. */
   max?: number;
   opzioni?: Array<{ chiave: string; nome: string }>;
+  /** L8-03: un testo con una forma propria. `condizioni`: il JSON di un elenco di condizioni del vocabolario unico (si scrive con l'editor
+   *  delle condizioni); `giorno`: un giorno del calendario di gioco «MM-GG». Il server lo ricontrolla. */
+  formato?: FormatoCampoCorrezione;
   /** Il valore che le pagine mostrano adesso, e quello della guida (identici se il campo non è corretto). */
   valore: ValoreCampoCorrezione;
   valoreGuida: ValoreCampoCorrezione;

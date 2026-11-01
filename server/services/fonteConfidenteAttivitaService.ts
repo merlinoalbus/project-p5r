@@ -7,6 +7,7 @@ import type { StatoDisponibilita } from './disponibilitaService.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { t } from './traduzioniService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 const NOME_GIORNO = { lun: 'Lunedì', mar: 'Martedì', mer: 'Mercoledì', gio: 'Giovedì', ven: 'Venerdì', sab: 'Sabato', dom: 'Domenica', festivi: 'festivi' } as const;
 
@@ -30,7 +31,7 @@ export function fonteConfidenteAttivita(r: Record<string, unknown>, st: StatoDis
   const fonteIlleggibile = false;
   const avvisiFonte = disp ? [] : ['La disponibilità del Confidente non è registrata nella fonte.'];
   const rangoAttuale = st ? st.ranghiConfidenti.get(chiave) ?? 0 : null;
-  const passo = rangoAttuale !== null && rangoAttuale < 10 ? ranghi.find(q => q.rango === rangoAttuale + 1) : null;
+  const passo = rangoAttuale !== null && rangoAttuale < RANGO_MASSIMO_CONFIDENTE ? ranghi.find(q => q.rango === rangoAttuale + 1) : null;
   const semafori = st && passo ? (prepared('SELECT * FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? ORDER BY indice').all(chiave, passo.rango) as RigaRequisito[]).map(q => valuta(q, st)) : null;
   const bloccanti = semafori?.filter(requisitoBloccante) ?? [];
   return { ...base, stato: campiIncompatibili.length || fonteIlleggibile ? 'conflitto' : 'collegato', avvio: ranghi.find(q => q.rango === 1) ?? null, rangoAttuale,

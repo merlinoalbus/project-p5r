@@ -15,6 +15,8 @@
 // è una nota di Palazzo da 3938 caratteri, il nome di mappa più lungo ne ha 118.
 // ============================================================
 
+import { RANGO_MASSIMO_CONFIDENTE } from './puntiConfidenti.js';
+
 export const LIMITI_GUIDA = {
   // L8-04: il livello consigliato è un minimo e un massimo (interi da 1 a `livelloMassimo`), non più un testo
   dungeon: { nome: 200, sovrano: 400, data: 1000, livelloMassimo: 99, note: 8000 },
@@ -25,7 +27,7 @@ export const LIMITI_GUIDA = {
   areaDedalo: { nome: 300, descrizione: 8000, timbri: 999 },
   // le Richieste dei Mementos (2026-10-11): nel pacchetto il nome più lungo ha 35 caratteri, le date 146, le note 545, una ricompensa
   // 119; al massimo 3 debolezze, 3 resistenze, 3 ricompense, rango 8
-  richiesta: { nome: 300, breve: 1000, note: 8000, voce: 300, voci: 30, rango: 10 },
+  richiesta: { nome: 300, breve: 1000, note: 8000, voce: 300, voci: 30, rango: RANGO_MASSIMO_CONFIDENTE },
   // Il nome di una mappa finisce nella chiave leggibile del percorso, che il server tiene sotto i
   // 180 caratteri **compreso il prefisso del genitore**: oltre quel tetto la rotta risponde
   // «percorso-troppo-lungo» e dice di abbreviare. Qui sta il massimo teorico; quello pratico

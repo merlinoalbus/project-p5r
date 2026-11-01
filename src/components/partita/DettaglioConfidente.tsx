@@ -32,7 +32,7 @@ import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
 import { slug } from '../../../shared/slug';
 import { formattaPunti } from '../../utils/punti';
 import { noteAParole, simboliNote } from '../../../shared/note';
-import { MOLTIPLICATORE_ARCANO, RANGO_DELLA_SCELTA_ROMANTICA, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
+import { MOLTIPLICATORE_ARCANO, RANGO_DELLA_SCELTA_ROMANTICA, RANGO_MASSIMO_CONFIDENTE, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { ConfidentePartitaDto } from '../../types';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
@@ -77,8 +77,8 @@ interface Props {
 export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, motivoOggi, appenaSalito, anteprima, moltiplicatori, azioni }: Props) {
   const aPunti = aPuntiDi(c);
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
-  const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === 10 ? 1 : 0;
-  const semaforo = c.rango < 10 ? c.semafori[0] : undefined;
+  const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === RANGO_MASSIMO_CONFIDENTE ? 1 : 0;
+  const semaforo = c.rango < RANGO_MASSIMO_CONFIDENTE ? c.semafori[0] : undefined;
   // il blocco e i semafori dicono lo stesso rango: i motivi stanno già nei semafori, non si ripetono in elenco
   const motiviNeiSemafori = !!c.bloccato && semaforo?.rango === c.bloccato.rango;
   const valoreRegalo = formattaPunti(anteprima({ regalo: true }));
@@ -114,14 +114,14 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                 <span className="testo-12 font-bold uppercase tracking-[.14em] text-text-secondary">Rango</span>
                 <AnelloAvanzamento quota={quota} dimensione={62} spessore={4} etichetta={aPunti ? `Progresso di ${c.nome} verso il rango ${prossimo}` : undefined}>
                   <AssetImg
-                    nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
-                    alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
+                    nome={c.rango === 0 ? null : c.rango === RANGO_MASSIMO_CONFIDENTE ? 'ui/rango-max' : `ui/rango-${c.rango}`}
+                    alt={c.rango === RANGO_MASSIMO_CONFIDENTE ? 'Rango MAX' : `Rango ${c.rango}`}
                     className="h-11 w-11 object-contain"
-                    fallback={<span className={`font-display testo-28 leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+                    fallback={<span className={`font-display testo-28 leading-none tabular-nums ${c.rango === RANGO_MASSIMO_CONFIDENTE ? 'text-primary-testo' : ''}`}>{c.rango === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : c.rango}</span>}
                   />
                 </AnelloAvanzamento>
               </div>
-              {!pronto && <button type="button" className="btn btn-primary btn-sm touch w-11" disabled={occ || c.rango === 10 || !!c.bloccato} title={c.bloccato ? `Bloccato: ${c.bloccato.motivi.join(' · ')}` : undefined} onClick={() => azioni.cambiaRango(prossimo)} aria-label={`Rango di ${c.nome} più uno${c.bloccato ? ' (bloccato dai requisiti)' : ''}`}>+</button>}
+              {!pronto && <button type="button" className="btn btn-primary btn-sm touch w-11" disabled={occ || c.rango === RANGO_MASSIMO_CONFIDENTE || !!c.bloccato} title={c.bloccato ? `Bloccato: ${c.bloccato.motivi.join(' · ')}` : undefined} onClick={() => azioni.cambiaRango(prossimo)} aria-label={`Rango di ${c.nome} più uno${c.bloccato ? ' (bloccato dai requisiti)' : ''}`}>+</button>}
             </div>
             <div className="targa-rango__info flex flex-col gap-1">
               {aPunti && (
@@ -140,7 +140,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                     </>
                   ) : (
                     <span className="text-text-secondary">
-                      {c.rango === 10 ? 'Rango massimo raggiunto'
+                      {c.rango === RANGO_MASSIMO_CONFIDENTE ? 'Rango massimo raggiunto'
                         : c.rango === 0 ? 'Da avviare: porta il rango a 1 quando lo incontri'
                           : c.puntiNecessari === null ? 'Solo trama: si sale con la storia, senza punti'
                             : `Il rango ${prossimo} non dipende dai punti`}
@@ -160,7 +160,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
       <div className="dettaglio-confidente__colonne">
         {/* che cosa serve per salire: requisiti del prossimo rango e moltiplicatori dei punti */}
         <div className="dettaglio-confidente__testa">
-          {c.rango < 10 && (semaforo || aPunti || (c.bloccato && !motiviNeiSemafori)) && <h4 className="titolo-sezione-confidente">Verso il rango {prossimo}</h4>}
+          {c.rango < RANGO_MASSIMO_CONFIDENTE && (semaforo || aPunti || (c.bloccato && !motiviNeiSemafori)) && <h4 className="titolo-sezione-confidente">Verso il rango {prossimo}</h4>}
           {c.bloccato && !motiviNeiSemafori && <ul className="m-0 pl-4 testo-12 text-text-secondary">{c.bloccato.motivi.map((m) => <li key={m}>{m}</li>)}</ul>}
           {semaforo && (
             <SemaforiRango semafori={semaforo} compatto occupato={occ} onConferma={(rango, r, confermato) => azioni.conferma(rango, r.indice, confermato)} onCorreggi={(rango) => azioni.correggi(rango)} />

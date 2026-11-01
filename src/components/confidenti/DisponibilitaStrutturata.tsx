@@ -28,6 +28,7 @@ import {
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -41,7 +42,7 @@ const elenco = (voci: string[]): string => voci.length <= 1 ? voci.join('') : `$
 /** L7-05: le date di gioco si scrivono in un modo solo, con l'articolo («il 28 settembre», «l'8 novembre»), come nel resto dell'app. */
 const conArticolo = (mmgg: string): string => dataGiocoConArticolo(mmgg);
 const SETTE_GIORNI = GIORNI_DISPONIBILITA.filter((g) => g !== 'festivi');
-const RANGHI = Array.from({ length: 10 }, (_, i) => i + 1);
+const RANGHI = Array.from({ length: RANGO_MASSIMO_CONFIDENTE }, (_, i) => i + 1);
 
 /** Un'eccezione in parole. */
 function testoEccezione(e: EccezioneDisponibilita): string {
@@ -209,7 +210,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
             <span className="min-w-0 flex-1 break-words">{e.tipo === 'date' ? 'Giorni in cui non si incontra' : testoEccezione(e)}</span>
             {e.tipo === 'dopo-rango' && <label className="flex items-center gap-1">giorni <input className="form-input w-16" type="number" min={1} max={30} value={e.giorni} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, giorni: Math.min(30, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>}
             {e.tipo === 'fascia-rango' && <>
-              <label className="flex items-center gap-1">rango <input className="form-input w-16" type="number" min={1} max={10} value={e.rango} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, rango: Math.min(10, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>
+              <label className="flex items-center gap-1">rango <input className="form-input w-16" type="number" min={1} max={RANGO_MASSIMO_CONFIDENTE} value={e.rango} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, rango: Math.min(RANGO_MASSIMO_CONFIDENTE, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>
               {FASCE_DISPONIBILITA.map((f) => <button key={f} type="button" aria-pressed={e.fasce.includes(f)} disabled={occupato} className={`chip touch ${e.fasce.includes(f) ? 'chip--attivo' : ''}`} onClick={() => { const prossime = ordinati(alterna(e.fasce, f), FASCE_DISPONIBILITA); if (prossime.length > 0) modificaEccezione(i, { ...e, fasce: prossime }); }}>{NOME_FASCIA[f]}</button>)}
             </>}
             {e.tipo === 'giorni-rango' && <>

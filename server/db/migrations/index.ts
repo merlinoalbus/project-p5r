@@ -427,6 +427,8 @@ import { migration337 } from './337_richieste_testi_e_area_tolti.js';
 import { migration338 } from './338_refuso_yongen_jaya_9_aprile.js';
 // 2026-11-01 (L8-02, «Sì, procedi»): avvisi del giorno, 181 doppioni tolti e 11 riscritti dall'elenco approvato del censimento
 import { migration339 } from './339_avvisi_del_giorno.js';
+// 2026-11-01 (L8-03, D4 «Solo i campi che l'app può usare: requisiti, date, prezzi»): requisiti, date e livelli strutturati accanto ai testi della guida
+import { migration340 } from './340_campi_strutturati_della_guida.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -452,5 +454,5 @@ export const migrations: Migration[] = [
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
-  migration333, migration334, migration335, migration336, migration337, migration338, migration339,
+  migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340,
 ];

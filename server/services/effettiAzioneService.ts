@@ -18,7 +18,7 @@ import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote } from './partiteService.js';
 import { applicaEventoDiario } from './puntiCronologici.js';
 import { annullaPiazzamentoDallaSpunta, piazzamentoCorrente, premiDellEsame, premioDelPiazzamento, segnaPiazzamentoDallaSpunta } from './piazzamentoEsamiService.js';
-import { CHIAVI_PIAZZAMENTO_ESAME, giocaLaSceltaRomantica, nomePiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { CHIAVI_PIAZZAMENTO_ESAME, giocaLaSceltaRomantica, nomePiazzamentoEsame, RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
@@ -44,8 +44,8 @@ const schemaRicevutaLegacy = z.object({
     prima: z.number().int().nonnegative(), dopo: z.number().int().nonnegative(), doti: z.array(doteReceipt).optional(), visione: z.boolean().optional() }).passthrough()).optional(),
   turni: z.array(z.object({ attivita: chiaveReceipt, nome: z.string(), ordine: z.number().int().positive(), doti: z.array(doteReceipt) }).passthrough()).optional(),
   incontro: z.object({ id: z.number().int().positive().nullable(), marcato: z.number().int().positive().nullable(), confidente: chiaveReceipt,
-    nome: z.string(), verso: z.number().int().min(1).max(10), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt),
-    rango: z.object({ da: z.number().int().min(0).max(10), a: z.number().int().min(1).max(10), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
+    nome: z.string(), verso: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt),
+    rango: z.object({ da: z.number().int().min(0).max(RANGO_MASSIMO_CONFIDENTE), a: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
   // le aperture dei Dedali dichiarate nelle visite di prima della 305: si leggono ancora (la ricevuta resta valida), non si scrivono più
   apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
   // L13 (ondata 7, O7-2): i risultati di un esame segnati dalla spunta, con il piazzamento di prima e le Doti del premio
@@ -199,7 +199,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
     // solo quel Confidente, non tutti (rilievo P1' della verifica); un riferimento a un Confidente che non c'è non dà punti
     const c = prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? confidenteDellaPartita(partitaId, a.riferimento.chiave) : undefined;
-    if (c && c.rango > 0 && c.rango < 10) {
+    if (c && c.rango > 0 && c.rango < RANGO_MASSIMO_CONFIDENTE) {
       const prima = c.punti;
       // R10-11c: le note entrano nel registro cronologico (con i parametri del calcolo, per rifarlo in ordine); senza voce, come prima
       const agg = a.voceUid && a.momento

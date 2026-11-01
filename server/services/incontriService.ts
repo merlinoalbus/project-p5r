@@ -35,6 +35,7 @@ import { registraEvento } from './storicoService.js';
 import { ultimoAnnullabile } from './ultimoAnnullabileConfidente.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 interface RigaIncontro {
   id: number; partita_id: number; confidente_chiave: string; data: string; fascia: string; verso_rango: number; passaggio: number; origine: string; doti_json: string;
@@ -78,7 +79,7 @@ function nomeConfidente(confidente: string): string {
  */
 export function registraIncontro(partitaId: number, confidente: string, momento: MomentoIncontro, rangoAtteso: number | null, puntiPrima: number | null = null): IncontroConfidenteDto {
   const passaggio = rangoAtteso !== null;
-  const verso = passaggio ? Math.min(10, Math.max(1, rangoAtteso)) : Math.min(10, rangoAttuale(partitaId, confidente) + 1);
+  const verso = passaggio ? Math.min(RANGO_MASSIMO_CONFIDENTE, Math.max(1, rangoAtteso)) : Math.min(RANGO_MASSIMO_CONFIDENTE, rangoAttuale(partitaId, confidente) + 1);
   const base = { confidente, nome: nomeConfidente(confidente), verso, passaggio, doti: [] as IncontroConfidenteDto['doti'] };
   if (passaggio) {
     const gia = prepared('SELECT id FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango = ?').get(partitaId, confidente, verso) as { id: number } | undefined;

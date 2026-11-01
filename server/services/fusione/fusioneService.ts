@@ -44,11 +44,19 @@ export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti:
 
 // ---- Stanza di Velluto (Fase 4.2) ----
 
+/** Le Persona del Compendio che contano per il suo completamento (non DLC e non del gruppo) e quante la partita ne ha registrate (0 senza
+ *  partita). Una regola sola per lo sconto del Registro e per la sfida «Collezionista di maschere» del Covo (L8-03). */
+export function registrazioniCompendio(partitaId: number | undefined): { registrate: number; totale: number } {
+  const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0 AND del_party = 0').get() as { n: number }).n;
+  if (partitaId === undefined) return { registrate: 0, totale };
+  const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0 AND p.del_party = 0').get(partitaId) as { n: number }).n;
+  return { registrate, totale };
+}
+
 /** Percentuale di completamento del compendio personale (Persona non DLC registrate) e sconto del Registro. */
 export function scontoPartita(partitaId: number | undefined): { registrate: number; totale: number; percentuale: number; sconto: number } {
-  const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0 AND del_party = 0').get() as { n: number }).n;
+  const { registrate, totale } = registrazioniCompendio(partitaId);
   if (partitaId === undefined) return { registrate: 0, totale, percentuale: 0, sconto: 0 };
-  const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0 AND p.del_party = 0').get(partitaId) as { n: number }).n;
   const percentuale = totale > 0 ? Math.floor((registrate / totale) * 100) : 0;
   return { registrate, totale, percentuale, sconto: scontoRegistro(percentuale) };
 }

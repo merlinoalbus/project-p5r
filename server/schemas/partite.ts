@@ -9,6 +9,7 @@ import { bodyRegistraAcquisto } from './acquisti.js';
 import { bodyRegistraSessionePesca } from './pesca.js';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
@@ -67,7 +68,7 @@ export const bodyConfidente = z
   .object({
     forza: z.boolean().optional(),
     sbloccato: z.boolean().optional(),
-    rango: z.number().int().min(0).max(10).optional(),
+    rango: z.number().int().min(0).max(RANGO_MASSIMO_CONFIDENTE).optional(),
     punti: z.number().min(0).max(9999).optional(),
     deltaPunti: z.number().min(-9999).max(9999).optional(),
     noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
@@ -85,7 +86,7 @@ export const bodyConfidente = z
     message: 'Indicare una sola sorgente di punti fra note della risposta, regalo, uscita, deltaPunti e punti.',
   });
 
-export const bodyRequisito = z.object({ rango: z.number().min(1).max(10), indice: z.number().int().min(0).max(50), confermato: z.boolean() });
+export const bodyRequisito = z.object({ rango: z.number().min(1).max(RANGO_MASSIMO_CONFIDENTE), indice: z.number().int().min(0).max(50), confermato: z.boolean() });
 
 export const bodyCompendio = z.object({
   registrata: z.boolean(),

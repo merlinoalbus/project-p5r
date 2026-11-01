@@ -21,6 +21,8 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { CondizioniGuida, LivelloNellaPartita } from '../components/guida/CondizioniNellaPartita';
+import { useEsitiNellaPartita } from '../hooks/useEsitiNellaPartita';
 import { NegoziazionePerUmore } from '../components/guida/NegoziazionePerUmore';
 import { AvvisoTogliPersona, PiastrelleCattura } from '../components/guida/PiastrelleCattura';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
@@ -226,6 +228,9 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
 /** Tre sezioni della guida: la Staffetta con i ranghi e i bonus, gli Speciali con la tabella delle coppie e dello sblocco, e Rapina, Assalto e Parla con i comandi di battaglia. */
 function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
+  // L8-03 (migrazione 340): lo sblocco di ogni Speciale nella partita attiva, in una richiesta sola
+  const gruppi = useMemo(() => sp.elenco.map((e) => ({ chiave: e.nome, condizioni: e.condizioni ?? [] })), [sp.elenco]);
+  const esiti = useEsitiNellaPartita(gruppi);
   return (
     <div className="flex flex-col gap-3 testo-13">
       <SezioneConFregio chiave="battaglia-staffetta" disposizione="lato">
@@ -254,7 +259,12 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
         <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva testo-12">
             <thead><tr><th>Speciale</th><th>Coppia</th><th>Sblocco</th></tr></thead>
-            <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
+            {/* Lo sblocco è la frase delle condizioni (il testo della guida dove non ci sono); con una partita, ogni condizione ha il suo esito */}
+            <tbody>{sp.elenco.map((e) => {
+              const esito = esiti.get(e.nome);
+              return <tr key={e.nome}><td data-etichetta="Speciale"><div className="flex items-start gap-1"><strong className="min-w-0 flex-1">{e.nome}</strong><ModificaGuida tipo="speciale" chiave={e.nome} cosa={`lo sblocco dello Speciale «${e.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td>
+                <td data-etichetta="Sblocco">{esito && e.condizioni?.length ? <CondizioniGuida titolo="Nella partita" condizioni={e.condizioni} esito={esito} /> : (e.sbloccoFrase ?? e.sblocco)}</td></tr>;
+            })}</tbody>
           </table>
         </div>
         <Fonte allineato={false} url={sp.urlFonte} />
@@ -303,7 +313,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
         <Dati>
           <Voce titolo="Dove e quando">{m.dove}</Voce>
           <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
-          <Voce titolo="Livello consigliato">{m.livelloConsigliato}</Voce>
+          <Voce titolo="Livello consigliato"><span className="flex flex-col gap-0.5">{m.livelloConsigliato}<LivelloNellaPartita minimo={m.livelloMinimo} /></span></Voce>
           <Voce titolo="Abilità">{m.abilita.join('; ')}</Voce>
           <Voce titolo="Immunità">{m.immunita.join(', ')}</Voce>
           <Voce titolo="Debolezze">{m.debolezze && m.debolezze.length > 0 ? <span className="flex flex-wrap items-center gap-1.5">{m.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />)}</span> : 'nessuna'}</Voce>

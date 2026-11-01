@@ -32,6 +32,7 @@ import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Se
 import { IconaAzione } from '../shared/IconaAzione';
 import { SelettoreData } from '../shared/SelettoreData';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 /** La condizione con cui nasce una riga nuova: valida, e la più comune. */
 const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
@@ -135,7 +136,7 @@ function Campo({ campo, valori, onCambia, elenchi, disabilitato }: { campo: Camp
       );
     }
     case 'rango5': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={5} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
-    case 'rango10': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={10} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
+    case 'rango10': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={RANGO_MASSIMO_CONFIDENTE} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'volte': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'relazioni': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 0} min={0} max={9} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;
     case 'almeno': return <Contatore etichetta={campo.etichetta} valore={typeof v === 'number' ? v : 1} min={1} max={9999} onCambia={(x) => onCambia(campo.nome, x)} disabilitato={disabilitato} />;

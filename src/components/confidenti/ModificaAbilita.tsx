@@ -18,13 +18,14 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 type Voce = { nome: string; descrizione: string };
-const RANGHI = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
-const etichettaRango = (r: number): string => (r === 10 ? 'MAX' : String(r));
+const RANGHI: readonly number[] = Array.from({ length: RANGO_MASSIMO_CONFIDENTE }, (_, i) => i + 1);
+const etichettaRango = (r: number): string => (r === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : String(r));
 const uguali = (a: Voce[], b: Voce[]): boolean => JSON.stringify(a) === JSON.stringify(b);
 
 /** La matita «Modifica» delle abilità del Confidente; alla chiusura con qualcosa di cambiato la scheda si rilegge (`onSalvato`). */

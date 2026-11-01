@@ -25,6 +25,7 @@ import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { FORCA_INCIDENTE_BONUS, INCENSI, INCENSI_DEL_CATALOGO, bonusLivelliFusione, guadagnoIncenso, moltiplicatoreForca, puntiAllarmeFusione, tierResistenza } from '../../shared/bonusVelluto.js';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, IncensoIsolamentoDto, PersonaPossedutaDto, SkillRiassuntoDto } from '../../shared/types.js';
 
 interface RigaScorta { id: number; persona_id: number; livello: number; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
@@ -190,7 +191,7 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
   const ric = possedutaOErrore(partitaId, dati.riceventeId);
   const sac = possedutaOErrore(partitaId, dati.sacrificioId);
   const rango = rangoArcana(partitaId, ric.arcana);
-  const igorMax = rangoArcana(partitaId, 'Fool') >= 10;
+  const igorMax = rangoArcana(partitaId, 'Fool') >= RANGO_MASSIMO_CONFIDENTE;
   const esito = moltiplicatoreForca({ rangoConfidente: rango, igorMax, stessaArcana: sac.arcana === ric.arcana, tesoro: sac.rara === 1, allarme: info.allarme, penalitaLivello: sac.livello > ric.livello });
   const cariche = (sac.carica === 1 ? 1 : 0) + (ric.carica === 1 ? 1 : 0);
   const puntiGarantiti = cariche >= 2 ? FORCA_INCIDENTE_BONUS.entrambeCariche : cariche === 1 ? FORCA_INCIDENTE_BONUS.unaPersonaCarica : FORCA_INCIDENTE_BONUS.sacrificioNormale;

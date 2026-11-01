@@ -14,6 +14,7 @@ import { useDettaglioConfidente } from './useDettaglioConfidente';
 import { SegnoStato } from '../shared/SegnoStato';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
 import { fraIGraditi, testoReazione } from '../../../shared/regali';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 /** Quanti regali mostrare in breve prima del «+ altri». */
 const REGALI_VISIBILI = 4;
@@ -28,7 +29,7 @@ function spuntaPerNome(c: ConfidentePartitaDto, g: RegaloConfidenteDto): boolean
 export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; onApriScheda: () => void }) {
   const { dati } = useDettaglioConfidente(c.chiave);
   if (!dati) return null;
-  const abilita = c.rango < 10 ? dati.abilita.filter((a) => a.rango === c.rango + 1) : [];
+  const abilita = c.rango < RANGO_MASSIMO_CONFIDENTE ? dati.abilita.filter((a) => a.rango === c.rango + 1) : [];
   // revisione dei lotti D e D2: le righe a +1 valgono quanto ogni altro regalo e non sono «graditi» (stesso criterio della scheda del Confidente)
   // in coda va solo la spunta per nome già segnata: un oggetto del catalogo già dato si può ridare e resta al suo posto
   const ordinati = dati.regali.filter(fraIGraditi).sort((a, b) => Number(spuntaPerNome(c, a)) - Number(spuntaPerNome(c, b)));

@@ -18,7 +18,7 @@ import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { eRomanzabile } from './relazioneRomanticaService.js';
 import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
-import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
+import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
 import { casaOmbra } from '../../shared/ombre.js';
 import { sqlStatoCattura } from './catturePersona.js';
@@ -26,7 +26,8 @@ import { trattoDellaGuida } from './trattiGuida.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
-import { fraseDellaRegola } from './condizioni/fraseCondizioni.js';
+import { condizioniDellaGuida, fraseDellaRegola } from './condizioni/fraseCondizioni.js';
+import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, StatoCattura, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -74,6 +75,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
     return { articolo, posto: articolo ? postoDellArticolo(articolo) : null, negozi, postiNegozi };
   };
   const prodotti = ricompensePerFonte('ricetta'); const materiali = materialiDelleRicette();
+  const nomi = nomiCondizioniMemo();
   // Ondata 5, lotto F (migrazione 279): l'effetto di una ricetta è quello del suo prodotto, nel catalogo
   const effettiProdotti = effettiDegliOggetti([...prodotti.values()].flat().map((p) => p.chiave));
   return { ...dati,
@@ -91,12 +93,36 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
     }),
     fabbricazione: { ...dati.fabbricazione, ricette: dati.fabbricazione.ricette.map((r) => ({ ...r,
       effetto: effettoDellaFonte(r.effetto, prodotti.get(r.attrezzo) ?? [], effettiProdotti),
-      prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [] })) },
+      prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [],
+      // L8-03 (migrazione 340): quando si può fabbricare, con la frase; il testo «sblocco» della guida resta
+      condizioni: condizioniDellaGuida(r.condizioniJson, nomi) })) },
+    personalizzazioneArmi: { ...dati.personalizzazioneArmi, confidente: confidenteDellePersonalizzazioni(dati.personalizzazioneArmi.progressioneConfidente, nomi) },
     abiti: { ...dati.abiti, elenco: dati.abiti.elenco.flatMap((v) => {
       const o = catalogo.get(fonteNodoGuida('abiti', v)); if (!o || o.nascosto) return [];
       return [{ ...v, ...identita(o), per: typeof o.statistiche?.per === 'string' ? o.statistiche.per : '' }];
     }) },
   };
+}
+
+/** Il Confidente della personalizzazione delle armi: il proprietario del negozio Untouchable (dove la guida colloca il servizio). */
+const CONFIDENTE_ARMI = 'iwai';
+
+/**
+ * L8-03: il Confidente della personalizzazione delle armi, letto dal DB e non dal testo: le condizioni per avviarlo (`confidente_requisito`,
+ * rango 1, il punto unico dei requisiti dei Confidenti) e, per ogni rango della progressione della guida, la condizione «rango N», per lo stato
+ * nella partita. Null se il Confidente non c'è in questa istanza.
+ */
+function confidenteDellePersonalizzazioni(progressione: readonly unknown[], nomi: ReturnType<typeof nomiCondizioniMemo>): NonNullable<OggettiGuidaDto['personalizzazioneArmi']['confidente']> | null {
+  const nome = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck().get(CONFIDENTE_ARMI) as string | undefined;
+  if (!nome) return null;
+  const avvio = (prepared('SELECT tipo, dati_json, testo FROM confidente_requisito WHERE confidente_chiave = ? AND rango = 1 ORDER BY indice').all(CONFIDENTE_ARMI) as Array<Pick<RigaRequisito, 'tipo' | 'dati_json' | 'testo'>>)
+    .flatMap((r) => { const c = condizioneDelRequisito(r); return c ? [condizioneConTesto(c, nomi)] : []; });
+  const ranghi = progressione.flatMap((x) => {
+    const rango = x !== null && typeof x === 'object' ? (x as { rango?: unknown }).rango : undefined;
+    return typeof rango === 'number' && Number.isInteger(rango) && rango >= 1 && rango <= RANGO_MASSIMO_CONFIDENTE
+      ? [{ rango, condizione: condizioneConTesto({ tipo: 'confidente', confidente: CONFIDENTE_ARMI, rango }, nomi) }] : [];
+  });
+  return { chiave: CONFIDENTE_ARMI, nome, avvio, ranghi };
 }
 
 interface RigaPersona {

@@ -16,6 +16,7 @@ import { useMemo, type ComponentProps } from 'react';
 import type { PersonaRiassuntoDto } from '../../types';
 import { Selettore } from './Selettore';
 import { SceltaCatalogoOggetto } from '../catalogo/SceltaCatalogoOggetto';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 interface ComuniScelta {
   etichetta?: string;
@@ -64,7 +65,7 @@ function ScelteDellaPersona({ etichetta = 'Persona del compendio', valore, perso
 }
 
 /** Il Confidente per nome (con l'arcano in grigio) e, se richiesto, il suo rango. */
-function ScelteDelConfidente({ etichetta = 'Confidente', valore, confidenti, rango, rangoMassimo = 10, onCambia, vuoto = '— nessuno —', disabilitato, inLinea }: PropsConfidente) {
+function ScelteDelConfidente({ etichetta = 'Confidente', valore, confidenti, rango, rangoMassimo = RANGO_MASSIMO_CONFIDENTE, onCambia, vuoto = '— nessuno —', disabilitato, inLinea }: PropsConfidente) {
   const conRango = rango !== undefined;
   const ranghi = useMemo(() => Array.from({ length: rangoMassimo }, (_, i) => ({ chiave: String(i + 1), nome: String(i + 1) })), [rangoMassimo]);
   const confidente = (

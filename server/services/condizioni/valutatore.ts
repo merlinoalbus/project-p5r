@@ -298,6 +298,9 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     case 'salvataggio-p5': return st.contenutiPartita?.salvataggioP5
       ? esito('salvataggio-p5', 'verde', 'Salvataggio di Persona 5 presente')
       : esito('salvataggio-p5', 'rosso', 'Salvataggio di Persona 5 non segnato (Partita → Modifica)');
+    case 'nuova-partita-plus': return st.contenutiPartita?.nuovaPartitaPlus
+      ? esito('nuova-partita-plus', 'verde', 'Nuova Partita+')
+      : esito('nuova-partita-plus', 'rosso', 'Non è una Nuova Partita+ (Partita → Modifica)');
     case 'dlc-posseduto': {
       // il set deve esistere (altrimenti grigio, da correggere); il nome è quello delle sue Persona
       const nome = nomi().setDlc?.[String(r.set)];

@@ -18,6 +18,7 @@ import { useDettaglioConfidente } from './useDettaglioConfidente';
 import { Spinner } from '../shared/PageState';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 interface Props {
   chiave: string;
@@ -35,7 +36,7 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
   const [scelte, setScelte] = useState<Record<number, boolean>>({});
   const [tutte, setTutte] = useState(false);
   const arrivo = rangoEvento;
-  const oltre = arrivo > 10;
+  const oltre = arrivo > RANGO_MASSIMO_CONFIDENTE;
   const dialoghi = dati?.dialoghi ?? [];
   const prossimi = !oltre ? dialoghi.filter((d) => d.rango === arrivo) : [];
   const altri = dialoghi.filter((d) => !prossimi.includes(d));

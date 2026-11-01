@@ -20,7 +20,7 @@
 // Due difese contro la deriva, entrambe all'avvio (`createApp` le chiama: una voce che non va fa fallire l'avvio, non un 404 a caso
 // in esercizio): (1) ogni voce dell'elenco deve corrispondere a una rotta davvero montata (un percorso rinominato o tolto non lascia
 // una voce morta che pare protegga qualcosa); (2) le sole scritture ammesse sono quelle dell'avanzamento (`/api/partite`,
-// `/api/condizioni/partite/…`, `/api/condizioni/valuta`): un refuso in questo file non può aprire la scrittura dei contenuti.
+// `/api/condizioni/partite/…`, `/api/condizioni/valuta`, `/api/condizioni/valuta-gruppi`): un refuso in questo file non può aprire la scrittura dei contenuti.
 // ============================================================
 
 import { Router, type RequestHandler } from 'express';
@@ -117,6 +117,8 @@ export const ROTTE_DEL_GIOCATORE: readonly string[] = [
 
   // ---- condizioni: la valutazione e il tracciamento dell'avanzamento (le scritture finiscono in `utente`) ----
   'POST /api/condizioni/valuta',
+  // L8-03: la stessa valutazione per più gruppi (lo stato nella partita delle pagine della guida)
+  'POST /api/condizioni/valuta-gruppi',
   'GET /api/condizioni/partite/:partita/progressi',
   'PUT /api/condizioni/partite/:partita/eventi/:chiave',
   'PUT /api/condizioni/partite/:partita/attivita/:chiave',
@@ -131,7 +133,7 @@ function eDellaPartita(percorso: string): boolean {
 }
 
 /** Le sole scritture che l'istanza di rilascio può avere: l'avanzamento della partita (e la valutazione, che è un POST di lettura). */
-const SCRITTURE_AMMESSE = /^\/api\/(partite(\/|$)|condizioni\/(valuta$|partite\/))/;
+const SCRITTURE_AMMESSE = /^\/api\/(partite(\/|$)|condizioni\/(valuta$|valuta-gruppi$|partite\/))/;
 
 /** Vero se la rotta (metodo minuscolo, percorso completo con il prefisso) è fra quelle del giocatore. */
 export function eRottaDelGiocatore(metodo: string, percorso: string): boolean {

@@ -2,6 +2,8 @@ import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { SfideDto } from '../../shared/types.js';
+import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { condizioniDellaGuida } from './condizioni/fraseCondizioni.js';
 
 /** La guida resta congelata; i riferimenti sono letti in blocco, senza interpretare ricompense o punteggi. */
 export function sfide(): Congelato<SfideDto> {
@@ -9,8 +11,10 @@ export function sfide(): Congelato<SfideDto> {
   if (!guida) throw httpErrors.notFound('sfide-non-disponibili', 'I dati delle sfide non sono caricati.');
   const chiavi = [...guida.battaglieSfida.elenco, ...guida.bossSegreti].map((r) => r.chiave);
   const premi = ricompensePerFonte('sfida', chiavi);
+  const nomi = nomiCondizioniMemo();
   return { ...guida,
     battaglieSfida: { ...guida.battaglieSfida, elenco: guida.battaglieSfida.elenco.map((r) => ({ ...r, oggettiRicompensa: premi.get(r.chiave) ?? [] })) },
-    bossSegreti: guida.bossSegreti.map((r) => ({ ...r, oggettiRicompensa: premi.get(r.chiave) ?? [] })),
+    // L8-03 (migrazione 340): i requisiti che la partita sa valutare, con la loro frase; i testi dei requisiti restano
+    bossSegreti: guida.bossSegreti.map((r) => ({ ...r, condizioni: condizioniDellaGuida(r.condizioniJson, nomi), oggettiRicompensa: premi.get(r.chiave) ?? [] })),
   };
 }

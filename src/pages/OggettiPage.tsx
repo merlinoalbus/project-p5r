@@ -20,6 +20,9 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { IconaScheda, IconaAzione } from '../components/shared/IconaAzione';
 import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { CondizioniGuida } from '../components/guida/CondizioniNellaPartita';
+import { useEsitiNellaPartita } from '../hooks/useEsitiNellaPartita';
+import { SegnoStato } from '../components/shared/SegnoStato';
 import { CatalogoOggetti } from '../components/catalogo/CatalogoOggetti';
 import type { GruppoOggetto } from '../../shared/catalogo';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -47,6 +50,9 @@ function Secondaria({ v }: { v: boolean }) {
 /** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */
 function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const f = d.fabbricazione;
+  // L8-03 (migrazione 340): quando si può fabbricare, nella partita attiva (le ricette con condizioni)
+  const gruppi = useMemo(() => f.ricette.map((r) => ({ chiave: r.attrezzo, condizioni: r.condizioni ?? [] })), [f.ricette]);
+  const esiti = useEsitiNellaPartita(gruppi);
   return (
     <div className="flex flex-col gap-2 testo-13">
       <section className="card prosa-misurata-figli flex flex-col gap-1">
@@ -69,7 +75,9 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
             <td data-etichetta="Materiali">{!!r.materialiCatalogo?.length && <OggettiCollegati oggetti={r.materialiCatalogo} />}
               {r.materialiCatalogo?.length ? <details><summary className="touch">Materiali indicati dalla guida</summary><span>{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</span></details>
                 : r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}
-            </td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td>
+            </td><td data-etichetta="Sblocco"><span className="flex flex-col gap-1">{r.sblocco ?? '—'}
+              {/* solo con la partita: senza, la frase delle condizioni ripeterebbe il testo della guida (come per boss e finali) */}
+              {esiti.has(r.attrezzo) && <CondizioniGuida titolo="Nella partita" condizioni={r.condizioni ?? []} esito={esiti.get(r.attrezzo)} />}</span></td>
           </tr>)}</tbody>
         </table>
       </div>
@@ -80,6 +88,10 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
 /** La personalizzazione delle armi da Iwai: introduzione, requisiti, costi e note, la tabella delle modifiche e la progressione col Confidente, le cui voci possono essere testi o oggetti resi come «chiave: valore». */
 function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const p = d.personalizzazioneArmi;
+  // L8-03: le condizioni d'avvio del Confidente (dai suoi requisiti di rango 1) e ogni rango della progressione, nella partita attiva
+  const gruppi = useMemo(() => p.confidente ? [{ chiave: 'avvio', condizioni: p.confidente.avvio }, ...p.confidente.ranghi.map((r) => ({ chiave: `rango-${r.rango}`, condizioni: [r.condizione] }))] : [], [p.confidente]);
+  const esiti = useEsitiNellaPartita(gruppi);
+  const rangoRaggiunto = (rango: unknown) => (typeof rango === 'number' ? esiti.get(`rango-${rango}`)?.complessivo.esito : undefined);
   return (
     <div className="flex flex-col gap-2 testo-13">
       <section className="card prosa-misurata-figli flex flex-col gap-1">
@@ -88,6 +100,8 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
           <ModificaGuida tipo="armi" chiave="armi" cosa="l’introduzione e i requisiti della personalizzazione delle armi" soloIcona onSalvato={onModificato} />
         </div>
         {p.requisiti && <VoceTesto titolo="Requisiti">{p.requisiti}</VoceTesto>}
+        {/* I requisiti per avviare il Confidente vengono dai suoi requisiti di rango (il loro punto unico), con lo stato nella partita */}
+        {p.confidente && esiti.has('avvio') && <CondizioniGuida titolo={`Nella partita: per avviare ${p.confidente.nome}`} condizioni={p.confidente.avvio} esito={esiti.get('avvio')} />}
         {p.costi && <VoceTesto titolo="Costi">{p.costi}</VoceTesto>}
         {p.note && <p className="m-0 text-text-muted">{p.note}</p>}
         <Fonte url={p.fonte} />
@@ -103,7 +117,10 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
       {p.progressioneConfidente.length > 0 && (
         <section className="card prosa-misurata-figli flex flex-col gap-1">
           <h2 className="m-0 testo-15 font-semibold">Progressione con il Confidente (Iwai)</h2>
-          <ul className="m-0 pl-4">{p.progressioneConfidente.map((x) => <li key={typeof x === 'string' ? x : JSON.stringify(x)}>{typeof x === 'string' ? x : Object.entries(x as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`).join(' · ')}
+          <ul className="m-0 pl-4">{p.progressioneConfidente.map((x) => <li key={typeof x === 'string' ? x : JSON.stringify(x)}>
+            {/* con una partita, la spunta dice se il rango è raggiunto (lo stesso esito del valutatore) */}
+            {typeof x === 'object' && x !== null && rangoRaggiunto((x as { rango?: unknown }).rango) === 'vero' && <SegnoStato stato="fatto" dimensione={14} testo="Rango raggiunto nella partita" className="mr-1 align-text-bottom" />}
+            {typeof x === 'string' ? x : Object.entries(x as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`).join(' · ')}
             {typeof x === 'object' && x !== null && 'rango' in x && <ModificaGuida tipo="arma-progressione" chiave={String((x as { rango: unknown }).rango)} cosa={`il rango ${String((x as { rango: unknown }).rango)} della progressione`} soloIcona onSalvato={onModificato} />}</li>)}</ul>
         </section>
       )}

@@ -34,6 +34,7 @@ import { NOME_QUALE } from '../../utils/elencoQuale';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { NOME_FAMIGLIA_EFFETTO, cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, effettoCompilatoCheSiPerde, fraseEffetto, indiceDelCollegamento, nomiEffettiDa, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 import { conferma } from '../../stores/confermaStore';
+import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
 
 interface Props {
   valore: CampiStrutturati;
@@ -41,10 +42,11 @@ interface Props {
   elenchi: ElenchiVoce;
 }
 
-/** Il rango atteso: Nessuno, 1…9 e MAX (il rango 10), con le cifre del rango (`ui/rango-N`) quando ci sono. */
-const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: 10 }, (_, i) => {
+/** Il rango atteso: Nessuno, 1…9 e MAX (il rango massimo, `RANGO_MASSIMO_CONFIDENTE`), con le cifre del rango (`ui/rango-N`) quando ci sono. */
+const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: RANGO_MASSIMO_CONFIDENTE }, (_, i) => {
   const n = i + 1;
-  return { chiave: String(n), nome: n === 10 ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={n === 10 ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{n === 10 ? 'MAX' : n}</span>} /> };
+  const massimo = n === RANGO_MASSIMO_CONFIDENTE;
+  return { chiave: String(n), nome: massimo ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={massimo ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{massimo ? 'MAX' : n}</span>} /> };
 })];
 
 /** Anteprima, mentre si scrive la voce, delle risposte migliori dell'evento del rango atteso: le stesse compariranno fra le note della
@@ -161,7 +163,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta }: Pro
           {frase(`Incontro con ${nome} (la Dote dell’incontro, se c’è) e le note della risposta che scegli alla spunta.`)}
           <span className="testo-13 text-text-secondary">Rango atteso</span>
           <FilaScelta etichetta="Rango atteso" valore={rango === null ? '' : String(rango)} opzioni={RANGHI} onCambia={(v) => onCambia({ ...valore, rangoAtteso: v ? Number(v) : null })} />
-          {rango !== null && frase(rango === 10 ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
+          {rango !== null && frase(rango === RANGO_MASSIMO_CONFIDENTE ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
           {rango !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rango} />}
         </>
       ) : frase('Scegli il Confidente in «Quale»: alla spunta si registra l’incontro e si scelgono le note.');

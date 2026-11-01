@@ -39,7 +39,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { confidentiRomanzabili } from '../services/relazioneRomanticaService.js';
 import { setDlcConPersone } from '../services/setDlcService.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, RispostaValutaGruppiDto, VoceCitabileDto } from '../../shared/types.js';
 
 const router = Router();
 const idPartita = idParam;
@@ -186,6 +186,31 @@ router.post('/valuta', validate({ body: z.object({ condizioni: z.array(condizion
     complessivo: condizioni.length ? valutazione(insieme, st, nomi) : { esito: 'vero', testo: 'Nessuna condizione' },
     condizioni: condizioni.map((c) => valutazione(c, st, nomi)),
   };
+  res.json(risposta);
+});
+
+/**
+ * L8-03: lo stesso esito di `/valuta` per più gruppi di condizioni in una richiesta sola (le pagine della guida: gli sblocchi degli Speciali,
+ * i requisiti dei boss segreti e dei finali, le ricette, i ranghi di Iwai). Lo stato della partita si legge una volta; ogni gruppo è
+ * valutato da sé, con l'esito dell'insieme e quello di ogni condizione. L'interfaccia mostra questi esiti e non rivaluta.
+ */
+router.post('/valuta-gruppi', validate({ body: z.object({
+  partita: idPartita,
+  // una chiave ripetuta renderebbe ambigua la risposta (gli esiti sono per chiave): si rifiuta con 400 `validation-error`
+  gruppi: z.array(z.object({ chiave: z.string().min(1).max(200), condizioni: z.array(condizioneSpillo).max(20) })).max(200)
+    .refine((g) => new Set(g.map((x) => x.chiave)).size === g.length, 'Ogni gruppo deve avere una chiave diversa.'),
+}) }), (req, res) => {
+  const { partita, gruppi } = req.body as { partita: number; gruppi: Array<{ chiave: string; condizioni: RequisitoSpillo[] }> };
+  verificaPartita(partita);
+  const st = statoDisponibilitaPartita(partita);
+  const nomi = nomiCondizioni({ conPin: true });
+  const risposta: RispostaValutaGruppiDto = { gruppi: Object.fromEntries(gruppi.map((g) => {
+    const insieme: RequisitoSpillo = g.condizioni.length === 1 ? g.condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni: g.condizioni };
+    return [g.chiave, {
+      complessivo: g.condizioni.length ? valutazione(insieme, st, nomi) : { esito: 'vero', testo: 'Nessuna condizione' },
+      condizioni: g.condizioni.map((c) => valutazione(c, st, nomi)),
+    } satisfies RispostaValutaCondizioniDto];
+  })) };
   res.json(risposta);
 });
 
