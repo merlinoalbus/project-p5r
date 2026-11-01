@@ -8,6 +8,7 @@ import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { PersonaRiassuntoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useFreccePerElenco } from '../../hooks/useFreccePerElenco';
 
 interface Props {
   etichetta: string;
@@ -23,6 +24,7 @@ interface Props {
 /** Campo di ricerca con elenco a discesa; la Persona scelta è mostrata con immagine, arcano e livello. */
 export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRare, inScorta }: Props) {
   const [q, setQ] = useState('');
+  const { rif, suTasto } = useFreccePerElenco();
   const candidate = useMemo(() => {
     const testo = q.trim().toLowerCase();
     if (!testo) return [];
@@ -47,14 +49,14 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
   }
 
   return (
-    <div className="card flex flex-col gap-2 relative">
+    <div ref={rif} onKeyDown={suTasto} className="card flex flex-col gap-2 relative">
       <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta}</span>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o arcano…" />
       {candidate.length > 0 && (
-        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] area-scorrevole" role="listbox" aria-label={`Risultati per ${etichetta}`}>
+        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] area-scorrevole" aria-label={`Risultati per ${etichetta}`}>
           {candidate.map((p) => (
-            <li key={p.id} role="option" aria-selected={false}>
-              <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onScegli(p); setQ(''); }}>
+            <li key={p.id}>
+              <button type="button" data-voce-elenco className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onScegli(p); setQ(''); }}>
                 <span className="w-9 text-right testo-12 text-text-muted">Liv. {p.livello}</span>
                 <span className="font-semibold flex-1 truncate">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</span>
                 <span className="chip">{p.arcanaNome}</span>

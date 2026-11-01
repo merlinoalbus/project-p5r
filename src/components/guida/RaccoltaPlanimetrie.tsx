@@ -14,6 +14,7 @@ import { impostaSpilloRaccolto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { parolaDelloStato } from '../../../shared/spilli';
 import type { SpilloRaccoltaDto } from '../../types';
+import { SegnoStato } from '../shared/SegnoStato';
 
 export interface PlanimetriaRaccolta { chiave: string; nome: string; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }
 
@@ -88,8 +89,10 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
                     // la parola del tipo: «aperto» per i forzieri, «rubato» per il Tesoro, «sconfitto» per i boss, «raccolto» per semi e oggetti… (scelta dell'utente, 2026-10-03)
                     const parola = parolaDelloStato({ tipo: s.tipo, collezionabile: true }); return (
                     <li key={s.id} className="flex items-center gap-2 testo-12">
+                      {/* D15: raccolto = spunta rossa a sinistra e nome barrato in grigio; la riga non raccolta lascia lo spazio del segno solo se i raccolti sono visibili (la parola dello stato sta nella casella accanto) */}
+                      <SegnoStato stato={s.raccolto ? 'fatto' : null} dimensione={14} riserva={mostraRaccolti} />
                       <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.colore }} aria-hidden="true" />
-                      <span className={`min-w-0 flex-1 ${s.raccolto ? 'line-through text-text-muted' : ''}`}>{s.nome}{omonimi ? ` ${numero}` : ''}</span>
+                      <span className={`min-w-0 flex-1 ${s.raccolto ? 'stato-fatto' : ''}`}>{s.nome}{omonimi ? ` ${numero}` : ''}</span>
                       {partitaId
                         ? <label className="touch flex items-center gap-1.5 testo-12"><input type="checkbox" className="h-5 w-5" checked={s.raccolto === true} disabled={!!occupati[s.id]} onChange={(e) => void cambia(s, e.target.checked)} aria-label={`${s.nome} ${numero} di ${nomeBreve(p.nome)} ${parola}`} />{parola.charAt(0).toUpperCase() + parola.slice(1)}</label>
                         : null}

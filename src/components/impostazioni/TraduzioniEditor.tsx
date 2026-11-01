@@ -142,7 +142,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
               <div className="testo-12 text-text-muted break-words">{t.chiave}</div>
               {inModifica?.chiave === t.chiave ? (
                 <div className="flex gap-2 items-start">
-                  <textarea className="form-input min-h-[44px]" value={testo} onChange={(e) => setTesto(e.target.value)} autoFocus />
+                  <textarea className="form-input min-h-[44px]" aria-label={`Resa italiana di ${t.chiave}`} value={testo} onChange={(e) => setTesto(e.target.value)} autoFocus />
                   <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={!testo.trim()} onClick={() => void applica(t, testo.trim())} />
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setInModifica(null)} />
                 </div>

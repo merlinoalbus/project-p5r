@@ -86,7 +86,7 @@ function ModificaAffinitaReale({ personaId, nome, affinita, affinitaGuida, onCam
     {aperta && (
       <Modal titolo={`Affinità di ${nome}`} aperta onChiudi={chiudi} larga
         azioni={<>
-          <button type="button" className="btn btn-secondary" disabled={occupato} onClick={chiudi}>Annulla</button>
+          <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>
           {affinitaGuida && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" disabled={occupato} onClick={() => setConferma(true)} />}
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || cambiati.length === 0} onClick={() => void salva()} />
         </>}>

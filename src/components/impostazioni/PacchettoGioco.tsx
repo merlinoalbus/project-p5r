@@ -355,7 +355,7 @@ export function PacchettoGioco() {
         larga
         azioni={
           <>
-            <button type="button" className="btn btn-secondary" onClick={chiudiAnteprima}>Annulla</button>
+            <button type="button" className="btn btn-secondary touch" onClick={chiudiAnteprima}>Annulla</button>
             <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Sostituisci i dati di gioco" disabled={occupato || !anteprima?.importabile} onClick={() => void importa()} />
           </>
         }

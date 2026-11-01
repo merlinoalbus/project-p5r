@@ -83,6 +83,7 @@ import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
 import { Modal } from '../components/shared/Modal';
 import { NEL_CESTINO } from '../utils/cestino';
+import { comportamentoScorrimento } from '../utils/movimento';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -553,7 +554,7 @@ export function DungeonDettaglioPage() {
   /** Se un'area va evidenziata come suggerita: no quando lo sono tutte, perché allora il suggerimento riguarda il Palazzo intero e lo dice il chip dell'intestazione. */
   const areaSuggerita = (chiaveArea: string) => !suggerimentoDiffuso && sugg.evidenziato('aree', chiaveArea);
   /** Apre la sezione «Da verificare» (in fondo a «Da raccogliere») e la porta in vista. */
-  const apriDaVerificare = () => { const s = sezioneDaVerificare.current; if (s) { s.open = true; s.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } };
+  const apriDaVerificare = () => { const s = sezioneDaVerificare.current; if (s) { s.open = true; s.scrollIntoView?.({ block: 'nearest', behavior: comportamentoScorrimento() }); } };
   /** R3-41, da 1024 px: il chip che riassume livello («Concluso», «Completato» o «In corso»), Tesoro e boss (✓/✗) e «N da verificare».
    *  Con divergenze è un pulsante che apre la loro sezione; il dettaglio di Tesoro e boss sta nei «Dettagli dalla guida». */
   const chipRiassunto = () => {

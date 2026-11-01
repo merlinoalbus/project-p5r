@@ -15,6 +15,7 @@ import { AvvisoTogliPersona, PiastrelleCattura } from '../guida/PiastrelleCattur
 import { NOME_PERSONALITA } from '../../../shared/elementi';
 import type { OmbraLuogoDto } from '../../../shared/ombre';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { SegnoStato } from '../shared/SegnoStato';
 
 interface Props {
   persona: { id: number; nome: string; nomeIt: string };
@@ -59,7 +60,7 @@ export function DoveSiIncontra({ persona, partitaId }: Props) {
                 ? <span className="testo-12 text-text-muted">La guida non dice dove si incontra.</span>
                 : o.luoghi.map((l) => (
                   <span key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} className="flex flex-wrap items-center gap-x-2">
-                    <Link to={l.casa} className={`touch inline-flex min-h-11 items-center testo-12 ${l.raggiungibile === false ? 'opacity-60' : ''}`}>{percorso(l)}</Link>
+                    <Link to={l.casa} className={`touch inline-flex min-h-11 items-center gap-1.5 testo-12 ${l.raggiungibile === false ? 'stato-esaurito' : ''}`}>{/* D15: Palazzo concluso = cerchio barrato a sinistra e percorso barrato in grigio (lo dice il cartellino accanto) */}<SegnoStato stato={l.raggiungibile === false ? 'esaurito' : null} dimensione={14} />{percorso(l)}</Link>
                     {l.raggiungibile === false && <span className="chip testo-12" title={l.motivoNonRaggiungibile}>Non più raggiungibile: il Palazzo è sparito</span>}
                   </span>
                 ))}

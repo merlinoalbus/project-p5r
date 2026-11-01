@@ -117,7 +117,7 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
             <input className="form-input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
           </label>
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
+            <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
             <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="esegui" dimensione={22} />} titolo={<>Esegui: rimuovi gli ingredienti e aggiungi {a.risultato.nomeIt}</>} type="submit" disabled={occupato} />
           </div>
         </form>

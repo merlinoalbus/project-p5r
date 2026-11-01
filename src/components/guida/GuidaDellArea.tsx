@@ -19,6 +19,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto, spostaPunto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
+import { comportamentoScorrimento } from '../../utils/movimento';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { puntoDaCollegare, puntoEnigma } from '../../../shared/spilli';
 import { quanteSegnate, segnataInVista, voceDescrittiva } from '../../utils/vociDellaGuida';
@@ -33,6 +34,7 @@ import { AFFINITA_DELLA_PERSONA, dettagliDaRighe, etichetteRipetute, righeDaDett
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { PersoneDelPalazzo } from './PersoneDelPalazzo';
 import { NEL_CESTINO } from '../../utils/cestino';
@@ -225,7 +227,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     const voce = [...document.querySelectorAll<HTMLElement>('[data-voce]')].find((e) => e.dataset.voce === chiave);
     if (!voce) return;
     daMostrare.current = null;
-    voce.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    voce.scrollIntoView?.({ block: 'nearest', behavior: comportamentoScorrimento() });
   });
   /**
    * «Ottenuto» o «Esaurito» (richiesta dell'utente, 2026-10-04: «quando clicco su Ottenuto deve chiudersi l'elemento corrente e
@@ -347,6 +349,8 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     const racconto = p.carattere === 'descrittiva' && !voceDescrittiva(p);
     // «esaurito» non sta nel testo: ha il suo chip (§4.1, R4-34)
     const statoTesto = p.stato && p.stato !== 'esaurito' ? (racconto ? 'letto' : p.stato) : null;
+    // D15: segnata e chiusa, la riga ha il segno a sinistra e il nome barrato in grigio (spunta rossa «ottenuto», cerchio barrato «esaurito»)
+    const chiuso = p.stato && !aperto ? (p.stato === 'esaurito' ? 'esaurito' : 'fatto') : null;
     // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
     const carattereScelto = p.carattereScelto && p.carattere ? p.carattere : '';
     // L3 RG-4: la planimetria si sceglie a mano per una voce di Palazzo senza pin (con i pin sta dove stanno i pin); non per un Enigma coi
@@ -357,13 +361,14 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     const ancheIn = p.oggetto ? [...(areePalazzo ?? [])].filter((a) => a.chiave !== area.chiave && a.punti?.some((x) => x.oggetto === p.oggetto)).sort((x, y) => x.ordine - y.ordine) : [];
     return (
       <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 testo-13 ${aperto ? 'bg-primary-bg' : ''}`}>
-        {/* segnata e chiusa, la riga si attenua: «esaurito» più di «ottenuto» (§4.1, R4-34: si distinguono a colpo d'occhio) */}
-        <button type="button" className={`touch flex flex-wrap items-start gap-2 text-left ${p.stato && !aperto ? (p.stato === 'esaurito' ? 'opacity-40' : 'opacity-60') : ''}`} onClick={() => { apri(aperto ? null : p.chiave, pl); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
+        {/* segnata e chiusa, la riga ha il segno (spunta rossa o cerchio barrato) e il nome barrato: «esaurito» e «ottenuto» si distinguono a colpo d'occhio (§4.1, R4-34); lo spazio del segno c'è in ogni riga, per l'allineamento */}
+        <button type="button" className="touch flex flex-wrap items-start gap-2 text-left" onClick={() => { apri(aperto ? null : p.chiave, pl); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
+          <SegnoStato stato={chiuso} riserva className="mt-0.5" />
           {/* `flex-wrap` e base minima del titolo: con tre cartellini accanto (Da verificare, avanzamento, pin) il titolo restava largo 0 px
               a 375; ora, se non c'è posto per almeno 10 rem di testo, i cartellini vanno sotto */}
           <span className="min-w-0 flex-[1_1_10rem]">
-            <span className="font-semibold">{p.nome}</span>
+            <span className={`font-semibold ${chiuso === 'esaurito' ? 'stato-esaurito' : chiuso === 'fatto' ? 'stato-fatto' : ''}`}>{p.nome}</span>
             <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
             {/* L4 §4.1: il carattere accanto al tipo (assente per le voci dei dedali e per le Persona); nel testo, così va a capo con lui */}
             {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle testo-12 ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>

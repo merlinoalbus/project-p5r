@@ -100,6 +100,14 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Conferme con `DialogoConferma`, mai `window.confirm`; una sola vista d'errore. Le finestre non si chiudono cliccando lo sfondo
   (selezionando del testo si chiudevano per errore).
 - Pulsanti occupati con `aria-disabled` (non perdono il fuoco); regioni `aria-live` per notifiche e totali.
+- Accessibilità (L6, WCAG 2.2 AA): testo ad almeno 4,5:1 anche nei chip degli elementi e delle affinità (tinte schiarite per il testo,
+  colore pieno per bordi e icone); caselle di spunta nel rosso del tema; file di schede con le frecce, Home e Fine; lo scorrimento animato
+  si spegne con «riduci movimento»; pin e ritagli dell'editor si spostano anche con le frecce e con i campi X/Y. Pin e frecce delle file
+  hanno un bersaglio di 44 px senza cambiare aspetto né posizione: il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
+  così la punta resta sul punto), il gruppo un'imbottitura uguale sui quattro lati; la freccia di una fila, col mouse, ha un riquadro di
+  clic da 44 px attorno al cerchio, sul tocco è il pulsante a essere da 44, e lo spazio ai capi della fila resta quello di prima. Le voci «fatte» ed
+  «esaurite» non sono più attenuate: hanno a sinistra il segno dello stato (spunta rossa, o cerchio barrato grigio per «esaurito») e il
+  nome barrato in un grigio leggibile (D15, scelta C dell'utente, 01/11), anche nella Partita.
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
 - La pagina Partita mantiene il suo aspetto; eccezioni approvate: finestra «Regala» in Confidenti; riga «Giorno e fascia
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**. Il modulo dei dati

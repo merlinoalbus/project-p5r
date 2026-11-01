@@ -72,9 +72,9 @@ export function GestionePartite() {
               <span className="chip">Liv. {p.livelloProtagonista}</span>
               <span className="testo-12 text-text-muted">{p.difficolta}{p.nuovaPartitaPlus ? ' · NG+' : ''}</span>
               <span className="flex-1" />
-              {p.attiva ? <span className="chip chip--attivo">Attiva</span> : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Rendi attiva" disabled={occupato === p.id} onClick={() => void attiva(p.id)} />}
+              {p.attiva ? <span className="chip chip--attivo">Attiva</span> : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Rendi attiva" aria-label={`Rendi attiva la partita «${p.nome}»`} disabled={occupato === p.id} onClick={() => void attiva(p.id)} />}
               <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica i dati della partita «${p.nome}»`} onClick={() => setInModifica(p.id)} />
-              <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato === p.id} onClick={() => void rimuovi(p.id, p.nome)} />
+              <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label={`Elimina la partita «${p.nome}»`} disabled={occupato === p.id} onClick={() => void rimuovi(p.id, p.nome)} />
             </li>
           ))}
         </ul>

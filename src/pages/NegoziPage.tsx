@@ -28,6 +28,9 @@ import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
+/** Nome accessibile del pulsante «Posizione»: contiene sempre il testo visibile (il nome della sede, se c'è), poi dice di quale negozio si tratta (WCAG 2.5.3). */
+const nomePosizione = (n: NegozioRiassuntoDto): string => (n.sedeNome ? `${n.sedeNome}: mostra la posizione di ${n.nome}` : `Mostra posizione di ${n.nome}`);
+
 /**
  * Pagina dei negozi: carica l'elenco per la partita attiva (ricaricando al cambio di giorno, fascia
  * o meteo) e legge il filtro degli articoli dai parametri dell'URL. Senza ricerca raggruppa i
@@ -108,7 +111,7 @@ export function NegoziPage() {
             titolo={`Dove si trova ${selezioneVisibile.nome}`}
             altezza={300}
           />}
-          {cerca && termineNegozio.length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{negoziTrovati.map(n => <div className="card flex flex-wrap items-center justify-between gap-2" key={n.chiave}><Link className="touch no-underline text-text" to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link><button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button></div>)}</section>}
+          {cerca && termineNegozio.length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{negoziTrovati.map(n => <div className="card flex flex-wrap items-center justify-between gap-2" key={n.chiave}><Link className="touch no-underline text-text" to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link><button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={nomePosizione(n)} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button></div>)}</section>}
           {cerca ? (
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (
@@ -135,7 +138,7 @@ export function NegoziPage() {
                           <span className="testo-12 text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
                         </Link>
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>
+                          <button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={nomePosizione(n)} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>
                           <ChipDisponibilita disponibilita={n.disponibilita} compatto />
                         </div>
                       </div>

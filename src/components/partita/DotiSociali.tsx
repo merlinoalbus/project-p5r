@@ -26,6 +26,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { classiSuggerito } from '../../utils/suggerimenti';
+import { comportamentoScorrimento } from '../../utils/movimento';
 import { TargaSuggerito } from '../shared/Suggerito';
 import { ModificaGuida } from '../guida/ModificaGuida';
 
@@ -101,7 +102,7 @@ export function DotiSociali({ partitaId }: Props) {
   /** Dal vertice della stella: seleziona la Dote e ne porta in vista la scheda. */
   const vaiAllaDote = (chiave: string) => {
     setSelezionata(chiave);
-    document.getElementById(`dote-${chiave}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById(`dote-${chiave}`)?.scrollIntoView?.({ behavior: comportamentoScorrimento(), block: 'nearest' });
   };
 
   return (

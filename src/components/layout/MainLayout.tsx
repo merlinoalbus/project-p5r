@@ -116,7 +116,9 @@ export function MainLayout() {
       {(!['/', '/home'].includes(location.pathname) || haAttiva) && <AvvisoPartiteNonCaricate />}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col" ref={main} id="contenuto" tabIndex={-1}>
+        {/* L6-02: sotto i 1024 px la barra inferiore (h-16, fissa) copre il fondo dell'area che scorre: `scroll-pb-24` (quanto il
+            `pb-24` che le lascia posto) fa fermare il fuoco da tastiera sopra la barra, mai sotto (WCAG 2.2, 2.4.11) */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 scroll-pb-24 lg:scroll-pb-0 flex flex-col" ref={main} id="contenuto" tabIndex={-1}>
           {/* le pagine arrivano alla prima visita (router.tsx): intanto la cornice resta e al centro gira l'attesa */}
           <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Spinner size={40} /></div>}>
             <Outlet />

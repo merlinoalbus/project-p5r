@@ -49,9 +49,10 @@ const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'c
  */
 const RigaPersonaElenco = memo(function RigaPersonaElenco({ p, evidenziata, onApri }: { p: PersonaRiassuntoDto; evidenziata: boolean; onApri: (id: number) => void }) {
   return (
-    <li id={`persona-${p.id}`}>
+    <li id={`persona-${p.id}`} className="relative riga-con-arte">
       <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile flex items-center gap-3 no-underline text-text ${evidenziata ? 'card--evidenza' : ''}`} onClick={() => onApri(p.id)}>
-        <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} /></span>
+        {/* la casella dell'arte: l'immagine (un pulsante) non può stare dentro il collegamento, sta sopra, fratello, alla stessa posizione */}
+        <span className="h-16 w-16 shrink-0" aria-hidden="true" />
         <LivelloBadge livello={p.livello} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -72,6 +73,8 @@ const RigaPersonaElenco = memo(function RigaPersonaElenco({ p, evidenziata, onAp
         </div>
         <IconChevronRight size={18} className="text-text-muted shrink-0" />
       </Link>
+      {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + imbottitura 16 px del `.card` = 17 px, centrata in altezza; lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
+      <span className="pointer-events-none absolute left-[17px] top-1/2 -translate-y-1/2"><span className="pointer-events-auto inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} /></span></span>
     </li>
   );
 });

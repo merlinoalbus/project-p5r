@@ -11,6 +11,7 @@
 // ============================================================
 
 import { useDettaglioConfidente } from './useDettaglioConfidente';
+import { SegnoStato } from '../shared/SegnoStato';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
 import { fraIGraditi, testoReazione } from '../../../shared/regali';
 
@@ -51,7 +52,9 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
             {visibili.map((g, i) => {
               const fatto = spuntaPerNome(c, g);
               return (
-                <li key={`${g.ordine}-${i}`} className={`chip ${fatto ? 'line-through opacity-60' : ''}`} title={fatto ? 'Già consegnato in questa partita' : undefined}>
+                <li key={`${g.ordine}-${i}`} className={`chip ${fatto ? 'stato-fatto' : ''}`} title={fatto ? 'Già consegnato in questa partita' : undefined}>
+                  {/* D15: regalo già consegnato = spunta rossa a sinistra e nome barrato in grigio (lo dice già «(già consegnato)» sotto) */}
+                  <SegnoStato stato={fatto ? 'fatto' : null} dimensione={14} />
                   {g.nome}{g.reazione !== null ? <span className="tabular-nums"> · <span className="sr-only">reazione </span>{testoReazione(g.reazione)}</span> : null}{fatto && <span className="sr-only"> (già consegnato)</span>}
                 </li>
               );

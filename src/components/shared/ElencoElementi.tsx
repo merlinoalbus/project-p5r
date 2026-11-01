@@ -14,7 +14,7 @@
 // ============================================================
 
 import { ELEMENTI_AFFINITA, NOME_ELEMENTO, type ChiaveElemento } from '../../../shared/elementi';
-import { coloreElemento } from '../../utils/elementi';
+import { coloreElemento, coloreTestoElemento } from '../../utils/elementi';
 import { piatto } from '../../utils/testo';
 import { AssetImg } from './AssetImg';
 import { IconaAzione } from './IconaAzione';
@@ -76,7 +76,7 @@ export function ElencoElementi({ etichetta, valore, onCambia, disabilitato, mass
           return (
             <button key={e.chiave} type="button" aria-pressed={on} disabled={disabilitato} onClick={() => alterna(e.chiave)}
               className="touch inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 testo-13 font-semibold disabled:cursor-default disabled:opacity-60"
-              style={on ? { borderColor: colore, color: colore, background: `color-mix(in srgb, ${colore} 22%, transparent)` } : { borderColor: 'var(--color-border-input)', color: 'var(--color-text-muted)', background: 'transparent' }}>
+              style={on ? { borderColor: colore, color: coloreTestoElemento(e.chiave), background: `color-mix(in srgb, ${colore} 22%, transparent)` } : { borderColor: 'var(--color-border-input)', color: 'var(--color-text-muted)', background: 'transparent' }}>
               <AssetImg nome={`elementi/${e.chiave}`} alt="" decorativa className="h-6 w-6 object-contain" fallback={<span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: colore }} aria-hidden="true" />} />
               {e.nome}
             </button>

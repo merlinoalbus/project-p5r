@@ -22,6 +22,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconMedaglia } from '../components/shared/iconeGuida';
+import { SegnoStato } from '../components/shared/SegnoStato';
 import { ModificaGuida, type EditorCampoSpeciale } from '../components/guida/ModificaGuida';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo';
@@ -73,11 +74,12 @@ function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; part
     try { onCambiato(await impostaTrofeo(partitaId, t.chiave, ottenuto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li id={`elemento-${t.chiave}`} className={`card flex min-w-0 flex-col gap-2 testo-13 ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
+    <li id={`elemento-${t.chiave}`} className={`card flex min-w-0 flex-col gap-2 testo-13`} style={{ borderLeft: `3px solid ${colore}` }}>
       <div className="flex items-start gap-2.5">
         <span aria-hidden className="mt-0.5 shrink-0" style={{ color: colore }}><IconMedaglia size={28} /></span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <strong className={`testo-15 leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
+          {/* D15: trofeo ottenuto = spunta rossa a sinistra del nome e nome barrato in grigio (lo dice anche la casella «Ottenuto») */}
+          <strong className="testo-15 leading-tight"><SegnoStato stato={t.ottenuto ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={t.ottenuto ? 'stato-fatto' : ''}>{t.nome}</span></strong>
           {t.nomeEn && t.nomeEn !== t.nome && <span className="testo-12 text-text-muted">{t.nomeEn}</span>}
         </div>
         <ModificaGuida tipo="trofeo" chiave={t.chiave} cosa={`il trofeo «${t.nome}»`} soloIcona onSalvato={onModificato} campiSpeciali={CAMPI_TROFEO} />

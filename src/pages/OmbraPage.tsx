@@ -24,6 +24,7 @@ import { AvvisoTogliPersona, PiastrelleCattura } from '../components/guida/Piast
 import { NOME_PERSONALITA } from '../../shared/elementi';
 import type { OmbraDettaglioDto, OmbraLuogoDto } from '../../shared/ombre';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { SegnoStato } from '../components/shared/SegnoStato';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -47,7 +48,7 @@ function Luoghi({ o, onSalvato }: { o: OmbraDettaglioDto; onSalvato: () => void 
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
             {o.luoghi.map((l) => (
               <li key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} className="flex flex-wrap items-center gap-x-2">
-                <Link to={l.casa} className={`touch inline-flex min-h-11 items-center testo-13 ${l.raggiungibile === false ? 'opacity-60' : ''}`}>{percorso(l)}</Link>
+                <Link to={l.casa} className={`touch inline-flex min-h-11 items-center gap-1.5 testo-13 ${l.raggiungibile === false ? 'stato-esaurito' : ''}`}>{/* D15: Palazzo concluso = cerchio barrato a sinistra e percorso barrato in grigio (lo dice il cartellino accanto) */}<SegnoStato stato={l.raggiungibile === false ? 'esaurito' : null} dimensione={14} />{percorso(l)}</Link>
                 {l.raggiungibile === false && <span className="chip testo-12" title={l.motivoNonRaggiungibile}>Non più raggiungibile: il Palazzo è sparito</span>}
                 {l.righe.map((r) => (
                   <span key={r.id} className="inline-flex items-center gap-0.5">

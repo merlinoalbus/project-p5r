@@ -47,12 +47,10 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
   </>;
   if (riga) {
     return (
-      <li className="min-w-0" id={`persona-${p.id}`}>
-        <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text grid grid-cols-[72px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
-          <div className="relative">
-            <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={72} forma="quadrata" /></span>
-            {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-8 h-8 object-contain drop-shadow" fallback={null} />}
-          </div>
+      <li className="relative min-w-0 piastrella" id={`persona-${p.id}`}>
+        <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile no-underline text-text grid grid-cols-[72px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
+          {/* la casella dell'arte: l'immagine (un pulsante) non può stare dentro il collegamento, sta sopra, fratello, alla stessa posizione */}
+          <div className="h-[72px] w-[72px]" aria-hidden="true" />
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex min-w-0 items-start gap-2">
               <LivelloBadge livello={p.livello} className="shrink-0" />
@@ -71,18 +69,19 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
             <AffinitaGriglia affinita={p.affinita} compatta fluida />
           </div>
         </Link>
+        {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + margine interno 10 px = 11 px (le stesse misure di `p-2.5` del collegamento); il riquadro lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
+        <div className="pointer-events-none absolute left-[11px] top-[11px] h-[72px] w-[72px]">
+          <span className="pointer-events-auto inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={72} forma="quadrata" /></span>
+          {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-8 h-8 object-contain drop-shadow" fallback={null} />}
+        </div>
       </li>
     );
   }
   return (
-    <li className="min-w-0" id={`persona-${p.id}`}>
-      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
-        <div className="relative flex justify-center">
-          <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={150} forma="quadrata" /></span>
-          <LivelloBadge livello={p.livello} className="absolute -left-2 -top-2" />
-          <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={36} quadrata className="absolute -right-1 -top-1 w-9 h-9 object-contain drop-shadow" fallback={null} />
-          {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute right-0 bottom-0 w-12 h-12 object-contain drop-shadow" fallback={null} />}
-        </div>
+    <li className="relative min-w-0 piastrella" id={`persona-${p.id}`}>
+      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.richiedeOggetto ? `, richiede l’oggetto ${p.richiedeOggetto.nome}` : ''}`} onClick={apri}>
+        {/* la casella dell'arte: l'immagine (un pulsante) non può stare dentro il collegamento, sta sopra, fratello, alla stessa posizione */}
+        <div className="h-[150px]" aria-hidden="true" />
         <div className="min-w-0">
           {/* il nome è l'identità della piastrella: va a capo invece di finire in «…» (i nomi lunghi —
               Magatsu-Izanagi Picaro, Amuleto dell'Imperatore — sbordavano di 60 px su telefono) */}
@@ -97,6 +96,16 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
           <AffinitaGriglia affinita={p.affinita} compatta />
         </div>
       </Link>
+      {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + imbottitura 16 px del `.card` = 17 px; il riquadro lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
+      <div className="pointer-events-none absolute inset-x-[17px] top-[17px] flex justify-center">
+        <span className="pointer-events-auto inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={150} forma="quadrata" /></span>
+        {/* il cartiglio sta sopra l'arte, fuori dal collegamento: il livello lo dice già il nome del collegamento (qui `decorativo`, così non si legge due volte)
+            e il suo suggerimento «Livello N» torna a comparire al passaggio, perché il riquadro lo prende; il clic porta alla stessa scheda (copia nascosta
+            ai lettori di schermo e fuori da Tab, come l'arte è un fratello del collegamento) */}
+        <Link to={`/compendio/persona/${p.id}`} tabIndex={-1} aria-hidden="true" className="pointer-events-auto absolute -left-2 -top-2 inline-flex" onClick={apri}><LivelloBadge livello={p.livello} decorativo /></Link>
+        <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={36} quadrata className="absolute -right-1 -top-1 w-9 h-9 object-contain drop-shadow" fallback={null} />
+        {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute right-0 bottom-0 w-12 h-12 object-contain drop-shadow" fallback={null} />}
+      </div>
     </li>
   );
 });

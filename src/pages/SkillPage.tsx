@@ -12,7 +12,7 @@ import { PageState, EmptyState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { ElementoChip } from '../components/compendio/ElementoChip';
-import { ORDINE_ELEMENTI_SKILL, coloreElemento } from '../utils/elementi';
+import { ORDINE_ELEMENTI_SKILL, coloreElemento, coloreTestoElemento } from '../utils/elementi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -75,7 +75,7 @@ export function SkillPage() {
             key={el}
             type="button"
             className="chip chip--icona touch"
-            style={elemento === el ? { borderColor: coloreElemento(el), color: coloreElemento(el), background: `color-mix(in srgb, ${coloreElemento(el)} 16%, transparent)` } : undefined}
+            style={elemento === el ? { borderColor: coloreElemento(el), color: coloreTestoElemento(el), background: `color-mix(in srgb, ${coloreElemento(el)} 16%, transparent)` } : undefined}
             onClick={() => setElemento(el)}
             aria-pressed={elemento === el}
           >

@@ -28,7 +28,7 @@ it('ogni Richiesta ha lo stato scelto fra tre; scegliere «—» toglie lo stato
   const { onRichiesta } = monta();
   const prima = screen.getByRole('radiogroup', { name: 'Stato di «Un ex appiccicoso»' });
   expect(within(prima).getAllByRole('radio').map((r) => `${r.textContent}:${r.getAttribute('aria-checked')}`)).toEqual(['—:false', 'Accettata:true', 'Fatta:false']);
-  expect(screen.getByRole('link', { name: 'Il treno fantasma' })).toHaveClass('line-through');
+  expect(within(screen.getByRole('link', { name: 'Il treno fantasma' })).getByText('Il treno fantasma')).toHaveClass('stato-fatto');
   // lo stato già scelto non riparte
   fireEvent.click(within(prima).getByRole('radio', { name: 'Accettata' }));
   expect(api.impostaStatoRichiesta).not.toHaveBeenCalled();

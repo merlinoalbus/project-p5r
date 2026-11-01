@@ -54,7 +54,8 @@ it('un tocco segna il meteo: la partita dello store e la versione del meteo si a
   await waitFor(() => expect(api.impostaMeteoGiorno).toHaveBeenCalledWith(4, '04-13', { giorno: 'pioggia' }));
   await waitFor(() => expect(usePartitaStore.getState().attiva?.meteoOra).toBe('pioggia'));
   expect(useMeteoStore.getState().versione).toBe(1);
-  expect(within(finestra).getByRole('button', { name: 'Di giorno: Pioggia (segnato: tocca per tornare alla guida)' })).toHaveAttribute('aria-pressed', 'true');
+  // L6-09: lo stato «segnato» lo dice `aria-pressed`, non più anche il nome
+  expect(within(finestra).getByRole('button', { name: 'Di giorno: Pioggia (tocca per tornare alla guida)' })).toHaveAttribute('aria-pressed', 'true');
   await userEvent.click(within(finestra).getByRole('button', { name: 'Fatto' }));
   expect(screen.queryByRole('dialog')).toBeNull();
 });

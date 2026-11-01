@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { GuidaDellArea } from './GuidaDellArea';
+import { SegnoStato } from '../shared/SegnoStato';
 import type { AreaDungeonDto, PuntoInteresseDto, StatoPunto } from '../../types';
 
 interface Props {
@@ -43,10 +44,12 @@ export function TramaDellArea({ dedalo, areaDedalo, partitaId, modifica, cambiaS
       {voci.map((p) => (
         <li key={p.chiave} className="flex flex-col">
           <label className={`touch flex items-start gap-2.5 py-1.5 testo-13 ${partitaId ? 'cursor-pointer' : ''}`}>
-            <input type="checkbox" className="mt-0.5 size-5 shrink-0 accent-[var(--color-primary)]" checked={!!p.stato} disabled={!partitaId || occupata === p.chiave}
+            <input type="checkbox" className="mt-0.5 size-5 shrink-0" checked={!!p.stato} disabled={!partitaId || occupata === p.chiave}
               onChange={() => void alterna(p)} />
+            {/* D15: voce ottenuta = spunta rossa, esaurita = cerchio barrato; nome barrato in grigio. Lo stato a parole: la casella e la guida della voce */}
+            <SegnoStato stato={p.stato ? (p.stato === 'esaurito' ? 'esaurito' : 'fatto') : null} riserva className="mt-0.5" />
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className={p.stato ? 'text-text-muted line-through' : ''}>{p.nome}</span>
+              <span className={p.stato === 'esaurito' ? 'stato-esaurito' : p.stato ? 'stato-fatto' : ''}>{p.nome}</span>
               {/* due righe: per esteso nel suggerimento e in «Modifica la guida» */}
               {p.descrizione && <span className="line-clamp-2 testo-12 text-text-muted" title={p.descrizione}>{p.descrizione}</span>}
             </span>

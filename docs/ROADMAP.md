@@ -87,15 +87,19 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   con un tetto in byte, letture condivise di «Da applicare», schede della Partita a richiesta, librerie in un file proprio; risposte
   campione identiche byte per byte; tempi mediani sulla copia: giorno del Diario −23/−39%, mappe −5/−34%, schede di Palazzo e Memento −2/−3%;
   avvio a freddo con «Slow 4G» −0,2 s).
+- L6 (accessibilità) fatto: schede con le frecce, fuoco sopra la barra inferiore, titoli h1, nomi dei pulsanti delle partite, contrasti
+  ad almeno 4,5:1 anche con i colori degli elementi (accesi col sì dell'utente), caselle nel rosso del tema, movimento ridotto, editor delle mappe da tastiera, fuoco nel popup del pin, Esc nella Guida, area di tocco
+  di 44 px per pin e frecce, piastrelle del Compendio senza pulsanti dentro i link, stati «fatto» ed «esaurito» col segno C ovunque.
 - Da L5, per L8: gli id di `partita` si riusano dopo un'eliminazione (nessun AUTOINCREMENT) e l'archivio immutabile
   `acquisto_legacy_valutazione` non ha una chiave esterna verso la partita: una partita nuova si ritrova accanto le righe d'archivio di una
   eliminata con lo stesso id.
 - Decisioni dell'utente (01/11): D1 non toccare (L8-01 resta com'è); D2 procedere; D3, D4, D5, D6 sì come proposto; D7 pulsante
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
-  D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 prima lo schizzo; D16 non serve riconfermare;
+  D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
   D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
-- Aperti: L6–L11; in sospeso D15 e D20 (schizzi da mostrare) e D19 (motivazione da dare). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
-  immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
+- Aperti: L7–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+  immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
+  e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 
 **Lavori aperti**
 - **Vecchia lista dei contenuti della guida.** `ContenutiGuidaMappa` (con `SchedaContenutoGuida` e `GET /api/mappe/contenuti/:chiave`)

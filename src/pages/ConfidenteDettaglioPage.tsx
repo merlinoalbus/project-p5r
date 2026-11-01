@@ -16,6 +16,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
+import { SegnoStato } from '../components/shared/SegnoStato';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
@@ -177,7 +178,9 @@ export function ConfidenteDettaglioPage() {
           <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
         </label>
       )}
-      <strong className={!g.catalogo && regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
+      {/* D15: regalo consegnato = spunta rossa a sinistra e nome barrato in grigio (lo stato a parole sta nella casella) */}
+      <SegnoStato stato={!g.catalogo && regaloConsegnato(g) ? 'fatto' : null} />
+      <strong className={!g.catalogo && regaloConsegnato(g) ? 'stato-fatto' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>{/* con il collegamento al catalogo il regalo non ha la casella (si dà dal comando «Regala», nel registro): nessuno stato da mostrare qui */}
       {g.reazione !== null && <ChipReazione reazione={g.reazione} />}
       {(g.dove || g.costo) && <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>}
       {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}

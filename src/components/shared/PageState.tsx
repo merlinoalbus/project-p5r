@@ -94,13 +94,16 @@ interface EmptyStateProps {
   action?: ReactNode;
   /** Nome dell'illustrazione dedicata (`illustrazioni/<nome>`); se manca si usa quella neutra, poi l'icona. */
   illustrazione?: string;
+  /** Il livello del titolo: h2 (default, lo stato vuoto sta sotto l'h1 della pagina), h1 quando è la pagina intera (la 404) o h3 sotto un h2. */
+  livello?: 1 | 2 | 3;
 }
 
 /** Stato vuoto illustrato con messaggio, suggerimento e azione facoltativa. */
-export function EmptyState({ icon, title, hint, action, illustrazione }: EmptyStateProps) {
+export function EmptyState({ icon, title, hint, action, illustrazione, livello = 2 }: EmptyStateProps) {
   const dedicata = illustrazione ? `illustrazioni/${illustrazione}` : null;
   const [urlDedicata, urlNeutra] = useAssetMulti([dedicata, ILLUSTRAZIONE_NEUTRA]);
   const nome = urlDedicata ? dedicata : urlNeutra ? ILLUSTRAZIONE_NEUTRA : null;
+  const Titolo = livello === 1 ? 'h1' : livello === 3 ? 'h3' : 'h2';
   return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3 text-center">
       <AssetImg
@@ -110,7 +113,7 @@ export function EmptyState({ icon, title, hint, action, illustrazione }: EmptySt
         className="max-h-[200px] w-auto object-contain"
         fallback={icon ? <div className="text-text-muted testo-40 leading-none">{icon}</div> : null}
       />
-      <h3 className="m-0 font-decor uppercase tracking-wide testo-28 leading-none text-text">{title}</h3>
+      <Titolo className="m-0 font-decor uppercase tracking-wide testo-28 leading-none text-text">{title}</Titolo>
       {hint && <p className="m-0 testo-14 text-text-muted max-w-[420px]">{hint}</p>}
       {action && <div className="mt-2 flex gap-2">{action}</div>}
     </div>

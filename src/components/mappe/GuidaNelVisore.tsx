@@ -24,7 +24,7 @@
 // Finestra fluttuante che si sposta dalla sua testata o con le frecce sulla maniglia ⠿ (da 1024 px), foglio dal basso sotto i 1024 px.
 // ============================================================
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { getGuidaMappa } from '../../services/api';
 import { catturaNelCompendio, salvaStatoVoce } from '../../services/gestiGuida';
@@ -33,6 +33,7 @@ import { useMedia } from '../../hooks/useMedia';
 import { useSpostamentoFinestra } from '../../hooks/useSpostamentoFinestra';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_TIPO, COLORE_TIPO } from '../../utils/dungeon';
+import { comportamentoScorrimento } from '../../utils/movimento';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import { raggruppaPassi } from '../../utils/passiEnigmi';
 import { quanteDaSegnare, quanteSegnate, segnataInVista, voceDescrittiva } from '../../utils/vociDellaGuida';
@@ -41,6 +42,7 @@ import { useConfermaRiapertura } from '../guida/ConfermaRiapertura';
 import { PersoneDelPalazzo } from '../guida/PersoneDelPalazzo';
 import { voceDaCatturare } from '../../utils/piastrelleCattura';
 import { IconaAzione } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import type { PuntoInteresseDto } from '../../types';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
@@ -113,7 +115,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
   useEffect(() => {
     if (spilloSelezionato === null) return;
     const el = elenco.current?.querySelector<HTMLElement>(`[data-pin-evidenziato="sì"]`);
-    el?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    el?.scrollIntoView?.({ block: 'nearest', behavior: comportamentoScorrimento() });
   }, [spilloSelezionato, guida.dati]);
 
   const infiltrazioni = guida.dati?.infiltrazioni ?? [];
@@ -173,9 +175,13 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
               <input type="checkbox" className="h-5 w-5" checked={!!p.stato} disabled={!partitaId || occupato} onChange={(e) => casella(p, e.target.checked)}
                 aria-label={p.stato ? `${p.nome}: fatto, togli il segno per riaprire` : `${p.nome}: segna come fatto`} />
             </label>}
-          <button type="button" className={`touch min-w-0 flex-1 text-left testo-13 ${p.stato ? 'opacity-60' : ''}`} aria-expanded={apri} onClick={() => setAperta(apri ? null : p.chiave)}>
-            <span className="font-semibold">{p.nome}</span>
-            <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}</span>
+          {/* D15: la voce segnata ha il segno a sinistra (spunta rossa o cerchio barrato) e il nome barrato in grigio; lo spazio del segno c'è in ogni voce */}
+          <button type="button" className="touch flex min-w-0 flex-1 items-start gap-1.5 text-left testo-13" aria-expanded={apri} onClick={() => setAperta(apri ? null : p.chiave)}>
+            <SegnoStato stato={p.stato ? (p.stato === 'esaurito' ? 'esaurito' : 'fatto') : null} riserva className="mt-0.5" />
+            <span className="min-w-0 flex-1">
+              <span className={`font-semibold ${p.stato === 'esaurito' ? 'stato-esaurito' : p.stato ? 'stato-fatto' : ''}`}>{p.nome}</span>
+              <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}</span>
+            </span>
           </button>
         </div>
         {apri && (
@@ -207,8 +213,15 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     );
   };
 
+  /** L6-09: Esc chiude la guida (WCAG 2.1.2/2.4.3). Un controllo interno che ha già usato Esc (tendina, campo) o una finestra aperta (la
+   *  conferma di «Riapri») hanno la loro Esc; `preventDefault` evita che la stessa pressione chiuda anche il popup del pin del visore. */
+  const suTasto = (e: ReactKeyboardEvent<HTMLElement>) => {
+    if (e.key !== 'Escape' || e.defaultPrevented || document.querySelector('.modal-overlay')) return;
+    e.preventDefault();
+    onChiudi();
+  };
   const corpo = (
-    <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria"
+    <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria" onKeyDown={suTasto}
       className={largo
         ? 'fixed z-[70] flex max-h-[min(70dvh,560px)] w-[340px] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
         : 'fixed inset-x-2 bottom-[calc(64px+env(safe-area-inset-bottom))] z-[70] flex max-h-[60dvh] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'}

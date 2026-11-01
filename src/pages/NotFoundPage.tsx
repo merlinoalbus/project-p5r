@@ -13,6 +13,7 @@ export function NotFoundPage() {
   return (
     <EmptyState
       illustrazione="vuoto-partita-senza-testo"
+      livello={1}
       title="Pagina non trovata"
       hint="L'indirizzo richiesto non corrisponde a nessuna sezione dell'app."
       action={

@@ -22,6 +22,7 @@ import { aggiornaConfidente, annullaRegaloOggetto, getConfidentiPartita, conferm
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
+import { SchedeTab } from '../shared/SchedeTab';
 import { Modal } from '../shared/Modal';
 import { IconChevronRight } from '../shared/icons';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
@@ -63,6 +64,8 @@ function gruppoDi(c: ConfidentePartitaDto): ChiaveGruppo {
 
 const CHIAVE_GRUPPI = 'p5r.confidentiPartita.gruppiAperti';
 const GRUPPI_PREDEFINITI: Record<ChiaveGruppo, boolean> = { attivi: true, bloccati: false };
+/** Le due viste del cassetto di un Confidente, nell'ordine delle schede (L6-01). */
+const VISTE_CONFIDENTE = ['levelup', 'scheda'] as const;
 
 /** Lo stato salvato dei gruppi; se manca, è illeggibile o lo storage non c'è, quello predefinito (attivi aperti, non disponibili chiusi). */
 function leggiGruppiAperti(): Record<ChiaveGruppo, boolean> {
@@ -327,16 +330,16 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       if (tipo === v.tipo) return;
       if (tipo === 'levelup') { setVista(null); void ricarica(); } else setVista({ chiave: c.chiave, tipo, search: '' });
     };
+    // L6-01: le due viste sono schede con le frecce (Inizio e Fine, Tab sulla vista aperta); i pulsanti restano quelli di prima
     return (
-      <>
-        <div className="flex gap-1.5" role="tablist" aria-label={`Viste di ${c.nome}`}>
-          <button type="button" role="tab" id="vista-confidente-levelup" aria-controls="pannello-confidente" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
-          <button type="button" role="tab" id="vista-confidente-scheda" aria-controls="pannello-confidente" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
-        </div>
-        <div id="pannello-confidente" role="tabpanel" aria-labelledby={v.tipo === 'levelup' ? 'vista-confidente-levelup' : 'vista-confidente-scheda'} className="flex flex-col gap-4">
-          {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} onLevelUp={() => vai('levelup')} />}
-        </div>
-      </>
+      <SchedeTab chiavi={VISTE_CONFIDENTE} attiva={v.tipo} onScegli={vai} etichetta={`Viste di ${c.nome}`} className="flex gap-1.5"
+        scheda={(k, a) => <button type="button" {...a} className={`chip touch ${v.tipo === k ? 'chip--attivo' : ''}`}>{k === 'levelup' ? 'Level up' : 'Scheda completa'}</button>}>
+        {(pannello) => (
+          <div {...pannello(v.tipo)} className="flex flex-col gap-4">
+            {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} onLevelUp={() => vai('levelup')} />}
+          </div>
+        )}
+      </SchedeTab>
     );
   };
 

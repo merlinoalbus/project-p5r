@@ -31,9 +31,12 @@ import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
 import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { useMedia } from '../../hooks/useMedia';
+import { comportamentoScorrimento } from '../../utils/movimento';
+import { ingombroPezzo } from '../../../shared/pezziMappa';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import { IconMappa } from '../shared/iconeGuida';
 import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
@@ -302,6 +305,19 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
   // l'altezza del popup dello spillo, misurata quando è ancorato al punto (vedi `popupSotto`): per spillo, così una nuova selezione rimisura
   const popupRif = useRef<HTMLDivElement | null>(null);
+  // L6-13: il popup (o il foglio, che sta in un portale a fine pagina) aperto da tastiera prende il fuoco: senza, il primo pulsante del popup
+  // distava decine di tabulazioni dal pin. Vale solo per l'apertura con Invio/Spazio (`click` con `detail` 0): il tocco e il mouse non
+  // spostano il fuoco, quindi niente tastiera a schermo né scorrimenti. Il fuoco si dà al popup stesso (`tabIndex -1`, con nome), non al
+  // primo pulsante: il lettore di schermo ne annuncia il nome e Tab entra nei suoi comandi.
+  const fuocoAlPopup = useRef(false);
+  /** Dà il fuoco al popup se è stato chiesto e il fuoco è ancora sul pin (o sulla voce dell'elenco) da cui si è aperto, o è andato perso. */
+  const portaFuocoNelPopup = useCallback((el: HTMLElement | null) => {
+    if (!el || !fuocoAlPopup.current) return;
+    const a = document.activeElement;
+    if (!a || a === document.body || a.closest('.spillo-mappa, .visore-mappa__voce')) el.focus({ preventScroll: true });
+  }, []);
+  /** Aggancia il popup: `popupRif` e, appena nasce (anche quando passa da ancorato a foglio e si ricrea in un altro posto), il fuoco chiesto. */
+  const agganciaPopup = useCallback((el: HTMLDivElement | null) => { popupRif.current = el; portaFuocoNelPopup(el); }, [portaFuocoNelPopup]);
   const [altezzaPopupMisurata, setAltezzaPopupMisurata] = useState<{ id: number; h: number } | null>(null);
   const [natCaricata, setNatCaricata] = useState<(Dimensioni & { src: string; img: HTMLImageElement }) | null>(null);
   const [zoomEsplicito, setZoomEsplicito] = useState<number | null>(null);
@@ -352,7 +368,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     if (richiestaScheda === 0) return;
     const el = schedaRef.current;
     if (!el) return;
-    el.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    el.scrollIntoView?.({ block: 'start', behavior: comportamentoScorrimento() });
     el.focus({ preventScroll: true });
   }, [richiestaScheda]);
   const [occupato, setOccupato] = useState(false);
@@ -381,7 +397,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const selezionatoId = scelta ? null : editor ? editor.selezionatoId : selezionatoUso;
   // con `popupIniziale` falso, lo spillo della selezione iniziale resta senza popup finché non lo si tocca (o se ne sceglie un altro)
   const [popupSoppresso, setPopupSoppresso] = useState<number | null>(popupIniziale ? null : selezioneIniziale ?? null);
-  const seleziona = useCallback((id: number | null) => { setPopupSoppresso(null); if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
+  const seleziona = useCallback((id: number | null) => { fuocoAlPopup.current = false; setPopupSoppresso(null); if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
 
   // Misura dell'area visibile (ResizeObserver quando disponibile; altrimenti finestra).
   useEffect(() => {
@@ -552,6 +568,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const guidaSuFoglio = guidaAperta !== null && sotto1024;
   /** Quante volte si è scelto un pin dalla Guida: riporta nella fascia libera sopra il foglio anche lo stesso pin scelto di nuovo. */
   const [richiesteGuida, setRichiesteGuida] = useState(0);
+  const pulsanteGuida = useRef<HTMLButtonElement | null>(null);
+  /** Chiude la guida (il suo × o Esc, L6-09) e rimette il fuoco sul pulsante «Guida» da cui si era aperta, se il fuoco era dentro la guida. */
+  const chiudiGuida = () => {
+    const conFuoco = !!guidaFoglio.current?.contains(document.activeElement) || !!document.activeElement?.closest('[aria-label="Guida della planimetria"]');
+    setGuidaAperta(null);
+    if (conFuoco) requestAnimationFrame(() => pulsanteGuida.current?.focus({ preventScroll: true }));
+  };
   /** Apre la guida in alto a destra della tela (o la chiude). */
   const apriGuida = () => {
     if (guidaAperta) { setGuidaAperta(null); return; }
@@ -804,6 +827,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // di una voce della guida ha anche «Ottenuto», e su una tela bassa (il visore incorporato, il tablet) il popup non ci stava
   // più né sopra né sotto e la tela lo tagliava. Quando non sta da nessun lato diventa il foglio, come l'elenco di un gruppo.
   // Prima della misura (il primo disegno) vale la stima di prima: ~215 px, la merce di un negozio di più.
+  // un altro pin scelto da tastiera mentre il popup c'è già: il popup resta montato, il fuoco va comunque a lui (L6-13)
+  useEffect(() => { portaFuocoNelPopup(popupRif.current); }, [selezionato?.id, portaFuocoNelPopup]);
   const misuraPopup = selezionato && altezzaPopupMisurata?.id === selezionato.id ? altezzaPopupMisurata.h : null;
   const altezzaPopup = misuraPopup ?? (selezionato && categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio ? 438 : 218);
   const yPopup = selezionato ? pan.y + (selezionato.y / 100) * nat.h * zoom : 0;
@@ -971,6 +996,59 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    *  portale: gli eventi React risalgono comunque alla tela) e riporta il fuoco sul pin. Tab/Maiusc+Tab fra i pin e Invio/Spazio sono quelli
    *  nativi dei pulsanti `.spillo-mappa`, con lo stesso `onClick` del tocco. Un tasto già gestito da un controllo interno (la tendina del
    *  Selettore, un campo) non arriva qui come comando: i comandi di vista agiscono solo se il fuoco è sulla tela stessa. */
+  // L6-07 (WCAG 2.5.7): nell'editor lo spillo e la copia di un pezzo selezionati si spostano anche con le frecce, non solo trascinando. Un passo
+  // è un pixel dell'immagine (per lo spillo in percentuale, almeno 0,1: la risoluzione salvata), con Maiusc dieci. Ogni pressione sposta subito
+  // l'oggetto sulla mappa (`trascinato`, `pezzoTrascinato`); il salvataggio, con la stessa chiamata del trascinamento (`onSposta`), parte
+  // quando le frecce si fermano: un tasto tenuto premuto non fa una scrittura per ripetizione.
+  const salvataggioFrecce = useRef<number | null>(null);
+  /** Frecce su uno spillo o su una copia selezionati (il pulsante dello spillo sulla mappa, la voce della copia nel pannello). */
+  const spostaConFrecce = (e: ReactKeyboardEvent<HTMLElement>) => {
+    if (!editor || editor.strumento !== 'seleziona' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+    const verso = ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] } as Record<string, [number, number] | undefined>)[e.key];
+    const b = e.target instanceof HTMLElement ? e.target : null;
+    // solo dai pulsanti dello spillo e della copia selezionati: nei campi e nelle tendine le frecce sono del campo
+    if (!verso || !b || b.tagName !== 'BUTTON') return;
+    const moltiplicatore = e.shiftKey ? 10 : 1;
+    const ed = editor;
+    /** Rimanda il salvataggio all'ultima pressione. */
+    const programma = (salva: () => void) => {
+      if (salvataggioFrecce.current !== null) window.clearTimeout(salvataggioFrecce.current);
+      salvataggioFrecce.current = window.setTimeout(() => { salvataggioFrecce.current = null; salva(); }, 400);
+    };
+    const idSpillo = b.dataset.spilloId !== undefined ? Number(b.dataset.spilloId) : null;
+    if (idSpillo !== null && idSpillo === editor.selezionatoId) {
+      const s = mappa.spilli.find((x) => x.id === idSpillo);
+      if (!s) return;
+      e.preventDefault();
+      const base = trascinato?.id === idSpillo ? trascinato : s;
+      const unPixel = (lato: number) => Math.max(0.1, Math.round(1000 / Math.max(1, lato)) / 10);
+      const x = Math.round(limita(base.x + verso[0] * unPixel(nat.w) * moltiplicatore, 0, 100) * 10) / 10;
+      const y = Math.round(limita(base.y + verso[1] * unPixel(nat.h) * moltiplicatore, 0, 100) * 10) / 10;
+      setTrascinato({ id: idSpillo, x, y });
+      programma(() => { ed.onSposta(idSpillo, x, y); setTrascinato(null); });
+      return;
+    }
+    const idCopia = b.dataset.copiaId !== undefined ? Number(b.dataset.copiaId) : null;
+    const strumentiCopie = ed.pezzi;
+    if (idCopia !== null && strumentiCopie && idCopia === strumentiCopie.selezionatoId) {
+      const q = posate.find((z) => z.copia.id === idCopia);
+      if (!q) return;
+      e.preventDefault();
+      const base = pezzoTrascinato?.id === idCopia ? pezzoTrascinato : q.copia.posizione;
+      const ing = ingombroPezzo(q.pezzo.sorgente.larghezza, q.pezzo.sorgente.altezza, q.copia.rotazione);
+      const x = Math.round(limita(base.x + verso[0] * moltiplicatore, 0, Math.max(0, nat.w - ing.larghezza)));
+      const y = Math.round(limita(base.y + verso[1] * moltiplicatore, 0, Math.max(0, nat.h - ing.altezza)));
+      setPezzoTrascinato({ id: idCopia, x, y });
+      programma(() => { strumentiCopie.onSposta(idCopia, x, y); setPezzoTrascinato(null); });
+    }
+  };
+  /** Chiude il popup del pin `id`; se il fuoco era dentro il popup (tastiera, o il tasto × premuto) lo si rimette sul pin da cui era stato aperto
+   *  (se è ancora sulla mappa), perché il popup sparisce con il fuoco dentro. Il tocco su × non cambia: il fuoco su un pulsante non mostra anelli. */
+  const chiudiPopup = (id: number) => {
+    const conFuoco = !!popupRif.current && popupRif.current.contains(document.activeElement);
+    seleziona(null);
+    if (conFuoco) requestAnimationFrame(() => tela.current?.querySelector<HTMLElement>(`[data-spillo-id="${id}"]`)?.focus({ preventScroll: true }));
+  };
   const suTasto = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     if (editor || e.defaultPrevented) return;
     if (e.key === 'Escape') {
@@ -1003,7 +1081,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   return (
     // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6)
     <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${paginaScorre ? 'visore-mappa--pagina-scorre' : ''} ${className ?? ''}`} data-testid="visore-mappa"
-      style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}>
+      style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}
+      onKeyDown={editor ? spostaConFrecce : undefined}>
+      {editor && <span id={`${idIstruzioni}-sposta`} className="sr-only">Con lo spillo selezionato, le frecce lo spostano di un pixel dell’immagine, con Maiusc di dieci; la posizione si scrive anche nel pannello.</span>}
       {/* in modalità scelta la mappa sta dentro la voce della guida, che porta i comandi: la testata ruberebbe la tela */}
       {!scelta && <header className="visore-mappa__barra">
         <nav className="visore-mappa__percorso" aria-label="Percorso della mappa">
@@ -1028,7 +1108,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               aria-label={`Torna a ${p.daNome}, al passaggio «${p.spilloNome}» da cui sei arrivato`} onClick={() => onNaviga(p.da, { spillo: p.spillo })} />;
           })()}
           {azioni}
-          {conGuida && <PulsanteVisivo tono={guidaAperta ? 'primario' : 'fantasma'} compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida" aria-pressed={!!guidaAperta} onClick={apriGuida} />}
+          {conGuida && <PulsanteVisivo tono={guidaAperta ? 'primario' : 'fantasma'} compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida" aria-pressed={!!guidaAperta} onClick={apriGuida} ref={pulsanteGuida} />}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => { setPannelloScelto(!pannelloAperto); onPannello?.(!pannelloAperto); }} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
           {ritorno}
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
@@ -1124,9 +1204,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             <ul className="m-0 p-0 list-none flex flex-col visore-mappa__elenco" aria-label="Spilli visibili">
               {visibili.map((s) => (
                 <li key={s.id}>
-                  <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
+                  <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
+                    {/* D15: spillo segnato = spunta rossa a sinistra e nome barrato in grigio, o cerchio barrato se le sue voci sono tutte
+                        «esaurito» (la parola dello stato sta accanto al tipo); lo spazio del segno c'è in ogni riga */}
+                    <SegnoStato stato={segnoSpillo(s)} riserva />
                     <PuntoSpillo tipo={s.tipo} colore={s.colore} />
-                    <span className="flex-1 min-w-0 truncate">{nomePin(s)}</span>
+                    <span className={`flex-1 min-w-0 truncate ${segnoSpillo(s) === 'esaurito' ? 'stato-esaurito' : segnoSpillo(s) === 'fatto' ? 'stato-fatto' : ''}`}>{nomePin(s)}</span>
                     <span className="testo-12 text-text-muted">{s.tipoNome}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</span>
                   </button>
                 </li>
@@ -1204,6 +1287,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
                   aria-label={scelta ? `${s.tipoNome}: ${nomePin(s)}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${nomePin(s)}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${s.daVerificare ? ' (da verificare)' : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
+                  aria-describedby={editor?.strumento === 'seleziona' && attivo ? `${idIstruzioni}-sposta` : undefined}
                   disabled={scelta?.occupato}
                   title={nomePin(s)}
                   onPointerDown={(e) => {
@@ -1214,7 +1298,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       tela.current?.setPointerCapture?.(e.pointerId);
                     }
                   }}
-                  onClick={(e) => { e.stopPropagation(); if (pinchRecente(e.timeStamp)) return; if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
+                  onClick={(e) => { e.stopPropagation(); if (pinchRecente(e.timeStamp)) return; if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; if (vaSubito(s)) { vaiAllArrivo(s); return; } const apre = !(attivo && s.id !== popupSoppresso); seleziona(apre ? s.id : null); fuocoAlPopup.current = apre && e.detail === 0; }}
                   // L3-01: il doppio tocco su un pin non arriva mai alla tela (dove azzererebbe zoom e posizione); nell'editor, su un passaggio, apre l'arrivo
                   onDoubleClick={(e) => { e.stopPropagation(); if (!visitabile) return; e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
@@ -1224,7 +1308,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               );
             })}
             {selezionato && !editor && selezionato.id !== popupSoppresso && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(popupSuFoglio, (
-              <div ref={popupRif} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio || guidaSuFoglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={popupSuFoglio ? stileFoglio : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+              <div ref={agganciaPopup} tabIndex={-1} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio || guidaSuFoglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={popupSuFoglio ? stileFoglio : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
@@ -1251,7 +1335,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                         onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: mappa.nome, voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })} /> : null;
                     })()}
                   </div>
-                  <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
+                  <button type="button" className="spillo-popup__chiudi" onClick={() => chiudiPopup(selezionato.id)} aria-label="Chiudi il popup">×</button>
                 </div>
                 {/* L5 §2: lo spillo chiesto che adesso non c'è (chiuso, non ancora sbloccato): lo si dice, col motivo */}
                 {selezionato.id === spilloChiesto && nonDisponibile(selezionato) && (
@@ -1356,7 +1440,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       {/* in modalità scelta l'elenco resta aperto: nello stesso punto se ne collegano anche più d'uno */}
                       <button type="button" className={`visore-mappa__voce ${scelta?.scelti.has(s.id) ? 'visore-mappa__voce--attiva' : ''}`} disabled={scelta?.occupato}
                         aria-pressed={scelta ? scelta.scelti.has(s.id) : undefined}
-                        onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(s.id); }}>
+                        onClick={(e) => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(s.id); fuocoAlPopup.current = e.detail === 0; }}>
                         <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                         <span className="flex-1 min-w-0 break-words text-left">{nomePin(s)}</span>
                         <span className="testo-12 text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
@@ -1385,7 +1469,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       {/* L3 RG-1: la guida da usare, fuori dal livello trasformato (finestra fissa sullo schermo, o foglio dal basso) */}
       {conGuida && guidaAperta && (
         <GuidaNelVisore mappa={mappa.chiave} partitaId={partitaId} spilloSelezionato={selezionatoId} spilliQui={spilliQui} onCentra={mostraDallaGuida}
-          onCambiato={guida?.onCambiato} onChiudi={() => setGuidaAperta(null)} ancora={guidaAperta} versione={versioneStati} foglioRef={guidaFoglio} />
+          onCambiato={guida?.onCambiato} onChiudi={chiudiGuida} ancora={guidaAperta} versione={versioneStati} foglioRef={guidaFoglio} />
       )}
     </div>
   );
@@ -1484,8 +1568,9 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
                     nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
                 {!eOffertaAojiru({ chiave: a.chiave }) && !(conCompra(a, partitaId) && onAcquistiCambiati) && partitaId && onAcquisto
                   ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} /></label>
-                  : <span className="w-5 shrink-0 text-center">{a.comprato && !ripetibile(a) ? '✓' : ''}</span>}
-                <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !ripetibile(a) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
+                  : <span className="w-5 shrink-0 text-center">{a.comprato && !ripetibile(a) && <span className="sr-only">comprato</span>}</span>}
+                {/* D15: pezzo unico comprato = spunta rossa a sinistra del nome e nome barrato in grigio (il collegamento al catalogo, inline-flex, non prende la barratura del genitore: la classe sta anche su di lui) */}
+                <div className="min-w-0 flex-1 break-words"><SegnoStato stato={a.comprato && !ripetibile(a) ? 'fatto' : null} dimensione={14} className="mr-1.5 align-text-bottom" /><span className={a.comprato && !ripetibile(a) ? 'stato-fatto' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className={`touch inline-flex items-center ${a.comprato && !ripetibile(a) ? 'stato-fatto' : ''}`}>{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
                 <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
                 {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
@@ -1511,6 +1596,13 @@ function parolaSegnato(s: SpilloDto | SchedaContenutoGuidaDto): string {
   const stati = [...new Set(s.voci.map((v) => v.stato))];
   if (stati.length === 0) return parolaDelloStato(s);
   return stati.length === 1 && stati[0] ? stati[0] : 'segnato';
+}
+
+/** Il segno D15 di un pin nell'elenco: nessuno se non è segnato, il cerchio barrato se le sue voci sono tutte «esaurito», la spunta
+ *  altrimenti (come `parolaSegnato`). */
+function segnoSpillo(s: SpilloDto): 'fatto' | 'esaurito' | null {
+  if (!s.raccolto) return null;
+  return parolaSegnato(s) === 'esaurito' ? 'esaurito' : 'fatto';
 }
 
 /** Un pin di spostamento con un arrivo raggiungibile (porta, scala, rampino, passaggio…): serve a spostarsi e non si segna, nemmeno con
@@ -1679,10 +1771,11 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                       : ripetibile(a)
                         // ciò che si compra più volte non ha un «comprato» sì/no: lo dicono «Compra» e gli acquisti qui sotto
                         ? <span className="w-5 shrink-0" aria-hidden="true" />
-                        : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
+                        : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'} />}
                     <div className="min-w-0 flex-1">
-                      <span className={`block testo-13 leading-tight ${a.comprato && !ripetibile(a) ? 'line-through' : ''}`}>
-                        {a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
+                      {/* D15: pezzo unico comprato = spunta rossa a sinistra del nome e nome barrato in grigio, non la categoria (il collegamento al catalogo, inline-flex, non prende la barratura del genitore: la classe sta anche su di lui) */}
+                      <span className="block testo-13 leading-tight">
+                        <SegnoStato stato={a.comprato && !ripetibile(a) ? 'fatto' : null} dimensione={14} className="mr-1.5 align-text-bottom" /><span className={a.comprato && !ripetibile(a) ? 'stato-fatto' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className={`touch inline-flex items-center ${a.comprato && !ripetibile(a) ? 'stato-fatto' : ''}`}>{a.nome}</Link> : a.nome}</span><span className="text-text-muted"> · {a.categoria}</span>
                       </span>
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">

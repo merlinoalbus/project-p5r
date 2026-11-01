@@ -111,7 +111,7 @@ function FormPezzoReale({ pezzo: p, copia: c, indice, immagine, elenchi, occupat
             <label className="editor-mappa__campo w-24">Y<input className="form-input" type="number" inputMode="numeric" min={0} max={yMax} step={1} value={y} onChange={(e) => setY(Number(e.target.value))} /></label>
             <div className="flex gap-1" role="group" aria-label="Sposta di un pixel">
               {([[-1, 0, 'sinistra', '←'], [0, -1, 'su', '↑'], [0, 1, 'giù', '↓'], [1, 0, 'destra', '→']] as const).map(([dx, dy, verso, freccia]) => (
-                <button key={verso} type="button" className="btn btn-secondary btn-sm touch min-w-11" aria-label={`Sposta di 1 px a ${verso}`} disabled={occupato} onClick={() => sposta(dx, dy)}>{freccia}</button>
+                <button key={verso} type="button" className="btn btn-secondary btn-sm touch min-w-11" aria-label={`Sposta di 1 px a ${verso}`} disabled={occupato} title="Maiusc: 10 px" onClick={(e) => { const passo = e.shiftKey ? 10 : 1; sposta(dx * passo, dy * passo); }}>{freccia}</button>
               ))}
             </div>
           </div>

@@ -243,7 +243,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           onChiudi={() => navigate(haCasaPropria(dati) ? casaDellaMappa(dati) : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
-          intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
+          intestazione={<h1 className="editor-mappa__targhetta">Modifica<span className="sr-only"> la mappa {nomePresentazioneMappa(dati)}</span></h1>}
           azioni={<>
             <PulsanteVisivo tono={conGiorno ? 'primario' : 'fantasma'} compatto attivo={conGiorno}
               icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
@@ -435,6 +435,7 @@ function PannelloEditor(p: PropsPannello) {
         <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'ritaglia'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ritaglia pezzo" dettaglio={strumento === 'ritaglia' ? 'trascina un rettangolo sulla mappa' : 'poi trascina sulla mappa'}
           disabled={occupato || !immagineDiBase} onClick={() => p.onStrumento(strumento === 'ritaglia' ? 'seleziona' : 'ritaglia')} />
         {!immagineDiBase && <p className="m-0 testo-12 text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
+        {p.copiaSelezionata && <p className="m-0 testo-12 text-text-muted">Copia selezionata: con il fuoco sulla sua voce dell’elenco, le frecce la spostano di 1 px, con Maiusc di 10; la posizione si scrive anche nei campi X e Y qui sotto.</p>}
         {mappa.pezzi.length === 0
           ? <p className="m-0 testo-12 text-text-muted">Nessun pezzo su questa mappa.</p>
           : (
@@ -451,7 +452,7 @@ function PannelloEditor(p: PropsPannello) {
                       const attiva = c.id === p.copiaSelezionata?.copia.id;
                       return (
                         <li key={c.id}>
-                          <button type="button" className={`visore-mappa__voce ${attiva ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={attiva} onClick={() => p.onSelezionaCopia(attiva ? null : c.id)}>
+                          <button type="button" data-copia-id={c.id} className={`visore-mappa__voce ${attiva ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={attiva} onClick={() => p.onSelezionaCopia(attiva ? null : c.id)}>
                             <span className="flex-1 min-w-0 truncate">{nomeCopia(pz, c, i)}</span>
                             <span className="testo-12 text-text-muted shrink-0">{c.posizione.x}, {c.posizione.y}{c.rotazione ? ` · ${c.rotazione}°` : ''}{c.condizioni.length ? ` · ${c.condizioni.length === 1 ? '1 condizione' : `${c.condizioni.length} condizioni`}` : ''}</span>
                           </button>
@@ -477,7 +478,7 @@ function PannelloEditor(p: PropsPannello) {
       <section className="visore-mappa__sezione" aria-label="Strumenti">
         <h3 className="visore-mappa__intestazione">Strumenti</h3>
         <div className="editor-mappa__strumenti" role="group" aria-label="Strumento attivo">
-          <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'seleziona'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona" dettaglio="sposta trascinando" onClick={() => p.onStrumento('seleziona')} />
+          <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'seleziona'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona" dettaglio="trascina o usa le frecce" onClick={() => p.onStrumento('seleziona')} />
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'aggiungi'} icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi" dettaglio="tocca la mappa" onClick={() => p.onStrumento('aggiungi')} />
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'incolla'} icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Incolla" dettaglio={appunti ? `«${appunti.nome}»` : 'copia prima uno spillo'} disabled={!appunti} onClick={() => p.onStrumento('incolla')} />
         </div>
@@ -498,7 +499,7 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </div>
         )}
-        <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
+        <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio). Da tastiera: Tab fino allo spillo, Invio per selezionarlo, poi le frecce lo spostano di 1 px (con Maiusc di 10); la posizione si scrive anche nei campi X e Y delle sue proprietà. Il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
       </section>
 
       {selezionato && (
@@ -691,6 +692,21 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   // gli spostamenti di prima avevano solo il riferimento alla mappa: qui è la stessa cosa di una destinazione senza spillo
   const destinazioneIniziale: DestinazioneSpillo | null = s.destinazione ?? (s.riferimento?.tipo === 'mappa' ? { mappa: s.riferimento.chiave, spillo: null } : null);
   const [destinazione, setDestinazione] = useState<DestinazioneSpillo | null>(destinazioneIniziale);
+  // L6-07 (WCAG 2.5.7): la posizione si scrive anche nei campi, in percentuale dell'immagine con una cifra decimale come il trascinamento;
+  // `null` = la posizione salvata. Se lo spillo si sposta per altra via (trascinamento, frecce) i campi tornano alla posizione nuova.
+  const [xTesto, setXTesto] = useState<string | null>(null);
+  const [yTesto, setYTesto] = useState<string | null>(null);
+  const [posizioneVista, setPosizioneVista] = useState({ x: s.x, y: s.y });
+  if (posizioneVista.x !== s.x || posizioneVista.y !== s.y) { setPosizioneVista({ x: s.x, y: s.y }); setXTesto(null); setYTesto(null); }
+  /** Il valore di un campo di posizione: fra 0 e 100, una cifra decimale; vuoto o non numerico vale la posizione salvata. */
+  const percentuale = (testo: string | null, salvata: number) => {
+    if (testo === null || testo.trim() === '') return salvata;
+    const n = Number(testo.replace(',', '.'));
+    return Number.isFinite(n) ? Math.round(Math.min(100, Math.max(0, n)) * 10) / 10 : salvata;
+  };
+  const x = percentuale(xTesto, s.x);
+  const y = percentuale(yTesto, s.y);
+  const posizioneCambiata = x !== s.x || y !== s.y;
   /** Nel mondo, la pagina da cui si aggiunge la mappa di destinazione al posto di «Crea mappa collegata» (null fuori). */
   const aggiunta = paginaPerAggiungere(mappa);
   const categoria = categoriaSpillo(tipo);
@@ -708,8 +724,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const riferimentoEffettivo = categoria === 'spostamento'
     ? (riferimento && riferimento.tipo !== 'mappa' ? riferimento : (destinazione ? { tipo: 'mappa' as const, chiave: destinazione.mappa } : null))
     : riferimento;
-  const dati = { nome: nome.trim() || s.nome, tipo, descrizione, riferimento: riferimentoEffettivo, condizioni: ammetteCondizioni(tipo) ? condizioni : [], destinazione: categoria === 'spostamento' ? destinazione : null };
-  const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== descrizioneIniziale
+  const dati = { nome: nome.trim() || s.nome, tipo, descrizione, riferimento: riferimentoEffettivo, condizioni: ammetteCondizioni(tipo) ? condizioni : [], destinazione: categoria === 'spostamento' ? destinazione : null, ...(posizioneCambiata ? { x, y } : {}) };
+  const modificato = posizioneCambiata || dati.nome !== s.nome || tipo !== s.tipo || descrizione !== descrizioneIniziale
     || (dati.riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (dati.riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null)
     || JSON.stringify(dati.condizioni) !== JSON.stringify(condizioniNude(s)) || JSON.stringify(dati.destinazione) !== JSON.stringify(categoria === 'spostamento' ? destinazioneIniziale : null);
   const puoCreareLuogo = pinCompatibileConNuovoLuogo(s);
@@ -728,7 +744,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display testo-20 leading-tight break-words">{s.nome}</h3>
-          <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].nome} · x {s.x}% · y {s.y}% · {s.origine}</p>
+          <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].nome} · <span aria-live="polite">x {s.x}% · y {s.y}%</span> · {s.origine}</p>
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi le proprietà">×</button>
       </div>
@@ -754,6 +770,14 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta nel luogo" disabled={occupato || spostando} onClick={() => void spostaNelLuogo()} />
         </div>}
 
+        <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5">
+          <legend className="testo-12 text-text-secondary mb-1">Posizione sulla mappa (percentuale dell’immagine)</legend>
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="editor-mappa__campo w-24">X<input className="form-input" type="number" inputMode="decimal" min={0} max={100} step={0.1} value={xTesto ?? String(s.x)} onChange={(e) => setXTesto(e.target.value)} disabled={occupato} /></label>
+            <label className="editor-mappa__campo w-24">Y<input className="form-input" type="number" inputMode="decimal" min={0} max={100} step={0.1} value={yTesto ?? String(s.y)} onChange={(e) => setYTesto(e.target.value)} disabled={occupato} /></label>
+          </div>
+          <span className="testo-12 text-text-muted">Si salva con «Salva spillo». Sulla mappa, con lo spillo selezionato: frecce di 1 px, con Maiusc di 10.</span>
+        </fieldset>
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
         {categoria === 'citta' && azioneLuogo}

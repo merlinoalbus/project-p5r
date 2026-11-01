@@ -35,7 +35,7 @@ export function MeteoGiornata({ fascia, meteo: f, onCambia, occupato }: Props) {
         return (
           <button key={m.chiave} type="button" className={`chip chip--icona touch justify-center ${stile}`} disabled={occupato}
             aria-pressed={mio}
-            aria-label={mio ? `${nome} (segnato: tocca per tornare alla guida)` : scelto ? `${nome} (dalla guida: tocca per confermarlo)` : nome}
+            aria-label={mio ? `${nome} (tocca per tornare alla guida)` : scelto ? `${nome} (dalla guida: tocca per confermarlo)` : nome}
             title={mio ? `${m.nome}: segnato da te${f.guida && f.guida !== m.chiave ? ` (la guida dice ${nomeMeteo(f.guida).toLowerCase()})` : ''} — tocca per tornare alla guida` : scelto ? `${m.nome}: dalla guida — tocca per confermarlo` : m.nome}
             onClick={() => onCambia(fascia, mio ? null : m.chiave)}>
             <IconaMeteo chiave={m.chiave} dimensione={20} />

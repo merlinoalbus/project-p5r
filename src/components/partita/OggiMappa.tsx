@@ -20,6 +20,7 @@ import { MappaIncorporata } from '../mappe/MappaIncorporata';
 import { MappaTokyo } from '../mappe/MappaTokyo';
 import { getDungeons, getQuartieri } from '../../services/api';
 import { radiciMetaverso } from '../../utils/palazzi';
+import { comportamentoScorrimento } from '../../utils/movimento';
 import { useCarica } from '../../hooks/useCarica';
 import { useCovoNellaPartita } from '../../hooks/useCovoNellaPartita';
 import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
@@ -61,7 +62,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
     if (richiestaVista.current === mappa.richiesta) return;
     richiestaVista.current = mappa.richiesta;
     const r = colonna.current?.getBoundingClientRect();
-    if (r && (r.top < 0 || r.top >= window.innerHeight)) colonna.current!.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (r && (r.top < 0 || r.top >= window.innerHeight)) colonna.current!.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' });
   }, [mappa.richiesta]);
 
   return (

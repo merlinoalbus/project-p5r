@@ -30,7 +30,8 @@ it('quattro icone; quella della guida si vede più tenue e non è «premuta»; u
 it('segnato: l’icona è premuta, e ritoccarla torna a quello della guida', async () => {
   const onCambia = vi.fn();
   render(<MeteoGiornata fascia="giorno" meteo={{ meteo: 'sereno', origine: 'partita', guida: 'pioggia', allerte: [] }} onCambia={onCambia} />);
-  const sereno = screen.getByRole('button', { name: 'Di giorno: Sereno (segnato: tocca per tornare alla guida)' });
+  // L6-09: lo stato «segnato» lo dice `aria-pressed`, non più anche il nome
+  const sereno = screen.getByRole('button', { name: 'Di giorno: Sereno (tocca per tornare alla guida)' });
   expect(sereno).toHaveAttribute('aria-pressed', 'true');
   expect(sereno.className).toContain('chip--attivo');
   expect(sereno).toHaveAttribute('title', 'Sereno: segnato da te (la guida dice pioggia) — tocca per tornare alla guida');

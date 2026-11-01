@@ -24,6 +24,7 @@ import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
 import { NoteStoricheOfferta } from '../catalogo/NoteStoricheOfferta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import { TestoNote } from '../shared/TestoNote';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -73,7 +74,8 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
   };
   return <li className={`catalogo-prodotto${a.acquistato && !ripetibile ? ' catalogo-prodotto--acquistato' : ''}`}>
     <div className="catalogo-prodotto__nome">
-      <strong className={a.acquistato && !ripetibile ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
+      {/* D15: pezzo unico acquistato = spunta rossa a sinistra e nome barrato in grigio (il bordo verde e la casella «Acquistato» lo dicono a parole) */}
+      <strong><SegnoStato stato={a.acquistato && !ripetibile ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={a.acquistato && !ripetibile ? 'stato-fatto' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className={`touch inline-flex items-center ${a.acquistato && !ripetibile ? 'stato-fatto' : ''}`}>{nome}</Link> : nome}</span></strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
       {a.statistiche && <span className="text-text-secondary"><TestoNote testo={a.statistiche} daParole="conteggi" /></span>}
       {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}

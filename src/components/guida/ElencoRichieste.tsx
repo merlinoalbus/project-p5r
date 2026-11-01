@@ -15,6 +15,7 @@ import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Selettore } from '../shared/Selettore';
+import { SegnoStato } from '../shared/SegnoStato';
 import type { RichiestaDelDedaloDto, StatoRichiesta } from '../../types';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -68,7 +69,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
         const idMotivi = `fatta-${r.chiave}`;
         return (
         <li key={r.chiave} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 testo-13">
-          <Link to={`/guida/richieste?dedalo=${encodeURIComponent(dedalo)}`} className={`touch inline-flex min-w-[10rem] flex-1 items-center ${r.stato === 'completata' ? 'text-text-muted line-through' : ''}`}>{r.nome}</Link>
+          <Link to={`/guida/richieste?dedalo=${encodeURIComponent(dedalo)}`} className="touch inline-flex min-w-[10rem] flex-1 items-center">{/* D15: Richiesta «Fatta» = spunta rossa a sinistra e nome barrato in grigio (lo stato a parole sta nel comando accanto) */}<SegnoStato stato={r.stato === 'completata' ? 'fatto' : null} className="mr-1.5" /><span className={r.stato === 'completata' ? 'stato-fatto' : ''}>{r.nome}</span></Link>
           {partitaId && motivi && <span id={idMotivi} className="sr-only">Si completa dopo: {motivi.join('; ')}</span>}
           {partitaId && (
             // da tastiera come vuole il ruolo: Tab entra sullo stato scelto, le frecce scelgono il precedente o il seguente

@@ -19,9 +19,11 @@ import { notifica } from '../stores/notificationStore';
 import { conferma } from '../stores/confermaStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { seGiornoAvanzato } from '../utils/giornoAvanzato';
+import { comportamentoScorrimento } from '../utils/movimento';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
 import { DaApplicare } from '../components/partita/DaApplicare';
 import { PageState } from '../components/shared/PageState';
+import { SegnoStato } from '../components/shared/SegnoStato';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
@@ -119,7 +121,8 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
           <RicompensaDomanda d={d} className="testo-12 text-text-muted" />
         </div>
-        <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
+        {/* D15: domanda fatta = spunta rossa a sinistra e testo barrato in grigio (lo stato a parole sta nella casella) */}
+        <div className="flex items-start gap-1.5"><SegnoStato stato={d.fatta ? 'fatto' : null} dimensione={14} className="mt-[3px]" /><span className={`min-w-0 ${d.fatta ? 'stato-fatto' : ''}`}>{d.domanda}</span></div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
         {/* Le risposte giuste, nell'ordine; per gli esami accanto a ogni risposta c'è il suo quesito. */}
         <ol className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Risposte corrette">
@@ -192,7 +195,7 @@ export function DomandePage() {
   const vaiAllaProssima = () => {
     if (!prossima) return;
     setTipo('tutte'); setStato('tutte'); setRicerca('');
-    setTimeout(() => document.getElementById(ancoraData(prossima.data))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+    setTimeout(() => document.getElementById(ancoraData(prossima.data))?.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' }), 0);
   };
 
   return (

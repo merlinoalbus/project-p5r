@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import type { SkillRiassuntoDto } from '../../types';
+import { useFreccePerElenco } from '../../hooks/useFreccePerElenco';
 
 interface Props {
   skill: SkillRiassuntoDto[];
@@ -20,6 +21,7 @@ interface Props {
 /** Chip delle skill scelte (tocco = rimuovi) più campo di ricerca con elenco a discesa. */
 export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta = 'Skill desiderate', senzaTratti = true }: Props) {
   const [q, setQ] = useState('');
+  const { rif, suTasto } = useFreccePerElenco();
   const candidate = useMemo(() => {
     const testo = q.trim().toLowerCase();
     if (!testo) return [];
@@ -29,7 +31,7 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
       .slice(0, 10);
   }, [q, skill, scelte, senzaTratti]);
   return (
-    <div className="card flex flex-col gap-2">
+    <div ref={rif} onKeyDown={suTasto} className="card flex flex-col gap-2">
       <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta} ({scelte.length}/{massimo})</span>
       <div className="flex flex-wrap gap-1.5">
         {scelte.map((s) => (
@@ -43,10 +45,10 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
         <>
           <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca una skill (nome o effetto)…" />
           {candidate.length > 0 && (
-            <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] area-scorrevole" role="listbox" aria-label="Skill trovate">
+            <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] area-scorrevole" aria-label="Skill trovate">
               {candidate.map((s) => (
-                <li key={s.id} role="option" aria-selected={false}>
-                  <button type="button" className="w-full text-left flex flex-wrap items-center gap-x-2 gap-y-1 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
+                <li key={s.id}>
+                  <button type="button" data-voce-elenco className="w-full text-left flex flex-wrap items-center gap-x-2 gap-y-1 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
                     <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                     <span className="font-semibold">{s.nomeIt}</span>
                     {/* l'effetto si legge intero (a capo, sotto il nome sul telefono): serve a scegliere la skill */}

@@ -13,6 +13,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { opzioniDaNomi } from '../utils/selettore';
+import { comportamentoScorrimento } from '../utils/movimento';
 import { getLibri, impostaProgressoLibro } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useCodaProgresso } from '../hooks/useCodaProgresso';
@@ -101,7 +102,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
   const libroSelezionato = dati.dati?.libri.find((l) => l.chiave === selezionato) ?? null;
   const posizione = libroSelezionato?.posizioni[fonteSelezionata] ?? null;
   useEffect(() => {
-    if (libroSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    if (libroSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: comportamentoScorrimento(), block: 'start' });
   }, [libroSelezionato]);
   const d = dati.dati;
   // il libro della voce si vede anche se già completato: non finisce nella piega dei completati

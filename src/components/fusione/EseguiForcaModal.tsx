@@ -111,7 +111,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
           </div>
         )}
         <div className="flex justify-end gap-2">
-          <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
+          <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={<>Registra: rimuovi {sacrificio.nomeIt}</>} type="submit" disabled={occupato || daDimenticare > 0 || (incidente && totalePunti === 0)} />
         </div>
       </form>

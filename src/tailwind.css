@@ -99,9 +99,18 @@
      questo fa almeno 4,6:1 (lotto C). Fondi e bordi d'errore restano su --color-error */
   --color-error-testo: #fb7c7c;
   --color-info: #3b82f6;
+  /* info, avvertimento e riuscita come TESTO sul proprio velo trasparente (codici di affinità «Resiste», «Riflette», «Assorbe»): sulla
+     superficie più chiara facevano 3,3:1, 4,4:1 e 4,3:1; questi, stessa tinta più luminosi, fanno almeno 4,8:1. Fondi e bordi restano sui token pieni. */
+  --color-info-testo: #76a6f9;
+  --color-warning-testo: #f8a826;
+  --color-success-testo: #3dd377;
   --color-text-on-primary: #ffffff;
+}
 
-  /* ---- Elementi di gioco (affinità e skill) ---- */
+/* ---- Elementi di gioco (affinità e skill) ----
+   `@theme static`: questi colori li compone il codice (`var(--color-el-${token})` in utils/elementi.ts), nessuna utility e nessuna regola CSS li
+   nomina per intero, e senza `static` Tailwind li toglie dal CSS finale come variabili inutilizzate (nella build restava solo `--color-el-tratto`). */
+@theme static {
   --color-el-fisico: #c9a227;
   --color-el-arma: #8f8f9a;
   --color-el-fuoco: #f0552b;
@@ -118,7 +127,23 @@
   --color-el-supporto: #8ab4f8;
   --color-el-passiva: #b0b0c0;
   --color-el-tratto: #ececf1;
+  /* Il colore dell'elemento come TESTO (nome, sigla, chip). Il colore pieno, sopra i veli dell'interfaccia, non arriva a 4,5:1 per otto elementi:
+     questi sono la stessa tinta schiarita verso il bianco quanto basta per fare almeno 4,6:1 su OGNI fondo (fondo pagina, carta, terziario,
+     superficie) con OGNI velo che ci sta sotto: i chip (8–22% del colore stesso) e i codici di affinità (Debole, Resiste, Annulla, Riflette,
+     Assorbe, al 20–25%). Pieno → testo, nel caso peggiore: Fisico 3,93→4,62 · Arma 2,97→4,61 · Fuoco 2,73→4,60 · Psicocinesi 3,28→4,63 ·
+     Maledizione 2,39→4,65 · Alterazione 4,15→4,62 · Supporto 4,51→4,61 · Passiva 4,44→4,59. Gli altri otto, già sopra 4,9:1, restano sul colore pieno.
+     Bordi, fondi e icone restano sempre sul colore pieno (`coloreElemento`); il testo usa `coloreTestoElemento`. */
+  --color-el-fisico-testo: #d2b24c;
+  --color-el-arma-testo: #b4b4bb;
+  --color-el-fuoco-testo: #f69e86;
+  --color-el-psicocinesi-testo: #ea9ae3;
+  --color-el-maledizione-testo: #cba5f7;
+  --color-el-alterazione-testo: #deab78;
+  --color-el-supporto-testo: #8eb6f8;
+  --color-el-passiva-testo: #b3b3c3;
+}
 
+@theme {
   /* ---- Radii ---- */
   --radius-xs: 2px;
   --radius-sm: 4px;
@@ -164,6 +189,9 @@
        segue la dimensione del testo scelta dall'utente nel sistema o nel browser */
     font-size: 93.75%;
     color-scheme: dark;
+    /* le caselle di spunta, i pulsanti d'opzione e gli intervalli nativi prendono il rosso del tema invece dell'azzurro del browser
+       (con la spunta bianca: 5,0:1 sul fondo del comando) */
+    accent-color: var(--color-primary-fondo);
   }
   body {
     background: var(--color-bg);
@@ -273,6 +301,8 @@
   .btn-visivo { max-width: 100%; min-width: 0; }
   .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-14); letter-spacing: .03em; white-space: normal; overflow-wrap: anywhere; line-height: 1.05; }
   .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: var(--testo-12); opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+  /* sul rosso del pulsante primario il bianco attenuato all'82% fa 3,8:1 (4,7 all'hover): qui il dettaglio è pieno (bianco su #d42d24 = 5,0:1) */
+  .btn-primary .btn-visivo__dettaglio { opacity: 1; }
   /* ▸/▾ in coda al titolo dei pulsanti che aprono e chiudono (FrecciaApertura); nel <summary> di un menu ruota con [open] */
   .btn-visivo__freccia { display: inline-block; margin-left: .3em; font-family: var(--font-sans); transition: transform .15s; }
   /* il tassello «Altro» nelle testate strette (Area, Dedalo): meno aria attorno, perché resti sulla riga dei comandi e il suo menu,
@@ -896,11 +926,11 @@
   .spillo-mappa:focus-visible { outline: none; z-index: 9; }
   .spillo-mappa:focus-visible .spillo-mappa__goccia, .spillo-mappa:focus-visible .spillo-mappa__disegno, .spillo-mappa:focus-visible .spillo-mappa__gruppo { outline: 3px solid var(--color-primary-testo); outline-offset: 3px; }
   .spillo-mappa:focus-visible .spillo-mappa__etichetta { opacity: 1; }
-  /* Col dito la goccia è 38 px, sotto i 44 richiesti; ingrandirla coprirebbe la mappa, che è il
-     contenuto. Si allarga quindi la sola area che riceve il tocco, con un rettangolo invisibile
-     attorno al disegno: il pin resta quello, il bersaglio arriva a 44. */
-  /* A ogni larghezza, mouse compreso: la goccia è 38 px e il bersaglio dev'essere 44 sempre. */
-  .spillo-mappa::after { content: ""; position: absolute; inset: -3px; }
+  /* La goccia è 38 px, sotto i 44 richiesti; ingrandirla coprirebbe la mappa, che è il contenuto. Il bersaglio è il PULSANTE, che
+     diventa 44×44 con un'imbottitura invisibile (3 px ai lati e 6 in alto; in basso niente, così la punta resta sul punto ancorato:
+     il pulsante si trasla di -100% in verticale): il pin si vede identico, e l'area misurata — non solo quella che riceve il clic —
+     è di 44 px a ogni larghezza, mouse compreso. Prima era un riquadro `::after` che il righello non contava (misurato 38). */
+  .spillo-mappa { padding: 6px 3px 0; }
   /* La goccia: quadrato con tre angoli tondi, ruotato di 45 gradi, cosi' l'angolo vivo cade in
      basso sul punto ancorato (il bottone e' traslato di -100% in verticale). Il colore e' quello
      del tipo, ed e' quel che si legge da lontano. La misura la passa il componente. */
@@ -932,10 +962,9 @@
     .spillo-mappa--spostamento:not(.spillo-mappa--selezionato) .spillo-mappa__etichetta[data-coperta] { opacity: 0; }
   }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
-  /* Il gruppo («2 spilli vicini») è 34 px, sei meno della goccia: i 3 px d'estensione che bastano a
-     una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
-     validatore, 2026-09-13, misurato con l'hit-testing e non col righello). */
-  .spillo-mappa--gruppo::after { inset: -5px; }
+  /* Il gruppo («2 spilli vicini») è 34 px, quattro meno della goccia: serve un'imbottitura di 5 px per parte (e non quella del singolo
+     pin, che sta solo in alto) perché l'ancora è al centro. Il pulsante è 44×44 (di più se il numero è largo). */
+  .spillo-mappa--gruppo { padding: 5px; }
   .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary-fondo); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
@@ -1639,6 +1668,17 @@
   .chip--bloccata { --chip-sfondo: color-mix(in srgb, var(--color-text-muted) 18%, var(--color-bg-secondary)); --chip-bordo: var(--color-text-muted); color: var(--color-text-secondary); }
   /* il chip con l'icona («Sulla mappa»): 6 px fra icona e testo, che `.chip` (4 px) riscriveva quando stava prima */
   .chip--icona { gap: 6px; }
+  /* ---- Stati «fatto» ed «esaurito» (D15, opzione C, 01/11) ----
+     Una riga chiusa non si attenua più con l'opacità (portava il testo a 1,9–3,4:1): ha il segno `SegnoStato` a sinistra e il TESTO DEL NOME
+     barrato in `--color-text-muted` (almeno 4,8:1 su superficie, carte e fondo). La barra è rossa per «fatto» e grigia per «esaurito».
+     Le classi vanno sull'elemento del nome, che non deve avere utilità di colore proprie (stanno in `components`, sotto le utilità).
+     Dopo `.chip`, perché un chip chiuso prenda il grigio di qui e non il suo. */
+  .stato-fatto, .stato-esaurito { color: var(--color-text-muted); text-decoration-line: line-through; text-decoration-thickness: 1.5px; }
+  .stato-fatto { text-decoration-color: var(--color-primary); }
+  .stato-esaurito { text-decoration-color: var(--color-text-muted); }
+  .segno-stato { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; }
+  .segno-stato--fatto { color: var(--color-primary); }
+  .segno-stato--esaurito { color: var(--color-text-muted); }
   /* L'infiltrazione scelta di una voce del Diario (2026-10-25): senza la parola «Infiltrazioni:» il chip si distingue dai cartellini pieni
      accanto (tipo, Palazzo, area) per il contorno e per la maschera dello spillo d'infiltrazione, che si vedono anche al tocco */
   .chip--infiltrazione {
@@ -2031,6 +2071,9 @@
   .livello-p5--grande .livello-p5__etichetta { font-size: var(--testo-12); }
   .piastrella { transition: transform 0.15s, border-color 0.15s; }
   .piastrella:hover { transform: translateY(-2px); }
+  /* la piastrella del Compendio è un <li> con il collegamento e, sopra l'arte, il pulsante dell'immagine (fratelli): il bordo si accende
+     anche passando sull'immagine, come quando stava dentro il collegamento */
+  .piastrella:hover > .card--cliccabile, .riga-con-arte:hover > .card--cliccabile { border-color: var(--color-primary); }
   .cornice-arte {
     position: relative;
     aspect-ratio: 16 / 10;
@@ -2349,7 +2392,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
 .progressi-partita__riga { display:flex; align-items:center; gap:10px; min-height:44px; padding:2px 6px; border-bottom:1px solid var(--color-border); font-size:var(--testo-13); }
 .progressi-partita__riga--evento { min-height:52px; cursor:pointer; }
-.progressi-casella { width:28px; height:28px; flex-shrink:0; cursor:pointer; accent-color:var(--color-primary); }
+.progressi-casella { width:28px; height:28px; flex-shrink:0; cursor:pointer; accent-color:var(--color-primary-fondo); }
 .progressi-scopo { border-left:3px solid var(--color-primary); padding-left:10px; font-size:var(--testo-13); color:var(--color-text-secondary); }
 /* il riepilogo fa anche da schede: quattro tessere sempre in una fila (sul telefono compatte, vedi in fondo al blocco) */
 .progressi-struttura { display:flex; flex-direction:column; gap:12px; }
@@ -2713,7 +2756,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    La fila sta in una cornice (`.fila-cornice`) e le frecce le stanno sopra, ai bordi: compaiono solo dal lato in cui la fila
    continua (`data-prima`/`data-dopo`, gli stessi attributi della sfumatura) e la fanno scorrere di una pagina. Coprono la parte già
    sfumata della fila; sui dispositivi a tocco il bersaglio è di 44 px (e la sfumatura un poco più larga, a fargli posto), col mouse
-   basta il cerchio. Sono nascoste ai lettori di schermo e fuori dall'ordine di Tab: la tastiera scorre la fila seguendo il fuoco. */
+   il cerchio sta in un riquadro da 32 con un'area di clic da 44. Sono nascoste ai lettori di schermo e fuori dall'ordine di Tab: la tastiera scorre la fila seguendo il fuoco. */
 @layer components {
   .fila-cornice { position: relative; display: flex; min-width: 0; }
   .fila-cornice > .fila-scorrevole { flex: 1 1 auto; min-width: 0; }
@@ -2725,8 +2768,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     display: none; position: absolute; top: 50%; z-index: 1; width: 32px; height: 32px; transform: translateY(-50%);
     align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: var(--color-text); cursor: pointer;
   }
-  /* col mouse il cerchio resta da 28 px e il riquadro da 32, ma l'area di tocco è di 44 px (misurato a 375 px col mouse: 32×32): un
-     riquadro invisibile centrato sul pulsante, come `.immagine-entita`; sui dispositivi a tocco il pulsante è già da 44 */
+  /* col mouse il cerchio resta da 28 px e il riquadro da 32, e l'area che riceve il clic è di 44×44: un riquadro invisibile centrato sul
+     pulsante (`::after`, conta nel clic anche se `getBoundingClientRect` dà 32), come `.immagine-entita`; così lo spazio ai capi della
+     fila resta di 32 px e le schede non si spostano. Sui dispositivi a tocco il pulsante stesso è da 44 */
   .fila-freccia::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
   .fila-freccia--prima { left: 0; justify-content: flex-start; }
   .fila-freccia--dopo { right: 0; justify-content: flex-end; }

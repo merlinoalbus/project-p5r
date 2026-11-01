@@ -97,7 +97,7 @@ export function ImmaginiCaricate() {
         onChiudi={chiudi}
         azioni={
           <>
-            <button type="button" className="btn btn-secondary" onClick={chiudi}>Annulla</button>
+            <button type="button" className="btn btn-secondary touch" onClick={chiudi}>Annulla</button>
             {pezziDaConfermare
               ? <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi anche i pezzi" disabled={occupato} onClick={() => void rimuovi(true)} />
               : <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi" disabled={occupato} onClick={() => void rimuovi()} />}

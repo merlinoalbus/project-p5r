@@ -21,11 +21,13 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { PageState } from '../shared/PageState';
+import { SchedeTab } from '../shared/SchedeTab';
 import { IconaCategoria } from '../guida/IconaCategoria';
 import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
 import { bloccata, motivoBlocco } from '../../utils/letture';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
@@ -72,8 +74,10 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
   const percentuale = v.totale > 0 ? Math.round((v.progresso / v.totale) * 100) : 0;
   return (
     <li className="flex items-center gap-2 py-1.5">
+      {/* D15: la voce completata ha la spunta rossa a sinistra e il titolo barrato in grigio (l'elenco dei completati lo dice già nel nome) */}
+      <SegnoStato stato={v.fatto ? 'fatto' : null} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate testo-13 font-semibold" title={v.nome}>{v.nome}</span>
+        <span className={`truncate testo-13 font-semibold ${v.fatto ? 'stato-fatto' : ''}`} title={v.nome}>{v.nome}</span>
         <span className="flex items-center gap-2">
           <span className="visore-mappa__progresso h-1.5 flex-1" role="progressbar" aria-label={`Progresso ${v.nome}`} aria-valuemin={0} aria-valuemax={v.totale} aria-valuenow={v.progresso}>
             <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
@@ -92,14 +96,14 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
 
 /** Il riquadro di un gruppo (libri, film, videogiochi): intestazione con conteggio dei completati e
  * collegamento alla pagina della Guida, le voci da fare, e i completati chiusi dietro un pulsante. */
-function Sezione({ gruppo, voci, occupati, visibile, onCambia, promemoria = [] }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; visibile: boolean; onCambia: (g: Gruppo, v: Voce, n: number) => void; promemoria?: readonly string[] }) {
+function Sezione({ id, gruppo, voci, occupati, visibile, onCambia, promemoria = [] }: { id: string; gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; visibile: boolean; onCambia: (g: Gruppo, v: Voce, n: number) => void; promemoria?: readonly string[] }) {
   const [mostraFatti, setMostraFatti] = useState(false);
   const e = ETICHETTA[gruppo];
   const daFare = voci.filter((v) => !v.fatto);
   const fatti = voci.filter((v) => v.fatto);
   return (
     // sotto i 1024 px si vede una categoria sola (scelta dalla barra di schede), da 1024 px tutte e tre in colonna
-    <section className={`card flex-col gap-2 lg:flex lg:h-full lg:min-h-0 ${visibile ? 'flex' : 'hidden'}`} aria-label={e.titolo}>
+    <section id={id} className={`card flex-col gap-2 lg:flex lg:h-full lg:min-h-0 ${visibile ? 'flex' : 'hidden'}`} aria-label={e.titolo}>
       <div className="flex flex-wrap items-center gap-2">
         <IconaCategoria categoria={e.categoria} dimensione={28} />
         <h3 className="m-0 flex-1 font-display testo-15 uppercase leading-none">{e.titolo}</h3>
@@ -121,7 +125,7 @@ function Sezione({ gruppo, voci, occupati, visibile, onCambia, promemoria = [] }
           <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
             titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length} aria-expanded={mostraFatti} onClick={() => setMostraFatti((x) => !x)} />
           {mostraFatti && (
-            <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 opacity-70" aria-label={`${e.titolo} completati`}>
+            <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`${e.titolo} completati`}>
               {fatti.map((v) => <Riga key={v.chiave} v={v} unita={e.unita} occupato={!!occupati[v.chiave]} onCambia={(x, n) => onCambia(gruppo, x, n)} />)}
             </ul>
           )}
@@ -217,21 +221,25 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
           Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi ed effetti, restano nella Guida.
         </p>
         {/* sotto i 1024 px: una barra di schede (una categoria alla volta, una sola barra di scorrimento, quella della pagina) */}
-        <div role="tablist" aria-label="Categoria" className="grid grid-cols-3 gap-2 lg:hidden">
-          {GRUPPI.map((g) => {
+        {/* L6-01: le tre categorie sono schede con le frecce (Inizio e Fine, Tab sulla categoria aperta); le sezioni restano riquadri
+            (`region` col loro nome) e ne prendono solo l'id, come bersaglio di `aria-controls` */}
+        <SchedeTab chiavi={GRUPPI} attiva={categoria} onScegli={scegli} etichetta="Categoria" className="grid grid-cols-3 gap-2 lg:hidden"
+          scheda={(g, a) => {
             const fatti = locali[g].filter((v) => v.fatto).length;
             const attiva = categoria === g;
             return (
-              <PulsanteVisivo key={g} role="tab" aria-selected={attiva} tono={attiva ? 'primario' : 'fantasma'} disposizione="colonna" className="max-w-none"
+              <PulsanteVisivo {...a} tono={attiva ? 'primario' : 'fantasma'} disposizione="colonna" className="max-w-none"
                 icona={<IconaCategoria categoria={ETICHETTA[g].categoria} dimensione={48} />} titolo={ETICHETTA[g].titolo}
-                dettaglio={<span className="tabular-nums">{fatti}/{locali[g].length}</span>} onClick={() => scegli(g)} />
+                dettaglio={<span className="tabular-nums">{fatti}/{locali[g].length}</span>} />
             );
-          })}
-        </div>
-        <div className="flex flex-col gap-3 lg:grid lg:min-h-[240px] lg:flex-1 lg:grid-cols-3">
-          {GRUPPI.map((g) => <Sezione key={g} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)}
-            promemoria={g === 'libri' ? promemoriaLibri : (g === 'film' ? film.dati?.promemoria : giochi.dati?.promemoria) ?? []} />)}
-        </div>
+          }}>
+          {(pannello) => (
+            <div className="flex flex-col gap-3 lg:grid lg:min-h-[240px] lg:flex-1 lg:grid-cols-3">
+              {GRUPPI.map((g) => <Sezione key={g} id={pannello(g).id} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)}
+                promemoria={g === 'libri' ? promemoriaLibri : (g === 'film' ? film.dati?.promemoria : giochi.dati?.promemoria) ?? []} />)}
+            </div>
+          )}
+        </SchedeTab>
       </div>
     </PageState>
   );

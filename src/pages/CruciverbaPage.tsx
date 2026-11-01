@@ -18,6 +18,7 @@ import { notifica } from '../stores/notificationStore';
 import { conferma } from '../stores/confermaStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { seGiornoAvanzato } from '../utils/giornoAvanzato';
+import { comportamentoScorrimento } from '../utils/movimento';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
 import { DaApplicare } from '../components/partita/DaApplicare';
 import { PageState } from '../components/shared/PageState';
@@ -28,6 +29,7 @@ import type { CruciverbaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { SegnoStato } from '../components/shared/SegnoStato';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { piatto } from '../utils/testo';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -68,7 +70,7 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li id={ancoraGiorno(c.giorno)} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
+    <li id={ancoraGiorno(c.giorno)} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${evidenzia ? 'border-primary' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
         {/* La casella da sola è un bersaglio di 20 px: col dito si manca, e qui è il gesto della
             pagina. L'etichetta attorno la rende toccabile per 44 px senza cambiarne l'aspetto. */}
@@ -77,7 +79,9 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
             <input type="checkbox" className="w-5 h-5" checked={c.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Cruciverba del ${formattaDataGioco(c.giorno)} risolto`} />
           </label>
         )}
-        <strong className="testo-15">{formattaDataGioco(c.giorno)}</strong>
+        {/* D15: cruciverba risolto = spunta rossa a sinistra della data e data barrata in grigio (lo dice anche la casella «risolto») */}
+        <SegnoStato stato={c.fatto ? 'fatto' : null} />
+        <strong className={`testo-15 ${c.fatto ? 'stato-fatto' : ''}`}>{formattaDataGioco(c.giorno)}</strong>
         {evidenzia && <span className="chip chip--attivo testo-12">Prossimo</span>}
         <span className="text-text-secondary">{c.indizio}</span>
       </div>
@@ -135,7 +139,7 @@ export function CruciverbaPage() {
   const vaiAlProssimo = () => {
     if (!prossimo) return;
     setStato('tutti'); setRicerca('');
-    setTimeout(() => document.getElementById(ancoraGiorno(prossimo.giorno))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+    setTimeout(() => document.getElementById(ancoraGiorno(prossimo.giorno))?.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' }), 0);
   };
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>

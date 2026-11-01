@@ -47,7 +47,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       onChiudi={onChiudi}
       azioni={
         <>
-          <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
+          <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea" disabled={occupato || !nome.trim()} onClick={() => void conferma()} />
         </>
       }

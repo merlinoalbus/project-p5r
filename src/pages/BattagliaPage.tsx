@@ -28,6 +28,7 @@ import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGu
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, NOME_PERSONALITA, PERSONALITA_OMBRA, type CodiceAffinita, type ChiaveElemento } from '../../shared/elementi';
 import type { OmbraLuogoDto, OmbraSchedaDto } from '../../shared/ombre';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { SegnoStato } from '../components/shared/SegnoStato';
 
 /** Le cinque schede, ognuna con la sua icona.
  *
@@ -77,7 +78,7 @@ function ChipElementoGuida({ testo }: { testo: string }) {
 const luogoBreve = (l: OmbraLuogoDto): string => (l.infiltrazione ? `${l.dungeonNome} › ${l.infiltrazione.nome}` : l.dungeonNome);
 
 /** L'elemento della debolezza come chip, col nome del vocabolario unico (le affinità vengono dal compendio, R8-08). */
-const ChipElemento = ({ elemento, nome }: { elemento: string; nome?: string }) => <ElementoChip elemento={elemento} nome={nome ?? NOME_ELEMENTO[elemento as ChiaveElemento] ?? elemento} piccolo />;
+const ChipElemento = ({ elemento, nome, attenuato }: { elemento: string; nome?: string; attenuato?: boolean }) => <ElementoChip elemento={elemento} nome={nome ?? NOME_ELEMENTO[elemento as ChiaveElemento] ?? elemento} piccolo attenuato={attenuato} />;
 
 /**
  * Ricerca rapida delle Ombre (L8, R8-28): un testo libero (nome, nomi alternativi, Persona) e tre filtri (dove si incontra, debole a, personalità).
@@ -133,13 +134,14 @@ function SchedaOmbre() {
                     ? o.debolezze.map((d) => <ChipElemento key={d} elemento={d} />)
                     : <span className="testo-12 text-text-muted">nessuna debolezza nota</span>}
                 </div>
-                {o.resistenze.length > 0 && <div className="flex flex-wrap items-center gap-1 opacity-70">
-                  {o.resistenze.map((r) => <ChipElemento key={r.elemento} elemento={r.elemento} nome={`${NOME_ELEMENTO[r.elemento as ChiaveElemento] ?? r.elemento}: ${NOME_ESITO_AFFINITA[r.codice as CodiceAffinita] ?? r.codice}`} />)}
+                {/* le resistenze sono di secondo piano rispetto alle debolezze: chip senza velo e con bordo neutro (prima l'opacità al 70% portava il testo sotto 4,5:1) */}
+                {o.resistenze.length > 0 && <div className="flex flex-wrap items-center gap-1">
+                  {o.resistenze.map((r) => <ChipElemento key={r.elemento} attenuato elemento={r.elemento} nome={`${NOME_ELEMENTO[r.elemento as ChiaveElemento] ?? r.elemento}: ${NOME_ESITO_AFFINITA[r.codice as CodiceAffinita] ?? r.codice}`} />)}
                 </div>}
                 {o.luoghi.length > 0 && (
                   <div className="flex flex-wrap gap-x-3">
                     {o.luoghi.map((l) => (
-                      <Link key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} to={l.casa} className={`touch inline-flex items-center testo-12 text-text-muted ${l.raggiungibile === false ? 'line-through opacity-60' : ''}`} title={l.raggiungibile === false ? 'Palazzo concluso: non più raggiungibile' : undefined}>{luogoBreve(l)}</Link>
+                      <Link key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} to={l.casa} className={`touch inline-flex items-center gap-1.5 testo-12 text-text-muted ${l.raggiungibile === false ? 'stato-esaurito' : ''}`} title={l.raggiungibile === false ? 'Palazzo concluso: non più raggiungibile' : undefined}>{/* D15: Palazzo concluso = cerchio barrato a sinistra e nome barrato in grigio (lo dice il suggerimento) */}<SegnoStato stato={l.raggiungibile === false ? 'esaurito' : null} dimensione={14} />{luogoBreve(l)}{l.raggiungibile === false && <span className="sr-only"> (Palazzo concluso: non più raggiungibile)</span>}</Link>
                     ))}
                   </div>
                 )}

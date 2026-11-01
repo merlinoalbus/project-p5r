@@ -27,6 +27,7 @@ import { dotiDaSegnareDaEffetti, testoDotiDaSegnare } from '../../utils/dotiDaSe
 import type { AzionePercorsoDto, FasciaGioco, GenereVoce, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { Maniglia } from '../shared/Maniglia';
+import { SegnoStato } from '../shared/SegnoStato';
 import { useRiordinoCollegato } from '../../hooks/useRiordino';
 import { MeteoIcona } from './MeteoIcona';
 import { TagAllerte } from '../shared/TagAllerta';
@@ -230,7 +231,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         aria-label={`Fatto: ${a.azione.slice(0, 60)}`} aria-describedby={nonDovuta ? `non-dovuta-${a.uid}` : undefined} /></label>}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
-        <span className={a.fatta ? 'line-through' : ''}>{a.azione}<TestoSelezioneRiga s={selezione} />{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
+        {/* D15: voce fatta = spunta rossa a sinistra e testo barrato in grigio (il segno fuori dal testo barrato: l'icona non si taglia) */}
+        <span><SegnoStato stato={a.fatta ? 'fatto' : null} dimensione={14} className="mr-1.5 align-text-bottom" /><span className={a.fatta ? 'stato-fatto' : ''}>{a.azione}<TestoSelezioneRiga s={selezione} />{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span></span>
         {/* a pieno contrasto: dice perché la casella è spenta e che la giornata va avanti lo stesso */}
         {nonDovuta && <span id={`non-dovuta-${a.uid}`} className="testo-12 text-text text-pretty break-words"><strong>Non dovuta:</strong> manca «{a.nonDovuta!.motivo}»</span>}
         {!IN_RILASCIO && daCompletare && <span className="flex"><SegnoDaCompletare n={daCompletare.n} voce={a.azione} onApri={daCompletare.onApri} /></span>}

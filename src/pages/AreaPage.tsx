@@ -37,6 +37,7 @@ import { urlLuogo } from '../utils/citta';
 import { indirizzoElemento } from '../utils/pannelloScheda';
 import { COVO_AREA, PAGINA_COVO } from '../utils/covo';
 import { NEL_CESTINO } from '../utils/cestino';
+import { comportamentoScorrimento } from '../utils/movimento';
 import type { AreaDettaglioDto, ElementoAreaDto } from '../types';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -139,7 +140,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
   const selezionaPin = (id: number) => {
     setPinChiesto(id); const q = new URLSearchParams(params); q.set('spillo', String(id)); setParams(q, { replace: true });
     // sul telefono l'elenco sta sotto il visore: il pin si vede solo tornando su
-    if (telefono) visore.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    if (telefono) visore.current?.scrollIntoView?.({ block: 'start', behavior: comportamentoScorrimento() });
   };
 
   // «Elimina» nella finestra è la conferma (R2-26, UX2-8): la finestra dice già che cosa si porta via, quindi la richiesta parte con

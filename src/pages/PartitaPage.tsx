@@ -77,6 +77,7 @@ export function PartitaPage() {
     <PageState isLoading={!caricata && (caricamento || !errore)} error={attiva ? null : errore} onRetry={() => void carica()}>
       {!attiva ? (
         <EmptyState
+          livello={1}
           title="Nessuna partita attiva"
           hint="Crea la tua prima partita: potrai tracciare Doti sociali, Confidenti, Persona possedute e compendio. Puoi gestire più partite e passare dall'una all'altra dalla barra in alto."
           action={<PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea partita" onClick={() => setNuova(true)} />}

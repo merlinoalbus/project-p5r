@@ -474,6 +474,14 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
 - `useCarica`: un aggiornamento locale dopo un `await` usa la forma con funzione (`imposta(d => …)`), mai i dati del render.
 - Store con richieste che si sovrappongono (`partitaStore`, `suggerimentiStore`): vale solo la risposta dell'ultima richiesta.
 - Progressi a pressioni rapide (libri, film, videogiochi): `useCodaProgresso`, una richiesta per volta per elemento.
+- Accessibilità comune: `SchedeTab` (file di schede con tabindex mobile, frecce, Home e Fine, sopra `useSchede`); `SegnoStato` e le classi
+  `.stato-fatto` / `.stato-esaurito` (segno e barratura degli stati chiusi, mai l'opacità); `utils/movimento.ts`
+  (`comportamentoScorrimento()`: 'auto' con «riduci movimento»); `useFreccePerElenco` (frecce negli elenchi dei selettori di Persona e
+  skill); `accent-color` del tema sulla radice. I colori degli elementi stanno in un blocco `@theme static` di `tailwind.css`, perché il
+  codice li compone (`var(--color-el-${…})`) e Tailwind toglierebbe le variabili che nessuna regola nomina per intero; per il testo dei
+  chip ci sono le tinte `--color-el-*-testo` (`coloreTestoElemento`). Bersagli da 44 px senza cambiare l'aspetto: `.spillo-mappa` ha
+  un'imbottitura trasparente `6px 3px 0` attorno alla goccia da 38 (punta ancorata), `.spillo-mappa--gruppo` 5 px per lato; `.fila-freccia`
+  col mouse è un riquadro da 32 con un `::after` da 44 che riceve il clic, sul tocco è da 44.
 - Letture condivise (`src/services/api/letturaCondivisa.ts`, `useLetturaCondivisa`): l'elenco «Da applicare» e le Doti sono una
   lettura per partita, comune a tutte le istanze montate di `DaApplicare` e a `DaApprovareStati`. Si rileggono quando cambia la
   versione delle mutazioni, dopo ogni scrittura (`segnalaScritturaCondivisa`, nel `finally` di `requestJson` e `inviaFile`), con

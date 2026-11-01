@@ -504,7 +504,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       larga
       azioni={
         <>
-          <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
+          <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
         </>
       }

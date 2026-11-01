@@ -17,6 +17,7 @@ import type { ObiettivoDto, PersonaRiassuntoDto, SkillRiassuntoDto, StatoObietti
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import type { ReactNode } from 'react';
 import { IconaAzione } from '../shared/IconaAzione';
+import { SegnoStato } from '../shared/SegnoStato';
 import { conferma } from '../../stores/confermaStore';
 
 interface Props {
@@ -94,11 +95,13 @@ export function ObiettiviPartita({ partitaId }: Props) {
       {visibili.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Obiettivi">
           {visibili.map((o) => (
-            <li key={o.id} className={`card flex gap-3 ${o.stato !== 'aperto' ? 'opacity-80' : ''}`}>
+            <li key={o.id} className="card flex gap-3">
               <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" />
               <div className="flex-1 min-w-0 flex flex-col gap-1 testo-13">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{o.nomeIt}</Link>
+                  {/* D15: obiettivo raggiunto = spunta rossa e nome barrato in grigio; annullato = cerchio barrato e nome barrato in grigio (lo dicono i cartellini «Raggiunto» e «Annullato») */}
+                  <SegnoStato stato={o.stato === 'raggiunto' ? 'fatto' : o.stato === 'annullato' ? 'esaurito' : null} dimensione={20} />
+                  <Link to={`/compendio/persona/${o.personaId}`} className={`font-display uppercase testo-20 leading-none hover:text-primary-testo ${o.stato === 'raggiunto' ? 'stato-fatto' : o.stato === 'annullato' ? 'stato-esaurito' : 'text-text no-underline'}`}>{o.nomeIt}</Link>
                   <span className="text-text-muted">{o.arcanaNome} · livello base {o.livelloBase}</span>
                   <span className={`chip ${o.priorita === 2 ? 'chip--attivo' : ''}`}>Priorità {PRIORITA.find((p) => p.v === o.priorita)?.l.toLowerCase()}</span>
                   {o.stato === 'raggiunto' && <span className="chip">Raggiunto{o.raggiuntoAt ? ` il ${new Date(o.raggiuntoAt).toLocaleDateString('it-IT')}` : ''}</span>}
@@ -234,7 +237,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
           <textarea className="form-input min-h-[70px]" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
         </label>
         <div className="flex justify-end gap-2">
-          <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
+          <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={obiettivo ? 'registra' : 'obiettivo'} dimensione={22} />} titolo={obiettivo ? 'Salva' : 'Crea obiettivo'} type="submit" disabled={occupato || !personaId} />
         </div>
       </form>

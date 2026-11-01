@@ -6,7 +6,9 @@ import { NavLink } from 'react-router-dom';
 import { VOCI_NAV } from './navigazione';
 import { IconaNav } from './IconaNav';
 
-/** Barra fissa in basso con le voci principali, bersagli touch da 56px. */
+/** Barra fissa in basso con le voci principali, bersagli touch da 56px. È alta 4rem (`h-16`, compreso l'inset di sicurezza): lo spazio
+ *  che `MainLayout` le lascia sotto l'area che scorre (`pb-24`) e il margine di scorrimento del fuoco (`scroll-pb-24`, L6-02) sono più
+ *  grandi di quell'altezza; se la barra cresce, vanno rivisti insieme. */
 export function BottomNav() {
   const voci = VOCI_NAV.filter((v) => v.principale);
   return (

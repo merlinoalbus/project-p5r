@@ -47,7 +47,8 @@ import { IconaScheda } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
-import { coloreElemento } from '../utils/elementi';
+import { SegnoStato } from '../components/shared/SegnoStato';
+import { coloreElemento, coloreTestoElemento } from '../utils/elementi';
 import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
 import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
@@ -76,7 +77,7 @@ function Affinita({ testo: scritto, tipo }: { testo: string; tipo: 'debole' | 'r
   if (!elemento) return <span className="chip testo-12" title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>{testo}</span>;
   const colore = coloreElemento(elemento);
   return <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 testo-12 font-semibold"
-    style={{ borderColor: colore, color: colore, background: `color-mix(in srgb, ${colore} ${tipo === 'debole' ? 18 : 8}%, transparent)` }}
+    style={{ borderColor: colore, color: coloreTestoElemento(elemento), background: `color-mix(in srgb, ${colore} ${tipo === 'debole' ? 18 : 8}%, transparent)` }}
     title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>
     <span aria-hidden>{tipo === 'debole' ? '▼' : '▲'}</span>{testo}
   </span>;
@@ -109,11 +110,12 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
   const mostraCompletaDopo = !!sp && !sp.completabile && sp.motiviCompletamento.length > 0
     && (sp.stato === 'disponibile' || sp.stato === 'da-verificare' || sp.stato === 'accettata');
   return (
-    <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
+    <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
       <div className="flex items-start gap-2.5">
         <IconaCategoria categoria="richiesta" dimensione={36} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <h3 className="m-0 testo-16 leading-tight">{r.nome}</h3>
+          {/* D15: Richiesta completata = spunta rossa a sinistra del nome e nome barrato in grigio (lo dice il cartellino di stato accanto) */}
+          <h3 className="m-0 testo-16 leading-tight"><SegnoStato stato={r.stato === 'completata' ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={r.stato === 'completata' ? 'stato-fatto' : ''}>{r.nome}</span></h3>
           {/* il Dedalo e l'area in cui è collocata (310: il `piano` in testo resta solo dove non è il nome dell'area) */}
           <span className="testo-12 text-text-muted">{[r.areaNome ?? r.area, r.areaDedaloNome, r.piano].filter(Boolean).join(' · ')}</span>
           {/* O7-1: passata la scadenza con la proroga valida, il bersaglio si è spostato (la guida: nel Dedalo di Da'at durante il terzo semestre) */}

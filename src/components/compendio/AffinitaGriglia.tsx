@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { AffinitaDto } from '../../types';
-import { STILE_AFFINITA, coloreElemento } from '../../utils/elementi';
+import { STILE_AFFINITA, coloreTestoElemento } from '../../utils/elementi';
 import { AssetImg } from '../shared/AssetImg';
 
 interface Props {
@@ -29,7 +29,7 @@ export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità', f
               className={`inline-flex flex-col items-center justify-center ${fluida ? 'min-w-0 flex-1 basis-0 h-[44px]' : 'w-[42px] h-[46px]'} rounded-md testo-12 leading-tight ${stile.classe}`}
               title={`${a.elementoNome}: ${a.codiceNome}`}
             >
-              <span style={{ color: coloreElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>
+              <span style={{ color: coloreTestoElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>
               <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt={a.codiceNome} className="w-6 h-6 object-contain" fallback={<span>{a.codice === '-' ? '—' : a.codiceSigla}</span>} />
             </span>
           );
@@ -46,7 +46,7 @@ export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità', f
             <AssetImg nome={`elementi/${a.elemento}`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
             {/* sul telefono le cinque colonne sono larghe ~60 px e «Elettricità» diventava «Elettri…»: lì si legge la sigla (come
                 nella griglia compatta) e il nome intero resta per i lettori di schermo */}
-            <span className="testo-12 font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>
+            <span className="testo-12 font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreTestoElemento(a.elemento) }} title={a.elementoNome}>
               {a.elementoSigla && <span className="sm:hidden" aria-hidden="true">{a.elementoSigla}</span>}
               <span className={a.elementoSigla ? 'max-sm:sr-only' : undefined}>{a.elementoNome}</span>
             </span>

@@ -15,6 +15,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { opzioniDaNomi } from '../utils/selettore';
+import { comportamentoScorrimento } from '../utils/movimento';
 import { getFilm, impostaProgressoFilm } from '../services/api';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 import { useCarica } from '../hooks/useCarica';
@@ -108,7 +109,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
 
   const filmSelezionato = dati.dati?.film.find((f) => f.chiave === selezionato) ?? null;
   const posizione = filmSelezionato?.posizioni[posizioneSelezionata] ?? null;
-  useEffect(() => { if (filmSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }, [filmSelezionato]);
+  useEffect(() => { if (filmSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: comportamentoScorrimento(), block: 'start' }); }, [filmSelezionato]);
   const d = dati.dati;
   // il titolo della voce si vede anche se già completato: non finisce nella piega dei completati
   const daFare = soloChiave ? visibili : visibili.filter((f) => !completatoCon(f, progressoDi(f)));

@@ -784,8 +784,9 @@ describe('§4.1: il carattere della voce', () => {
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p3' }), 'ottenuto'));
   });
 
-  // §4.1 (segnalazione C, R4-34): «Esaurito» si vede — chip proprio, non più solo « · esaurito» nel testo — e la riga ha un'opacità diversa da «ottenuto»
-  it('«Esaurito» è un chip proprio, non testo, e la riga è più tenue di una «ottenuto»', () => {
+  // §4.1 (segnalazione C, R4-34): «Esaurito» si vede — chip proprio, non più solo « · esaurito» nel testo —; D15 (L6-05, scelta C dell'utente):
+  // al posto dell'opacità il nome barrato in grigio leggibile, con il segno dello stato a sinistra (cerchio barrato o spunta)
+  it('«Esaurito» è un chip proprio, non testo, e la riga si distingue da una «ottenuto»', () => {
     monta([
       punto({ chiave: 'p1', nome: 'Forziere svuotato', carattere: 'permanente', stato: 'esaurito' }),
       punto({ chiave: 'p2', nome: 'Forziere aperto', carattere: 'permanente', stato: 'ottenuto' }),
@@ -797,8 +798,8 @@ describe('§4.1: il carattere della voce', () => {
     expect(esaurito).not.toHaveTextContent('· esaurito');
     expect(within(ottenuto).queryByText('Esaurito')).toBeNull();
     expect(ottenuto).toHaveTextContent('· ottenuto');
-    expect(esaurito).toHaveClass('opacity-40');
-    expect(ottenuto).toHaveClass('opacity-60');
+    expect(within(esaurito).getByText('Forziere svuotato')).toHaveClass('stato-esaurito');
+    expect(within(ottenuto).getByText('Forziere aperto')).toHaveClass('stato-fatto');
   });
 
   // §4.1: una voce permanente il cui oggetto ha voci in altre infiltrazioni lo dice sotto la riga, «Anche nella 4ª infiltrazione», e il tocco la apre

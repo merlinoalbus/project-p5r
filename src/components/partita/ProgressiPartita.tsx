@@ -18,6 +18,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { PageState } from '../shared/PageState';
+import { SchedeTab } from '../shared/SchedeTab';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { RANGHI_CLIENTE } from '../../../shared/condizioniSpillo';
@@ -40,6 +41,9 @@ type Evento = Progressi['eventi'][number];
 const SEZIONI: ReadonlyArray<{ k: Sezione; nome: string }> = [
   { k: 'storia', nome: 'Storia' }, { k: 'attivita', nome: 'Attività' }, { k: 'negozi', nome: 'Negozi' }, { k: 'pesca', nome: 'Pesca' },
 ];
+/** Le chiavi nell'ordine delle tessere, e il nome di ciascuna (L6-01: per la fila di schede con le frecce). */
+const CHIAVI_SEZIONI: readonly Sezione[] = SEZIONI.map((s) => s.k);
+const NOME_SEZIONE = Object.fromEntries(SEZIONI.map((s) => [s.k, s.nome])) as Record<Sezione, string>;
 const CHIAVE_MEMORIA = 'p5r:progressi:sezione';
 
 const eSezione = (v: unknown): v is Sezione => SEZIONI.some((s) => s.k === v);
@@ -167,17 +171,17 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
         <div className="progressi-struttura">
-          <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
-            {SEZIONI.map((s) => (
-              <button key={s.k} type="button" role="tab" id={`progressi-tab-${s.k}`} aria-selected={sezione === s.k} aria-controls="progressi-pannello" className={`progressi-tessera touch ${sezione === s.k ? 'progressi-tessera--attiva' : ''}`} onClick={() => scegli(s.k)}>
-                <span className="progressi-tessera__nome">{s.nome}</span>
-                <span className="progressi-tessera__valore">{tessere[s.k].valore}</span>
-                <span className="progressi-tessera__dettaglio">{tessere[s.k].dettaglio}</span>
+          {/* L6-01: le quattro tessere sono schede con le frecce (Inizio e Fine, Tab sulla tessera aperta); le tessere restano quelle di prima */}
+          <SchedeTab chiavi={CHIAVI_SEZIONI} attiva={sezione} onScegli={scegli} etichetta="Argomenti dei progressi" className="progressi-riepilogo"
+            scheda={(k, a) => (
+              <button type="button" {...a} className={`progressi-tessera touch ${sezione === k ? 'progressi-tessera--attiva' : ''}`}>
+                <span className="progressi-tessera__nome">{NOME_SEZIONE[k]}</span>
+                <span className="progressi-tessera__valore">{tessere[k].valore}</span>
+                <span className="progressi-tessera__dettaglio">{tessere[k].dettaglio}</span>
               </button>
-            ))}
-          </div>
-
-          <div id="progressi-pannello" role="tabpanel" aria-labelledby={`progressi-tab-${sezione}`} className="flex min-w-0 flex-col gap-4">
+            )}>
+          {(pannello) => (
+          <div {...pannello(sezione)} className="flex min-w-0 flex-col gap-4">
             {/* scopo e dettaglio della tessera attiva aprono il contenuto del pannello: sopra restano solo le tessere (intestazione ≤ 30%) */}
             <div className="flex flex-col gap-1">
               <p className="progressi-scopo m-0">
@@ -372,6 +376,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
             {/* Ondata 5 (lotto F-bis): «Lo zen della pesca» letto si ricorda anche dove si registra la visita */}
             {sezione === 'pesca' && <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} promemoria={p.attivita.find((a) => a.chiave === ATTIVITA_PESCA)?.promemoria} />}
           </div>
+          )}
+          </SchedeTab>
         </div>
       )}
     </PageState>
