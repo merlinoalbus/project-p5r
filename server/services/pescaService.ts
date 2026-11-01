@@ -101,35 +101,41 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
     if(input.scelta.tipo==='nuova')verificaRangoFotografato(p,input.momento,input.osservazione);
     verificaIdentitaCatture(input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:null);
     verificaFattiOsservazione(p,input.momento,input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:undefined);
-    conseguenze.push(input.scelta.tipo==='collega'?'Aggiunge soltanto una fonte alla visita già registrata.':input.turno.tipo==='nuovo'?'Registra esattamente un nuovo turno A02.':'Raccorda una visita già conteggiata senza aumentare il contatore.','Catture e Perizia restano osservazioni separate. I benefici e le spese diventano proposte, senza modifiche automatiche alle Doti o al denaro.');
+    // L10-09: le frasi dell'anteprima in parole da giocatore (niente turni, fonti, contatori né sigle); il significato è quello di prima
+    const volte=st.contatore.volte;
+    conseguenze.push(input.scelta.tipo==='collega'?'Aggiunge un’altra registrazione alla visita già segnata: la visita resta una sola e il conto non cambia.'
+      :input.turno.tipo==='nuovo'?`È una visita nuova: le visite alla pesca contate nelle attività salgono da ${volte} a ${volte+1}.`
+      :input.turno.tipo==='esistente'?`Era già contata nelle attività (la visita n. ${input.turno.ordine}): il conto resta ${volte}.`
+      :`È una delle visite contate prima nelle attività: il conto resta ${volte}.`,
+    'I pesci presi e la Perizia restano segnati a parte. Punti di Perizia, quota d’ingresso e punti pesca restano da approvare: Doti e soldi non cambiano da soli.');
   }else if(azione==='salva-osservazione'){
     const s=sessione(p,bersaglio!);controllaOsservazione(p,{momento:momentoSessione(s),osservazione:(r as {osservazione:OsservazionePesca}).osservazione} as NuovaSessionePesca,osservazioneDto(osservazioneCorrente(s.id)).dati.fortuna.attiva);verificaFattiOsservazione(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,s.id);
     verificaRangoFotografato(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,osservazioneDto(osservazioneCorrente(s.id)).dati);
     verificaIdentitaCatture((r as {osservazione:OsservazionePesca}).osservazione,s.id);
-    conseguenze.push('Conserva la revisione precedente; aggiorna soltanto i fatti derivati dalle fonti della sessione e le proposte pertinenti. Un valore divenuto ignoto non annulla un beneficio già provato.');
+    conseguenze.push('La versione di prima resta fra le correzioni della visita. Cambiano solo i fatti che vengono da questa visita e i premi da approvare che la riguardano; un dato che ora lasci «non lo so» non toglie un premio già provato.');
   }else if(azione==='registra-fatto'){
     if(!EVENTI_PESCA.includes(bersaglio as EventoPesca))throw httpErrors.badRequest('pesca-evento-invalido','Fatto della pesca non riconosciuto.');
     verificaFatto(p,bersaglio as EventoPesca,r as Extract<InputOperazionePesca,{valore:unknown}>);
-    conseguenze.push('Registra una fonte manuale del fatto; non crea una visita, una cattura o un turno.');
+    conseguenze.push('Segna il fatto a mano: non aggiunge visite, pesci presi né visite contate nelle attività.');
   }else if(azione==='rimuovi-fonte'){
     if(!fontiPesca(p).some(f=>f.id===bersaglio))throw httpErrors.notFound('pesca-fonte-assente','La fonte non è presente.');
-    conseguenze.push('Rimuove solo questa fonte e i fatti che essa sostiene. L’ultima fonte può annullare solo il turno nuovo posseduto; un turno storico raccordato rimane conteggiato.');
-  }else if(azione==='rimuovi-sessione'){sessione(p,bersaglio!);conseguenze.push('Rimuove tutte le fonti della sessione. Il contatore pregresso e le attribuzioni durevoli restano protetti.');}
+    conseguenze.push('Toglie solo questa registrazione e i fatti che vengono da lei. Se è l’ultima della visita, la visita esce dal conto delle attività solo se ce l’aveva messa lei; una visita che era già contata resta contata.');
+  }else if(azione==='rimuovi-sessione'){sessione(p,bersaglio!);conseguenze.push('Toglie la visita con tutte le sue registrazioni. Le visite contate nelle attività prima di questa restano contate.');}
   else if(azione==='rimuovi-fatto'){
     const f=fattiPesca(p).find(f=>f.id===bersaglio);if(!f||f.sessione_id)throw httpErrors.conflict('pesca-fatto-non-manuale','La fonte non esiste o appartiene a una sessione: correggi l’osservazione di origine.');
-    conseguenze.push('Revoca soltanto questa fonte manuale, conservando le altre fonti temporali.');
+    conseguenze.push('Toglie solo questo segno fatto a mano; gli altri segni dello stesso fatto restano.');
   }else if(azione==='rimuovi-acquisto-esca'){
     if(!st.acquistiEsca.some(a=>a.id===bersaglio&&a.attivo))throw httpErrors.notFound('pesca-esca-assente','L’acquisto dell’esca non è attivo.');
-    conseguenze.push('Ritira il fatto di acquisto e propone l’eventuale inversa solo della quantità già attribuita.');
-  }else if(azione==='acquista-esca'){if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','Il costo dell’esca non ha una fonte leggibile.');conseguenze.push('Registra un acquisto effettivamente osservato, distinto dal possesso. Il costo in punti pesca richiede una decisione esplicita.');}
-  else conseguenze.push('Registra il saldo punti pesca osservato. La rettifica non dichiara già conteggiato alcun acquisto specifico.');
+    conseguenze.push('Toglie l’acquisto; se i punti pesca erano già stati scalati, propone di restituire soltanto quelli.');
+  }else if(azione==='acquista-esca'){if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','Il costo dell’esca non ha una fonte leggibile.');conseguenze.push('Segna un acquisto che hai fatto davvero: avere un’esca non vuol dire averla comprata. Il costo in punti pesca resta da approvare.');}
+  else conseguenze.push('Segna il saldo dei punti pesca che vedi nel gioco. Correggerlo non segna come già pagato nessun acquisto.');
   const o='osservazione'in r?r.osservazione:null,m='momento'in r?r.momento:azione==='salva-osservazione'?momentoSessione(sessione(p,bersaglio!)):null;
   const precedente=m?valoreFattoPesca(p,'guardiano-ichigaya-catturato',m,true):'ignoto';
   const guardianoPrecedente=precedente==='ignoto'?null:precedente==='avvenuto';
   const punto=o?puntoOsservazionePesca(o):{tipo:'pianificazione' as const};
   const e=azione==='acquista-esca'?r as Extract<InputOperazionePesca,{quantita:unknown}>:null;
   const acquistoEscaPrevisto=e?{quantita:e.quantita,costoUnitario:st.regola.dati!.costoEscaPunti,costoTotale:e.quantita*st.regola.dati!.costoEscaPunti,unita:'punti-pesca' as const}:undefined;
-  const benefici=acquistoEscaPrevisto?[{causa:`richiesta:${r.operazioneId}`,tipo:'punti-pesca' as const,chiave:'',unita:'punti-pesca' as const,intervallo:{minimo:-acquistoEscaPrevisto.costoTotale,massimo:-acquistoEscaPrevisto.costoTotale},attribuito:0,deltaCerto:-acquistoEscaPrevisto.costoTotale,residuoIgnoto:false,motivo:'Costo del nuovo acquisto osservato: nessuna attribuzione pregressa viene presunta.'}]:bersaglio?beneficiPescaDto(p,bersaglio):[];
+  const benefici=acquistoEscaPrevisto?[{causa:`richiesta:${r.operazioneId}`,tipo:'punti-pesca' as const,chiave:'',unita:'punti-pesca' as const,intervallo:{minimo:-acquistoEscaPrevisto.costoTotale,massimo:-acquistoEscaPrevisto.costoTotale},attribuito:0,deltaCerto:-acquistoEscaPrevisto.costoTotale,residuoIgnoto:false,motivo:'Costo del nuovo acquisto: nessun punto risulta già scalato.'}]:bersaglio?beneficiPescaDto(p,bersaglio):[];
   return {azione,richiesta:r,bersaglio,stato:st,punto,profiliPianificazione:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente):[],profili:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente,punto):[],benefici,...(acquistoEscaPrevisto?{acquistoEscaPrevisto}:{}),esitoPrevisto:conseguenze[0]!,conseguenze,revisionePescaAttesa:firmaPesca({azione,r,bersaglio,foto:fotografiaPesca(p)})};
 }
 function verificaFattiOsservazione(p:number,momento:NuovaSessionePesca['momento'],o:OsservazionePesca,escludi?:string):void {

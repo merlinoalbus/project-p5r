@@ -10,6 +10,11 @@ export function eAttivitaPesca(chiave: string): boolean {
 export const EVENTI_PESCA = ['guardiano-ichigaya-catturato', 'boss-ichigaya-catturato', 'terzo-semestre-avviato'] as const;
 export type EventoPesca = typeof EVENTI_PESCA[number];
 export type SpeciePesca = 'guardiano' | 'boss' | 'altro';
+/** I pesci della visita, con il loro nome: l'unico elenco, letto dai moduli, dai riepiloghi e dai contatori. */
+export const SPECIE_PESCA: ReadonlyArray<{ chiave: SpeciePesca; nome: string }> = [
+  { chiave: 'guardiano', nome: 'Guardiano di Ichigaya' }, { chiave: 'boss', nome: 'Boss di Ichigaya' }, { chiave: 'altro', nome: 'Altro pesce' },
+];
+export const nomeSpeciePesca = (s: string): string => SPECIE_PESCA.find(x => x.chiave === s)?.nome ?? 'Altro pesce';
 export type ValoreFattoPesca = 'avvenuto' | 'non-avvenuto' | 'ignoto';
 export interface MomentoPesca { giorno: string; fascia: 'giorno' | 'sera'; ordineVisita: number }
 export type FontePesca = { tipo: 'manuale' } | { tipo: 'diario'; voceUid: string; effettoUid: string };
@@ -121,6 +126,21 @@ export function deltaCertoPesca(intervallo: IntervalloBeneficioPesca, attribuito
   if (attribuito < intervallo.minimo) return intervallo.minimo - attribuito;
   if (intervallo.massimo !== null && attribuito > intervallo.massimo) return intervallo.massimo - attribuito;
   return 0;
+}
+/**
+ * Le osservazioni di una visita che non possono stare insieme, in parole: tentativi oltre il rango + 2, un pesce a un tentativo dopo
+ * quelli fatti, uscita senza ritirare i premi con la Perizia ricevuta. Le legge lo schema del server (`schemaOsservazionePesca`, che con
+ * una di queste rifiuta la richiesta) e la dicono prima dell'anteprima i moduli della visita (nuova e «Correggi la visita»).
+ */
+export function incoerenzeOsservazionePesca(o: Pick<OsservazionePesca, 'rangoPeriziaOsservato' | 'tentativiConsumati' | 'catture' | 'finale' | 'perizia'>): string[] {
+  const e: string[] = [];
+  if (o.rangoPeriziaOsservato !== null && o.tentativiConsumati !== null && o.tentativiConsumati > o.rangoPeriziaOsservato + 2)
+    e.push(`Con il rango Perizia ${o.rangoPeriziaOsservato} i tentativi sono al massimo ${o.rangoPeriziaOsservato + 2}.`);
+  if (o.catture?.some(c => c.tentativo !== null && o.tentativiConsumati !== null && c.tentativo > o.tentativiConsumati))
+    e.push('Un pesce è segnato a un tentativo dopo quelli fatti.');
+  if (o.finale.tipo === 'uscita-senza-riscossione' && o.perizia.esito === 'ricevuta')
+    e.push('Sei uscito senza ritirare i premi, ma la Perizia risulta ricevuta: correggi una delle due.');
+  return e;
 }
 export function nomeEventoPesca(evento: EventoPesca): string {
   return evento === 'guardiano-ichigaya-catturato' ? 'Guardiano di Ichigaya catturato' : evento === 'boss-ichigaya-catturato' ? 'Boss di Ichigaya catturato' : 'Terzo semestre avviato';

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { EVENTI_PESCA, nomeEventoPesca, type AnteprimaOperazionePescaDto, type EventoPesca, type FonteFattoPescaDto, type MomentoPesca, type OsservazionePesca, type RicevutaOperazionePescaDto, type SessionePescaDto, type StatoPescaDto, type ValoreFattoPesca } from '../../../shared/pesca';
+import { EVENTI_PESCA, incoerenzeOsservazionePesca, nomeEventoPesca, type AnteprimaOperazionePescaDto, type EventoPesca, type FonteFattoPescaDto, type MomentoPesca, type OsservazionePesca, type RicevutaOperazionePescaDto, type SessionePescaDto, type StatoPescaDto, type ValoreFattoPesca } from '../../../shared/pesca';
 import { anteprimaPesca, leggiPesca, type AnteprimaClientPesca } from '../../services/api/pesca';
 import { eseguiPescaConRegistro, gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPartita';
 import { useCarica } from '../../hooks/useCarica';
@@ -9,7 +9,8 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { CampoTesto } from '../shared/Campo';
 import { GestiPartita } from '../partita/GestiPartita';
-import { PreparazioneSessionePesca } from './PreparazioneSessionePesca';
+import { RegistraVisitaPesca } from './RegistraVisitaPesca';
+import { turnoDellaVisita } from './visitaPesca';
 import { MomentoPescaForm } from './MomentoPescaForm';
 import { momentoPescaCompleto, type MomentoPescaInCompilazione } from '../../utils/pesca';
 import { OsservazionePescaForm } from './OsservazionePescaForm';
@@ -27,8 +28,11 @@ const quando = (m: MomentoPesca | null) => m ? `${dataGiocoTesto(m.giorno)} · $
 const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canonico(x)])) : v;
 const uguali = (a: unknown, b: unknown) => JSON.stringify(canonico(a)) === JSON.stringify(canonico(b));
 
-type Editor = { tipo: 'manuale' } | { tipo: 'osservazione'; sessione: SessionePescaDto } | { tipo: 'fatto'; evento: EventoPesca }
+// L10-09: «manuale» (una visita nuova) e «collega» (una registrazione in più su una visita già segnata, il comando della visita) aprono
+// il foglio in tre passi `RegistraVisitaPesca`; gli altri gesti restano nel modulo con l'anteprima di `ConfermaGestoPesca`.
+type Editor = { tipo: 'manuale' } | { tipo: 'collega'; sessione: SessionePescaDto } | { tipo: 'osservazione'; sessione: SessionePescaDto } | { tipo: 'fatto'; evento: EventoPesca }
   | { tipo: 'esca' } | { tipo: 'saldo' };
+type EditorModulo = Exclude<Editor, { tipo: 'manuale' } | { tipo: 'collega' }>;
 interface GestoPronto { titolo: string; operazione: AnteprimaClientPesca }
 
 /** L'esito di un gesto sulla pesca, in parole (mai la sigla tecnica). */
@@ -135,15 +139,15 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
   </Modal>;
 }
 
-function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPronto, onCambiato }: { partitaId: number; editor: Editor; stato: StatoPescaDto; aperta: boolean; onChiudi: () => void; onPronto: (p: GestoPronto) => void; onCambiato: () => void | Promise<void> }) {
+function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPronto }: { partitaId: number; editor: EditorModulo; stato: StatoPescaDto; aperta: boolean; onChiudi: () => void; onPronto: (p: GestoPronto) => void }) {
   const [momento, setMomento] = useState<MomentoPescaInCompilazione>({ giorno: '', fascia: '', ordineVisita: null });
   const [valore, setValore] = useState<ValoreFattoPesca | ''>(''), [dataFatto, setDataFatto] = useState(''), [nota, setNota] = useState(''), [quantita, setQuantita] = useState('');
   const [osservazione, setOsservazione] = useState<OsservazionePesca | null>(() => editor.tipo === 'osservazione' ? structuredClone(editor.sessione.osservazione.dati) : null);
   useGestiPartita();
   const pendente = gestoPendenteNelloScope(partitaId, { pesca: true });
-  const titolo = editor.tipo === 'manuale' ? 'Registra una visita' : editor.tipo === 'osservazione' ? 'Correggi la visita' : editor.tipo === 'fatto' ? nomeEventoPesca(editor.evento) : editor.tipo === 'esca' ? 'Registra un acquisto di esca' : 'Correggi il saldo dei punti pesca';
+  const titolo = editor.tipo === 'osservazione' ? 'Correggi la visita' : editor.tipo === 'fatto' ? nomeEventoPesca(editor.evento) : editor.tipo === 'esca' ? 'Registra un acquisto di esca' : 'Correggi il saldo dei punti pesca';
   const intero = quantita.trim() !== '' && Number.isSafeInteger(Number(quantita)) && Number(quantita) >= (editor.tipo === 'saldo' ? 0 : 1) && Number(quantita) <= (editor.tipo === 'saldo' ? 999_999_999 : 1_000_000);
-  const completo = editor.tipo === 'osservazione' ? osservazione !== null : editor.tipo === 'fatto' ? valore !== '' && (dataFatto === 'ignota' || (dataFatto === 'nota' && momentoPescaCompleto(momento))) : editor.tipo === 'esca' ? intero && momentoPescaCompleto(momento) && stato.regola.stato === 'collegata' && !!stato.regola.dati : editor.tipo === 'saldo' ? intero : false;
+  const completo = editor.tipo === 'osservazione' ? osservazione !== null && !incoerenzeOsservazionePesca(osservazione).length : editor.tipo === 'fatto' ? valore !== '' && (dataFatto === 'ignota' || (dataFatto === 'nota' && momentoPescaCompleto(momento))) : editor.tipo === 'esca' ? intero && momentoPescaCompleto(momento) && stato.regola.stato === 'collegata' && !!stato.regola.dati : editor.tipo === 'saldo' ? intero : false;
   const prepara = (e: FormEvent) => {
     e.preventDefault(); if (!completo || pendente || !aperta) return;
     const operazioneId = nuovoId();
@@ -153,11 +157,10 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
     else if (editor.tipo === 'saldo') onPronto({ titolo, operazione: { azione: 'rettifica-punti', bersaglio: null, richiesta: { operazioneId, saldoOsservato: Number(quantita) } } });
   };
   return <Modal aperta={aperta} larga titolo={titolo} onChiudi={onChiudi}>
-    {editor.tipo === 'manuale' ? <PreparazioneSessionePesca partitaId={partitaId} fonte={{ tipo: 'manuale' }}
-      onConferma={r => { const { revisionePescaAttesa, ...richiesta } = r; return eseguiPescaConRegistro(partitaId, { azione: 'registra-sessione', richiesta, bersaglio: null, revisionePescaAttesa }, { etichetta: titolo, pesca: true }); }} onCambiato={onCambiato} /> : <form className="flex min-w-0 flex-col gap-3 testo-13" onSubmit={prepara}><fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={!!pendente}>
+    <form className="flex min-w-0 flex-col gap-3 testo-13" onSubmit={prepara}><fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={!!pendente}>
       {editor.tipo === 'osservazione' && osservazione && <>
         <p className="m-0">{quando(editor.sessione.momento)}. La correzione resta sulla stessa visita e sullo stesso turno, e vale per tutte le registrazioni mostrate.</p><FontiSessione sessione={editor.sessione} />
-        <OsservazionePescaForm partitaId={partitaId} valore={osservazione} onCambia={setOsservazione} />
+        <OsservazionePescaForm partitaId={partitaId} valore={osservazione} onCambia={setOsservazione} mostraIncoerenze />
       </>}
       {editor.tipo === 'fatto' && <>
         <Selettore etichetta="Che cosa è successo" valore={valore} vuoto="Scegli" opzioni={[{ chiave: 'avvenuto', nome: 'Avvenuto' }, { chiave: 'non-avvenuto', nome: 'Non ancora avvenuto in quel momento' }, { chiave: 'ignoto', nome: 'Non si sa' }]} onCambia={v => setValore(v as ValoreFattoPesca)} />
@@ -170,7 +173,7 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
       {editor.tipo === 'saldo' && <><p className="m-0">Saldo segnato ora: {stato.saldoPunti === null ? 'non segnato' : stato.saldoPunti.toLocaleString('it-IT')} punti pesca.</p><CampoTesto etichetta="Saldo che vedi nel gioco" tipo="numero" valore={quantita} onCambia={setQuantita} /><p className="m-0">Correggere il saldo non segna le spese già fatte, non cambia i punti già attribuiti e non toglie le proposte aperte.</p></>}
       </fieldset>{pendente && <p role="alert" className="m-0 text-warning">L’operazione di prima non è ancora confermata: completala dall’elenco «Operazioni da completare». Nessuna nuova dichiarazione viene inviata.</p>}
       <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost touch" onClick={onChiudi}>Annulla</button><PulsanteVisivo type="submit" tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rivedi prima di registrare" disabled={!completo || !!pendente} /></div>
-    </form>}
+    </form>
   </Modal>;
 }
 
@@ -207,7 +210,7 @@ function RegistroPescaNelContesto({ partitaId, onCambiato, promemoria }: { parti
       {registro.caricamento && <p role="status" className="m-0 testo-12">Rilettura in corso: quello che vedi e quello che stai scrivendo restano. Ogni conferma passa da una nuova anteprima.</p>}
       {s.regola.stato !== 'collegata' && <p role="alert" className="m-0 text-warning">Regola non collegata integralmente: {s.regola.motivi.join(' ')}. I riferimenti personali esistenti restano visibili.</p>}
       {!!s.avvisi.length && <ul className="m-0 pl-4 text-warning">{s.avvisi.map((a, i) => <li key={i}>{a}</li>)}</ul>}
-      <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Registra o collega una visita" disabled={!!pendente || s.regola.stato !== 'collegata'} onClick={() => setEditor({ tipo: 'manuale' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="negozio" dimensione={22} />} titolo="Registra acquisto esca" disabled={!!pendente} onClick={() => setEditor({ tipo: 'esca' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi il saldo" disabled={!!pendente} onClick={() => setEditor({ tipo: 'saldo' })} /></div>
+      <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Registra una visita" disabled={!!pendente || s.regola.stato !== 'collegata'} onClick={() => setEditor({ tipo: 'manuale' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="negozio" dimensione={22} />} titolo="Registra acquisto esca" disabled={!!pendente} onClick={() => setEditor({ tipo: 'esca' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi il saldo" disabled={!!pendente} onClick={() => setEditor({ tipo: 'saldo' })} /></div>
       <details><summary className="touch">Turni già contati e quote del conteggio</summary><p className="testo-13">Una visita si può collegare a un turno già contato o a una quota libera del conteggio di prima: non aggiunge turni né catture.</p><ul className="m-0 pl-4 testo-12">{s.contatore.turni.map(t => <li key={t.firma}>Turno {t.ordine}{t.raccordatoASessione ? ' · collegato a una visita' : ' · non collegato'}</li>)}</ul></details>
       <h3 className="m-0 testo-15">Visite registrate ·{s.sessioni.length}</h3>
       {!s.sessioni.length && <p className="m-0 testo-13">Nessuna visita registrata. Le visite contate prima restano nel conteggio.</p>}
@@ -218,7 +221,11 @@ function RegistroPescaNelContesto({ partitaId, onCambiato, promemoria }: { parti
         <RiepilogoOsservazionePesca osservazione={v.osservazione.dati} /><ProfiliSessionePesca punto={v.punto} profili={v.profili} profiliPianificazione={v.profiliPianificazione} /><BeneficiPesca benefici={v.benefici} />
         {!!v.avvisi.length && <ul className="m-0 pl-4 text-warning">{v.avvisi.map((a, i) => <li key={i}>{a}</li>)}</ul>}
         <details><summary className="touch">Correzioni della visita · {v.revisioni.length}</summary><ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{v.revisioni.map(r => <li className="border-t border-border pt-2" key={r.id}><strong>Versione {r.versione}{r.id === v.osservazione.id ? ' · quella valida' : ''}</strong><RiepilogoOsservazionePesca osservazione={r.dati} /></li>)}</ul></details>
-        <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la visita"disabled={!!pendente} onClick={() => setEditor({ tipo: 'osservazione', sessione: v })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi la rimozione della visita" disabled={!!pendente} onClick={() => rimuovi('rimuovi-sessione', v.id, 'Togli la visita e tutte le sue registrazioni')} /></div>
+        <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la visita"disabled={!!pendente} onClick={() => setEditor({ tipo: 'osservazione', sessione: v })} />
+          {/* L10-09: aggiungere una registrazione a una visita già segnata è un comando della visita, non più una scelta del modulo */}
+          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi a questa visita già segnata" disabled={!!pendente || s.regola.stato !== 'collegata' || turnoDellaVisita(v) === null} onClick={() => setEditor({ tipo: 'collega', sessione: v })} />
+          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi la rimozione della visita" disabled={!!pendente} onClick={() => rimuovi('rimuovi-sessione', v.id, 'Togli la visita e tutte le sue registrazioni')} /></div>
+        {turnoDellaVisita(v) === null && <p className="m-0 text-text-secondary">Questa visita non è più contata nelle attività: non le si aggiungono altre registrazioni.</p>}
       </li>)}</ul>
       <h3 className="m-0 testo-15">Fatti della pesca</h3>
       <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{EVENTI_PESCA.map(evento => {
@@ -239,7 +246,9 @@ function RegistroPescaNelContesto({ partitaId, onCambiato, promemoria }: { parti
       {!s.acquistiEsca.length && <p className="m-0 testo-13">Nessun acquisto registrato. Avere o usare un’esca si segna nella visita.</p>}
       <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.acquistiEsca.map(a => <li key={a.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 testo-13"><strong>{quando(a.momento)} · {a.quantita} Boilie sospetto · {a.costo.toLocaleString('it-IT')} punti pesca{a.attivo ? '' : ' · rimosso'}</strong><BeneficiPesca benefici={a.benefici} />{a.attivo && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi la rimozione dell’acquisto" className="self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-acquisto-esca', a.id, 'Togli questo acquisto di esca')} />}</li>)}</ul>
       <Link className="touch self-start" to="/impostazioni">Apri il Cestino e le operazioni da completare</Link>
-      {editor && <CompilaGestoPesca key={editor.tipo === 'osservazione' ? `${editor.tipo}:${editor.sessione.id}:${editor.sessione.osservazione.id}` : editor.tipo === 'fatto' ? `${editor.tipo}:${editor.evento}` : editor.tipo} partitaId={partitaId} editor={editor} stato={s} aperta={pronto === null} onChiudi={() => setEditor(null)} onCambiato={cambiato} onPronto={setPronto} />}
+      {editor && (editor.tipo === 'manuale' || editor.tipo === 'collega')
+        ? <RegistraVisitaPesca key={editor.tipo === 'collega' ? `collega:${editor.sessione.id}` : 'manuale'} partitaId={partitaId} collega={editor.tipo === 'collega' ? editor.sessione : null} onChiudi={() => setEditor(null)} onCambiato={cambiato} />
+        : editor && <CompilaGestoPesca key={editor.tipo === 'osservazione' ? `${editor.tipo}:${editor.sessione.id}:${editor.sessione.osservazione.id}` : editor.tipo === 'fatto' ? `${editor.tipo}:${editor.evento}` : editor.tipo} partitaId={partitaId} editor={editor} stato={s} aperta={pronto === null} onChiudi={() => setEditor(null)} onPronto={setPronto} />}
     </>}
     {pronto && <ConfermaGestoPesca key={pronto.operazione.richiesta.operazioneId} partitaId={partitaId} pronto={pronto} onChiudi={conclusa => { setPronto(null); if (conclusa) setEditor(null); }} onCambiato={cambiato} />}
   </section>;

@@ -371,6 +371,16 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Domande d'esame solo nelle righe di `domanda`, con la data. **(24/10)**
 - Negoziazione: si cerca la domanda (è l'unica cosa che si legge mentre l'Ombra parla); il carattere è un colore.
 - Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti.
+- Pesca, «Registra una visita» (L10-09, D18): tre passi (Quando, Cosa hai pescato, Riepilogo) con gli stessi dati del modulo unico di
+  prima. Giorno e fascia partono da quelli della partita, l'ordine dopo l'ultima visita di quella fascia (si corregge con «Cambia»), il
+  riepilogo li ripete per primi. «L'avevi già contata nelle attività?» compare solo se ci sono visite contate senza dettaglio (turni del
+  contatore non collegati o visite contate prima). Il tocco su «Registra la visita» è la conferma, senza spunta: la protezione è
+  l'anteprima obbligatoria, perché il server registra solo con la firma dell'anteprima della stessa richiesta (`revisionePescaAttesa`) e la
+  ricalcola prima di scrivere. Aggiungere una registrazione a una visita già segnata è un comando della visita. Le frasi dell'anteprima
+  (`esitoPrevisto`, `conseguenze`) le scrive il server in parole da giocatore. «Da applicare» completa la pesca di una voce già fatta
+  ancora con il modulo di prima (`PreparazioneSessionePesca`, campi in un solo modulo e spunta): passare al foglio in tre passi va deciso
+  da Roberto (punto aperto in ROADMAP). Le tre osservazioni incompatibili (tentativi oltre rango + 2, pesce dopo i tentativi fatti, uscita senza ritirare i premi con la Perizia
+  ricevuta) sono una regola sola (`incoerenzeOsservazionePesca`), letta dallo schema del server e detta prima dell'anteprima dal foglio in tre passi e da «Correggi la visita».
 
 ## 13. Grafica
 - Asset originali in stile P5R, generati da IA con ogni testo in italiano e la variante senza testo; nessuna copia delle illustrazioni

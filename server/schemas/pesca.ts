@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { dataGioco, idParam } from './comuni.js';
-import { EVENTI_PESCA } from '../../shared/pesca.js';
+import { EVENTI_PESCA, incoerenzeOsservazionePesca } from '../../shared/pesca.js';
 
 const uid = z.string().regex(/^[0-9a-f]{32}$/);
 const firma = z.string().regex(/^[0-9a-f]{64}$/);
@@ -20,10 +20,9 @@ export const schemaOsservazionePesca = z.object({
 }).strict().superRefine((o, ctx) => {
   const errore = (message: string) => ctx.addIssue({ code: 'custom', message });
   if ((o.rangoPeriziaOsservato === null) !== (o.provenienzaRango === 'ignoto')) errore('Rango e provenienza devono distinguere il dato ignoto.');
-  if (o.rangoPeriziaOsservato !== null && o.tentativiConsumati !== null && o.tentativiConsumati > o.rangoPeriziaOsservato + 2) errore('I tentativi consumati superano il limite del rango osservato.');
   if (o.catture && new Set(o.catture.map(c => c.id)).size !== o.catture.length) errore('Ogni cattura deve avere un’identità distinta.');
-  if (o.catture?.some(c => c.tentativo !== null && o.tentativiConsumati !== null && c.tentativo > o.tentativiConsumati)) errore('Una cattura non può essere successiva ai tentativi osservati.');
-  if (o.finale.tipo === 'uscita-senza-riscossione' && o.perizia.esito === 'ricevuta') errore('Riscossione finale assente e Perizia ricevuta sono osservazioni incompatibili.');
+  // L10-09: le tre osservazioni incompatibili sono una regola sola, la stessa che i moduli della visita dicono prima dell'anteprima
+  for (const e of incoerenzeOsservazionePesca(o)) errore(e);
 });
 const fonte = z.discriminatedUnion('tipo', [z.object({ tipo: z.literal('manuale') }).strict(), z.object({ tipo: z.literal('diario'), voceUid: uid, effettoUid: uid }).strict()]);
 const scelta = z.discriminatedUnion('tipo', [z.object({ tipo: z.literal('nuova') }).strict(), z.object({ tipo: z.literal('collega'), sessioneId: uid }).strict()]);

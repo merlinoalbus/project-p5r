@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { OsservazionePesca, SpeciePesca } from '../../../shared/pesca';
+import { SPECIE_PESCA, incoerenzeOsservazionePesca, type OsservazionePesca, type SpeciePesca } from '../../../shared/pesca';
 import { getFortuna } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -10,13 +10,14 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
 const id = () => crypto.randomUUID().replaceAll('-', '');
-const SPECIE: Array<{ chiave: SpeciePesca; nome: string }> = [
-  { chiave: 'guardiano', nome: 'Guardiano di Ichigaya' }, { chiave: 'boss', nome: 'Boss di Ichigaya' }, { chiave: 'altro', nome: 'Altro pesce' },
-];
+/** L'elenco unico dei pesci (`shared/pesca.ts`), in copia modificabile come vuole il Selettore. */
+const SPECIE = [...SPECIE_PESCA];
 
 /** Dati osservati della visita: nessun premio, cattura o rango è dedotto dal contatore. */
-export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = false, partitaId }: {
+export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = false, partitaId, mostraIncoerenze = false }: {
   valore: OsservazionePesca; onCambia: (v: OsservazionePesca) => void; disabilitato?: boolean;
+  /** Dice le osservazioni incompatibili (`incoerenzeOsservazionePesca`) prima dell'anteprima: «Correggi la visita». Il modulo di «Da applicare» resta com'era. */
+  mostraIncoerenze?: boolean;
   /** Con la partita, la Fortuna della Perizia si legge dal suo stato (`leggiFortuna`) invece di chiederla: per una nuova visita. */
   partitaId?: number;
 }) {
@@ -79,6 +80,8 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
           onCambia={attiva => cambia({ fortuna: { ...o.fortuna, attiva } })} />
         : <p className="m-0 testo-13">Fortuna sulla Perizia in quel giorno: <strong>{o.fortuna.attiva === null ? 'non segnata nella partita' : o.fortuna.attiva ? 'accesa' : 'non accesa'}</strong>: la legge dalla partita.</p>}
     </div>
+    {/* L10-09: le stesse osservazioni incompatibili che il server rifiuta, dette qui come nel foglio della visita nuova («Correggi la visita») */}
+    {mostraIncoerenze && incoerenzeOsservazionePesca(o).length > 0 && <ul role="alert" className="m-0 pl-4 testo-13 text-warning">{incoerenzeOsservazionePesca(o).map((e, i) => <li key={i}>{e}</li>)}</ul>}
     <p className="m-0 testo-12 text-text-secondary">Una cattura non vuol dire che la Perizia sia arrivata. Le Doti si applicano dal pulsante sulla voce: segnare la visita non cambia nessun saldo.</p>
   </fieldset>;
 }

@@ -1,4 +1,4 @@
-import type { BeneficioPescaDto, EsitoProfiloPescaDto, OsservazionePesca, PuntoValutazionePesca } from '../../../shared/pesca';
+import { nomeSpeciePesca, type BeneficioPescaDto, type EsitoProfiloPescaDto, type OsservazionePesca, type PuntoValutazionePesca } from '../../../shared/pesca';
 import { urlHttp } from '../../../shared/urlHttp';
 import { IntervalloPesca } from './CampiPesca';
 
@@ -16,7 +16,7 @@ const TENTATIVO: Record<EsitoProfiloPescaDto['tentativo'], string> = {
   pianificabile: 'Da preparare per una visita', tentabile: 'Puoi tentare adesso', esaurito: 'Tentativi finiti',
   'gia-catturato': 'Già catturato in questa visita', 'da-verificare': 'Non si sa se il prossimo tentativo può riuscire',
 };
-const specie = (v: string) => v === 'guardiano' ? 'Guardiano di Ichigaya' : v === 'boss' ? 'Boss di Ichigaya' : 'Altro pesce';
+const specie = nomeSpeciePesca;
 const osservato = (v: boolean | null) => v === null ? 'Non noto' : v ? 'Sì' : 'No';
 
 export function ProfiliSessionePesca({ punto, profili, profiliPianificazione }: { punto: PuntoValutazionePesca; profili: EsitoProfiloPescaDto[]; profiliPianificazione: EsitoProfiloPescaDto[] }) {
