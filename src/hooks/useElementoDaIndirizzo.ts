@@ -16,16 +16,20 @@ import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 const DURATA_MS = 3500;
 
 /** Porta in vista e evidenzia l'elemento `#elemento-<chiave>` quando `pronto` (i dati sono arrivati). `ancora` cambia quando cambia ciò che la
- *  pagina mostra (la scheda): l'elemento si cerca di nuovo. */
-export function useElementoDaIndirizzo(pronto: boolean, ancora = ''): void {
+ *  pagina mostra (la scheda): l'elemento si cerca di nuovo. `chiaveScelta`, se la pagina la calcola da un altro parametro (le domande da
+ *  `?data=`, L4-03), vale quando l'indirizzo non ha `?elemento=`. */
+export function useElementoDaIndirizzo(pronto: boolean, ancora = '', chiaveScelta: string | null = null): void {
   const [params] = useSearchParams();
-  const chiave = params.get(PARAMETRO_ELEMENTO);
+  const chiave = params.get(PARAMETRO_ELEMENTO) ?? chiaveScelta;
   useEffect(() => {
     if (!pronto || !chiave) return;
     const el = document.getElementById(`elemento-${chiave}`);
     if (!el) return;
     const ridotto = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-    el.scrollIntoView({ block: 'center', behavior: ridotto ? 'auto' : 'smooth' });
+    // L4: un elemento più alto di metà schermo (le carte delle Battaglie Sfida, dei boss) centrato avrebbe il titolo fuori dallo schermo:
+    // si allinea in cima all'area che scorre (sotto la barra in alto, che non scorre)
+    const alto = el.getBoundingClientRect().height > window.innerHeight / 2;
+    el.scrollIntoView({ block: alto ? 'start' : 'center', behavior: ridotto ? 'auto' : 'smooth' });
     el.classList.add('card--evidenza');
     const timer = window.setTimeout(() => el.classList.remove('card--evidenza'), DURATA_MS);
     return () => { window.clearTimeout(timer); el.classList.remove('card--evidenza'); };

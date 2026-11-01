@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { OmbraRiferimentoDto } from './ombre.js';
 import type { PiazzamentoEsame, PremioPiazzamentoEsame, ReazioneRegalo, RequisitoConoscenzaEsame } from './puntiConfidenti.js';
 import type { RegolaRifornimento } from './rifornimento.js';
 import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
@@ -171,6 +172,8 @@ export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
   carteDaEsecuzione: Array<{ id: number; nome: string }>;
   /** Titolo dell'Ombra per la negoziazione, se catturabile. */
   negoziazione: { titolo: string; titoloNome: string } | null;
+  /** L4-06: le Ombre che hanno questa Persona (di solito una; due quando c'è anche la versione boss), con la loro pagina. */
+  ombre: OmbraRiferimentoDto[];
 }
 
 /** Scheda completa di una skill. */

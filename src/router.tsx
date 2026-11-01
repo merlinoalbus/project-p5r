@@ -21,6 +21,7 @@ import { SchermataAvvio } from './components/shared/SchermataAvvio';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useVersioneStore } from './stores/versioneStore';
+import { VersoIConfidenti } from './components/layout/VersoIConfidenti';
 import { eErroreDiChunk, pigra as pigraBase, senzaRete, type PaginaPigra } from './utils/pagineLazy';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -140,8 +141,9 @@ export const router = createBrowserRouter([
           pagina('fusione', FusionePage),
           pagina('partita', PartitaPage),
           pagina('confidenti/:chiave', ConfidenteDettaglioPage),
-          // R9-09/3: «i Confidenti» (il link del pin Confidente non ancora collegato) porta all'elenco che già c'è, i Personaggi, che aprono la scheda: nessuna pagina nuova
-          { path: 'confidenti', element: <Navigate to="/guida/personaggi" replace /> },
+          // L4-05: «i Confidenti» hanno un indirizzo solo (indice della Guida, pin Confidente non ancora collegato): con una partita attiva
+          // l'elenco della partita, senza i Personaggi che aprono la scheda (R9-09/3)
+          { path: 'confidenti', element: <VersoIConfidenti /> },
           pagina('guida', GuidaPage),
           pagina('guida/domande', DomandePage),
           pagina('guida/calendario', CalendarioPage),

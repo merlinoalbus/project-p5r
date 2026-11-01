@@ -7,6 +7,7 @@ import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getOggettiGuida, URL_OGGETTI_GUIDA } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useSchede } from '../hooks/useSchede';
 import { PageState } from '../components/shared/PageState';
@@ -60,7 +61,7 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
               era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
           <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Sblocco</th></tr></thead>
           <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}>
-            <td data-etichetta="Attrezzo">{r.prodottiCatalogo?.length ? <OggettiCollegati oggetti={r.prodottiCatalogo} /> : <><strong>Prodotto non collegato</strong><span className="block text-text-muted">Nome nella fonte: {r.attrezzo}</span></>} <Secondaria v={r.verificato} /><ModificaGuida tipo="ricetta" chiave={r.attrezzo} cosa={`la ricetta «${r.attrezzo}»`} soloIcona onSalvato={onModificato} /></td>
+            <td data-etichetta="Attrezzo" id={`elemento-${r.attrezzo}`} className="scroll-mt-20">{r.prodottiCatalogo?.length ? <OggettiCollegati oggetti={r.prodottiCatalogo} /> : <><strong>Prodotto non collegato</strong><span className="block text-text-muted">Nome nella fonte: {r.attrezzo}</span></>} <Secondaria v={r.verificato} /><ModificaGuida tipo="ricetta" chiave={r.attrezzo} cosa={`la ricetta «${r.attrezzo}»`} soloIcona onSalvato={onModificato} /></td>
             <td data-etichetta="Effetto">{r.effetto}</td>
             <td data-etichetta="Materiali">{!!r.materialiCatalogo?.length && <OggettiCollegati oggetti={r.materialiCatalogo} />}
               {r.materialiCatalogo?.length ? <details><summary className="touch">Materiali indicati dalla guida</summary><span>{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</span></details>
@@ -216,6 +217,8 @@ export function OggettiPage() {
 function SezioniDellaGuida({ scheda }: { scheda: Exclude<Scheda, 'catalogo'> }) {
   const dati = useCarica(() => getOggettiGuida(), [], { cacheUrl: URL_OGGETTI_GUIDA });
   const d = dati.dati;
+  // L4-02: la ricetta citata da `?elemento=` (la casa delle ricompense «ricetta» nelle schede degli oggetti) in vista, a dati arrivati
+  useElementoDaIndirizzo(!!d && scheda === 'fabbricazione', scheda);
   /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la sezione rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>{d && <>

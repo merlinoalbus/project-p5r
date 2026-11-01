@@ -211,7 +211,15 @@ function SchedaPersona() {
                     {p.areeMementos.length > 0 && (
                       <span>Mementos: <strong className="text-text">{p.areeMementos.map((a) => a.nome).join(', ')}</strong>{p.pianiMementos ? ` — ${p.pianiMementos}` : ''}</span>
                     )}
-                    {p.negoziazione && <span>Ombra: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
+                    {/* L4-06: le Ombre di questa Persona portano alla loro pagina (la casa la dà il server); il titolo che l'Ombra porta nella
+                        negoziazione è un altro nome («Ambasciatore della sozzura» per Belphegor) e resta testo */}
+                    {p.ombre.length > 0 && (
+                      <span className="flex flex-wrap items-center gap-x-2">
+                        {p.ombre.length > 1 ? 'Ombre:' : 'Ombra:'}
+                        {p.ombre.map((o) => <Link key={o.chiave} to={o.casa} className="touch inline-flex items-center text-primary-testo">{o.nome}</Link>)}
+                      </span>
+                    )}
+                    {p.negoziazione && <span>{p.ombre.length > 0 ? 'Nella negoziazione' : 'Ombra'}: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <label className="testo-13 text-text-secondary flex items-center gap-2">

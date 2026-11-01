@@ -34,6 +34,7 @@ import { FinestraModificaArea } from '../components/mappe/FinestraModificaArea';
 import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { centroAccessoMondo } from '../utils/accessoMondo';
 import { urlLuogo } from '../utils/citta';
+import { indirizzoElemento } from '../utils/pannelloScheda';
 import { COVO_AREA, PAGINA_COVO } from '../utils/covo';
 import { NEL_CESTINO } from '../utils/cestino';
 import type { AreaDettaglioDto, ElementoAreaDto } from '../types';
@@ -45,12 +46,13 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const TITOLO_COVO = 'Nel gioco il Covo si apre dal menu, dal 5/5';
 
 /** La pagina della guida di un elemento segnato sull'Area, quando il server non dice la sua `casa`: il luogo nella sua pagina (L5), il
- *  negozio nella sua scheda (che rimanda alla sua sede), l'attività nell'elenco delle attività, il Confidente nella sua pagina. */
+ *  negozio nella sua scheda (che rimanda alla sua sede), l'attività da sola nell'elenco delle attività (`?elemento=`, L4-01), il Confidente
+ *  nella sua pagina. */
 function schedaElemento(e: ElementoAreaDto): string {
   switch (e.tipo) {
     case 'luogo': return urlLuogo(e.chiave);
     case 'negozio': return `/guida/negozi/${encodeURIComponent(e.chiave)}`;
-    case 'attivita': return '/guida/attivita';
+    case 'attivita': return indirizzoElemento('/guida/attivita', e.chiave);
     case 'confidente': return `/confidenti/${encodeURIComponent(e.chiave)}`;
   }
 }

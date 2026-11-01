@@ -15,6 +15,7 @@ import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
+import { slug } from '../../shared/slug';
 import type { SfideDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
@@ -131,7 +132,8 @@ function SchedaMagnate({ d, onModificato }: { d: SfideDto; onModificato: () => v
   );
 }
 
-/** Tabella dei tratti delle Persona con ricerca (nome italiano e inglese, effetto, personaggio) e filtro per categoria, con le categorie ricavate dai tratti stessi. */
+/** Tabella dei tratti delle Persona con ricerca (nome italiano e inglese, effetto, personaggio) e filtro per categoria, con le categorie ricavate dai tratti stessi.
+ *  Ogni riga ha l'id `elemento-<slug del nome>`: è la «casa» che la ricerca globale dà al tratto (`?scheda=tratti&elemento=…`). */
 function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
@@ -152,7 +154,7 @@ function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => vo
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva testo-12">
           <thead><tr><th>Tratto</th><th>Effetto</th><th>Categoria</th><th>Di chi</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={x.nome}><td data-etichetta="Tratto"><div className="flex items-start gap-1"><span className="min-w-0 flex-1"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</span><ModificaGuida tipo="tratto" chiave={x.nome} cosa={`il tratto «${x.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={x.nome} id={`elemento-${slug(x.nome)}`}><td data-etichetta="Tratto"><div className="flex items-start gap-1"><span className="min-w-0 flex-1"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</span><ModificaGuida tipo="tratto" chiave={x.nome} cosa={`il tratto «${x.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
       <Fonte url={t.fonte} />

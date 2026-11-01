@@ -33,6 +33,7 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
 import { NOME_DOTE } from '../utils/citta';
+import { indirizzoElemento } from '../utils/pannelloScheda';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
 import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo';
@@ -133,7 +134,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
         <dt className="text-text-muted">Dove</dt>
         <dd className="m-0 flex flex-wrap gap-1">
           {libro.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}
-          {(libro.ricompensaDi ?? []).map((r) => <Link key={`${r.tipo}/${r.chiave}`} to="/guida/richieste" className="chip touch no-underline">Ricompensa di «{r.nome}»</Link>)}
+          {(libro.ricompensaDi ?? []).map((r) => <Link key={`${r.tipo}/${r.chiave}`} to={indirizzoElemento('/guida/richieste', r.chiave)} className="chip touch no-underline">Ricompensa di «{r.nome}»</Link>)}
           {altrePosizioni.map((p) => <span key={`${p.tipo}/${p.chiave}`} className="chip">{p.etichetta}</span>)}
           {libro.negozi.length === 0 && altrePosizioni.length === 0 && !libro.ricompensaDi?.length && <span>Non indicato</span>}
         </dd>

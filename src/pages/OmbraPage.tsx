@@ -129,7 +129,7 @@ export function OmbraPage() {
               <ul className="m-0 flex list-none flex-wrap gap-x-3 p-0 testo-12">
                 {o.voci.map((v) => (
                   <li key={v.chiave} className="flex items-center">
-                    <Link to={`/guida/dungeon/${v.dungeon}?${v.dungeon === 'mementos' ? 'area' : 'infiltrazione'}=${encodeURIComponent(v.infiltrazione)}`} className="touch inline-flex min-h-11 items-center">{v.nome}</Link>
+                    <Link to={v.casa} className="touch inline-flex min-h-11 items-center">{v.nome}</Link>
                     {/* R11-17/1: quale Ombra descrive la voce (se è un'altra, la voce passa alla sua pagina) */}
                     <ModificaGuida tipo="ombra-voce" chiave={v.chiave} soloIcona cosa={`la voce «${v.nome}»: quale Ombra descrive`} onSalvato={() => void dati.ricarica()} />
                   </li>

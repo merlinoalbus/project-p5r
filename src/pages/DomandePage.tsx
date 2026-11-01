@@ -10,7 +10,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getDomande, impostaDomandaFatta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -29,6 +29,7 @@ import type { DomandaDto, DomandeDto, PremioEsameDto } from '../types';
 import { RicompensaDomanda } from '../components/shared/RicompensaDomanda';
 import { daConoscenza } from '../utils/ricompensaDomanda';
 import { simboliNote } from '../../shared/note';
+import { dataValida, ordineGioco } from '../../shared/condizioniSpillo';
 import { elencoNomi } from '../../shared/riepilogoEffetti';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
@@ -149,8 +150,17 @@ export function DomandePage() {
   const [tipo, setTipo] = useState<FiltroTipo>('tutte');
   const [stato, setStato] = useState<FiltroStato>('tutte');
   const d = dati.dati;
-  // dalla ricerca globale: porta in vista la domanda citata da `?elemento=` a dati arrivati
-  useElementoDaIndirizzo(!!d);
+  // L4-03: dal Calendario `?data=MM-GG` porta alla prima domanda da quella data in poi (nell'ordine dell'anno scolastico, aprile → marzo)
+  const [params] = useSearchParams();
+  const dataCercata = params.get('data');
+  const chiaveDaData = useMemo(() => {
+    if (!d || !dataCercata || !dataValida(dataCercata)) return null;
+    const soglia = ordineGioco(dataCercata);
+    const prima = d.domande.filter((x) => ordineGioco(x.data) >= soglia).sort((a, b) => ordineGioco(a.data) - ordineGioco(b.data))[0];
+    return prima ? String(prima.chiave ?? prima.id) : null;
+  }, [d, dataCercata]);
+  // dalla ricerca globale e dalle ricompense degli oggetti: porta in vista la domanda o l'esame citato da `?elemento=` a dati arrivati
+  useElementoDaIndirizzo(!!d, '', chiaveDaData);
   const q = piatto(ricerca.trim());
   const prossimeId = useMemo(() => new Set((d?.prossime ?? []).map((x) => x.id)), [d]);
   const visibili = useMemo(() => (d?.domande ?? []).filter((x) => {
@@ -207,7 +217,7 @@ export function DomandePage() {
             {premiComuni && <ElencoPremi premi={premiComuni} etichetta="Premi di ogni esame" />}
             <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13">
               {d.esami.map((e) => (
-                <li key={e.chiave} className="flex min-w-0 flex-col gap-1 py-1">
+                <li key={e.chiave} id={`elemento-${e.chiave}`} className="flex min-w-0 flex-col gap-1 py-1 scroll-mt-20">
                   <div className="flex flex-wrap items-center gap-2">
                     <strong>{e.nome}</strong>
                     <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>

@@ -175,6 +175,10 @@ partita sta in `utente` con `partita_id`.
   ancorato allo spillo, che diventa un foglio dal basso quando non c'è spazio (sempre sotto i 768 px); da 768 px il foglio sta nella
   colonna del visore; lo spillo toccato si centra nella fascia libera sopra il foglio; con la Guida aperta come foglio il riquadro le
   si impila sopra.
+  Attraversando un pin di spostamento il visore annota il passaggio (`src/utils/passaggioMappe.ts`: mappa, nome e pin di partenza); il
+  visore che mostra la mappa d'arrivo lo consuma e mette nella barra il ritorno col nome della mappa di partenza (più il nome del pin se
+  le due mappe si chiamano allo stesso modo), che riporta a quel pin con la navigazione del suo ospite (pagina della mappa, scheda del
+  Palazzo, pagina dell'Area). Entrando da un'altra strada, o dopo un ricaricamento, il ritorno non c'è.
   I raccolti sono nascosti salvo «Mostra anche i raccolti». Le condizioni di visibilità sono assolute: con una partita attiva uno
   spillo con una condizione falsa sparisce (salvo «Mostra anche i non ancora disponibili»). In uso normale nessun tocco sulla mappa
   modifica dati.
@@ -244,7 +248,7 @@ Sono indirizzi **del frontend** (non rotte API: nessun redirect lato server). Il
 | Indirizzo vecchio | Destinazione | Dove sta |
 |---|---|---|
 | `/` | `/home` | `src/router.tsx` |
-| `/confidenti` | `/guida/personaggi` | `src/router.tsx` |
+| `/confidenti` (l'indirizzo unico dei Confidenti: indice della Guida, pin Confidente non collegato) | con una partita attiva `/partita?scheda=confidenti`, senza `/guida/personaggi`; si sceglie dopo che l'elenco delle partite è arrivato | `src/components/layout/VersoIConfidenti.tsx` |
 | `/guida/dungeon/iweleth` e `/guida/dungeon/iweleth/area/:slug` | `/guida/dungeon/mementos?area=mementos-08-iweleth` (Iweleth è solo un dedalo) | `src/router.tsx` |
 | `/guida/rimossi` | `/impostazioni#nascosti` (i «Nascosti dalla guida» del Cestino) | `src/router.tsx` |
 | `/guida/mappe/tokyo` | `/guida/citta` | `src/pages/MappaPage.tsx` |
@@ -331,7 +335,7 @@ Effetto «Persona registrata», solo nel Compendio o anche nella scorta: `{tipo:
 - Il **cestino** (`cestinoService.ts`; tabella `cestino` 104, utente 021 per le partite) registra le eliminazioni con trigger temporanei su ogni tabella dei due file; un registro catturato prima di un drop torna senza la colonna tolta (`colonneCompatibili` in `fontiTolte.ts`).
 
 ### Ricerca globale
-`GET /api/ricerca` (`routes/ricerca.ts`, `ricercaService.ts`): cerca nei nomi (mostrato, originale, sinonimi) di un indice in memoria (`ricerca/indiceRicerca.ts`, un costruttore per ognuno dei 25 tipi di `TIPI_RICERCA` in `shared/ricerca.ts`), raggruppa per tipo e restituisce percorso, casa e immagine. Le cose nascoste non entrano; i luoghi chiusi sì, con il loro stato (`ricerca/statoRicerca.ts`). L'indice si ricostruisce quando un dato di gioco cambia (registro `cacheDiGioco.ts`).
+`GET /api/ricerca` (`routes/ricerca.ts`, `ricercaService.ts`): cerca nei nomi (mostrato, originale, sinonimi) di un indice in memoria (`ricerca/indiceRicerca.ts`, un costruttore per ognuno dei 29 tipi di `TIPI_RICERCA` in `shared/ricerca.ts`, fra cui personaggi, tratti delle Persona, cruciverba e termini del glossario), raggruppa per tipo e restituisce percorso, casa e immagine. La casa di un elemento di un elenco è la sua pagina con `?elemento=<chiave>` (vedi Frontend). Le cose nascoste non entrano; i luoghi chiusi sì, con il loro stato (`ricerca/statoRicerca.ts`). L'indice si ricostruisce quando un dato di gioco cambia (registro `cacheDiGioco.ts`).
 
 ### Catalogo degli oggetti
 Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Persona per nome inglese. L'identità di un oggetto è la riga di `catalogo_oggetto` (migrazione 121, utente 026); le offerte (`articolo`), i regali dei Confidenti, i contenuti e le ricompense la citano per chiave. Letture: `catalogoOggettiLetture.ts` (base, senza dipendere dai consumatori) e `catalogoOggettiService.ts` (aggrega offerte, regali, contenuti); scritture: `catalogoOggettiScritture.ts` (identità), `catalogoOggettiProposte.ts` (proposte di abbinamento, conferme, legami) e `catalogoOggettiFusione.ts` (fusione reversibile tramite il cestino). Router `/api/catalogo-oggetti` (`routes/catalogoOggetti.ts`); pagine `OggettiPage` (catalogo) e `OggettoPage`, componenti in `src/components/catalogo/`. Le note storiche (`nota_storica`, 139) dicono una discordanza della guida senza cambiare prezzi o acquisti e si correggono con Ripristina (`noteStoricheService.ts`).
@@ -454,6 +458,14 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
 - `useCarica`: un aggiornamento locale dopo un `await` usa la forma con funzione (`imposta(d => …)`), mai i dati del render.
 - Store con richieste che si sovrappongono (`partitaStore`, `suggerimentiStore`): vale solo la risposta dell'ultima richiesta.
 - Progressi a pressioni rapide (libri, film, videogiochi): `useCodaProgresso`, una richiesta per volta per elemento.
+- Rimandi a un elemento di un elenco: `?elemento=<chiave>` (`indirizzoElemento`, `src/utils/pannelloScheda.ts`). Attività e Richieste
+  mostrano quel solo elemento, come pagina e nel pannello sopra il diario; libri e film solo nel pannello (come pagina restano l'elenco, e
+  le voci del Diario rimandano lì); le altre pagine (domande ed esami, sfide e boss, tratti, Covo, ricette, glossario,
+  cruciverba, personaggi, trofei) lo portano in vista ed evidenziato con `useElementoDaIndirizzo`, su `id="elemento-<chiave>"`; un
+  elemento più alto di metà schermo si allinea in cima invece di centrarsi. Le domande accettano anche `?data=MM-GG` (la prima da quella
+  data in poi, nell'ordine dell'anno scolastico). Le case che il server dà alle ricompense degli oggetti seguono la stessa forma
+  (`conElemento`, `fontiRicompenseOggetti.ts`); la pagina di un'Ombra è `casaOmbra` (`shared/ombre.ts`), letta dalla scheda Persona,
+  dalla ricerca e dal servizio delle Ombre, che dà anche la casa delle voci della guida che la descrivono.
 - Elenchi modificabili con stato per riga: chiavi da `useIdStabili`, mai l'indice né il contenuto.
 - Finestre (`Modal`): il fuoco entra nella finestra, Tab resta dentro, alla chiusura torna a chi l'ha aperta; nessuna chiusura dallo
   sfondo. Lo spostamento (barra trascinata, frecce sulla maniglia ⠿, sempre per intero nello schermo) è `useSpostamentoFinestra`, lo

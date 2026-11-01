@@ -7,6 +7,11 @@ import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompenseP
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 
 export interface FonteRicompensaOggetto { nome: string; testo: string; casa: string; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; prezzo?: number | null }
+
+/** L'indirizzo che porta in vista un elemento della sua pagina (`?elemento=<chiave>`, `useElementoDaIndirizzo`); `base` può avere già parametri. */
+export function conElemento(base: string, chiave: string): string {
+  return `${base}${base.includes('?') ? '&' : '?'}elemento=${encodeURIComponent(chiave)}`;
+}
 export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, FonteRicompensaOggetto> {
   const richiesti = new Set(tipi);
   const out = new Map<string, FonteRicompensaOggetto>();
@@ -40,8 +45,9 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
         let valore: unknown; try { valore = JSON.parse(testo) as unknown; } catch { valore = null; }
         if (Array.isArray(valore)) testo = valore.filter((v): v is string => typeof v === 'string').join(' · ');
       }
-      const casa = tipo === 'richiesta' ? `/guida/richieste?richiesta=${encodeURIComponent(r.chiave)}`
-        : tipo === 'confidente' ? `/confidenti/${encodeURIComponent(r.chiave)}` : '/guida/domande';
+      // L4-02: la casa è l'elemento, non l'elenco (`?elemento=`, letto da RichiestePage e, per domande ed esami, da DomandePage)
+      const casa = tipo === 'richiesta' ? conElemento('/guida/richieste', r.chiave)
+        : tipo === 'confidente' ? `/confidenti/${encodeURIComponent(r.chiave)}` : conElemento('/guida/domande', r.chiave);
       aggiungi(tipo, r.chiave, { nome: r.nome, testo, casa });
     }
   }
@@ -52,19 +58,19 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
       // Ondata 5, lotto F (migrazione 279): l'effetto della ricetta è quello del prodotto, che la scheda dell'oggetto dice già; qui resta solo il
       // testo proprio della ricetta, se c'è (senza un prodotto unico collegato, o corretto dall'utente)
       aggiungi('ricetta', r.attrezzo, { nome: collegati.length ? collegati.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
-        testo: [r.effetto?.trim() ? r.effetto : null, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: '/guida/oggetti?scheda=fabbricazione' });
+        testo: [r.effetto?.trim() ? r.effetto : null, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: conElemento('/guida/oggetti?scheda=fabbricazione', r.attrezzo) });
     }
   }
   if (richiesti.has('covo')) for (const r of datiGuidaCorretti<CompletamentoDto>('completamento')?.covo.premi ?? []) {
-    const fonte = { nome: r.nome, testo: [r.sblocco, r.effetto].filter(Boolean).join(' · '), casa: '/guida/covo' };
+    const fonte = { nome: r.nome, testo: [r.sblocco, r.effetto].filter(Boolean).join(' · '), casa: conElemento('/guida/covo', r.nome) };
     aggiungi('covo', r.nome, fonte);
   }
   if (richiesti.has('sfida')) {
     const sfide = datiGuidaCorretti<SfideDto>('sfide');
     for (const r of sfide?.battaglieSfida.elenco ?? []) aggiungi('sfida', r.chiave,
-      { nome: r.nomeIt ?? r.nome, testo: r.ricompense.join(' · '), casa: '/guida/sfide?scheda=battaglie' });
+      { nome: r.nomeIt ?? r.nome, testo: r.ricompense.join(' · '), casa: conElemento('/guida/sfide?scheda=battaglie', r.chiave) });
     for (const r of sfide?.bossSegreti ?? []) aggiungi('sfida', r.chiave,
-      { nome: r.nome, testo: r.ricompense.join(' · '), casa: '/guida/sfide?scheda=boss' });
+      { nome: r.nome, testo: r.ricompense.join(' · '), casa: conElemento('/guida/sfide?scheda=boss', r.chiave) });
   }
   return out;
 }

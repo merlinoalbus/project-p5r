@@ -189,12 +189,13 @@ export function ConfidenteDettaglioPage() {
 
   return (
     <>
-    <PageState isLoading={inPrimoCaricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()} scheda={{ titolo: 'Confidente', ripiego: '/partita?scheda=confidenti' }}>
+    <PageState isLoading={inPrimoCaricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()} scheda={{ titolo: 'Confidente', ripiego: '/confidenti' }}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
           {/* Lotto B (punto 6): l'azione di gioco è il pulsante primario; gli strumenti di modifica stanno nel menu «Modifica ⋯», che
               compare con la scheda (prima «Modifica informazioni» stava fuori dallo stato della pagina e si vedeva durante il caricamento) */}
-          <IntestazioneScheda ripiego="/partita?scheda=confidenti" titolo={c.nome}
+          {/* L4-05: l'elenco a cui la scheda appartiene è l'indirizzo unico dei Confidenti (la partita attiva o, senza, i Personaggi) */}
+          <IntestazioneScheda ripiego="/confidenti" titolo={c.nome}
             figura={<ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" modificabile />}
             chip={<>
               <span className="chip chip--attivo">{c.arcanaNome}</span>

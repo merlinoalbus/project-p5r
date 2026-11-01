@@ -11,19 +11,21 @@ import type { IllustrazioneDto } from './types.js';
 
 /** Nell'ordine in cui il server costruisce l'indice e, a parità di punteggio, l'interfaccia mostra i gruppi. */
 export const TIPI_RICERCA = [
-  'confidente', 'persona', 'ombra', 'skill', 'oggetto', 'libro', 'film', 'videogioco',
+  'confidente', 'personaggio', 'persona', 'ombra', 'skill', 'tratto', 'oggetto', 'libro', 'film', 'videogioco',
   'luogo', 'negozio', 'attivita', 'quartiere', 'citta', 'area', 'planimetria',
   'palazzo', 'infiltrazione', 'dedalo', 'area-dedalo', 'voce',
-  'richiesta', 'giorno', 'domanda', 'trofeo', 'sfida',
+  'richiesta', 'giorno', 'domanda', 'cruciverba', 'trofeo', 'sfida', 'glossario',
 ] as const;
 export type TipoRicerca = (typeof TIPI_RICERCA)[number];
 
 /** Come si chiama un gruppo e un suo elemento (il singolare serve all'etichetta accessibile di un risultato). */
 export const ETICHETTE_RICERCA: Readonly<Record<TipoRicerca, { singolare: string; plurale: string }>> = {
   confidente: { singolare: 'Confidente', plurale: 'Confidenti' },
+  personaggio: { singolare: 'Personaggio', plurale: 'Personaggi' },
   persona: { singolare: 'Persona', plurale: 'Persona' },
   ombra: { singolare: 'Ombra', plurale: 'Ombre' },
   skill: { singolare: 'Skill', plurale: 'Skill' },
+  tratto: { singolare: 'Tratto', plurale: 'Tratti' },
   oggetto: { singolare: 'Oggetto', plurale: 'Oggetti' },
   libro: { singolare: 'Libro', plurale: 'Libri' },
   film: { singolare: 'Film', plurale: 'Film e DVD' },
@@ -43,8 +45,10 @@ export const ETICHETTE_RICERCA: Readonly<Record<TipoRicerca, { singolare: string
   richiesta: { singolare: 'Richiesta', plurale: 'Richieste' },
   giorno: { singolare: 'Giorno', plurale: 'Giorni' },
   domanda: { singolare: 'Domanda in classe', plurale: 'Domande in classe' },
+  cruciverba: { singolare: 'Cruciverba', plurale: 'Cruciverba' },
   trofeo: { singolare: 'Trofeo', plurale: 'Trofei' },
   sfida: { singolare: 'Sfida', plurale: 'Sfide' },
+  glossario: { singolare: 'Termine del glossario', plurale: 'Termini del glossario' },
 };
 
 export const MIN_CARATTERI_RICERCA = 2;

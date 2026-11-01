@@ -64,7 +64,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Pesca con regole e visite della partita; Covo dei Ladri, sfide, personaggi.
 
 ## Ricerca e strumenti
-- Ricerca globale su 25 tipi di cose, dalla barra in alto.
+- Ricerca globale su 29 tipi di cose (personaggi, tratti, cruciverba e glossario compresi), dalla barra in alto; ogni risultato porta
+  all'elemento nella sua pagina.
 - Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, pacchetto di gioco («Importa»), copia
   dell'istanza, documentazione delle API, «Prepara edizione» del rilascio.
 - Interfaccia per desktop, tablet e telefono; installabile a schermo intero.
@@ -79,8 +80,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Fatti: L0 (misure di base sulla copia), L1 (difetti visibili mentre si gioca; L1-01 e L1-02 secondo lo schizzo approvato per D2) e
   L2 (scritture sicure: niente ripetizioni automatiche delle scritture, errori in italiano, guida del giorno tenuta senza rete,
   «Applica» in un gesto unico) e L3 (mappe al tocco: doppio tocco e pinch sui pin, pagina che scorre col dito sulla mappa a vista
-  intera, foglio e Guida che non coprono il pin, trascinamento senza ridisegni, Covo chiuso nell'indice prima del 5 maggio).
-- Aperti: L4–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
+  intera, foglio e Guida che non coprono il pin, trascinamento senza ridisegni, Covo chiuso nell'indice prima del 5 maggio) e L4
+  (navigazione verso l'elemento: rimandi all'elemento citato invece che all'elenco, ritorno fra mappe sorelle, quattro tipi nuovi nella
+  ricerca, Confidenti con un indirizzo solo, Memento dai Palazzi, Ombre collegate dalla scheda Persona).
+- Aperti: L5–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
   blocchi della guida in prosa. Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
 

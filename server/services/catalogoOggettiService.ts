@@ -13,7 +13,7 @@ import { letturePlanimetrieDelleVoci, planimetriaDellaVoce } from './mappe/plani
 import { casaDellArea, casaDelPalazzo, contestoAree } from './mappe/casaMappa.js';
 import { lettureListiniCondivisi } from './listiniCondivisi.js';
 import { regaliDellaPartita } from './regaliPartita.js';
-import { fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
+import { conElemento, fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { copieDellOggetto } from './copieOggetti.js';
@@ -131,7 +131,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
     .map((r) => {
       const prodotti = prodottiRicette.get(r.ricetta) ?? [];
       return { chiave: r.ricetta, nome: prodotti.length ? prodotti.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
-        nomeStorico: r.ricetta, prodotti, quantita: r.quantita, casa: '/guida/oggetti?scheda=fabbricazione' };
+        nomeStorico: r.ricetta, prodotti, quantita: r.quantita, casa: conElemento('/guida/oggetti?scheda=fabbricazione', r.ricetta) };
     });
   let lettura: OggettoDettaglioDto['lettura'] = null;
   const libro = prepared('SELECT chiave FROM libro WHERE catalogo_chiave = ?').get(chiave) as { chiave: string } | undefined;

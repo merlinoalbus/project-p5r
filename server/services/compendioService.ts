@@ -20,6 +20,7 @@ import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
+import { casaOmbra } from '../../shared/ombre.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -408,6 +409,9 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
     skill, areeMementos: aree, pianiMementos: r.piani_mementos,
     ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
     negoziazione: titolo ? { titolo, titoloNome: t('negoziazione', titolo) } : null,
+    // L4-06: le Ombre di questa Persona, che la scheda collega alla loro pagina
+    ombre: (prepared('SELECT chiave, nome FROM ombra WHERE persona_id = ? ORDER BY nome, chiave').all(id) as Array<{ chiave: string; nome: string }>)
+      .map((o) => ({ ...o, casa: casaOmbra(o.chiave) })),
     descrizione: r.descrizione, fonteDescrizione: r.fonte_descrizione,
   };
 }

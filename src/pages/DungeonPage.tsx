@@ -17,6 +17,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { sintesi } from '../utils/testoBreve';
@@ -43,7 +45,9 @@ export function DungeonPage() {
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Palazzi" sottotitolo="I Palazzi (Iweleth è un dedalo dei Memento): infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati." />
+          <IntestazionePagina titolo="Palazzi" sottotitolo="I Palazzi (Iweleth è un dedalo dei Memento): infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati."
+            // L4-04: i Memento non stanno fra i Palazzi ma hanno la loro pagina: ci si va da qui
+            azioni={<CollegamentoVisivo to="/guida/dungeon/mementos" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Memento" dettaglio="dedali e Richieste" />} />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
               // L4 (§1.5, §8.10): l'anello conta gli oggetti permanenti (numeri del server); il segno dice «Concluso» o «Completato»

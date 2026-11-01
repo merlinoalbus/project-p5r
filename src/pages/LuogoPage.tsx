@@ -37,6 +37,7 @@ import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citta';
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
+import { indirizzoElemento } from '../utils/pannelloScheda';
 import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
 import { compratoNelCiclo } from '../../shared/rifornimento';
@@ -226,7 +227,7 @@ export function LuogoPage() {
                   </>}
                   {l.attivitaDettaglio.length > 0 && <>
                     <TitoloSezione variante="display">Attività</TitoloSezione>
-                    <div className="flex flex-wrap gap-1.5">{l.attivitaDettaglio.map((a) => <Link key={a.chiave} to="/guida/attivita" className="chip touch no-underline">{a.nome}</Link>)}</div>
+                    <div className="flex flex-wrap gap-1.5">{l.attivitaDettaglio.map((a) => <Link key={a.chiave} to={indirizzoElemento('/guida/attivita', a.chiave)} className="chip touch no-underline">{a.nome}</Link>)}</div>
                   </>}
                 </section>
               )}

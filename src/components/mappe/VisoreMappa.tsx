@@ -13,6 +13,8 @@ import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inq
 import { areaConPezzi, copiePosate, mascheraZone, nomeCopia, posaDi, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
 import { ALTEZZA_GOCCIA, raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
 import { testoAvanzamento } from '../../utils/gestiVoce';
+import { indirizzoElemento } from '../../utils/pannelloScheda';
+import { annotaPassaggio, consumaPassaggio, passaggioVerso } from '../../utils/passaggioMappe';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
@@ -289,6 +291,11 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
 export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onAcquistiCambiati, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true, nonDisponibili }: Props) {
   const sugg = useSuggerimenti();
+  // L4-07: il passaggio da cui si è arrivati a questa mappa (`passaggioMappe`), letto quando la mappa cambia (anche nello stesso visore, come
+  // nella pagina della mappa) e consumato dopo averla mostrata, così non torna più tardi entrando da un'altra strada
+  const [ritornoPassaggio, setRitornoPassaggio] = useState(() => ({ mappa: mappa.chiave, passaggio: passaggioVerso(mappa.chiave) }));
+  if (ritornoPassaggio.mappa !== mappa.chiave) setRitornoPassaggio({ mappa: mappa.chiave, passaggio: passaggioVerso(mappa.chiave) });
+  useEffect(() => { consumaPassaggio(); }, [mappa.chiave]);
   const tela = useRef<HTMLDivElement | null>(null);
   // id delle istruzioni da tastiera lette dal lettore di schermo (`aria-describedby` della tela): uno per visore, ce ne può essere più d'uno in pagina
   const idIstruzioni = useId();
@@ -524,10 +531,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     if (editor || scelta || !passaggioConArrivo(s)) return false;
     return !(partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile');
   };
+  /** L4-07: la navigazione dell'ospite attraverso il pin di spostamento `s`, che annota il passaggio per il ritorno (`passaggioMappe`). */
+  const passaDa = (s: SpilloDto): NavigaMappa => (k, arrivo) => {
+    annotaPassaggio({ da: mappa.chiave, daNome: mappa.nome, spillo: s.id, spilloNome: s.nome, verso: k });
+    onNaviga(k, arrivo);
+  };
   /** Porta all'arrivo del pin di spostamento (con lo spillo d'arrivo se indicato). */
   const vaiAllArrivo = (s: SpilloDto) => {
     const a = arrivoSpillo(s);
-    if (a) onNaviga(a.mappa, a.spillo ? { spillo: a.spillo } : undefined);
+    if (a) passaDa(s)(a.mappa, a.spillo ? { spillo: a.spillo } : undefined);
   };
   // L3 RG-1: la guida da usare, l'unica del visore (2026-10-31: «il visore doveva già essere unico»), fuori dall'editor e dalla scelta dei pin,
   // su ogni mappa che può avere voci della guida (`GET /api/mappe/:chiave/guida`): una planimetria di un Palazzo (le voci senza pin stanno
@@ -1007,6 +1019,14 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           <span className="visore-mappa__tipo chip testo-12">{nomeTipoMappa(mappa)}</span>
         </nav>
         <div className="visore-mappa__strumenti">
+          {/* L4-07: arrivati da una mappa sorella attraverso un passaggio, il ritorno porta il nome di quella mappa (mai «Torna») e riporta al
+              pin attraversato, con la navigazione dell'ospite; il nome del pin compare solo se le due mappe si chiamano allo stesso modo (le
+              planimetrie di un'Area), dove il solo nome non direbbe dove si torna */}
+          {ritornoPassaggio.passaggio && !editor && (() => {
+            const p = ritornoPassaggio.passaggio;
+            return <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={p.daNome} dettaglio={p.daNome === mappa.nome ? p.spilloNome : undefined}
+              aria-label={`Torna a ${p.daNome}, al passaggio «${p.spilloNome}» da cui sei arrivato`} onClick={() => onNaviga(p.da, { spillo: p.spillo })} />;
+          })()}
           {azioni}
           {conGuida && <PulsanteVisivo tono={guidaAperta ? 'primario' : 'fantasma'} compatto icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida" aria-pressed={!!guidaAperta} onClick={apriGuida} />}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => { setPannelloScelto(!pannelloAperto); onPannello?.(!pannelloAperto); }} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
@@ -1020,7 +1040,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           {pannello ?? <>
           {contenutiPannello}
           {selezionato && (
-            <SchedaSpillo key={`${partitaId}:${selezionato.id}`} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={onNaviga} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onAcquistiCambiati={onAcquistiCambiati} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
+            <SchedaSpillo key={`${partitaId}:${selezionato.id}`} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={passaDa(selezionato)} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onAcquistiCambiati={onAcquistiCambiati} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
           )}
           {!senzaVicine && (mappa.genitore || mappa.figli.length > 0) && (
             <section className="visore-mappa__sezione">
@@ -1253,7 +1273,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     fatto; un informativo dice e basta. */}
                 {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onAcquistiCambiati={onAcquistiCambiati} />}
                 <div className="flex flex-wrap gap-1">
-                  {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
+                  {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={passaDa(selezionato)} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
                   {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
                       collegato a una o più voci della guida (una sicura, un passaggio): lo stato delle voci è il suo (2026-10-01, 098) */}
                   {(statoDelPin(selezionato) !== null || selezionato.voci.length > 0) && partitaId && !passaggioConArrivo(selezionato) && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
@@ -1687,7 +1707,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         </div>
       )}
       {d?.tipo === 'confidente' && d.confidente && <CollegamentoVisivo to={`/confidenti/${encodeURIComponent(d.confidente.chiave)}`} tono="secondario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo={d.confidente.nome} dettaglio={d.confidente.arcanaNome} />}
-      {d?.tipo === 'richiesta' && d.richiesta && <CollegamentoVisivo to="/guida/richieste" tono="secondario" compatto icona={<IconaAzione chiave="obiettivo" dimensione={20} />} titolo={d.richiesta.nome} dettaglio={d.richiesta.stato ?? 'richiesta dei Mementos'} />}
+      {d?.tipo === 'richiesta' && d.richiesta && <CollegamentoVisivo to={indirizzoElemento('/guida/richieste', d.richiesta.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="obiettivo" dimensione={20} />} titolo={d.richiesta.nome} dettaglio={d.richiesta.stato ?? 'richiesta dei Mementos'} />}
 
       <div className="flex flex-wrap gap-1.5">
         {!nonSpaziale && onCentra && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />}

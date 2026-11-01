@@ -45,5 +45,6 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'sfide', to: '/guida/sfide', titolo: 'Battaglie Sfida, boss segreti e tratti', descrizione: '7 Battaglie Sfida, Jose, Gemelle Custodi e Lavenza, Magnate, 90 tratti delle Persona in italiano', icona: <IconMask size={DIM} /> },
   { chiave: 'personaggi', to: '/guida/personaggi', titolo: 'Personaggi', descrizione: 'Il cast senza spoiler: Ladri Fantasma, Stanza di Velluto, Confidenti e terzo semestre, con Persona, armi e ruolo in battaglia', icona: <IconMask size={DIM} /> },
   { chiave: 'oggetti', to: '/guida/oggetti', titolo: 'Oggetti, materiali e fabbricazione', descrizione: '247 consumabili, oggetti chiave e materiali, ricette degli attrezzi, personalizzazione delle armi, abiti e lavanderia, scambi', icona: <IconBook size={DIM} /> },
-  { chiave: 'confidenti', to: '/partita?scheda=confidenti', titolo: 'Confidenti', descrizione: 'Risposte migliori, abilità e regali per ogni Confidente', icona: <IconCuore size={DIM} /> },
+  // L4-05: l'indirizzo unico dei Confidenti (`router.tsx`, `VersoIConfidenti`): la partita attiva o, senza, i Personaggi
+  { chiave: 'confidenti', to: '/confidenti', titolo: 'Confidenti', descrizione: 'Risposte migliori, abilità e regali per ogni Confidente', icona: <IconCuore size={DIM} /> },
 ];

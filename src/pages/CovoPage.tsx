@@ -27,6 +27,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useCovoNellaPartita } from '../hooks/useCovoNellaPartita';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
@@ -107,6 +108,8 @@ export function CovoPage() {
   const sfide = useMemo(() => (covo?.sfide ?? []).filter((s) => !q || `${s.nome} ${s.requisito}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
   const premi = useMemo(() => (covo?.premi ?? []).filter((p) => !q || `${p.nome} ${p.sblocco ?? ''} ${p.effetto ?? ''} ${(p.oggettiRicompensa ?? []).map((o) => o.nome).join(' ')}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
   const c = covo ? conti(covo) : null;
+  // L4-02: il premio citato da `?elemento=` (la casa delle ricompense «covo» nelle schede degli oggetti) in vista, a dati arrivati
+  useElementoDaIndirizzo(!!covo);
 
   return (
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -189,7 +192,7 @@ export function CovoPage() {
                 ? <p className="m-0 testo-13 text-text-muted" role="status">Nessun premio con questo testo.</p>
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
                     {premi.map((p) => (
-                      <li key={p.nome} className="flex flex-col gap-0.5 py-2 testo-13">
+                      <li key={p.nome} id={`elemento-${p.nome}`} className="flex flex-col gap-0.5 py-2 testo-13 scroll-mt-20">
                         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">{p.oggettiRicompensa?.length ? <OggettiCollegati oggetti={p.oggettiRicompensa} /> : <span className="font-semibold">{p.nome}</span>}</div>
                           {p.costo !== null && <span className="shrink-0 tabular-nums testo-12 text-text-muted">{medaglie(p.costo)}</span>}

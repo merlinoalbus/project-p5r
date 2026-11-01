@@ -169,7 +169,8 @@ export function CalendarioPage() {
               )}
               <div className="flex flex-wrap items-center gap-2">
                 {!IN_RILASCIO && <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)} />}
-                <Link to="/guida/domande" className="touch inline-flex items-center testo-12 text-primary-testo">Domande in classe della data →</Link>
+                {/* L4-03: porta alla prima domanda da oggi in poi (in classe, d'esame o del quiz in TV), non in cima all'elenco */}
+                <Link to={`/guida/domande?data=${encodeURIComponent(d.oggi.data)}`} className="touch inline-flex items-center testo-12 text-primary-testo">Domande ed esami da oggi →</Link>
               </div>
             </section>
           )}

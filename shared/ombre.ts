@@ -11,6 +11,12 @@
 import type { AffinitaDto } from './types.js';
 import type { PersonalitaOmbra } from './elementi.js';
 
+/** La casa di un'Ombra: la sua pagina. Un solo punto per server (scheda, ricerca, scheda Persona) e interfaccia (L4-06). */
+export const casaOmbra = (chiave: string): string => `/guida/ombra/${encodeURIComponent(chiave)}`;
+
+/** Un'Ombra citata da un'altra scheda (la Persona che le corrisponde), con la sua casa. */
+export interface OmbraRiferimentoDto { chiave: string; nome: string; casa: string }
+
 /** La Persona di un'Ombra. */
 export interface OmbraPersonaDto { id: number; nome: string; nomeIt: string }
 
@@ -90,7 +96,7 @@ export interface OmbraDettaglioDto extends OmbraSchedaDto {
   /** Con una partita e una Persona catturabile: dove si cattura ancora; null altrimenti. */
   raggiungibilita: OmbraRaggiungibilitaDto | null;
   /** Le voci Persona della guida che la descrivono. */
-  voci: Array<{ chiave: string; nome: string; dungeon: string; infiltrazione: string }>;
+  voci: Array<{ chiave: string; nome: string; dungeon: string; infiltrazione: string; /** L4-06: la scheda che mostra la voce (il dedalo nei Memento, l'infiltrazione nei Palazzi). */ casa: string }>;
   note: string;
 }
 

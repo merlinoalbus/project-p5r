@@ -18,8 +18,10 @@ import { affinitaDi, codiciAffinita } from './compendioService.js';
 import { verificaPartita } from './verificaPartita.js';
 import { personeRegistrate } from './catturePersona.js';
 import { statoPalazzi } from './palazziService.js';
+import { casaDelDedalo, casaDelPalazzo } from './mappe/casaMappa.js';
 import { normalizza } from '../../shared/maschere.js';
 import { eCodiceAffinita, eChiaveElemento, ELEMENTI, PERSONALITA_OMBRA, type PersonalitaOmbra } from '../../shared/elementi.js';
+import { casaOmbra } from '../../shared/ombre.js';
 import type { OmbraDettaglioDto, OmbraLuogoDto, OmbraRaggiungibilitaDto, OmbraResistenzaDto, OmbraSchedaDto, OmbreVerificaDto } from '../../shared/ombre.js';
 
 interface RigaOmbra {
@@ -29,7 +31,6 @@ interface RigaOmbra {
 
 const COLONNE = 'chiave, nome, nomi_altri_json, persona_id, maschera_nota, personalita, catturabile, negoziabile, affinita_proprie_json, livello, note, origine';
 
-const casaOmbra = (chiave: string): string => `/guida/ombra/${chiave}`;
 const personalitaValida = (v: string): PersonalitaOmbra => ((PERSONALITA_OMBRA as readonly string[]).includes(v) ? v : 'sconosciuta') as PersonalitaOmbra;
 const nomiAltriDi = (json: string): string[] => { try { const v = JSON.parse(json) as unknown; return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []; } catch { return []; } };
 
@@ -110,9 +111,11 @@ function luoghiDelleOmbre(conclusi: Map<string, string> | null, chiave?: string)
     const k = `${dungeon}|${infiltrazione?.chiave ?? ''}`;
     let l = posti.get(k);
     if (!l) {
-      const parametro = tipo === 'mementos' ? 'area' : 'infiltrazione';
       const motivo = tipo === 'palazzo' ? conclusi?.get(dungeon) : undefined;
-      l = { dungeon, dungeonNome: nomeDungeon, tipo, infiltrazione, areeDedalo: [], fonti: [], righe: [], casa: infiltrazione ? `/guida/dungeon/${dungeon}?${parametro}=${encodeURIComponent(infiltrazione.chiave)}` : `/guida/dungeon/${dungeon}`,
+      // la casa con le regole di `casaMappa`, come le voci (il menù del dedalo nei Memento, l'infiltrazione nei Palazzi)
+      const casa = !infiltrazione ? casaDelPalazzo(dungeon)
+        : tipo === 'mementos' ? casaDelDedalo(infiltrazione.chiave) : `${casaDelPalazzo(dungeon)}?infiltrazione=${encodeURIComponent(infiltrazione.chiave)}`;
+      l = { dungeon, dungeonNome: nomeDungeon, tipo, infiltrazione, areeDedalo: [], fonti: [], righe: [], casa,
         raggiungibile: conclusi ? motivo === undefined : null, ...(motivo !== undefined ? { motivoNonRaggiungibile: motivo } : {}) };
       posti.set(k, l);
     }
@@ -197,8 +200,10 @@ export function dettaglioOmbra(chiave: string, partita?: number): OmbraDettaglio
   for (const [el, cod] of proprie) daCompendio.set(el, cod);
   const griglia = affinitaDi(daCompendio);
   const affinita = (r.persona_id !== null ? griglia : griglia.filter((a) => proprie.has(a.elemento))).map((a) => ({ ...a, proprie: proprie.has(a.elemento) }));
-  const voci = prepared(`SELECT p.chiave, p.nome, a.dungeon_chiave AS dungeon, p.area_chiave AS infiltrazione FROM ombra_voce ov JOIN punto_interesse p ON p.chiave = ov.voce_chiave
-      JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE ov.ombra_chiave = ? ORDER BY a.dungeon_chiave, a.ordine, p.ordine, p.chiave`).all(chiave) as OmbraDettaglioDto['voci'];
+  // L4-06: la casa della voce la dice il server, con le regole di `casaMappa` (il menù del dedalo nei Memento, l'infiltrazione nei Palazzi)
+  const voci = (prepared(`SELECT p.chiave, p.nome, a.dungeon_chiave AS dungeon, p.area_chiave AS infiltrazione FROM ombra_voce ov JOIN punto_interesse p ON p.chiave = ov.voce_chiave
+      JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE ov.ombra_chiave = ? ORDER BY a.dungeon_chiave, a.ordine, p.ordine, p.chiave`).all(chiave) as Array<Omit<OmbraDettaglioDto['voci'][number], 'casa'>>)
+    .map((v) => ({ ...v, casa: v.dungeon === 'mementos' ? casaDelDedalo(v.infiltrazione) : `${casaDelPalazzo(v.dungeon)}?infiltrazione=${encodeURIComponent(v.infiltrazione)}` }));
   const luoghi = luoghiDelleOmbre(partita === undefined ? null : palazziConclusi(partita), chiave).get(chiave) ?? [];
   const registrata = partita !== undefined && r.persona_id !== null ? personeRegistrate(partita).has(r.persona_id) : null;
   const base = scheda(r, indicePersone(), { affinita: daCompendio, luoghi, registrata });

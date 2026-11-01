@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { getPersonaggi, getPersone, URL_PERSONAGGI, urlPersone } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
@@ -27,14 +28,14 @@ import { TitoloSezione } from '../components/shared/TitoloSezione';
  * dettagli» apre presentazione, armi, battaglia, scuola ed età, doppiatori (con il segno sui campi
  * da fonte secondaria), il rimando alla scheda Confidente e la fonte.
  */
-function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCompendio: Map<string, number>; onModificato: () => void }) {
+function Personaggio({ p, idCompendio, onModificato, conId }: { p: PersonaggioDto; idCompendio: Map<string, number>; onModificato: () => void; conId: boolean }) {
   const [aperto, setAperto] = useState(false);
   const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
   /** Il segno «(fonte secondaria)» se quel campo del personaggio non viene dalla guida italiana, altrimenti niente. */
   const nota = (campo: string) => (secondari.has(campo) ? <span className="testo-12 text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
-    <li className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
+    <li id={conId ? `elemento-${p.chiave}` : undefined} className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
       {/* stesso riquadro per tutti: i Confidenti usano la loro immagine, gli altri (Protagonista, Stanza di Velluto, Jose) il ritratto del personaggio, caricabile allo stesso modo */}
       {p.confidente
         ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" modificabile />
@@ -73,7 +74,8 @@ function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCo
 /**
  * Pagina dei personaggi: carica il cast e il compendio (per collegare le Persona per nome
  * italiano, originale o minuscolo), mostra la barra dei gruppi con il numero di membri e i gruppi
- * scelti (tutti, o uno solo), con le carte dei loro membri.
+ * scelti (tutti, o uno solo), con le carte dei loro membri. Un personaggio in più gruppi ha l'id `elemento-<chiave>` (la «casa» che gli dà la
+ * ricerca globale) solo sulla prima carta mostrata, mai doppio.
  */
 export function PersonaggiPage() {
   useDocumentTitle('Personaggi');
@@ -87,6 +89,15 @@ export function PersonaggiPage() {
   // «Tutti» è la chiave vuota
   const chiaviGruppi = useMemo(() => ['', ...(d?.gruppi ?? []).map((g) => g.nome)], [d]);
   const schede = useSchede({ chiavi: chiaviGruppi, attiva: gruppo, onScegli: setGruppo });
+  // la prima occorrenza di ogni personaggio fra i gruppi mostrati: è quella che porta l'id
+  const primeCarte = useMemo(() => {
+    const viste = new Set<string>();
+    const prime = new Set<string>();
+    for (const g of gruppi) for (const m of g.membri) if (perChiave.has(m) && !viste.has(m)) { viste.add(m); prime.add(`${g.nome}|${m}`); }
+    return prime;
+  }, [gruppi, perChiave]);
+  // `?elemento=<chiave>` (la «casa» di un personaggio nella ricerca globale) porta in vista la carta e la evidenzia
+  useElementoDaIndirizzo(!!d);
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
@@ -104,7 +115,7 @@ export function PersonaggiPage() {
                 <ModificaGuida tipo="gruppo-personaggi" chiave={g.nome} cosa={`il gruppo «${g.nome}»`} soloIcona onSalvato={() => { setGruppo(''); void dati.ricarica(); }} />
               </div>
               <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[minmax(0,1fr)] xl:grid-cols-2" aria-label={g.nome}>
-                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} onModificato={() => void dati.ricarica()} />)}
+                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} onModificato={() => void dati.ricarica()} conId={primeCarte.has(`${g.nome}|${p.chiave}`)} />)}
               </ul>
             </section>
           ))}

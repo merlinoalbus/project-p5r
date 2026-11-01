@@ -33,7 +33,8 @@ describe('GuidaPage', () => {
     expect(screen.getByText('Palazzi', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/guida/dungeon');
     expect(screen.queryByRole('link', { name: /Palazzi e Dedali/ })).toBeNull();
     expect(screen.getByRole('link', { name: /Guida giorno per giorno/ })).toHaveAttribute('href', '/guida/percorso');
-    expect(screen.getByText('Confidenti', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/partita?scheda=confidenti');
+    // L4-05: l'indirizzo unico dei Confidenti, che sceglie la partita attiva o i Personaggi (`router.tsx`)
+    expect(screen.getByText('Confidenti', { selector: 'span' }).closest('a')).toHaveAttribute('href', '/confidenti');
     // senza asset: riserva vettoriale, nessuna immagine
     expect(document.querySelectorAll('img')).toHaveLength(0);
     expect(document.querySelectorAll('.piastrella-guida__riserva')).toHaveLength(SEZIONI_GUIDA.length);

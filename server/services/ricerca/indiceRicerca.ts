@@ -13,7 +13,7 @@
 import { getDb, type AppDatabase } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { datiGuidaCorretti } from '../datiGuida.js';
-import { t } from '../traduzioniService.js';
+import { t, vociAmbito } from '../traduzioniService.js';
 import { casaDelPalazzo, casaDellArea, contestoAree, type ContestoAree, type RigaArea } from '../mappe/casaMappa.js';
 import { entitaDellaRadice } from '../mappe/alberoMappe.js';
 import { caricataDellaMappa, illustrazioneDaRiga, urlCaricata, type RigaPerIllustrazione } from '../mappe/immagineMappa.js';
@@ -21,11 +21,13 @@ import { casaDelLuogo } from '../luoghiService.js';
 import { nomiAltriOggetto } from '../catalogoOggettiLetture.js';
 import { espandiAbbreviazione, chiaveSinonimo, sinonimiRicerca, type SinonimiRicerca } from './sinonimiRicerca.js';
 import { casaOggetto } from '../../../shared/catalogo.js';
+import { nomeCategoriaTermine } from '../../../shared/categorieTermine.js';
 import { dataLeggibile } from '../../../shared/condizioniSpillo.js';
 import { giornoDellaSettimana } from '../../../shared/date.js';
 import { versioneImmagine } from '../../../shared/miniature.js';
 import { slug } from '../../../shared/slug.js';
 import { normalizzaTesto } from '../../../shared/testo.js';
+import { casaOmbra } from '../../../shared/ombre.js';
 import { PARAMETRO_ELEMENTO, type TipoRicerca } from '../../../shared/ricerca.js';
 import type { IllustrazioneDto } from '../../../shared/types.js';
 
@@ -216,18 +218,34 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     immagine: { immagineUrl: null, asset: ctx.assetConfidenti.has(`${c.chiave}-fedele`) ? `confidenti/${c.chiave}-fedele` : `confidenti/${c.chiave}` },
   })),
 
+  // il cast della pagina `/guida/personaggi` (stesso blocco della guida, con le correzioni dell'utente): la casa porta alla carta con `?elemento=`;
+  // il percorso è il primo gruppo in cui il personaggio compare (11 su 27 stanno in più gruppi); l'immagine è quella della pagina (il
+  // Confidente se lo è, altrimenti il ritratto del personaggio)
+  personaggio: (ctx) => {
+    const g = datiGuidaCorretti<{ personaggi?: ReadonlyArray<{ chiave: string; nome: string; nomeCodice?: string | null; confidente?: string | null }>; gruppi?: ReadonlyArray<{ nome: string; membri: ReadonlyArray<string> }> }>('personaggi');
+    const primoGruppo = new Map<string, string>();
+    for (const gruppo of g?.gruppi ?? []) for (const m of gruppo.membri) if (!primoGruppo.has(m)) primoGruppo.set(m, gruppo.nome);
+    return (g?.personaggi ?? []).map((p): Bozza => ({
+      tipo: 'personaggio', chiave: p.chiave, nome: p.nome, altri: [p.nomeCodice], casa: `/guida/personaggi?${PARAMETRO_ELEMENTO}=${encodeURIComponent(p.chiave)}`,
+      percorso: primoGruppo.has(p.chiave) ? [primoGruppo.get(p.chiave)!] : [],
+      immagine: p.confidente
+        ? { immagineUrl: null, asset: ctx.assetConfidenti.has(`${p.confidente}-fedele`) ? `confidenti/${p.confidente}-fedele` : `confidenti/${p.confidente}` }
+        : assetDi('personaggi', p.chiave),
+    }));
+  },
+
   persona: (ctx) => q<{ id: number; nome: string; chiave_forma: string | null }>(ctx, 'SELECT id, nome, chiave_forma FROM persona ORDER BY id').map((p) => ({
     tipo: 'persona', chiave: String(p.id), nome: t('persona', p.nome), casa: `/compendio/persona/${p.id}`,
     altri: [p.nome, ...(ctx.sinonimi.sinonimi.get(chiaveSinonimo('persona', p.nome)) ?? [])],
     immagine: immagineDellaPersona(p.nome, p.chiave_forma, ctx),
   })),
 
-  // l'Ombra ha la sua pagina (`/guida/ombra/<chiave>`, la stessa di `casaOmbra` in ombreService); l'immagine è quella della sua Persona
+  // l'Ombra ha la sua pagina (`casaOmbra`, `shared/ombre.ts`); l'immagine è quella della sua Persona
   // nel compendio (se ne ha una), con la stessa regola; i nomi altri e il nome della Persona permettono di trovarla anche con il nome della maschera
   ombra: (ctx) => q<{ chiave: string; nome: string; nomi_altri_json: string; maschera_nota: string | null; persona_nome: string | null; chiave_forma: string | null }>(ctx,
     `SELECT o.chiave, o.nome, o.nomi_altri_json, o.maschera_nota, p.nome AS persona_nome, p.chiave_forma
      FROM ombra o LEFT JOIN persona p ON p.id = o.persona_id ORDER BY o.nome COLLATE NOCASE, o.chiave`).map((o) => ({
-    tipo: 'ombra', chiave: o.chiave, nome: o.nome, casa: `/guida/ombra/${encodeURIComponent(o.chiave)}`,
+    tipo: 'ombra', chiave: o.chiave, nome: o.nome, casa: casaOmbra(o.chiave),
     altri: [...nomiAltriDellOmbra(o.nomi_altri_json), o.persona_nome ? t('persona', o.persona_nome) : null, o.persona_nome, o.maschera_nota],
     immagine: o.persona_nome ? immagineDellaPersona(o.persona_nome, o.chiave_forma, ctx) : null,
   })),
@@ -237,6 +255,16 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     altri: [s.nome, ...(ctx.sinonimi.sinonimi.get(chiaveSinonimo('skill', s.nome)) ?? [])],
     immagine: s.elemento ? { immagineUrl: null, asset: `elementi/${s.elemento}` } : null,
   })),
+
+  // i tratti delle Persona stanno nella scheda «Tratti» di `/guida/sfide`; non hanno una chiave propria (le correzioni li indicano per nome):
+  // la chiave è lo slug del nome, la stessa dell'id della riga (`elemento-<slug>`); il percorso è la categoria
+  tratto: () => {
+    const g = datiGuidaCorretti<{ tratti?: { elenco?: ReadonlyArray<{ nome: string; nomeEn?: string | null; categoria?: string | null }> } }>('sfide');
+    return (g?.tratti?.elenco ?? []).filter((x) => slug(x.nome) !== '').map((x): Bozza => ({
+      tipo: 'tratto', chiave: slug(x.nome), nome: x.nome, altri: [x.nomeEn], percorso: x.categoria ? [x.categoria] : [],
+      casa: `/guida/sfide?scheda=tratti&${PARAMETRO_ELEMENTO}=${encodeURIComponent(slug(x.nome))}`,
+    }));
+  },
 
   oggetto: (ctx) => oggettiDelCatalogo(CATEGORIE_CON_PAGINA_PROPRIA, false, 'oggetto', ctx),
   libro: (ctx) => oggettiDelCatalogo(['libro'], true, 'libro', ctx),
@@ -375,6 +403,14 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     };
   }),
 
+  // i cruciverba di Leblanc (`/guida/cruciverba`): il nome è l'indizio (accorciato), la chiave il giorno ('MM-GG', unico); la risposta si trova
+  // come «trovato come» (come per le domande: la pagina la cerca allo stesso modo), senza lo stato di risolto, che dipende dalla partita
+  cruciverba: (ctx) => q<{ data: string; indizio: string; risposta: string; risposta_en: string | null }>(ctx,
+    'SELECT data, indizio, risposta, risposta_en FROM cruciverba ORDER BY ordine').map((c) => ({
+    tipo: 'cruciverba', chiave: c.data, nome: accorcia(c.indizio), casa: `/guida/cruciverba?${PARAMETRO_ELEMENTO}=${encodeURIComponent(c.data)}`,
+    altri: [c.risposta, c.risposta_en, c.data], percorso: [dataLeggibile(c.data)],
+  })),
+
   trofeo: (ctx) => q<{ chiave: string; nome: string; nome_en: string | null }>(ctx, 'SELECT chiave, nome, nome_en FROM trofeo ORDER BY ordine').map((r) => ({
     tipo: 'trofeo', chiave: r.chiave, nome: r.nome, altri: [r.nome_en], casa: `/guida/completamento?elemento=${encodeURIComponent(r.chiave)}`,
   })),
@@ -391,6 +427,14 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     }));
     return [...battaglie, ...boss];
   },
+
+  // i termini del glossario (`/compendio/glossario`, ambito «termine» delle traduzioni, lo stesso elenco della pagina): il nome è la resa
+  // italiana, il termine inglese (la chiave) si trova come «trovato come»; il percorso è la categoria; la chiave della casa è lo slug della
+  // chiave, la stessa dell'id della voce nella pagina (le chiavi hanno spazi e maiuscole: «1 More»)
+  glossario: () => vociAmbito('termine').filter((v) => slug(v.chiave) !== '').map((v): Bozza => ({
+    tipo: 'glossario', chiave: v.chiave, nome: v.testo, altri: [v.chiave], percorso: [nomeCategoriaTermine(String(v.extra?.categoria ?? 'altro'))],
+    casa: `/compendio/glossario?${PARAMETRO_ELEMENTO}=${encodeURIComponent(slug(v.chiave))}`,
+  })),
 };
 
 /** L'immagine di un dungeon (lo stemma, più la caricata): quella delle sue infiltrazioni e dei suoi dedali. */

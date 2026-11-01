@@ -27,8 +27,9 @@ export interface CollegamentoAzione {
   etichetta: string;
   /** Il collegamento porta alla planimetria d'atterraggio di un Palazzo (non alla sua scheda): chi mostra la mappa accanto la può aprire lì. */
   atterraggio?: { chiave: string; spilloId: number | null };
-  /** R10-27: dove il diario con il pannello apre la scheda dell'oggetto, se diverso da `href`. Libri, film, attività e Richieste non hanno una
-   *  pagina per singolo elemento: l'elenco (`href`) resta il collegamento di sempre, il pannello mostra quell'elemento nell'elenco filtrato. */
+  /** R10-27: dove il diario con il pannello apre la scheda dell'oggetto, se diverso da `href`. Libri e film non hanno una vista per singolo
+   *  elemento come pagina: l'elenco (`href`) resta il collegamento, il pannello mostra quell'elemento nell'elenco filtrato. Attività e
+   *  Richieste ce l'hanno (`?elemento=`, L4), e `href` è già l'elemento. */
   scheda?: string;
 }
 
@@ -64,10 +65,11 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
         }
         return { href: `/guida/dungeon/${r.chiave}${a.infiltrazioniDelPalazzo ? '?infiltrazione=in-corso' : ''}`, etichetta: testo ?? 'Palazzo' };
       }
-      case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos', scheda: indirizzoElemento('/guida/richieste', r.chiave) };
+      // L4: Richieste e attività hanno la loro vista per elemento anche come pagina (`?elemento=`), libri e film solo nel pannello
+      case 'richiesta': return { href: indirizzoElemento('/guida/richieste', r.chiave), etichetta: testo ?? 'Richieste dei Mementos' };
       case 'libro': return { href: '/guida/libri', etichetta: testo ?? 'Libri', scheda: indirizzoElemento('/guida/libri', r.chiave) };
       case 'film': return { href: '/guida/film', etichetta: testo ?? 'Film e DVD', scheda: indirizzoElemento('/guida/film', r.chiave) };
-      case 'attivita': return { href: '/guida/attivita', etichetta: testo ?? 'Attività', scheda: indirizzoElemento('/guida/attivita', r.chiave) };
+      case 'attivita': return { href: indirizzoElemento('/guida/attivita', r.chiave), etichetta: testo ?? 'Attività' };
       case 'negozio': return { href: `/guida/negozi/${r.chiave}`, etichetta: testo ?? 'Negozio' };
       case 'dote': return { href: '/guida/attivita', etichetta: testo ?? 'Doti sociali' };
       default: return null;

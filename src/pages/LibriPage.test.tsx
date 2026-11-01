@@ -116,7 +116,8 @@ describe('LibriPage', () => {
     // la ricompensa di una Richiesta si dice dalla struttura (`ricompensaDi`), con il rimando alle Richieste
     getLibri.mockResolvedValue(dto({ ...base, posizioni: [], negozi: [], ricompensaDi: [{ tipo: 'richiesta', chiave: 'un-part-time-infernale', nome: 'Un part-time infernale' }] }));
     const conRicompensa = render(<MemoryRouter><LibriPage /></MemoryRouter>);
-    expect(await screen.findByRole('link', { name: 'Ricompensa di «Un part-time infernale»' })).toHaveAttribute('href', '/guida/richieste');
+    // L4-01: la ricompensa porta alla Richiesta citata, non in cima all'elenco
+    expect(await screen.findByRole('link', { name: 'Ricompensa di «Un part-time infernale»' })).toHaveAttribute('href', '/guida/richieste?elemento=un-part-time-infernale');
     expect(screen.queryByText('Non indicato')).toBeNull();
     conRicompensa.unmount();
 

@@ -77,6 +77,13 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Navigazione: barra in basso (telefono e tablet) con Home, Compendio, Fusione, Partita, Guida; Skill dal chip in testa al Compendio,
   dalle schede Persona, dalla Home senza partita e, da 1024 px, dalla barra laterale. Briciole a due livelli, «Vai al contenuto»,
   fuoco sul titolo dopo ogni cambio di pagina.
+- Un rimando che conosce l'elemento citato porta a lui, non in cima a un elenco: le attività di quartieri, luoghi e Aree, le Richieste e
+  le attività delle voci del Diario, le ricompense delle Richieste, le fonti delle ricompense degli oggetti (Richieste, domande, esami,
+  sfide, Covo, ricette), le Ombre della scheda Persona e la ricerca globale. Libri e film si aprono da soli solo nel pannello sopra il
+  diario; il cartellino «Da segnare» di una Richiesta porta all'elenco, perché il requisito non dice quale. Dal Calendario «Domande ed esami da oggi» porta alla prima domanda da quel giorno in poi; dai Palazzi si va ai Memento.
+  «Confidenti» ha un solo indirizzo: con una partita attiva l'elenco della partita, senza i Personaggi.
+- Attraversando un passaggio fra due mappe il visore offre il ritorno col nome della mappa di partenza (il testo visibile è il nome della
+  cosa, mai «Torna»), verso il pin attraversato.
 - Tipografia in rem (radice al 93,75%), testo informativo ≥ 12 px; 11 px solo per quattro segni fitti (etichette dei pin, percentuale
   dello zoom, targhette «LV», iniziale di riserva dei ritratti). I caratteri P5 caricati valgono per titoli e parole grandi; i titoli
   dei pulsanti `PulsanteVisivo` restano nel carattere display maiuscolo.

@@ -25,10 +25,10 @@ import { ETICHETTE_RICERCA, LIMITE_MASSIMO_RICERCA, MIN_CARATTERI_RICERCA, type 
 import { urlMiniatura } from '../../../shared/miniature';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Spinner } from '../shared/PageState';
-import { IconBolt, IconClose, IconMask } from '../shared/icons';
+import { IconBolt, IconBook, IconClose, IconMask } from '../shared/icons';
 import {
-  IconAppunti, IconBersaglio, IconBussola, IconCarte, IconChiave, IconFilm, IconGioca, IconGioco, IconLibro, IconMaschera, IconMedaglia, IconMessaggio, IconNegozio,
-  IconOrologio, IconPersone, IconPianta, IconPosizione, IconRegalo, IconScudo,
+  IconAppunti, IconBersaglio, IconBussola, IconCarte, IconChiave, IconElenco, IconFilm, IconGioca, IconGioco, IconLibro, IconMaschera, IconMatita, IconMedaglia, IconMessaggio,
+  IconNegozio, IconOrologio, IconPersone, IconPianta, IconPosizione, IconRegalo, IconScudo, IconStella,
 } from '../shared/iconeGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -39,9 +39,11 @@ const ATTESA_MS = 200;
 /** L'icona di ogni tipo, per i risultati senza immagine; un `Record` completo: un tipo nuovo senza icona non compila. Mai l'icona delle mappe per un posto. */
 const ICONE_TIPO: Readonly<Record<TipoRicerca, (dimensione: number) => ReactNode>> = {
   confidente: (s) => <IconPersone size={s} />,
+  personaggio: (s) => <IconStella size={s} />,
   persona: (s) => <IconMask size={s} />,
   ombra: (s) => <IconMaschera size={s} />,
   skill: (s) => <IconBolt size={s} />,
+  tratto: (s) => <IconElenco size={s} />,
   oggetto: (s) => <IconRegalo size={s} />,
   libro: (s) => <IconLibro size={s} />,
   film: (s) => <IconFilm size={s} />,
@@ -61,8 +63,10 @@ const ICONE_TIPO: Readonly<Record<TipoRicerca, (dimensione: number) => ReactNode
   richiesta: (s) => <IconMessaggio size={s} />,
   giorno: (s) => <IconOrologio size={s} />,
   domanda: (s) => <IconCarte size={s} />,
+  cruciverba: (s) => <IconMatita size={s} />,
   trofeo: (s) => <IconMedaglia size={s} />,
   sfida: (s) => <IconBersaglio size={s} />,
+  glossario: (s) => <IconBook size={s} />,
 };
 
 /** Gli elementi che ricevono il fuoco con Tab. */

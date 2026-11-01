@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react';
 import { getCruciverba, impostaCruciverba } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { ordineGioco } from '../../shared/condizioniSpillo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -34,8 +35,8 @@ import { Note } from '../components/shared/TestoNote';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
-/** L'id dell'elemento della riga di un giorno, usato come ancora per scorrere al prossimo cruciverba. */
-const ancoraGiorno = (giorno: string) => `cruciverba-${giorno}`;
+/** L'id della riga di un giorno: ogni riga lo porta, perché è la «casa» che la ricerca globale dà al cruciverba (`?elemento=<giorno>`) e l'ancora per scorrere al prossimo. */
+const ancoraGiorno = (giorno: string) => `elemento-${giorno}`;
 
 /**
  * La riga di un cruciverba: spunta di risolto (solo con una partita), data, indizio e segno di
@@ -67,7 +68,7 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li id={evidenzia ? ancoraGiorno(c.giorno) : undefined} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
+    <li id={ancoraGiorno(c.giorno)} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
         {/* La casella da sola è un bersaglio di 20 px: col dito si manca, e qui è il gesto della
             pagina. L'etichetta attorno la rende toccabile per 44 px senza cambiarne l'aspetto. */}
@@ -105,6 +106,8 @@ export function CruciverbaPage() {
   const [ricerca, setRicerca] = useState('');
   const [stato, setStato] = useState<FiltroStato>('tutti');
   const d = dati.dati;
+  // `?elemento=<giorno>` (la «casa» di un cruciverba nella ricerca globale) porta in vista la riga e la evidenzia
+  useElementoDaIndirizzo(!!d);
   const q = piatto(ricerca.trim());
   const visibili = useMemo(() => (d?.cruciverba ?? []).filter((c) => {
     if (stato === 'da-fare' && c.fatto) return false;
