@@ -484,6 +484,11 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
   pigre (`schedePartita.ts`; il cassetto del Confidente del Diario usa la stessa), fuori dal caricamento iniziale, precaricate al
   passaggio sulla piastrella e nel tempo morto; il cambio di scheda è una transizione, quindi resta a schermo la scheda di prima
   finché la nuova è pronta.
+- Installazione come web app: `src/utils/installazioneApp.ts` ascolta `beforeinstallprompt` da subito (`main.tsx`, prima della lettura
+  della configurazione: l'evento arriva una volta) e lo tiene per l'invito; `components/layout/InvitoInstallazione.tsx`, montato dalla
+  Home, si apre una volta per dispositivo (`localStorage` `p5r-invito-installazione`), solo con `(pointer: coarse)` e fuori dall'app
+  installata (`display-mode` `standalone` o `fullscreen`, `navigator.standalone` di iOS). L'evento può andare perso se il browser lo lancia
+  prima che il bundle sia eseguito: allora l'invito indica la voce del menu.
 - Ricerche nelle liste: il filtro usa `useDeferredValue` (Compendio personale, Glossario, Abiti); quella delle Traduzioni, che
   interroga il server, parte 300 ms dopo l'ultimo tasto.
 - Rimandi a un elemento di un elenco: `?elemento=<chiave>` (`indirizzoElemento`, `src/utils/pannelloScheda.ts`). Attività e Richieste

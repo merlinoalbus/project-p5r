@@ -68,7 +68,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   all'elemento nella sua pagina.
 - Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, pacchetto di gioco («Importa»), copia
   dell'istanza, documentazione delle API, «Prepara edizione» del rilascio.
-- Interfaccia per desktop, tablet e telefono; installabile a schermo intero.
+- Interfaccia per desktop, tablet e telefono; installabile come web app a schermo intero, con l'invito la prima volta che la Home si apre da telefono o tablet.
 
 ## Punti aperti
 
@@ -90,8 +90,11 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Da L5, per L8: gli id di `partita` si riusano dopo un'eliminazione (nessun AUTOINCREMENT) e l'archivio immutabile
   `acquisto_legacy_valutazione` non ha una chiave esterna verso la partita: una partita nuova si ritrova accanto le righe d'archivio di una
   eliminata con lo stesso id.
-- Aperti: L6–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
-  blocchi della guida in prosa. Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Decisioni dell'utente (01/11): D1 non toccare (L8-01 resta com'è); D2 procedere; D3, D4, D5, D6 sì come proposto; D7 pulsante
+  «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
+  D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 prima lo schizzo; D16 non serve riconfermare;
+  D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
+- Aperti: L6–L11; in sospeso D15 e D20 (schizzi da mostrare) e D19 (motivazione da dare). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
 
 **Lavori aperti**

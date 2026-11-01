@@ -18,6 +18,7 @@ import { tuttePrecarica } from './router';
 import { precaricaPagineScheda } from './components/scheda/pagineScheda';
 import { precaricaSchedePartita } from './components/partita/schedePartita';
 import { avviaControlloVersione } from './utils/versioneApp';
+import { ascoltaInstallazione } from './utils/installazioneApp';
 import { registraEdizione } from './services/api/cacheGioco';
 import { impostaGestoreAvanzamento } from './services/api/_helpers';
 import { seAvanzamentoInIntestazione } from './utils/giornoAvanzato';
@@ -115,4 +116,7 @@ async function boot(): Promise<void> {
   if (import.meta.env.PROD) precaricaInBackground([...precaricaSchedePartita, ...tuttePrecarica, ...precaricaPagineScheda]);
 }
 
+// l'evento d'installazione arriva una volta sola, anche prima che la configurazione sia letta e la Home montata: si ascolta da subito
+// (`InvitoInstallazione`)
+ascoltaInstallazione();
 void boot();

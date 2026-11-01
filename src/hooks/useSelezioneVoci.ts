@@ -27,7 +27,7 @@ export interface SelezioneVoci {
   intervallo: (uid: string) => void;
   /** Mette (o toglie) più voci insieme (le caselle «Tutte» / «Nessuna» di una fascia). */
   scegli: (uid: readonly string[], dentro: boolean) => void;
-  /** Sostituisce la selezione con queste voci (le voci appena incollate). */
+  /** Sostituisce la selezione con queste voci (la selezione di prima, rimessa dopo un doppio clic sul testo). */
   imposta: (uid: readonly string[]) => void;
   svuota: () => void;
 }

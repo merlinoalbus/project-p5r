@@ -351,10 +351,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   // e la finestra «Copia in…» / «Sposta in…» la manda in un altro giorno.
   const ordineVisivo = useMemo(() => [...g.azioni.filter((a) => a.fascia === 'giorno'), ...g.azioni.filter((a) => a.fascia === 'sera')].map((a) => a.uid), [g.azioni]);
   const sel = useSelezioneVoci(g.giorno, ordineVisivo);
-  // C9: le voci che entrano nella selezione (Maiusc+clic che scavalca una fascia chiusa, voci incollate e selezionate, «Tutte» della
-  // scelta) si vedono: la loro fascia chiusa si riapre. Solo le nuove: richiudere una fascia con voci selezionate la lascia chiusa (Copia,
-  // Taglia e «Copia in…» continuano ad agire su tutta la selezione, anche nascosta). Una voce non ancora nella giornata (incollata, prima
-  // che la giornata si rilegga) resta «nuova» finché non c'è.
+  // C9: le voci che entrano nella selezione (Maiusc+clic che scavalca una fascia chiusa, «Tutte» della scelta) si vedono: la loro fascia
+  // chiusa si riapre. Solo le nuove: richiudere una fascia con voci selezionate la lascia chiusa (Copia, Taglia e «Copia in…» continuano ad
+  // agire su tutta la selezione, anche nascosta).
   const selezioneVista = useRef<readonly string[]>([]);
   useEffect(() => {
     const viste = selezioneVista.current;
@@ -369,6 +368,23 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     selezioneVista.current = conosciute;
     if (fasce.size) useFasceDiarioStore.getState().apri(g.giorno, [...fasce]);
   }, [sel.uid, g.azioni, g.giorno]);
+  // Dopo un incolla (2026-11-01, «deve uscire dalla modalità selezione... (click automatico su fine)») le voci arrivate non restano
+  // selezionate, ma si vedono lo stesso: la loro fascia chiusa si riapre. Una voce non ancora nella giornata (prima che si rilegga) resta
+  // in attesa finché non c'è.
+  const incollateDaMostrare = useRef<readonly string[]>([]);
+  const [incollaFatti, setIncollaFatti] = useState(0);
+  useEffect(() => {
+    const attese = incollateDaMostrare.current;
+    if (!attese.length) return;
+    const fasce = new Set<FasciaGioco>();
+    const restano: string[] = [];
+    for (const uid of attese) {
+      const fascia = g.azioni.find((v) => v.uid === uid)?.fascia;
+      if (fascia) fasce.add(fascia); else restano.push(uid);
+    }
+    incollateDaMostrare.current = restano;
+    if (fasce.size) useFasceDiarioStore.getState().apri(g.giorno, [...fasce]);
+  }, [incollaFatti, g.azioni, g.giorno]);
   const [caselleDi, setCaselleDi] = useState<string | null>(null);
   const caselle = !IN_RILASCIO && caselleDi === g.giorno;
   const [trasferimento, setTrasferimento] = useState<'copia' | 'sposta' | null>(null);
@@ -454,6 +470,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   // Ctrl+C / Ctrl+X / Ctrl+V / Esc con gli appunti di sistema (nel rilascio niente: l'hook è vuoto e il modulo esce dal bundle)
   // Esc chiude prima il menu della voce aperto (il fuoco torna al suo «⋯»), poi annulla la selezione
   const appunti = useAppuntiDiario({ giorno: g.giorno, voci: g.azioni, selezione: sel, onModificata: async () => { await aggiornata(); },
+    // dopo l'incolla come «Fine» (anche dalla scelta a caselle), con le voci arrivate a vista
+    onIncollate: (uid) => { incollateDaMostrare.current = uid; setIncollaFatti((n) => n + 1); setCaselleDi(null); sel.svuota(); },
     chiudiMenu: () => {
       if (menu === null) return false;
       const uid = menu.slice(menu.indexOf('/') + 1);

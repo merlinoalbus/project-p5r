@@ -25,6 +25,7 @@ import { IconMaschera } from '../components/shared/iconeGuida';
 import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
 import { useMedia } from '../hooks/useMedia';
+import { InvitoInstallazione } from '../components/layout/InvitoInstallazione';
 import type { PartitaDto } from '../types';
 
 /** Le cinque scorciatoie, con **la stessa figura della barra di navigazione**.
@@ -140,6 +141,8 @@ export function HomePage() {
   const carica = usePartitaStore((s) => s.carica);
   return (
     <div className="home flex flex-col gap-3">
+      {/* la prima volta da telefono o tablet, l'invito a installare l'app (finestra in primo piano, una volta per dispositivo) */}
+      <InvitoInstallazione />
       <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" compatta />
       {attiva ? (
         <HomeConPartita key={attiva.id} partita={attiva} />

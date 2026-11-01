@@ -79,6 +79,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Navigazione: barra in basso (telefono e tablet) con Home, Compendio, Fusione, Partita, Guida; Skill dal chip in testa al Compendio,
   dalle schede Persona, dalla Home senza partita e, da 1024 px, dalla barra laterale. Briciole a due livelli, «Vai al contenuto»,
   fuoco sul titolo dopo ogni cambio di pagina.
+- Installazione come web app dal browser (manifesto, niente service worker né cache offline): la prima volta che la Home si apre con lo
+  schermo a tocco (telefono e tablet) e l'app non è già installata, una finestra invita a installarla, una volta per dispositivo. Con
+  Chrome, Edge e Samsung Internet il pulsante «Installa» apre la finestra del browser; su iPhone e iPad dice i passi di «Condividi»;
+  altrove indica la voce del menu **(01/11)**.
 - Un rimando che conosce l'elemento citato porta a lui, non in cima a un elenco: le attività di quartieri, luoghi e Aree, le Richieste e
   le attività delle voci del Diario, le ricompense delle Richieste, le fonti delle ricompense degli oggetti (Richieste, domande, esami,
   sfide, Covo, ricette), le Ombre della scheda Persona e la ricerca globale. Libri e film si aprono da soli solo nel pannello sopra il
@@ -188,6 +192,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   scopre il bersaglio.
 - Quantità negli acquisti facoltativa (1 se non indicata).
 - Copia, Taglia e Incolla delle voci con gli appunti di sistema, e appunti fissi delle voci che si ripetono: solo nella preparazione.
+  Dopo un incolla si esce dalla selezione come con «Fine», anche dalla scelta a caselle, e le fasce chiuse delle voci arrivate si
+  riaprono **(01/11)**.
 - Gli oggetti citati da una voce si aprono in un pannello sopra il Diario, con ritorno alla stessa posizione.
 - I 173 eventi del calendario restano eventi collegati per chiave alle voci, non diventano voci. **(24/10)**
 

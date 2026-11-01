@@ -212,6 +212,9 @@ interface Opzioni {
   selezione: SelezioneVoci;
   /** Dopo l'incolla o l'annullo: la giornata si ricarica. */
   onModificata: () => Promise<void>;
+  /** Dopo un incolla riuscito, a giornata riletta, con le voci arrivate: chi usa l'hook chiude la selezione come «Fine» e mostra le voci
+   *  (le loro fasce chiuse si riaprono). Senza, la selezione si svuota soltanto. */
+  onIncollate?: (uid: readonly string[]) => void;
   /** Esc: chiude il menu della voce, se ce n'è uno aperto (vero se l'ha chiuso: la selezione resta). */
   chiudiMenu?: () => boolean;
   /** Il posto del fuoco nel giorno: il «⋯» della voce `uid` se c'è, altrimenti un posto stabile del giorno (dopo l'incolla e l'annullo).
@@ -227,7 +230,7 @@ const NESSUNO: AppuntiDelGiorno = {
 /** Gli appunti del giorno (solo nella preparazione: nel rilascio un hook vuoto, e il modulo esce dal bundle). */
 export const useAppuntiDiario: (o: Opzioni) => AppuntiDelGiorno = IN_RILASCIO ? () => NESSUNO : useAppuntiDiarioReale;
 
-function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMenu, fuoco }: Opzioni): AppuntiDelGiorno {
+function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, onIncollate, chiudiMenu, fuoco }: Opzioni): AppuntiDelGiorno {
   const [inAttesa, setInAttesa] = useState<IncollaInAttesa | null>(null);
   const [manuale, setManuale] = useState<{ dopoUid: string | null } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -239,8 +242,8 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
   // L13 (O7-3): il nome del collegamento come la voce lo mostra (quello scritto o, se manca, quello dell'elemento), per il testo leggibile
   const nomi: NomiDelleVoci = useMemo(() => new Map(voci.map((v) => [v.uid, v.riferimentoTesto])), [voci]);
   // i riferimenti che i gestori dei tasti (montati una volta) leggono sempre aggiornati
-  const ultimi = useRef({ giorno, voci, selezione, frasi, nomi, onModificata, chiudiMenu, fuoco });
-  useLayoutEffect(() => { ultimi.current = { giorno, voci, selezione, frasi, nomi, onModificata, chiudiMenu, fuoco }; });
+  const ultimi = useRef({ giorno, voci, selezione, frasi, nomi, onModificata, onIncollate, chiudiMenu, fuoco });
+  useLayoutEffect(() => { ultimi.current = { giorno, voci, selezione, frasi, nomi, onModificata, onIncollate, chiudiMenu, fuoco }; });
 
   // ---- i blocchi pronti per l'evento `copy` / `cut`: per gruppo di voci, validi finché la giornata non si ricarica ----
   const pronti = useRef<{ voci: readonly AzionePercorsoDto[]; blocchi: Map<string, AppuntiDiario> }>({ voci, blocchi: new Map() });
@@ -344,14 +347,20 @@ function useAppuntiDiarioReale({ giorno, voci, selezione, onModificata, chiudiMe
       .catch((err: unknown) => notifica('error', `Voci non preparate per gli appunti fissi: ${messaggio(err, 'riprova')}.`));
   }, [bloccoPronto]);
 
-  /** Esegue l'incolla, ricarica la giornata, seleziona le voci arrivate e notifica con «Annulla». */
+  /** Esegue l'incolla, ricarica la giornata, esce dalla selezione e notifica con «Annulla». */
   const esegui = useCallback(async (r: RichiestaEseguiIncolla, conFuoco: boolean) => {
     const esito = await incollaVociDiario(r);
     const store = useAppuntiDiarioStore.getState();
     if (r.appunti.modo === 'taglia' && store.taglio?.id === r.appunti.taglio) store.svuota();
     const { onModificata: ricarica } = ultimi.current;
     await ricarica();
-    if (vivo.current) ultimi.current.selezione.imposta(esito.uid);
+    // richiesta dell'utente (2026-11-01): «quando eseguo incolla deve uscire dalla modalità selezione... (click automatico su fine)»:
+    // si esce dalla selezione come con «Fine» (prima restavano selezionate le voci arrivate, con la barra a schermo); chi usa l'hook
+    // mostra anche le voci arrivate (`onIncollate`)
+    if (vivo.current) {
+      const { onIncollate: dopo, selezione } = ultimi.current;
+      if (dopo) dopo(esito.uid); else selezione.svuota();
+    }
     // la riga del gesto («Incolla qui», il «⋯») si rimonta con la ricarica: il fuoco, se era su un comando e si è perso, va sulla prima
     // voce arrivata (con Ctrl+V dopo un clic sulla riga il fuoco non era su niente: resta così)
     const trova = (uid: string | null) => (attendi = false) => ultimi.current.fuoco?.(uid, attendi) ?? null;
