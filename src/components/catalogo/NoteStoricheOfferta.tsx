@@ -80,10 +80,10 @@ function NotaStorica({ nota, onLegamiCambiati, effetto }: { nota: NotaStoricaOff
         ? <p className="m-0">{effetto.ripristino}</p>
         : <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">Testo
-            <textarea className="input min-h-32" value={testo} maxLength={2000} disabled={occupato} onChange={(e) => setTesto(e.target.value)} />
+            <textarea className="form-input min-h-32" value={testo} maxLength={2000} disabled={occupato} onChange={(e) => setTesto(e.target.value)} />
           </label>
           <label className="flex flex-col gap-1 text-sm">Fonte
-            <input className="input touch" value={fonte} maxLength={500} disabled={occupato} onChange={(e) => setFonte(e.target.value)} />
+            <input className="form-input touch" value={fonte} maxLength={500} disabled={occupato} onChange={(e) => setFonte(e.target.value)} />
           </label>
           <p className="m-0 text-sm text-text-secondary">{effetto.modifica}</p>
         </div>}

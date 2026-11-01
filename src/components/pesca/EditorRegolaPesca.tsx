@@ -10,6 +10,7 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 import { Campo, CampoTesto } from '../shared/Campo';
 import { CampoElenco } from '../guida/moduli/campi';
 import { CHIUDI_SENZA_SALVARE, conferma as chiediConferma } from '../../stores/confermaStore';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -36,6 +37,8 @@ function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: Regol
     bonus: String(regola.dati?.beneficioPerizia.bonusFortuna ?? ''),
   }));
   const [vie, setVie] = useState<ViaBozza[]>(() => regola.dati?.vie.map(inBozza) ?? []);
+  // le vie hanno uno stato loro (i selettori): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiaviVie = useIdStabili(vie.length);
   const [occupato, setOccupato] = useState(false), [salvata, setSalvata] = useState(false), [errore, setErrore] = useState<string | null>(null);
   const [conferma, setConferma] = useState(false);
   const blocco = useRef(false), viva = useRef(true);
@@ -101,7 +104,7 @@ function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: Regol
             <CampoTesto key={k} etichetta={etichetta} tipo="numero" valore={numeri[k]} disabilitato={disabilitato} onCambia={v => { cambia(); setNumeri(n => ({ ...n, [k]: v })); }} />)}
         </div>
         <CampoElenco etichetta="Fonti della regola (indirizzi)" voci={fonti} lungo={false} max={2000} disabilitato={disabilitato} onCambia={v => { cambia(); setFonti(v); }} />
-        {vie.map((v, i) => <fieldset key={i} className="regole-editor min-w-0 space-y-2">
+        {vie.map((v, i) => <fieldset key={chiaviVie.ids[i]} className="regole-editor min-w-0 space-y-2">
           <legend>Via documentata {i + 1}</legend>
           <div className="griglia-campi">
             <CampoTesto etichetta="Chiave" valore={v.id} massimo={100} disabilitato={disabilitato} onCambia={id => modificaVia(i, { id })} />
@@ -127,7 +130,7 @@ function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: Regol
             </div>
           </Campo>
           <CampoTesto etichetta="Nota" tipo="lungo" valore={v.nota} massimo={4000} disabilitato={disabilitato} onCambia={nota => modificaVia(i, { nota })} />
-          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi questa via dalla bozza" onClick={() => { cambia(); setVie(x => x.filter((_, j) => i !== j)); }} />
+          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi questa via dalla bozza" onClick={() => { cambia(); chiaviVie.togli(i); setVie(x => x.filter((_, j) => i !== j)); }} />
         </fieldset>)}
         <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi una via alla bozza" disabled={vie.length >= 100} onClick={() => { cambia(); setVie(x => [...x, { id: '', specie: 'guardiano', faseTerzoSemestre: false, fascia: 'giorno', meteo: 'normale', guardianoPrecedente: 'indifferente', rangoComparsa: null, rangoCattura: 1, tentativo: 'primo', seiCatture: false, fonti: [], nota: '' }]); }} />
         {!valido && <p role="alert" className="m-0 text-warning">Completa nome, numeri interi non negativi, fonti e almeno una via con chiave distinta. Ogni fonte della via deve comparire nella regola; base e bonus non possono superare complessivamente 999 punti interni.</p>}

@@ -35,6 +35,7 @@ import { eCreazione, fraseDotiEsito } from '../../../shared/esitiAttivita';
 import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 import { DaApplicare } from './DaApplicare';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
+import { leggiMemoria, scriviMemoria } from '../../utils/memoriaDispositivo';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -48,10 +49,10 @@ const NOME_SEZIONE = Object.fromEntries(SEZIONI.map((s) => [s.k, s.nome])) as Re
 const CHIAVE_MEMORIA = 'p5r:progressi:sezione';
 
 const eSezione = (v: unknown): v is Sezione => SEZIONI.some((s) => s.k === v);
-const leggiMemoria = (): Sezione | null => {
-  try { const v = localStorage.getItem(CHIAVE_MEMORIA); return eSezione(v) ? v : null; } catch { return null; }
-};
-const scriviMemoria = (s: Sezione) => { try { localStorage.setItem(CHIAVE_MEMORIA, s); } catch { /* memoria non disponibile: la scelta vale per questa visita */ } };
+/** La sezione ricordata su questo dispositivo, se è ancora una delle sezioni. */
+const sezioneRicordata = (): Sezione | null => { const v = leggiMemoria(CHIAVE_MEMORIA); return eSezione(v) ? v : null; };
+/** Ricorda la sezione; senza memoria la scelta vale per questa visita. */
+const ricordaSezione = (s: Sezione) => scriviMemoria(CHIAVE_MEMORIA, s);
 
 /** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
@@ -114,13 +115,13 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   // all'apertura: il collegamento alla pesca (#pesca) > l'indirizzo > l'ultima scelta > Storia
   const [sezione, setSezione] = useState<Sezione>(() => {
     const dallIndirizzo = params.get('sezione');
-    return hash === '#pesca' ? 'pesca' : eSezione(dallIndirizzo) ? dallIndirizzo : leggiMemoria() ?? 'storia';
+    return hash === '#pesca' ? 'pesca' : eSezione(dallIndirizzo) ? dallIndirizzo : sezioneRicordata() ?? 'storia';
   });
   const p = stato ?? dati.dati;
 
   const scegli = (s: Sezione) => {
     setSezione(s);
-    scriviMemoria(s);
+    ricordaSezione(s);
     setParams((prec) => { const n = new URLSearchParams(prec); n.set('sezione', s); return n; }, { replace: true });
   };
 

@@ -246,7 +246,8 @@ function MenuGesti({ id, uid, gesti, etichetta, ancora, disabled, fuocoIniziale,
   return createPortal(
     <div ref={menu} id={id} role="menu" aria-label={etichetta} data-voce={uid} className="menu-voce" onKeyDown={tasti}>
       {gesti.map((g) => (
-        <PulsanteVisivo key={g.chiave} compatto tono={g.premuto ? 'primario' : g.tono ?? 'fantasma'} icona={g.icona} titolo={g.titolo} title={g.descrizione}
+        // `data-gesto`: chi rimette il fuoco su un gesto del menu (dopo «Sposta su») lo ritrova dalla sua chiave, non dal testo
+        <PulsanteVisivo key={g.chiave} data-gesto={g.chiave} compatto tono={g.premuto ? 'primario' : g.tono ?? 'fantasma'} icona={g.icona} titolo={g.titolo} title={g.descrizione}
           role={g.premuto === undefined ? 'menuitem' : 'menuitemcheckbox'} aria-checked={g.premuto === undefined ? undefined : g.premuto} tabIndex={-1}
           // fermo mentre la giornata salva (dopo «Sposta su» il menu resta aperto): la voce resta raggiungibile con le frecce e lo dice
           aria-disabled={disabled || undefined} onClick={() => { if (!disabled) g.onClick(); }} />

@@ -24,6 +24,7 @@ import { slug } from '../../../shared/slug';
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
+import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDispositivo';
 
 interface Props {
   partitaId: number;
@@ -237,26 +238,20 @@ const FILTRI_PRESENZA: Array<{ k: VistaScorta['presenza']; l: string }> = [{ k: 
 
 /** La vista salvata (filtro di presenza, arcano, ordine); la ricerca di testo non si ricorda. Se manca o è illeggibile, quella predefinita. */
 function leggiVista(): VistaScorta {
-  try {
-    const grezzo = window.localStorage.getItem(CHIAVE_VISTA);
-    if (grezzo) {
-      const o = JSON.parse(grezzo) as Partial<Record<keyof VistaScorta, unknown>>;
-      return {
-        q: '',
-        presenza: o.presenza === 'squadra' || o.presenza === 'deposito' ? o.presenza : 'tutte',
-        arcano: typeof o.arcano === 'string' ? o.arcano : '',
-        ordine: o.ordine === 'arcano' ? 'arcano' : 'livello',
-      };
-    }
-  } catch { /* storage assente o contenuto illeggibile: vale la vista predefinita */ }
-  return { ...VISTA_PREDEFINITA };
+  const o = leggiMemoriaJson(CHIAVE_VISTA) as Partial<Record<keyof VistaScorta, unknown>> | null;
+  // storage assente o contenuto illeggibile: vale la vista predefinita
+  if (!o || typeof o !== 'object') return { ...VISTA_PREDEFINITA };
+  return {
+    q: '',
+    presenza: o.presenza === 'squadra' || o.presenza === 'deposito' ? o.presenza : 'tutte',
+    arcano: typeof o.arcano === 'string' ? o.arcano : '',
+    ordine: o.ordine === 'arcano' ? 'arcano' : 'livello',
+  };
 }
 
-/** Ricorda la vista; se lo storage non risponde si perde solo il ricordo. */
+/** Ricorda la vista; se lo storage non risponde (pieno o bloccato) si perde solo il ricordo. */
 function salvaVista(v: VistaScorta): void {
-  try {
-    window.localStorage.setItem(CHIAVE_VISTA, JSON.stringify({ presenza: v.presenza, arcano: v.arcano, ordine: v.ordine }));
-  } catch { /* storage pieno o bloccato */ }
+  scriviMemoriaJson(CHIAVE_VISTA, { presenza: v.presenza, arcano: v.arcano, ordine: v.ordine });
 }
 
 // ---- Capienza in testa ----

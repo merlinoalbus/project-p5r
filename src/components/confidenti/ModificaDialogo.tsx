@@ -27,6 +27,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { SCELTE_NOTE } from '../../../shared/note';
+import { useIdStabili } from '../../hooks/useIdStabili';
+import { fuocoDopoSposta } from '../../utils/fuocoGesto';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -71,6 +73,8 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   const [partenzaScelte] = useState<SceltaBozza[]>(() => dialogo.scelte.map(daDto));
   const [note, setNote] = useState(dialogo.note);
   const [scelte, setScelte] = useState<SceltaBozza[]>(partenzaScelte);
+  // le scelte si tolgono e si spostano: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(scelte.length);
   const [occupato, setOccupato] = useState(false);
   const noteCambiate = note !== partenzaNote;
   const scelteCambiate = JSON.stringify(scelte) !== JSON.stringify(partenzaScelte);
@@ -79,7 +83,8 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   useBozzaSporca(`dialogo:${dialogo.id}`, `il dialogo di ${nome}`, sporca);
 
   const cambiaScelta = (i: number, parte: Partial<SceltaBozza>) => setScelte((l) => l.map((x, j) => (j === i ? { ...x, ...parte } : x)));
-  const sposta = (i: number, verso: -1 | 1) => setScelte((l) => { const n = [...l]; const j = i + verso; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j]!, n[i]!]; return n; });
+  // il fuoco resta sul gesto premuto (o va sull'opposto al bordo): React sposta il nodo della riga (`fuocoDopoSposta`)
+  const sposta = (i: number, verso: -1 | 1) => { fuocoDopoSposta(chiavi.ids[i]!, verso); chiavi.sposta(i, verso); setScelte((l) => { const n = [...l]; const j = i + verso; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j]!, n[i]!]; return n; }); };
   /** «Nessun punto» lascia com'è la scelta senza punti nella guida (o già a zero); dopo una nota scrive zero. */
   const puntiDa = (voce: string, attuale: number | null): number | null => (voce === NESSUNO ? (attuale === null ? null : 0) : Number(voce));
 
@@ -117,7 +122,7 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
       </SezioneCampi>
       {scelte.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessuna scelta.</p>}
       {scelte.map((s, i) => (
-        <SezioneCampi key={i} titolo={`Scelta ${i + 1}`}>
+        <SezioneCampi key={chiavi.ids[i]} titolo={`Scelta ${i + 1}`}>
           <CampoTesto etichetta="Testo" valore={s.testo} onCambia={(v) => cambiaScelta(i, { testo: v })} massimo={500} obbligatorio largo disabilitato={occupato}
             errore={s.testo.trim() === '' ? 'Scrivi il testo della scelta.' : undefined} />
           <Campo etichetta="Punti" senzaGruppo>
@@ -135,9 +140,9 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
           <CampoTesto etichetta="Avviso (facoltativo)" valore={s.avviso} onCambia={(v) => cambiaScelta(i, { avviso: v })} massimo={500} largo disabilitato={occupato} />
           <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={s.romantica} disabled={occupato} onChange={(e) => cambiaScelta(i, { romantica: e.target.checked })} /> Avvia o riguarda la relazione romantica</label>
           <div className="flex flex-wrap gap-2">
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su la scelta ${i + 1}`} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù la scelta ${i + 1}`} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setScelte((l) => l.filter((_, j) => j !== i))} aria-label={`Togli la scelta ${i + 1}`} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" data-riga={chiavi.ids[i]} data-gesto="su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su la scelta ${i + 1}`} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" data-riga={chiavi.ids[i]} data-gesto="giu" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù la scelta ${i + 1}`} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => { chiavi.togli(i); setScelte((l) => l.filter((_, j) => j !== i)); }} aria-label={`Togli la scelta ${i + 1}`} />
           </div>
         </SezioneCampi>
       ))}

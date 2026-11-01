@@ -27,6 +27,7 @@ import { Segmenti } from '../shared/Segmenti';
 import { elencoNomi } from '../../../shared/riepilogoEffetti';
 import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
 
@@ -41,14 +42,16 @@ type Turno = Extract<EffettoVoce, { tipo: 'turno' }>;
 
 /** «Doti proprie di questo turno»: di norma il turno dà le Doti dell'attività; qui si dichiarano quelle di questo turno (il secondo turno al Beef Bowl Shop, la sera con Lala). */
 export function DotiProprieTurno({ effetto: e, onCambia }: { effetto: Turno; onCambia: (e: Turno) => void }) {
+  // le righe hanno uno stato loro (i selettori di `RigaDote`): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(e.doti?.length ?? 0);
   return (
     <div className="flex flex-col gap-2">
       <label className="flex items-center gap-2 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={e.doti !== undefined}
         onChange={(ev) => onCambia(ev.target.checked ? { ...e, doti: [{ dote: 'perizia', note: 2 }] } : { tipo: 'turno', attivita: e.attivita })} />Doti proprie di questo turno, al posto di quelle dell’attività</label>
       {e.doti?.map((d, i) => (
-        <div key={i} className="flex flex-wrap items-end gap-2">
+        <div key={chiavi.ids[i]} className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1}`} dote={d} onCambia={(nuova) => onCambia({ ...e, doti: e.doti!.map((x, j) => (j === i ? nuova : x)) })} /></div>
-          {e.doti!.length > 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1}`} onClick={() => onCambia({ ...e, doti: e.doti!.filter((_, j) => j !== i) })} />}
+          {e.doti!.length > 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1}`} onClick={() => { chiavi.togli(i); onCambia({ ...e, doti: e.doti!.filter((_, j) => j !== i) }); }} />}
         </div>
       ))}
       {e.doti && e.doti.length < 5 && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Dote" onClick={() => onCambia({ ...e, doti: [...e.doti!, { dote: 'fascino', note: 2 }] })} />}

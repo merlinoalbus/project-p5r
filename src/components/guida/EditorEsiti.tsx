@@ -22,6 +22,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { CondizioniEditor } from './CondizioniEditor';
 import { useCarica } from '../../hooks/useCarica';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import { getElenchiRegole } from '../../services/api';
 import { CHIAVI_DOTI, nomeDote, type DoteChiave } from '../../../shared/doti';
 import { SCELTE_NOTE } from '../../../shared/note';
@@ -89,6 +90,9 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
   const elenchi = useCarica(async () => { const e = await getElenchiRegole(); return { articoli: e.articoli ?? [], trofei: e.trofei ?? [] }; }, []);
   const nomeTrofeo = (chiave: string): string => elenchi.dati?.trofei.find((t) => t.chiave === chiave)?.nome ?? 'Trofeo non più nell’elenco';
   const elenco = esiti?.esiti ?? [];
+  // le righe hanno uno stato loro (condizioni, selettori) e la chiave dell'esito segue il nome mentre si scrive: la chiave di React è un id
+  // stabile (`useIdStabili`), che resta scrivendo il nome (il campo non perde il fuoco) e segue la riga quando un esito sopra si toglie
+  const chiaviRighe = useIdStabili(elenco.length);
   // «nessuna Dote» si dice solo se qualche esito ne dà (l'estrazione della lotteria non ne dà: la frase non informerebbe)
   const conDoti = elenco.some((e) => e.doti.length > 0);
   const valido = esiti === null || normalizzaEsitiAttivita(esiti) !== null;
@@ -133,6 +137,7 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
   const togliEsito = (i: number) => {
     const via = elenco[i]!.chiave;
     const resto = elenco.filter((_, j) => j !== i).map((x) => { if (x.bonusDi !== via) return x; const y: EsitoAttivita = { ...x }; delete y.bonusDi; return y; });
+    chiaviRighe.togli(i);
     onCambia(resto.length ? { ...esiti!, esiti: resto } : null);
   };
   const aggiungi = () => {
@@ -159,8 +164,8 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
         {elenco.map((e, i) => {
           const qui = aperto === e.chiave;
           return (
-            // la chiave di React è la posizione: la chiave dell'esito segue il nome mentre si scrive, e il campo non deve perdere il fuoco
-            <li key={i} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
+            // la chiave di React è l'id stabile della riga (non la chiave dell'esito, che segue il nome mentre si scrive)
+            <li key={chiaviRighe.ids[i]} className="flex min-w-0 flex-col gap-2 border-b border-border pb-2">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="min-w-0 flex-1 testo-13"><strong>{e.nome}</strong>{conDoti ? <> · <TestoNote testo={fraseDotiEsito(e.doti)} /></> : null}{e.gruppo ? ` · ${e.gruppo}` : ''}{e.paga ? ` · paga ${formattaYen(e.paga)}` : ''}{e.trofeo ? ` · trofeo «${nomeTrofeo(e.trofeo)}»` : ''}{e.oggetti?.length ? ` · ${e.oggetti.length === 1 ? '1 oggetto' : `${e.oggetti.length} oggetti`}` : ''}{e.consuma?.length ? ` · ne consuma ${e.consuma.length === 1 ? '1' : e.consuma.length}` : ''}{e.bonusDi ? ` · con il bonus di «${elenco.find((x) => x.chiave === e.bonusDi)?.nome ?? 'esito non più nell’elenco'}»` : ''}</span>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={qui ? 'chiudi' : 'modifica'} dimensione={20} />} titolo={qui ? 'Chiudi' : 'Modifica'} aria-expanded={qui} disabled={disabilitato} onClick={() => setAperto(qui ? null : e.chiave)} />

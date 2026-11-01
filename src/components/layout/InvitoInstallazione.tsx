@@ -14,17 +14,20 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { apertaComeApp, apriInstallazione, dispositivoApple, installabileDalBrowser, seCambiaInstallabile } from '../../utils/installazioneApp';
+import { leggiMemoria, scriviMemoria } from '../../utils/memoriaDispositivo';
 
 /** La chiave del browser che ricorda che l'invito è già stato mostrato su questo dispositivo. */
 const CHIAVE_VISTO = 'p5r-invito-installazione';
 /** L'attesa prima di aprire l'invito: lascia al browser il tempo di dire se l'app si installa con la sua finestra. */
 const ATTESA_MS = 1500;
 
+/** Già mostrato su questo dispositivo; senza memoria del dispositivo (`undefined`) vale come già mostrato. */
 function giaVisto(): boolean {
-  try { return globalThis.localStorage?.getItem(CHIAVE_VISTO) !== null; } catch { return true; }
+  return leggiMemoria(CHIAVE_VISTO) !== null;
 }
+/** Ricorda che l'invito è stato mostrato; senza storage l'invito può tornare: niente di grave. */
 function segnaVisto(): void {
-  try { globalThis.localStorage?.setItem(CHIAVE_VISTO, new Date().toISOString()); } catch { /* senza storage l'invito può tornare: niente di grave */ }
+  scriviMemoria(CHIAVE_VISTO, new Date().toISOString());
 }
 /** Telefono o tablet: lo schermo a tocco come puntatore principale. */
 function aTocco(): boolean {

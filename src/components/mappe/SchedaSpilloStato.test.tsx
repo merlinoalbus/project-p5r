@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { SchedaSpillo } from './VisoreMappa';
+import { SchedaSpillo } from './SchedaSpillo';
 import type { SpilloDto } from '../../types';
 
 /** Spillo «Leva» di tipo meccanismo sulla mappa k-01, non collezionabile, con i campi di `extra` che sovrascrivono i predefiniti. */

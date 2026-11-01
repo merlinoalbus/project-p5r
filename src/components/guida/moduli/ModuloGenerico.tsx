@@ -8,19 +8,22 @@ import { IconaAzione } from '../../shared/IconaAzione';
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, CampoData, Griglia } from './campi';
 import { CAMPI_GENERICI, type Risposta } from './definizioni';
+import { useIdStabili } from '../../../hooks/useIdStabili';
 
 /** Le risposte giuste come righe in ordine: certe domande d'esame si rispondono in più passaggi. */
 function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: Risposta[]; onCambia: (r: Risposta[]) => void; disabilitato?: boolean }) {
   /** Cambia il testo della risposta in posizione `i`. */
   const cambia = (i: number, testo: string) => onCambia(risposte.map((r, j) => (j === i ? { ...r, testo } : r)));
   /** Toglie la risposta in posizione `i` e rinumera l'ordine delle restanti da 1. */
-  const togli = (i: number) => onCambia(risposte.filter((_, j) => j !== i).map((r, j) => ({ ...r, ordine: j + 1 })));
+  // le risposte si tolgono una per una: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(risposte.length);
+  const togli = (i: number) => { chiavi.togli(i); onCambia(risposte.filter((_, j) => j !== i).map((r, j) => ({ ...r, ordine: j + 1 }))); };
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
       <legend>Risposte giuste</legend>
       <p className="m-0 testo-12 text-text-muted">Che cosa rispondere, nell’ordine. Una sola riga per le domande in classe; più righe dove il gioco chiede una sequenza di risposte.</p>
       {risposte.map((r, i) => (
-        <div key={i} className="flex flex-wrap items-end gap-2">
+        <div key={chiavi.ids[i]} className="flex flex-wrap items-end gap-2">
           <span className="chip shrink-0" aria-hidden>{i + 1}</span>
           <label className="editor-mappa__campo min-w-[220px] flex-[3]">
             <span className="sr-only">Risposta {i + 1}</span>

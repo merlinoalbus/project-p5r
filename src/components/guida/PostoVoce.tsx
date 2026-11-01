@@ -40,7 +40,8 @@ export function PostoVoce({ altre, posto, testo, fascia, disabled, onPosto }: Pr
     if (nuovo === posto) return;
     onPosto(nuovo);
     const alBordo = verso === -1 ? nuovo <= 0 : nuovo >= altre.length;
-    if (alBordo) setTimeout(() => gruppo.current?.querySelector<HTMLButtonElement>(`button[aria-label="${verso === -1 ? 'Sposta giù di un posto' : 'Sposta su di un posto'}"]`)?.focus());
+    // il pulsante opposto si ritrova dalla sua chiave (`data-gesto`), non dal nome accessibile
+    if (alBordo) setTimeout(() => gruppo.current?.querySelector<HTMLButtonElement>(`button[data-gesto="${verso === -1 ? 'giu' : 'su'}"]`)?.focus());
   };
 
   const inizia = (e: PointerEvent<HTMLButtonElement>) => {
@@ -97,8 +98,8 @@ export function PostoVoce({ altre, posto, testo, fascia, disabled, onPosto }: Pr
                 onPointerDown={inizia} onPointerMove={muovi} onPointerUp={(e) => finisci(e, true)} onPointerCancel={(e) => finisci(e, false)} onKeyDown={tasto}>⠿</button>
               <span className="w-6 shrink-0 text-right tabular-nums">{posto + 1}.</span>
               <span className="flex-1 min-w-0 truncate">{testo}</span>
-              <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" disabled={disabled || posto === 0} onClick={() => passo(-1)} aria-label="Sposta su di un posto" />
-              <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" disabled={disabled || posto === altre.length} onClick={() => passo(1)} aria-label="Sposta giù di un posto" />
+              <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" data-gesto="su" disabled={disabled || posto === 0} onClick={() => passo(-1)} aria-label="Sposta su di un posto" />
+              <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" data-gesto="giu" disabled={disabled || posto === altre.length} onClick={() => passo(1)} aria-label="Sposta giù di un posto" />
             </li>
           );
         })}

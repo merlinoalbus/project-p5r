@@ -621,7 +621,26 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
   data in poi, nell'ordine dell'anno scolastico). Le case che il server dà alle ricompense degli oggetti seguono la stessa forma
   (`conElemento`, `fontiRicompenseOggetti.ts`); la pagina di un'Ombra è `casaOmbra` (`shared/ombre.ts`), letta dalla scheda Persona,
   dalla ricerca e dal servizio delle Ombre, che dà anche la casa delle voci della guida che la descrivono.
-- Elenchi modificabili con stato per riga: chiavi da `useIdStabili`, mai l'indice né il contenuto.
+- Elenchi modificabili (righe che si tolgono, si aggiungono o si spostano): chiavi da `useIdStabili` (`togli`, anche di più righe,
+  `aggiungi` in fondo, `sposta` di un posto), mai l'indice né il contenuto; l'indice resta solo negli elenchi che non cambiano forma.
+- Memoria del dispositivo: le comodità ricordate in `localStorage` (preferenze, sezioni aperte, filtri, posto e stato della finestra degli
+  appunti fissi, invito all'installazione) passano tutte da `utils/memoriaDispositivo.ts` (`leggiMemoria`, `leggiMemoriaJson`,
+  `scriviMemoria`, `scriviMemoriaJson`, protetti: senza memoria la pagina funziona con i valori predefiniti); la memoria della scheda del
+  browser (`sessionStorage`) resta nei moduli che la usano, ognuno con la sua regola.
+- Le pagine grandi sono divise per responsabilità. Scheda del Palazzo e dei Memento (`DungeonDettaglioPage`): la disposizione e lo stato
+  dell'indirizzo nella pagina, gli indirizzi in `useNavigazionePalazzo`, i gesti di stato nella partita (con le riletture in silenzio e
+  `versioneStati`) in `useStatiPalazzo`, i moduli di modifica in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
+  `MenuModificaPalazzo`, e `LineaDelTempo`, `DedaloNelBinario`, `InfiltrazioniInArea` (components/guida). Visore (`VisoreMappa`): vista,
+  gesti, spilli e popup nel visore; che cosa dicono la scheda e il popup di uno spillo in `SchedaSpillo` (con `MerceNelPopup`,
+  `AzioniStato`, `GalleriaSpillo`), i nomi e le parole dei pin in `utils/paroleSpillo.ts`, la posa dei nomi dei passaggi in
+  `etichetteSpilli.ts`. Giorno del Diario (`GiornoGuida`): le fasce, i gesti sulle voci e gli appunti; la riga d'azione con la sua spunta
+  in `AzioneGiornata`, la selezione col mouse in `useSelezioneAlClic`.
+- Il fuoco rimesso da codice si ritrova da una chiave, mai dal testo o dal nome accessibile: i gesti dal loro `data-gesto` (menu della
+  voce del Diario, «Su»/«Giù» del posto della voce, «Sposta su/giù» degli appunti fissi con `data-appunto`, delle abilità e delle scelte
+  dei dialoghi dei Confidenti con `data-riga`, l'id stabile della riga: dopo lo spostamento il fuoco resta sul gesto o, al bordo,
+  passa all'opposto, `utils/fuocoGesto.ts`), la guida del visore da `data-guida-visore`. Cambiando pagina (`useFuocoNavigazione`) un
+  elemento ricreato si ritrova dalla sua chiave `data-fuoco` (le frecce dei giorni del Diario); solo un elemento senza chiave si ritrova
+  ancora dal nome accessibile, perché il meccanismo vale per qualunque elemento della pagina.
 - Finestre (`Modal`): il fuoco entra nella finestra, Tab resta dentro, alla chiusura torna a chi l'ha aperta; nessuna chiusura dallo
   sfondo. Lo spostamento (barra trascinata, frecce sulla maniglia ⠿, sempre per intero nello schermo) è `useSpostamentoFinestra`, lo
   stesso della guida del visore.

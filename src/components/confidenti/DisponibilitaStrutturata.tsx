@@ -29,6 +29,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -158,6 +159,8 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
   const setMotivo = (motivo: string) => aggiorna((c) => ({ ...c, motivo }));
   const setLuoghi = (f: (l: string[]) => string[]) => aggiorna((c) => ({ ...c, luoghi: f(c.luoghi) }));
   const { modo, giorni, fasce, eccezioni, dal, motivo, luoghi } = campi ?? CAMPI_VUOTI;
+  // le eccezioni hanno uno stato loro (il selettore del rango, il giorno da aggiungere): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiaviEccezioni = useIdStabili(eccezioni.length);
   const [occupato, setOccupato] = useState(false);
   const nomeLuogo = (k: string) => dati?.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
   const dalValido = dal === '' || dataValida(dal);
@@ -206,7 +209,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Eccezioni</legend>
         {eccezioni.length === 0 && <span className="text-text-muted">Nessuna eccezione.</span>}
         {eccezioni.map((e, i) => (
-          <div key={i} className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-1">
+          <div key={chiaviEccezioni.ids[i]} className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-1">
             <span className="min-w-0 flex-1 break-words">{e.tipo === 'date' ? 'Giorni in cui non si incontra' : testoEccezione(e)}</span>
             {e.tipo === 'dopo-rango' && <label className="flex items-center gap-1">giorni <input className="form-input w-16" type="number" min={1} max={30} value={e.giorni} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, giorni: Math.min(30, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>}
             {e.tipo === 'fascia-rango' && <>
@@ -219,7 +222,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
             </>}
             {e.tipo === 'con-relazione' && FASCE_DISPONIBILITA.map((f) => <button key={f} type="button" aria-pressed={e.fasce.includes(f)} disabled={occupato} className={`chip touch ${e.fasce.includes(f) ? 'chip--attivo' : ''}`} onClick={() => { const prossime = ordinati(alterna(e.fasce, f), FASCE_DISPONIBILITA); if (prossime.length > 0) modificaEccezione(i, { ...e, fasce: prossime }); }}>{NOME_FASCIA[f]}</button>)}
             {e.tipo === 'date' && <DateEscluse date={e.date} disabilitato={occupato} onCambia={(date) => modificaEccezione(i, { ...e, date })} />}
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setEccezioni((l) => l.filter((_, j) => j !== i))} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => { chiaviEccezioni.togli(i); setEccezioni((l) => l.filter((_, j) => j !== i)); }} />
           </div>
         ))}
         <div className="flex flex-wrap gap-2">

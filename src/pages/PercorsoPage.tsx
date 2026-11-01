@@ -182,10 +182,10 @@ export function PercorsoPage() {
           ) : (<>
           {ritornoRicerca && <BarraRitornoRisultati ritorno={ritornoRicerca} onTorna={() => tornaAiRisultati(ritornoRicerca)} />}
           <div className="flex flex-wrap items-center gap-1.5">
-            <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => vai(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
+            <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => vai(g.precedente)} aria-label="Giorno precedente" data-fuoco="giorno-precedente"><IconChevronLeft size={16} /></button>
             <Selettore compatto ricerca="mai" etichetta="Mese" valore={g.giorno.slice(0, 2)} opzioni={mesi.map((m) => ({ chiave: m, nome: meseGioco(`${m}-01`) }))} onCambia={(k) => { const primo = indice.dati?.giorni.find((x) => x.giorno.slice(0, 2) === k); vai(primo?.giorno ?? null); }} />
             <Selettore compatto etichetta="Giorno" valore={g.giorno} opzioni={giorniDelMese.map((x) => ({ chiave: x.giorno, nome: `${dataGiocoTesto(x.giorno)} (${x.giornoSettimana})`, dettaglio: x.azioni ? `${x.fatte}/${x.azioni}` : undefined }))} onCambia={(k) => vai(k)} />
-            <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => vai(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
+            <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => vai(g.successivo)} aria-label="Giorno successivo" data-fuoco="giorno-successivo"><IconChevronRight size={16} /></button>
             {indice.dati.dataCorrente && indice.dati.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => vai(indice.dati?.dataCorrente ?? null)} />}
             {!IN_RILASCIO && <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setEditorGiornoAperto(true)} />}
             {partitaId && g.dataCorrente !== g.giorno && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Segna come giorno corrente" className="ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()} />}

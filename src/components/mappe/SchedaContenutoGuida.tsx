@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 import { aggiornaSpillo, aggiungiImmagineSpillo, aggiornaImmagineSpillo, eliminaImmagineSpillo, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } from '../../services/api';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
-import { SchedaSpillo } from './VisoreMappa';
+import { SchedaSpillo } from './SchedaSpillo';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 

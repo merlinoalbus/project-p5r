@@ -9,6 +9,7 @@
 
 import { getGlossario, getSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import type { CampoCorrezioneDto, ValoreCampoCorrezione } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -21,6 +22,8 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
   const skill = useCarica(() => getSkills(), []);
   const voci = Array.isArray(valore) ? valore : [];
   const righe = voci.map(leggiSkill);
+  // le righe hanno uno stato loro (i selettori): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(righe.length);
   const nomi = new Map((skill.dati ?? []).map((s) => [s.nome, s.nomeIt]));
   const nomeDi = (n: string) => nomi.get(n) ?? n;
   const opzioniSkill = (skill.dati ?? []).map((s) => ({ chiave: s.nome, nome: s.nomeIt, dettaglio: s.nomeIt !== s.nome ? s.nome : undefined }));
@@ -34,7 +37,7 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
       {skill.errore && <p role="alert" className="m-0 testo-12 text-error-testo">Elenco delle skill non caricato: {skill.errore}</p>}
       {righe.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna skill.</p>}
       {righe.map((r, i) => (
-        <div key={i} className="flex flex-wrap items-end gap-2">
+        <div key={chiavi.ids[i]} className="flex flex-wrap items-end gap-2">
           <span className="chip mb-2 shrink-0" aria-hidden>{i + 1}</span>
           <div className="min-w-[200px] flex-[3]">
             <Selettore etichetta={`Skill ${i + 1}`} valore={r.nome} ricerca="sempre" disabilitato={occupato || skill.caricamento} segnaposto="Scegli la skill…"
@@ -54,7 +57,7 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
                 onChange={(e) => cambia(i, { ...r, livello: e.target.value === '' ? null : Number(e.target.value) })} />
             </label>
           )}
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => imposta(voci.filter((_, j) => j !== i))} aria-label={`Togli la skill ${r.nome ? nomeDi(r.nome) : i + 1}`} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => { chiavi.togli(i); imposta(voci.filter((_, j) => j !== i)); }} aria-label={`Togli la skill ${r.nome ? nomeDi(r.nome) : i + 1}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una skill"

@@ -9,11 +9,12 @@
 // `mappaHomeChiusa`: la mappa della Home chiusa in una linguetta sul bordo destro.
 // `bloccoStandby` (L12, R12-03): tiene lo schermo acceso mentre si gioca (Screen Wake Lock, vedi `hooks/useBloccoStandby.ts`); spento di
 // default (consuma batteria: lo accende chi vuole) e ricordato su questo dispositivo, come le altre preferenze.
-// La lettura/scrittura del localStorage è protetta: se non disponibile (modalità privata, quota, sandbox)
+// La lettura/scrittura del localStorage è protetta (`memoriaDispositivo`): se non disponibile (modalità privata, quota, sandbox)
 // si usano i valori predefiniti senza errori.
 // ============================================================
 
 import { create } from 'zustand';
+import { leggiMemoriaJson, scriviMemoriaJson } from '../utils/memoriaDispositivo';
 
 const CHIAVE_STORAGE = 'p5r-preferenze';
 
@@ -32,31 +33,20 @@ const PREDEFINITE: Preferenze = { graficaPredefinita: true, vistaPersona: 'piast
 /** Legge le preferenze salvate partendo dai valori predefiniti: ogni campo si prende solo se ha un valore valido; storage
  *  assente o JSON illeggibile danno i predefiniti. */
 function leggi(): Preferenze {
-  try {
-    const grezzo = globalThis.localStorage?.getItem(CHIAVE_STORAGE);
-    if (!grezzo) return PREDEFINITE;
-    const dati = JSON.parse(grezzo) as Partial<Preferenze>;
-    return {
-      ...PREDEFINITE,
-      ...(typeof dati.graficaPredefinita === 'boolean' ? { graficaPredefinita: dati.graficaPredefinita } : {}),
-      ...(dati.vistaPersona === 'elenco' || dati.vistaPersona === 'piastrelle' ? { vistaPersona: dati.vistaPersona } : {}),
-      ...(typeof dati.menuRidotto === 'boolean' ? { menuRidotto: dati.menuRidotto } : {}),
-      ...(typeof dati.mappaHomeChiusa === 'boolean' ? { mappaHomeChiusa: dati.mappaHomeChiusa } : {}),
-      ...(typeof dati.bloccoStandby === 'boolean' ? { bloccoStandby: dati.bloccoStandby } : {}),
-    };
-  } catch {
-    return PREDEFINITE;
-  }
+  const dati = leggiMemoriaJson(CHIAVE_STORAGE) as Partial<Preferenze> | null;
+  if (!dati || typeof dati !== 'object') return PREDEFINITE;
+  return {
+    ...PREDEFINITE,
+    ...(typeof dati.graficaPredefinita === 'boolean' ? { graficaPredefinita: dati.graficaPredefinita } : {}),
+    ...(dati.vistaPersona === 'elenco' || dati.vistaPersona === 'piastrelle' ? { vistaPersona: dati.vistaPersona } : {}),
+    ...(typeof dati.menuRidotto === 'boolean' ? { menuRidotto: dati.menuRidotto } : {}),
+    ...(typeof dati.mappaHomeChiusa === 'boolean' ? { mappaHomeChiusa: dati.mappaHomeChiusa } : {}),
+    ...(typeof dati.bloccoStandby === 'boolean' ? { bloccoStandby: dati.bloccoStandby } : {}),
+  };
 }
 
-/** Salva le preferenze nel localStorage, ignorando gli errori dello storage. */
-function scrivi(p: Preferenze): void {
-  try {
-    globalThis.localStorage?.setItem(CHIAVE_STORAGE, JSON.stringify(p));
-  } catch {
-    // Storage non disponibile: la preferenza vale solo per la sessione corrente.
-  }
-}
+/** Salva le preferenze sul dispositivo; senza storage la preferenza vale solo per la sessione corrente. */
+const scrivi = (p: Preferenze): void => scriviMemoriaJson(CHIAVE_STORAGE, p);
 
 interface PreferenzeState extends Preferenze {
   impostaGraficaPredefinita: (valore: boolean) => void;

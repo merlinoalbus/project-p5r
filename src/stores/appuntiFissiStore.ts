@@ -7,7 +7,7 @@
 //
 //   - L'elenco viene dal server (`/api/appunti-fissi`, dati utente): qui c'è solo la copia a schermo, riletta a ogni apertura della finestra
 //     e dopo un rifiuto «l'elenco è cambiato» (un altro dispositivo). Mai in `localStorage`.
-//   - Lo stato della finestra (chiusa, aperta, ridotta a icona) si ricorda PER DISPOSITIVO in `localStorage`, con try/catch: senza (finestra
+//   - Lo stato della finestra (chiusa, aperta, ridotta a icona) si ricorda PER DISPOSITIVO in `localStorage` (`memoriaDispositivo`): senza (finestra
 //     privata, dati bloccati) la finestra parte chiusa e funziona lo stesso. Posizione e dimensione le tiene la finestra (`FinestraAppuntiFissi`).
 //   - `proposta`: un appunto da aggiungere già pronto (dal menu della voce del Diario, «Salva negli appunti fissi»): la finestra si apre con
 //     il modulo d'aggiunta compilato, il titolo proposto si cambia prima di salvare.
@@ -17,20 +17,18 @@
 import { create } from 'zustand';
 import { creaAppuntoFisso, eliminaAppuntoFisso, getAppuntiFissi, isApiError, modificaAppuntoFisso, riordinaAppuntiFissi } from '../services/api';
 import type { AppuntoFissoDto, ModificaAppuntoFisso, NuovoAppuntoFisso } from '../../shared/appuntiFissi';
+import { leggiMemoria, scriviMemoria } from '../utils/memoriaDispositivo';
 
 export type StatoFinestraAppunti = 'chiusa' | 'aperta' | 'ridotta';
 
 const CHIAVE_STATO = 'p5r.appuntiFissi.stato';
 
 function leggiStato(): StatoFinestraAppunti {
-  try {
-    const v = window.localStorage.getItem(CHIAVE_STATO);
-    return v === 'aperta' || v === 'ridotta' ? v : 'chiusa';
-  } catch { return 'chiusa'; }
+  const v = leggiMemoria(CHIAVE_STATO);
+  return v === 'aperta' || v === 'ridotta' ? v : 'chiusa';
 }
-function scriviStato(s: StatoFinestraAppunti): void {
-  try { window.localStorage.setItem(CHIAVE_STATO, s); } catch { /* senza memoria del dispositivo la finestra riparte chiusa */ }
-}
+/** Ricorda lo stato della finestra; senza memoria del dispositivo la finestra riparte chiusa. */
+const scriviStato = (s: StatoFinestraAppunti): void => scriviMemoria(CHIAVE_STATO, s);
 
 interface StatoAppuntiFissi {
   stato: StatoFinestraAppunti;

@@ -17,6 +17,7 @@ import { LIMITI_QUIZ, giorniDelQuizTesto, type EsitoQuiz, type QuizAttivita, typ
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Campo, CampoTesto } from '../shared/Campo';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 /** Una guida vuota, da riempire. */
 const QUIZ_VUOTO: QuizAttivita = { giorni: [], spiegazione: '', domanda: '', voci: [{ oggetto: '', altroNome: null, risposta: '', nota: null }], esiti: [] };
@@ -34,6 +35,9 @@ interface Props {
  * funziona, la domanda, le risposte riga per riga e i premi per esito, ciascuno con «Togli», e il pulsante che toglie tutta la guida.
  */
 export function EditorQuiz({ quiz, onCambia, disabilitato }: Props) {
+  // risposte e premi si tolgono una riga per volta: le chiavi di riga sono id stabili, non l'indice (`useIdStabili`)
+  const chiaviVoci = useIdStabili(quiz?.voci.length ?? 0);
+  const chiaviEsiti = useIdStabili(quiz?.esiti.length ?? 0);
   if (!quiz) {
     return (
       <PulsanteVisivo tono="secondario" compatto className="campo--largo self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi la guida di un quiz"
@@ -68,7 +72,7 @@ export function EditorQuiz({ quiz, onCambia, disabilitato }: Props) {
         <CampoTesto etichetta="Come funziona" tipo="lungo" valore={quiz.spiegazione} massimo={LIMITI_QUIZ.testo} disabilitato={disabilitato} onCambia={(spiegazione) => cambia({ spiegazione })} />
       </div>
       {quiz.voci.map((v, i) => (
-        <fieldset key={i} className="regole-editor flex min-w-0 flex-col gap-2">
+        <fieldset key={chiaviVoci.ids[i]} className="regole-editor flex min-w-0 flex-col gap-2">
           <legend>Risposta {i + 1}</legend>
           <div className="griglia-campi">
             <CampoTesto etichetta="Nome" valore={v.oggetto} massimo={LIMITI_QUIZ.nome} disabilitato={disabilitato} segnaposto="Come lo chiama la guida italiana" onCambia={(oggetto) => cambiaVoce(i, { oggetto })} />
@@ -76,19 +80,19 @@ export function EditorQuiz({ quiz, onCambia, disabilitato }: Props) {
             <CampoTesto etichetta="Risposta giusta" valore={v.risposta} massimo={LIMITI_QUIZ.risposta} disabilitato={disabilitato} onCambia={(risposta) => cambiaVoce(i, { risposta })} />
             <CampoTesto etichetta="Nota" valore={v.nota ?? ''} massimo={LIMITI_QUIZ.nota} disabilitato={disabilitato} segnaposto="Facoltativa, sempre visibile" onCambia={(t) => cambiaVoce(i, { nota: t || null })} />
           </div>
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="self-start" disabled={disabilitato} onClick={() => cambia({ voci: quiz.voci.filter((_, j) => j !== i) })} aria-label={`Togli la risposta ${i + 1}`} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="self-start" disabled={disabilitato} onClick={() => { chiaviVoci.togli(i); cambia({ voci: quiz.voci.filter((_, j) => j !== i) }); }} aria-label={`Togli la risposta ${i + 1}`} />
         </fieldset>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una risposta"
         disabled={disabilitato || quiz.voci.length >= LIMITI_QUIZ.voci} onClick={() => cambia({ voci: [...quiz.voci, { oggetto: '', altroNome: null, risposta: '', nota: null }] })} />
       {quiz.esiti.map((e, i) => (
-        <fieldset key={i} className="regole-editor flex min-w-0 flex-col gap-2">
+        <fieldset key={chiaviEsiti.ids[i]} className="regole-editor flex min-w-0 flex-col gap-2">
           <legend>Premio {i + 1}</legend>
           <div className="griglia-campi">
             <CampoTesto etichetta="Esito" valore={e.esito} massimo={LIMITI_QUIZ.esito} disabilitato={disabilitato} segnaposto="Giusta al primo tentativo" onCambia={(esito) => cambiaEsito(i, { esito })} />
             <CampoTesto etichetta="Che cosa dà" valore={e.premio} massimo={LIMITI_QUIZ.premio} disabilitato={disabilitato} segnaposto="7.400 ¥ e 3 punti Fascino" onCambia={(premio) => cambiaEsito(i, { premio })} />
           </div>
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="self-start" disabled={disabilitato} onClick={() => cambia({ esiti: quiz.esiti.filter((_, j) => j !== i) })} aria-label={`Togli il premio ${i + 1}`} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="self-start" disabled={disabilitato} onClick={() => { chiaviEsiti.togli(i); cambia({ esiti: quiz.esiti.filter((_, j) => j !== i) }); }} aria-label={`Togli il premio ${i + 1}`} />
         </fieldset>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un premio"

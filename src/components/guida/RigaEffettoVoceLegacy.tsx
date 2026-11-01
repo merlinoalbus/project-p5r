@@ -2,6 +2,7 @@ import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { RigaDote } from './RigaDote';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import { CATEGORIE_LETTURA, TIPI_EFFETTO_AZIONE, type CategoriaLettura, type EffettoAzione } from '../../../shared/effettiAzione';
 import type { ElenchiAzioneDto } from '../../types';
 
@@ -16,6 +17,8 @@ function effettoNuovo(tipo: EffettoAzione['tipo']): EffettoAzione {
 
 /** I tre tipi storici conservano gli stessi controlli sia nella vecchia lista sia nella fonte con UID. */
 export function RigaEffettoVoceLegacy({ effetto, elenchi, onCambia, onTogli, numero }: { effetto: EffettoAzione; elenchi: ElenchiAzioneDto; onCambia: (e: EffettoAzione) => void; onTogli: () => void; numero: number }) {
+  // le Doti proprie del turno hanno uno stato loro (i selettori di `RigaDote`): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiaviDoti = useIdStabili(effetto.tipo === 'turno' ? effetto.doti?.length ?? 0 : 0);
   return <li className="flex flex-col gap-2 rounded border border-border p-2">
     <div className="flex flex-wrap items-end gap-2">
       <Selettore className="min-w-[10rem] flex-1" etichetta={`Effetto ${numero}`} valore={effetto.tipo} opzioni={TIPI_EFFETTO_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome }))} onCambia={(v) => { if (v !== effetto.tipo) onCambia(effettoNuovo(v as EffettoAzione['tipo'])); }} />
@@ -30,9 +33,9 @@ export function RigaEffettoVoceLegacy({ effetto, elenchi, onCambia, onTogli, num
     {effetto.tipo === 'turno' && <div className="flex flex-col gap-2">
       <Selettore etichetta="Attività (contata per volte)" valore={effetto.attivita} opzioni={elenchi.attivita.filter((a) => a.turni)} onCambia={(v) => onCambia({ ...effetto, attivita: v })} />
       <label className="flex items-center gap-2 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={effetto.doti !== undefined} onChange={(e) => onCambia(e.target.checked ? { ...effetto, doti: [{ dote: 'perizia', note: 2 }] } : { tipo: 'turno', attivita: effetto.attivita })} />Doti proprie di questo turno, al posto di quelle dell’attività</label>
-      {effetto.doti?.map((d, i) => <div key={i} className="flex flex-wrap items-end gap-2">
+      {effetto.doti?.map((d, i) => <div key={chiaviDoti.ids[i]} className="flex flex-wrap items-end gap-2">
         <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1}`} dote={d} onCambia={(nuova) => onCambia({ ...effetto, doti: effetto.doti!.map((x, j) => j === i ? nuova : x) })} /></div>
-        {effetto.doti!.length > 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1} dell’effetto ${numero}`} onClick={() => onCambia({ ...effetto, doti: effetto.doti!.filter((_, j) => j !== i) })} />}
+        {effetto.doti!.length > 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1} dell’effetto ${numero}`} onClick={() => { chiaviDoti.togli(i); onCambia({ ...effetto, doti: effetto.doti!.filter((_, j) => j !== i) }); }} />}
       </div>)}
       {effetto.doti && effetto.doti.length < 5 && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Dote" onClick={() => onCambia({ ...effetto, doti: [...effetto.doti!, { dote: 'fascino', note: 2 }] })} />}
     </div>}

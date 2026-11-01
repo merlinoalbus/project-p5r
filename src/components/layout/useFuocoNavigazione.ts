@@ -13,7 +13,8 @@
 //   e qui non succede niente, l'annuncio lo fa chi cambia (lo stesso vale per i cassetti e le finestre, che hanno il loro fuoco);
 // - se il fuoco è su un elemento della pagina che c'è ancora (un selettore o le frecce che cambiano l'indirizzo restando nella stessa
 //   pagina, come le infiltrazioni di un Palazzo o i giorni della Guida): chi lo sta usando non va spostato; se la pagina nuova ha
-//   ricreato quell'elemento (le frecce dei giorni del Percorso), il fuoco torna sull'elemento nuovo con lo stesso nome accessibile;
+//   ricreato quell'elemento (le frecce dei giorni del Percorso), il fuoco torna sull'elemento nuovo con la stessa chiave
+//   (`data-fuoco`) o, per chi non ne dichiara una, con lo stesso nome accessibile;
 // - se il fuoco è dentro una finestra (`role="dialog"`);
 // - se, mentre la pagina nuova carica i dati, l'utente ha già messo il fuoco altrove.
 // La pagina nuova può mostrare l'attesa prima dell'h1: lo si aspetta fino a 4 secondi, poi si ripiega su `<main>`.
@@ -55,15 +56,19 @@ export function useFuocoNavigazione(main: RefObject<HTMLElement | null>, annunci
   const ultimoTitolo = useRef<string | null>(null);
   const annunciaRef = useRef(annuncia);
   useEffect(() => { annunciaRef.current = annuncia; });
-  /** L'ultimo elemento della pagina che ha avuto il fuoco, con il suo nome accessibile: se il cambio di percorso lo ricrea, lo si ritrova. */
-  const ultimoFuoco = useRef<{ el: HTMLElement; nome: string } | null>(null);
+  /** L'ultimo elemento della pagina che ha avuto il fuoco, col selettore che lo ritrova (chiave `data-fuoco`, o nome accessibile): se il
+   *  cambio di percorso lo ricrea, lo si ritrova. */
+  const ultimoFuoco = useRef<{ el: HTMLElement; selettore: string } | null>(null);
   useEffect(() => {
     const radice = main.current;
     if (!radice) return;
     const ricorda = (e: FocusEvent) => {
       const el = e.target;
+      // la chiave dichiarata (`data-fuoco`) vale prima del nome accessibile: il nome resta solo per gli elementi che non ne hanno una
+      const chiave = el instanceof HTMLElement ? el.dataset.fuoco : undefined;
       const nome = el instanceof HTMLElement ? el.getAttribute('aria-label') : null;
-      ultimoFuoco.current = el instanceof HTMLElement && nome ? { el, nome } : null;
+      ultimoFuoco.current = el instanceof HTMLElement && chiave ? { el, selettore: `[data-fuoco="${CSS.escape(chiave)}"]` }
+        : el instanceof HTMLElement && nome ? { el, selettore: `[aria-label="${CSS.escape(nome)}"]` } : null;
     };
     radice.addEventListener('focusin', ricorda);
     return () => radice.removeEventListener('focusin', ricorda);
@@ -77,7 +82,7 @@ export function useFuocoNavigazione(main: RefObject<HTMLElement | null>, annunci
     const prima = document.activeElement;
     // l'elemento col fuoco è stato tolto dal ridisegno (il fuoco è tornato al documento): si cercherà quello nuovo con lo stesso nome
     const ricreato = (prima === null || prima === document.body) && ultimoFuoco.current !== null && !ultimoFuoco.current.el.isConnected
-      ? ultimoFuoco.current.nome : null;
+      ? ultimoFuoco.current.selettore : null;
     const restaNellaPagina = (prima instanceof HTMLElement && prima !== radice && radice.contains(prima)) || ricreato !== null;
     const inFinestra = prima instanceof Element && prima.closest('[role="dialog"], [role="alertdialog"], dialog') !== null;
     const sposta = !restaNellaPagina && !inFinestra;
@@ -90,7 +95,7 @@ export function useFuocoNavigazione(main: RefObject<HTMLElement | null>, annunci
     const prova = () => {
       // subito, a ogni tentativo: l'elemento ricreato riprende il fuoco appena c'è (l'annuncio, sotto, può aspettare il titolo nuovo)
       if (ricreato !== null && (document.activeElement === null || document.activeElement === document.body)) {
-        const gemello = radice.querySelector<HTMLElement>(`[aria-label="${CSS.escape(ricreato)}"]`);
+        const gemello = radice.querySelector<HTMLElement>(ricreato);
         // ricreato ma disabilitato (la freccia del primo giorno): non prende il fuoco, che va sul titolo come per una pagina nuova
         if (gemello && !gemello.matches(':disabled')) gemello.focus({ preventScroll: true });
         else if (gemello) { const h1 = radice.querySelector<HTMLElement>('h1'); if (h1) metti(h1); }

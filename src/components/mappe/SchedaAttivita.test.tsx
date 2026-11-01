@@ -5,7 +5,7 @@
 
 import {render,screen} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
-import {SchedaSpillo} from './VisoreMappa';
+import {SchedaSpillo} from './SchedaSpillo';
 import type {SpilloDto} from '../../types';
 
 it.each(['attivita','luogo'] as const)('mostra la scheda Attività con riferimento %s',tipo=>{

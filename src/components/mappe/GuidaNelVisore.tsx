@@ -221,7 +221,8 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
     onChiudi();
   };
   const corpo = (
-    <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria" onKeyDown={suTasto}
+    // `data-guida-visore`: il visore riconosce la guida (il fuoco dentro, alla chiusura) da qui, non dal nome accessibile
+    <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria" data-guida-visore="" onKeyDown={suTasto}
       className={largo
         ? 'fixed z-[70] flex max-h-[min(70dvh,560px)] w-[340px] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
         : 'fixed inset-x-2 bottom-[calc(64px+env(safe-area-inset-bottom))] z-[70] flex max-h-[60dvh] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'}

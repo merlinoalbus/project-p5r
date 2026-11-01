@@ -19,6 +19,8 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { useIdStabili } from '../../hooks/useIdStabili';
+import { fuocoDopoSposta } from '../../utils/fuocoGesto';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -48,6 +50,8 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
   const delRango = dati.dati?.find((a) => a.rango === rango);
   const salvate: Voce[] = delRango?.abilita ?? [];
   const elenco = bozza ?? salvate;
+  // le abilità si tolgono e si spostano: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(elenco.length);
   const sporca = bozza !== null && !uguali(bozza, salvate);
   const valida = elenco.length <= 20 && elenco.every((v) => v.nome.trim() !== '' && v.nome.length <= 200 && v.descrizione.length <= 2000);
   useBozzaSporca(`abilita:${chiave}`, `le abilità di ${nome}`, sporca);
@@ -69,7 +73,8 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
     finally { setOccupato(false); }
   };
-  const sposta = (i: number, verso: -1 | 1) => cambia((v) => { const n = [...v]; const j = i + verso; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j]!, n[i]!]; return n; });
+  // il fuoco resta sul gesto premuto (o va sull'opposto al bordo): React sposta il nodo della riga (`fuocoDopoSposta`)
+  const sposta = (i: number, verso: -1 | 1) => { fuocoDopoSposta(chiavi.ids[i]!, verso); chiavi.sposta(i, verso); cambia((v) => { const n = [...v]; const j = i + verso; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j]!, n[i]!]; return n; }); };
 
   return (
     <Modal titolo={`Abilità di ${nome}`} aperta larga onChiudi={chiudi} azioni={(
@@ -92,7 +97,7 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
           </fieldset>
           {elenco.length === 0 && <p className="m-0 text-text-muted">Nessuna abilità a questo rango.</p>}
           <ul className="m-0 flex list-none flex-col gap-2 p-0">{elenco.map((v, i) => (
-            <li key={i} className="flex flex-col gap-2 rounded border border-border p-2">
+            <li key={chiavi.ids[i]} className="flex flex-col gap-2 rounded border border-border p-2">
               <label className="flex flex-col gap-1">Nome dell’abilità
                 <input className="form-input" value={v.nome} maxLength={200} disabled={occupato} aria-invalid={v.nome.trim() === ''} onChange={(e) => cambia((l) => l.map((x, j) => (j === i ? { ...x, nome: e.target.value } : x)))} />
               </label>
@@ -100,9 +105,9 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
                 <textarea className="form-input" rows={2} value={v.descrizione} maxLength={2000} disabled={occupato} onChange={(e) => cambia((l) => l.map((x, j) => (j === i ? { ...x, descrizione: e.target.value } : x)))} />
               </label>
               <div className="flex flex-wrap gap-2">
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su l’abilità ${i + 1}`} />
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === elenco.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù l’abilità ${i + 1}`} />
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => cambia((l) => l.filter((_, j) => j !== i))} aria-label={`Togli l’abilità ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" data-riga={chiavi.ids[i]} data-gesto="su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su l’abilità ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" data-riga={chiavi.ids[i]} data-gesto="giu" disabled={occupato || i === elenco.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù l’abilità ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => { chiavi.togli(i); cambia((l) => l.filter((_, j) => j !== i)); }} aria-label={`Togli l’abilità ${i + 1}`} />
               </div>
             </li>))}</ul>
           <div><PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un’abilità" disabled={occupato || elenco.length >= 20} onClick={() => cambia((l) => [...l, { nome: '', descrizione: '' }])} /></div>

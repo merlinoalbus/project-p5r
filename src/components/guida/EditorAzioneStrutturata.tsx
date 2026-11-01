@@ -35,6 +35,7 @@ import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { NOME_FAMIGLIA_EFFETTO, cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, effettoCompilatoCheSiPerde, fraseEffetto, indiceDelCollegamento, nomiEffettiDa, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 import { conferma } from '../../stores/confermaStore';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 interface Props {
   valore: CampiStrutturati;
@@ -201,6 +202,8 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta }: Pro
 function EffettiStorici({ valore, onCambia, elenchi }: Props) {
   const imposta = (p: Partial<CampiStrutturati>) => onCambia({ ...valore, ...p });
   const nuovo: EffettoAzione = { tipo: 'dote', dote: 'fascino', note: 2 };
+  // le righe hanno uno stato loro (i selettori): la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(valore.produce.length);
   return (
     <div className="flex flex-col gap-2">
       {valore.produce.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto: la spunta segna solo che l’hai fatto.</p>}
@@ -209,9 +212,9 @@ function EffettiStorici({ valore, onCambia, elenchi }: Props) {
           turni è il caso normale di ogni voce (la stessa regola di `shared/riepilogoEffetti.ts`) */}
       <ul className="flex flex-col gap-2 list-none m-0 p-0">
         {valore.produce.map((e, i) => (
-          <RigaEffettoVoceLegacy key={i} numero={i + 1} effetto={e} elenchi={elenchi.azione}
+          <RigaEffettoVoceLegacy key={chiavi.ids[i]} numero={i + 1} effetto={e} elenchi={elenchi.azione}
             onCambia={(n) => imposta({ produce: valore.produce.map((x, j) => (j === i ? n : x)) })}
-            onTogli={() => imposta({ produce: valore.produce.filter((_, j) => j !== i) })} />
+            onTogli={() => { chiavi.togli(i); imposta({ produce: valore.produce.filter((_, j) => j !== i) }); }} />
         ))}
       </ul>
       {valore.produce.length < 20 && (

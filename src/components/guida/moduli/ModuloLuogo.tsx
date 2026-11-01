@@ -10,6 +10,7 @@
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
+import { useIdStabili } from '../../../hooks/useIdStabili';
 import { getConfidenti, getQuartiere, getQuartieri } from '../../../services/api';
 import type { PiattoLuogo } from './definizioni';
 import { Selettore } from '../../shared/Selettore';
@@ -70,8 +71,11 @@ function ConfidentiEPiatti({ dati, imposta, disabilitato }: Pick<PropsModulo, 'd
   const confidenti = useCarica(() => getConfidenti(), []);
   const scelti = Array.isArray(dati.confidenti_json) ? (dati.confidenti_json as string[]) : [];
   const piatti = (dati.piatti_json as PiattoLuogo[] | null) ?? [];
+  // i piatti si tolgono uno per uno: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiaviPiatti = useIdStabili(piatti.length);
   /** Cambia un piatto (o lo toglie con `null`). */
   const piatto = (i: number, p: PiattoLuogo | null) => {
+    if (!p) chiaviPiatti.togli(i);
     const n = p ? piatti.map((x, j) => (j === i ? p : x)) : piatti.filter((_, j) => j !== i);
     imposta({ piatti_json: n.length > 0 ? n : null });
   };
@@ -89,7 +93,7 @@ function ConfidentiEPiatti({ dati, imposta, disabilitato }: Pick<PropsModulo, 'd
     </SezioneCampi>
     <SezioneCampi titolo="Piatti">
       {piatti.map((p, i) => (
-        <fieldset key={i} className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
+        <fieldset key={chiaviPiatti.ids[i]} className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
           <legend>Piatto {i + 1}</legend>
           <div className="griglia-campi">
             <CampoTesto etichetta="Nome" valore={p.nome} massimo={160} obbligatorio disabilitato={disabilitato} onCambia={(nome) => piatto(i, { ...p, nome })} />

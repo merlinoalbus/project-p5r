@@ -16,6 +16,7 @@
 import { ELEMENTI_AFFINITA, NOME_ELEMENTO, type ChiaveElemento } from '../../../shared/elementi';
 import { coloreElemento, coloreTestoElemento } from '../../utils/elementi';
 import { piatto } from '../../utils/testo';
+import { useIdStabili } from '../../hooks/useIdStabili';
 import { AssetImg } from './AssetImg';
 import { IconaAzione } from './IconaAzione';
 import { PulsanteVisivo } from './PulsanteVisivo';
@@ -59,10 +60,14 @@ export function ElencoElementi({ etichetta, valore, onCambia, disabilitato, mass
   /** Le voci che non sono un elemento puro, con la loro posizione nell'elenco intero. */
   const altre = valore.map((v, i) => ({ v, i })).filter((x) => elementoPuro(x.v) === null);
   const acceso = (chiave: ChiaveElemento) => valore.some((v) => elementoPuro(v) === chiave);
+  // le voci si tolgono: la chiave di riga è un id stabile, non l'indice (`useIdStabili`), che segue anche le voci tolte spegnendo un elemento
+  const chiavi = useIdStabili(valore.length);
   /** Accende (aggiunge il nome canonico) o spegne (toglie le voci del solo nome) un elemento. */
   const alterna = (chiave: ChiaveElemento) => {
-    if (acceso(chiave)) onCambia(valore.filter((v) => elementoPuro(v) !== chiave));
-    else if (valore.length < maxVoci) onCambia([...valore, NOME_ELEMENTO[chiave]]);
+    if (acceso(chiave)) {
+      chiavi.togli(valore.flatMap((v, i) => (elementoPuro(v) === chiave ? [i] : [])));
+      onCambia(valore.filter((v) => elementoPuro(v) !== chiave));
+    } else if (valore.length < maxVoci) onCambia([...valore, NOME_ELEMENTO[chiave]]);
   };
   /** Cambia il testo della voce in posizione `i` o la toglie. */
   const cambiaAltra = (i: number, testo: string) => onCambia(valore.map((v, j) => (j === i ? testo : v)));
@@ -87,9 +92,9 @@ export function ElencoElementi({ etichetta, valore, onCambia, disabilitato, mass
         <div className="flex flex-col gap-2">
           <span className="campo__aiuto">Voci con una nota, scritte dalla guida: restano come sono.</span>
           {altre.map(({ v, i }) => (
-            <div key={i} className="flex items-start gap-2">
+            <div key={chiavi.ids[i]} className="flex items-start gap-2">
               <input className="form-input min-w-0 flex-1" type="text" maxLength={massimo} value={v} disabled={disabilitato} aria-label={`${etichetta}: voce con nota ${i + 1}`} onChange={(e) => cambiaAltra(i, e.target.value)} />
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => onCambia(valore.filter((_, j) => j !== i))} aria-label={`Togli «${v}» da ${etichetta}`} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => { chiavi.togli(i); onCambia(valore.filter((_, j) => j !== i)); }} aria-label={`Togli «${v}» da ${etichetta}`} />
             </div>
           ))}
         </div>

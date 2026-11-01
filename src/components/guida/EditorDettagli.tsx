@@ -13,10 +13,13 @@ import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { etichetteRipetute, type RigaDettaglio } from '../../utils/dettagliVoce';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 /** L'editor: le righe (in JSON, perché il modulo della correzione tiene solo testi) e la loro modifica. */
 export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: string; onCambia: (v: string) => void; nascosti?: readonly string[] }) {
   const righe = JSON.parse(valore) as RigaDettaglio[];
+  // le righe si tolgono: la chiave è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(righe.length);
   const cambia = (nuove: RigaDettaglio[]) => onCambia(JSON.stringify(nuove));
   const ripetute = etichetteRipetute(righe);
   const aggiorna = (i: number, parte: Partial<RigaDettaglio>) => cambia(righe.map((r, j) => (j === i ? { ...r, ...parte } : r)));
@@ -28,7 +31,7 @@ export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: st
       {visibili.length === 0 && <p className="m-0 text-text-muted">Nessun dettaglio.</p>}
       {ripetute.length > 0 && <p className="m-0 text-error-testo" role="alert">Etichetta ripetuta: {ripetute.join(', ')}. Cambiala per salvare.</p>}
       {visibili.map(({ r, i }) => (
-        <div key={i} className="flex flex-wrap items-start gap-2 rounded-md bg-white/[0.03] p-1.5" role="group" aria-label={`Dettaglio ${r.etichetta || i + 1}`}>
+        <div key={chiavi.ids[i]} className="flex flex-wrap items-start gap-2 rounded-md bg-white/[0.03] p-1.5" role="group" aria-label={`Dettaglio ${r.etichetta || i + 1}`}>
           <label className="flex w-full flex-col gap-1 sm:w-[170px]">
             Etichetta
             <input className="form-input" value={r.etichetta} maxLength={LIMITI_GUIDA.punto.etichetta} onChange={(e) => aggiorna(i, { etichetta: e.target.value })} />
@@ -40,7 +43,7 @@ export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: st
               <textarea className="form-input min-h-[44px]" rows={Math.min(6, Math.max(1, Math.ceil(r.testo.length / 60)))} value={r.testo} maxLength={LIMITI_GUIDA.punto.dettaglio} onChange={(e) => aggiorna(i, { testo: e.target.value })} />
             </label>}
           <PulsanteVisivo tono="fantasma" compatto className="self-end" icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Togli"
-            aria-label={`Togli il dettaglio ${r.etichetta || i + 1}`} onClick={() => cambia(righe.filter((_, j) => j !== i))} />
+            aria-label={`Togli il dettaglio ${r.etichetta || i + 1}`} onClick={() => { chiavi.togli(i); cambia(righe.filter((_, j) => j !== i)); }} />
         </div>
       ))}
       {righe.length < LIMITI_GUIDA.punto.dettagli && (

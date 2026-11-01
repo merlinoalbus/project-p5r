@@ -13,6 +13,7 @@ import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 import { Campo as CampoComune, CampoTesto, TestoCheCresce } from '../../shared/Campo';
 import { SelettoreData } from '../../shared/SelettoreData';
+import { useIdStabili } from '../../../hooks/useIdStabili';
 
 interface PropsCampo {
   nome: string;
@@ -68,12 +69,14 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
 }) {
   /** Cambia il testo della voce in posizione `i`. */
   const cambia = (i: number, testo: string) => onCambia(voci.map((v, j) => (j === i ? testo : v)));
+  // le voci si tolgono una per una: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiavi = useIdStabili(voci.length);
   return (
     <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
       <legend>{etichetta}</legend>
       {voci.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna voce.</p>}
       {voci.map((v, i) => (
-        <div key={i} className="flex flex-wrap items-start gap-2">
+        <div key={chiavi.ids[i]} className="flex flex-wrap items-start gap-2">
           <span className="chip mt-2 shrink-0" aria-hidden>{i + 1}</span>
           {/* L13 (O7-5): la voce parte alta quanto gli altri campi (una riga, 44 px) e si allunga col testo: prima due righe fisse */}
           <div className="campo min-w-[200px] flex-[3]">
@@ -81,7 +84,7 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
               ? <TestoCheCresce righe={1} massimo={max} valore={v} disabilitato={disabilitato} onCambia={(t) => cambia(i, t)} aria-label={`${etichetta}: voce ${i + 1}`} />
               : <input className="form-input" type="text" maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />}
           </div>
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => onCambia(voci.filter((_, j) => j !== i))} aria-label={`Togli la voce ${i + 1} di ${etichetta}`} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => { chiavi.togli(i); onCambia(voci.filter((_, j) => j !== i)); }} aria-label={`Togli la voce ${i + 1} di ${etichetta}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" disabled={disabilitato || voci.length >= 60}

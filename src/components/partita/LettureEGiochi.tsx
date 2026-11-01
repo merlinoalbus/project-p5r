@@ -29,6 +29,7 @@ import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { SegnoStato } from '../shared/SegnoStato';
 import { PromemoriaLibri } from '../shared/PromemoriaLibri';
+import { leggiMemoria, scriviMemoria } from '../../utils/memoriaDispositivo';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
 
@@ -39,10 +40,8 @@ const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
 
 /** L'ultima categoria scelta su questo dispositivo (libri se non c'è o la memoria non risponde). */
 function categoriaRicordata(): Gruppo {
-  try {
-    const v = localStorage.getItem(CHIAVE_CATEGORIA);
-    return GRUPPI.find((g) => g === v) ?? 'libri';
-  } catch { return 'libri'; }
+  const v = leggiMemoria(CHIAVE_CATEGORIA);
+  return GRUPPI.find((g) => g === v) ?? 'libri';
 }
 
 /** Quel che serve per disegnare una riga, uguale per tutti e tre: il resto e' differenza di nome. */
@@ -157,7 +156,8 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const [categoria, setCategoria] = useState<Gruppo>(categoriaRicordata);
   const scegli = (g: Gruppo) => {
     setCategoria(g);
-    try { localStorage.setItem(CHIAVE_CATEGORIA, g); } catch { /* memoria del browser non disponibile: si ricorda solo per questa visita */ }
+    // memoria del browser non disponibile: si ricorda solo per questa visita
+    scriviMemoria(CHIAVE_CATEGORIA, g);
   };
 
   /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. Ondata 5 (lotto F-bis): con «Lettura rapida» letto un pomeriggio vale due

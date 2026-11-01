@@ -17,6 +17,10 @@
 // con i suoi elementi: voci della guida, Richieste e timbri — che fanno la percentuale; un'area è
 // completata quando lo sono tutti, il dedalo quando lo sono tutte. La pianta della guida non c'è: i
 // piani si generano.
+//
+// Qui la disposizione e lo stato dell'indirizzo; gli indirizzi della scheda stanno in `useNavigazionePalazzo`, i gesti di stato nella
+// partita in `useStatiPalazzo`, i moduli di modifica in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
+// `MenuModificaPalazzo` (components/guida), con `LineaDelTempo`, `DedaloNelBinario` e `InfiltrazioniInArea`.
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -24,11 +28,10 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
 import { useNavigate, useParams, useSearchParams } from '../components/scheda/routerScheda';
-import { aggiornaArea, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, riordinaAree, ripristinaDungeon, risolviMappa } from '../services/api';
-import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
+import { creaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, riordinaAree } from '../services/api';
+import { useNavigazionePalazzo } from '../hooks/useNavigazionePalazzo';
+import { useStatiPalazzo } from '../hooks/useStatiPalazzo';
 import { enigmiCheSiRiaprono, righeRiapertura, vociDelPin } from '../utils/gestiVoce';
-import { personeRegistrate } from '../utils/piastrelleCattura';
-import { catturaNelCompendio, salvaStatoVoce } from '../services/gestiGuida';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
 import { SchedeDaSistemare } from '../components/guida/SchedeDaSistemare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
@@ -48,7 +51,6 @@ import { useImmagineMappa } from '../hooks/useImmagineMappa';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
-import { SpuntaCompletata, TestoCompletata } from '../components/guida/SpuntaCompletata';
 import { AreePalazzo } from '../components/guida/AreePalazzo';
 import { FinestraLegamiInfiltrazione } from '../components/guida/FinestraLegamiInfiltrazione';
 import { ModuloNuovaArea, type DatiNuovaArea as DatiNuovaInfiltrazione } from '../components/guida/ModuloNuovaArea';
@@ -62,26 +64,24 @@ import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
 import { centroAccessoMondo } from '../utils/accessoMondo';
 import { areeCompletate } from '../utils/completamentoAree';
 import { dimenticaEntrata, indirizzoDiUscita, istantaneaPalazzo, leggiEntrata, leggiRitornoDiario, ricordaEntrata, riepilogoUscita } from '../utils/ritornoDiario';
-import { LIMITI_GUIDA } from '../../shared/limitiGuida';
-import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
-import { CampoTesto } from '../components/shared/Campo';
 import { NoteStoricheOfferta, type EffettoNotaStorica } from '../components/catalogo/NoteStoricheOfferta';
 import { testoLivelloConsigliato } from '../utils/palazzi';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
-import { nomeBreveDedalo, percentualeDedalo, raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
 import { percentualeSegnati } from '../../shared/avanzamento';
-import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
-import { erroreDatePalazzo, type DatePalazzo } from '../../shared/datePalazzo';
-import { SelettoreData } from '../components/shared/SelettoreData';
-import type { AreaDedaloDto, AreaDungeonDto, AreaRiassuntoDto, DungeonDettaglioDto, PlanimetriaAreaDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../types';
+import type { AreaDungeonDto, AreaRiassuntoDto, PlanimetriaAreaDto } from '../types';
 import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDellArea';
 import { BarraCollegamentoPin } from '../components/guida/BarraCollegamentoPin';
-import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IndietroScheda, TitoloScheda } from '../components/shared/IntestazioneScheda';
-import { MenuModifica } from '../components/shared/MenuModifica';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
-import { classiSuggerito } from '../utils/suggerimenti';
+import { LineaDelTempo } from '../components/guida/LineaDelTempo';
+import { DedaloNelBinario } from '../components/guida/DedaloNelBinario';
+import { InfiltrazioniInArea } from '../components/guida/InfiltrazioniInArea';
+import { CorrezioneSchedaPalazzo } from '../components/guida/CorrezioneSchedaPalazzo';
+import { ModuloBossFinale } from '../components/guida/ModuloBossFinale';
+import { ModuloInfiltrazione } from '../components/guida/ModuloInfiltrazione';
+import { MenuModificaPalazzo, type FinestraPalazzo } from '../components/guida/MenuModificaPalazzo';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
@@ -102,97 +102,11 @@ function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null)
   return { chiave: conPin.chiave, nome, testo: `Su questa planimetria non ci sono pin: quelli dell’area stanno su «${nome}».` };
 }
 
-/** Le date di un Palazzo come una linea: si apre, conviene rubare, la lettera di sfida entro, scade (L13 O6-3: da una fonte sola, le date
- *  MM-GG della scheda; quel che la guida diceva in più sta nelle note). Mostrate «22 apr»; la data per esteso nel `title`. */
-const TAPPE = [
-  { chiave: 'dal', etichetta: 'Si apre', tono: 'bg-white/10 text-text', segno: 'si-apre' },
-  { chiave: 'furtoConsigliato', etichetta: 'Furto consigliato', tono: 'bg-oro/15 text-oro', segno: 'furto' },
-  // il termine della lettera è un limite come la scadenza: lo stesso segno, col tono del consiglio (l'oro) perché viene prima
-  { chiave: 'letteraEntro', etichetta: 'Lettera entro', tono: 'bg-oro/15 text-oro', segno: 'scade' },
-  { chiave: 'al', etichetta: 'Scade', tono: 'bg-primary/20 text-primary-testo', segno: 'scade' },
-] as const satisfies ReadonlyArray<{ chiave: keyof DungeonDettaglioDto['date']; etichetta: string; tono: string; segno: ChiaveSegno }>;
-
-/** Le date nella bozza di «Correggi la scheda»: MM-GG, '' = nessuna (per la scadenza: senza fine), come vuole `SelettoreData`. */
-interface BozzaDate { dal: string; al: string; furto: string; lettera: string }
-const bozzaDate = (date: DungeonDettaglioDto['date']): BozzaDate => ({ dal: date.dal ?? '', al: date.al ?? '', furto: date.furtoConsigliato ?? '', lettera: date.letteraEntro ?? '' });
-/** Le date della bozza come le vuole la regola (e il server): '' diventa null. */
-const dateDellaBozza = (b: BozzaDate): DatePalazzo => ({ dal: b.dal || null, al: b.al || null, furtoConsigliato: b.furto || null, letteraEntro: b.lettera || null });
-/** Le date della bozza sono diverse da quelle salvate? */
-const dateCambiate = (b: BozzaDate, date: DungeonDettaglioDto['date']): boolean => { const s = bozzaDate(date); return b.dal !== s.dal || b.al !== s.al || b.furto !== s.furto || b.lettera !== s.lettera; };
-
-/** L8-04: un livello nella bozza come testo ('' = la fonte non lo dice). */
-const numeroInBozza = (n: number | null): string => (n === null ? '' : String(n));
-/** Il livello consigliato della bozza come lo vuole il server: interi da 1 a `livelloMassimo`, '' = null, il minimo non sopra il massimo. */
-function livelloDellaBozza(min: string, max: string): { min: number | null; max: number | null } {
-  const leggi = (v: string, quale: string): number | null => {
-    if (!v.trim()) return null;
-    const n = Number(v);
-    if (!Number.isInteger(n) || n < 1 || n > LIMITI_GUIDA.dungeon.livelloMassimo) throw new Error(`Il livello consigliato ${quale} va da 1 a ${LIMITI_GUIDA.dungeon.livelloMassimo}.`);
-    return n;
-  };
-  const l = { min: leggi(min, 'minimo'), max: leggi(max, 'massimo') };
-  if (l.min !== null && l.max !== null && l.min > l.max) throw new Error('Il livello consigliato minimo non può superare il massimo.');
-  return l;
-}
 /** La nota storica del livello non cambia il livello consigliato: lo dicono le finestre della nota. */
 const EFFETTO_NOTA_LIVELLO: EffettoNotaStorica = {
   modifica: 'È una nota sulla fonte: il livello consigliato minimo e massimo si correggono nella scheda del Palazzo.',
   ripristino: 'Testo e fonte della nota tornano come li dà la guida. Il livello consigliato non cambia.',
 };
-
-/** La finestra del Palazzo (o dei Memento) in tappe. Nei Palazzi (LAY3-5, regola dell'utente «intestazione al massimo il 30% della
- *  schermata») la tappa è compatta a ogni larghezza, come era da 1024 px (R3-41): segno e data su una riga, l'etichetta per chi non vede e
- *  nel suggerimento, niente frecce; nei Memento resta com'era (compatta da 1024 px). */
-function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
-  const tappe = TAPPE.flatMap((t) => { const valore = date[t.chiave]; return valore ? [{ ...t, valore }] : []; });
-  if (tappe.length === 0) return null;
-  return (
-    <ol className={`m-0 flex list-none flex-wrap items-stretch p-0 ${memento ? 'gap-1.5' : 'gap-1 lg:gap-1.5'}`} aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
-      {tappe.map((t, i) => (
-        <li key={t.chiave} className="flex items-stretch gap-1.5">
-          {/* Le tappe vanno a capo sugli schermi stretti, e una freccia a inizio riga non collega
-              più niente: da lì in giù l'ordine lo dicono già le etichette. */}
-          {/* da 1024 px niente frecce: l'ordine lo dicono i segni delle tappe, e la riga sotto il titolo deve stare su una riga (R3-41) */}
-          {i > 0 && memento && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
-          {/* Da 1024 px (R3-41; nei Palazzi a ogni larghezza, LAY3-5) la tappa sta su una riga: segno e data, l'etichetta per chi non vede
-              e nel suggerimento */}
-          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${dataGiocoTesto(t.valore)}`}>
-            {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
-            <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
-            {/* L13 O6-3: ogni tappa è una data di gioco, «22 apr» (le frasi di Shido e Maruki che a 1024×690 alzavano l'intestazione, LAY3-4,
-                non ci sono più: stanno nelle note). Corta a ogni larghezza: l'intestazione resta entro il 30% (LAY3-5, R3-41). */}
-            <span className={`whitespace-nowrap font-display leading-none ${memento ? 'testo-17 lg:testo-14' : 'testo-14'}`}>{dataGiocoBreve(t.valore)}</span>
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-/** Un dedalo nel binario (da 1024 px) o nella fila (tablet): numero, nome, percentuale e barra, ✓ se completato. La percentuale è
- *  quella della regola unica (L10-03, `percentualeDedalo`), la stessa della scheda del dedalo e della sua carta nei Luoghi. */
-function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDungeonDto; scelto: boolean; suggerito: boolean; onScegli: () => void; fila?: boolean }) {
-  const percentuale = percentualeDedalo(a);
-  const completato = a.dedalo?.completato === true;
-  if (fila) {
-    return (
-      <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome} className={`chip touch shrink-0 ${scelto ? 'chip--attivo' : ''} ${completato ? 'chip--icona' : ''} ${classiSuggerito(suggerito, 'chip')}`}>
-        {completato && <SpuntaCompletata />}{a.ordine + 1} {nomeBreveDedalo(a.nome)}{!completato && percentuale !== null ? ` · ${percentuale}%` : ''}{completato && <TestoCompletata />}
-      </button>
-    );
-  }
-  return (
-    <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome}
-      className={`touch flex w-full flex-col gap-1 rounded-md border px-2 py-1.5 text-left transition-colors ${scelto ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'} ${classiSuggerito(suggerito)}`}>
-      <span className="flex items-baseline gap-1.5 testo-13 leading-tight">
-        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary-testo' : 'text-text-muted'}`}>{a.ordine + 1}</span>
-        <span className="min-w-0 flex-1 font-semibold">{nomeBreveDedalo(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
-        <span className="shrink-0 testo-12 tabular-nums text-text-muted">{percentuale !== null ? `${percentuale}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
-      </span>
-      {percentuale !== null && <span className="visore-mappa__progresso ml-5 h-1" aria-hidden><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></span>}
-    </button>
-  );
-}
 
 /**
  * Scheda di un Palazzo o dei Memento presa dalla chiave nell'URL: carica il dettaglio per la
@@ -284,117 +198,16 @@ export function DungeonDettaglioPage() {
     .find((k): k is string => !!k && chiaviVersioni.includes(k)) ?? chiaviVersioni[0] ?? null;
   const spilloIndirizzo = Number(params.get('spillo')) || null;
   const puntoIndirizzo = useMemo(() => centroAccessoMondo(params), [params]);
-  // ogni cambio di stato dalla colonna ricarica il visore (e viceversa il visore ricarica la pagina)
-  const [versioneStati, setVersioneStati] = useState(0);
   // Memento (progetto approvato del 2026-10-12): «Gioca» ha solo i comandi per segnare, «Modifica la guida» anche quelli per
   // sistemarla; il pozzo dei dedali si apre a richiesta
   const [modifica, setModifica] = useState(false);
   const [pozzo, setPozzo] = useState(false);
 
-  // Gli aggiornamenti locali partono dai dati correnti (forma funzionale di `imposta`), non dalla `d` del render: arrivano dopo
-  // un `await`, e due gesti ravvicinati si annullerebbero a vicenda.
-  const aggiornaPunto = (nuovo: PuntoInteresseDto) => {
-    dati.imposta((attuale) => {
-      // nei Memento una voce è un elemento della sua area del dedalo (099): aree, dedalo e anello seguono subito
-      const aree = attuale.aree.map((a) => (a.punti.some((p) => p.chiave === nuovo.chiave) ? ricalcolaDedalo({ ...a, punti: a.punti.map((p) => (p.chiave === nuovo.chiave ? nuovo : p)) }, partitaId !== null) : a));
-      return { ...attuale, aree, raccolta: attuale.tipo === 'mementos' ? raccoltaDeiDedali(aree, attuale.raccolta) : attuale.raccolta };
-    });
-  };
-  // Le riletture in silenzio della scheda (dopo uno stato o un raccolto) possono sovrapporsi: vale solo l'ultima chiesta, una
-  // risposta più vecchia che arriva dopo non sovrascrive quella più nuova (rilievo del validatore).
-  const ultimaLettura = useRef(0);
-  /** Rilegge la scheda dal server senza stato di caricamento (solo con una partita) e la applica solo se nel frattempo non è partita una lettura più nuova. */
-  const rileggiInSilenzio = async () => {
-    if (!partitaId) return;
-    const n = ++ultimaLettura.current;
-    const fresco = await getDungeon(chiave, partitaId);
-    if (n === ultimaLettura.current) dati.imposta(fresco);
-  };
-  // Cambiato il giorno della partita, la scheda si rilegge in silenzio: da quel giorno dipende dove si atterra dalla mappa di
-  // Tokyo («Oggi si atterra su…», 2026-10-04). Non con una dipendenza di `useCarica`, che svuoterebbe la pagina fino alla
-  // risposta e chiuderebbe la finestra aperta.
-  const giornoPartita = attiva?.dataGioco ?? null;
-  const giornoLetto = useRef(giornoPartita);
-  // la rilettura più recente, letta dall'effetto senza farlo ripartire a ogni render
-  const rilettura = useRef(rileggiInSilenzio);
-  useEffect(() => { rilettura.current = rileggiInSilenzio; });
-  useEffect(() => {
-    if (giornoLetto.current === giornoPartita) return;
-    giornoLetto.current = giornoPartita;
-    void rilettura.current().catch(() => { /* resta la scheda di prima */ });
-  }, [giornoPartita]);
-  /** Imposta (o toglie, con null) lo stato di un punto della guida nella partita: aggiorna il punto locale, fa ricaricare il visore e poi
-   *  rilegge la scheda; l'errore viene notificato. Vero se lo stato è stato salvato (la guida passa alla voce successiva solo allora). */
-  const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null): Promise<boolean> => {
-    if (!partitaId) return false;
-    try {
-      // L4 §8.11: il gesto sulla voce tocca tutti i suoi pin, e con loro le altre voci che li condividono: il server dice quali (la rilettura
-      // sotto le aggiorna nella scheda), `salvaStatoVoce` le dice a parole (lo stesso salvataggio della guida del visore)
-      const nuovo = await salvaStatoVoce(partitaId, p.chiave, stato, d?.aree);
-      aggiornaPunto(nuovo);
-      setVersioneStati((v) => v + 1);
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-      return false;
-    }
-    // Un punto della guida può essere agganciato a uno spillo collezionabile (il server lo conta come raccolto):
-    // la raccolta si rilegge dal server, senza stato di caricamento, così anello e colonna non divergono. Lo stato è già
-    // salvato: una rilettura fallita lo dice, ma non lo disfa.
-    try { await rileggiInSilenzio(); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Rilettura della scheda non riuscita.'); }
-    return true;
-  };
-  /**
-   * Nei Memento una Persona è catturata se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12): la registra o
-   * la toglie, aggiorna subito le catturate della scheda e notifica. Le catture non contano nella percentuale: niente da ricalcolare.
-   */
-  const cattura = async (personaId: number, catturata: boolean, ombra?: string): Promise<void> => {
-    if (!partitaId) return;
-    try {
-      // la chiamata unica della cattura (`catturaNelCompendio`), la stessa della guida del visore e delle piastrelle delle altre viste
-      const registrate = personeRegistrate(await catturaNelCompendio(partitaId, personaId, catturata, ombra));
-      dati.imposta((attuale) => ({ ...attuale, personeCatturate: registrate }));
-      // la guida del visore incorporato rilegge le sue piastrelle (`versione` del visore, anche quando la mappa non cambia)
-      setVersioneStati((v) => v + 1);
-    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.'); }
-  };
+  // i gesti che cambiano lo stato nella partita (voci, catture, pin raccolti, timbri e Richieste dei dedali) e le riletture che seguono;
+  // `versioneStati` cresce a ogni cambio dalla colonna e fa ricaricare il visore (e viceversa il visore ricarica la pagina)
+  const { versioneStati, setVersioneStati, aggiornaPunto, cambiaStato, cattura, segnaRaccolto, aggiornaTimbri, aggiornaRichiesta } =
+    useStatiPalazzo(dati, chiave, partitaId, attiva?.dataGioco ?? null);
   const catturate = useMemo(() => (d?.personeCatturate ? new Set(d.personeCatturate) : null), [d]);
-  /** Uno spillo raccolto (o riaperto): si aggiornano le planimetrie del Palazzo, quelle delle aree e l'anello, senza ricaricare. */
-  const segnaRaccolto = (spilloId: number, raccolto: boolean) => {
-    if (!d) return;
-    /** Una planimetria con lo spillo segnato raccolto o no e il conteggio dei presi ricalcolato; resta identica se lo spillo non è suo. */
-    const aggiornaMappa = <T extends { presi: number | null; spilli: Array<{ id: number; raccolto: boolean | null }> }>(m: T): T => {
-      if (!m.spilli.some((s) => s.id === spilloId)) return m;
-      const spilli = m.spilli.map((s) => (s.id === spilloId ? { ...s, raccolto } : s));
-      return { ...m, spilli, presi: spilli.filter((s) => s.raccolto).length };
-    };
-    dati.imposta((attuale) => {
-      const planimetrie = attuale.planimetrie.map(aggiornaMappa);
-      const aree = attuale.aree.map((a) => ({ ...a, mappe: a.mappe.map(aggiornaMappa) }));
-      const presi = planimetrie.reduce((s, p) => s + (p.presi ?? 0), 0);
-      return { ...attuale, planimetrie, aree, raccolta: { ...attuale.raccolta, presi, mappeComplete: planimetrie.filter((p) => p.presi !== null && p.presi >= p.n).length } };
-    });
-    setVersioneStati((v) => v + 1);
-    // Il raccolto di un pin segna (o riapre) la sua voce della guida e, se è un passo, il suo Enigma (095): stati che qui non si
-    // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
-    void rileggiInSilenzio().catch(() => { /* resta l'aggiornamento immediato */ });
-  };
-  /** Un dedalo cambiato dentro (timbri, stato di una Richiesta): le sue aree, il dedalo e l'anello dei Memento si ricalcolano con
-   *  la regola del server (`shared/dedali.ts`, 099). `cambia` riceve un'area del dedalo e la restituisce aggiornata. */
-  const aggiornaAreeDedalo = (cambia: (a: AreaDedaloDto) => AreaDedaloDto) => {
-    dati.imposta((attuale) => {
-      const aree = attuale.aree.map((a) => (a.dedalo ? ricalcolaDedalo({ ...a, dedalo: { ...a.dedalo, aree: a.dedalo.aree.map(cambia) } }, partitaId !== null) : a));
-      return { ...attuale, aree, raccolta: raccoltaDeiDedali(aree, attuale.raccolta) };
-    });
-  };
-  /** I timbri di un'area di un dedalo cambiano. */
-  const aggiornaTimbri = (areaDedalo: string, raccolti: number) => {
-    aggiornaAreeDedalo((a) => (a.chiave === areaDedalo && a.timbri ? { ...a, timbri: { ...a.timbri, raccolti } } : a));
-  };
-  /** Lo stato di una Richiesta cambia (nell'area in cui sta, o fra quelle da collocare, che non contano). */
-  const aggiornaRichiesta = (chiaveRichiesta: string, stato: StatoRichiesta | null) => {
-    dati.imposta((attuale) => ({ ...attuale, aree: attuale.aree.map((a) => (a.dedalo ? { ...a, dedalo: { ...a.dedalo, daCollocare: a.dedalo.daCollocare.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r)) } } : a)) }));
-    aggiornaAreeDedalo((a) => (a.richieste.some((r) => r.chiave === chiaveRichiesta) ? { ...a, richieste: a.richieste.map((r) => (r.chiave === chiaveRichiesta ? { ...r, stato } : r)) } : a));
-  };
   // Il collegamento dei pin di una voce della guida si fa sulla mappa principale (2026-10-18): la guida lo apre e dice voce, pin e
   // gesti; qui la planimetria mostrata durante il collegamento (parte da dove sta già un pin della voce) e la ricerca. Una voce
   // nuova riparte dalla sua planimetria e con la ricerca vuota, e la mappa viene portata in vista (sul telefono sta sopra la guida).
@@ -428,69 +241,12 @@ export function DungeonDettaglioPage() {
   // 420); comincia sotto la prima schermata, perché la pagina è lunga per scelta. Da 1024 a 1279 px resta la misura di R3-41.
   const classeVisoreMappa = 'h-[min(64dvh,560px)] lg:h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]';
   const sceltaPin = collegamento ? { titolo: collegamento.nome, scelti: collegamento.scelti, occupato: collegamento.occupato, ricerca: ricercaPin, attenuaNascosti: true, onScegli: (s: { id: number; nome: string }) => collegamento.onScegli(s) } : undefined;
-  /** Memento: apre un dedalo mettendolo nell'indirizzo (che perde gli altri parametri). */
-  const scegliArea = (k: string) => { setParams(ritorno ? { area: k, da: ritorno.da, voce: ritorno.voce } : { area: k }); };
-  // ---- Palazzi (L3, §4.1–§4.2): l'area ha il suo indirizzo, l'infiltrazione va nei parametri ----
-  const base = `/guida/dungeon/${encodeURIComponent(chiave)}`;
-  /** R10-28: muovendosi nella scheda (infiltrazione, area, planimetria) il ritorno al diario resta nell'indirizzo, così «Esci» non sparisce. */
-  const tieniRitorno = (q: URLSearchParams) => { if (ritorno) { q.set('da', ritorno.da); q.set('voce', ritorno.voce); } return q; };
-  /** Apre l'area `s`, con l'infiltrazione e la versione date (se ci sono). */
-  const apriArea = (s: string, infiltrazione?: string | null, planimetria?: string | null) => {
-    const q = tieniRitorno(new URLSearchParams());
-    if (infiltrazione) q.set('infiltrazione', infiltrazione);
-    if (planimetria) q.set('planimetria', planimetria);
-    const testo = q.toString();
-    navigate(`${base}/area/${encodeURIComponent(s)}${testo ? `?${testo}` : ''}`);
-  };
-  /** Un'area scelta dall'elenco: l'infiltrazione aperta resta se la tocca, altrimenti si apre la prima che la tocca. */
-  const scegliAreaFisica = (s: string) => {
-    const a = areePalazzo.find((x) => x.slug === s);
-    apriArea(s, area && a?.infiltrazioni?.some((x) => x.chiave === area.chiave) ? area.chiave : null);
-  };
-  /** Un'infiltrazione scelta (selettore, aree senza infiltrazione): si apre sulla sua prima area. */
-  const scegliInfiltrazione = (k: string) => navigate(`${base}?${tieniRitorno(new URLSearchParams({ infiltrazione: k })).toString()}`);
-  /** Un'infiltrazione scelta dentro l'area aperta («Infiltrazioni in quest'area»): l'area e la versione restano. */
-  const scegliInfiltrazioneQui = (k: string) => (areaFisica ? apriArea(areaFisica.slug, k, planimetriaScelta) : scegliInfiltrazione(k));
-  /** Un'altra versione dell'area: cambia solo `?planimetria=` (sostituendo la voce della cronologia), come nella pagina dell'Area (L2). */
-  const scegliVersione = (p: string) => {
-    const q = new URLSearchParams(params);
-    q.set('planimetria', p);
-    for (const k of ['spillo', 'x', 'y', 'zoom']) q.delete(k);
-    setParams(q, { replace: true });
-  };
-  /** AP3-2, AP3-4: l'indirizzo nella scheda della planimetria `mappa`, se è di un'area di questo Palazzo (altrimenti null), con
-   *  l'arrivo dato. L'infiltrazione aperta resta se tocca l'area d'arrivo, come scegliendo l'area dall'elenco; `?planimetria=` c'è
-   *  sempre, perché con `?infiltrazione=` la versione iniziale dell'infiltrazione passerebbe davanti a quella chiesta. */
-  const indirizzoPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): string | null => {
-    const p = d?.planimetrie.find((x) => x.chiave === mappa);
-    const a = p?.area ? areePalazzo.find((x) => x.chiave === p.area) : undefined;
-    if (!a) return null;
-    const q = tieniRitorno(new URLSearchParams());
-    if (area && a.infiltrazioni?.some((x) => x.chiave === area.chiave)) q.set('infiltrazione', area.chiave);
-    q.set('planimetria', mappa);
-    return urlCasa(`${base}/area/${encodeURIComponent(a.slug)}?${q.toString()}`, arrivo);
-  };
-  /** Apre nella scheda la planimetria `mappa` se è di un'area di questo Palazzo (vero se l'ha aperta). */
-  const apriPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): boolean => {
-    const indirizzo = indirizzoPlanimetriaQui(mappa, arrivo);
-    if (indirizzo) navigate(indirizzo);
-    return indirizzo !== null;
-  };
-  /** AP3-4: il collegamento del nome di una planimetria in «Da raccogliere»: la sua area nella scheda, altrimenti la sua pagina. */
-  const indirizzoRaccolta = (mappa: string) => indirizzoPlanimetriaQui(mappa) ?? urlMappa(mappa);
-  /** AP3-2: i passaggi (e le briciole) del visore della scheda. Una planimetria del Palazzo si apre qui; una chiave che la scheda non
-   *  conosce (interna, alias) si risolve, e se è del Palazzo si apre qui, altrimenti si va alla sua casa. */
-  const navigaDalVisore: NavigaMappa = (k, arrivo) => {
-    if (apriPlanimetriaQui(k, arrivo)) return;
-    risolviMappa(k)
-      .then((r) => { if (r.tipo === 'mappa' && apriPlanimetriaQui(r.mappa, arrivo)) return; navigate(r.tipo === 'mappa' ? urlCasa(r.casa, arrivo) : urlMappa(k, arrivo)); })
-      .catch(() => navigate(urlMappa(k, arrivo)));
-  };
-  /** Un'infiltrazione eliminata dalla guida: se era quella aperta, la scheda torna sul Palazzo. */
-  const areaEliminata = (k: string) => { if (area?.chiave === k) navigate(base); };
+  // gli indirizzi della scheda: dedalo (Memento), infiltrazione, area, versione e passaggi del visore (`useNavigazionePalazzo`)
+  const { base, tieniRitorno, scegliArea, apriArea, scegliAreaFisica, scegliInfiltrazione, scegliInfiltrazioneQui, scegliVersione, indirizzoRaccolta, navigaDalVisore, areaEliminata } =
+    useNavigazionePalazzo({ chiave, d, ritorno, params, setParams, navigate, areePalazzo, area, areaFisica, planimetriaScelta });
   /** Rilegge il Palazzo e l'area aperta (dopo una modifica di aree, versioni o legami). */
   const rileggiTutto = async () => { setRevisioneArea((r) => r + 1); await dati.ricarica(); setVersioneStati((v) => v + 1); };
-  const [finestra, setFinestra] = useState<'aggiungi-area' | 'aggiungi-planimetria' | 'modifica-area' | 'elimina-area' | 'nuova-infiltrazione' | null>(null);
+  const [finestra, setFinestra] = useState<FinestraPalazzo | null>(null);
   const [legami, setLegami] = useState<string | null>(null);
   // R3-41: da 1024 px la riga dell'infiltrazione è una sola, e «Modifica testo» e «Descrizione» si aprono dal suo menu
   const largo = useMedia('(min-width: 1024px)');
@@ -689,136 +445,22 @@ export function DungeonDettaglioPage() {
   const illustrato = !!useImmagineMappa(memento ? null : d?.illustrazione);
 
   const senzaPin = versioneSenzaPin(versioniArea, planimetriaScelta);
-  // L13 O6-3: «senza fine» solo dove il gioco non fissa una scadenza, come vuole il server: i Memento e i Palazzi col boss dei Memento (Iweleth)
-  const senzaFinePossibile = memento || d?.regolaBoss === 'memento';
-  /** La correzione della scheda (nome, sovrano, date, livello, note). Nei Memento è il pulsante ✎ dell'intestazione, in «Modifica la
-   *  guida»; nei Palazzi (lotto B) si apre dal menu «Modifica ⋯» e il modulo sta sotto l'intestazione (`onChiudi`). */
-  const correzioneScheda = (onChiudi?: () => void) => d && (
-    <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
-      {...(onChiudi ? { aperta: true, onChiudi } : {})}
-      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloMin: numeroInBozza(d.livelloConsigliato.min), livelloMax: numeroInBozza(d.livelloConsigliato.max), note: d.note, ...bozzaDate(d.date) })}
-      onSalva={async (b) => {
-        const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: livelloDellaBozza(b.livelloMin, b.livelloMax), note: b.note };
-        // le date si mandano solo se sono cambiate: senza, la scheda di un posto senza finestra si salverebbe con una data vuota. Una data
-        // rovesciata o mancante non parte: il messaggio è quello del server (la stessa regola, `shared/datePalazzo`)
-        const date = dateDellaBozza(b);
-        if (dateCambiate(b, d.date)) {
-          const errore = erroreDatePalazzo(date, senzaFinePossibile);
-          if (errore || !date.dal) throw new Error(errore?.messaggio ?? 'Manca il giorno in cui si apre.');
-          await aggiornaDungeon(d.chiave, { ...testi, date: { ...date, dal: date.dal } });
-        } else await aggiornaDungeon(d.chiave, testi);
-        await dati.ricarica();
-      }}>
-      {(b, cambia) => {
-        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
-        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
-        // la regola del server, detta prima di salvare; solo se le date sono state toccate (una scheda senza finestra resta salvabile)
-        const errore = dateCambiate(b, d.date) ? erroreDatePalazzo(dateDellaBozza(b), senzaFinePossibile)?.messaggio : null;
-        return <>
-          {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
-          {/* L13 O6-3: un solo editor delle date del Palazzo, giorni del calendario di gioco (prima tre testi qui e la finestra in «Sulla
-              mappa di Tokyo»). La finestra è anche quella della mappa di Tokyo e dell'arco della storia. */}
-          <fieldset className="m-0 flex w-full basis-full flex-col gap-2 border-0 p-0">
-            <legend className="mb-1 p-0 testo-12 uppercase tracking-[0.08em] text-text-secondary">{memento ? 'Date dei Memento' : 'Date del Palazzo'}</legend>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <SelettoreData etichetta="Si apre" valore={b.dal} onCambia={(v) => cambia({ dal: v })} />
-              {!memento && <SelettoreData etichetta="Furto consigliato" facoltativa valore={b.furto} onCambia={(v) => cambia({ furto: v })} />}
-              {!memento && <SelettoreData etichetta="Lettera entro" facoltativa valore={b.lettera} onCambia={(v) => cambia({ lettera: v })} />}
-              {senzaFinePossibile && (
-                <label className="touch flex items-center gap-1.5 testo-12">
-                  <input type="checkbox" className="h-5 w-5" checked={b.al === ''} onChange={(e) => cambia({ al: e.target.checked ? '' : b.dal })} />Senza fine
-                </label>
-              )}
-              {(!senzaFinePossibile || b.al !== '') && <SelettoreData etichetta="Scade" valore={b.al} onCambia={(v) => cambia({ al: v })} />}
-            </div>
-            {errore && <p className="m-0 testo-12 text-error-testo" role="alert">{errore}</p>}
-          </fieldset>
-          {/* L8-04 (D5): il livello consigliato minimo e massimo (vuoto = la fonte non lo dice); il confronto delle fonti è la nota storica */}
-          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato minimo" valore={b.livelloMin} massimo={2} onCambia={(v) => cambia({ livelloMin: v })} />
-          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato massimo" valore={b.livelloMax} massimo={2} onCambia={(v) => cambia({ livelloMax: v })} />
-          {campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
-        </>; }}
-    </CorrezioneGuida>
-  );
 
-  /** Lotto B (punto 6): gli strumenti di modifica del Palazzo in un solo menu «Modifica ⋯». Prima erano sparsi su tre righe («✎»
-   *  accanto al nome, «Modifica testo» e «+ Infiltrazione», «Modifica aree», «Modifica» e «Altro» dell'area): sul telefono riempivano
-   *  la prima schermata prima della mappa. Le voci hanno gli stessi nomi accessibili dei comandi di prima; le finestre e i moduli che
-   *  aprono sono gli stessi. Nei Memento resta la modalità «Modifica la guida», che c'era già e non cambia. */
+  /** Lotto B (punto 6): gli strumenti di modifica del Palazzo in un solo menu «Modifica ⋯» (`MenuModificaPalazzo`); nei Memento resta la
+   *  modalità «Modifica la guida». */
   const menuModifica = (classePulsante = '') => {
     if (!d || !area || memento) return null;
     return (
-      <MenuModifica cosa={`il Palazzo «${d.nome}»`} classePulsante={classePulsante}>
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi la scheda" dettaglio="del Palazzo"
-          aria-label={`Correggi la scheda: il Palazzo «${d.nome}»`} onClick={() => setCorreggendoPalazzo(true)} />
-        {/* L4 §8.14: la voce del boss finale (non per un Palazzo col boss dei Memento, Iweleth: il server lo rifiuta) */}
-        {d.regolaBoss !== 'memento' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Boss finale"
-          dettaglio={d.voceBossFinale?.nome ?? 'da dichiarare'} aria-label={`Boss finale: il Palazzo «${d.nome}»`} onClick={() => setCorreggendoBoss(true)} />}
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Modifica testo" dettaglio={area.nome}
-          aria-label={`Modifica testo: l’infiltrazione «${area.nome}»`} onClick={() => setCorreggendoInfiltrazione(area.chiave)} />
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Modifica aree" dettaglio="toccate dall’infiltrazione"
-          aria-label="Modifica aree" onClick={() => setLegami(area.chiave)} />
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi infiltrazione" onClick={() => setFinestra('nuova-infiltrazione')} />
-        {areaFisica && <>
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica area" dettaglio={areaFisica.nome}
-            aria-label="Modifica area" disabled={!dettaglioArea.dati} onClick={() => setFinestra('modifica-area')} />
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi planimetria" dettaglio={areaFisica.nome}
-            aria-label="Aggiungi planimetria" disabled={!dettaglioArea.dati} onClick={() => setFinestra('aggiungi-planimetria')} />
-          <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina area" dettaglio={areaFisica.nome}
-            aria-label="Elimina area" onClick={() => setFinestra('elimina-area')} />
-        </>}
-      </MenuModifica>
+      <MenuModificaPalazzo d={d} area={area} areaFisica={areaFisica} dettaglioAreaPronto={!!dettaglioArea.dati} classePulsante={classePulsante}
+        onCorreggiScheda={() => setCorreggendoPalazzo(true)} onBossFinale={() => setCorreggendoBoss(true)} onModificaTesto={setCorreggendoInfiltrazione}
+        onModificaAree={setLegami} onFinestra={setFinestra} />
     );
   };
 
   /** Il modulo del testo dell'infiltrazione (nome e descrizione, con l'eliminazione), aperto dal menu «Modifica ⋯»: sotto la riga. */
   const moduloInfiltrazione = () => d && area && correggendoInfiltrazione === area.chiave && (
-    <CorrezioneGuida key={area.chiave} aperta onChiudi={() => setCorreggendoInfiltrazione(null)} cosa={`l’infiltrazione «${area.nome}»`} etichetta="Modifica testo"
-      iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
-      onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
-      // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
-      elimina={{
-        avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le aree del Palazzo restano, con le loro altre infiltrazioni. ${NEL_CESTINO}`,
-        onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await dati.ricarica(); },
-      }}>
-      {(b, cambia) => <>
-        <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
-        <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-      </>}
-    </CorrezioneGuida>
+    <ModuloInfiltrazione key={area.chiave} area={area} onChiudi={() => setCorreggendoInfiltrazione(null)} onSalvato={() => dati.ricarica()} onEliminata={areaEliminata} />
   );
-
-  /** «Modifica › Boss finale» (L4 §8.14): la voce «Boss» del Palazzo che lo conclude, fra le voci «Boss» della sua guida (nell'ordine delle
-   *  infiltrazioni), «nessuna» per toglierla e «Ripristina» se l'utente l'ha cambiata. Senza voce il Palazzo non risulta mai concluso.
-   *  Si apre sotto l'intestazione, come la correzione della scheda. Nel rilascio non c'è (costante di build: il modulo esce dal bundle). */
-  const moduloBossFinale = IN_RILASCIO ? () => null : () => {
-    if (!d || memento) return null;
-    const vociBoss = d.aree.flatMap((a) => a.punti.filter((p) => p.tipo === 'boss').map((p) => ({ chiave: p.chiave, nome: p.nome, dettaglio: `${a.ordine + 1}. ${a.nome}` })));
-    // la voce dichiarata oggi resta fra le scelte anche se non è più «Boss» (cambiata di tipo dopo): l'utente vede che cosa sta togliendo
-    const attuale = d.voceBossFinale;
-    const opzioni = attuale && !vociBoss.some((o) => o.chiave === attuale.chiave)
-      ? [{ chiave: attuale.chiave, nome: attuale.nome, dettaglio: 'dichiarata, non è più una voce «Boss»' }, ...vociBoss]
-      : vociBoss;
-    const ripristina = async () => {
-      try { await ripristinaDungeon(d.chiave); setCorreggendoBoss(false); notifica('success', 'Boss finale riportato a quello della guida.'); await dati.ricarica(); }
-      catch (err) { notifica('error', err instanceof Error ? err.message : 'Boss finale non ripristinato.'); }
-    };
-    return (
-      <CorrezioneGuida aperta onChiudi={() => setCorreggendoBoss(false)} cosa={`il boss finale del Palazzo «${d.nome}»`} etichetta="Boss finale"
-        iniziale={() => ({ voce: d.voceBossFinale?.chiave ?? '' })}
-        onSalva={async (b) => { await aggiornaDungeon(d.chiave, { voceBossFinale: b.voce || null }); await dati.ricarica(); }}>
-        {(b, cambia) => <>
-          {/* sempre il selettore: «nessuna» resta raggiungibile anche senza voci «Boss» da scegliere */}
-          <span className="min-w-[220px] flex-1">
-            <Selettore etichetta="Voce del boss finale" valore={b.voce} vuoto="— nessuna: il Palazzo non si conclude —" opzioni={opzioni} onCambia={(v) => cambia({ voce: v })} />
-          </span>
-          {vociBoss.length === 0 && <p className="m-0 basis-full testo-13 text-text-secondary">La guida del Palazzo non ha voci «Boss»: aggiungine una in un’infiltrazione per sceglierla qui.</p>}
-          {d.bossFinaleCorretto && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina"
-            aria-label={`Ripristina il boss finale della guida: il Palazzo «${d.nome}»`} onClick={() => void ripristina()} />}
-        </>}
-      </CorrezioneGuida>
-    );
-  };
 
   /** R3-41 (decisione del PM, 2026-10-20), da 1024 px: la riga dell'infiltrazione è una sola — il selettore (il titolo), le aree toccate
    *  in una fila scorrevole (da 1280 i chip «Aree toccate»; da 1024 a 1279 la fila di tutte le aree, con le toccate evidenziate, che lì
@@ -942,7 +584,7 @@ export function DungeonDettaglioPage() {
                     <TitoloScheda>{d.nome}</TitoloScheda>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida»; nei Palazzi
                         sta nel menu «Modifica ⋯» (lotto B) e il modulo si apre sotto l'intestazione */}
-                    {!IN_RILASCIO && memento && modifica && correzioneScheda()}
+                    {!IN_RILASCIO && memento && modifica && <CorrezioneSchedaPalazzo d={d} memento={memento} onSalvato={() => dati.ricarica()} />}
                   </div>
                   {/* Da 1024 px sovrano e arcana prendono quel che resta della riga del nome, ognuno su una riga coi puntini (testo intero nel
                       suggerimento): in Madarame e Okumura il sovrano è una frase e andava a capo (intestazione da 170 a 197 px), l'arcana di
@@ -993,8 +635,8 @@ export function DungeonDettaglioPage() {
             </div>
           )}
           {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯» */}
-          {!IN_RILASCIO && !memento && correggendoPalazzo && <div className="shrink-0">{correzioneScheda(() => setCorreggendoPalazzo(false))}</div>}
-          {!IN_RILASCIO && !memento && correggendoBoss && <div className="shrink-0">{moduloBossFinale()}</div>}
+          {!IN_RILASCIO && !memento && correggendoPalazzo && <div className="shrink-0"><CorrezioneSchedaPalazzo d={d} memento={memento} onChiudi={() => setCorreggendoPalazzo(false)} onSalvato={() => dati.ricarica()} /></div>}
+          {!IN_RILASCIO && !memento && correggendoBoss && <div className="shrink-0"><ModuloBossFinale d={d} onChiudi={() => setCorreggendoBoss(false)} onSalvato={() => dati.ricarica()} /></div>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
@@ -1305,27 +947,5 @@ export function DungeonDettaglioPage() {
         </div>
       )}
     </PageState>
-  );
-}
-
-/** Il pannello del visore nei Palazzi (§4.2): le infiltrazioni che passano dall'area aperta; toccarne una la apre restando sull'area. */
-function InfiltrazioniInArea({ area, aperta, completate, onScegli }: { area: AreaRiassuntoDto; aperta: string; completate: ReadonlySet<string>; onScegli: (chiave: string) => void }) {
-  // nell'ordine della guida, comunque arrivino
-  const infiltrazioni = [...(area.infiltrazioni ?? [])].sort((x, y) => x.ordine - y.ordine);
-  return (
-    <section className="visore-mappa__sezione" aria-label="Infiltrazioni in quest’area">
-      <h3 className="visore-mappa__intestazione">Infiltrazioni in quest’area</h3>
-      {infiltrazioni.length === 0
-        ? <p className="m-0 testo-12 text-text-muted">Nessuna infiltrazione passa di qui.</p>
-        : <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
-          {infiltrazioni.map((x) => (
-            <li key={x.chiave}>
-              <button type="button" className={`chip touch testo-12 ${x.chiave === aperta ? 'chip--attivo' : ''} ${completate.has(x.chiave) ? 'chip--icona' : ''}`} aria-pressed={x.chiave === aperta} onClick={() => onScegli(x.chiave)}>
-                {completate.has(x.chiave) && <SpuntaCompletata />}{x.ordine + 1}. {x.nome}{completate.has(x.chiave) && <TestoCompletata />}
-              </button>
-            </li>
-          ))}
-        </ul>}
-    </section>
   );
 }

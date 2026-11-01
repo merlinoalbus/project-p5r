@@ -172,7 +172,12 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   («In scorta», «Nel Registro», anche nella scheda Persona), filtri di Skill, Glossario, Domande e Cruciverba nell'indirizzo, skill per nome
   italiano; indice delle sezioni in testa alle Impostazioni; dedali dei Memento in griglia al telefono, col pozzo come sfondo; testate delle
   schede di dettaglio, dell'Area e del Palazzo entro il 30% a ogni formato.
-- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- L11-01 e L11-05 fatti: scheda del Palazzo, visore e giorno del Diario divisi in moduli (DOM confrontato prima e dopo a 1366×657,
+  1280×689, 1024×690, 768×1024 e 375×812, anche con menu, moduli di modifica, menu della voce e guida del visore aperti); la memoria del
+  dispositivo in un'utilità sola, `useMedia` al posto del suo doppione nel visore, il fuoco rimesso da codice ritrovato da una chiave e non
+  dal testo o dal nome (menu della voce, posto della voce, appunti fissi, guida del visore, frecce dei giorni), chiavi stabili nei 18
+  elenchi modificabili con il fuoco che resta sul gesto dopo «Sposta», la classe dei campi della nota storica.
+- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11 (le voci dalla 02 alla 04, la 06 e la 07); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

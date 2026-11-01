@@ -41,6 +41,7 @@ import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
 import { svuotaDettagliConfidenti } from './useDettaglioConfidente';
 import { SchedaNelCassetto } from './SchedaNelCassetto';
+import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDispositivo';
 
 interface Props {
   partitaId: number;
@@ -73,25 +74,17 @@ const VISTE_CONFIDENTE = ['levelup', 'scheda'] as const;
 
 /** Lo stato salvato dei gruppi; se manca, è illeggibile o lo storage non c'è, quello predefinito (attivi aperti, non disponibili chiusi). */
 function leggiGruppiAperti(): Record<ChiaveGruppo, boolean> {
-  try {
-    const grezzo = window.localStorage.getItem(CHIAVE_GRUPPI);
-    if (grezzo) {
-      const o = JSON.parse(grezzo) as Partial<Record<ChiaveGruppo, unknown>>;
-      return {
-        attivi: typeof o.attivi === 'boolean' ? o.attivi : GRUPPI_PREDEFINITI.attivi,
-        bloccati: typeof o.bloccati === 'boolean' ? o.bloccati : GRUPPI_PREDEFINITI.bloccati,
-      };
-    }
-  } catch { /* storage assente o contenuto illeggibile: valgono i predefiniti */ }
-  return { ...GRUPPI_PREDEFINITI };
+  const o = leggiMemoriaJson(CHIAVE_GRUPPI) as Partial<Record<ChiaveGruppo, unknown>> | null;
+  // storage assente o contenuto illeggibile: valgono i predefiniti
+  if (!o || typeof o !== 'object') return { ...GRUPPI_PREDEFINITI };
+  return {
+    attivi: typeof o.attivi === 'boolean' ? o.attivi : GRUPPI_PREDEFINITI.attivi,
+    bloccati: typeof o.bloccati === 'boolean' ? o.bloccati : GRUPPI_PREDEFINITI.bloccati,
+  };
 }
 
-/** Ricorda lo stato dei gruppi; se lo storage non risponde non succede niente. */
-function salvaGruppiAperti(stato: Record<ChiaveGruppo, boolean>): void {
-  try {
-    window.localStorage.setItem(CHIAVE_GRUPPI, JSON.stringify(stato));
-  } catch { /* storage pieno o bloccato: si perde solo il ricordo */ }
-}
+/** Ricorda lo stato dei gruppi; se lo storage non risponde si perde solo il ricordo. */
+const salvaGruppiAperti = (stato: Record<ChiaveGruppo, boolean>): void => scriviMemoriaJson(CHIAVE_GRUPPI, stato);
 
 /** I Confidenti della partita in due gruppi richiudibili, una scheda per Confidente e il cassetto del Confidente aperto: rango con +/−
  * (e «Segna comunque» se bloccato dai requisiti), semafori del rango successivo, punti con note della risposta e risposte migliori,

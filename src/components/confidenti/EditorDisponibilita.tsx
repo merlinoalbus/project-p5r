@@ -22,6 +22,7 @@ import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, 
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -63,6 +64,8 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
   const iniziali: InformazioniConfidente = nuova ? vuote() : { note: c.valori.note ?? '', noteGenerali: c.valori.noteGenerali ?? '', fonti: c.valori.fonti ?? [] };
   const [modalita, setModalita] = useState<'modifica' | 'storico'>('modifica');
   const [valori, setValori] = useState<InformazioniConfidente>(iniziali);
+  // le fonti si tolgono una per una: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
+  const chiaviFonti = useIdStabili(valori.fonti.length);
   const [fontiToccate, setFontiToccate] = useState(false);
   const [motivo, setMotivo] = useState('');
   const [versione, setVersione] = useState<number | null>(null);
@@ -156,11 +159,11 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
               )}
               {valori.fonti.length === 0 && <span className="text-text-muted">Nessuna fonte.</span>}
               {valori.fonti.map((f, i) => (
-                <div key={i} className="flex min-w-0 items-center gap-2">
+                <div key={chiaviFonti.ids[i]} className="flex min-w-0 items-center gap-2">
                   <input className="form-input min-w-0 flex-1" aria-label={`Fonte ${i + 1}`} value={f} maxLength={600}
                     onChange={(e) => cambiaFonti(valori.fonti.map((x, j) => (j === i ? e.target.value : x)))} />
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la fonte ${i + 1}`}
-                    onClick={() => cambiaFonti(valori.fonti.filter((_, j) => j !== i))} />
+                    onClick={() => { chiaviFonti.togli(i); cambiaFonti(valori.fonti.filter((_, j) => j !== i)); }} />
                 </div>
               ))}
               <PulsanteVisivo compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una fonte" onClick={() => cambiaFonti([...valori.fonti, ''])} />

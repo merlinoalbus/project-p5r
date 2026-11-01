@@ -19,10 +19,12 @@ const nuovoId =(): number => ++contatore;
 export interface IdStabili {
   /** Un id per riga, nell'ordine dell'elenco: da usare come `key`. */
   ids: number[];
-  /** Da chiamare insieme alla rimozione della riga `i`. */
-  togli: (i: number) => void;
+  /** Da chiamare insieme alla rimozione della riga `i` (o delle righe di quegli indici). */
+  togli: (i: number | readonly number[]) => void;
   /** Da chiamare insieme all'aggiunta di una riga in fondo. */
   aggiungi: () => void;
+  /** Da chiamare insieme allo scambio della riga `i` con quella accanto (`verso` −1 sopra, +1 sotto); fuori dall'elenco non fa niente. */
+  sposta: (i: number, verso: -1 | 1) => void;
 }
 
 /** Id stabili per un elenco di `lunghezza` righe. */
@@ -36,7 +38,14 @@ export function useIdStabili(lunghezza: number): IdStabili {
   }
   return {
     ids: correnti,
-    togli: (i) => setIds(correnti.filter((_, j) => j !== i)),
+    togli: (i) => { const via = typeof i === 'number' ? [i] : i; setIds(correnti.filter((_, j) => !via.includes(j))); },
     aggiungi: () => setIds([...correnti, nuovoId()]),
+    sposta: (i, verso) => {
+      const j = i + verso;
+      if (i < 0 || i >= correnti.length || j < 0 || j >= correnti.length) return;
+      const n = [...correnti];
+      [n[i], n[j]] = [n[j]!, n[i]!];
+      setIds(n);
+    },
   };
 }

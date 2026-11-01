@@ -12,7 +12,7 @@
 //   - Si sposta trascinando la barra del titolo (eventi pointer: mouse, penna e dito), oppure con le frecce sulla maniglia ⠿; si ridimensiona
 //     dall'angolo in basso a destra (anche con le frecce). «Riduci a icona» (o Esc) la fa diventare un'icona rotonda, che si trascina a sua
 //     volta; un tocco la riporta com'era, bozze comprese (la finestra resta montata, nascosta).
-//   - Posizione, dimensione e posto dell'icona si ricordano per dispositivo (`localStorage` con try/catch, mai dati); sul telefono (< 640 px)
+//   - Posizione, dimensione e posto dell'icona si ricordano per dispositivo (`memoriaDispositivo`, mai dati); sul telefono (< 640 px)
 //     la finestra è larga quanto lo schermo. Sempre dentro la finestra visibile, anche quando questa cambia (ridimensionamento, rotazione).
 //   - Un tocco su un appunto scrive il suo testo negli appunti di sistema (`copiaTesto`: `writeText` con il ripiego dell'evento `copy`) e
 //     dice «Copiato»; poi Ctrl+V nel Diario (o «Incolla qui» nel menu ⋯ di una voce) lo incolla come ogni blocco copiato dal Diario.
@@ -33,6 +33,7 @@ import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { useMedia } from '../../hooks/useMedia';
 import { copiaTesto } from '../../utils/scritturaAppunti';
 import { leggiAppunti } from '../../utils/appuntiDiario';
+import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDispositivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { CampoRicerca } from '../shared/CampoRicerca';
@@ -91,16 +92,13 @@ function dentro(g: Geometria, telefono: boolean): Geometria {
 /** La geometria ricordata sul dispositivo (ogni numero controllato), sopra quella di partenza. Senza memoria, quella di partenza. */
 function leggiGeometria(telefono: boolean): Geometria {
   const base = predefinita(telefono);
-  try {
-    const v = JSON.parse(window.localStorage.getItem(CHIAVE_GEOMETRIA) ?? 'null') as Partial<Record<keyof Geometria, unknown>> | null;
-    if (!v || typeof v !== 'object') return dentro(base, telefono);
-    const num = (k: keyof Geometria) => (typeof v[k] === 'number' && Number.isFinite(v[k]) ? (v[k] as number) : base[k]);
-    return dentro({ x: num('x'), y: num('y'), w: num('w'), h: num('h'), ix: num('ix'), iy: num('iy') }, telefono);
-  } catch { return dentro(base, telefono); }
+  const v = leggiMemoriaJson(CHIAVE_GEOMETRIA) as Partial<Record<keyof Geometria, unknown>> | null;
+  if (!v || typeof v !== 'object') return dentro(base, telefono);
+  const num = (k: keyof Geometria) => (typeof v[k] === 'number' && Number.isFinite(v[k]) ? (v[k] as number) : base[k]);
+  return dentro({ x: num('x'), y: num('y'), w: num('w'), h: num('h'), ix: num('ix'), iy: num('iy') }, telefono);
 }
-function scriviGeometria(g: Geometria): void {
-  try { window.localStorage.setItem(CHIAVE_GEOMETRIA, JSON.stringify(g)); } catch { /* senza memoria del dispositivo si riparte dal posto predefinito */ }
-}
+/** Ricorda la geometria; senza memoria del dispositivo si riparte dal posto predefinito. */
+const scriviGeometria = (g: Geometria): void => scriviMemoriaJson(CHIAVE_GEOMETRIA, g);
 
 /** Il testo per cercare: minuscolo e senza accenti. */
 const perCercare = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
@@ -331,8 +329,8 @@ function FinestraAppuntiFissiReale() {
   /** Un passo su o giù; il fuoco resta sul gesto, o va sull'opposto se al bordo il gesto sparisce. */
   const sposta = (a: AppuntoFissoDto, verso: -1 | 1) => {
     void useAppuntiFissiStore.getState().sposta(a.id, verso).then(() => requestAnimationFrame(() => {
-      const nome = (v: -1 | 1) => `${v === -1 ? 'Sposta su' : 'Sposta giù'} «${a.titolo}»`;
-      const trova = (v: -1 | 1) => [...(finestra.current?.querySelectorAll<HTMLButtonElement>('button[aria-label]') ?? [])].find((b) => b.getAttribute('aria-label') === nome(v));
+      // il gesto si ritrova dall'id dell'appunto e dalla sua chiave, non dal nome: due appunti possono avere lo stesso titolo
+      const trova = (v: -1 | 1) => finestra.current?.querySelector<HTMLButtonElement>(`button[data-appunto="${a.id}"][data-gesto="${v === -1 ? 'su' : 'giu'}"]`) ?? undefined;
       (trova(verso) ?? trova(verso === -1 ? 1 : -1))?.focus();
     })).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Non spostato.'));
   };
@@ -437,9 +435,9 @@ function FinestraAppuntiFissiReale() {
                         altri={(
                           <>
                             {i > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su «${a.titolo}»`}
-                              onClick={() => sposta(a, -1)} />}
+                              data-appunto={a.id} data-gesto="su" onClick={() => sposta(a, -1)} />}
                             {i >= 0 && i < n - 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù «${a.titolo}»`}
-                              onClick={() => sposta(a, 1)} />}
+                              data-appunto={a.id} data-gesto="giu" onClick={() => sposta(a, 1)} />}
                             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label={`Elimina «${a.titolo}»`}
                               onClick={async () => {
                                 if (!(await conferma({ titolo: 'Eliminare l’appunto?', testo: `«${a.titolo}» esce dagli appunti fissi su tutti i dispositivi. Non va nel Cestino.`, etichetta: 'Elimina' }))) return;

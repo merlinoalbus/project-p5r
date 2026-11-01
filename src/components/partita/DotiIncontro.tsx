@@ -22,6 +22,7 @@ import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 import { TestoNote } from '../shared/TestoNote';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
+import { useIdStabili } from '../../hooks/useIdStabili';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -122,13 +123,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
                   <strong className="testo-13">Al passaggio al rango {r.rango}</strong>
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Ripristina" aria-label={`Ripristina la Dote del rango ${r.rango} come nella guida`} disabled={occupato} onClick={() => void ripristina(r.rango)} />
                 </div>
-                {r.doti.length === 0 && <span className="testo-12 text-text-muted">Nessuna Dote.</span>}
-                {r.doti.map((d, i) => (
-                  <div key={i} className="flex flex-wrap items-end gap-2">
-                    <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1} del rango ${r.rango}`} dote={d} onCambia={(nuova) => cambiaRango(r.rango, r.doti.map((x, j) => (j === i ? nuova : x)))} /></div>
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1} del rango ${r.rango}`} onClick={() => cambiaRango(r.rango, r.doti.filter((_, j) => j !== i))} />
-                  </div>
-                ))}
+                <DotiDelRango rango={r.rango} doti={r.doti} onCambia={(doti) => cambiaRango(r.rango, doti)} />
                 {r.doti.length < 5 && (
                   <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Dote" aria-label={`Aggiungi una Dote al rango ${r.rango}`}
                     onClick={() => cambiaRango(r.rango, [...r.doti, { dote: 'fascino', note: 2 }])} />
@@ -140,4 +135,19 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
       )}
     </section>
   );
+}
+
+/** Le Doti di un rango nella finestra, una riga per Dote con «Togli». Le righe hanno uno stato loro (i selettori di `RigaDote`): la chiave
+ *  è un id stabile, non l'indice (`useIdStabili`). */
+function DotiDelRango({ rango, doti, onCambia }: { rango: number; doti: DoteNote[]; onCambia: (doti: DoteNote[]) => void }) {
+  const chiavi = useIdStabili(doti.length);
+  return <>
+    {doti.length === 0 && <span className="testo-12 text-text-muted">Nessuna Dote.</span>}
+    {doti.map((d, i) => (
+      <div key={chiavi.ids[i]} className="flex flex-wrap items-end gap-2">
+        <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1} del rango ${rango}`} dote={d} onCambia={(nuova) => onCambia(doti.map((x, j) => (j === i ? nuova : x)))} /></div>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1} del rango ${rango}`} onClick={() => { chiavi.togli(i); onCambia(doti.filter((_, j) => j !== i)); }} />
+      </div>
+    ))}
+  </>;
 }
