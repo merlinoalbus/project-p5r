@@ -2,7 +2,7 @@
 // OggettiPage — catalogo unico e sezioni della guida, con gli indirizzi storici conservati
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getOggettiGuida, URL_OGGETTI_GUIDA } from '../services/api';
@@ -111,7 +111,11 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
 /** Gli abiti: introduzione, la carta della lavanderia e la tabella degli abiti con ricerca (nome, personaggio, dove) e il ritratto di chi li indossa. */
 function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const [q, setQ] = useState('');
-  const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
+  // L5-09: il testo normalizzato di ogni abito si calcola una volta per i dati (non a ogni battuta), e l'elenco si rifà con il testo «differito»
+  // (il campo segue subito la battuta; calcolo e disegno a priorità bassa, interrotti alla battuta dopo)
+  const indice = useMemo(() => d.abiti.elenco.map((x) => ({ x, testo: normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`) })), [d]);
+  const qDifferita = useDeferredValue(q);
+  const visibili = useMemo(() => { const n = normalizzaTesto(qDifferita); return indice.filter((r) => !n || r.testo.includes(n)).map((r) => r.x); }, [indice, qDifferita]);
   return (
     <div className="flex flex-col gap-2 testo-13">
       <div className="prosa-misurata flex items-start gap-2">

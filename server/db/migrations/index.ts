@@ -415,6 +415,8 @@ import { migration332 } from './332_doni_rampino_e_sacchetto.js';
 // spunta, con le note): esiti scelti alla spunta per biliardo, Gun About, freccette e Frui-te del Diner, prosa delle Doti di Takemi tolta (è nel
 // Confidente), voci del Diario lasciate dalla 312 collegate alle loro attività dove l'elemento è uno solo
 import { migration333 } from './333_effetti_attivita_e_voci_collegate.js';
+// 2026-11-01 (L5-01, prestazioni): gli indici del registro delle operazioni sugli effetti e delle destinazioni dei pin
+import { migration334 } from './334_indici_registro_effetti_e_destinazioni.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -440,5 +442,5 @@ export const migrations: Migration[] = [
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
-  migration333,
+  migration333, migration334,
 ];

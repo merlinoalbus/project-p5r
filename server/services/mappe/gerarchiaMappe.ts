@@ -24,7 +24,8 @@
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
 // ============================================================
 
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { haTabellaMain } from '../../db/schemaMemo.js';
 import { GRUPPI_CONTEGGIO_SPILLO, gruppoConteggioSpillo } from '../../../shared/spilli.js';
 import type { ConteggiNodoDto, ConteggiPinDto, GerarchiaMappeDto, IllustrazioneDto, NodoGerarchiaDto } from '../../../shared/types.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -43,7 +44,7 @@ import { mappeDaCollocare, sbloccoArea } from './areeService.js';
  * (L8 B7, migrazione 175) esce dai Palazzi: i dungeon che confluiscono in un dedalo (`dedalo_confluenza`) non sono Palazzi, e il loro posto è il
  * ramo dei Memento. Senza la tabella (schema precedente alla 175) vale il solo tipo.
  */
-const tabellaConfluenza = (): boolean => !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'dedalo_confluenza'").get();
+const tabellaConfluenza = (): boolean => haTabellaMain(getDb(), 'dedalo_confluenza');
 const sqlPalazzi = (): string => {
   const confluenza = tabellaConfluenza();
   return confluenza ? "d.tipo = 'palazzo' AND d.chiave NOT IN (SELECT dungeon_chiave FROM dedalo_confluenza)" : "d.tipo = 'palazzo'";

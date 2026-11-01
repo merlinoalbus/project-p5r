@@ -32,6 +32,7 @@ import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
+import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { nomeEffettoConYen, riepilogoEffettiVoce, type CruciverbaRiepilogoEffetti, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti, type QuesitoRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
@@ -285,6 +286,25 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
   /** Gli effetti con condizioni (`CondizioniEffetto`) che nella partita non valgono, al giorno della voce (uid → che cosa manca), con lo stato
    *  letto una volta per la giornata e solo se un effetto ha condizioni. Assente senza partita. */
   fuoriCondizione?: ReturnType<typeof valutatoreEffettiCondizionati> }
+
+/**
+ * I dati di gioco che la giornata rilegge a ogni chiamata e che non cambiano con la partita: i nomi di letture, attività ed esami (con gli esiti),
+ * le guide dei quiz e le identità del catalogo delle letture. Restano in memoria fino a quando i dati di gioco cambiano (registro comune
+ * `cacheDiGioco`: correzioni, catalogo, traduzioni, «Importa», ripristini). Mai dati della partita (schema `utente`): quelli cambiano a ogni spunta
+ * e si leggono ogni volta. Gli oggetti sono in sola lettura per chi li usa (frasi e DTO li leggono soltanto).
+ */
+interface DatiDiGiocoDelDiario { nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>; oggetti: ReturnType<typeof riferimentiOggettiPerFonti> }
+let datiDiGioco: DatiDiGiocoDelDiario | null = null;
+registraCacheDiGioco(() => { datiDiGioco = null; });
+/** I dati di gioco del Diario dalla memoria; se una delle tre letture fallisce non si memorizza niente. Dentro una transazione si rileggono
+ *  sempre e non si memorizzano (come il modello dei Palazzi e `schemaMemo`): una transazione che cambia i dati di gioco e poi rilegge una
+ *  voce (le migrazioni 328, 330 e 331) non deve vedere quelli di prima, e un valore letto a metà non deve restare dopo un annullamento. */
+function datiDiGiocoDelDiario(): DatiDiGiocoDelDiario {
+  const leggi = (): DatiDiGiocoDelDiario => ({ nomi: nomiEffetti(), quiz: attivitaConQuiz(), oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']) });
+  if (getDb().inTransaction) return leggi();
+  datiDiGioco ??= leggi();
+  return datiDiGioco;
+}
 
 /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
  *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
@@ -595,7 +615,7 @@ export interface VocePerRicerca { riferimentoTesto: string | null; spuntando: st
  */
 export function vociPerRicerca(righe: readonly RigaVoce[], partitaId?: number): Map<string, VocePerRicerca> {
   const spunte = leggiSpunte(partitaId);
-  const nomi = nomiEffetti();
+  const nomi = datiDiGiocoDelDiario().nomi;
   const out = new Map<string, VocePerRicerca>();
   for (const r of righe) {
     let fonte = leggiEffettiVocePerMostrare(r.uid);
@@ -623,8 +643,7 @@ export function vociPerRicerca(righe: readonly RigaVoce[], partitaId?: number): 
  *  (`?daVoce=`, UX3-1) la legge per dire da quale proposta viene. 404 `voce-non-trovata`. */
 export function vocePercorso(uid: string, partitaId?: number): AzionePercorsoDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
-  const r = rigaVoce(uid);
-  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  return voceDelGiorno(uid, partitaId);
 }
 
 /** Lo stato «da rivedere» (§1.4) della voce, solo quando c'è qualcosa da dire (assente vale «non da rivedere»). */
@@ -660,7 +679,7 @@ export function impostaInfiltrazioniVoce(uid: string, chiavi: readonly string[],
     prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
     chiavi.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
   })();
-  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  return voceDelGiorno(uid, partitaId);
 }
 
 /**
@@ -680,7 +699,7 @@ export function rivediVoce(uid: string, esito: EsitoRevisioneVoce, partitaId?: n
   } else {
     prepared('UPDATE voce_giornata SET da_rivedere = 0 WHERE uid = ?').run(uid);
   }
-  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  return voceDelGiorno(uid, partitaId);
 }
 
 /** 404 se la data non è un giorno del percorso. */
@@ -703,11 +722,14 @@ export function spuntePartita(partitaId: number | undefined, data?: string): Map
  * la spunta resta (la voce è fatta), senza effetti, e il motivo va in `illeggibili`, così quella voce risulta «da correggere» e le altre si
  * vedono e funzionano. Non si tocca niente: i dati restano com'erano. Le scritture (spunta, annulla) continuano a leggere in modo rigido.
  */
-function leggiSpunte(partitaId: number | undefined, data?: string): { fatte: Map<string, EffettiAzioneDto | null>; illeggibili: Map<string, string> } {
+function leggiSpunte(partitaId: number | undefined, data?: string, voceUid?: string): { fatte: Map<string, EffettiAzioneDto | null>; illeggibili: Map<string, string> } {
   const fatte = new Map<string, EffettiAzioneDto | null>();
   const illeggibili = new Map<string, string>();
   if (partitaId === undefined) return { fatte, illeggibili };
-  const righe = (data === undefined
+  // `voceUid`: la sola spunta di quella voce (la risposta di una sola voce non rilegge le ricevute delle altre del giorno)
+  const righe = (voceUid !== undefined
+    ? prepared('SELECT voce_uid, effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').all(partitaId, voceUid)
+    : data === undefined
     ? prepared('SELECT voce_uid, effetti_json FROM spunta_voce_partita WHERE partita_id = ?').all(partitaId)
     : prepared('SELECT s.voce_uid, s.effetti_json FROM spunta_voce_partita s JOIN voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND v.data = ?').all(partitaId, data)) as Array<{ voce_uid: string; effetti_json: string | null }>;
   for (const r of righe) {
@@ -764,15 +786,34 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     const nascoste = new Set(ingressiConclusiNascosti(partitaId).map((v) => v.uid));
     if (nascoste.size > 0) return vociDelGiorno(data, partitaId, conf).filter((v) => !nascoste.has(v.uid));
   }
-  const spunte = leggiSpunte(partitaId, data);
-  const ctx: Contesto = {
+  const ctx = contestoDelDiario(leggiSpunte(partitaId, data), partitaId, conf);
+  return righeDelGiorno(data).map((r) => voceDto(r, ctx));
+}
+
+/** Il contesto con cui si compone una voce: le spunte lette, i Confidenti (della partita, se non li ha già chi chiama), i dati di gioco dalla
+ *  memoria (`datiDiGiocoDelDiario`) e i valutatori delle condizioni, che leggono lo stato della partita solo se una voce ha condizioni. */
+function contestoDelDiario(spunte: ReturnType<typeof leggiSpunte>, partitaId: number | undefined, conf?: Map<string, ConfidentePartitaDto> | null): Contesto {
+  const gioco = datiDiGiocoDelDiario();
+  return {
     fatte: spunte.fatte, illeggibili: spunte.illeggibili,
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
-    nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
-    oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
+    nomi: gioco.nomi, quiz: gioco.quiz, partita: partitaId,
+    oggetti: gioco.oggetti,
     ...(partitaId !== undefined ? { nonDovuta: valutatoreVociDovute(partitaId), fuoriCondizione: valutatoreEffettiCondizionati(partitaId) } : {}),
   };
-  return righeDelGiorno(data).map((r) => voceDto(r, ctx));
+}
+
+/**
+ * Una sola voce per l'interfaccia, com'è nel suo giorno (con la partita, il suo stato): lo stesso DTO che `vociDelGiorno` dà per quella voce, senza
+ * comporre le altre del giorno. La composizione di una voce dipende solo dalla sua riga, dalla sua spunta, dai Confidenti e dallo stato della
+ * partita (mai da altre voci: il contatore, l'ordine e le alternative stanno nel suo DTO o nei dati della partita), quindi la spunta, la creazione e le
+ * modifiche rispondono con la sola voce toccata. La riga si rilegge qui: chi ha appena scritto la voce non ne ha più la copia giusta.
+ * 404 `voce-non-trovata`. Come `vociDelGiorno`, 404 per una partita che non c'è.
+ */
+export function voceDelGiorno(uid: string, partitaId?: number): AzionePercorsoDto {
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const r = rigaVoce(uid);
+  return voceDto(r, contestoDelDiario(leggiSpunte(partitaId, undefined, uid), partitaId));
 }
 
 /** Per l'indice dei giorni: quante azioni (le voci che si spuntano) ha ogni giorno e quante sono fatte nella partita. */
@@ -893,7 +934,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
     inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
-  return vociDelGiorno(data, partitaId).find((v) => v.uid === uid)!;
+  return voceDelGiorno(uid, partitaId);
 }
 
 /** Modifica una voce: testo, note, genere, tipo, collegamento, rango, effetti, fascia e posto nella fascia. */
@@ -944,7 +985,7 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     riallineaVoceNelRegistro(uid);
     return applicazioni;
   })();
-  const dto = vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+  const dto = voceDelGiorno(uid, partitaId);
   return applicazioniEffetti?.length ? { ...dto, applicazioniEffetti } : dto;
 }
 
@@ -1058,7 +1099,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  const aggiornata = vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+  const aggiornata = voceDelGiorno(uid, partitaId);
   return avvisiSpunta.length ? { ...aggiornata, avvisiSpunta } : aggiornata;
 }
 

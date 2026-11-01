@@ -2,7 +2,7 @@
 // CompendioPersonale — Persona registrate nel compendio della Stanza di Velluto
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { aggiornaCompendio, getCompendioPartita, getPersone, urlPersone } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -24,12 +24,14 @@ export function CompendioPersonale({ partitaId }: Props) {
   const [soloMancanti, setSoloMancanti] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
 
-  const setRegistrate = new Map((registrate.dati ?? []).map((r) => [r.personaId, r]));
+  const setRegistrate = useMemo(() => new Map((registrate.dati ?? []).map((r) => [r.personaId, r])), [registrate.dati]);
+  // L5-09: il campo segue subito la battuta, l'elenco (oltre duecento righe con spunta) si rifà con il testo «differito»: React lo calcola e lo
+  // disegna a priorità bassa e lo interrompe alla battuta dopo (stesso criterio di Compendio e Skill)
+  const qDifferita = useDeferredValue(q);
   const lista = useMemo(() => {
-    const testo = q.trim().toLowerCase();
+    const testo = qDifferita.trim().toLowerCase();
     return (tutte.dati ?? []).filter((p) => (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)) && (!soloMancanti || !setRegistrate.has(p.id)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tutte.dati, q, soloMancanti, registrate.dati]);
+  }, [tutte.dati, qDifferita, soloMancanti, setRegistrate]);
 
   const totale = tutte.dati?.length ?? 0;
   const fatte = registrate.dati?.length ?? 0;

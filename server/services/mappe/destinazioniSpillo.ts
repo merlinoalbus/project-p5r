@@ -13,7 +13,8 @@
 // ============================================================
 
 import { z } from 'zod';
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { haColonnaMain } from '../../db/schemaMemo.js';
 import { chiaveMappa, idMappa } from './percorsiMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { DestinazionePacchetto, DestinazioneSpillo } from '../../../shared/types.js';
@@ -73,7 +74,18 @@ export function risolviSpilloArrivo(mappa: string, cerca: { nome: string | null;
 
 /** La colonna arriva con la migrazione 065: il seed può caricarsi con lo schema ancora indietro (nei test le migrazioni si applicano a scaglioni). */
 function haColonnaArrivo(): boolean {
-  return (prepared("SELECT name FROM pragma_table_info('spillo_destinazione')").all() as Array<{ name: string }>).some((c) => c.name === 'spillo_arrivo_id');
+  return haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id');
+}
+
+/** La riga salvata della destinazione di uno spillo: la mappa d'arrivo (chiave interna) e lo spillo d'arrivo. */
+export interface RigaDestinazione { mappa_chiave: string | null; spillo_arrivo_id: number | null }
+
+/** Dalla riga salvata (o dalla sua assenza) alla destinazione dell'API. */
+function destinazioneDaRiga(r: RigaDestinazione | undefined): { destinazione: DestinazioneSpillo | null; destinazioneNonDisponibile: boolean } {
+  return {
+    destinazione: r?.mappa_chiave ? { mappa: chiaveMappa(r.mappa_chiave), spillo: r.spillo_arrivo_id } : null,
+    destinazioneNonDisponibile: !!r && r.mappa_chiave === null,
+  };
 }
 
 /**
@@ -81,11 +93,19 @@ function haColonnaArrivo(): boolean {
  * mappa nulla è la lapide di un collegamento perso: niente destinazione e `destinazioneNonDisponibile` vero.
  */
 export function leggiDestinazioneSpillo(id: number): { destinazione: DestinazioneSpillo | null; destinazioneNonDisponibile: boolean } {
-  const r = prepared(haColonnaArrivo() ? 'SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?' : 'SELECT mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?').get(id) as { mappa_chiave: string | null; spillo_arrivo_id: number | null } | undefined;
-  return {
-    destinazione: r?.mappa_chiave ? { mappa: chiaveMappa(r.mappa_chiave), spillo: r.spillo_arrivo_id } : null,
-    destinazioneNonDisponibile: !!r && r.mappa_chiave === null,
-  };
+  const r = prepared(haColonnaArrivo() ? 'SELECT mappa_chiave, spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?' : 'SELECT mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione WHERE spillo_id=?').get(id) as RigaDestinazione | undefined;
+  return destinazioneDaRiga(r);
+}
+
+/** Le destinazioni salvate di TUTTI gli spilli (spillo → riga), in una sola lettura: per chi descrive molti pin in una risposta (L5-05). */
+export function righeDestinazioni(): Map<number, RigaDestinazione> {
+  const righe = prepared(haColonnaArrivo() ? 'SELECT spillo_id, mappa_chiave, spillo_arrivo_id FROM spillo_destinazione' : 'SELECT spillo_id, mappa_chiave, NULL AS spillo_arrivo_id FROM spillo_destinazione').all() as Array<RigaDestinazione & { spillo_id: number }>;
+  return new Map(righe.map((r) => [r.spillo_id, { mappa_chiave: r.mappa_chiave, spillo_arrivo_id: r.spillo_arrivo_id }]));
+}
+
+/** La destinazione di uno spillo da una lettura in blocco (`righeDestinazioni`): lo stesso risultato di `leggiDestinazioneSpillo`. */
+export function destinazioneDaRighe(righe: ReadonlyMap<number, RigaDestinazione>, id: number): { destinazione: DestinazioneSpillo | null; destinazioneNonDisponibile: boolean } {
+  return destinazioneDaRiga(righe.get(id));
 }
 
 /** La destinazione come va scritta in un pacchetto: lo spillo d'arrivo per nome e posizione. */

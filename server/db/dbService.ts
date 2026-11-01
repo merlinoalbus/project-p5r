@@ -18,6 +18,8 @@
 //   - synchronous=NORMAL   → accoppiamento raccomandato con WAL
 //   - busy_timeout=5000    → copre il breve riavvio di tsx watch
 //   - foreign_keys=ON      → integrità referenziale reale (CASCADE), dentro ogni file
+//   - journal_size_limit   → 64 MB per file: dopo un checkpoint il WAL torna a quella dimensione (L5-10)
+//   - optimize             → una volta un minuto dopo l'avvio, ogni 6 ore e alla chiusura (`ottimizzaDb`)
 //
 // `prepared(sql)` è la cache degli statement (better-sqlite3 non
 // memoizza le prepare). `':memory:'` è supportato per i test (anche
@@ -130,9 +132,50 @@ export function initDb(dbPath: string = resolveDbPath(), opzioni: OpzioniDb = {}
     throw new Error(`file delle partite assente (${path.basename(partitePath)}): va creato dalla copia dell'edizione prima dell'apertura.`);
   }
   db.prepare('ATTACH DATABASE ? AS utente').run(partitePath);
-  if (dbPath !== ':memory:') db.pragma('utente.journal_mode = WAL');
+  if (dbPath !== ':memory:') {
+    db.pragma('utente.journal_mode = WAL');
+    // L5-10: il WAL non ha un limite di suo; dopo un checkpoint che lo azzera, SQLite lo riporta a questa dimensione invece di lasciarlo
+    // grande quanto il picco di una migrazione o di un caricamento di immagini. Il WAL di `main` in rilascio non esiste (giornale classico).
+    if (!soloLettura) db.pragma(`main.journal_size_limit = ${LIMITE_WAL_BYTE}`);
+    db.pragma(`utente.journal_size_limit = ${LIMITE_WAL_BYTE}`);
+    if (!soloLettura) pianificaOttimizzazione();
+  }
   stmtCache.clear();
   return db;
+}
+
+/** La dimensione a cui SQLite riporta il WAL di ciascun file dopo un checkpoint che lo azzera (L5-10). */
+const LIMITE_WAL_BYTE = 64 * 1024 * 1024;
+/** L'ottimizzazione delle statistiche si fa una volta poco dopo l'avvio (migrazioni e indici nuovi comprese) e poi a intervalli. */
+const RITARDO_PRIMA_OTTIMIZZAZIONE_MS = 60_000;
+const INTERVALLO_OTTIMIZZAZIONE_MS = 6 * 60 * 60 * 1000;
+let timerOttimizzazione: NodeJS.Timeout | null = null;
+
+/**
+ * `PRAGMA optimize` e un checkpoint passivo (mai bloccante) del WAL. Prima `optimize` girava solo alla chiusura, e un server che resta acceso
+ * per giorni non aggiornava mai le statistiche del pianificatore. Come alla chiusura: nessun `analysis_limit`, perché `optimize` analizza
+ * solo ciò che serve; best effort, non solleva mai.
+ */
+export function ottimizzaDb(): void {
+  if (!db || giocoInSolaLettura) return;
+  try {
+    db.pragma('optimize');
+    db.pragma('wal_checkpoint(PASSIVE)');
+  } catch {
+    // best effort: una manutenzione che non riesce (database occupato) si ripete al prossimo giro
+  }
+}
+
+/** Pianifica `ottimizzaDb` dopo l'avvio e poi ogni 6 ore; il timer non tiene vivo il processo e `closeDb` lo ferma. */
+function pianificaOttimizzazione(): void {
+  if (timerOttimizzazione) return;
+  const primo = setTimeout(() => {
+    ottimizzaDb();
+    timerOttimizzazione = setInterval(ottimizzaDb, INTERVALLO_OTTIMIZZAZIONE_MS);
+    timerOttimizzazione.unref();
+  }, RITARDO_PRIMA_OTTIMIZZAZIONE_MS);
+  primo.unref();
+  timerOttimizzazione = primo;
 }
 
 /** Connessione già inizializzata (errore d'uso se manca initDb). */
@@ -143,6 +186,7 @@ export function getDb(): AppDatabase {
 
 /** Ottimizza e chiude la connessione, svuotando la cache degli statement. */
 export function closeDb(): void {
+  if (timerOttimizzazione) { clearTimeout(timerOttimizzazione); timerOttimizzazione = null; }
   // in rilascio `optimize` potrebbe provare a scrivere le statistiche in `main` (sola lettura): non si chiama
   if (db && !giocoInSolaLettura) {
     try {

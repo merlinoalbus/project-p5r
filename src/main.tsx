@@ -16,6 +16,7 @@ import App from './App.tsx';
 import { useConfigStore } from './stores/configStore';
 import { tuttePrecarica } from './router';
 import { precaricaPagineScheda } from './components/scheda/pagineScheda';
+import { precaricaSchedePartita } from './components/partita/schedePartita';
 import { avviaControlloVersione } from './utils/versioneApp';
 import { registraEdizione } from './services/api/cacheGioco';
 import { impostaGestoreAvanzamento } from './services/api/_helpers';
@@ -110,7 +111,8 @@ async function boot(): Promise<void> {
 
   // UI-ASSET-01: avviso «nuova versione» e precarico in tempo morto di tutte le pagine (solo nella build: in sviluppo i file non hanno hash)
   avviaControlloVersione();
-  if (import.meta.env.PROD) precaricaInBackground([...tuttePrecarica, ...precaricaPagineScheda]);
+  // (L5-11: per prime le schede della pagina Partita, la pagina che si usa durante il gioco)
+  if (import.meta.env.PROD) precaricaInBackground([...precaricaSchedePartita, ...tuttePrecarica, ...precaricaPagineScheda]);
 }
 
 void boot();

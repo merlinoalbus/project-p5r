@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import { getDaApplicare } from '../../services/api';
-import { useCarica } from '../../hooks/useCarica';
+import { useLetturaCondivisa } from '../../hooks/useLetturaCondivisa';
 import { useGestiPartita } from '../../services/gestiPartita';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -28,7 +28,9 @@ import { delPassato } from '../../../shared/propostePartita';
 /** Il pulsante «Da approvare · N» e la finestra con l'elenco del passato; niente senza proposte aperte. */
 export function DaApprovareStati({ partitaId }: { partitaId: number }) {
   const gesti = useGestiPartita();
-  const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
+  // L5-07: la stessa lettura delle proposte che condividono le istanze di `DaApplicare` (una per partita)
+  const elenco = useLetturaCondivisa(`proposte:${partitaId}`, `${gesti.versionePerPartita[partitaId] ?? 0}:${gesti.versioneGuida}`, () => getDaApplicare(partitaId),
+    [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const [aperta, setAperta] = useState(false);
   const n = (elenco.dati ?? []).filter((p) => p.stato === 'aperta' && delPassato(p)).length;
   // una lettura fallita senza dati non fa sparire l'elenco in silenzio: lo dice, con «Riprova» (Revisione 3, R3)

@@ -5,6 +5,7 @@
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch, type HttpFetchOptions } from './_httpClient';
 import { epocaCacheGioco, scriviCacheGioco, svuotaCacheGioco } from './cacheGioco';
+import { segnalaScritturaCondivisa } from './letturaCondivisa';
 import type { AvanzamentoInIntestazioneDto } from '../../types';
 
 /** Errore HTTP normalizzato con status, codice, dettagli e request ID backend. */
@@ -123,7 +124,14 @@ async function requestJson<T>(
     // qualunque scrittura sui contenuti (anche una finita in errore o in timeout: può essere arrivata a metà) rende vecchie le
     // letture in cache dei dati di gioco; l'avanzamento della partita non vi è mai (vedi `cacheGioco.ts`)
     if (scriveContenuti(method, path)) svuotaCacheGioco();
+    // L5-07: qualunque scrittura (anche dentro `/partite`, che qui sopra non svuota niente) rende vecchie le letture condivise fra le istanze
+    if (eScrittura(method)) segnalaScritturaCondivisa();
   }
+}
+
+/** Ogni metodo che può cambiare qualcosa sul server. */
+function eScrittura(method: string): boolean {
+  return method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS';
 }
 
 /** Vero se la richiesta può cambiare i dati di gioco: ogni metodo di scrittura fuori da `/partite` (l'avanzamento non è in cache). */
@@ -188,6 +196,7 @@ export async function inviaFile<T>(method: 'PUT' | 'POST', path: string, file: F
   } finally {
     // un file caricato cambia i contenuti (immagini, mappe importate): stessa regola delle scritture JSON
     if (scriveContenuti(method, path)) svuotaCacheGioco();
+    segnalaScritturaCondivisa();
   }
 }
 

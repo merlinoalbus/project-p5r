@@ -44,6 +44,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **«Importa» sostituisce `gioco.db`** con un backup scelto dalla cartella d'appoggio del server, dopo anteprima e conferma, con una
   copia di sicurezza (ne restano 3); non unisce e non tocca `partite.db`. Il file non passa dal browser. L'esportazione
   dell'istanza deve essere sempre reimportabile **(24/10)**.
+- Le copie di avvio di gioco e partite sono al più 7 e occupano al più 2 GiB: con file da circa 415 MB ne restano 5. Le 2 più recenti
+  con il file di gioco non vuoto restano sempre, anche sopra il tetto; l'età non toglie copie, perché dopo mesi di pausa cancellerebbe quelle utili.
 - Il pacchetto completo (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una

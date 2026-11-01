@@ -6,7 +6,7 @@ import { testoDoteInPunti, testoPunti } from '../../../shared/note';
 import { Note, TestoNote } from '../shared/TestoNote';
 import { anteprimaDecisioneProposte, getDaApplicare, getDoti } from '../../services/api';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
-import { useCarica } from '../../hooks/useCarica';
+import { useLetturaCondivisa } from '../../hooks/useLetturaCondivisa';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { PreparazioneAcquistoAojiru, RiepilogoConsumoPreparato } from '../catalogo/ConsumiAojiru';
@@ -67,9 +67,15 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
   const { partitaId, voceUid, richiesta, passati, attivita, onCambiato, gestiNellaColonna = false } = props;
   const versione = props.attivita !== undefined ? props.versione ?? 0 : 0;
   const gesti = useGestiPartita();
-  const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida, versione]);
+  // L5-07: l'elenco delle proposte e le Doti sono UNA lettura per partita, condivisa da tutte le istanze montate (a fine partita sono centinaia:
+  // una per voce del Diario, per domanda, per Richiesta). Si rilegge, per tutte insieme, quando cambiano le versioni delle mutazioni, dopo
+  // ogni scrittura e a ogni `ricarica()`; il contatore dell'attività (`versione`) vale per questa sola istanza (vedi `useLetturaCondivisa`).
+  const versioniMutazioni = `${gesti.versionePerPartita[partitaId] ?? 0}:${gesti.versioneGuida}`;
+  const elenco = useLetturaCondivisa(`proposte:${partitaId}`, versioniMutazioni, () => getDaApplicare(partitaId),
+    [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida, versione], versione);
   // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
-  const doti = useCarica(() => getDoti(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
+  const doti = useLetturaCondivisa(`doti:${partitaId}`, versioniMutazioni, () => getDoti(partitaId),
+    [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const puntiDote = (chiave: string | null): number | null => (chiave ? doti.dati?.find((d) => d.chiave === chiave)?.punti ?? null : null);
   const [anteprima, setAnteprima] = useState<AnteprimaDecisioneProposteDto | null>(null);
   const [consumo, setConsumo] = useState<PropostaPartitaDto | null>(null);

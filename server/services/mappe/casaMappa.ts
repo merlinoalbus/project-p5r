@@ -13,6 +13,7 @@
 // ============================================================
 
 import { getDb, type AppDatabase } from '../../db/dbService.js';
+import { haTabellaMain } from '../../db/schemaMemo.js';
 import { chiaveMappa } from './percorsiMappe.js';
 import { entitaDellaRadice } from './alberoMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
@@ -35,7 +36,7 @@ export interface ContestoAree { aree: Map<string, RigaArea>; nomiQuartieri: Map<
 
 /** Vero se la tabella delle Aree c'è (dalla 109; i test su uno schema di prima non l'hanno). */
 export function conAree(db: AppDatabase = getDb()): boolean {
-  return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'area'").get();
+  return haTabellaMain(db, 'area');
 }
 
 /** Le Aree e i nomi dei contenitori; vuoto su uno schema senza Aree. */

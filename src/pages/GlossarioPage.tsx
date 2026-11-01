@@ -2,7 +2,7 @@
 // GlossarioPage — termini della localizzazione italiana ufficiale (dalla guida) per categoria
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
@@ -28,12 +28,15 @@ export function GlossarioPage() {
   useElementoDaIndirizzo(!!dati);
 
   const categorie = useMemo(() => [...new Set((dati ?? []).map((t) => t.categoria))], [dati]);
+  // L5-09: il campo segue subito la battuta, l'elenco (centinaia di termini, con filtro, ordine e raggruppamento) si rifà con il testo
+  // «differito»: calcolo e disegno a priorità bassa, interrotti alla battuta dopo (stesso criterio di Compendio e Skill)
+  const qDifferita = useDeferredValue(q);
   const filtrati = useMemo(() => {
-    const testo = q.trim().toLowerCase();
+    const testo = qDifferita.trim().toLowerCase();
     return (dati ?? [])
       .filter((t) => (!categoria || t.categoria === categoria) && (!testo || t.nome.toLowerCase().includes(testo) || t.chiave.toLowerCase().includes(testo) || (t.definizione ?? '').toLowerCase().includes(testo)))
       .sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nome.localeCompare(b.nome, 'it'));
-  }, [dati, q, categoria]);
+  }, [dati, qDifferita, categoria]);
 
   const perCategoria = useMemo(() => {
     const m = new Map<string, TermineDto[]>();

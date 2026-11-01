@@ -18,10 +18,11 @@ import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMapp
 import { assegnaUidMancanti, uidValido } from './identitaSpillo.js';
 import type { DestinazioneSpillo, NativoSpilloDto, RuoloImmagine } from '../../../shared/types.js';
 import { RUOLI_IMMAGINE } from '../../../shared/types.js';
-import { destinazionePerPacchetto, leggiDestinazioneSpillo, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare } from './destinazioniSpillo.js';
+import { destinazioneDaRighe, destinazionePerPacchetto, leggiDestinazioneSpillo, righeDestinazioni, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare, type RigaDestinazione } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { conCestino, registrazioneCestinoInCorso, registraRipristinoCestino } from '../cestinoService.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -79,7 +80,7 @@ function nelMondo(chiave: string): boolean {
 
 /** Vero se la tabella `mappa` ha la colonna (le migrazioni le aggiungono: i test possono avere uno schema di prima). */
 function colonnaMappa(nome: string): boolean {
-  return (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === nome);
+  return haColonnaMain(getDb(), 'mappa', nome);
 }
 
 /** La riga di una mappa dalla chiave pubblica o interna (passa da `idMappa`); 404 se non esiste. */
@@ -121,7 +122,7 @@ interface ContestoMappe {
 function contestoMappe(): ContestoMappe {
   const righe = prepared('SELECT * FROM mappa').all() as RigaMappa[];
   const presentazioni = new Map<string, Pick<MappaRiassuntoDto, 'contesti'>>();
-  if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
+  if (haTabellaMain(getDb(), 'mappa_presentazione')) {
     for (const p of prepared('SELECT mappa_chiave, contesti_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string }>) {
       presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json) });
     }
@@ -354,8 +355,7 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): N
 /** Vero se la tabella `spillo` dello schema corrente ha la colonna `nome` (le colonne aggiunte dalle migrazioni, per esempio
  *  `nativo_json` della 046, possono mancare su un file che non le ha ancora applicate). */
 function colonnaSpillo(nome: string): boolean {
-  const colonne = getDb().prepare("SELECT name FROM pragma_table_info('spillo')").all() as Array<{ name: string }>;
-  return colonne.some((c) => c.name === nome);
+  return haColonnaMain(getDb(), 'spillo', nome);
 }
 /** Vero se lo spillo ha già la colonna delle prove native `nativo_json` (migrazione 046). */
 function colonnaNativoJson(): boolean { return colonnaSpillo('nativo_json'); }
@@ -388,7 +388,24 @@ interface ContestoSpilli { partitaId?: number; st?: StatoDisponibilita | null; n
   /** L4: l'infiltrazione guardata, data da chi chiama. */
   contesto?: string | null;
   /** L5: le letture dei luoghi (presenza, sedi dei negozi), fatte al primo pin che ne ha bisogno e poi riusate. */
-  luoghi?: LettureLuoghi }
+  luoghi?: LettureLuoghi;
+  /** L5-05: le destinazioni salvate dei pin e i nomi di mappe e pin d'arrivo, letti in blocco al primo pin con un contesto condiviso. */
+  arrivi?: ArriviDeiPin }
+
+/** L5-05: le destinazioni dei pin (spillo → riga) e i nomi già noti di mappe (chiave interna) e pin d'arrivo (id); `undefined` = non esiste. */
+interface ArriviDeiPin { righe: Map<number, RigaDestinazione>; nomiMappa: Map<string, string | undefined>; nomiSpillo: Map<number, string | undefined> }
+
+/** Le destinazioni di tutti i pin e i nomi delle mappe e dei pin d'arrivo, in tre letture invece di tre per pin; riusate da tutta la risposta. */
+function arriviDi(ctx: ContestoSpilli): ArriviDeiPin {
+  if (ctx.arrivi) return ctx.arrivi;
+  const nomiMappa = new Map<string, string | undefined>();
+  const nomiSpillo = new Map<number, string | undefined>();
+  for (const m of prepared('SELECT chiave, nome FROM mappa WHERE chiave IN (SELECT mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL)').all() as Array<{ chiave: string; nome: string }>) nomiMappa.set(m.chiave, m.nome);
+  if (haColonnaMain(getDb(), 'spillo_destinazione', 'spillo_arrivo_id')) {
+    for (const s of prepared('SELECT id, nome FROM spillo WHERE id IN (SELECT spillo_arrivo_id FROM spillo_destinazione WHERE spillo_arrivo_id IS NOT NULL)').all() as Array<{ id: number; nome: string }>) nomiSpillo.set(s.id, s.nome);
+  }
+  return (ctx.arrivi = { righe: righeDestinazioni(), nomiMappa, nomiSpillo });
+}
 
 /** L5: le letture dei luoghi del contesto, una volta per risposta (con lo stato della partita già calcolato). */
 function luoghiDi(ctx: ContestoSpilli): LettureLuoghi {
@@ -423,7 +440,7 @@ function contestoSpilli(partitaId?: number, contesto: string | null = null): Con
   if (partitaId) verificaPartita(partitaId);
   const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
   // per gli ingressi dei Palazzi conclusi: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
-  const destinazioni = st && st.palazziConclusi.size > 0 && prepared("SELECT 1 FROM sqlite_master WHERE name='spillo_destinazione'").get()
+  const destinazioni = st && st.palazziConclusi.size > 0 && haTabellaMain(getDb(), 'spillo_destinazione')
     ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
     : undefined;
   return { partitaId, st, nomi: nomiCondizioni(), palazzi: st && st.palazziConclusi.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni, contesto };
@@ -544,13 +561,30 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
  * Uno spillo di una mappa per l'API: i dettagli, la destinazione con i nomi di mappa e spillo d'arrivo (per «Vai: …») e la
  * posizione. 409 per un elemento della guida senza mappa, che una posizione non ce l'ha.
  */
-function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
+function spilloDto(r: RigaSpillo, contesto?: ContestoSpilli): SpilloDto {
   if(!r.mappa_chiave)throw httpErrors.conflict('contenuto-guida','Il contenuto non ha una posizione geografica.');
-  const arrivo = leggiDestinazioneSpillo(r.id);
+  const ctx = contesto ?? {};
+  // L5-05: con un contesto condiviso fra i pin della risposta le destinazioni e i nomi si leggono una volta per tutti. Anche un pin solo
+  // (`elementoSpilloDto` passa sempre un contesto, al più vuoto) legge in blocco: sono le destinazioni di tutto il gioco (223 righe sulla
+  // copia), tre letture come prima per il pin con destinazione; il ramo senza contesto resta per chi chiama `spilloDto` direttamente
+  const arrivi = contesto ? arriviDi(contesto) : null;
+  const arrivo = arrivi ? destinazioneDaRighe(arrivi.righe, r.id) : leggiDestinazioneSpillo(r.id);
   // i nomi della mappa e dello spillo d'arrivo, per il pulsante «Vai: …» senza un'altra chiamata
+  const nomeMappa = (chiave: string): string | undefined => {
+    if (arrivi?.nomiMappa.has(chiave)) return arrivi.nomiMappa.get(chiave);
+    const nome = (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome;
+    arrivi?.nomiMappa.set(chiave, nome);
+    return nome;
+  };
+  const nomeSpillo = (id: number): string | undefined => {
+    if (arrivi?.nomiSpillo.has(id)) return arrivi.nomiSpillo.get(id);
+    const nome = (prepared('SELECT nome FROM spillo WHERE id = ?').get(id) as { nome: string } | undefined)?.nome;
+    arrivi?.nomiSpillo.set(id, nome);
+    return nome;
+  };
   const nomi = arrivo.destinazione ? {
-    mappa: (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(idMappa(arrivo.destinazione.mappa)) as { nome: string } | undefined)?.nome ?? arrivo.destinazione.mappa,
-    spillo: arrivo.destinazione.spillo ? ((prepared('SELECT nome FROM spillo WHERE id = ?').get(arrivo.destinazione.spillo) as { nome: string } | undefined)?.nome ?? null) : null,
+    mappa: nomeMappa(idMappa(arrivo.destinazione.mappa)) ?? arrivo.destinazione.mappa,
+    spillo: arrivo.destinazione.spillo ? (nomeSpillo(arrivo.destinazione.spillo) ?? null) : null,
   } : undefined;
   return { ...dettagliSpillo(r,ctx), ...arrivo, ...(nomi ? { destinazioneNomi: nomi } : {}), mappaChiave:chiaveMappa(r.mappa_chiave),x:r.x,y:r.y };
 }
@@ -1636,7 +1670,7 @@ function vociAmmesse(nome: string, mappa: string, voci: string[]): string[] {
 /** Le voci proprie di un pin (`spillo_voce`), in ordine di chiave. Su uno schema di prima della 098 (i test caricano il seed a
  *  scaglioni) la sola colonna della 094, se c'è. */
 function vociProprie(id: number): string[] {
-  if (prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get()) {
+  if (haTabellaMain(getDb(), 'spillo_voce')) {
     return prepared('SELECT voce_chiave FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').pluck().all(id) as string[];
   }
   if (!colonnaSpillo('voce_chiave')) return [];

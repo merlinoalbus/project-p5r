@@ -8,9 +8,10 @@
 // mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import { Suspense, useState, type MouseEvent, type ReactNode } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
-import { ConfidentiPartita } from '../partita/ConfidentiPartita';
+// L5-11: il cassetto del Confidente usa la pagina pigra della scheda, così Confidenti non entra nel caricamento iniziale
+import { ConfidentiPartita as ConfidentiPigri } from '../partita/schedePartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, notaRipeteRisposte, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto, tipoGiaDetto } from '../../utils/percorso';
 import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
@@ -117,7 +118,11 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
           ricordaVoce(e);
         }}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip testo-12">{a.riferimentoTesto}</span>}
-      {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />}
+      {cassetto && partitaAttiva !== null && (
+        <Suspense fallback={null}>
+          <ConfidentiPigri.Componente partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />
+        </Suspense>
+      )}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch testo-12" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
           {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» se il posto non ha un nome o se è

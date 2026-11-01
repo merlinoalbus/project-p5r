@@ -14,6 +14,15 @@
       il browser lo chiederebbe anonimo e riceverebbe la pagina di login al posto del JSON.
     -->
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
+    <!--
+      Avvio più corto (L5-06): `/api/config` partirebbe solo quando il JavaScript è in esecuzione; qui parte subito, in parallelo al bundle.
+      `src/main.tsx` la chiede con un `fetch` semplice (stessa modalità e stessi cookie: il browser riusa la risposta già in arrivo);
+      `crossorigin` fa combaciare le due richieste, e i cookie dello stesso sito partono comunque (accesso di Cloudflare nell'istanza di
+      rilascio). Gli indirizzi sono gli stessi in preparazione e in rilascio: `/api` passa dal proxy (Vite o nginx) verso il backend.
+      I caratteri NON si precaricano: misurato a freddo con «Slow 4G», i 65 kB di Anton e Inter in testa contendevano la banda al
+      JavaScript che blocca l'avvio e lo ritardavano di 1–3 s (il testo si vede comunque subito, `font-display: swap`).
+    -->
+    <link rel="preload" href="/api/config" as="fetch" crossorigin />
     <!-- L'app ha il solo tema scuro: i due colori della barra di stato coincidono (colore della Topbar, `--color-bg-secondary`) -->
     <meta name="theme-color" content="#14141a" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14141a" media="(prefers-color-scheme: dark)" />

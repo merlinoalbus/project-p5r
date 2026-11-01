@@ -6,7 +6,9 @@
 // Palazzi (`palazziService`, il boss finale), e nessuno di loro deve richiamarsi in cerchio.
 // ============================================================
 
+import type { Statement } from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
+import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { puntoDescrittivo, sqlVoceDescrittiva } from '../../../shared/spilli.js';
 import type { EffettiDelGestoDto, StatoPunto, VoceDelGestoDto } from '../../../shared/types.js';
 import { carattereDellaVoce, type CarattereVoce } from '../../../shared/caratteriVoce.js';
@@ -73,12 +75,51 @@ function colonna(db: AppDatabase, tabella: string, nome: string): boolean {
   return (db.prepare(`PRAGMA main.table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === nome);
 }
 
+// ---- Il modello in memoria (L5-04) ----
+//
+// Ricostruirlo costava ad ogni apertura di mappa, Palazzo o area (tutte le voci, tutti i legami pin-voce, il grafo degli oggetti). Sono soli dati
+// di gioco, quindi si tiene l'ultimo modello per connessione, mai nulla della partita (gli stati stanno in `statiDellaPartita`, sempre letti
+// ora). Il modello vale finché il «gettone» della connessione non cambia: `data_version` di `main` (un'altra connessione ha scritto il file),
+// `schema_version` di `main` (una migrazione ha cambiato la struttura: le colonne opzionali che il modello legge) e `total_changes()` (QUALSIASI
+// scrittura di questa connessione, anche di una partita: più prudente del necessario, ma senza elenchi di scrittori da ricordare, cosa che
+// il registro delle cache di gioco da solo non garantisce: dungeon, mappe e cestino scrivono senza chiamarlo). Dentro una transazione non si
+// usa né si salva niente (una scrittura annullata lascerebbe un modello fatto su dati che non esistono più), e `registraCacheDiGioco` lo
+// svuota ad ogni importazione, ripristino o scrittura che lo chiama. Il modello restituito è lo stesso oggetto per tutti: chi lo riceve
+// lo legge soltanto (nessun chiamante lo modifica).
+interface ModelloInMemoria { gettone: string; generazione: number; modello: ModelloAvanzamento }
+const modelliInMemoria = new WeakMap<AppDatabase, ModelloInMemoria>();
+const gettoniDati = new WeakMap<AppDatabase, [Statement, Statement, Statement]>();
+let generazioneModelli = 0;
+registraCacheDiGioco(() => { generazioneModelli++; });
+
+/** Il gettone dei dati di gioco della connessione: cambia a ogni scrittura, di questa o di un'altra connessione, e a ogni cambio di struttura. */
+function gettoneDeiDati(db: AppDatabase): string {
+  let s = gettoniDati.get(db);
+  if (!s) {
+    s = [db.prepare('PRAGMA main.data_version').pluck(), db.prepare('PRAGMA main.schema_version').pluck(), db.prepare('SELECT total_changes()').pluck()];
+    gettoniDati.set(db, s);
+  }
+  return `${s[0].get()}.${s[1].get()}.${s[2].get()}`;
+}
+
 /**
  * Il modello di lettura (dati di gioco), in blocco: le voci con il carattere effettivo, gli oggetti permanenti (componenti connesse
  * del grafo voci permanenti ↔ pin, per Palazzo: `oggettiPermanenti` di §1.3), le voci di ogni pin (`spillo_voce` e il riferimento
- * «punto» dello strato di prima), le infiltrazioni in ordine.
+ * «punto» dello strato di prima), le infiltrazioni in ordine. Dalla memoria se i dati di gioco non sono cambiati (L5-04).
  */
 export function modelloAvanzamento(db: AppDatabase): ModelloAvanzamento {
+  if (db.inTransaction) return costruisciModello(db);
+  const gettone = gettoneDeiDati(db);
+  const memo = modelliInMemoria.get(db);
+  if (memo && memo.gettone === gettone && memo.generazione === generazioneModelli) return memo.modello;
+  const generazione = generazioneModelli;
+  const modello = costruisciModello(db);
+  modelliInMemoria.set(db, { gettone, generazione, modello });
+  return modello;
+}
+
+/** Il modello letto dal DB, ogni volta da capo. */
+function costruisciModello(db: AppDatabase): ModelloAvanzamento {
   const conCarattere = colonna(db, 'punto_interesse', 'carattere');
   const conDedalo = colonna(db, 'punto_interesse', 'area_dedalo_chiave');
   const voci = new Map<string, VoceDelModello>();

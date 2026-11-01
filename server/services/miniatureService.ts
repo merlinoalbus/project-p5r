@@ -24,6 +24,7 @@
 
 import type { Sharp, SharpOptions } from 'sharp';
 import { eGiocoInSolaLettura, getDb, nowIso, type AppDatabase } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { logger } from '../utils/logger.js';
 import { GENERAZIONE_MINIATURE, LARGHEZZE_MINIATURA, versioneImmagine, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import { caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, immaginiCaricateDi } from './mappe/immagineMappa.js';
@@ -88,7 +89,7 @@ function originale(s: SorgenteMiniatura, l: LarghezzaMiniatura): RispostaMiniatu
 
 /** Vero se la tabella delle miniature c'è (dalla 108; i test su uno schema di prima non l'hanno). */
 function conMiniature(db: AppDatabase): boolean {
-  return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'immagine_miniatura'").get();
+  return haTabellaMain(db, 'immagine_miniatura');
 }
 
 /** I metadati di una immagine, senza il contenuto: bastano a calcolare l'ETag e a cercare la miniatura in cache (R12-03). */

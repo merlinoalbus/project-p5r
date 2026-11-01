@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 333 migrazioni di gioco (l'ultima è la 333), 63 delle partite (l'ultima è la 063).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 334 migrazioni di gioco (l'ultima è la 334), 63 delle partite (l'ultima è la 063).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -82,8 +82,15 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   «Applica» in un gesto unico) e L3 (mappe al tocco: doppio tocco e pinch sui pin, pagina che scorre col dito sulla mappa a vista
   intera, foglio e Guida che non coprono il pin, trascinamento senza ridisegni, Covo chiuso nell'indice prima del 5 maggio) e L4
   (navigazione verso l'elemento: rimandi all'elemento citato invece che all'elenco, ritorno fra mappe sorelle, quattro tipi nuovi nella
-  ricerca, Confidenti con un indirizzo solo, Memento dai Palazzi, Ombre collegate dalla scheda Persona).
-- Aperti: L5–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
+  ricerca, Confidenti con un indirizzo solo, Memento dai Palazzi, Ombre collegate dalla scheda Persona) e L5 (prestazioni: indici,
+  cache dei dati di gioco del Diario e dei Palazzi, una voce sola alla spunta, pin letti in blocco, ETag del manifest, copie di avvio
+  con un tetto in byte, letture condivise di «Da applicare», schede della Partita a richiesta, librerie in un file proprio; risposte
+  campione identiche byte per byte; tempi mediani sulla copia: giorno del Diario −23/−39%, mappe −5/−34%, schede di Palazzo e Memento −2/−3%;
+  avvio a freddo con «Slow 4G» −0,2 s).
+- Da L5, per L8: gli id di `partita` si riusano dopo un'eliminazione (nessun AUTOINCREMENT) e l'archivio immutabile
+  `acquisto_legacy_valutazione` non ha una chiave esterna verso la partita: una partita nuova si ritrova accanto le righe d'archivio di una
+  eliminata con lo stesso id.
+- Aperti: L6–L11 e le decisioni D1, D3–D20, tra cui lo stato per infiltrazione dei pin Oggetto e Nemico di Kamoshida e Madarame e i
   blocchi della guida in prosa. Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate».
 

@@ -18,6 +18,7 @@ import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
+import { haTabellaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
@@ -75,7 +76,7 @@ export interface DimensioniMappa { larghezza: number; altezza: number }
 
 /** Le tabelle ci sono dalla 102 e dalla 103: nei test e nei file di prima possono mancare (con la sola 102 i pezzi non si leggono). */
 export function conPezzi(): boolean {
-  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'copia_pezzo'").get();
+  return haTabellaMain(getDb(), 'copia_pezzo');
 }
 
 /** La copia per l'API: con lo stato della partita (`st`) porta l'esito delle condizioni, come i pin. */

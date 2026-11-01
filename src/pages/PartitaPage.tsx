@@ -2,7 +2,7 @@
 // PartitaPage — tracking della partita attiva: riepilogo, Doti, Confidenti, scorta, compendio, storico
 // ============================================================
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
@@ -10,28 +10,22 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../stores/partitaStore';
-import { PageState, EmptyState } from '../components/shared/PageState';
+import { PageState, EmptyState, Spinner } from '../components/shared/PageState';
+import { ErroreInRiquadro } from '../components/shared/ErrorePagina';
 import { NuovaPartitaModal } from '../components/partita/NuovaPartitaModal';
 import { FinestraModificaPartita } from '../components/partita/FinestraModificaPartita';
-import { SquadraPartita } from '../components/partita/SquadraPartita';
-import { DotiSociali } from '../components/partita/DotiSociali';
-import { ConfidentiPartita } from '../components/partita/ConfidentiPartita';
-import { ScortaPersona } from '../components/partita/ScortaPersona';
-import { CompendioPersonale } from '../components/partita/CompendioPersonale';
-import { PersonaDellaPartita } from '../components/partita/PersonaDellaPartita';
-import { StoricoPartita } from '../components/partita/StoricoPartita';
-import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
-import { PianiSalvati } from '../components/partita/PianiSalvati';
-import { CicliSalvati } from '../components/partita/CicliSalvati';
-import { LettureEGiochi } from '../components/partita/LettureEGiochi';
-import { ProgressiPartita } from '../components/partita/ProgressiPartita';
+// L5-11: «Oggi» (la scheda d'apertura) sta nel file della pagina; le altre dodici si scaricano alla prima apertura (vedi schedePartita.ts)
+import {
+  CicliSalvati, CompendioPersonale, ConfidentiPartita, DotiSociali, LettureEGiochi, ObiettiviPartita, PersonaDellaPartita, PianiSalvati,
+  ProgressiPartita, SCHEDE_A_RICHIESTA, ScortaPersona, SquadraPartita, StoricoPartita, type ChiaveSchedaARichiesta,
+} from '../components/partita/schedePartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { DaApprovareStati } from '../components/partita/DaApprovareStati';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
-type Scheda = 'oggi' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'persona-partita' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | ChiaveSchedaARichiesta;
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'oggi', l: 'Oggi' },
@@ -50,6 +44,18 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
 ];
 // «Riepilogo» non è più una scheda (richiesta dell'utente, 2026-10-25): i dati della partita si modificano dalla finestra che apre
 // «Modifica» nella riga dei dati; il vecchio indirizzo `?scheda=riepilogo` (link della pagina Domande) apre quella finestra.
+
+/** Il ripiego mentre una scheda si scarica: lo spazio della scheda con l'indicatore di caricamento del tema, perché sotto la riga delle schede
+ *  la pagina non si accorci e non salti (di solito non compare: il file è già scaricato in tempo morto, e cambiando scheda React tiene a
+ *  schermo quella di prima finché la nuova non è pronta). */
+function CaricamentoScheda() {
+  return <div className="flex min-h-[40vh] flex-1 items-center justify-center"><Spinner size={36} /></div>;
+}
+
+/** Porta in memoria il file di una scheda prima del clic (passaggio del mouse, fuoco, tocco); un errore qui non conta: lo mostrerà l'apertura. */
+function anticipaScheda(k: Scheda): void {
+  if (k !== 'oggi') SCHEDE_A_RICHIESTA[k].precarica().catch(() => undefined);
+}
 
 /** Pagina della partita attiva con schede; senza partite propone la creazione. */
 export function PartitaPage() {
@@ -104,7 +110,7 @@ export function PartitaPage() {
               // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che
               // si riconosce da lontano — 28 px — e l'etichetta sta sotto, piu' piccola. Resta
               // scritta: un'icona sola non dice «Piani salvati» a nessuno la prima volta.
-              <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k} title={s.l}>
+              <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} onPointerEnter={() => anticipaScheda(s.k)} onFocus={() => anticipaScheda(s.k)} onTouchStart={() => anticipaScheda(s.k)} aria-pressed={scheda === s.k} title={s.l}>
                 <IconaScheda chiave={s.k} dimensione={22} />
                 <span>{s.l}</span>
               </button>
@@ -115,19 +121,29 @@ export function PartitaPage() {
             // aperta dal vecchio indirizzo non c'è un pulsante da cui è partita: il fuoco va su «Modifica», non in cima al documento
             if (richiesta === 'riepilogo') { setParams({ scheda: 'oggi' }, { replace: true }); requestAnimationFrame(() => document.getElementById('modifica-dati-partita')?.focus()); }
           }} />
-          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi onGiorno={setGiornoOggi} /></div>}
-          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali key={attiva.id} partitaId={attiva.id} /></div>}
-          {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'confidenti' && <ConfidentiPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi key={attiva.id} partitaId={attiva.id} /></div>}
-          {scheda === 'progressi' && <ProgressiPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'scorta' && <ScortaPersona key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'compendio' && <CompendioPersonale key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'persona-partita' && <PersonaDellaPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'piani' && <PianiSalvati key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'cicli' && <CicliSalvati key={attiva.id} partitaId={attiva.id} />}
-          {scheda === 'storico' && <StoricoPartita key={attiva.id} partitaId={attiva.id} />}
+          {/* Un solo `Suspense` per tutte le schede, sempre montato: cambiando scheda React tiene a schermo quella di prima finché la nuova non è
+              scaricata (la navigazione è una transizione), senza ripiego e senza salti. Il ripiego compare solo se la pagina si apre già su una scheda
+              non ancora scaricata. L'errore di una scheda (un file sparito dopo un rilascio) resta nel suo riquadro, con la riga delle schede
+              sopra; la `key` lo azzera passando a un'altra scheda. «Oggi» non cambia: nessun riquadro, il suo errore va alla pagina come prima. */}
+          <Suspense fallback={<CaricamentoScheda />}>
+            {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi onGiorno={setGiornoOggi} /></div>}
+            {scheda !== 'oggi' && (
+              <ErroreInRiquadro key={scheda}>
+                {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali.Componente key={attiva.id} partitaId={attiva.id} /></div>}
+                {scheda === 'squadra' && <SquadraPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'confidenti' && <ConfidentiPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi.Componente key={attiva.id} partitaId={attiva.id} /></div>}
+                {scheda === 'progressi' && <ProgressiPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'scorta' && <ScortaPersona.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'compendio' && <CompendioPersonale.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'persona-partita' && <PersonaDellaPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'obiettivi' && <ObiettiviPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'piani' && <PianiSalvati.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'cicli' && <CicliSalvati.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'storico' && <StoricoPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+              </ErroreInRiquadro>
+            )}
+          </Suspense>
         </div>
       )}
       <NuovaPartitaModal aperta={nuova} onChiudi={() => setNuova(false)} />

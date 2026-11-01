@@ -9,7 +9,8 @@
 // pin è fatto quando **tutte** le sue voci sono segnate (`fattoPerVoci`).
 // ============================================================
 
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { sqlVoceDescrittiva } from '../../../shared/spilli.js';
 
 /**
@@ -33,8 +34,8 @@ export const VOCI_GESTITE_SQL = `SELECT pp.punto_chiave FROM punto_partita pp JO
 
 /** Le colonne di `spillo` e se c'è `spillo_voce`: chi legge durante le migrazioni può trovare lo schema di prima. */
 function schemaVoci(): { tabella: boolean; colonna: boolean } {
-  const tabella = !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get();
-  const colonna = !tabella && (prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).some((c) => c.name === 'voce_chiave');
+  const tabella = haTabellaMain(getDb(), 'spillo_voce');
+  const colonna = !tabella && haColonnaMain(getDb(), 'spillo', 'voce_chiave');
   return { tabella, colonna };
 }
 

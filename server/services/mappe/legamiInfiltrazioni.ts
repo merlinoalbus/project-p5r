@@ -14,12 +14,13 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
+import { haTabellaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { idMappa } from './percorsiMappe.js';
 
 /** Vero se la tabella dei legami c'è (dalla 110). */
 export function conLegami(): boolean {
-  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'infiltrazione_area'").get();
+  return haTabellaMain(getDb(), 'infiltrazione_area');
 }
 
 /** Un'infiltrazione che tocca un'Area. */

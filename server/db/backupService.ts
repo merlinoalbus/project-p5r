@@ -4,7 +4,8 @@
 //
 // Gira PRIMA di runMigrations(): ogni migrazione di schema è preceduta
 // da uno snapshot. Usa l'API online-backup di better-sqlite3, l'unica
-// sicura con WAL attivo. Rotazione: ultime 7 copie.
+// sicura con WAL attivo. Rotazione: ultime 7 copie e al più `TETTO_BYTE_COPIE` in tutto, ma le `COPIE_SEMPRE_TENUTE` più recenti restano
+// sempre (L5-10: ogni copia pesa quanto il gioco, centinaia di MB).
 // Se ci sono migrazioni da applicare e la copia fallisce, `runBootBackup` lancia: il boot si ferma (index.ts), perché le
 // migrazioni non hanno marcia indietro. Senza migrazioni in arrivo non si copia nulla.
 // Dalla 079 il file di gioco porta dentro le immagini (centinaia di MB): lo
@@ -33,19 +34,62 @@ export function pulisciGiornaliOrfani(backupsDir: string): void {
   }
 }
 
-/** Tiene le ultime `KEEP_LAST` copie di avvio. Una copia vecchia se ne va con le partite accanto e con i giornali di entrambe
- *  (`-wal`/`-shm`): prima si toglieva solo il `.db`, e i giornali restavano a decine. Esportata per i test. */
-export function ruotaCopieDiAvvio(backupsDir: string): void {
+/** Le copie di avvio che non si tolgono mai per il peso: le più recenti con il gioco leggibile (non vuoto). Sono la rete di sicurezza dei dati. */
+export const COPIE_SEMPRE_TENUTE = 2;
+/** Il peso massimo delle copie di avvio conservate (gioco + partite + giornali di ognuna): oltre, le più vecchie se ne vanno (L5-10).
+ *  Con `gioco.db` di ~415 MB, sette copie erano ~2,9 GB. Le `COPIE_SEMPRE_TENUTE` più recenti restano comunque, anche se da sole superano il tetto. */
+export const TETTO_BYTE_COPIE = 2 * 1024 ** 3;
+
+/** I byte di una copia di avvio: il gioco e le partite accanto con i giornali di entrambe (i file mancanti valgono 0). */
+function pesoDellaCopia(backupsDir: string, nomeGioco: string): number {
+  let byte = 0;
+  for (const nome of [nomeGioco, nomeGioco.replace(/\.db$/, '.partite.db')]) {
+    for (const coda of ['', '-wal', '-shm']) {
+      try { byte += fs.statSync(path.join(backupsDir, `${nome}${coda}`)).size; } catch { /* file assente: 0 */ }
+    }
+  }
+  return byte;
+}
+
+/** Vero se il file di gioco della copia esiste e non è vuoto: una copia vuota non è una rete di sicurezza e non protegge dalla rotazione. */
+function copiaLeggibile(backupsDir: string, nomeGioco: string): boolean {
+  try { return fs.statSync(path.join(backupsDir, nomeGioco)).size > 0; } catch { return false; }
+}
+
+/**
+ * Tiene le copie di avvio più recenti entro due tetti: al più `KEEP_LAST` copie e al più `tettoByte` in tutto. Le prime
+ * `COPIE_SEMPRE_TENUTE` copie con il file di gioco non vuoto non si toccano mai (nemmeno se pesano più del tetto); fra le altre, la prima
+ * che sfora uno dei due tetti toglie anche tutte le più vecchie (una serie continua; l'unico buco possibile è una copia vuota o che sfora
+ * prima di una protetta, perché le due protette valgono più della continuità). Una copia vecchia se ne va con le partite accanto e con
+ * i giornali di entrambe (`-wal`/`-shm`): prima si toglieva solo il `.db`, e i giornali restavano a decine. Esportata per i test.
+ */
+export function ruotaCopieDiAvvio(backupsDir: string, tettoByte: number = TETTO_BYTE_COPIE): void {
   const copie = fs
     .readdirSync(backupsDir)
     .filter((f) => f.startsWith(PREFIX) && f.endsWith('.db') && !f.endsWith('.partite.db'))
     .sort()
     .reverse();
-  for (const vecchia of copie.slice(KEEP_LAST)) {
-    for (const nome of [vecchia, vecchia.replace(/\.db$/, '.partite.db')]) {
+  let protette = 0;
+  let conservate = 0;
+  let byteConservati = 0;
+  let taglia = false;
+  const daTogliere: Array<{ nome: string; byte: number }> = [];
+  for (const nome of copie) {
+    const byte = pesoDellaCopia(backupsDir, nome);
+    if (protette < COPIE_SEMPRE_TENUTE && copiaLeggibile(backupsDir, nome)) {
+      protette++; conservate++; byteConservati += byte;
+      continue;
+    }
+    if (!taglia && (conservate >= KEEP_LAST || byteConservati + byte > tettoByte)) taglia = true;
+    if (taglia) daTogliere.push({ nome, byte });
+    else { conservate++; byteConservati += byte; }
+  }
+  for (const vecchia of daTogliere) {
+    for (const nome of [vecchia.nome, vecchia.nome.replace(/\.db$/, '.partite.db')]) {
       for (const coda of ['', '-wal', '-shm']) fs.rmSync(path.join(backupsDir, `${nome}${coda}`), { force: true });
     }
   }
+  if (daTogliere.length > 0) logger.info({ tolte: daTogliere.map((c) => c.nome), byteTolti: daTogliere.reduce((s, c) => s + c.byte, 0), conservate, byteConservati, tettoByte }, 'rotazione delle copie di avvio');
   pulisciGiornaliOrfani(backupsDir);
 }
 

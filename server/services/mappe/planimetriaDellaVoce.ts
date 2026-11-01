@@ -18,6 +18,7 @@
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 
 /** Una voce di un Palazzo per la regola: la sua infiltrazione, il Palazzo, l'Enigma di cui è un passo e l'aggancio a mano. */
 interface VocePerLaRegola { infiltrazione: string; palazzo: string; contenitore: string | null; aMano: string | null }
@@ -47,10 +48,10 @@ export interface PlanimetriaDellaVoce {
 }
 
 function colonna(db: AppDatabase, tabella: string, nome: string): boolean {
-  return (db.prepare(`PRAGMA main.table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === nome);
+  return haColonnaMain(db, tabella, nome);
 }
 function tabella(db: AppDatabase, nome: string): boolean {
-  return !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
+  return haTabellaMain(db, nome);
 }
 
 /** Legge in blocco voci dei Palazzi, pin, passi degli Enigmi e planimetrie 1 (tutte le letture usano questa e `planimetriaDellaVoce`). */

@@ -9,6 +9,7 @@
 // con un ETag stabile finché la riga non cambia.
 // ============================================================
 
+import { createHash } from 'node:crypto';
 import express, { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyDaUrl, paramsImmagine, queryConfermaPezzi, queryFileImmagine, queryImmagini, queryRimozioneImmagini } from '../schemas/immagini.js';
@@ -26,10 +27,20 @@ router.get('/', validate({ query: queryImmagini }), (req, res) => {
   res.json(elencaImmagini((req.query as { ambito?: string }).ambito));
 });
 
-/** La grafica predefinita nel database, nella forma del manifest degli asset (chiave → URL versionato). */
+/**
+ * La grafica predefinita nel database, nella forma del manifest degli asset (chiave → URL versionato).
+ * L5-08: l'ETag è l'impronta del contenuto che conta (`totale` e `file`: ogni URL porta la versione dell'immagine, quindi basta a dire se
+ * qualcosa è cambiato), NON del corpo intero. Il corpo porta anche `generato`, l'ora della risposta (`nowIso()`): due letture di seguito, senza
+ * nessuna scrittura, hanno corpi diversi, e l'ETag automatico di Express (calcolato sul corpo) non coincideva mai, così il 304 non scattava.
+ * Con l'ETag stabile e `no-cache` (rivalida a ogni richiesta, mai servito dalla cache senza chiedere) un manifest invariato risponde 304 senza
+ * corpo, e una sostituzione si vede subito; prima `no-store` impediva anche di mandare `If-None-Match`.
+ */
 router.get('/manifest', (_req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(manifestoPredefinite());
+  const manifesto = manifestoPredefinite();
+  res.setHeader('Cache-Control', 'private, no-cache');
+  res.setHeader('ETag', `"${createHash('sha1').update(JSON.stringify({ totale: manifesto.totale, file: manifesto.file })).digest('base64url')}"`);
+  // con l'ETag già scelto `res.json` risponde 304 da solo se `If-None-Match` coincide (Express confronta con `req.fresh`)
+  res.json(manifesto);
 });
 
 // Rimozione multipla: tutte le immagini caricate di un ambito (query `ambito`) o di tutti gli ambiti di caricamento; le mappe con

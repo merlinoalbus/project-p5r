@@ -26,6 +26,9 @@ const NOMI_AMBITO: Record<string, string> = {
   skill: 'Nomi delle skill', persona: 'Nomi delle Persona', oggetto: 'Nomi dell’equipaggiamento', termine: 'Termini di gioco',
 };
 
+/** Quanto aspetta la ricerca sul server dopo l'ultima lettera scritta, prima di partire (L5-09; come la ricerca del Diario). */
+const RITARDO_RICERCA_MS = 300;
+
 interface PropsTraduzioniEditor {
   /** Ambito e testo di partenza (da un collegamento, per esempio quello della scheda di una skill): l'editor si apre già filtrato e la pagina scorre fino a qui. */
   ambitoIniziale?: string;
@@ -37,6 +40,15 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
   const ambiti = useCarica(() => getAmbitiTraduzioni(), []);
   const [ambito, setAmbito] = useState(ambitoIniziale ?? 'arcana');
   const [q, setQ] = useState(qIniziale ?? '');
+  // L5-09: il campo segue subito la battuta; la richiesta al server parte con il testo `qRichiesta`, che lo raggiunge dopo una breve pausa (una
+  // richiesta per ogni lettera caricava il server e rifaceva l'elenco di centinaia di voci a ogni tasto). Svuotare il campo, cambiare ambito
+  // o filtro e il collegamento dall'esterno valgono subito.
+  const [qRichiesta, setQRichiesta] = useState(qIniziale ?? '');
+  useEffect(() => {
+    if (q === qRichiesta) return;
+    const t = window.setTimeout(() => setQRichiesta(q), q.trim() ? RITARDO_RICERCA_MS : 0);
+    return () => window.clearTimeout(t);
+  }, [q, qRichiesta]);
   // Con un filtro di partenza la pagina scorre fino a qui. Le sezioni sopra si caricano dopo e spostano la pagina: finché l'utente non scorre da sé
   // o non passano alcuni secondi, a ogni cambio di altezza si scorre di nuovo alla sezione (stesso criterio di «Nascosti dalla guida»).
   const sezione = useRef<HTMLElement>(null);
@@ -55,7 +67,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
     return () => { window.clearTimeout(fine); basta(); for (const e of eventi) window.removeEventListener(e, basta); };
   }, [ambitoIniziale, qIniziale]);
   const [soloUtente, setSoloUtente] = useState(false);
-  const voci = useCarica(() => getTraduzioni({ ambito, q: q.trim() || undefined, soloUtente: soloUtente || undefined }), [ambito, q, soloUtente]);
+  const voci = useCarica(() => getTraduzioni({ ambito, q: qRichiesta.trim() || undefined, soloUtente: soloUtente || undefined }), [ambito, qRichiesta, soloUtente]);
   const [inModifica, setInModifica] = useState<TraduzioneDto | null>(null);
   const [testo, setTesto] = useState('');
   const [testoNuovo, setTestoNuovo] = useState('');
@@ -68,6 +80,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
     if (ambitoIniziale) {
       setAmbito(ambitoIniziale);
       setQ(qIniziale ?? '');
+      setQRichiesta(qIniziale ?? '');
       setSoloUtente(false);
       setInModifica(null);
       setTestoNuovo('');
@@ -75,7 +88,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
   }
   // Il testo cercato dal collegamento non ha ancora una riga di traduzione (solo per gli effetti delle skill, dove il server ne crea una al primo salvataggio):
   // l'editor mostra la voce «nessuna resa» con il campo già pronto per scriverla
-  const mancante: TraduzioneDto | null = ambitoIniziale === 'effettoSkill' && qIniziale && ambito === ambitoIniziale && q === qIniziale && !soloUtente
+  const mancante: TraduzioneDto | null = ambitoIniziale === 'effettoSkill' && qIniziale && ambito === ambitoIniziale && q === qIniziale && qRichiesta === qIniziale && !soloUtente
     && voci.dati && !voci.caricamento && !voci.dati.some((v) => v.chiave === qIniziale)
     ? { ambito, chiave: qIniziale, testo: '', extra: null, fonte: 'seed', updatedAt: '' }
     : null;
@@ -107,9 +120,9 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
       <TitoloSezione>Traduzioni</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
       <div className="flex flex-wrap gap-2 items-center">
-        <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={setAmbito} />
+        <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={(a) => { setAmbito(a); setQRichiesta(q); }} />
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />
-        <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => setSoloUtente((v) => !v)} aria-pressed={soloUtente}>Solo modificate</button>
+        <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => { setSoloUtente((v) => !v); setQRichiesta(q); }} aria-pressed={soloUtente}>Solo modificate</button>
       </div>
       <PageState isLoading={voci.inPrimoCaricamento} error={voci.errore} onRetry={() => void voci.ricarica()}>
         {/* L'elenco scorre con la pagina, non in un riquadro suo (L13: era uno scroll dentro lo scroll, 1991 px in 411/485). Nessun tetto: l'ambito più grande, gli effetti delle skill, ha oggi 512 voci */}
