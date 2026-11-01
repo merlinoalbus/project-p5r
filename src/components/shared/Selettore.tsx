@@ -73,14 +73,19 @@ const STACCO = 2;
 const ALTEZZA_MINIMA_ELENCO = 88;
 
 /** Vero se il rettangolo `r` di `el` è fuori dallo schermo o nascosto da un antenato che taglia il contenuto (scorrevole o con
- *  `overflow: hidden`): il corpo di una finestra scorso fin oltre il pulsante, per esempio. */
+ *  `overflow: hidden`): il corpo di una finestra scorso fin oltre il pulsante, per esempio. Un antenato `position: fixed` (il visore
+ *  delle mappe a schermo intero, con l'editor) esce dagli antenati sopra di lui: quelli non lo tagliano, e la risalita si ferma lì
+ *  (2026-11-01: nell'editor delle mappe il pannello sta fuori dal riquadro di `main`, e i selettori delle condizioni si richiudevano
+ *  appena aperti). */
 function fuoriVista(el: HTMLElement, r: DOMRect, larghezza: number, altezza: number): boolean {
   if (r.bottom <= 0 || r.top >= altezza || r.right <= 0 || r.left >= larghezza) return true;
   for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
     const stile = getComputedStyle(a);
-    if (stile.overflowX === 'visible' && stile.overflowY === 'visible') continue;
-    const c = a.getBoundingClientRect();
-    if (r.bottom <= c.top || r.top >= c.bottom || r.right <= c.left || r.left >= c.right) return true;
+    if (stile.overflowX !== 'visible' || stile.overflowY !== 'visible') {
+      const c = a.getBoundingClientRect();
+      if (r.bottom <= c.top || r.top >= c.bottom || r.right <= c.left || r.left >= c.right) return true;
+    }
+    if (stile.position === 'fixed') break;
   }
   return false;
 }
