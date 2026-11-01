@@ -153,19 +153,25 @@ export function ScortaPersona({ partitaId }: Props) {
                 <li key={p.id} className={`riga-persona ${p.inSquadra ? '' : 'riga-persona--deposito'}`}>
                   <button type="button" className="riga-persona__scelta" aria-haspopup="dialog" onClick={() => setSelezionata(p.id)}
                     aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.inSquadra ? '' : ', in deposito'}: apri la gestione`}>
-                    {/* dentro il pulsante della riga una miniatura non interattiva (un pulsante nel pulsante non è valido): l'ingrandimento sta nel cassetto */}
-                    <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} className="rounded" />
+                    {/* dentro il pulsante della riga una miniatura non interattiva (un pulsante nel pulsante non è valido): l'ingrandimento sta nel cassetto;
+                        88 px e intera (`contieni`), mai ritagliata */}
+                    <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={88} contieni className="rounded" />
                     <span className="riga-persona__testo">
                       <span className="riga-persona__nome">
-                        <span className="truncate">{p.nomeIt}</span>
+                        {/* a 22 px un nome lungo («Collana della Regina») al telefono non sta su una riga: va a capo, mai coi puntini */}
+                        <span className="riga-persona__nome-testo">{p.nomeIt}</span>
                         <span className={`punto-stato ${p.statisticheConfermate ? 'punto-stato--reali' : 'punto-stato--stima'}`} role="img"
                           aria-label={p.statisticheConfermate ? 'Statistiche reali' : 'Statistiche stimate'}
                           title={p.statisticheConfermate ? 'Statistiche lette nel gioco a questo livello' : 'Statistiche stimate'} />
-                        {st === 'aggiornata' && <span className="riga-persona__registrata" title="Registrata nel compendio"><IconaAzione chiave="registra" dimensione={14} /><span className="sr-only">Registrata nel compendio</span></span>}
+                        {st === 'aggiornata' && <span className="riga-persona__registrata" title="Registrata nel compendio"><IconaAzione chiave="registra" dimensione={20} /><span className="sr-only">Registrata nel compendio</span></span>}
                       </span>
+                      {/* l'arcano da solo; «In deposito» è un chip a parte che non si tronca mai: accanto all'arcano se c'è posto, sotto se no */}
                       <span className="riga-persona__arcano">
-                        <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 shrink-0 object-contain" fallback={null} />
-                        <span className="truncate">{p.arcanaNome}{p.inSquadra ? '' : ' · in deposito'}</span>
+                        <span className="riga-persona__arcano-nome">
+                          <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={22} quadrata className="size-[22px] shrink-0 object-contain" fallback={null} />
+                          <span className="truncate">{p.arcanaNome}</span>
+                        </span>
+                        {!p.inSquadra && <span className="chip riga-persona__deposito">In deposito</span>}
                       </span>
                       <span className="riga-persona__skill">
                         {p.skill.map((s) => <QuadratoSkill key={s.slot} elemento={s.elemento} nome={s.nomeIt} />)}
@@ -283,12 +289,12 @@ function IntestazioneCapienza({ quante, capienza }: { quante: number; capienza: 
   );
 }
 
-/** Una skill come piccolo quadrato con l'icona e il colore dell'elemento (il nome sta nel titolo). */
+/** Una skill come quadrato da 28 px con l'icona dell'elemento da 22 px e il suo colore (il nome sta nel titolo). */
 function QuadratoSkill({ elemento, nome }: { elemento: string; nome: string }) {
   const colore = coloreElemento(elemento);
   return (
     <span className="quadrato-skill" title={nome} style={{ borderColor: colore, background: `color-mix(in srgb, ${colore} 18%, transparent)` }}>
-      <AssetImg nome={`elementi/${elemento}`} alt="" decorativa className="w-3.5 h-3.5 object-contain" fallback={<span className="inline-block w-2 h-2 rounded-full" style={{ background: colore }} aria-hidden="true" />} />
+      <AssetImg nome={`elementi/${elemento}`} alt="" decorativa className="size-[22px] object-contain" fallback={<span className="inline-block size-3 rounded-full" style={{ background: colore }} aria-hidden="true" />} />
       <span className="sr-only">{nome}</span>
     </span>
   );

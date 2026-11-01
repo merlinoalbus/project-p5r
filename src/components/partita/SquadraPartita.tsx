@@ -121,7 +121,8 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
    * ciascuno col suo titolo scritto una volta sola: l'impaginazione non cambia con la larghezza,
    * cambia solo se i due numeri stanno affiancati o incolonnati. Nessun bersaglio sotto i 44 px.
    */
-  // L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda diventa una riga da almeno 56 px dentro l'area «Squadra» (niente carta per
+  // L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda diventa una riga da almeno 76 px (ritratti più grandi su richiesta
+  // dell'utente del 01/11, «un po' più grandi», resi a 64 px; prima 56 px con il ritratto da 44) dentro l'area «Squadra» (niente carta per
   // Ladro, titoli «Esperienza» e «Livello» una volta sola in testa all'area, nascosti a vista nelle righe ma letti dai lettori di schermo);
   // se i numeri non stanno accanto al nome vanno a capo sotto. Sotto i 1024 px resta la carta in due fasce.
   const riga = (m: MembroSquadraDto) => {
@@ -129,11 +130,13 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
     return (
       // `lg:relative`: le etichette nascoste a vista (`lg:sr-only`, assolute) si ancorano alla riga, dentro l'area che scorre; ancorate al
       // documento lo allungavano (rilievo F1 della verifica di L10)
-      <li key={m.chiave} className="card flex flex-col gap-3 lg:relative lg:min-h-[56px] lg:shrink-0 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3 lg:gap-y-1 lg:rounded-none lg:border-x-0 lg:border-t-0 lg:border-border-light lg:bg-transparent lg:px-1.5 lg:py-1.5">
+      <li key={m.chiave} className="card flex flex-col gap-3 lg:relative lg:min-h-[76px] lg:shrink-0 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3 lg:gap-y-1 lg:rounded-none lg:border-x-0 lg:border-t-0 lg:border-border-light lg:bg-transparent lg:px-1.5 lg:py-1.5">
         <div className="flex items-center gap-3 lg:min-w-[320px] lg:flex-1">
           {/* Il protagonista **non e' un Confidente**, e il suo ritratto non sta fra i Confidenti: si
               chiama `personaggi/joker`. Chiedendolo come Confidente non lo trovava e restava il vuoto. */}
-          <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={44} />
+          {/* ritratti più grandi su richiesta dell'utente del 01/11 («un po' più grandi»), resi a 64 px; interi (`ImmagineEntita` contiene,
+              mai ritaglia); la riga cresce con loro */}
+          <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={64} />
           <span className="min-w-0 flex-1">
             <span className="block break-words font-semibold testo-15 leading-tight" title={m.nome}>{m.nome}</span>
             <span className="block testo-12 text-text-muted">

@@ -483,7 +483,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
   Letture e giochi, Denaro e squadra, Confidenti, Compendio personale, Persona della partita e Storico da 1024 px (`RIEMPIONO_DA_1024`,
   `scheda-riempi-lg` / `riempi-figli-lg`): la radice della scheda è alta quanto il contenitore (`lg:h-full lg:min-h-0`), comandi e testate
   restano fermi (`lg:shrink-0`) e l'elenco scorre in un'area `lg:area-scorrevole` (in Denaro e squadra la colonna sinistra di 340 px con
-  denaro e oggetti, che scorre tutta per scelta dell'utente del 01/11, e l'area della squadra, con righe da almeno 56 px che a 1024 vanno su
+  denaro e oggetti, che scorre tutta per scelta dell'utente del 01/11, e l'area della squadra, con ritratti resi a 64 px (l'utente li ha chiesti «un po' più grandi») e righe da almeno 76 px che a 1024 vanno su
   due linee perché la colonna è stretta; in Confidenti un'area per gruppo aperto). Le etichette nascoste a vista con
   `lg:sr-only` stanno in una riga posizionata (`lg:relative`): un assoluto fuori dall'area allungherebbe il documento (la regola globale
   `.sr-only { top: 0; left: 0 }` non vale per la variante). Sotto quelle larghezze i contenitori aggiunti sono neutri (`contents` o

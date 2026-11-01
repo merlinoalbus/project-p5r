@@ -198,7 +198,13 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   «Spegni», il pulsante dell'invito col bordo oro e «×1,2» in oro sui pulsanti dei punti. In Denaro e squadra, al posto dello schizzo (denaro
   fermo, solo gli oggetti che scorrono), la colonna di sinistra di 340 px (denaro e oggetti) scorre tutta insieme nella sua area con bordo:
   gli oggetti si vedono bene, il denaro esce scorrendo (scelta dell'utente sugli screenshot a 1280×689, «Variante: colonna intera», 01/11).
-  Le righe dei compagni sono alte almeno 56 px; a 1024 vanno su due linee, perché la colonna della squadra è stretta.
+  Nelle righe dei compagni ritratti più grandi su richiesta dell'utente del 01/11 («un po' più grandi»), resi a 64 px (prima 44), interi;
+  le righe sono alte almeno 76 px; a 1024 vanno su due linee, perché la colonna della squadra è stretta. Nella Scorta righe grandi
+  (scelta dell'utente del 01/11, «Grandi, 2 colonne»): immagine da 88 px intera, nome da 22 px nel carattere display (un nome lungo va
+  a capo, mai coi puntini), arcano con icona da 22 px e testo da 15, skill come quadrati da 28 px con l'icona dell'elemento da 22,
+  livello da 40 px; righe alte 120 px, di più dove skill, nome o il segno del deposito vanno a capo; 2 colonne da 1024 px, 1 sotto. Le
+  Persona in deposito restano attenuate e hanno il chip «In deposito», che non si tronca mai: accanto all'arcano se c'è posto, sotto
+  se no; l'arcano sta da solo.
   Il modulo dei dati della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
 - **Filtri nell'indirizzo (L10-04)**: Compendio, Skill, Glossario, Domande e Cruciverba tengono ricerca e filtri nell'indirizzo, così

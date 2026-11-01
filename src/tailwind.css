@@ -42,6 +42,7 @@
   --testo-17: 1.1333rem;
   --testo-18: 1.2rem;
   --testo-20: 1.3333rem;
+  --testo-22: 1.4667rem;
   --testo-24: 1.6rem;
   --testo-28: 1.8667rem;
   --testo-32: 2.1333rem;
@@ -1125,7 +1126,7 @@
     .pulsante-senza-icona-lg { min-width: 44px; padding: 0 8px; gap: 0; justify-content: center; }
     .pulsante-senza-icona-lg .btn-visivo__icona { display: none; }
   }
-  /* ---- Scheda «Scorta» della partita: capienza in testa, righe compatte in griglia, cassetto della Persona ----
+  /* ---- Scheda «Scorta» della partita: capienza in testa, righe grandi in griglia, cassetto della Persona ----
      Scorre solo la pagina; i comandi stanno nel cassetto (`Modal cassetto`, foglio dal basso sul telefono). */
   .scorta-capienza { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; margin-bottom: 8px; border-radius: var(--radius-md);
     border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 9%, var(--color-bg-secondary)); }
@@ -1137,30 +1138,41 @@
   .scorta-capienza__tacche > i.scorta-capienza__vuota { background: var(--color-border); }
   .scorta-strumenti { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
   .scorta-strumenti__filtri { flex-wrap: wrap; align-items: center; gap: 6px; }
-  /* 1 colonna sul telefono, 2 sul tablet, 3 sul desktop */
-  .griglia-scorta { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr); }
-  @media (min-width: 640px) { .griglia-scorta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 1280px) { .griglia-scorta { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Righe grandi (scelta dell'utente del 01/11, «Grandi, 2 colonne»): immagine 88 px intera, nome 22 px, arcano e skill con icone da
+     22 px, livello grande, righe alte circa 120 px; 1 colonna sul telefono e sul tablet, 2 da 1024 px */
+  .griglia-scorta { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 1024px) { .griglia-scorta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .riga-persona { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); }
   .riga-persona:hover { border-color: var(--color-primary); }
   .riga-persona--deposito { opacity: .6; }
-  .riga-persona__scelta { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 56px; padding: 5px 10px 5px 5px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
+  .riga-persona__scelta { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 118px; padding: 8px 12px 8px 8px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
   .riga-persona__scelta:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-  .riga-persona__testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: var(--testo-14); letter-spacing: .03em; }
+  .riga-persona__testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .riga-persona__nome { display: flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--font-display); font-size: var(--testo-22); line-height: 1.1; letter-spacing: .03em; }
+  .riga-persona__nome-testo { min-width: 0; overflow-wrap: anywhere; }
   /* l'icona dell'arcano davanti al nome, come nella riga dei Confidenti */
-  .riga-persona__arcano { display: flex; align-items: center; gap: 4px; min-width: 0; font-size: var(--testo-12); color: var(--color-text-muted); }
-  .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 2px; }
+  /* l'arcano e il chip «In deposito» vanno a capo come elementi interi (la riga si spezza sulla loro larghezza piena): il chip non si
+     restringe mai, l'arcano si accorcia coi puntini solo se da solo non ci sta */
+  .riga-persona__arcano { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; font-size: var(--testo-15); color: var(--color-text-muted); }
+  .riga-persona__arcano-nome { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+  /* `.chip` viene più sotto e dichiara `white-space: normal`: qui la specificità doppia */
+  .chip.riga-persona__deposito { flex-shrink: 0; white-space: nowrap; }
+  .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 4px; }
   .riga-persona__registrata { display: inline-flex; color: var(--color-primary-testo); flex-shrink: 0; }
   .riga-persona__livello { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 34px; line-height: 1; }
   .riga-persona__livello > span { font-family: var(--font-display); font-size: var(--testo-24); }
   .riga-persona__livello > small { font-size: var(--testo-micro); font-weight: 600; color: var(--color-text-muted); }
   .riga-persona__livello--grande > span { font-size: var(--testo-32); }
+  /* il livello nella riga cresce con lei; nel cassetto resta quello di `--grande` */
+  .riga-persona__scelta > .riga-persona__livello { min-width: 48px; gap: 2px; }
+  .riga-persona__scelta > .riga-persona__livello > span { font-size: var(--testo-40); }
+  .riga-persona__scelta > .riga-persona__livello > small { font-size: var(--testo-12); }
   .punto-stato { display: inline-block; width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
+  .riga-persona__nome > .punto-stato { width: 12px; height: 12px; }
   .punto-stato--reali { background: #2fbf71; }
   .punto-stato--stima { background: var(--color-oro); }
-  .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--color-border); border-radius: 3px; }
-  .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-12); color: var(--color-text-muted); }
+  .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--color-border); border-radius: 4px; }
+  .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 120px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-15); color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
   .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary-testo); }
   /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
