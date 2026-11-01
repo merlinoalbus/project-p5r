@@ -121,11 +121,16 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
    * ciascuno col suo titolo scritto una volta sola: l'impaginazione non cambia con la larghezza,
    * cambia solo se i due numeri stanno affiancati o incolonnati. Nessun bersaglio sotto i 44 px.
    */
+  // L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda diventa una riga da almeno 56 px dentro l'area «Squadra» (niente carta per
+  // Ladro, titoli «Esperienza» e «Livello» una volta sola in testa all'area, nascosti a vista nelle righe ma letti dai lettori di schermo);
+  // se i numeri non stanno accanto al nome vanno a capo sotto. Sotto i 1024 px resta la carta in due fasce.
   const riga = (m: MembroSquadraDto) => {
     const fermo = occupato === m.chiave;
     return (
-      <li key={m.chiave} className="card flex flex-col gap-3">
-        <div className="flex items-center gap-3">
+      // `lg:relative`: le etichette nascoste a vista (`lg:sr-only`, assolute) si ancorano alla riga, dentro l'area che scorre; ancorate al
+      // documento lo allungavano (rilievo F1 della verifica di L10)
+      <li key={m.chiave} className="card flex flex-col gap-3 lg:relative lg:min-h-[56px] lg:shrink-0 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3 lg:gap-y-1 lg:rounded-none lg:border-x-0 lg:border-t-0 lg:border-border-light lg:bg-transparent lg:px-1.5 lg:py-1.5">
+        <div className="flex items-center gap-3 lg:min-w-[320px] lg:flex-1">
           {/* Il protagonista **non e' un Confidente**, e il suo ritratto non sta fra i Confidenti: si
               chiama `personaggi/joker`. Chiedendolo come Confidente non lo trovava e restava il vuoto. */}
           <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={44} />
@@ -151,22 +156,23 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
                 aria-pressed={m.inSquadra} aria-label={`${m.nome} in squadra`}
                 onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { inSquadra: !m.inSquadra }))} />}
         </div>
-        <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-          <label className="editor-mappa__campo min-w-[150px] flex-1">
-            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
+        <div className="flex flex-wrap items-end gap-x-3 gap-y-2 lg:ml-auto lg:flex-nowrap lg:items-center">
+          <label className="editor-mappa__campo min-w-[150px] flex-1 lg:w-24 lg:min-w-0 lg:flex-none">
+            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted lg:sr-only lg:top-0 lg:left-0">Esperienza</span>
             <CampoEsperienza valore={m.esperienza} nome={m.nome} disabilitato={fermo}
               onSalva={(v) => conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v }))} />
           </label>
           <span className="editor-mappa__campo shrink-0">
-            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted">Livello</span>
+            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted lg:sr-only lg:top-0 lg:left-0">Livello</span>
             <span className="flex items-center gap-1.5">
-              <PulsanteVisivo compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="−1"
-                disabled={fermo || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`}
+              {/* da 1024 px, nella riga, −1 e +1 sono la sola scritta (44 × 44, senza l'icona): il nome accessibile e il suggerimento dicono il gesto */}
+              <PulsanteVisivo compatto className="pulsante-senza-icona-lg" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="−1"
+                disabled={fermo || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`} title={`Togli un livello a ${m.nome}`}
                 onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
               <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display testo-20 tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary-testo' : 'text-text-muted'}`}
                 title={m.segnato ? `Livello ${m.livello}` : 'Livello non ancora segnato'}>{m.livello}</span>
-              <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="+1"
-                disabled={fermo || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}
+              <PulsanteVisivo tono="primario" compatto className="pulsante-senza-icona-lg" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="+1"
+                disabled={fermo || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`} title={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}
                 onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: 1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
             </span>
           </span>
@@ -178,7 +184,13 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
   return (
     <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
       {dati && (
-        <div className="flex flex-col gap-4">
+        // L10-01 (schizzi approvati, 2026-11-01): da 1024 px due colonne alte quanto la schermata, a sinistra denaro e oggetti, a destra la
+        // squadra in righe dentro la sua area. La colonna sinistra scorre tutta insieme nella sua area con bordo: il denaro (testo e comandi)
+        // è alto 330–350 px e alle altezze reali (657–690) un elenco degli oggetti a parte sotto di lui resterebbe di 40–110 px, meno di due
+        // righe. Sotto i 1024 px una colonna sola che scorre con la pagina, come prima (i due contenitori di colonna lì sono `contents`: non
+        // aggiungono niente all'impaginazione).
+        <div className="flex flex-col gap-4 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-3">
+          <div className="contents lg:flex lg:min-h-0 lg:flex-col lg:gap-3 lg:area-scorrevole lg:p-2">
           {/* Quanto c'è sopra, come si cambia sotto. Prima erano sulla stessa riga con uno spaziatore
               elastico in mezzo, e su ogni schermo più stretto di un monitor restava una voragine fra
               la cifra e i comandi. */}
@@ -213,15 +225,23 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
 
           {/* L13 (ondata 3): gli oggetti del catalogo che la partita ha ricevuto (voci del Diario, Richieste completate), accanto al denaro */}
           <OggettiOttenuti partitaId={partitaId} />
+          </div>
 
-          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Ladri Fantasma">
-            {dati.membri.map(riga)}
-          </ul>
+          <div className="contents lg:flex lg:min-h-0 lg:flex-col lg:gap-2 lg:rounded-md lg:border lg:border-border lg:bg-bg-secondary lg:p-3">
+            {/* la testa dell'area (solo da 1024 px): quanti Ladri e i titoli delle due colonne di numeri, scritti una volta */}
+            <div className="hidden lg:flex lg:shrink-0 lg:items-center lg:gap-3 testo-12 uppercase tracking-[0.08em] text-text-muted" aria-hidden="true">
+              <span>Squadra · {dati.membri.length}</span>
+              <span className="ml-auto">Esperienza · livello</span>
+            </div>
+            <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2 lg:flex lg:min-h-[180px] lg:flex-1 lg:flex-col lg:gap-0 lg:area-scorrevole lg:px-1.5" aria-label="Ladri Fantasma">
+              {dati.membri.map(riga)}
+            </ul>
 
-          <p className="m-0 testo-12 text-text-muted">
-            Il livello del Protagonista è lo stesso che il calcolatore di fusione usa per sapere quali Persona puoi evocare:
-            cambiarlo qui lo aggiorna anche lì.
-          </p>
+            <p className="m-0 testo-12 text-text-muted lg:shrink-0">
+              Il livello del Protagonista è lo stesso che il calcolatore di fusione usa per sapere quali Persona puoi evocare:
+              cambiarlo qui lo aggiorna anche lì.
+            </p>
+          </div>
         </div>
       )}
     </PageState>

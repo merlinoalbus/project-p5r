@@ -112,37 +112,52 @@ export function PersonaDellaPartita({ partitaId }: Props) {
       error={tutte.errore ?? possedute.errore ?? compendio.errore}
       onRetry={() => { void tutte.ricarica(); void possedute.ricarica(); void compendio.ricarica(); }}
     >
-      <div className="flex flex-wrap items-center gap-3 mb-3">
+      {/* L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza; conteggi, ricerca e filtri stanno in una fila ferma
+          (le due righe di prima diventano una: `lg:contents`; a 1024 px, se non ci stanno, vanno a capo) e l'elenco scorre nella sua area con
+          bordo, su due colonne di righe da 44 px, con «Mostra altre» in fondo all'area. Sotto i 1024 px tutto come prima, con la pagina che
+          scorre (lo stacco `md:gap-1.5` è quello che la colonna della pagina dava ai blocchi quando erano suoi figli diretti) */}
+      <div className="flex flex-col md:gap-1.5 lg:h-full lg:min-h-0">
+      <div className="contents lg:mb-3 lg:flex lg:shrink-0 lg:flex-wrap lg:items-center lg:gap-x-2 lg:gap-y-2">
+      <div className="flex flex-wrap items-center gap-3 mb-3 lg:contents">
         <span className="chip">{inScortaN} in scorta</span>
         <span className="chip">{registrateN} registrate su {totale}</span>
-        <CampoRicerca valore={q} onCambia={(v) => { setQ(v); setQuante(PASSO); }} segnaposto="Cerca Persona…" />
+        <CampoRicerca className="lg:min-w-[160px]" valore={q} onCambia={(v) => { setQ(v); setQuante(PASSO); }} segnaposto="Cerca Persona…" />
       </div>
-      <div className="flex flex-wrap items-end gap-3 mb-3">
+      <div className="flex flex-wrap items-end gap-3 mb-3 lg:contents">
         <Selettore compatto etichetta="Arcano" valore={arcano} vuoto="Tutti gli arcani" opzioni={arcani} onCambia={(k) => { setArcano(k); setQuante(PASSO); }} />
         <Selettore compatto etichetta="Scorta" valore={scorta} opzioni={FILTRO_SCORTA} ricerca="mai" onCambia={(k) => { setScorta(k); setQuante(PASSO); }} />
         <Selettore compatto etichetta="Compendio personale" valore={registrazione} opzioni={FILTRO_REGISTRAZIONE} ricerca="mai" onCambia={(k) => { setRegistrazione(k); setQuante(PASSO); }} />
         <span className="testo-13 text-text-muted">{lista.length} Persona</span>
       </div>
+      </div>
       {lista.length === 0 ? (
-        <p className="card testo-13 text-text-muted m-0">Nessuna Persona corrisponde ai filtri.</p>
+        <p className="card testo-13 text-text-muted m-0 lg:shrink-0">Nessuna Persona corrisponde ai filtri.</p>
       ) : (
-        <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light">
+        <div className="contents lg:flex lg:min-h-[180px] lg:flex-1 lg:flex-col lg:area-scorrevole lg:px-2 lg:py-1">
+        <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light lg:grid lg:grid-cols-2 lg:gap-x-4 lg:divide-y-0 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-0">
           {visibili.map((p) => {
             const esemplare = postedutaPer.get(p.id);
             const c = istantaneaPer.get(p.id);
             const { registrata, datata } = statoDi(p.id);
             return (
-              <li key={p.id} className="flex items-center gap-2 py-1 flex-wrap">
+              <li key={p.id} className="flex items-center gap-2 py-1 flex-wrap lg:min-h-[44px] lg:border-b lg:border-border-light lg:py-0">
                 <span className="w-9 text-right testo-12 text-text-muted" title="Livello base">Liv. {p.livello}</span>
-                <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 min-w-[140px]">
+                {/* nome italiano e nome originale come due pezzi della riga, staccati e a capo se serve (lo spazio davanti all'originale, in
+                    un contenitore flex, spariva: «MandragoraMandrake») */}
+                <Link to={`/compendio/persona/${p.id}`} className="touch flex flex-wrap items-center gap-x-1.5 font-semibold no-underline text-text hover:text-primary-testo flex-1 min-w-[140px] lg:min-w-[96px] break-words">
                   {p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}
                 </Link>
                 <span className="chip">{p.arcanaNome}</span>
+                {/* L10-01: il segno «In scorta» compare solo quando è vero; «Non in scorta», ripetuto su quasi ogni riga, non informava più del
+                    conteggio in testa e del filtro «Scorta». Resta detto ai lettori di schermo, così la riga dice lo stato anche a loro.
+                    «In scorta» è in oro come nello schizzo, distinto dal rosso di «Registrata» */}
                 {esemplare
-                  ? <span className="chip chip--attivo" title={esemplare.inSquadra ? 'È nella tua scorta' : 'È nella tua scorta, in deposito'}>In scorta · Liv. {esemplare.livello}</span>
-                  : <span className="chip" title="Non è nella tua scorta">Non in scorta</span>}
+                  ? <span className="chip chip--oro" title={esemplare.inSquadra ? 'È nella tua scorta' : 'È nella tua scorta, in deposito'}>In scorta · Liv. {esemplare.livello}</span>
+                  : <span className="sr-only">Non in scorta</span>}
+                {/* L10-01 (schizzo approvato): «Registrata · Liv. N», come «In scorta · Liv. N»; che si tratti del compendio personale lo dicono
+                    il conteggio in testa, il filtro e il suggerimento. Più corto, la riga sta su una linea nelle due colonne */}
                 {registrata
-                  ? <span className="chip chip--attivo" title="Registrata nel compendio personale">{c?.livelloRegistrato != null ? `Registrata nel compendio · Liv. ${c.livelloRegistrato}` : 'Registrata nel compendio'}</span>
+                  ? <span className="chip chip--attivo" title="Registrata nel compendio personale">{c?.livelloRegistrato != null ? `Registrata · Liv. ${c.livelloRegistrato}` : 'Registrata'}</span>
                   : <span className="chip" title="Non registrata nel compendio personale">Non registrata</span>}
                 {datata && <span className="chip" title="L'esemplare in scorta è cambiato dopo la registrazione: livello, abilità, bonus o tratto sono diversi">Registrazione da aggiornare</span>}
                 {esemplare && (!registrata || datata) && (
@@ -152,12 +167,14 @@ export function PersonaDellaPartita({ partitaId }: Props) {
             );
           })}
         </ul>
-      )}
-      {lista.length > visibili.length && (
-        <div className="flex justify-center mt-3">
-          <PulsanteVisivo icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo={<>Mostra altre ({lista.length - visibili.length})</>} onClick={() => setQuante((n) => n + PASSO)} />
+        {lista.length > visibili.length && (
+          <div className="flex justify-center mt-3 lg:shrink-0 lg:pb-2">
+            <PulsanteVisivo icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo={<>Mostra altre ({lista.length - visibili.length})</>} onClick={() => setQuante((n) => n + PASSO)} />
+          </div>
+        )}
         </div>
       )}
+      </div>
     </PageState>
   );
 }

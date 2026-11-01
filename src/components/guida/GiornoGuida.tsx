@@ -642,8 +642,9 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     // fascia di arrivo vuota o chiusa: non ha righe su cui mostrare la linea, quindi è lei a evidenziarsi (in una chiusa la voce va in fondo)
     const bersagloVuoto = riordino.trascinato !== null && riordino.rilascio?.lista === f && (voci.length === 0 || !vista);
     const idCorpo = `${idGiorno}-${f}`;
+    // `sezione-fascia`: solo un aggancio (nessuno stile proprio): la scheda «Oggi» della Partita la stringe sotto i 768 px (L10-02, tailwind.css)
     return (
-      <section key={f} ref={riordino.lista(f)} className={`card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''} ${bersagloVuoto ? 'ring-2 ring-primary' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
+      <section key={f} ref={riordino.lista(f)} className={`sezione-fascia card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''} ${bersagloVuoto ? 'ring-2 ring-primary' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           {/* C9: il nome della fascia apre e chiude le sue voci; il conto «fatte su tutte» e «Adesso» restano a vista anche a fascia chiusa */}
           <FasciaGiornata fascia={f} attiva={fasciaCorrente === f} dettaglio={partitaId && daFare.length > 0 ? `${fatte} su ${daFare.length}` : undefined}

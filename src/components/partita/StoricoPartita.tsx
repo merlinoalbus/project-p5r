@@ -112,10 +112,14 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
     }
   };
 
+  // L10-01 (schizzi approvati, 2026-11-01): nella scheda (non nel riquadro compatto) da 1024 px la scheda riempie l'altezza; filtri e comandi
+  // della selezione restano fermi, le voci e «Carica altri» scorrono in un'area con bordo e ogni voce sta su una riga (titolo · dettaglio · tipo,
+  // a capo se lunga). Sotto i 1024 px scorre la pagina, come prima.
+  const riempi = !compatto;
   return (
-    <div className="flex flex-col gap-3">
+    <div className={`flex flex-col gap-3 ${riempi ? 'lg:h-full lg:min-h-0' : ''}`}>
       {!compatto && (
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 lg:shrink-0">
           <button type="button" className={`chip chip--icona touch ${gruppo === 'tutti' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('tutti')} aria-pressed={gruppo === 'tutti'}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
           {GRUPPI_EVENTO.map((g) => (
             <button key={g.chiave} type="button" className={`chip chip--icona touch ${gruppo === g.chiave ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.chiave)} aria-pressed={gruppo === g.chiave}>{ICONE_GRUPPO[g.chiave] ?? <IconaAzione chiave="tutti" dimensione={14} />}{g.nome}</button>
@@ -131,28 +135,34 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
           : <EmptyState illustrazione="vuoto-storico" title="Nessun evento" hint={gruppo === 'tutti' ? 'Le modifiche a scorta, Confidenti, Doti, compendio e Stanza di Velluto vengono registrate automaticamente.' : 'Nessun evento in questo gruppo.'} />
       )}
       {!compatto && eventi && eventi.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 testo-12" role="group" aria-label="Selezione multipla">
+        <div className="flex flex-wrap items-center gap-2 testo-12 lg:shrink-0" role="group" aria-label="Selezione multipla">
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona tutte le voci visibili" onClick={() => setSelezionati(Object.fromEntries(eventi.map((e) => [e.id, true as const])))} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Deseleziona" disabled={idSelezionati.length === 0} onClick={() => setSelezionati({})} />
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Elimina selezionate (${idSelezionati.length})`} disabled={idSelezionati.length === 0 || eliminazioneMultipla} onClick={() => void eliminaSelezionati()} />
         </div>
       )}
+      {/* sotto i 1024 px (e nel riquadro compatto) il contenitore non c'è (`contents`): elenco e «Carica altri» restano figli della colonna */}
+      {((eventi && eventi.length > 0) || (!compatto && prossimo !== null)) && (
+      <div className={riempi ? 'contents lg:flex lg:min-h-[180px] lg:flex-1 lg:flex-col lg:gap-3 lg:area-scorrevole lg:px-2 lg:pb-2' : 'contents'}>
       {eventi && eventi.length > 0 && (
         <ol className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Eventi della partita">
           {eventi.map((e) => (
             // Sul telefono (sotto i 640 px) la riga va su due righe: sopra casella, data, miniatura ed «Elimina», sotto il testo a tutta
             // larghezza (prima casella 44 + data 92 + miniatura 40 + pulsante 44 + spazi lasciavano ~75 px al titolo: una parola per riga a 375 px).
             // Da 640 px la riga è quella di sempre, tutta su una linea (`sm:flex-nowrap`, il testo torna al suo posto con `sm:order-none`).
-            <li key={e.id} className={`py-2 flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-1 testo-13 ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
+            // L10-01: nella scheda, da 1024 px, titolo, dettaglio e tipo stanno su una riga separati da « · » (a capo se lunghi) e la riga è
+            // centrata in altezza; sotto, le tre righe di prima.
+            <li key={e.id} className={`py-2 flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-1 testo-13 ${riempi ? 'lg:min-h-[52px] lg:items-center lg:py-1' : ''} ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
               {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 */}
               {!compatto && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} /></label>}
               <time dateTime={e.createdAt} className="max-sm:flex-1 sm:shrink-0 sm:w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
               {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} />}
               <div className="max-sm:order-last max-sm:basis-full flex-1 min-w-0">
                 {/* «conteggi»: lo storico vecchio «+1 nota» diventa «♪», ma «Fascino +3 (♪♪) da segnare nelle Doti» resta: lì +3 sono punti */}
-                <div className="font-semibold break-words"><TestoNote testo={e.titolo} daParole="conteggi" /></div>
-                {e.dettaglio && <div className="text-text-secondary"><TestoNote testo={e.dettaglio} daParole="conteggi" /></div>}
-                <div className="testo-12 text-text-muted">
+                <div className={`font-semibold break-words ${riempi ? 'lg:inline' : ''}`}><TestoNote testo={e.titolo} daParole="conteggi" /></div>
+                {e.dettaglio && <div className={`text-text-secondary ${riempi ? 'lg:inline' : ''}`}>{riempi && <span className="hidden lg:inline" aria-hidden="true"> · </span>}<TestoNote testo={e.dettaglio} daParole="conteggi" /></div>}
+                <div className={`testo-12 text-text-muted ${riempi ? 'lg:inline' : ''}`}>
+                  {riempi && <span className="hidden lg:inline" aria-hidden="true"> · </span>}
                   {e.tipoNome}
                   {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary-testo">{e.personaNomeIt}</Link></>}
                 </div>
@@ -163,9 +173,11 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
         </ol>
       )}
       {!compatto && prossimo !== null && (
-        <div className="flex justify-center">
+        <div className="flex justify-center lg:shrink-0">
           <PulsanteVisivo icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo={caricamentoAltri ? 'Caricamento…' : 'Carica altri'} disabled={caricamentoAltri} onClick={() => void caricaAltri()} />
         </div>
+      )}
+      </div>
       )}
     </div>
   );

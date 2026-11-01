@@ -155,15 +155,19 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   memoria e di processi su ogni container, frontend del rilascio in sola lettura, guardia intera del bundle nella costruzione dell'immagine;
   lo User-Agent senza il nome utente (D17). Non fatti per D11: intestazioni nell'nginx della preparazione, limite di frequenza e tetto di
   righe nel rilascio. Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
-- L10-05, prima parte fatta (D6): «Annulla ultimo» del cassetto del Confidente letto dallo storico, resta dopo un ricaricamento. Da fare la
-  seconda parte (un segno ben visibile quando l'invito ×1,2 è acceso), dopo lo schizzo approvato.
+- L10-01, L10-02, L10-05 fatti, dagli schizzi approvati: da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
+  partita e Storico stanno in una schermata (scorre solo l'elenco, nella sua area; in Denaro e squadra la colonna di denaro e oggetti scorre tutta,
+  scelta dell'utente del 01/11, e a 1024 le righe dei compagni vanno su due linee); a 375 px la prima voce di «Oggi» sale da 778 a 720
+  («Guida completa» come pulsante-icona nella riga dei giorni, sezione della fascia con 8 px di imbottitura); «Annulla ultimo» del cassetto del
+  Confidente letto dallo storico e, con l'invito SMS acceso, la fascia oro ferma in cima al cassetto con «Spegni», il bordo oro sul pulsante e
+  «×1,2» sui pulsanti dei punti.
 - L10-09 fatto (D18, schizzo approvato): «Registra una visita» della Pesca in tre passi (Quando, Cosa hai pescato, Riepilogo), giorno e
   fascia della partita già messi, ordine calcolato con «Cambia», domanda sul conto delle attività solo se ci sono visite contate senza
   dettaglio, pesci a contatore, il resto in «Altri dettagli», niente spunta di conferma; «Aggiungi a questa visita già segnata» è un comando
   della visita. Le frasi dell'anteprima della pesca dette dal server in parole da giocatore.
 - Da applicare: le visite di pesca del Diario si registrano ancora con il modulo di prima (17 campi e spunta); usare il foglio in tre passi
   va deciso da Roberto (nel Diario la domanda sul conto andrebbe lasciata obbligatoria).
-- Aperti: L8 (le voci sopra), L10 (le proposte con schizzo approvato, D20, e la seconda parte di L10-05) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Aperti: L8 (le voci sopra), L10 (L10-03, L10-04, L10-08, L10-10 con schizzo approvato, D20) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

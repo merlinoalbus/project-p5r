@@ -44,7 +44,9 @@ export function OggiPartita({ partita, riempi, onGiorno }: Props) {
       {oggi.lettaAlle !== null && <AvvisoGuidaVecchia alle={oggi.lettaAlle} causa={oggi.causaLettura} onRiprova={() => void oggi.ricarica()} />}
       <PageState isLoading={oggi.caricamento} error={oggi.errore} causa={oggi.causaErrore} onRetry={() => void oggi.ricarica()}>
         {oggi.indice && oggi.giorno && (
-          <div className={`grid grid-cols-1 gap-4 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
+          // `oggi-partita`: la scheda «Oggi» della Partita (la Home usa la stessa colonna della guida, ma non questa radice): le regole del
+          // telefono di L10-02 (riga dei giorni su una linea, sezione della fascia con 8 px di imbottitura) valgono solo qui, in tailwind.css
+          <div className={`oggi-partita grid grid-cols-1 gap-4 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
             <OggiGuida oggi={oggi} riempi={riempi} />
             <OggiMappa oggi={oggi} riempi={riempi} />
           </div>

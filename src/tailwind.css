@@ -1096,11 +1096,27 @@
   .blocco-confidente { display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border: 1px dashed var(--color-text-muted); }
 
   /* ---- Scheda «Confidenti» della partita: schede compatte in griglia + cassetto di dettaglio ----
-     Scorre solo la pagina; il dettaglio sta nel cassetto (`.modal-content--cassetto`), che mentre è aperto è l'unica area che scorre.
+     Sotto i 1024 px scorre solo la pagina; da 1024 px la scheda riempie l'altezza e scorrono solo le schede del gruppo aperto, nella loro area
+     (L10-01). Il dettaglio sta nel cassetto (`.modal-content--cassetto`), che mentre è aperto è l'unica area che scorre.
      Una barra sola alla volta, mai due affiancate né una dentro l'altra. */
   /* le schede dei Confidenti in griglia: una colonna sul telefono, poi quante ne stanno da 300 px (2 sul tablet, 3–5 sul desktop);
      sotto i 300 px nome e OGGI non ci stavano più accanto all'anello del rango */
   .griglia-confidenti { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  /* L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza e le schede stanno in un'area che scorre; più colonne
+     (3 a 1024, 4 da 1280) perché ne entrino di più. Nelle colonne strette nome e stato vanno a capo per intero, mai coi puntini
+     (`lg:line-clamp-none` in `RigaConfidente`) */
+  @media (min-width: 1024px) {
+    .griglia-confidenti { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1280px) {
+    .griglia-confidenti { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  /* L10-01 (schizzo approvato): da 1024 px, nelle righe della squadra, −1 e +1 sono la sola scritta in un pulsante da 44 × 44 (l'icona del
+     segno ripeteva la scritta e allargava la riga oltre la colonna); il nome accessibile e il suggerimento dicono il gesto */
+  @media (min-width: 1024px) {
+    .pulsante-senza-icona-lg { min-width: 44px; padding: 0 8px; gap: 0; justify-content: center; }
+    .pulsante-senza-icona-lg .btn-visivo__icona { display: none; }
+  }
   /* ---- Scheda «Scorta» della partita: capienza in testa, righe compatte in griglia, cassetto della Persona ----
      Scorre solo la pagina; i comandi stanno nel cassetto (`Modal cassetto`, foglio dal basso sul telefono). */
   .scorta-capienza { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; margin-bottom: 8px; border-radius: var(--radius-md);
@@ -1151,6 +1167,27 @@
   @container (min-width: 620px) {
     .dettaglio-confidente__colonne { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "testa risposte" "registra risposte" "altro risposte"; }
   }
+  /* ---- L10-05 (schizzo approvato, 2026-11-01): l'invito SMS acceso nel cassetto del Confidente ----
+     Vale per tutti i Confidenti finché non si spegne: acceso, una fascia oro ferma fra l'intestazione del cassetto e il corpo che scorre
+     (`Modal fascia`), il pulsante «Invito SMS» col bordo oro (non il rosso dei moltiplicatori di Persona ed esami) e un piccolo segno
+     «×1,2» sui pulsanti dei punti. L'oro resta distinto dalla targa «Oggi» accanto al nome (cartellino pieno, testo scuro): qui una fascia a
+     tutta larghezza su fondo oro tenue, col bordo sinistro spesso. */
+  .fascia-invito { flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 20px 4px; padding: 6px 6px 6px 12px; min-height: 56px;
+    border: 1px solid var(--color-oro); border-left-width: 4px; border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-oro) 16%, var(--color-bg-secondary)); }
+  .fascia-invito__icona { display: inline-flex; width: 28px; height: 28px; flex-shrink: 0; color: var(--color-oro); }
+  .fascia-invito__icona > img, .fascia-invito__icona > svg { width: 100%; height: 100%; object-fit: contain; }
+  .fascia-invito__testo { flex: 1 1 200px; min-width: 0; font-size: var(--testo-13); line-height: 1.3; color: var(--color-text); }
+  .fascia-invito__testo strong { color: var(--color-oro); }
+  .fascia-invito__titolo { font-family: var(--font-display); font-weight: 400; font-size: var(--testo-18); text-transform: uppercase; letter-spacing: .03em; }
+  .fascia-invito > .btn { margin-left: auto; }
+  @media (max-width: 767px) { .fascia-invito { margin: 0 12px 4px; } }
+  .btn.btn-primary.btn-visivo--invito, .btn.btn-primary.btn-visivo--invito:hover:not(:disabled):not([aria-disabled="true"]) { --btn-bordo: var(--color-oro);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-oro) 55%, transparent)); }
+  .btn.btn-visivo--invito::after { inset: 2px; }
+  /* il segno «×1,2» dentro un pulsante dei punti: un `chip chip--oro` (come nello schizzo) più stretto, 12 px; il fondo del chip è scuro,
+     quindi resta leggibile anche sul rosso del pulsante */
+  .chip.segno-invito { margin-left: 4px; padding: 1px 6px; font-family: var(--font-sans); font-size: var(--testo-12); font-weight: 700; line-height: 1.25;
+    letter-spacing: 0; text-transform: none; vertical-align: middle; }
   /* etichetta breve davanti a una fila di comandi («Moltiplicatori», «Risposta») */
   .etichetta-campo-confidente { font-size: var(--testo-12); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
   /* intestazione di un gruppo: tutta la riga è il pulsante che apre e chiude */
@@ -1712,6 +1749,20 @@
      182 px): ~300 px in tutto, dentro la colonna più stretta (325 px, la Home sul tablet a 768 px); se mai non ci
      stesse, le icone vanno a capo tutte insieme invece di schiacciare il testo. */
   .momento-meteo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  /* ---- L10-02 (schizzo approvato, 2026-11-01): la scheda «Oggi» della Partita sul telefono ----
+     A 375 px «Guida completa» andava da sola su una seconda riga (riga dei giorni 94 px) e la prima voce del Diario cominciava a 778, sotto la
+     barra inferiore. Sotto i 768 px: «Guida completa» diventa un pulsante-icona da 44 × 44 nella riga dei giorni (la scritta resta per i lettori
+     di schermo, il suggerimento al passaggio la dice), i pezzi della riga si accostano di 2 px (‹, data, ›, «Oggi nella partita» e il libro:
+     321 px + 8 di stacchi, dentro i 333 che restano anche con la barra di scorrimento della pagina), e la sezione della fascia ha 8 px di
+     imbottitura invece di 16 (la voce è più larga e va meno a capo). Solo nella Partita (`.oggi-partita`): la Home e la guida completa non
+     cambiano. Lo stacco della riga sta qui e non in un'utility, perché la regola del telefono lo possa cambiare. */
+  .fila-giorni-oggi { gap: 6px; }
+  @media (max-width: 767px) {
+    .oggi-partita .fila-giorni-oggi { gap: 2px; }
+    .oggi-partita .pulsante-guida-completa { width: 44px; padding: 0; gap: 0; justify-content: center; }
+    .oggi-partita .pulsante-guida-completa .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .oggi-partita .sezione-fascia { padding: 8px; }
+  }
   .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: var(--testo-13); white-space: nowrap; flex-shrink: 0; }
   .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
   .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }

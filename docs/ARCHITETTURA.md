@@ -447,6 +447,19 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 - Le pagine si caricano alla prima visita con un `loader` di precarico (`pagina` in `src/router.tsx`): se il file non arriva, si resta dove si era e si segnala la «nuova versione» (`versioneStore`).
 - Immagini: una regola sola per le mappe (§5 ter); per le entità `ImmagineEntita` mostra il file caricato per (ambito, chiave), altrimenti l'asset predefinito, altrimenti le iniziali. Grafica predefinita: `public/asset/` → manifest generato dal plugin Vite → `assetStore` → `AssetImg`/`useAsset` con la preferenza `graficaPredefinita`; ogni punto ha un fallback, l'app funziona senza alcun asset.
 - Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`); `overflow-wrap: anywhere` sul body.
+- Pagina Partita in una schermata (`PartitaPage`): «Oggi» e «Doti sociali» riempiono l'altezza da 768 px (`scheda-riempi`, `riempi-figli`);
+  Letture e giochi, Denaro e squadra, Confidenti, Compendio personale, Persona della partita e Storico da 1024 px (`RIEMPIONO_DA_1024`,
+  `scheda-riempi-lg` / `riempi-figli-lg`): la radice della scheda è alta quanto il contenitore (`lg:h-full lg:min-h-0`), comandi e testate
+  restano fermi (`lg:shrink-0`) e l'elenco scorre in un'area `lg:area-scorrevole` (in Denaro e squadra la colonna sinistra di 340 px con
+  denaro e oggetti, che scorre tutta per scelta dell'utente del 01/11, e l'area della squadra, con righe da almeno 56 px che a 1024 vanno su
+  due linee perché la colonna è stretta; in Confidenti un'area per gruppo aperto). Le etichette nascoste a vista con
+  `lg:sr-only` stanno in una riga posizionata (`lg:relative`): un assoluto fuori dall'area allungherebbe il documento (la regola globale
+  `.sr-only { top: 0; left: 0 }` non vale per la variante). Sotto quelle larghezze i contenitori aggiunti sono neutri (`contents` o
+  senza classi attive) e scorre la pagina. Le regole del telefono della scheda «Oggi» (L10-02) valgono solo dentro `.oggi-partita`, la radice
+  di `OggiPartita`: la Home usa la stessa `OggiGuida` senza cambiare. `Modal` ha una `fascia` facoltativa, ferma fra intestazione e corpo:
+  il cassetto del Confidente la usa per l'invito SMS acceso (`ConfidentiPartita`, `fascia-invito` dentro un contenitore `role="status"`
+  sempre presente, che la annuncia all'accensione), col moltiplicatore da `MOLTIPLICATORE_INVITO` / `testoMoltiplicatore`; «Spegni» riporta
+  il fuoco all'interruttore «Invito SMS» (`interruttore-invito-sms`) o, nella Scheda completa, alla finestra del cassetto; `DettaglioConfidente` riceve `invito` per il segno «×1,2» sui pulsanti dei punti.
 - Meccaniche di gioco nel tracker: Doti = note→punti con soglie dei 5 ranghi; Confidenti = note→punti verso il rango successivo (`docs/riferimenti/confidenti-punti.md`); `src/utils/punti.ts` replica la formula per l'anteprima.
 
 ## 7 bis. Le due istanze: preparazione e rilascio

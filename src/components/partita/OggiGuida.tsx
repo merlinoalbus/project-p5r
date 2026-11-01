@@ -30,7 +30,9 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
   if (!g || !indice) return null;
   const colonna = (
     <div className={`flex flex-col gap-2 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
-      <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+      {/* L10-02 (schizzo approvato, 2026-11-01): nella scheda «Oggi» della Partita, sotto i 768 px, «Guida completa» è un pulsante-icona da
+          44 × 44 (nome accessibile e suggerimento «Guida completa») e la riga dei giorni sta su una linea sola (`.oggi-partita`, tailwind.css) */}
+      <div className="fila-giorni-oggi flex flex-wrap items-center shrink-0">
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => oggi.vaiAlGiorno(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
         <span className="font-display testo-20 uppercase">{dataGiocoTesto(g.giorno)}</span>
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => oggi.vaiAlGiorno(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
@@ -38,7 +40,8 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
           ? <span className="chip chip--attivo">Oggi nella partita</span>
           : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Segna come giorno corrente" disabled={oggi.occupato} onClick={() => void oggi.segnaCorrente()} />}
         {indice.dataCorrente && indice.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => oggi.vaiAlGiorno(indice.dataCorrente)} />}
-        <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa" />
+        <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="pulsante-guida-completa ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa"
+          aria-label="Guida completa" title="Guida completa" />
       </div>
       {/* L1-08: le operazioni senza conferma sicura (che spengono la casella di una voce) si completano da qui, come nella guida completa */}
       <GestiPartita partitaId={oggi.partitaId} contestoChiave={`${oggi.partitaId}:${g.giorno}`} onCambiato={() => oggi.ricarica()} />

@@ -50,21 +50,26 @@ export function CompendioPersonale({ partitaId }: Props) {
 
   return (
     <PageState isLoading={tutte.inPrimoCaricamento || registrate.inPrimoCaricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
-      <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3">
+      {/* L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza, i comandi restano fermi in una riga e l'elenco scorre
+          nella sua area con bordo, su due colonne di righe da 44 px; sotto i 1024 px una colonna che scorre con la pagina, come prima (lo
+          stacco `md:gap-1.5` è quello che la colonna della pagina dava ai due blocchi quando erano suoi figli diretti) */}
+      <div className="flex min-w-0 flex-col md:gap-1.5 lg:h-full lg:min-h-0">
+      <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3 lg:shrink-0">
         <TesseraKpi className="shrink-0" etichettaSopra segno="completati" etichetta="Completamento" valore={`${totale ? Math.round((fatte / totale) * 100) : 0}%`} nota={`${fatte} di ${totale}`} />
         <div className="flex-1 min-w-[min(100%,180px)] flex"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" /></div>
         <button type="button" className={`chip chip--icona touch shrink-0 ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
       </div>
-      <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light min-w-0 max-w-full overflow-hidden">
+      <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light min-w-0 max-w-full overflow-hidden lg:grid lg:min-h-[180px] lg:flex-1 lg:grid-cols-2 lg:content-start lg:gap-x-4 lg:divide-y-0 lg:area-scorrevole lg:px-2 lg:py-1">
         {lista.map((p) => {
           const r = setRegistrate.get(p.id);
           return (
-            <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-0 py-1 min-w-0">
+            <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-0 py-1 min-w-0 lg:min-h-[44px] lg:border-b lg:border-border-light lg:py-0">
               <label className="touch flex items-center justify-center cursor-pointer shrink-0">
                 <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nomeIt} registrata`} />
               </label>
               <span className="w-9 shrink-0 text-right testo-12 text-text-muted">Liv. {p.livello}</span>
-              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</Link>
+              {/* nome italiano e originale staccati (lo spazio davanti all'originale, in un contenitore flex, spariva: «MandragoraMandrake») */}
+              <Link to={`/compendio/persona/${p.id}`} className="touch flex flex-wrap items-center gap-x-1.5 font-semibold no-underline text-text hover:text-primary-testo flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</Link>
               <span className="chip shrink-0">{p.arcanaNome}</span>
               {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && (
                 <span className="testo-12 text-text-secondary min-w-0 max-w-full break-words" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
@@ -75,6 +80,7 @@ export function CompendioPersonale({ partitaId }: Props) {
           );
         })}
       </ul>
+      </div>
     </PageState>
   );
 }

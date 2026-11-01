@@ -44,6 +44,8 @@ interface ModalProps {
   ruolo?: 'dialog' | 'alertdialog';
   /** Id dell'elemento che descrive la finestra (`aria-describedby`): il testo della domanda, letto subito dopo il titolo. */
   idDescrizione?: string;
+  /** Una fascia ferma fra l'intestazione e il corpo che scorre (L10-05: l'invito SMS acceso nel cassetto del Confidente); senza, niente. */
+  fascia?: ReactNode;
 }
 
 /** Gli elementi che ricevono il fuoco con Tab. */
@@ -89,7 +91,7 @@ function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null
 const SPOSTABILE_DA = '(min-width: 768px)';
 
 /** Finestra modale con intestazione, corpo scorrevole e piè di pagina opzionale. */
-export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto, ruolo = 'dialog', idDescrizione }: ModalProps) {
+export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto, ruolo = 'dialog', idDescrizione, fascia }: ModalProps) {
   const finestra = useRef<HTMLDivElement | null>(null);
   const sfondo = useRef<HTMLDivElement | null>(null);
 
@@ -189,6 +191,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
             <IconClose size={20} />
           </button>
         </div>
+        {fascia}
         <div className="modal-body">{children}</div>
         {azioni && <div className="modal-footer">{azioni}</div>}
       </div>

@@ -32,7 +32,7 @@ import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
 import { slug } from '../../../shared/slug';
 import { formattaPunti } from '../../utils/punti';
 import { noteAParole, simboliNote } from '../../../shared/note';
-import { MOLTIPLICATORE_ARCANO, RANGO_DELLA_SCELTA_ROMANTICA, RANGO_MASSIMO_CONFIDENTE, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
+import { MOLTIPLICATORE_ARCANO, MOLTIPLICATORE_INVITO, RANGO_DELLA_SCELTA_ROMANTICA, RANGO_MASSIMO_CONFIDENTE, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { ConfidentePartitaDto } from '../../types';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
@@ -70,11 +70,19 @@ interface Props {
   anteprima: (cosa: { noteRisposta?: 1 | 2 | 3; regalo?: boolean; uscita?: boolean }) => number;
   /** I moltiplicatori della partita (esami, invito SMS): valgono per tutti, si scelgono qui accanto al bonus dell'arcano. */
   moltiplicatori?: ReactNode;
+  /** L10-05: l'invito SMS è acceso: i pulsanti dei punti portano un piccolo segno col suo moltiplicatore (già compreso nel numero). */
+  invito?: boolean;
   azioni: AzioniConfidente;
 }
 
+/** Il piccolo segno dell'invito SMS acceso accanto al numero di un pulsante dei punti: il moltiplicatore viene dalla regola unica. Decorativo:
+ *  il nome accessibile del pulsante dice già i punti, moltiplicatore compreso. */
+function SegnoInvito() {
+  return <span className="chip chip--oro segno-invito" aria-hidden="true">{testoMoltiplicatore(MOLTIPLICATORE_INVITO)}</span>;
+}
+
 /** La vista «Level up»: testata con la targa del rango, «Verso il rango N+1», risposte migliori, registrazione dei punti, il resto. */
-export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, motivoOggi, appenaSalito, anteprima, moltiplicatori, azioni }: Props) {
+export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, motivoOggi, appenaSalito, anteprima, moltiplicatori, invito = false, azioni }: Props) {
   const aPunti = aPuntiDi(c);
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
   const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === RANGO_MASSIMO_CONFIDENTE ? 1 : 0;
@@ -197,8 +205,9 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
               {([1, 2, 3] as const).map((n) => {
                 const valore = anteprima({ noteRisposta: n });
                 return (
-                  <button key={n} type="button" className="btn btn-primary btn-sm touch w-[76px]" disabled={occ} onClick={() => azioni.nota(n)} aria-label={`${c.nome}: risposta da ${noteAParole(n)} (${formattaPunti(valore)} punti)`}>
-                    <span aria-hidden="true">{simboliNote(n)}</span> <span className="testo-12 opacity-90">+{formattaPunti(valore)}</span>
+                  // con l'invito acceso il pulsante si allarga quanto serve al segno «×1,2» (almeno i 76 px di prima); spento resta com'era
+                  <button key={n} type="button" className={`btn btn-primary btn-sm touch ${invito ? 'min-w-[76px]' : 'w-[76px]'}`} disabled={occ} onClick={() => azioni.nota(n)} aria-label={`${c.nome}: risposta da ${noteAParole(n)} (${formattaPunti(valore)} punti)`}>
+                    <span aria-hidden="true">{simboliNote(n)}</span> <span className="testo-12 opacity-90">+{formattaPunti(valore)}</span>{invito && <SegnoInvito />}
                   </button>
                 );
               })}
@@ -206,8 +215,8 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
             <div className="flex flex-wrap items-center gap-1.5">
               {/* ondata 5 (RG-10, RG-11): «Regala» apre la finestra unica (un qualunque oggetto regalo → reazione, punti, consegna, copia o
                   acquisto) e c'è solo per chi riceve regali: per Yoshida, Mishima, Morgana, Igor, Gemelle e Sae nessun pulsante */}
-              {c.regalabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${valoreRegalo} punti`} disabled={occ} onClick={azioni.regala} aria-label={`${c.nome}: regala un oggetto (${valoreRegalo} punti)`} />}
-              <PulsanteVisivo compatto icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprima({ uscita: true }))} punti`} disabled={occ} onClick={azioni.uscita} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprima({ uscita: true }))} punti)`} />
+              {c.regalabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={<>+{valoreRegalo} punti{invito && <SegnoInvito />}</>} disabled={occ} onClick={azioni.regala} aria-label={`${c.nome}: regala un oggetto (${valoreRegalo} punti)`} />}
+              <PulsanteVisivo compatto icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={<>+{formattaPunti(anteprima({ uscita: true }))} punti{invito && <SegnoInvito />}</>} disabled={occ} onClick={azioni.uscita} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprima({ uscita: true }))} punti)`} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${ultimo ? ` (${ultimo.regalo ? 'regalo ' : ''}−${formattaPunti(ultimo.punti)})` : ''}`} disabled={occ || !ultimo} onClick={azioni.annullaUltimo} aria-label={`${c.nome}: annulla ${ultimo?.regalo ? 'l\'ultimo regalo' : 'l\'ultimo incremento'}`} />
             </div>
           </div>

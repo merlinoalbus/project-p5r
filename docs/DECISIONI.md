@@ -170,8 +170,18 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
 - La pagina Partita mantiene il suo aspetto; eccezioni approvate: finestra «Regala» in Confidenti; riga «Giorno e fascia
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
-  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (Roberto, 01/11). Il modulo dei dati
-  della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
+  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (Roberto, 01/11); gli schizzi
+  L10-01, L10-02 e L10-05 approvati dall'utente (01/11): da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
+  partita e Storico riempiono l'altezza come Oggi, Doti e Letture (intestazione e schede ferme, comandi in una fila ferma, l'elenco in
+  un'area con bordo; Confidenti su 3 colonne a 1024 e 4 da 1280, Compendio e Persona su due colonne di righe da 44 px, Storico con una voce
+  per riga; testi a capo, mai coi puntini); in Persona della partita «In scorta · Liv. N» in oro, «Non in scorta» solo ai lettori di
+  schermo, «Registrata · Liv. N»; nella scheda Oggi, sotto i 768 px, «Guida completa» è un pulsante-icona nella riga dei giorni e la
+  sezione della fascia ha 8 px di imbottitura; nel cassetto del Confidente, con l'invito SMS acceso, una fascia oro ferma in cima con
+  «Spegni», il pulsante dell'invito col bordo oro e «×1,2» in oro sui pulsanti dei punti. In Denaro e squadra, al posto dello schizzo (denaro
+  fermo, solo gli oggetti che scorrono), la colonna di sinistra di 340 px (denaro e oggetti) scorre tutta insieme nella sua area con bordo:
+  gli oggetti si vedono bene, il denaro esce scorrendo (scelta dell'utente sugli screenshot a 1280×689, «Variante: colonna intera», 01/11).
+  Le righe dei compagni sono alte almeno 56 px; a 1024 vanno su due linee, perché la colonna della squadra è stretta.
+  Il modulo dei dati della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
 - **Testi che informano (L7, 01/11)**: un testo visibile compare solo se dice qualcosa a chi gioca. Niente numeri scritti a mano che vanno
   fuori sincrono (i conteggi si ricavano dai dati o non si scrivono), niente identificativi né percorsi. Le date di gioco si scrivono in un

@@ -45,6 +45,11 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
 // «Riepilogo» non è più una scheda (richiesta dell'utente, 2026-10-25): i dati della partita si modificano dalla finestra che apre
 // «Modifica» nella riga dei dati; il vecchio indirizzo `?scheda=riepilogo` (link della pagina Domande) apre quella finestra.
 
+/** Le schede che da 1024 px riempiono l'altezza della schermata (`scheda-riempi-lg`): intestazione e fila delle schede restano ferme e scorre
+ *  solo l'area dell'elenco della scheda. Sotto i 1024 px scorre la pagina. Letture e giochi (tre colonne) e, con L10-01 (schizzi approvati
+ *  dall'utente il 2026-11-01), Denaro e squadra, Confidenti, Compendio personale, Persona della partita e Storico. */
+const RIEMPIONO_DA_1024: ReadonlySet<Scheda> = new Set<Scheda>(['letture', 'squadra', 'confidenti', 'compendio', 'persona-partita', 'storico']);
+
 /** Il ripiego mentre una scheda si scarica: lo spazio della scheda con l'indicatore di caricamento del tema, perché sotto la riga delle schede
  *  la pagina non si accorci e non salti (di solito non compare: il file è già scaricato in tempo morto, e cambiando scheda React tiene a
  *  schermo quella di prima finché la nuova non è pronta). */
@@ -83,7 +88,7 @@ export function PartitaPage() {
           action={<PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea partita" onClick={() => setNuova(true)} />}
         />
       ) : (
-        <div className={`flex flex-col gap-0 max-sm:-mt-3 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
+        <div className={`flex flex-col gap-0 max-sm:-mt-3 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : RIEMPIONO_DA_1024.has(scheda) ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
           {/* i dati della partita stanno nella riga del titolo (a destra, o sotto sul telefono): con le schede su una riga sola
               l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
           <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga azioniAccanto className="intestazione--partita pt-0" azioni={
@@ -131,17 +136,18 @@ export function PartitaPage() {
             {scheda !== 'oggi' && (
               <ErroreInRiquadro key={scheda}>
                 {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali.Componente key={attiva.id} partitaId={attiva.id} /></div>}
-                {scheda === 'squadra' && <SquadraPartita.Componente key={attiva.id} partitaId={attiva.id} />}
-                {scheda === 'confidenti' && <ConfidentiPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {/* L10-01: da 1024 px queste schede riempiono l'altezza (il contenitore passa l'altezza al figlio, `riempi-figli-lg`) */}
+                {scheda === 'squadra' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><SquadraPartita.Componente key={attiva.id} partitaId={attiva.id} /></div>}
+                {scheda === 'confidenti' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><ConfidentiPartita.Componente key={attiva.id} partitaId={attiva.id} /></div>}
                 {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi.Componente key={attiva.id} partitaId={attiva.id} /></div>}
                 {scheda === 'progressi' && <ProgressiPartita.Componente key={attiva.id} partitaId={attiva.id} />}
                 {scheda === 'scorta' && <ScortaPersona.Componente key={attiva.id} partitaId={attiva.id} />}
-                {scheda === 'compendio' && <CompendioPersonale.Componente key={attiva.id} partitaId={attiva.id} />}
-                {scheda === 'persona-partita' && <PersonaDellaPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'compendio' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><CompendioPersonale.Componente key={attiva.id} partitaId={attiva.id} /></div>}
+                {scheda === 'persona-partita' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><PersonaDellaPartita.Componente key={attiva.id} partitaId={attiva.id} /></div>}
                 {scheda === 'obiettivi' && <ObiettiviPartita.Componente key={attiva.id} partitaId={attiva.id} />}
                 {scheda === 'piani' && <PianiSalvati.Componente key={attiva.id} partitaId={attiva.id} />}
                 {scheda === 'cicli' && <CicliSalvati.Componente key={attiva.id} partitaId={attiva.id} />}
-                {scheda === 'storico' && <StoricoPartita.Componente key={attiva.id} partitaId={attiva.id} />}
+                {scheda === 'storico' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><StoricoPartita.Componente key={attiva.id} partitaId={attiva.id} /></div>}
               </ErroreInRiquadro>
             )}
           </Suspense>

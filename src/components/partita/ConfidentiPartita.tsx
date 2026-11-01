@@ -4,7 +4,8 @@
 //
 // Disposizione (2026-10-24, una barra di scorrimento sola alla volta, regola dell'utente): due gruppi richiudibili («Attivi e
 // sbloccabili», «Non ancora disponibili») con una scheda di sintesi per Confidente (`RigaConfidente`: ritratto, nome, arcano, rango e
-// UN solo stato) in griglia; scorre solo la pagina. Il tocco su una scheda apre il cassetto (`Modal cassetto`: da destra, alto quanto lo
+// UN solo stato) in griglia; sotto i 1024 px scorre solo la pagina, da 1024 px (L10-01) solo le schede del gruppo aperto, nella loro area,
+// con intestazione e testate ferme. Il tocco su una scheda apre il cassetto (`Modal cassetto`: da destra, alto quanto lo
 // schermo; dal basso sul telefono) col dettaglio (`DettaglioConfidente`: targa del rango con − / +, requisiti, moltiplicatori, note ♪,
 // regalo e uscita, risposte migliori del prossimo rango a fianco); mentre è aperto scorre solo lui e la pagina sotto è ferma. Il
 // Confidente aperto sta nell'indirizzo (`?confidente=<chiave>`, accanto a `?scheda=`): Indietro chiude il cassetto.
@@ -16,7 +17,7 @@
 // Qui sta tutta la logica delle azioni (salva, annulla ultimo, conferma, note, regalo); i componenti figli sono solo presentazione.
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { aggiornaConfidente, annullaUltimoConfidente, getConfidentiPartita, confermaRequisitoConfidente, impostaPiazzamentoEsame, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -65,6 +66,8 @@ function gruppoDi(c: ConfidentePartitaDto): ChiaveGruppo {
 
 const CHIAVE_GRUPPI = 'p5r.confidentiPartita.gruppiAperti';
 const GRUPPI_PREDEFINITI: Record<ChiaveGruppo, boolean> = { attivi: true, bloccati: false };
+/** L'id dell'interruttore «Invito SMS» nel cassetto: «Spegni» della fascia gli riporta il fuoco (L10-05). Un cassetto solo alla volta. */
+const ID_INTERRUTTORE_INVITO = 'interruttore-invito-sms';
 /** Le due viste del cassetto di un Confidente, nell'ordine delle schede (L6-01). */
 const VISTE_CONFIDENTE = ['levelup', 'scheda'] as const;
 
@@ -307,13 +310,43 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     <>
       <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={24} />} titolo="Esami top 10" dettaglio={`${per('primi-10')} · scuola`} onClick={() => scegliPiazzamento('primi-10')} aria-label={`Esami top 10 ${per('primi-10')}`} title={spiegaEsame('Fra i primi dieci', 'primi-10')} />
       <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={24} />} titolo="Esami 1º" dettaglio={`${per('primo')} · scuola`} onClick={() => scegliPiazzamento('primo')} aria-label={`Esami 1º ${per('primo')}`} title={spiegaEsame('Primo del corso', 'primo')} />
-      <PulsanteVisivo compatto attivo={invito} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio={`${xInvito} · uscita`} onClick={() => setInvito((v) => !v)} aria-label={`Invito SMS ${xInvito}`} title={`Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ${xInvito} (vale per tutti i Confidenti finché non lo spegni)`} />
+      {/* L10-05: acceso ha il bordo oro (`btn-visivo--invito`), come la fascia in cima al cassetto: diverso dal rosso dei moltiplicatori che
+          dipendono dalla Persona o dagli esami */}
+      <PulsanteVisivo id={ID_INTERRUTTORE_INVITO} compatto attivo={invito} className={invito ? 'btn-visivo--invito' : undefined} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio={`${xInvito} · uscita`} onClick={() => setInvito((v) => !v)} aria-label={`Invito SMS ${xInvito}`} title={`Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ${xInvito} (vale per tutti i Confidenti finché non lo spegni)`} />
     </>
+  );
+
+  // L10-05 (schizzo approvato, 2026-11-01): l'invito vale per tutti i Confidenti finché non lo si spegne ed era facile dimenticarlo acceso
+  // (cambiavano solo il colore del pulsante e i numeri). Acceso, una fascia oro ferma in cima al cassetto (fuori dal corpo che scorre) lo dice
+  // con il moltiplicatore della regola unica e lo spegne; spento, il cassetto è come prima. L'oro è una fascia piena: la targa «Oggi» accanto
+  // al nome è un cartellino.
+  // «Spegni» sparisce con la fascia: il fuoco torna all'interruttore «Invito SMS» (nella vista Level up) o, se non c'è (Scheda completa), alla
+  // finestra del cassetto, mai a <body> fuori dalla finestra modale.
+  const spegniInvito = (e: MouseEvent<HTMLButtonElement>) => {
+    const finestra = e.currentTarget.closest<HTMLElement>('[role="dialog"]');
+    setInvito(false);
+    requestAnimationFrame(() => (document.getElementById(ID_INTERRUTTORE_INVITO) ?? finestra)?.focus());
+  };
+  // Il contenitore `role="status"` c'è sempre a cassetto aperto (vuoto con l'invito spento, senza riquadro): così all'accensione i lettori di
+  // schermo annunciano una volta la fascia che vi entra; allo spegnimento non dicono niente (un'aggiunta sola, `aria-relevant` predefinito).
+  const fasciaInvito = (
+    <div role="status" className="shrink-0">
+      {invito && (
+        <div className="fascia-invito">
+          <span className="fascia-invito__icona" aria-hidden="true"><IconaAzione chiave="sms" dimensione={24} /></span>
+          <span className="fascia-invito__testo">
+            <strong className="fascia-invito__titolo">Invito SMS acceso</strong>
+            <span> · i punti di questa uscita valgono <strong>{xInvito}</strong> per tutti i Confidenti</span>
+          </span>
+          <button type="button" className="btn btn-secondary btn-sm touch shrink-0" onClick={spegniInvito} aria-label="Spegni l’invito SMS">Spegni</button>
+        </div>
+      )}
+    </div>
   );
 
   /** Il dettaglio del Confidente `c` (nel cassetto). */
   const dettaglioDi = (c: ConfidentePartitaDto) => (
-    <DettaglioConfidente key={c.chiave} c={c} occupato={occupato === c.chiave} bonus={bonusArcanoDi(c)} ultimo={c.ultimoAnnullabile ?? undefined}
+    <DettaglioConfidente key={c.chiave} c={c} occupato={occupato === c.chiave} bonus={bonusArcanoDi(c)} ultimo={c.ultimoAnnullabile ?? undefined} invito={invito}
       oggi={oggi(c.chiave)} motivoOggi={sugg.motivo('confidenti', c.chiave)} moltiplicatori={moltiplicatori}
       appenaSalito={appenaSalito[c.chiave] === c.rango}
       anteprima={(cosa) => anteprima(c, cosa, bonusArcanoDi(c))} azioni={azioniDi(c)} />
@@ -342,9 +375,11 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
 
   const contenuto = (
     <>
-      {/* una pagina sola che scorre: i gruppi richiudibili con le schede in griglia; il dettaglio si apre nel cassetto.
-          Nel cassetto da solo (diario) l'elenco non c'è */}
-      {!soloCassetto && <div className="flex flex-col gap-3">
+      {/* i gruppi richiudibili con le schede in griglia; il dettaglio si apre nel cassetto. Nel cassetto da solo (diario) l'elenco non c'è.
+          L10-01 (schizzi approvati, 2026-11-01): da 1024 px la scheda riempie l'altezza; le testate dei gruppi restano ferme e le schede di un
+          gruppo aperto scorrono in un'area con bordo (`lg:area-scorrevole`), 3 colonne a 1024 e 4 da 1280. Con due gruppi aperti le due aree si
+          dividono l'altezza; un gruppo chiuso resta solo la sua testata. Sotto i 1024 px scorre la pagina, come prima */}
+      {!soloCassetto && <div className="flex flex-col gap-3 lg:h-full lg:min-h-0">
           {GRUPPI.map(({ chiave: gruppo, titolo, descrizione }) => {
             const elenco = elencoDi(gruppo);
             // Il gruppo degli attivi resta visibile anche vuoto (a inizio partita lo e): senza spiegazione sembrerebbe che i Confidenti manchino.
@@ -352,7 +387,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
             const aperto = gruppiAperti[gruppo];
             const idElenco = `gruppo-confidenti-${gruppo}`;
             return (
-              <section key={gruppo} className="flex flex-col gap-1.5" aria-label={titolo}>
+              <section key={gruppo} className={`flex flex-col gap-1.5 ${aperto ? 'lg:min-h-[180px] lg:flex-1' : 'lg:shrink-0'}`} aria-label={titolo}>
                 <h3 className="m-0">
                   <button type="button" className="gruppo-confidenti__testata touch" aria-expanded={aperto} aria-controls={idElenco} onClick={() => alternaGruppo(gruppo)}>
                     <IconChevronRight size={18} className={`shrink-0 transition-transform ${aperto ? 'rotate-90' : ''}`} />
@@ -361,7 +396,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
                     <span className="hidden md:inline ml-auto testo-12 text-text-muted">{descrizione}</span>
                   </button>
                 </h3>
-                <div id={idElenco} hidden={!aperto}>
+                <div id={idElenco} hidden={!aperto} className="lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
                   {elenco.length === 0
                     ? <p className="m-0 testo-13 text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
                     : (
@@ -379,7 +414,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       {/* il dettaglio: cassetto da destra alto quanto lo schermo (foglio dal basso sul telefono); mentre è aperto scorre solo lui.
           Da solo si apre subito e, finché i Confidenti arrivano, dice che sta caricando (o l'errore, con Riprova) */}
       {/* la ✕ chiude sempre; Esc solo se il cassetto è la finestra più in alto (lo decide `Modal`) */}
-      <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto>
+      <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto fascia={trovato ? fasciaInvito : null}>
         {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
           <p className="m-0 testo-13 text-text-muted">Questo Confidente non è nella partita attiva.</p>
         </PageState>}
