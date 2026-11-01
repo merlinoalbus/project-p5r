@@ -18,8 +18,8 @@
 // prima ciò che entra, poi ciò che esce, così il tetto a zero vale una volta sola sul risultato. La voce messa nel cestino chiude i suoi
 // movimenti con il motivo `voce-eliminata`; rimessa, li rifà dove il ripristino ha rimesso lo stato che li aveva mossi (`rimettiYenDellaVoceRipristinata`).
 //
-// Decisioni 2 e 3 restano: gli yen già scritti in un altro dato li muove quel dato (un effetto «yen» accanto a lui è rifiutato dal server,
-// `motivoYenGiaStrutturati`), e le ricompense di una Richiesta le muove solo la Richiesta completata (`riallineaYenRichiesta`).
+// Decisioni 2 e 3 restano: gli yen già scritti in un altro dato li muove quel dato (un effetto «yen» senza condizioni accanto a lui è
+// rifiutato dal server, `motivoYenGiaStrutturati`; con una condizione «Vale solo se» è una correzione ammessa), e le ricompense di una Richiesta le muove solo la Richiesta completata (`riallineaYenRichiesta`).
 //
 // Le proposte «Applica» degli yen nate prima (`utente.da_applicare` di tipo `yen`, con il loro `movimento_yen`) non si toccano: una causa che
 // ha ancora una proposta aperta o yen già applicati con una proposta resta in quel registro («in sospeso», `yenPropostiInSospeso`) finché non

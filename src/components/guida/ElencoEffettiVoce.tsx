@@ -12,7 +12,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { ammetteCondizioni, condizioniDellEffetto, fraseCondizioniEffetto, MASSIMO_CONDIZIONI_EFFETTO, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
+import { ammetteCondizioni, avvisoYenCondizionato, condizioniDellEffetto, fraseCondizioniEffetto, MASSIMO_CONDIZIONI_EFFETTO, motivoOggettiGiaNelTurno, motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { CondizioniEditor } from './CondizioniEditor';
 import { useCarica } from '../../hooks/useCarica';
@@ -158,13 +158,17 @@ export function ElencoEffettiVoce({ valore, onCambia, elenchi, nomi, altrove, fa
   };
 
   // L13 (decisione 2): un effetto «yen» accanto a un dato che porta già i suoi yen si segnala SUBITO, con la stessa regola del server
-  const motivoYen = motivoYenGiaStrutturati(righe.map((r) => r.effetto), { riferimento: valore.riferimento, yenDi: (tipo, chiave) => yenDelDato(elenchi, tipo, chiave) });
+  const contestoYen = { riferimento: valore.riferimento, yenDi: (tipo: DatoConYen, chiave: string) => yenDelDato(elenchi, tipo, chiave) };
+  const motivoYen = motivoYenGiaStrutturati(righe.map((r) => r.effetto), contestoYen);
+  // 2026-11-01: uno Yen con «Vale solo se» accanto a un dato che porta i suoi yen è ammesso (correzione voluta): solo un avviso, non blocca
+  const avvisoYen = motivoYen ? null : avvisoYenCondizionato(righe.map((r) => r.effetto), contestoYen);
   // 2026-10-27 (punto 4 della richiesta: «nessun doppione»): un «oggetto ricevuto» che lo strumento del turno dà già si segnala SUBITO, con la
   // stessa regola del server (che lo rifiuta con 409 `oggetto-gia-nel-turno`)
   const motivoOggetti = motivoOggettiGiaNelTurno(righe.map((r) => r.effetto), { prodottiDi: (attivita, esito) => prodottiDiStrumento(elenchi, attivita, esito), nomeOggetto: (k) => nomi.oggetti?.get(k) });
   return (
     <div className="flex flex-col gap-2">
       {motivoYen && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning">{motivoYen}</p>}
+      {avvisoYen && <p role="note" className="m-0 rounded border border-warning p-2 testo-13 text-text-secondary">{avvisoYen}</p>}
       {motivoOggetti && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning text-pretty">{motivoOggetti}</p>}
       {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">{righe.length === 0 ? 'Nessun effetto: la spunta registra solo che l’hai fatta.' : 'Nessun altro effetto.'}</p>}
       {visibili.length > 0 && (

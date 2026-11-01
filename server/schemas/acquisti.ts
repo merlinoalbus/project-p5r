@@ -3,6 +3,8 @@ import { dataGioco, dote, uidVoce } from './comuni.js';
 import { bodyAnteprimaSessionePesca } from './pesca.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto.js';
+import { MASSIMO_CONDIZIONI_EFFETTO } from '../../shared/effettiVoce.js';
+import { condizioneSpillo } from './catalogo.js';
 
 const uid = z.string().regex(/^[0-9a-f]{32}$/,'Identità non valida.');
 const revisione = z.string().regex(/^[0-9a-f]{64}$/,'Revisione non valida.');
@@ -37,6 +39,8 @@ const decisione = z.discriminatedUnion('tipo',[
 export const bodyAnteprimaDecisioneProposte = z.object({operazioneId:uid,decisione}).strict();
 export const bodyDecisioneProposte = bodyAnteprimaDecisioneProposte.extend({revisioneProposteAttesa:revisione}).strict();
 const doteNote = z.object({dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)])}).strict();
+/** Le condizioni di un effetto della voce: le stesse del catalogo (niente stato di un pin né di una voce della guida), al più quante ne ammette l'effetto. */
+const condizioniEffetto = z.array(condizioneSpillo).max(MASSIMO_CONDIZIONI_EFFETTO).optional();
 export const effettoVoce = z.discriminatedUnion('tipo',[
   // L13: `possibili` (Dote a valori scelti alla spunta) ed `esito` (turno con esito atteso) dell'ondata 2: la forma completa la verifica `normalizzaEffettoVoce`
   z.object({tipo:z.literal('dote'),dote,note:z.union([z.literal(1),z.literal(2),z.literal(3)]),possibili:z.array(z.union([z.literal(1),z.literal(2),z.literal(3)])).min(2).max(3).optional()}).strict(),
@@ -44,10 +48,12 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   // 2026-10-27: `quantita` = le creazioni dello strumento (`strumentoDi`: con o senza versione con il bonus); la forma canonica la verifica `normalizzaEffettoVoce`
   z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional(),esito:z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).optional(),quantita:z.number().int().min(1).max(999).optional()}).strict(),
   // L13 (ondata 3): yen, oggetto ricevuto, trofeo, sblocco; quantità facoltativa dell'articolo
-  z.object({tipo:z.literal('yen'),importo:z.number().int().min(-9_999_999).max(9_999_999).refine((n)=>n!==0,'L’importo non può essere zero.')}).strict(),
-  z.object({tipo:z.literal('oggetto'),oggetto:z.string().min(1).max(200),quantita:z.number().int().min(1).max(999)}).strict(),
-  z.object({tipo:z.literal('trofeo'),trofeo:chiave}).strict(),
-  z.object({tipo:z.literal('sblocco'),bersaglio:z.enum(['richiesta','attivita']),chiave}).strict(),
+  // 2026-11-01: le condizioni «Vale solo se» dei tipi che le ammettono (`TIPI_EFFETTO_CON_CONDIZIONE`: yen, oggetto, persona, trofeo, sblocco);
+  // l'editor le manda, e prima lo schema le rifiutava tutte (400). La forma canonica la verifica `normalizzaEffettoVoce`
+  z.object({tipo:z.literal('yen'),importo:z.number().int().min(-9_999_999).max(9_999_999).refine((n)=>n!==0,'L’importo non può essere zero.'),condizioni:condizioniEffetto}).strict(),
+  z.object({tipo:z.literal('oggetto'),oggetto:z.string().min(1).max(200),quantita:z.number().int().min(1).max(999),condizioni:condizioniEffetto}).strict(),
+  z.object({tipo:z.literal('trofeo'),trofeo:chiave,condizioni:condizioniEffetto}).strict(),
+  z.object({tipo:z.literal('sblocco'),bersaglio:z.enum(['richiesta','attivita']),chiave,condizioni:condizioniEffetto}).strict(),
   // 2026-10-28: Persona tolta dalla scorta, punti a un Confidente, oggetto restituito o venduto (il prezzo solo per la vendita: lo verifica `normalizzaEffettoVoce`)
   z.object({tipo:z.literal('personaTolta'),persona:z.number().int().positive()}).strict(),
   // 2026-10-28 («i punti rango andavano gestiti come note»): le note (1–3); i punti fissi solo per rimandare com'è un effetto scritto prima
@@ -60,7 +66,7 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('fortuna'),dote}).strict(),
   z.object({tipo:z.literal('storia'),evento:chiave}).strict(),
   // 2026-10-26: `scorta` (anche nella scorta) e il suo `livello`; la forma canonica (livello solo con la scorta) la verifica `normalizzaEffettoVoce`
-  z.object({tipo:z.literal('persona'),persona:z.number().int().positive(),scorta:z.literal(true).optional(),livello:z.number().int().min(1).max(99).optional()}).strict(),
+  z.object({tipo:z.literal('persona'),persona:z.number().int().positive(),scorta:z.literal(true).optional(),livello:z.number().int().min(1).max(99).optional(),condizioni:condizioniEffetto}).strict(),
   z.object({tipo:z.literal('domanda'),domanda:z.number().int().positive()}).strict(),
   z.object({tipo:z.literal('cruciverba'),data:z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)}).strict(),
   z.object({tipo:z.literal('richiesta'),richiesta:chiave}).strict(),

@@ -152,7 +152,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   possibile anche con il saldo insufficiente; togliendo la spunta torna solo quanto scalato. I guadagni legati a voci ed eventi (paga
   dei lavori, ricompense delle Richieste, effetto «Yen ricevuti») entrano da soli. Restano manuali i soldi delle battaglie e delle
   vendite nei Palazzi e nei Memento. Gli yen già scritti in un altro dato (film, attività, lavori, pesca, Richiesta) li muove
-  l'elemento collegato, mai la voce. Il denaro si imposta anche a un valore nuovo.
+  l'elemento collegato, mai la voce; un effetto Yen della voce accanto a quel dato è ammesso solo con una condizione «Vale solo se»,
+  come correzione voluta, e l'editor avvisa del rischio di contare due volte **(01/11)**. Il denaro si imposta anche a un valore nuovo.
 - **Avanzamento automatico**: spuntata l'ultima voce di giorno senza decisioni aperte, la partita passa alla sera; spuntata l'ultima di
   sera, al giorno dopo (con la richiesta del meteo). Con decisioni aperte avanza alla chiusura dell'ultima. Togliere una spunta non
   riporta indietro.

@@ -31,8 +31,9 @@ export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
  * L13 (ondata 3, decisione 1): gli yen che la voce dà o toglie (`importo` con il segno: positivo = ricevuti, negativo = spesi). Decisione 18:
  * la spunta li muove da sola sul saldo della partita, mai sotto zero, con il movimento registrato (`utente.yen_automatico`); togliendo la
  * spunta tornano com'erano (solo quanto era stato davvero mosso). Le proposte «Applica» nate prima (`utente.da_applicare` di tipo `yen`, con
- * `utente.movimento_yen`) restano decidibili. Decisione 2: mai insieme a un dato che porta già il suo prezzo (articolo, consumazione, pesca,
- * Richiesta completata): il server rifiuta la lista.
+ * `utente.movimento_yen`) restano decidibili. Decisione 2: senza condizioni, mai insieme a un dato che porta già il suo prezzo (articolo,
+ * consumazione, pesca, Richiesta completata…): il server rifiuta la lista. Con una condizione «Vale solo se» è una correzione voluta e si ammette
+ * (2026-11-01, `motivoYenGiaStrutturati`).
  */
 export interface EffettoYenVoce { tipo: 'yen'; importo: number; condizioni?: RequisitoSpillo[] }
 /**
@@ -368,13 +369,30 @@ export interface ContestoYenVoce {
 const NOME_DATO_CON_YEN: Record<DatoConYen, string> = { film: 'il film (il prezzo del biglietto)', attivita: 'l’attività o il lavoro (il costo, la paga o il prezzo della sfida)', richiesta: 'la Richiesta (la sua ricompensa in yen)' };
 /**
  * L13 (decisione 2 dell'utente: «Yen già scritti in un altro dato, film, attività, lavori, pesca, Richiesta: li muove l'elemento collegato, mai
- * la voce»): perché un effetto «yen» non può stare in questa voce, o null se può. Gli yen li porta già: un acquisto o un articolo comprato (il
+ * la voce»): perché un effetto «yen» senza condizioni non può stare in questa voce, o null se può (uno con «Vale solo se» si ammette, con
+ * l'avviso di `avvisoYenCondizionato`). Gli yen li porta già: un acquisto o un articolo comprato (il
  * prezzo), la pesca (la quota), una Richiesta completata (la ricompensa, decisione 3), il turno di un'attività con costo o paga, la lettura di un
  * film con il prezzo, o il dato a cui la voce è collegata (film, attività, Richiesta) se ha i suoi yen. Una regola sola: la usano il server
  * (rifiuto 409 `yen-gia-strutturati`) e l'editor della voce (avviso subito, prima del salvataggio).
  */
 export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: ContestoYenVoce): string | null {
-  if (!effetti.some((e) => e.tipo === 'yen')) return null;
+  // 2026-11-01 (richiesta dell'utente: «se io voglio correggere un addebito in base al verificarsi di una condizione non devo essere
+  // bloccato»; scelta «Sblocca con condizione»): blocca solo un effetto Yen SENZA condizione; uno con «Vale solo se» è una correzione voluta,
+  // che l'editor accompagna con un avviso (`avvisoYenCondizionato`)
+  if (!effetti.some((e) => e.tipo === 'yen' && condizioniDellEffetto(e).length === 0)) return null;
+  const chi = chiPortaGiaYen(effetti, c);
+  return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte. Per una correzione che vale solo in certi casi, dagli una condizione «Vale solo se».` : null;
+}
+
+/** Per un effetto Yen con condizione accanto a un dato che porta già i suoi yen: l'avviso dell'editor (non blocca), o null. */
+export function avvisoYenCondizionato(effetti: readonly EffettoVoce[], c: ContestoYenVoce): string | null {
+  if (!effetti.some((e) => e.tipo === 'yen' && condizioniDellEffetto(e).length > 0)) return null;
+  const chi = chiPortaGiaYen(effetti, c);
+  return chi ? `Gli yen di questa voce li porta già ${chi}: l’effetto Yen si aggiunge solo quando vale la sua condizione. Controlla che non conti due volte ciò che il dato calcola già (per esempio lo sconto di un negozio legato al rango di un Confidente).` : null;
+}
+
+/** Chi porta già gli yen della voce (un effetto o il collegamento), in parole; null se nessuno. */
+function chiPortaGiaYen(effetti: readonly EffettoVoce[], c: ContestoYenVoce): string | null {
   const conYen = (tipo: DatoConYen, chiave: string): boolean => { const n = c.yenDi(tipo, chiave); return typeof n === 'number' && n > 0; };
   let chi: string | null = null;
   for (const e of effetti) {
@@ -388,7 +406,7 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
   }
   const r = c.riferimento;
   if (!chi && r && (r.tipo === 'film' || r.tipo === 'attivita' || r.tipo === 'richiesta') && conYen(r.tipo, r.chiave)) chi = `il collegamento della voce: ${NOME_DATO_CON_YEN[r.tipo]}`;
-  return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte.` : null;
+  return chi;
 }
 
 /** Il contesto della regola degli oggetti già dati dallo strumento del turno: gli oggetti che lo strumento («attività/esito») dà, e i nomi. */
