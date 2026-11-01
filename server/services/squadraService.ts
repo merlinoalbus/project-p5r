@@ -37,7 +37,9 @@ export function giocabili(): RigaPersonaggio[] {
 export function squadraPartita(partitaId: number): SquadraPartitaDto {
   verificaPartita(partitaId);
   const p = prepared('SELECT yen, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { yen: number; livello_protagonista: number };
-  const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, in_squadra, updated_at FROM membro_squadra_partita WHERE partita_id = ?').all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; in_squadra: number; updated_at: string }>).map((r) => [r.personaggio_chiave, r]));
+  const righe = new Map((prepared('SELECT personaggio_chiave, livello, esperienza, in_squadra, updated_at FROM membro_squadra_partita WHERE partita_id = ?')
+    .all(partitaId) as Array<{ personaggio_chiave: string; livello: number; esperienza: number; in_squadra: number; updated_at: string }>)
+    .map((r) => [r.personaggio_chiave, r]));
   const membri: MembroSquadraDto[] = giocabili().map((g) => {
     const r = righe.get(g.chiave);
     return {

@@ -5,22 +5,25 @@
 import { Router } from 'express';
 import { applicaDeltaPuntiPesca } from '../services/pescaService.js';
 import { z } from 'zod';
-import { prepared } from '../db/dbService.js';
 import { verificaPartita } from '../services/verificaPartita.js';
 import { httpErrors } from '../utils/httpError.js';
-import { validate } from '../middleware/validate.js';
+import { corpoDelServizio, validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura,
+  bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato,
+  bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita,
+  paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
+  paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
-import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
-import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
-import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, incensiDellaPartita, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
+import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano, type DatiPianoSalvato } from '../services/pianiSalvatiService.js';
+import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, incensiDellaPartita, resistenzaIsolamentoDellaPosseduta } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { capienzaScorta } from '../services/capienzaScortaService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
-import { CHIAVI_PIAZZAMENTO_ESAME, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta, riepilogoRichieste } from '../services/richiesteService.js';
 import { oggettiOttenutiPartita } from '../services/oggettiOttenutiService.js';
@@ -38,8 +41,7 @@ import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { annullaUltimoDelConfidente } from '../services/annullaUltimoConfidente.js';
 import { annullaRegalo, regala } from '../services/regaloAzioneService.js';
-import type { ModificaConfidente, ModificatoriDotiDto, RichiestaRegalo } from '../../shared/types.js';
-import { haAnimaDaCineasta } from '../services/puntiDoti.js';
+import { modificatoriDotiDellaPartita } from '../services/puntiDoti.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
@@ -51,7 +53,6 @@ import { segnaCruciverbaDallaGuida, segnaDomandaDallaGuida } from '../services/s
 import { annullaInvito, registraInvito } from '../services/inviti.js';
 import { impostaFortuna, leggiFortuna } from '../services/fortunaService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
-import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
@@ -171,9 +172,7 @@ router.get('/:id/doti', validate({ params: paramsPartita }), (req, res) => {
 router.get('/:id/doti/modificatori', validate({ params: paramsPartita }), (req, res) => {
   const id = Number(req.params.id);
   verificaPartita(id);
-  // il nome del libro come lo dice il catalogo (o la riga del libro), per il suggerimento dell'interruttore spento
-  const libro = prepared("SELECT COALESCE(c.nome, l.nome) AS nome FROM libro l LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave WHERE l.chiave = 'anima-da-cineasta'").get() as { nome: string } | undefined;
-  res.json({ animaDaCineasta: haAnimaDaCineasta(id), libroAnimaDaCineasta: libro?.nome ?? null } satisfies ModificatoriDotiDto);
+  res.json(modificatoriDotiDellaPartita(id));
 });
 router.patch('/:id/doti/:chiave', validate({ params: paramsPartitaChiave, body: bodyDote }), (req, res) => {
   res.json(aggiornaDote(Number(req.params.id), String(req.params.chiave), req.body));
@@ -193,10 +192,10 @@ router.get('/:id/squadra', validate({ params: paramsPartita }), (req, res) => {
 /** Sta **prima** di `/:id/squadra/:chiave`: «yen» non è la chiave di un membro, e registrata dopo
  *  finirebbe in quella rotta rispondendo «non è un membro giocabile della squadra». */
 router.patch('/:id/squadra/yen', validate({ params: paramsPartita, body: bodyYen }), (req, res) => {
-  res.json(impostaYen(Number(req.params.id), req.body as { yen?: number; delta?: number }));
+  res.json(impostaYen(Number(req.params.id), req.body));
 });
 router.patch('/:id/squadra/:chiave', validate({ params: paramsPartitaChiave, body: bodyMembroSquadra }), (req, res) => {
-  res.json(impostaMembro(Number(req.params.id), String(req.params.chiave), req.body as { livello?: number; esperienza?: number; deltaLivello?: number; inSquadra?: boolean }));
+  res.json(impostaMembro(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
 // ---- Confidenti ----
@@ -207,9 +206,9 @@ router.get('/:id/confidenti', validate({ params: paramsPartita }), (req, res) =>
 router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, body: bodyConfidente }), (req, res) => {
   // ondata 5 (revisione dei lotti D e D2): il regalo senza oggetto (+50 di ripiego) non c'è più: ogni regalo è l'azione «Regala», che sa
   // quale oggetto, con la sua reazione, la copia usata e l'annullo
-  if ((req.body as { regalo?: boolean }).regalo === true) throw httpErrors.badRequest('usa-regala', 'Il regalo si registra con l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
+  if (req.body.regalo === true) throw httpErrors.badRequest('usa-regala', 'Il regalo si registra con l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
   // L13 (O10-2): la sola relazione romantica non è una correzione di punti o di rango: niente incontri né nuova base del registro cronologico
-  const { relazioneRomantica, ...resto } = req.body as ModificaConfidente;
+  const { relazioneRomantica, ...resto } = req.body;
   if (relazioneRomantica !== undefined && Object.values(resto).every((v) => v === undefined)) {
     res.json(impostaRelazioneRomantica(Number(req.params.id), String(req.params.chiave), relazioneRomantica));
     return;
@@ -219,7 +218,7 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
 
 /** L10-05: «Annulla ultimo» del cassetto del Confidente: toglie l'ultima registrazione annullabile, letta dallo storico, se è ancora l'evento dato. */
 router.post('/:id/confidenti/:chiave/annulla-ultimo', validate({ params: paramsPartitaChiave, body: bodyAnnullaUltimoConfidente }), (req, res) => {
-  const b = req.body as { evento: number; creatoIl: string };
+  const b = req.body;
   res.json(annullaUltimoDelConfidente(Number(req.params.id), String(req.params.chiave), b.evento, b.creatoIl));
 });
 
@@ -235,12 +234,12 @@ router.delete('/:id/inviti/:confidente/:data', validate({ params: paramsInvito }
 
 /** Conferma di un requisito `evento` (semafori, Fase 12.3; gli altri tipi li dice la partita, R6-01b); restituisce il Confidente aggiornato. */
 router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartitaChiave, body: bodyRequisito }), (req, res) => {
-  const b = req.body as { rango: number; indice: number; confermato: boolean };
+  const b = req.body;
   confermaRequisito(Number(req.params.id), String(req.params.chiave), b.rango, b.indice, b.confermato);
   res.json(confidente(Number(req.params.id), String(req.params.chiave)));
 });
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
-  const b = req.body as { regalo?: string; catalogo?: string; fatto: boolean };
+  const b = req.body;
   // N5/R10-18: il regalo di un oggetto del catalogo è l'azione unica «Regala» (punti, consegna, eventuale acquisto, storico, annullabile):
   // questa strada accetta solo le righe per nome, senza oggetto collegato, e non può più scavalcarla.
   if (b.catalogo !== undefined) throw httpErrors.badRequest('usa-regala', 'Il regalo di un oggetto del catalogo è l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
@@ -248,25 +247,25 @@ router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChi
 });
 /** R10-18: «Regala» è un'azione sola (oggetto del catalogo per chiave → punti, consegna, eventuale acquisto, storico) e si annulla identica. */
 router.post('/:id/regali', validate({ params: paramsPartita, body: bodyRegala }), (req, res) => {
-  res.status(201).json(regala(Number(req.params.id), req.body as RichiestaRegalo));
+  res.status(201).json(regala(Number(req.params.id), req.body));
 });
 router.post('/:id/regali/annulla', validate({ params: paramsPartita, body: bodyAnnullaRegalo }), (req, res) => {
-  const b = req.body as { confidente: string; catalogo: string; id?: number };
+  const b = req.body;
   res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo, b.id));
 });
 
 router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {
-  const b = req.body as { trofeo: string; ottenuto: boolean };
+  const b = req.body;
   res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
-  const b = req.body as z.infer<typeof bodyAzionePercorso>;
+  const b = req.body;
   // la spunta e, se era l'ultima attività del giorno corrente, il passaggio al giorno dopo (togliere la spunta non torna indietro)
   // sono un'unica operazione del servizio: o succedono tutte e due o nessuna
   res.json(spuntaEAvanza(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, acquisti: b.acquisti, pesche: b.pesche, scelteEsito: b.scelteEsito, relazioneRomantica: b.relazioneRomantica }));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
-  res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
+  res.json(impostaGiornoCorrente(Number(req.params.id), req.body.data));
 });
 
 // ---- Meteo della partita: di giorno e di sera, scelto o della guida ----
@@ -276,35 +275,35 @@ router.get('/:id/meteo/:data', validate({ params: paramsPartitaData }), (req, re
 });
 /** Restituisce anche la partita: il suo `meteoOra` fa ricaricare mappe, negozi e disponibilità. */
 router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyMeteo }), (req, res) => {
-  const meteo = impostaMeteo(Number(req.params.id), String(req.params.data), req.body as { giorno?: MeteoPartita | null; sera?: MeteoPartita | null });
+  const meteo = impostaMeteo(Number(req.params.id), String(req.params.data), req.body);
   res.json({ meteo, partita: leggiPartita(Number(req.params.id)) });
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
-  const b = req.body as { articolo: string; fatto: boolean; sede?: string; soloPresenza?: true };
+  const b = req.body;
   res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede, b.soloPresenza ? { soloPresenza: true } : {}));
 });
 /** Ondata 5 (decisione 21): annulla un solo acquisto della pagina del negozio (una riga del registro), qualunque sia il suo ciclo. */
 router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto, query: queryRigaAcquisto }), (req, res) => {
-  const q = req.query as { sede?: string };
+  const q = req.query;
   res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId), q.sede));
 });
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {
-  const b = req.body as { data: string; fatto: boolean };
+  const b = req.body;
   res.json(segnaCruciverbaDallaGuida(Number(req.params.id), b.data, b.fatto));
 });
 router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }), (req, res) => {
-  const b = req.body as { tipo: 'libro' | 'film' | 'videogioco'; chiave: string; fatto?: boolean; avanzamento?: number };
+  const b = req.body;
   const modifica = b.avanzamento === undefined ? { fatto: b.fatto as boolean } : { avanzamento: b.avanzamento };
   res.json(impostaLettura(Number(req.params.id), b.tipo, b.chiave, modifica));
 });
 
 router.put('/:id/sessione-videogioco', validate({ params: paramsPartita, body: bodySessioneVideogioco }), (req, res) => {
-  const b = req.body as { chiave: string; dichiarata: boolean };
+  const b = req.body;
   res.json(impostaSessioneVideogioco(Number(req.params.id), b.chiave, b.dichiarata));
 });
 router.put('/:id/richieste', validate({ params: paramsPartita, body: bodyStatoRichiesta }), (req, res) => {
-  const b = req.body as { richiesta: string; stato: 'accettata' | 'completata' | null };
+  const b = req.body;
   res.json(impostaStatoRichiesta(Number(req.params.id), b.richiesta, b.stato));
 });
 /** L13: il riepilogo leggero delle Richieste per la Home (accettate, in scadenza): solo conteggi. */
@@ -324,21 +323,21 @@ router.delete('/:id/consumi/:consumoId', validate({ params: paramsPartitaConsumo
 });
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera). */
 router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ area: z.string().min(1).max(200), raccolti: z.number().int().min(0).max(999) }) }), (req, res) => {
-  const b = req.body as { area: string; raccolti: number };
+  const b = req.body;
   res.json(impostaTimbri(Number(req.params.id), b.area, b.raccolti));
 });
 router.put('/:id/punti', validate({ params: paramsPartita, body: bodyStatoPunto }), (req, res) => {
-  const b = req.body as { punto: string; stato: 'ottenuto' | 'esaurito' | null };
+  const b = req.body;
   res.json(impostaStatoPunto(Number(req.params.id), b.punto, b.stato));
 });
 router.put('/:id/domande/:domandaId', validate({ params: paramsPartitaDomanda, body: bodyDomandaFatta }), (req, res) => {
-  const b = req.body as { fatta: boolean; conoscenza?: boolean };
+  const b = req.body;
   res.json(segnaDomandaDallaGuida(Number(req.params.id), Number(req.params.domandaId), b.fatta, b.conoscenza === true));
 });
 
 // ---- Piazzamento agli esami (L9 R9-08): vale per il moltiplicatore dei sette Confidenti fino all'esame successivo ----
 router.put('/:id/esami/:esame/piazzamento', validate({ params: z.object({ id: paramsPartita.shape.id, esame: z.string().min(1).max(60) }), body: z.object({ piazzamento: z.enum(CHIAVI_PIAZZAMENTO_ESAME).nullable() }).strict() }), (req, res) => {
-  res.json(impostaPiazzamentoEsame(Number(req.params.id), String(req.params.esame), (req.body as { piazzamento: PiazzamentoEsame | null }).piazzamento));
+  res.json(impostaPiazzamentoEsame(Number(req.params.id), String(req.params.esame), req.body.piazzamento));
 });
 
 // ---- Compendio personale ----
@@ -356,13 +355,13 @@ router.get('/:id/suggerimenti', validate({ params: paramsPartita }), (req, res) 
 
 /** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */
 router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: idParam, spilloId: idParam }), body: bodyRaccolto }), (req, res) => {
-  const b = req.body as { raccolto: boolean; infiltrazione?: string };
+  const b = req.body;
   res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), b.raccolto, b.infiltrazione ?? null));
 });
 
 // L4 (§3.2): le divergenze conservate «da verificare» e «Togli il fatto al pin»
 router.get('/:id/divergenze', validate({ params: paramsPartita, query: z.object({ dungeon: z.string().min(1).max(80).optional() }) }), (req, res) => {
-  res.json(elencoDivergenze(Number(req.params.id), (req.query as { dungeon?: string }).dungeon));
+  res.json(elencoDivergenze(Number(req.params.id), req.query.dungeon));
 });
 router.delete('/:id/divergenze/:spilloUid', validate({ params: z.object({ id: idParam, spilloUid: z.string().min(1).max(80) }) }), (req, res) => {
   togliFattoAlPin(Number(req.params.id), String(req.params.spilloUid));
@@ -377,7 +376,7 @@ router.get('/:id/persona', validate({ params: paramsPartita }), (req, res) => {
   res.json(personePossedute(Number(req.params.id)));
 });
 router.post('/:id/persona', validate({ params: paramsPartita, body: bodyAggiungiPosseduta }), (req, res) => {
-  const { personaId, ...dati } = req.body as { personaId: number } & Parameters<typeof aggiungiPosseduta>[2];
+  const { personaId, ...dati } = req.body;
   res.status(201).json(aggiungiPosseduta(Number(req.params.id), personaId, dati));
 });
 router.put('/:id/persona/:possedutaId', validate({ params: paramsPartitaPosseduta, body: bodyAggiornaPosseduta }), (req, res) => {
@@ -394,10 +393,10 @@ router.post('/:id/persona/:possedutaId/registra', validate({ params: paramsParti
 
 // ---- Obiettivi (Fase 5.2) ----
 router.get('/:id/obiettivi', validate({ params: paramsPartita, query: queryObiettivi }), (req, res) => {
-  res.json(obiettivi(Number(req.params.id), (req.query as { stato?: 'aperto' | 'raggiunto' | 'annullato' }).stato));
+  res.json(obiettivi(Number(req.params.id), req.query.stato));
 });
 router.post('/:id/obiettivi', validate({ params: paramsPartita, body: bodyCreaObiettivo }), (req, res) => {
-  const { personaId, ...dati } = req.body as { personaId: number } & Parameters<typeof creaObiettivo>[2];
+  const { personaId, ...dati } = req.body;
   res.status(201).json(creaObiettivo(Number(req.params.id), personaId, dati));
 });
 router.put('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObiettivo, body: bodyAggiornaObiettivo }), (req, res) => {
@@ -410,10 +409,11 @@ router.delete('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObi
 
 // ---- Piani salvati (Fase 5.3) ----
 router.get('/:id/piani', validate({ params: paramsPartita, query: queryPianiSalvati }), (req, res) => {
-  res.json(pianiSalvati(Number(req.params.id), (req.query as unknown as { obiettivo?: number }).obiettivo));
+  res.json(pianiSalvati(Number(req.params.id), req.query.obiettivo));
 });
-router.post('/:id/piani', validate({ params: paramsPartita, body: bodySalvaPiano }), (req, res) => {
-  res.status(201).json(salvaPiano(Number(req.params.id), req.body as Parameters<typeof salvaPiano>[1]));
+// l'albero del piano lo verifica `salvaPiano` (`verificaAlbero`): lo schema ne controlla la forma esterna
+router.post('/:id/piani', validate({ params: paramsPartita, body: corpoDelServizio<DatiPianoSalvato>()(bodySalvaPiano) }), (req, res) => {
+  res.status(201).json(salvaPiano(Number(req.params.id), req.body));
 });
 router.put('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano, body: bodyAggiornaPianoSalvato }), (req, res) => {
   res.json(aggiornaPianoSalvato(Number(req.params.id), Number(req.params.pianoId), req.body));
@@ -428,7 +428,7 @@ router.get('/:id/cicli', validate({ params: paramsPartita }), (req, res) => {
   res.json(cicliSalvati(Number(req.params.id)));
 });
 router.post('/:id/cicli', validate({ params: paramsPartita, body: bodySalvaCiclo }), (req, res) => {
-  res.status(201).json(salvaCiclo(Number(req.params.id), req.body as Parameters<typeof salvaCiclo>[1]));
+  res.status(201).json(salvaCiclo(Number(req.params.id), req.body));
 });
 router.put('/:id/cicli/:cicloId', validate({ params: paramsPartitaCiclo, body: bodyAggiornaCiclo }), (req, res) => {
   res.json(aggiornaCiclo(Number(req.params.id), Number(req.params.cicloId), req.body));
@@ -443,17 +443,17 @@ router.delete('/:id/cicli/:cicloId', validate({ params: paramsPartitaCiclo }), (
 
 // ---- Operazioni della Stanza di Velluto dalla scorta (Fase 5.4) ----
 router.post('/:id/velluto/fusione/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaFusione }), (req, res) => {
-  const b = req.body as { possedutaIds: number[]; risultatoId?: number };
+  const b = req.body;
   res.json(anteprimaFusione(Number(req.params.id), b.possedutaIds, b.risultatoId));
 });
 router.post('/:id/velluto/fusione', validate({ params: paramsPartita, body: bodyFusioneScorta }), (req, res) => {
-  res.status(201).json(eseguiFusione(Number(req.params.id), req.body as Parameters<typeof eseguiFusione>[1]));
+  res.status(201).json(eseguiFusione(Number(req.params.id), req.body));
 });
 router.post('/:id/velluto/forca', validate({ params: paramsPartita, body: bodyForca }), (req, res) => {
-  res.json(eseguiForca(Number(req.params.id), req.body as Parameters<typeof eseguiForca>[1]));
+  res.json(eseguiForca(Number(req.params.id), req.body));
 });
 router.post('/:id/velluto/isolamento', validate({ params: paramsPartita, body: bodyIsolamento }), (req, res) => {
-  res.json(eseguiIsolamento(Number(req.params.id), req.body as Parameters<typeof eseguiIsolamento>[1]));
+  res.json(eseguiIsolamento(Number(req.params.id), req.body));
 });
 // Ondata 5 (lotto F-bis): gli incensi del catalogo con prezzo dell'offerta e copie possedute
 router.get('/:id/velluto/incensi', validate({ params: paramsPartita }), (req, res) => {
@@ -461,19 +461,16 @@ router.get('/:id/velluto/incensi', validate({ params: paramsPartita }), (req, re
 });
 router.get('/:id/velluto/isolamento/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   verificaPartita(Number(req.params.id)); // seconda difesa: la partita deve essere del proprietario della richiesta
-  const r = prepared('SELECT persona_id, livello FROM persona_posseduta WHERE id = ? AND partita_id = ?').get(Number(req.params.possedutaId), Number(req.params.id)) as { persona_id: number; livello: number } | undefined;
-  if (!r) throw httpErrors.notFound('posseduta-non-trovata', 'La Persona posseduta non è nella scorta di questa partita.');
-  const s = skillResistenzaIsolamento(r.persona_id, r.livello);
-  res.json({ elemento: s.elemento, elementoNome: s.elemento ? t('elemento', s.elemento) : null, tier: s.tier, skill: s.skill });
+  res.json(resistenzaIsolamentoDellaPosseduta(Number(req.params.id), Number(req.params.possedutaId)));
 });
 
 // ---- Storico (Fase 5.1) ----
 router.get('/:id/storico', validate({ params: paramsPartita, query: queryStorico }), (req, res) => {
-  const q = req.query as unknown as { limite?: number; prima?: number; tipi?: string; persona?: number };
+  const q = req.query;
   res.json(storico(Number(req.params.id), { limite: q.limite, prima: q.prima, tipi: q.tipi ? (q.tipi.split(',').filter(Boolean) as TipoEvento[]) : undefined, personaId: q.persona }));
 });
 router.post('/:id/storico/elimina', validate({ params: paramsPartita, body: bodyEliminaEventi }), (req, res) => {
-  res.json({ eliminati: eliminaEventi(Number(req.params.id), (req.body as { ids: number[] }).ids) });
+  res.json({ eliminati: eliminaEventi(Number(req.params.id), req.body.ids) });
 });
 router.delete('/:id/storico/:eventoId', validate({ params: paramsPartitaEvento }), (req, res) => {
   eliminaEvento(Number(req.params.id), Number(req.params.eventoId));

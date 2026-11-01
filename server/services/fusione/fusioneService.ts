@@ -281,10 +281,12 @@ function motivoNessunPiano(target: PersonaFusione, ctx: Contesto, skillRichieste
     const fonti = prepared('SELECT p.nome, p.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND p.del_party = 0 AND ps.livello <= p.livello ORDER BY p.livello').all(sk.id) as Array<{ nome: string; livello: number }>;
     if (fonti.length === 0) {
       const tardive = prepared('SELECT p.nome, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND p.del_party = 0 ORDER BY ps.livello LIMIT 3').all(sk.id) as Array<{ nome: string; livello: number }>;
-      return { codice: 'skill-senza-fonte', testo: `Nessuna Persona conosce ${sk.nomeIt} già al livello base: si impara salendo di livello${tardive.length ? ` (${tardive.map((x) => `${t('persona', x.nome)} al livello ${x.livello}`).join(', ')})` : ''}. Portane una in scorta con la skill appresa e riprova.` };
+      return { codice: 'skill-senza-fonte',
+        testo: `Nessuna Persona conosce ${sk.nomeIt} già al livello base: si impara salendo di livello${tardive.length ? ` (${tardive.map((x) => `${t('persona', x.nome)} al livello ${x.livello}`).join(', ')})` : ''}. Portane una in scorta con la skill appresa e riprova.` };
     }
     if (livelloMax !== null && fonti[0].livello > livelloMax) {
-      return { codice: 'limite-livello', testo: `Con il limite al livello ${livelloMax} nessun ingrediente può portare ${sk.nomeIt}: la Persona di livello più basso che la conosce dal livello base è ${t('persona', fonti[0].nome)} (livello ${fonti[0].livello}). Togli il limite o porta in scorta una Persona che l'ha imparata.` };
+      return { codice: 'limite-livello',
+        testo: `Con il limite al livello ${livelloMax} nessun ingrediente può portare ${sk.nomeIt}: la Persona di livello più basso che la conosce dal livello base è ${t('persona', fonti[0].nome)} (livello ${fonti[0].livello}). Togli il limite o porta in scorta una Persona che l'ha imparata.` };
     }
   }
   return null;

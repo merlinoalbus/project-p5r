@@ -18,7 +18,14 @@
 import type { AppDatabase } from './dbService.js';
 
 /** Le tabelle che vivono nel file delle partite, in ordine alfabetico. */
-export const TABELLE_UTENTE = ["acquisto_partita","attivita_svolta_partita","cestino_partite","ciclo_salvato","compendio_partita","confidente_partita","cruciverba_partita","domanda_partita","dote_sociale_partita","effetto_lettura_partita","evento_partita","evento_storia_partita","incontro_confidente_partita","lettura_partita","membro_squadra_partita","meteo_partita","obiettivo_partita","partita","persona_posseduta","persona_posseduta_skill","piano_salvato","progresso_film_partita","progresso_libro_partita","progresso_videogioco_partita","punti_negozio_partita","punto_partita","regalo_partita","requisito_partita","richiesta_partita","sessione_videogioco_partita","spillo_partita","spunta_voce_partita","timbri_dedalo_partita","trofeo_partita","turno_partita"] as const;
+export const TABELLE_UTENTE = [
+  "acquisto_partita","attivita_svolta_partita","cestino_partite","ciclo_salvato","compendio_partita","confidente_partita","cruciverba_partita",
+  "domanda_partita","dote_sociale_partita","effetto_lettura_partita","evento_partita","evento_storia_partita","incontro_confidente_partita",
+  "lettura_partita","membro_squadra_partita","meteo_partita","obiettivo_partita","partita","persona_posseduta","persona_posseduta_skill","piano_salvato",
+  "progresso_film_partita","progresso_libro_partita","progresso_videogioco_partita","punti_negozio_partita","punto_partita","regalo_partita",
+  "requisito_partita","richiesta_partita","sessione_videogioco_partita","spillo_partita","spunta_voce_partita","timbri_dedalo_partita","trofeo_partita",
+  "turno_partita"
+] as const;
 
 /** Nessuna FK fra i due file: i riferimenti ai giochi si controllano con RIFERIMENTI_PARTITE. */
 export const DDL_SESSIONE_VIDEOGIOCO = `CREATE TABLE IF NOT EXISTS utente.sessione_videogioco_partita (

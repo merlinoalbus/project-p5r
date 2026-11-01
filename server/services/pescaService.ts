@@ -21,7 +21,12 @@ function sessione(p:number,id:string):RigaSessionePesca {
   const s=sessioniPesca(p).find(x=>x.id===id);if(!s)throw httpErrors.notFound('pesca-sessione-assente','La sessione non esiste con questa identità.');return s;
 }
 function richiestaValida(azione:AzioneOperazionePesca,r:InputOperazionePesca):void {
-  const schema=azione==='registra-sessione'?bodyAnteprimaSessionePesca:azione==='salva-osservazione'?bodyAnteprimaOsservazionePesca:azione==='registra-fatto'?bodyAnteprimaFattoPesca:azione==='acquista-esca'?bodyAnteprimaAcquistoEsca:azione==='rettifica-punti'?bodyAnteprimaRettificaPuntiPesca:bodyAnteprimaRimozionePesca;
+  const schema=azione==='registra-sessione'?bodyAnteprimaSessionePesca
+    :azione==='salva-osservazione'?bodyAnteprimaOsservazionePesca
+    :azione==='registra-fatto'?bodyAnteprimaFattoPesca
+    :azione==='acquista-esca'?bodyAnteprimaAcquistoEsca
+    :azione==='rettifica-punti'?bodyAnteprimaRettificaPuntiPesca
+    :bodyAnteprimaRimozionePesca;
   if(!schema.safeParse(r).success)throw httpErrors.badRequest('pesca-richiesta-non-valida','La richiesta di pesca non è completa: riapri la finestra e riprova.');
 }
 /** La Fortuna sulla Perizia in quel giorno, dallo stato della partita (R10-10/2): true/false se lo stato lo dice, null se non lo sa. */
@@ -57,7 +62,8 @@ function verificaRangoFotografato(p:number,m:NuovaSessionePesca['momento'],o:Oss
   // correggere l'esca non deve confrontare di nuovo quel rango con la partita odierna.
   if(precedente?.provenienzaRango==='fotografia-corrente-confermata'&&precedente.rangoPeriziaOsservato===o.rangoPeriziaOsservato)return;
   const partita=prepared('SELECT data_gioco,fascia_gioco FROM utente.partita WHERE id=?').get(p) as {data_gioco:string|null;fascia_gioco:string};
-  if(partita.data_gioco!==m.giorno||partita.fascia_gioco!==m.fascia||dotiSociali(p).find(d=>d.chiave==='perizia')?.rango!==o.rangoPeriziaOsservato)throw httpErrors.conflict('pesca-rango-fotografia-diversa','Il rango o il momento non corrispondono a quelli della partita. Per una visita passata scrivi il rango che avevi o lascialo non noto.');
+  if(partita.data_gioco!==m.giorno||partita.fascia_gioco!==m.fascia||dotiSociali(p).find(d=>d.chiave==='perizia')?.rango!==o.rangoPeriziaOsservato)
+    throw httpErrors.conflict('pesca-rango-fotografia-diversa','Il rango o il momento non corrispondono a quelli della partita. Per una visita passata scrivi il rango che avevi o lascialo non noto.');
 }
 function verificaFonte(p:number,r:NuovaSessionePesca):void {
   if(r.fonte.tipo==='manuale')return;
@@ -86,7 +92,8 @@ function verificaTurno(r:NuovaSessionePesca,st:StatoPescaDto):void {
 function verificaFatto(p:number,evento:EventoPesca,r:Extract<InputOperazionePesca,{valore:unknown}>,escludiSessione?:string):void {
   for(const f of fattiPesca(p).filter(f=>f.sessione_id!==escludiSessione&&f.evento_chiave===evento&&f.valore!=='ignoto'&&r.valore!=='ignoto'&&f.valore!==r.valore)){
     const precedente=f.momento_json===null?null:jsonPesca(f.momento_json,'momento del fatto') as typeof r.momento;
-    if(precedente&&r.momento&&(f.valore==='avvenuto'?confrontaMomentiPesca(precedente,r.momento)<=0:confrontaMomentiPesca(r.momento,precedente)<=0))throw httpErrors.conflict('pesca-fatti-incompatibili','Una fonte negativa raggiungerebbe un limite in cui il fatto è già attestato. Revoca o correggi prima la fonte pertinente.');
+    if(precedente&&r.momento&&(f.valore==='avvenuto'?confrontaMomentiPesca(precedente,r.momento)<=0:confrontaMomentiPesca(r.momento,precedente)<=0))
+      throw httpErrors.conflict('pesca-fatti-incompatibili','Una fonte negativa raggiungerebbe un limite in cui il fatto è già attestato. Revoca o correggi prima la fonte pertinente.');
     if(precedente===null&&r.momento===null)throw httpErrors.conflict('pesca-fatti-incompatibili','Due affermazioni correnti non datate sono incompatibili. Le fonti datate restano distinte.');
   }
 }
@@ -109,7 +116,10 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
       :`È una delle visite contate prima nelle attività: il conto resta ${volte}.`,
     'I pesci presi e la Perizia restano segnati a parte. Punti di Perizia, quota d’ingresso e punti pesca restano da approvare: Doti e soldi non cambiano da soli.');
   }else if(azione==='salva-osservazione'){
-    const s=sessione(p,bersaglio!);controllaOsservazione(p,{momento:momentoSessione(s),osservazione:(r as {osservazione:OsservazionePesca}).osservazione} as NuovaSessionePesca,osservazioneDto(osservazioneCorrente(s.id)).dati.fortuna.attiva);verificaFattiOsservazione(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,s.id);
+    const s=sessione(p,bersaglio!);
+    controllaOsservazione(p,{momento:momentoSessione(s),osservazione:(r as {osservazione:OsservazionePesca}).osservazione} as NuovaSessionePesca,
+      osservazioneDto(osservazioneCorrente(s.id)).dati.fortuna.attiva);
+    verificaFattiOsservazione(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,s.id);
     verificaRangoFotografato(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,osservazioneDto(osservazioneCorrente(s.id)).dati);
     verificaIdentitaCatture((r as {osservazione:OsservazionePesca}).osservazione,s.id);
     conseguenze.push('La versione di prima resta fra le correzioni della visita. Cambiano solo i fatti che vengono da questa visita e i premi da approvare che la riguardano; un dato che ora lasci «non lo so» non toglie un premio già provato.');
@@ -127,7 +137,9 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
   }else if(azione==='rimuovi-acquisto-esca'){
     if(!st.acquistiEsca.some(a=>a.id===bersaglio&&a.attivo))throw httpErrors.notFound('pesca-esca-assente','L’acquisto dell’esca non è attivo.');
     conseguenze.push('Toglie l’acquisto; se i punti pesca erano già stati scalati, propone di restituire soltanto quelli.');
-  }else if(azione==='acquista-esca'){if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','Il costo dell’esca non ha una fonte leggibile.');conseguenze.push('Segna un acquisto che hai fatto davvero: avere un’esca non vuol dire averla comprata. Il costo in punti pesca resta da approvare.');}
+  }else if(azione==='acquista-esca'){
+    if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','Il costo dell’esca non ha una fonte leggibile.');
+    conseguenze.push('Segna un acquisto che hai fatto davvero: avere un’esca non vuol dire averla comprata. Il costo in punti pesca resta da approvare.');}
   else conseguenze.push('Segna il saldo dei punti pesca che vedi nel gioco. Correggerlo non segna come già pagato nessun acquisto.');
   const o='osservazione'in r?r.osservazione:null,m='momento'in r?r.momento:azione==='salva-osservazione'?momentoSessione(sessione(p,bersaglio!)):null;
   const precedente=m?valoreFattoPesca(p,'guardiano-ichigaya-catturato',m,true):'ignoto';
@@ -135,22 +147,38 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
   const punto=o?puntoOsservazionePesca(o):{tipo:'pianificazione' as const};
   const e=azione==='acquista-esca'?r as Extract<InputOperazionePesca,{quantita:unknown}>:null;
   const acquistoEscaPrevisto=e?{quantita:e.quantita,costoUnitario:st.regola.dati!.costoEscaPunti,costoTotale:e.quantita*st.regola.dati!.costoEscaPunti,unita:'punti-pesca' as const}:undefined;
-  const benefici=acquistoEscaPrevisto?[{causa:`richiesta:${r.operazioneId}`,tipo:'punti-pesca' as const,chiave:'',unita:'punti-pesca' as const,intervallo:{minimo:-acquistoEscaPrevisto.costoTotale,massimo:-acquistoEscaPrevisto.costoTotale},attribuito:0,deltaCerto:-acquistoEscaPrevisto.costoTotale,residuoIgnoto:false,motivo:'Costo del nuovo acquisto: nessun punto risulta già scalato.'}]:bersaglio?beneficiPescaDto(p,bersaglio):[];
-  return {azione,richiesta:r,bersaglio,stato:st,punto,profiliPianificazione:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente):[],profili:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente,punto):[],benefici,...(acquistoEscaPrevisto?{acquistoEscaPrevisto}:{}),esitoPrevisto:conseguenze[0]!,conseguenze,revisionePescaAttesa:firmaPesca({azione,r,bersaglio,foto:fotografiaPesca(p)})};
+  const benefici=acquistoEscaPrevisto?[{
+    causa:`richiesta:${r.operazioneId}`,tipo:'punti-pesca' as const,chiave:'',unita:'punti-pesca' as const,
+    intervallo:{minimo:-acquistoEscaPrevisto.costoTotale,massimo:-acquistoEscaPrevisto.costoTotale},attribuito:0,
+    deltaCerto:-acquistoEscaPrevisto.costoTotale,residuoIgnoto:false,motivo:'Costo del nuovo acquisto: nessun punto risulta già scalato.'
+  }]:bersaglio?beneficiPescaDto(p,bersaglio):[];
+  return {
+    azione,richiesta:r,bersaglio,stato:st,punto,
+    profiliPianificazione:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente):[],
+    profili:o&&m?profiliPesca(p,st.regola.dati,m,o,guardianoPrecedente,punto):[],
+    benefici,...(acquistoEscaPrevisto?{acquistoEscaPrevisto}:{}),esitoPrevisto:conseguenze[0]!,conseguenze,
+    revisionePescaAttesa:firmaPesca({azione,r,bersaglio,foto:fotografiaPesca(p)})
+  };
 }
 function verificaFattiOsservazione(p:number,momento:NuovaSessionePesca['momento'],o:OsservazionePesca,escludi?:string):void {
   for(const c of o.catture??[])if(c.specie!=='altro')verificaFatto(p,c.specie==='guardiano'?'guardiano-ichigaya-catturato':'boss-ichigaya-catturato',{operazioneId:'',valore:'avvenuto',momento,nota:''},escludi);
   if(o.faseTerzoSemestre!==null)verificaFatto(p,'terzo-semestre-avviato',{operazioneId:'',valore:o.faseTerzoSemestre?'avvenuto':'non-avvenuto',momento,nota:''},escludi);
 }
 function verificaIdentitaCatture(o:OsservazionePesca,sessioneId:string|null):void {
-  for(const c of o.catture??[]){const r=prepared('SELECT sessione_id FROM utente.pesca_cattura WHERE id=?').get(c.id) as {sessione_id:string}|undefined;if(r&&r.sessione_id!==sessioneId)throw httpErrors.conflict('pesca-cattura-gia-riferita','L’identità della cattura appartiene a un’altra visita. Non viene spostata o duplicata.');}
+  for(const c of o.catture??[]){
+    const r=prepared('SELECT sessione_id FROM utente.pesca_cattura WHERE id=?').get(c.id) as {sessione_id:string}|undefined;
+    if(r&&r.sessione_id!==sessioneId)
+      throw httpErrors.conflict('pesca-cattura-gia-riferita','L’identità della cattura appartiene a un’altra visita. Non viene spostata o duplicata.');
+  }
 }
 export function anteprimaPesca(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,bersaglio:string|null=null):AnteprimaOperazionePescaDto {return getDb().transaction(()=>prepara(p,azione,r,bersaglio))();}
 export function leggiOperazionePesca(p:number,id:string):RicevutaOperazionePescaDto {
   verificaPartita(p);const row=prepared('SELECT * FROM utente.pesca_operazione WHERE partita_id=? AND operazione_id=?').get(p,id) as {azione:string;payload_json:string;ricevuta_json:string}|undefined;
   if(!row||row.azione===AZIONE_ALLOCAZIONE_TURNO_PESCA)throw httpErrors.notFound('pesca-operazione-assente','Questa operazione di pesca non risulta registrata. Non vuol dire che un’altra operazione sia fallita.');
   const d=jsonPesca(row.ricevuta_json,'ricevuta della pesca') as RicevutaOperazionePescaDto;
-  if(!d||d.operazioneId!==id||d.partitaId!==p||d.azione!==row.azione||typeof d.creataIl!=='string'||canonicoPesca({azione:d.azione,richiesta:d.richiesta,bersaglio:d.bersaglio})!==row.payload_json)throw httpErrors.conflict('pesca-ricevuta-incoerente','La ricevuta registrata non corrisponde a questa operazione di pesca: niente è stato cambiato.');
+  if(!d||d.operazioneId!==id||d.partitaId!==p||d.azione!==row.azione||typeof d.creataIl!=='string'
+    ||canonicoPesca({azione:d.azione,richiesta:d.richiesta,bersaglio:d.bersaglio})!==row.payload_json)
+    throw httpErrors.conflict('pesca-ricevuta-incoerente','La ricevuta registrata non corrisponde a questa operazione di pesca: niente è stato cambiato.');
   richiestaValida(d.azione,d.richiesta);return d;
 }
 function nuovaOsservazione(s:RigaSessionePesca,o:OsservazionePesca):string {
@@ -167,9 +195,14 @@ function ricostruisciFattiSessione(s:RigaSessionePesca,o:OsservazionePesca):void
   for(const f of fontiPesca(s.partita_id).filter(f=>f.sessione_id===s.id)){
     for(const c of o.catture??[])if(c.specie!=='altro'){
       const evento:EventoPesca=c.specie==='guardiano'?'guardiano-ichigaya-catturato':'boss-ichigaya-catturato';
-      prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,sessione_id,cattura_id,provenienza_id,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,\'avvenuto\',?,?,?,?,?,?,?,?)').run(firmaPesca({fonte:f.id,cattura:c.id}).slice(0,32),s.partita_id,evento,canonicoPesca(momentoSessione(s)),s.id,c.id,f.id,f.fonte_json,'Cattura osservata nella sessione.',f.operazione_id,nowIso());
+      prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,sessione_id,cattura_id,provenienza_id,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,\'avvenuto\',?,?,?,?,?,?,?,?)')
+        .run(firmaPesca({fonte:f.id,cattura:c.id}).slice(0,32),s.partita_id,evento,canonicoPesca(momentoSessione(s)),s.id,c.id,f.id,f.fonte_json,
+          'Cattura osservata nella sessione.',f.operazione_id,nowIso());
     }
-    if(o.faseTerzoSemestre!==null)prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,sessione_id,cattura_id,provenienza_id,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,?,?,?,NULL,?,?,?,?,?)').run(firmaPesca({fonte:f.id,evento:'terzo-semestre'}).slice(0,32),s.partita_id,'terzo-semestre-avviato',o.faseTerzoSemestre?'avvenuto':'non-avvenuto',canonicoPesca(momentoSessione(s)),s.id,f.id,f.fonte_json,'Fase osservata durante la visita.',f.operazione_id,nowIso());
+    if(o.faseTerzoSemestre!==null)
+      prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,sessione_id,cattura_id,provenienza_id,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,?,?,?,NULL,?,?,?,?,?)')
+        .run(firmaPesca({fonte:f.id,evento:'terzo-semestre'}).slice(0,32),s.partita_id,'terzo-semestre-avviato',o.faseTerzoSemestre?'avvenuto':'non-avvenuto',
+          canonicoPesca(momentoSessione(s)),s.id,f.id,f.fonte_json,'Fase osservata durante la visita.',f.operazione_id,nowIso());
   }
 }
 function registraSessione(p:number,r:NuovaSessionePesca,contesto?:ContestoDiarioPesca):{sessioneId:string;provenienzaId:string;osservazioneId:string;esito:RicevutaOperazionePescaDto['esito']} {
@@ -188,14 +221,19 @@ function registraSessione(p:number,r:NuovaSessionePesca,contesto?:ContestoDiario
     const attivitaTurno=r.turno.tipo==='esistente'?st.contatore.turni.find(t=>r.turno.tipo==='esistente'&&t.ordine===r.turno.ordine&&t.firma===r.turno.firmaTurno)!.attivita:ATTIVITA_PESCA;
     const esistente=prepared('SELECT * FROM utente.turno_partita WHERE partita_id=? AND attivita_chiave=? AND ordine=?').get(p,attivitaTurno,ordine) as Record<string,unknown>&{uid:string|null};const uid=esistente.uid??turnoUid;
     if(esistente.uid===null)prepared('UPDATE utente.turno_partita SET uid=? WHERE partita_id=? AND attivita_chiave=? AND ordine=? AND uid IS NULL').run(uid,p,attivitaTurno,ordine);
-    prepared('INSERT INTO utente.pesca_sessione(id,partita_id,attivita_chiave,giorno,fascia,ordine_visita,turno_uid,turno_ordine,origine_turno,identita_json,creata_il) VALUES(?,?,?,?,?,?,?,?,?,?,?)').run(id,p,ATTIVITA_PESCA,r.momento.giorno,r.momento.fascia,r.momento.ordineVisita,uid,ordine,origine,canonicoPesca({attivita:ATTIVITA_PESCA,turnoAttivita:attivitaTurno,nome:'Pesca a Ichigaya',regola:st.regola.dati}),nowIso());
+    prepared('INSERT INTO utente.pesca_sessione(id,partita_id,attivita_chiave,giorno,fascia,ordine_visita,turno_uid,turno_ordine,origine_turno,identita_json,creata_il) VALUES(?,?,?,?,?,?,?,?,?,?,?)')
+      .run(id,p,ATTIVITA_PESCA,r.momento.giorno,r.momento.fascia,r.momento.ordineVisita,uid,ordine,origine,
+        canonicoPesca({attivita:ATTIVITA_PESCA,turnoAttivita:attivitaTurno,nome:'Pesca a Ichigaya',regola:st.regola.dati}),nowIso());
     if(r.turno.tipo==='esistente')registraAllocazioneTurnoPesca(p,id,esistente,prepared('SELECT * FROM utente.turno_partita WHERE partita_id=? AND uid=?').get(p,uid) as Record<string,unknown>,r.turno.firmaTurno);
     s=sessione(p,id);osservazioneId=nuovaOsservazione(s,r.osservazione);
   }
   const fonte=r.fonte;
   const gia=fonte.tipo==='diario'?fontiPesca(p).find(f=>f.voce_uid===fonte.voceUid&&f.effetto_uid===fonte.effettoUid):null;
   if(gia)return {sessioneId:s.id,provenienzaId:gia.id,osservazioneId,esito:'gia-collegata'};
-  const id=uidPesca();prepared('INSERT INTO utente.pesca_provenienza(id,partita_id,sessione_id,tipo,voce_uid,effetto_uid,generazione,operazione_id,fonte_json,creata_il) VALUES(?,?,?,?,?,?,?,?,?,?)').run(id,p,s.id,r.fonte.tipo,r.fonte.tipo==='diario'?r.fonte.voceUid:null,r.fonte.tipo==='diario'?r.fonte.effettoUid:null,r.fonte.tipo==='diario'?contesto!.generazione:null,r.operazioneId,canonicoPesca(r.fonte),nowIso());
+  const id=uidPesca();
+  prepared('INSERT INTO utente.pesca_provenienza(id,partita_id,sessione_id,tipo,voce_uid,effetto_uid,generazione,operazione_id,fonte_json,creata_il) VALUES(?,?,?,?,?,?,?,?,?,?)')
+    .run(id,p,s.id,r.fonte.tipo,r.fonte.tipo==='diario'?r.fonte.voceUid:null,r.fonte.tipo==='diario'?r.fonte.effettoUid:null,
+      r.fonte.tipo==='diario'?contesto!.generazione:null,r.operazioneId,canonicoPesca(r.fonte),nowIso());
   ricostruisciFattiSessione(s,r.osservazione);riconciliaBeneficiPesca(p,s.id);
   return {sessioneId:s.id,provenienzaId:id,osservazioneId,esito:r.scelta.tipo==='nuova'?'sessione-creata':'fonte-collegata'};
 }
@@ -231,13 +269,23 @@ export function confermaPesca(p:number,azione:AzioneOperazionePesca,input:Confer
     if(azione==='registra-sessione')Object.assign(result,registraSessione(p,r as NuovaSessionePesca,contesto));
     else if(azione==='salva-osservazione'){const s=sessione(p,bersaglio!);result.sessioneId=s.id;result.osservazioneId=nuovaOsservazione(s,(r as {osservazione:OsservazionePesca}).osservazione);result.esito='osservazione-salvata';riconciliaBeneficiPesca(p,s.id);}
     else if(azione==='rimuovi-fonte'){result.provenienzaId=bersaglio;result.sessioneId=rimuoviFontePescaNellaTransazione(p,bersaglio!);}
-    else if(azione==='rimuovi-sessione'){const s=sessione(p,bersaglio!);for(const f of fontiPesca(p).filter(f=>f.sessione_id===s.id))rimuoviFontePescaNellaTransazione(p,f.id);prepared('DELETE FROM utente.pesca_sessione WHERE partita_id=? AND id=?').run(p,s.id);riconciliaBeneficiPesca(p,s.id);result.sessioneId=s.id;result.esito='sessione-rimossa';}
+    else if(azione==='rimuovi-sessione'){
+      const s=sessione(p,bersaglio!);
+      for(const f of fontiPesca(p).filter(f=>f.sessione_id===s.id))rimuoviFontePescaNellaTransazione(p,f.id);
+      prepared('DELETE FROM utente.pesca_sessione WHERE partita_id=? AND id=?').run(p,s.id);
+      riconciliaBeneficiPesca(p,s.id);result.sessioneId=s.id;result.esito='sessione-rimossa';
+    }
     else if(azione==='registra-fatto'){
-      const f=r as Extract<InputOperazionePesca,{valore:unknown}>,id=uidPesca();prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,?,?,?,?,?,?)').run(id,p,bersaglio!,f.valore,f.momento?canonicoPesca(f.momento):null,canonicoPesca({tipo:'manuale'}),f.nota,f.operazioneId,nowIso());result.fattoFonteId=id;result.esito='fatto-registrato';
+      const f=r as Extract<InputOperazionePesca,{valore:unknown}>,id=uidPesca();
+      prepared('INSERT INTO utente.pesca_fatto_fonte(id,partita_id,evento_chiave,valore,momento_json,fonte_json,nota,operazione_id,creata_il) VALUES(?,?,?,?,?,?,?,?,?)')
+        .run(id,p,bersaglio!,f.valore,f.momento?canonicoPesca(f.momento):null,canonicoPesca({tipo:'manuale'}),f.nota,f.operazioneId,nowIso());
+      result.fattoFonteId=id;result.esito='fatto-registrato';
     }else if(azione==='rimuovi-fatto'){annullaEventiPesca(p,{fatto:bersaglio!});prepared('DELETE FROM utente.pesca_fatto_fonte WHERE partita_id=? AND id=? AND sessione_id IS NULL').run(p,bersaglio!);result.fattoFonteId=bersaglio;result.esito='fatto-rimosso';}
     else if(azione==='acquista-esca'){
       const e=r as Extract<InputOperazionePesca,{quantita:unknown}>,id=uidPesca(),costo=e.quantita*a.stato.regola.dati!.costoEscaPunti;if(!Number.isSafeInteger(costo))throw httpErrors.conflict('pesca-costo-fuori-limiti','Il costo non è rappresentabile esattamente.');
-      prepared('INSERT INTO utente.pesca_acquisto_esca(id,partita_id,momento_json,quantita,costo_punti,attivo,identita_json,creato_il) VALUES(?,?,?,?,?,1,?,?)').run(id,p,canonicoPesca(e.momento),e.quantita,costo,canonicoPesca({regola:a.stato.regola.dati,unita:'punti-pesca'}),nowIso());riconciliaBeneficiPesca(p,id);result.acquistoEscaId=id;result.esito='esca-acquistata';
+      prepared('INSERT INTO utente.pesca_acquisto_esca(id,partita_id,momento_json,quantita,costo_punti,attivo,identita_json,creato_il) VALUES(?,?,?,?,?,1,?,?)')
+        .run(id,p,canonicoPesca(e.momento),e.quantita,costo,canonicoPesca({regola:a.stato.regola.dati,unita:'punti-pesca'}),nowIso());
+      riconciliaBeneficiPesca(p,id);result.acquistoEscaId=id;result.esito='esca-acquistata';
     }else if(azione==='rimuovi-acquisto-esca'){annullaEventiPesca(p,{esca:bersaglio!});prepared('DELETE FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').run(p,bersaglio!);riconciliaBeneficiPesca(p,bersaglio!);result.acquistoEscaId=bersaglio;result.esito='acquisto-esca-rimosso';}
     else {
       const saldo=(r as Extract<InputOperazionePesca,{saldoOsservato:unknown}>).saldoOsservato,prima=a.stato.saldoPunti;

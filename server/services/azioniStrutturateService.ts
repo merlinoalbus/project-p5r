@@ -293,7 +293,11 @@ export function elenchiAzione(): ElenchiAzioneDto {
     libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     film: conYen(pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)), yenFilm),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
-    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, ...(yenAttivita.has(a.chiave) ? { yen: yenAttivita.get(a.chiave)! } : {}), turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta', ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json)) })),
+    attivita: attivita.map((a) => ({
+      chiave: a.chiave, nome: a.nome, ...(yenAttivita.has(a.chiave) ? { yen: yenAttivita.get(a.chiave)! } : {}),
+      turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta',
+      ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json))
+    })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
   };
@@ -312,7 +316,11 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
   // e il contenuto; un articolo nascosto resta per il suo nome (una voce che lo cita ancora lo mostra) ma l'editor non lo propone
   const incompatibili = mappaIncompatibili();
   const righe = prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, ${sqlPrezzoPerFascia('a')} AS prezzo_per_fascia_json, a.catalogo_chiave AS catalogoChiave, a.nascosto, a.condizioni_json
-    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; catalogoChiave: string | null; nascosto: number; condizioni_json: string | null }>;
+    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`)
+    .all() as Array<{
+      chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; prezzo_per_fascia_json: string | null;
+      catalogoChiave: string | null; nascosto: number; condizioni_json: string | null
+    }>;
   const contenuti = contenutoArticoli(righe.map((a) => a.chiave));
   const articoli = righe
     .filter((a) => !eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogoChiave }))

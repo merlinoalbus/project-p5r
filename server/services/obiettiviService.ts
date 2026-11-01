@@ -112,7 +112,9 @@ export function creaObiettivo(partitaId: number, personaId: number, dati: DatiOb
       .run(partitaId, personaId, JSON.stringify(skillIds), dati.livelloMin ?? null, dati.priorita ?? 1, dati.note ?? '', adesso, adesso);
     const id = Number(info.lastInsertRowid);
     const nomiSkill = skillIds.map((s) => skillDto(s)?.nomeIt ?? String(s));
-    registraEvento(partitaId, 'obiettivo-creato', `Obiettivo: ${t('persona', persona.nome)}`, [nomiSkill.length ? `Skill: ${nomiSkill.join(', ')}` : '', dati.livelloMin ? `almeno livello ${dati.livelloMin}` : ''].filter(Boolean).join(' · '), { obiettivoId: id, skillIds, livelloMin: dati.livelloMin ?? null }, personaId);
+    registraEvento(partitaId, 'obiettivo-creato', `Obiettivo: ${t('persona', persona.nome)}`,
+      [nomiSkill.length ? `Skill: ${nomiSkill.join(', ')}` : '', dati.livelloMin ? `almeno livello ${dati.livelloMin}` : ''].filter(Boolean).join(' · '),
+      { obiettivoId: id, skillIds, livelloMin: dati.livelloMin ?? null }, personaId);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     // Se la Persona è già in scorta e soddisfa le condizioni, l'obiettivo nasce raggiunto.
     verificaObiettivi(partitaId, personaId);

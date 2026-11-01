@@ -122,12 +122,15 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     // di un altro utente, nell'istanza di rilascio) riceverebbe lo stesso id, e il ripristino dal cestino andrebbe in conflitto
     // («identità già presente») per sempre. Il cestino delle partite (`utente.cestino_partite.partita_id`, e il vecchio `main.cestino`
     // di tipo `partita`, la cui chiave è l'id) ricorda l'id della partita eliminata anche se la riga non c'è più: si sceglie un id
-    // maggiore sia del massimo in `partita` sia del massimo citato nel cestino. Vale in entrambe le modalità; la struttura delle
-    // tabelle non cambia (niente AUTOINCREMENT, che costringerebbe a ricostruire `partita`).
+    // maggiore sia del massimo in `partita` sia del massimo citato nel cestino. Vale in entrambe le modalità. L11-04 (utente 064): la
+    // tabella ha AUTOINCREMENT e il suo contatore (`sqlite_sequence`) ricorda il più alto id mai dato, anche di una partita il cui posto
+    // nel cestino è stato svuotato o rimasta solo nell'archivio degli acquisti: entra nel massimo, così un id non torna mai.
     const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
     const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
     const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
-    const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco) + 1;
+    const conContatore = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'").get();
+    const contatore = conContatore ? (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m : 0;
+    const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco, contatore) + 1;
     const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       idNuovo, dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.fasciaGioco ?? 'giorno', dati.difficolta ?? 'normale',

@@ -239,7 +239,8 @@ function descriviIncontro(i: IncontroConfidenteDto): string {
  *  ricevute e si applicano con «Applica» sulla voce (`motoreDiario.beneficiLegacy`), mai in automatico. */
 export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   // L13: «nessuna ♪» scelta alla spunta per una Dote a valori possibili si dice, non si propone
-  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)` : `${testoDoteInPunti(d)}${d.note && (d.cinema || d.scelta) ? ` (${[d.cinema ? 'Anima da cineasta' : null, d.scelta ? 'note scelte alla spunta' : null].filter(Boolean).join(', ')})` : ''} da applicare con «Applica» sulla voce`);
+  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: ${NESSUNA_NOTA} (scelta alla spunta)`
+    : `${testoDoteInPunti(d)}${d.note && (d.cinema || d.scelta) ? ` (${[d.cinema ? 'Anima da cineasta' : null, d.scelta ? 'note scelte alla spunta' : null].filter(Boolean).join(', ')})` : ''} da applicare con «Applica» sulla voce`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${frasiDoti(l.doti)})` : ''}`);
   // 2026-10-27: anche gli oggetti che il turno ha dato e usato (con la quantità e il bonus della voce), solo se ci sono
   const oggetti = (o: ReadonlyArray<{ nome: string; quantita: number }> | undefined) => (o ?? []).map((x) => (x.quantita > 1 ? `${x.nome} ×${x.quantita}` : x.nome)).join(', ');

@@ -12,7 +12,6 @@ import { validate } from '../middleware/validate.js';
 import { paramsFont } from '../schemas/font.js';
 import { MAX_BYTE_FONT, elencaFont, eliminaFont, fileFont, salvaFont } from '../services/fontService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { RuoloFont } from '../../shared/types.js';
 
 const router = Router();
 
@@ -21,7 +20,7 @@ router.get('/', (_req, res) => {
 });
 
 router.get('/:ruolo/file', validate({ params: paramsFont }), (req, res) => {
-  const { percorso, mime } = fileFont(String(req.params.ruolo) as RuoloFont);
+  const { percorso, mime } = fileFont(req.params.ruolo);
   res.type(mime);
   // Rivalidazione a ogni richiesta: una sostituzione è visibile subito (il frontend aggiunge anche la data al querystring).
   res.setHeader('Cache-Control', 'private, no-cache');
@@ -34,12 +33,12 @@ router.put(
   express.raw({ type: () => true, limit: MAX_BYTE_FONT }),
   (req, res) => {
     if (!Buffer.isBuffer(req.body)) throw httpErrors.badRequest('corpo-non-font', 'Il corpo della richiesta deve essere il file del font.');
-    res.status(201).json(salvaFont(String(req.params.ruolo) as RuoloFont, req.body));
+    res.status(201).json(salvaFont(req.params.ruolo, req.body));
   },
 );
 
 router.delete('/:ruolo', validate({ params: paramsFont }), (req, res) => {
-  eliminaFont(String(req.params.ruolo) as RuoloFont);
+  eliminaFont(req.params.ruolo);
   res.status(204).end();
 });
 

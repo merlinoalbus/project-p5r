@@ -19,7 +19,10 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
-import { coppiaBonus, dotiEsitoConPunti, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita, type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto } from '../../shared/esitiAttivita.js';
+import {
+  coppiaBonus, dotiEsitoConPunti, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita,
+  type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto
+} from '../../shared/esitiAttivita.js';
 import { CHIAVI_DOTI, eDote, nomeDote, type DoteChiave } from '../../shared/doti.js';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { simboliPossibili } from '../../shared/note.js';
@@ -49,7 +52,10 @@ export type SceltaRisolta =
 /** Il lavoro senza esiti il cui turno, alla spunta, chiede yen ricevuti e note ottenute (L13, 31/10): `tipo` «lavoro», nessun esito dichiarato
  *  (con gli esiti, come Ore no Beko, paga e note le dice l'esito), né Confidente né pesca. Null per ogni altra attività. */
 export function lavoroAScelta(chiave: string): { nome: string; paga: { base: number; massima: number | null } | null; doti: DoteChiave[] } | null {
-  const r = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; tipo: string; paga_yen: number | null; paga_massima: number | null; effetti_json: string | null; esiti_json?: string | null; confidente_chiave?: string | null; pesca_regola_chiave?: string | null } | undefined;
+  const r = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as {
+    nome: string; tipo: string; paga_yen: number | null; paga_massima: number | null; effetti_json: string | null; esiti_json?: string | null;
+    confidente_chiave?: string | null; pesca_regola_chiave?: string | null
+  } | undefined;
   if (!r || r.tipo !== 'lavoro' || leggiEsitiAttivita(r.esiti_json ?? null) || r.confidente_chiave != null || r.pesca_regola_chiave != null) return null;
   const doti: DoteChiave[] = [];
   try {

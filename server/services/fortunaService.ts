@@ -74,7 +74,9 @@ export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: D
   prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il, da_voce, prima_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = excluded.da_voce, prima_json = excluded.prima_json')
     .run(partitaId, dote, oggi, nowIso(), voceUid, memoria);
   const testo = (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').get(voceUid) as { azione: string } | undefined)?.azione;
-  registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ${X_FORTUNA}.` : `I punti di questa Dote valgono ${X_FORTUNA} finché non la spegni.`}`, { dote, giorno: oggi, voce: voceUid });
+  registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`,
+    `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ${X_FORTUNA}.` : `I punti di questa Dote valgono ${X_FORTUNA} finché non la spegni.`}`,
+    { dote, giorno: oggi, voce: voceUid });
 }
 
 /** 2026-10-26 (le ricevute della spunta): la Fortuna che la spunta di questa voce ha acceso ed è ancora in vigore (la riga è della voce: si

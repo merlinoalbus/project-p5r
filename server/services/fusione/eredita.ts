@@ -59,7 +59,8 @@ function carica(): SnapshotEredita {
   }
   const apprese = new Map<number, Array<{ skill: SkillEredita; livello: number }>>();
   // Le forme del gruppo non fondono e non ereditano: fuori dall'istantanea (e con loro le righe senza livello).
-  for (const r of prepared('SELECT ps.persona_id, ps.skill_id, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE p.del_party = 0 AND ps.livello IS NOT NULL ORDER BY ps.persona_id, ps.livello, ps.skill_id').all() as Array<{ persona_id: number; skill_id: number; livello: number }>) {
+  for (const r of prepared('SELECT ps.persona_id, ps.skill_id, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE p.del_party = 0 AND ps.livello IS NOT NULL ORDER BY ps.persona_id, ps.livello, ps.skill_id')
+    .all() as Array<{ persona_id: number; skill_id: number; livello: number }>) {
     const s = skill.get(r.skill_id);
     if (!s) continue;
     apprese.set(r.persona_id, [...(apprese.get(r.persona_id) ?? []), { skill: s, livello: r.livello }]);

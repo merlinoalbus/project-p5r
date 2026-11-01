@@ -89,7 +89,8 @@ function opzioniPosti(inUso: Posto[]): Array<{ chiave: string; nome: string }> {
   const visti = new Set<string>(['']);
   const aggiungi = (p: Posto, nome: string) => { const k = rif(p); if (!visti.has(k)) { visti.add(k); out.push({ chiave: k, nome }); } };
   for (const r of prepared("SELECT chiave, nome FROM quartiere WHERE chiave <> 'mementos' ORDER BY ordine").all() as Array<{ chiave: string; nome: string }>) aggiungi({ tipo: 'quartiere', chiave: r.chiave }, `${r.nome} — quartiere`);
-  for (const r of prepared('SELECT l.chiave AS chiave, l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as Array<{ chiave: string; nome: string; quartiere: string }>) aggiungi({ tipo: 'luogo', chiave: r.chiave }, `${r.nome} — luogo, ${r.quartiere}`);
+  for (const r of prepared('SELECT l.chiave AS chiave, l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine')
+    .all() as Array<{ chiave: string; nome: string; quartiere: string }>) aggiungi({ tipo: 'luogo', chiave: r.chiave }, `${r.nome} — luogo, ${r.quartiere}`);
   for (const r of prepared('SELECT chiave, nome FROM negozio WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>) aggiungi({ tipo: 'negozio', chiave: r.chiave }, `${r.nome} — negozio`);
   for (const r of prepared('SELECT chiave, nome FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>) aggiungi({ tipo: 'attivita', chiave: r.chiave }, `${r.nome} — attività`);
   for (const p of inUso) aggiungi(p, descrizionePosto(p));

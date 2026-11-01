@@ -1,0 +1,244 @@
+// ============================================================
+// Condizioni — gli elenchi per l'editor delle condizioni, i progressi della partita che le rendono vere e l'anteprima dell'esito
+// ============================================================
+//
+// La logica di `/api/condizioni` (L11-03: le letture e le scritture stavano nella rotta, che ora è sottile).
+//
+// Gli elenchi sono tutto ciò che l'editor può offrire come **valore** di una condizione: articoli, letture, arcani, Persona, abilità,
+// Ladri, attività conteggiabili, negozi (con il loro programma punti), eventi di storia, contatori. Sono elenchi chiusi, letti dalla
+// Guida: nell'editor non si scrive, si sceglie.
+//
+// I progressi distinguono due cose. **Calcolati dalla partita**: gli eventi «entra in squadra» (letti da
+// `membro_squadra_partita.in_squadra`, tre stati come i semafori), il grado cliente dei negozi che ce l'hanno (dalla spesa segnata),
+// i contatori. **Da segnare**: gli eventi manuali residui, le attività che si contano per volte svolte (`tracciamento = 'svolta'`),
+// i punti dei negozi con programma manuale. Segnare a mano una cosa calcolata è rifiutato (400).
+// ============================================================
+
+import { getDb, prepared, nowIso } from '../db/dbService.js';
+import { giocabili } from './squadraService.js';
+import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
+import { tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
+import { elementiDeiContatori, statoAlGiorno, statoDisponibilitaPartita } from './disponibilitaService.js';
+import { esitoAperturaDedalo, valutazione } from './condizioni/valutatore.js';
+import { impostaEventoStoria, ranghiPerEvento } from './semaforiService.js';
+import { leggiProgrammaPunti } from './negoziService.js';
+import { verificaPartita } from './verificaPartita.js';
+import { ricevuteAttive, vociDegliEventi, vociDeiContatori, vociDeiTurni } from './vociDeiProgressi.js';
+import { effettiDelTurno, impostaVolteAttivita } from './attivitaService.js';
+import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
+import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { esitiDto } from './esitiAttivitaService.js';
+import { promemoriaLibriPerAttivita } from './modificatoriLibri.js';
+import { httpErrors } from '../utils/httpError.js';
+import { confidentiRomanzabili } from './relazioneRomanticaService.js';
+import { setDlcConPersone } from './setDlcService.js';
+import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, dedaloDellEvento, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import type { ElenchiRegoleDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, RispostaValutaGruppiDto } from '../../shared/types.js';
+
+/** I negozi con il loro programma punti (null se non ne hanno). */
+function negoziConProgramma() {
+  return (prepared('SELECT chiave, nome, programma_punti_json FROM negozio WHERE nascosto = 0 ORDER BY nome')
+    .all() as Array<{ chiave: string; nome: string; programma_punti_json: string | null }>)
+    .map((n) => ({ chiave: n.chiave, nome: n.nome, programma: leggiProgrammaPunti(n.programma_punti_json) }));
+}
+/** Le attività che si contano per volte svolte: le sole che una condizione «svolta almeno n volte» può leggere. */
+function attivitaConteggiabili() {
+  // contata per volte come la intendono i turni (`attivitaConTurni`): un valore fuori catalogo vale quello del tipo
+  // `SELECT *`: su uno schema di prima della 233 `esiti_json` non c'è (nessun esito); si portano fuori solo i campi dichiarati
+  return (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY nome').all() as Array<{
+    chiave: string; nome: string; tipo: string; tracciamento: string; effetti_json: string | null; esiti_json?: string | null;
+    confidente_chiave?: string | null; pesca_regola_chiave?: string | null
+  }>)
+    .filter((a) => (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta')
+    .map((a) => ({ chiave: a.chiave, nome: a.nome, tipo: a.tipo, effettiTurno: effettiDelTurno({ effetti_json: a.effetti_json }),
+      // L13: gli esiti dichiarati (mai per le fonti Confidente o pesca, che hanno la loro progressione)
+      esitiDichiarati: a.confidente_chiave || a.pesca_regola_chiave ? null : leggiEsitiAttivita(a.esiti_json),
+      // Ondata 5 (lotto F-bis): una fonte Confidente rimanda alla sua scheda: nessun promemoria dei libri
+      confidente: !!a.confidente_chiave }));
+}
+
+/** Gli elenchi chiusi che l'editor delle condizioni offre come valore. */
+export function elenchiRegole(): ElenchiRegoleDto {
+  return {
+    allerte: prepared('SELECT DISTINCT chiave,nome FROM allerta_meteo ORDER BY nome').all() as NonNullable<ElenchiRegoleDto['allerte']>,
+    // il nome è quello del catalogo degli oggetti (la copia `nome_it` che lo ripeteva è stata tolta, L11 R11-02/10)
+    articoli: prepared("SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), 'Oggetto da collegare') AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome")
+      .all() as ElenchiRegoleDto['articoli'],
+    // Ondata 5 (lotto G): il trofeo che un esito fa ottenere si sceglie da qui (editor degli esiti dell'attività)
+    trofei: prepared('SELECT chiave, nome FROM trofeo ORDER BY ordine').all() as NonNullable<ElenchiRegoleDto['trofei']>,
+    letture: prepared(
+      "SELECT l.chiave, COALESCE(c.nome, l.nome) AS nome, 'libro' AS categoria FROM libro l LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave WHERE l.nascosto = 0 UNION ALL SELECT f.chiave, COALESCE(c.nome, f.nome), 'film' FROM film f LEFT JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave WHERE f.nascosto = 0 ORDER BY nome",
+    ).all() as ElenchiRegoleDto['letture'],
+    arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
+    // L6 (R6-03): Persona e abilità si scelgono per nome e si salvano per id
+    // le 27 forme del gruppo (`del_party = 1`) non si portano nella scorta né si registrano: non sono Persona da citare in una condizione (R8-20)
+    persone: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona WHERE del_party = 0 ORDER BY nome').all() as ElenchiRegoleDto['persone'],
+    abilita: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
+    // I Ladri Fantasma per «in squadra»: chi sia la squadra lo dice il seed con `giocabile`.
+    squadra: giocabili().map((p) => ({ chiave: p.chiave, nome: p.nome })),
+    attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
+    // Con il programma punti: l'editor offre «punti negozio» solo ai programmi manuali e «grado cliente» solo a chi ha il rango.
+    negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
+    eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null || dedaloDellEvento(e.chiave) !== null })),
+    contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
+    // L6: luoghi, tutti i quartieri e gli inviti (questi ultimi si leggono soltanto)
+    luoghi: prepared('SELECT l.chiave, l.nome, q.nome AS gruppo FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine')
+      .all() as NonNullable<ElenchiRegoleDto['luoghi']>,
+    quartieri: prepared("SELECT chiave, nome FROM quartiere WHERE chiave <> 'mementos' ORDER BY ordine").all() as NonNullable<ElenchiRegoleDto['quartieri']>,
+    // L13 (O11-1): i Confidenti romanzabili, dal DB (`confidente.romanzabile`), per la condizione «Relazione romantica con»
+    romanzabili: (() => {
+      const r = confidentiRomanzabili();
+      return (prepared('SELECT chiave, nome FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).filter((c) => r.has(c.chiave));
+    })(),
+    // i set di contenuti scaricabili (chiave = id come testo), per la condizione «Contenuto scaricabile posseduto»
+    setDlc: setDlcConPersone().map((s) => ({ chiave: String(s.id), nome: s.nome })),
+    inviti: (() => {
+      const n = nomiCondizioniMemo();
+      return tuttiGliInviti().map((i) => ({ chiave: i.chiave, nome: n.inviti?.[i.chiave] ?? i.chiave, gruppo: n.confidenti?.[i.confidente_chiave] ?? i.confidente_chiave, confidente: i.confidente_chiave }));
+    })(),
+  };
+}
+
+/** Gli stati di una partita: calcolati dalla partita e da segnare a mano, completi anche dove non c'è ancora una riga. */
+export function progressiPartita(id: number): ProgressiPartitaDto {
+  const st = statoDisponibilitaPartita(id);
+  const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
+  const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?')
+    .all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
+  // da quale voce del Diario viene ciò che si mostra (decisione 8): gli eventi di storia (R10-22/3), i turni delle attività e le letture dei
+  // contatori, ognuno solo se la spunta della voce, ancora attiva, l'ha prodotto davvero (`vociDeiProgressi.ts`)
+  // le ricevute delle spunte attive e gli elementi dei contatori si leggono una volta per richiesta (questi già con lo stato della partita)
+  const dalleVoci = vociDegliEventi(id);
+  const ricevute = ricevuteAttive(id);
+  const turniDalleVoci = vociDeiTurni(id);
+  const contatoriDalleVoci = vociDeiContatori(ricevute, st.elementiContatori ?? elementiDeiContatori(id));
+  const svolte = new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?')
+    .all(id) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte]));
+  // R12-01/7: le attività con proposte nate dai turni del + (causa «<attività>:<uid>»)
+  const conProposte = new Set((prepared("SELECT DISTINCT substr(causa_chiave, 1, instr(causa_chiave, ':') - 1) AS a FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'turno'")
+    .all(id) as Array<{ a: string }>).map((r) => r.a));
+  const punti = new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?')
+    .all(id) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti]));
+  const negozi = negoziConProgramma();
+  // a che cosa serve segnarlo: i ranghi dei Confidenti che lo chiedono (il caffè al Leblanc → Sojiro, rango 3)
+  const serveA = ranghiPerEvento();
+  return {
+    eventi: EVENTI_STORIA.map((e) => {
+      // 305: l'apertura di un Dedalo dei Memento si calcola dalla sua condizione d'apertura (il Palazzo concluso, la data della guida)
+      if (dedaloDellEvento(e.chiave)) {
+        const a = esitoAperturaDedalo(e.chiave, st);
+        return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto: a.stato === 'verde' ? true : a.stato === 'rosso' ? false : null, apertura: a.condizione };
+      }
+      const membro = membroDellEvento(e.chiave);
+      if (!membro) return { chiave: e.chiave, nome: e.nome, origine: 'manuale' as const,
+        avvenuto: eventiManuali.get(e.chiave) ?? false,
+        ...(dalleVoci.has(e.chiave) ? { daVoci: dalleVoci.get(e.chiave) } : {}),
+        ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
+      // Tre stati, come i semafori: in squadra, dichiarato fuori, non ancora segnato.
+      const avvenuto = st.membriSquadra.has(membro) ? true : st.membriFuoriSquadra.has(membro) ? false : null;
+      return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto, membro, membroNome: nomiSquadra.get(membro) ?? membro };
+    }),
+    // L13: con gli esiti dichiarati il + apre la scelta dell'esito, valutata sullo stato della partita (il giorno corrente)
+    // Ondata 5 (lotto F-bis): con la chiave dell'attività gli esiti portano i promemoria dei libri letti per la scelta del +; la riga li porta
+    // anche quando l'attività non ha esiti (Fioraio Rafflesia, pesca)
+    attivita: attivitaConteggiabili().map(({ esitiDichiarati, confidente, ...a }) => ({
+      ...a, volte: svolte.get(a.chiave) ?? 0, esiti: esitiDichiarati ? esitiDto(esitiDichiarati, st, a.chiave) : null,
+      promemoria: confidente ? [] : promemoriaLibriPerAttivita(st.letture, { chiave: a.chiave, tipo: a.tipo }),
+      ...(turniDalleVoci.has(a.chiave) ? { daVoci: turniDalleVoci.get(a.chiave) } : {}),
+      // R12-01/7: i turni del + hanno proposte «Applica» (aperte o decise): la riga mostra `DaApplicare` dell'attività
+      conProposteDeiTurni: conProposte.has(a.chiave) })),
+    puntiNegozio: negozi.filter((n) => n.programma?.calcolo === 'manuale')
+      .map((n) => ({ negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, unita: n.programma!.unita, punti: punti.get(n.chiave) ?? 0 })),
+    rangoCliente: negozi.filter((n) => n.programma?.calcolo === 'rango-cliente').map((n) => {
+      const spesa = st.spesaPerNegozio.get(n.chiave) ?? 0;
+      const attuale = [...RANGHI_CLIENTE].reverse().find((x) => spesa >= x.spesa) ?? RANGHI_CLIENTE[0];
+      const prossimo = RANGHI_CLIENTE.find((x) => x.spesa > spesa) ?? null;
+      return { negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, spesa, rango: { chiave: attuale.chiave, nome: attuale.nome },
+        prossimo: prossimo ? { chiave: prossimo.chiave, nome: prossimo.nome, spesa: prossimo.spesa } : null };
+    }),
+    contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome, valore: st.contatori.get(c.chiave) ?? 0,
+      ...(contatoriDalleVoci.has(c.chiave) ? { daVoci: contatoriDalleVoci.get(c.chiave) } : {}) })),
+  };
+}
+
+/**
+ * L6 (§2, §6.1): l'anteprima dell'esito, col valutatore unico. Per ogni condizione esito («vero», «falso», «avviso», «grigio»), testo e cosa
+ * manca; più l'esito dell'insieme (tutte le condizioni insieme, in AND). Con `giorno` si valuta la partita a quel giorno di gioco (il resto
+ * della partita resta com'è). L'interfaccia mostra questi esiti e non rivaluta (R6-02).
+ */
+export function valutaCondizioni(condizioni: RequisitoSpillo[], partita: number, giorno?: string): RispostaValutaCondizioniDto {
+  verificaPartita(partita);
+  if (giorno && !dataValida(giorno)) throw httpErrors.badRequest('giorno-non-valido', 'Il giorno non esiste nel calendario di gioco.');
+  const base = statoDisponibilitaPartita(partita);
+  const st = giorno ? statoAlGiorno(base, giorno) : base;
+  const nomi = nomiCondizioni({ conPin: true });
+  const insieme: RequisitoSpillo = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni };
+  return {
+    complessivo: condizioni.length ? valutazione(insieme, st, nomi) : { esito: 'vero', testo: 'Nessuna condizione' },
+    condizioni: condizioni.map((c) => valutazione(c, st, nomi)),
+  };
+}
+
+/**
+ * L8-03: lo stesso esito di `valutaCondizioni` per più gruppi di condizioni in una richiesta sola (le pagine della guida: gli sblocchi degli
+ * Speciali, i requisiti dei boss segreti e dei finali, le ricette, i ranghi di Iwai). Lo stato della partita si legge una volta; ogni gruppo
+ * è valutato da sé, con l'esito dell'insieme e quello di ogni condizione. L'interfaccia mostra questi esiti e non rivaluta.
+ */
+export function valutaGruppiDiCondizioni(partita: number, gruppi: Array<{ chiave: string; condizioni: RequisitoSpillo[] }>): RispostaValutaGruppiDto {
+  verificaPartita(partita);
+  const st = statoDisponibilitaPartita(partita);
+  const nomi = nomiCondizioni({ conPin: true });
+  return { gruppi: Object.fromEntries(gruppi.map((g) => {
+    const insieme: RequisitoSpillo = g.condizioni.length === 1 ? g.condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni: g.condizioni };
+    return [g.chiave, {
+      complessivo: g.condizioni.length ? valutazione(insieme, st, nomi) : { esito: 'vero', testo: 'Nessuna condizione' },
+      condizioni: g.condizioni.map((c) => valutazione(c, st, nomi)),
+    } satisfies RispostaValutaCondizioniDto];
+  })) };
+}
+
+/** I progressi di una partita (404 se non c'è). */
+export function progressiDellaPartita(id: number): ProgressiPartitaDto {
+  verificaPartita(id);
+  return progressiPartita(id);
+}
+
+/** Segna a mano un evento di storia; risponde con i progressi. Gli eventi calcolati (squadra, apertura dei Dedali) si rifiutano (400). */
+export function segnaEventoStoria(id: number, evento: string, avvenuto: boolean): ProgressiPartitaDto {
+  verificaPartita(id);
+  if (!EVENTI_STORIA.some((e) => e.chiave === evento)) throw httpErrors.notFound('evento-non-trovato', 'Evento di storia non trovato.');
+  // «Entra in squadra» si legge dalla squadra della partita: si segna lì, non qui.
+  if (membroDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'Questo evento si calcola dalla squadra della partita (Partita → Denaro e squadra): non si segna a mano.');
+  if (dedaloDellEvento(evento)) throw httpErrors.badRequest('evento-calcolato', 'L’apertura di un Dedalo dei Memento si calcola dai Palazzi conclusi nella partita: non si segna a mano.');
+  // lo stesso dato del «Condizione soddisfatta» dei Confidenti (`confermaRequisito`); evento e data di modifica della partita
+  // cambiano insieme o per niente
+  getDb().transaction(() => {
+    impostaEventoStoria(id, evento, avvenuto);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+  })();
+  return progressiPartita(id);
+}
+
+/** Le volte svolte di un'attività conteggiabile; risponde con i progressi e con le Doti dei turni tolti da segnare. */
+export function segnaVolteAttivita(id: number, attivita: string, volte: number, esito?: string | null): ProgressiPartitaDto & { daSegnare: ReturnType<typeof impostaVolteAttivita> } {
+  verificaPartita(id);
+  // R12-01/7: le Doti dei turni aggiunti diventano il promemoria «Applica» dell'attività (togliendo il turno si riallinea); `daSegnare` dice solo
+  // quelle dei turni tolti che non vengono dal + (registrati da una voce o prima del registro). Le Doti non si toccano
+  const daSegnare = impostaVolteAttivita(id, attivita, volte, esito);
+  return { ...progressiPartita(id), daSegnare };
+}
+
+/** I punti di un negozio con programma manuale; risponde con i progressi. */
+export function segnaPuntiNegozio(id: number, negozio: string, punti: number): ProgressiPartitaDto {
+  verificaPartita(id);
+  const riga = prepared('SELECT programma_punti_json FROM negozio WHERE chiave = ?').get(negozio) as { programma_punti_json: string | null } | undefined;
+  if (!riga) throw httpErrors.notFound('negozio-non-trovato', 'Negozio non trovato.');
+  if (leggiProgrammaPunti(riga.programma_punti_json)?.calcolo !== 'manuale') throw httpErrors.badRequest('negozio-senza-punti', 'Questo negozio non ha un programma punti da segnare a mano.');
+  getDb().transaction(() => {
+    const adesso = nowIso();
+    prepared('INSERT INTO punti_negozio_partita (partita_id, negozio_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, negozio_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at')
+      .run(id, negozio, punti, adesso);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, id);
+  })();
+  return progressiPartita(id);
+}

@@ -61,7 +61,8 @@ export function statoTanakaDi(db: Database.Database, schema = 'main'): StatoTana
 /** Gli avvisi da mostrare prima di sostituire il file di gioco: che cosa cambia per il listino di Tanaka e il suo registro. */
 export function avvisiImportazioneTanaka(istanza: StatoTanakaFileDto, pacchetto: StatoTanakaFileDto): string[] {
   const avvisi: string[] = [];
-  if (istanza.attiva && pacchetto.attiva !== istanza.attiva) avvisi.push(`L’istanza ha la decisione Tanaka ${istanza.attiva} applicata; il pacchetto ${pacchetto.attiva ? `ne porta un’altra (${pacchetto.attiva})` : 'non la porta'}: il listino diventa quello del pacchetto (${pacchetto.listino}).`);
+  if (istanza.attiva && pacchetto.attiva !== istanza.attiva)
+    avvisi.push(`L’istanza ha la decisione Tanaka ${istanza.attiva} applicata; il pacchetto ${pacchetto.attiva ? `ne porta un’altra (${pacchetto.attiva})` : 'non la porta'}: il listino diventa quello del pacchetto (${pacchetto.listino}).`);
   if (pacchetto.listino === 'misto') avvisi.push('Il pacchetto porta un listino di Tanaka misto (né le 20 offerte di prima né le 18 Royal).');
   if (!pacchetto.registroIntegro) avvisi.push(`Il registro delle decisioni Tanaka del pacchetto non è integro: ${pacchetto.problemi.join(' ')}`);
   if (istanza.noteStoriche > 0 && pacchetto.noteStoriche === 0) avvisi.push('Il pacchetto non porta le note storiche della fonte (Homunculus, G-034): se ha uno schema precedente alla 139 l’importazione le ricrea al valore della guida, altrimenti restano assenti.');

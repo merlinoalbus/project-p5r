@@ -19,10 +19,14 @@ const senzaUid=(r:RawTurno):RawTurno=>Object.fromEntries(Object.entries(r).filte
 function validaAllocazione(db:AppDatabase,p:number,raw:unknown):AllocazioneTurnoPesca {
   if(!oggetto(raw)||canonicoPesca(Object.keys(raw).sort())!==canonicoPesca([...campi].sort()))return conflitto();
   const a=raw as unknown as AllocazioneTurnoPesca;
-  if(a.versione!==1||!Number.isSafeInteger(a.partitaId)||a.partitaId!==p||!uid(a.turnoUid)||!uid(a.sessioneId)||a.attivita!==ATTIVITA_PESCA&&a.attivita!==SFIDA_PESCA||!Number.isSafeInteger(a.ordine)||a.ordine<1||typeof a.firmaOriginaria!=='string'||!/^[0-9a-f]{64}$/.test(a.firmaOriginaria))return conflitto();
+  if(a.versione!==1||!Number.isSafeInteger(a.partitaId)||a.partitaId!==p||!uid(a.turnoUid)||!uid(a.sessioneId)
+    ||a.attivita!==ATTIVITA_PESCA&&a.attivita!==SFIDA_PESCA||!Number.isSafeInteger(a.ordine)||a.ordine<1
+    ||typeof a.firmaOriginaria!=='string'||!/^[0-9a-f]{64}$/.test(a.firmaOriginaria))return conflitto();
   const colonne=(db.prepare("SELECT name FROM pragma_table_info('turno_partita','utente')").all() as Array<{name:string}>).map(c=>c.name).sort();
   for(const t of [a.turnoPrimaRAW,a.turnoDopoRAW]){
-    if(!oggetto(t)||canonicoPesca(Object.keys(t).sort())!==canonicoPesca(colonne)||Object.values(t).some(v=>v!==null&&typeof v!=='string'&&(typeof v!=='number'||!Number.isSafeInteger(v)))||t.partita_id!==p||t.attivita_chiave!==a.attivita||t.ordine!==a.ordine||typeof t.created_at!=='string')return conflitto();
+    if(!oggetto(t)||canonicoPesca(Object.keys(t).sort())!==canonicoPesca(colonne)
+      ||Object.values(t).some(v=>v!==null&&typeof v!=='string'&&(typeof v!=='number'||!Number.isSafeInteger(v)))
+      ||t.partita_id!==p||t.attivita_chiave!==a.attivita||t.ordine!==a.ordine||typeof t.created_at!=='string')return conflitto();
   }
   if(![null,a.turnoUid].includes(a.turnoPrimaRAW.uid as string|null)||a.turnoDopoRAW.uid!==a.turnoUid||firmaPesca(a.turnoPrimaRAW)!==a.firmaOriginaria||canonicoPesca(senzaUid(a.turnoPrimaRAW))!==canonicoPesca(senzaUid(a.turnoDopoRAW)))return conflitto();
   return a;
@@ -64,7 +68,9 @@ export function registraAllocazioneTurnoPesca(p:number,sessioneId:string,prima:R
 export function provaUidTurnoPesca(p:number,attivita:unknown,ordine:unknown,prima:RawTurno,ora:RawTurno):boolean {
   if(!uid(ora.uid)||prima.uid!==undefined&&prima.uid!==null)return false;
   const a=leggiAllocazioniTurniPesca(p).find(x=>x.turnoUid===ora.uid);
-  return !!a&&a.attivita===attivita&&a.ordine===ordine&&prima.partita_id===p&&ora.partita_id===p&&prima.attivita_chiave===attivita&&ora.attivita_chiave===attivita&&prima.ordine===ordine&&ora.ordine===ordine&&canonicoPesca(a.turnoDopoRAW)===canonicoPesca(ora)&&canonicoPesca(senzaUid(a.turnoPrimaRAW))===canonicoPesca(senzaUid(prima));
+  return !!a&&a.attivita===attivita&&a.ordine===ordine&&prima.partita_id===p&&ora.partita_id===p
+    &&prima.attivita_chiave===attivita&&ora.attivita_chiave===attivita&&prima.ordine===ordine&&ora.ordine===ordine
+    &&canonicoPesca(a.turnoDopoRAW)===canonicoPesca(ora)&&canonicoPesca(senzaUid(a.turnoPrimaRAW))===canonicoPesca(senzaUid(prima));
 }
 
 /** Vecchi file senza la famiglia pesca restano importabili; un journal presente non viene ignorato. */

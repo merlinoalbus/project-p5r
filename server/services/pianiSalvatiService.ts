@@ -141,7 +141,9 @@ export function salvaPiano(partitaId: number, dati: DatiPianoSalvato): PianoSalv
     const info = prepared('INSERT INTO piano_salvato (partita_id, persona_id, obiettivo_id, nome, note, opzioni_json, skill_json, piano_json, costo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .run(partitaId, dati.personaId, dati.obiettivoId ?? null, dati.nome ?? '', dati.note ?? '', JSON.stringify(dati.opzioni ?? {}), JSON.stringify(skillIds), JSON.stringify(dati.piano), Math.max(0, Math.round(dati.piano.costo ?? 0)), adesso, adesso);
     const id = Number(info.lastInsertRowid);
-    registraEvento(partitaId, 'piano-salvato', `Piano di fusione salvato: ${nomeIt}`, `${dati.piano.fusioni} ${dati.piano.fusioni === 1 ? 'fusione' : 'fusioni'}, costo ${Math.round(dati.piano.costo ?? 0)} ¥${dati.obiettivoId ? ' · legato a un obiettivo' : ''}.`, { pianoId: id, obiettivoId: dati.obiettivoId ?? null, skillIds }, dati.personaId);
+    registraEvento(partitaId, 'piano-salvato', `Piano di fusione salvato: ${nomeIt}`,
+      `${dati.piano.fusioni} ${dati.piano.fusioni === 1 ? 'fusione' : 'fusioni'}, costo ${Math.round(dati.piano.costo ?? 0)} ¥${dati.obiettivoId ? ' · legato a un obiettivo' : ''}.`,
+      { pianoId: id, obiettivoId: dati.obiettivoId ?? null, skillIds }, dati.personaId);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     return pianoDto(prepared(`${SQL_PIANO} WHERE s.id = ?`).get(id) as RigaPiano, scortaDi(partitaId));
   })();

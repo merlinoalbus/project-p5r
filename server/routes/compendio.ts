@@ -7,30 +7,34 @@ import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
 import { aggiornaGiorno, leggiGiorno, ripristinaGiorno } from '../services/giorniService.js';
-import { METEO_GIORNO, type ModificaGiorno } from '../../shared/giorno.js';
+import { METEO_GIORNO } from '../../shared/giorno.js';
 import { correggiAffinita, ripristinaAffinita } from '../services/affinitaPersonaService.js';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi.js';
-import type { ModificaAffinitaPersona } from '../../shared/affinitaPersona.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioOmbra, doveSiIncontraPersona, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
-import { paramsOmbra, queryOmbra, queryOmbre, type QueryOmbre } from '../schemas/ombre.js';
+import { paramsOmbra, queryOmbra, queryOmbre } from '../schemas/ombre.js';
 import { negoziazione, negoziazioneCompatta, verificaNegoziazione } from '../services/negoziazioneService.js';
-import { queryNegoziazione, type QueryNegoziazione } from '../schemas/negoziazione.js';
-import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
-import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
+import { queryNegoziazione } from '../schemas/negoziazione.js';
+import {
+  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
+  impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea
+} from '../services/dungeonService.js';
+import {
+  bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea,
+  bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea,
+  paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce
+} from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { setDlcConPersone } from '../services/setDlcService.js';
-import type { Condizione } from '../../shared/condizioniSpillo.js';
 import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere, ripristinaSbloccoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
 import { elencaInviti } from '../services/inviti.js';
 import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
 import { bodyAnteprimaInformazioniConfidente, bodySalvaInformazioniConfidente } from '../schemas/disponibilitaConfidenti.js';
 import { anteprimaInformazioniConfidente, informazioniConfidente, salvaInformazioniConfidente } from '../services/disponibilitaConfidentiService.js';
-import type { AzioneInformazioniConfidente, SalvaInformazioniConfidente } from '../../shared/disponibilitaConfidenti.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
@@ -40,20 +44,23 @@ import { elenchiAzione, elenchiEffettiVoce } from '../services/azioniStrutturate
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
 import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
+import type { RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce.js';
 import { applicaPropostaConversione, elencaProposteConversione, scartaPropostaConversione } from '../services/proposteConversioneService.js';
 import { bodyApplicaProposta, bodyScartaProposta, paramsPropostaConversione, queryApplicaProposta, queryProposteConversione } from '../schemas/proposteConversione.js';
-import type { FiltroProposte, RichiestaApplicaProposta, RichiestaScartaProposta } from '../../shared/proposteConversione.js';
+import type { RichiestaApplicaProposta } from '../../shared/proposteConversione.js';
 import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
 import { datiGuidaCorretti } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
-import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
-import type { DatiVoceGiornata, EsitoRevisioneVoce, PersonaggiDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
-import { validate } from '../middleware/validate.js';
-import { bodyAggiornaVoce, bodyDotiIncontro, bodyEsportaAppunti, bodyIncollaAnteprima, bodyIncollaVoci, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsOperazioneVoci, paramsVoceGiornata, queryOggetti, queryPersona, queryRicercaDiario, querySkill, type QueryRicercaDiario } from '../schemas/compendio.js';
+import { impostaAtterraggi, impostaFinestra } from '../services/atterraggioPalazziService.js';
+import type { DatiVoceGiornata, PersonaggiDto } from '../../shared/types.js';
+import { corpoDelServizio, validate } from '../middleware/validate.js';
+import {
+  bodyAggiornaVoce, bodyDotiIncontro, bodyEsportaAppunti, bodyIncollaAnteprima, bodyIncollaVoci, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce,
+  bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsOperazioneVoci, paramsVoceGiornata, queryOggetti, queryPersona, queryRicercaDiario, querySkill
+} from '../schemas/compendio.js';
 import { annullaOperazione, esportaAppunti, incollaVoci, pianoIncolla } from '../services/appuntiDiarioService.js';
-import type { RichiestaAppuntiDiario, RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../shared/appuntiDiario.js';
-import type { DoteNote } from '../../shared/effettiAzione.js';
+import type { RichiestaEseguiIncolla, RichiestaIncollaVoci } from '../../shared/appuntiDiario.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
@@ -75,7 +82,8 @@ const queryArticoli = z.object({
 const queryCalendario = z.object({ partita: idParam.optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
-router.put('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata, body: bodySalvaEffettiVoce }), (req, res) => {
+// gli effetti li ricontrolla uno per uno `normalizzaEffettoVoce` nel servizio
+router.put('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata, body: corpoDelServizio<RichiestaSalvaEffettiVoce>()(bodySalvaEffettiVoce) }), (req, res) => {
   res.json(salvaEffettiVoce(String(req.params.uid), req.body));
 });
 router.get('/percorso/effetti/proposte', (_req, res) => {
@@ -83,28 +91,35 @@ router.get('/percorso/effetti/proposte', (_req, res) => {
   res.json(elencaProposteEffettiVoce());
 });
 const paramsPropostaEffetto = z.object({ id: z.string().min(1).max(200) }).strict();
-router.post('/percorso/effetti/proposte/:id/anteprima', validate({ params: paramsPropostaEffetto, body: bodyAnteprimaDecisioneEffettoVoce }), (req, res) => {
+router.post('/percorso/effetti/proposte/:id/anteprima', validate({
+  params: paramsPropostaEffetto, body: corpoDelServizio<RichiestaAnteprimaDecisioneEffettoVoce>()(bodyAnteprimaDecisioneEffettoVoce),
+}), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(anteprimaDecisioneEffettoVoce(String(req.params.id), req.body));
 });
-router.post('/percorso/effetti/proposte/:id/decisione', validate({ params: paramsPropostaEffetto, body: bodyDecisioneEffettoVoce }), (req, res) => {
+router.post('/percorso/effetti/proposte/:id/decisione', validate({
+  params: paramsPropostaEffetto, body: corpoDelServizio<RichiestaDecisioneEffettoVoce>()(bodyDecisioneEffettoVoce),
+}), (req, res) => {
   res.json(decidiPropostaEffettoVoce(String(req.params.id), req.body));
 });
 
 // ---- L13 (ondata 4a): le proposte «da completare» sulle voci del Diario. Solo preparazione: fuori dall'elenco del giocatore ----
 router.get('/proposte-conversione', validate({ query: queryProposteConversione }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  const q = req.query as unknown as FiltroProposte;
+  const q = req.query;
   res.json(elencaProposteConversione({ da: q.da, a: q.a, stato: q.stato }));
 });
-router.post('/proposte-conversione/:id/applica', validate({ params: paramsPropostaConversione, body: bodyApplicaProposta, query: queryApplicaProposta }), (req, res) => {
-  const corpo = req.body as RichiestaApplicaProposta & { voce?: DatiVoceGiornata & { infiltrazioni?: unknown } };
+router.post('/proposte-conversione/:id/applica', validate({
+  params: paramsPropostaConversione, query: queryApplicaProposta,
+  body: corpoDelServizio<RichiestaApplicaProposta & { voce?: DatiVoceGiornata & { infiltrazioni?: string[] } }>()(bodyApplicaProposta),
+}), (req, res) => {
+  const corpo = req.body;
   // le infiltrazioni di una voce di Palazzo si salvano da sole, dalla voce: una proposta non le tocca
   if (corpo.voce?.infiltrazioni !== undefined) throw httpErrors.badRequest('infiltrazioni-da-sole', 'Le infiltrazioni della voce si salvano da sole, dalla voce.');
-  res.json(applicaPropostaConversione(String(req.params.id), corpo, (req.query as unknown as { partita?: number }).partita));
+  res.json(applicaPropostaConversione(String(req.params.id), corpo, req.query.partita));
 });
 router.post('/proposte-conversione/:id/scarta', validate({ params: paramsPropostaConversione, body: bodyScartaProposta }), (req, res) => {
-  res.json(scartaPropostaConversione(String(req.params.id), req.body as RichiestaScartaProposta));
+  res.json(scartaPropostaConversione(String(req.params.id), req.body));
 });
 
 router.get('/glossario', (_req, res) => {
@@ -125,8 +140,7 @@ router.get('/set-dlc', (_req, res) => {
 });
 
 router.get('/persona', validate({ query: queryPersona }), (req, res) => {
-  const q = req.query as unknown as import('../schemas/compendio.js').QueryPersona;
-  res.json(elencaPersona(q));
+  res.json(elencaPersona(req.query));
 });
 
 router.get('/persona/:id', validate({ params: paramsId }), (req, res) => {
@@ -134,12 +148,11 @@ router.get('/persona/:id', validate({ params: paramsId }), (req, res) => {
 });
 // L8-08: «Dove si incontra» della Persona, un servizio solo: Ombre della guida e dedali dei Memento del compendio che le Ombre non dicono
 router.get('/persona/:id/dove-si-incontra', validate({ params: paramsId, query: queryOmbra }), (req, res) => {
-  res.json(doveSiIncontraPersona(Number(req.params.id), (req.query as unknown as { partita?: number }).partita));
+  res.json(doveSiIncontraPersona(Number(req.params.id), req.query.partita));
 });
 
 router.get('/skill', validate({ query: querySkill }), (req, res) => {
-  const q = req.query as { q?: string; elemento?: string };
-  res.json(elencaSkill(q));
+  res.json(elencaSkill(req.query));
 });
 
 router.get('/skill/:id', validate({ params: paramsId }), (req, res) => {
@@ -147,8 +160,7 @@ router.get('/skill/:id', validate({ params: paramsId }), (req, res) => {
 });
 
 router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
-  const q = req.query as { q?: string; categoria?: string };
-  res.json(elencaOggetti(q));
+  res.json(elencaOggetti(req.query));
 });
 
 router.get('/confidenti', (_req, res) => {
@@ -166,17 +178,17 @@ router.get('/sfide', (_req, res) => {
   res.json(sfide());
 });
 router.get('/completamento', validate({ query: queryDomande }), (req, res) => {
-  res.json(completamento((req.query as unknown as { partita?: number }).partita));
+  res.json(completamento(req.query.partita));
 });
 router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
-  res.json(indicePercorso((req.query as unknown as { partita?: number }).partita));
+  res.json(indicePercorso(req.query.partita));
 });
 router.get('/percorso/:data', validate({ params: z.object({ data: dataGioco }), query: queryDomande }), (req, res) => {
-  res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
+  res.json(giornoPercorso(String(req.params.data), req.query.partita));
 });
 /** La ricerca fra tutte le voci del Diario, per testo («Che cosa fare» e note) e per tipo, nell'ordine del calendario di gioco. */
 router.get('/percorso-ricerca', validate({ query: queryRicercaDiario }), (req, res) => {
-  const { q, tipo, partita } = req.query as unknown as QueryRicercaDiario;
+  const { q, tipo, partita } = req.query;
   res.json(cercaVociDiario(q, tipo, partita));
 });
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
@@ -189,16 +201,19 @@ router.get('/percorso-elenchi-effetti', (_req, res) => {
 });
 // Le voci della giornata sono canone (file di gioco, per tutte le partite): aggiungere al posto esatto, modificare (anche
 // fascia e posto), spostare di un passo, eliminare. `?partita=` facoltativo: la risposta porta lo stato nella partita.
-router.post('/percorso/:data/voci', validate({ params: paramsGiornoGuida, body: bodyNuovaVoce, query: queryDomande }), (req, res) => {
-  res.status(201).json(creaVoce(String(req.params.data), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
+// i vecchi effetti `produce` li ricontrolla il servizio della giornata
+router.post('/percorso/:data/voci', validate({ params: paramsGiornoGuida, body: corpoDelServizio<DatiVoceGiornata & { azione: string }>()(bodyNuovaVoce), query: queryDomande }), (req, res) => {
+  res.status(201).json(creaVoce(String(req.params.data), req.body, req.query.partita));
 });
 /** UX3-1 (L3 §4.4): una voce della giornata per uid, in sola lettura (la scheda del Palazzo aperta con `?daVoce=`). */
 router.get('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, query: queryDomande }), (req, res) => {
-  res.json(vocePercorso(String(req.params.uid), (req.query as unknown as { partita?: number }).partita));
+  res.json(vocePercorso(String(req.params.uid), req.query.partita));
 });
-router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: bodyAggiornaVoce, query: queryDomande }), (req, res) => {
-  const { infiltrazioni, ...resto } = req.body as DatiVoceGiornata & { infiltrazioni?: string[] };
-  const partita = (req.query as unknown as { partita?: number }).partita;
+router.put('/percorso/voci/:uid', validate({
+  params: paramsVoceGiornata, body: corpoDelServizio<DatiVoceGiornata & { infiltrazioni?: string[] }>()(bodyAggiornaVoce), query: queryDomande,
+}), (req, res) => {
+  const { infiltrazioni, ...resto } = req.body;
+  const partita = req.query.partita;
   // L3: il campo «Infiltrazioni» si salva da solo (insieme ordinato, anche vuoto) e non tocca niente della voce
   if (infiltrazioni !== undefined) {
     if (Object.values(resto).some((v) => v !== undefined)) throw httpErrors.badRequest('infiltrazioni-da-sole', 'Le infiltrazioni della voce si salvano da sole, senza altri campi.');
@@ -209,25 +224,26 @@ router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: b
 });
 /** L3 §1.4: «Tieni il nuovo», «Rimetti il precedente» o «Fatto» su una voce da rivedere. */
 router.post('/percorso/voci/:uid/rivista', validate({ params: paramsVoceGiornata, body: bodyRivistaVoce, query: queryDomande }), (req, res) => {
-  res.json(rivediVoce(String(req.params.uid), (req.body as { esito: EsitoRevisioneVoce }).esito, (req.query as unknown as { partita?: number }).partita));
+  res.json(rivediVoce(String(req.params.uid), req.body.esito, req.query.partita));
 });
 /** Sposta la voce di un passo nella sua fascia; risponde con tutte le voci del giorno, nel nuovo ordine. */
 router.put('/percorso/voci/:uid/sposta', validate({ params: paramsVoceGiornata, body: bodySpostaVoce, query: queryDomande }), (req, res) => {
-  res.json(spostaVoce(String(req.params.uid), (req.body as { verso: -1 | 1 }).verso, (req.query as unknown as { partita?: number }).partita));
+  res.json(spostaVoce(String(req.params.uid), req.body.verso, req.query.partita));
 });
 /** Copia o sposta una o più voci in un altro giorno e fascia (2026-10-12): in fondo, nel loro ordine. */
 router.post('/percorso/voci/trasferisci', validate({ body: bodyTrasferisciVoci, query: queryDomande }), (req, res) => {
-  res.json(trasferisciVoci(req.body as TrasferisciVociGiornata, (req.query as unknown as { partita?: number }).partita));
+  res.json(trasferisciVoci(req.body, req.query.partita));
 });
 // Appunti del Diario (2026-10-26): l'istantanea per gli appunti di sistema (sola lettura), il piano e l'esecuzione dell'incolla, l'annullo
 router.post('/percorso/voci/appunti', validate({ body: bodyEsportaAppunti }), (req, res) => {
-  res.json(esportaAppunti((req.body as RichiestaAppuntiDiario).uid));
+  res.json(esportaAppunti(req.body.uid));
 });
-router.post('/percorso/voci/incolla/anteprima', validate({ body: bodyIncollaAnteprima }), (req, res) => {
-  res.json(pianoIncolla(req.body as RichiestaIncollaVoci));
+// gli appunti incollati li ricontrolla il servizio (formato, versione, voci)
+router.post('/percorso/voci/incolla/anteprima', validate({ body: corpoDelServizio<RichiestaIncollaVoci>()(bodyIncollaAnteprima) }), (req, res) => {
+  res.json(pianoIncolla(req.body));
 });
-router.post('/percorso/voci/incolla', validate({ body: bodyIncollaVoci }), (req, res) => {
-  res.json(incollaVoci(req.body as RichiestaEseguiIncolla));
+router.post('/percorso/voci/incolla', validate({ body: corpoDelServizio<RichiestaEseguiIncolla>()(bodyIncollaVoci) }), (req, res) => {
+  res.json(incollaVoci(req.body));
 });
 router.post('/percorso/voci/operazioni/:id/annulla', validate({ params: paramsOperazioneVoci }), (req, res) => {
   res.json(annullaOperazione(String(req.params.id)));
@@ -239,13 +255,13 @@ router.delete('/percorso/voci/:uid', validate({ params: paramsVoceGiornata }), (
   else res.status(204).end();
 });
 router.get('/negozi', validate({ query: queryDomande }), (req, res) => {
-  res.json(elencaNegozi((req.query as unknown as { partita?: number }).partita));
+  res.json(elencaNegozi(req.query.partita));
 });
 router.get('/negozi/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), query: queryDomande }), (req, res) => {
-  res.json(dettaglioNegozio(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+  res.json(dettaglioNegozio(String(req.params.chiave), req.query.partita));
 });
 router.get('/articoli', validate({ query: queryArticoli }), (req, res) => {
-  const q = req.query as unknown as { q?: string; categoria?: string; categorie?: string[]; per?: string; stato?: 'acquistati' | 'da-acquistare'; disponibilita?: 'disponibili' | 'bloccati'; partita?: number };
+  const q = req.query;
   res.json(ricercaArticoli({ q: q.q, categoria: q.categoria, categorie: q.categorie, per: q.per, stato: q.stato, disponibilita: q.disponibilita }, q.partita));
 });
 /** Tutti i luoghi della città come voci da scegliere (la sede di un negozio o di un'attività). */
@@ -254,7 +270,7 @@ router.get('/luoghi', (_req, res) => {
 });
 /** L5: la pagina di un luogo, con presenza, orari, negozi della sede (listini), attività, Confidenti e pin. */
 router.get('/luoghi/:quartiere/:luogo', validate({ params: paramsLuogo, query: queryLuogo }), (req, res) => {
-  res.json(dettaglioLuogo(String(req.params.quartiere), String(req.params.luogo), (req.query as unknown as { partita?: number }).partita));
+  res.json(dettaglioLuogo(String(req.params.quartiere), String(req.params.luogo), req.query.partita));
 });
 /** L6: gli inviti dei Confidenti, per Confidente o per posto aperto (un quartiere comprende i suoi luoghi), con lo stato della partita se
  *  indicata: se si possono registrare adesso, che cosa manca, se sono registrati. */
@@ -264,75 +280,81 @@ router.get('/inviti', validate({ query: z.object({
   apreChiave: z.string().regex(/^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/).max(200).optional(),
   partita: idParam.optional(),
 }) }), (req, res) => {
-  const q = req.query as unknown as { confidente?: string; apreTipo?: 'quartiere' | 'luogo' | 'area'; apreChiave?: string; partita?: number };
+  const q = req.query;
   res.json(elencaInviti({ confidente: q.confidente, apreTipo: q.apreTipo, apreChiave: q.apreChiave }, q.partita));
 });
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
-  res.json(cruciverba((req.query as unknown as { partita?: number }).partita));
+  res.json(cruciverba(req.query.partita));
 });
 router.delete('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)})}),(req,res)=>{impostaIngressoQuartiere(String(req.params.chiave),null);res.status(204).end();});
 // L2: l'ingresso si dà con l'Area del quartiere (`area`, slug: la planimetria è la sua predefinita); il corpo di prima con `mappa` resta
-router.put('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)}),body:z.object({mappa:z.string().min(1).max(200).optional(),area:z.string().min(1).max(120).optional(),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6).default(2.5)}).strict().refine((b)=>(b.mappa===undefined)!==(b.area===undefined),{message:'Indica l’area dell’ingresso (o, come prima, la planimetria): una delle due.',path:['area']})}),(req,res)=>{res.json(impostaIngressoQuartiere(String(req.params.chiave),req.body));});
+router.put('/citta/:chiave/ingresso',validate({
+  params:z.object({chiave:z.string().min(1).max(80)}),
+  body:z.object({
+    mappa:z.string().min(1).max(200).optional(),area:z.string().min(1).max(120).optional(),x:z.number().min(0).max(100),y:z.number().min(0).max(100),
+    zoom:z.number().min(1).max(6).default(2.5)
+  }).strict().refine((b)=>(b.mappa===undefined)!==(b.area===undefined),{message:'Indica l’area dell’ingresso (o, come prima, la planimetria): una delle due.',path:['area']})
+}),(req,res)=>{res.json(impostaIngressoQuartiere(String(req.params.chiave),req.body));});
 // Con `?partita` ogni quartiere dice anche se e' gia' nel mondo: le condizioni di sblocco non sono
 // solo date, e senza la partita non si possono valutare.
 router.get('/citta', validate({ query: queryDomande }), (req, res) => {
-  res.json(elencaQuartieri((req.query as unknown as { partita?: number }).partita));
+  res.json(elencaQuartieri(req.query.partita));
 });
 router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), query: queryDomande }), (req, res) => {
   // La partita serve ai **luoghi**, non al quartiere: senza, l'elenco non può dire quali posti a
   // quel punto della partita non esistono ancora.
-  res.json(dettaglioQuartiere(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+  res.json(dettaglioQuartiere(String(req.params.chiave), req.query.partita));
 });
 /** L6: modifica la condizione propria dello sblocco del quartiere; gli inviti restano gestiti dal Confidente. */
 router.put('/citta/:chiave/sblocco', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), body: z.object({ condizioni: z.array(condizioneSpillo).max(20) }).strict() }), (req, res) => {
-  res.json(aggiornaSbloccoQuartiere(String(req.params.chiave), (req.body as { condizioni: Condizione[] }).condizioni));
+  res.json(aggiornaSbloccoQuartiere(String(req.params.chiave), req.body.condizioni));
 });
 /** L6: ripristina la condizione propria dalla copia della guida. */
 router.post('/citta/:chiave/sblocco/ripristina', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
   res.json(ripristinaSbloccoQuartiere(String(req.params.chiave)));
 });
 router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
-  res.json(attivitaTutte((req.query as unknown as { partita?: number }).partita));
+  res.json(attivitaTutte(req.query.partita));
 });
 router.get('/libri', validate({ query: queryDomande }), (req, res) => {
-  res.json(libriTutti((req.query as unknown as { partita?: number }).partita));
+  res.json(libriTutti(req.query.partita));
 });
 router.get('/film', validate({ query: queryDomande }), (req, res) => {
-  res.json(filmDvdTutti((req.query as unknown as { partita?: number }).partita));
+  res.json(filmDvdTutti(req.query.partita));
 });
 router.get('/videogiochi', validate({ query: queryDomande }), (req, res) => {
-  res.json(videogiochiTutti((req.query as unknown as { partita?: number }).partita));
+  res.json(videogiochiTutti(req.query.partita));
 });
 router.get('/battaglia', (_req, res) => {
   res.json(battaglia());
 });
 /* ---- Le Ombre (L8): l'entità nuova, sola lettura. «verifica» prima di «:chiave», che altrimenti la prenderebbe. ---- */
 router.get('/ombre', validate({ query: queryOmbre }), (req, res) => {
-  res.json(elencaOmbre(req.query as unknown as QueryOmbre));
+  res.json(elencaOmbre(req.query));
 });
 router.get('/ombre/verifica', (_req, res) => {
   res.json(verificaOmbre());
 });
 router.get('/ombre/:chiave', validate({ params: paramsOmbra, query: queryOmbra }), (req, res) => {
-  res.json(dettaglioOmbra(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+  res.json(dettaglioOmbra(String(req.params.chiave), req.query.partita));
 });
 /* ---- La negoziazione per umore (L8, B5): il lettore unico, sola lettura. «verifica» è una rotta propria, non un parametro. ---- */
 router.get('/negoziazione', validate({ query: queryNegoziazione }), (req, res) => {
-  const q = req.query as unknown as QueryNegoziazione;
+  const q = req.query;
   res.json(q.compatto === '1' ? negoziazioneCompatta(q) : negoziazione(q));
 });
 router.get('/negoziazione/verifica', (_req, res) => {
   res.json(verificaNegoziazione());
 });
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
-  res.json(richieste((req.query as unknown as { partita?: number }).partita));
+  res.json(richieste(req.query.partita));
 });
 /* ---- Le Richieste modificabili, aggiungibili ed eliminabili (2026-10-11: «Modifica, aggiungi, elimina») ---- */
 router.post('/richieste', validate({ body: bodyNuovaRichiesta }), (req, res) => {
-  res.status(201).json(creaRichiesta(req.body as Parameters<typeof creaRichiesta>[0]));
+  res.status(201).json(creaRichiesta(req.body));
 });
 router.put('/richieste/:chiave', validate({ params: paramsChiaveGuida, body: bodyRichiesta }), (req, res) => {
-  res.json(aggiornaRichiesta(String(req.params.chiave), req.body as Parameters<typeof aggiornaRichiesta>[1]));
+  res.json(aggiornaRichiesta(String(req.params.chiave), req.body));
 });
 /** Chi cita la Richiesta: lo si dice prima di eliminarla. */
 router.get('/richieste/:chiave/citazioni', validate({ params: paramsChiaveGuida }), (req, res) => {
@@ -345,13 +367,13 @@ router.delete('/richieste/:chiave', validate({ params: paramsChiaveGuida }), (re
 });
 /** Colloca una Richiesta in un'area di un dedalo (099), o la toglie dall'area (null): è un elemento delle aree. */
 router.put('/richieste/:chiave/area', validate({ params: paramsChiaveGuida, body: bodyCollocaRichiesta }), (req, res) => {
-  res.json(collocaRichiesta(String(req.params.chiave), (req.body as { areaDedalo: string | null }).areaDedalo));
+  res.json(collocaRichiesta(String(req.params.chiave), req.body.areaDedalo));
 });
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
-  res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
+  res.json(elencaDungeon(req.query.partita));
 });
 router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: querySchedaDungeon }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; infiltrazione?: string };
+  const q = req.query;
   res.json(dettaglioDungeon(String(req.params.chiave), q.partita, q.infiltrazione ?? null));
 });
 /** L4 (§3.2): i gruppi di copie di una voce secondo la regola dell'utente (R4-15), in sola lettura; nessuna fusione in L4. */
@@ -360,14 +382,14 @@ router.get('/dungeon/:chiave/copie', validate({ params: paramsChiaveGuida }), (r
 });
 /** L4 (§2.3, §4.3): «Schede da sistemare» — «Crea la voce» (POST, col tipo) o «Collega a una voce» (PUT, con la voce). */
 router.post('/schede/:id/voce', validate({ params: z.object({ id: idParam }), body: bodyCreaVoceDallaScheda }), (req, res) => {
-  res.status(201).json(creaVoceDallaScheda(Number(req.params.id), (req.body as { tipo: Parameters<typeof creaVoceDallaScheda>[1] }).tipo));
+  res.status(201).json(creaVoceDallaScheda(Number(req.params.id), req.body.tipo));
 });
 router.put('/schede/:id/voce', validate({ params: z.object({ id: idParam }), body: bodyCollegaSchedaAllaVoce }), (req, res) => {
-  res.json(collegaSchedaAllaVoce(Number(req.params.id), (req.body as { voce: string }).voce));
+  res.json(collegaSchedaAllaVoce(Number(req.params.id), req.body.voce));
 });
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
 router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
-  res.json(aggiornaDungeon(String(req.params.chiave), req.body as Parameters<typeof aggiornaDungeon>[1]));
+  res.json(aggiornaDungeon(String(req.params.chiave), req.body));
 });
 /** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
 router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
@@ -376,24 +398,24 @@ router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida 
 /** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04); con L13 O6-3
  *  anche furto consigliato e lettera, insieme. La pagina modifica le date da «Correggi la scheda» (`PUT /dungeon/:chiave` con `date`). */
 router.put('/dungeon/:chiave/finestra', validate({ params: paramsChiaveGuida, body: bodyFinestraDungeon }), (req, res) => {
-  const { dal, al, furtoConsigliato, letteraEntro } = req.body as { dal: string; al: string | null; furtoConsigliato?: string | null; letteraEntro?: string | null };
+  const { dal, al, furtoConsigliato, letteraEntro } = req.body;
   res.json(impostaFinestra(String(req.params.chiave), dal, al, furtoConsigliato !== undefined && letteraEntro !== undefined ? { furtoConsigliato, letteraEntro } : undefined));
 });
 /** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
 router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {
-  res.json(impostaAtterraggi(String(req.params.chiave), (req.body as { regole: RegolaAtterraggio[] }).regole));
+  res.json(impostaAtterraggi(String(req.params.chiave), req.body.regole));
 });
 /** Una sezione nuova della guida del Palazzo, al posto scelto e, se data, nella planimetria (2026-10-01). */
 router.post('/dungeon/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaArea }), (req, res) => {
-  res.status(201).json(creaArea(String(req.params.chiave), req.body as Parameters<typeof creaArea>[1]));
+  res.status(201).json(creaArea(String(req.params.chiave), req.body));
 });
 /** L3 (R3-23): le Aree del Palazzo che l'infiltrazione tocca, in ordine, con la versione da aprire; non sposta voci né pin. */
 router.put('/aree/:chiave/aree-palazzo', validate({ params: paramsChiaveGuida, body: bodyAreePalazzoInfiltrazione, query: queryDomande }), (req, res) => {
-  const b = req.body as { aree: string[]; planimetrieIniziali?: Record<string, string | null> };
-  res.json(impostaAreePalazzoInfiltrazione(String(req.params.chiave), b.aree, b.planimetrieIniziali, (req.query as unknown as { partita?: number }).partita));
+  const b = req.body;
+  res.json(impostaAreePalazzoInfiltrazione(String(req.params.chiave), b.aree, b.planimetrieIniziali, req.query.partita));
 });
 router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea }), (req, res) => {
-  res.json(aggiornaArea(String(req.params.chiave), req.body as Parameters<typeof aggiornaArea>[1]));
+  res.json(aggiornaArea(String(req.params.chiave), req.body));
 });
 /** Elimina l'area della guida per tutte le partite, con i suoi punti e i suoi legami (2026-09-30). */
 router.delete('/aree/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
@@ -403,13 +425,13 @@ router.delete('/aree/:chiave', validate({ params: paramsChiaveGuida }), (req, re
 /* ---- Le aree dei dedali dei Memento (099, richiesta dell'utente del 2026-10-11): Dedalo → Aree → Elementi ---- */
 /** Un'area nuova in fondo al dedalo (la chiave è quella del dedalo, cioè della sua area della guida). */
 router.post('/dedali/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaAreaDedalo }), (req, res) => {
-  res.status(201).json(creaAreaDedalo(String(req.params.chiave), req.body as Parameters<typeof creaAreaDedalo>[1]));
+  res.status(201).json(creaAreaDedalo(String(req.params.chiave), req.body));
 });
 router.put('/aree-dedalo/:chiave', validate({ params: paramsChiaveGuida, body: bodyAreaDedalo }), (req, res) => {
-  res.json(aggiornaAreaDedalo(String(req.params.chiave), req.body as Parameters<typeof aggiornaAreaDedalo>[1]));
+  res.json(aggiornaAreaDedalo(String(req.params.chiave), req.body));
 });
 router.put('/aree-dedalo/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
-  res.json(spostaAreaDedalo(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));
+  res.json(spostaAreaDedalo(String(req.params.chiave), req.body.verso));
 });
 /** Elimina l'area per tutte le partite: le voci con lei, le Richieste restano nel dedalo da collocare. */
 router.delete('/aree-dedalo/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
@@ -417,10 +439,10 @@ router.delete('/aree-dedalo/:chiave', validate({ params: paramsChiaveGuida }), (
   res.status(204).end();
 });
 router.post('/aree/:chiave/punti', validate({ params: paramsChiaveGuida, body: bodyNuovoPunto }), (req, res) => {
-  res.status(201).json(creaPunto(String(req.params.chiave), req.body as Parameters<typeof creaPunto>[1]));
+  res.status(201).json(creaPunto(String(req.params.chiave), req.body));
 });
 router.put('/punti/:chiave', validate({ params: paramsChiaveGuida, body: bodyPunto }), (req, res) => {
-  res.json(aggiornaPunto(String(req.params.chiave), req.body as Parameters<typeof aggiornaPunto>[1]));
+  res.json(aggiornaPunto(String(req.params.chiave), req.body));
 });
 router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   eliminaPunto(String(req.params.chiave));
@@ -428,29 +450,29 @@ router.delete('/punti/:chiave', validate({ params: paramsChiaveGuida }), (req, r
 });
 /** Più voci di un Palazzo insieme in un'altra sua area (2026-10-14): in fondo, nel loro ordine, tutto o niente. */
 router.post('/punti/sposta-in-area', validate({ body: bodySpostaPuntiInArea }), (req, res) => {
-  const b = req.body as SpostaPuntiInArea;
+  const b = req.body;
   res.json(spostaPuntiInArea(b.chiavi, b.area));
 });
 /** Le stesse voci copiate in un'altra area del Palazzo (2026-10-18): voci nuove, coi passi e le schede, in fondo; tutto o niente. */
 router.post('/punti/copia-in-area', validate({ body: bodySpostaPuntiInArea }), (req, res) => {
-  const b = req.body as SpostaPuntiInArea;
+  const b = req.body;
   res.status(201).json(copiaPuntiInArea(b.chiavi, b.area));
 });
 router.put('/punti/:chiave/sposta', validate({ params: paramsChiaveGuida, body: bodySpostaPunto }), (req, res) => {
-  res.json(spostaPunto(String(req.params.chiave), (req.body as { verso: -1 | 1 }).verso));
+  res.json(spostaPunto(String(req.params.chiave), req.body.verso));
 });
 /** I pin delle planimetrie che rappresentano il punto (2026-10-01): si collegano e si scollegano uno alla volta. */
 router.put('/punti/:chiave/pin/:spillo', validate({ params: paramsPinDelPunto }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; spillo: number };
+  const p = req.params;
   res.json(collegaPinAlPunto(String(p.chiave), Number(p.spillo), true));
 });
 router.delete('/punti/:chiave/pin/:spillo', validate({ params: paramsPinDelPunto }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; spillo: number };
+  const p = req.params;
   res.json(collegaPinAlPunto(String(p.chiave), Number(p.spillo), false));
 });
 
 router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; mese?: string };
+  const q = req.query;
   res.json(calendario(q.partita, q.mese));
 });
 /** Gli eventi del calendario collegati a una voce del Diario (L9 R9-20), sola lettura. */
@@ -458,7 +480,7 @@ router.get('/calendario/voci/:uid', validate({ params: paramsVoceGiornata }), (r
   res.json(eventiDellaVoce(String(req.params.uid)));
 });
 router.get('/domande', validate({ query: queryDomande }), (req, res) => {
-  res.json(domande((req.query as unknown as { partita?: number }).partita));
+  res.json(domande(req.query.partita));
 });
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
@@ -470,11 +492,11 @@ router.get('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveG
 });
 router.post('/confidenti/:chiave/disponibilita/anteprima', validate({ params: paramsChiaveGuida, body: bodyAnteprimaInformazioniConfidente }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json(anteprimaInformazioniConfidente(String(req.params.chiave), req.body as AzioneInformazioniConfidente));
+  res.json(anteprimaInformazioniConfidente(String(req.params.chiave), req.body));
 });
 router.put('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida, body: bodySalvaInformazioniConfidente }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json(salvaInformazioniConfidente(String(req.params.chiave), req.body as SalvaInformazioniConfidente));
+  res.json(salvaInformazioniConfidente(String(req.params.chiave), req.body));
 });
 /** L6 (§6.1): i requisiti del Confidente per rango, per l'editor («Modifica requisiti»). */
 router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida }), (req, res) => {
@@ -483,30 +505,30 @@ router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida
 const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE) });
 /** L6: i requisiti di un rango al posto di quelli di adesso (condizioni del vocabolario unico, con la frase facoltativa). */
 router.put('/confidenti/:chiave/requisiti/:rango', validate({ params: paramsRangoConfidente, body: z.object({ requisiti: z.array(z.object({ condizione: condizioneSpillo, testo: z.string().max(500).nullable().optional() })).max(10) }) }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; rango: number };
-  res.json(impostaRequisitiRango(p.chiave, p.rango, (req.body as { requisiti: Array<{ condizione: Condizione; testo?: string | null }> }).requisiti));
+  const p = req.params;
+  res.json(impostaRequisitiRango(p.chiave, p.rango, req.body.requisiti));
 });
 /** L6: il rango torna come lo dà la guida. */
 router.post('/confidenti/:chiave/requisiti/:rango/ripristina', validate({ params: paramsRangoConfidente }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; rango: number };
+  const p = req.params;
   res.json(ripristinaRequisitiRango(p.chiave, p.rango));
 });
 /** Un requisito che cita una Richiesta (per esempio eliminata, «da correggere»): cita un'altra Richiesta (scelta dell'utente,
  *  2026-10-11: «Requisito correggibile»). */
 router.put('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params: paramsRequisitoConfidente, body: bodyRequisitoRichiesta }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; rango: number; indice: number };
-  correggiRequisitoRichiesta(p.chiave, p.rango, p.indice, (req.body as { richiesta: string }).richiesta);
+  const p = req.params;
+  correggiRequisitoRichiesta(p.chiave, p.rango, p.indice, req.body.richiesta);
   res.status(204).end();
 });
 /** Toglie un requisito che cita una Richiesta, per tutte le partite. */
 router.delete('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params: paramsRequisitoConfidente }), (req, res) => {
-  const p = req.params as unknown as { chiave: string; rango: number; indice: number };
+  const p = req.params;
   togliRequisitoRichiesta(p.chiave, p.rango, p.indice);
   res.status(204).end();
 });
 /** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
 router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveGuida, body: bodyDotiIncontro }), (req, res) => {
-  res.json(impostaDotiIncontro(String(req.params.chiave), (req.body as { ranghi: Array<{ rango: number; doti: DoteNote[] }> }).ranghi));
+  res.json(impostaDotiIncontro(String(req.params.chiave), req.body.ranghi));
 });
 
 // ---- Il giorno di gioco modificabile (L9 R9-19): meteo nelle due fasce, nota, trama e vincoli, con «Ripristina» ----
@@ -525,7 +547,7 @@ router.get('/giorni/:data', validate({ params: paramsGiorno }), (req, res) => {
   res.json(leggiGiorno(String(req.params.data)));
 });
 router.put('/giorni/:data', validate({ params: paramsGiorno, body: bodyGiorno }), (req, res) => {
-  res.json(aggiornaGiorno(String(req.params.data), req.body as ModificaGiorno));
+  res.json(aggiornaGiorno(String(req.params.data), req.body));
 });
 /** «Ripristina»: il giorno torna come lo dà la guida. */
 router.post('/giorni/:data/ripristina', validate({ params: paramsGiorno }), (req, res) => {
@@ -535,8 +557,8 @@ router.post('/giorni/:data/ripristina', validate({ params: paramsGiorno }), (req
 // ---- Le affinità di una Persona modificabili (L8 R8-10/1): correggere la griglia e rimetterla com'è nella guida ----
 const bodyAffinitaPersona = z.object({
   affinita: z.array(z.object({
-    elemento: z.enum(ELEMENTI_AFFINITA.map((e) => e.chiave) as [string, ...string[]]),
-    codice: z.enum(ESITI_AFFINITA.map((e) => e.codice) as [string, ...string[]]),
+    elemento: z.enum(ELEMENTI_AFFINITA.map((e) => e.chiave)),
+    codice: z.enum(ESITI_AFFINITA.map((e) => e.codice)),
   }).strict()).length(ELEMENTI_AFFINITA.length),
 }).strict().superRefine((b, ctx) => {
   const visti = new Set<string>();
@@ -546,7 +568,7 @@ const bodyAffinitaPersona = z.object({
   });
 });
 router.put('/persona/:id/affinita', validate({ params: paramsId, body: bodyAffinitaPersona }), (req, res) => {
-  res.json(correggiAffinita(Number(req.params.id), req.body as ModificaAffinitaPersona));
+  res.json(correggiAffinita(Number(req.params.id), req.body));
 });
 /** «Ripristina»: le affinità corrette tornano quelle della guida. */
 router.post('/persona/:id/affinita/ripristina', validate({ params: paramsId }), (req, res) => {

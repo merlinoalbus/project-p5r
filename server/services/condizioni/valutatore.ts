@@ -18,7 +18,10 @@ import { nellaFinestraPalazzo } from './finestrePalazzi.js';
 import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
 import { condizioneAperturaDedalo, condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataConArticolo, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import {
+  ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataConArticolo, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo,
+  membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo
+} from '../../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
 import { nomeDote } from '../../../shared/doti.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
@@ -196,7 +199,10 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const oggi = ordineGioco(st.dataGioco);
       const dentro = oggi >= ordineGioco(r.dal) && oggi <= ordineGioco(r.al);
-      return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo ${dataConArticolo(r.dal)}: è oggi` : `Solo ${dataConArticolo(r.dal)}, oggi è ${dataConArticolo(st.dataGioco)}`) : dentro ? `Nel periodo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')}, oggi è ${dataConArticolo(st.dataGioco)}`);
+      return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al
+        ? (dentro ? `Solo ${dataConArticolo(r.dal)}: è oggi` : `Solo ${dataConArticolo(r.dal)}, oggi è ${dataConArticolo(st.dataGioco)}`)
+        : dentro ? `Nel periodo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')} (oggi ${dataLeggibile(st.dataGioco)})`
+          : `Solo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')}, oggi è ${dataConArticolo(st.dataGioco)}`);
     }
     case 'finestra-palazzo': {
       if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato');
@@ -362,7 +368,9 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'pesca-sessione': {
       const o=st.contestoPesca;if(!o)return esito('pesca-sessione','grigio','Questa condizione richiede il contesto di una visita di pesca.');
-      const v=r.dato==='esca-speciale'?o.escaSpecialePosseduta:r.dato==='tentativo-residuo'?o.rangoPeriziaOsservato===null||o.tentativiConsumati===null?null:o.rangoPeriziaOsservato+2-o.tentativiConsumati>0:o.catture===null?null:o.catture.some(c=>c.specie===(r.dato==='guardiano-catturato'?'guardiano':'boss'));
+      const v=r.dato==='esca-speciale'?o.escaSpecialePosseduta
+        :r.dato==='tentativo-residuo'?o.rangoPeriziaOsservato===null||o.tentativiConsumati===null?null:o.rangoPeriziaOsservato+2-o.tentativiConsumati>0
+          :o.catture===null?null:o.catture.some(c=>c.specie===(r.dato==='guardiano-catturato'?'guardiano':'boss'));
       return esito('pesca-sessione',v===null?'grigio':v===r.valore?'verde':'rosso',v===null?'Osservazione della visita ignota.':descriviRequisitoSpillo(r));
     }
     case 'contatore': {

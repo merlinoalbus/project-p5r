@@ -32,7 +32,11 @@ export function indiceGiornoScolastico(data: string): number {
 
 /** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
 function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>, voceUid?: string, premioVoce?: DomandaDto['premioVoce']): DomandaDto {
-  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id), ...(voceUid ? { voceUid } : {}), ...(premioVoce ? { premioVoce } : {}) };
+  return {
+    id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'],
+    ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id), ...(voceUid ? { voceUid } : {}),
+    ...(premioVoce ? { premioVoce } : {})
+  };
 }
 
 /** L13 (ondata 7, O7-2): il premio di un piazzamento con i nomi (Doti e trofeo). */
@@ -148,7 +152,9 @@ export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: 
       const info = prepared('INSERT OR IGNORE INTO domanda_partita (partita_id, domanda_id, fatta_at) VALUES (?, ?, ?)').run(partitaId, domandaId, adesso);
       if (info.changes > 0) {
         nuova = true;
-        registraEvento(partitaId, 'domanda-risposta', `Domanda ${dataConArticolo(d.data, 'di')} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
+        registraEvento(partitaId, 'domanda-risposta', `Domanda ${dataConArticolo(d.data, 'di')} (${d.chi || d.tipo}) risposta`,
+          `${d.domanda}${conoscenza ? ` · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti)` : ''}`,
+          { domandaId, conoscenza });
       }
     } else {
       prepared('DELETE FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').run(partitaId, domandaId);

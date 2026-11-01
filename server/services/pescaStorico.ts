@@ -13,7 +13,14 @@ export function eventoPescaMarcato(raw:unknown):boolean {
   return true;
 }
 export function registraEventoPesca(r:RicevutaOperazionePescaDto):void {
-  registraEvento(r.partitaId,'pesca',r.azione==='registra-sessione'?'Visita di pesca registrata':r.azione==='salva-osservazione'?'Osservazione della pesca corretta':r.azione==='acquista-esca'?'Acquisto dell’esca osservato':r.azione==='rettifica-punti'?'Saldo punti pesca osservato':'Fonte della pesca aggiornata','Gesto confermato; catture, beneficio finale e movimenti restano distinti.',{pescaV1:{formato:1},operazioneId:r.operazioneId,azione:r.azione,sessioneId:r.sessioneId,provenienzaId:r.provenienzaId,osservazioneId:r.osservazioneId,fattoFonteId:r.fattoFonteId,acquistoEscaId:r.acquistoEscaId});
+  registraEvento(r.partitaId,'pesca',
+    r.azione==='registra-sessione'?'Visita di pesca registrata'
+      :r.azione==='salva-osservazione'?'Osservazione della pesca corretta'
+        :r.azione==='acquista-esca'?'Acquisto dell’esca osservato'
+          :r.azione==='rettifica-punti'?'Saldo punti pesca osservato':'Fonte della pesca aggiornata',
+    'Gesto confermato; catture, beneficio finale e movimenti restano distinti.',
+    {pescaV1:{formato:1},operazioneId:r.operazioneId,azione:r.azione,sessioneId:r.sessioneId,provenienzaId:r.provenienzaId,osservazioneId:r.osservazioneId,
+      fattoFonteId:r.fattoFonteId,acquistoEscaId:r.acquistoEscaId});
 }
 /** Selezione per identità posseduta e prova del journal; mai per titolo o nome. */
 export function annullaEventiPesca(p:number,bersaglio:{fonte?:string;sessione?:string;fatto?:string;esca?:string}):void {

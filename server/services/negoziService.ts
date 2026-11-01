@@ -38,10 +38,21 @@ import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettagli
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
 interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
-interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; sconto_json?: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { prezzo_per_fascia_json?: string | null; rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
+interface RigaNegozio extends PresenzaRiga {
+  condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null;
+  sconto_json?: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null;
+  confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null;
+  quartiere_nome?: string | null; articoli?: number; verificati?: number
+}
+interface RigaArticolo {
+  prezzo_per_fascia_json?: string | null; rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null;
+  condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string;
+  negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
-  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null;
+  sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null;
+  statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string
+}
 
 // L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
@@ -505,7 +516,9 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
     const prezzoEvento = r.costo_json == null && r.prezzo !== null
       ? (opz.voce ? prezzoDellArticolo(r.chiave, fasciaDellaVoce(opz.voce.voceUid), partitaId, opz.voce.voceUid) : prezzoDellArticolo(r.chiave, fasciaDellaPartita(partitaId), partitaId))
       : prezzoNellaFascia(r.prezzo, r.prezzo_per_fascia_json ?? null, fasciaDellaPartita(partitaId));
-    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? (costoEvento && costoEvento.tipo !== 'oggetti' ? ` · ${testoCostoAImporto(costoEvento)}` : ' · Scambio') : prezzoEvento !== null ? ` · ${prezzoEvento.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
+    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`,
+      `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? (costoEvento && costoEvento.tipo !== 'oggetti' ? ` · ${testoCostoAImporto(costoEvento)}` : ' · Scambio') : prezzoEvento !== null ? ` · ${prezzoEvento.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`,
+      { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);

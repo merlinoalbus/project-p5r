@@ -82,9 +82,26 @@ export function contenutiMappa(chiave: string, partitaId?:number): ContenutiMapp
   const avanzamento = (() => { let a: { m: ModelloAvanzamento; s: StatiDellaPartita | null } | null = null; return () => (a ??= ((m) => ({ m, s: partitaId ? statiDellaPartita(getDb(), m, partitaId) : null }))(modelloAvanzamento(getDb()))); })();
   return { mappa: chiaveMappa(mappa), aree: aree.map(a => ({ chiave: a.chiave, nome: a.nome_visibile, descrizione: a.descrizione,
     collegamenti: (prepared("SELECT id FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='sezione' ORDER BY ordine,id").all(a.chiave) as Array<{id:number}>).map(s=>schede.get(s.id)!),
-    punti: palazzi.has(a.dungeon_chiave) ? vociDelPalazzo(a.chiave, avanzamento()) : conPassiDentro((prepared("SELECT id,nome,descrizione,tipo,riferimento_tipo,riferimento_chiave,collezionabile,solo_posizione,ruolo_guida FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='punto' ORDER BY ordine,id").all(a.chiave) as Array<{ id: number; nome: string; descrizione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null; collezionabile: number; solo_posizione: number; ruolo_guida: 'punto' | 'sezione' }>).map((s): PuntoGuidaMappaDto => ({ scheda:schede.get(s.id),id:s.id,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento_tipo&&s.riferimento_chiave?{tipo:s.riferimento_tipo,chiave:s.riferimento_chiave}:null,collezionabile:s.collezionabile===1,soloPosizione:s.solo_posizione===1,ruolo:s.ruolo_guida })).concat((prepared(`SELECT p.chiave,p.nome,p.descrizione,p.tipo,p.esauribile FROM punto_interesse p WHERE p.area_chiave=? AND NOT EXISTS(SELECT 1 FROM spillo s WHERE s.area_guida_chiave=p.area_chiave AND s.riferimento_tipo='punto' AND s.riferimento_chiave=p.chiave) ORDER BY p.ordine,p.chiave`).all(a.chiave) as Array<{chiave:string;nome:string;descrizione:string;tipo:string;esauribile:number}>).map((p):PuntoGuidaMappaDto=>({id:'punto:'+p.chiave,nome:p.nome,descrizione:p.descrizione,tipo:p.tipo,riferimento:{tipo:'punto',chiave:p.chiave},collezionabile:p.esauribile===1&&categoriaSpillo(spilloPerPunto(p.tipo))==='consumabile',soloPosizione:false,ruolo:'punto'})))),
+    punti: palazzi.has(a.dungeon_chiave) ? vociDelPalazzo(a.chiave, avanzamento()) : conPassiDentro(
+      (prepared("SELECT id,nome,descrizione,tipo,riferimento_tipo,riferimento_chiave,collezionabile,solo_posizione,ruolo_guida FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='punto' ORDER BY ordine,id")
+        .all(a.chiave) as Array<{
+          id: number; nome: string; descrizione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null;
+          collezionabile: number; solo_posizione: number; ruolo_guida: 'punto' | 'sezione'
+        }>)
+        .map((s): PuntoGuidaMappaDto => ({
+          scheda:schede.get(s.id),id:s.id,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,
+          riferimento:s.riferimento_tipo&&s.riferimento_chiave?{tipo:s.riferimento_tipo,chiave:s.riferimento_chiave}:null,
+          collezionabile:s.collezionabile===1,soloPosizione:s.solo_posizione===1,ruolo:s.ruolo_guida
+        }))
+        .concat((prepared(`SELECT p.chiave,p.nome,p.descrizione,p.tipo,p.esauribile FROM punto_interesse p WHERE p.area_chiave=? AND NOT EXISTS(SELECT 1 FROM spillo s WHERE s.area_guida_chiave=p.area_chiave AND s.riferimento_tipo='punto' AND s.riferimento_chiave=p.chiave) ORDER BY p.ordine,p.chiave`)
+          .all(a.chiave) as Array<{chiave:string;nome:string;descrizione:string;tipo:string;esauribile:number}>)
+          .map((p):PuntoGuidaMappaDto=>({
+            id:'punto:'+p.chiave,nome:p.nome,descrizione:p.descrizione,tipo:p.tipo,riferimento:{tipo:'punto',chiave:p.chiave},
+            collezionabile:p.esauribile===1&&categoriaSpillo(spilloPerPunto(p.tipo))==='consumabile',soloPosizione:false,ruolo:'punto'
+          })))),
     // le planimetrie dell'infiltrazione: tutte quelle delle sue aree, nell'ordine dei legami e delle versioni (L3 §1.2)
-    mappe: (prepared("SELECT m.chiave FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave=ia.area_chiave WHERE ia.infiltrazione_chiave=? ORDER BY ia.ordine,ia.area_chiave,m.versione_ordine,m.chiave").all(a.chiave) as Array<{ chiave: string }>).map(x => ({ chiave: chiaveMappa(x.chiave), nome: nomePercorso(x.chiave) })) })) };
+    mappe: (prepared("SELECT m.chiave FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave=ia.area_chiave WHERE ia.infiltrazione_chiave=? ORDER BY ia.ordine,ia.area_chiave,m.versione_ordine,m.chiave")
+      .all(a.chiave) as Array<{ chiave: string }>).map(x => ({ chiave: chiaveMappa(x.chiave), nome: nomePercorso(x.chiave) })) })) };
 }
 
 /**

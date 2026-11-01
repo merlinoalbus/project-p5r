@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 339 migrazioni di gioco (l'ultima è la 339), 63 delle partite (l'ultima è la 063).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 340 migrazioni di gioco (l'ultima è la 340), 64 delle partite (l'ultima è la 064).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -104,9 +104,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   (228), poi `dungeon.note` (8), `punto_interesse.descrizione` (7), `settimana_guida.incertezze` (9), `confidente_regalo.*` (7).
   Il conteggio sull'istanza va rifatto su una copia prima della migrazione.
   Le incertezze del calendario e della battaglia nel rilascio sono già nascoste; gli altri testi si vedono anche lì.
-- Da L5, per L8: gli id di `partita` si riusano dopo un'eliminazione (nessun AUTOINCREMENT) e l'archivio immutabile
-  `acquisto_legacy_valutazione` non ha una chiave esterna verso la partita: una partita nuova si ritrova accanto le righe d'archivio di una
-  eliminata con lo stesso id.
 - Decisioni dell'utente (01/11): D1 non toccare (L8-01 resta com'è); D2 procedere; D3, D4, D5, D6 sì come proposto; D7 pulsante
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
   D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
@@ -177,7 +174,22 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   dispositivo in un'utilità sola, `useMedia` al posto del suo doppione nel visore, il fuoco rimesso da codice ritrovato da una chiave e non
   dal testo o dal nome (menu della voce, posto della voce, appunti fissi, guida del visore, frecce dei giorni), chiavi stabili nei 18
   elenchi modificabili con il fuoco che resta sul gesto dopo «Sposta», la classe dei campi della nota storica.
-- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11 (le voci dalla 02 alla 04, la 06 e la 07); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- L11-02, L11-03, L11-04 fatti (parte server): righe compattate del server riformattate con l'AST invariato (resta oltre i 300 caratteri
+  solo il testo dei letterali: SQL, messaggi, descrizioni dell'API, DDL di base, più le migrazioni registrate e i test, che non si
+  toccano); `validate` tipizzato, senza nessun cast di `req.body`, `req.query` o `req.params` nelle rotte, e nessun SQL nelle rotte
+  (`condizioniService`); `RIFERIMENTI_PARTITE` completato dallo schema reale e censimento di ogni tabella e colonna di riferimento delle
+  partite, che dà un avviso nel log se manca qualcosa (non blocca, decisione dell'utente del 01/11); utente 064, gli id delle partite non
+  si riusano più.
+- Edizione di rilascio con schema partite 64: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
+  copia e col sì di Roberto; finché resta l'edizione attuale il rilascio funziona.
+- Da L11-04, da decidere con l'utente: nell'archivio immutabile `acquisto_legacy_valutazione` della copia della produzione restano 15 righe
+  della partita 3, che non c'è più né fra le partite né nel Cestino. Dalla 064 nessuna partita nuova può più prendere l'id 3, quindi non si
+  mostrano più a nessuno; toglierle chiede di aggirare il blocco dell'archivio (che vieta le cancellazioni) e si fa solo con il sì
+  dell'utente.
+- Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
+  personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
+  censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.
+- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11 (la 06 e la 07); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

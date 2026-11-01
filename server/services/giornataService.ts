@@ -359,7 +359,8 @@ function nomeAttualeDelRiferimento(r: RigaVoce, rif: RiferimentoAzioneDto | null
  * la condizione dell'avanzamento automatico di fascia e di giorno (`avanzaSeFasciaCompleta`, decisione A1 del 2026-10-25).
  */
 export function decisioniApertePerVoce(partitaId: number, voceUid: string): number {
-  return prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(partitaId, voceUid, partitaId, voceUid) as number;
+  return prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`)
+    .pluck().get(partitaId, voceUid, partitaId, voceUid) as number;
 }
 
 /**
@@ -445,10 +446,16 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const condizioni = spuntabile ? condizioniDellaVoce(r) : [];
   const motivoNonDovuta = condizioni.length > 0 && ctx.nonDovuta && !ctx.fatte.has(r.uid) ? ctx.nonDovuta(r) : null;
   return {
-    ...v, effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}), ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}), ...(daApplicare > 0 ? { daApplicare } : {}),
+    ...v, effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}),
+    ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}),
+    ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
-    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => ((s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
-    ...avvisiDisponibilitaDellaVoce(r, r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
+    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (
+      (s.tipo === 'turno' || s.tipo === 'lavoro') && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}),
+    ...(yenAutomatici.length ? { yenAutomatici } : {}),
+    ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
+    ...avvisiDisponibilitaDellaVoce(r, r.riferimento_tipo === 'confidente' && r.riferimento_chiave ? ctx.conf?.get(r.riferimento_chiave)?.relazioneRomantica ?? null : null),
+    ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()],
     // L13 (decisione 4): a voce fatta, gli articoli segnati e quelli in alternativa aggiunti dopo la spunta (il riepilogo non nega un acquisto mai chiesto)
     // L13 (O10-5): e gli yen registrati dei turni, perché la riga del turno dica la ricevuta e non l'istruzione della spunta
     ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo, ctx.partita !== undefined && ctx.fatte.has(r.uid) ? alternativeDellaVoceFatta(ctx.partita, r.uid, fonte.effetti) : undefined, fasciaDi(r),
@@ -1072,7 +1079,8 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
     if (fatta) {
       if (precedente) {
-        if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length||opz.relazioneRomantica !== undefined) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
+        if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length||opz.relazioneRomantica !== undefined)
+          throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
         return; // idempotente: non riapplica punti, letture o turni (dalla 305 la visita ai Memento non dichiara più aperture)
       }
       // L13 (O9-3, «in tal caso viene meno la consegna»): una voce non dovuta nella partita non si spunta (409 `voce-non-dovuta`, col motivo);

@@ -30,6 +30,10 @@ export function riconciliaPescaDopoRipristino(p:number,interaPartita=false):void
   const saldo=prepared('SELECT saldo FROM utente.punti_pesca_partita WHERE partita_id=?').get(p) as {saldo:number|null}|undefined;
   const ultimo=prepared('SELECT dopo FROM utente.movimento_punti_pesca WHERE partita_id=? ORDER BY rowid DESC LIMIT 1').get(p) as {dopo:number}|undefined;
   if(interaPartita&&ultimo&&saldo?.saldo!==ultimo.dopo)throw httpErrors.conflict('pesca-saldo-ripristino-incoerente','Il saldo punti della partita non coincide con il proprio ultimo movimento. Nessun delta viene ripetuto.');
-  const cause=new Set([...sessioniPesca(p).map(s=>s.id),...(prepared('SELECT id FROM utente.pesca_acquisto_esca WHERE partita_id=?').all(p) as Array<{id:string}>).map(a=>a.id),...(prepared("SELECT DISTINCT causa_chiave FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='pesca'").all(p) as Array<{causa_chiave:string}>).map(c=>c.causa_chiave)]);
+  const cause=new Set([
+    ...sessioniPesca(p).map(s=>s.id),
+    ...(prepared('SELECT id FROM utente.pesca_acquisto_esca WHERE partita_id=?').all(p) as Array<{id:string}>).map(a=>a.id),
+    ...(prepared("SELECT DISTINCT causa_chiave FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='pesca'").all(p) as Array<{causa_chiave:string}>).map(c=>c.causa_chiave)
+  ]);
   for(const id of cause)riconciliaBeneficiPesca(p,id);
 }

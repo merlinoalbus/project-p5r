@@ -7,7 +7,8 @@
 //      il completo, stesso nome in pacchetto/completo/ fuori da git, si importa da Impostazioni e sostituisce il file); senza iniziale, istanza vuota
 //   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
 //   2. runBootBackup() — snapshot rotante pre-migrazioni di entrambi i file, FATALE se serve e non riesce
-//   3. runMigrations() — schema versionato, FATALE su errore o se uno schema è più nuovo del codice
+//   3. runMigrations() — schema versionato, FATALE su errore o se uno schema è più nuovo del codice; poi il censimento delle tabelle
+//      delle partite (`avvisaCensimentoPartite`): un avviso nel log se una tabella o una colonna di riferimento non è classificata
 //   4. regole sui dati — nomi degli spilli, luoghi e planimetrie, spilli dei luoghi (rieseguite a ogni avvio)
 //   5. createApp() + listen(porta)
 //
@@ -28,6 +29,7 @@ import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/
 import { riscaldaMiniature } from './services/miniatureService.js';
 import { proponiStatiMancanti } from './services/statiMancantiService.js';
 import { verificaRuntimeNode } from './utils/nodeRuntime.js';
+import { avvisaCensimentoPartite } from './services/censimentoPartite.js';
 
 // Le linee Node interessate dall'advisory di sicurezza del 2026-10-21 devono
 // essere almeno alle rispettive release correttive prima di avviare il backend.
@@ -64,6 +66,14 @@ try {
 } catch (err) {
   console.error('[project-p5r] FATALE: migrazione schema fallita:', err);
   process.exit(1);
+}
+
+// L11-04: ogni tabella e ogni colonna di riferimento del file delle partite dovrebbe essere classificata (`censimentoPartite.ts`); ciò che
+// manca si dice nel log come avviso e l'avvio prosegue (decisione dell'utente del 01/11: non blocca niente, al massimo un warning)
+try {
+  avvisaCensimentoPartite(initDb());
+} catch (err) {
+  logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento delle partite non riuscito (l\'avvio prosegue)');
 }
 
 try {

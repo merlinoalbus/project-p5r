@@ -55,7 +55,8 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense
   libro: ['condizioni_json', 'nome', 'prezzo', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
-  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
+  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia',
+    'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
   // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
   luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'confidenti_json', 'piatti_json', 'note', 'verificato'],

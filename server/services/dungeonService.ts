@@ -19,10 +19,18 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { palazzoDellaMappa, radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
-import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, togliStatiDeiPin, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
+import {
+  completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati,
+  type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, togliStatiDeiPin, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione,
+  type ModelloAvanzamento, type StatiDellaPartita
+} from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
-import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, AvanzamentoLuogoDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type {
+  AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, AvanzamentoLuogoDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto,
+  GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto,
+  RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto
+} from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -55,7 +63,10 @@ interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: nu
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
 /** Un'area di un dedalo dei Memento (099). */
 interface RigaAreaDedalo { chiave: string; dedalo_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
-interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null; /** 111 */ carattere?: string | null }
+interface RigaPunto {
+  chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number;
+  dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null; /** 111 */ carattere?: string | null
+}
 
 /** Ciò che serve alla voce di un Palazzo per i campi di L4: il modello e, con la partita, i suoi stati; e (L3) quel che serve alla regola
  *  della planimetria della voce, letto una volta per risposta. */
@@ -73,7 +84,11 @@ function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDell
  * volta, per una voce sola lo si costruisce qui. Con `avanzamento` (le voci dei Palazzi, L4 §3.1) porta anche carattere, oggetto
  * e «da verificare»; le voci dei dedali dei Memento restano come prima (R4-30).
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; cattura?: ReadonlyMap<string, VoceDiCattura> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
+function puntoDto(
+  r: RigaPunto, stato: StatoPunto | null, pin: PinDelPuntoDto[],
+  letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; cattura?: ReadonlyMap<string, VoceDiCattura> },
+  avanzamento?: AvanzamentoVoce
+): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
   // L8 (B6): la Persona di una voce da catturare è quella della sua maschera, altrimenti quella della sua Ombra (le voci dei Palazzi non hanno maschera)
   const idx = letture?.maschere ?? indiceMaschere();
@@ -81,7 +96,9 @@ function puntoDto(r: RigaPunto, stato: StatoPunto | null, pin: PinDelPuntoDto[],
   const persona = r.tipo === 'persona' ? cattura?.persona ?? personaDellaMaschera(idx, dettagli.maschera) : null;
   const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
   const contenuto = (letture?.contenuti ?? contenutiDelleVoci([r.chiave])).get(r.chiave) ?? [];
-  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo,
+  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione,
+    esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, pin, contenitore: r.contenitore_chiave ?? null,
+    areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo,
     ...(cattura?.ombra ? { ombra: cattura.ombra } : {}) };
   if (!avanzamento || r.area_dedalo_chiave) return base;
   const { m, s } = avanzamento;
@@ -248,13 +265,17 @@ function lettureDedali(dungeonChiave: string, partitaId: number | undefined, sta
     aree.set(a.dedalo_chiave, [...(aree.get(a.dedalo_chiave) ?? []), a]);
   }
   const voci = new Map<string, Array<{ tipo: string; stato: StatoPunto | null }>>();
-  for (const v of prepared('SELECT p.chiave, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = ? AND p.area_dedalo_chiave IS NOT NULL').all(dungeonChiave) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string }>) {
+  for (const v of prepared('SELECT p.chiave, p.tipo, p.area_dedalo_chiave FROM punto_interesse p JOIN dungeon_area d ON d.chiave = p.area_chiave WHERE d.dungeon_chiave = ? AND p.area_dedalo_chiave IS NOT NULL')
+    .all(dungeonChiave) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string }>) {
     voci.set(v.area_dedalo_chiave, [...(voci.get(v.area_dedalo_chiave) ?? []), { tipo: v.tipo, stato: stati.get(v.chiave) ?? null }]);
   }
-  const statiRichieste = partitaId === undefined ? new Map<string, StatoRichiesta>() : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>).map((r) => [r.richiesta_chiave, r.stato]));
+  const statiRichieste = partitaId === undefined ? new Map<string, StatoRichiesta>()
+    : new Map((prepared('SELECT richiesta_chiave, stato FROM richiesta_partita WHERE partita_id = ?').all(partitaId) as Array<{ richiesta_chiave: string; stato: StatoRichiesta }>)
+      .map((r) => [r.richiesta_chiave, r.stato]));
   const richieste = new Map<string, RichiestaDelDedaloDto[]>();
   const daCollocare = new Map<string, RichiestaDelDedaloDto[]>();
-  const righeRichieste = prepared('SELECT r.chiave, r.nome, r.area_chiave, r.area_dedalo_chiave FROM richiesta r JOIN dungeon_area d ON d.chiave = r.area_chiave WHERE d.dungeon_chiave = ? ORDER BY d.ordine, r.ordine, r.chiave').all(dungeonChiave) as Array<{ chiave: string; nome: string; area_chiave: string; area_dedalo_chiave: string | null }>;
+  const righeRichieste = prepared('SELECT r.chiave, r.nome, r.area_chiave, r.area_dedalo_chiave FROM richiesta r JOIN dungeon_area d ON d.chiave = r.area_chiave WHERE d.dungeon_chiave = ? ORDER BY d.ordine, r.ordine, r.chiave')
+    .all(dungeonChiave) as Array<{ chiave: string; nome: string; area_chiave: string; area_dedalo_chiave: string | null }>;
   // O7-1: con la partita, perché una Richiesta non ancora completata non si può completare oggi (il comando «Fatta» lo dice invece di dare 409)
   const daCompletare = righeRichieste.filter((r) => statiRichieste.get(r.chiave) !== 'completata').map((r) => r.chiave);
   const bloccate = partitaId === undefined ? new Map<string, string[]>() : motiviCompletamentoRichieste(partitaId, daCompletare);
@@ -302,7 +323,8 @@ function raccoltaMementos(dungeonChiave: string, partitaId: number | undefined, 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: number | undefined, palazzi: Map<string, StatoPalazzo>,
   gia: { raccolta?: RaccoltaDungeon | null; segni?: SegniPartita; m?: ModelloAvanzamento } = {}): DungeonRiassuntoDto {
   const conPartita = partitaId !== undefined;
-  const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave, p.carattere FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null; carattere: string | null }>;
+  const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo, p.area_dedalo_chiave, p.carattere FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?')
+    .all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string; area_dedalo_chiave: string | null; carattere: string | null }>;
   const raccolta = r.tipo === 'mementos' ? raccoltaMementos(r.chiave, partitaId, stati) : (({ totale, presi, mappe, mappeComplete }) => ({ totale, presi, mappe, mappeComplete }))(gia.raccolta ?? raccoltaMappe(r.chiave, partitaId, gia.segni));
   const palazzo = r.tipo === 'palazzo';
   const giorno = giornoDellaPartita(partitaId);
@@ -449,7 +471,10 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
   const archivi = r.tipo === 'mementos' ? archiviDeiDedali() : new Map<string, ArchivioDelPalazzoDto>();
   // L8 (B7): un Palazzo confluito in un dedalo (Iweleth) rimanda al dedalo: la sua scheda è un archivio, non una casa
-  const confluenza = tabellaConfluenza() ? (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?').get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined) : undefined;
+  const confluenza = tabellaConfluenza()
+    ? (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?')
+      .get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined)
+    : undefined;
   // lo stato di una Persona da catturare (dedali e Palazzi, L8 R8-12/R8-14) è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
   const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
@@ -545,7 +570,8 @@ function completamentoInfiltrazione(m: ModelloAvanzamento, s: StatiDellaPartita 
  */
 export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato: StatoPunto | null): PuntoInteresseDto {
   verificaPartita(partitaId);
-  const p = prepared('SELECT p.*, a.nome AS area_nome, d.nome AS dungeon_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?').get(puntoChiave) as (RigaPunto & { area_nome: string; dungeon_nome: string }) | undefined;
+  const p = prepared('SELECT p.*, a.nome AS area_nome, d.nome AS dungeon_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?')
+    .get(puntoChiave) as (RigaPunto & { area_nome: string; dungeon_nome: string }) | undefined;
   if (!p) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
   // una voce descrittiva si legge, non si segna (scelta dell'utente, 2026-10-01); azzerarla resta possibile, per ripulire.
   // Nelle aree dei dedali non ce ne sono: ogni elemento ha uno stato (099, scelta dell'utente del 2026-10-11); una voce «Altro» con
@@ -1321,7 +1347,11 @@ export function copieDelPalazzo(dungeon: string): GruppoCopieDto[] {
   if (!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(dungeon)) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${dungeon}' non esiste.`);
   const righe = prepared(`SELECT p.chiave, p.area_chiave, p.ordine, p.tipo, p.nome, p.descrizione, p.dettagli_json, p.contenitore_chiave,
       (SELECT group_concat(spillo_id) FROM (SELECT sv.spillo_id FROM spillo_voce sv WHERE sv.voce_chiave = p.chiave ORDER BY sv.spillo_id)) AS pin
-    FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ? ORDER BY a.ordine, p.ordine, p.chiave`).all(dungeon) as Array<{ chiave: string; area_chiave: string; ordine: number; tipo: string; nome: string; descrizione: string; dettagli_json: string; contenitore_chiave: string | null; pin: string | null }>;
+    FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ? ORDER BY a.ordine, p.ordine, p.chiave`)
+    .all(dungeon) as Array<{
+      chiave: string; area_chiave: string; ordine: number; tipo: string; nome: string; descrizione: string; dettagli_json: string;
+      contenitore_chiave: string | null; pin: string | null
+    }>;
   const gruppi = new Map<string, typeof righe>();
   for (const r of righe) {
     if (!r.pin) continue;

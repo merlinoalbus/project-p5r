@@ -50,15 +50,33 @@ import { convertiManualiImportati } from '../condizioni/importazione.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
-import { ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
-import { aggiornaCopia, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
+import {
+  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA,
+  TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo
+} from '../../../shared/spilli.js';
+import type {
+  AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo,
+  DatiNuovoPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto
+} from '../../../shared/types.js';
+import {
+  aggiornaCopia, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa,
+  pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi,
+  type DimensioniMappa, type PezzoDaImportare
+} from './pezziMappa.js';
 
-interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
+interface RigaMappa {
+  chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null;
+  larghezza: number | null; altezza: number | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine;
+  nome_rivisto?: number;
   /** L'Area della planimetria e la sua versione (109, L2); assenti su uno schema di prima. */
   area_chiave?: string | null; versione_etichetta?: string | null; versione_ordine?: number | null }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
-interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; uid: string; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null; nativo_json?: string | null; }
+interface RigaSpillo {
+  area_guida_chiave?: string|null; solo_posizione: number; id: number; uid: string; mappa_chiave: string; tipo: TipoSpillo; nome: string;
+  descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number;
+  ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null;
+  nativo_json?: string | null;
+}
 
 /** La colonna della 082 c'è dal suo turno in poi; prima il nome rivisto non è dichiarabile. */
 function conNomeRivisto(): boolean {
@@ -275,7 +293,11 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo, area: area ? { nome: area.nome } : null, casa: casaDellaMappa(m, aree) }, immagine: { url: img ? urlCaricata(img) : null, asset: m.asset } };
     }
     case 'punto': {
-      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, p.carattere, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; carattere: string | null; dungeon_chiave: string; area_chiave: string; area_nome: string } | undefined;
+      const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, p.area_dedalo_chiave, p.carattere, a.dungeon_chiave, a.chiave AS area_chiave, a.nome AS area_nome FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?')
+        .get(chiave) as {
+          chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; area_dedalo_chiave: string | null; carattere: string | null;
+          dungeon_chiave: string; area_chiave: string; area_nome: string
+        } | undefined;
       if (!p) return null;
       const base = { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, areaDedalo: p.area_dedalo_chiave };
       // L4 (§3.1): una voce dei Palazzi porta carattere, infiltrazione e «da verificare», e lo stato con cui risulta (§8.11: dai suoi
@@ -345,7 +367,11 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): N
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
     throw err;
   }
-  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, sconto: n.sconto ?? null, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nome, categoria: a.categoria, prezzo: a.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null, disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti,
+  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, sconto: n.sconto ?? null,
+    articoli: n.articoliElenco.map((a) => ({
+      chiave: a.chiave, nome: a.nome, categoria: a.categoria, prezzo: a.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null,
+      disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo,
+      costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti,
     // Ondata 5 (decisione 21): regola, scorta della sede del pin e acquisti per chiave, come nella pagina del negozio («Compra», «Annulla»)
     rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}), acquistiRegistrati: a.acquistiRegistrati ?? [],
     // revisione della chiusura dell'ondata 5 (B1): lo sconto che vale adesso (Clinica di Takemi), lo stesso importo che l'acquisto da qui scala
@@ -553,7 +579,9 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
     nome: lp ? lp.nome : r.nome, descrizione: lp ? lp.descrizione : r.descrizione,
     ...(lp ? { notaPin: lp.notaPin, presenza: lp.presenza } : {}),
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, ...campiL4, dettaglio, voci, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativo ? { nativo } : {}), condizioni,
+    ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, ...campiL4, dettaglio, voci,
+    immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
 
@@ -1082,7 +1110,10 @@ export function eliminaCopiaPezzoMappa(id: number): { pezzoEliminato: boolean } 
   return eliminaCopia(id);
 }
 
-export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
+export interface DatiSpillo {
+  soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number;
+  riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null
+}
 export type DatiAggiornaSpillo = DatiSpillo & { mappa?: string; riferimentoLuogo?: string; revisioneRaccordoAttesa?: string; areaLuogo?: string };
 
 /** L'etichetta con cui si scarta lo stato di un pin o di una voce della guida citato fuori dalle condizioni dei pin. */
@@ -1177,7 +1208,11 @@ export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefi
 function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, attuale?: { tipo: string | null; chiave: string | null }): void {
   if (!rif) return;
   if (!(TIPI_RIFERIMENTO as readonly string[]).includes(rif.tipo)) throw httpErrors.badRequest('riferimento-non-valido', 'Tipo di riferimento non ammesso.');
-  const tabella: Record<TipoRiferimento, string> = { mappa: 'SELECT 1 FROM mappa WHERE chiave = ?', negozio: 'SELECT 1 FROM negozio WHERE chiave = ?', punto: 'SELECT 1 FROM punto_interesse WHERE chiave = ?', luogo: 'SELECT 1 FROM luogo WHERE chiave = ?', confidente: 'SELECT 1 FROM confidente WHERE chiave = ?', richiesta: 'SELECT 1 FROM richiesta WHERE chiave = ?', attivita: 'SELECT 1 FROM luogo WHERE chiave = ?' };
+  const tabella: Record<TipoRiferimento, string> = {
+    mappa: 'SELECT 1 FROM mappa WHERE chiave = ?', negozio: 'SELECT 1 FROM negozio WHERE chiave = ?', punto: 'SELECT 1 FROM punto_interesse WHERE chiave = ?',
+    luogo: 'SELECT 1 FROM luogo WHERE chiave = ?', confidente: 'SELECT 1 FROM confidente WHERE chiave = ?', richiesta: 'SELECT 1 FROM richiesta WHERE chiave = ?',
+    attivita: 'SELECT 1 FROM luogo WHERE chiave = ?'
+  };
   if (!prepared(tabella[rif.tipo]).get(rif.chiave)) throw httpErrors.notFound('riferimento-non-trovato', `${rif.tipo} '${rif.chiave}' non trovato.`);
   // Un collegamento **nuovo** a una voce descrittiva della guida si rifiuta, come da `collegaPinAlPunto` (2026-10-01): le
   // descrittive non hanno pin. Quello che c'è già (gli elementi della guida senza mappa di prima) resta: nessuna riconciliazione.
@@ -1340,8 +1375,9 @@ export function precondizioneRimozioneSpillo(id: number): PrecondizioneRimozione
   })();
 }
 
-/** Il gesto singolo è recuperabile; i chiamanti aggregati mantengono il loro unico cestino esterno. */
-export function eliminaSpillo(id: number, dati?: RichiestaRimozionePin): void {
+/** Il gesto singolo è recuperabile; i chiamanti aggregati mantengono il loro unico cestino esterno. Il corpo vuoto (`{}`) vale come assente:
+ *  lo riconosce `richiestaRimozionePin`. */
+export function eliminaSpillo(id: number, dati?: RichiestaRimozionePin | Record<string, never>): void {
   const richiesta = richiestaRimozionePin(dati), db = getDb();
   db.transaction(() => {
     const r = db.prepare('SELECT * FROM main.spillo WHERE id=?').get(id) as RigaSpillo | undefined;
@@ -1591,7 +1627,9 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...destinazionePerPacchetto(s.id),
       uid: s.uid,
-      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, voci: vociProprie(s.id), soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
+      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y,
+      riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, voci: vociProprie(s.id),
+      soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
       // L3: origine, ultima modifica, identità del seed e prove native com'erano salvate
       origine: s.origine as 'seed' | 'utente', updatedAt: s.updated_at,
       ...(conSeedIdentita ? { seedIdentita: (s as RigaSpillo & { seed_identita_json?: string | null }).seed_identita_json ?? null } : {}),
@@ -1643,7 +1681,9 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     ORDER BY infiltrazione_chiave, ordine, area_chiave`).all(...areeEsportate) as Array<{ infiltrazione_chiave: string; area_chiave: string; ordine: number; planimetria_iniziale: string | null; origine: LegamePacchetto['origine'] }>)
     .map((l) => ({ infiltrazione: l.infiltrazione_chiave, area: l.area_chiave, ordine: l.ordine, planimetriaIniziale: l.planimetria_iniziale ? chiaveMappa(l.planimetria_iniziale) : null, origine: l.origine }));
   for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetEsistente(m.asset);m.assetOriginale=m.asset;for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
-  const ingressi=(prepared(`SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom${conAree()?',area_chiave AS area':''} FROM quartiere_ingresso`).all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
+  const ingressi=(prepared(`SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom${conAree()?',area_chiave AS area':''} FROM quartiere_ingresso`)
+    .all() as NonNullable<EsportazioneMappeDto['ingressi']>)
+    .filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
   return { versione: 1, esportato: nowIso(), ...(aree.length ? { aree } : {}), ...(legami.length ? { legami } : {}), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
@@ -1690,7 +1730,9 @@ function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][
   // si confronta con quel che il pacchetto **produrrebbe** (regole di categoria applicate), non con quel che scrive
   const categoria = categoriaSpillo(s.tipo);
   const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
-  if (r.tipo!==s.tipo || r.nome!==s.nome || r.descrizione!==(s.descrizione??'') || r.x!==s.x || r.y!==s.y || r.riferimento_tipo!==(riferimento?.tipo??null) || r.riferimento_chiave!==(riferimento?.chiave??null) || r.collezionabile!==(categoria==='consumabile'?1:0) || r.ordine!==(s.ordine??0) || r.solo_posizione!==(s.soloPosizione?1:0)) return false;
+  if (r.tipo!==s.tipo || r.nome!==s.nome || r.descrizione!==(s.descrizione??'') || r.x!==s.x || r.y!==s.y
+    || r.riferimento_tipo!==(riferimento?.tipo??null) || r.riferimento_chiave!==(riferimento?.chiave??null)
+    || r.collezionabile!==(categoria==='consumabile'?1:0) || r.ordine!==(s.ordine??0) || r.solo_posizione!==(s.soloPosizione?1:0)) return false;
   // la voce della guida, come la destinazione: un pacchetto che non la dichiara non toglie quella che l'utente ha collegato
   const dichiarate = vociDichiarate(s);
   if (dichiarate !== undefined && JSON.stringify(vociProprie(r.id)) !== JSON.stringify(vociAmmesse(s.nome, r.mappa_chiave, dichiarate))) return false;
@@ -1730,7 +1772,17 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
   return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
 }
 
-export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number; /** Le copie posate scritte (103). */ copie: number; /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number; /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number; /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; /** Le copie tolte con quei pezzi (103). */ copieEliminate: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
+export interface EsitoImportazione {
+  mappe: number; spilli: number;
+  /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number;
+  /** Le copie posate scritte (103). */ copie: number;
+  /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number;
+  /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number;
+  /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number;
+  /** Le copie tolte con quei pezzi (103). */ copieEliminate: number;
+  immagini: number; saltate: string[];
+  /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number;
+  /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
   /** L3 (§3.6.3): pin, pezzi e copie tornati con lo stesso uid che non hanno potuto riprendere il loro id (preso da un'altra riga): id
    *  nuovo, con i riferimenti (voci, stati, passaggi, atterraggi, copie) che seguono l'uid nella stessa transazione. Assente se vuoto. */
   idCambiati?: IdCambiatoImportazione[];
@@ -2002,7 +2054,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         // L3 (andata e ritorno identica): il pin che torna con lo stesso uid riprende il suo id e le colonne che un pacchetto di prima non
         // porta (identità del seed, prove native)
         if (prima?.uid) {
-          const resto = prepared(`SELECT condizioni_json, ${conSeedIdentita ? 'seed_identita_json' : 'NULL AS seed_identita_json'}, ${conNativo ? 'nativo_json' : 'NULL AS nativo_json'} FROM spillo WHERE id = ?`).get(id) as { condizioni_json: string | null; seed_identita_json: string | null; nativo_json: string | null };
+          const resto = prepared(`SELECT condizioni_json, ${conSeedIdentita ? 'seed_identita_json' : 'NULL AS seed_identita_json'}, ${conNativo ? 'nativo_json' : 'NULL AS nativo_json'} FROM spillo WHERE id = ?`)
+            .get(id) as { condizioni_json: string | null; seed_identita_json: string | null; nativo_json: string | null };
           pinDiPrima.set(prima.uid, { id, seedIdentita: resto.seed_identita_json, nativo: resto.nativo_json, condizioni: resto.condizioni_json });
         }
         // le voci collegate dall'utente seguono il pin reinserito con lo stesso uid, se il pacchetto non ne dice niente

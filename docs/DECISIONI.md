@@ -83,6 +83,14 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Le copie di avvio di gioco e partite sono al più 7 e occupano al più 2 GiB: con file da circa 415 MB ne restano 5. Le 2 più recenti
   con il file di gioco non vuoto restano sempre, anche sopra il tetto; l'età non toglie copie, perché dopo mesi di pausa cancellerebbe quelle utili.
 - Il pacchetto completo (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.
+- **Un id di partita non si riusa (L11-04, 01/11)**: `partita` ha AUTOINCREMENT (utente 064) e il suo contatore parte dal più alto id che
+  il file conosca (partite, ogni colonna `partita_id`, Cestino); la partita nuova prende un id oltre anche quello. Una partita nel Cestino
+  si può ripristinare anche dopo averne create altre, e l'archivio degli acquisti senza chiave esterna non si mescola con una partita nuova.
+- **Censimento delle partite, solo come avviso (L11-04, decisione dell'utente del 01/11: «al massimo warning»)**: ogni tabella del file
+  delle partite e ogni sua colonna dal nome di riferimento va classificata, come riferimento ai dati di gioco (`RIFERIMENTI_PARTITE`,
+  controllato dall'anteprima dell'«Importa») o con il motivo per cui non lo è (`CENSIMENTO_PARTITE`). Una tabella o una colonna non
+  classificata si dice con un avviso nel log, con l'elenco di ciò che manca, all'avvio della preparazione e in «Prepara edizione»; non
+  blocca niente, e non c'è un controllo in CI.
 - **Due istanze dallo stesso codice**: preparazione (scrittura dei contenuti, un solo proprietario) e rilascio (contenuti in sola lettura,
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
   variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non migra e si ferma se l'edizione non
@@ -118,6 +126,13 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Documentazione dell'API generata (OpenAPI 3.1 dagli schemi zod, descrizioni in italiano in un registro), servita dall'istanza senza
   CDN; «Prova» spenta per i metodi che scrivono.
 - Errori 4xx di Express e del body-parser resi nell'envelope in italiano (413, 400); mai un 500 in inglese per un caso ordinario.
+- **Rotte sottili e tipizzate (L11-03, 01/11)**: il corpo, i parametri e la query arrivano al gestore con il tipo dello schema zod che li
+  ha validati, senza cast; dove il servizio completa da sé la verifica di un corpo lo schema verifica solo la forma esterna e la rotta
+  dichiara il tipo del servizio con `corpoDelServizio<T>()`, che il compilatore confronta con lo schema. L'SQL sta nei servizi, mai
+  nelle rotte.
+- **Righe del server entro 300 caratteri (L11-02, 01/11)**: il codice compattato si riformatta senza cambiare l'AST (prova: confronto
+  dell'albero sintattico senza posizioni e delle parole dei commenti). Restano più lunghe solo le righe fatte da un letterale (SQL,
+  messaggi, descrizioni dell'API, DDL di base); le migrazioni registrate e i test non si toccano.
 - Il client ripete da solo solo le letture (GET, HEAD, OPTIONS); nessuna scrittura si ripete in automatico, salvo `maxRetries`
   esplicito dove il servizio è provato idempotente (31/10: un acquisto ripetuto dopo una risposta persa si registrava due volte).
 - Gli errori arrivano all'utente in italiano e senza codici tecnici (offline, server che non risponde, errore del server); il dettaglio

@@ -29,7 +29,10 @@ import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
 // L8-09 (migrazione 337): `disponibile_dal` e `scadenza` (testi della guida mai convertiti, vuoti in tutte le righe) e `area` (il nome del
 // dedalo, copia di `area_chiave`) non ci sono più: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
-interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
+interface RigaRichiesta {
+  chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null;
+  piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string;
+  fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
   condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null;
   /** L13 (ondata 7, migrazione 310): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
   completamento_condizioni_json: string | null; proroga_area_dedalo_chiave: string | null; proroga_area_nome: string | null; proroga_dedalo_chiave: string | null; proroga_dedalo_nome: string | null }
@@ -286,7 +289,8 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     if (stato === null) prepared('DELETE FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').run(partitaId, chiave);
     // L13 (decisione 18): `updated_at` è il momento in cui la Richiesta ha preso il suo stato (per gli yen, il momento del completamento,
     // `yenAutomaticiService.statoYenRichiesta`): segnare di nuovo lo stesso stato non lo sposta
-    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END').run(partitaId, chiave, stato, adesso);
+    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END')
+      .run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
       // il posto: il Dedalo e la sua area (310: il `piano` in testo resta solo dove non è il nome dell'area)
@@ -595,7 +599,8 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
 export function eliminaRichiesta(chiave: string): void {
   const r = rigaRichiesta(chiave);
   conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area_nome ?? '' }, () => {
-    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ? UNION SELECT partita_id FROM utente.yen_automatico WHERE causa_tipo = 'richiesta' AND causa_chiave = ? AND annullato_il IS NULL").pluck().all(chiave, chiave, chiave) as number[];
+    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ? UNION SELECT partita_id FROM utente.yen_automatico WHERE causa_tipo = 'richiesta' AND causa_chiave = ? AND annullato_il IS NULL")
+      .pluck().all(chiave, chiave, chiave) as number[];
     prepared('DELETE FROM richiesta_partita WHERE richiesta_chiave = ?').run(chiave);
     prepared("DELETE FROM utente.sblocco_partita WHERE bersaglio_tipo = 'richiesta' AND bersaglio_chiave = ?").run(chiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);

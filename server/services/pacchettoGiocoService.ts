@@ -149,6 +149,57 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'evento_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'ciclo_salvato', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'piano_salvato', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
+  // L11-04: i riferimenti che l'elenco non aveva, ricavati dallo schema reale delle partite (censimento in `censimentoPartite.ts`, che a ogni
+  // avvio rifiuta una tabella o una colonna di riferimento delle partite non classificata)
+  // la voce e l'effetto di ciò che una spunta ha dato o tolto (stati, oggetti, consumi, sblocchi, inviti, storico, yen automatici)
+  { tabella: 'effetto_stato_voce', colonna: 'voce_uid', entita: 'voce dello stato applicato', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  // la riga «anche nella scorta» ha per effetto `<uid>:scorta` (`effettiDiStatoService.uidScorta`): l'effetto vero lo dice la riga della Persona
+  { tabella: 'effetto_stato_voce', colonna: 'effetto_uid', entita: 'effetto dello stato applicato', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid', filtro: "tipo <> 'persona-scorta'" },
+  { tabella: 'censimento_stato_voce', colonna: 'voce_uid', entita: 'voce del censimento degli stati', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'censimento_stato_voce', colonna: 'effetto_uid', entita: 'effetto del censimento degli stati', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
+  { tabella: 'oggetto_ottenuto_partita', colonna: 'voce_uid', entita: 'voce dell’oggetto ricevuto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'oggetto_ottenuto_partita', colonna: 'effetto_uid', entita: 'effetto dell’oggetto ricevuto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
+  { tabella: 'consumo_oggetto_partita', colonna: 'voce_uid', entita: 'voce dell’uscita di un oggetto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
+  { tabella: 'consumo_oggetto_partita', colonna: 'effetto_uid', entita: 'effetto dell’uscita di un oggetto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid', colonnaOpzionale: true },
+  { tabella: 'sblocco_partita', colonna: 'voce_uid', entita: 'voce dello sblocco', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'invito_partita', colonna: 'voce_uid', entita: 'voce dell’invito', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
+  { tabella: 'evento_partita', colonna: 'voce_uid', entita: 'voce dell’evento dello storico', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
+  { tabella: 'yen_automatico', colonna: 'voce_uid', entita: 'voce del movimento di yen', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'punti_confidente_voce', colonna: 'voce_uid', entita: 'voce dei punti di un Confidente', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'fortuna_partita', colonna: 'da_voce', entita: 'voce che ha acceso la Fortuna', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid', colonnaOpzionale: true },
+  // le chiavi d'entità delle tabelle nate dopo l'elenco
+  { tabella: 'punti_confidente_voce', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
+  { tabella: 'punti_confidente_generazione', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
+  { tabella: 'fortuna_partita', colonna: 'dote', entita: 'Dote sociale della Fortuna', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave' },
+  { tabella: 'esame_piazzamento_partita', colonna: 'esame_chiave', entita: 'esame', tabellaGioco: 'esame', colonnaGioco: 'chiave' },
+  { tabella: 'regalo_partita', colonna: 'acquisto_articolo', entita: 'articolo comprato per il regalo', tabellaGioco: 'articolo', colonnaGioco: 'chiave', colonnaOpzionale: true },
+  { tabella: 'acquisto_legacy_valutazione', colonna: 'articolo_chiave', entita: 'articolo della presenza storica (archivio)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  { tabella: 'acquisto_legacy_raccordo', colonna: 'articolo_chiave', entita: 'articolo del raccordo storico (archivio)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  // le chiavi polimorfe, nelle varianti che citano una tabella di gioco (il tipo della riga dice quale)
+  { tabella: 'da_applicare', colonna: 'chiave', entita: 'Dote sociale della proposta personale', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave', filtro: "tipo = 'dote'" },
+  { tabella: 'beneficio_ciclo', colonna: 'chiave', entita: 'Dote sociale del beneficio', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave', filtro: "tipo = 'dote'" },
+  { tabella: 'beneficio_ciclo', colonna: 'causa_chiave', entita: 'Richiesta del beneficio', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
+  { tabella: 'yen_automatico', colonna: 'causa_chiave', entita: 'Richiesta del movimento di yen', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
+  { tabella: 'yen_fuori_registro', colonna: 'causa_chiave', entita: 'Richiesta degli yen fuori registro', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
+  { tabella: 'movimento_yen', colonna: 'causa_chiave', entita: 'Richiesta del movimento di yen applicato', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
+  { tabella: 'effetto_applicato', colonna: 'chiave', entita: 'Dote della ricevuta (fotografia conservata)', tabellaGioco: 'dote_sociale', colonnaGioco: 'chiave', filtro: "tipo = 'dote'" },
+  { tabella: 'effetto_applicato', colonna: 'chiave', entita: 'attività del turno della ricevuta (fotografia conservata)', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtro: "tipo = 'turno'" },
+  { tabella: 'effetto_applicato', colonna: 'chiave', entita: 'esame della ricevuta (fotografia conservata)', tabellaGioco: 'esame', colonnaGioco: 'chiave', filtro: "tipo = 'esame'" },
+  { tabella: 'effetto_applicato', colonna: 'chiave', entita: 'articolo della consumazione della ricevuta (fotografia conservata)', tabellaGioco: 'articolo', colonnaGioco: 'chiave', filtro: "tipo = 'acquisto'" },
+  ...(['effetto_stato_voce', 'censimento_stato_voce'] as const).flatMap((tabella): Riferimento[] => {
+    const di = tabella === 'effetto_stato_voce' ? 'dello stato applicato' : 'del censimento degli stati';
+    return [
+      { tabella, colonna: 'chiave', entita: `articolo ${di}`, tabellaGioco: 'articolo', colonnaGioco: 'chiave', filtro: "tipo = 'articolo'" },
+      { tabella, colonna: 'chiave', entita: `cruciverba ${di}`, tabellaGioco: 'cruciverba', colonnaGioco: 'data', filtro: "tipo = 'cruciverba'" },
+      { tabella, colonna: 'chiave', entita: `domanda ${di}`, tabellaGioco: 'domanda', colonnaGioco: 'id', filtro: "tipo = 'domanda'" },
+      { tabella, colonna: 'chiave', entita: `invito ${di}`, tabellaGioco: 'confidente_invito', colonnaGioco: 'chiave', filtro: "tipo = 'invito'" },
+      { tabella, colonna: 'chiave', entita: `Persona ${di}`, tabellaGioco: 'persona', colonnaGioco: 'id', filtro: "tipo IN ('persona', 'persona-scorta', 'personaTolta')" },
+      { tabella, colonna: 'chiave', entita: `trofeo ${di}`, tabellaGioco: 'trofeo', colonnaGioco: 'chiave', filtro: "tipo = 'trofeo'" },
+      { tabella, colonna: 'chiave', entita: `oggetto ${di}`, tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave', filtro: "tipo IN ('oggetto', 'uscitaOggetto')" },
+      { tabella, colonna: 'chiave', entita: `Richiesta ${di}`, tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "tipo = 'richiesta'" },
+      { tabella, colonna: 'chiave', entita: `Confidente ${di}`, tabellaGioco: 'confidente', colonnaGioco: 'chiave', filtro: "tipo = 'puntiConfidente'" },
+    ];
+  }),
 ];
 
 /** I nomi delle tabelle di uno schema in ordine alfabetico, escluse quelle interne di SQLite (`sqlite_%`). */
@@ -322,7 +373,9 @@ function verificaPacchetto(percorso: string): void {
     throw httpErrors.badRequest('pacchetto-non-valido', 'Il file non è un backup dei dati di gioco: usa il file gioco.db scaricato da «Scarica backup dati di gioco».');
   }
   const cosa = verificaDatabase(percorso);
-  if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite' ? 'Il file contiene solo partite: un backup dei dati di gioco porta i dati di gioco.' : 'Il file contiene anche le partite (vecchio file unico): un backup dei dati di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
+  if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite'
+    ? 'Il file contiene solo partite: un backup dei dati di gioco porta i dati di gioco.'
+    : 'Il file contiene anche le partite (vecchio file unico): un backup dei dati di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
 }
 
 /** Che cosa cambierebbe importando il pacchetto in `percorso` (un file locale). Lo verifica per intero e non sostituisce nulla. */

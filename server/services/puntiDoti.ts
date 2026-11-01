@@ -12,6 +12,8 @@
 // ============================================================
 
 import { puntiDaNote } from '../../shared/doti.js';
+import { prepared } from '../db/dbService.js';
+import type { ModificatoriDotiDto } from '../../shared/types.js';
 import { fortunaSu } from './fortunaService.js';
 import { letturaCompletata } from './lettureCompletate.js';
 
@@ -21,6 +23,14 @@ export interface OrigineNote { libro?: boolean; cinema?: boolean }
 /** «Anima da cineasta» letto nella partita: film e DVD salgono di uno scalino. */
 export function haAnimaDaCineasta(partitaId: number): boolean {
   return letturaCompletata(partitaId, 'libro', 'anima-da-cineasta');
+}
+
+/** L8-11: le letture della partita che cambiano i punti delle note (oggi «Anima da cineasta»), con il nome del libro come lo dice il catalogo
+ *  (o la riga del libro), per il suggerimento dell'interruttore spento della scheda Doti. La partita la verifica chi chiama. */
+export function modificatoriDotiDellaPartita(partitaId: number): ModificatoriDotiDto {
+  const libro = prepared("SELECT COALESCE(c.nome, l.nome) AS nome FROM libro l LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave WHERE l.chiave = 'anima-da-cineasta'")
+    .get() as { nome: string } | undefined;
+  return { animaDaCineasta: haAnimaDaCineasta(partitaId), libroAnimaDaCineasta: libro?.nome ?? null };
 }
 
 /** I punti che `note` note di `dote` valgono nella partita adesso: la regola unica con la Fortuna della partita su quella Dote. L8-11: lo

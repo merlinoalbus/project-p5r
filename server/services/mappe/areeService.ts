@@ -159,7 +159,11 @@ export function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassunto
   const esito = st ? valutaInsieme(condizioni.map((c) => condizioneConTesto(c, nomi)), st) : null;
   const stato = esito?.stato;
   const manca = stato === 'bloccato' ? cosaManca(condizione, st!, nomi) : null;
-  const sblocco: SbloccoDto = { condizione, condizioneSalvata: propria.length === 1 ? propria[0] : propria.length > 1 ? { tipo: 'gruppo', modo: 'tutte', condizioni: propria } : null, testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca, inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false };
+  const sblocco: SbloccoDto = {
+    condizione, condizioneSalvata: propria.length === 1 ? propria[0] : propria.length > 1 ? { tipo: 'gruppo', modo: 'tutte', condizioni: propria } : null,
+    testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca,
+    inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false
+  };
   return { sblocco, disponibile: stato !== 'bloccato', bloccoMotivo: manca };
 }
 

@@ -46,36 +46,36 @@ router.get('/oggetti', (_req, res) => {
 
 /** Le righe toccate dall'utente; con `?nascosti=1` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */
 router.get('/:tipo', validate({ params: paramsTipoCatalogo, query: queryNascosti }), (req, res) => {
-  const q = req.query as unknown as { nascosti?: string; negozio?: string };
-  res.json(q.nascosti ? elencaNascosti(req.params.tipo as TipoCatalogo, { negozio: q.negozio }) : elencaCatalogo(req.params.tipo as TipoCatalogo));
+  const q = req.query;
+  res.json(q.nascosti ? elencaNascosti(req.params.tipo, { negozio: q.negozio }) : elencaCatalogo(req.params.tipo));
 });
 router.post('/:tipo', validate({ params: paramsTipoCatalogo }), (req, res) => {
-  const tipo = req.params.tipo as TipoCatalogo;
+  const tipo = req.params.tipo;
   res.status(201).json(creaElemento(tipo, corpoPerTipo(tipo, req.body, false)));
 });
 router.get('/:tipo/:chiave', validate({ params: paramsElementoCatalogo }), (req, res) => {
-  res.json(leggiElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave)));
+  res.json(leggiElemento(req.params.tipo, req.params.chiave));
 });
 router.put('/:tipo/:chiave', validate({ params: paramsElementoCatalogo }), (req, res) => {
-  const tipo = req.params.tipo as TipoCatalogo;
-  res.json(aggiornaElemento(tipo, String(req.params.chiave), corpoPerTipo(tipo, req.body, true)));
+  const tipo = req.params.tipo;
+  res.json(aggiornaElemento(tipo, req.params.chiave, corpoPerTipo(tipo, req.body, true)));
 });
 router.put('/:tipo/:chiave/nascosta', validate({ params: paramsElementoCatalogo, body: bodyNascondi }), (req, res) => {
-  res.json(nascondiElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave), (req.body as { nascosta: boolean }).nascosta));
+  res.json(nascondiElemento(req.params.tipo, req.params.chiave, req.body.nascosta));
 });
 /** Elimina la riga creata dall'utente oppure riporta al seed quella corretta. L5: per un luogo o un negozio `DELETE` elimina e basta, nel
  *  cestino (409 col riepilogo senza `?conferma=1` se ha contenuti); «Ripristina» è `POST …/ripristina`. */
 router.delete('/:tipo/:chiave', validate({ params: paramsElementoCatalogo, query: queryConferma }), (req, res) => {
-  const tipo = req.params.tipo as TipoCatalogo;
+  const tipo = req.params.tipo;
   if (tipo === 'luogo' || tipo === 'negozio') {
-    res.json(eliminaNelCestino(tipo, String(req.params.chiave), (req.query as { conferma?: string }).conferma === '1'));
+    res.json(eliminaNelCestino(tipo, req.params.chiave, req.query.conferma === '1'));
     return;
   }
-  res.json(eliminaElemento(tipo, String(req.params.chiave)));
+  res.json(eliminaElemento(tipo, req.params.chiave));
 });
 /** L5: «Ripristina i valori della guida» per ogni tipo del catalogo: rimette `seed_json`; non elimina mai. */
 router.post('/:tipo/:chiave/ripristina', validate({ params: paramsElementoCatalogo }), (req, res) => {
-  res.json(ripristinaElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave)));
+  res.json(ripristinaElemento(req.params.tipo, req.params.chiave));
 });
 
 export default router;

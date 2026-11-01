@@ -9,7 +9,10 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 export function profiliPesca(_p:number,regola:DefinizioneRegolaPesca|null,m:MomentoPesca,o:OsservazionePesca,guardianoPrecedente:boolean|null,punto:PuntoValutazionePesca={tipo:'pianificazione'}):EsitoProfiloPescaDto[] {
   // Queste vie hanno un vocabolario chiuso: non si caricano i progressi odierni
   // per riempire le osservazioni storiche mancanti.
-  const st:StatoPartitaSemafori={doti:new Map(),arcaniInScorta:new Set(),personeConAbilita:new Set(),palazziConclusi:new Map(),richiesteCompletate:new Set(),ranghiConfidenti:new Map(),membriSquadra:new Set(),membriFuoriSquadra:new Set(),dataGioco:m.giorno,fasciaGioco:m.fascia,meteoOra:null,eventi:new Set()};
+  const st:StatoPartitaSemafori={
+    doti:new Map(),arcaniInScorta:new Set(),personeConAbilita:new Set(),palazziConclusi:new Map(),richiesteCompletate:new Set(),
+    ranghiConfidenti:new Map(),membriSquadra:new Set(),membriFuoriSquadra:new Set(),dataGioco:m.giorno,fasciaGioco:m.fascia,meteoOra:null,eventi:new Set()
+  };
   st.dataGioco=m.giorno;st.fasciaGioco=m.fascia;
   st.meteoOra=o.meteo===null?null:{meteo:o.meteo,origine:'partita'};
   st.doti=o.rangoPeriziaOsservato===null?new Map():new Map([['perizia',o.rangoPeriziaOsservato]]);

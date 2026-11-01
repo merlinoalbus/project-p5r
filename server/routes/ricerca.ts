@@ -6,15 +6,13 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { queryRicerca } from '../schemas/ricerca.js';
 import { cercaGlobale } from '../services/ricercaService.js';
-import type { TipoRicerca } from '../../shared/ricerca.js';
 
 const router = Router();
 
 /** Ricerca per nome (italiano, originale, sinonimi): i risultati raggruppati per tipo con percorso, casa, immagine e stato. */
 router.get('/', validate({ query: queryRicerca }), (req, res) => {
-  const q = req.query as unknown as { q: string; tipi?: TipoRicerca[]; limite: number; partita?: number };
   // lo stato di luoghi e negozi dipende dalla partita: la risposta non si tiene in cache
-  res.set('Cache-Control', 'no-store').json(cercaGlobale(q));
+  res.set('Cache-Control', 'no-store').json(cercaGlobale(req.query));
 });
 
 export default router;

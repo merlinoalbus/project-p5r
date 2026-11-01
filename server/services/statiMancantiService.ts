@@ -156,7 +156,13 @@ export function proponiStatiMancanti(): { partite: CensimentoPartita[] } {
           // l'oggetto ricevuto, i punti al Confidente e l'oggetto restituito o venduto sommano, non sono uno stato sì/no: senza la loro riga mancano sempre
           if (!eEffettoCheSomma(e) && statoGiaVero(r.partita_id, e)) { registra(r, 'gia-presente'); c.giaPresenti += 1; return; }
           const aperteprima = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid);
-          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, { passato: { descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, e.tipo === 'articolo' ? nomiFraseEffetto(fasciaDellaVoce(r.voce_uid)) : nomi), motivo: motivoDelPassato(r.partita_id, e) }, senzaAvanzamento: true });
+          creaPropostaEffettoStorico(r.partita_id, r.voce_uid, r.effetto_uid, undefined, {
+            passato: {
+              descrizione: fraseEffettoConNomi(e as EffettoDiStatoVoce, e.tipo === 'articolo' ? nomiFraseEffetto(fasciaDellaVoce(r.voce_uid)) : nomi),
+              motivo: motivoDelPassato(r.partita_id, e)
+            },
+            senzaAvanzamento: true
+          });
           const aperteDopo = contaAperte(r.partita_id, r.voce_uid, r.effetto_uid, true);
           if (aperteDopo > 0) registra(r, 'proposta');
           if (aperteDopo > 0 && aperteprima === 0) c.proposte += 1; else c.invariate += 1;

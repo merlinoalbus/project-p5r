@@ -97,7 +97,11 @@ export function anteprimaFusione(partitaId: number, possedutaIds: number[], risu
   const skillInnate = skillInnateFinoAlLivello(ricetta.risultato.id, ricetta.risultato.livello + bonus.min);
   const cariche = esemplari.filter((e) => e.carica === 1).length;
   return {
-    risultato: { id: ricetta.risultato.id, nome: ricetta.risultato.nome, nomeIt: t('persona', ricetta.risultato.nome), arcana: ricetta.risultato.arcana, arcanaNome: t('arcana', ricetta.risultato.arcana), livello: ricetta.risultato.livello, speciale: ricetta.risultato.speciale, rara: ricetta.risultato.rara, dlc: ricetta.risultato.dlc },
+    risultato: {
+      id: ricetta.risultato.id, nome: ricetta.risultato.nome, nomeIt: t('persona', ricetta.risultato.nome), arcana: ricetta.risultato.arcana,
+      arcanaNome: t('arcana', ricetta.risultato.arcana), livello: ricetta.risultato.livello, speciale: ricetta.risultato.speciale,
+      rara: ricetta.risultato.rara, dlc: ricetta.risultato.dlc
+    },
     tipo: ricetta.tipo,
     ingredienti: esemplari.map((e) => ({ possedutaId: e.id, personaId: e.persona_id, nome: e.nome, nomeIt: t('persona', e.nome), livello: e.livello, carica: e.carica === 1 })),
     cariche,
@@ -230,7 +234,11 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
       { riceventeId: ric.id, sacrificio: { personaId: sac.persona_id, livello: sac.livello }, moltiplicatore: esito.moltiplicatore, fattori: esito.fattori, incidente: dati.incidente === true, da: ric.livello, a: nuovoLivello, skillTrasferite: trasferite, punti }, ric.persona_id);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, ric.persona_id);
-    return { ricevente: possedutaDto(partitaId, ric.id), sacrificio: { personaId: sac.persona_id, nomeIt: t('persona', sac.nome), livello: sac.livello, carica: sac.carica === 1 }, moltiplicatore: esito.moltiplicatore, fattori: esito.fattori, interpolato: esito.interpolato, incidente: dati.incidente === true, puntiGarantiti };
+    return {
+      ricevente: possedutaDto(partitaId, ric.id),
+      sacrificio: { personaId: sac.persona_id, nomeIt: t('persona', sac.nome), livello: sac.livello, carica: sac.carica === 1 },
+      moltiplicatore: esito.moltiplicatore, fattori: esito.fattori, interpolato: esito.interpolato, incidente: dati.incidente === true, puntiGarantiti
+    };
   })();
 }
 
@@ -242,6 +250,17 @@ function sommaPunti(p: Partial<Statistiche>): number {
 // ---- Isolamento ----
 
 const ELEMENTO_SKILL: Record<string, string | null> = { phys: 'Phys', gun: null, fire: 'Fire', ice: 'Ice', electric: 'Elec', wind: 'Wind', psy: 'Psy', nuclear: 'Nuke', bless: 'Bless', curse: 'Curse' };
+
+/**
+ * La resistenza che l'Isolamento darebbe all'esemplare della scorta (la debolezza da coprire, il tier per il livello, la skill), per la
+ * finestra dell'Isolamento. 404 se l'esemplare non è nella scorta della partita (la partita la verifica chi chiama).
+ */
+export function resistenzaIsolamentoDellaPosseduta(partitaId: number, possedutaId: number): { elemento: string | null; elementoNome: string | null; tier: string; skill: SkillRiassuntoDto | null } {
+  const r = prepared('SELECT persona_id, livello FROM persona_posseduta WHERE id = ? AND partita_id = ?').get(possedutaId, partitaId) as { persona_id: number; livello: number } | undefined;
+  if (!r) throw httpErrors.notFound('posseduta-non-trovata', 'La Persona posseduta non è nella scorta di questa partita.');
+  const s = skillResistenzaIsolamento(r.persona_id, r.livello);
+  return { elemento: s.elemento, elementoNome: s.elemento ? t('elemento', s.elemento) : null, tier: s.tier, skill: s.skill };
+}
 
 /** Skill di resistenza che la Persona ottiene in isolamento (tier dal livello, elemento dalla prima debolezza), se esiste nel dataset. */
 export function skillResistenzaIsolamento(personaId: number, livello: number): { elemento: string | null; skill: SkillRiassuntoDto | null; tier: string } {

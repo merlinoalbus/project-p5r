@@ -7,10 +7,7 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import {
-  bodyModificaAppuntoFisso, bodyNuovoAppuntoFisso, bodyOrdineAppuntiFissi, paramsAppuntoFisso,
-  type DatiModificaAppuntoFisso, type DatiNuovoAppuntoFisso, type DatiOrdineAppuntiFissi,
-} from '../schemas/appuntiFissi.js';
+import { bodyModificaAppuntoFisso, bodyNuovoAppuntoFisso, bodyOrdineAppuntiFissi, paramsAppuntoFisso } from '../schemas/appuntiFissi.js';
 import { creaAppuntoFisso, elencoAppuntiFissi, eliminaAppuntoFisso, modificaAppuntoFisso, riordinaAppuntiFissi } from '../services/appuntiFissiService.js';
 
 const router = Router();
@@ -19,13 +16,13 @@ router.get('/', (_req, res) => {
   res.json(elencoAppuntiFissi());
 });
 router.post('/', validate({ body: bodyNuovoAppuntoFisso }), (req, res) => {
-  res.status(201).json(creaAppuntoFisso(req.body as DatiNuovoAppuntoFisso));
+  res.status(201).json(creaAppuntoFisso(req.body));
 });
 router.put('/ordine', validate({ body: bodyOrdineAppuntiFissi }), (req, res) => {
-  res.json(riordinaAppuntiFissi((req.body as DatiOrdineAppuntiFissi).ids));
+  res.json(riordinaAppuntiFissi(req.body.ids));
 });
 router.patch('/:id', validate({ params: paramsAppuntoFisso, body: bodyModificaAppuntoFisso }), (req, res) => {
-  res.json(modificaAppuntoFisso(Number(req.params.id), req.body as DatiModificaAppuntoFisso));
+  res.json(modificaAppuntoFisso(Number(req.params.id), req.body));
 });
 router.delete('/:id', validate({ params: paramsAppuntoFisso }), (req, res) => {
   eliminaAppuntoFisso(Number(req.params.id));

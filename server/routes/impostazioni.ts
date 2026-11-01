@@ -92,12 +92,12 @@ router.get('/istanza/gioco/deposito', (_req, res) => {
 
 /** Anteprima di un pacchetto depositato: lo legge il server dal mount. */
 router.post('/istanza/gioco/deposito/anteprima', validate({ body: corpoFileDeposito }), (req, res) => {
-  res.json(anteprimaPacchettoDaDeposito((req.body as { nome: string }).nome));
+  res.json(anteprimaPacchettoDaDeposito(req.body.nome));
 });
 
 /** Sostituisce i dati di gioco con un pacchetto depositato. */
 router.put('/istanza/gioco/deposito', validate({ body: corpoFileDeposito }), async (req, res) => {
-  res.json(await importaPacchettoDaDeposito((req.body as { nome: string }).nome));
+  res.json(await importaPacchettoDaDeposito(req.body.nome));
 });
 
 /** Che cosa c'è nella cartella d'appoggio per il ripristino dell'istanza: gli ZIP (`ESTENSIONI_BACKUP`); un database si ripristina indicandolo per nome. */
@@ -107,7 +107,7 @@ router.get('/istanza/deposito', (_req, res) => {
 
 /** Ripristina l'istanza da un file depositato: lo legge il server. */
 router.put('/istanza/deposito', validate({ body: corpoFileDeposito }), async (req, res) => {
-  res.json(await ripristinaIstanzaDaDeposito((req.body as { nome: string }).nome));
+  res.json(await ripristinaIstanzaDaDeposito(req.body.nome));
 });
 
 /** A che punto è l'importazione: si interroga quando la risposta non arriva (un proxy può chiudere prima). */

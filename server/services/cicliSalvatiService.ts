@@ -48,7 +48,11 @@ function anelliValidati(partitaId: number, personaId: number, input: AnelloInput
     const modo: AnelloCicloDto['partnerModo'] = registro.has(partner.id) ? 'registro' : scorta.has(partner.id) ? 'scorta' : 'cattura';
     const rango = rangoArcana(partitaId, r.risultato.arcana);
     const bonus = bonusLivelliFusione(rangoMatto, rango);
-    out.push({ ingrediente: personaDto(ing.id), partner: personaDto(partner.id), partnerModo: modo, partnerCosto: modo === 'registro' ? prezzoScontato(prezzoEvocazione(partner), sconto) : 0, risultato: personaDto(r.risultato.id), tipo: r.tipo, bonusLivelli: { min: bonus.min, max: bonus.max }, rangoArcano: rango });
+    out.push({
+      ingrediente: personaDto(ing.id), partner: personaDto(partner.id), partnerModo: modo,
+      partnerCosto: modo === 'registro' ? prezzoScontato(prezzoEvocazione(partner), sconto) : 0, risultato: personaDto(r.risultato.id), tipo: r.tipo,
+      bonusLivelli: { min: bonus.min, max: bonus.max }, rangoArcano: rango
+    });
     corrente = r.risultato.id;
   });
   if (corrente !== personaId) throw httpErrors.badRequest('ciclo-non-valido', 'L\'ultimo anello deve rigenerare la Persona di partenza.');

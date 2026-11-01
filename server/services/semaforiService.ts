@@ -115,7 +115,8 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const tutteLeRichieste = prepared('SELECT chiave, nome FROM richiesta').all() as Array<{ chiave: string; nome: string }>;
   const richiesteEsistenti = new Set(tutteLeRichieste.flatMap((r) => [r.chiave, r.nome.toLowerCase()]));
   const nomiRichieste = new Map(tutteLeRichieste.map((r) => [r.chiave, r.nome]));
-  const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'").all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
+  const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'")
+    .all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
   const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
@@ -137,7 +138,9 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
+  return { partitaId, doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze,
+    richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco,
+    meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, sblocchiRicevuti, fattiPesca,
     relazioniRomantiche: relazioniConGiorno(partitaId), contenutiPartita: contenutiDellaPartita(partitaId) };
 }
 
@@ -243,7 +246,10 @@ function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoVa
 
 /** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
 export function impostaEventoStoria(partitaId: number, evento: string, avvenuto: boolean): void {
-  if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');  prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at').run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
+  if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))
+    throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');
+  prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at')
+    .run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
 }
 
 /** «Condizione soddisfatta» di un requisito `evento`: segna l'evento della partita, così il Confidente e Partita → Progressi dicono la

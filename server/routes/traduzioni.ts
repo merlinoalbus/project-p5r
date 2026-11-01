@@ -10,8 +10,7 @@ import { aggiornaTraduzione, elencaAmbiti, elencaTraduzioni, ripristinaTraduzion
 const router = Router();
 
 router.get('/', validate({ query: queryTraduzioni }), (req, res) => {
-  const q = req.query as { ambito?: string; q?: string; soloUtente?: boolean };
-  res.json(elencaTraduzioni(q));
+  res.json(elencaTraduzioni(req.query));
 });
 
 router.get('/ambiti', (_req, res) => {
@@ -19,7 +18,7 @@ router.get('/ambiti', (_req, res) => {
 });
 
 router.put('/:ambito/:chiave', validate({ params: paramsTraduzione, body: bodyTraduzione }), (req, res) => {
-  res.json(aggiornaTraduzione(String(req.params.ambito), String(req.params.chiave), (req.body as { testo: string }).testo));
+  res.json(aggiornaTraduzione(String(req.params.ambito), String(req.params.chiave), req.body.testo));
 });
 
 router.delete('/:ambito/:chiave', validate({ params: paramsTraduzione }), (req, res) => {

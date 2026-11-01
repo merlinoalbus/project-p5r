@@ -7,7 +7,12 @@ import { registraEvento, annullaEventiFonteAcquistoNellaTransazione } from './st
 import { eDote, puntiDaNote } from '../../shared/doti.js';
 import { giornoDellaSettimanaPiatto } from '../../shared/date.js';
 import { AOJIRU_NOTE, ARTICOLO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru, prossimaVarianteAojiru } from '../../shared/acquisti.js';
-import type { AnteprimaRegistrazioneAcquistoDto, AnteprimaRimozioneAcquistoDto, DatiConsumoAojiru, FonteAcquisto, IdentitaAcquisto, NuovaRegistrazioneAcquisto, PresenzaStoricaAcquistoDto, ProvenienzaAcquistoDto, RegistrazioneAcquistoDto, RicevutaOperazioneAcquistoDto, RichiestaAnnullaProvenienza, RichiestaAnteprimaAnnullaProvenienza, RichiestaAnteprimaRimozioneLegacy, RichiestaRegistraAcquisto, RichiestaRimozioneLegacy, StatoAcquistiArticoloDto, StatoAcquistiDto } from '../../shared/acquisti.js';
+import type {
+  AnteprimaRegistrazioneAcquistoDto, AnteprimaRimozioneAcquistoDto, DatiConsumoAojiru, FonteAcquisto, IdentitaAcquisto, NuovaRegistrazioneAcquisto,
+  PresenzaStoricaAcquistoDto, ProvenienzaAcquistoDto, RegistrazioneAcquistoDto, RicevutaOperazioneAcquistoDto, RichiestaAnnullaProvenienza,
+  RichiestaAnteprimaAnnullaProvenienza, RichiestaAnteprimaRimozioneLegacy, RichiestaRegistraAcquisto, RichiestaRimozioneLegacy,
+  StatoAcquistiArticoloDto, StatoAcquistiDto
+} from '../../shared/acquisti.js';
 import type { DisponibilitaDto } from '../../shared/types.js';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import { improntaDato, jsonCanonico, leggiJsonRegistro, leggiOggettoRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiAcquisto } from './propostePartitaService.js';
@@ -45,8 +50,16 @@ function registrazioneDto(a:RigaAcquisto,fonti:RigaFonte[]):RegistrazioneAcquist
   if(a.legacy_firma!==null){const raw=leggiOggettoRegistro(a.legacy_raw_json??'','tuple legacy');if(improntaDato(raw)!==a.legacy_firma||raw.partita_id!==a.partita_id||raw.articolo_chiave!==a.articolo_chiave)throw httpErrors.conflict('legacy-incoerente','Il raccordo legacy non è valido.');}
   const provenienze=fonti.filter((f)=>f.acquisto_id===a.id).map(fonteDto);
   const legacyValutazioneId=generazioneRappresentata(getDb(),a.id);
-  if(legacyValutazioneId){const f=fotoLegacy(getDb(),legacyValutazioneId);if(f.riga.presenza_firma!==a.legacy_firma||jsonCanonico(f.presenza)!==jsonCanonico(leggiOggettoRegistro(a.legacy_raw_json??'','tuple legacy')))throw httpErrors.conflict('generazione-acquisto-diversa','Il fatto non coincide con la generazione della presenza rappresentata.');}
-  return {id:a.id,partitaId:a.partita_id,identita,momento:{giorno:a.giorno,fascia:a.fascia,ordine:a.ordine},prezzoYen:a.prezzo_yen,consumo,legacyFirma:a.legacy_firma,legacyValutazioneId,attiva:provenienze.length>0,provenienze,creataIl:a.created_at,orfana:!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave)};
+  if(legacyValutazioneId){
+    const f=fotoLegacy(getDb(),legacyValutazioneId);
+    if(f.riga.presenza_firma!==a.legacy_firma||jsonCanonico(f.presenza)!==jsonCanonico(leggiOggettoRegistro(a.legacy_raw_json??'','tuple legacy')))
+      throw httpErrors.conflict('generazione-acquisto-diversa','Il fatto non coincide con la generazione della presenza rappresentata.');
+  }
+  return {
+    id:a.id,partitaId:a.partita_id,identita,momento:{giorno:a.giorno,fascia:a.fascia,ordine:a.ordine},prezzoYen:a.prezzo_yen,consumo,
+    legacyFirma:a.legacy_firma,legacyValutazioneId,attiva:provenienze.length>0,provenienze,creataIl:a.created_at,
+    orfana:!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave)
+  };
 }
 /** Nelle LETTURE tolleranti un'incoerenza dello storico (409) non ferma la lettura: si registra nel log con partita e contesto e la voce incoerente resta fuori dallo stato. Ogni altro errore risale. */
 function anomaliaLetta(partita:number,err:unknown,contesto:Record<string,unknown>):void {
@@ -78,7 +91,12 @@ export function leggiAcquistiPartita(partita:number,tollerante=false):StatoAcqui
   for(const l of presenzeStoriche)if(!l.rappresentataDa&&l.valutazione?.negozio!==null&&l.valutazione?.negozio!==undefined){const k=l.valutazione.negozio;spesa.set(k,(spesa.get(k)??0)+l.valutazione.contributoYen);}
   for(const a of registrazioni)if(a.attiva){ottenuti.add(a.identita.articolo);if(a.identita.negozio)spesa.set(a.identita.negozio,(spesa.get(a.identita.negozio)??0)+a.prezzoYen);}
   if([...spesa.values()].some(n=>!Number.isSafeInteger(n)))throw httpErrors.conflict('spesa-non-rappresentabile','Il totale della spesa non è rappresentabile senza perdita di precisione.');
-  return {partitaId:partita,presenzeStoriche,registrazioni,articoliOttenuti:[...ottenuti].sort(),spesaPerNegozio:[...spesa].sort(([a],[b])=>a.localeCompare(b)).map(([negozio,spesa])=>({negozio,spesa})),revisione:improntaDato({acquisti,fonti,legacy,fotografie,raccordi:registrazioni.map(a=>[a.id,a.legacyValutazioneId])}),...(escluse>0?{righeEscluse:escluse}:{})};
+  return {
+    partitaId:partita,presenzeStoriche,registrazioni,articoliOttenuti:[...ottenuti].sort(),
+    spesaPerNegozio:[...spesa].sort(([a],[b])=>a.localeCompare(b)).map(([negozio,spesa])=>({negozio,spesa})),
+    revisione:improntaDato({acquisti,fonti,legacy,fotografie,raccordi:registrazioni.map(a=>[a.id,a.legacyValutazioneId])}),
+    ...(escluse>0?{righeEscluse:escluse}:{})
+  };
 }
 export function acquistiArticolo(partita:number,articolo:string,precaricato?:StatoAcquistiDto):StatoAcquistiArticoloDto {
   const stato=precaricato??leggiAcquistiPartita(partita);if(stato.partitaId!==partita)throw httpErrors.conflict('partita-diversa','Il riepilogo appartiene a un’altra partita.');
@@ -86,10 +104,16 @@ export function acquistiArticolo(partita:number,articolo:string,precaricato?:Sta
   const attive=registrazioni.filter((a)=>a.attiva),incongruenze:string[]=[];
   for(let i=1;i<attive.length;i++)if(prossimaVarianteAojiru(attive[i-1]!.consumo.variante)!==attive[i]!.consumo.variante)incongruenze.push(`Fra ${attive[i-1]!.momento.giorno} e ${attive[i]!.momento.giorno} lo storico registrato ha una lacuna o una variante differente.`);
   return {articolo,acquistato:stato.articoliOttenuti.includes(articolo),presenzaStorica:stato.presenzeStoriche.find((l)=>l.articolo===articolo)??null,registrazioni,
-    aojiru:articolo===ARTICOLO_AOJIRU?{confermate:attive.length,varianteAttesa:attive.length?prossimaVarianteAojiru(attive[attive.length-1]!.consumo.variante):null,incongruenze,nota:'Atteso secondo le consumazioni registrate; eventuali consumi mancanti non sono dedotti dalle date o dal segno storico.'}:null};
+    aojiru:articolo===ARTICOLO_AOJIRU?{
+      confermate:attive.length,varianteAttesa:attive.length?prossimaVarianteAojiru(attive[attive.length-1]!.consumo.variante):null,incongruenze,
+      nota:'Atteso secondo le consumazioni registrate; eventuali consumi mancanti non sono dedotti dalle date o dal segno storico.'
+    }:null};
 }
 export const chiaviArticoliOttenuti=(p:number,stato?:StatoAcquistiDto):Set<string>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Set((stato??leggiAcquistiPartita(p,true)).articoliOttenuti);};
-export const spesaAcquistiPerNegozio=(p:number,stato?:StatoAcquistiDto):Map<string,number>=>{if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');return new Map((stato??leggiAcquistiPartita(p,true)).spesaPerNegozio.map((x)=>[x.negozio,x.spesa]));};
+export const spesaAcquistiPerNegozio=(p:number,stato?:StatoAcquistiDto):Map<string,number>=>{
+  if(stato&&stato.partitaId!==p)throw httpErrors.conflict('partita-diversa','Riepilogo di un’altra partita.');
+  return new Map((stato??leggiAcquistiPartita(p,true)).spesaPerNegozio.map((x)=>[x.negozio,x.spesa]));
+};
 
 function offerta(chiave:string):{identita:IdentitaAcquisto;raw:Record<string,unknown>} {
   const r=prepared('SELECT a.*,n.nome AS negozio_nome,c.nome AS catalogo_nome FROM main.articolo a LEFT JOIN main.negozio n ON n.chiave=a.negozio_chiave LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?').get(chiave) as Record<string,unknown>|undefined;
@@ -112,7 +136,9 @@ function verificaFonte(partita:number,r:NuovaRegistrazioneAcquisto):{raw:unknown
     const prima=receipt?leggiJsonRegistro<Record<string,unknown>>(receipt.prima_json,'versione precedente'):null,ric=receipt?leggiJsonRegistro<Record<string,unknown>>(receipt.ricevuta_json,'fonte precedente'):null;
     if(!prima||!ric||ric.provenienzaId!==old.id||ric.acquistoId!==old.acquisto_id||jsonCanonico(prima.effetto)===jsonCanonico(d))throw httpErrors.conflict('fonte-gia-collegata','La voce possiede già una provenienza: collega quel medesimo fatto.');
   }
-  const v=prepared('SELECT * FROM main.voce_giornata WHERE uid=?').get(r.fonte.voceUid),transizione=prepared('SELECT * FROM main.voce_effetto_transizione WHERE voce_uid=?').get(r.fonte.voceUid),effetti=prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine,uid').all(r.fonte.voceUid);
+  const v=prepared('SELECT * FROM main.voce_giornata WHERE uid=?').get(r.fonte.voceUid),
+    transizione=prepared('SELECT * FROM main.voce_effetto_transizione WHERE voce_uid=?').get(r.fonte.voceUid),
+    effetti=prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine,uid').all(r.fonte.voceUid);
   return {raw:{effetto:e,voce:v,transizione,effetti},ordine:Number(e.ordine)};
 }
 function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?:PorteDisponibilitaAcquisto):AnteprimaRegistrazioneAcquistoDto {
@@ -124,10 +150,16 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
   const p=prepared('SELECT data_gioco,fascia_gioco,updated_at FROM utente.partita WHERE id=?').get(partita) as {data_gioco:string|null;fascia_gioco:string;updated_at:string};
   const corrente=p.data_gioco===r.momento.giorno&&p.fascia_gioco===r.momento.fascia;
   let valutazione:unknown=null;
-  if(corrente){if(!porte)throw httpErrors.conflict('valutatore-non-collegato','Il valutatore corrente non è disponibile.');valutazione=porte.valutaCorrente(partita,r.articolo);if((valutazione as {disponibilita:DisponibilitaDto}).disponibilita.stato!=='disponibile')throw httpErrors.conflict('articolo-non-disponibile','L’offerta non risulta disponibile nel momento corrente.');}
+  if(corrente){
+    if(!porte)throw httpErrors.conflict('valutatore-non-collegato','Il valutatore corrente non è disponibile.');
+    valutazione=porte.valutaCorrente(partita,r.articolo);
+    if((valutazione as {disponibilita:DisponibilitaDto}).disponibilita.stato!=='disponibile')
+      throw httpErrors.conflict('articolo-non-disponibile','L’offerta non risulta disponibile nel momento corrente.');
+  }
   const legacy=acquisti.presenzaStorica;
   if(legacy){if(!r.rapportoLegacy||r.rapportoLegacy.firma!==legacy.firma)throw httpErrors.conflict('rapporto-legacy-richiesto','Dichiara se questa consumazione rappresenta il segno storico oppure è ulteriore.');
-    if(!r.rapportoLegacy.valutazione||jsonCanonico(r.rapportoLegacy.valutazione)!==jsonCanonico(legacy.valutazione))throw httpErrors.conflict('generazione-legacy-cambiata','La generazione o la valutazione della presenza non coincide con quella mostrata: rileggi il registro e prepara una nuova anteprima.');}
+    if(!r.rapportoLegacy.valutazione||jsonCanonico(r.rapportoLegacy.valutazione)!==jsonCanonico(legacy.valutazione))
+      throw httpErrors.conflict('generazione-legacy-cambiata','La generazione o la valutazione della presenza non coincide con quella mostrata: rileggi il registro e prepara una nuova anteprima.');}
   else if(r.rapportoLegacy!==null)throw httpErrors.conflict('presenza-legacy-cambiata','La presenza storica non corrisponde più al riepilogo.');
   let esitoPrevisto:AnteprimaRegistrazioneAcquistoDto['esitoPrevisto']='registrata';
   if(r.scelta.tipo==='collega'){
@@ -135,7 +167,9 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
     if(!a)throw httpErrors.notFound('acquisto-non-trovato','La registrazione indicata non appartiene alla partita.');
     // l'identità dell'offerta è la sua chiave con l'oggetto del catalogo; il negozio della ricevuta è quello del momento in cui fu scritta
     // (migrazione 304: l'offerta dell'Aojiru è passata, con la stessa chiave, dal KiyasuKu al Chiosco delle bevande) e non la rende un altro fatto
-    if(a.identita.articolo!==r.articolo||a.identita.catalogo!==o.identita.catalogo||jsonCanonico(a.momento)!==jsonCanonico(r.momento)||a.consumo.variante!==r.variante||a.consumo.fortuna!==r.fortuna||a.prezzoYen!==PREZZO_AOJIRU)throw httpErrors.conflict('acquisto-differente','Identità, momento, variante, prezzo o Fortuna divergono: il fatto non viene sovrascritto né collegato.');
+    if(a.identita.articolo!==r.articolo||a.identita.catalogo!==o.identita.catalogo||jsonCanonico(a.momento)!==jsonCanonico(r.momento)
+      ||a.consumo.variante!==r.variante||a.consumo.fortuna!==r.fortuna||a.prezzoYen!==PREZZO_AOJIRU)
+      throw httpErrors.conflict('acquisto-differente','Identità, momento, variante, prezzo o Fortuna divergono: il fatto non viene sovrascritto né collegato.');
     if(a.legacyFirma&&r.rapportoLegacy?.tipo==='ulteriore'&&a.legacyFirma===r.rapportoLegacy.firma&&a.legacyValutazioneId===legacy?.valutazione?.id)throw httpErrors.conflict('rapporto-legacy-diverso','Questo fatto rappresenta già questa generazione della presenza storica.');
     if(a.legacyFirma&&r.rapportoLegacy?.tipo==='rappresenta'&&a.legacyFirma!==r.rapportoLegacy.firma)throw httpErrors.conflict('rapporto-legacy-diverso','Il fatto rappresenta un’altra tuple storica immutabile: il raccordo non viene sovrascritto.');
     if(a.legacyFirma&&r.rapportoLegacy?.tipo==='rappresenta'&&a.legacyValutazioneId!==legacy?.valutazione?.id)throw httpErrors.conflict('generazione-legacy-diversa','Il fatto rappresenta un’altra generazione storica: il raccordo non viene sovrascritto.');
@@ -145,7 +179,15 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
     const firma=r.rapportoLegacy.firma,rappresentante=stato.registrazioni.find((a)=>a.legacyFirma===firma&&a.legacyValutazioneId===legacy?.valutazione?.id&&a.identita.articolo===r.articolo);
     if(rappresentante&&(r.scelta.tipo!=='collega'||r.scelta.acquistoId!==rappresentante.id))throw httpErrors.conflict('legacy-gia-rappresentata','Il vecchio segno ha già una registrazione, anche se non più attiva: collega quella invece di crearne un’altra.');
   }
-  return {nuovo:r,identita:o.identita,acquisti,disponibilita:{tipo:corrente?'corrente':'osservazione',calendario:'compatibile',condizioniStoricheNonRicostruibili:!corrente,motivi:corrente?[]:['Solo il calendario è verificato; i progressi del momento storico non sono ricostruiti. La consumazione è una tua osservazione esplicita.']},effetto:{dote:r.variante,puntiBase:2,puntiConfermati:r.fortuna===null?null:puntiDaNote(AOJIRU_NOTE,false,r.fortuna),note:AOJIRU_NOTE,prezzoYen:5000},esitoPrevisto,revisioneAcquistiAttesa:improntaDato({richiesta:r,stato,o,fonte,p,g,valutazione})};
+  return {
+    nuovo:r,identita:o.identita,acquisti,
+    disponibilita:{
+      tipo:corrente?'corrente':'osservazione',calendario:'compatibile',condizioniStoricheNonRicostruibili:!corrente,
+      motivi:corrente?[]:['Solo il calendario è verificato; i progressi del momento storico non sono ricostruiti. La consumazione è una tua osservazione esplicita.']
+    },
+    effetto:{dote:r.variante,puntiBase:2,puntiConfermati:r.fortuna===null?null:puntiDaNote(AOJIRU_NOTE,false,r.fortuna),note:AOJIRU_NOTE,prezzoYen:5000},
+    esitoPrevisto,revisioneAcquistiAttesa:improntaDato({richiesta:r,stato,o,fonte,p,g,valutazione})
+  };
 }
 export function anteprimaRegistrazioneAcquisto(p:number,r:NuovaRegistrazioneAcquisto,porte?:PorteDisponibilitaAcquisto):AnteprimaRegistrazioneAcquistoDto {return getDb().transaction(()=>preparaRegistrazione(p,r,porte))();}
 function replay(p:number,id:string,azione:string,payload:unknown):RicevutaOperazioneAcquistoDto|null {
@@ -154,13 +196,22 @@ function replay(p:number,id:string,azione:string,payload:unknown):RicevutaOperaz
   const ricevuta=leggiOggettoRegistro(r.ricevuta_json,'ricevuta operazione acquisto'),dato=payload as Record<string,unknown>;
   const esiti=azione==='registra'?['registrata','fonte-collegata','gia-collegata']:azione==='annulla-fonte'?['fonte-rimossa']:['presenza-rimossa'];
   const uid=(x:unknown)=>typeof x==='string'&&/^[0-9a-f]{32}$/.test(x);
-  if(ricevuta.partitaId!==p||ricevuta.operazioneId!==id||!esiti.includes(String(ricevuta.esito))||typeof ricevuta.articolo!=='string'||typeof ricevuta.creataIl!=='string'||(azione==='registra'&&(!uid(ricevuta.acquistoId)||!uid(ricevuta.provenienzaId)||ricevuta.articolo!==dato.articolo))||(azione==='annulla-fonte'&&(!uid(ricevuta.acquistoId)||ricevuta.provenienzaId!==dato.provenienzaId))||(azione==='rimuovi-legacy'&&(ricevuta.acquistoId!==null||ricevuta.provenienzaId!==null||ricevuta.articolo!==dato.articolo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta registrata non corrisponde a questa operazione: niente è stato cambiato.');
+  if(ricevuta.partitaId!==p||ricevuta.operazioneId!==id||!esiti.includes(String(ricevuta.esito))||typeof ricevuta.articolo!=='string'
+    ||typeof ricevuta.creataIl!=='string'
+    ||(azione==='registra'&&(!uid(ricevuta.acquistoId)||!uid(ricevuta.provenienzaId)||ricevuta.articolo!==dato.articolo))
+    ||(azione==='annulla-fonte'&&(!uid(ricevuta.acquistoId)||ricevuta.provenienzaId!==dato.provenienzaId))
+    ||(azione==='rimuovi-legacy'&&(ricevuta.acquistoId!==null||ricevuta.provenienzaId!==null||ricevuta.articolo!==dato.articolo)))
+    throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta registrata non corrisponde a questa operazione: niente è stato cambiato.');
   return ricevuta as unknown as RicevutaOperazioneAcquistoDto;
 }
 function salvaOperazione(p:number,id:string,azione:string,payload:unknown,ricevuta:RicevutaOperazioneAcquistoDto):void {
   prepared('INSERT INTO utente.acquisto_operazione(partita_id,operazione_id,azione,payload_json,ricevuta_json,created_at) VALUES(?,?,?,?,?,?)').run(p,id,azione,jsonCanonico(payload),jsonCanonico(ricevuta),ricevuta.creataIl);
   const fonte=payload&&typeof payload==='object'?'fonte' in payload?(payload as {fonte?:FonteAcquisto}).fonte:undefined:undefined;
-  registraEvento(p,'acquisto',ricevuta.esito==='presenza-rimossa'?'Presenza storica rimossa':ricevuta.esito==='fonte-rimossa'?'Provenienza acquisto rimossa':'Consumazione confermata',ricevuta.articolo,{operazioneId:id,acquistoId:ricevuta.acquistoId,provenienzaId:ricevuta.provenienzaId,acquistoV1:{formato:1,azione},...(fonte?.tipo==='diario'?{voceUid:fonte.voceUid,effettoUid:fonte.effettoUid}:{})});
+  registraEvento(p,'acquisto',
+    ricevuta.esito==='presenza-rimossa'?'Presenza storica rimossa':ricevuta.esito==='fonte-rimossa'?'Provenienza acquisto rimossa':'Consumazione confermata',
+    ricevuta.articolo,
+    {operazioneId:id,acquistoId:ricevuta.acquistoId,provenienzaId:ricevuta.provenienzaId,acquistoV1:{formato:1,azione},
+      ...(fonte?.tipo==='diario'?{voceUid:fonte.voceUid,effettoUid:fonte.effettoUid}:{})});
   prepared('UPDATE utente.partita SET updated_at=? WHERE id=?').run(ricevuta.creataIl,p);
 }
 export function registraAcquistoNellaTransazione(p:number,r:RichiestaRegistraAcquisto,porte?:PorteDisponibilitaAcquisto,opz:{nuovaSpunta?:boolean}={}):RicevutaOperazioneAcquistoDto {
@@ -177,7 +228,12 @@ export function registraAcquistoNellaTransazione(p:number,r:RichiestaRegistraAcq
   const legacy=r.rapportoLegacy?.tipo==='rappresenta'?righeLegacy(p).find((l)=>l.articolo_chiave===r.articolo):undefined;
   if(r.scelta.tipo==='nuova')prepared('INSERT INTO utente.acquisto_registrato(id,partita_id,articolo_chiave,giorno,fascia,ordine,prezzo_yen,identita_json,dati_json,legacy_firma,legacy_raw_json,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)')
     .run(id,p,r.articolo,r.momento.giorno,r.momento.fascia,r.momento.ordine,PREZZO_AOJIRU,jsonCanonico(a.identita),jsonCanonico({regola:'aojiru',versione:1,variante:r.variante,fortuna:r.fortuna}),legacy?improntaDato(legacy):null,legacy?jsonCanonico(legacy):null,adesso);
-  else if(legacy){const attuale=prepared('SELECT legacy_firma FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,id) as {legacy_firma:string|null};if(attuale.legacy_firma===null&&prepared('UPDATE utente.acquisto_registrato SET legacy_firma=?,legacy_raw_json=? WHERE partita_id=? AND id=? AND legacy_firma IS NULL').run(improntaDato(legacy),jsonCanonico(legacy),p,id).changes!==1)throw httpErrors.conflict('legacy-cambiata','Il raccordo storico è cambiato.');}
+  else if(legacy){
+    const attuale=prepared('SELECT legacy_firma FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,id) as {legacy_firma:string|null};
+    if(attuale.legacy_firma===null&&prepared('UPDATE utente.acquisto_registrato SET legacy_firma=?,legacy_raw_json=? WHERE partita_id=? AND id=? AND legacy_firma IS NULL')
+      .run(improntaDato(legacy),jsonCanonico(legacy),p,id).changes!==1)
+      throw httpErrors.conflict('legacy-cambiata','Il raccordo storico è cambiato.');
+  }
   if(legacy)collegaGenerazioneLegacy(getDb(),id,legacy);
   let provenienza=righeFonti(p).find((f)=>f.acquisto_id===id&&jsonCanonico(leggiJsonRegistro(f.fonte_json))===jsonCanonico(r.fonte));
   if(!provenienza){const fonte=verificaFonte(p,nuovo),fid=nuovoUid();prepared('INSERT INTO utente.acquisto_provenienza(id,partita_id,acquisto_id,tipo,voce_uid,effetto_uid,effetto_ordine,fonte_json,operazione_id,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)')
@@ -185,7 +241,11 @@ export function registraAcquistoNellaTransazione(p:number,r:RichiestaRegistraAcq
   riconciliaBeneficiAcquisto(p,id);
   const ricevuta:RicevutaOperazioneAcquistoDto={operazioneId:r.operazioneId,esito:a.esitoPrevisto,partitaId:p,acquistoId:id,provenienzaId:provenienza.id,articolo:r.articolo,creataIl:adesso};salvaOperazione(p,r.operazioneId,'registra',nuovo,ricevuta);return ricevuta;
 }
-export function registraAcquisto(p:number,r:RichiestaRegistraAcquisto,porte?:PorteDisponibilitaAcquisto):RicevutaOperazioneAcquistoDto {if(r.fonte.tipo!=='manuale')throw httpErrors.badRequest('fonte-diario-dal-motore','Un acquisto del Diario si conferma insieme alla spunta o dalla sua proposta, con ricevuta posseduta.');return getDb().transaction(()=>registraAcquistoNellaTransazione(p,r,porte))();}
+export function registraAcquisto(p:number,r:RichiestaRegistraAcquisto,porte?:PorteDisponibilitaAcquisto):RicevutaOperazioneAcquistoDto {
+  if(r.fonte.tipo!=='manuale')
+    throw httpErrors.badRequest('fonte-diario-dal-motore','Un acquisto del Diario si conferma insieme alla spunta o dalla sua proposta, con ricevuta posseduta.');
+  return getDb().transaction(()=>registraAcquistoNellaTransazione(p,r,porte))();
+}
 
 export function anteprimaAnnullaProvenienza(p:number,r:RichiestaAnteprimaAnnullaProvenienza):AnteprimaRimozioneAcquistoDto {
   verificaPartita(p);const s=leggiAcquistiPartita(p),a=s.registrazioni.find((a)=>a.provenienze.some((f)=>f.id===r.provenienzaId));
@@ -214,7 +274,12 @@ export function preparaRimozioneArticoliAcquistati(chiaviArticoli:string[]):void
   if(!getDb().inTransaction)throw new Error('La rimozione degli articoli richiede la transazione del cestino.');
   const chiavi=new Set(chiaviArticoli),fatti=(prepared('SELECT * FROM utente.acquisto_registrato ORDER BY partita_id,id').all() as RigaAcquisto[]).filter((a)=>chiavi.has(a.articolo_chiave));
   for(const p of new Set(fatti.map((a)=>a.partita_id)))leggiAcquistiPartita(p);
-  for(const a of fatti){const fonti=prepared('SELECT id FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=?').all(a.partita_id,a.id) as Array<{id:string}>;for(const f of fonti)annullaEventiFonteAcquistoNellaTransazione(a.partita_id,f.id);prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=?').run(a.partita_id,a.id);riconciliaBeneficiAcquisto(a.partita_id,a.id);}
+  for(const a of fatti){
+    const fonti=prepared('SELECT id FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=?').all(a.partita_id,a.id) as Array<{id:string}>;
+    for(const f of fonti)annullaEventiFonteAcquistoNellaTransazione(a.partita_id,f.id);
+    prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=?').run(a.partita_id,a.id);
+    riconciliaBeneficiAcquisto(a.partita_id,a.id);
+  }
 }
 export function anteprimaRimozionePresenzaLegacy(p:number,r:RichiestaAnteprimaRimozioneLegacy):AnteprimaRimozioneAcquistoDto {
   const s=leggiAcquistiPartita(p),presenza=s.presenzeStoriche.find((l)=>l.articolo===r.articolo);if(!presenza)throw httpErrors.notFound('presenza-non-trovata','La presenza storica non esiste più.');
@@ -241,11 +306,21 @@ export function preparaRipristinoAcquisti(r:{tipoCestino:string;partitaIds:numbe
   return {...r,partitaIds:ids,durevoli,identita};
 }
 export function verificaRipristinoAcquisti(c:ContestoRipristinoAcquisti):void {
-  if(c.tipoCestino!=='partita')for(const t of TABELLE_DUREVOLI_ACQUISTI){const ora=c.partitaIds.flatMap((p)=>prepared(`SELECT * FROM utente.${t} WHERE partita_id=? ORDER BY rowid`).all(p));if(jsonCanonico(ora)!==jsonCanonico(c.durevoli[t]))throw httpErrors.conflict('ricevute-cambiate','Il ripristino tentava di cambiare ricevute o decisioni successive: intero blocco conservato.');}
-  for(const prima of c.identita){const ora=prepared('SELECT * FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(prima.partita_id,prima.id) as Record<string,unknown>|undefined;if(ora&&jsonCanonico(ora)!==jsonCanonico(prima))throw httpErrors.conflict('uuid-acquisto-occupato','Questo acquisto è già registrato con dati diversi: niente è stato sovrascritto.');}
+  if(c.tipoCestino!=='partita')for(const t of TABELLE_DUREVOLI_ACQUISTI){
+    const ora=c.partitaIds.flatMap((p)=>prepared(`SELECT * FROM utente.${t} WHERE partita_id=? ORDER BY rowid`).all(p));
+    if(jsonCanonico(ora)!==jsonCanonico(c.durevoli[t]))
+      throw httpErrors.conflict('ricevute-cambiate','Il ripristino tentava di cambiare ricevute o decisioni successive: intero blocco conservato.');
+  }
+  for(const prima of c.identita){
+    const ora=prepared('SELECT * FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(prima.partita_id,prima.id) as Record<string,unknown>|undefined;
+    if(ora&&jsonCanonico(ora)!==jsonCanonico(prima))
+      throw httpErrors.conflict('uuid-acquisto-occupato','Questo acquisto è già registrato con dati diversi: niente è stato sovrascritto.');
+  }
   if(c.tipoCestino!=='partita')for(const p of c.partitaIds)for(const f of righeFonti(p))if(f.tipo==='diario'){
     const ricevute=prepared('SELECT annullato_il FROM utente.effetto_applicato WHERE partita_id=? AND voce_uid=? AND effetto_uid=? ORDER BY applicato_il,id').all(p,f.voce_uid,f.effetto_uid) as Array<{annullato_il:string|null}>;
-    if(ricevute.length&&ricevute.every((r)=>r.annullato_il!==null)&&!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,f.voce_uid))throw httpErrors.conflict('fonte-annullata-successivamente','La spunta è stata annullata dopo la rimozione: il ripristino non può riattivare quella fonte.');
+    if(ricevute.length&&ricevute.every((r)=>r.annullato_il!==null)
+      &&!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,f.voce_uid))
+      throw httpErrors.conflict('fonte-annullata-successivamente','La spunta è stata annullata dopo la rimozione: il ripristino non può riattivare quella fonte.');
   }
   for(const p of c.partitaIds)if(prepared('SELECT 1 FROM utente.partita WHERE id=?').get(p)){leggiAcquistiPartita(p);leggiPropostePartita(p,{ancheChiuse:true});}
 }

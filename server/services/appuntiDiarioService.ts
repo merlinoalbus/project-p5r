@@ -197,7 +197,11 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
   if (v.riferimento) {
     let ok = TIPI_RIF.has(v.riferimento.tipo);
     if (ok) { try { nomeRiferimento(v.riferimento, { ancheNascosti: true }); } catch (e) { if (!(e instanceof HttpError)) throw e; ok = false; } }
-    if (!ok) { d.riferimentoNonValido = true; d.soloSenzaSegnalati = true; mio({ codice: 'riferimento-non-valido', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}»: il collegamento (${v.riferimento.tipo} «${v.riferimentoTesto ?? v.riferimento.chiave}») non esiste più. Si incolla solo senza collegamento${v.riferimentoTesto ? `, col solo nome «${v.riferimentoTesto}»` : ''}.` }); }
+    if (!ok) {
+      d.riferimentoNonValido = true; d.soloSenzaSegnalati = true;
+      mio({ codice: 'riferimento-non-valido', gravita: 'conferma', voceIndice: indice,
+        testo: `«${breve(azione)}»: il collegamento (${v.riferimento.tipo} «${v.riferimentoTesto ?? v.riferimento.chiave}») non esiste più. Si incolla solo senza collegamento${v.riferimentoTesto ? `, col solo nome «${v.riferimentoTesto}»` : ''}.` });
+    }
   }
   // gli effetti: ognuno riconosciuto integralmente e verificato come uno nuovo; una fonte da correggere passa com'è
   if (v.effetti.stato === 'convertita') {
@@ -244,13 +248,15 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
   // le infiltrazioni: quelle del Palazzo della copia che esistono ancora
   const inf = infiltrazioniApplicabili(v, !d.riferimentoNonValido);
   d.infiltrazioni = inf.valide;
-  if (inf.scartate.length) mio({ codice: 'infiltrazioni-non-applicabili', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}»: ${inf.scartate.length === 1 ? 'un’infiltrazione non esiste più o non è' : `${inf.scartate.length} infiltrazioni non esistono più o non sono`} del Palazzo della voce: la copia ne resta senza.` });
+  if (inf.scartate.length) mio({ codice: 'infiltrazioni-non-applicabili', gravita: 'conferma', voceIndice: indice,
+    testo: `«${breve(azione)}»: ${inf.scartate.length === 1 ? 'un’infiltrazione non esiste più o non è' : `${inf.scartate.length} infiltrazioni non esistono più o non sono`} del Palazzo della voce: la copia ne resta senza.` });
   // ciò che la copia non eredita, detto prima (la voce d'origine, se c'è ancora, lo tiene)
   if (prepared('SELECT 1 FROM voce_giornata WHERE uid = ?').get(v.uid)) {
     const eventi = haTabella('main', 'evento_calendario_voce') ? prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
     if (eventi) mio({ codice: 'eventi-calendario', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» è collegata a ${eventi === 1 ? 'un evento' : `${eventi} eventi`} del calendario: la copia nasce senza il collegamento (resta all’originale).` });
     const proposte = haTabella('main', 'proposta_conversione_voce') ? prepared("SELECT COUNT(*) FROM proposta_conversione_voce WHERE voce_uid = ? AND stato = 'aperta'").pluck().get(v.uid) as number : 0;
-    if (proposte) mio({ codice: 'proposte-aperte', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» ha ${proposte === 1 ? 'una proposta «da completare» aperta: resta all’originale, la copia non la ha' : `${proposte} proposte «da completare» aperte: restano all’originale, la copia non le ha`}.` });
+    if (proposte) mio({ codice: 'proposte-aperte', gravita: 'conferma', voceIndice: indice,
+      testo: `«${breve(azione)}» ha ${proposte === 1 ? 'una proposta «da completare» aperta: resta all’originale, la copia non la ha' : `${proposte} proposte «da completare» aperte: restano all’originale, la copia non le ha`}.` });
     const proposta = conLegami() && d.infiltrazioni.length === 0 ? prepared('SELECT COUNT(*) FROM proposta_infiltrazione_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
     if (proposta) mio({ codice: 'proposta-infiltrazioni', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» ha una proposta d’infiltrazioni salvata: la copia non la eredita (se la riconosce dal testo la ricalcola).` });
   }
@@ -281,7 +287,8 @@ function pianoTaglio(v: VoceAppunti, indice: number, giorno: string, fasciaDest:
     d.stato = 'gia-spostata';
     return d;
   }
-  if (eGiornoDelDiarioValidato(r.data) && r.data !== giorno) rilievi.push({ codice: 'diario-validato', gravita: 'conferma', voceIndice: indice, testo: `«${breve(r.azione)}» è del diario validato (fino al ${giornoTesto(ULTIMO_GIORNO_VALIDATO)}): spostarla cambia il diario validato. Lo spostamento resta nel registro e si annulla dalla notifica.` });
+  if (eGiornoDelDiarioValidato(r.data) && r.data !== giorno) rilievi.push({ codice: 'diario-validato', gravita: 'conferma', voceIndice: indice,
+    testo: `«${breve(r.azione)}» è del diario validato (fino al ${giornoTesto(ULTIMO_GIORNO_VALIDATO)}): spostarla cambia il diario validato. Lo spostamento resta nel registro e si annulla dalla notifica.` });
   const fonte = leggiEffettiVocePerMostrare(r.uid);
   for (const x of rilieviDiData(fonte.effetti, r.data, giorno, indice, r.azione)) rilievi.push(x);
   for (const x of rilieviDiDisponibilita(r, giorno, fasciaDest, indice, r.azione)) rilievi.push(x);
@@ -309,7 +316,8 @@ function calcolaPiano(r: RichiestaIncollaVoci): Piano {
   const fasciaAncora = ancora ? fasciaDi(ancora) : null;
   const rilievi: RilievoIncolla[] = [];
   // il giorno di destinazione nel diario validato: un rilievo solo, per il blocco
-  if (eGiornoDelDiarioValidato(r.giorno)) rilievi.push({ codice: 'diario-validato', gravita: 'conferma', voceIndice: null, testo: `Il ${giornoTesto(r.giorno)} è nel diario validato (fino al ${giornoTesto(ULTIMO_GIORNO_VALIDATO)}): incollare qui cambia il diario validato. Il gesto resta nel registro e si annulla dalla notifica.` });
+  if (eGiornoDelDiarioValidato(r.giorno)) rilievi.push({ codice: 'diario-validato', gravita: 'conferma', voceIndice: null,
+    testo: `Il ${giornoTesto(r.giorno)} è nel diario validato (fino al ${giornoTesto(ULTIMO_GIORNO_VALIDATO)}): incollare qui cambia il diario validato. Il gesto resta nel registro e si annulla dalla notifica.` });
   const gia = a.modo === 'taglia' ? giaSpostateDalTaglio(a.taglio) : new Set<string>();
   const dettagli = a.voci.map((v, i) => {
     const fasciaDest = fasciaAncora ?? (v.origine.fascia === 'sera' ? 'sera' : 'giorno');
@@ -333,7 +341,10 @@ export function pianoIncolla(r: RichiestaIncollaVoci): PianoIncollaDto {
 // ---- Le scritture: copia e spostamento, un solo percorso ----
 
 /** La copia di una voce in un giorno e fascia: voce nuova (uid nuovo), effetti con uid nuovi registrati, infiltrazioni. Restituisce l'uid. */
-function inserisciCopia(v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltrazioni: readonly string[], riferimento: VoceAppunti['riferimento'], giorno: string, fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }): { uid: string; mappaEffetti: Record<string, string> } {
+function inserisciCopia(
+  v: VoceAppunti, effetti: IstantaneaEffettiVoce, infiltrazioni: readonly string[], riferimento: VoceAppunti['riferimento'], giorno: string,
+  fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }
+): { uid: string; mappaEffetti: Record<string, string> } {
   const uid = nuovoId(), adesso = nowIso();
   // `produce_json` resta al suo valore predefinito: gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
   // (la copia non discende dalla guida di quel giorno) e senza il segno «da rivedere». Il nome del collegamento si copia SEMPRE: la guida

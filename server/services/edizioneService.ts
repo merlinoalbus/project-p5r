@@ -55,6 +55,7 @@ import { assegnaUidMancanti } from './mappe/identitaSpillo.js';
 import { miniaturaDi, pulisciMiniatureOrfane } from './miniatureService.js';
 import { LARGHEZZE_MINIATURA } from '../../shared/miniature.js';
 import { RIFERIMENTI_PARTITE, orfaniPartite, versioneSchemaCodice } from './pacchettoGiocoService.js';
+import { avvisaCensimentoPartite } from './censimentoPartite.js';
 import { conCartellaDiLavoro, copiaDatabase, timbro } from './impostazioniService.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { svuotaProposteConversione } from '../db/proposteConversioneDb.js';
@@ -550,6 +551,12 @@ async function creaPartiteVuoto(gioco: string, destinazione: string): Promise<{ 
     const versione = db.pragma('utente.user_version', { simple: true }) as number;
     const ultimo = migrazioniUtente.reduce((massimo, m) => Math.max(massimo, m.id), 0);
     if (versione !== ultimo) throw new Error(`Le migrazioni delle partite si sono fermate alla ${versione} su ${ultimo}.`);
+    // L11-04: sullo schema completo delle partite, ciò che il censimento non classifica si dice nel log (avviso, non blocca l'edizione)
+    try {
+      avvisaCensimentoPartite(db);
+    } catch (err) {
+      logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'censimento delle partite non riuscito (l\'edizione prosegue)');
+    }
     const controllo = db.pragma('utente.integrity_check') as Array<{ integrity_check: string }>;
     if (controllo.length !== 1 || controllo[0].integrity_check !== 'ok') throw new Error('Il file delle partite vuoto non supera il controllo di integrità.');
     return { versione, impronta: improntaSchema(db, 'utente') };

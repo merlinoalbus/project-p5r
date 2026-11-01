@@ -112,7 +112,9 @@ function validaFoto(r: ValutazioneLegacy): FotografiaLegacy {
   const { prova_firma, ...dati } = r;
   const raw = presenza(parse(r.presenza_json)), identita = parse(r.identita_json) as IdentitaLegacy;
   if (!/^[a-f0-9]{32}$/.test(r.id) || !Number.isSafeInteger(r.generazione) || r.generazione < 1 || firma(dati) !== prova_firma || firma(raw) !== r.presenza_firma || raw.partita_id !== r.partita_id || raw.articolo_chiave !== r.articolo_chiave
-    || !identita || Object.keys(identita).sort().join(',') !== 'articolo,catalogo,negozio,negozioNome,nome' || identita.articolo !== r.articolo_chiave || typeof identita.nome !== 'string' || typeof identita.negozioNome !== 'string' || !(identita.negozio === null || typeof identita.negozio === 'string') || !(identita.catalogo === null || typeof identita.catalogo === 'string')
+    || !identita || Object.keys(identita).sort().join(',') !== 'articolo,catalogo,negozio,negozioNome,nome' || identita.articolo !== r.articolo_chiave
+    || typeof identita.nome !== 'string' || typeof identita.negozioNome !== 'string' || !(identita.negozio === null || typeof identita.negozio === 'string')
+    || !(identita.catalogo === null || typeof identita.catalogo === 'string')
     || !Number.isSafeInteger(r.contributo_yen) || r.contributo_yen < 0 || !['continuita-migrazione', 'continuita-importazione', 'nuova-presenza'].includes(r.origine) || typeof r.creata_il !== 'string'
     || (r.stato_prezzo === 'noto' ? !Number.isSafeInteger(r.prezzo_catalogo) || r.prezzo_catalogo! < 0 || r.contributo_yen !== r.prezzo_catalogo : !['ignoto', 'offerta-assente'].includes(r.stato_prezzo) || r.prezzo_catalogo !== null || r.contributo_yen !== 0)
     || r.stato_prezzo === 'offerta-assente' && identita.negozio !== null) return errore('La prova della valutazione non coincide con il contenuto.');
@@ -208,7 +210,8 @@ export function collegaGenerazioneLegacy(db: AppDatabase, acquistoId: string, ra
   const f = valutazioniLegacyPartita(db, raw.partita_id).find(f => canonico(f.presenza) === canonico(raw));
   if (!f) return errore('Manca la generazione da rappresentare.');
   const fatto = db.prepare('SELECT partita_id,articolo_chiave,legacy_firma,legacy_raw_json FROM utente.acquisto_registrato WHERE id=?').get(acquistoId) as { partita_id: number; articolo_chiave: string; legacy_firma: string | null; legacy_raw_json: string | null } | undefined;
-  if (!fatto || fatto.partita_id !== raw.partita_id || fatto.articolo_chiave !== raw.articolo_chiave || fatto.legacy_firma !== f.riga.presenza_firma || !fatto.legacy_raw_json || canonico(parse(fatto.legacy_raw_json)) !== canonico(raw)) errore('Il fatto da raccordare non coincide con la prova generazionale.');
+  if (!fatto || fatto.partita_id !== raw.partita_id || fatto.articolo_chiave !== raw.articolo_chiave || fatto.legacy_firma !== f.riga.presenza_firma
+    || !fatto.legacy_raw_json || canonico(parse(fatto.legacy_raw_json)) !== canonico(raw)) errore('Il fatto da raccordare non coincide con la prova generazionale.');
   const vecchia = generazioneRappresentata(db, acquistoId);
   if (vecchia) { if (vecchia !== f.riga.id) errore('Il fatto rappresenta un’altra generazione.'); return; }
   db.prepare('INSERT INTO utente.acquisto_legacy_raccordo(acquisto_id,partita_id,articolo_chiave,valutazione_id) VALUES(?,?,?,?)').run(acquistoId, raw.partita_id, raw.articolo_chiave, f.riga.id);
@@ -270,6 +273,7 @@ export function verificaCestinoLegacy(db: AppDatabase, passi: readonly PassoLega
     if (esigiUltima && corrente && canonico(corrente) !== canonico(raw)) errore('La presenza è cambiata dopo la rimozione.');
   }
   for (const p of passi.filter(p => p.schema === 'utente' && p.tabella === 'acquisto_legacy_associazione')) {
-    if (p.op !== 'D' || !p.prima || !passi.some(x => x.schema === 'utente' && x.tabella === 'acquisto_partita' && x.op === 'D' && x.prima?.partita_id === p.prima!.partita_id && x.prima?.articolo_chiave === p.prima!.articolo_chiave)) errore('L’associazione del Cestino non ha la propria presenza originale.');
+    if (p.op !== 'D' || !p.prima || !passi.some(x => x.schema === 'utente' && x.tabella === 'acquisto_partita' && x.op === 'D'
+      && x.prima?.partita_id === p.prima!.partita_id && x.prima?.articolo_chiave === p.prima!.articolo_chiave)) errore('L’associazione del Cestino non ha la propria presenza originale.');
   }
 }

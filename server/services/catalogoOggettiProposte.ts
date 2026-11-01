@@ -56,7 +56,8 @@ function testoVoce(r: Riga): { nome: string; testo: string } {
 function testoFonte(tipo: TipoPropostaOggetto, chiave: string, nomi: ReturnType<typeof nomiCondizioni>, premi: ReadonlyMap<string, FonteRicompensaOggetto>): { nome: string; testo: string } {
   if (tipo === 'regalo') {
     const [confidente, ordine] = regalo(chiave);
-    const r = prepared('SELECT g.nome,g.costo,g.dove,c.nome AS confidente FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave WHERE g.confidente_chiave = ? AND g.ordine = ?').get(confidente, ordine) as { nome: string; costo: string | null; dove: string | null; confidente: string } | undefined;
+    const r = prepared('SELECT g.nome,g.costo,g.dove,c.nome AS confidente FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave WHERE g.confidente_chiave = ? AND g.ordine = ?')
+      .get(confidente, ordine) as { nome: string; costo: string | null; dove: string | null; confidente: string } | undefined;
     return r ? { nome: `${r.confidente} · ${r.nome}`, testo: [r.nome, r.costo, r.dove].filter(Boolean).join(' · ') } : { nome: 'Regalo eliminato', testo: 'La riga originale non è più disponibile.' };
   }
   if (tipo === 'ricetta') return { nome: chiave, testo: 'Materiale di fabbricazione' };

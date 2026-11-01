@@ -101,7 +101,9 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const caricate = immaginiCaricateDelleMappe();
   const aree = numeroAreePerQuartiere();
-  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(q.chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
+  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(q.chiave, partitaId),
+    mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi,
+    verificati: q.verificati,
     illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
     aree: aree.get(q.chiave) ?? 0,
     ...disponibilitaQuartiere(q.chiave, st) }));
@@ -121,13 +123,16 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   // le Aree del quartiere (L2), nel loro ordine, col passaggio sull'illustrazione e l'ingresso
   // (il contenitore scritto qui e non da `contenitoreDaRotta`: anche l'ingresso dei Memento ha la sua scheda, senza Aree)
   const aree = areeDelContenitore({ colonna: 'quartiere_chiave', chiave: q.chiave, mappa: chiaveImmagineQuartiere(q.chiave), nome: q.nome, rotta: 'citta', prefisso: `citta/${q.chiave}/`, tipoPlanimetria: 'luogo' }, partitaId);
-  return { chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree,
+  return { chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId),
+    mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi,
+    mappa, illustrazione, aree,
     luoghiDaCollocare: luoghiDaCollocare(chiave, letture) };
 }
 
 /** Tutti i luoghi della città (non nascosti) come voci da scegliere: la sede di un negozio o di un'attività. */
 export function elencaLuoghi(): LuogoOpzioneDto[] {
-  return (prepared('SELECT l.chiave, l.nome, l.tipo, l.quartiere_chiave AS quartiere, q.nome AS quartiere_nome FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as Array<{ chiave: string; nome: string; tipo: string; quartiere: string; quartiere_nome: string }>)
+  return (prepared('SELECT l.chiave, l.nome, l.tipo, l.quartiere_chiave AS quartiere, q.nome AS quartiere_nome FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine')
+    .all() as Array<{ chiave: string; nome: string; tipo: string; quartiere: string; quartiere_nome: string }>)
     .map((r) => ({ chiave: r.chiave, nome: r.nome, tipo: r.tipo, quartiere: r.quartiere, quartiereNome: r.quartiere_nome }));
 }
 

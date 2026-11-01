@@ -20,13 +20,17 @@ const gesti=[
   {azione:'registra-fatto',anteprima:'/fatti/:evento/anteprima',salva:'/fatti/:evento',params:schemi.paramsFattoPesca,preview:schemi.bodyAnteprimaFattoPesca,body:schemi.bodyRegistraFattoPesca,bersaglio:'evento'},
   {azione:'rimuovi-fatto',anteprima:'/fatti/fonti/:fonte/anteprima-rimozione',salva:'/fatti/fonti/:fonte/rimozione',params:schemi.paramsFontePesca,preview:schemi.bodyAnteprimaRimozionePesca,body:schemi.bodyRimozionePesca,bersaglio:'fonte',cestino:'osservazione-pesca',prefisso:'fatto:'},
   {azione:'acquista-esca',anteprima:'/acquisti-esca/anteprima',salva:'/acquisti-esca',params:schemi.paramsPesca,preview:schemi.bodyAnteprimaAcquistoEsca,body:schemi.bodyAcquistoEsca},
-  {azione:'rimuovi-acquisto-esca',anteprima:'/acquisti-esca/:acquisto/anteprima-rimozione',salva:'/acquisti-esca/:acquisto/rimozione',params:schemi.paramsAcquistoEsca,preview:schemi.bodyAnteprimaRimozionePesca,body:schemi.bodyRimozionePesca,bersaglio:'acquisto',cestino:'osservazione-pesca',prefisso:'esca:'},
+  {azione:'rimuovi-acquisto-esca',anteprima:'/acquisti-esca/:acquisto/anteprima-rimozione',salva:'/acquisti-esca/:acquisto/rimozione',
+    params:schemi.paramsAcquistoEsca,preview:schemi.bodyAnteprimaRimozionePesca,body:schemi.bodyRimozionePesca,bersaglio:'acquisto',cestino:'osservazione-pesca',
+    prefisso:'esca:'},
   {azione:'rettifica-punti',anteprima:'/punti/anteprima-rettifica',salva:'/punti/rettifica',params:schemi.paramsPesca,preview:schemi.bodyAnteprimaRettificaPuntiPesca,body:schemi.bodyRettificaPuntiPesca},
 ] as const;
+/** Il parametro del bersaglio del gesto (`sessione`, `fonte`, `evento`, `acquisto`), già validato dallo schema del gesto. */
+const parametro=(params:Record<string,unknown>,nome:string):string=>String(params[nome]);
 for(const g of gesti){
-  router.post(g.anteprima,validate({params:g.params,body:g.preview}),(req,res)=>res.json(anteprimaPesca(Number(req.params.id),g.azione as AzioneOperazionePesca,req.body,'bersaglio'in g?String(req.params[g.bersaglio]):null)));
+  router.post(g.anteprima,validate({params:g.params,body:g.preview}),(req,res)=>res.json(anteprimaPesca(Number(req.params.id),g.azione as AzioneOperazionePesca,req.body,'bersaglio'in g?parametro(req.params,g.bersaglio):null)));
   router.post(g.salva,validate({params:g.params,body:g.body}),(req,res)=>{
-    const p=Number(req.params.id),bersaglio='bersaglio'in g?String(req.params[g.bersaglio]):null;
+    const p=Number(req.params.id),bersaglio='bersaglio'in g?parametro(req.params,g.bersaglio):null;
     const opera=()=>confermaPesca(p,g.azione as AzioneOperazionePesca,req.body,bersaglio);
     const result='cestino'in g?conCestinoPrivato({tipo:g.cestino,chiave:('prefisso'in g?g.prefisso:'')+bersaglio,nome:g.cestino==='fonte-pesca'?'Fonte della visita di pesca':g.cestino==='sessione-pesca'?'Visita di pesca':'Osservazione della pesca',partitaId:p},opera):opera();
     res.status(201).json(result);

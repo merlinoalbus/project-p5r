@@ -404,7 +404,8 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const r = prepared(`SELECT p.*, ${sqlStatoCattura('p')} AS stato_cattura FROM persona p WHERE p.id = ?`).get(id) as RigaPersona | undefined;
   if (!r) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
   const base = personaRiassunto(r);
-  const skill = (prepared('SELECT s.*, ps.livello AS livello_appreso, ps.modo FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = ? ORDER BY ps.livello IS NULL, ps.livello, ps.modo, s.nome').all(id) as Array<RigaSkill & { livello_appreso: number | null; modo: ModoApprendimento }>)
+  const skill = (prepared('SELECT s.*, ps.livello AS livello_appreso, ps.modo FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = ? ORDER BY ps.livello IS NULL, ps.livello, ps.modo, s.nome')
+    .all(id) as Array<RigaSkill & { livello_appreso: number | null; modo: ModoApprendimento }>)
     .map((s): SkillAppresaDto => ({ ...skillRiassunto(s), livello: s.livello_appreso, modo: s.modo }));
   const trattoRiga = prepared('SELECT * FROM skill WHERE nome = ?').get(r.tratto) as RigaSkill | undefined;
   const ricetta = prepared('SELECT risultato_id FROM fusione_speciale WHERE risultato_id = ?').get(id) ? ricettaDto(id) : null;
@@ -485,7 +486,8 @@ export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
 export function dettaglioSkill(id: number): SkillDettaglioDto {
   const r = prepared('SELECT * FROM skill WHERE id = ?').get(id) as RigaSkill | undefined;
   if (!r) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
-  const persone: SkillDettaglioDto['persone'] = (prepared('SELECT p.id, p.nome, p.arcana, p.livello AS livello_persona, ps.livello, ps.modo FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY p.livello, p.nome').all(id) as Array<{ id: number; nome: string; arcana: string; livello_persona: number; livello: number | null; modo: ModoApprendimento }>)
+  const persone: SkillDettaglioDto['persone'] = (prepared('SELECT p.id, p.nome, p.arcana, p.livello AS livello_persona, ps.livello, ps.modo FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY p.livello, p.nome')
+    .all(id) as Array<{ id: number; nome: string; arcana: string; livello_persona: number; livello: number | null; modo: ModoApprendimento }>)
     .map((p) => ({ id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livelloPersona: p.livello_persona, livello: p.livello, modo: p.modo }));
   // un tratto non sta in `persona_skill`: la Persona lo ha in `persona.tratto` (per nome), com'è per l'eredità
   if (r.elemento === 'trait') {
@@ -584,7 +586,11 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const conCatalogo = catalogoOggettiDisponibile();
   // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
   const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
-  const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`).all(chiave) as Array<{ ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null; nota: string | null; seed_json: string | null }>)
+  const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
+    .all(chiave) as Array<{
+      ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null;
+      nota: string | null; seed_json: string | null
+    }>)
     .map((g) => ({ ...g, reazione: (g.reazione === 1 || g.reazione === 2 || g.reazione === 3 ? g.reazione : conReazione ? null : g.sconsigliato === 1 ? 1 : 3) as ReazioneRegalo | null }));
   const chiaviRegali = righeRegali.flatMap((g) => g.catalogo_chiave ? [g.catalogo_chiave] : []);
   const oggettiRegali = oggettiConChiavi(chiaviRegali); const offerteRegali = offerteBaseDegliOggetti(chiaviRegali);
@@ -603,7 +609,9 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     // ondata 5 (decisione 12, RG-13): con il listino il luogo e il prezzo sono solo quelli delle offerte; il testo della guida (e il ripristino del
     // suo costo) vale soltanto per un regalo senza offerte, dove è l'unico punto
     const conListino = offerte.length > 0;
-    return { ...g, modificato: regaloModificato(g), ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
+    return { ...g, modificato: regaloModificato(g),
+      ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}),
+      nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
       // la sede si dice solo se è un posto diverso dal negozio («High Sense (High Sense)» non informa)
       dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
       costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
@@ -616,7 +624,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
     // ondata 5: dalla reazione più alta (a parità, l'ordine della guida); niente più «sconsigliati»: ogni regalo vale almeno +1
-    regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }))
+    regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => (
+      { ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }))
       .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
     regalabile,
     // L13 (O10-2): con il Confidente si può iniziare una relazione romantica (migrazioni 324-325)

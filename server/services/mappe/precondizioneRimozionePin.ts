@@ -55,7 +55,9 @@ export function fotografiaRimozionePin(db: AppDatabase, id: number): {
   const immagini = leggi(db, 'main', 'spillo_immagine', 'spillo_id=?', [id]);
   const sorgenti = leggi(db, 'main', 'immagine', "EXISTS (SELECT 1 FROM main.spillo_immagine si WHERE si.spillo_id=? AND ((immagine.ambito='spillo' AND immagine.chiave=si.immagine_chiave) OR si.asset=immagine.ambito||'/'||immagine.chiave))", [id]);
   const miniature = leggi(db, 'main', 'immagine_miniatura', "immagine_id IN (SELECT i.id FROM main.immagine i JOIN main.spillo_immagine si ON si.spillo_id=? AND ((i.ambito='spillo' AND i.chiave=si.immagine_chiave) OR si.asset=i.ambito||'/'||i.chiave))", [id]);
-  const riferimentiImmagini = leggi(db, 'main', 'spillo_immagine', "EXISTS (SELECT 1 FROM main.immagine i JOIN main.spillo_immagine target ON target.spillo_id=? AND ((i.ambito='spillo' AND i.chiave=target.immagine_chiave) OR target.asset=i.ambito||'/'||i.chiave) WHERE (i.ambito='spillo' AND spillo_immagine.immagine_chiave=i.chiave) OR spillo_immagine.asset=i.ambito||'/'||i.chiave)", [id]);
+  const riferimentiImmagini = leggi(db, 'main', 'spillo_immagine',
+    "EXISTS (SELECT 1 FROM main.immagine i JOIN main.spillo_immagine target ON target.spillo_id=? AND ((i.ambito='spillo' AND i.chiave=target.immagine_chiave) OR target.asset=i.ambito||'/'||i.chiave) WHERE (i.ambito='spillo' AND spillo_immagine.immagine_chiave=i.chiave) OR spillo_immagine.asset=i.ambito||'/'||i.chiave)",
+    [id]);
   const cancellabili = new Set(sorgenti.righe.filter(i => i.ambito === 'spillo' && immagini.righe.some(si => si.immagine_chiave === i.chiave)).map(i => i.chiave));
   const immaginiCondivise = riferimentiImmagini.righe.some(si => si.spillo_id !== id && (cancellabili.has(si.immagine_chiave) || [...cancellabili].some(k => si.asset === `spillo/${k}`)));
   const tutteCondizioni = leggi(db, 'main', 'spillo', 'id<>? AND condizioni_json IS NOT NULL', [id]);

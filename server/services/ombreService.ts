@@ -123,14 +123,22 @@ function luoghiDelleOmbre(conclusi: Map<string, string> | null, chiave?: string)
   };
   for (const r of prepared(`SELECT l.id, l.ombra_chiave, l.dungeon_chiave, d.nome AS dungeon_nome, d.tipo, l.infiltrazione_chiave, a.nome AS infiltrazione_nome, l.fonte
       FROM ombra_luogo l JOIN dungeon d ON d.chiave = l.dungeon_chiave LEFT JOIN dungeon_area a ON a.chiave = l.infiltrazione_chiave
-      ${chiave ? 'WHERE l.ombra_chiave = ?' : ''} ORDER BY d.ordine, COALESCE(a.ordine, 0), l.id`).all(...(chiave ? [chiave] : [])) as Array<{ id: number; ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; infiltrazione_chiave: string | null; infiltrazione_nome: string | null; fonte: 'battaglia' | 'voce' | 'utente' }>) {
+      ${chiave ? 'WHERE l.ombra_chiave = ?' : ''} ORDER BY d.ordine, COALESCE(a.ordine, 0), l.id`)
+    .all(...(chiave ? [chiave] : [])) as Array<{
+      id: number; ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; infiltrazione_chiave: string | null;
+      infiltrazione_nome: string | null; fonte: 'battaglia' | 'voce' | 'utente'
+    }>) {
     const l = posto(r.ombra_chiave, r.dungeon_chiave, r.dungeon_nome, r.tipo, r.infiltrazione_chiave ? { chiave: r.infiltrazione_chiave, nome: r.infiltrazione_nome ?? r.infiltrazione_chiave } : null);
     if (!l.fonti.includes(r.fonte)) l.fonti.push(r.fonte);
     l.righe.push({ id: r.id, fonte: r.fonte });
   }
   for (const r of prepared(`SELECT v.ombra_chiave, v.dungeon_chiave, d.nome AS dungeon_nome, d.tipo, v.dedalo_chiave, da.nome AS dedalo_nome, v.area_dedalo_chiave, ad.nome AS area_nome
       FROM ombra_luogo_dedalo v JOIN dungeon d ON d.chiave = v.dungeon_chiave JOIN dungeon_area da ON da.chiave = v.dedalo_chiave JOIN area_dedalo ad ON ad.chiave = v.area_dedalo_chiave
-      ${chiave ? 'WHERE v.ombra_chiave = ?' : ''} GROUP BY v.ombra_chiave, v.dedalo_chiave, v.area_dedalo_chiave ORDER BY d.ordine, da.ordine, ad.ordine, ad.chiave`).all(...(chiave ? [chiave] : [])) as Array<{ ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; dedalo_chiave: string; dedalo_nome: string; area_dedalo_chiave: string; area_nome: string }>) {
+      ${chiave ? 'WHERE v.ombra_chiave = ?' : ''} GROUP BY v.ombra_chiave, v.dedalo_chiave, v.area_dedalo_chiave ORDER BY d.ordine, da.ordine, ad.ordine, ad.chiave`)
+    .all(...(chiave ? [chiave] : [])) as Array<{
+      ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; dedalo_chiave: string; dedalo_nome: string;
+      area_dedalo_chiave: string; area_nome: string
+    }>) {
     const l = posto(r.ombra_chiave, r.dungeon_chiave, r.dungeon_nome, r.tipo, { chiave: r.dedalo_chiave, nome: r.dedalo_nome });
     if (!l.fonti.includes('dedalo')) l.fonti.push('dedalo');
     if (!l.areeDedalo.some((a) => a.chiave === r.area_dedalo_chiave)) l.areeDedalo.push({ chiave: r.area_dedalo_chiave, nome: r.area_nome });

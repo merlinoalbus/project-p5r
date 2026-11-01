@@ -16,7 +16,7 @@ import { bodyDaUrl, paramsImmagine, queryConfermaPezzi, queryFileImmagine, query
 import { MISURE_AMMESSE, etagMiniatura, miniaturaDi, miniaturaInCache } from '../services/miniatureService.js';
 import { larghezzaMiniaturaAmmessa, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import {
-  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, metadatiFileImmagine, salvaImmagine, type AmbitoImmagine,
+  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, metadatiFileImmagine, salvaImmagine,
 } from '../services/immaginiService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaImmagineMappa, mappaEsiste, scaricaImmagineMappa } from '../services/mappe/mappeService.js';
@@ -38,7 +38,7 @@ function intestazioniDelFile(res: Response, mime: string, chiave: string): void 
 }
 
 router.get('/', validate({ query: queryImmagini }), (req, res) => {
-  res.json(elencaImmagini((req.query as { ambito?: string }).ambito));
+  res.json(elencaImmagini(req.query.ambito));
 });
 
 /**
@@ -60,12 +60,12 @@ router.get('/manifest', (_req, res) => {
 // Rimozione multipla: tutte le immagini caricate di un ambito (query `ambito`) o di tutti gli ambiti di caricamento; le mappe con
 // pezzi che perderebbero la loro immagine chiedono conferma (L1, F5: 409 `mappa-con-pezzi`, `eliminaPezzi=1`).
 router.delete('/', validate({ query: queryRimozioneImmagini }), (req, res) => {
-  const q = req.query as { ambito?: string; eliminaPezzi?: string };
+  const q = req.query;
   res.json({ eliminate: eliminaImmaginiAmbito(q.ambito, { eliminaPezzi: q.eliminaPezzi === '1' }) });
 });
 
 router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: queryFileImmagine }), async (req, res) => {
-  const { v, l } = req.query as { v?: string; l?: string };
+  const { v, l } = req.query;
   // la larghezza della miniatura (L1, variante «miniature»): solo le misure ammesse, ogni altro valore è un 400 (un URL inventato
   // non genera niente e la cache non cresce senza limiti)
   const larghezza = l === undefined ? null : Number(l);
@@ -121,12 +121,12 @@ router.put(
   (req, res) => {
     const mime = (req.headers['content-type'] ?? '').split(';')[0].trim();
     if (!Buffer.isBuffer(req.body)) throw httpErrors.badRequest('corpo-non-immagine', 'Il corpo della richiesta deve essere un file immagine (Content-Type image/*).');
-    const ambito = String(req.params.ambito) as AmbitoImmagine;
+    const ambito = req.params.ambito;
     const chiave = String(req.params.chiave);
     // L1: l'immagine di una mappa che esiste passa dalla stessa strada dell'editor (pezzi da confermare, dimensioni, ruolo): prima
     // questa rotta la salvava e basta, e il ruolo dipendeva da chi l'aveva caricata
     if (ambito === 'mappa' && mappaEsiste(chiave)) {
-      impostaImmagineMappa(chiave, mime, req.body, { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' });
+      impostaImmagineMappa(chiave, mime, req.body, { eliminaPezzi: req.query.eliminaPezzi === '1' });
       res.status(201).json(leggiImmagine(ambito, chiave));
       return;
     }
@@ -135,13 +135,13 @@ router.put(
 );
 
 router.post('/:ambito/:chiave/da-url', validate({ params: paramsImmagine, query: queryConfermaPezzi, body: bodyDaUrl }), async (req, res) => {
-  const ambito = String(req.params.ambito) as AmbitoImmagine;
+  const ambito = req.params.ambito;
   const chiave = String(req.params.chiave);
-  const url = (req.body as { url: string }).url;
+  const url = req.body.url;
   // L1 (F5 del validatore): l'immagine di una mappa che esiste, scaricata da un indirizzo scelto dall'utente, segue la strada
   // dell'editor come il caricamento qui sopra (pezzi da confermare, dimensioni, ruolo, la mappa diventa dell'utente)
   if (ambito === 'mappa' && mappaEsiste(chiave)) {
-    await scaricaImmagineMappa(chiave, url, { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' });
+    await scaricaImmagineMappa(chiave, url, { eliminaPezzi: req.query.eliminaPezzi === '1' });
     res.status(201).json(leggiImmagine(ambito, chiave));
     return;
   }
@@ -150,7 +150,7 @@ router.post('/:ambito/:chiave/da-url', validate({ params: paramsImmagine, query:
 
 // L1 (F5): togliere l'immagine che una mappa con pezzi mostra chiede la stessa conferma (409 `mappa-con-pezzi`, `?eliminaPezzi=1`)
 router.delete('/:ambito/:chiave', validate({ params: paramsImmagine, query: queryConfermaPezzi }), (req, res) => {
-  eliminaImmagine(String(req.params.ambito), String(req.params.chiave), { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' });
+  eliminaImmagine(String(req.params.ambito), String(req.params.chiave), { eliminaPezzi: req.query.eliminaPezzi === '1' });
   res.status(204).end();
 });
 

@@ -99,4 +99,10 @@ export const bodyAggiornaPezzo = z.object({
 /** La creazione di un pezzo: la zona e (facoltativa) la sua prima copia. */
 export const bodyCreaPezzo = bodyAggiornaPezzo.extend({ sorgente: schemaSorgentePezzo, copia: bodyCreaCopiaPezzo.optional() }).strict();
 export const queryRiferimenti = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), q: z.string().max(120).optional().default(''), limite: z.coerce.number().int().min(1).max(100).optional() });
-export const bodyImporta = z.object({ pacchetto: z.object({ versione: z.literal(1), mappe: z.array(z.object({ chiave: z.string(), nome: z.string(), tipo: z.string() }).passthrough()).max(2000), immagini: z.record(z.string(), z.object({ mime: z.string(), base64: z.string() })).optional() }).passthrough(), sovrascrivi: z.boolean().optional() });
+export const bodyImporta = z.object({
+  pacchetto: z.object({
+    versione: z.literal(1), mappe: z.array(z.object({ chiave: z.string(), nome: z.string(), tipo: z.string() }).passthrough()).max(2000),
+    immagini: z.record(z.string(), z.object({ mime: z.string(), base64: z.string() })).optional()
+  }).passthrough(),
+  sovrascrivi: z.boolean().optional()
+});

@@ -396,7 +396,10 @@ function verificaMetadatiPrivati(r: RigaCestinoPrivato): void {
     || !Number.isSafeInteger(r.partita_id) || r.partita_id < 1 || !/^[0-9a-f]{32}$/.test(r.uid)
     || typeof r.registro_json !== 'string' || typeof r.riepilogo_json !== 'string' || typeof r.eliminato_il !== 'string'
     || !(r.contesto === null || typeof r.contesto === 'string')
-    || (r.tipo === 'partita' ? r.chiave !== String(r.partita_id) : r.tipo === 'persona-scorta' ? !/^[1-9]\d{0,14}$/.test(r.chiave) : TIPI_CESTINO_PESCA.includes(r.tipo as typeof TIPI_CESTINO_PESCA[number]) ? !radiceCestinoPesca(r.tipo,r.chiave) : !/^[0-9a-f]{32}$/.test(r.chiave) && !(r.chiave.startsWith('legacy:') && r.chiave.length > 7))) {
+    || (r.tipo === 'partita' ? r.chiave !== String(r.partita_id)
+      : r.tipo === 'persona-scorta' ? !/^[1-9]\d{0,14}$/.test(r.chiave)
+        : TIPI_CESTINO_PESCA.includes(r.tipo as typeof TIPI_CESTINO_PESCA[number]) ? !radiceCestinoPesca(r.tipo,r.chiave)
+          : !/^[0-9a-f]{32}$/.test(r.chiave) && !(r.chiave.startsWith('legacy:') && r.chiave.length > 7))) {
     throw httpErrors.conflict('cestino-privato-illeggibile', 'I metadati del cestino personale non sono riconoscibili: dati conservati.');
   }
 }
