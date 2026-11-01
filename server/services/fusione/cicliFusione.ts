@@ -58,12 +58,12 @@ export interface OpzioniCicli {
 /**
  * Come si procura un partner e quanto costa, o null se non è procurabile. Il Registro ha la precedenza sulla scorta
  * (un esemplare in scorta serve solo alla prima iterazione, vedi `dallaScorta`); la cattura, se ammessa, vale per le
- * Persona che non sono speciali, rare né DLC.
+ * Persona catturabili (L8-07: la regola unica del Compendio e degli alberi, `sqlPersonaCatturabile`: non speciali, rare, DLC né del gruppo).
  */
 function modoPartner(p: PersonaFusione, disp: Disponibilita, opz: OpzioniCicli): { modo: ModoPartner; costo: number } | null {
   if (disp.registro.has(p.id)) return { modo: 'registro', costo: prezzoEvocazione(p) };
   if ((disp.scorta.get(p.id) ?? 0) > 0) return { modo: 'scorta', costo: 0 };
-  if (opz.catture && !p.speciale && !p.rara && !p.dlc) return { modo: 'cattura', costo: 0 };
+  if (opz.catture && p.catturabile) return { modo: 'cattura', costo: 0 };
   return null;
 }
 

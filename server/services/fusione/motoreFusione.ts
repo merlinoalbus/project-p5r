@@ -17,6 +17,7 @@
 import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { prezzoEvocazioneRegistro } from '../../../shared/bonusVelluto.js';
+import { sqlPersonaCatturabile } from '../catturePersona.js';
 
 export interface PersonaFusione {
   id: number;
@@ -28,6 +29,9 @@ export interface PersonaFusione {
   dlc: boolean;
   /** Set DLC di appartenenza (null se non DLC). */
   dlcSet: number | null;
+  /** L8-07: catturabile secondo la regola unica (`sqlPersonaCatturabile`: non speciale, non Demone del Tesoro, non DLC; provata da un'Ombra o
+   *  da un'area dei Memento, oppure ancora da verificare), letta dagli alberi e dai cicli. */
+  catturabile: boolean;
 }
 
 export type TipoFusione = 'normale' | 'stesso-arcano' | 'tesoro' | 'speciale';
@@ -70,9 +74,9 @@ registraCacheDiGioco(invalidaMotoreFusione);
  */
 function caricaSnapshot(): Snapshot {
   if (snapshot) return snapshot;
-  const righe = prepared(`SELECT p.id, p.nome, p.arcana, p.livello, p.speciale, p.rara, p.dlc, d.set_id
-    FROM persona p LEFT JOIN dlc_set_persona d ON d.persona_id = p.id WHERE p.del_party = 0 ORDER BY p.livello, p.nome`).all() as Array<{ id: number; nome: string; arcana: string; livello: number; speciale: number; rara: number; dlc: number; set_id: number | null }>;
-  const persone: PersonaFusione[] = righe.map((r) => ({ id: r.id, nome: r.nome, arcana: r.arcana, livello: r.livello, speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, dlcSet: r.set_id }));
+  const righe = prepared(`SELECT p.id, p.nome, p.arcana, p.livello, p.speciale, p.rara, p.dlc, d.set_id, ${sqlPersonaCatturabile('p')} AS catturabile
+    FROM persona p LEFT JOIN dlc_set_persona d ON d.persona_id = p.id WHERE p.del_party = 0 ORDER BY p.livello, p.nome`).all() as Array<{ id: number; nome: string; arcana: string; livello: number; speciale: number; rara: number; dlc: number; set_id: number | null; catturabile: number }>;
+  const persone: PersonaFusione[] = righe.map((r) => ({ id: r.id, nome: r.nome, arcana: r.arcana, livello: r.livello, speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, dlcSet: r.set_id, catturabile: r.catturabile === 1 }));
   const perId = new Map(persone.map((p) => [p.id, p]));
   const tabella = new Map<string, Map<string, string>>();
   for (const t of prepared('SELECT a, b, risultato FROM fusione_arcana').all() as Array<{ a: string; b: string; risultato: string }>) {

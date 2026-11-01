@@ -40,9 +40,13 @@ import { copreIlGiorno } from './condizioni/valutatore.js';
 import { motiviCompletamentoRichieste } from './richiesteService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
+import { noteStoricheDi } from './noteStoricheService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
 
-interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; livello_consigliato: string; note: string; fonti_json: string;
+interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; note: string; fonti_json: string;
+  /** L8-04 (migrazione 335, D5): il livello consigliato minimo e massimo di Royal; null = la fonte non lo dice. Il confronto delle fonti
+   *  sta nella nota storica del Palazzo (`nota_storica_legame`, tipo `dungeon`). */
+  livello_min?: number | null; livello_max?: number | null;
   /** 118 e 308 (L13 O6-3): il termine della lettera di sfida e il furto consigliato, MM-GG; null dove la guida non li dà. Con la finestra
    *  sono le date del Palazzo, una fonte sola (i testi in prosa di prima sono usciti con la 308). */
   lettera_entro?: string | null; furto_consigliato_data?: string | null;
@@ -309,7 +313,7 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     // L13 O6-3: le date del Palazzo da una fonte sola, la finestra e le colonne strutturate (MM-GG)
     date: { dal: finestra?.dal ?? null, al: finestra?.al ?? null, letteraEntro: r.lettera_entro ?? null, furtoConsigliato: r.furto_consigliato_data ?? null },
-    finestra, livelloConsigliato: r.livello_consigliato,
+    finestra, livelloConsigliato: { min: r.livello_min ?? null, max: r.livello_max ?? null },
     disponibile: !concluso && (!giorno || !finestra || copreIlGiorno([finestra.al ? { tipo: 'intervallo', dal: finestra.dal, al: finestra.al } : { tipo: 'data', dal: finestra.dal }], giorno)),
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
@@ -458,6 +462,8 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   // L4: con il completamento (oggetti permanenti con un pin su una sua planimetria; senza niente da contare completata)
   const areePalazzo = palazzo && raccolta ? areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined, { m, s: segni?.s ?? null, oggettiPerMappa }) : null;
   return { ...riassunto(r, stati, partitaId, statoPalazzi(partitaId, m), { raccolta, segni, m }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
+    // L8-04 (D5): il confronto delle fonti sul livello consigliato, come nota storica del Palazzo (un solo punto di modifica: la nota)
+    noteLivello: noteStoricheDi('dungeon', chiave),
     illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)),
     ...(confluenza ? { confluisceIn: { dungeon: confluenza.dungeon_chiave, dedalo: confluenza.dedalo_chiave, nome: confluenza.nome } } : {}),
     ...(areePalazzo ? { areePalazzo } : {}),
@@ -560,7 +566,9 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
 // Le correzioni sono **dati di gioco** (stanno in `gioco.db`), quindi entrano nel pacchetto quando
 // lo si rigenera, e valgono per ogni partita: non sono avanzamento.
 
-export interface DatiDungeon { nome?: string; sovrano?: string; livelloConsigliato?: string; note?: string;
+export interface DatiDungeon { nome?: string; sovrano?: string; note?: string;
+  /** L8-04 (D5): il livello consigliato minimo e massimo (1–99; null = la fonte non lo dice; il minimo non sopra il massimo). */
+  livelloConsigliato?: { min: number | null; max: number | null };
   /** L13 O6-3: le date del Palazzo (MM-GG; `al`, furto e lettera null = la guida non li dà), scritte da `impostaFinestra`. */
   date?: { dal: string; al: string | null } & ConsigliPalazzo;
   /** L4 §8.14: la voce del boss finale («Modifica › Boss finale»); null = nessuna. */
@@ -571,15 +579,18 @@ export interface DatiDungeon { nome?: string; sovrano?: string; livelloConsiglia
  * finale»): una voce `boss` del Palazzo (400 `voce-non-boss`, 400 `voce-di-un-altro-palazzo`, 404 `punto-non-trovato`; nei Memento 400
  * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Il primo cambio della voce conserva il valore della guida in
  * `seed_json`, per «Ripristina» (`ripristinaDungeon`). Le date (L13 O6-3) passano da `impostaFinestra`, l'unico che le scrive (400 se non
- * sono giorni del calendario o se sono rovesciate); tutto in una transazione: con una data sbagliata non si salva niente.
+ * sono giorni del calendario o se sono rovesciate); tutto in una transazione: con una data sbagliata non si salva niente. Il livello
+ * consigliato (L8-04) è un minimo e un massimo: 400 `livello-rovesciato` se il minimo supera il massimo.
  */
 export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
   if (dati.voceBossFinale !== undefined) verificaVoceBossFinale(r, dati.voceBossFinale);
+  const livello = dati.livelloConsigliato ?? { min: r.livello_min ?? null, max: r.livello_max ?? null };
+  if (livello.min !== null && livello.max !== null && livello.min > livello.max) throw httpErrors.badRequest('livello-rovesciato', 'Il livello consigliato minimo non può superare il massimo.');
   getDb().transaction(() => {
-    prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, livello_consigliato = ?, note = ? WHERE chiave = ?`).run(
-      dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, dati.livelloConsigliato ?? r.livello_consigliato, dati.note ?? r.note, chiave);
+    prepared(`UPDATE dungeon SET nome = ?, sovrano = ?, livello_min = ?, livello_max = ?, note = ? WHERE chiave = ?`).run(
+      dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, livello.min, livello.max, dati.note ?? r.note, chiave);
     if (dati.date) impostaFinestra(chiave, dati.date.dal, dati.date.al, { furtoConsigliato: dati.date.furtoConsigliato, letteraEntro: dati.date.letteraEntro });
     if (dati.voceBossFinale !== undefined && dati.voceBossFinale !== (r.voce_boss_finale ?? null)) {
       // il valore della guida si conserva al primo cambio, come per le Aree (`seed_json` non nullo = corretto dall'utente)

@@ -37,7 +37,8 @@ import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProven
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { annullaRegalo, regala } from '../services/regaloAzioneService.js';
-import type { ModificaConfidente, RichiestaRegalo } from '../../shared/types.js';
+import type { ModificaConfidente, ModificatoriDotiDto, RichiestaRegalo } from '../../shared/types.js';
+import { haAnimaDaCineasta } from '../services/puntiDoti.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
@@ -164,6 +165,12 @@ router.delete('/:id', validate({ params: paramsPartita }), (req, res) => {
 // ---- Doti sociali ----
 router.get('/:id/doti', validate({ params: paramsPartita }), (req, res) => {
   res.json(dotiSociali(Number(req.params.id)));
+});
+// L8-11: le letture della partita che cambiano i punti delle note (oggi «Anima da cineasta»): la scheda Doti precompila l'interruttore
+router.get('/:id/doti/modificatori', validate({ params: paramsPartita }), (req, res) => {
+  const id = Number(req.params.id);
+  verificaPartita(id);
+  res.json({ animaDaCineasta: haAnimaDaCineasta(id) } satisfies ModificatoriDotiDto);
 });
 router.patch('/:id/doti/:chiave', validate({ params: paramsPartitaChiave, body: bodyDote }), (req, res) => {
   res.json(aggiornaDote(Number(req.params.id), String(req.params.chiave), req.body));

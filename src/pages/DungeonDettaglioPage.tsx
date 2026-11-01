@@ -64,6 +64,9 @@ import { areeCompletate } from '../utils/completamentoAree';
 import { dimenticaEntrata, indirizzoDiUscita, istantaneaPalazzo, leggiEntrata, leggiRitornoDiario, ricordaEntrata, riepilogoUscita } from '../utils/ritornoDiario';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
+import { CampoTesto } from '../components/shared/Campo';
+import { NoteStoricheOfferta, type EffettoNotaStorica } from '../components/catalogo/NoteStoricheOfferta';
+import { testoLivelloConsigliato } from '../utils/palazzi';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
 import { raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
 import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
@@ -115,6 +118,26 @@ const bozzaDate = (date: DungeonDettaglioDto['date']): BozzaDate => ({ dal: date
 const dateDellaBozza = (b: BozzaDate): DatePalazzo => ({ dal: b.dal || null, al: b.al || null, furtoConsigliato: b.furto || null, letteraEntro: b.lettera || null });
 /** Le date della bozza sono diverse da quelle salvate? */
 const dateCambiate = (b: BozzaDate, date: DungeonDettaglioDto['date']): boolean => { const s = bozzaDate(date); return b.dal !== s.dal || b.al !== s.al || b.furto !== s.furto || b.lettera !== s.lettera; };
+
+/** L8-04: un livello nella bozza come testo ('' = la fonte non lo dice). */
+const numeroInBozza = (n: number | null): string => (n === null ? '' : String(n));
+/** Il livello consigliato della bozza come lo vuole il server: interi da 1 a `livelloMassimo`, '' = null, il minimo non sopra il massimo. */
+function livelloDellaBozza(min: string, max: string): { min: number | null; max: number | null } {
+  const leggi = (v: string, quale: string): number | null => {
+    if (!v.trim()) return null;
+    const n = Number(v);
+    if (!Number.isInteger(n) || n < 1 || n > LIMITI_GUIDA.dungeon.livelloMassimo) throw new Error(`Il livello consigliato ${quale} va da 1 a ${LIMITI_GUIDA.dungeon.livelloMassimo}.`);
+    return n;
+  };
+  const l = { min: leggi(min, 'minimo'), max: leggi(max, 'massimo') };
+  if (l.min !== null && l.max !== null && l.min > l.max) throw new Error('Il livello consigliato minimo non può superare il massimo.');
+  return l;
+}
+/** La nota storica del livello non cambia il livello consigliato: lo dicono le finestre della nota. */
+const EFFETTO_NOTA_LIVELLO: EffettoNotaStorica = {
+  modifica: 'È una nota sulla fonte: il livello consigliato minimo e massimo si correggono nella scheda del Palazzo.',
+  ripristino: 'Testo e fonte della nota tornano come li dà la guida. Il livello consigliato non cambia.',
+};
 
 /** La finestra del Palazzo (o dei Memento) in tappe. Nei Palazzi (LAY3-5, regola dell'utente «intestazione al massimo il 30% della
  *  schermata») la tappa è compatta a ogni larghezza, come era da 1024 px (R3-41): segno e data su una riga, l'etichetta per chi non vede e
@@ -583,7 +606,10 @@ export function DungeonDettaglioPage() {
   const testoAreePlanimetrie = `${areePalazzo.length} ${areePalazzo.length === 1 ? 'area' : 'aree'} · ${d?.planimetrie.length ?? 0} planimetrie${planimetrieComplete !== null ? ` · ${planimetrieComplete} complete` : ''}`;
   // `sotto`: è l'istanza dei «Dettagli» della riga sotto il titolo (quella che si vede sotto i 1024 px); solo lei porta «Sulla mappa di
   // Tokyo», che così non è montato due volte
-  const dettagliGuida = (classe: string, sotto = false) => d && (d.livelloConsigliato || d.note || !memento) ? (
+  // L8-04 (D5): il livello consigliato minimo e massimo; il confronto delle fonti (nota storica) solo nella preparazione (D10)
+  const livelloTesto = d ? testoLivelloConsigliato(d.livelloConsigliato) : null;
+  const noteLivello = !IN_RILASCIO && d ? d.noteLivello : [];
+  const dettagliGuida = (classe: string, sotto = false) => d && (livelloTesto || noteLivello.length || d.note || !memento) ? (
     <details className={`testo-12 ${classe}`}>
       <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
       <div className="flex flex-col gap-1 pt-1.5">
@@ -606,7 +632,8 @@ export function DungeonDettaglioPage() {
         {/* LAY3-5 (e LAY3-2): sovrano e arcana interi, perché nell'intestazione si accorciano quando sono frasi lunghe */}
         {!memento && d.sovrano && <TestoRipiegabile testo={`Sovrano: ${d.sovrano}`} massimo={120} className="testo-12 text-text-secondary" />}
         {!memento && d.arcanaSovranoNome && <TestoRipiegabile testo={`Arcana: ${d.arcanaSovranoNome}`} massimo={120} className="testo-12 text-text-secondary" />}
-        {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="testo-13 text-text-secondary" />}
+        {livelloTesto && <span className="testo-13 text-text-secondary">Livello consigliato: {livelloTesto}</span>}
+        {noteLivello.length > 0 && <NoteStoricheOfferta note={noteLivello} effetto={EFFETTO_NOTA_LIVELLO} />}
         {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="testo-12 text-text-muted whitespace-pre-wrap" />}
       </div>
     </details>
@@ -628,9 +655,9 @@ export function DungeonDettaglioPage() {
   const correzioneScheda = (onChiudi?: () => void) => d && (
     <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
       {...(onChiudi ? { aperta: true, onChiudi } : {})}
-      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloConsigliato: d.livelloConsigliato, note: d.note, ...bozzaDate(d.date) })}
+      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloMin: numeroInBozza(d.livelloConsigliato.min), livelloMax: numeroInBozza(d.livelloConsigliato.max), note: d.note, ...bozzaDate(d.date) })}
       onSalva={async (b) => {
-        const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: b.livelloConsigliato, note: b.note };
+        const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: livelloDellaBozza(b.livelloMin, b.livelloMax), note: b.note };
         // le date si mandano solo se sono cambiate: senza, la scheda di un posto senza finestra si salverebbe con una data vuota. Una data
         // rovesciata o mancante non parte: il messaggio è quello del server (la stessa regola, `shared/datePalazzo`)
         const date = dateDellaBozza(b);
@@ -665,7 +692,10 @@ export function DungeonDettaglioPage() {
             </div>
             {errore && <p className="m-0 testo-12 text-error-testo" role="alert">{errore}</p>}
           </fieldset>
-          {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
+          {/* L8-04 (D5): il livello consigliato minimo e massimo (vuoto = la fonte non lo dice); il confronto delle fonti è la nota storica */}
+          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato minimo" valore={b.livelloMin} massimo={2} onCambia={(v) => cambia({ livelloMin: v })} />
+          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato massimo" valore={b.livelloMax} massimo={2} onCambia={(v) => cambia({ livelloMax: v })} />
+          {campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
         </>; }}
     </CorrezioneGuida>
   );

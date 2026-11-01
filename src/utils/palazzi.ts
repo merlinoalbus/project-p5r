@@ -59,3 +59,13 @@ export function soloPalazzi<T extends Pick<DungeonRiassuntoDto, 'tipo' | 'regola
 export function radiciMetaverso<T extends Pick<DungeonRiassuntoDto, 'tipo' | 'regolaBoss'>>(dungeon: T[]): T[] {
   return dungeon.filter((d) => (d.tipo === 'palazzo' && !eDedaloDeiMemento(d)) || d.tipo === 'mementos');
 }
+
+/** L8-04 (D5): il livello consigliato di un Palazzo in parole, dal minimo e dal massimo di Royal: «15–16», «75», «45 o più», «fino a 30»;
+ *  null se la fonte non dà nessun numero (la scheda allora non lo scrive: il confronto delle fonti sta nella nota storica). */
+export function testoLivelloConsigliato(l: DungeonRiassuntoDto['livelloConsigliato']): string | null {
+  const { min, max } = l;
+  if (min !== null && max !== null) return min === max ? String(min) : `${min}–${max}`;
+  if (min !== null) return `${min} o più`;
+  if (max !== null) return `fino a ${max}`;
+  return null;
+}

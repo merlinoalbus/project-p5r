@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ARTICOLO_AOJIRU, ORDINE_AOJIRU,
+  ARTICOLO_AOJIRU, AOJIRU_NOTE, ORDINE_AOJIRU, PREZZO_AOJIRU,
   type AnteprimaRegistrazioneAcquistoDto, type AnteprimaRimozioneAcquistoDto,
   type FonteAcquisto, type RichiestaRegistraAcquisto, type StatoAcquistiArticoloDto,
   type RegistrazioneAcquistoDto,
   type NuovaRegistrazioneAcquisto,
 } from '../../../shared/acquisti';
-import { eDote, nomeDote, type DoteChiave } from '../../../shared/doti';
+import { eDote, nomeDote, puntiDaNote, type DoteChiave } from '../../../shared/doti';
 import { dataValida } from '../../../shared/condizioniSpillo';
 import {
   anteprimaAnnullaProvenienzaAcquisto,
@@ -38,6 +38,10 @@ const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const messaggio = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 const fortunaInParole = (f: boolean | null) => f === null ? 'Fortuna non nota' : f ? 'con Fortuna' : 'senza Fortuna';
 const fasciaInParole = (f: string) => f === 'sera' ? 'di sera' : 'di giorno';
+// L8-10: prezzo, note e punti dell'Aojiru dalle regole condivise (`shared/acquisti`, `puntiDaNote`), mai scritti a mano
+const PREZZO_TESTO = `${PREZZO_AOJIRU.toLocaleString('it-IT')} yen`;
+const PUNTI_AOJIRU = puntiDaNote(AOJIRU_NOTE as 1);
+const PUNTI_AOJIRU_FORTUNA = puntiDaNote(AOJIRU_NOTE as 1, false, true);
 
 /** Quanto contava il vecchio segno «Acquistato», in parole: non è il prezzo davvero pagato. */
 function ProvaPresenza({ valutazione: v }: { valutazione: ValutazionePresenza }) {
@@ -148,7 +152,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
   if (confermato) return <p role="status" className="m-0 text-success">{esitoConferma}</p>;
   if (pendente) return <div className="flex flex-col gap-2"><p role="status" className="m-0 text-warning">C’è già un’operazione da completare per questa voce: finché non è chiusa non ne invio un’altra.</p><GestiPartita partitaId={partitaId} onCambiato={async () => { if (attiva()) await onRecuperato?.(); }} /></div>;
   return <div className="flex min-w-0 flex-col gap-3 testo-13">
-    <p className="m-0">Domenica · 5.000 yen · non consuma tempo. Dà 2 punti (<Note n={1} />) alla Dote del succo, 3 se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
+    <p className="m-0">Domenica · {PREZZO_TESTO} · non consuma tempo. Dà {PUNTI_AOJIRU} punti (<Note n={AOJIRU_NOTE} />) alla Dote del succo, {PUNTI_AOJIRU_FORTUNA} se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
     {stato?.aojiru && <p className="m-0">{stato.aojiru.varianteAttesa ? `Prossima variante prevista: ${nomeDote(stato.aojiru.varianteAttesa)}.` : 'Variante iniziale da osservare.'}</p>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((s) => <li key={s}>{s}</li>)}</ul>}
     {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void registro.ricarica()} /></p>}
@@ -169,13 +173,13 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
         <CampoTesto etichetta="Quale in quella fascia" tipo="numero" valore={campi.ordine} aiuto="1 se è il primo della fascia" onCambia={(ordine) => cambia({ ordine })} />
       </div>
       <Selettore etichetta="Che succo hai bevuto" valore={campi.variante} opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => cambia({ variante: d as DoteChiave })} />
-      {!!campi.variante && <span className="testo-12 text-text-secondary">{fortunaCalcolata === null ? 'Di quel giorno la partita non ricorda la Fortuna: conto solo i 2 punti certi.' : fortunaCalcolata ? 'In quel giorno la Fortuna era accesa su questa Dote: 3 punti.' : 'In quel giorno la Fortuna non era accesa su questa Dote: 2 punti.'}</span>}
+      {!!campi.variante && <span className="testo-12 text-text-secondary">{fortunaCalcolata === null ? `Di quel giorno la partita non ricorda la Fortuna: conto solo i ${PUNTI_AOJIRU} punti certi.` : fortunaCalcolata ? `In quel giorno la Fortuna era accesa su questa Dote: ${PUNTI_AOJIRU_FORTUNA} punti.` : `In quel giorno la Fortuna non era accesa su questa Dote: ${PUNTI_AOJIRU} punti.`}</span>}
       {presenza && <Selettore etichetta="Il vecchio segno «Acquistato»" valore={campi.rapporto} opzioni={[{ chiave: 'rappresenta', nome: 'Questo consumo prende il suo posto' }, { chiave: 'ulteriore', nome: 'È un consumo in più' }]} onCambia={(r) => cambia({ rapporto: r })} />}
     </fieldset>
     {!anteprima && <PulsanteVisivo icona={<IconaAzione chiave="dettagli" dimensione={22} />} titolo="Mostra il riepilogo" className="self-start" disabled={!valido || occupato || !registro.dati} onClick={() => void prepara()} />}
     {anteprima && <div className="flex flex-col gap-2 rounded border border-border p-3">
       <strong>{anteprima.identita.nome} · {dataGiocoTesto(anteprima.nuovo.momento.giorno)}, {fasciaInParole(anteprima.nuovo.momento.fascia)} · {nomeDote(anteprima.effetto.dote)}</strong>
-      <span>{anteprima.effetto.puntiConfermati === null ? 'Il totale dei punti non è certo.' : <>{anteprima.effetto.puntiConfermati} punti{anteprima.effetto.note ? <> · <Note n={anteprima.effetto.note} /></> : null}.</>} Costo: 5.000 yen.</span>
+      <span>{anteprima.effetto.puntiConfermati === null ? 'Il totale dei punti non è certo.' : <>{anteprima.effetto.puntiConfermati} punti{anteprima.effetto.note ? <> · <Note n={anteprima.effetto.note} /></> : null}.</>} Costo: {PREZZO_TESTO}.</span>
       <span>{anteprima.esitoPrevisto === 'registrata' ? 'È un consumo nuovo.' : anteprima.esitoPrevisto === 'fonte-collegata' ? 'Si collega al consumo scelto; non ne aggiunge un altro.' : 'Questa voce è già collegata: non aggiunge un consumo.'}</span>
       {anteprima.nuovo.scelta.tipo === 'collega' && anteprima.acquisti.registrazioni.filter(r => anteprima.nuovo.scelta.tipo === 'collega' && r.id === anteprima.nuovo.scelta.acquistoId).map(r => <DettagliConsumo key={r.id} acquisto={r} />)}
       <span>{anteprima.nuovo.fonte.tipo === 'manuale' ? 'Inserito a mano' : 'Dal Diario'} · {fortunaInParole(anteprima.nuovo.fortuna)}.</span>

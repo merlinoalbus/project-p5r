@@ -133,7 +133,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
       useSuggerimentiStore.getState().invalida();
       // R12-01/7: le Doti dei turni del + stanno nel promemoria «Applica» della riga; l'avviso dice solo quelle dei turni tolti che non vengono
       // dal + (registrati da una voce o prima del registro), da segnare a mano. L'app non tocca le Doti
-      avvisaDotiDaSegnare(nuovo.daSegnare);
+      avvisaDotiDaSegnare(nuovo.daSegnare, undefined, partitaId);
     }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
   const rileggi = async () => { setStato(null); await dati.ricarica(); };

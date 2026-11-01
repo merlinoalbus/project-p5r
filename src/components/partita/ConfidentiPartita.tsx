@@ -157,7 +157,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       if (prima && agg.rango !== prima.rango) setUltimo((u) => ({ ...u, [chiave]: [] }));
       // la Dote del passaggio di rango: il passaggio l'ha registrata (o, scendendo, tolta); una risposta registra l'incontro
       // senza Dote (dal 2026-10-17). Le Doti si segnano a mano: l'avviso la ricorda
-      avvisaDotiDaSegnare(agg.doteIncontro, `Incontro con ${agg.nome}`);
+      avvisaDotiDaSegnare(agg.doteIncontro, `Incontro con ${agg.nome}`, partitaId);
       if (prima && agg.puntiNecessari !== null && agg.puntiNecessari > 0 && agg.mancanti === 0 && (prima.mancanti ?? 1) > 0) {
         notifica('success', `${agg.nome}: punti sufficienti per il rango ${agg.rango + 1}! Passa del tempo insieme per salire di rango.`);
       }

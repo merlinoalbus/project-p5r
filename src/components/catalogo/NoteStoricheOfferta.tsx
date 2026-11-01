@@ -11,11 +11,20 @@ import { IconaAzione } from '../shared/IconaAzione';
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
+/** Che cosa la nota non cambia, detto nelle finestre di modifica e di ripristino: per le offerte il prezzo e gli acquisti (il caso di sempre),
+ *  per un Palazzo il livello consigliato (L8-04). */
+export interface EffettoNotaStorica { modifica: string; ripristino: string }
+const EFFETTO_OFFERTA: EffettoNotaStorica = {
+  modifica: 'È una nota sulla fonte: non cambia il prezzo dell’offerta né gli acquisti registrati.',
+  ripristino: 'Testo e fonte della nota tornano come li dà la guida. Prezzi, acquisti e progressi non cambiano.',
+};
+
 /** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato (migrazione 139), che si
- *  modifica da qui e torna al valore della guida con «Ripristina»; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. */
-export function NoteStoricheOfferta({ note, onLegamiCambiati }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void> }) {
+ *  modifica da qui e torna al valore della guida con «Ripristina»; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. Dalla 335
+ *  (L8-04) è anche il confronto delle fonti sul livello consigliato di un Palazzo (`effetto` dice che cosa la nota non cambia). */
+export function NoteStoricheOfferta({ note, onLegamiCambiati, effetto = EFFETTO_OFFERTA }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void>; effetto?: EffettoNotaStorica }) {
   if (!note?.length) return null;
-  return <div className="flex min-w-0 flex-col gap-2 testo-12">{note.map(n => <NotaStorica key={n.id} nota={n} onLegamiCambiati={onLegamiCambiati} />)}</div>;
+  return <div className="flex min-w-0 flex-col gap-2 testo-12">{note.map(n => <NotaStorica key={n.id} nota={n} onLegamiCambiati={onLegamiCambiati} effetto={effetto} />)}</div>;
 }
 
 /** Le offerte e gli oggetti a cui si riferisce la nota si scelgono per nome con la ricerca (R11-17/1). */
@@ -26,7 +35,7 @@ const NOTA_SALVATA = 'nota-storica-salvata';
 
 /** Una nota con i suoi gesti. La nota mostrata deriva dalla prop: un refetch (o un'altra vista) vince sempre; il valore restituito dal
  *  server dopo un salvataggio si usa solo finché la prop è quella su cui si è salvato, e si annuncia alle altre istanze con lo stesso id. */
-function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onLegamiCambiati?: () => void | Promise<void> }) {
+function NotaStorica({ nota, onLegamiCambiati, effetto }: { nota: NotaStoricaOfferta; onLegamiCambiati?: () => void | Promise<void>; effetto: EffettoNotaStorica }) {
   const [salvata, setSalvata] = useState<{ su: NotaStoricaOfferta; nuova: NotaStoricaOfferta } | null>(null);
   const attuale = salvata && salvata.su === nota ? salvata.nuova : nota;
   useEffect(() => {
@@ -68,7 +77,7 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
       <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={aperta === 'ripristina' ? 'riapri' : 'registra'} dimensione={22} />} titolo={aperta === 'ripristina' ? 'Ripristina' : 'Salva'} disabled={occupato || (aperta === 'modifica' && vuota)} onClick={() => void esegui()} />
     </>}>
       {aperta === 'ripristina'
-        ? <p className="m-0">Testo e fonte della nota tornano come li dà la guida. Prezzi, acquisti e progressi non cambiano.</p>
+        ? <p className="m-0">{effetto.ripristino}</p>
         : <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">Testo
             <textarea className="input min-h-32" value={testo} maxLength={2000} disabled={occupato} onChange={(e) => setTesto(e.target.value)} />
@@ -76,7 +85,7 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
           <label className="flex flex-col gap-1 text-sm">Fonte
             <input className="input touch" value={fonte} maxLength={500} disabled={occupato} onChange={(e) => setFonte(e.target.value)} />
           </label>
-          <p className="m-0 text-sm text-text-secondary">È una nota sulla fonte: non cambia il prezzo dell’offerta né gli acquisti registrati.</p>
+          <p className="m-0 text-sm text-text-secondary">{effetto.modifica}</p>
         </div>}
     </Modal>}
   </div>;

@@ -196,7 +196,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
       const agg = gruppo === 'libri' ? daLibro(esito as LibroDto) : gruppo === 'film' ? daFilm(esito as FilmDto) : daGioco(esito as VideogiocoDto);
       setToccate((t) => ({ ...t, [agg.chiave]: { voce: agg, base: lette.current[gruppo] } }));
       // il conseguimento dà le sue Doti: si segnano a mano, l'avviso le ricorda
-      avvisaDotiDaSegnare(esito.daSegnare, v.nome);
+      avvisaDotiDaSegnare(esito.daSegnare, v.nome, partitaId);
       // Ondata 5 (lotto F-bis): un libro finito (o riaperto) cambia i promemoria dei libri letti nei tre gruppi: si rileggono, con la toppa sopra
       if (gruppo === 'libri' && agg.fatto !== v.fatto) { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }
     } catch (err) {

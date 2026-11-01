@@ -71,8 +71,8 @@ describe('API', () => {
     expect(d.skill.length).toBeGreaterThan(0);
     expect(d.skill[0].effettoNome).not.toBe(d.skill[0].effetto);
     expect(d.trattoDettaglio?.elemento).toBe('trait');
-    expect(d.areeMementos.length).toBeGreaterThan(0);
-    expect(d.areeMementos[0].nome).toMatch(/^Dedalo di/);
+    // L8-08: «dove si incontra» è un servizio solo (`/compendio/persona/:id/dove-si-incontra`, Ombre e dedali dei Memento): la scheda non lo ripete
+    expect('areeMementos' in d).toBe(false);
     expect(d.ingredienteDi.map((r) => r.risultato.nome)).toContain('Black Frost');
     const speciale = (await request(app).get('/api/compendio/persona?speciale=true')).body.data as PersonaRiassuntoDto[];
     const bf = (await request(app).get(`/api/compendio/persona/${speciale.find((p) => p.nome === 'Black Frost')!.id}`)).body.data as PersonaDettaglioDto;

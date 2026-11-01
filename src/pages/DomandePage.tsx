@@ -96,7 +96,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
       onCambiata(esito);
       // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta è la sua
       // (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
-      avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata');
+      avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata', partitaId);
       if (d.voceUid) useSuggerimentiStore.getState().invalida();
       seGiornoAvanzato({ giornoAvanzato, fasciaAvanzata });
     } catch (err) {

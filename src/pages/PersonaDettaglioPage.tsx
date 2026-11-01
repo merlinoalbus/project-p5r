@@ -108,7 +108,7 @@ export function PersonaDettaglioPage() {
   return <SchedaPersona key={id} />;
 }
 
-/** Identità, statistiche, affinità, skill, tratto, fusioni, esecuzione, Mementos. */
+/** Identità, statistiche, affinità, dove si incontra (dalle Ombre, Memento compresi), skill, tratto, fusioni, esecuzione. */
 function SchedaPersona() {
   const { id } = useParams();
   const personaId = Number(id);
@@ -208,9 +208,6 @@ function SchedaPersona() {
                       </span>
                     )}
                     {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
-                    {p.areeMementos.length > 0 && (
-                      <span>Mementos: <strong className="text-text">{p.areeMementos.map((a) => a.nome).join(', ')}</strong>{p.pianiMementos ? ` — ${p.pianiMementos}` : ''}</span>
-                    )}
                     {/* L4-06: le Ombre di questa Persona portano alla loro pagina (la casa la dà il server); il titolo che l'Ombra porta nella
                         negoziazione è un altro nome («Ambasciatore della sozzura» per Belphegor) e resta testo */}
                     {p.ombre.length > 0 && (

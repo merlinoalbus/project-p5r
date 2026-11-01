@@ -75,7 +75,7 @@ const areaPalazzo = (slug: string, nome: string, predefinita: string, infiltrazi
  *  spilli portano lo stato della partita (1 preso su 4), senza restano `null`. */
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
-  date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: null }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
+  date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: null }, finestra: null, livelloConsigliato: { min: null, max: null }, noteLivello: [], punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 3, mappeComplete: partita ? 0 : null }, completato: null, concluso: null, atterraggio: null, atterraggi: [], illustrazione: { immagineUrl: null, asset: null }, personeCatturate: partita ? [] : null, note: '', fonti: [],
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)], area: 'dungeon/kamoshida/cancello' }],

@@ -20,7 +20,7 @@ const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   // L13 O6-3: le date sono giorni del calendario di gioco (MM-GG), una fonte sola
   date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: '04-22' },
   finestra: { dal: '04-12', al: '05-02' },
-  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, concluso: null, atterraggio: null, ...extra,
+  livelloConsigliato: { min: 10, max: null }, aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, concluso: null, atterraggio: null, ...extra,
 });
 
 beforeEach(() => {
@@ -46,7 +46,8 @@ describe('DungeonPage', () => {
     expect(screen.getByText('Sblocco 12 apr')).toHaveAttribute('title', 'Si apre: 12 aprile');
     expect(screen.getByText('Scadenza 2 mag')).toHaveAttribute('title', 'Scade: 2 maggio');
     expect(screen.getByText('Sblocco 16 mag')).toBeInTheDocument();
-    expect(screen.getAllByText(/^Livello: /)[0]).toHaveAttribute('title', expect.stringContaining('boss finale'));
+    // L8-04: il livello consigliato minimo e massimo (qui solo il minimo), senza il testo delle fonti
+    expect(screen.getAllByText('Livello: 10 o più')[0]).toBeInTheDocument();
     // emblema di riserva: iniziale «K» per Kamoshida (nessun arcano), icona dell'arcano assente → iniziale «M» per Madarame
     expect(screen.getAllByText('K')).toHaveLength(1);
     expect(screen.getAllByText('M')).toHaveLength(1);

@@ -5,7 +5,7 @@
 import type {
   CapienzaScortaDto, CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { DivergenzaDto, EsitoRegaloDto, IncensoIsolamentoDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
+import type { DivergenzaDto, EsitoRegaloDto, IncensoIsolamentoDto, ModificatoriDotiDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -70,6 +70,8 @@ export const eliminaPartita = (id: number): Promise<void> => apiDelete(`/partite
 
 /** Le Doti sociali della partita con punti, rango e punti mancanti al successivo. */
 export const getDoti = (id: number): Promise<DoteSocialePartitaDto[]> => apiGet(`/partite/${id}/doti`);
+/** L8-11: le letture della partita che cambiano i punti delle note («Anima da cineasta» letto), per precompilare la scheda Doti. */
+export const getModificatoriDoti = (id: number): Promise<ModificatoriDotiDto> => apiGet(`/partite/${id}/doti/modificatori`);
 /** Modifica a mano una Dote sociale: punti assoluti, differenza o note viste in gioco (mai sotto zero); risponde con la Dote aggiornata. */
 export const aggiornaDote =(id: number, chiave: string, mod: ModificaDote): Promise<DoteSocialePartitaDto> =>
   apiPatch(`/partite/${id}/doti/${encodeURIComponent(chiave)}`, mod);

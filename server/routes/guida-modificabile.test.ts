@@ -182,7 +182,9 @@ describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
     await request(app).put('/api/compendio/dungeon/kamoshida').send({ nome: lungo(LIMITI_GUIDA.dungeon.nome + 1) }).expect(400);
     await request(app).put('/api/compendio/dungeon/kamoshida').send({ sovrano: lungo(LIMITI_GUIDA.dungeon.sovrano) }).expect(200);
     await request(app).put('/api/compendio/dungeon/kamoshida').send({ sovrano: lungo(LIMITI_GUIDA.dungeon.sovrano + 1) }).expect(400);
-    await request(app).put('/api/compendio/dungeon/kamoshida').send({ livelloConsigliato: lungo(LIMITI_GUIDA.dungeon.livello) }).expect(200);
+    // L8-04: il livello consigliato è un minimo e un massimo, entro il livello massimo condiviso
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ livelloConsigliato: { min: 1, max: LIMITI_GUIDA.dungeon.livelloMassimo } }).expect(200);
+    await request(app).put('/api/compendio/dungeon/kamoshida').send({ livelloConsigliato: { min: 1, max: LIMITI_GUIDA.dungeon.livelloMassimo + 1 } }).expect(400);
     await request(app).put('/api/compendio/dungeon/kamoshida').send({ note: lungo(LIMITI_GUIDA.dungeon.note) }).expect(200);
   });
 

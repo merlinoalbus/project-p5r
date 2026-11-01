@@ -37,7 +37,7 @@ describe('le Richieste modificabili', () => {
 
   it('ogni Richiesta del pacchetto si risalva com\'è (i tetti stanno sopra i dati veri)', async () => {
     for (const r of (await elenco()).richieste) {
-      const corpo = { nome: r.nome, committente: r.committente, disponibileDal: r.disponibileDal, scadenza: r.scadenza, dedalo: r.areaChiave, areaDedalo: r.areaDedalo, piano: r.piano,
+      const corpo = { nome: r.nome, committente: r.committente, dedalo: r.areaChiave, areaDedalo: r.areaDedalo, piano: r.piano,
         bersaglio: r.bersaglio, ricompense: r.ricompense, confidente: r.confidente?.chiave ?? null, confidenteRango: r.confidente?.rango ?? null, note: r.note };
       const risposta = await request(app).put(`/api/compendio/richieste/${r.chiave}`).send(corpo);
       expect(risposta.status, `${r.chiave}: ${JSON.stringify(risposta.body)}`).toBe(200);

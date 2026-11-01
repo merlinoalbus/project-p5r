@@ -10,6 +10,7 @@
 // ============================================================
 
 import { notifica } from '../stores/notificationStore';
+import { aggiornaDote } from '../services/api';
 import { testoDoteInPunti } from '../../shared/note';
 import type { DoteDaSegnareDto, EffettiAzioneDto } from '../types';
 
@@ -41,8 +42,31 @@ export function promemoriaDoti(lista: DoteDaSegnareDto[] | null | undefined): st
   return lista && lista.length > 0 ? `Da segnare nelle Doti: ${testoDotiDaSegnare(lista)}` : null;
 }
 
-/** L'avviso del promemoria, se c'è qualcosa da segnare (dura di più: va letto e poi fatto). */
-export function avvisaDotiDaSegnare(lista: DoteDaSegnareDto[] | null | undefined, premessa?: string): void {
+/**
+ * L'avviso del promemoria, se c'è qualcosa da segnare (dura di più: va letto e poi fatto). L8-12 (decisione dell'utente D7, «pulsante nella
+ * notifica»): con la partita, l'avviso ha il pulsante «Applica», che segna nella scheda Doti i punti detti (anche in meno), Dote per Dote,
+ * con lo stesso gesto della scheda (`aggiornaDote` con la differenza). Le Doti restano a mano: si applicano solo premendo, mai da sole, e
+ * non nasce un promemoria persistente; chiusa la notifica senza premere, si segnano dalla scheda come prima.
+ */
+export function avvisaDotiDaSegnare(lista: DoteDaSegnareDto[] | null | undefined, premessa: string | undefined, partitaId: number | null): void {
   const testo = promemoriaDoti(lista);
-  if (testo) notifica('info', premessa ? `${premessa} — ${testo}` : testo, 7000);
+  if (!testo || !lista) return;
+  const messaggio = premessa ? `${premessa} — ${testo}` : testo;
+  if (partitaId === null) { notifica('info', messaggio, 7000); return; }
+  const doti = lista.filter((d) => d.delta !== 0);
+  const applica = async () => {
+    // Dote per Dote: se una non si segna, l'errore dice quali sono già segnate e quali no, così chi riprova dalla scheda non le conta due volte
+    const segnate: DoteDaSegnareDto[] = [];
+    for (const d of doti) {
+      try { await aggiornaDote(partitaId, d.chiave, { delta: d.delta }); segnate.push(d); }
+      catch (err) {
+        const mancano = doti.filter((x) => !segnate.includes(x));
+        const causa = err instanceof Error ? err.message : 'errore del server';
+        notifica('error', `${segnate.length ? `Già segnato nelle Doti: ${testoDotiDaSegnare(segnate)}. ` : 'Nessuna Dote segnata. '}Non segnato: ${testoDotiDaSegnare(mancano)} (${causa}). Segna dalla scheda Doti solo quelle non segnate.`);
+        return;
+      }
+    }
+    notifica('success', `Segnato nelle Doti: ${testoDotiDaSegnare(doti)}.`);
+  };
+  notifica('info', messaggio, 15000, { azione: { etichetta: 'Applica', nomeAccessibile: `Applica nelle Doti: ${testoDotiDaSegnare(doti)}`, onClick: () => { void applica(); } } });
 }

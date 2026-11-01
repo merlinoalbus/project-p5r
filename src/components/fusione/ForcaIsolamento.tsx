@@ -10,7 +10,11 @@ import { EseguiForcaModal } from './EseguiForcaModal';
 import { NOMI_STATISTICHE, type ChiaveStatistica } from '../../../shared/statistiche';
 import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
-import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
+import {
+  FORCA_ALLARME, FORCA_INCIDENTE_BONUS, FORCA_PENALITA_LIVELLO, FORCA_SKILL_TRASFERITE, FORCA_STESSO_ARCANO, FORCA_TESORO, GIORNI_PER_APPLICAZIONE, INCENSI, INCENSO_ALLARME,
+  ISOLAMENTO_AVVISO, LIVELLO_RESISTENZA_COPRE, RANGO_GEMELLE_ISOLAMENTO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza,
+} from '../../../shared/bonusVelluto';
+import { testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { IncensoIsolamentoDto, PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 import { SelettorePosseduta } from './SelettorePosseduta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -53,7 +57,8 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
   return (
     <section className="card flex flex-col gap-3">
       <h2 className="m-0 testo-15 font-semibold">Forca (Potenziamento)</h2>
-      <p className="m-0 testo-13 text-text-secondary">Sacrifica una Persona per dare EXP a un'altra. L'EXP di base dipende dal livello del sacrificio; qui vedi i moltiplicatori: rango del Confidente dell'arcano del ricevente (Igor al massimo aumenta), stesso arcano ×1,5, Demone del Tesoro ×3/×5, Allarme 2/3/5/7, sacrificio di livello superiore ×0,5. Una skill trasferita a caso (1–3 con l'Allarme); un uso al giorno per Persona (nessun limite con l'Allarme).</p>
+      {/* L8-10: i fattori si leggono dalle costanti del calcolo (`shared/bonusVelluto`), mai scritti a mano */}
+      <p className="m-0 testo-13 text-text-secondary">Sacrifica una Persona per dare EXP a un'altra. L'EXP di base dipende dal livello del sacrificio; qui vedi i moltiplicatori: rango del Confidente dell'arcano del ricevente (Igor al massimo aumenta), stesso arcano {testoMoltiplicatore(FORCA_STESSO_ARCANO)}, Demone del Tesoro {testoMoltiplicatore(FORCA_TESORO.arcanoDiverso)}/{testoMoltiplicatore(FORCA_TESORO.stessoArcano)}, Allarme {FORCA_ALLARME.normaleArcanoDiverso}/{FORCA_ALLARME.normaleStessoArcano}/{FORCA_ALLARME.tesoroArcanoDiverso}/{FORCA_ALLARME.tesoroStessoArcano}, sacrificio di livello superiore {testoMoltiplicatore(FORCA_PENALITA_LIVELLO)}. {FORCA_SKILL_TRASFERITE.normale === 1 ? 'Una skill trasferita' : `${FORCA_SKILL_TRASFERITE.normale} skill trasferite`} a caso ({FORCA_SKILL_TRASFERITE.allarmeMin}–{FORCA_SKILL_TRASFERITE.allarmeMax} con l'Allarme); un uso al giorno per Persona (nessun limite con l'Allarme).</p>
       {scorta.length < 2 ? (
         <p className="m-0 testo-13 text-text-muted">Servono almeno due Persona nella scorta della partita attiva.</p>
       ) : (
@@ -164,8 +169,9 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
   return (
     <section className="card flex flex-col gap-3">
       <h2 className="m-0 testo-15 font-semibold">Isolamento (addestramento)</h2>
-      <p className="m-0 testo-13 text-text-secondary">Sbloccato al rango 3 delle Gemelle. La Persona in isolamento impara una skill di resistenza contro la sua debolezza (il tier dipende dal suo livello al deposito) e, bruciando un incenso, guadagna statistiche ogni 2 giorni (raddoppiate durante l'Allarme). Attenzione: avviso al giorno {ISOLAMENTO_AVVISO.giornoAvviso}, perdita al giorno {ISOLAMENTO_AVVISO.giornoPerdita}.</p>
-      {rangoGemelle < 3 && <p className="m-0 testo-12 text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
+      {/* L8-10: rango di sblocco, giorni per applicazione, moltiplicatore dell'Allarme dalle costanti del calcolo */}
+      <p className="m-0 testo-13 text-text-secondary">Sbloccato al rango {RANGO_GEMELLE_ISOLAMENTO} delle Gemelle. La Persona in isolamento impara una skill di resistenza contro la sua debolezza (il tier dipende dal suo livello al deposito) e, bruciando un incenso, guadagna statistiche ogni {GIORNI_PER_APPLICAZIONE} giorni ({testoMoltiplicatore(INCENSO_ALLARME)} durante l'Allarme). Attenzione: avviso al giorno {ISOLAMENTO_AVVISO.giornoAvviso}, perdita al giorno {ISOLAMENTO_AVVISO.giornoPerdita}.</p>
+      {rangoGemelle < RANGO_GEMELLE_ISOLAMENTO && <p className="m-0 testo-12 text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
         <div className="form-label">
@@ -178,7 +184,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
         </label>
       </div>
       <div className="testo-13 flex flex-col gap-1">
-        <div>Durata dell'addestramento al rango {rangoGemelle} delle Gemelle: <strong>{giorniIsolamento(rangoGemelle)} giorni</strong>{rangoGemelle < 3 ? ' (una volta sbloccato)' : ''}.</div>
+        <div>Durata dell'addestramento al rango {rangoGemelle} delle Gemelle: <strong>{giorniIsolamento(rangoGemelle)} giorni</strong>{rangoGemelle < RANGO_GEMELLE_ISOLAMENTO ? ' (una volta sbloccato)' : ''}.</div>
         {/* Rilievo R4: caricamento, errore ed elenco vuoto si dicono; senza incensi si registra «Senza incenso» */}
         {incensi.caricamento && !incensi.dati && <div role="status" className="text-text-muted">Carico gli incensi del catalogo…</div>}
         {incensi.errore && <div role="alert" className="text-error-testo">Gli incensi non si sono caricati: {incensi.errore}. Puoi registrare l’Isolamento senza incenso.</div>}
@@ -208,7 +214,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
           <div>
             {persona.nomeIt} (livello {persona.livello}): resistenza ottenuta di tier <strong>{tierResistenza(persona.livello).skill}</strong>
             {tierResistenza(persona.livello).livelloMax !== null && <span className="text-text-muted"> · dal livello {tierResistenza(persona.livello).livelloMax! + 1} il tier successivo</span>}
-            {persona.livello < 34 && <span className="text-warning"> · sotto il livello 34 la debolezza non viene coperta (solo schivata)</span>}
+            {persona.livello < LIVELLO_RESISTENZA_COPRE && <span className="text-warning"> · sotto il livello {LIVELLO_RESISTENZA_COPRE} la debolezza non viene coperta (solo schivata)</span>}
           </div>
         )}
         {persona && suggerimento.dati && (
@@ -222,7 +228,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
         )}
         {persona && (
           <div className="flex items-center gap-2 flex-wrap">
-            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}{scelto ? '' : ' senza incenso'}</>} disabled={occupato || rangoGemelle < 3} onClick={() => void registra()} />
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}{scelto ? '' : ' senza incenso'}</>} disabled={occupato || rangoGemelle < RANGO_GEMELLE_ISOLAMENTO} onClick={() => void registra()} />
           </div>
         )}
       </div>

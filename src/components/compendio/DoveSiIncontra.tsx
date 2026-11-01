@@ -2,13 +2,14 @@
 // DoveSiIncontra — nella scheda di una Persona: le Ombre che la portano, dove si incontrano e se è registrata nella partita (L8, R8-05, R8-07)
 // ============================================================
 //
-// Una sola fonte, quella delle Ombre (`GET /api/compendio/ombre?persona=`): lo stesso «dove si incontra» della Battaglia, dei dedali e della pagina
-// Ombra, con un Palazzo concluso dichiarato non più raggiungibile (R8-15b). La registrazione è la strada unica del compendio: un tocco la fa, togliere
+// L8-08: un servizio solo (`GET /api/compendio/persona/:id/dove-si-incontra`): le Ombre della guida (lo stesso «dove si incontra» della Battaglia,
+// dei dedali e della pagina Ombra, con un Palazzo concluso dichiarato non più raggiungibile, R8-15b) e i dedali dei Memento del compendio delle
+// Persona che le Ombre non dicono già (Makami e Scathach non hanno un'Ombra nella guida), col piano. La registrazione è la strada unica del compendio: un tocco la fa, togliere
 // chiede la conferma di sempre. La Persona si registra a mano anche se nessuna Ombra si cattura dall'incontro (fusione, Babau/Bugs).
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { getOmbre } from '../../services/api';
+import { getDoveSiIncontra } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useCatturaPersona } from '../../hooks/useCatturaPersona';
 import { AvvisoTogliPersona, PiastrelleCattura } from '../guida/PiastrelleCattura';
@@ -26,9 +27,10 @@ const percorso = (l: OmbraLuogoDto): string => [l.dungeonNome, l.infiltrazione?.
 
 /** La sezione «Dove si incontra» con le Ombre, i luoghi e la registrazione nella partita. */
 export function DoveSiIncontra({ persona, partitaId }: Props) {
-  const ombre = useCarica(() => getOmbre({ persona: persona.id, partita: partitaId ?? undefined }), [persona.id, partitaId]);
+  const ombre = useCarica(() => getDoveSiIncontra(persona.id, partitaId ?? undefined), [persona.id, partitaId]);
   const cattura = useCatturaPersona(partitaId);
-  const elenco = ombre.dati ?? [];
+  const elenco = ombre.dati?.ombre ?? [];
+  const memento = ombre.dati?.memento ?? [];
   // l'incontro da cui si cattura, se ce n'è uno: il server controlla la sua catturabilità; altrimenti la registrazione è a mano
   const daIncontro = elenco.find((o) => o.catturabile);
   const registrata = cattura.catturate?.has(persona.id) ?? null;
@@ -46,7 +48,8 @@ export function DoveSiIncontra({ persona, partitaId }: Props) {
       </div>
       {cattura.daTogliere?.persona && <AvvisoTogliPersona nome={cattura.daTogliere.persona.nomeIt} occupato={cattura.occupata !== null} onConferma={cattura.conferma} onAnnulla={cattura.annulla} />}
       {ombre.errore && <p className="m-0 testo-12 text-error-testo" role="alert">{ombre.errore}</p>}
-      {!ombre.errore && elenco.length === 0 && !ombre.caricamento && <p className="m-0 testo-13 text-text-muted">La guida non ha Ombre con questa Persona: si ottiene per fusione o la si registra dal compendio.</p>}
+      {/* «si ottiene per fusione» solo se non si incontra da nessuna parte: né Ombre della guida né dedali dei Memento del compendio */}
+      {!ombre.errore && ombre.dati && elenco.length === 0 && memento.length === 0 && <p className="m-0 testo-13 text-text-muted">La guida non ha Ombre con questa Persona: si ottiene per fusione o la si registra dal compendio.</p>}
       {elenco.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {elenco.map((o) => (
@@ -66,6 +69,19 @@ export function DoveSiIncontra({ persona, partitaId }: Props) {
                 ))}
             </li>
           ))}
+        </ul>
+      )}
+      {/* L8-08: i dedali dei Memento del compendio delle Persona che le Ombre non dicono (o con un dettaglio sul piano che le aree non hanno) */}
+      {memento.length > 0 && (
+        <ul className="m-0 flex list-none flex-col gap-0.5 p-0 testo-13" aria-label="Nei Memento">
+          {memento.map((m) => {
+            const testo = `Memento › ${m.dedalo}${m.piani ? ` — ${m.piani}` : ''}`;
+            return (
+              <li key={m.dedalo}>
+                {m.casa ? <Link to={m.casa} className="touch inline-flex min-h-11 items-center testo-12">{testo}</Link> : <span className="testo-12">{testo}</span>}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

@@ -9,8 +9,8 @@
 // `FinestraModifica` (una colonna sul telefono, due da 768 px, piè fisso con Elimina / Annulla / Salva):
 //  - «La Richiesta»: nome, committente, Confidente collegato, note (il piano in testo solo dove la guida diceva altro dall'area);
 //  - «Sblocco e scadenza»: le condizioni di sblocco con l'editor UNICO delle condizioni (compresa «Sblocco ricevuto» da una voce del
-//    Diario), la scadenza come data di gioco (`SelettoreData`) e l'eventuale proroga con le sue condizioni. Il testo della guida resta
-//    visibile, e modificabile, solo dove la conversione non l'ha potuto leggere con certezza (migrazione 235). O7-1: con la proroga, l'area
+//    Diario), la scadenza come data di gioco (`SelettoreData`) e l'eventuale proroga con le sue condizioni (L8-09: i testi di sblocco e di
+//    scadenza della guida, vuoti in tutte le Richieste, non ci sono più, migrazione 337). O7-1: con la proroga, l'area
 //    (scelta da elenco, raggruppata per Dedalo) in cui il bersaglio si sposta finché vale (la guida: nel Dedalo di Da'at);
 //  - «Per completarla» (O7-1): le condizioni proprie di completamento, oltre al Dedalo del bersaglio aperto, con lo stesso editor;
 //  - «Dove»: dedalo e area;
@@ -56,7 +56,7 @@ const TERZO_SEMESTRE: RequisitoSpillo = { tipo: 'evento', evento: 'terzo-semestr
 
 /** I campi del modulo, come si scrivono; diventano dati solo al salvataggio. */
 interface Bozza {
-  nome: string; committente: string; disponibileDal: string; scadenza: string; dedalo: string; areaDedalo: string; piano: string;
+  nome: string; committente: string; dedalo: string; areaDedalo: string; piano: string;
   bersaglio: string; formaDemoniaca: string; livello: string; debolezze: string[]; resistenze: string[]; confusione: boolean;
   ricompense: string[]; confidente: string; note: string;
   condizioni: RequisitoSpillo[]; scadenzaData: string; prorogaData: string; prorogaCondizioni: RequisitoSpillo[];
@@ -75,7 +75,7 @@ function bozzaDa(r: RichiestaDto | null, iniziale: { dedalo?: string | null; are
   // (`daOmbra.propri`), che restano e valgono dove la scheda non sa; mai i valori letti dall'Ombra, che si correggono nella sua scheda
   const propri = r?.bersaglio.daOmbra?.propri ?? r?.bersaglio;
   return {
-    nome: r?.nome ?? '', committente: r?.committente ?? '', disponibileDal: r?.disponibileDal ?? '', scadenza: r?.scadenza ?? '',
+    nome: r?.nome ?? '', committente: r?.committente ?? '',
     dedalo: r ? r.areaChiave ?? NESSUNO : iniziale.dedalo ?? NESSUNO, areaDedalo: r ? r.areaDedalo ?? NESSUNO : iniziale.areaDedalo ?? NESSUNO, piano: r?.piano ?? '',
     bersaglio: r?.bersaglio.nome ?? '', formaDemoniaca: r?.bersaglio.formaDemoniaca ?? '', livello: propri?.livello ? String(propri.livello) : '',
     debolezze: [...(propri?.debolezze ?? [])], resistenze: [...(propri?.resistenze ?? [])], confusione: r?.bersaglio.vulnerabileConfusione ?? false,
@@ -185,7 +185,7 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
     if (!b.bersaglio.trim() && !ombra) throw new Error('Il nome del bersaglio è obbligatorio (o scegli l’Ombra del compendio).');
     if (b.prorogaData && !b.scadenzaData) throw new Error('La proroga vale solo con una scadenza: scegli prima la scadenza.');
     return {
-      nome: b.nome.trim(), committente: b.committente.trim(), disponibileDal: b.disponibileDal.trim(), scadenza: b.scadenza.trim(),
+      nome: b.nome.trim(), committente: b.committente.trim(),
       dedalo: b.dedalo || null, areaDedalo: b.dedalo && b.areaDedalo ? b.areaDedalo : null, piano: b.piano.trim(),
       // i campi propri si mandano sempre come sono: con l'Ombra non si azzerano (valgono dove la sua scheda non sa, e tornano se la si toglie)
       bersaglio: { nome: (b.bersaglio.trim() || ombra?.nome) ?? '', formaDemoniaca: b.formaDemoniaca.trim(), livello: intero(b.livello, 1, 99, 'Livello del bersaglio'),
@@ -247,7 +247,6 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
           <span className="testo-13 text-text-secondary">Quando si sblocca: tutte le condizioni vere (data, Confidente, Palazzo, Richiesta completata, «Sblocco ricevuto» da una voce del Diario…). Senza condizioni è disponibile da subito.</span>
           <CondizioniEditor condizioni={b.condizioni} onCambia={(c) => cambia({ condizioni: c })} disabilitato={occupato} massimo={20} />
         </div>
-        {partenza.disponibileDal && <CampoTesto etichetta="Testo della guida da convertire (non si valuta)" valore={b.disponibileDal} massimo={R.breve} aiuto="La conversione non l’ha potuto leggere con certezza: scrivi le condizioni qui sopra e poi svuota il testo." onCambia={(v) => cambia({ disponibileDal: v })} disabilitato={occupato} largo />}
         <SelettoreData etichetta="Scadenza" valore={b.scadenzaData} facoltativa onCambia={(v) => cambia({ scadenzaData: v, ...(v ? {} : { prorogaData: '' }) })} disabilitato={occupato} />
         {b.scadenzaData && <SelettoreData etichetta="Proroga fino al" valore={b.prorogaData} facoltativa onCambia={(v) => cambia({ prorogaData: v, ...(v && !b.prorogaCondizioni.length ? { prorogaCondizioni: [TERZO_SEMESTRE] } : {}) })} disabilitato={occupato} />}
         {b.scadenzaData && b.prorogaData && (
@@ -262,7 +261,6 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
             opzioni={[{ chiave: NESSUNO, nome: '— resta dov’è —' }, ...collocazioni.flatMap((d) => d.aree.map((a) => ({ chiave: a.chiave, nome: a.nome, gruppo: d.nome })))]}
             onCambia={(v) => cambia({ prorogaArea: v })} />
         )}
-        {partenza.scadenza && <CampoTesto etichetta="Scadenza scritta dalla guida (non si valuta)" valore={b.scadenza} massimo={R.breve} aiuto="La data qui sopra è quella che conta: svuota il testo se lo ripete." onCambia={(v) => cambia({ scadenza: v })} disabilitato={occupato} largo />}
       </SezioneCampi>
       <SezioneCampi titolo="Per completarla">
         <div className="campo--largo flex min-w-0 flex-col gap-1">

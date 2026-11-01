@@ -14,7 +14,7 @@ import type { ModificaAffinitaPersona } from '../../shared/affinitaPersona.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { dettaglioOmbra, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
+import { dettaglioOmbra, doveSiIncontraPersona, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
 import { paramsOmbra, queryOmbra, queryOmbre, type QueryOmbre } from '../schemas/ombre.js';
 import { negoziazione, negoziazioneCompatta, verificaNegoziazione } from '../services/negoziazioneService.js';
 import { queryNegoziazione, type QueryNegoziazione } from '../schemas/negoziazione.js';
@@ -130,6 +130,10 @@ router.get('/persona', validate({ query: queryPersona }), (req, res) => {
 
 router.get('/persona/:id', validate({ params: paramsId }), (req, res) => {
   res.json(dettaglioPersona(Number(req.params.id)));
+});
+// L8-08: «Dove si incontra» della Persona, un servizio solo: Ombre della guida e dedali dei Memento del compendio che le Ombre non dicono
+router.get('/persona/:id/dove-si-incontra', validate({ params: paramsId, query: queryOmbra }), (req, res) => {
+  res.json(doveSiIncontraPersona(Number(req.params.id), (req.query as unknown as { partita?: number }).partita));
 });
 
 router.get('/skill', validate({ query: querySkill }), (req, res) => {
@@ -513,6 +517,8 @@ const bodyGiorno = z.object({
   meteoDaVerificare: z.boolean().optional(),
   trama: z.string().max(4000).optional(),
   vincoli: z.array(z.string().max(500)).max(30).optional(),
+  // L8-02: gli avvisi del giorno (oggi al più 4 per giorno, il più lungo di 210 caratteri)
+  avvisi: z.array(z.string().max(1000)).max(30).optional(),
 }).strict();
 router.get('/giorni/:data', validate({ params: paramsGiorno }), (req, res) => {
   res.json(leggiGiorno(String(req.params.data)));

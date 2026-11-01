@@ -152,7 +152,8 @@ export function CompendioPage() {
       && (!arcana || p.arcana === arcana)
       && p.livello >= Math.min(livelloMin, livelloMax) && p.livello <= Math.max(livelloMin, livelloMax)
       && (mostraDlc || !p.dlc)
-      && (!soloCatturabili || (!p.speciale && !p.rara && !p.dlc && !p.delParty))
+      // L8-07: la regola unica, dalle Ombre (la stessa degli alberi di fusione e dei cicli)
+      && (!soloCatturabili || p.catturabile)
       && (!elemento || p.affinita.some((a) => a.elemento === elemento && (!codice || a.codice === codice)))
       && (!immagine || (immagine === 'con') === (conImmagine?.has(p.nome) ?? false)),
     );

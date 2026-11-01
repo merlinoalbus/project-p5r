@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { EFFETTI_ALLARME } from '../../../shared/bonusVelluto';
+import { EFFETTI_ALLARME, RANGO_GEMELLE_TRATTAMENTO_SPECIALE } from '../../../shared/bonusVelluto';
 import type { VellutoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -59,7 +59,7 @@ export function PannelloVelluto({ velluto, onCambiaAllarme, inCaricamento = fals
                 </li>
               ))}
             </ul>
-            {!v.gemelle.trattamentoSpeciale && <p className="m-0 mt-1 testo-12 text-text-muted">Senza «Trattamento speciale» (rango 5) non puoi fondere Persona sopra il tuo livello: usa il filtro «Fino al livello del protagonista».</p>}
+            {!v.gemelle.trattamentoSpeciale && <p className="m-0 mt-1 testo-12 text-text-muted">Senza «Trattamento speciale» (rango {RANGO_GEMELLE_TRATTAMENTO_SPECIALE}) non puoi fondere Persona sopra il tuo livello: usa il filtro «Fino al livello del protagonista».</p>}
           </div>
           <div>
             <div className="testo-12 uppercase tracking-wide text-text-muted">Bonus EXP del Confidente sulla fusione (per arcano del risultato)</div>

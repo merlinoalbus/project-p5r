@@ -9,7 +9,7 @@ import { t } from '../traduzioniService.js';
 import { assicuraNonDelGruppo } from '../personeDelGruppo.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
-import { SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
+import { RANGO_GEMELLE_TRATTAMENTO_SPECIALE, SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
 import type { VellutoDto } from '../../../shared/types.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { cicliFusione } from './cicliFusione.js';
@@ -86,7 +86,7 @@ export function vellutoDto(partitaId: number): VellutoDto {
     allarmeAttivo: partita.allarme_attivo === 1,
     gemelle: {
       rango: gemelle,
-      trattamentoSpeciale: gemelle >= 5,
+      trattamentoSpeciale: gemelle >= RANGO_GEMELLE_TRATTAMENTO_SPECIALE,
       sblocchi: SBLOCCHI_GEMELLE.map((s) => ({ ...s, ottenuto: s.rango <= gemelle })),
       prossimo: sb.prossimo,
     },

@@ -21,13 +21,12 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
-import { sintesi } from '../utils/testoBreve';
 import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { schedaAccessoMondo } from '../utils/accessoMondo';
-import { soloPalazzi } from '../utils/palazzi';
+import { soloPalazzi, testoLivelloConsigliato } from '../utils/palazzi';
 import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
 
 /**
@@ -84,9 +83,8 @@ export function DungeonPage() {
                         {/* L13 O6-3: le date della scheda (MM-GG, una fonte sola), «11 apr»; per esteso nel suggerimento */}
                         {d.date.dal && <span className="chip" title={`Si apre: ${dataGiocoTesto(d.date.dal)}`}>Sblocco {dataGiocoBreve(d.date.dal)}</span>}
                         {d.date.al && <span className="chip chip--attivo" title={`Scade: ${dataGiocoTesto(d.date.al)}`}>Scadenza {dataGiocoBreve(d.date.al)}</span>}
-                        {/* la prima frase «Non esplicitato/indicato da…» è una nota di ricerca: nella chip si salta e si legge quel che segue («Il boss
-                            finale è di Livello 11»); il testo intero resta nel `title` e nella scheda */}
-                        {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato.replace(/^Non (esplicitato|indicato).*?\.\s+(?=[A-ZÀ-Ý])/, '') || d.livelloConsigliato, 36)}</span>}
+                        {/* L8-04 (D5): il livello consigliato minimo e massimo di Royal; il confronto delle fonti sta nella nota storica della scheda */}
+                        {testoLivelloConsigliato(d.livelloConsigliato) && <span className="chip">Livello: {testoLivelloConsigliato(d.livelloConsigliato)}</span>}
                       </div>
                       <span className="testo-12 text-text-muted">{d.aree} infiltrazioni · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
                     </div>

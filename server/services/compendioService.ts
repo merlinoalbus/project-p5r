@@ -21,13 +21,14 @@ import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
 import { casaOmbra } from '../../shared/ombre.js';
+import { sqlStatoCattura } from './catturePersona.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { fraseDellaRegola } from './condizioni/fraseCondizioni.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
-  CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, StatoCattura, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../shared/types.js';
 
 // ---- Righe DB ----
@@ -105,6 +106,8 @@ interface RigaPersona {
   del_party: number; personaggio: string | null; forma: number | null; forma_di: number | null; deriva_da: number | null; chiave_forma: string | null; forma_condizioni_json: string | null;
   /** Ondata 5 (lotto F-bis, migrazione 296): l'oggetto chiave che la fusione richiede; la colonna manca negli schemi di prima. */
   richiede_oggetto?: string | null;
+  /** L8-07: lo stato della cattura (`sqlStatoCattura`, letto nella stessa SELECT): `provata`, `esclusa` o `da-verificare`. */
+  stato_cattura: StatoCattura;
 }
 
 /** Ondata 5 (lotto F-bis, decisione 22): l'oggetto che la Persona richiede per la fusione, con il nome del catalogo e la Richiesta che lo dà
@@ -216,6 +219,8 @@ function personaRiassunto(r: RigaPersona, affinita: Map<string, string> = codici
     statistiche: { forza: r.forza, magia: r.magia, resistenza: r.resistenza, agilita: r.agilita, fortuna: r.fortuna },
     affinita: affinitaDi(affinita),
     delParty: r.del_party === 1, personaggio: r.personaggio, forma: r.forma,
+    // L8-07: catturabile = non esclusa per documento (anche «da verificare», come prima); lo stato dice perché
+    catturabile: r.stato_cattura !== 'esclusa', statoCattura: r.stato_cattura,
   };
 }
 
@@ -349,7 +354,7 @@ export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
     par.push(f.skill);
   }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
-  const righe = getDb().prepare(`SELECT p.* FROM persona p JOIN arcana a ON a.chiave = p.arcana ${where} ORDER BY p.livello, a.ordine, p.nome`).all(...par) as RigaPersona[];
+  const righe = getDb().prepare(`SELECT p.*, ${sqlStatoCattura('p')} AS stato_cattura FROM persona p JOIN arcana a ON a.chiave = p.arcana ${where} ORDER BY p.livello, a.ordine, p.nome`).all(...par) as RigaPersona[];
   const affinita = codiciAffinitaDi(righe.map((r) => r.id));
   const dto = righe.map((r) => personaRiassunto(r, affinita.get(r.id) ?? new Map()));
   const q = f.q;
@@ -359,10 +364,10 @@ export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
 /**
  * Scheda completa di una Persona (404 se non esiste): riassunto, skill apprese per livello, dettaglio del tratto, ricetta
  * speciale e ricette di cui è ingrediente, set DLC, carte skill ottenibili con l'esecuzione, titolo di negoziazione (cercato
- * fra le skill la cui negoziazione termina con «(nome)», tolta la parentesi), aree di Mementos e oggetti con descrizione tradotta.
+ * fra le skill la cui negoziazione termina con «(nome)», tolta la parentesi) e oggetti con descrizione tradotta.
  */
 export function dettaglioPersona(id: number): PersonaDettaglioDto {
-  const r = prepared('SELECT * FROM persona WHERE id = ?').get(id) as RigaPersona | undefined;
+  const r = prepared(`SELECT p.*, ${sqlStatoCattura('p')} AS stato_cattura FROM persona p WHERE p.id = ?`).get(id) as RigaPersona | undefined;
   if (!r) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
   const base = personaRiassunto(r);
   const skill = (prepared('SELECT s.*, ps.livello AS livello_appreso, ps.modo FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = ? ORDER BY ps.livello IS NULL, ps.livello, ps.modo, s.nome').all(id) as Array<RigaSkill & { livello_appreso: number | null; modo: ModoApprendimento }>)
@@ -374,7 +379,6 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const carte = prepared('SELECT s.id, s.nome FROM skill_fonte_esecuzione f JOIN skill s ON s.id = f.skill_id WHERE f.persona_id = ? ORDER BY s.nome').all(id) as Array<{ id: number; nome: string }>;
   const negoz = prepared('SELECT negoziazione FROM skill WHERE negoziazione LIKE ? LIMIT 1').get(`%(${r.nome})`) as { negoziazione: string } | undefined;
   const titolo = negoz?.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') ?? null;
-  const aree = (JSON.parse(r.aree_mementos_json) as string[]).map((a) => ({ chiave: a, nome: t('areaMementos', a) }));
   // Il nome del dataset individua il suo ID; dopo M7 identità e descrizione vengono dal catalogo anche dopo una fusione.
   // Le forme del gruppo non si eseguono: niente oggetti (colonne NULL), niente ricerca.
   const originali = r.oggetto === null || r.oggetto_allarme === null ? [] : prepared('SELECT id,nome,descrizione FROM oggetto WHERE nome IN (?,?)').all(r.oggetto, r.oggetto_allarme) as Array<Pick<RigaOggetto, 'id' | 'nome' | 'descrizione'>>;
@@ -406,7 +410,9 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
     oggettoCatalogo: normale ? { chiave: normale.chiave, nome: normale.nome, casa: normale.casa } : null,
     oggettoAllarmeCatalogo: allarme ? { chiave: allarme.chiave, nome: allarme.nome, casa: allarme.casa } : null,
     trattoDettaglio: trattoRiga ? skillRiassunto(trattoRiga) : null,
-    skill, areeMementos: aree, pianiMementos: r.piani_mementos,
+    // L8-08: «Dove si incontra» non sta nella scheda: lo dà il servizio unico `ombreService.doveSiIncontraPersona`
+    // (`GET /compendio/persona/:id/dove-si-incontra`), con le Ombre della guida e le aree dei Memento del dataset che le Ombre non dicono
+    skill,
     ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
     negoziazione: titolo ? { titolo, titoloNome: t('negoziazione', titolo) } : null,
     // L4-06: le Ombre di questa Persona, che la scheda collega alla loro pagina

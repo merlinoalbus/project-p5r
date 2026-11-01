@@ -555,9 +555,10 @@ function normalizzato(testo: string): string {
 }
 
 /**
- * La proposta per la voce, solo con l'insieme vuoto: le righe di G-022, oppure le regole certe a richiesta — (a) il nome di **una sola**
- * infiltrazione del Palazzo compare nel testo della voce (senza maiuscole, accenti e punteggiatura); (b) la data della voce (`gg/mm`)
- * compare nel nome di **una sola** infiltrazione. Più candidati, o nessuno: nessuna proposta.
+ * La proposta per la voce, solo con l'insieme vuoto: le righe di G-022, oppure le regole a richiesta — (a, certa) il nome di **una sola**
+ * infiltrazione del Palazzo compare nel testo della voce (senza maiuscole, accenti e punteggiatura); (b, probabile; L8-06) un'altra voce
+ * dello **stesso giorno** è legata a **una sola** infiltrazione del Palazzo (il giorno di un'infiltrazione è quello delle sue voci, non una
+ * data scritta nel suo nome). Più candidati, o nessuno: nessuna proposta.
  */
 export function propostaInfiltrazioni(r: Pick<RigaVoce, 'uid' | 'data' | 'azione' | 'note'>, palazzo: string): AzionePercorsoDto['propostaInfiltrazioni'] {
   const salvata = propostaSalvata(r.uid).filter((p) => p.dungeon === palazzo);
@@ -566,9 +567,12 @@ export function propostaInfiltrazioni(r: Pick<RigaVoce, 'uid' | 'data' | 'azione
   const testo = normalizzato(`${r.azione} ${r.note ?? ''}`);
   const perNome = elenco.filter((i) => normalizzato(i.nome).trim() && testo.includes(normalizzato(i.nome)));
   if (perNome.length === 1) return { infiltrazioni: [{ chiave: perNome[0].chiave, nome: perNome[0].nome }], motivo: 'Il nome dell’infiltrazione è nel testo della voce.', certezza: 'certa' };
-  const [mm, gg] = r.data.split('-');
-  const perData = elenco.filter((i) => new RegExp(`(^|[^0-9])${gg}/${mm}([^0-9]|$)`).test(i.nome));
-  if (perData.length === 1) return { infiltrazioni: [{ chiave: perData[0].chiave, nome: perData[0].nome }], motivo: 'La data della voce è nel nome dell’infiltrazione.', certezza: 'certa' };
+  // L8-06: il giorno di un'infiltrazione è quello delle voci del Diario legate a lei (`voce_infiltrazione`, il legame che scrive l'utente),
+  // non una data scritta nel suo nome. Se un'altra voce dello stesso giorno è legata a una sola infiltrazione del Palazzo, è la proposta.
+  const delGiorno = new Set(prepared(`SELECT DISTINCT vi.infiltrazione_chiave FROM voce_infiltrazione vi JOIN voce_giornata v ON v.uid = vi.voce_uid
+    WHERE v.data = ? AND v.uid <> ?`).pluck().all(r.data, r.uid) as string[]);
+  const perData = elenco.filter((i) => delGiorno.has(i.chiave));
+  if (perData.length === 1) return { infiltrazioni: [{ chiave: perData[0].chiave, nome: perData[0].nome }], motivo: 'Un’altra voce dello stesso giorno è legata a questa infiltrazione.', certezza: 'probabile' };
   return null;
 }
 

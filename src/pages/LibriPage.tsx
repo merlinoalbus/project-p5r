@@ -75,7 +75,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     })),
     // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
     dopoOgniInvio: (libro) => {
-      avvisaDotiDaSegnare(libro.daSegnare, libro.nome);
+      avvisaDotiDaSegnare(libro.daSegnare, libro.nome, partitaId);
       // Ondata 5 (lotto F-bis): un libro con effetti che non sono Doti (Lettura rapida, Comprendere il cuore…) cambia il passo e i promemoria
       // della pagina: si rilegge, perché il segno e i promemoria li calcola il server dai libri letti
       if (libro.effetti.some((v) => v.effetto.famiglia !== 'dote')) void dati.ricarica();

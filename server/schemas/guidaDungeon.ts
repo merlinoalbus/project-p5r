@@ -34,11 +34,15 @@ export const paramsChiaveGuida =z.object({ chiave: z.string().min(1).max(200) })
 /** Le date di un Palazzo (L13 O6-3, migrazione 308): giorni del calendario di gioco; `al`, furto e lettera null = la guida non li dà
  *  (l'esistenza del giorno e l'ordine apertura ≤ furto ≤ lettera ≤ scadenza li controlla `impostaFinestra`). */
 const consigliPalazzo = { furtoConsigliato: dataGioco.nullable(), letteraEntro: dataGioco.nullable() };
+/** Un livello di gioco (1–99). */
+const livelloGioco = z.number().int().min(1).max(LIMITI_GUIDA.dungeon.livelloMassimo);
 export const bodyDungeon = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.dungeon.nome).optional(), sovrano: z.string().max(LIMITI_GUIDA.dungeon.sovrano).optional(),
   /** L13 O6-3: le date al posto dei tre testi di prima («Si apre», «Furto consigliato», «Scade»), una fonte sola. */
   date: z.object({ dal: dataGioco, al: dataGioco.nullable(), ...consigliPalazzo }).optional(),
-  livelloConsigliato: z.string().max(LIMITI_GUIDA.dungeon.livello).optional(), note: z.string().max(LIMITI_GUIDA.dungeon.note).optional(),
+  /** L8-04 (D5): il livello consigliato minimo e massimo di Royal (null = la fonte non lo dice); il minimo sopra il massimo lo rifiuta il servizio. */
+  livelloConsigliato: z.object({ min: livelloGioco.nullable(), max: livelloGioco.nullable() }).strict().optional(),
+  note: z.string().max(LIMITI_GUIDA.dungeon.note).optional(),
   /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
   voceBossFinale: z.string().min(1).max(200).nullable().optional(),
 });
@@ -152,7 +156,7 @@ const bersaglio = z.object({
  *  nessun dedalo / da collocare). */
 export const bodyRichiesta = z.object({
   nome: z.string().trim().min(1).max(R.nome).optional(), committente: z.string().trim().max(R.breve).optional(),
-  disponibileDal: z.string().trim().max(R.breve).optional(), scadenza: z.string().trim().max(R.breve).optional(),
+  // L8-09: niente più testi di sblocco e di scadenza della guida (`disponibileDal`, `scadenza`): valgono `condizioni` e `scadenzaData`
   dedalo: z.string().min(1).max(200).nullable().optional(), areaDedalo: z.string().min(1).max(200).nullable().optional(),
   piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(), ricompense: elencoVoci.optional(),
   confidente: z.string().min(1).max(200).nullable().optional(), confidenteRango: z.number().int().min(1).max(R.rango).nullable().optional(),

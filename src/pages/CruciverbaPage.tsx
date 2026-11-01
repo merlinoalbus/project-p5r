@@ -64,7 +64,7 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
       onCambiato(esito);
       // la nota di Conoscenza del cruciverba si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta
       // è la sua (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
-      avvisaDotiDaSegnare(esito.daSegnare, 'Cruciverba risolto');
+      avvisaDotiDaSegnare(esito.daSegnare, 'Cruciverba risolto', partitaId);
       if (c.voceUid) useSuggerimentiStore.getState().invalida();
       seGiornoAvanzato({ giornoAvanzato, fasciaAvanzata });
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }

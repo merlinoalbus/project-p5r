@@ -22,7 +22,7 @@ import { casaDelDedalo, casaDelPalazzo } from './mappe/casaMappa.js';
 import { normalizza } from '../../shared/maschere.js';
 import { eCodiceAffinita, eChiaveElemento, ELEMENTI, PERSONALITA_OMBRA, type PersonalitaOmbra } from '../../shared/elementi.js';
 import { casaOmbra } from '../../shared/ombre.js';
-import type { OmbraDettaglioDto, OmbraLuogoDto, OmbraRaggiungibilitaDto, OmbraResistenzaDto, OmbraSchedaDto, OmbreVerificaDto } from '../../shared/ombre.js';
+import type { DoveSiIncontraDto, OmbraDettaglioDto, OmbraLuogoDto, OmbraRaggiungibilitaDto, OmbraResistenzaDto, OmbraSchedaDto, OmbreVerificaDto } from '../../shared/ombre.js';
 
 interface RigaOmbra {
   chiave: string; nome: string; nomi_altri_json: string; persona_id: number | null; maschera_nota: string | null; personalita: string;
@@ -155,6 +155,32 @@ export function elencaOmbre(f: FiltroOmbre = {}): OmbraSchedaDto[] {
     .filter((r) => (!f.dungeon || (luoghi.get(r.chiave) ?? []).some((l) => l.dungeon === f.dungeon)) && (!f.personalita || r.personalita === f.personalita) && (f.persona === undefined || r.persona_id === f.persona))
     .map((r) => scheda(r, persone, { affinita: affinitaDellOmbra(r, perPersona), luoghi: luoghi.get(r.chiave) ?? [], registrata: registrate && r.persona_id !== null ? registrate.has(r.persona_id) : null }))
     .filter((o) => !testo || normalizza([o.nome, ...o.nomiAltri, o.persona?.nome ?? '', o.persona?.nomeIt ?? ''].join(' ')).includes(testo));
+}
+
+/**
+ * L8-08: «Dove si incontra» una Persona, il servizio unico della scheda Persona: le Ombre della guida (`elencaOmbre`) e, accanto, i dedali dei
+ * Memento del compendio delle Persona (`persona.aree_mementos_json`, `piani_mementos`) che le Ombre non dicono già — tutti, se la Persona non
+ * ha Ombre (Makami, Scathach). Un dedalo detto dalle Ombre si ripete solo se il piano del compendio porta un dettaglio fra parentesi che le
+ * aree non hanno («prima del Palazzo 7»): così nessuna informazione di prima si perde e niente si scrive due volte. Il piano si divide per
+ * dedalo quando il testo ne ha uno per dedalo («piano 5 e 6 / piano 1-4»), altrimenti resta intero. 404 se la Persona non c'è.
+ */
+export function doveSiIncontraPersona(personaId: number, partita?: number): DoveSiIncontraDto {
+  const r = prepared('SELECT aree_mementos_json, piani_mementos FROM persona WHERE id = ?').get(personaId) as { aree_mementos_json: string | null; piani_mementos: string | null } | undefined;
+  if (!r) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  const ombre = elencaOmbre({ persona: personaId, partita });
+  let chiavi: string[] = [];
+  try { const v = JSON.parse(r.aree_mementos_json ?? '[]') as unknown; if (Array.isArray(v)) chiavi = v.filter((x): x is string => typeof x === 'string'); } catch { chiavi = []; }
+  const nomi = mappaAmbito('areaMementos');
+  const dedali = new Map((prepared("SELECT a.chiave, a.nome FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE d.tipo = 'mementos'").all() as Array<{ chiave: string; nome: string }>).map((d) => [d.nome, d.chiave]));
+  const detti = new Set(ombre.flatMap((o) => o.luoghi.filter((l) => l.tipo === 'mementos' && l.infiltrazione).map((l) => l.infiltrazione!.chiave)));
+  const parti = r.piani_mementos ? r.piani_mementos.split(' / ') : [];
+  const memento = chiavi.map((k, i) => {
+    const dedalo = nomi[k] ?? k;
+    const dedaloChiave = dedali.get(dedalo) ?? null;
+    const piani = r.piani_mementos === null ? null : parti.length === chiavi.length ? parti[i] : r.piani_mementos;
+    return { dedalo, dedaloChiave, casa: dedaloChiave ? casaDelDedalo(dedaloChiave) : null, piani, giaNelleOmbre: dedaloChiave !== null && detti.has(dedaloChiave) };
+  }).filter((m) => !m.giaNelleOmbre || /\(/.test(m.piani ?? ''));
+  return { ombre, memento };
 }
 
 /**

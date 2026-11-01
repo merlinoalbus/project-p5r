@@ -23,9 +23,11 @@ export function haAnimaDaCineasta(partitaId: number): boolean {
   return letturaCompletata(partitaId, 'libro', 'anima-da-cineasta');
 }
 
-/** I punti che `note` note di `dote` valgono nella partita adesso: la regola unica con la Fortuna della partita su quella Dote. */
+/** I punti che `note` note di `dote` valgono nella partita adesso: la regola unica con la Fortuna della partita su quella Dote. L8-11: lo
+ *  scalino in più di film e DVD vale solo con «Anima da cineasta» letto nella partita, qualunque cosa dica chi chiama (anche l'interruttore
+ *  della scheda Doti): la lettura della partita decide. */
 export function puntiDote(partitaId: number, dote: string, note: 1 | 2 | 3, origine: OrigineNote = {}): number {
-  return puntiDaNote(note, origine.libro === true, fortunaSu(partitaId, dote), origine.cinema === true);
+  return puntiDaNote(note, origine.libro === true, fortunaSu(partitaId, dote), origine.cinema === true && haAnimaDaCineasta(partitaId));
 }
 
 /**

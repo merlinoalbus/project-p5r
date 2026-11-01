@@ -21,7 +21,7 @@ const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
 vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 const richiesta: RichiestaDto = {
-  chiave: 'bulli', nome: 'Bullismo sui bulli', committente: 'Mishima', disponibileDal: '20 maggio', scadenza: '', area: 'Dedalo di Aiyatsbus', areaChiave: 'aiy', piano: 'Area 3',
+  chiave: 'bulli', nome: 'Bullismo sui bulli', committente: 'Mishima', areaChiave: 'aiy', piano: 'Area 3',
   bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento'], vulnerabileConfusione: false },
   ricompense: ['485 PE', 'Pozione'], confidente: { chiave: 'ryuji', nome: 'Ryuji Sakamoto', rango: 2 }, areaNome: 'Dedalo di Aiyatsbus', areaOrdine: 1,
   areaDedalo: 'aiy-1', areaDedaloNome: 'Area 1', note: 'Facile.', fonte: '', stato: null,
@@ -75,7 +75,7 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
   api.aggiornaRichiesta.mockResolvedValue(richiesta);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', {
-    nome: 'Bullismo sui bulli', committente: 'Mishima', disponibileDal: '20 maggio', scadenza: '', dedalo: 'aiy', areaDedalo: 'aiy-2', piano: 'Area 3',
+    nome: 'Bullismo sui bulli', committente: 'Mishima', dedalo: 'aiy', areaDedalo: 'aiy-2', piano: 'Area 3',
     bersaglio: { nome: 'Kazuo', formaDemoniaca: 'Ippon-Datara', livello: 12, debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento', 'Sacro'], vulnerabileConfusione: false },
     ricompense: ['485 PE', 'Pozione'], confidente: 'ryuji', confidenteRango: null, note: 'Facile.',
     // L13: gli oggetti della ricompensa non cambiati non si mandano (il server non tocca le righe né le loro note)
@@ -185,7 +185,8 @@ it('O7-1: salvata per altro, la Richiesta non manda l’area della proroga (quel
 });
 
 it('O7-1: i testi della guida da convertire compaiono solo se non sono vuoti', async () => {
-  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, disponibileDal: '', scadenza: '', piano: '' }] });
+  // L8-09: i testi di sblocco e di scadenza della guida non ci sono più (i due campi non compaiono mai); resta il piano
+  api.getRichieste.mockResolvedValue({ ...elenco, richieste: [{ ...richiesta, piano: '' }] });
   monta('bulli');
   await screen.findByRole('dialog');
   expect(screen.queryByRole('textbox', { name: /Testo della guida da convertire/ })).toBeNull();

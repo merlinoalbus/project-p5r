@@ -36,8 +36,9 @@ function dto(r: RigaNota): NotaStoricaOfferta {
   return { id: r.chiave, versione: r.versione, fonte: r.fonte, testo: r.testo, modificata: g !== null && (g.testo !== r.testo || g.fonte !== r.fonte) };
 }
 
-/** Le note storiche di una riga (un'offerta per chiave, un oggetto del catalogo per chiave); vuoto se non ne ha. */
-export function noteStoricheDi(tipo: 'articolo' | 'catalogo', chiave: string): NotaStoricaOfferta[] {
+/** Le note storiche di una riga (un'offerta per chiave, un oggetto del catalogo per chiave, un Palazzo per chiave: dalla 335 il confronto delle
+ *  fonti sul livello consigliato, L8-04); vuoto se non ne ha. */
+export function noteStoricheDi(tipo: 'articolo' | 'catalogo' | 'dungeon', chiave: string): NotaStoricaOfferta[] {
   if (!conNote()) return [];
   return (prepared(`SELECT n.chiave, n.testo, n.fonte, n.versione, n.seed_json FROM nota_storica n JOIN nota_storica_legame l ON l.nota_chiave = n.chiave
     WHERE l.tipo = ? AND l.chiave = ? ORDER BY n.chiave`).all(tipo, chiave) as RigaNota[]).map(dto);

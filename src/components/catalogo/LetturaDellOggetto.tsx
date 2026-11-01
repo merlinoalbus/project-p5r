@@ -21,7 +21,7 @@ function Avanzamento<T extends Voce>({ voce, titolo, tipo, totale, passo, partit
 }) {
   const coda = useCodaProgresso<T>(partitaId, {
     invia, applica: onSalvata,
-    dopoOgniInvio: (v) => avvisaDotiDaSegnare(v.daSegnare, titolo),
+    dopoOgniInvio: (v) => avvisaDotiDaSegnare(v.daSegnare, titolo, partitaId),
     messaggioErrore: 'Aggiornamento dell’avanzamento fallito.', segnalaErrore: (m) => notifica('error', m),
   });
   return <>

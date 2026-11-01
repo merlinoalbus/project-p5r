@@ -117,7 +117,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           {/* D15: Richiesta completata = spunta rossa a sinistra del nome e nome barrato in grigio (lo dice il cartellino di stato accanto) */}
           <h3 className="m-0 testo-16 leading-tight"><SegnoStato stato={r.stato === 'completata' ? 'fatto' : null} className="mr-1.5 align-text-bottom" /><span className={r.stato === 'completata' ? 'stato-fatto' : ''}>{r.nome}</span></h3>
           {/* il Dedalo e l'area in cui è collocata (310: il `piano` in testo resta solo dove non è il nome dell'area) */}
-          <span className="testo-12 text-text-muted">{[r.areaNome ?? r.area, r.areaDedaloNome, r.piano].filter(Boolean).join(' · ')}</span>
+          <span className="testo-12 text-text-muted">{[r.areaNome, r.areaDedaloNome, r.piano].filter(Boolean).join(' · ')}</span>
           {/* O7-1: passata la scadenza con la proroga valida, il bersaglio si è spostato (la guida: nel Dedalo di Da'at durante il terzo semestre) */}
           {/* (la frase non nomina il terzo semestre: dice la proroga, qualunque sia la sua condizione, che il server ha già valutato) */}
           {r.statoPartita?.doveOggi.spostato && <span className="testo-12 text-text-secondary">Durante la proroga il bersaglio è nel {[r.statoPartita.doveOggi.dedaloNome, r.statoPartita.doveOggi.areaDedaloNome].filter(Boolean).join(', ')}</span>}
@@ -201,11 +201,9 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           {r.condizioni.length > 0 && <span><span className="text-text-muted">Si sblocca:</span> {r.condizioni.map((c) => c.testo).join(' · ')}</span>}
           {/* O7-1: le condizioni proprie per completarla (oltre al Dedalo aperto, che lo stato della partita dice da sé) */}
           {r.completamentoCondizioni.length > 0 && <span><span className="text-text-muted">Per completarla:</span> {r.completamentoCondizioni.map((c) => c.testo).join(' · ')}</span>}
-          {r.disponibileDal && <span><span className="text-text-muted">Disponibile dal (guida)</span> {r.disponibileDal}</span>}
-          {!r.condizioni.length && !r.disponibileDal && <span><span className="text-text-muted">Si sblocca:</span> da subito</span>}
+          {!r.condizioni.length && <span><span className="text-text-muted">Si sblocca:</span> da subito</span>}
           {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata ${dataConArticolo(r.proroga.data, 'a')} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}
             {r.proroga?.areaDedaloNome ? ` · intanto il bersaglio è nel ${[r.proroga.dedaloNome, r.proroga.areaDedaloNome].filter(Boolean).join(', ')}` : ''}</span>}
-          {r.scadenza && <span><span className="text-text-muted">Scadenza (guida)</span> {r.scadenza}</span>}
           {r.note && <span>{r.note}</span>}
         </div>
       )}
@@ -265,7 +263,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
       if (accettazione === 'non-accettate' && r.stato !== null) return false;
       if (completamento === 'completate' && r.stato !== 'completata') return false;
       if (completamento === 'da-completare' && r.stato === 'completata') return false;
-      if (q && !piatto(`${r.nome} ${r.bersaglio.nome} ${r.bersaglio.formaDemoniaca} ${r.confidente?.nome ?? ''} ${r.areaNome ?? r.area} ${r.committente}`).includes(q)) return false;
+      if (q && !piatto(`${r.nome} ${r.bersaglio.nome} ${r.bersaglio.formaDemoniaca} ${r.confidente?.nome ?? ''} ${r.areaNome ?? ''} ${r.committente}`).includes(q)) return false;
       return true;
     })
     // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.

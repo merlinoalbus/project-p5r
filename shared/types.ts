@@ -94,7 +94,15 @@ export interface PersonaRiassuntoDto {
   personaggio: string | null;
   /** 1ª, 2ª o 3ª forma; null fuori dal gruppo (Arsène e Satanael non hanno forme). */
   forma: number | null;
+  /** L8-07: catturabile (stato diverso da `esclusa`): la regola unica, la stessa degli alberi di fusione e dei cicli (`sqlPersonaCatturabile`). */
+  catturabile: boolean;
+  /** L8-07: perché: `provata` (un'Ombra della guida o un'area dei Memento), `esclusa` (speciale, Demone del Tesoro, DLC, del gruppo) o
+   *  `da-verificare` (nessun dato dice dove si incontra: resta catturabile finché l'utente non decide). */
+  statoCattura: StatoCattura;
 }
+
+/** L8-07: lo stato della cattura di una Persona (`catturePersona.sqlStatoCattura`). */
+export type StatoCattura = 'provata' | 'esclusa' | 'da-verificare';
 
 export interface CostoSkillDto {
   tipo: 'sp' | 'hp' | 'nessuno';
@@ -160,8 +168,6 @@ export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
   oggettoAllarmeCatalogo?: RiferimentoOggettoDto | null;
   trattoDettaglio: SkillRiassuntoDto | null;
   skill: SkillAppresaDto[];
-  areeMementos: Array<{ chiave: string; nome: string }>;
-  pianiMementos: string | null;
   /** Ricetta speciale che produce questa Persona, se esiste. */
   ricettaSpeciale: RicettaSpecialeDto | null;
   /** Ricette speciali in cui questa Persona è ingrediente. */
@@ -691,6 +697,13 @@ export interface DoteSocialePartitaDto {
   updatedAt: string | null;
 }
 
+/** L8-11: le letture della partita che cambiano i punti delle note, per precompilare gli interruttori della scheda Doti
+ *  (`GET /partite/:id/doti/modificatori`). */
+export interface ModificatoriDotiDto {
+  /** «Anima da cineasta» letto: film e DVD salgono di uno scalino (il server lo applica solo se è vero). */
+  animaDaCineasta: boolean;
+}
+
 /** Incremento di una dote: punti assoluti, delta, oppure note (1–3) con modificatori. */
 export interface ModificaDote {
   punti?: number;
@@ -878,9 +891,10 @@ export interface PersonaPossedutaDto {
 }
 
 /**
- * La capienza della scorta (la «riserva di Personae» della Stanza di Velluto) nella partita. Viene dalle abilità del Confidente Igor
- * nei dati di gioco («La capacità della riserva di Personae sale a N»): `gradini` sono i ranghi che la fanno salire. Il valore di
- * partenza, prima del primo gradino, non è nei dati: finché non c'è `capienza` è `null` e l'app mostra la scorta senza tacche.
+ * La capienza della scorta (la «riserva di Personae» della Stanza di Velluto) nella partita. Viene da un dato solo, il blocco di gioco
+ * `dati_guida.capienza-scorta`: il valore di partenza e i gradini (L8-05, migrazione 336: il rango di Igor da cui la riserva sale a N posti;
+ * prima si leggevano dal testo delle abilità). `abilita` è il nome dell'abilità di Igor a quel rango. Senza il valore di partenza nei dati,
+ * prima del primo gradino `capienza` è `null` e l'app mostra la scorta senza tacche.
  */
 export interface CapienzaScortaDto {
   /** Rango di Igor nella partita (0 se non ancora incontrato). */
@@ -2531,9 +2545,8 @@ export interface RichiestaDto {
   chiave: string;
   nome: string;
   committente: string;
-  disponibileDal: string;
-  scadenza: string;
-  area: string;
+  /** Il dedalo dei Memento in cui si svolge (`dungeon_area`, il nome in `areaNome`). L8-09: niente più `area` (copia del nome del dedalo), né i
+   *  testi di sblocco e di scadenza della guida (`disponibileDal`, `scadenza`): valgono `condizioni` e `scadenzaData`. */
   areaChiave: string | null;
   piano: string;
   bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean;
@@ -2555,7 +2568,7 @@ export interface RichiestaDto {
   stato: StatoRichiesta | null;
   /** L13 (ondata 3): «Quando si sblocca», con il vocabolario unico delle condizioni (testo generato per mostrarle). */
   condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
-  /** La scadenza come data di gioco (MM-GG) e la proroga, valida solo con le sue condizioni; null = non indicata (resta il testo `scadenza`). */
+  /** La scadenza come data di gioco (MM-GG); null = la guida non la indica. */
   scadenzaData: string | null;
   /**
    * La proroga, valida solo con le sue condizioni. L13 (ondata 7, O7-1): `areaDedalo` è l'area (di un altro Dedalo, il Da'at della guida) in cui
@@ -2894,7 +2907,9 @@ export interface DungeonRiassuntoDto {
    *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
    *  aperti, restano. */
   finestra: { dal: string; al: string | null } | null;
-  livelloConsigliato: string;
+  /** L8-04 (migrazione 335, D5): il livello consigliato minimo e massimo di Royal; null = la fonte non lo dice. Il confronto delle fonti
+   *  (il testo di prima) è la nota storica del Palazzo (`DungeonDettaglioDto.noteLivello`). */
+  livelloConsigliato: { min: number | null; max: number | null };
   aree: number;
   punti: number;
   esauribili: number;
@@ -3001,6 +3016,8 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   confluisceIn?: { dungeon: string; dedalo: string; nome: string };
   note: string;
   fonti: string[];
+  /** L8-04 (D5): il confronto delle fonti sul livello consigliato, come nota storica del Palazzo (si modifica e si ripristina dalla nota). */
+  noteLivello: NotaStoricaOfferta[];
   aree: AreaDungeonDto[];
   /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
    *  ordine logico, con i collezionabili di ognuna e le aree della guida che contiene (i legami `infiltrazione_area`,

@@ -84,7 +84,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       };
     }),
     // la visione dà le sue Doti: si segnano a mano, l'avviso le ricorda
-    dopoOgniInvio: (film) => avvisaDotiDaSegnare(film.daSegnare, film.nome),
+    dopoOgniInvio: (film) => avvisaDotiDaSegnare(film.daSegnare, film.nome, partitaId),
     messaggioErrore: 'Aggiornamento della visione fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });

@@ -417,6 +417,16 @@ import { migration332 } from './332_doni_rampino_e_sacchetto.js';
 import { migration333 } from './333_effetti_attivita_e_voci_collegate.js';
 // 2026-11-01 (L5-01, prestazioni): gli indici del registro delle operazioni sugli effetti e delle destinazioni dei pin
 import { migration334 } from './334_indici_registro_effetti_e_destinazioni.js';
+// 2026-11-01 (L8-04, decisione D5): il livello consigliato dei Palazzi come minimo e massimo, con il confronto delle fonti in una nota storica
+import { migration335 } from './335_livello_consigliato_dei_palazzi.js';
+// 2026-11-01 (L8-05): i gradini della capienza della scorta nel blocco `capienza-scorta`, non più ricavati dal testo delle abilità di Igor
+import { migration336 } from './336_gradini_capienza_scorta.js';
+// 2026-11-01 (L8-09): Richieste senza i testi di sblocco e di scadenza della guida (vuoti) né la copia del nome del dedalo
+import { migration337 } from './337_richieste_testi_e_area_tolti.js';
+// 2026-11-01 (L8-13): il refuso «Tongen-Java» nella voce del 9 aprile, per uid e solo col testo di prima
+import { migration338 } from './338_refuso_yongen_jaya_9_aprile.js';
+// 2026-11-01 (L8-02, «Sì, procedi»): avvisi del giorno, 181 doppioni tolti e 11 riscritti dall'elenco approvato del censimento
+import { migration339 } from './339_avvisi_del_giorno.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -442,5 +452,5 @@ export const migrations: Migration[] = [
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
-  migration333, migration334,
+  migration333, migration334, migration335, migration336, migration337, migration338, migration339,
 ];

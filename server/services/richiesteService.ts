@@ -27,7 +27,9 @@ import { riallineaYenRichiesta, statoYenRichiesta, yenPropostiInSospeso } from '
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
-interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
+// L8-09 (migrazione 337): `disponibile_dal` e `scadenza` (testi della guida mai convertiti, vuoti in tutte le righe) e `area` (il nome del
+// dedalo, copia di `area_chiave`) non ci sono più: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
+interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
   condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null;
   /** L13 (ondata 7, migrazione 310): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
   completamento_condizioni_json: string | null; proroga_area_dedalo_chiave: string | null; proroga_area_nome: string | null; proroga_dedalo_chiave: string | null; proroga_dedalo_nome: string | null }
@@ -71,14 +73,6 @@ function condizioniDaValutare(r: RigaRichiesta): RequisitoSpillo[] {
     return [...salvate, { tipo: 'confidente', confidente: r.confidente_chiave, rango: r.confidente_rango }];
   }
   return salvate;
-}
-
-/** I testi della guida che la conversione non ha letto con certezza (sblocco, scadenza senza data): da verificare nel gioco. */
-function testiDaVerificare(r: RigaRichiesta): string[] {
-  const out: string[] = [];
-  if (r.disponibile_dal.trim()) out.push(`Sblocco ancora scritto solo dalla guida, da verificare nel gioco: «${r.disponibile_dal.trim()}»`);
-  if (r.scadenza.trim() && !r.scadenza_data) out.push(`Scadenza ancora scritta solo dalla guida, da verificare nel gioco: «${r.scadenza.trim()}»`);
-  return out;
 }
 
 /** Il numero del giorno nel calendario di gioco (1 aprile = 0), per contare i giorni alla scadenza. */
@@ -130,9 +124,9 @@ function completamento(r: RigaRichiesta, st: StatoDisponibilita, nomi: ReturnTyp
 /**
  * L13 (ondata 3): lo stato della Richiesta nella partita, calcolato (il client lo mostra, non lo valuta). Completata e accettata vengono
  * dallo stato segnato; poi la scadenza: passata la data (e la proroga, se c'è e le sue condizioni sono vere), è scaduta, salvo che sia già
- * completata; altrimenti le condizioni di sblocco: un rosso la blocca con quel che manca. Senza rossi, una Richiesta con lo sblocco o la
- * scadenza ancora solo nel testo della guida (non convertiti dalla 235) è «da verificare» con quel testo fra i motivi: si può accettare, con
- * l'avviso, ma non si dice «disponibile» su un dato che nessuno ha valutato. Il resto è disponibile (un grigio si dice fra i motivi).
+ * completata; altrimenti le condizioni di sblocco: un rosso la blocca con quel che manca, il resto è disponibile (un grigio si dice fra i
+ * motivi). L8-09: lo sblocco e la scadenza scritti solo come testo della guida non ci sono più (vuoti in tutte le righe, colonne tolte dalla
+ * 337): lo stato «da verificare» non nasce più da loro.
  */
 function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: StatoDisponibilita, nomi: ReturnType<typeof nomiCondizioniMemo>): StatoCalcolatoRichiestaDto {
   const oggi = st.dataGioco;
@@ -145,13 +139,11 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false, completabile: c.completabile, motiviCompletamento: c.motivi, doveOggi: c.doveOggi };
   if (segnato === 'completata') return { ...base, completabile: true, motiviCompletamento: [], stato: 'completata', motivi: [] };
   if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta ${dataConArticolo(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga ${dataConArticolo(r.proroga_data, 'a')} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
-  const daVerificare = testiDaVerificare(r);
-  if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: daVerificare };
+  if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: [] };
   const condizioni = condizioniDaValutare(r).map((c) => condizioneConTesto(c, nomi));
   const v = valutaInsieme(condizioni, st);
   if (v.stato === 'bloccato') return { ...base, stato: 'bloccata', motivi: v.requisiti.filter((q) => q.stato === 'rosso' && q.bloccante !== false).map((q) => q.dettaglio) };
   const grigi = v.requisiti.filter((q) => q.stato === 'grigio' && q.bloccante !== false).map((q) => `Da verificare nel gioco: ${q.dettaglio}`);
-  if (daVerificare.length) return { ...base, stato: 'da-verificare', accettabile: true, motivi: [...daVerificare, ...grigi] };
   return { ...base, stato: 'disponibile', accettabile: true, motivi: grigi };
 }
 
@@ -184,7 +176,7 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
       // altrimenti che cosa fanno davvero nella partita (entrati da soli, o già nel saldo da prima), perché la frase della pagina sia sempre vera
       ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave) : {}),
     } } : {}),
-    chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
+    chiave: r.chiave, nome: r.nome, committente: r.committente, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],
     oggettiRicompensa: premi.get(r.chiave) ?? [],
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave, rango: r.confidente_rango } : null,
@@ -298,7 +290,7 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     if (stato === 'completata' && prima !== 'completata') {
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
       // il posto: il Dedalo e la sua area (310: il `piano` in testo resta solo dove non è il nome dell'area)
-      const dove = r.area_nome ?? r.area;
+      const dove = r.area_nome ?? '';
       const piano = r.area_dedalo_nome || r.piano;
       registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${dove}${piano ? ` (${piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
     }
@@ -317,8 +309,7 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
 /**
  * Colloca una Richiesta in un'area di un dedalo dei Memento (099: le Richieste sono elementi delle aree, scelta dell'utente del
  * 2026-10-11), o la toglie dall'area (null: resta nel suo dedalo, da collocare). Collocandola, il dedalo della Richiesta diventa
- * quello dell'area (`area_chiave`); se cambia dedalo, il suo nome va in `area` (che altrimenti tiene la prosa della guida) e la
- * Richiesta va in fondo all'elenco. Dato di gioco, per tutte le partite.
+ * quello dell'area (`area_chiave`); se cambia dedalo, la Richiesta va in fondo all'elenco. Dato di gioco, per tutte le partite.
  */
 export function collocaRichiesta(chiave: string, areaDedalo: string | null): RichiestaDto {
   const r = prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta | undefined;
@@ -326,10 +317,10 @@ export function collocaRichiesta(chiave: string, areaDedalo: string | null): Ric
   if (areaDedalo === null) {
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE chiave = ?').run(chiave);
   } else {
-    const a = prepared('SELECT ad.dedalo_chiave, d.nome AS dedalo_nome FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE ad.chiave = ?').get(areaDedalo) as { dedalo_chiave: string; dedalo_nome: string } | undefined;
+    const a = prepared('SELECT ad.dedalo_chiave FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE ad.chiave = ?').get(areaDedalo) as { dedalo_chiave: string } | undefined;
     if (!a) throw httpErrors.notFound('area-dedalo-non-trovata', `L'area del dedalo '${areaDedalo}' non esiste.`);
     const ordine = a.dedalo_chiave === r.area_chiave ? r.ordine : (prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM richiesta').get() as { n: number }).n + 1;
-    prepared('UPDATE richiesta SET area_dedalo_chiave = ?, area_chiave = ?, area = ?, ordine = ? WHERE chiave = ?').run(areaDedalo, a.dedalo_chiave, a.dedalo_chiave === r.area_chiave ? r.area : a.dedalo_nome, ordine, chiave);
+    prepared('UPDATE richiesta SET area_dedalo_chiave = ?, area_chiave = ?, ordine = ? WHERE chiave = ?').run(areaDedalo, a.dedalo_chiave, ordine, chiave);
   }
   return dto(prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta, new Map());
 }
@@ -343,7 +334,7 @@ export function collocaRichiesta(chiave: string, areaDedalo: string | null): Ric
 
 /** I campi di una Richiesta che il modulo scrive. `dedalo` e `areaDedalo`: dove sta (null = in nessun dedalo / da collocare). */
 export interface DatiRichiesta {
-  nome?: string; committente?: string; disponibileDal?: string; scadenza?: string;
+  nome?: string; committente?: string;
   dedalo?: string | null; areaDedalo?: string | null; piano?: string;
   bersaglio?: RichiestaDto['bersaglio'];
   ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
@@ -435,11 +426,11 @@ function rigaRichiesta(chiave: string): RigaRichiesta {
 }
 
 /**
- * Dove sta la Richiesta: dedalo (una `dungeon_area` dei Memento), sua area (`area_dedalo`) e il nome del dedalo (colonna `area`).
+ * Dove sta la Richiesta: dedalo (una `dungeon_area` dei Memento) e sua area (`area_dedalo`); il nome del dedalo si legge da `area_chiave`.
  * Un'area porta con sé il suo dedalo (e deve essere di quello dato, se c'è); cambiando dedalo senza dire l'area, la Richiesta
  * resta da collocare nel dedalo nuovo.
  */
-function collocazione(dati: DatiRichiesta, prima: { dedalo: string | null; area: string | null }): { dedalo: string | null; area: string | null; nomeDedalo: string } {
+function collocazione(dati: DatiRichiesta, prima: { dedalo: string | null; area: string | null }): { dedalo: string | null; area: string | null } {
   let dedalo = dati.dedalo === undefined ? prima.dedalo : dati.dedalo;
   let area = dati.areaDedalo === undefined ? (dedalo === prima.dedalo ? prima.area : null) : dati.areaDedalo;
   if (area !== null) {
@@ -448,13 +439,12 @@ function collocazione(dati: DatiRichiesta, prima: { dedalo: string | null; area:
     if (dati.dedalo !== undefined && dati.dedalo !== null && dati.dedalo !== a.dedalo_chiave) throw httpErrors.badRequest('area-di-altro-dedalo', `«${a.nome}» è un'area di un altro dedalo.`);
     dedalo = a.dedalo_chiave;
   }
-  if (dedalo === null) { area = null; return { dedalo, area, nomeDedalo: '' }; }
-  const d = prepared("SELECT a.nome FROM dungeon_area a JOIN dungeon g ON g.chiave = a.dungeon_chiave WHERE a.chiave = ? AND g.tipo = 'mementos'").get(dedalo) as { nome: string } | undefined;
-  if (!d) {
+  if (dedalo === null) { area = null; return { dedalo, area }; }
+  if (!prepared("SELECT 1 FROM dungeon_area a JOIN dungeon g ON g.chiave = a.dungeon_chiave WHERE a.chiave = ? AND g.tipo = 'mementos'").get(dedalo)) {
     if (prepared('SELECT 1 FROM dungeon_area WHERE chiave = ?').get(dedalo)) throw httpErrors.badRequest('non-un-dedalo', `'${dedalo}' non è un dedalo dei Memento.`);
     throw httpErrors.notFound('area-non-trovata', `Il dedalo '${dedalo}' non esiste.`);
   }
-  return { dedalo, area, nomeDedalo: d.nome };
+  return { dedalo, area };
 }
 
 /** Il Confidente collegato deve esistere. */
@@ -486,9 +476,9 @@ export function creaRichiesta(dati: DatiRichiesta & { nome: string; bersaglio: R
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
   getDb().transaction(() => {
-  prepared(`INSERT INTO richiesta (chiave, ordine, nome, committente, disponibile_dal, scadenza, area, area_chiave, area_dedalo_chiave, piano, bersaglio_json, ricompense_json, confidente_chiave, confidente_rango, note, fonte)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente')`).run(
-    chiave, ordineInFondo(), dati.nome.trim(), dati.committente ?? '', dati.disponibileDal ?? '', dati.scadenza ?? '', dove.nomeDedalo, dove.dedalo, dove.area, dati.piano ?? '',
+  prepared(`INSERT INTO richiesta (chiave, ordine, nome, committente, area_chiave, area_dedalo_chiave, piano, bersaglio_json, ricompense_json, confidente_chiave, confidente_rango, note, fonte)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente')`).run(
+    chiave, ordineInFondo(), dati.nome.trim(), dati.committente ?? '', dove.dedalo, dove.area, dati.piano ?? '',
     JSON.stringify(dati.bersaglio), JSON.stringify(dati.ricompense ?? []), dati.confidente ?? null, dati.confidente ? dati.confidenteRango ?? null : null, dati.note ?? '');
   aggiornaCampiStrutturati(chiave, dati);
   })();
@@ -496,8 +486,7 @@ export function creaRichiesta(dati: DatiRichiesta & { nome: string; bersaglio: R
 }
 
 /**
- * Corregge una Richiesta: si cambiano solo i campi inviati. Cambiando dedalo va in fondo all'elenco e `area` prende il nome del
- * dedalo nuovo (altrimenti tiene la prosa della guida, «Dedalo di Aiyatsbus (Area 7) / …»). Cambiando nome, i requisiti
+ * Corregge una Richiesta: si cambiano solo i campi inviati. Cambiando dedalo va in fondo all'elenco. Cambiando nome, i requisiti
  * dei Confidenti che la citavano per nome (i dati della guida lo fanno così) passano a citarla per chiave, e il loro testo dice il
  * nome nuovo: altrimenti smetterebbero in silenzio di riconoscerla.
  */
@@ -511,9 +500,9 @@ export function aggiornaRichiesta(chiave: string, dati: DatiRichiesta): Richiest
   if (nome.toLowerCase() !== r.nome.toLowerCase()) verificaNomeLibero(nome, chiave);
   const ordine = dove.dedalo !== r.area_chiave ? ordineInFondo() : r.ordine;
   getDb().transaction(() => {
-    prepared(`UPDATE richiesta SET nome = ?, committente = ?, disponibile_dal = ?, scadenza = ?, area = ?, area_chiave = ?, area_dedalo_chiave = ?, piano = ?, bersaglio_json = ?,
+    prepared(`UPDATE richiesta SET nome = ?, committente = ?, area_chiave = ?, area_dedalo_chiave = ?, piano = ?, bersaglio_json = ?,
       ricompense_json = ?, confidente_chiave = ?, confidente_rango = ?, note = ?, ordine = ? WHERE chiave = ?`).run(
-      nome, dati.committente ?? r.committente, dati.disponibileDal ?? r.disponibile_dal, dati.scadenza ?? r.scadenza, dove.dedalo === r.area_chiave ? r.area : dove.nomeDedalo, dove.dedalo, dove.area, dati.piano ?? r.piano,
+      nome, dati.committente ?? r.committente, dove.dedalo, dove.area, dati.piano ?? r.piano,
       dati.bersaglio ? JSON.stringify(dati.bersaglio) : r.bersaglio_json, dati.ricompense ? JSON.stringify(dati.ricompense) : r.ricompense_json, confidente, rango, dati.note ?? r.note, ordine, chiave);
     aggiornaCampiStrutturati(chiave, dati);
     if (nome !== r.nome) {
@@ -605,7 +594,7 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
  */
 export function eliminaRichiesta(chiave: string): void {
   const r = rigaRichiesta(chiave);
-  conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area }, () => {
+  conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area_nome ?? '' }, () => {
     const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ? UNION SELECT partita_id FROM utente.yen_automatico WHERE causa_tipo = 'richiesta' AND causa_chiave = ? AND annullato_il IS NULL").pluck().all(chiave, chiave, chiave) as number[];
     prepared('DELETE FROM richiesta_partita WHERE richiesta_chiave = ?').run(chiave);
     prepared("DELETE FROM utente.sblocco_partita WHERE bersaglio_tipo = 'richiesta' AND bersaglio_chiave = ?").run(chiave);

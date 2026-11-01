@@ -33,6 +33,24 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Equipaggiamento del dataset e articoli dei negozi: nessun abbinamento fondato solo sul nome; identità distinte finché l'equivalenza
   non è documentata.
 - Dati non decidibili dalle fonti restano senza effetto, con il motivo annotato: niente dati inventati. **(24/10)**
+- **Livello consigliato dei Palazzi (D5, 01/11)**: è un livello minimo e massimo di Royal, e il testo con il confronto delle fonti resta intero
+  come nota storica del Palazzo, visibile e modificabile solo nella preparazione. Niente medie fra le fonti. I numeri vengono dalla guida
+  italiana dove li dice; Kamoshida (minimo 10) e Niijima (minimo 45) vengono da una fonte secondaria, l'unico consiglio numerico scritto nel
+  testo di prima: restano per non perdere ciò che la scheda mostrava e sono da confermare da Roberto (fonte secondaria). Dove nessuna fonte dà
+  un consiglio (Kaneshiro, Shido, Memento) non c'è un numero.
+- **Una regola per dato (L8, 01/11)**: la capienza della scorta (gradini compresi) è un dato del blocco `capienza-scorta`, non il testo delle
+  abilità di Igor; il giorno di un'infiltrazione è quello delle voci legate a lei, non una data nel nome; la cattura di una Persona è una
+  regola sola per Compendio, alberi di fusione e cicli, con tre stati: provata (un'Ombra catturabile della guida la porta, oppure il compendio
+  delle Persona le dà un'area dei Memento), esclusa per documento (speciale, Demone del Tesoro, DLC, del gruppo) e da verificare (nessun dato
+  dice dove si incontra); finché l'utente non decide, le da verificare restano catturabili come prima; «dove si incontra» è un servizio solo,
+  con le Ombre della guida e i dedali dei Memento del compendio che le Ombre non dicono (tutti per chi non ha Ombre, come Makami e Scathach),
+  senza perdere nulla di quel che la scheda mostrava; «si ottiene per fusione» solo per chi non si incontra da nessuna parte; le Richieste non
+  hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date. I tratti hanno due testi (la guida nelle Sfide, la
+  traduzione della skill nella scheda Persona): restano tutti e due finché l'utente non sceglie.
+- **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
+  intero ciò che la scheda del giorno mostra (voci con il rango atteso, effetti, trama e vincoli, «Giorno non coperto») sono tolti (181, con
+  archivio), quelli che ne ripetevano una parte riscritti col resto (11); restano gli avvisi con un'informazione propria, i casi in dubbio e
+  quelli coperti solo da trama o vincoli, che aspettano una decisione a parte.
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
   attribuzioni in `NOTICE`. Il foglio Royal della negoziazione (raccolta joyce-chen, senza licenza dichiarata) è copiato nel
   repository per scelta dell'utente, con attribuzione in `NOTICE`.
@@ -124,7 +142,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   fuori sincrono (i conteggi si ricavano dai dati o non si scrivono), niente identificativi né percorsi. Le date di gioco si scrivono in un
   modo solo, «12 aprile» (con l'articolo nelle frasi: «del 12 aprile», «dall'11 aprile»), anche nei titoli dello Storico scritti dal server
   (quelli già scritti in «MM-GG» si rendono così in lettura, senza riscrivere i dati); «22 apr» solo nei chip stretti. I moltiplicatori e i
-  punti mostrati si leggono dalle regole, mai scritti a mano. La scheda dei soli dati di gioco si chiama ovunque «Backup dei dati di gioco».
+  punti mostrati si leggono dalle regole, mai scritti a mano (anche i fattori della Forca e dell'Isolamento, i punti dell'Allarme dei cicli e
+  prezzo e punti dell'Aojiru, L8-10). La scheda dei soli dati di gioco si chiama ovunque «Backup dei dati di gioco».
 - Immagini mai ritagliate (`object-contain`); un tocco apre l'ingrandimento con i comandi di caricamento.
 
 ## 6. Compendio, skill e traduzioni
@@ -152,6 +171,11 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **Doti sociali a note**: 1♪ = 2, 2♪ = 3, 3♪ = 5 punti (7 con un libro a resa maggiorata), Fortuna ×1,5 per difetto; soglie cumulative
   del contatore. Le Doti si applicano **solo a mano**: le voci e il + del contatore delle attività propongono «Applica», mai in automatico. Le «Dote +N» della guida sono
   note, non punti.
+- **Doti da segnare con «Applica» nella notifica (D7, 01/11)**: dove l'app dice soltanto «Da segnare nelle Doti» (letture, videogiochi,
+  cruciverba, domande, incontri della pagina Confidenti, turni tolti), la notifica ha il pulsante «Applica», che le segna nella scheda; non
+  nasce un promemoria persistente e niente si applica da solo.
+- Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro, e lo scalino in più vale solo con il
+  libro letto; l'interruttore «Libro» resta a mano **(01/11)**.
 - **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
   «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.
 - Alla spunta di un incontro si chiede solo «Quante note hai ottenuto?» (le note dell'ultima risposta dopo il passaggio di rango): le

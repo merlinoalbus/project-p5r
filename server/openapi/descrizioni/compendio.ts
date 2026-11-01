@@ -83,8 +83,14 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/persona/:id': {
     sommario: 'Scheda completa di una Persona',
-    descrizione: 'Riassunto più skill apprese per livello, dettaglio del tratto, ricetta speciale (se la Persona ne è il risultato) e ricette di cui è ingrediente, set DLC, carte skill ottenibili con l\'esecuzione, titolo di negoziazione, aree e piani di Mementos, oggetto e oggetto d\'allarme con nome e descrizione tradotti.',
+    descrizione: 'Riassunto più skill apprese per livello, dettaglio del tratto, ricetta speciale (se la Persona ne è il risultato) e ricette di cui è ingrediente, set DLC, carte skill ottenibili con l\'esecuzione, titolo di negoziazione, oggetto e oggetto d\'allarme con nome e descrizione tradotti. L8-08: dove si incontra (Ombre della guida e dedali dei Memento del compendio) non è qui ma nel servizio unico `GET /api/compendio/persona/:id/dove-si-incontra`. L8-07: il riassunto porta `catturabile` (vero se la Persona non è speciale, Demone del Tesoro, DLC né del gruppo) e `statoCattura` (`provata` con un\'Ombra catturabile o un\'area dei Memento, `esclusa`, `da-verificare` se nessun dato dice dove si incontra).',
     risposta: '`PersonaDettaglioDto`; `affinitaGuida` porta le affinità come le dà la guida solo se l\'utente ne ha corretta almeno una, altrimenti null.',
+    errori: [[404, 'persona-non-trovata']],
+  },
+  'GET /api/compendio/persona/:id/dove-si-incontra': {
+    sommario: 'Dove si incontra una Persona',
+    descrizione: 'L8-08, il servizio unico di «Dove si incontra»: le Ombre della guida che portano la Persona (come `GET /api/compendio/ombre?persona=`, con `?partita=` anche la registrazione e se il posto è ancora raggiungibile) e i dedali dei Memento del compendio delle Persona che le Ombre non dicono già, col loro piano (tutti, se la Persona non ha Ombre; un dedalo già detto si ripete solo se il piano ha un dettaglio fra parentesi). Vuoti tutti e due: la Persona non si incontra.',
+    risposta: '`DoveSiIncontraDto`',
     errori: [[404, 'persona-non-trovata']],
   },
   'PUT /api/compendio/persona/:id/affinita': {
@@ -175,8 +181,8 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     errori: [[404, 'giorno-non-trovato']],
   },
   'PUT /api/compendio/giorni/:data': {
-    sommario: 'Cambia il giorno di gioco: meteo di giorno e di sera, nota, flag «da verificare», trama, vincoli',
-    descrizione: 'Corpo strict e parziale. Alla prima modifica la riga conserva com’era la guida (`seed_json`) e passa a origine «utente»; calendario, meteo della guida e guida del percorso leggono la stessa riga. Una modifica che non cambia niente non scrive.',
+    sommario: 'Cambia il giorno di gioco: meteo di giorno e di sera, nota, flag «da verificare», trama, vincoli, avvisi',
+    descrizione: 'Corpo strict e parziale. L8-02: `avvisi` (elenco di frasi, le vuote tolte) è l’unico punto di modifica degli avvisi del giorno che la scheda del giorno mostra; una fotografia di prima senza gli avvisi li riceve quando cambiano. Alla prima modifica la riga conserva com’era la guida (`seed_json`) e passa a origine «utente»; calendario, meteo della guida e guida del percorso leggono la stessa riga. Una modifica che non cambia niente non scrive.',
     risposta: '`GiornoModificabileDto` aggiornato',
     errori: [[404, 'giorno-non-trovato']],
   },
@@ -586,9 +592,9 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/dungeon/:chiave': {
     sommario: 'Corregge i testi della scheda di un Palazzo',
-    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: nessun boss finale da dichiarare (400 `boss-finale-dei-memento`).',
+    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. L8-04: `livelloConsigliato` è `{ min, max }`, interi da 1 a 99 o null (la fonte non lo dice); il minimo sopra il massimo dà 400 `livello-rovesciato`; il confronto delle fonti è la nota storica del Palazzo (`noteLivello` della scheda), che si modifica come le altre note storiche. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: nessun boss finale da dichiarare (400 `boss-finale-dei-memento`).',
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
-    errori: [[404, 'dungeon-non-trovato'], [404, 'punto-non-trovato'], [400, 'voce-non-boss'], [400, 'voce-di-un-altro-palazzo'], [400, 'boss-finale-dei-memento']],
+    errori: [[404, 'dungeon-non-trovato'], [404, 'punto-non-trovato'], [400, 'voce-non-boss'], [400, 'voce-di-un-altro-palazzo'], [400, 'boss-finale-dei-memento'], [400, 'livello-rovesciato']],
   },
   'POST /api/compendio/dungeon/:chiave/ripristina': {
     sommario: '«Ripristina» della scheda di un Palazzo (L4 §8.14)',

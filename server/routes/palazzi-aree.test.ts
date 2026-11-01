@@ -437,12 +437,17 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     expect((await voce('06-13', conNome)).propostaInfiltrazioni).toEqual({ infiltrazioni: [{ chiave: unica.chiave, nome: unica.nome }], motivo: 'Il nome dell’infiltrazione è nel testo della voce.', certezza: 'certa' });
     const senza = await nuovaVoce('06-13', 'Palazzo di Madarame: niente di particolare', 'madarame');
     expect((await voce('06-13', senza)).propostaInfiltrazioni).toBeNull();
-    // regola (b): la data della voce nel nome di una sola infiltrazione
-    const tutorial = ((await request(app).post('/api/compendio/dungeon/kamoshida/aree').send({ nome: 'Tutorial di prova 11/04' }).expect(201)).body.data as { chiave: string }).chiave;
-    const conData = await nuovaVoce('04-11', 'Primo giro nel castello', 'kamoshida');
-    expect((await voce('04-11', conData)).propostaInfiltrazioni).toMatchObject({ infiltrazioni: [{ chiave: tutorial }], motivo: 'La data della voce è nel nome dell’infiltrazione.' });
-    await request(app).post('/api/compendio/dungeon/kamoshida/aree').send({ nome: 'Altra prova 11/04' }).expect(201);
-    expect((await voce('04-11', conData)).propostaInfiltrazioni).toBeNull();
+    // regola (b), L8-06: il giorno di un'infiltrazione è quello delle voci legate a lei (non una data scritta nel nome): un'altra voce dello
+    // stesso giorno legata a una sola infiltrazione del Palazzo dà la proposta, «probabile»; due infiltrazioni in quel giorno, nessuna
+    const tutorial = ((await request(app).post('/api/compendio/dungeon/kamoshida/aree').send({ nome: 'Tutorial di prova' }).expect(201)).body.data as { chiave: string }).chiave;
+    const legata = await nuovaVoce('06-14', 'Un giro di prova', 'kamoshida');
+    await request(app).put(`/api/compendio/percorso/voci/${legata}`).send({ infiltrazioni: [tutorial] }).expect(200);
+    const conData = await nuovaVoce('06-14', 'Primo giro nel castello', 'kamoshida');
+    expect((await voce('06-14', conData)).propostaInfiltrazioni).toMatchObject({ infiltrazioni: [{ chiave: tutorial }], motivo: 'Un’altra voce dello stesso giorno è legata a questa infiltrazione.', certezza: 'probabile' });
+    const altra = ((await request(app).post('/api/compendio/dungeon/kamoshida/aree').send({ nome: 'Altra prova' }).expect(201)).body.data as { chiave: string }).chiave;
+    const seconda = await nuovaVoce('06-14', 'Un secondo giro di prova', 'kamoshida');
+    await request(app).put(`/api/compendio/percorso/voci/${seconda}`).send({ infiltrazioni: [altra] }).expect(200);
+    expect((await voce('06-14', conData)).propostaInfiltrazioni).toBeNull();
   });
 
   it('UX3-1 (§4.4) — «Entra»: insieme valorizzato → la prima non completata o l’ultima; insieme vuoto con proposta → la prima della proposta (qualunque certezza); senza proposta il campo è assente; GET della voce per uid', async () => {

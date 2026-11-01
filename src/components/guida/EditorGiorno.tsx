@@ -2,7 +2,7 @@
 // EditorGiorno — il giorno di gioco modificabile, con «Ripristina» (R9-19)
 // ============================================================
 //
-// Meteo del giorno e della sera, nota sul meteo, «da verificare», trama e vincoli del giorno. Sta nella pagina del giorno della guida (non in Partita).
+// Meteo del giorno e della sera, nota sul meteo, «da verificare», trama, vincoli e avvisi del giorno (L8-02). Sta nella pagina del giorno della guida (non in Partita).
 // «Ripristina» riporta il giorno com'è nella guida. Le voci del diario non si toccano da qui.
 // L13 (ondata 4a): una sola finestra dall'apertura alla chiusura. Finché il giorno non è arrivato è la stessa `FinestraModifica` con «Un attimo…»;
 // prima un guscio di caricamento a parte si smontava all'arrivo dei dati e nasceva un'altra finestra (il fuoco tornava indietro). I campi partono
@@ -30,10 +30,12 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const OPZIONI_METEO = METEO_GIORNO.map((m) => ({ chiave: m, nome: m }));
 
 /** I campi del modulo. I vincoli sono un elenco di frasi (una riga a campo, «Aggiungi» / «Togli»), non più un testo da dividere a capo. */
-interface CampiGiorno { meteoGiorno: MeteoGiorno | ''; meteoSera: MeteoGiorno | ''; notaMeteo: string; daVerificare: boolean; trama: string; vincoli: string[] }
+interface CampiGiorno { meteoGiorno: MeteoGiorno | ''; meteoSera: MeteoGiorno | ''; notaMeteo: string; daVerificare: boolean; trama: string; vincoli: string[]; avvisi: string[] }
 const campiDa = (d: GiornoModificabileDto): CampiGiorno => ({
-  meteoGiorno: d.meteoGiorno ?? '', meteoSera: d.meteoSera ?? '', notaMeteo: d.notaMeteo ?? '', daVerificare: d.meteoDaVerificare, trama: d.trama, vincoli: d.vincoli,
+  meteoGiorno: d.meteoGiorno ?? '', meteoSera: d.meteoSera ?? '', notaMeteo: d.notaMeteo ?? '', daVerificare: d.meteoDaVerificare, trama: d.trama, vincoli: d.vincoli, avvisi: d.avvisi,
 });
+/** Un elenco del modulo come lo vuole il server: righe ripulite, le vuote tolte. */
+const pulito = (righe: readonly string[]): string[] => righe.map((v) => v.trim()).filter((v) => v.length > 0);
 
 /** La finestra per correggere il giorno `data` ('MM-GG'); `onSalvato` rilegge la pagina. */
 // L12 (passo 8): nel rilascio (sola lettura) l'editor del giorno non esiste; la condizione è costante di build, `EditorGiornoReale` esce dal bundle
@@ -47,9 +49,11 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
   const campi = modifiche ?? (dati ? campiDa(dati) : null);
   const imposta = (p: Partial<CampiGiorno>) => { if (dati) setModifiche((m) => ({ ...(m ?? campiDa(dati)), ...p })); };
   const [occupato, setOccupato] = useState(false);
-  const elencoVincoli = (campi?.vincoli ?? []).map((v) => v.trim()).filter((v) => v.length > 0);
+  const elencoVincoli = pulito(campi?.vincoli ?? []);
+  const elencoAvvisi = pulito(campi?.avvisi ?? []);
   const sporca = !!dati && !!campi && (campi.meteoGiorno !== (dati.meteoGiorno ?? '') || campi.meteoSera !== (dati.meteoSera ?? '') || campi.notaMeteo !== (dati.notaMeteo ?? '')
-    || campi.daVerificare !== dati.meteoDaVerificare || campi.trama !== dati.trama || JSON.stringify(elencoVincoli) !== JSON.stringify(dati.vincoli));
+    || campi.daVerificare !== dati.meteoDaVerificare || campi.trama !== dati.trama || JSON.stringify(elencoVincoli) !== JSON.stringify(dati.vincoli)
+    || JSON.stringify(elencoAvvisi) !== JSON.stringify(dati.avvisi));
   useBozzaSporca(`giorno:${data}`, `il giorno ${dataGiocoTesto(data)}`, sporca);
 
   const esegui = async (azione: () => Promise<GiornoModificabileDto>, esito: string) => {
@@ -62,7 +66,7 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
     if (!campi) return;
     return esegui(() => salvaGiornoModificabile(data, {
       meteoGiorno: campi.meteoGiorno === '' ? null : campi.meteoGiorno, meteoSera: campi.meteoSera === '' ? null : campi.meteoSera,
-      notaMeteo: campi.notaMeteo.trim() === '' ? null : campi.notaMeteo.trim(), meteoDaVerificare: campi.daVerificare, trama: campi.trama, vincoli: elencoVincoli,
+      notaMeteo: campi.notaMeteo.trim() === '' ? null : campi.notaMeteo.trim(), meteoDaVerificare: campi.daVerificare, trama: campi.trama, vincoli: elencoVincoli, avvisi: elencoAvvisi,
     }), 'Giorno salvato.');
   };
 
@@ -84,6 +88,8 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
           <SezioneCampi titolo="Il giorno">
             <CampoTesto etichetta="Trama del giorno" tipo="lungo" righe={4} valore={campi.trama} massimo={4000} disabilitato={occupato} onCambia={(v) => imposta({ trama: v })} />
             <CampoElenco etichetta="Vincoli" voci={campi.vincoli} onCambia={(v) => imposta({ vincoli: v })} disabilitato={occupato} />
+            {/* L8-02: gli avvisi del giorno (le frasi sotto trama e vincoli nella scheda), un solo punto di modifica, come i vincoli */}
+            <CampoElenco etichetta="Avvisi" voci={campi.avvisi} onCambia={(v) => imposta({ avvisi: v })} disabilitato={occupato} />
           </SezioneCampi>
         </>
       )}

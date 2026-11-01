@@ -11,6 +11,8 @@ import { notifica } from '../../stores/notificationStore';
 import { SelettorePersona } from './SelettorePersona';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
+// L8-10: i punti dell'Allarme nel testo si leggono dalla regola del calcolo
+import { puntiAllarmeFusione } from '../../../shared/bonusVelluto';
 import { NOME_MODO_PARTNER } from '../../utils/cicli';
 import type { CicloFusioneDto, PersonaRiassuntoDto } from '../../types';
 import { PersonaChip } from './PersonaChip';
@@ -108,7 +110,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
     <div className="flex flex-col gap-3">
       <SelettorePersona etichetta="Persona di partenza (e di arrivo)" persone={persone} scelta={scelta} onScegli={setScelta} inScorta={inScorta} senzaRare />
       <p className="m-0 testo-13 text-text-secondary">
-        Un ciclo fonde la Persona scelta con un partner, poi il risultato con un altro partner, e così via finché l'ultima fusione la rigenera. Si ripete identico a ogni giro. In Royal la fusione non trasferisce statistiche né livelli dei materiali: ogni anello dà al risultato il bonus di livello del Confidente del suo arcano e, durante l'Allarme, +15/+20/+25 punti e lo stato «gialla» (utile poi alla Forca o come ingrediente). I partner dal Registro costano l'evocazione (sconto del compendio applicato), quelli da catturare vanno ripresi ogni giro.
+        Un ciclo fonde la Persona scelta con un partner, poi il risultato con un altro partner, e così via finché l'ultima fusione la rigenera. Si ripete identico a ogni giro. In Royal la fusione non trasferisce statistiche né livelli dei materiali: ogni anello dà al risultato il bonus di livello del Confidente del suo arcano e, durante l'Allarme, +{puntiAllarmeFusione(0)}/+{puntiAllarmeFusione(1)}/+{puntiAllarmeFusione(2)} punti e lo stato «gialla» (utile poi alla Forca o come ingrediente). I partner dal Registro costano l'evocazione (sconto del compendio applicato), quelli da catturare vanno ripresi ogni giro.
       </p>
       {scelta && (
         <>

@@ -131,6 +131,22 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'il nome del catalogo degli oggetti (`catalogo_oggetto.nome`), con l’inglese fra i nomi alternativi; i valori restano nell’archivio «archivio-frasi-l11»',
   })),
   {
+    schema: 'main', tabella: 'dungeon', colonna: 'livello_consigliato', tolta: 'L8 · migrazione 335',
+    sostituitaDa: 'il livello consigliato minimo e massimo del Palazzo (`livello_min`, `livello_max`), con il confronto delle fonti nella sua nota storica; i testi di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'richiesta', colonna: 'disponibile_dal', tolta: 'L8 · migrazione 337',
+    sostituitaDa: 'le condizioni di sblocco della Richiesta (`condizioni_json`); i testi con un valore restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'richiesta', colonna: 'scadenza', tolta: 'L8 · migrazione 337',
+    sostituitaDa: 'la scadenza come data di gioco (`scadenza_data`) con la proroga; i testi con un valore restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'richiesta', colonna: 'area', tolta: 'L8 · migrazione 337',
+    sostituitaDa: 'il dedalo della Richiesta (`area_chiave`) con il suo nome; i nomi diversi da quello del dedalo restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

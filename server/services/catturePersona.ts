@@ -26,6 +26,25 @@ import { httpErrors, type HttpError } from '../utils/httpError.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import type { PersonaDellaMascheraDto } from '../../shared/types.js';
 
+/**
+ * L8-07: la regola UNICA della cattura di una Persona, con tre stati (`StatoCattura`):
+ *   - `esclusa`: per documento non si cattura mai — speciale (solo la ricetta speciale), Demone del Tesoro (`rara`), DLC (si ha dal pacchetto
+ *     scaricabile, mai da un incontro), Persona del gruppo. Sono le esclusioni che il Compendio e i cicli applicavano già;
+ *   - `provata`: un'Ombra catturabile della guida la porta (`ombra.persona_id`, `ombra.catturabile = 1`; Babau/Bugs no) oppure il compendio delle
+ *     Persona le dà un'area dei Memento (`aree_mementos_json`: Makami e Scathach non hanno un'Ombra nella guida);
+ *   - `da-verificare`: nessun dato dice dove si incontra (62 Persona sulla copia del 1° novembre): resta catturabile, come prima, finché
+ *     l'utente non decide.
+ * «Catturabile» = stato diverso da `esclusa`: lo leggono il filtro «Solo catturabili» del Compendio (`PersonaRiassuntoDto.catturabile`), gli
+ * alberi di fusione e i cicli (`PersonaFusione.catturabile`, le foglie «da catturare»). Prima ognuno aveva la sua combinazione (gli alberi non
+ * escludevano i DLC); ora è una sola.
+ */
+export const sqlStatoCattura = (alias: string): string =>
+  `(CASE WHEN ${alias}.speciale <> 0 OR ${alias}.rara <> 0 OR ${alias}.dlc <> 0 OR ${alias}.del_party <> 0 THEN 'esclusa'`
+  + ` WHEN EXISTS (SELECT 1 FROM ombra o_cattura WHERE o_cattura.persona_id = ${alias}.id AND o_cattura.catturabile = 1)`
+  + ` OR COALESCE(${alias}.aree_mementos_json, '[]') <> '[]' THEN 'provata' ELSE 'da-verificare' END)`;
+/** Vera in SQL se la Persona con l'alias dato è catturabile (stato diverso da `esclusa`, vedi `sqlStatoCattura`). */
+export const sqlPersonaCatturabile = (alias: string): string => `(${sqlStatoCattura(alias)} <> 'esclusa')`;
+
 /** Vera (in SQL) se la voce con l'alias dato è una Persona da catturare (vedi l'intestazione). */
 export const sqlVoceDiCattura = (alias: string): string => `(${alias}.tipo = 'persona' AND (
   ${alias}.area_chiave IN (SELECT a.chiave FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE d.tipo = 'mementos')

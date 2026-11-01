@@ -25,7 +25,7 @@ export function ComandiVideogioco({ gioco, partitaId, onSalvata }: {
     try {
       const nuovo = await scrivi(id);
       useSuggerimentiStore.getState().invalida();
-      avvisaDotiDaSegnare(nuovo.daSegnare, nuovo.nome);
+      avvisaDotiDaSegnare(nuovo.daSegnare, nuovo.nome, id);
       if (montato.current && usePartitaStore.getState().attiva?.id === id) onSalvata(nuovo);
     } catch (e) {
       if (montato.current && usePartitaStore.getState().attiva?.id === id) notifica('error', e instanceof Error ? e.message : 'Aggiornamento fallito.');

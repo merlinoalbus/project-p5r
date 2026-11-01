@@ -184,7 +184,9 @@ export const getDungeon =(chiave: string, partita?: number): Promise<DungeonDett
 /* ---- Correzione dei testi della guida ai Palazzi: la sezione non è più in sola lettura ---- */
 /** I campi della scheda di un Palazzo. `date` (L13 O6-3): apertura, scadenza, furto consigliato e termine della lettera, MM-GG del
  *  calendario di gioco (null = la guida non lo dà; `al` null = senza fine, solo Iweleth e i Memento): l'unico punto in cui si modificano. */
-export interface DatiDungeonApi { nome?: string; sovrano?: string; livelloConsigliato?: string; note?: string;
+export interface DatiDungeonApi { nome?: string; sovrano?: string; note?: string;
+  /** L8-04 (D5): il livello consigliato minimo e massimo (1–99; null = la fonte non lo dice). */
+  livelloConsigliato?: { min: number | null; max: number | null };
   date?: { dal: string; al: string | null; furtoConsigliato: string | null; letteraEntro: string | null };
   /** L4 §8.14: la voce «Boss» che conclude il Palazzo («Modifica › Boss finale»); null = nessuna. */
   voceBossFinale?: string | null }
@@ -254,7 +256,7 @@ export const spostaAreaDedalo = (chiave: string, verso: -1 | 1): Promise<AreaDed
 /* ---- Le Richieste modificabili, aggiungibili ed eliminabili (2026-10-11) ---- */
 /** I campi di una Richiesta che il modulo scrive; `dedalo`/`areaDedalo` null = in nessun dedalo / da collocare. */
 export interface DatiRichiestaApi {
-  nome?: string; committente?: string; disponibileDal?: string; scadenza?: string; dedalo?: string | null; areaDedalo?: string | null; piano?: string;
+  nome?: string; committente?: string; dedalo?: string | null; areaDedalo?: string | null; piano?: string;
   bersaglio?: RichiestaDto['bersaglio']; ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
   /** L13 (ondata 3): sblocco, scadenza e proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
   condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[]; areaDedalo?: string | null } | null;

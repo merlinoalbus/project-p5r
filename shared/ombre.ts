@@ -58,6 +58,17 @@ export interface OmbraRaggiungibilitaDto {
 }
 
 /** Un'Ombra in elenco. */
+/**
+ * L8-08: «Dove si incontra» una Persona, da un servizio solo (`GET /api/compendio/persona/:id/dove-si-incontra`). `ombre`: le Ombre della guida
+ * che la portano, con i loro luoghi. `memento`: i dedali dei Memento del compendio delle Persona (`aree_mementos_json` con `piani_mementos`)
+ * che le Ombre non dicono già, uno per dedalo, col suo piano; un dedalo che le Ombre dicono c'è lo stesso se il piano del compendio ha un
+ * dettaglio che le aree non hanno (fra parentesi: «prima del Palazzo 7»). Vuoti tutti e due: la Persona non si incontra.
+ */
+export interface DoveSiIncontraDto {
+  ombre: OmbraSchedaDto[];
+  memento: Array<{ dedalo: string; dedaloChiave: string | null; casa: string | null; piani: string | null; giaNelleOmbre: boolean }>;
+}
+
 export interface OmbraSchedaDto {
   chiave: string;
   nome: string;

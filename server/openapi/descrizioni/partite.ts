@@ -138,6 +138,12 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     risposta: 'Elenco di `DoteSocialePartitaDto`',
     errori: [PARTITA],
   },
+  'GET /api/partite/:id/doti/modificatori': {
+    sommario: 'Le letture che cambiano i punti delle note',
+    descrizione: 'L8-11: che cosa dicono le letture della partita sui modificatori della scheda Doti: `animaDaCineasta` vero se il libro «Anima da cineasta» è letto (film e DVD salgono di uno scalino). La scheda precompila così il suo interruttore; il server applica lo scalino solo se la lettura c\'è, qualunque cosa mandi il client.',
+    risposta: '`ModificatoriDotiDto`',
+    errori: [PARTITA],
+  },
   'PATCH /api/partite/:id/doti/:chiave': {
     sommario: 'Segna i punti di una Dote sociale',
     descrizione: 'Imposta i punti (`punti`), li incrementa (`delta`) o aggiunge le `note` viste nel gioco, convertite in punti come nel gioco (con `libro` e `cinema` per gli scalini maggiorati; il ×1,5 della Fortuna lo legge dallo stato della partita, `PUT /fortuna`); `punti` vince su `note`, che vince su `delta`. I punti non scendono mai sotto zero. È l\'unico modo in cui i punti delle Doti cambiano: spunte, letture, incontri, domande e cruciverba dicono che cosa il gioco dà ma non le toccano. Un cambio di rango va nello storico (`dote-rango`).',

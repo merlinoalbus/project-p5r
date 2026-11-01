@@ -16,7 +16,8 @@
 // ============================================================
 
 export const LIMITI_GUIDA = {
-  dungeon: { nome: 200, sovrano: 400, data: 1000, livello: 1000, note: 8000 },
+  // L8-04: il livello consigliato è un minimo e un massimo (interi da 1 a `livelloMassimo`), non più un testo
+  dungeon: { nome: 200, sovrano: 400, data: 1000, livelloMassimo: 99, note: 8000 },
   area: { nome: 300, descrizione: 8000 },
   // i dettagli della voce (2026-10-18, modificabili): oggi al più 11 per voce, etichetta più lunga 19, valore più lungo 1983 (una tabella)
   punto: { nome: 300, descrizione: 8000, dettagli: 40, etichetta: 60, dettaglio: 4000 },

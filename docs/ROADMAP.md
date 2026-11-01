@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 334 migrazioni di gioco (l'ultima è la 334), 63 delle partite (l'ultima è la 063).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 339 migrazioni di gioco (l'ultima è la 339), 63 delle partite (l'ultima è la 063).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -111,7 +111,31 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
   D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
   D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
-- Aperti: L8–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- L8 (coerenza dei dati), stato attuale (migrazioni 335–339):
+  - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339).
+  - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo (335).
+  - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
+    da `area_chiave` (337). Giorno di un'infiltrazione: quello delle voci legate a lei.
+  - Cattura delle Persona: una regola sola per Compendio, alberi e cicli, con tre stati (provata, esclusa per documento, da verificare; le da
+    verificare restano catturabili). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento del compendio.
+  - Forca, Isolamento, Gemelle, cicli e Aojiru leggono i numeri dalle regole condivise. «Anima da cineasta» parte acceso col libro letto e vale
+    solo col libro letto. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi, bagno,
+    gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
+- L8, in attesa della scelta di Roberto:
+  - tratti: due testi per 90 tratti, scelta di Roberto in attesa (la scheda «Tratti» delle Sfide mostra il testo della guida, la scheda
+    Persona e le skill la traduzione della skill);
+  - le 62 Persona «da verificare» (nessuna Ombra né area dei Memento: oggi catturabili come prima);
+  - i livelli consigliati di Kamoshida (minimo 10) e Niijima (minimo 45), da fonte secondaria: da confermare;
+  - avvisi del giorno: le 13 frasi coperte solo da trama o vincoli (#70, #140, #161, #171, #181, #196–#203), i 10 casi in dubbio e i 13
+    conflitti di dati del censimento (Richiesta di Kawakami sulla voce del 19 luglio, «Impeto dell'Arcano Sup.», lettera a Kamoshida, ranghi
+    senza voce di Akechi e di Igor, nome del trofeo dell'11 ottobre, data del rango 1 di Hifumi, date di Medjed, scadenza del Palazzo di
+    Niijima, termine del ricatto di Kaneshiro, conto alla rovescia di Okumura, giorno delle elezioni, rango 5 di Kasumi);
+  - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida (la scheda le mostra tutte e due);
+  - alberi di fusione: le Persona DLC dei pacchetti posseduti non sono più proposte «da catturare», ma solo se in scorta o nel Registro
+    (come già facevano Compendio e cicli);
+  - «Anima da cineasta» si può accendere anche senza il libro letto: appare attivo ma non cambia i punti.
+- L8, ancora da fare: L8-01 (D1: non toccare), L8-03; i gradini della capienza non hanno un editor (si correggono con una migrazione).
+- Aperti: L8 (le voci sopra), L9–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 
