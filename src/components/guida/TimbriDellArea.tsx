@@ -109,6 +109,7 @@ export function TimbriDellArea({ area, partitaId, modifica: modificaRichiesta, o
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); void salvaTotale(); }}>
             <label className="flex flex-col gap-1 testo-12">
               Timbri dell’area (vuoto = nessuno)
+              {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il campo compare al tocco di «Imposta il totale» o «Cambia il totale» per scriverlo subito */}
               <input className="form-input w-28" inputMode="numeric" maxLength={3} value={totale} autoFocus onChange={(e) => setTotale(e.target.value)} />
             </label>
             <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} />

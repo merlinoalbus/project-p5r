@@ -67,6 +67,7 @@ function momento(iso: string): string | null {
 /** Gli effetti di stato che non valgono nella partita: la frase e, solo per quelli nell'elenco della partita, dove si approvano. */
 function ElencoNonApplicati({ stati, etichetta }: { stati: readonly StatoEffettoDiStatoDto[]; etichetta?: string }) {
   return (
+    // eslint-disable-next-line jsx-a11y/no-redundant-roles -- con `list-none` Safari e VoiceOver (iPad) non annuncerebbero più l'elenco: il ruolo resta esplicito
     <ul role="list" aria-label={etichetta} className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
       {stati.map((s) => (
         <li key={s.effettoUid} className="flex min-w-0 flex-col gap-0.5 py-2 first:pt-0 last:pb-0">
@@ -102,6 +103,7 @@ export function RicevuteVoce({ applicato = [], nonApplicati = [], voce }: { appl
           idDescrizione={inizio.troncata ? idVoce : undefined}>
           {inizio.troncata && <p id={idVoce} className="m-0 mb-3 testo-13 text-text-secondary break-words">{voce}</p>}
           {/* role="list": con `list-none` Safari e VoiceOver (iPad) non annuncerebbero più l'elenco né il numero delle righe */}
+          {/* eslint-disable-next-line jsx-a11y/no-redundant-roles -- ruolo esplicito voluto, vedi la riga sopra */}
           {!!applicato.length && <ul role="list" className="m-0 flex list-none flex-col divide-y divide-border-light p-0 testo-13">
             {applicato.map((x) => {
               const quando = momento(x.applicatoIl);

@@ -102,6 +102,7 @@ export function CalendarioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const partitaId = attiva?.id ?? null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- la data di gioco non entra nella lettura: al suo cambio si rilegge
   const dati = useCarica(() => getCalendario(partitaId ?? undefined), [partitaId, attiva?.dataGioco]);
   const d = dati.dati;
   const [meseScelto, setMeseScelto] = useState<string | null>(null);

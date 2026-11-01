@@ -132,6 +132,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
               <div className="testo-12 text-text-muted break-words">{mancante.chiave}</div>
               <div className="flex gap-2 items-start flex-wrap">
                 <span className="chip">nessuna resa</span>
+                {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il testo senza resa si apre per scriverne subito la resa */}
                 <textarea className="form-input min-h-[44px] flex-1 min-w-[200px]" aria-label="Resa italiana" placeholder="Scrivi la resa italiana…" value={testoNuovo} onChange={(e) => setTestoNuovo(e.target.value)} autoFocus />
                 <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={!testoNuovo.trim()} onClick={() => void applica(mancante, testoNuovo.trim())} />
               </div>
@@ -142,6 +143,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
               <div className="testo-12 text-text-muted break-words">{t.chiave}</div>
               {inModifica?.chiave === t.chiave ? (
                 <div className="flex gap-2 items-start">
+                  {/* eslint-disable-next-line jsx-a11y/no-autofocus -- toccato «Modifica» sulla voce, si scrive subito la nuova resa */}
                   <textarea className="form-input min-h-[44px]" aria-label={`Resa italiana di ${t.chiave}`} value={testo} onChange={(e) => setTesto(e.target.value)} autoFocus />
                   <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={!testo.trim()} onClick={() => void applica(t, testo.trim())} />
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setInModifica(null)} />

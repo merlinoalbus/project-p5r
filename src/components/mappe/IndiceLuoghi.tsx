@@ -158,6 +158,7 @@ export function IndiceLuoghi() {
   const attiva = usePartitaStore((s) => s.attiva);
   // la data, la fascia e il meteo della partita decidono quali quartieri e Aree sono già aperti (`disponibile`): al cambio si rilegge (come `useMappaPartita`)
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` non entra nella lettura: al suo cambio si rilegge
   const gerarchia = useCarica(() => getGerarchiaMappe(attiva?.id), [attiva?.id, momento]);
   const g = gerarchia.dati;
   const [params, setParams] = useSearchParams();

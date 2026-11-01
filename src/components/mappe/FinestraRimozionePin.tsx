@@ -22,6 +22,7 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
   spillo: Pick<SpilloDto, 'id' | 'uid' | 'nome'>; mappa: string; contestoAncoraAttivo: () => boolean;
   onChiudi: () => void; onRimosso: () => void | Promise<void>;
 }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- l'UID non entra nella lettura: uno spillo con lo stesso id e UID diverso rilegge la fotografia
   const anteprima = useCarica(() => precondizioneRimozionePin(spillo.id), [spillo.id, spillo.uid]);
   const registro = useRegistroRimozioniPin();
   const pendente = rimozionePinPendente(spillo.uid);

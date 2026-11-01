@@ -49,7 +49,8 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
   }
 
   return (
-    <div ref={rif} onKeyDown={suTasto} className="card flex flex-col gap-2 relative">
+    // role="presentation": il contenitore raccoglie solo i tasti che risalgono dal campo e dalle voci
+    <div ref={rif} role="presentation" onKeyDown={suTasto} className="card flex flex-col gap-2 relative">
       <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta}</span>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o arcano…" />
       {candidate.length > 0 && (

@@ -52,6 +52,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
   const [gruppo, setGruppo] = useState<Gruppo>('tutti');
   const tipi = gruppo === 'tutti' ? undefined : tipiDelGruppo(gruppo);
   const chiave = `${partitaId}|${perPagina}|${gruppo}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `tipi` deriva da `gruppo`: si rilegge al cambio del filtro
   const prima = useCarica(() => getStorico(partitaId, { limite: perPagina, prima: undefined, tipi }), [partitaId, perPagina, gruppo]);
   const [extra, setExtra] = useState<PagineExtra | null>(null);
   const [caricamentoAltri, setCaricamentoAltri] = useState(false);

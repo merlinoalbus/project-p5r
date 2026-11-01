@@ -35,6 +35,7 @@ export function CampoRicerca({ valore, onCambia, segnaposto = 'Cerca…', autoFo
         className="form-input campo-ricerca__input pl-9 pr-11"
         placeholder={segnaposto}
         value={valore}
+        // eslint-disable-next-line jsx-a11y/no-autofocus -- il fuoco iniziale lo decide chi usa il campo (`autoFocus`, spento di norma)
         autoFocus={autoFocus}
         onChange={(e) => onCambia(e.target.value)}
         aria-label={segnaposto}

@@ -33,7 +33,8 @@ interface Props {
  * dell'elenco), skill ereditabili da scegliere entro gli slot disponibili, quelle non ereditabili col motivo e le note.
  */
 export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChiudi, onEseguita }: Props) {
-  const anteprima = useCarica(() => getAnteprimaFusione(partitaId, { possedutaIds, risultatoId }), [partitaId, possedutaIds.join(','), risultatoId]);
+  // le dipendenze si confrontano per valore (`useCarica`): l'elenco degli esemplari rilegge quando cambia, come la sua forma unita
+  const anteprima = useCarica(() => getAnteprimaFusione(partitaId, { possedutaIds, risultatoId }), [partitaId, possedutaIds, risultatoId]);
   const [livello, setLivello] = useState<number | null>(null);
   const [skill, setSkill] = useState<number[]>([]);
   const [tratto, setTratto] = useState<number | null>(null);

@@ -244,6 +244,7 @@ function MenuGesti({ id, uid, gesti, etichetta, ancora, disabled, fuocoIniziale,
   };
 
   return createPortal(
+    // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- il fuoco va sulle voci del menu (frecce, Home, Fine), non sul menu
     <div ref={menu} id={id} role="menu" aria-label={etichetta} data-voce={uid} className="menu-voce" onKeyDown={tasti}>
       {gesti.map((g) => (
         // `data-gesto`: chi rimette il fuoco su un gesto del menu (dopo «Sposta su») lo ritrova dalla sua chiave, non dal testo

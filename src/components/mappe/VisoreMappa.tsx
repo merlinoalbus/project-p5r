@@ -1011,8 +1011,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   };
 
   return (
-    // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6)
-    <div className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${paginaScorre ? 'visore-mappa--pagina-scorre' : ''} ${className ?? ''}`} data-testid="visore-mappa"
+    // la proporzione dell'immagine, per chi ospita il visore e vuole la tela alta quanto la figura (`.visore-alto-quanto-immagine`, UX2-6);
+    // role="presentation": nell'editor il contenitore raccoglie solo le frecce che risalgono dallo spillo scelto
+    <div role="presentation" className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${paginaScorre ? 'visore-mappa--pagina-scorre' : ''} ${className ?? ''}`} data-testid="visore-mappa"
       style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}
       onKeyDown={editor ? spostaConFrecce : undefined}>
       {editor && <span id={`${idIstruzioni}-sposta`} className="sr-only">Con lo spillo selezionato, le frecce lo spostano di un pixel dell’immagine, con Maiusc di dieci; la posizione si scrive anche nel pannello.</span>}
@@ -1151,6 +1152,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           </>}
         </aside>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- role="application": la tela gestisce da sé frecce, zoom, trascinamento e doppio tocco */}
         <div
           ref={tela}
           className={`visore-mappa__tela ${cursore} ${trascinando ? 'cursor-grabbing' : ''}`}
@@ -1240,6 +1242,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               );
             })}
             {selezionato && !editor && selezionato.id !== popupSoppresso && (singoli.some((s) => s.id === selezionato.id) || gruppi.some((g) => g.spilli.some((s) => s.id === selezionato.id))) && inPortale(popupSuFoglio, (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- i gestori fermano solo i gesti perché non arrivino alla tela sotto; i tasti li hanno i comandi del popup
               <div ref={agganciaPopup} tabIndex={-1} className={`spillo-popup ${popupSotto ? 'spillo-popup--sotto' : ''} ${popupFoglio || guidaSuFoglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomePin(selezionato)} style={popupSuFoglio ? stileFoglio : { left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${popupDx}px), ${popupSotto ? '14px' : 'calc(-100% - 42px)'})`, '--spillo-popup-freccia': `calc(50% - ${popupDx}px)` } as CSSProperties} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
@@ -1360,6 +1363,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 ritaglio (rilievo del validatore, 2026-09-13). Quanto sia alto e da che parte stia
                 lo decide `elenco`, qui sopra, contando il contorno invece di stimarlo. */}
             {gruppoScelto && inPortale(elenco.foglio, (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- i gestori fermano solo i gesti perché non arrivino alla tela sotto; i tasti li hanno le voci dell'elenco
               <div className={`spillo-popup ${elencoSotto ? 'spillo-popup--sotto' : ''} ${elenco.foglio ? 'spillo-popup--foglio' : ''} ${guidaSuFoglio ? 'spillo-popup--sopra-guida' : ''}`} role="dialog" aria-label={nomeGruppo(gruppoScelto.spilli.length)}
                 style={elenco.foglio ? stileFoglio : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>

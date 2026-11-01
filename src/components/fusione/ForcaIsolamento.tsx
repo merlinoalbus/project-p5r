@@ -143,6 +143,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
   const guadagno = incenso ? guadagnoIncenso(incenso, giorni, allarme) : { applicazioni: 0, puntiPerStatistica: 0, totale: 0 };
   const statScelte: ChiaveStatistica[] = scelto ? [...scelto.statistiche] : [];
   const [occupato, setOccupato] = useState(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- della Persona contano l'id (la lettura) e il livello (rilegge il suggerimento), non gli altri campi
   const suggerimento = useCarica(() => (persona ? getSuggerimentoIsolamento(partitaId, persona.id) : Promise.resolve(null)), [partitaId, persona?.id, persona?.livello]);
   /**
    * Registra l'isolamento della Persona scelta con l'incenso del catalogo e i giorni indicati (le statistiche sono quelle dell'incenso); a buon

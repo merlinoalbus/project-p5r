@@ -59,6 +59,7 @@ describe('Modal — fuoco (A5, verifica 2026-10-03)', () => {
       <>
         <button type="button" onClick={() => setAperta(true)}>Apri</button>
         <Modal titolo="Finestra" aperta={aperta} onChiudi={() => setAperta(false)} azioni={<button type="button">Conferma</button>}>
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il test verifica come la finestra rispetta l'autoFocus di un campo */}
           <input aria-label="Nome" autoFocus={conAutoFocus} />
         </Modal>
       </>
@@ -103,6 +104,7 @@ it('A5: anche con un campo autoFocus, alla chiusura il fuoco torna al pulsante c
     return (
       <>
         <button type="button" onClick={() => setAperta(true)}>Apri con campo</button>
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il test verifica come la finestra rispetta l'autoFocus di un campo */}
         <Modal titolo="Con campo" aperta={aperta} onChiudi={() => setAperta(false)}><input aria-label="Testo" autoFocus /></Modal>
       </>
     );
@@ -123,6 +125,7 @@ it('A5: una finestra montata già aperta dal genitore (e smontata alla chiusura)
     return (
       <>
         <button type="button" onClick={() => setMostra(true)}>Aggiungi</button>
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il test verifica come la finestra rispetta l'autoFocus di un campo */}
         {mostra && <Modal titolo="Montata" aperta onChiudi={() => setMostra(false)}><textarea aria-label="Voce" autoFocus /></Modal>}
       </>
     );
@@ -144,6 +147,7 @@ it('A5: in StrictMode (sviluppo) il campo con autoFocus tiene il fuoco, e alla c
     return (
       <>
         <button type="button" onClick={() => setMostra(true)}>Apri severa</button>
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il test verifica come la finestra rispetta l'autoFocus di un campo */}
         {mostra && <Modal titolo="Severa" aperta onChiudi={() => setMostra(false)}><textarea aria-label="Campo severo" autoFocus /></Modal>}
       </>
     );

@@ -2,7 +2,7 @@
 // capacita — la modalità dell'istanza e che cosa permette (L12, passo 1 del progetto delle due istanze)
 // ============================================================
 //
-// Fonte unica, letta da backend e frontend (docs/coordinamento/lotti/L12/progetto-due-istanze.md, §1). Il codice è uno solo; le istanze sono due:
+// Fonte unica, letta da backend e frontend (docs/ARCHITETTURA.md, §7 bis). Il codice è uno solo; le istanze sono due:
 //   - `preparazione`: l'istanza privata di oggi, con tutte le funzioni di modifica e configurazione (default ovunque);
 //   - `rilascio`: l'istanza pubblica in sola lettura; si usano solo mappe, guida, diario e tracciamento dell'avanzamento.
 // La modalità NON viene da una variabile d'ambiente dello stack: è fissata nella build (backend: punto d'avvio `server/rilascio.ts`;

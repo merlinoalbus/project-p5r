@@ -101,7 +101,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const momento = usePartitaStore((s) => `${s.attiva?.dataGioco ?? ''}|${s.attiva?.fasciaGioco ?? ''}|${s.attiva?.meteoOra ?? ''}`);
   const [giornoCorrente, setGiornoCorrente] = useState(false);
   const conGiorno = giornoCorrente && !!attiva;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` (giorno, fascia, meteo) non entra nella lettura: al suo cambio si rilegge
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, conGiorno ? attiva.id : undefined), [chiave, conGiorno, attiva?.id, momento]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `chiave` non entra nella lettura: l'albero si rilegge al cambio di mappa
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
   // elenchi per le condizioni di visibilità (Confidenti, quartieri, richieste, Palazzi): una volta per pagina
   const elenchi = useCarica<ElenchiCondizioni>(async () => {
@@ -637,6 +639,7 @@ function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo:
  * salva subito, come «Collega pin» nella guida. Un pin fuori dai Palazzi, senza voci, non ne mostra niente.
  */
 function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto; disabilitato: boolean; onCollega: (voce: string, collega: boolean) => Promise<void> }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- le voci già collegate non entrano nella lettura: al loro cambio si rilegge
   const collegabili = useCarica(() => getVociCollegabili(s.id), [s.id, s.voci.map((v) => v.chiave)]);
   const opzioni = useMemo(() => (collegabili.dati ?? []).map((v) => ({ chiave: v.chiave, nome: v.nome, gruppo: v.areaNome, ...(v.enigma ? { dettaglio: 'passo di un Enigma' } : {}) })), [collegabili.dati]);
   if (s.voci.length === 0 && !collegabili.errore && opzioni.length === 0) return null;

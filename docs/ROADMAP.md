@@ -115,8 +115,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     Confidenti al rango massimo, Richieste, Compendio, livello di una Persona; i totali «tutti» contati nel DB); con lo stato nella partita.
     I testi della guida restano; i prezzi hanno già il loro punto unico (catalogo e listini).
   - Sfide del Covo senza conteggio perché la partita non tiene lo stato che contano (lacune aperte, elenco con i motivi nel censimento di
-    L8-03): le scelte degli esiti dei turni non si registrano se non danno oggetti o trofei (Big Bang Burger, fuoricampo, miglior caffè e
-    curry), i punti della pesca sono un saldo senza il guadagnato, i punti del negozio dei vestiti usati sono un saldo, le statistiche delle
+    L8-03): l'esito scelto di un turno resta solo nella ricevuta della spunta, non in uno stato che la partita conta, se non dà oggetti o
+    trofei (Big Bang Burger, fuoricampo, miglior caffè e curry), i punti della pesca sono un saldo senza il guadagnato, i punti del negozio dei vestiti usati sono un saldo, le statistiche delle
     Persona sono stime salvo i valori osservati, i fiori dei Memento e le statistiche di battaglia non si tengono; Maid Café e gioco
     dell'artiglio non sono attività del DB, il Jazz Club non si conta.
   - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339).
@@ -169,17 +169,31 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   («In scorta», «Nel Registro», anche nella scheda Persona), filtri di Skill, Glossario, Domande e Cruciverba nell'indirizzo, skill per nome
   italiano; indice delle sezioni in testa alle Impostazioni; dedali dei Memento in griglia al telefono, col pozzo come sfondo; testate delle
   schede di dettaglio, dell'Area e del Palazzo entro il 30% a ogni formato.
-- L11-01 e L11-05 fatti: scheda del Palazzo, visore e giorno del Diario divisi in moduli (DOM confrontato prima e dopo a 1366×657,
-  1280×689, 1024×690, 768×1024 e 375×812, anche con menu, moduli di modifica, menu della voce e guida del visore aperti); la memoria del
-  dispositivo in un'utilità sola, `useMedia` al posto del suo doppione nel visore, il fuoco rimesso da codice ritrovato da una chiave e non
-  dal testo o dal nome (menu della voce, posto della voce, appunti fissi, guida del visore, frecce dei giorni), chiavi stabili nei 18
-  elenchi modificabili con il fuoco che resta sul gesto dopo «Sposta», la classe dei campi della nota storica.
-- L11-02, L11-03, L11-04 fatti (parte server): righe compattate del server riformattate con l'AST invariato (resta oltre i 300 caratteri
-  solo il testo dei letterali: SQL, messaggi, descrizioni dell'API, DDL di base, più le migrazioni registrate e i test, che non si
-  toccano); `validate` tipizzato, senza nessun cast di `req.body`, `req.query` o `req.params` nelle rotte, e nessun SQL nelle rotte
-  (`condizioniService`); `RIFERIMENTI_PARTITE` completato dallo schema reale e censimento di ogni tabella e colonna di riferimento delle
-  partite, che dà un avviso nel log se manca qualcosa (non blocca, decisione dell'utente del 01/11); utente 064, gli id delle partite non
-  si riusano più.
+- L11 (manutenibilità e documenti) fatto, voci da 01 a 07:
+  - L11-01 e L11-05: scheda del Palazzo, visore e giorno del Diario divisi in moduli (DOM confrontato prima e dopo a 1366×657,
+    1280×689, 1024×690, 768×1024 e 375×812, anche con menu, moduli di modifica, menu della voce e guida del visore aperti); la memoria del
+    dispositivo in un'utilità sola, `useMedia` al posto del suo doppione nel visore, il fuoco rimesso da codice ritrovato da una chiave e non
+    dal testo o dal nome (menu della voce, posto della voce, appunti fissi, guida del visore, frecce dei giorni), chiavi stabili nei 18
+    elenchi modificabili con il fuoco che resta sul gesto dopo «Sposta», la classe dei campi della nota storica.
+  - L11-02, L11-03, L11-04 (parte server): righe compattate del server riformattate con l'AST invariato (resta oltre i 300 caratteri
+    solo il testo dei letterali: SQL, messaggi, descrizioni dell'API, DDL di base, più le migrazioni registrate e i test, che non si
+    toccano); `validate` tipizzato, senza nessun cast di `req.body`, `req.query` o `req.params` nelle rotte, e nessun SQL nelle rotte
+    (`condizioniService`); `RIFERIMENTI_PARTITE` completato dallo schema reale e censimento di ogni tabella e colonna di riferimento delle
+    partite, che dà un avviso nel log se manca qualcosa (non blocca, decisione dell'utente del 01/11); utente 064, gli id delle partite non
+    si riusano più.
+  - L11-06 (D12): le dipendenze di `useCarica` controllate dalla regola di `useEffect` (`react-hooks/exhaustive-deps` con
+    `additionalHooks`) ed `eslint-plugin-jsx-a11y` 6.10.2 con le regole raccomandate; lint a 0 errori e 0 avvisi, con le correzioni che non
+    cambiano il comportamento né l'aspetto e, dove l'omissione o il gesto sono voluti, una disattivazione sulla riga col suo motivo.
+  - L11-07: i punti aperti su bagno, centro battute e Big Bang Burger erano già allineati alle migrazioni 233, 314 e 319; commenti
+    superati corretti (Iweleth fra i Palazzi, il numero delle schede della Partita, i Palazzi del Meta-Nav, documenti tolti dal
+    repository); le decisioni «(24/10)» non si riconfermano (D16).
+- Da L11-06, da decidere con Roberto: nella finestra «Colloca …» di una planimetria da collocare (`FinestraCollocaPlanimetria`) le aree del contenitore
+  scelto si rileggono solo al cambio della scelta; se l'elenco dei contenitori cambia a finestra aperta la lettura non si rifà. Il
+  comportamento è rimasto quello di prima; rileggere anche a quel cambio va deciso.
+- Dipendenze di sviluppo: aggiornate le versioni corrette di vitest e `@vitest/coverage-v8` (4.1.12), `fast-uri` (3.1.9) e `undici`
+  (7.30.1). Resta l'avviso su `minimatch` (GHSA-g3hv-75wg-m249, gravità moderata, solo strumenti di sviluppo: ESLint, typescript-eslint,
+  jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
+  quando la accetteranno.
 - Edizione di rilascio con schema partite 64: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
   copia e col sì di Roberto; finché resta l'edizione attuale il rilascio funziona.
 - Da L11-04, da decidere con l'utente: nell'archivio immutabile `acquisto_legacy_valutazione` della copia della produzione restano 15 righe
@@ -189,7 +203,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
   censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.
-- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11 (la 06 e la 07); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Aperti: L8 (le voci sopra) e L10 (le proposte non ancora fatte); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

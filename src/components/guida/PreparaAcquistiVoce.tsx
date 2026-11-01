@@ -33,6 +33,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   const [risposte, setRisposte] = useState<RisposteOsservazioni>({});
   // dopo un rifiuto le anteprime si rifanno (token nuovi), con le risposte già date
   const [giro, setGiro] = useState(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- della voce contano uid e revisione degli effetti, non ogni campo; `giro` fa solo rifare le anteprime
   const prep = useCarica(() => preparaOsservazioniVoce(partitaId, a, oggi, risposte), [partitaId, a.uid, a.effettiVoce?.revisione, oggi, risposte, giro]);
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);

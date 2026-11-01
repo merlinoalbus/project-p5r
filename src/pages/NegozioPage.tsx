@@ -46,6 +46,7 @@ export function NegozioPage() {
   const partitaId = attiva?.id ?? null;
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` non entra nella lettura: al suo cambio si rilegge
   const dati = useCarica(() => getNegozio(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const n = dati.dati;
   useDocumentTitle(n?.nome ?? 'Negozio');

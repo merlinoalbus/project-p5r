@@ -32,11 +32,12 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
   // cambio del giorno, della fascia o del meteo, come i quartieri (`useMappaPartita`); senza partita si vedono tutte.
   const attiva = usePartitaStore((s) => s.attiva);
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` (giorno, fascia, meteo) non entra nella lettura: al suo cambio si rilegge
   const aree = useCarica(() => getAreeCitta(attiva?.id), [attiva?.id, momento]);
   // come `AreeDelQuartiere`: l'Area ancora chiusa nella partita non si propone (l'indirizzo diretto resta consultabile)
   const navigabili = (aree.dati ?? []).filter((a) => a.disponibile !== false);
   // L12 (passo 8): le planimetrie da collocare sono una lettura diagnostica dell'editor, solo della preparazione: nel rilascio nessuna richiesta
-  const sciolte = useCarica(IN_RILASCIO ? async (): Promise<MappaDaCollocareDto[]> => [] : getDaCollocare, []);
+  const sciolte = useCarica(() => (IN_RILASCIO ? Promise.resolve<MappaDaCollocareDto[]>([]) : getDaCollocare()), []);
   const [daRimuovere, setDaRimuovere] = useState<AreaRiassuntoDto | null>(null);
   const [riepilogo, setRiepilogo] = useState<string | null>(null);
   const [daCollocare, setDaCollocare] = useState<MappaDaCollocareDto | null>(null);

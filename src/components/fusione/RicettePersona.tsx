@@ -32,13 +32,15 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
   const [soloPronte, setSoloPronte] = useState(false);
   const [limite, setLimite] = useState(limiteIniziale);
   const livelloMax = soloLivello && livelloProtagonista ? livelloProtagonista : undefined;
+  // della Persona scelta la lettura usa solo l'id
+  const idScelta = scelta?.id;
   const { dati, caricamento, errore } = useCarica(
     () => {
-      if (!scelta) return Promise.resolve(null);
+      if (idScelta === undefined) return Promise.resolve(null);
       const opz = { partita: partitaId ?? undefined, livelloMax, limite, soloPronte: soloPronte && partitaId !== null ? true : undefined };
-      return modalita === 'per' ? getRicettePer(scelta.id, opz) : getFusioniCon(scelta.id, opz);
+      return modalita === 'per' ? getRicettePer(idScelta, opz) : getFusioniCon(idScelta, opz);
     },
-    [scelta?.id, partitaId, livelloMax, limite, soloPronte, modalita],
+    [idScelta, partitaId, livelloMax, limite, soloPronte, modalita],
   );
 
   // «solo pronte» lo decide il server prima del limite: filtrare qui le sole prime ricette scaricate ne perderebbe molte

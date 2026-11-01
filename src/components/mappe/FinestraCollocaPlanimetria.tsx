@@ -58,6 +58,7 @@ function FinestraCollocaPlanimetriaReale({ mappa, contenitori, onChiudi, onCollo
     if (contenitore.aree) return contenitore.aree;
     if (contenitore.tipo === 'quartiere') return (await getQuartiere(contenitore.chiave)).aree.map((a) => ({ slug: a.slug, nome: a.nome }));
     return [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `contenitore` viene da `scelto` e da `contenitori`; `contenitori` resta fuori di proposito, come prima: se cambia a finestra aperta la lettura non si rifà (punto aperto in ROADMAP)
   }, [scelto]);
   const pronto = !!contenitore && (area === NUOVA ? !!nuova.trim() : !!area) && !occupato;
   const salva = async () => {

@@ -9,6 +9,7 @@ import { useCarica } from './useCarica';
 /** Componente di prova: carica con `useCarica` i dati di `id` (ricaricando al suo cambio) e mostra in una riga lo stato
  *  (caricamento, errore o dati), con un pulsante «ricarica» che chiama `ricarica()`. */
 function Prova({ id, carica }: { id: number; carica: (id: number) => Promise<string> }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- il test rilegge solo al cambio di `id`: la funzione di prova resta fuori dalle dipendenze
   const { dati, caricamento, errore, ricarica } = useCarica(() => carica(id), [id]);
   return (
     <div>
@@ -20,6 +21,7 @@ function Prova({ id, carica }: { id: number; carica: (id: number) => Promise<str
 
 /** Espone lo stato del hook al test a ogni render (per i casi che lo pilotano direttamente). */
 function Sonda<T>({ carica, suStato }: { carica: () => Promise<T>; suStato: (s: ReturnType<typeof useCarica<T>>) => void }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- la sonda passa a `useCarica` la funzione del test così com'è, con un solo caricamento
   suStato(useCarica(carica, []));
   return null;
 }

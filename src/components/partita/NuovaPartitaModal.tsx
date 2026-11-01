@@ -53,6 +53,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       }
     >
       <label className="form-label">Nome
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- la finestra si apre per scrivere il nome della partita */}
         <input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="es. Prima partita" autoFocus maxLength={80} />
       </label>
       <div className="form-label">

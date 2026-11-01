@@ -14,7 +14,7 @@
 // diventava un «da configurare» che l'app mostrava come punto interrogativo per sempre.
 //
 // Le regole sono quelle che servono alle 128 frasi distinte censite l'11 settembre 2026 nelle
-// 324 righe rimaste prosa (docs/analisi/2026-09-11-modello-mappe-negozi-oggetti.md). Ogni regola
+// 324 righe rimaste prosa (analisi del 2026-09-11, nella cronologia di git). Ogni regola
 // chiede «la frase dice questo?», non «contiene questa parola?»: «a partire dall'arco del Palazzo
 // di Niijima» è un arco, «durante l'arco del Palazzo di Niijima» è un periodo, e le due frasi
 // condividono tutte le parole.

@@ -27,7 +27,8 @@ export function useCovoNellaPartita(partitaId: number | null | undefined, dipend
     if (!attivo) return { area: undefined };
     const aree = await getAreeDelQuartiere(COVO_AREA.quartiere, partitaId ?? undefined);
     return { area: aree.find((a) => a.chiave === COVO_AREA.chiave) ?? null };
-  }, [partitaId ?? null, attivo]);
+  // le dipendenze si confrontano serializzate (`useCarica`): una partita `undefined` vale `null`, come prima con `?? null`
+  }, [partitaId, attivo]);
   useRileggiAlCambio(dati.ricarica, dipendenza);
   const area = dati.dati?.area;
   // un oggetto stabile finché l'esito non cambia: chi lo riceve (la mappa di Tokyo) ci calcola sopra i suoi segni

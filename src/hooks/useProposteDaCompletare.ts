@@ -28,6 +28,7 @@ export function useElenchiProposte(giorno: string): { elenchi: ElenchiVoce | nul
 
 /** Le proposte aperte del giorno, per voce; `versione` le fa rileggere dopo una modifica della giornata. */
 function useProposteDelGiornoReale(giorno: string, versione: number): { perVoce: ReadonlyMap<string, PropostaConversioneDto[]>; ricarica: () => Promise<void> } {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `versione` non entra nella lettura: cambia dopo una modifica della giornata e fa rileggere
   const p = useCarica(() => getProposteConversione({ da: giorno, a: giorno }), [giorno, versione]);
   const perVoce = useMemo(() => {
     const m = new Map<string, PropostaConversioneDto[]>();

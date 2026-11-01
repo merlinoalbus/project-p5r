@@ -109,13 +109,12 @@ export function PartitaPage() {
               <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} giorno={giornoScuola} />
             </FilaScorrevole>
           } />
-          {/* una riga sola che scorre anche su tablet e desktop: a capo le 15 piastrelle facevano due righe e l'intestazione superava il 30% */}
+          {/* una riga sola che scorre anche su tablet e desktop: a capo le piastrelle di `SCHEDE` facevano due righe e l'intestazione superava il 30% */}
           <FilaScorrevole role="group" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
             {SCHEDE.map((s) => (
-              // Prima l'immagine, poi la parola: erano pastiglie di testo con un'iconcina da 16 px
-              // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che
-              // si riconosce da lontano — 28 px — e l'etichetta sta sotto, piu' piccola. Resta
-              // scritta: un'icona sola non dice «Piani salvati» a nessuno la prima volta.
+              // Prima l'immagine, poi la parola: l'icona (22 px) è il segno che si riconosce da lontano,
+              // con il nome accanto (`.fila-schede-partita` in src/tailwind.css). Resta scritto: un'icona
+              // sola non dice «Piani salvati» a nessuno la prima volta.
               <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} onPointerEnter={() => anticipaScheda(s.k)} onFocus={() => anticipaScheda(s.k)} onTouchStart={() => anticipaScheda(s.k)} aria-pressed={scheda === s.k} title={s.l}>
                 <IconaScheda chiave={s.k} dimensione={22} />
                 <span>{s.l}</span>

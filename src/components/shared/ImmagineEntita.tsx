@@ -245,6 +245,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
           {modificabile && modalitaUrl && (
             <div className="w-full">
               <label className="form-label" htmlFor={`url-immagine-${ambito}-${chiave}`}>Indirizzo dell'immagine (http/https)</label>
+              {/* eslint-disable-next-line jsx-a11y/no-autofocus -- toccato «Da URL», il campo compare per incollare subito l'indirizzo */}
               <input id={`url-immagine-${ambito}-${chiave}`} className="form-input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" autoFocus />
               <p className="form-hint">Il file viene scaricato dal server e salvato fra le risorse dell'app (PNG, JPEG, WEBP, GIF o SVG, massimo 8 MB).</p>
             </div>

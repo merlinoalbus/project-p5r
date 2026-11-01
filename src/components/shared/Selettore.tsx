@@ -305,7 +305,9 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
       </button>
       {errore && <p id={idErrore} className="m-0 mt-1 testo-12 text-error-testo">{errore}</p>}
       {aperto && (
-        <div ref={tendina} className="selettore__tendina" onKeyDown={conRicerca ? tastiera : undefined}>
+        // role="presentation": la tendina raccoglie solo i tasti che risalgono dal campo di ricerca
+        <div ref={tendina} role="presentation" className="selettore__tendina" onKeyDown={conRicerca ? tastiera : undefined}>
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus -- aperta la tendina con la ricerca, si scrive subito nel campo (il fuoco non resta sul pulsante) */}
           {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} aria-activedescendant={attiva >= 0 ? idVoce(attiva) : undefined} autoComplete="off" autoFocus />}
           {/* il fuoco resta sul pulsante o sul campo: premere su una voce non deve spostarlo (toglierebbe la tendina da sotto il dito) */}
           <ul ref={elenco} id={id} role="listbox" aria-label={etichetta} className="selettore__elenco" onMouseDown={(e) => e.preventDefault()}>
@@ -316,6 +318,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
               return [
                 intestazione ? <li key={`gruppo:${o.chiave}`} role="presentation" className="selettore__gruppo">{intestazione}</li> : null,
                 // La voce è l'`option` stessa (nessun pulsante dentro): ha un id per `aria-activedescendant`, il tocco la sceglie.
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- la tastiera sceglie dal pulsante o dal campo (aria-activedescendant), il fuoco non entra nelle voci
                 <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
                   <div className="selettore__pulsante touch">
                     <span className="min-w-0 flex-1 break-words"><TestoNote testo={o.nome} /></span>

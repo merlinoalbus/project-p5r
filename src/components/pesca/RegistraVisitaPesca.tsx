@@ -77,12 +77,15 @@ export function RegistraVisitaPesca({ partitaId, collega, onChiudi, onCambiato }
   onChiudi: () => void; onCambiato: () => void | Promise<void>;
 }) {
   const gesti = useGestiPartita();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- la versione dei gesti della partita non entra nella lettura: al suo cambio si rilegge
   const registro = useCarica(() => leggiPesca(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0]);
   const stato = registro.dati;
   // La data e la fascia della partita (anche se non è quella attiva): sono il punto di partenza, e il «giorno di oggi» della Fortuna
   const partita = usePartitaStore(s => s.partite.find(p => p.id === partitaId) ?? (s.attiva?.id === partitaId ? s.attiva : null));
   const oggi = partita?.dataGioco ?? null;
-  const fortuna = useCarica(() => collega ? Promise.resolve(null) : getFortuna(partitaId), [partitaId, collega?.id ?? null]);
+  // della visita da collegare conta l'id: con una visita la Fortuna non si legge
+  const idCollega = collega?.id ?? null;
+  const fortuna = useCarica(() => idCollega !== null ? Promise.resolve(null) : getFortuna(partitaId), [partitaId, idCollega]);
 
   const [passo, setPasso] = useState<Passo>(collega ? 3 : 1);
   const [giorno, setGiorno] = useState(() => oggi ?? '');
@@ -110,6 +113,7 @@ export function RegistraVisitaPesca({ partitaId, collega, onChiudi, onCambiato }
       if (!dto.stato.sessioni.some(s => s.id === id)) throw new Error('Il riepilogo non mostra più la visita scelta: rileggilo prima di registrare.');
     }
     return dto;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- la richiesta si riconosce dal suo operazioneId: uno nuovo per ogni arrivo al riepilogo
   }, [partitaId, richiesta?.operazioneId ?? null]);
 
   // Il giorno di gioco della Fortuna sulla Perizia, dalla partita (come prima: un valore già segnato non si riscrive)

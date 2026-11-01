@@ -50,6 +50,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
   confermaScrive?: boolean; titoloConferma?: string; invalidazioneAnteprima?: number;
 }) {
   const gesti = useGestiPartita();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- la versione dei gesti della partita e `invalidazioneAnteprima` non entrano nella lettura: fanno rileggere
   const registro = useCarica(() => leggiPesca(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, invalidazioneAnteprima]);
   const [momento, setMomento] = useState<MomentoPescaInCompilazione>(() => ({ giorno: giorno ?? '', fascia: fascia ?? '', ordineVisita: null }));
   const [osservazione, setOsservazione] = useState<OsservazionePesca>(() => osservazionePescaIgnota(giorno ?? ''));

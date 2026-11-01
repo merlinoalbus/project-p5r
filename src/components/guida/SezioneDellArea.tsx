@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Progetto approvato dall'utente («Approvo»): ogni area ha quattro elementi — Timbri, Persona, Richieste, Trama — e ognuno sta in
-// un riquadro con la sua icona (`ui/sezione-<chiave>`, consegna di Codex `docs/grafica/consegna-2026-10-12-memento.md`; senza il
+// un riquadro con la sua icona (`ui/sezione-<chiave>`, consegna di Codex del 2026-10-12; senza il
 // file, un segno disegnato qui), il nome, il conto e una nota breve.
 // ============================================================
 

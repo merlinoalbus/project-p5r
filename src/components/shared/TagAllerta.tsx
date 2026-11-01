@@ -6,7 +6,7 @@
 // scheda del giorno (Partita → Oggi e Guida giorno per giorno) e nel calendario; il tag dice «Solo il nome» — gli effetti
 // stanno nel suggerimento al passaggio del mouse, il tag non si tocca. Se l'allerta vale in una fascia sola lo dice
 // («Notte torrida · sera»). L'icona è quella di Codex per l'allerta (`ui/allerta-<nome>`, consegna
-// `docs/grafica/consegna-2026-10-12-allerte.md`); finché non c'è, il segno d'allarme generico.
+// del 2026-10-12); finché non c'è, il segno d'allarme generico.
 // ============================================================
 
 import { AssetImg } from './AssetImg';

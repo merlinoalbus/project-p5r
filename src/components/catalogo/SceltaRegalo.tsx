@@ -68,9 +68,12 @@ function gruppo(chiave: string, inElenco: ReazioneRegalo | undefined, gradito: b
 
 /** «Regala a …»: scelta dell'oggetto fra tutti i regali, reazione e punti previsti, copia posseduta o acquisto da segnare insieme. */
 export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, ammessi, stato, bonusArcano, invito = false, oggettoIniziale = '', onChiudi, onFatto }: Props) {
-  const dettaglio = useCarica(() => (regali ? Promise.resolve(null) : getConfidenteDettaglio(confidente)), [confidente, !!regali]);
+  // della lista dei regali e dello stato passati conta solo se ci sono: decidono se leggerli dal server
+  const conRegali = !!regali;
+  const conStato = stato !== undefined;
+  const dettaglio = useCarica(() => (conRegali ? Promise.resolve(null) : getConfidenteDettaglio(confidente)), [confidente, conRegali]);
   const catalogo = useCarica(() => getCatalogoOggetti({ categoria: 'regalo' }), []);
-  const lettoStato = useCarica(() => (stato !== undefined ? Promise.resolve(null) : getConfidentiPartita(partita).then((l) => l.find((c) => c.chiave === confidente) ?? null)), [partita, confidente, stato !== undefined]);
+  const lettoStato = useCarica(() => (conStato ? Promise.resolve(null) : getConfidentiPartita(partita).then((l) => l.find((c) => c.chiave === confidente) ?? null)), [partita, confidente, conStato]);
   const sc = stato !== undefined ? stato : lettoStato.dati;
   const elenco = regali ?? dettaglio.dati?.regali;
   /** Revisione dei lotti D e D2: reazione, gruppo e punti dipendono dall'elenco del Confidente e dal suo stato nella partita. Finché non sono

@@ -8,6 +8,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 /** La lettura dei fatti e i loro annulli non dipendono dalla permanenza di un’offerta nel catalogo. */
 export function RegistroAcquistiPartita({ partitaId, onCambiato }: { partitaId: number; onCambiato?: () => void | Promise<void> }) {
   const gesti = useGestiPartita();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- le versioni dei gesti (della partita e della guida) non entrano nella lettura: al loro cambio si rilegge
   const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const articoli = [...new Set([...(registro.dati?.registrazioni.map(r => r.identita.articolo) ?? []), ...(registro.dati?.presenzeStoriche.map(p => p.articolo) ?? [])])];
   return <details className="card min-w-0">

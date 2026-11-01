@@ -83,6 +83,7 @@ export function IngressoQuartiere({ quartiere: q, aperta, onChiudi, onSalvato }:
             <Selettore etichetta="Area d’ingresso" valore={area} disabilitato={occupato} opzioni={q.aree.map((a) => ({ chiave: a.slug, nome: a.nome, dettaglio: a.numeroPlanimetrie > 1 ? `${a.numeroPlanimetrie} planimetrie` : undefined }))}
               onCambia={(k) => { setArea(k); setX(50); setY(50); }} />
             {src ? (
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex -- role="application": il punto si sceglie col tocco o con le frecce, a fuoco sull'immagine
               <div className={`ingresso-quartiere__immagine ${occupato ? 'ingresso-quartiere__immagine--occupata' : ''}`} role="application" aria-label={`Punto d’arrivo su ${scelta?.nome}: tocca l’immagine, o usa le frecce`} tabIndex={0}
                 onKeyDown={(e) => { const d = e.shiftKey ? 5 : 1; if (e.key === 'ArrowLeft') { e.preventDefault(); sposta(-d, 0); } if (e.key === 'ArrowRight') { e.preventDefault(); sposta(d, 0); } if (e.key === 'ArrowUp') { e.preventDefault(); sposta(0, -d); } if (e.key === 'ArrowDown') { e.preventDefault(); sposta(0, d); } }}
                 onClick={tocca}>

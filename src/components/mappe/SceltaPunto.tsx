@@ -33,6 +33,7 @@ export function SceltaPunto({ src, alt, punto, onPunto, disabilitato = false }: 
     onPunto({ x: Math.min(100, Math.max(0, base.x + dx)), y: Math.min(100, Math.max(0, base.y + dy)) });
   };
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex -- role="application": il punto si sceglie col tocco o con le frecce, a fuoco sull'immagine
     <div className={`ingresso-quartiere__immagine ${disabilitato ? 'ingresso-quartiere__immagine--occupata' : ''}`} role="application" tabIndex={0}
       style={proporzione ? { width: `min(100%, 720px, calc(60dvh * ${proporzione}))` } : undefined}
       aria-label={`${alt}: tocca il punto, o usa le frecce`}

@@ -120,30 +120,28 @@ export const LINEE_TOKYO: Linea[] = [
  *
  * **Le posizioni non si sfiorano, e non è un caso.** Sono state calcolate: si misurano i riquadri
  * di figura e targa nel browser e si separano finché non resta una sovrapposizione, poi si
- * riverifica alle tre larghezze. Prima erano in fila lungo il bordo alto ed erano il grosso delle
- * 38 sovrapposizioni contate all'inizio — targhe l'una sull'altra e sopra i quartieri. La prova si
- * rifà con lo script in `docs/MAPPE.md`.
+ * riverifica alle tre larghezze. La prova si rifà misurando i riquadri nel browser alle tre larghezze.
  *
- * **`dungeon-mementos` è tornato.** L'avevo tolto scrivendo che «i Memento non hanno un ingresso
- * sulla mappa di viaggio»: vero, e irrilevante, perché non ce l'hanno nemmeno i cinque Palazzi del
- * Meta-Nav qui sotto né il Covo, e stanno tutti sulla mappa. L'utente li aveva chiesti per nome —
- * «il Covo dei Ladri e i mementos possono essere posizionati in aree libere» — la loro finestra è
- * già nella voce `finestre-dungeon` di `dati_guida` (dal 7 maggio, e non si chiude: migrazione 318) e la sagoma esiste. Stanno
- * accanto a Iweleth sul bordo, che è il posto di ciò che si apre col Meta-Nav e non da una
- * fermata. Il perché della confusione è scritto in `src/utils/palazzi.ts`. */
+ * **`dungeon-mementos` sta sulla mappa.** I Memento non hanno un ingresso sulla mappa di viaggio, ma
+ * non ce l'hanno nemmeno i quattro Palazzi del Meta-Nav qui sotto né il Covo, e stanno tutti sulla
+ * mappa. L'utente li ha chiesti per nome — «il Covo dei Ladri e i mementos possono essere posizionati
+ * in aree libere» — la loro finestra è nella voce `finestre-dungeon` di `dati_guida` (dal 7 maggio, e
+ * non si chiude: migrazione 318) e la sagoma esiste. Stanno sul bordo, sotto i Palazzi del Meta-Nav,
+ * che è il posto di ciò che si apre col Meta-Nav e non da una fermata. Le due domande (elenco dei
+ * Palazzi e mappa) sono spiegate in `src/utils/palazzi.ts`. */
 export const RADICI_TOKYO: Record<string, Collocazione> = {
   // i quattro con un posto dichiarato, accanto al loro quartiere
   'dungeon-kamoshida': { x: 53.5, y: 43, scala: 4.5 },
   'dungeon-madarame': { x: 26.7, y: 64.2, scala: 4.6 },
   'dungeon-kaneshiro': { x: 38.9, y: 63.6, scala: 4.6 },
   'dungeon-futaba': { x: 8.7, y: 56.6, scala: 4.6 },
-  // i cinque del Meta-Nav, sul bordo di nord-est, dove non c'è rete da attraversare
+  // i quattro del Meta-Nav, sul bordo di nord-est, dove non c'è rete da attraversare
   'dungeon-okumura': { x: 64, y: 5, scala: 4.2 },
   'dungeon-niijima': { x: 74, y: 5, scala: 4.2 },
   'dungeon-shido': { x: 84, y: 5, scala: 4.2 },
   'dungeon-maruki': { x: 93, y: 5, scala: 4.2 },
   // (Iweleth non ha più un posto suo: dal lotto L8 è un dedalo dei Memento, `radiciMetaverso` non lo propone come radice)
-  // i Memento, che col Meta-Nav si aprono da ovunque: sul bordo, sotto i cinque Palazzi del Meta-Nav
+  // i Memento, che col Meta-Nav si aprono da ovunque: sul bordo, sotto i quattro Palazzi del Meta-Nav
   'dungeon-mementos': { x: 82.5, y: 17, scala: 4.2 },
 };
 

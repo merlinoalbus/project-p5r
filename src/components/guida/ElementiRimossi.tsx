@@ -39,6 +39,7 @@ interface Props {
 // L12 (passo 8): nel rilascio (sola lettura) il ripristino delle righe nascoste non esiste; la condizione è costante di build, `ElementiRimossiReale` esce dal bundle
 export const ElementiRimossi: StrumentoDiModifica<typeof ElementiRimossiReale> = IN_RILASCIO ? NienteInRilascio : ElementiRimossiReale;
 function ElementiRimossiReale({ tipo, negozio, onRipristinato, sempre, versione }: Props) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `versione` non entra nella lettura: la pagina la cambia dopo un ripristino per rileggere
   const elenco = useCarica(() => getCatalogo(tipo, { nascosti: true, negozio }), [tipo, negozio, versione]);
   // Nella pagina di tutti i tipi un articolo dice di quale negozio è, col nome e non con la chiave.
   const negozi = useCarica(() => (tipo === 'articolo' && !negozio ? getNegozi() : Promise.resolve([])), [tipo, negozio]);

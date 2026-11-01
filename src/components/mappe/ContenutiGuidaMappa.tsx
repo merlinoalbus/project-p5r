@@ -22,6 +22,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   const [selezionato, seleziona] = useState<number | null>(null);
   // L0: nei Memento le sezioni sono dedali, nei Palazzi infiltrazioni; il collegamento porta alla scheda del posto
   const memento = dungeon === 'mementos';
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- data, fascia e meteo della partita non entrano nella lettura: al loro cambio si rilegge
   const contenuti = useCarica(() => getContenutiMappa(mappa, attiva?.id), [mappa, attiva?.id, attiva?.dataGioco, attiva?.fasciaGioco, attiva?.meteoOra]);
   const navigate = useNavigate();
   /** L3 (AP3-4): il nome di una planimetria porta dritto alla sua casa (la scheda del Palazzo sulla sua area, con l'infiltrazione

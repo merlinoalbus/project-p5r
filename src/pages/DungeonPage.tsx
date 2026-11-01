@@ -2,13 +2,10 @@
 // DungeonPage — i Palazzi come schede visive: emblema, anello di avanzamento nella partita, date e livello in breve (Fase 7.1, grafica 11.4)
 // ============================================================
 //
-// Si chiamava «Palazzi e Dedali» e ne elencava dieci. I Dedali erano due — Iweleth e i Memento —
-// e i due non si somigliano affatto: Iweleth si visita per aree come un Palazzo, e le sue mappe
-// esistono; i Memento non hanno aree fisse, i piani sono generati a ogni discesa, e la loro pagina
-// li disegna per intero. Tenerli nello stesso elenco prometteva la stessa cosa a proposito di due
-// posti diversi. Ora la sezione è **Palazzi**, Iweleth ci sta dentro perché si comporta come loro,
-// e i Memento si raggiungono da `/guida/dungeon/mementos` e dalle Richieste. Il filtro è
-// `soloPalazzi`, condiviso con la mappa di Tokyo.
+// La sezione è **Palazzi**: solo i Palazzi che si visitano per aree. I Memento non ci stanno (non hanno aree fisse, i piani sono
+// generati a ogni discesa, e la loro pagina li disegna per intero) e si raggiungono da `/guida/dungeon/mementos` e dalle Richieste;
+// Iweleth nemmeno, perché dal lotto L8 è un dedalo dei Memento (`regolaBoss = 'memento'`). Il filtro è `soloPalazzi`
+// (`utils/palazzi.ts`); la mappa di Tokyo usa `radiciMetaverso`, che ci aggiunge i Memento.
 
 import { Link } from 'react-router-dom';
 import { getDungeons } from '../services/api';

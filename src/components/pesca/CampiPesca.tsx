@@ -35,6 +35,7 @@ export function NumeroOsservatoPesca({ etichetta, valore, onCambia, minimo = 0, 
 }) {
   return <label className="flex min-w-0 flex-col gap-1 testo-13">
     <span>{etichetta}</span>
+    {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- aria-description è un attributo globale di ARIA 1.3: l'elenco della regola (aria-query) non lo conosce ancora */}
     <input className="form-input min-h-11 w-full" type="number" inputMode="numeric" min={minimo} max={massimo} step={1}
       value={valore ?? ''} disabled={disabilitato} aria-description="Lascia vuoto se il valore non è noto."
       onChange={e => {

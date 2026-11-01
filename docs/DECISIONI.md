@@ -3,8 +3,7 @@
 Le scelte che spiegano perché l'app si comporta così, raccolte per area e scritte nella forma di oggi. Le decisioni superate non ci
 sono più: la loro storia è nella cronologia di git. Il «come» (tabelle, servizi, componenti) sta in [`ARCHITETTURA.md`](ARCHITETTURA.md).
 
-Le voci segnate **(24/10)** vengono da una giornata di lavoro di cui l'utente ha sospeso le approvazioni fino a una verifica e a una
-sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costruirci sopra.
+Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 
 ## 1. Prodotto
 - L'app è per **Persona 5 Royal** (non l'edizione base). In caso di discrepanza fra fonti prevale il dato Royal documentato; il
@@ -64,9 +63,9 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   negozio, Confidenti al rango massimo, Richieste completate, Compendio, livello di una Persona). Dove la guida dice «tutti» (videogiochi,
   Confidenti, Richieste, Persona del Compendio senza DLC) il conteggio non ha un numero scritto: il totale si conta nel DB a ogni lettura. Ogni
   campo si corregge e si ripristina dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
-  stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Il rango 8 di
-  Akechi entro il 17 novembre non è un requisito del finale Royal (né il suo contrario del finale standard): il testo della guida dice che
-  aggiunge solo una scena, e il coordinatore ha accolto questa lettura sulla base del testo (non è una decisione di Roberto). I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
+  stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Che il rango 8
+  di Akechi non sia un requisito del finale Royal (né il suo contrario del finale standard) è una lettura del testo della guida, non una
+  decisione di Roberto. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
   loro punto unico; i testi della guida restano. I prezzi non diventano campi nuovi: hanno già il loro punto unico nel catalogo e nei listini,
   e i prezzi della pagina Oggetti diversi dal listino restano note, in attesa di Roberto (ROADMAP).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
@@ -137,6 +136,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   esplicito dove il servizio è provato idempotente (31/10: un acquisto ripetuto dopo una risposta persa si registrava due volte).
 - Gli errori arrivano all'utente in italiano e senza codici tecnici (offline, server che non risponde, errore del server); il dettaglio
   resta nella console e nel log.
+- **Lint delle dipendenze e dell'accessibilità (L11-06, D12, 01/11)**: le dipendenze di `useCarica` le controlla la regola di `useEffect`
+  (`react-hooks/exhaustive-deps`); `eslint-plugin-jsx-a11y` controlla l'accessibilità con le regole raccomandate. Le correzioni non cambiano
+  né il comportamento né l'aspetto; dove l'omissione o il gesto sono voluti (un valore che fa solo rileggere, un campo che prende il fuoco
+  all'apertura, una finestra che raccoglie i tasti) resta una disattivazione sulla riga con il motivo, mai una regola spenta per tutti.
 - I test restano nel repository ma girano solo su richiesta, sul percorso indicato; non girano nella pipeline a ogni push.
 - Il numero di una migrazione non si riserva: si prende il primo libero al momento del commit. I test che chiamano funzioni tolte su
   decisione dell'utente diventano `it.skip` con un commento, non si cancellano. **(24/10)**
@@ -174,9 +177,12 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   rosso d'errore come testo `#fb7c7c`. I colori degli spilli restano quelli autorati, anche gli otto molto chiari: è una scelta, non una dimenticanza.
 - Pulsanti con figura: i pulsanti di solo testo sono convertiti; restano di testo gli «Annulla» delle finestre e i pulsanti a solo
   simbolo con nome accessibile. Ogni chiave d'icona nasce con una riserva SVG in codice.
-- Conferme con `DialogoConferma`, mai `window.confirm`; una sola vista d'errore. Le finestre non si chiudono cliccando lo sfondo
-  (selezionando del testo si chiudevano per errore).
-- Pulsanti occupati con `aria-disabled` (non perdono il fuoco); regioni `aria-live` per notifiche e totali.
+- Conferme con `DialogoConferma`, mai `window.confirm`; una sola vista d'errore. Le finestre (`Modal`) non si chiudono cliccando lo sfondo
+  (selezionando del testo si chiudevano per errore); la ricerca globale e il pannello delle schede si chiudono dallo sfondo solo se il
+  gesto comincia e finisce lì.
+- Pulsanti occupati: di norma `disabled`; `aria-disabled` (il pulsante non perde il fuoco) nei punti delle Doti e nella Fortuna, nei dati
+  della partita, nella lettura degli appunti fissi, nelle voci del menu della voce e nella maniglia di riordino; le scelte alla spunta lo
+  usano per le opzioni non disponibili. Regioni `aria-live` per notifiche e totali.
 - Accessibilità (L6, WCAG 2.2 AA): testo ad almeno 4,5:1 anche nei chip degli elementi e delle affinità (tinte schiarite per il testo,
   colore pieno per bordi e icone); caselle di spunta nel rosso del tema; file di schede con le frecce, Home e Fine; lo scorrimento animato
   si spegne con «riduci movimento»; pin e ritagli dell'editor si spostano anche con le frecce e con i campi X/Y. Pin e frecce delle file
@@ -228,7 +234,7 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   su una fila (su due file di cinque dove la piastrella è stretta, come a 1024); due colonne da 640 px, tre da 1024 (nove piastrelle intere
   a 1280×689), quattro da 1536; sotto i 640 px la riga del telefono. Con una partita attiva, e solo se veri, i segni «In scorta ·
   Liv. N» (oro) e «Nel Registro · Liv. N» (rosso), anche nella testa della scheda Persona. La vista «Elenco» non cambia.
-- Aggiunta alla scorta: una Persona per partita; skill precompilate con le ultime 8 apprese al livello scelto; l'aggiunta registra
+- Aggiunta alla scorta: ogni Persona al più una volta per partita; skill precompilate con le ultime 8 apprese al livello scelto; l'aggiunta registra
   la Persona nel compendio personale col livello più alto raggiunto.
 - Le descrizioni delle Persona sono testi originali in italiano sull'origine della figura, non il testo del compendio del gioco.
 - La resa italiana dell'effetto di una skill (condivisa fra skill con lo stesso testo) si modifica e si ripristina solo dalla pagina

@@ -349,6 +349,7 @@ function FinestraAppuntiFissiReale() {
 
   return createPortal(
     <>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Esc riduce la finestra ovunque sia il fuoco dentro */}
       <section ref={finestra} className="appunti-fissi" role="dialog" aria-modal="false" aria-labelledby={idTitolo} tabIndex={-1} hidden={ridotta}
         style={{ left: g.x, top: g.y, width: g.w, height: g.h }} onKeyDown={tasti}>
         <div className={`appunti-fissi__barra ${trascina ? 'appunti-fissi__barra--trascina' : ''}`} data-gesto="sposta"
@@ -533,6 +534,7 @@ function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onS
       <label className="campo" htmlFor={`${id}-t`}>
         <span className="campo__etichetta">Titolo</span>
         {/* il titolo prende il fuoco: dal Diario arriva proposto, e lo si cambia prima di salvare */}
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- fuoco voluto, vedi la riga sopra */}
         <input id={`${id}-t`} className="form-input" value={titolo} maxLength={LIMITE_TITOLO_APPUNTO} autoFocus onChange={(e) => setTitolo(e.target.value)}
           placeholder="Per esempio DOMANDA IN CLASSE" enterKeyHint="done" aria-describedby={avviso ? `${id}-v` : lettura ? `${id}-a` : undefined} />
       </label>
@@ -546,6 +548,7 @@ function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onS
             </span>
           </span>
           {/* raggiungibile da tastiera (Tab) per scorrere un testo lungo; non si modifica: per un testo diverso, copialo e tocca di nuovo + */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- un'area che scorre deve prendere il fuoco per scorrere da tastiera, vedi la riga sopra */}
           <div role="region" aria-labelledby={`${id}-a`} tabIndex={0} className="appunti-fissi__anteprima testo-13">{lettura.anteprima}</div>
         </div>
       ) : (

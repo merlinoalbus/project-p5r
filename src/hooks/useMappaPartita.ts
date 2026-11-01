@@ -39,6 +39,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   // rimontava (zoom e posizione persi a ogni pin toccato nel «Collega pin», 2026-10-18). La rilegge in silenzio l'effetto più sotto.
   /** La mappa con lo stato della partita, nell'infiltrazione di contesto se c'è (altrimenti la chiamata di sempre). */
   const leggi = () => (contesto.current ? getMappa(chiave, partitaId ?? undefined, contesto.current) : getMappa(chiave, partitaId ?? undefined));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `leggi` usa `chiave`, `partitaId` e l'infiltrazione da un riferimento; `momento` fa solo rileggere
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => leggi(), [chiave, partitaId, momento]);
   // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
   // nuova (una rilettura, anche quella di una versione nuova, o un caricamento completo per un cambio di momento o mappa) vale

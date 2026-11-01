@@ -82,6 +82,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
       if (!costo || costo.unita !== 'punti-pesca' || costo.quantita !== o.richiesta.quantita || !Number.isSafeInteger(costo.costoUnitario) || costo.costoUnitario < 0 || !Number.isSafeInteger(costo.costoTotale) || costo.costoTotale !== costo.costoUnitario * costo.quantita) throw new Error('Il costo mostrato non corrisponde alla quantità comprata: rileggi l’anteprima prima di confermare.');
     }
     return dto;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- l'operazione si riconosce dal suo operazioneId: la stessa operazione non si rilegge
   }, [partitaId, o.richiesta.operazioneId]);
   const [occupato, setOccupato] = useState(false), [attestato, setAttestato] = useState(false);
   const [ricevuta, setRicevuta] = useState<RicevutaOperazionePescaDto | null>(null), [errore, setErrore] = useState<string | null>(null);
@@ -191,6 +192,7 @@ function RegistroPescaNelContesto({ partitaId, onCambiato, promemoria }: { parti
     const questa = ++lettura.current, dto = await leggiPesca(partitaId);
     if (vivo.current && lettura.current === questa) setUltimoStato(dto);
     return dto;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- le versioni dei gesti (della partita e della guida) non entrano nella lettura: al loro cambio si rilegge
   }, [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const pendente = gestoPendenteNelloScope(partitaId, { pesca: true });
   const s = registro.dati ?? ultimoStato;

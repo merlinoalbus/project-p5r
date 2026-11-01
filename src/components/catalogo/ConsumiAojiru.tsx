@@ -91,7 +91,9 @@ interface PreparazioneProps {
 export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICOLO_AOJIRU, giorno, fascia = 'giorno', stato, titoloConferma = 'Registra il consumo', esitoConferma = 'Consumo registrato.', confermaScrive = true, invalidazioneAnteprima = 0, onRecuperato, onConferma }: PreparazioneProps) {
   useGestiPartita();
   const pendente = gestoPendenteNelloScope(partitaId, { articolo, ...(fonte.tipo === 'diario' ? { voceUid: fonte.voceUid } : {}) });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `invalidazioneAnteprima` non entra nella lettura: è il segnale del genitore per rileggere
   const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId, invalidazioneAnteprima]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- come sopra: `invalidazioneAnteprima` fa solo rileggere
   const fortuna = useCarica(() => getFortuna(partitaId), [partitaId, invalidazioneAnteprima]);
   const oggi = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.dataGioco : null));
   const [campi, setCampi] = useState(() => ({ giorno: giorno ?? '', fascia, ordine: '1', variante: '' as '' | DoteChiave, scelta: '', rapporto: '' }));

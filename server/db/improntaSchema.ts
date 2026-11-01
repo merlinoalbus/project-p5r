@@ -2,7 +2,7 @@
 // improntaSchema — l'impronta della struttura di uno schema SQLite (L12, passi 7 e 9 del progetto delle due istanze)
 // ============================================================
 //
-// La struttura delle partite è congelata alla consegna (`docs/coordinamento/lotti/L12/progetto-due-istanze.md`, §5): la «Prepara edizione» della
+// La struttura delle partite è congelata alla consegna (`docs/ARCHITETTURA.md`, §7 bis): la «Prepara edizione» della
 // preparazione registra nel manifesto l'impronta dello schema di `partite-vuoto.db`, e l'istanza di rilascio la ricalcola a ogni avvio sul file
 // delle partite vero: se le due non coincidono l'avvio si ferma, perché il codice scriverebbe su tabelle diverse da quelle che si aspetta.
 //

@@ -50,7 +50,9 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onCh
   const [mappa, setMappa] = useState(planimetrie[0]?.chiave ?? '');
   const [punto, setPunto] = useState<{ x: number; y: number } | null>(null);
   const [occupato, setOccupato] = useState(false);
-  const q = useCarica(() => (luogo ? Promise.resolve(null) : getQuartiere(quartiere)), [quartiere, luogo?.chiave]);
+  // del luogo già scelto conta la chiave: con un luogo non si legge il quartiere
+  const chiaveLuogo = luogo?.chiave;
+  const q = useCarica(() => (chiaveLuogo !== undefined ? Promise.resolve(null) : getQuartiere(quartiere)), [quartiere, chiaveLuogo]);
   const planimetria = planimetrie.find((p) => p.chiave === mappa) ?? null;
   const src = useImmagineMappa(planimetria);
   // prima i luoghi senza pin (quelli da posizionare), poi gli altri

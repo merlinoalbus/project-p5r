@@ -185,6 +185,7 @@ export function DungeonDettaglioPage() {
   // le versioni dell'area (con etichette e conteggi): la pagina dell'area di L2, letta per il contenitore `dungeon`
   const [revisioneArea, setRevisioneArea] = useState(0);
   const dettaglioArea = useCarica(() => (d && areaFisica ? getArea({ tipo: 'dungeon', chiave: d.chiave }, areaFisica.slug, partitaId ?? undefined) : Promise.resolve(null)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- del Palazzo e dell'area contano chiave e slug; `revisioneArea` fa solo rileggere
     [d?.chiave, areaFisica?.slug, partitaId, revisioneArea]);
   const versioniArea = dettaglioArea.dati && dettaglioArea.dati.slug === areaFisica?.slug ? dettaglioArea.dati.planimetrie : [];
   const planimetrieArea = useMemo(() => (d?.planimetrie ?? []).filter((p) => !!areaFisica && p.area === areaFisica.chiave), [d, areaFisica]);

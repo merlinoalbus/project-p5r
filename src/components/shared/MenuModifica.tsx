@@ -84,7 +84,8 @@ function MenuModificaReale({ children, cosa, allinea = 'destra', classePulsante 
   };
 
   return (
-    <div ref={radice} className={`menu-modifica ${className}`} onKeyDown={tasti}
+    // role="presentation": il contenitore raccoglie solo i tasti e l'uscita del fuoco che risalgono dal pulsante e dalle voci
+    <div ref={radice} role="presentation" className={`menu-modifica ${className}`} onKeyDown={tasti}
       // il fuoco che esce dal menu (Tab oltre l'ultima voce) lo chiude
       onBlur={(e) => { if (aperto && e.relatedTarget && !radice.current?.contains(e.relatedTarget as Node)) setAperto(false); }}>
       <PulsanteVisivo ref={pulsante} tono="fantasma" compatto className={classePulsante} icona={<IconaAzione chiave="modifica" dimensione={20} />}
@@ -94,6 +95,7 @@ function MenuModificaReale({ children, cosa, allinea = 'destra', classePulsante 
       {/* scelta una voce (il clic arriva qui dopo il suo gestore) il riquadro si chiude e il fuoco torna al pulsante. Solo i clic che
           stanno davvero nel riquadro (DOM): React fa risalire fin qui anche quelli dentro la finestra in portale che una voce apre, e
           chiudere per quelli riportava il fuoco sul pulsante, dietro la finestra, fuori dalla sua trappola del fuoco */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- il clic risale dalla voce scelta (che ha i suoi tasti); il riquadro è il bersaglio di aria-controls e non cambia ruolo */}
       <div ref={riquadro} id={id} hidden={!aperto} className={`menu-modifica__voci ${allinea === 'sinistra' ? 'menu-modifica__voci--sinistra' : ''}`}
         onClick={(e) => { const t = e.target as Element; if (riquadro.current?.contains(t) && t.closest(VOCI)) chiudi(); }}>
         {children}

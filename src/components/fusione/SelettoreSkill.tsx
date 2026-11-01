@@ -31,7 +31,8 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
       .slice(0, 10);
   }, [q, skill, scelte, senzaTratti]);
   return (
-    <div ref={rif} onKeyDown={suTasto} className="card flex flex-col gap-2">
+    // role="presentation": il contenitore raccoglie solo i tasti che risalgono dal campo e dalle voci
+    <div ref={rif} role="presentation" onKeyDown={suTasto} className="card flex flex-col gap-2">
       <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta} ({scelte.length}/{massimo})</span>
       <div className="flex flex-wrap gap-1.5">
         {scelte.map((s) => (

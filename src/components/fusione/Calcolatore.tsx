@@ -42,9 +42,12 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
   const partiteCaricate = usePartitaStore((s) => s.caricata);
   const [a, setA] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeA) ?? null);
   const [b, setB] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeB) ?? null);
+  // delle due Persona la lettura usa solo l'id
+  const idA = a?.id;
+  const idB = b?.id;
   const { dati: esito, caricamento, errore } = useCarica(
-    () => (a && b ? getFondi(a.id, b.id, { partita: partitaId ?? undefined }) : Promise.resolve(null)),
-    [a?.id, b?.id, partitaId],
+    () => (idA !== undefined && idB !== undefined ? getFondi(idA, idB, { partita: partitaId ?? undefined }) : Promise.resolve(null)),
+    [idA, idB, partitaId],
   );
 
   const r = esito?.ricetta ?? null;

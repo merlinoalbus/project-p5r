@@ -74,6 +74,7 @@ function testoQuando(s: Struttura): string {
 
 /** La scheda: dove (luoghi per nome), quando (struttura), eccezioni, «dal» e se è disponibile adesso nella partita. */
 export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onModifica }: { chiave: string; partita?: number; versione: number; onModifica: () => void }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `versione` non entra nella lettura: la scheda la cambia dopo una modifica per rileggere
   const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita, versione]);
   if (d.caricamento && !d.dati) return <p role="status" className="m-0 testo-13 text-text-muted">Un attimo…</p>;
   if (d.errore || !d.dati) return <p role="alert" className="m-0 testo-13 text-error-testo">{d.errore ?? 'Disponibilità non disponibile.'}</p>;

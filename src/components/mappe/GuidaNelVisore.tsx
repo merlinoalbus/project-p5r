@@ -222,6 +222,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
   };
   const corpo = (
     // `data-guida-visore`: il visore riconosce la guida (il fuoco dentro, alla chiusura) da qui, non dal nome accessibile
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Esc chiude la guida ovunque sia il fuoco dentro
     <section ref={agganciaFinestra} role="dialog" aria-label="Guida della planimetria" data-guida-visore="" onKeyDown={suTasto}
       className={largo
         ? 'fixed z-[70] flex max-h-[min(70dvh,560px)] w-[340px] flex-col border border-primary bg-[rgb(11,11,14)] shadow-[0_8px_24px_rgba(0,0,0,0.6)]'

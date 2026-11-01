@@ -30,7 +30,8 @@ export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }
   const livelloMax = soloLivello && livelloProtagonista ? livelloProtagonista : undefined;
   const { dati, caricamento, errore } = useCarica(
     () => (ids.length > 0 ? cercaPerSkill(ids, { partita: partitaId ?? undefined, risultato: risultato?.id, livelloMax, limite: 100 }) : Promise.resolve(null)),
-    [ids.join(','), partitaId, risultato?.id, livelloMax],
+    // le dipendenze si confrontano per valore (`useCarica`): l'elenco degli id rilegge quando cambia, come la sua forma unita
+    [ids, partitaId, risultato?.id, livelloMax],
   );
 
   return (

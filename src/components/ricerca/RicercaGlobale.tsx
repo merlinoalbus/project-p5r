@@ -231,8 +231,10 @@ function FinestraRicerca() {
     <div className="ricerca-globale" role="presentation"
       onMouseDown={(e) => { premutoSuSfondo.current = e.target === e.currentTarget; }}
       onClick={(e) => { if (premutoSuSfondo.current && e.target === e.currentTarget) chiudi(); premutoSuSfondo.current = false; }}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- trappola del fuoco (Tab), Invio e frecce della finestra valgono ovunque sia il fuoco dentro */}
       <div ref={foglio} className="ricerca-globale__foglio" role="dialog" aria-modal="true" aria-label="Cerca nella guida" tabIndex={-1} onKeyDown={tasti}>
         <div className="ricerca-globale__testa">
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus -- la ricerca si apre per scrivere subito */}
           <CampoRicerca valore={q} onCambia={impostaQ} segnaposto="Cerca nella guida…" autoFocus />
           <button type="button" className="btn btn-ghost btn-sm touch shrink-0" onClick={() => chiudi()} aria-label="Chiudi la ricerca">
             <IconClose size={18} /> Chiudi

@@ -24,6 +24,7 @@ export function useEsitiNellaPartita(gruppi: readonly GruppoCondizioni[]): Reado
     .map((g) => ({ chiave: g.chiave, condizioni: normalizzaCondizioniSpillo([...g.condizioni]) })), [gruppi]);
   const esiti = useCarica(
     () => (attiva && richiesta.length ? valutaGruppiCondizioni(richiesta, attiva.id) : Promise.resolve(null)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- della partita contano id, giorno, livello e Nuova partita+ (rileggono), non ogni campo
     [attiva?.id, attiva?.dataGioco, attiva?.livelloProtagonista, attiva?.nuovaPartitaPlus, richiesta],
   );
   return useMemo(() => new Map(Object.entries(esiti.dati?.gruppi ?? {})), [esiti.dati]);

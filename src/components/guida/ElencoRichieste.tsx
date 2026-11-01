@@ -73,6 +73,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
           {partitaId && motivi && <span id={idMotivi} className="sr-only">Si completa dopo: {motivi.join('; ')}</span>}
           {partitaId && (
             // da tastiera come vuole il ruolo: Tab entra sullo stato scelto, le frecce scelgono il precedente o il seguente
+            // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- il fuoco va sui radio dentro il gruppo, non sul gruppo
             <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-border" role="radiogroup" aria-label={`Stato di «${r.nome}»`}
               onKeyDown={(e) => {
                 const passo = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;

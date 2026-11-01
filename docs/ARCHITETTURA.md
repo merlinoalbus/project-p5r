@@ -35,7 +35,7 @@ La fonte dei dati è il DB dell'istanza; «Importa» sostituisce esplicitamente 
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
 | Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (tramite `test/supertest.ts`), DB in memoria con il pacchetto iniziale (`test/dbDiProva.ts`), moduli finti dal modulo vero (`test/mockModuli.ts`), migrazioni (`server/db/migrationRunner.test.ts`, `migrations/index.test.ts`) |
-| Qualità | ESLint 10 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
+| Qualità | ESLint 10 flat config (`eslint.config.js`: nel frontend `react-hooks`, con `exhaustive-deps` esteso a `useCarica`, e `jsx-a11y` raccomandato), `tsc -b` su 4 progetti (app / node / server / test) |
 | Deploy | Immagini `node:24.22.1-alpine` (backend) e `nginx:1.30-alpine` (frontend); GitHub Actions su Node 24 |
 
 ## 3. Struttura del repository
@@ -82,7 +82,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
    nell'intestazione `X-Avanzamento-Partita`, ridotti (`AvanzamentoInIntestazioneDto`: id della partita, giorno e fascia, decisioni
    aperte, senza la partita, così l'intestazione resta piccola). Il client la legge in `_helpers.ts` e la passa al gestore registrato in
    `main.tsx` (`impostaGestoreAvanzamento` → `seAvanzamentoInIntestazione`), che rilegge l'elenco delle partite e avvisa.
-3. `express.json({ limit: '5mb' })` (64 MB solo per `POST /api/mappe/importa`). **Niente CORS** (DECISIONI 2026-10-03): il
+3. `express.json({ limit: '5mb' })` (512 MB solo per `POST /api/mappe/importa`; nel rilascio 256 kB per tutto, `LIMITE_CORPO_RILASCIO`). **Niente CORS** (DECISIONI 2026-10-03): il
    frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha autenticazione, quindi un'altra
    origine non deve poterla chiamare dal browser dell'utente.
 4. Router di area (`ROUTER_DI_AREA` in `server/routes/index.ts`, 20 montaggi: elenco in §3) con `validate({ params, query, body })` zod
@@ -407,8 +407,8 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
   `acquisto_articolo`) che non è un riferimento, con il motivo; una tabella o una colonna non classificata dà un avviso nel log
   (`avvisaCensimentoPartite`) all'avvio della preparazione e in «Prepara edizione», senza bloccarli (decisione dell'utente del 01/11). I
   valori delle colonne di tipo delle chiavi polimorfe non sono censiti.
-- Le correzioni dell'utente stanno nel database, quindi nell'export e nelle copie di sicurezza; dopo l'import di un file più vecchio le correzioni successive a quel file non sono nel DB ma restano nella copia di sicurezza. Tre import di fila fanno scorrere via la copia più vecchia.
-- Il backup di avvio (`backupService.ts`) copia i due file prima delle migrazioni e tiene le ultime 7.
+- Le correzioni dell'utente stanno nel database, quindi nell'export e nelle copie di sicurezza; dopo l'import di un file più vecchio le correzioni successive a quel file non sono nel DB ma restano nella copia di sicurezza. Le copie di sicurezza tenute sono le ultime 3: quella di un import se ne va al terzo import successivo.
+- Il backup di avvio (`backupService.ts`) copia i due file prima delle migrazioni e ne tiene al più 7, entro il tetto in byte di §5.
 
 ### Migrazioni
 - **Gioco**: 340 migrazioni registrate in `server/db/migrations/index.ts`, l'ultima è la 340 (`340_campi_strutturati_della_guida`). **Utente**: 64 registrate in `server/db/migrazioniUtente/index.ts`, l'ultima è la 064 (`064_partita_senza_riuso_degli_id`). Il numero cresce: fa fede il registro. Registri append-only; `index.test.ts` pretende id consecutivi; ogni migrazione gira in una transazione con `foreign_key_check` prima di avanzare `user_version`.
@@ -432,7 +432,14 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 | `negozio.sblocco`, `quartiere.sblocco`, `articolo.condizione`, `articolo.disponibile_dal` | 184, 187, 188, 194 | le condizioni (`sblocco_json`, `condizioni_json`); il «disponibile dal» mostrato è generato dalle condizioni |
 | `luogo.negozio`, `luogo.attivita_json` | 187 | `negozio.sede_chiave`, `attivita.sede_chiave` |
 | `giorno_calendario`, `giorno_percorso` | 189 | il giorno unico (`giorno`); le azioni del percorso sono le voci del Diario, copia storica in `archivio-giorno-percorso-azioni-l11` |
+| `attivita.altri_effetti`, `attivita.regole`, `attivita.premi`, `attivita.paga` | 203 | il testo `dettagli` dell'attività, gli effetti strutturati e la paga strutturata (`paga_yen`, `paga_massima`); archivio `archivio-frasi-l11` |
+| `pianta_quartiere` | 210 | l'illustrazione del quartiere nel database; archivio `archivio-pianta-quartiere-l11` |
+| `libro.nome_it`, `film.nome_it`, `articolo.nome_it` | 215 | il nome del catalogo degli oggetti (`catalogo_oggetto.nome`); archivio `archivio-frasi-l11` |
+| `luogo.sblocco`, `attivita.sblocco` | 218 | le condizioni (`condizioni_json`) e gli inviti che aprono il luogo; archivio `archivio-frasi-l11` |
+| `dungeon.livello_consigliato` | 335 | `livello_min`, `livello_max` e la nota storica del Palazzo; archivio `archivio-frasi-l11` |
+| `richiesta.disponibile_dal`, `richiesta.scadenza`, `richiesta.area` | 337 | `condizioni_json`, `scadenza_data` con la proroga, `area_chiave`; archivio `archivio-frasi-l11` |
 | `utente.lettura_partita` | utente 043 | `progresso_libro_partita`, `progresso_film_partita` |
+| `utente.requisito_partita` | utente 044, solo se la tabella è vuota (con righe resta e il log lo avvisa) | niente: le conferme a mano dei requisiti dei Confidenti non si leggono più |
 
 ## 6. Motore di fusione
 - `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato con le altre cache di gioco, `cacheDiGioco`, quando il pacchetto cambia) e contesti memoizzati per insieme di DLC posseduti;
@@ -447,7 +454,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 - `server/services/fusione/alberoFusione.ts`: `pianiFusione(target, ctx, disponibilita, opzioni)` → piani ordinati per costo; foglie
   `scorta` (0 yen, un esemplare per volta), `registro` (prezzo di evocazione), `cattura` (Persona catturabile secondo `sqlPersonaCatturabile`, ≤ livelloMax); nodi `fusione` con
   2 ingredienti (o N per le ricette speciali). Stima ottimistica memoizzata + ricerca in profondità con potatura (branch-and-bound sulle N migliori),
-  ampiezza per nodo 12; `pianoCoerente` verifica ogni nodo col motore. La disponibilità viene da `persona_posseduta` e `compendio_partita` della partita.
+  ampiezza per nodo 12 (almeno 40 con skill richieste); `pianoCoerente` verifica ogni nodo col motore. La disponibilità viene da `persona_posseduta` e `compendio_partita` della partita.
 - `server/services/fusione/eredita.ts`: snapshot skill/apprese/tratti/tipi/matrice; `slotEreditabili(totale)`, `elementoEreditabile(tipo, elemento)`,
   `skillAlLivello`, `skillPosseduta`, `analisiEredita(risultato, ingredienti)` (candidate con motivo, slot, tratti), `copre(analisi, skillIds)`.
   `fusioneService.ereditaDto` (bacino dalla scorta se posseduta) e `cercaPerSkillDto` (filtri rapidi per tipo e bacino, poi analisi completa).
@@ -542,10 +549,12 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
 ## 8. Build, test, deploy
 - Test (Vitest). Aiuti comuni in `test/`: `dbDiProva()` (`test/dbDiProva.ts`, DB del backend in memoria con il pacchetto iniziale caricato e migrato); `test/supertest.ts` (alias di `supertest` in `vitest.config.ts`, chiuso a fine file da `test/setup.ts`); `moduloApi` / `moduloNotifiche` (`test/mockModuli.ts`) per i `vi.mock` del frontend. Il frontend gira in jsdom.
 - Dev: `scripts/start-all.sh` (`npm run dev:server` = `tsx watch`, che **si riavvia da solo** a ogni salvataggio in `server/` e applica subito le migrazioni nuove ai dati di `data/`; `npm run dev:client` = `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`. Le porte vengono da `.env` (`BE_PORT`/`PORT`, `FE_PORT`).
-- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint, audit. I test non girano a ogni push: si lanciano su richiesta sul solo percorso indicato, in locale `npx vitest run <percorso>` o con `test-su-richiesta.yml` (`workflow_dispatch`, input `percorso`).
+- CI (`.github/workflows/ci.yml`, anche riusabile con `workflow_call`): typecheck, lint, build del frontend di rilascio e di
+  preparazione con il controllo del bundle di rilascio, audit delle dipendenze di produzione (`npm audit --omit=dev --audit-level=high`). I test non girano a ogni push: si lanciano su richiesta sul solo percorso indicato, in locale `npx vitest run <percorso>` o con `test-su-richiesta.yml` (`workflow_dispatch`, input `percorso`).
 - Immagini della preparazione (`docker-publish.yml`): a ogni push su `main`, dopo il gate `verify` (lo stesso `ci.yml`), build & push su GitHub Container Registry di `project-p5r-backend` e `project-p5r-frontend` con tag `latest` e `sha`.
 - Immagini del rilascio (`docker-publish-rilascio.yml`): solo con un tag `rilascio-vX.Y.Z` raggiungibile da `main`, dopo lo stesso gate; immagini distinte (`project-p5r-rilascio-backend`, `project-p5r-rilascio-frontend`) con la versione fissa, mai `latest`, e nessun aggiornamento automatico.
-- Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).
+- Il backend in Docker gira come `node --import tsx server/index.ts` nella preparazione e `node --import tsx server/rilascio.ts` nello
+  stage `rilascio` (PID 1 = node, riceve SIGTERM da `docker stop`).
 
 ## 9. Regole per chi scrive codice
 **Server**
@@ -663,4 +672,4 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
   stesso della guida del visore.
 - Accessibilità: un `div`/`span` con `aria-label` ha sempre un `role` (lo controlla `src/accessibilita.test.ts`).
 - Runtime (`docker-compose.yml`): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK`, BE solo su rete interna (3101, proxato da nginx su `/api/`), volume `project_p5r_data` su `/data` (DB creato al primo boot dal pacchetto iniziale nell'immagine). La cartella d'appoggio è un volume NFS: lo stack deve definire `NAS_ADDR` e `NAS_PATH`, senza valori predefiniti. I container della preparazione portano la label di Watchtower per l'aggiornamento automatico; quelli del rilascio no. Ogni servizio ha `mem_limit` e `pids_limit` (§7 ter).
-- `nginx.conf`: il backend si risolve per nome a ogni richiesta (`resolver 127.0.0.11`, variabile `$backend`), così un container ricreato non lascia nginx sul vecchio indirizzo; `/api/mappe/importa` ha un limite proprio (`client_max_body_size` più largo del resto dell'API; Express lo ferma a 64 MB); `immutable` solo sui file con hash di `/assets/`, gli altri statici si rivalidano.
+- `nginx.conf`: il backend si risolve per nome a ogni richiesta (`resolver 127.0.0.11`, variabile `$backend`), così un container ricreato non lascia nginx sul vecchio indirizzo; `/api/mappe/importa` ha un limite proprio (`client_max_body_size 512m` contro i 10M del resto dell'API; Express lo ferma a 512 MB); `immutable` solo sui file con hash di `/assets/`, gli altri statici si rivalidano.

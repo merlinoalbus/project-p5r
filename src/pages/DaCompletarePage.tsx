@@ -41,6 +41,7 @@ export function DaCompletarePage() {
   const [a, setA] = useState('');
   const [stato, setStato] = useState<FiltroStato>('aperta');
   const [versione, setVersione] = useState(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `versione` non entra nella lettura: cambia dopo un'applicazione o uno scarto e fa rileggere
   const lista = useCarica(() => getProposteConversione({ da: da || undefined, a: a || undefined, stato }), [da, a, stato, versione]);
   const { elenchi, nomi, errore: erroreElenchi } = useElenchiProposte(da || '04-01');
   const [modifica, setModifica] = useState<{ proposta: PropostaConversioneDto; voce: AzionePercorsoDto; voci: AzionePercorsoDto[] } | null>(null);

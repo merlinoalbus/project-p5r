@@ -88,9 +88,12 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
       notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
     }
   };
+  // della Persona scelta la lettura usa solo l'id; le dipendenze si confrontano per valore (`useCarica`): l'elenco degli id delle skill
+  // rilegge quando cambia, come la sua forma unita
+  const idScelta = scelta?.id;
   const { dati, caricamento, errore } = useCarica(
-    () => (scelta ? getPianiFusione(scelta.id, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null, skill: skillIds, slotFortunato }) : Promise.resolve(null)),
-    [scelta?.id, partitaId, profondita, alternative, catture, limitaLivello, livelloProtagonista, skillIds.join(','), slotFortunato],
+    () => (idScelta !== undefined ? getPianiFusione(idScelta, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null, skill: skillIds, slotFortunato }) : Promise.resolve(null)),
+    [idScelta, partitaId, profondita, alternative, catture, limitaLivello, livelloProtagonista, skillIds, slotFortunato],
   );
 
   return (

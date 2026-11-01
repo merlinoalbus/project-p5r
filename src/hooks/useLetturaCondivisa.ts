@@ -34,6 +34,7 @@ export function useLetturaCondivisa<T>(
       invalidaLetturaCondivisa(chiave);
     }
     return leggiCondivisa(chiave, token, carica);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- le dipendenze sono quelle del chiamante (con `chiave` e `token`), passate così come sono
   }, dipendenze);
   const { ricarica: ricaricaBase } = stato;
   const ricarica = useCallback(() => {

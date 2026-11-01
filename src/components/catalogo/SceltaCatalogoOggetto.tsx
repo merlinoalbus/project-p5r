@@ -19,6 +19,7 @@ interface Props {
 
 /** Stesso selettore per offerte, regali e proposte: ricerca anche gli alias senza copiarli nel nome mostrato. */
 export function SceltaCatalogoOggetto({ aggiornamento = 0, ...props }: Props) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `aggiornamento` non entra nella lettura: è il segnale del chiamante per rileggere
   const elenco = useCarica(() => getCatalogoOggetti(), [aggiornamento]);
   return <SceltaNelCatalogo {...props} oggetti={elenco.dati} caricamento={elenco.caricamento} errore={elenco.errore} onRicarica={() => void elenco.ricarica()} />;
 }

@@ -171,7 +171,10 @@ interface ModalProps {
  * cercare la Persona fra quelle non rare (al più 12 risultati); poi skill desiderate (fino a 8),
  * livello minimo fra 1 e 99, priorità e note. Il risultato del salvataggio va a `onSalvato`. */
 export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi, onSalvato }: ModalProps) {
-  const persone = useCarica(() => (obiettivo || personaIniziale ? Promise.resolve([] as PersonaRiassuntoDto[]) : getPersone()), [obiettivo?.id, personaIniziale?.id]);
+  // dell'obiettivo e della Persona preselezionata conta l'id: con uno dei due la Persona non si cerca
+  const idObiettivo = obiettivo?.id;
+  const idIniziale = personaIniziale?.id;
+  const persone = useCarica(() => (idObiettivo !== undefined || idIniziale !== undefined ? Promise.resolve([] as PersonaRiassuntoDto[]) : getPersone()), [idObiettivo, idIniziale]);
   const tutteSkill = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   const [q, setQ] = useState('');
   const [personaId, setPersonaId] = useState<number | null>(obiettivo?.personaId ?? personaIniziale?.id ?? null);

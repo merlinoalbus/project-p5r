@@ -39,6 +39,7 @@ export function DialogoConferma({ aperta, titolo, testo, etichetta, tono = 'peri
       azioni={(
         <>
           {/* autoFocus: Modal lascia il fuoco dove l'ha messo il montaggio, quindi parte da qui e non dal pulsante che conferma */}
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus -- fuoco voluto, vedi la riga sopra */}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} autoFocus />
           <PulsanteVisivo tono={tono === 'pericolo' ? 'pericolo' : 'primario'} compatto icona={<IconaAzione chiave={chiaveIcona} dimensione={20} />} titolo={etichetta} onClick={onConferma} />
         </>

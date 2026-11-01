@@ -2,7 +2,7 @@
 // edizioneService — «Prepara edizione»: il prodotto che l'istanza pubblica di rilascio riceve (L12, passi 7 e 9)
 // ============================================================
 //
-// Il progetto delle due istanze (docs/coordinamento/lotti/L12/progetto-due-istanze.md, §6) vuole che il file `gioco.db` del rilascio nasca
+// Il progetto delle due istanze (docs/ARCHITETTURA.md, §7 bis) vuole che il file `gioco.db` del rilascio nasca
 // DALLA PREPARAZIONE con un'azione sola, senza script: questa. Si lancia dalle Impostazioni della preparazione e lavora su COPIE: i dati
 // dell'utente non si toccano mai (né `gioco.db`, né `partite.db`, né la cartella dei caratteri, né la cartella di lavoro di altri servizi).
 //

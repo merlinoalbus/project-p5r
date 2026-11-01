@@ -185,6 +185,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
         <span className="testo-12 text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
       </div>
       <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- sullo schermo largo l'editor della voce si apre per scrivere il testo */}
         <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus={largo} onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>

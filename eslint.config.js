@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
@@ -19,12 +20,18 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
+      jsxA11y.flatConfigs.recommended,
     ],
     languageOptions: {
       ecmaVersion: 2023,
       globals: globals.browser,
     },
     rules: {
+      // `useCarica` (src/hooks/useCarica.ts) rilegge a ogni cambio delle dipendenze: le controlla la stessa regola di useEffect.
+      // Il nome non finisce in «Effect», quindi la regola lo tratta come useMemo e segnala anche le dipendenze in più.
+      'react-hooks/exhaustive-deps': ['warn', { additionalHooks: '^useCarica$' }],
+      // Il testo di un'etichetta può stare al terzo livello (etichetta > colonna > riga); `CampoEsperienza` (SquadraPartita) è un campo.
+      'jsx-a11y/label-has-associated-control': ['error', { depth: 3, controlComponents: ['CampoEsperienza'] }],
       // Un solo elenco chiuso in tutta l'app: il Selettore (ricerca da dieci voci in su, 44 px,
       // tastiera). La tendina nativa non si cerca e sul telefono è minuscola: vietata.
       'no-restricted-syntax': ['error', {

@@ -65,6 +65,7 @@ export function LuogoPage() {
   const partitaId = attiva?.id ?? null;
   // giorno, fascia e meteo decidono se il luogo è aperto: al cambio si rilegge
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` non entra nella lettura: al suo cambio si rilegge
   const dati = useCarica(() => getLuogo(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const l = dati.dati;
   useDocumentTitle(l?.nome ?? 'Luogo');

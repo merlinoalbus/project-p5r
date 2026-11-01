@@ -50,6 +50,7 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
     if (typeof chiaveNegozio !== 'string' || !chiaveNegozio) throw new Error('Il negozio dell’offerta collegata non è disponibile.');
     const negozio = await getElementoCatalogo('negozio', chiaveNegozio);
     return `${articolo.nome} · ${negozio.nome}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `versioneGuida` non entra nella lettura: cambia a ogni modifica della guida e fa rileggere
   }, [gesti.versioneGuida]);
   const doti = righe.filter((r) => r.uid !== null && r.effetto.tipo === 'dote');
   return <div className="flex min-w-0 flex-col gap-2">

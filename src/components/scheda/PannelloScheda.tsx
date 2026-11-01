@@ -136,6 +136,7 @@ function Pannello({ scheda, profondita, onChiudi }: PropsPannello) {
     <div className="pannello-scheda" role="presentation"
       onMouseDown={(e) => { premutoSuSfondo.current = e.target === e.currentTarget; }}
       onClick={(e) => { if (premutoSuSfondo.current && e.target === e.currentTarget) onChiudi(); premutoSuSfondo.current = false; }}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- la trappola del fuoco (Tab) del pannello vale ovunque sia il fuoco dentro */}
       <div ref={foglio} className="pannello-scheda__foglio" role="dialog" aria-modal="true" aria-label={`Scheda: ${scheda.etichetta}`} tabIndex={-1} onKeyDown={tieniIlFuoco}>
         <div className="pannello-scheda__testa">
           {profondita > 1 && (

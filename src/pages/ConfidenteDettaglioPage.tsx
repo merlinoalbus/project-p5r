@@ -66,6 +66,7 @@ export function ConfidenteDettaglioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const { dati: c, inPrimoCaricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
   // per id della partita e Confidente; ai cambi di stato della partita si rilegge senza azzerare (`mio`, Rango e semafori restano)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- della partita conta l'id; `chiave` non entra nella lettura ma la rifà al cambio di Confidente
   const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva?.id, chiave]);
   useRileggiAlCambio(stato.ricarica, attiva);
   const requisiti = useCarica(() => getRequisitiConfidente(chiave), [chiave]);

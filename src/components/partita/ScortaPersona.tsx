@@ -410,6 +410,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
 
   return (
     <Modal titolo="Aggiungi Persona alla scorta" aperta={aperta} onChiudi={onChiudi}>
+      {/* eslint-disable-next-line jsx-a11y/no-autofocus -- la finestra si apre per cercare la Persona da aggiungere */}
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca nel compendio…" autoFocus />
       <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[50vh] area-scorrevole">
         {filtrate.map((p) => (

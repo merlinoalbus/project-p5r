@@ -45,12 +45,14 @@ export function FusionePage() {
   const [params, setParams] = useSearchParams();
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), [], { cacheUrl: URL_REGOLE_FUSIONE });
   const persone = useCarica(() => getPersone(), [], { cacheUrl: urlPersone() });
-  const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
+  // della partita attiva le letture usano solo l'id
+  const idAttiva = attiva?.id;
+  const scorta = useCarica(() => (idAttiva !== undefined ? getPossedute(idAttiva) : Promise.resolve([])), [idAttiva]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
   const perId = useMemo(() => new Map((persone.dati ?? []).map((p) => [p.id, p])), [persone.dati]);
   /** La Persona completa del compendio con quell'id, per i chip; se il compendio non l'ha (o non è ancora arrivato) resta il riferimento ridotto. */
   const completa = (x: { id: number; nome: string; nomeIt: string }) => perId.get(x.id) ?? x;
-  const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id]);
+  const velluto = useCarica(() => (idAttiva !== undefined ? getVelluto(idAttiva) : Promise.resolve(null)), [idAttiva]);
   // allarme e aggiornamenti della partita fanno rileggere la Stanza di Velluto senza azzerarla
   useRileggiAlCambio(velluto.ricarica, attiva ? [attiva.allarmeAttivo, attiva.updatedAt] : null);
   /** Segna acceso o spento l'allarme delle fusioni nella partita attiva, aggiorna lo store locale (che fa rileggere la Stanza di Velluto) e notifica l'esito. */

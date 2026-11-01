@@ -83,9 +83,11 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
   const [catture, setCatture] = useState(false);
   const [limitaLivello, setLimitaLivello] = useState(true);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
+  // della Persona scelta la lettura usa solo l'id
+  const idScelta = scelta?.id;
   const { dati, caricamento, errore } = useCarica(
-    () => (scelta ? getCicliFusione(scelta.id, { partita: partitaId ?? undefined, lunghezza, lunghezzaMin: Math.min(lunghezzaMin, lunghezza), partnerDistinti, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null }) : Promise.resolve(null)),
-    [scelta?.id, partitaId, lunghezza, lunghezzaMin, partnerDistinti, alternative, catture, limitaLivello, livelloProtagonista],
+    () => (idScelta !== undefined ? getCicliFusione(idScelta, { partita: partitaId ?? undefined, lunghezza, lunghezzaMin: Math.min(lunghezzaMin, lunghezza), partnerDistinti, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null }) : Promise.resolve(null)),
+    [idScelta, partitaId, lunghezza, lunghezzaMin, partnerDistinti, alternative, catture, limitaLivello, livelloProtagonista],
   );
 
   /**

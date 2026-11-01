@@ -46,6 +46,7 @@ export function NegoziPage() {
   const partitaId = attiva?.id ?? null;
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}|${attiva?.meteoOra ?? ''}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `momento` non entra nella lettura: al suo cambio si rilegge
   const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId, momento]);
   // **I filtri stanno nell'indirizzo.** `/guida/negozi?categorie=arma,libro&stato=da-acquistare`
   // apre l'elenco già filtrato, e chi torna indietro lo ritrova: un filtro è un valore
@@ -63,6 +64,7 @@ export function NegoziPage() {
   const chiaveFiltro = parametriDaFiltro(filtro).toString();
   const risultati = useCarica(() => (cerca
     ? ricercaArticoli({ q: termine.length >= 2 ? termine : undefined, categorie: filtro.categorie.length ? filtro.categorie : undefined, per: filtro.per || undefined, stato: partitaId && filtro.stato !== 'tutti' ? filtro.stato : undefined, disponibilita: partitaId && filtro.disponibilita !== 'tutti' ? filtro.disponibilita : undefined }, partitaId ?? undefined)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- il filtro conta per la sua forma nell'indirizzo (`chiaveFiltro`); `momento` fa solo rileggere
     : Promise.resolve(null)), [chiaveFiltro, partitaId, cerca, momento]);
   const lista = negozi.dati;
   // Il catalogo resta consultabile anche prima dello sblocco; il semaforo distingue la scheda
