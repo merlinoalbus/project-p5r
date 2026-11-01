@@ -14,13 +14,13 @@ const conflitto = (testo: string) => httpErrors.conflict('rimozione-pin-conflitt
 /** Anche i chiamanti interni devono fornire la coppia completa, senza campi ignorati. */
 export function richiestaRimozionePin(v: unknown): RichiestaRimozionePin | undefined {
   if (v === undefined) return undefined;
-  if (!v || typeof v !== 'object' || Array.isArray(v)) throw httpErrors.badRequest('rimozione-pin-corpo-non-valido', 'Indica soltanto UID e precondizione completa del pin.');
+  if (!v || typeof v !== 'object' || Array.isArray(v)) throw httpErrors.badRequest('rimozione-pin-corpo-non-valido', 'La richiesta di rimozione del pin non è completa: riapri la finestra e riprova.');
   const o = v as Riga;
   if (!Object.keys(o).length) return undefined;
   if (Object.keys(o).length !== 2 || Object.keys(o).some(k => k !== 'spilloUid' && k !== 'revisioneRimozioneAttesa')
     || !Object.hasOwn(o, 'spilloUid') || !Object.hasOwn(o, 'revisioneRimozioneAttesa') || typeof o.spilloUid !== 'string' || !/^[0-9a-f]{32}$/.test(o.spilloUid)
     || typeof o.revisioneRimozioneAttesa !== 'string' || !/^[0-9a-f]{64}$/.test(o.revisioneRimozioneAttesa)) {
-    throw httpErrors.badRequest('rimozione-pin-corpo-non-valido', 'UID e precondizione vanno forniti insieme, senza altri campi.');
+    throw httpErrors.badRequest('rimozione-pin-corpo-non-valido', 'La richiesta di rimozione del pin non è completa: riapri la finestra e riprova.');
   }
   return { spilloUid: o.spilloUid, revisioneRimozioneAttesa: o.revisioneRimozioneAttesa };
 }

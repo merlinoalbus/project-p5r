@@ -34,7 +34,7 @@ import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { improntaDato } from './propostePartitaService.js';
 import { normalizzaEffettoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
 import { TIPI_RIFERIMENTO_AZIONE } from '../../shared/effettiAzione.js';
-import { dataLeggibile } from '../../shared/condizioniSpillo.js';
+import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 import { condizioniDaSalvare, condizioniDellaVoce } from './voceDovuta.js';
 import {
   FORMATO_APPUNTI_DIARIO, VERSIONE_APPUNTI_DIARIO, type AppuntiDiario, type EsitoAnnulloIncollaDto, type EsitoIncollaDto, type PianoIncollaDto,
@@ -58,7 +58,7 @@ function ordineDeiGiorni(): Map<string, number> {
 }
 /** 404 se il giorno non è del calendario. */
 function giornoDelCalendario(data: string): void {
-  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso ${dataConArticolo(data)}.`);
 }
 /** Le righe nell'ordine della giornata: giorno del calendario, poi le voci di giorno prima di quelle di sera, poi il posto. */
 function nellOrdine(righe: RigaVoce[]): RigaVoce[] {

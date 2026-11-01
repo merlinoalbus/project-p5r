@@ -212,7 +212,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
           </div>
         )}
         {persona && suggerimento.dati && (
-          <div>Skill di resistenza prevista: <strong>{suggerimento.dati.skill ? suggerimento.dati.skill.nomeIt : 'nessuna nel dataset'}</strong>{suggerimento.dati.elementoNome ? ` (debolezza: ${suggerimento.dati.elementoNome})` : ' (nessuna debolezza)'}.</div>
+          <div>Skill di resistenza prevista: <strong>{suggerimento.dati.skill ? suggerimento.dati.skill.nomeIt : 'nessuna'}</strong>{suggerimento.dati.elementoNome ? ` (debolezza: ${suggerimento.dati.elementoNome})` : ' (nessuna debolezza)'}.</div>
         )}
         {statScelte.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">

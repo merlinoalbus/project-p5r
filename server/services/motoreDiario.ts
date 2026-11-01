@@ -154,7 +154,7 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
 function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna'||e.tipo==='yen')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
 function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
-  for(const e of effetti){if(!/^[0-9a-f]{32}$/.test(e.uid)||ids.has(e.uid))throw httpErrors.badRequest('identita-effetto-non-valida','Gli UID degli effetti devono essere distinti.');ids.add(e.uid);}
+  for(const e of effetti){if(!/^[0-9a-f]{32}$/.test(e.uid)||ids.has(e.uid))throw httpErrors.badRequest('identita-effetto-non-valida','Due effetti della voce risultano uguali: riapri la voce e salva di nuovo.');ids.add(e.uid);}
   // L13 (decisione 2): gli yen che un altro dato porta già (il prezzo di un articolo o di una consumazione, la quota della pesca, le
   // ricompense di una Richiesta completata, la paga o il costo del turno di un'attività, il prezzo del film visto) li muove quel dato: un
   // effetto «yen» accanto a loro li conterebbe due volte. Qui gli effetti; il collegamento della voce lo guarda `verificaYenVoce` al salvataggio
@@ -214,7 +214,7 @@ export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEf
     const nuovi=fondiArticoliUguali(riconosciuti).map((x,ordine):EffettoVoceDto=>{
       const effetto=x.effetto;
       const old=x.uid===null?undefined:prima.effetti.find((e)=>e.uid===x.uid);
-      if(x.uid!==null&&(!old||usati.has(x.uid)))throw httpErrors.conflict('uid-effetto-diverso','Un UID non appartiene alla fonte corrente oppure è duplicato.');
+      if(x.uid!==null&&(!old||usati.has(x.uid)))throw httpErrors.conflict('uid-effetto-diverso','Un effetto non appartiene più a questa voce oppure è ripetuto: riapri la voce e salva di nuovo.');
       if(x.uid)usati.add(x.uid);
       const uguale=old&&jsonCanonico(old.effetto)===jsonCanonico(effetto),id=old?.uid??nuovoUid();
       if(!uguale)verificaNuovoEffetto(effetto);
@@ -633,16 +633,16 @@ function preparaAssorbimentiDote(p:number,uid:string,e:EffettoVoceDto,r:NuovaReg
   const fonte=leggiEffettiVoce(uid),proposte=leggiPropostePartita(p,{ancheChiuse:true}),out:AssorbimentoDote[]=[];
   for(const id of e.effetto.sostituisceDoti){
     const nodo=fonte.effetti.find((x)=>x.uid===id);
-    if(!nodo||nodo.effetto.tipo!=='dote')throw httpErrors.conflict('dote-da-assorbire-assente','L’UID dichiarato non è una Dote della medesima voce.');
+    if(!nodo||nodo.effetto.tipo!=='dote')throw httpErrors.conflict('dote-da-assorbire-assente','La Dote indicata non è della stessa voce.');
     const dote=nodo.effetto.dote,s=saldoDoteVoce(p,uid,id,dote);
-    if(!Number.isSafeInteger(s.attribuito)||s.attribuito<0)throw httpErrors.conflict('attribuzione-dote-incoerente','B della Dote non è integro o non negativo.');
+    if(!Number.isSafeInteger(s.attribuito)||s.attribuito<0)throw httpErrors.conflict('attribuzione-dote-incoerente','I punti già attribuiti alla Dote non sono leggibili: niente è stato cambiato.');
     const attiva=ricevute.find((x)=>x.effettoUid===id&&x.annullatoIl===null);
     if(!attiva){
       const assorbite=ricevute.filter((x)=>x.effettoUid===id&&x.assorbitaDa!==null);
       if(assorbite.length){const destinazione=r.scelta.tipo==='collega'?r.scelta.acquistoId:null;if(s.attribuito===0&&destinazione&&assorbite.some((x)=>ricevute.find((a)=>a.id===x.assorbitaDa)?.ricevuta.acquistoId===destinazione))continue;throw httpErrors.conflict('dote-gia-assorbita','La Dote appartiene già a un altro raccordo o conserva un’attribuzione non riconciliata: collega il medesimo fatto senza trasferirla di nuovo.');}
       const altraPromessa=proposte.some((x)=>x.stato==='aperta'&&x.causa.tipo==='voce'&&x.causa.chiave.startsWith(`${uid}:`)&&x.causa.chiave!==`${uid}:${e.uid}`&&((x.tipo==='dote'&&x.chiave===dote)||(x.tipo==='effetto-voce'&&((x.dati.effetto as {tipo?:unknown;dote?:unknown;variante?:unknown}|undefined)?.dote===dote||(x.dati.effetto as {variante?:unknown}|undefined)?.variante===dote))));
       const altroSidecar=ricevute.some((x)=>x.annullatoIl===null&&x.effettoUid!==e.uid&&Array.isArray(x.ricevuta.benefici)&&x.ricevuta.benefici.some((b)=>{const v=verificaBeneficio(b);return v.tipo==='dote'&&v.chiave===dote&&v.delta!==0;}));
-      if(s.attribuito!==0||altraPromessa||altroSidecar)throw httpErrors.conflict('dote-precedente-da-riconciliare','Senza sidecar provato restano attribuzioni o promesse della Dote: riconciliale prima del raccordo.');
+      if(s.attribuito!==0||altraPromessa||altroSidecar)throw httpErrors.conflict('dote-precedente-da-riconciliare','La Dote ha ancora punti attribuiti o promemoria aperti: chiudili prima di collegare l’acquisto.');
       continue; // Il promemoria legacy non prova alcuna attribuzione: la nuova Dote resta da dichiarare.
     }
     const configurazione=(attiva.prima as {effetto?:unknown}|null)?.effetto,legacy=leggiRicevutaEffettiAzione(jsonCanonico(attiva.ricevuta.legacy));
@@ -670,7 +670,7 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   // Persona 5 o senza un contenuto scaricabile): non si applicano, quindi niente ricevuta, niente stato e niente yen da annullare togliendo la spunta
   const fuoriCondizione=effettiFuoriCondizione(p,uid,stato.effetti);
   const consumi=stato.effetti.filter((e)=>e.effetto.tipo==='acquisto'),richieste=opz.acquisti??[];
-  if(richieste.length!==consumi.length||new Set(richieste.map((r)=>r.fonte.tipo==='diario'?r.fonte.effettoUid:'')).size!==richieste.length||new Set(richieste.map((r)=>r.operazioneId)).size!==richieste.length)throw httpErrors.conflict('dati-acquisti-richiesti','Rivedi ogni consumazione della voce e invia variante osservata, Fortuna, eventuale raccordo e token insieme alla spunta, con operazioni distinte.');
+  if(richieste.length!==consumi.length||new Set(richieste.map((r)=>r.fonte.tipo==='diario'?r.fonte.effettoUid:'')).size!==richieste.length||new Set(richieste.map((r)=>r.operazioneId)).size!==richieste.length)throw httpErrors.conflict('dati-acquisti-richiesti','Prima di spuntare la voce rivedi ogni consumazione: variante, Fortuna ed eventuale collegamento a un acquisto già segnato.');
   const receiptNuovi:ReceiptEffettoVoceDto[]=[],generazione=nuovoUid(),pesche=stato.effetti.filter(e=>e.effetto.tipo==='pesca'),richiestePesca=opz.pesche??[];
   if(richiestePesca.length!==pesche.length||new Set(richiestePesca.map(r=>r.operazioneId)).size!==richiestePesca.length||new Set([...richieste,...richiestePesca].map(r=>r.operazioneId)).size!==richieste.length+richiestePesca.length)throw httpErrors.conflict('pesca-osservazioni-richieste','Rivedi ogni visita di pesca con operazioni distinte prima della spunta.');
   for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.voceUid===uid&&r.fonte.effettoUid===e.uid);if(!r)throw httpErrors.conflict('pesca-osservazione-mancante','Manca la visita osservata per un effetto pesca.');const {revisionePescaAttesa,...input}=r;if(anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa!==revisionePescaAttesa)throw httpErrors.conflict('pesca-cambiata','Una visita del gruppo è cambiata: nessun effetto viene applicato.');}
@@ -780,7 +780,7 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     leggiRicevuteEffettiVoce(p,uid);return;
   }
   if(e.effetto.tipo==='pesca'){
-    if(!pesca||!tokenPesca)throw httpErrors.badRequest('pesca-osservazione-richiesta','Rivedi la visita completa e il suo token prima del raccordo.');
+    if(!pesca||!tokenPesca)throw httpErrors.badRequest('pesca-osservazione-richiesta','Rivedi tutta la visita di pesca prima di collegarla.');
     for(const a of assorbimentiPesca)if(prepared('UPDATE utente.effetto_applicato SET annullato_il=?,assorbita_da=? WHERE partita_id=? AND id=? AND annullato_il IS NULL AND assorbita_da IS NULL').run(nowIso(),nuovaRicevuta,p,a.ricevuta.id).changes!==1)throw httpErrors.conflict('pesca-porzione-cambiata','La porzione pregressa è cambiata prima del raccordo.');
     const tokenCorrente=anteprimaPesca(p,'registra-sessione',pesca).revisionePescaAttesa;
     const nuova=registraPesca(p,uid,e,{...pesca,revisionePescaAttesa:tokenCorrente},nuovoUid(),false,{id:nuovaRicevuta,sostituisceRicevuta:attiva?.id,assorbeRicevute:assorbimentiPesca.map(a=>a.ricevuta.id)});
@@ -950,7 +950,7 @@ export function anteprimaDecisioneEffettoVoce(id:string,r:RichiestaAnteprimaDeci
 export function decidiPropostaEffettoVoce(id:string,r:RichiestaDecisioneEffettoVoce):StatoEffettiVoceDto {
   return getDb().transaction(()=>{
     const richiesta={id,operazioneId:r.operazioneId,decisione:r.decisione,...(r.effetto===undefined?{}:{effetto:r.effetto})},payload=jsonCanonico(richiesta),old=prepared('SELECT payload_json,dopo_json FROM main.operazione_effetti_voce WHERE id=?').get(r.operazioneId) as {payload_json:string;dopo_json:string}|undefined;
-    if(old){if(old.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','L’ID appartiene a un’altra decisione.');return leggiJsonRegistro<StatoEffettiVoceDto>(old.dopo_json,'ricevuta decisione candidato');}
+    if(old){if(old.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','Questa decisione è già stata registrata con dati diversi: rileggi la pagina e riprova.');return leggiJsonRegistro<StatoEffettiVoceDto>(old.dopo_json,'ricevuta decisione candidato');}
     const p=preparaDecisione(id,{operazioneId:r.operazioneId,decisione:r.decisione,...(r.effetto===undefined?{}:{effetto:r.effetto})});
     if(p.revisionePropostaAttesa!==r.revisionePropostaAttesa)throw httpErrors.conflict('candidato-cambiato','Il candidato, la voce o le spunte sono cambiati: rivedi.');
     let applicazioni:ApplicazioneStatoPartitaDto[]|undefined;

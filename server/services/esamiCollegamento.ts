@@ -11,7 +11,7 @@
 
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import { ordineGioco } from '../../shared/condizioniSpillo.js';
+import { dataConArticolo, ordineGioco } from '../../shared/condizioniSpillo.js';
 
 export type TipoRigaEsame = 'esame-medio' | 'esame-finale';
 export interface EsameCollegabile { chiave: string; nome: string; data_risultati: string | null }
@@ -112,11 +112,11 @@ export function verificaDomandaEsame(prima: { id: number; data: string; tipo: st
   if (eEsame(dopo.tipo)) {
     const doveFinisce = esameDi(mappaDopo);
     if (doveFinisce === null) {
-      throw httpErrors.badRequest('domanda-fuori-dagli-esami', `Una domanda d’esame deve cadere nel periodo di uno degli esami: il ${dopo.data} non appartiene a nessuno dei quattro (dopo i risultati dell’esame precedente dello stesso tipo e fino ai suoi).`, { campo: 'data' });
+      throw httpErrors.badRequest('domanda-fuori-dagli-esami', `Una domanda d’esame deve cadere nel periodo di uno degli esami: ${dataConArticolo(dopo.data)} non appartiene a nessuno dei quattro (dopo i risultati dell’esame precedente dello stesso tipo e fino ai suoi).`, { campo: 'data' });
     }
     // una domanda che era di un esame resta di quell'esame: spostarla in un altro è un altro dato, non una correzione
     if (prima && eEsame(prima.tipo) && esameDi(mappaPrima) !== doveFinisce) {
-      throw httpErrors.badRequest('domanda-fuori-dagli-esami', `Con il ${dopo.data} la domanda passerebbe a un altro esame: una correzione la lascia nel suo esame (cambia la data dentro il suo periodo).`, { campo: 'data' });
+      throw httpErrors.badRequest('domanda-fuori-dagli-esami', `Con ${dataConArticolo(dopo.data)} la domanda passerebbe a un altro esame: una correzione la lascia nel suo esame (cambia la data dentro il suo periodo).`, { campo: 'data' });
     }
   }
   for (const e of esami) {

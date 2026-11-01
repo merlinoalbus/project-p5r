@@ -26,7 +26,7 @@ import { PageState } from '../components/shared/PageState';
 import { SegnoStato } from '../components/shared/SegnoStato';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { Segmenti } from '../components/shared/Segmenti';
-import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
+import { dataGiocoConArticolo, dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto, PremioEsameDto } from '../types';
 import { RicompensaDomanda } from '../components/shared/RicompensaDomanda';
 import { daConoscenza } from '../utils/ricompensaDomanda';
@@ -109,7 +109,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     <li id={evidenzia ? ancoraData(d.data) : undefined} className={`py-2 flex gap-3 testo-13 scroll-mt-20 ${evidenzia ? 'bg-primary-bg rounded-md px-2' : ''}`}>
       {partitaId && (
         <label className="flex items-start pt-0.5 touch">
-          <input type="checkbox" className="w-5 h-5" checked={d.fatta} disabled={occupato} onChange={(e) => void segna(e.target.checked)} aria-label={`Domanda del ${dataGiocoTesto(d.data)} fatta`} />
+          <input type="checkbox" className="w-5 h-5" checked={d.fatta} disabled={occupato} onChange={(e) => void segna(e.target.checked)} aria-label={`Domanda ${dataGiocoConArticolo(d.data, 'di')} fatta`} />
         </label>
       )}
       {/* `elemento-<chiave>`: dove la ricerca globale porta (`?elemento=`); l'`id` del `<li>` resta dell'ancora della data */}
@@ -223,7 +223,7 @@ export function DomandePage() {
                 <li key={e.chiave} id={`elemento-${e.chiave}`} className="flex min-w-0 flex-col gap-1 py-1 scroll-mt-20">
                   <div className="flex flex-wrap items-center gap-2">
                     <strong>{e.nome}</strong>
-                    <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
+                    <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati ${dataGiocoConArticolo(e.dataRisultati)}` : ''}</span>
                     <ModificaGuida tipo="esame" chiave={e.chiave} cosa={`l’esame «${e.nome}»`} soloIcona className="ml-auto" onSalvato={() => void dati.ricarica()} />
                   </div>
                   {!premiComuni && e.premi.length > 0 && <ElencoPremi premi={e.premi} etichetta="Premi" />}

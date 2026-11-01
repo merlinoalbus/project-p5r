@@ -32,7 +32,7 @@ import { aPuntiDi, sogliaRaggiunta } from './regoleConfidente';
 import { slug } from '../../../shared/slug';
 import { formattaPunti } from '../../utils/punti';
 import { noteAParole, simboliNote } from '../../../shared/note';
-import { RANGO_DELLA_SCELTA_ROMANTICA } from '../../../shared/puntiConfidenti';
+import { MOLTIPLICATORE_ARCANO, RANGO_DELLA_SCELTA_ROMANTICA, testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import type { ConfidentePartitaDto } from '../../types';
 
 /** Le azioni che il dettaglio può chiedere; la logica (e le notifiche) sta in `ConfidentiPartita`. */
@@ -174,9 +174,9 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                   compatto
                   icona={<AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa dimensione={24} quadrata className="h-6 w-6 object-contain" fallback={<IconMaschera size={20} />} />}
                   titolo={`Persona ${c.arcanaNome}`}
-                  dettaglio={c.personaArcanoInScorta ? '×1,5 · in scorta' : '×1,5 · attiva a mano'}
+                  dettaglio={`${testoMoltiplicatore(MOLTIPLICATORE_ARCANO)} · ${c.personaArcanoInScorta ? 'in scorta' : 'attiva a mano'}`}
                   onClick={() => azioni.bonus(!bonus)}
-                  title={c.personaArcanoInScorta ? `Nella scorta c'è una Persona ${c.arcanaNome}: bonus ×1,5 attivo` : `Nessuna Persona ${c.arcanaNome} in scorta: attiva il bonus a mano se la possiedi`}
+                  title={c.personaArcanoInScorta ? `Nella scorta c'è una Persona ${c.arcanaNome}: bonus ${testoMoltiplicatore(MOLTIPLICATORE_ARCANO)} attivo` : `Nessuna Persona ${c.arcanaNome} in scorta: attiva il bonus a mano se la possiedi`}
                 />
                 {moltiplicatori}
               </div>

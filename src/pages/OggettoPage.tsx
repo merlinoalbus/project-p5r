@@ -36,7 +36,7 @@ import { TestoNote } from '../components/shared/TestoNote';
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-const STATO_FORZIERE = { preso: 'Preso', 'non-piu-ottenibile': 'Non più ottenibile', 'da-prendere': 'Da prendere', 'da-jose': 'Da Jose', 'da-verificare': 'Raccolta da verificare: pin forziere non collegato' } as const;
+const STATO_FORZIERE = { preso: 'Preso', 'non-piu-ottenibile': 'Non più ottenibile', 'da-prendere': 'Da prendere', 'da-jose': 'Da Jose', 'da-verificare': 'Stato non segnabile: la voce non ha un pin sulla mappa' } as const;
 
 /** Una sola casa dell'oggetto; prezzi, stati dei forzieri e disponibilità arrivano dai rispettivi servizi. */
 export function OggettoPage() {
@@ -175,7 +175,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             {o.forzieri.length > 0 && <div><h3 className="m-0 text-base">Forzieri e contenuti della guida</h3><ul className="m-0 list-none divide-y divide-border p-0">{o.forzieri.map((f) => <li key={f.voce} className="flex flex-col gap-1 py-2 testo-13">
               <Link to={f.casa} className="touch inline-flex items-center">{f.palazzoNome} › {f.infiltrazioneNome}{f.areaNome ? ` › ${f.areaNome}` : ''}</Link>
               <span>{f.voceNome} · {f.quantita} × {o.nome}</span>
-              {f.stato && <span className={`chip self-start${f.stato === 'preso' ? ' chip--attivo' : ''}`}>{STATO_FORZIERE[f.stato]}</span>}
+              {/* il pin mancante è un difetto dei dati che corregge chi prepara: nel rilascio non si dice (L7-04, D10) */}
+              {f.stato && !(IN_RILASCIO && f.stato === 'da-verificare') && <span className={`chip self-start${f.stato === 'preso' ? ' chip--attivo' : ''}`}>{STATO_FORZIERE[f.stato]}</span>}
               {f.jose && <><Link to={f.jose.casa} className="touch inline-flex items-center self-start">Si compra da Jose</Link><span className="text-text-muted">{f.jose.nota}</span></>}
             </li>)}</ul></div>}
             {o.ricompense.length > 0 && <div><h3 className="m-0 text-base">Ricompense</h3><ul className="m-0 list-none p-0">{o.ricompense.map((r) => <li key={`${r.fonteTipo}:${r.fonteChiave}`} className="flex flex-col gap-1 py-1 testo-13">

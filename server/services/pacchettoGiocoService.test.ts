@@ -95,7 +95,7 @@ describe('pacchettoGiocoService — pacchetto di gioco (voce 10)', () => {
     const dopo = statoImportazione();
     expect(dopo).toMatchObject({ inCorso: false, fase: null });
     expect(dopo.ultima).toMatchObject({ riuscita: false, esito: null, operazione });
-    expect(dopo.ultima?.messaggio).toContain('non è un pacchetto di gioco');
+    expect(dopo.ultima?.messaggio).toContain('non è un backup dei dati di gioco');
     // il lucchetto è tornato libero
     await expect(importaPacchetto(fileQualunque('ancora altro'))).rejects.toMatchObject({ code: 'pacchetto-non-valido' });
     // la cartella di lavoro dell'importazione non resta in data/tmp, nemmeno quando fallisce

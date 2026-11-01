@@ -31,6 +31,24 @@ export function prezzoScontato(prezzo: number, sconto: number): number {
   return Math.round(prezzo * (1 - sconto / 100));
 }
 
+/** Prezzo di evocazione dal Registro di una Persona di livello L, senza sconto: 27·L² + 126·L + 2147. Il costo di una fusione è la somma
+ *  di quelli degli ingredienti (`costoFusione`). */
+export function prezzoEvocazioneRegistro(livello: number): number {
+  return 27 * livello * livello + 126 * livello + 2147;
+}
+
+/**
+ * L7-07: quanto costa davvero una ricetta, dato il suo costo dal server (prezzi di evocazione degli ingredienti, già scontati dal Registro):
+ * gli ingredienti in scorta valgono 0 (DECISIONI §7). Il costo si ripartisce sugli ingredienti in proporzione al loro prezzo di evocazione,
+ * così lo sconto del Registro resta applicato; con nessuno in scorta è il costo del server, con tutti in scorta è 0.
+ */
+export function costoRicettaConScorta(costo: number, ingredienti: ReadonlyArray<{ livello: number; inScorta: boolean }>): number {
+  const totale = ingredienti.reduce((t, i) => t + prezzoEvocazioneRegistro(i.livello), 0);
+  const daEvocare = ingredienti.reduce((t, i) => t + (i.inScorta ? 0 : prezzoEvocazioneRegistro(i.livello)), 0);
+  if (totale === 0 || daEvocare === totale) return costo;
+  return Math.round(costo * daEvocare / totale);
+}
+
 // ---- Bonus EXP del Confidente sulla fusione (tabella generica, affidabilità media) ----
 
 const MOLTIPLICATORE_EXP_CONFIDENTE: Readonly<Record<number, number>> = { 0: 1.0, 1: 1.15, 2: 1.3, 3: 1.5, 4: 1.7, 5: 2.0, 6: 2.15, 7: 2.3, 8: 2.5, 9: 2.7, 10: 3.0 };

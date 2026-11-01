@@ -24,6 +24,9 @@ import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 const SCHEDE = [
   ['battaglie', 'Battaglie Sfida', 'sfide-battaglia'], ['boss', 'Boss segreti', 'boss'],
   ['magnate', 'Magnate', 'magnate'], ['tratti', 'Tratti', 'tratti'],
@@ -51,7 +54,7 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
       </section>
       {b.elenco.map((s) => (
         <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><TitoloSezione>{s.nomeIt ?? s.nome}</TitoloSezione>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2"><TitoloSezione>{s.nomeIt ?? s.nome}</TitoloSezione>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!IN_RILASCIO && !s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
@@ -71,7 +74,7 @@ function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void
     <div className="flex flex-col gap-2 testo-13">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} id={`elemento-${b.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<TitoloSezione>{b.nome}</TitoloSezione>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<TitoloSezione>{b.nome}</TitoloSezione>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!IN_RILASCIO && !b.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />

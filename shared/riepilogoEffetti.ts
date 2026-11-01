@@ -15,7 +15,8 @@
 // (`partiEffettoAzione`, `contoArticoli`, i nomi di `NomiFraseEffetto`): nessuna chiave grezza, mai testo troncato.
 // ============================================================
 
-import { EVENTI_STORIA, dataLeggibile, type NomiCondizioni } from './condizioniSpillo.js';
+import { EVENTI_STORIA, dataConArticolo, dataLeggibile, type NomiCondizioni } from './condizioniSpillo.js';
+import { MOLTIPLICATORE_INVITO, testoMoltiplicatore } from './puntiConfidenti.js';
 import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
 import { contoArticoli, eInNote, formatoYen, fraseCondizioniEffetto, gruppiAlternativi, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, type EffettoVoce, type NomiFraseEffetto, type RigaContoArticoli } from './effettiVoce.js';
@@ -392,10 +393,10 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         const soluzione = c?.risposta.trim() ?? '';
         gruppo('cruciverba').righe.push(indizio
           ? { nome: indizio, ...(soluzione ? { risposte: [{ testo: soluzione }] } : {}) }
-          : { nome: `Del ${dataLeggibile(e.data)}` });
+          : { nome: (() => { const t = dataConArticolo(e.data, 'di'); return t.charAt(0).toUpperCase() + t.slice(1); })() });
         break;
       }
-      case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
+      case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', `i punti dell’incontro valgono ${testoMoltiplicatore(MOLTIPLICATORE_INVITO)}`); break; }
       // il gruppo si chiama «Compendio»: la riga dice solo il nome; il dettaglio compare solo quando aggiunge qualcosa (anche nella scorta)
       case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', e.scorta ? `anche nella scorta${e.livello ? `, livello ${e.livello}` : ''}` : undefined); break;
       case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo'); break;

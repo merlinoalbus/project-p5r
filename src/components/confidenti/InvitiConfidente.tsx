@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dataLeggibile, fraseMessaggioInvito } from '../../../shared/condizioniSpillo';
+import { dataConArticolo, dataLeggibile, fraseMessaggioInvito } from '../../../shared/condizioniSpillo';
 import { eliminaInvitoConfidente, getInviti, impostaInvitoAvvenuto } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
@@ -39,7 +39,7 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
   /** Toglie un invito creato dall'utente: finisce nel Cestino (il server rifiuta se una partita lo ha registrato o un altro dato lo cita). */
   const togli = async (invito: InvitoDto) => {
     if (occupato || !invito.data) return;
-    if (!(await conferma({ titolo: 'Togliere l’invito?', testo: `L’invito del ${dataLeggibile(invito.data)} finisce nel Cestino.`, etichetta: 'Togli l’invito' }))) return;
+    if (!(await conferma({ titolo: 'Togliere l’invito?', testo: `L’invito ${dataConArticolo(invito.data, 'di')} finisce nel Cestino.`, etichetta: 'Togli l’invito' }))) return;
     setOccupato(invito.chiave);
     try {
       await eliminaInvitoConfidente(invito.confidente, invito.data);
@@ -66,8 +66,8 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
             <span>Apre: {invito.apre.casa ? <Link to={invito.apre.casa} className="touch inline-flex items-center">{invito.apre.nome}</Link> : invito.apre.nome}</span>
             {!IN_RILASCIO && invito.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
             {!IN_RILASCIO && invito.daUtente && <span className="chip" title="Invito creato da te: non è nella guida">Creato da te</span>}
-            {modificabile && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica l’invito del ${invito.data ? dataLeggibile(invito.data) : 'Confidente'}`} disabled={occupato !== null} onClick={() => setEditor(invito)} />}
-            {modificabile && invito.daUtente && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli l’invito del ${invito.data ? dataLeggibile(invito.data) : 'Confidente'}`} disabled={occupato !== null} onClick={() => void togli(invito)} />}
+            {modificabile && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica l’invito ${invito.data ? dataConArticolo(invito.data, 'di') : 'del Confidente'}`} disabled={occupato !== null} onClick={() => setEditor(invito)} />}
+            {modificabile && invito.daUtente && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli l’invito ${invito.data ? dataConArticolo(invito.data, 'di') : 'del Confidente'}`} disabled={occupato !== null} onClick={() => void togli(invito)} />}
           </div>
           {invito.condizioniTesto.length > 0 && <p className="m-0 text-text-secondary">Condizioni: {invito.condizioniTesto.join(' · ')}.</p>}
           {attiva && !invito.registrato && invito.possibile === false && <p className="m-0 text-text-secondary">Non ancora possibile: manca {invito.manca ?? 'una delle condizioni dell’invito'}.</p>}

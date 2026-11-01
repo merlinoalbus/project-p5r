@@ -92,7 +92,7 @@ export function NegozioPage() {
               {n.programmaPunti && <span><strong className="text-text">Programma punti:</strong> {n.programmaPunti.nome} ({n.programmaPunti.unita}{n.programmaPunti.calcolo === 'rango-cliente' ? ', dal rango cliente' : ', si segnano a mano'})</span>}
               {n.sconto && <span>{testoSconto(n.sconto, n.sconto.confidenteNome)}</span>}
             </div>
-            <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
+            <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{!IN_RILASCIO && n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </IntestazioneScheda>
           {/* i requisiti mancanti fuori dall'intestazione, che resta entro il 30% della schermata (LAY3-5): possono essere lunghi */}
           {n.disponibilita && n.disponibilita.stato !== 'disponibile' && n.disponibilita.requisiti.length > 0 && (

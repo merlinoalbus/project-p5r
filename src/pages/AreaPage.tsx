@@ -192,7 +192,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             <TitoloScheda aria-current="page">{a.nome}</TitoloScheda>
             {/* da 1024 px la versione la dice il segmento premuto della fila, subito sotto (variante 2 di Stesura): qui il chip solo sotto */}
             {scelta && a.planimetrie.length > 1 && <span className="chip testo-12 lg:hidden">Planimetria · {nomeVersione(scelta, indiceScelta)}</span>}
-            {a.daVerificare && <span className="chip chip--attivo testo-12" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
+            {!IN_RILASCIO && a.daVerificare && <span className="chip chip--attivo testo-12" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
             {/* il Covo: le sfide e le Medaglie P stanno nella pagina del Covo (meta della metro); qui un collegamento compatto nella
                 testata, perché la carta a parte toglieva 53 px al visore (LAY2-1, decisione di Stesura). Da 1024 a 1279 px, se c'è la
                 fila delle versioni, va in fondo alla fila (sotto): la testata resta su una riga senza accorciare il nome (§4.3) */}

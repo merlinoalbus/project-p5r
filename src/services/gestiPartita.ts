@@ -249,23 +249,23 @@ function validaRicevuta(x: unknown, g: GestoPartita): Ricevuta {
       if (p.tipo === 'rimozione-legacy' && v.data.esito === 'presenza-rimossa' && v.data.articolo === p.dati.articolo && v.data.provenienzaId === null && v.data.acquistoId === null) return v.data;
     }
   }
-  throw new Error('La risposta non contiene una ricevuta canonica della medesima operazione: esito da verificare.');
+  throw new Error('La risposta del server non conferma questa operazione: controllala nell’elenco «Operazioni da completare».');
 }
 function validaRecord(x: unknown): GestoPartita {
   const r = baseRecord.parse(x), g = r as GestoPartita;
   if ((r.payload.tipo === 'decisione-effetto-voce') !== (r.partitaId === null) || (r.partitaId === null && !r.bersaglio.voceUid)
     || r.operazioneId !== idOperazione(r.payload) || r.id !== identitaGesto(r.partitaId, r.operazioneId) || (r.stato === 'riuscita') !== (r.ricevuta !== null)
-    || (r.ricevutaPersistita && r.stato !== 'riuscita' && r.stato !== 'rifiutata')) throw new Error('Identità o stato di un gesto non riconoscibili.');
+    || (r.ricevutaPersistita && r.stato !== 'riuscita' && r.stato !== 'rifiutata')) throw new Error('Un’operazione salvata in questa scheda non si legge.');
   if (r.ricevuta !== null) validaRicevuta(r.ricevuta, g);
   return immutabile(copia(g));
 }
 function scrivi(gesti: readonly GestoPartita[]): void {
   try {
     const storage = window.sessionStorage;
-    if (storage.getItem(CHIAVE) !== ultimoRaw) throw new Error('Il contenuto della scheda è cambiato esternamente.');
+    if (storage.getItem(CHIAVE) !== ultimoRaw) throw new Error('Le operazioni da completare sono state cambiate da un’altra scheda: ricarica la pagina.');
     const raw = JSON.stringify({ versione: 1, gesti });
     storage.setItem(CHIAVE, raw);
-    if (storage.getItem(CHIAVE) !== raw) throw new Error('La persistenza non è stata confermata.');
+    if (storage.getItem(CHIAVE) !== raw) throw new Error('La scheda del browser non ha salvato le operazioni da completare.');
     ultimoRaw = raw;
   } catch (e) { throw bloccaArchivio(e); }
   store.setState({ gesti: immutabile(copia(gesti)), erroreArchivio: null });
@@ -278,22 +278,22 @@ export function caricaRegistroGestiPartita(): void {
   try {
     ultimoRaw = window.sessionStorage.getItem(CHIAVE);
     const letti = ultimoRaw === null ? [] : z.object({ versione: z.literal(1), gesti: z.array(z.unknown()) }).strict().parse(JSON.parse(ultimoRaw)).gesti.map(validaRecord);
-    if (new Set(letti.map(g => g.id)).size !== letti.length) throw new Error('ID di gesto duplicati.');
+    if (new Set(letti.map(g => g.id)).size !== letti.length) throw new Error('Le operazioni salvate in questa scheda contengono la stessa operazione due volte.');
     const ids = letti.flatMap(g => operazioni(g.payload).map(id => identitaGesto(g.partitaId, id)));
-    if (new Set(ids).size !== ids.length) throw new Error('Un identificativo di operazione appartiene a più gesti.');
+    if (new Set(ids).size !== ids.length) throw new Error('Le operazioni salvate in questa scheda contengono la stessa operazione due volte.');
     for (const noto of pendentiNoti) {
       const letto = letti.find(g => g.id === noto.id);
-      if (!letto || !uguali(letto.payload, noto.payload) || !uguali(letto.bersaglio, noto.bersaglio)) throw new Error('Un gesto pendente è assente o cambiato nel registro conservato: nessuna sovrascrittura.');
+      if (!letto || !uguali(letto.payload, noto.payload) || !uguali(letto.bersaglio, noto.bersaglio)) throw new Error('Un’operazione da completare non c’è più o è cambiata in questa scheda: l’elenco non viene sovrascritto.');
     }
     const gesti = letti.map(g => {
       const nota = esitiNoti.find(n => n.id === g.id);
       if (nota) {
-        if (!uguali(nota.payload, g.payload) || !uguali(nota.bersaglio, g.bersaglio)) throw new Error('Il gesto conservato diverge dalla ricevuta già acquisita.');
+        if (!uguali(nota.payload, g.payload) || !uguali(nota.bersaglio, g.bersaglio)) throw new Error('L’operazione salvata non corrisponde all’esito già ricevuto.');
         return nota;
       }
       return g.stato === 'invio' ? { ...g, stato: 'incerto' as const, errore: 'La scheda è stata ricaricata durante l’invio: verifica esplicitamente questa operazione.' } : g;
     });
-    if (esitiNoti.some(n => !gesti.some(g => g.id === n.id))) throw new Error('Manca il gesto dell’esito già acquisito: nessuna sovrascrittura.');
+    if (esitiNoti.some(n => !gesti.some(g => g.id === n.id))) throw new Error('Manca l’operazione di un esito già ricevuto: l’elenco non viene sovrascritto.');
     store.setState({ gesti: immutabile(gesti), erroreArchivio: null });
     // 2026-10-29 (segnalazione dell'utente: 55 righe, quasi tutte «Completata»): il registro tiene solo ciò che è in sospeso. Alla lettura escono
     // le operazioni completate (la ricevuta c'è: toglierle dal registro conservato È salvarne l'esito) e i rifiuti già mostrati e salvati in una
@@ -430,18 +430,18 @@ async function esegui(partitaId: number | null, richiesta: Payload, bersaglio: B
   if (store.getState().erroreArchivio) throw new Error(store.getState().erroreArchivio!);
   positivo.nullable().parse(partitaId);
   const p = payload.parse(copia(richiesta)), b = bersaglioSchema.parse(copia(bersaglio)), op = idOperazione(p), id = identitaGesto(partitaId, op);
-  if ((p.tipo === 'decisione-effetto-voce') !== (partitaId === null) || (partitaId === null && !b.voceUid)) throw new Error('Ambito guida o identità della voce non coerenti.');
-  if (p.tipo === 'pesca' && p.dati.azione === 'registra-sessione' && p.dati.richiesta.fonte.tipo !== 'manuale') throw new Error('La fonte del Diario si registra soltanto nella transazione della spunta o della proposta.');
+  if ((p.tipo === 'decisione-effetto-voce') !== (partitaId === null) || (partitaId === null && !b.voceUid)) throw new Error('L’operazione non indica la voce o la partita giusta.');
+  if (p.tipo === 'pesca' && p.dati.azione === 'registra-sessione' && p.dati.richiesta.fonte.tipo !== 'manuale') throw new Error('Una visita che viene dal Diario si registra con la spunta della voce o con la sua proposta.');
   const old = store.getState().gesti.find(g => g.id === id);
   if (old) {
-    if (!uguali(old.payload, p) || !uguali(old.bersaglio, b)) throw new Error('Lo stesso ID appartiene a un payload o bersaglio differente.');
+    if (!uguali(old.payload, p) || !uguali(old.bersaglio, b)) throw new Error('Questa operazione è già salvata con dati diversi: rileggi la pagina e riprova.');
     return invia(old, true);
   }
   const nuoviIds = operazioni(p);
-  if (new Set(nuoviIds).size !== nuoviIds.length || store.getState().gesti.some(g => g.partitaId === partitaId && operazioni(g.payload).some(id => nuoviIds.includes(id)))) throw new Error('Un identificativo di operazione è già conservato in un altro gesto: nessun nuovo invio.');
+  if (new Set(nuoviIds).size !== nuoviIds.length || store.getState().gesti.some(g => g.partitaId === partitaId && operazioni(g.payload).some(id => nuoviIds.includes(id)))) throw new Error('Questa operazione è già nell’elenco «Operazioni da completare»: non viene inviata di nuovo.');
   const nuoviAmbiti = ambiti(p, b);
   if (store.getState().gesti.some(g => g.partitaId === partitaId && pendente(g) && ambiti(g.payload, g.bersaglio).some(k => nuoviAmbiti.includes(k)))) {
-    throw new Error('Esiste già un gesto da verificare per questo bersaglio: recupera quello conservato, senza crearne un altro.');
+    throw new Error('C’è già un’operazione non confermata su questo elemento: completala dall’elenco «Operazioni da completare» prima di farne un’altra.');
   }
   const adesso = new Date().toISOString();
   const g: GestoPartita = immutabile({ id, partitaId, operazioneId: op, bersaglio: b, payload: p, stato: 'incerto', creatoIl: adesso, aggiornatoIl: adesso, errore: null, ricevuta: null, ricevutaPersistita: false });
@@ -454,14 +454,14 @@ export const annullaFonteConRegistro = (id: number, dati: RichiestaAnnullaProven
 export const rimuoviLegacyConRegistro = (id: number, dati: RichiestaRimozioneLegacy, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'rimozione-legacy', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
 export const decidiProposteConRegistro = (id: number, dati: RichiestaDecisioneProposte, bersaglio: BersaglioGestoPartita): Promise<RicevutaDecisioneProposteDto> => esegui(id, { tipo: 'decisione-proposte', dati }, bersaglio) as Promise<RicevutaDecisioneProposteDto>;
 export function eseguiSpuntaAcquistiConRegistro(id: number, voceUid: string, dati: CorpoSpuntaAcquisti, bersaglio: BersaglioGestoPartita): Promise<AzionePercorsoDto> {
-  if ('uid' in dati) return Promise.reject(new Error('L’identità della voce si passa una sola volta, separata dal corpo.'));
+  if ('uid' in dati) return Promise.reject(new Error('La voce è indicata due volte nella richiesta.'));
   return esegui(id, { tipo: 'spunta-acquisti', dati: { ...dati, uid: voceUid } }, bersaglio) as Promise<AzionePercorsoDto>;
 }
 /** Solo azione esplicita: verbi/percorso immutabili; la prima spunta consente soltanto la verifica readonly. */
 export function riprendiGestoPartita(id: string): Promise<Ricevuta | null> {
   caricaRegistroGestiPartita();
   const g = store.getState().gesti.find(x => x.id === id);
-  if (!g) return Promise.reject(new Error('Il gesto non è presente in questa scheda.'));
+  if (!g) return Promise.reject(new Error('Questa operazione non è salvata in questa scheda del browser.'));
   if (g.stato === 'rifiutata') {
     try {
       if (!g.ricevutaPersistita) cambia({ ...g, ricevutaPersistita: true });
@@ -473,7 +473,7 @@ export function riprendiGestoPartita(id: string): Promise<Ricevuta | null> {
 export function archiviaGestoPartita(id: string): void {
   caricaRegistroGestiPartita();
   const g = store.getState().gesti.find(x => x.id === id);
-  if (!g || pendente(g) || inVolo.has(id)) throw new Error('Una richiesta pendente non si elimina dal registro.');
+  if (!g || pendente(g) || inVolo.has(id)) throw new Error('Un’operazione non ancora confermata non si toglie dall’elenco.');
   scrivi(store.getState().gesti.filter(x => x.id !== id));
 }
 /** Rilettura manuale, mai reset; permette di recuperare dopo un blocco di accesso allo storage. */

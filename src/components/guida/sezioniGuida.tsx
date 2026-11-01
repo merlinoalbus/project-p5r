@@ -23,7 +23,7 @@ const DIM = 30;
 export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'percorso', to: '/guida/percorso', titolo: 'Guida giorno per giorno', descrizione: 'Cosa fare oggi, di giorno e di sera: Confidenti, Palazzi, Doti, acquisti, avvisi sulle scadenze; giorno corrente e azioni spuntabili', icona: <IconSole size={DIM} /> },
   { chiave: 'domande', to: '/guida/domande', titolo: 'Domande in classe ed esami', descrizione: 'Risposte corrette per data, prossime domande, spunta «fatta»', icona: <IconBook size={DIM} /> },
-  { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: '38 cruciverba con indizio e risposta (Conoscenza ♪), spunta «risolto»', icona: <IconBook size={DIM} /> },
+  { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: 'I cruciverba con indizio e risposta (Conoscenza ♪), spunta «risolto»', icona: <IconBook size={DIM} /> },
   { chiave: 'calendario', to: '/guida/calendario', titolo: 'Calendario di gioco', descrizione: 'Meteo, eventi, scadenze dei Palazzi, consigli per settimana', icona: <IconOrologio size={DIM} /> },
   { chiave: 'mappe', to: '/guida/mappe', titolo: 'Luoghi della guida', descrizione: 'Città, Palazzi e Memento con le loro aree: l\'albero di tutti i luoghi, con le planimetrie e i pin', icona: <IconMappa size={DIM} /> },
   { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi', descrizione: 'Infiltrazioni, punti di interesse, boss e mappe interattive con avanzamento; i Memento, Iweleth compreso, hanno la loro pagina', icona: <IconMask size={DIM} /> },
@@ -32,19 +32,19 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   // le Richieste o per un collegamento dentro un'altra pagina. Dall'indice della Guida non c'era
   // modo di aprirli, ed è la prima cosa che uno cerca qui dentro.
   { chiave: 'mementos', to: '/guida/dungeon/mementos', titolo: 'Memento', descrizione: 'Il dedalo sotto Tokyo: i livelli, il pozzo, Jose e i suoi fiori, le Ombre che ci si incontrano e la mappa disegnata coi pezzi del gioco', icona: <IconMask size={DIM} /> },
-  { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: '33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
+  { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: 'Le Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
   { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per infiltrazione o dedalo, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
   { chiave: 'citta', to: '/guida/citta', titolo: 'La città', descrizione: 'Quartieri e luoghi: negozi, ristoranti, attività, Confidenti, orari e sblocchi', icona: <IconHome size={DIM} /> },
-  { chiave: 'negozi', to: '/guida/negozi', titolo: 'Negozi e inventario', descrizione: '47 negozi e 499 articoli: armi, protezioni, accessori, oggetti, regali e cibo con prezzi, sblocchi e acquisti per partita', icona: <IconBolt size={DIM} /> },
-  { chiave: 'libri', to: '/guida/libri', titolo: 'Libri', descrizione: '46 libri con avanzamento per sessioni; bonus e quartieri si sbloccano al completamento', icona: <IconBook size={DIM} /> },
+  { chiave: 'negozi', to: '/guida/negozi', titolo: 'Negozi e inventario', descrizione: 'Negozi e articoli: armi, protezioni, accessori, oggetti, regali e cibo con prezzi, sblocchi e acquisti per partita', icona: <IconBolt size={DIM} /> },
+  { chiave: 'libri', to: '/guida/libri', titolo: 'Libri', descrizione: 'I libri con avanzamento per sessioni; bonus e quartieri si sbloccano al completamento', icona: <IconBook size={DIM} /> },
   { chiave: 'attivita', to: '/guida/attivita', titolo: 'Attività e Doti sociali', descrizione: 'Mini-giochi, lavori, studio, libri e film con le note delle Doti; libri letti e film visti per partita', icona: <IconBersaglio size={DIM} /> },
-  { chiave: 'completamento', to: '/guida/completamento', titolo: 'Trofei e finali', descrizione: '53 trofei con spunta per partita, condizioni dei finali, DLC, effetti del meteo, Nuova Partita+ e regole del tempo', icona: <IconMedaglia size={DIM} /> },
-  { chiave: 'covo', to: '/guida/covo', titolo: 'Covo dei Ladri', descrizione: 'L’area bonus di Royal: 52 sfide che danno Medaglie P e 36 voci di catalogo che le spendono, con prezzi e sblocchi', icona: <IconMask size={DIM} /> },
-  { chiave: 'film', to: '/guida/film', titolo: 'Film e DVD', descrizione: '18 film al cinema e 12 DVD: periodi, Doti, luoghi, sessioni e rivisioni registrate per partita', icona: <IconFilm size={DIM} /> },
-  { chiave: 'videogiochi', to: '/guida/videogiochi', titolo: 'Videogiochi', descrizione: '7 giochi con round, Doti e completamento registrato per partita', icona: <IconGioco size={DIM} /> },
-  { chiave: 'sfide', to: '/guida/sfide', titolo: 'Battaglie Sfida, boss segreti e tratti', descrizione: '7 Battaglie Sfida, Jose, Gemelle Custodi e Lavenza, Magnate, 90 tratti delle Persona in italiano', icona: <IconMask size={DIM} /> },
+  { chiave: 'completamento', to: '/guida/completamento', titolo: 'Trofei e finali', descrizione: 'I trofei con spunta per partita, condizioni dei finali, DLC, effetti del meteo, Nuova Partita+ e regole del tempo', icona: <IconMedaglia size={DIM} /> },
+  { chiave: 'covo', to: '/guida/covo', titolo: 'Covo dei Ladri', descrizione: 'L’area bonus di Royal: le sfide che danno Medaglie P e il catalogo che le spende, con prezzi e sblocchi', icona: <IconMask size={DIM} /> },
+  { chiave: 'film', to: '/guida/film', titolo: 'Film e DVD', descrizione: 'Film al cinema e DVD: periodi, Doti, luoghi, sessioni e rivisioni registrate per partita', icona: <IconFilm size={DIM} /> },
+  { chiave: 'videogiochi', to: '/guida/videogiochi', titolo: 'Videogiochi', descrizione: 'I giochi con round, Doti e completamento registrato per partita', icona: <IconGioco size={DIM} /> },
+  { chiave: 'sfide', to: '/guida/sfide', titolo: 'Battaglie Sfida, boss segreti e tratti', descrizione: 'Battaglie Sfida, Jose, Gemelle Custodi e Lavenza, Magnate, tratti delle Persona in italiano', icona: <IconMask size={DIM} /> },
   { chiave: 'personaggi', to: '/guida/personaggi', titolo: 'Personaggi', descrizione: 'Il cast senza spoiler: Ladri Fantasma, Stanza di Velluto, Confidenti e terzo semestre, con Persona, armi e ruolo in battaglia', icona: <IconMask size={DIM} /> },
-  { chiave: 'oggetti', to: '/guida/oggetti', titolo: 'Oggetti, materiali e fabbricazione', descrizione: '247 consumabili, oggetti chiave e materiali, ricette degli attrezzi, personalizzazione delle armi, abiti e lavanderia, scambi', icona: <IconBook size={DIM} /> },
+  { chiave: 'oggetti', to: '/guida/oggetti', titolo: 'Oggetti, materiali e fabbricazione', descrizione: 'Consumabili, oggetti chiave e materiali, ricette degli attrezzi, personalizzazione delle armi, abiti e lavanderia, scambi', icona: <IconBook size={DIM} /> },
   // L4-05: l'indirizzo unico dei Confidenti (`router.tsx`, `VersoIConfidenti`): la partita attiva o, senza, i Personaggi
   { chiave: 'confidenti', to: '/confidenti', titolo: 'Confidenti', descrizione: 'Risposte migliori, abilità e regali per ogni Confidente', icona: <IconCuore size={DIM} /> },
 ];

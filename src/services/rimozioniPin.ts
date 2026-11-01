@@ -24,10 +24,10 @@ function blocca(e: unknown): Error {
 }
 function scrivi(intenti: readonly IntentoRimozionePin[]): void {
   try {
-    if (sessionStorage.getItem(CHIAVE) !== ultimoRaw) throw new Error('Il registro della scheda è cambiato esternamente.');
+    if (sessionStorage.getItem(CHIAVE) !== ultimoRaw) throw new Error('L’elenco delle rimozioni è stato cambiato da un’altra scheda: ricarica la pagina.');
     const raw = JSON.stringify({ versione: 1, intenti });
     sessionStorage.setItem(CHIAVE, raw);
-    if (sessionStorage.getItem(CHIAVE) !== raw) throw new Error('Salvataggio non confermato.');
+    if (sessionStorage.getItem(CHIAVE) !== raw) throw new Error('La scheda del browser non ha salvato l’elenco delle rimozioni.');
     ultimoRaw = raw;
   } catch (e) { throw blocca(e); }
   store.setState({ intenti: copia(intenti), pronto: true, errore: null });
@@ -38,7 +38,7 @@ function carica(): void {
   try {
     ultimoRaw = sessionStorage.getItem(CHIAVE);
     const letti = ultimoRaw === null ? [] : z.object({ versione: z.literal(1), intenti: z.array(schemaIntento) }).strict().parse(JSON.parse(ultimoRaw)).intenti;
-    if (new Set(letti.map(i => i.uid)).size !== letti.length) throw new Error('Identità duplicate nel registro.');
+    if (new Set(letti.map(i => i.uid)).size !== letti.length) throw new Error('L’elenco delle rimozioni salvato in questa scheda contiene lo stesso pin due volte.');
     archivioInterpretato = true;
     const intenti = letti.map(i => i.stato === 'invio' ? { ...i, stato: 'incerto' as const } : i);
     store.setState({ intenti: copia(intenti), pronto: true, errore: null });
@@ -58,7 +58,7 @@ function salvaEsito(i: IntentoRimozionePin): void {
   catch {
     // L’esito ricevuto resta noto nella memoria della scheda anche se lo storage non può salvarlo.
     store.setState({ intenti: copia(intenti) });
-    notifica('warning', `Esito della rimozione del pin «${i.nome}» acquisito ma non salvato nella scheda. Conserva questa scheda e salva il registro senza ripetere la richiesta.`, 0);
+    notifica('warning', `La rimozione del pin «${i.nome}» ha avuto risposta, ma la scheda del browser non l’ha salvata. Non chiudere la scheda: in Impostazioni salva gli esiti senza ripetere la rimozione.`, 0);
   }
 }
 /** Un solo invio, preceduto da persistenza verificata; chiusura e reload non cancellano l’incertezza. */
@@ -66,7 +66,7 @@ export async function rimuoviPinConRegistro(input: Omit<IntentoRimozionePin, 'st
   carica();
   if (store.getState().errore) throw new Error(store.getState().errore!);
   const i = schemaIntento.parse({ ...input, stato: 'invio' });
-  if (inVolo.has(i.uid) || rimozionePinPendente(i.uid)) throw new Error('Esiste già una rimozione da verificare per questo UID. Nessun nuovo invio.');
+  if (inVolo.has(i.uid) || rimozionePinPendente(i.uid)) throw new Error('C’è già una rimozione non confermata di questo pin: rileggi il pin e il Cestino prima di riprovare.');
   scrivi([...store.getState().intenti.filter(v => v.uid !== i.uid), i]);
   inVolo.add(i.uid);
   try { await eliminaSpillo(i.id, i.richiesta); salvaEsito({ ...i, stato: 'riuscita' }); }
@@ -78,12 +78,12 @@ export async function rimuoviPinConRegistro(input: Omit<IntentoRimozionePin, 'st
 /** Chiamato solo dopo la rilettura esplicita e la dimostrazione che il vecchio CAS non è più valido. */
 export function risolviRimozionePinOsservata(uidPin: string, revisioneOriginale: string): void {
   const i = rimozionePinPendente(uidPin);
-  if (!i || inVolo.has(uidPin) || i.richiesta.revisioneRimozioneAttesa !== revisioneOriginale) throw new Error('Il gesto da verificare è cambiato o è ancora in invio.');
+  if (!i || inVolo.has(uidPin) || i.richiesta.revisioneRimozioneAttesa !== revisioneOriginale) throw new Error('La rimozione non confermata è cambiata o è ancora in corso.');
   scrivi(store.getState().intenti.filter(v => v.uid !== uidPin));
 }
 /** Non rilegge o cancella contenuti divergenti: ritenta soltanto la persistenza dello stato già noto. */
 export function salvaRegistroRimozioniPin(): void {
   carica();
-  if (!archivioInterpretato) throw new Error('Il contenuto conservato non è leggibile: nessuna sovrascrittura del registro.');
+  if (!archivioInterpretato) throw new Error('L’elenco delle rimozioni salvato in questa scheda non si legge: non viene sovrascritto.');
   scrivi(store.getState().intenti);
 }

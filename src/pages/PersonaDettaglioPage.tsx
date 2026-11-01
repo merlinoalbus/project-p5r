@@ -276,7 +276,7 @@ function SchedaPersona() {
           <section className="card">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <TitoloSezione>Affinità</TitoloSezione>
-              {p.affinitaGuida && <span className="chip testo-12">corrette da te</span>}
+              {!IN_RILASCIO && p.affinitaGuida && <span className="chip testo-12">corrette da te</span>}
               <ModificaAffinita personaId={p.id} nome={p.nomeIt} affinita={p.affinita} affinitaGuida={p.affinitaGuida} onCambiato={ricarica} />
             </div>
             <AffinitaGriglia affinita={p.affinita} />

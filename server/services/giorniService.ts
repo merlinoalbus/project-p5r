@@ -10,6 +10,9 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import type { GiornoModificabileDto, MeteoGiorno, ModificaGiorno } from '../../shared/giorno.js';
+import { dataConArticolo } from '../../shared/condizioniSpillo.js';
+
+const maiuscola = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 interface RigaGiorno {
   data: string; meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null; meteo_da_verificare: number;
@@ -20,7 +23,7 @@ interface Fotografia { meteo_giorno: string | null; meteo_sera: string | null; n
 
 const riga = (data: string): RigaGiorno => {
   const r = prepared('SELECT data, meteo_giorno, meteo_sera, nota_meteo, meteo_da_verificare, trama, vincoli_json, seed_json FROM giorno WHERE data = ?').get(data) as RigaGiorno | undefined;
-  if (!r) throw httpErrors.notFound('giorno-non-trovato', `Il ${data} non è un giorno del calendario di gioco.`);
+  if (!r) throw httpErrors.notFound('giorno-non-trovato', `${maiuscola(dataConArticolo(data))} non è un giorno del calendario di gioco.`);
   return r;
 };
 

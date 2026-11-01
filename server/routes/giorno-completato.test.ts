@@ -42,7 +42,7 @@ describe('Giorno completato → giorno dopo', () => {
     expect(ultima.giornoAvanzato).toMatchObject({ da: '04-09', a: '04-10', partita: { dataGioco: '04-10', fasciaGioco: 'giorno' } });
     expect(await partita()).toMatchObject({ dataGioco: '04-10', fasciaGioco: 'giorno' });
     const storico = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ titolo: string }> };
-    expect(storico.eventi.some((e) => e.titolo === 'Giornata del 04-09 completata')).toBe(true);
+    expect(storico.eventi.some((e) => e.titolo === 'Giornata del 9 aprile completata')).toBe(true);
   });
 
   it('togliere una spunta del giorno passato non torna indietro; rispuntarla non fa avanzare di nuovo', async () => {

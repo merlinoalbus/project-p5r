@@ -15,6 +15,8 @@ import { useState, type ReactNode } from 'react';
 import { aggiornaDote, getDoti, getFortuna, impostaFortuna } from '../../services/api';
 import { puntiDaNote } from '../../../shared/doti';
 import { noteAParole, simboliNote, testoPunti } from '../../../shared/note';
+import { MOLTIPLICATORE_FORTUNA } from '../../../shared/fortuna';
+import { testoMoltiplicatore } from '../../../shared/puntiConfidenti';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -29,6 +31,10 @@ import { classiSuggerito } from '../../utils/suggerimenti';
 import { comportamentoScorrimento } from '../../utils/movimento';
 import { TargaSuggerito } from '../shared/Suggerito';
 import { ModificaGuida } from '../guida/ModificaGuida';
+
+// L7-02: ×1,5 della Fortuna e i 7 punti del libro si leggono dalle regole (`shared/fortuna`, `puntiDaNote`), mai scritti a mano
+const xFortuna = testoMoltiplicatore(MOLTIPLICATORE_FORTUNA);
+const puntiLibro = puntiDaNote(3, true);
 
 interface Props {
   partitaId: number;
@@ -125,9 +131,9 @@ export function DotiSociali({ partitaId }: Props) {
             <div className="w-full flex flex-col items-center gap-1.5" role="group" aria-label="Modificatori delle note">
               <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
               <div className="flex flex-wrap justify-center gap-2">
-                <PulsanteVisivo id={`fortuna-${partitaId}`} disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={!fortuna.dati} aria-disabled={occupata === 'fortuna' || undefined} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ×1,5 (per difetto) per il resto del giorno" />
-                <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio={`${simboliNote(3)} = 7 punti`} onClick={() => setLibro((v) => !v)} aria-label={`Libro: ${noteAParole(3)} valgono 7 punti`} title={`Libri a resa maggiorata: ${noteAParole(3)} valgono 7 punti`} />
-                <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title="Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ×1,5 di Chihaya" />
+                <PulsanteVisivo id={`fortuna-${partitaId}`} disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={!fortuna.dati} aria-disabled={occupata === 'fortuna' || undefined} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo={`Fortuna ${xFortuna}`} dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label={`Fortuna ${xFortuna}: lettura della fortuna di Chihaya`} title={`Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ${xFortuna} (per difetto) per il resto del giorno`} />
+                <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio={`${simboliNote(3)} = ${puntiLibro} punti`} onClick={() => setLibro((v) => !v)} aria-label={`Libro: ${noteAParole(3)} valgono ${puntiLibro} punti`} title={`Libri a resa maggiorata: ${noteAParole(3)} valgono ${puntiLibro} punti`} />
+                <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title={`Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ${xFortuna} di Chihaya`} />
               </div>
             </div>
             {scegliFortuna && <div className="flex flex-col items-center gap-1.5" role="group" aria-label="Dote della Fortuna">

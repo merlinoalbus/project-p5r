@@ -252,13 +252,13 @@ export function GalleriaSpillo({ immagini, nome, compatta }: { immagini: Immagin
         {immagini.map((i, n) => (
           <li key={i.id}>
             <button type="button" className="p-0 border border-border bg-bg-tertiary block" style={{ width: d, height: d }} onClick={() => setAperta(i)} title={i.didascalia || `Schermata ${n + 1}`} aria-label={`Ingrandisci: ${i.didascalia || `schermata ${n + 1}`}`}>
-              {i.url ? <img src={i.url} alt="" className="w-full h-full object-contain" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-contain" fallback={<span className="testo-12 text-text-muted">asset</span>} />}
+              {i.url ? <img src={i.url} alt="" className="w-full h-full object-contain" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-contain" fallback={<span className="testo-12 text-text-muted">assente</span>} />}
             </button>
           </li>
         ))}
       </ul>
       <Modal titolo={aperta?.didascalia || nome} aperta={aperta !== null} onChiudi={() => setAperta(null)} larga>
-        {aperta && (aperta.url ? <img src={aperta.url} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" /> : <AssetImg nome={aperta.asset} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" fallback={<p className="m-0 testo-13 text-text-muted">Asset «{aperta.asset}» non ancora presente nel repository.</p>} />)}
+        {aperta && (aperta.url ? <img src={aperta.url} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" /> : <AssetImg nome={aperta.asset} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" fallback={<p className="m-0 testo-13 text-text-muted">Immagine non disponibile.</p>} />)}
       </Modal>
     </>
   );
@@ -278,9 +278,17 @@ function motivoNonDisponibile(d: SpilloDto['disponibilita']): string {
   return requisiti.filter((r) => r.stato === 'grigio').map((r) => `da verificare: ${r.dettaglio || r.testo}`).join(' · ');
 }
 
-/** Etichetta leggibile della disponibilità di un articolo: il dato porta già la preposizione («dal 18 aprile», «dopo Palazzo di Madarame», «solo in primavera»), come in ArticoliTabella. */
-function disponibilita(a: { disponibileDal: string | null }): string {
-  return a.disponibileDal?.trim() || 'sempre';
+/** La disponibilità di un articolo nella riga del visore (L7-10): con l'esito strutturato della partita vale lui — «disponibile», o il
+ *  cartellino di `ChipDisponibilita` (lo stesso del listino, `ArticoliTabella`) —; senza esito, la frase delle condizioni di tempo che il
+ *  server ricava dalle condizioni strutturate («dal 18 aprile», «dopo Palazzo di Madarame», «solo in primavera»), o niente. */
+function DisponibilitaArticolo({ a }: { a: { disponibileDal: string | null; disponibilita?: DisponibilitaDto } }) {
+  if (a.disponibilita) {
+    return a.disponibilita.stato === 'disponibile'
+      ? <><span>disponibile</span><ChipDisponibilita disponibilita={a.disponibilita} compatto /></>
+      : <ChipDisponibilita disponibilita={a.disponibilita} compatto />;
+  }
+  const tempo = a.disponibileDal?.trim();
+  return tempo ? <span>{tempo}</span> : null;
 }
 
 /** Il visore di una mappa: barra con percorso e strumenti (assente in modalità `scelta`), pannello
@@ -1321,11 +1329,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       const infiltrazioni = [...new Map(selezionato.voci.filter((v) => v.infiltrazione).map((v) => [v.infiltrazione!.chiave, v.infiltrazione!])).values()];
                       return onContesto && infiltrazioni.length > 1
                         ? <span className="flex w-full items-center gap-1.5 testo-12 text-text-secondary" role="group" aria-label="Infiltrazione dello stato">
-                            <span className="shrink-0">Stato nella</span>
-                            <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta="Stato nella" valore={contesto.chiave} ricerca="mai"
+                            {/* L7-11: forma neutra, giusta con ogni nome («Corridoio della prigione», «3ª infiltrazione»), e non più larga di prima */}
+                            <span className="shrink-0">Stato in</span>
+                            <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta="Stato in" valore={contesto.chiave} ricerca="mai"
                               opzioni={infiltrazioni.map((i) => ({ chiave: i.chiave, nome: i.nome }))} onCambia={(k) => { if (k && k !== contesto.chiave) onContesto(k); }} />
                           </span>
-                        : <span className="block testo-12 text-text-secondary">Stato nella {contesto.nome}</span>;
+                        : <span className="block testo-12 text-text-secondary">Stato in: {contesto.nome}</span>;
                     })()}
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                     {/* L4 (§4.2): pin fatto con una voce non fatta, da prima dell'aggiornamento: il tocco apre la finestra che lo sistema */}
@@ -1716,14 +1725,14 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
       {s.voci.length === 1 && (
         <p className="m-0 testo-12 text-text-secondary">
-          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
+          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora segnata nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </p>
       )}
       {/* più voci (098): ognuna col suo stato; il Palazzo è lo stesso per tutte (lo controlla ogni collegamento) */}
       {s.voci.length > 1 && (
         <div className="flex flex-col gap-0.5 testo-12 text-text-secondary">
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0" aria-label="Voci della guida">
-            {s.voci.map((v) => <li key={v.chiave} className="break-words">«{v.nome}»: {v.esauribile ? 'esauribile · ' : ''}{v.stato ? `nella Guida: ${v.stato}` : 'non ancora gestito nella Guida'}</li>)}
+            {s.voci.map((v) => <li key={v.chiave} className="break-words">«{v.nome}»: {v.esauribile ? 'esauribile · ' : ''}{v.stato ? `nella Guida: ${v.stato}` : 'non ancora segnata nella Guida'}</li>)}
           </ul>
           <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </div>
@@ -1782,11 +1791,10 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                         <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} prezzoPerFascia={a.prezzoPerFascia} daVerificare={a.costoDaVerificare} /></span>
                         {/* revisione della chiusura dell'ondata 5 (B1): l'importo che l'acquisto da qui scala, come nel listino */}
                         <PrezzoScontato scontato={a.prezzoScontato} />
-                        {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
-                            del contrario era una contraddizione scritta due volte sulla stessa riga. */}
-                        {a.disponibilita && a.disponibilita.stato !== 'disponibile'
-                          ? <ChipDisponibilita disponibilita={a.disponibilita} compatto />
-                          : <span>{disponibilita(a)}</span>}
+                        {/* L7-10: prevale l'esito strutturato della partita; la frase delle condizioni di tempo («dal 18 aprile») solo
+                            senza esito (nessuna partita). «Sempre» non si dice più: senza esito non si sa, e accanto a un cartellino
+                            che avvisava del contrario era una contraddizione scritta due volte sulla stessa riga. */}
+                        <DisponibilitaArticolo a={a} />
                       </span>
                       {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <ConsumiAojiru key={`${partitaId}:${s.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} />}
                       {acquistabile && conCompra(a, partitaId) && onAcquistiCambiati && <AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}

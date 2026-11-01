@@ -114,7 +114,7 @@ describe('ModuloCatalogo', () => {
     api.aggiornaElementoCatalogo.mockResolvedValue({ ...negozioSeed, modificata: true });
     render(<ModuloCatalogo tipo="negozio" elemento={negozioSeed} onChiudi={vi.fn()} onSalvato={vi.fn()} />);
     expect(screen.getByText('Negozio: Untouchable')).toBeInTheDocument();
-    expect(screen.getByText(/la correzione resterà anche dopo gli aggiornamenti/)).toBeInTheDocument();
+    expect(screen.getByText(/la correzione si salva nei dati di gioco/)).toBeInTheDocument();
     // una riga del seed intatta non si può eliminare: si può solo correggere o nascondere
     expect(screen.queryByRole('button', { name: /Elimina|Ripristina/ })).toBeNull();
     expect(screen.queryByLabelText(/Sblocco|Fonte/)).toBeNull();

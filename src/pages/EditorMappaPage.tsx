@@ -293,7 +293,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 const a = document.createElement('a');
                 a.href = url; a.download = 'mappe-editor.json'; a.click();
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
-              }, 'Mappe esportate in JSON: per condividerle con un\'altra istanza usa «Importa», oppure il pacchetto di gioco in Impostazioni.')}
+              }, 'Mappe esportate in JSON: per condividerle con un\'altra istanza usa «Importa», oppure il backup dei dati di gioco in Impostazioni.')}
               onImporta={(file, sovrascrivi) => esegui(async () => {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
@@ -511,7 +511,7 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'mappa'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
         <h3 className="visore-mappa__intestazione">Immagine di base</h3>
-        <p className="m-0 testo-12 text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (immagineDiBase ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
+        <p className="m-0 testo-12 text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (immagineDiBase ? 'Immagine predefinita dell’app.' : 'Immagine non disponibile: gli spilli stanno su una griglia.') : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
         <input ref={inputImmagine} type="file" accept="image/*" className="sr-only" aria-label="File dell'immagine di base" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImmagine(f); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={mappa.immagineUrl ? 'Sostituisci immagine' : 'Carica immagine'} disabled={occupato} onClick={() => inputImmagine.current?.click()} />
@@ -575,8 +575,8 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'file'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Esportazione e importazione">
         <h3 className="visore-mappa__intestazione">Scambio</h3>
-        <p className="m-0 testo-12 text-text-muted">Le mappe fanno parte dei dati di gioco: per portarle in un'altra istanza, o farne il dato predefinito dell'app, si usa il pacchetto di gioco (Impostazioni → Dati di gioco). «Esporta» salva tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
-        <input ref={inputImporta} type="file" accept="application/json,.json" className="sr-only" aria-label="File del pacchetto da importare" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImporta(f, sovrascrivi); e.target.value = ''; }} />
+        <p className="m-0 testo-12 text-text-muted">Le mappe fanno parte dei dati di gioco: per portarle in un'altra istanza, o farne il dato predefinito dell'app, si usa il backup dei dati di gioco (Impostazioni → Backup dei dati di gioco). «Esporta» salva tutte le mappe in un file JSON, con le immagini dell'istanza, per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
+        <input ref={inputImporta} type="file" accept="application/json,.json" className="sr-only" aria-label="File delle mappe da importare" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImporta(f, sovrascrivi); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta" dettaglio="tutte le mappe, JSON" disabled={occupato} onClick={p.onEsporta} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa" disabled={occupato} onClick={() => inputImporta.current?.click()} />

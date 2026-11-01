@@ -27,6 +27,7 @@ import {
 } from '../../../shared/disponibilitaStrutturata';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -37,9 +38,8 @@ const NOME_FASCIA: Record<FasciaDisponibilita, string> = { giorno: 'di giorno', 
 const NOME_STATO: Record<string, string> = { disponibile: 'Disponibile adesso', 'non-disponibile': 'Non disponibile adesso', 'su-messaggio': 'Solo su suo messaggio', trama: 'Con la trama', sconosciuto: 'Non si sa se è disponibile adesso' };
 
 const elenco = (voci: string[]): string => voci.length <= 1 ? voci.join('') : `${voci.slice(0, -1).join(', ')} e ${voci[voci.length - 1]}`;
-const dataBreve = (mmgg: string): string => `${mmgg.slice(3)}/${mmgg.slice(0, 2)}`;
-/** «MM-GG» con l'articolo, senza zeri: «il 28/9», «l'8/11». */
-const conArticolo = (mmgg: string): string => { const g = Number(mmgg.slice(3)); return `${g === 8 || g === 11 ? 'l’' : 'il '}${g}/${Number(mmgg.slice(0, 2))}`; };
+/** L7-05: le date di gioco si scrivono in un modo solo, con l'articolo («il 28 settembre», «l'8 novembre»), come nel resto dell'app. */
+const conArticolo = (mmgg: string): string => dataGiocoConArticolo(mmgg);
 const SETTE_GIORNI = GIORNI_DISPONIBILITA.filter((g) => g !== 'festivi');
 const RANGHI = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -80,7 +80,7 @@ export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onMo
   return (
     <div className="flex flex-col gap-1 testo-13 text-text-secondary">
       <span><strong className="text-text">Dove:</strong> {luoghi.length ? luoghi.map((l) => l.nome).join(', ') : (s.motivoSenzaLuogo || '—')}</span>
-      <span><strong className="text-text">Quando:</strong> {testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}</span>
+      <span><strong className="text-text">Quando:</strong> {testoQuando(s)}{s.dal ? ` · ${dataGiocoConArticolo(s.dal, 'da')}` : ''}</span>
       {eccezioni.length > 0 && <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">{eccezioni.map((t, i) => <li key={i}>{t}</li>)}</ul>}
       {oggi && <span><span className={`chip ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span> <span className="text-text-muted">{oggi.motivo}</span></span>}
       {!IN_RILASCIO && <span className="flex flex-wrap items-center gap-2">
@@ -99,7 +99,7 @@ export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?
   const eccezioni = righeEccezioni(s, d.dati.ranghiNonConLaPioggia ?? []);
   return (
     <span className="flex flex-wrap items-center gap-1.5 testo-12 text-text-secondary">
-      <span>{testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}{eccezioni.length > 0 ? ` · ${eccezioni.join(' · ')}` : ''}</span>
+      <span>{testoQuando(s)}{s.dal ? ` · ${dataGiocoConArticolo(s.dal, 'da')}` : ''}{eccezioni.length > 0 ? ` · ${eccezioni.join(' · ')}` : ''}</span>
       {oggi && oggi.stato !== 'sconosciuto' && <span className={`chip testo-12 ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span>}
     </span>
   );
@@ -117,8 +117,8 @@ function DateEscluse({ date, onCambia, disabilitato }: { date: string[]; onCambi
       {date.length === 0
         ? <span role="alert" className="text-error-testo">Scegli almeno un giorno.</span>
         : <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">{date.map((d) => (
-          <li key={d} className="flex items-center gap-1 rounded border border-border pl-2"><span>{dataBreve(d)}</span>
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Togli il ${dataBreve(d)}`} disabled={disabilitato} onClick={() => onCambia(date.filter((x) => x !== d))} /></li>
+          <li key={d} className="flex items-center gap-1 rounded border border-border pl-2"><span>{dataGiocoTesto(d)}</span>
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Togli ${dataGiocoConArticolo(d)}`} disabled={disabilitato} onClick={() => onCambia(date.filter((x) => x !== d))} /></li>
         ))}</ul>}
       <span className="flex flex-wrap items-center gap-2">
         <SelettoreData etichetta="Giorno da escludere" valore={nuova} onCambia={setNuova} disabilitato={disabilitato} />

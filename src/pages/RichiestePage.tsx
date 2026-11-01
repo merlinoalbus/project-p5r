@@ -33,7 +33,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../types';
-import { dataLeggibile } from '../../shared/condizioniSpillo';
+import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo';
 
 /** L13: il nome dello stato calcolato di una Richiesta nella partita. */
 const NOME_STATO: Record<StatoCalcolatoRichiestaDto['stato'], string> = { bloccata: 'Bloccata', disponibile: 'Disponibile', 'da-verificare': 'Da verificare', accettata: 'Accettata', completata: 'Completata', scaduta: 'Scaduta' };
@@ -203,7 +203,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           {r.completamentoCondizioni.length > 0 && <span><span className="text-text-muted">Per completarla:</span> {r.completamentoCondizioni.map((c) => c.testo).join(' · ')}</span>}
           {r.disponibileDal && <span><span className="text-text-muted">Disponibile dal (guida)</span> {r.disponibileDal}</span>}
           {!r.condizioni.length && !r.disponibileDal && <span><span className="text-text-muted">Si sblocca:</span> da subito</span>}
-          {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata al ${dataLeggibile(r.proroga.data)} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}
+          {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata ${dataConArticolo(r.proroga.data, 'a')} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}
             {r.proroga?.areaDedaloNome ? ` · intanto il bersaglio è nel ${[r.proroga.dedaloNome, r.proroga.areaDedaloNome].filter(Boolean).join(', ')}` : ''}</span>}
           {r.scadenza && <span><span className="text-text-muted">Scadenza (guida)</span> {r.scadenza}</span>}
           {r.note && <span>{r.note}</span>}

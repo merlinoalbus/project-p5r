@@ -33,7 +33,8 @@ import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { SceltaRegalo } from '../catalogo/SceltaRegalo';
 import { esitoDelRegalo } from '../../../shared/regali';
-import type { PiazzamentoEsame } from '../../../shared/puntiConfidenti';
+import { CONFIDENTI_CON_BONUS_ESAME, MOLTIPLICATORE_ESAME, MOLTIPLICATORE_INVITO, testoMoltiplicatore, type PiazzamentoEsame } from '../../../shared/puntiConfidenti';
+import { congiunzione } from '../../../shared/testo';
 import { RigaConfidente } from './RigaConfidente';
 import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
@@ -306,11 +307,17 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
 
   /** I moltiplicatori della partita (esami, invito SMS): valgono per tutti i Confidenti, si scelgono nel dettaglio accanto al bonus
    * dell'arcano, dove si registrano i punti; la spiegazione sta nel suggerimento di ciascuno. */
+  // L7-02: chi ha il bonus degli esami e quanto vale si leggono dalla regola unica (`shared/puntiConfidenti`). Il nome breve («Ryuji»,
+  // «Kawakami») è la chiave del Confidente con l'iniziale maiuscola: nessun dato porta un nome breve, e per i sette coincide col testo di prima
+  const conBonusEsame = congiunzione(CONFIDENTI_CON_BONUS_ESAME.map((k) => k.charAt(0).toUpperCase() + k.slice(1)));
+  const per = (p: 'primo' | 'primi-10') => testoMoltiplicatore(MOLTIPLICATORE_ESAME[p]);
+  const xInvito = testoMoltiplicatore(MOLTIPLICATORE_INVITO);
+  const spiegaEsame = (come: string, p: 'primo' | 'primi-10') => piazzamentoEsame ? `${come} agli ultimi esami (${piazzamentoEsame.nome}): punti ${per(p)} per ${conBonusEsame} fino all'esame successivo; vale per tutti i punti registrati` : 'I risultati del primo esame non sono ancora usciti';
   const moltiplicatori = (
     <>
-      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={24} />} titolo="Esami top 10" dettaglio="×1,2 · scuola" onClick={() => scegliPiazzamento('primi-10')} aria-label="Esami top 10 ×1,2" title={piazzamentoEsame ? `Fra i primi dieci agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,2 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo; vale per tutti i punti registrati` : 'I risultati del primo esame non sono ancora usciti'} />
-      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={24} />} titolo="Esami 1º" dettaglio="×1,5 · scuola" onClick={() => scegliPiazzamento('primo')} aria-label="Esami 1º ×1,5" title={piazzamentoEsame ? `Primo del corso agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,5 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo; vale per tutti i punti registrati` : 'I risultati del primo esame non sono ancora usciti'} />
-      <PulsanteVisivo compatto attivo={invito} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio="×1,2 · uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2 (vale per tutti i Confidenti finché non lo spegni)" />
+      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={24} />} titolo="Esami top 10" dettaglio={`${per('primi-10')} · scuola`} onClick={() => scegliPiazzamento('primi-10')} aria-label={`Esami top 10 ${per('primi-10')}`} title={spiegaEsame('Fra i primi dieci', 'primi-10')} />
+      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={24} />} titolo="Esami 1º" dettaglio={`${per('primo')} · scuola`} onClick={() => scegliPiazzamento('primo')} aria-label={`Esami 1º ${per('primo')}`} title={spiegaEsame('Primo del corso', 'primo')} />
+      <PulsanteVisivo compatto attivo={invito} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio={`${xInvito} · uscita`} onClick={() => setInvito((v) => !v)} aria-label={`Invito SMS ${xInvito}`} title={`Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ${xInvito} (vale per tutti i Confidenti finché non lo spegni)`} />
     </>
   );
 

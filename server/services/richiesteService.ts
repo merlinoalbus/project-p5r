@@ -14,7 +14,7 @@ import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import { conCestino } from './cestinoService.js';
 import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, RiepilogoRichiesteDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../../shared/types.js';
-import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataConArticolo, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibilitaService.js';
 import { esitoAperturaDelDedalo, valutaInsieme } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -144,7 +144,7 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   const c = completamento(r, st, nomi, prorogaVale);
   const base = { scadenzaEffettiva, giorniAllaScadenza: giorni, accettabile: false, completabile: c.completabile, motiviCompletamento: c.motivi, doveOggi: c.doveOggi };
   if (segnato === 'completata') return { ...base, completabile: true, motiviCompletamento: [], stato: 'completata', motivi: [] };
-  if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta il ${dataLeggibile(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga al ${dataLeggibile(r.proroga_data)} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
+  if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta ${dataConArticolo(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga ${dataConArticolo(r.proroga_data, 'a')} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
   const daVerificare = testiDaVerificare(r);
   if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: daVerificare };
   const condizioni = condizioniDaValutare(r).map((c) => condizioneConTesto(c, nomi));

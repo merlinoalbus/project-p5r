@@ -16,6 +16,7 @@
 
 import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
+import { prezzoEvocazioneRegistro } from '../../../shared/bonusVelluto.js';
 
 export interface PersonaFusione {
   id: number;
@@ -140,9 +141,9 @@ export function arcanaRisultato(a: string, b: string): string | null {
   return caricaSnapshot().tabella.get(a)?.get(b) ?? null;
 }
 
-/** Costo stimato in yen di una fusione: somma sugli ingredienti di 27·L² + 126·L + 2147. */
+/** Costo stimato in yen di una fusione: somma dei prezzi di evocazione dal Registro degli ingredienti (27·L² + 126·L + 2147 ciascuno). */
 export function costoFusione(ingredienti: readonly PersonaFusione[]): number {
-  return ingredienti.reduce((tot, p) => tot + 27 * p.livello * p.livello + 126 * p.livello + 2147, 0);
+  return ingredienti.reduce((tot, p) => tot + prezzoEvocazioneRegistro(p.livello), 0);
 }
 
 /** Livello di riferimento della fusione a due. */

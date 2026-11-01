@@ -18,7 +18,7 @@ import { nellaFinestraPalazzo } from './finestrePalazzi.js';
 import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
 import { condizioneAperturaDedalo, condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTesto, dataConArticolo, dataLeggibile, dedaloDellEvento, descriviRequisitoSpillo, membroDellEvento, nomePalazzo, ordineGioco, proiezioneDiPresenza, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
 import { nomeDote } from '../../../shared/doti.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
@@ -188,15 +188,15 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     // — calendario e mondo —
     case 'data': {
-      if (!st.dataGioco) return esito('data', 'rosso', `Disponibile dal ${dataLeggibile(r.dal)}: il giorno corrente della partita non è impostato (Partita → Oggi)`);
+      if (!st.dataGioco) return esito('data', 'rosso', `Disponibile ${dataConArticolo(r.dal, 'da')}: il giorno corrente della partita non è impostato (Partita → Oggi)`);
       const ok = ordineGioco(st.dataGioco) >= ordineGioco(r.dal);
-      return esito('data', ok ? 'verde' : 'rosso', ok ? `Disponibile dal ${dataLeggibile(r.dal)} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(r.dal)}, oggi è il ${dataLeggibile(st.dataGioco)}`);
+      return esito('data', ok ? 'verde' : 'rosso', ok ? `Disponibile ${dataConArticolo(r.dal, 'da')} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile ${dataConArticolo(r.dal, 'da')}, oggi è ${dataConArticolo(st.dataGioco)}`);
     }
     case 'intervallo': {
       if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const oggi = ordineGioco(st.dataGioco);
       const dentro = oggi >= ordineGioco(r.dal) && oggi <= ordineGioco(r.al);
-      return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo il ${dataLeggibile(r.dal)}: è oggi` : `Solo il ${dataLeggibile(r.dal)}, oggi è il ${dataLeggibile(st.dataGioco)}`) : dentro ? `Nel periodo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}, oggi è il ${dataLeggibile(st.dataGioco)}`);
+      return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo ${dataConArticolo(r.dal)}: è oggi` : `Solo ${dataConArticolo(r.dal)}, oggi è ${dataConArticolo(st.dataGioco)}`) : dentro ? `Nel periodo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')}, oggi è ${dataConArticolo(st.dataGioco)}`);
     }
     case 'finestra-palazzo': {
       if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato');
@@ -275,12 +275,12 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       const relazioni = st.relazioniRomantiche;
       if (!relazioni?.has(r.confidente)) return esito('relazione-romantica', 'rosso', `Nessuna relazione romantica con ${nome} (scheda del Confidente o scelta alla spunta del rango 9)`);
       const dal = relazioni.get(r.confidente) ?? null;
-      if (!r.entro) return esito('relazione-romantica', 'verde', `Relazione romantica con ${nome}${dal ? ` dal ${dataLeggibile(dal)}` : ''}`);
+      if (!r.entro) return esito('relazione-romantica', 'verde', `Relazione romantica con ${nome}${dal ? ` ${dataConArticolo(dal, 'da')}` : ''}`);
       if (dal === null) return esito('relazione-romantica', 'grigio', `Relazione romantica con ${nome}: giorno d’inizio della relazione non registrato: segnala di nuovo dalla scheda`);
       const inTempo = ordineGioco(dal) <= ordineGioco(r.entro);
       return esito('relazione-romantica', inTempo ? 'verde' : 'rosso', inTempo
-        ? `Relazione romantica con ${nome} dal ${dataLeggibile(dal)} (entro il ${dataLeggibile(r.entro)})`
-        : `Relazione romantica con ${nome} iniziata il ${dataLeggibile(dal)}, dopo il ${dataLeggibile(r.entro)}`);
+        ? `Relazione romantica con ${nome} ${dataConArticolo(dal, 'da')} (entro ${dataConArticolo(r.entro)})`
+        : `Relazione romantica con ${nome} iniziata ${dataConArticolo(dal)}, dopo ${dataConArticolo(r.entro)}`);
     }
     case 'relazioni-romantiche': {
       // una relazione senza giorno d'inizio conta come presente anche con `entro` (prudente: «senza fidanzata» non si dà per vero senza saperlo)
@@ -289,7 +289,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
         .filter(([, dal]) => !r.entro || dal === null || ordineGioco(dal) <= ordineGioco(r.entro))
         .map(([c]) => n.confidenti?.[c] ?? t('confidente', c));
       const ok = contate.length <= r.al_piu;
-      const quando = (plurale: boolean) => (r.entro ? ` ${plurale ? 'iniziate' : 'iniziata'} entro il ${dataLeggibile(r.entro)}` : '');
+      const quando = (plurale: boolean) => (r.entro ? ` ${plurale ? 'iniziate' : 'iniziata'} entro ${dataConArticolo(r.entro)}` : '');
       return esito('relazioni-romantiche', ok ? 'verde' : 'rosso', contate.length === 0
         ? `Nessuna relazione romantica${quando(false)}`
         : `${contate.length === 1 ? 'Una relazione romantica' : `${contate.length} relazioni romantiche`}${quando(contate.length > 1)} (${contate.join(', ')}): al più ${r.al_piu === 0 ? 'nessuna' : r.al_piu}`);
@@ -332,7 +332,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       if (st.sblocchiRicevuti?.has(chiave)) return esito('sblocco', 'verde', `${nome}: sbloccata da una voce del Diario`);
       const voce = prepared("SELECT v.data, v.azione FROM voce_effetto e JOIN voce_giornata v ON v.uid = e.voce_uid WHERE e.tipo = 'sblocco' AND e.chiave = ? ORDER BY v.data, v.ordine LIMIT 1").get(chiave) as { data: string; azione: string } | undefined;
       if (!voce) return { ...esito('sblocco', 'grigio', `${nome}: nessuna voce del Diario dà ancora questo sblocco, quindi non blocca`), bloccante: false };
-      return esito('sblocco', 'rosso', `${nome}: non ancora sbloccata. Lo sblocca la voce del ${dataLeggibile(voce.data)} «${voce.azione.length > 70 ? `${voce.azione.slice(0, 69)}…` : voce.azione}», spuntandola`);
+      return esito('sblocco', 'rosso', `${nome}: non ancora sbloccata. Lo sblocca la voce ${dataConArticolo(voce.data, 'di')} «${voce.azione.length > 70 ? `${voce.azione.slice(0, 69)}…` : voce.azione}», spuntandola`);
     }
     case 'evento': {
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;

@@ -8,7 +8,7 @@ import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote } from './partiteService.js';
 import { puntiDote } from './puntiDoti.js';
-import { ordineGioco } from '../../shared/condizioniSpillo.js';
+import { dataConArticolo, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto, PremioEsameDto } from '../../shared/types.js';
 import { CONFIDENTI_CON_BONUS_ESAME, MOLTIPLICATORE_ESAME, nomePiazzamentoEsame, PIAZZAMENTI_ESAME, type PremioPiazzamentoEsame } from '../../shared/puntiConfidenti.js';
 import { eDote } from '../../shared/doti.js';
@@ -148,7 +148,7 @@ export function scriviDomandaFatta(partitaId: number, domandaId: number, fatta: 
       const info = prepared('INSERT OR IGNORE INTO domanda_partita (partita_id, domanda_id, fatta_at) VALUES (?, ?, ?)').run(partitaId, domandaId, adesso);
       if (info.changes > 0) {
         nuova = true;
-        registraEvento(partitaId, 'domanda-risposta', `Domanda del ${d.data} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
+        registraEvento(partitaId, 'domanda-risposta', `Domanda ${dataConArticolo(d.data, 'di')} (${d.chi || d.tipo}) risposta`, `${d.domanda}${conoscenza ? ` · il gioco dà ${testoDoteInPunti({ nome: nomeDote('conoscenza'), note: 1, delta: puntiDote(partitaId, 'conoscenza', 1) })} (da segnare nelle Doti)` : ''}`, { domandaId, conoscenza });
       }
     } else {
       prepared('DELETE FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').run(partitaId, domandaId);

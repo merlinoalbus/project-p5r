@@ -130,7 +130,7 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
     try {
       const refs = 'proposte' in decisione ? decisione.proposte : [decisione.proposta];
       const riguardaPesca = (elenco.dati ?? []).some(p => refs.some(r => r.id === p.id && r.uid === p.uid) && (p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca'));
-      if (gestoPendenteNelloScope(partitaId, { proposte: refs, ...(riguardaPesca ? { pesca: true } : {}) })) throw new Error('Esiste un gesto da verificare per queste proposte o per la pesca: recupera prima la sua ricevuta.');
+      if (gestoPendenteNelloScope(partitaId, { proposte: refs, ...(riguardaPesca ? { pesca: true } : {}) })) throw new Error('Un’operazione su queste proposte o sulla pesca non è ancora confermata: completala prima dall’elenco «Operazioni da completare».');
       const a = await anteprimaDecisioneProposte(partitaId, { operazioneId: crypto.randomUUID().replaceAll('-', ''), decisione });
       if (a.richiesta.decisione.tipo === 'applica-effetto' && a.richiesta.decisione.pesca?.scelta.tipo === 'collega') {
         const p = a.richiesta.decisione.pesca, f = a.fotografiaSessionePesca;

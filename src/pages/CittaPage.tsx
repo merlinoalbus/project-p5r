@@ -29,6 +29,9 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { radiciMetaverso } from '../utils/palazzi';
 import { AreeDellaCitta } from '../components/mappe/AreeDellaCitta';
 
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Pagina della città: carica i quartieri e le radici del Metaverso per la partita attiva, mostra la
  * mappa di Tokyo disegnata e accanto le schede dei quartieri (sagoma, stato di apertura alla data
@@ -119,7 +122,7 @@ export function CittaPage() {
                     {!aperto && <span className="chip testo-12" title={x.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
-                  <span className="testo-12 text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
+                  <span className="testo-12 text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{!IN_RILASCIO && x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
                   {x.sbloccoCondizione?.testo && <span className="break-words testo-12 text-text-muted">Sblocco: {x.sbloccoCondizione.testo}</span>}
                   {/* la descrizione intera: tagliata a due righe con «…» nascondeva informazione (3 quartieri a 1280 px, 4 a 768) */}
                   {x.descrizione && <span className="testo-12 text-text-secondary">{x.descrizione}</span>}

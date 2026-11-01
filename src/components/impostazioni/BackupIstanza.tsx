@@ -106,7 +106,7 @@ export function BackupIstanza() {
       <p className="m-0 testo-13 text-text-secondary">
         Scarica una copia di tutto e rimettila quando vuoi, anche su un altro dispositivo. L'<strong>istanza completa</strong> contiene i dati di gioco con le
         immagini, le partite con il loro tracking e i caratteri che hai caricato. Ogni scaricamento lascia una copia anche nella <strong>cartella d'appoggio</strong>
-        del server: è da lì che si ripristina, perché un file da centinaia di MB non passa dal browser. Per i soli dati di gioco c'è la card «Pacchetto di gioco».
+        del server: è da lì che si ripristina, perché un file da centinaia di MB non passa dal browser. Per i soli dati di gioco c'è la card «Backup dei dati di gioco».
       </p>
       {s && (
         <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 testo-13">
@@ -125,7 +125,7 @@ export function BackupIstanza() {
       </div>
       <section className="flex flex-col gap-1.5" aria-label="Cartella d'appoggio">
         <h3 className="m-0 testo-14">Dalla cartella d'appoggio</h3>
-        <p className="m-0 testo-12 text-text-muted">Gli ZIP dell'istanza depositati sul server (ci finiscono gli scaricamenti): il file non passa dal browser, quindi la dimensione non è un problema. I soli dati di gioco si importano dalla card «Pacchetto di gioco».</p>
+        <p className="m-0 testo-12 text-text-muted">Gli ZIP dell'istanza depositati sul server (ci finiscono gli scaricamenti): il file non passa dal browser, quindi la dimensione non è un problema. I soli dati di gioco si importano dalla card «Backup dei dati di gioco».</p>
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Cerca i file disponibili" dettaglio="guarda nella cartella d'appoggio" disabled={occupato} onClick={() => void cercaNelDeposito()} />
         </div>

@@ -109,12 +109,12 @@ export function assicuraPacchettoIniziale(dbPath: string = resolveDbPath()): { d
   if (dbPath === resolveDbPath() && fs.existsSync(path.join(config.dataDir, config.dbFileNameLegacy))) return { database: false };
   const sorgente = percorsoPacchettoDb();
   if (!fs.existsSync(sorgente)) {
-    logger.warn({ sorgente }, 'pacchetto iniziale assente: l\'istanza nasce vuota, importa il pacchetto completo da Impostazioni → Pacchetto di gioco');
+    logger.warn({ sorgente }, 'pacchetto iniziale assente: l\'istanza nasce vuota, importa un backup completo da Impostazioni → Backup dei dati di gioco');
     return { database: false, pacchettoAssente: true };
   }
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   fs.copyFileSync(sorgente, dbPath);
-  logger.info({ sorgente, dbPath }, 'file di gioco creato dal pacchetto iniziale (senza immagini): importa il pacchetto completo da Impostazioni → Pacchetto di gioco');
+  logger.info({ sorgente, dbPath }, 'file di gioco creato dal pacchetto iniziale (senza immagini): importa un backup completo da Impostazioni → Backup dei dati di gioco');
   return { database: true };
 }
 

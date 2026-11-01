@@ -49,6 +49,23 @@ export function nomeTipoAccessoMondo(tipo: string, chiave?: string): string {
   }
 }
 
+/** L7-06: che cosa dire quando la cosa cercata non ha una posizione sulla mappa, con la parola del suo tipo; il perché solo dove è noto
+ *  (gli articoli venduti dentro un Palazzo o online), mai la stessa spiegazione per tutti. */
+export function senzaPosizioneAccessoMondo(tipo: string, chiave?: string): { frase: string; perche: string | null } {
+  const frase = (soggetto: string) => `${soggetto} non ha una posizione sulla mappa.`;
+  switch (tipo) {
+    case 'negozio': return { frase: frase('Questo negozio'), perche: null };
+    case 'confidente': return { frase: frase('Questo Confidente'), perche: null };
+    case 'luogo': return { frase: frase('Questo luogo'), perche: null };
+    case 'articolo': return { frase: frase('Questo articolo'), perche: 'Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.' };
+    case 'attivita': return { frase: frase('Questa attività'), perche: null };
+    case 'area': return { frase: frase(deiMemento(tipo, chiave) ? 'Questo dedalo' : 'Questa infiltrazione'), perche: null };
+    case 'punto': return { frase: frase('Questo punto di interesse'), perche: null };
+    case 'mappa': return { frase: 'Questa planimetria non ha un punto d’arrivo su un’altra mappa.', perche: null };
+    default: return { frase: frase('Questa voce'), perche: null };
+  }
+}
+
 /** Il nome del comando che apre la scheda dell'entità, detto con la parola giusta (L0, 2026-10-20): prima ogni scheda era «Scheda del
  *  luogo», anche quella di un quartiere o di un Palazzo, e «luogo» oggi vuol dire solo l'attività (Untouchable, Diner). */
 export function titoloSchedaAccessoMondo(tipo: string, chiave?: string, nome?: string): string {

@@ -22,7 +22,7 @@ export function GuidaPage() {
   const sezioni = SEZIONI_GUIDA.filter((s) => s.chiave !== 'covo' || covoAperto);
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Guida" sottotitolo="La guida italiana allgamestaff resa consultabile in gioco, con lo stato della tua partita." />
+      <IntestazionePagina titolo="Guida" sottotitolo="La guida italiana resa consultabile in gioco, con lo stato della tua partita." />
       <ul className="m-0 p-0 list-none grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-4" aria-label="Sezioni della guida">
         {sezioni.map((s) => (
           <li key={s.chiave} className="min-w-0">

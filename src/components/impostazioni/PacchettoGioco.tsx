@@ -75,7 +75,7 @@ function ElencoOrfani({ orfani, quando }: { orfani: OrfanoPartiteDto[]; quando: 
 
 /** R11-05/3: le strutture del backup che questa versione non usa più. Nessuna scelta da fare: non si importano e restano nella copia di sicurezza. */
 function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[]; quando: 'prima' | 'dopo'; copia?: string }) {
-  if (scarti.length === 0) return <p className="m-0 testo-13 text-success">{quando === 'prima' ? 'Il pacchetto non porta strutture che questa versione non usa più.' : 'Nessuna struttura del pacchetto è stata scartata.'}</p>;
+  if (scarti.length === 0) return <p className="m-0 testo-13 text-success">{quando === 'prima' ? 'Il backup non contiene strutture che questa versione non usa più.' : 'Nessuna struttura del backup è stata scartata.'}</p>;
   const spiegati = scarti.filter((s) => s.spiegata), altri = scarti.filter((s) => !s.spiegata);
   const riga = (s: ScartoPacchettoDto) => (
     <li key={`${s.tabella}.${s.colonna ?? ''}`} className="flex flex-col gap-0.5 rounded border border-border px-2 py-1">
@@ -158,7 +158,7 @@ const LISTINO_TANAKA: Record<NonNullable<AnteprimaPacchettoDto['tanaka']>['istan
 };
 
 /**
- * Card «Pacchetto di gioco» delle Impostazioni: stato dei dati di gioco dell'istanza (con gli avvisi se è vuota o
+ * Card «Backup dei dati di gioco» delle Impostazioni (nome tecnico `PacchettoGioco`, per compatibilità): stato dei dati di gioco dell'istanza (con gli avvisi se è vuota o
  * ha solo i dati iniziali), scaricamento del pacchetto, scelta di un file dalla cartella d'appoggio, anteprima
  * dell'importazione in una finestra di conferma, avanzamento del lavoro sul server ed esito finale con gli orfani.
  * Non ha props.

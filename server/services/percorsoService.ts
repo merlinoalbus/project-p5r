@@ -17,6 +17,7 @@ import { conteggiGiornate, spuntaVoce, vociDelGiorno } from './giornataService.j
 import type { OpzioniSpunta } from './effettiAzioneService.js';
 import { allerteDelGiorno, meteoDelGiorno, testoMeteo } from './meteoService.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
+import { dataConArticolo } from '../../shared/condizioniSpillo.js';
 
 interface Riga { data: string; ordine: number; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
 /** Una riga di `giorno` (R9-15) come la vede il percorso: il meteo è il testo del giorno unico, lo stesso del calendario. */
@@ -53,7 +54,7 @@ export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
 export function giornoPercorso(data: string, partitaId?: number): PercorsoGiornoDto {
   // R9-15: il giorno è uno solo (modificabile dall'editor, R9-19): trama, vincoli e meteo sono gli stessi del calendario
   const grezza = prepared('SELECT * FROM giorno WHERE data = ?').get(data) as RigaGiorno | undefined;
-  if (!grezza) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  if (!grezza) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso ${dataConArticolo(data)}.`);
   const r = comeRiga(grezza);
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;

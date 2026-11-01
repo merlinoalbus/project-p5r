@@ -10,6 +10,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { SelettorePersona } from './SelettorePersona';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { formattaYen } from '../../utils/punti';
+import { costoRicettaConScorta } from '../../../shared/bonusVelluto';
 import { PannelloEredita } from './PannelloEredita';
 import { EseguiFusioneModal } from './EseguiFusioneModal';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto } from '../../types';
@@ -47,6 +48,12 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
   );
 
   const r = esito?.ricetta ?? null;
+  // L7-07 (F13): il prezzo di evocazione dal Registro, 0 per gli ingredienti in scorta; con il costo a 0 lo sconto non si dice
+  const costo = r ? costoRicettaConScorta(r.costo, r.ingredienti.map((i) => ({ livello: i.livello, inScorta: inScorta.has(i.id) }))) : 0;
+  const note = [
+    ...(r && r.ingredienti.some((i) => inScorta.has(i.id)) ? [r.ingredienti.every((i) => inScorta.has(i.id)) ? 'ingredienti in scorta' : 'in scorta valgono 0'] : []),
+    ...(costo > 0 && (esito?.sconto ?? 0) > 0 ? [`sconto Registro ${esito?.sconto}%`] : []),
+  ];
   return (
     <div className="flex flex-col gap-3">
       {/* La carta c'è sempre, con un'altezza minima: scelta la seconda Persona il risultato compare al suo posto invece di spingere
@@ -66,7 +73,7 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
                 <Link to={`/compendio/persona/${r.risultato.id}`} className="text-2xl font-black text-primary-testo no-underline break-words">{r.risultato.nomeIt}</Link>
                 {r.risultato.nomeIt !== r.risultato.nome && <span className="testo-13 text-text-muted ml-2">{r.risultato.nome}</span>}
                 <div className="testo-13 text-text-secondary mt-1">{r.risultato.arcanaNome} · livello {r.risultato.livello}{r.risultato.speciale ? ' · fusione speciale' : ''}</div>
-                <div className="testo-13 text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · costo stimato <strong className="text-text whitespace-nowrap">{formattaYen(r.costo)}</strong>{(esito?.sconto ?? 0) > 0 && <span className="text-text-muted"> (sconto Registro {esito?.sconto}%)</span>}</div>
+                <div className="testo-13 text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · evocazione dal Registro <strong className="text-text whitespace-nowrap">{formattaYen(costo)}</strong>{note.length > 0 && <span className="text-text-muted"> ({note.join('; ')})</span>}</div>
                 {esito?.bonusConfidente && (
                   <div className="testo-13 text-text-secondary">
                     Bonus EXP del Confidente {esito.bonusConfidente.arcanaNome}{esito.bonusConfidente.confidenteNome ? ` (${esito.bonusConfidente.confidenteNome})` : ''}: rango {esito.bonusConfidente.rango} → <strong className="text-text">×{esito.bonusConfidente.moltiplicatoreExp.toLocaleString('it-IT')}</strong>

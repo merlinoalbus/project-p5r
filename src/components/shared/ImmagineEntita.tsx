@@ -158,7 +158,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const origine = mostraAlternativa
     ? 'Grafica predefinita dell\'app: versione stilizzata'
     : srcUtente
-      ? (urlAlternativa ? 'Immagine caricata da te (passa il mouse per la versione stilizzata)' : 'Immagine caricata da te')
+      // L7-09: nel rilascio l'immagine l'ha caricata chi prepara i contenuti, non chi gioca
+      ? (urlAlternativa ? `${IN_RILASCIO ? 'Immagine della guida' : 'Immagine caricata da te'} (passa il mouse per la versione stilizzata)` : IN_RILASCIO ? 'Immagine della guida' : 'Immagine caricata da te')
       : urlPredefinito
         ? (urlAlternativa ? 'Grafica predefinita dell\'app: ritratto fedele (passa il mouse per la versione stilizzata)' : 'Grafica predefinita dell\'app')
         : 'Nessuna immagine: mostrate le iniziali';

@@ -12,6 +12,7 @@ import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 import { vociCollegate } from './vociDiStato.js';
 import { testoDoteInPunti } from '../../shared/note.js';
+import { dataConArticolo } from '../../shared/condizioniSpillo.js';
 
 interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
@@ -45,7 +46,7 @@ export function cruciverba(partitaId?: number): CruciverbaTuttiDto {
 export function scriviCruciverba(partitaId: number, data: string, fatto: boolean): { riga: CruciverbaDto; nuovo: boolean } {
   verificaPartita(partitaId);
   const r = prepared('SELECT * FROM cruciverba WHERE data = ?').get(data) as Riga | undefined;
-  if (!r) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba il ${data}.`);
+  if (!r) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba ${dataConArticolo(data)}.`);
   const adesso = nowIso();
   let nuovo = false;
   getDb().transaction(() => {

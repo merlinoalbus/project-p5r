@@ -127,7 +127,7 @@ export function LuogoPage() {
                 chip={<>
                   <BadgePresenza l={l} />
                   <span className="chip luogo-tipo" style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[l.tipo] ?? COLORE_TIPO_LUOGO.altro } as CSSProperties}><IconaSpillo tipo={definizioneTipoLuogo(l.tipo).icona} dimensione={14} /> {NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
-                  {!l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
+                  {!IN_RILASCIO && !l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
                 </>}
                 azioni={<>
                   {/* il pulsante porta a «Dove si trova» da 640 a 1279 px; sul telefono la sezione viene subito dopo l'intestazione, e da
@@ -170,7 +170,7 @@ export function LuogoPage() {
                         {n.sconto && <span>{testoSconto(n.sconto, n.sconto.confidenteNome)}</span>}
                       </div>
                       {n.note && <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words testo-13 text-text-secondary" />}
-                      <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
+                      <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{!IN_RILASCIO && n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
                       {!IN_RILASCIO && <div className="flex flex-wrap gap-1.5">
                         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" onClick={() => setModulo({ negozio: n.chiave, elemento: null })} />
                         <CorreggiElemento tipo="negozio" chiave={n.chiave} titolo="Correggi il negozio" onSalvato={() => void dati.ricarica()} />

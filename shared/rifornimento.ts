@@ -13,7 +13,7 @@
 // successivo alla data della partita non contano). Funzioni pure, senza database: le usano il server (`scorteService`) e l'interfaccia.
 // ============================================================
 
-import { GIORNI_SETTIMANA, dataLeggibile } from './condizioniSpillo.js';
+import { GIORNI_SETTIMANA, dataConArticolo, dataLeggibile } from './condizioniSpillo.js';
 import { annoDiGioco, giornoDellaSettimanaPiatto } from './date.js';
 
 /** I modi in cui un articolo torna in negozio. */
@@ -226,15 +226,15 @@ export function descriviRifornimento(regola: RegolaRifornimento, quantita: numbe
 export function descriviStatoScorta(regola: RegolaRifornimento, s: StatoScorta): string {
   if (!s.esaurito) return s.rimasti === null ? 'Nessun limite di pezzi' : `Rimasti ${s.rimasti} di ${s.quantita}`;
   // il negozio che spedisce ha in viaggio un ordine di un altro giorno (e questo articolo non l'ha già comprato)
-  if (s.comprati === 0 && s.ordineInViaggio) return s.torna ? `Un ordine è in consegna: nuovi ordini dal ${dataLeggibile(s.torna)}` : 'Un ordine è in consegna: nuovi ordini all’arrivo';
+  if (s.comprati === 0 && s.ordineInViaggio) return s.torna ? `Un ordine è in consegna: nuovi ordini ${dataConArticolo(s.torna, 'da')}` : 'Un ordine è in consegna: nuovi ordini all’arrivo';
   if (regola.tipo === 'mai') return 'Pezzo unico già comprato';
   if (regola.tipo === 'restituzione') return 'In prestito: torna alla restituzione';
-  if (regola.tipo === 'consegna') return s.torna ? `Ordine in consegna: arriva il ${dataLeggibile(s.torna)}` : 'Ordine in consegna';
+  if (regola.tipo === 'consegna') return s.torna ? `Ordine in consegna: arriva ${dataConArticolo(s.torna)}` : 'Ordine in consegna';
   if (regola.tipo === 'pioggia') return 'Esaurito: torna con la prossima pioggia';
   if (!s.torna) return 'Esaurito';
   const g = giornoDellaSettimanaPiatto(s.torna);
   const nome = GIORNI_SETTIMANA.find((x) => x.chiave === g)?.nome;
-  return `Esaurito: torna ${nome ? `${nome} ` : 'il '}${dataLeggibile(s.torna)}`;
+  return `Esaurito: torna ${nome ? `${nome} ${dataLeggibile(s.torna)}` : dataConArticolo(s.torna)}`;
 }
 
 /** Il ciclo ha senso per l'interfaccia (si compra più volte): tutte le regole tranne il pezzo unico. */

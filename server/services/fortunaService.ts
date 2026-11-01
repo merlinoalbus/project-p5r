@@ -11,10 +11,14 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { eDote, nomeDote, type DoteChiave } from '../../shared/doti.js';
-import type { FortunaPartitaDto } from '../../shared/fortuna.js';
+import { MOLTIPLICATORE_FORTUNA, type FortunaPartitaDto } from '../../shared/fortuna.js';
+import { testoMoltiplicatore } from '../../shared/puntiConfidenti.js';
 import { dataLeggibile } from '../../shared/condizioniSpillo.js';
 import { registraEvento } from './storicoService.js';
 import { verificaPartita } from './verificaPartita.js';
+
+/** L7-02: il ×1,5 della Fortuna nei testi dello storico, letto dalla regola. */
+const X_FORTUNA = testoMoltiplicatore(MOLTIPLICATORE_FORTUNA);
 
 interface RigaFortuna { dote: string; giorno: string | null }
 
@@ -48,7 +52,7 @@ export function impostaFortuna(partitaId: number, dote: DoteChiave | null): Fort
       const oggi = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null }).data_gioco;
       prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = NULL, prima_json = NULL')
         .run(partitaId, dote, oggi, nowIso());
-      registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ×1,5.` : 'I punti di questa Dote valgono ×1,5 finché non la spegni.', { dote, giorno: oggi });
+      registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ${X_FORTUNA}.` : `I punti di questa Dote valgono ${X_FORTUNA} finché non la spegni.`, { dote, giorno: oggi });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
@@ -70,7 +74,7 @@ export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: D
   prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il, da_voce, prima_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = excluded.da_voce, prima_json = excluded.prima_json')
     .run(partitaId, dote, oggi, nowIso(), voceUid, memoria);
   const testo = (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').get(voceUid) as { azione: string } | undefined)?.azione;
-  registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ×1,5.` : 'I punti di questa Dote valgono ×1,5 finché non la spegni.'}`, { dote, giorno: oggi, voce: voceUid });
+  registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ${X_FORTUNA}.` : `I punti di questa Dote valgono ${X_FORTUNA} finché non la spegni.`}`, { dote, giorno: oggi, voce: voceUid });
 }
 
 /** 2026-10-26 (le ricevute della spunta): la Fortuna che la spunta di questa voce ha acceso ed è ancora in vigore (la riga è della voce: si

@@ -30,6 +30,7 @@ import { decisioniApertePerVoce, righeDelGiorno, spuntePartita } from './giornat
 import { leggiPartita } from './partiteService.js';
 import { prelevaAvanzamentoRichiesta, registraAvanzamentoRichiesta } from '../middleware/requestContext.js';
 import type { AvanzamentoGiornataDto } from '../../shared/types.js';
+import { dataConArticolo } from '../../shared/condizioniSpillo.js';
 import { vociNonDovute } from './voceDovuta.js';
 
 /** Le decisioni aperte di tutte le voci date. */
@@ -60,7 +61,7 @@ export function avanzaSeFasciaCompleta(partitaId: number, data: string): Avanzam
     if (tutteFatte && decisioniAperteDelleVoci(partitaId, righe.map((v) => v.uid)) === 0) {
       const succ = prepared('SELECT data FROM giorno WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
       if (!succ) return null;
-      cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata del ${data} completata`, dettaglio: `Tutte le attività del giorno sono fatte e nessuna decisione è rimasta aperta: la partita passa al ${succ.data}, di giorno.` });
+      cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata ${dataConArticolo(data, 'di')} completata`, dettaglio: `Tutte le attività del giorno sono fatte e nessuna decisione è rimasta aperta: la partita passa ${dataConArticolo(succ.data, 'a')}, di giorno.` });
       return { giornoAvanzato: { da: data, a: succ.data, partita: leggiPartita(partitaId), decisioniAperte: decisioniAperteDelleVoci(partitaId, righe.map((v) => v.uid)) } };
     }
 
@@ -69,7 +70,7 @@ export function avanzaSeFasciaCompleta(partitaId: number, data: string): Avanzam
       const diGiorno = righe.filter((v) => v.fascia !== 'sera');
       const azioniDiGiorno = azioni.filter((v) => v.fascia !== 'sera');
       if (azioniDiGiorno.length > 0 && azioniDiGiorno.every((a) => fatte.has(a.uid)) && decisioniAperteDelleVoci(partitaId, diGiorno.map((v) => v.uid)) === 0) {
-        const passata = passaAllaSeraPartita(partitaId, { titolo: `Attività di giorno del ${data} completate`, dettaglio: `Tutte le attività di giorno sono fatte e nessuna decisione è rimasta aperta: la partita passa alla sera del ${data}.` });
+        const passata = passaAllaSeraPartita(partitaId, { titolo: `Attività di giorno ${dataConArticolo(data, 'di')} completate`, dettaglio: `Tutte le attività di giorno sono fatte e nessuna decisione è rimasta aperta: la partita passa alla sera ${dataConArticolo(data, 'di')}.` });
         if (!passata) return null;
         return { fasciaAvanzata: { giorno: data, da: 'giorno', a: 'sera', partita: leggiPartita(partitaId), decisioniAperte: decisioniAperteDelleVoci(partitaId, righe.map((v) => v.uid)) } };
       }

@@ -343,7 +343,7 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
           ? <span className="chip chip--attivo" title="Statistiche lette nel gioco a questo livello">Valori reali</span>
           : p.origineStima === 'osservate' && p.osservate
             ? <span className="chip" title={`Stima dai valori reali registrati al livello ${p.osservate.livello}: ${descriviOsservate(p.osservate)}`}>Stima dal liv. {p.osservate.livello}</span>
-            : <span className="chip" title={p.osservate ? `Stima dalla base del dataset: il livello ${p.livello} è sotto quello dei valori reali registrati (${p.osservate.livello})` : 'Stima dalla base del dataset: registra i valori letti nel gioco con «Modifica»'}>Stima</span>}
+            : <span className="chip" title={p.osservate ? `Stima dalla base del compendio: il livello ${p.livello} è sotto quello dei valori reali registrati (${p.osservate.livello})` : 'Stima dalla base del compendio: registra i valori letti nel gioco con «Modifica»'}>Stima</span>}
         {!p.statisticheBase && <span className="chip chip--attivo" title={descriviBonus(p.bonus)}>Bonus {totaleBonus(p.bonus) > 0 ? '+' : ''}{totaleBonus(p.bonus)}</span>}
         {stato === 'aggiornata' && <span className="chip" title="Il compendio conserva questa versione">Registrata</span>}
         {!p.inSquadra && <span className="chip">In deposito</span>}
@@ -540,7 +540,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               {reali
                 ? `Registrerai i valori letti nel gioco al livello ${reali.livello}: da qui in su la stima riparte da questi e i bonus ripartono da zero, perché i valori reali li comprendono già.`
                 : osservate
-                  ? `Valori reali registrati al livello ${osservate.livello} (${descriviOsservate(osservate)}). ${origine === 'osservate' ? 'La stima riparte da questi valori.' : 'Sotto quel livello la stima usa la base del dataset.'}`
+                  ? `Valori reali registrati al livello ${osservate.livello} (${descriviOsservate(osservate)}). ${origine === 'osservate' ? 'La stima riparte da questi valori.' : 'Sotto quel livello la stima usa la base del compendio.'}`
                   : 'Scrivi ciò che leggi nella scheda della Persona: nel gioco la crescita ha una ripartizione propria di ogni Persona che l\'app non conosce e stima.'}
             </p>
             {posseduta.osservate && !dimentica && !reali && (

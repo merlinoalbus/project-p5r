@@ -66,8 +66,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 ## Ricerca e strumenti
 - Ricerca globale su 29 tipi di cose (personaggi, tratti, cruciverba e glossario compresi), dalla barra in alto; ogni risultato porta
   all'elemento nella sua pagina.
-- Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, pacchetto di gioco («Importa»), copia
-  dell'istanza, documentazione delle API, «Prepara edizione» del rilascio.
+- Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, backup dei dati di gioco («Importa»), copia
+  dell'istanza, documentazione delle API, «Prepara edizione» del rilascio; «Informazioni» con le fonti dei dati, l'unico punto che le cita.
 - Interfaccia per desktop, tablet e telefono; installabile come web app a schermo intero, con l'invito la prima volta che la Home si apre da telefono o tablet.
 
 ## Punti aperti
@@ -90,6 +90,20 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - L6 (accessibilità) fatto: schede con le frecce, fuoco sopra la barra inferiore, titoli h1, nomi dei pulsanti delle partite, contrasti
   ad almeno 4,5:1 anche con i colori degli elementi (accesi col sì dell'utente), caselle nel rosso del tema, movimento ridotto, editor delle mappe da tastiera, fuoco nel popup del pin, Esc nella Guida, area di tocco
   di 44 px per pin e frecce, piastrelle del Compendio senza pulsanti dentro i link, stati «fatto» ed «esaurito» col segno C ovunque.
+- L7 (testi) fatto: nel rilascio niente provenienza dei dati né note per chi li corregge, con le fonti in Impostazioni → Informazioni (D10);
+  niente conteggi scritti a mano nella Home e nell'indice della Guida; l'elenco dei Confidenti col bonus degli esami letto dalla regola unica e
+  i moltiplicatori (esami, invito, Persona dell'arcano, Fortuna, punti del libro) letti dalle costanti condivise, con lo stesso testo; via la
+  frase falsa sui dati «ricaricati a ogni avvio» e un nome solo, «Backup dei dati di gioco»; via UID, firme, codici di risposta, ore ISO, fasi
+  interne e percorsi `docs/…` (interfaccia e messaggi del server); date di gioco in un formato solo con l'articolo giusto anche per l'8 e
+  l'11, titoli dello Storico compresi (quelli già scritti in «MM-GG» si rendono in lettura); gergo tolto («registro dei gesti», «non ancora
+  gestito», «strutture fisse», i testi della pesca in parole da giocatore), «Dove si trova» con la frase del suo tipo; il costo della fusione
+  è «evocazione dal Registro», 0 per gli ingredienti in scorta; la disponibilità dell'articolo nel visore dall'esito strutturato; «Stato in:
+  …» al posto di «Stato nella …»; nel rilascio la negoziazione mostra le varianti del testo della domanda, senza le provenienze.
+- Da L7, per L8 (correzioni ai dati, non fatte: servono migrazioni): nel pacchetto iniziale 308 testi liberi dei dati di gioco (fuori dalle
+  colonne di fonte e d'archivio) citano allgamestaff, «da verificare», `docs/` o un file `.md`/`.json`; i più sono in `spillo.descrizione`
+  (228), poi `dungeon.note` (8), `punto_interesse.descrizione` (7), `settimana_guida.incertezze` (9), `confidente_regalo.*` (7).
+  Il conteggio sull'istanza va rifatto su una copia prima della migrazione.
+  Le incertezze del calendario e della battaglia nel rilascio sono già nascoste; gli altri testi si vedono anche lì.
 - Da L5, per L8: gli id di `partita` si riusano dopo un'eliminazione (nessun AUTOINCREMENT) e l'archivio immutabile
   `acquisto_legacy_valutazione` non ha una chiave esterna verso la partita: una partita nuova si ritrova accanto le righe d'archivio di una
   eliminata con lo stesso id.
@@ -97,7 +111,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
   D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
   D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
-- Aperti: L7–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Aperti: L8–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

@@ -119,7 +119,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
         {nonAncora && <span className="chip chip--attivo testo-12" title={perche || undefined}>Non ancora nel mondo</span>}
         {!nonAncora && l.condizioni && l.disponibilita && <span className="chip testo-12" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
         {l.quando && <span className="chip">{l.quando === 'entrambe' ? 'giorno e sera' : l.quando}</span>}
-        {!l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
+        {!IN_RILASCIO && !l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
       </div>
       <p className="m-0">{l.cosaOffre}</p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
@@ -231,7 +231,7 @@ export function QuartierePage() {
           </section>}
 
           {/* il registro della fonte («G-018») è tracciabilità del progetto, non un'informazione per chi gioca: si dice solo se va verificata */}
-          {q.sbloccoCondizione?.fonte && q.sbloccoCondizione.fonte.certezza !== 'alta' && <p className="m-0 testo-12 text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Condizione con certezza {q.sbloccoCondizione.fonte.certezza}: da verificare.</p>}
+          {!IN_RILASCIO && q.sbloccoCondizione?.fonte && q.sbloccoCondizione.fonte.certezza !== 'alta' && <p className="m-0 testo-12 text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Condizione con certezza {q.sbloccoCondizione.fonte.certezza}: da verificare.</p>}
           {q.sbloccoCondizione?.esito === 'falso' && <p className="m-0 testo-13 text-text-secondary">Manca: {q.sbloccoCondizione.manca ?? q.sbloccoCondizione.testo}.</p>}
           <InvitiConfidente filtro={{ apreTipo: 'quartiere', apreChiave: q.chiave }} onCambiato={dati.ricarica} />
 

@@ -170,10 +170,11 @@ function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: Mapp
   const titoli = new Map(etichetteDistinte(contenute, (t) => senzaPrefisso(t, nome)).map((t, i) => [contenute[i].chiave, t]));
   return <div className="flex flex-col gap-4">
     {inGriglia.length > 0 && <Griglia mappe={inGriglia} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} versioni={versioni} />}
-    {tecnicheSenzaPin.length > 0 && <section className="flex flex-col gap-2" aria-label="Fogli dell’estrazione senza nome">
+    {/* L7-09: le planimetrie senza nome e senza pin servono a chi cura l'atlante: nel rilascio non ci sono */}
+    {!IN_RILASCIO && tecnicheSenzaPin.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza nome e senza pin">
       <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="pianta" dimensione={20} />} aria-expanded={mostraFogli} onClick={() => setMostraFogli((v) => !v)}
-        titolo={`${mostraFogli ? 'Nascondi' : 'Mostra'} i fogli dell’estrazione senza nome`} dettaglio={`· ${tecnicheSenzaPin.length}`} />
-      {mostraFogli && <Griglia mappe={tecnicheSenzaPin} nome={nome} titoli={titoli} etichetta={`Fogli dell’estrazione senza nome di ${nome}`} onScendi={onScendi} versioni={versioni} />}
+        titolo={`${mostraFogli ? 'Nascondi' : 'Mostra'} le planimetrie senza nome e senza pin`} dettaglio={`· ${tecnicheSenzaPin.length}`} />
+      {mostraFogli && <Griglia mappe={tecnicheSenzaPin} nome={nome} titoli={titoli} etichetta={`Planimetrie senza nome e senza pin di ${nome}`} onScendi={onScendi} versioni={versioni} />}
     </section>}
   </div>;
 }

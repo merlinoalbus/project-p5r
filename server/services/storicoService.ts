@@ -8,6 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type TipoEvento } from '../../shared/eventi.js';
+import { dateDiGiocoNelTesto } from '../../shared/condizioniSpillo.js';
 import type { EventoPartitaDto, StoricoDto } from '../../shared/types.js';
 
 interface RigaEvento {
@@ -28,7 +29,8 @@ function eventoDto(r: RigaEvento): EventoPartitaDto {
     fontePresente: fonteId === null ? null : !!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? AND id=?').get(r.partita_id, acquistoId, fonteId) } : undefined;
   return {
     id: r.id, tipo: r.tipo, tipoNome: ETICHETTE_EVENTO[r.tipo]?.nome ?? r.tipo, gruppo: ETICHETTE_EVENTO[r.tipo]?.gruppo ?? 'partita',
-    titolo: r.titolo, dettaglio: r.dettaglio, dati, ...(acquistoRegistrato ? { acquistoRegistrato } : {}),
+    // L7-05 (F9): le date «MM-GG» dei titoli scritti prima del formato unico si rendono in lettura; il dato salvato non cambia
+    titolo: dateDiGiocoNelTesto(r.titolo), dettaglio: dateDiGiocoNelTesto(r.dettaglio), dati, ...(acquistoRegistrato ? { acquistoRegistrato } : {}),
     personaId: r.persona_id, personaNome: r.persona_nome, personaNomeIt: r.persona_nome ? t('persona', r.persona_nome) : null, createdAt: r.created_at,
   };
 }

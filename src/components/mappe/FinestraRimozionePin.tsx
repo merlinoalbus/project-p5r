@@ -50,7 +50,7 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
         notifica('warning', `Pin «${a.spillo.nome}» rimosso; aggiornamento della vista non riuscito: ${testo(e)}`, 0);
       } else {
         const certo = !rimozionePinPendente(spillo.uid);
-        notifica(certo ? 'error' : 'warning', `Rimozione del pin «${a.spillo.nome}» della mappa «${a.spillo.mappa!.nome}»: ${certo ? 'richiesta rifiutata' : 'esito da verificare'}. ${testo(e)}`, 0);
+        notifica(certo ? 'error' : 'warning', `Rimozione del pin «${a.spillo.nome}» della mappa «${a.spillo.mappa!.nome}»: ${certo ? 'richiesta rifiutata' : 'esito non confermato'}. ${testo(e)}`, 0);
         if (attiva()) { setIncerto(!certo); setRifiutata(certo); setErrore(testo(e)); }
       }
     } finally { blocco.current = false; if (attiva()) setOccupato(false); }
@@ -67,19 +67,19 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
       const nelCestino = cestino.filter(v => v.tipo === 'pin' && v.chiave === spillo.uid);
       const intento = rimozionePinPendente(spillo.uid);
       if (vista.chiave !== mappa || (perId && perId.uid !== spillo.uid) || (perUid && perUid.id !== spillo.id) || nelCestino.length > 1 || (perUid && nelCestino.length)) {
-        setRiscontro('Stato in conflitto: identità riutilizzata o presenza incoerente fra mappa e Cestino. Nessuna rimozione viene ripetuta.');
+        setRiscontro('La mappa e il Cestino non concordano su questo pin. Nessuna rimozione viene ripetuta.');
       } else if (!perUid && nelCestino.length === 1) {
         if (intento && intento.id === spillo.id && intento.mappa === mappa) risolviRimozionePinOsservata(uidOriginale, intento.richiesta.revisioneRimozioneAttesa);
         setIncerto(false); setRifiutata(true);
-        setRiscontro('Stato osservato: il pin con l’UID originale non è sulla mappa ed è nel Cestino. Questa lettura non attribuisce l’esito al tentativo precedente. Nessuna rimozione viene ripetuta.');
+        setRiscontro('Il pin non è più sulla mappa ed è nel Cestino. Nessuna rimozione viene ripetuta.');
       } else if (perUid) {
         const fresca = await precondizioneRimozionePin(spillo.id);
         if (!attiva()) return;
         const vecchiaInvalida = intento && intento.id === fresca.spillo.id && intento.uid === fresca.spillo.uid && intento.mappa === fresca.spillo.mappa?.chiave && fresca.spillo.mappa.chiave === mappa && fresca.revisioneRimozioneAttesa !== intento.richiesta.revisioneRimozioneAttesa;
         if (vecchiaInvalida) { risolviRimozionePinOsservata(uidOriginale, intento.richiesta.revisioneRimozioneAttesa); setIncerto(false); setRifiutata(true); }
-        setRiscontro(vecchiaInvalida ? 'Il pin originale è presente e la precondizione precedente non coincide più. Non è una prova dell’esito del tentativo: un’eventuale nuova rimozione richiede nuova anteprima e nuova conferma.' : 'Stato osservato: il pin originale è ancora sulla mappa. La lettura non prova che la prima richiesta sia terminata; il blocco rimane e nessuna rimozione viene ripetuta.');
+        setRiscontro(vecchiaInvalida ? 'Il pin è ancora sulla mappa ed è cambiato dopo la prima richiesta: per toglierlo servono una nuova anteprima e una nuova conferma.' : 'Il pin è ancora sulla mappa, ma non è detto che la prima richiesta sia finita: il blocco resta e nessuna rimozione viene ripetuta.');
       } else {
-        setRiscontro('Il pin originale non è visibile né sulla mappa né fra le radici pin del Cestino. Esito ancora da verificare; nessuna nuova rimozione viene inviata.');
+        setRiscontro('Il pin non è né sulla mappa né nel Cestino. L’esito resta non confermato; nessuna nuova rimozione viene inviata.');
       }
     } catch (e) { if (attiva()) setErrore(`Rilettura non riuscita: ${testo(e)}`); }
     finally { blocco.current = false; if (attiva()) setOccupato(false); }
@@ -101,11 +101,11 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
       {anteprima.caricamento && <p role="status" className="m-0">Rileggo il pin e le conseguenze della rimozione…</p>}
       {anteprima.errore && <p role="alert" className="m-0 text-error-testo">{anteprima.errore}</p>}
       {a && !identica && <p role="alert" className="m-0 text-error-testo">Il pin o la mappa non coincidono più con la selezione: nessuna rimozione viene inviata.</p>}
-      {a && identica && <><span>Mappa: {a.spillo.mappa!.nome}</span><code className="break-all testo-12">Pin {a.spillo.id} · UID {a.spillo.uid}</code>
+      {a && identica && <><span>Mappa: {a.spillo.mappa!.nome}</span>
         <ul className="m-0 pl-4">{conteggi.map(([nome, quante]) => <li key={nome}>{nome}: {quante}</li>)}</ul>
-        <p className="m-0">{a.contenuti.riallineamento ? 'Le voci collegate richiedono il riallineamento degli stati della guida nelle partite; il Cestino conserva le righe interessate.' : 'La fotografia non richiede il riallineamento degli stati delle voci della guida.'}</p></>}
+        <p className="m-0">{a.contenuti.riallineamento ? 'Le voci collegate richiedono il riallineamento degli stati della guida nelle partite; il Cestino conserva le righe interessate.' : 'Nessuno stato delle voci della guida da riallineare nelle partite.'}</p></>}
       {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
-      {(incerto || pendente) && <><p role="alert" className="m-0 text-warning">Esito da verificare conservato per questo UID, anche dopo chiusura o reload. La richiesta non viene ripetuta: puoi soltanto rileggere la mappa e il Cestino.</p><PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi lo stato senza ripetere la rimozione" className="self-start" disabled={occupato || pendente?.stato === 'invio'} onClick={() => void rileggi()} /></>}
+      {(incerto || pendente) && <><p role="alert" className="m-0 text-warning">L’esito della rimozione non è confermato e resta segnato anche se chiudi o ricarichi la pagina. La richiesta non si ripete: puoi soltanto rileggere la mappa e il Cestino.</p><PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi lo stato senza ripetere la rimozione" className="self-start" disabled={occupato || pendente?.stato === 'invio'} onClick={() => void rileggi()} /></>}
       {!incerto && !pendente && !rimossa && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" className="self-start" disabled={occupato || anteprima.caricamento} onClick={() => { setRifiutata(false); setErrore(null); void anteprima.ricarica(); }} />}
       {riscontro && <p role="status" className="m-0">{riscontro}</p>}
     </div>

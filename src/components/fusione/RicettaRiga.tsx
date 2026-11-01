@@ -6,6 +6,7 @@ import { PersonaChip } from './PersonaChip';
 import { IconSpunta } from '../shared/iconeGuida';
 import type { RicettaFusioneDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
+import { costoRicettaConScorta } from '../../../shared/bonusVelluto';
 
 const NOME_TIPO: Record<RicettaFusioneDto['tipo'], string> = {
   normale: 'Normale',
@@ -31,6 +32,8 @@ export function OperatoreRicetta({ tipo }: { tipo: 'piu' | 'risultato' }) {
 export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ricetta: RicettaFusioneDto; inScorta?: Set<number>; mostraRisultato?: boolean }) {
   const scorta = inScorta ?? new Set<number>();
   const tuttiInScorta = ricetta.ingredienti.every((i) => scorta.has(i.id));
+  const inScortaAlcuni = ricetta.ingredienti.some((i) => scorta.has(i.id));
+  const costo = costoRicettaConScorta(ricetta.costo, ricetta.ingredienti.map((i) => ({ livello: i.livello, inScorta: scorta.has(i.id) })));
   return (
     <li className={`ricetta-riga ${tuttiInScorta ? 'ricetta-riga--pronta' : ''}`}>
       <span className="ricetta-riga__persone">
@@ -49,7 +52,8 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
       </span>
       <span className="ricetta-riga__dati">
         <span className="ricetta-riga__tipo">{NOME_TIPO[ricetta.tipo]}</span>
-        <span className="ricetta-riga__costo">{formattaYen(ricetta.costo)}</span>
+        {/* L7-07: il «costo» è il prezzo di evocazione dal Registro degli ingredienti, e un ingrediente in scorta vale 0 */}
+        <span className="ricetta-riga__costo" title={inScortaAlcuni ? 'Prezzo di evocazione dal Registro degli ingredienti che non hai: quelli in scorta valgono 0' : 'Prezzo di evocazione dal Registro degli ingredienti'}><span className="sr-only">Evocazione dal Registro: </span>{formattaYen(costo)}</span>
         {tuttiInScorta && <span className="chip chip--attivo chip--icona testo-12" title="Hai tutti gli ingredienti nella scorta"><IconSpunta size={14} /> Pronta</span>}
       </span>
     </li>

@@ -51,6 +51,13 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   partite per utente). La modalità è fissata nella build (punto d'avvio `server/rilascio.ts`, `VITE_MODALITA=rilascio`), mai in una
   variabile dello stack; la sola lettura ha tre livelli più il bundle senza editor; il rilascio non migra e si ferma se l'edizione non
   coincide con il manifesto.
+- **Provenienza dei dati nel rilascio (D10, 01/11)**: chi gioca non vede da dove viene un dato né le note per chi lo corregge (collegamenti
+  alle fonti, «da fonte secondaria», «Da verificare» delle aree, incertezze delle fonti, provenienze degli esiti della negoziazione,
+  affidabilità delle regole), né i comandi di chi prepara i contenuti. Le fonti (guida italiana di allgamestaff, meteo di wikiwiki.jp,
+  negoziazione di joyce-chen, dataset del compendio) stanno in un punto solo, Impostazioni → Informazioni, visibile in entrambe le istanze, e
+  in `NOTICE`. Nella preparazione quelle note restano, perché servono a chi corregge i dati; i residui tecnici (UID, firme, codici di
+  risposta, ore ISO, percorsi `docs/…`) non compaiono in nessuna delle due. Nelle sole schede di amministrazione della preparazione (backup,
+  «Prepara edizione») restano i nomi dei file, delle cartelle e delle tabelle, che servono a chi le usa.
 - Deploy: immagini su GitHub Container Registry da GitHub Actions dopo il gate CI; nessuna porta pubblicata, frontend sulla rete del
   proxy, backend solo sulla rete interna. La preparazione si aggiorna da sola (Watchtower esterno, solo label); il rilascio ha versioni
   fisse e nessun aggiornamento automatico.
@@ -113,6 +120,11 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**. Il modulo dei dati
   della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
+- **Testi che informano (L7, 01/11)**: un testo visibile compare solo se dice qualcosa a chi gioca. Niente numeri scritti a mano che vanno
+  fuori sincrono (i conteggi si ricavano dai dati o non si scrivono), niente identificativi né percorsi. Le date di gioco si scrivono in un
+  modo solo, «12 aprile» (con l'articolo nelle frasi: «del 12 aprile», «dall'11 aprile»), anche nei titoli dello Storico scritti dal server
+  (quelli già scritti in «MM-GG» si rendono così in lettura, senza riscrivere i dati); «22 apr» solo nei chip stretti. I moltiplicatori e i
+  punti mostrati si leggono dalle regole, mai scritti a mano. La scheda dei soli dati di gioco si chiama ovunque «Backup dei dati di gioco».
 - Immagini mai ritagliate (`object-contain`); un tocco apre l'ingrandimento con i comandi di caricamento.
 
 ## 6. Compendio, skill e traduzioni
@@ -128,7 +140,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 
 ## 7. Fusione
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).
-- Il costo di un piano è la somma dei prezzi di evocazione dal Registro; una Persona in scorta vale 0 ma si usa una volta sola.
+- Il costo di un piano è la somma dei prezzi di evocazione dal Registro; una Persona in scorta vale 0 ma si usa una volta sola. Anche
+  nella fusione diretta e nelle ricette il costo si chiama «evocazione dal Registro» e un ingrediente in scorta vale 0.
 - Il filtro «fino al livello del protagonista» è attivabile, non imposto.
 - I bonus si modellano solo con una fonte (affidabilità in `docs/riferimenti/bonus-velluto.md`). La fusione non trasferisce livelli
   né statistiche dei materiali.

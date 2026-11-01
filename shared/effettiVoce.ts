@@ -1,9 +1,9 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
-import { EVENTI_STORIA, dataLeggibile, descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from './condizioniSpillo.js';
+import { EVENTI_STORIA, dataConArticolo, descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from './condizioniSpillo.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
 import { fasceConPrezzoDiverso, type PrezzoPerFascia } from './catalogo.js';
 import { simboliNote, testoPunti } from './note.js';
-import { puntiBase } from './puntiConfidenti.js';
+import { MOLTIPLICATORE_INVITO, puntiBase, testoMoltiplicatore } from './puntiConfidenti.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
 export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -552,7 +552,7 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
     case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
     case 'storia': return `Evento di storia: ${EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento}`;
     case 'domanda': { const d = n.domanda(e.domanda); return d ? `Domanda risposta: ${breve(d)}` : 'Domanda risposta'; }
-    case 'cruciverba': return `Cruciverba del ${dataLeggibile(e.data)} risolto`;
+    case 'cruciverba': return `Cruciverba ${dataConArticolo(e.data, 'di')} risolto`;
     case 'richiesta': return `Richiesta «${n.richiesta(e.richiesta) ?? 'Richiesta'}» completata`;
     case 'articolo': {
       const a = n.articolo(e.articolo), q = e.quantita ?? 1;
@@ -569,7 +569,7 @@ export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto, 
       if (opz.applicato) return e.bersaglio === 'richiesta' ? `Richiesta «${nome ?? 'Richiesta'}» sbloccata` : `Attività «${nome ?? 'attività'}» sbloccata`;
       return e.bersaglio === 'richiesta' ? `Sblocca la Richiesta «${nome ?? 'Richiesta'}»` : `Sblocca l’attività «${nome ?? 'attività'}»`;
     }
-    case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
+    case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` ${dataConArticolo(i.data, 'di')}` : ''} avvenuto: i punti dell'incontro valgono ${testoMoltiplicatore(MOLTIPLICATORE_INVITO)}` : 'Invito avvenuto'; }
     case 'persona': {
       const p = n.persona(e.persona);
       // con la scorta la frase lo dice (e il livello solo se indicato: senza, vale il livello base della Persona)

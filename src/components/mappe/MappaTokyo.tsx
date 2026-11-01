@@ -28,7 +28,7 @@
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
-import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { dataConArticolo } from '../../../shared/condizioniSpillo';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { urlMappa } from '../../utils/navigazioneMappa';
 import {
@@ -459,7 +459,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
         // l'ingresso dalla città, chiuso a Palazzo concluso (`palazziService`). Dal 2026-10-20 (L4 §8.10) gli effetti seguono il concluso,
         // non il completato (che vale solo per anello e percentuale); `completato` resta per le risposte di prima, senza `concluso`.
         presente: d.disponibile !== false,
-        quando: d.concluso ? `concluso: ${d.concluso}` : f ? (f.al ? `dal ${dataLeggibile(f.dal)} al ${dataLeggibile(f.al)}` : `dal ${dataLeggibile(f.dal)}`) : null,
+        quando: d.concluso ? `concluso: ${d.concluso}` : f ? (f.al ? `${dataConArticolo(f.dal, 'da')} ${dataConArticolo(f.al, 'a')}` : dataConArticolo(f.dal, 'da')) : null,
       });
     }
     // Il Covo dei Ladri: nel gioco si apre dal menu, dal 5 maggio, e non si raggiunge in metro (registro dell'Esperto della guida, G-004;

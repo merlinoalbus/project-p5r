@@ -30,6 +30,7 @@ import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, Dialogo
 import { attivitaConQuiz, costoDelTurno, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
+import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
@@ -704,7 +705,7 @@ export function rivediVoce(uid: string, esito: EsitoRevisioneVoce, partitaId?: n
 
 /** 404 se la data non è un giorno del percorso. */
 function giornoEsiste(data: string): void {
-  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso ${dataConArticolo(data)}.`);
 }
 
 /** Le voci di un giorno nel loro ordine: prima di giorno, poi di sera. */
@@ -890,7 +891,7 @@ function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: s
       const fonte = leggiEffettiVoce(r.uid);
       if (fonte.stato !== 'convertita') throw httpErrors.conflict('effetti-legacy-da-correggere', 'La fonte storica non è convertibile: correggila esplicitamente nell’editor completo degli effetti.');
       if (JSON.stringify(completa) === JSON.stringify(produceDi(fonte))) return out;
-      throw httpErrors.conflict('effetti-completi-richiesti', 'Per modificare gli effetti di una voce esistente invia la lista canonica completa con UID e revisione: la posizione non identifica un effetto.');
+      throw httpErrors.conflict('effetti-completi-richiesti', 'Gli effetti della voce sono cambiati o sono incompleti: riapri la voce e salva di nuovo.');
     }
     out.produce = verificaEffetti(d.produce);
   }
@@ -923,7 +924,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
   const adesso = nowIso();
   getDb().transaction(() => {
     if (d.effettiVoce && (d.effettiVoce.revisioneEffettiAttesa !== undefined || d.effettiVoce.effetti.some(e => e.uid !== null))) {
-      throw httpErrors.badRequest('fonte-nuova-non-valida', 'Una nuova voce non può reclamare token o UID di effetti preesistenti.');
+      throw httpErrors.badRequest('fonte-nuova-non-valida', 'Una voce nuova non può riprendere gli effetti di un’altra voce: aggiungili di nuovo.');
     }
     if (genere !== 'azione' && d.effettiVoce?.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
     // gli effetti vanno solo in `voce_effetto` (`inizializzaEffettiVoce`): `produce_json` resta col suo valore predefinito, non si scrive più
@@ -1025,7 +1026,7 @@ export function eliminaVoce(uid: string): string[] {
   const r = rigaVoce(uid);
   const sorelle = righeDelGiorno(r.data).filter(v => v.fascia === r.fascia).map(v => v.uid), posto = sorelle.indexOf(uid);
   const vicini = { prima: sorelle[posto - 1] ?? null, dopo: sorelle[posto + 1] ?? null };
-  return conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
+  return conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${dataLeggibile(r.data)} · ${r.fascia}`, vicini }, () => {
     const avvisi = preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
@@ -1082,7 +1083,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
-      registraEvento(partitaId, 'percorso', `Percorso ${r.data}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti }, null, uid);
+      registraEvento(partitaId, 'percorso', `Diario ${dataConArticolo(r.data, 'di')}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti }, null, uid);
     } else {
       // R10-11f: punti e rank up della voce stanno nel registro cronologico: si tolgono da lì e si ricalcola dalla base (i rank up non più raggiunti
       // tornano indietro, i punti dopo si riassegnano); l'annullo vecchio, dalla ricevuta, resta per le spunte che non sono nel registro corrente

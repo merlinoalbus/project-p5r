@@ -34,6 +34,7 @@ import { TestoNote } from '../shared/TestoNote';
 import { eCreazione, fraseDotiEsito } from '../../../shared/esitiAttivita';
 import { PromemoriaLibri } from '../shared/PromemoriaLibri';
 import { DaApplicare } from './DaApplicare';
+import { dataGiocoConArticolo } from '../../utils/dateGioco';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -75,7 +76,7 @@ function VociDiProvenienza({ voci, className }: { voci: readonly VoceDiProvenien
   if (!voci?.length) return null;
   return (
     <span className={`flex flex-wrap items-center gap-x-2 testo-12 text-text-secondary ${className ?? ''}`}>
-      {voci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
+      {voci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce {dataGiocoConArticolo(v.giorno, 'di')} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
     </span>
   );
 }

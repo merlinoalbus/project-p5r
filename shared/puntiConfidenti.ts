@@ -28,6 +28,8 @@ export const PUNTI_USCITA = 10;
 export const MOLTIPLICATORE_ARCANO = 1.5;
 /** Moltiplicatore dell'invito accettato subito (effetto «invito» della voce). */
 export const MOLTIPLICATORE_INVITO = 1.2;
+/** Un moltiplicatore come lo scrive l'interfaccia: «×1,5» (L7-02: letto dalla costante, mai scritto a mano). */
+export const testoMoltiplicatore = (n: number): string => `×${n.toLocaleString('it-IT')}`;
 /** L13 (O10-2/O10-3): il rango in cui la guida fa scegliere la relazione romantica (lo stesso per tutti i Confidenti romanzabili, la regola
  *  della migrazione 325). Un solo punto per il server (`relazioneRomanticaService`) e per l'interfaccia (scheda del Confidente, spunta). */
 export const RANGO_DELLA_SCELTA_ROMANTICA = 9;

@@ -2,8 +2,8 @@
 // MieiDati — le righe del catalogo che hai aggiunto, corretto o nascosto (Fase 16.1)
 // ============================================================
 //
-// I dati della guida vengono ricaricati a ogni avvio: quello che aggiungi o correggi resta, ed è qui che
-// lo ritrovi tutto insieme, con «Ripristina» per tornare al dato originale.
+// Quello che aggiungi o correggi nei dati della guida (in `gioco.db`) lo ritrovi qui tutto insieme, con «Ripristina» per tornare al
+// dato originale. «Importa» sostituisce `gioco.db`, e con lui anche queste righe.
 // ============================================================
 
 import { useState } from 'react';
@@ -37,8 +37,8 @@ export function MieiDati() {
       <TitoloSezione>I miei dati</TitoloSezione>
       {/* `testo-link-esteso`: il collegamento «Nascosti dalla guida» sta dentro la frase (16 px di altezza): area di tocco da 44 px senza cambiare la riga */}
       <p className="m-0 testo-13 text-text-secondary testo-link-esteso">
-        Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
-        «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
+        Le righe che hai aggiunto o corretto tu sopra i dati della guida. «Ripristina dalla guida» rimette l'originale, e le righe che hai
+        aggiunto tu si eliminano dallo stesso pulsante. Stanno nei dati di gioco: importando un backup dei dati di gioco si sostituiscono anche loro.
         Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
       </p>
       {riepilogo.errore && <p className="m-0 testo-13 text-error-testo">{riepilogo.errore}</p>}

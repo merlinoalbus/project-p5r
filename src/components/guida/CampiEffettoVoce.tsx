@@ -25,7 +25,7 @@ import { noteAParole, SCELTE_NOTE, simboliNote, testoPunti } from '../../../shar
 import { BERSAGLI_SBLOCCO, eInNote, gruppiAlternativi, LIVELLO_MASSIMO_PERSONA, MODI_USCITA_OGGETTO, QUANTITA_MASSIMA_EFFETTO, REGOLA_ALTERNATIVE, testoNotePuntiConfidente, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type ModoUscitaOggetto, type NotePuntiConfidente, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { Segmenti } from '../shared/Segmenti';
 import { elencoNomi } from '../../../shared/riepilogoEffetti';
-import { dataGiocoTesto } from '../../utils/dateGioco';
+import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
@@ -409,7 +409,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     // L13 (ondata 7, O7-2): i risultati di un esame, scelto dall'elenco (con il giorno dei risultati); il piazzamento si sceglie alla spunta
     case 'esame':
       return <Selettore etichetta="Esame" valore={e.esame} ricerca="mai"
-        opzioni={conCorrente((effetti.esami ?? []).map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dataRisultati ? { dettaglio: `risultati il ${dataGiocoTesto(x.dataRisultati)}` } : {}) })), e.esame, 'Esame non più nella guida')}
+        opzioni={conCorrente((effetti.esami ?? []).map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dataRisultati ? { dettaglio: `risultati ${dataGiocoConArticolo(x.dataRisultati)}` } : {}) })), e.esame, 'Esame non più nella guida')}
         onCambia={(v) => onCambia({ tipo: 'esame', esame: v })} />;
   }
 }

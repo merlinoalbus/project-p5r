@@ -12,7 +12,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
-import { NOMI_MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
+import { NOMI_MESI_GIOCO, dataGiocoConArticolo, dataGiocoTesto } from '../utils/dateGioco';
 import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
@@ -72,10 +72,10 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
                     Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
                   </Link>
                   {v.certezza === 'D' && <span className="chip testo-12" title="Il collegamento fra l’evento e questa voce è dubbio">collegamento dubbio</span>}
-                  <ModificaGuida tipo="evento-voce" chiave={`${e.id}:${v.uid}`} cosa={`il collegamento di «${e.titolo}» con la voce del ${dataGiocoTesto(v.giorno)}`} soloIcona onSalvato={onSalvato} />
+                  <ModificaGuida tipo="evento-voce" chiave={`${e.id}:${v.uid}`} cosa={`il collegamento di «${e.titolo}» con la voce ${dataGiocoConArticolo(v.giorno, 'di')}`} soloIcona onSalvato={onSalvato} />
                 </div>
               ))}
-              {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
+              {!IN_RILASCIO && e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           ))}
           {g.tempoLibero && <span className="testo-12 text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
@@ -122,7 +122,7 @@ export function CalendarioPage() {
     if (!attiva) return;
     try {
       aggiornaLocale(await aggiornaPartita(attiva.id, { dataGioco: data }));
-      notifica('success', `Data di gioco impostata al ${dataGiocoTesto(data)}.`);
+      notifica('success', `Data di gioco impostata ${dataGiocoConArticolo(data, 'a')}.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     }
@@ -132,7 +132,7 @@ export function CalendarioPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Calendario di gioco" sottotitolo={<>Giorno per giorno dal 9 aprile: meteo previsto, eventi della storia, scadenze dei Palazzi, esami, sblocchi e feste (guida allgamestaff, meteo da wikiwiki.jp). {partitaId ? (d.dataGioco ? `Oggi nella partita è ${dataGiocoTesto(d.dataGioco)}.` : 'Apri un giorno e imposta la data di gioco della partita.') : 'Attiva una partita per seguire la data di gioco.'}</>} />
+          <IntestazionePagina titolo="Calendario di gioco" sottotitolo={<>Giorno per giorno dal 9 aprile: meteo previsto, eventi della storia, scadenze dei Palazzi, esami, sblocchi e feste. {partitaId ? (d.dataGioco ? `Oggi nella partita è ${dataGiocoTesto(d.dataGioco)}.` : 'Apri un giorno e imposta la data di gioco della partita.') : 'Attiva una partita per seguire la data di gioco.'}</>} />
 
           {d.oggi && (
             <section className="card flex flex-col gap-2 border-primary">
@@ -154,9 +154,10 @@ export function CalendarioPage() {
               ) : <p className="m-0 testo-13 text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
                 <div className="testo-13 flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
+                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{!IN_RILASCIO && settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
                   <span className="text-text-secondary">{settimanaOggi.riassunto}</span>
-                  {settimanaOggi.incertezze && <span className="testo-12 text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
+                  {/* D10 (L7-01): le incertezze sulle fonti servono a chi prepara i dati */}
+                  {!IN_RILASCIO && settimanaOggi.incertezze && <span className="testo-12 text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
                 </div>
               )}
               {d.prossimeScadenze.length > 0 && (

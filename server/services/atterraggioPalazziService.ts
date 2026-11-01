@@ -21,7 +21,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { datiGuida, finestreDungeon, invalidaDatiGuida, type FinestraDungeon } from './datiGuida.js';
 import { palazzoDellaMappa } from './mappe/alberoMappe.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
-import { dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { dataLeggibile, dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { erroreDatePalazzo, type DatePalazzo } from '../../shared/datePalazzo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import type { AtterraggioPalazzoDto } from '../../shared/types.js';
@@ -85,7 +85,7 @@ export function impostaAtterraggi(dungeon: string, regole: readonly RegolaAtterr
       if (d !== null && !dataValida(d)) throw httpErrors.badRequest('data-non-valida', `${posto}: «${d}» non è un giorno del calendario di gioco (${nome}).`);
     }
     if (r.al && !r.dal) throw httpErrors.badRequest('fine-senza-inizio', `${posto}: una fine senza inizio non dice da quando vale.`);
-    if (r.dal && r.al && ordineGioco(r.al) < ordineGioco(r.dal)) throw httpErrors.badRequest('fine-prima-di-inizio', `${posto}: la fine (${r.al}) viene prima dell'inizio (${r.dal}).`);
+    if (r.dal && r.al && ordineGioco(r.al) < ordineGioco(r.dal)) throw httpErrors.badRequest('fine-prima-di-inizio', `${posto}: la fine (${dataLeggibile(r.al)}) viene prima dell'inizio (${dataLeggibile(r.dal)}).`);
     const interna = idMappa(r.mappa);
     const m = prepared('SELECT chiave, genitore_chiave FROM mappa WHERE chiave = ?').get(interna) as { chiave: string; genitore_chiave: string | null } | undefined;
     if (!m) throw httpErrors.notFound('mappa-non-trovata', `${posto}: la mappa '${r.mappa}' non esiste.`);

@@ -18,7 +18,7 @@ import {
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
-import { dataGiocoTesto } from '../../utils/dateGioco';
+import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import { fortunaDelConsumo } from '../../utils/fortunaConsumo';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
@@ -63,7 +63,7 @@ export function DettagliConsumo({ acquisto, fonteSelezionata }: { acquisto: Regi
     <span>{acquisto.attiva ? '' : 'Nessuna voce o registrazione lo conferma più. '}{acquisto.orfana ? 'L’offerta non c’è più nel catalogo. ' : ''}{acquisto.legacyFirma ? 'Prende il posto di un vecchio segno «Acquistato».' : ''}</span>
     {acquisto.provenienze.map((p) => <div key={p.id} className="flex min-w-0 flex-col gap-1 border-l border-border pl-2">
       <strong>{p.id === fonteSelezionata ? 'Da togliere: ' : ''}{p.fonte.tipo === 'manuale' ? 'Inserito a mano' : 'Dal Diario'}</strong>
-      {p.fonte.tipo === 'diario' && (p.voceCorrente ? <Link className="touch self-start" to={`/guida/percorso/${p.voceCorrente.giorno}?voce=${encodeURIComponent(p.fonte.voceUid)}`}>Apri la voce del {dataGiocoTesto(p.voceCorrente.giorno)}</Link> : <span className="text-warning">La voce non c’è più.</span>)}
+      {p.fonte.tipo === 'diario' && (p.voceCorrente ? <Link className="touch self-start" to={`/guida/percorso/${p.voceCorrente.giorno}?voce=${encodeURIComponent(p.fonte.voceUid)}`}>Apri la voce {dataGiocoConArticolo(p.voceCorrente.giorno, 'di')}</Link> : <span className="text-warning">La voce non c’è più.</span>)}
     </div>)}
   </div>;
 }
@@ -181,7 +181,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
       <span>{anteprima.nuovo.fonte.tipo === 'manuale' ? 'Inserito a mano' : 'Dal Diario'} · {fortunaInParole(anteprima.nuovo.fortuna)}.</span>
       {anteprima.nuovo.rapportoLegacy && <span>{anteprima.nuovo.rapportoLegacy.tipo === 'rappresenta' ? 'Prende il posto del vecchio segno «Acquistato».' : 'Il vecchio segno «Acquistato» resta: è un consumo in più.'}</span>}
       {anteprima.nuovo.rapportoLegacy?.valutazione && <ProvaPresenza valutazione={anteprima.nuovo.rapportoLegacy.valutazione} />}
-      {!!altreStessoGiorno.length && <div role="alert" className="flex flex-col gap-1 text-warning"><strong>Forse è già registrato.</strong><span>Per il {dataGiocoTesto(anteprima.nuovo.momento.giorno)} ci sono già {altreStessoGiorno.length} consumi. Se è lo stesso, collega quello; se è un altro, puoi registrarlo.</span>{altreStessoGiorno.map(r => <DettagliConsumo key={r.id} acquisto={r} />)}</div>}
+      {!!altreStessoGiorno.length && <div role="alert" className="flex flex-col gap-1 text-warning"><strong>Forse è già registrato.</strong><span>Per {dataGiocoConArticolo(anteprima.nuovo.momento.giorno)} ci sono già {altreStessoGiorno.length} consumi. Se è lo stesso, collega quello; se è un altro, puoi registrarlo.</span>{altreStessoGiorno.map(r => <DettagliConsumo key={r.id} acquisto={r} />)}</div>}
       {anteprima.disponibilita.motivi.map((m) => <p className="m-0 text-warning" key={m}>{m}</p>)}
       <p className="m-0">I punti si applicano dal pulsante sulla voce.</p>
       <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={attestato} disabled={occupato || incerto} onChange={(e) => setAttestato(e.target.checked)} />Giorno, succo e vecchio segno sono giusti.</label>

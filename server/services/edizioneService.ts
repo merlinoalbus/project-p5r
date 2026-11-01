@@ -144,7 +144,7 @@ export function statoEdizione(): StatoEdizioneDto {
  * scrivibile (l'edizione si deposita lì: meglio saperlo prima di minuti di lavoro) o se l'istanza tiene il database in memoria.
  */
 export function avviaPreparazioneEdizione(): { operazione: string } {
-  if (inCorso) throw httpErrors.conflict('edizione-in-corso', `Una preparazione dell'edizione è già in corso dalle ${inCorso.iniziataIl} (fase: ${inCorso.fase}): attendi che finisca.`);
+  if (inCorso) throw httpErrors.conflict('edizione-in-corso', 'Una preparazione dell’edizione è già in corso: attendi che finisca.');
   if (!fs.existsSync(resolveDbPath())) throw httpErrors.badRequest('istanza-in-memoria', 'L\'istanza tiene il database in memoria: non c\'è un file da cui preparare l\'edizione.');
   if (!depositoScrivibile()) throw httpErrors.badRequest('deposito-non-configurato', 'L\'edizione si deposita nella cartella d\'appoggio, che su questo server non è configurata (DEPOSITO_DIR) o non è scrivibile.');
   rilasciaIstanza = occupaIstanza('La preparazione dell\'edizione di rilascio');

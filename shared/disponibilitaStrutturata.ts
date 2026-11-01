@@ -14,7 +14,7 @@
 // ============================================================
 
 import { giornoDellaSettimana } from './date.js';
-import { ordineGioco, type RequisitoSpillo } from './condizioniSpillo.js';
+import { dataConArticolo, ordineGioco, type RequisitoSpillo } from './condizioniSpillo.js';
 
 export type ModoDisponibilita = 'settimanale' | 'su-messaggio' | 'stanza-velluto' | 'trama';
 export const MODI_DISPONIBILITA: readonly ModoDisponibilita[] = ['settimanale', 'su-messaggio', 'stanza-velluto', 'trama'];
@@ -113,7 +113,8 @@ export function alternativeAllaPioggia(c: RequisitoSpillo): RequisitoSpillo[] | 
 const SIGLE: Record<string, GiornoDisponibilita> = { Lunedì: 'lun', Martedì: 'mar', Mercoledì: 'mer', Giovedì: 'gio', Venerdì: 'ven', Sabato: 'sab', Domenica: 'dom' };
 const NOME_GIORNO: Record<GiornoDisponibilita, string> = { lun: 'lunedì', mar: 'martedì', mer: 'mercoledì', gio: 'giovedì', ven: 'venerdì', sab: 'sabato', dom: 'domenica', festivi: 'festivi' };
 /** «MM-GG» → «GG/MM». */
-const dataBreve = (mmgg: string): string => `${mmgg.slice(3)}/${mmgg.slice(0, 2)}`;
+/** L7-05: «il 28 settembre», con l'articolo, come ogni data di gioco nelle frasi (`dataConArticolo`). */
+const conArticoloMaiuscolo = (mmgg: string): string => { const t = dataConArticolo(mmgg); return t.charAt(0).toUpperCase() + t.slice(1); };
 
 /** Un'eccezione del vocabolario con i campi che il valutatore legge (un elenco che non è un elenco la renderebbe illeggibile): le altre si scartano. */
 function eccezioneLeggibile(e: unknown): e is EccezioneDisponibilita {
@@ -159,12 +160,12 @@ function giornoAmmesso(giorni: readonly GiornoDisponibilita[], c: ContestoDispon
 export function valutaDisponibilita(s: DisponibilitaStrutturata, c: ContestoDisponibilita): EsitoDisponibilita {
   if (s.modo === 'trama') return { stato: 'trama', motivo: 'Il legame avanza da solo con la trama.' };
   if (s.modo === 'su-messaggio') return { stato: 'su-messaggio', motivo: 'Si avanza solo dopo un suo messaggio o incontrandola nel luogo indicato.' };
-  if (s.dal && c.data && ordineGioco(c.data) < ordineGioco(s.dal)) return { stato: 'non-disponibile', causa: 'dal', motivo: `Disponibile dal ${s.dal.slice(3)}/${s.dal.slice(0, 2)}.` };
+  if (s.dal && c.data && ordineGioco(c.data) < ordineGioco(s.dal)) return { stato: 'non-disponibile', causa: 'dal', motivo: `Disponibile ${dataConArticolo(s.dal, 'da')}.` };
   if (s.modo === 'stanza-velluto') return { stato: 'disponibile', motivo: 'Sempre accessibile, alla Stanza di Velluto.' };
   if (!c.data) return { stato: 'sconosciuto', motivo: 'Manca il giorno di gioco.' };
   const prossimo = (c.rango ?? 0) + 1;
   // un giorno del calendario escluso vale qualunque sia il giorno della settimana
-  if (s.eccezioni.some((e) => e.tipo === 'date' && e.date.includes(c.data!))) return { stato: 'non-disponibile', causa: 'date', motivo: `Il ${dataBreve(c.data)} non si incontra.` };
+  if (s.eccezioni.some((e) => e.tipo === 'date' && e.date.includes(c.data!))) return { stato: 'non-disponibile', causa: 'date', motivo: `${conArticoloMaiuscolo(c.data)} non si incontra.` };
   // i giorni del rango successivo, se ha i suoi, prendono il posto di quelli generali
   const giorniRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'giorni-rango' }> => e.tipo === 'giorni-rango' && e.rango === prossimo);
   const giornoOk = giornoAmmesso(giorniRango ? giorniRango.giorni : s.giorni, c);

@@ -9,6 +9,9 @@ import type { VellutoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+/** Nel rilascio l'affidabilità delle regole (una nota sulle fonti) non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   velluto: VellutoDto | null;
   onCambiaAllarme?: (attivo: boolean) => void;
@@ -71,11 +74,10 @@ export function PannelloVelluto({ velluto, onCambiaAllarme, inCaricamento = fals
             <div className="testo-12 uppercase tracking-wide text-text-muted">Effetti dell'Allarme delle fusioni</div>
             <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
               {EFFETTI_ALLARME.map((e) => (
-                <li key={e.area}><strong>{e.area}</strong>: {e.effetto} {e.affidabilita !== 'alta' && <span className="text-text-muted">(affidabilità {e.affidabilita})</span>}</li>
+                <li key={e.area}><strong>{e.area}</strong>: {e.effetto} {!IN_RILASCIO && e.affidabilita !== 'alta' && <span className="text-text-muted">(affidabilità {e.affidabilita})</span>}</li>
               ))}
             </ul>
           </div>
-          <p className="m-0 testo-12 text-text-muted">Fonti e affidabilità di ogni regola in <code>docs/riferimenti/bonus-velluto.md</code>.</p>
         </div>
       )}
     </div>

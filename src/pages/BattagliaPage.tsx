@@ -30,6 +30,9 @@ import type { OmbraLuogoDto, OmbraSchedaDto } from '../../shared/ombre';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { SegnoStato } from '../components/shared/SegnoStato';
 
+/** Nel rilascio la provenienza dei dati e le incertezze delle fonti non si mostrano (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Le cinque schede, ognuna con la sua icona.
  *
  * Erano cinque pastiglie di solo testo, tutte uguali: in mano durante uno scontro, una barra così
@@ -183,8 +186,9 @@ function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato
       <SezioneConFregio chiave="battaglia-regole" disposizione="grande">
         <TitoloSezione variante="display">Regole</TitoloSezione>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
-        {n.incertezze && <p className="m-0 text-text-muted testo-12">{n.incertezze}</p>}
-        <span>{n.urlFonti.map((u) => <Fonte etichetta="fonte: allgamestaff" allineato={false} key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
+        {/* D10 (L7-01): incertezze sulle fonti e collegamenti alle fonti servono a chi prepara i dati, non a chi gioca */}
+        {!IN_RILASCIO && n.incertezze && <p className="m-0 text-text-muted testo-12">{n.incertezze}</p>}
+        {!IN_RILASCIO && <span>{n.urlFonti.map((u) => <Fonte allineato={false} key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>}
       </SezioneConFregio>
     </div>
   );
@@ -213,7 +217,7 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
           <Voce titolo="1 More">{d.sistema.unoMore}</Voce>
         </Dati>
         <p className="m-0 text-text-muted testo-12">{d.sistema.notaFineBattaglia}</p>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={d.tecnico.urlFonte} />
+        <Fonte allineato={false} url={d.tecnico.urlFonte} />
       </SezioneConFregio>
     </div>
   );
@@ -238,7 +242,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
         <div className="flex flex-wrap gap-1.5">
           {s.ranghi.map((r) => <span key={r.rango} className="rounded-md border border-border-light bg-white/[0.03] px-2 py-1 testo-12"><strong className="font-display">Rango {r.rango}</strong> · {r.bonus}</span>)}
         </div>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={s.urlFonte} />
+        <Fonte allineato={false} url={s.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
         <div className="flex items-center gap-1"><TitoloSezione variante="display">Speciali</TitoloSezione><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
@@ -253,7 +257,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
             <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
           </table>
         </div>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={sp.urlFonte} />
+        <Fonte allineato={false} url={sp.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
         <div className="flex items-center gap-1"><TitoloSezione variante="display">Rapina, Assalto e Parla</TitoloSezione><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
@@ -264,7 +268,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
           <Voce titolo="Avvio dello scontro">{d.sistema.avvioScontro}</Voce>
         </Dati>
         <ul className="m-0 pl-4">{d.sistema.comandi.map((c) => <li key={c}>{c}</li>)}</ul>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={a.urlFonte} />
+        <Fonte allineato={false} url={a.urlFonte} />
       </SezioneConFregio>
     </div>
   );
@@ -291,8 +295,8 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
           <Voce titolo="Ricompense">{o.ricompense}</Voce>
           <Voce titolo="Dove">{o.doveCompaiono}</Voce>
         </Dati>
-        <p className="m-0 text-text-muted testo-12">{o.incertezze}</p>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={o.urlFonte} />
+        {!IN_RILASCIO && o.incertezze && <p className="m-0 text-text-muted testo-12">{o.incertezze}</p>}
+        <Fonte allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
         <div className="flex items-center gap-1"><TitoloSezione variante="display">{m.categoria}</TitoloSezione><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
@@ -307,7 +311,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
         </Dati>
         {/* La strategia è una sequenza: resta numerata, che è la sua forma. */}
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={m.urlFonte} />
+        <Fonte allineato={false} url={m.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
         <div className="flex items-center gap-1"><TitoloSezione variante="display">{t.categoria}</TitoloSezione><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
@@ -325,7 +329,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
             <tbody>{t.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Demone"><strong>{e.nome}</strong></td><td data-etichetta="Livello" className="tabular-nums">{e.livello}</td><td data-etichetta="Arcano">{e.arcano}</td><td data-etichetta="Dove">{e.dove}</td></tr>)}</tbody>
           </table>
         </div>
-        <Fonte etichetta="fonte: allgamestaff" allineato={false} url={t.urlFonte} />
+        <Fonte allineato={false} url={t.urlFonte} />
       </SezioneConFregio>
     </div>
   );
@@ -348,7 +352,7 @@ export function BattagliaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per infiltrazione o dedalo, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
+          <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per infiltrazione o dedalo, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali." />
           <FilaScorrevole {...schede.lista} aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" {...schede.scheda(k)} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>

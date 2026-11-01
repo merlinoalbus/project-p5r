@@ -15,7 +15,7 @@ import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { conCestino } from './cestinoService.js';
 import { verificaCondizioni } from './mappe/mappeService.js';
 import { invitiDelConfidente } from './inviti.js';
-import { normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { dataConArticolo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { InvitoDto } from '../../shared/types.js';
 
 export type TipoPostoInvito = 'quartiere' | 'luogo' | 'area';
@@ -116,9 +116,9 @@ function dtoDi(chiave: string): InvitoDto {
 /** Crea un invito del Confidente: la chiave è `<confidente>/<data>`, 409 se quel giorno ne ha già uno. */
 export function creaInvito(confidente: string, corpo: CorpoNuovoInvito): InvitoDto {
   esisteConfidente(confidente);
-  if (!dataValida(corpo.data)) throw httpErrors.badRequest('data-non-valida', 'La data dell’invito è nel formato MM-GG e deve esistere nel calendario del gioco.');
+  if (!dataValida(corpo.data)) throw httpErrors.badRequest('data-non-valida', 'La data dell’invito non è un giorno del calendario del gioco.');
   const chiave = `${confidente}/${corpo.data}`;
-  if (prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('invito-esistente', `Il Confidente ha già un invito per il ${corpo.data}: modificalo.`);
+  if (prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('invito-esistente', `Il Confidente ha già un invito per ${dataConArticolo(corpo.data)}: modificalo.`);
   verificaPosto(corpo.apre);
   verificaMessaggio(corpo.messaggio);
   const condizioni = condizioniVerificate(chiave, corpo.condizioni);

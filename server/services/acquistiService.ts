@@ -143,18 +143,18 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
   }
   if(r.rapportoLegacy?.tipo==='rappresenta'){
     const firma=r.rapportoLegacy.firma,rappresentante=stato.registrazioni.find((a)=>a.legacyFirma===firma&&a.legacyValutazioneId===legacy?.valutazione?.id&&a.identita.articolo===r.articolo);
-    if(rappresentante&&(r.scelta.tipo!=='collega'||r.scelta.acquistoId!==rappresentante.id))throw httpErrors.conflict('legacy-gia-rappresentata','La presenza storica ha già una registrazione, anche se inattiva: usa quel medesimo UUID.');
+    if(rappresentante&&(r.scelta.tipo!=='collega'||r.scelta.acquistoId!==rappresentante.id))throw httpErrors.conflict('legacy-gia-rappresentata','Il vecchio segno ha già una registrazione, anche se non più attiva: collega quella invece di crearne un’altra.');
   }
   return {nuovo:r,identita:o.identita,acquisti,disponibilita:{tipo:corrente?'corrente':'osservazione',calendario:'compatibile',condizioniStoricheNonRicostruibili:!corrente,motivi:corrente?[]:['Solo il calendario è verificato; i progressi del momento storico non sono ricostruiti. La consumazione è una tua osservazione esplicita.']},effetto:{dote:r.variante,puntiBase:2,puntiConfermati:r.fortuna===null?null:puntiDaNote(AOJIRU_NOTE,false,r.fortuna),note:AOJIRU_NOTE,prezzoYen:5000},esitoPrevisto,revisioneAcquistiAttesa:improntaDato({richiesta:r,stato,o,fonte,p,g,valutazione})};
 }
 export function anteprimaRegistrazioneAcquisto(p:number,r:NuovaRegistrazioneAcquisto,porte?:PorteDisponibilitaAcquisto):AnteprimaRegistrazioneAcquistoDto {return getDb().transaction(()=>preparaRegistrazione(p,r,porte))();}
 function replay(p:number,id:string,azione:string,payload:unknown):RicevutaOperazioneAcquistoDto|null {
   const r=prepared('SELECT azione,payload_json,ricevuta_json FROM utente.acquisto_operazione WHERE partita_id=? AND operazione_id=?').get(p,id) as {azione:string;payload_json:string;ricevuta_json:string}|undefined;
-  if(!r)return null;if(r.azione!==azione||r.payload_json!==jsonCanonico(payload))throw httpErrors.conflict('operazione-diversa','L’ID dell’operazione appartiene a un’altra identità o payload.');
+  if(!r)return null;if(r.azione!==azione||r.payload_json!==jsonCanonico(payload))throw httpErrors.conflict('operazione-diversa','Questa operazione è già stata registrata con dati diversi: rileggi la pagina e riprova.');
   const ricevuta=leggiOggettoRegistro(r.ricevuta_json,'ricevuta operazione acquisto'),dato=payload as Record<string,unknown>;
   const esiti=azione==='registra'?['registrata','fonte-collegata','gia-collegata']:azione==='annulla-fonte'?['fonte-rimossa']:['presenza-rimossa'];
   const uid=(x:unknown)=>typeof x==='string'&&/^[0-9a-f]{32}$/.test(x);
-  if(ricevuta.partitaId!==p||ricevuta.operazioneId!==id||!esiti.includes(String(ricevuta.esito))||typeof ricevuta.articolo!=='string'||typeof ricevuta.creataIl!=='string'||(azione==='registra'&&(!uid(ricevuta.acquistoId)||!uid(ricevuta.provenienzaId)||ricevuta.articolo!==dato.articolo))||(azione==='annulla-fonte'&&(!uid(ricevuta.acquistoId)||ricevuta.provenienzaId!==dato.provenienzaId))||(azione==='rimuovi-legacy'&&(ricevuta.acquistoId!==null||ricevuta.provenienzaId!==null||ricevuta.articolo!==dato.articolo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta non coincide con operazione, identità o payload: registro conservato.');
+  if(ricevuta.partitaId!==p||ricevuta.operazioneId!==id||!esiti.includes(String(ricevuta.esito))||typeof ricevuta.articolo!=='string'||typeof ricevuta.creataIl!=='string'||(azione==='registra'&&(!uid(ricevuta.acquistoId)||!uid(ricevuta.provenienzaId)||ricevuta.articolo!==dato.articolo))||(azione==='annulla-fonte'&&(!uid(ricevuta.acquistoId)||ricevuta.provenienzaId!==dato.provenienzaId))||(azione==='rimuovi-legacy'&&(ricevuta.acquistoId!==null||ricevuta.provenienzaId!==null||ricevuta.articolo!==dato.articolo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta registrata non corrisponde a questa operazione: niente è stato cambiato.');
   return ricevuta as unknown as RicevutaOperazioneAcquistoDto;
 }
 function salvaOperazione(p:number,id:string,azione:string,payload:unknown,ricevuta:RicevutaOperazioneAcquistoDto):void {
@@ -205,7 +205,7 @@ export const annullaProvenienzaAcquisto=annullaProvenienzaAcquistoNellaTransazio
 export function annullaFontiDiarioNellaTransazione(p:number,voce:string,provenienzePossedute:string[],effetto?:string):void {
   if(!getDb().inTransaction)throw new Error('L’annullo del Diario richiede una transazione.');
   const fonti=(prepared(`SELECT * FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?${effetto?' AND effetto_uid=?':''}`).all(...(effetto?[p,voce,effetto]:[p,voce])) as RigaFonte[]);
-  if(fonti.some((f)=>!provenienzePossedute.includes(f.id)))throw httpErrors.conflict('provenienza-diversa','La fonte corrente non è quella posseduta dalle ricevute: nessuna attribuzione per solo UID.');
+  if(fonti.some((f)=>!provenienzePossedute.includes(f.id)))throw httpErrors.conflict('provenienza-diversa','La provenienza attuale non è quella delle ricevute: niente è stato attribuito.');
   for(const f of fonti){fonteDto(f);annullaEventiFonteAcquistoNellaTransazione(p,f.id);prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=? AND id=?').run(p,f.id);}
   for(const id of new Set(fonti.map((f)=>f.acquisto_id)))riconciliaBeneficiAcquisto(p,id);
 }
@@ -242,7 +242,7 @@ export function preparaRipristinoAcquisti(r:{tipoCestino:string;partitaIds:numbe
 }
 export function verificaRipristinoAcquisti(c:ContestoRipristinoAcquisti):void {
   if(c.tipoCestino!=='partita')for(const t of TABELLE_DUREVOLI_ACQUISTI){const ora=c.partitaIds.flatMap((p)=>prepared(`SELECT * FROM utente.${t} WHERE partita_id=? ORDER BY rowid`).all(p));if(jsonCanonico(ora)!==jsonCanonico(c.durevoli[t]))throw httpErrors.conflict('ricevute-cambiate','Il ripristino tentava di cambiare ricevute o decisioni successive: intero blocco conservato.');}
-  for(const prima of c.identita){const ora=prepared('SELECT * FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(prima.partita_id,prima.id) as Record<string,unknown>|undefined;if(ora&&jsonCanonico(ora)!==jsonCanonico(prima))throw httpErrors.conflict('uuid-acquisto-occupato','Lo stesso UUID ha un’identità o contenuto diverso: nessuna sovrascrittura.');}
+  for(const prima of c.identita){const ora=prepared('SELECT * FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(prima.partita_id,prima.id) as Record<string,unknown>|undefined;if(ora&&jsonCanonico(ora)!==jsonCanonico(prima))throw httpErrors.conflict('uuid-acquisto-occupato','Questo acquisto è già registrato con dati diversi: niente è stato sovrascritto.');}
   if(c.tipoCestino!=='partita')for(const p of c.partitaIds)for(const f of righeFonti(p))if(f.tipo==='diario'){
     const ricevute=prepared('SELECT annullato_il FROM utente.effetto_applicato WHERE partita_id=? AND voce_uid=? AND effetto_uid=? ORDER BY applicato_il,id').all(p,f.voce_uid,f.effetto_uid) as Array<{annullato_il:string|null}>;
     if(ricevute.length&&ricevute.every((r)=>r.annullato_il!==null)&&!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,f.voce_uid))throw httpErrors.conflict('fonte-annullata-successivamente','La spunta è stata annullata dopo la rimozione: il ripristino non può riattivare quella fonte.');

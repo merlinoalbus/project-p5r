@@ -11,7 +11,7 @@ import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { giocabili } from '../squadraService.js';
 import { catalogoOggettiDisponibile } from '../catalogoOggettiLetture.js';
-import { dataLeggibile, type NomiCondizioni } from '../../../shared/condizioniSpillo.js';
+import { dataConArticolo, type NomiCondizioni } from '../../../shared/condizioniSpillo.js';
 import { sqlVoceDescrittiva, statoCitabile } from '../../../shared/spilli.js';
 import { vociDelPinSql } from '../mappe/voceDelPin.js';
 import { setDlcConPersone } from '../setDlcService.js';
@@ -63,7 +63,7 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
     persone: mappa('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona'),
     abilita: mappa('SELECT CAST(id AS TEXT) AS chiave, nome FROM skill'),
     inviti: () => Object.fromEntries((prepared('SELECT i.chiave, i.data, c.nome FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave').all() as Array<{ chiave: string; data: string | null; nome: string }>)
-      .map((r) => [r.chiave, `l’invito di ${r.nome}${r.data ? ` del ${dataLeggibile(r.data)}` : ''}`])),
+      .map((r) => [r.chiave, `l’invito di ${r.nome}${r.data ? ` ${dataConArticolo(r.data, 'di')}` : ''}`])),
     spilli: () => Object.fromEntries(pinConStato().map((p) => [p.uid, { nome: p.nome, tipo: p.tipo, mappa: p.mappa, parola: p.parola }])),
     voci: () => Object.fromEntries(vociCitabili().map((v) => [v.chiave, { nome: v.nome, posto: v.posto }])),
     // i set di contenuti scaricabili per id: le loro Persona («Izanagi e Izanagi Picaro»), dal punto unico dell'elenco

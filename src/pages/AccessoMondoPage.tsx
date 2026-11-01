@@ -26,7 +26,7 @@ import { PageState } from '../components/shared/PageState';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
-import { nomeTipoAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
+import { nomeTipoAccessoMondo, schedaAccessoMondo, senzaPosizioneAccessoMondo } from '../utils/accessoMondo';
 import { nomeTipoMappa } from '../utils/vocabolarioMappe';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
@@ -86,6 +86,7 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
   const cercata = tipo === 'mappa' ? perChiave.get(chiave) : undefined;
   const livello = tipo !== 'mappa' ? nomeTipoAccessoMondo(tipo, chiave) : cercata?.area ? 'Area' : cercata ? nomeTipoMappa(cercata) : 'Planimetria';
   const nomeCercato = `${livello}: ${cercata?.area?.nome ?? dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
+  const senzaPosizione = senzaPosizioneAccessoMondo(tipo, chiave);
   if (!incorporato && !carica.caricamento && !carica.errore && dati?.esito === 'unica' && dati.destinazioni.length === 1 && guide.length === 0) {
     return <Navigate to={urlDestinazioneMondo(dati.destinazioni[0])} replace />;
   }
@@ -102,8 +103,8 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
           Il comando «Sulla mappa» resta al suo posto — un comando che a volte sparisce è peggio —
           ma qui va detto chiaramente, invece di aprire una pagina che non mostra niente. */}
       {dati?.esito === 'assente' && guide.length === 0 && <div role="status" className="card flex flex-col gap-2">
-        <p className="m-0">Questa voce non ha una posizione sulla mappa: nel catalogo c’è, ma non è collocata su nessuna planimetria.</p>
-        <p className="m-0 text-text-secondary testo-13">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
+        <p className="m-0">{senzaPosizione.frase}</p>
+        {senzaPosizione.perche && <p className="m-0 text-text-secondary testo-13">{senzaPosizione.perche}</p>}
       </div>}
       {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0 || incorporato) && <section className="flex flex-col gap-2" aria-label="Posizioni sulla mappa">
         <p className="m-0 testo-13 text-text-secondary">

@@ -43,6 +43,7 @@ import { nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { logger } from '../utils/logger.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
+import { dataConArticolo } from '../../shared/condizioniSpillo.js';
 import { chiaveSblocco, eInNote, type EffettoDiStatoVoce, type EffettoVoce } from '../../shared/effettiVoce.js';
 import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { dettaglioCopie } from './copieOggetti.js';
@@ -84,8 +85,8 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     if (EVENTI_PESCA.includes(e.evento as typeof EVENTI_PESCA[number])) throw httpErrors.conflict('pesca-fatto-dedicato', 'Questo fatto usa il registro della pesca: non si segna da una voce.');
     return;
   }
-  if (e.tipo === 'domanda' && !prepared('SELECT 1 FROM domanda WHERE id = ?').get(e.domanda)) throw httpErrors.notFound('domanda-non-trovata', `La domanda ${e.domanda} non esiste.`);
-  if (e.tipo === 'cruciverba' && !prepared('SELECT 1 FROM cruciverba WHERE data = ?').get(e.data)) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba il ${e.data}.`);
+  if (e.tipo === 'domanda' && !prepared('SELECT 1 FROM domanda WHERE id = ?').get(e.domanda)) throw httpErrors.notFound('domanda-non-trovata', 'La domanda indicata non esiste più nella guida.');
+  if (e.tipo === 'cruciverba' && !prepared('SELECT 1 FROM cruciverba WHERE data = ?').get(e.data)) throw httpErrors.notFound('cruciverba-non-trovato', `Nessun cruciverba ${dataConArticolo(e.data)}.`);
   if (e.tipo === 'articolo') {
     const a = prepared('SELECT chiave, catalogo_chiave FROM articolo WHERE chiave = ?').get(e.articolo) as { chiave: string; catalogo_chiave: string | null } | undefined;
     if (!a) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${e.articolo}' non esiste.`);

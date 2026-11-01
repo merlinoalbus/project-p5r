@@ -270,7 +270,7 @@ describe('VisoreMappa', () => {
     expect(screen.queryByRole('button', { name: /Scrigno raccolto/ })).toBeNull();
     fireEvent.click(pin);
     const popup = within(screen.getByRole('dialog', { name: 'Seme della Bramosia' }));
-    expect(popup.getByText('Stato nella 3ª infiltrazione')).toBeInTheDocument();
+    expect(popup.getByText('Stato in: 3ª infiltrazione')).toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Da verificare' }));
     expect(onDaVerificare).toHaveBeenCalledWith({ spilloUid: 'u9', spilloNome: 'Seme della Bramosia', mappaNome: 'Shibuya', voce: 'k-03/7', voceNome: 'Seme del cortile', infiltrazioneNome: 'Cortile' });
   });
@@ -287,8 +287,8 @@ describe('VisoreMappa', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Nemico: Ombre della sala/ }));
     const popup = within(screen.getByRole('dialog', { name: 'Ombre della sala' }));
     // il nome del pulsante porta anche il valore intero (LAY3-7, `valoreNelNome`)
-    expect(valoreSelettore('Stato nella: Scopri dov’è il Tesoro', popup.getByRole('group', { name: 'Infiltrazione dello stato' }))).toBe('Scopri dov’è il Tesoro');
-    scegliVoce(/^Stato nella/, 'Nelle profondità del Museo');
+    expect(valoreSelettore('Stato in: Scopri dov’è il Tesoro', popup.getByRole('group', { name: 'Infiltrazione dello stato' }))).toBe('Scopri dov’è il Tesoro');
+    scegliVoce(/^Stato in/, 'Nelle profondità del Museo');
     expect(onContesto).toHaveBeenCalledWith('m-04');
   });
 
@@ -940,7 +940,7 @@ it('un pin con più voci della guida (098): nel popup una riga per voce, ognuna 
   const scheda = within(await screen.findByRole('region', { name: 'Scheda: Punto di infiltrazione' }));
   const elenco = within(scheda.getByRole('list', { name: 'Voci della guida' }));
   expect(elenco.getByText('«Infiltrati nel castello»: nella Guida: ottenuto')).toBeInTheDocument();
-  expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora gestito nella Guida')).toBeInTheDocument();
+  expect(elenco.getByText('«Ritorno al castello»: esauribile · non ancora segnata nella Guida')).toBeInTheDocument();
 });
 
 describe('i pezzi della planimetria (102, 2026-10-14) e le loro copie (103)', () => {

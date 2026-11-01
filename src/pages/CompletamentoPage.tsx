@@ -93,7 +93,7 @@ function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; part
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="chip testo-12" style={{ borderColor: colore, color: colore }}>{NOME_TIPO_TROFEO[t.tipo]}</span>
         {t.mancabile && <span className="chip chip--attivo testo-12" title="Se lo salti, in questa partita non lo prendi più">mancabile</span>}
-        {!t.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
+        {!IN_RILASCIO && !t.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </div>
       <p className="m-0 text-text-secondary">{t.descrizione}</p>
       {(t.come || t.quando) && (

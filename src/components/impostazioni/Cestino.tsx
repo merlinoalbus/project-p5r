@@ -84,7 +84,8 @@ function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
             {g.righe.map((s) => (
               <li key={`${s.tabella}|${s.motivo}`}>
                 <span className="font-semibold">{s.quante.toLocaleString('it-IT')} {s.etichetta}</span> {motivoSaltata(s.motivo, s.quante)}
-                {s.colonne && s.colonne.length > 0 && <span className="block testo-12 text-text-muted">dato non conservato: {s.colonne.map((c) => <code key={c}>{c} </code>)}</span>}
+                {/* L7-04: i nomi delle colonne servono a chi prepara i dati; a chi gioca basta la frase sopra */}
+                {!IN_RILASCIO && s.colonne && s.colonne.length > 0 && <span className="block testo-12 text-text-muted">dato non conservato: {s.colonne.map((c) => <code key={c}>{c} </code>)}</span>}
                 {s.sostituitaDa && <span className="block testo-12 text-text-muted">ora: {s.sostituitaDa}</span>}
                 {s.esempi.length > 0 && <span className="block break-words testo-12 text-text-muted">{s.esempi.join(', ')}{s.quante > s.esempi.length ? ', …' : ''}</span>}
               </li>

@@ -263,12 +263,14 @@ function Scheda({ g, sezione, ramo, tokyo, memento, daCollocare, vai, onRicarica
   if (sezione === 'memento') {
     return <div className="flex flex-col gap-4">
       <Gruppo titolo={inizio.nome} voci={[{ nodo: inizio }]} />
-      <Gruppo titolo="Dedali e strutture fisse" voci={inizio.figli.map((f) => scendiDa([], f))} />
+      {/* L7-06: le strutture fisse dei Memento non ci sono più (migrazione 322): sotto i Memento stanno solo i dedali */}
+      <Gruppo titolo="Dedali" voci={inizio.figli.map((f) => scendiDa([], f))} />
     </div>;
   }
   const quartieri = inizio.figli.filter((f) => f.tipo === 'quartiere');
-  const aree = inizio.figli.filter((f) => f.tipo !== 'quartiere' && f.tipo !== 'palazzo' && !f.daVerificare);
-  const daVerificare = inizio.figli.filter((f) => f.tipo !== 'quartiere' && f.tipo !== 'palazzo' && f.daVerificare);
+  // D10 (L7-01): «da verificare» (nessuna fonte colloca l'area) serve a chi prepara i dati; nel rilascio l'area resta fra le altre
+  const aree = inizio.figli.filter((f) => f.tipo !== 'quartiere' && f.tipo !== 'palazzo' && (IN_RILASCIO || !f.daVerificare));
+  const daVerificare = IN_RILASCIO ? [] : inizio.figli.filter((f) => f.tipo !== 'quartiere' && f.tipo !== 'palazzo' && f.daVerificare);
   return <div className="flex flex-col gap-4">
     <Gruppo titolo={`Quartieri · ${g.totali.quartieri}`} dettaglio={`${parola(g.totali.areeMondo, 'area', 'aree')} · ${parola(g.totali.planimetrieMondo, 'planimetria', 'planimetrie')}`} voci={quartieri.map((f) => scendiDa([], f))} />
     <Gruppo titolo="Aree della città" voci={aree.map((f) => scendiDa([], f))} />

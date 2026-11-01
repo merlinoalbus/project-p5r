@@ -12,7 +12,7 @@
 import { AssetImg } from './AssetImg';
 import { IconaAzione } from './IconaAzione';
 import { ModificaGuida } from '../guida/ModificaGuida';
-import { dataGiocoTesto } from '../../utils/dateGioco';
+import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import type { AllertaGiornoDto } from '../../types';
 
 /** Il nome dell'asset dell'icona di un'allerta: `ui/allerta-<chiave>` senza il doppio «allerta» («allerta-polline» → `ui/allerta-polline`). */
@@ -46,7 +46,7 @@ export function TagAllerte({ allerte, compatto, modifica }: { allerte: readonly 
         <span key={a.chiave} className="inline-flex flex-wrap items-center gap-1">
           <TagAllerta allerta={a} compatto={compatto} />
           {a.modificata && <span className="chip testo-12">corretta</span>}
-          <ModificaGuida tipo="allerta-meteo" chiave={`${modifica.data}:${a.chiave}`} cosa={`l’allerta «${a.nome}» del ${dataGiocoTesto(modifica.data)}`} soloIcona onSalvato={modifica.onSalvato} />
+          <ModificaGuida tipo="allerta-meteo" chiave={`${modifica.data}:${a.chiave}`} cosa={`l’allerta «${a.nome}» ${dataGiocoConArticolo(modifica.data, 'di')}`} soloIcona onSalvato={modifica.onSalvato} />
         </span>
       ))}
     </>

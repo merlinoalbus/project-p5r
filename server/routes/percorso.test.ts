@@ -53,7 +53,7 @@ describe('API percorso giorno per giorno', () => {
     expect(g.azioni[0].fatta).toBe(true);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=percorso`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
-    expect(storico.eventi[0].titolo).toContain('04-12');
+    expect(storico.eventi[0].titolo).toContain('12 aprile');
     a = (await request(app).put(`/api/partite/${id}/percorso`).send({ uid: prima.uid, fatta: false })).body.data as AzionePercorsoDto;
     expect(a.fatta).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/percorso`).send({ uid: '0'.repeat(32), fatta: true })).status).toBe(404);

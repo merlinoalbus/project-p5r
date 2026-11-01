@@ -529,11 +529,11 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     expect(selettore('Giorno', finestra)).toHaveTextContent('2 maggio (lun)');
     fireEvent.click(within(finestra).getByRole('radio', { name: 'Di sera' }));
     api.trasferisciVociGiornata.mockResolvedValue({ giorno: '05-02', fascia: 'sera', uid: ['n1', 'n2'], voci: [] });
-    fireEvent.click(within(finestra).getByRole('button', { name: /^Copia nel 2 maggio, di sera/ }));
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Copia al 2 maggio, di sera/ }));
     // nell'ordine della giornata (Zorro di giorno prima della consegna di sera), non in quello dei tocchi
     await waitFor(() => expect(api.trasferisciVociGiornata).toHaveBeenCalledWith({ uid: [uid(1), uid(4)], giorno: '05-02', fascia: 'sera', modo: 'copia' }, 3));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate nel 2 maggio, di sera, in fondo: per tutte le partite.');
+    expect(notifica).toHaveBeenCalledWith('success', '2 voci copiate al 2 maggio, di sera, in fondo: per tutte le partite.');
     expect(ricarica).toHaveBeenCalled();
     expect(screen.queryByRole('region', { name: 'Voci selezionate' })).toBeNull();
   });
@@ -550,7 +550,7 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     expect(finestra).toHaveTextContent('La voce lascia questo giorno e porta con sé le spunte delle partite.');
     scegliVoce('Giorno', /^13 aprile/, finestra);
     api.trasferisciVociGiornata.mockRejectedValue(new Error('Questa voce della giornata non esiste (più).'));
-    fireEvent.click(within(finestra).getByRole('button', { name: /^Sposta nel 13 aprile, di sera/ }));
+    fireEvent.click(within(finestra).getByRole('button', { name: /^Sposta al 13 aprile, di sera/ }));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Questa voce della giornata non esiste (più).'));
     expect(api.trasferisciVociGiornata).toHaveBeenCalledWith({ uid: [uid(4)], giorno: '04-13', fascia: 'sera', modo: 'sposta' }, 3);
     expect(screen.getByRole('dialog', { name: 'Sposta 1 voce in un altro giorno' })).toBeInTheDocument();

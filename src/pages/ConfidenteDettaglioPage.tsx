@@ -328,8 +328,9 @@ export function ConfidenteDettaglioPage() {
             <OggettiCollegati oggetti={c.oggettiRicompensa} />
           </section>}
 
-          {c.fonti.length > 0 && (
-            <p className="m-0 testo-12 text-text-muted">Fonti: {c.fonti.map((f, i) => {
+          {/* D10 (L7-01): le fonti servono a chi prepara i dati; nel rilascio stanno solo in Impostazioni → Informazioni */}
+          {!IN_RILASCIO && c.fonti.length > 0 && (
+            <p className="m-0 testo-12 text-text-muted">Fonti:{' '}{c.fonti.map((f, i) => {
               const sito = sitoDellaFonte(f);
               const separatore = i < c.fonti.length - 1 ? ', ' : '';
               return sito

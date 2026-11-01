@@ -14,7 +14,10 @@ export interface FortunaPartitaDto {
   scaduta: boolean;
 }
 
+/** Il moltiplicatore della Fortuna, letto anche dai testi dell'interfaccia (L7-02). */
+export const MOLTIPLICATORE_FORTUNA = 1.5;
+
 /** L'unico lettore del ×1,5 della Fortuna per Doti, voci del Diario e Aojiru: arrotondato per difetto. La Perizia della pesca NON lo usa:
  *  legge la propria regola fotografata nel gesto (punti base + `bonusFortuna`, modificabili nell'editor), che col valore di fabbrica
  *  (2 + 1) dà lo stesso risultato; vedi `pescaLetture` e la decisione del 2026-10-25 in docs/DECISIONI.md. */
-export const moltiplicaFortuna = (punti: number): number => Math.floor(punti * 1.5);
+export const moltiplicaFortuna = (punti: number): number => Math.floor(punti * MOLTIPLICATORE_FORTUNA);

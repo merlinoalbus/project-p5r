@@ -22,7 +22,10 @@ import type { NegCellaCompattaDto, NegDomandaCompattaDto, NegDomandaDto, NegRisp
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
-const NOME_ESITO: Record<EsitoNegoziazione, string> = { buona: 'Buona', passabile: 'Passabile', cattiva: 'Cattiva' };
+/** Nel rilascio la provenienza degli esiti non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+const NOME_ESITO: Record<EsitoNegoziazione, string> ={ buona: 'Buona', passabile: 'Passabile', cattiva: 'Cattiva' };
 const CLASSE_ESITO: Record<EsitoNegoziazione, string> = {
   buona: 'border-success/70 bg-success/10 text-success', passabile: 'border-warning/70 bg-warning/10 text-warning', cattiva: 'border-error/60 bg-error/10 text-error-testo',
 };
@@ -44,17 +47,18 @@ function Cella({ c }: { c: NegCellaCompattaDto }) {
       {c.esito
         ? <Esito esito={c.esito} incerto={!!c.incerto} />
         : c.alternative && c.alternative.length > 0
-          ? <>{c.alternative.map((e, i) => <Esito key={`${e}${i}`} esito={e} incerto={!!c.incerto} />)}<span className="testo-12 text-text-muted">la fonte si contraddice</span></>
-          : <span className="testo-12 text-text-muted">non documentata</span>}
-      {c.fonte && c.fonte !== 'royal' && <span className="testo-12 text-text-muted" title="Royal non documenta questa cella: l’esito viene dall’app e non è verificato">solo dall’app</span>}
-      {c.nonConfermata && <span className="testo-12 text-text-muted" title="Esito ereditato dal gioco base, non confermato in Royal">ereditato, non confermato</span>}
-      {c.altre && c.altre.map((a, i) => <span key={`${a.fonte}${i}`} className="testo-12 text-text-muted">anche «{NOME_ESITO[a.esito].toLowerCase()}» ({a.fonte === 'royal' ? 'Royal' : 'app'})</span>)}
+          ? <>{c.alternative.map((e, i) => <Esito key={`${e}${i}`} esito={e} incerto={!!c.incerto} />)}<span className="testo-12 text-text-muted">{IN_RILASCIO ? 'esito incerto' : 'la fonte si contraddice'}</span></>
+          : <span className="testo-12 text-text-muted">{IN_RILASCIO ? 'esito non noto' : 'non documentata'}</span>}
+      {/* D10 (L7-01): da dove viene l'esito (Royal, gioco base, app) serve a chi prepara i dati; nel rilascio resta solo l'esito */}
+      {!IN_RILASCIO && c.fonte && c.fonte !== 'royal' && <span className="testo-12 text-text-muted" title="Royal non documenta questa cella: l’esito viene dall’app e non è verificato">solo dall’app</span>}
+      {!IN_RILASCIO && c.nonConfermata && <span className="testo-12 text-text-muted" title="Esito ereditato dal gioco base, non confermato in Royal">ereditato, non confermato</span>}
+      {c.altre && c.altre.map((a, i) => <span key={`${a.fonte}${i}`} className="testo-12 text-text-muted">anche «{NOME_ESITO[a.esito].toLowerCase()}»{IN_RILASCIO ? '' : ` (${a.fonte === 'royal' ? 'Royal' : 'app'})`}</span>)}
     </span>
   );
 }
 
 /** Il dettaglio completo di una famiglia: le varianti e, per ogni risposta, le attestazioni di ogni provenienza. */
-function Dettaglio({ domanda, umore, onCambiato }: { domanda: string; umore: UmoreNegoziazione; onCambiato: () => void }) {
+function Dettaglio({ domanda, umore, onCambiato, soloVarianti = false }: { domanda: string; umore: UmoreNegoziazione; onCambiato: () => void; soloVarianti?: boolean }) {
   const d = useCarica(() => getNegoziazioneDomanda(domanda, umore), [domanda, umore]);
   /** Dopo una correzione si rilegge il dettaglio e l'elenco compatto che sta sopra. */
   const cambiato = () => { void d.ricarica(); onCambiato(); };
@@ -64,6 +68,12 @@ function Dettaglio({ domanda, umore, onCambiato }: { domanda: string; umore: Umo
   if (d.errore) return <p className="m-0 testo-12 text-error-testo" role="alert">{d.errore}</p>;
   const fam: NegDomandaDto | undefined = d.dati?.domande[0];
   if (!fam) return null;
+  // L7 (F11): nel rilascio le varianti del testo della domanda si leggono, senza da dove viene ciascuna né le correzioni
+  if (soloVarianti) return (
+    <ul className="m-0 flex list-none flex-col gap-1 border-t border-border-light p-0 pt-2 testo-12 text-text-secondary" aria-label="Varianti del testo della domanda">
+      {fam.varianti.map((v) => <li key={v.chiave}>{v.testo ?? v.testoOriginale}</li>)}
+    </ul>
+  );
   return (
     <div className="flex flex-col gap-2 border-t border-border-light pt-2 testo-12">
       {fam.varianti.map((v) => (
@@ -102,14 +112,19 @@ function Domanda({ d, umore, onCambiato }: { d: NegDomandaCompattaDto; umore: Um
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {d.risposte.map((r: NegRispostaCompattaDto) => (
           <li key={r.chiave} className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
-            <span className="min-w-0 flex-1">{r.testoDisponibile ? r.testo : 'Testo non disponibile nella fonte'}</span>
+            <span className="min-w-0 flex-1">{r.testoDisponibile ? r.testo : 'Testo non disponibile'}</span>
             <Cella c={r.cella} />
           </li>
         ))}
       </ul>
-      <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((v) => !v)}
-        titolo={<>{aperta ? 'Nascondi i dettagli' : `Dettagli e provenienze${d.nVarianti > 1 ? ` (${d.nVarianti} varianti)` : ''}`}<FrecciaApertura aperto={aperta} /></>} />
-      {aperta && <Dettaglio domanda={d.chiave} umore={umore} onCambiato={onCambiato} />}
+      {/* D10 (L7-01): i dettagli sono le provenienze di ogni esito, con le correzioni: servono a chi prepara i dati */}
+      {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((v) => !v)}
+        titolo={<>{aperta ? 'Nascondi i dettagli' : `Dettagli e provenienze${d.nVarianti > 1 ? ` (${d.nVarianti} varianti)` : ''}`}<FrecciaApertura aperto={aperta} /></>} />}
+      {!IN_RILASCIO && aperta && <Dettaglio domanda={d.chiave} umore={umore} onCambiato={onCambiato} />}
+      {/* F11: nel rilascio, con più varianti, il testo di ciascuna si legge (le provenienze no) */}
+      {IN_RILASCIO && d.nVarianti > 1 && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((v) => !v)}
+        titolo={<>{aperta ? 'Nascondi le varianti' : `Varianti del testo (${d.nVarianti})`}<FrecciaApertura aperto={aperta} /></>} />}
+      {IN_RILASCIO && d.nVarianti > 1 && aperta && <Dettaglio domanda={d.chiave} umore={umore} onCambiato={onCambiato} soloVarianti />}
     </li>
   );
 }

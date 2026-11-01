@@ -156,7 +156,7 @@ export function salvaInformazioniConfidente(chiave: string, input: SalvaInformaz
     const ripetuta = s.registro?.revisioni.find(r => r.operazioneId === input.operazioneId);
     // Replay PRIMA del CAS: il token originale è ormai stale dopo il primo salvataggio riuscito.
     if (ripetuta) {
-      if (ripetuta.richiesta !== richiesta) throw httpErrors.conflict('operazione-disponibilita-riutilizzata', 'Identificativo già usato con un payload diverso.');
+      if (ripetuta.richiesta !== richiesta) throw httpErrors.conflict('operazione-disponibilita-riutilizzata', 'Questa modifica è già stata registrata con dati diversi: rileggi la pagina e riprova.');
       return { esito: 'gia-eseguita', versione: ripetuta.id, corrente: mostra(db, chiave, s) };
     }
     const { anteprimaAttesa, operazioneId, ...azione } = input;

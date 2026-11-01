@@ -36,9 +36,12 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 const GRUPPO_STORICO: Readonly<Record<string, GruppoOggetto>> = { consumabili: 'consumabili', equipaggiamento: 'equipaggiamento', chiave: 'materiali' };
 
-/** Il segno «da fonte secondaria» accanto a una voce non verificata sulla guida italiana; niente se la voce è verificata. */
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** Il segno «da fonte secondaria» accanto a una voce non verificata sulla guida italiana; niente se la voce è verificata o nel rilascio. */
 function Secondaria({ v }: { v: boolean }) {
-  return v ? null : <span className="chip testo-12" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
+  return v || IN_RILASCIO ? null : <span className="chip testo-12" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
 }
 
 /** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */

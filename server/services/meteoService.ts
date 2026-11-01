@@ -14,6 +14,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ALLERTA_PIOGGIA, fasceDellaGuida, type MeteoPartita } from '../../shared/meteoPartita.js';
+import { dataLeggibile } from '../../shared/condizioniSpillo.js';
 import type { AllertaGiornoDto, FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
 
 /** Il meteo del giorno come testo, nelle due fasce («Sereno/Pioggia»; una sola parola se coincidono) con la nota fra parentesi (R9-15). */
@@ -101,7 +102,7 @@ export function meteoOra(partitaId: number, data: string | null, momento: Fascia
 /** Segna il meteo di un giorno: per ogni fascia indicata un meteo, o `null` per tornare a quello della guida. */
 export function impostaMeteo(partitaId: number, data: string, mod: { giorno?: MeteoPartita | null; sera?: MeteoPartita | null }): MeteoGiornoDto {
   verificaPartita(partitaId);
-  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Il ${data} non è un giorno del calendario di gioco.`);
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Questa data (${dataLeggibile(data)}) non è un giorno del calendario di gioco.`);
   const prima = scelto(partitaId, data);
   const giorno = mod.giorno === undefined ? prima.giorno : mod.giorno;
   const sera = mod.sera === undefined ? prima.sera : mod.sera;

@@ -13,11 +13,15 @@ export function VoceTesto({ titolo, children }: { titolo: string; children: Reac
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
 }
 
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01): costante di build, come in ogni modulo (`utils/modalita.ts`). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Il collegamento alla pagina della fonte, se c'è. Un campo che ne porta più d'una («url ;url») apre la prima. `allineato`
- * (predefinito) lo tiene alla sua larghezza dentro una colonna flessibile.
+ * (predefinito) lo tiene alla sua larghezza dentro una colonna flessibile. Serve a chi prepara e corregge i dati: nel rilascio non
+ * c'è, e le fonti stanno in un punto solo (Impostazioni → Informazioni).
  */
 export function Fonte({ url, etichetta = 'fonte', allineato = true }: { url: string | null | undefined; etichetta?: string; allineato?: boolean }) {
-  if (!url) return null;
+  if (!url || IN_RILASCIO) return null;
   return <a href={url.split(' ;')[0]} target="_blank" rel="noreferrer" className={allineato ? 'credito touch inline-flex items-center self-start' : 'credito touch inline-flex items-center'}>{etichetta}</a>;
 }

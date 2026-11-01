@@ -234,7 +234,7 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
           {colonnaDestra}
         </div>
         {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
-        <p className="m-0 testo-12 text-text-muted">La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.</p>
+        <p className="m-0 testo-12 text-text-muted">La modifica cambia la guida per tutte le partite ed entra nel backup dei dati di gioco che scarichi.</p>
       </div>
     </FinestraModifica>
   );

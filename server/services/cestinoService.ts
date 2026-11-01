@@ -654,8 +654,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         const ora = leggi(prima);
         if (ora) {
           if (uguali(ora, prima, colonne)) continue;
-          if (identitaImmutabile) throw httpErrors.conflict('cestino-uuid-acquisto-divergente', 'Lo stesso UUID personale ha identità o contenuto immutabile diverso: nessuna fusione o sovrascrittura, intero ripristino annullato.');
-          if (eventoAcquisto) throw httpErrors.conflict('cestino-evento-acquisto-divergente', 'L’ID dell’evento di acquisto contiene uno storico diverso: nessuna sovrascrittura, intero ripristino annullato.');
+          if (identitaImmutabile) throw httpErrors.conflict('cestino-uuid-acquisto-divergente', 'Un acquisto del Cestino è già registrato nella partita con dati diversi: niente è stato sovrascritto, il ripristino è annullato.');
+          if (eventoAcquisto) throw httpErrors.conflict('cestino-evento-acquisto-divergente', 'Lo storico di un acquisto del Cestino è diverso da quello della partita: niente è stato sovrascritto, il ripristino è annullato.');
           if ((p.schema === 'main' && !DERIVATE.has(p.tabella)) || r.tipo === 'partita' || radiceScorta || (p.schema === 'utente' && ['acquisto_registrato','acquisto_provenienza'].includes(p.tabella))) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(prima)}`);
           else salta(p.tabella, 'cambiata-dopo', descrivi(prima));
           continue;

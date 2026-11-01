@@ -1,5 +1,5 @@
 // ============================================================
-// CompendioPage — le 232 Persona con filtri nell'URL (ricerca, arcano, livello min/max, affinità, immagine caricata, ordine e verso),
+// CompendioPage — le Persona con filtri nell'URL (ricerca, arcano, livello min/max, affinità, immagine caricata, ordine e verso),
 // vista a piastrelle o compatta ricordata per dispositivo, ritorno alla Persona vista dopo la scheda di dettaglio
 // ============================================================
 
@@ -41,7 +41,9 @@ const livelloValido = (v: string | null, predefinito: number): number => {
 };
 
 /** Parametri dell'URL gestiti dal pannello dei filtri (ricerca e ordinamento esclusi). */
-const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'catturabili'] as const;
+/** Costante di build: nel rilascio i comandi di chi prepara i contenuti non ci sono (L7-09). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+const CHIAVI_FILTRI =['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'catturabili'] as const;
 
 /**
  * Una Persona nella vista a elenco. Memoizzata come le piastrelle (R12-03): digitando nella ricerca restano uguali `persona`,
@@ -109,7 +111,8 @@ export function CompendioPage() {
   const soloCatturabili = params.get('catturabili') === '1';
   const elemento = params.get('el') ?? '';
   const codice = params.get('aff') ?? '';
-  const immagine: Immagine = params.get('img') === 'con' || params.get('img') === 'senza' ? (params.get('img') as Immagine) : '';
+  // L7-09: nel rilascio le immagini le carica chi prepara i contenuti: il filtro «immagine caricata» non c'è, e un `?img=` resta senza effetto
+  const immagine: Immagine = !IN_RILASCIO && (params.get('img') === 'con' || params.get('img') === 'senza') ? (params.get('img') as Immagine) : '';
 
   /** Imposta o rimuove (null) più parametri con un solo aggiornamento dell'URL. */
   const impostaTutti = (valori: Record<string, string | null>) => {
@@ -271,10 +274,10 @@ export function CompendioPage() {
                 <Selettore compatto etichetta="Tipo di affinità" valore={codice} vuoto="Qualsiasi" disabilitato={!elemento} opzioni={codici.map((c) => ({ chiave: c.chiave, nome: c.nome }))} onCambia={(k) => imposta('aff', k, '')} />
               </span>
             </div>
-            <div className="pannello-filtri__gruppo">
+            {!IN_RILASCIO && <div className="pannello-filtri__gruppo">
               <span className="pannello-filtri__etichetta">Immagine mia</span>
               <Selettore compatto etichetta="Immagine personalizzata" valore={immagine} vuoto="Tutte" opzioni={[{ chiave: 'con', nome: 'Presente' }, { chiave: 'senza', nome: 'Assente' }]} onCambia={(k) => imposta('img', k, '')} />
-            </div>
+            </div>}
             <div className="pannello-filtri__gruppo" role="group" aria-label="Inclusioni">
               <span className="pannello-filtri__etichetta">Inclusioni</span>
               <span className="flex items-center gap-1">

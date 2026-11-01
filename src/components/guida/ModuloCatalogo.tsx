@@ -205,7 +205,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
           <p className="m-0 testo-12 text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
             {elemento.modificata && (lettura ? 'Il ripristino riguarda sessioni, effetti e condizioni della lettura.' : 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.')}
-            {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: salvando, la correzione resterà anche dopo gli aggiornamenti.'}
+            {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: la correzione si salva nei dati di gioco, e «Ripristina i valori della guida» la toglie. Importando un backup dei dati di gioco si sostituisce anche lei.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
         )}

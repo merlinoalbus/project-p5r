@@ -48,6 +48,8 @@ import { fasceConPrezzoDiverso } from '../../shared/catalogo';
 import { fraseConsumaEsito, fraseDotiEsito, fraseOggettiEsito } from '../../shared/esitiAttivita';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
 
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
@@ -143,7 +145,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {a.pesca && <span className="chip">{a.pesca.ruolo === 'visita' ? 'Registro delle visite di pesca' : 'Obiettivi della visita di pesca'}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
         {a.volteSvolte !== undefined && <span className={`chip ${a.volteSvolte > 0 ? 'chip--attivo' : ''}`} title="Quante volte risulta svolta nella partita attiva">{a.volteSvolte === 0 ? 'Mai svolta' : `Svolta ${a.volteSvolte} ${a.volteSvolte === 1 ? 'volta' : 'volte'}`}</span>}
-        {!a.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
+        {!IN_RILASCIO && !a.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
       {/* `testo-link-esteso`: il collegamento alla sede sta dentro una frase da una riga (16 px): l'area di tocco sale a 44 px senza cambiare la riga */}
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary testo-link-esteso">

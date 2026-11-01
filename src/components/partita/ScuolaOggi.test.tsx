@@ -67,7 +67,7 @@ beforeEach(() => {
 describe('ScuolaOggi', () => {
   it('mostra soltanto le domande in classe del giorno corrente', async () => {
     render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Domande in classe del 11 maggio: 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Domande in classe dell’11 maggio: 1/ }));
     expect(screen.getByText('Domanda di oggi in classe?')).toBeInTheDocument();
     expect(screen.queryByText('Domanda di domani?')).not.toBeInTheDocument();
     expect(screen.getByText('Risposta giusta')).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('ScuolaOggi', () => {
 
   it('mostra le domande numerate dell’esame e non la voce riassuntiva dell’elenco generale', async () => {
     render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Domande d’esame del 11 maggio: 2/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Domande d’esame dell’11 maggio: 2/ }));
     const voci = screen.getAllByRole('listitem').map((li) => li.textContent ?? '');
     expect(voci).toHaveLength(2);
     expect(voci[0]).toContain('Figura storica che ispirò l’idioma');
@@ -96,7 +96,7 @@ describe('ScuolaOggi', () => {
 
   it('mostra la risposta del cruciverba del giorno', async () => {
     render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Cruciverba del 11 maggio/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Cruciverba dell’11 maggio/ }));
     expect(screen.getByText('Indizio di oggi')).toBeInTheDocument();
     expect(screen.getByText('PARLARE')).toBeInTheDocument();
     expect(screen.queryByText('ALTRO')).not.toBeInTheDocument();
@@ -115,7 +115,7 @@ describe('ScuolaOggi', () => {
 
   it('i collegamenti alla Guida ci sono anche nei giorni con le scorciatoie e in quelli vuoti', async () => {
     const { unmount } = render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} /></MemoryRouter>);
-    await screen.findByRole('button', { name: /Cruciverba del 11 maggio/ });
+    await screen.findByRole('button', { name: /Cruciverba dell’11 maggio/ });
     expect(screen.getByRole('link', { name: 'Domande e risposte: tutte le date nella Guida' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Cruciverba: tutti i giorni nella Guida' })).toBeInTheDocument();
     unmount();
@@ -127,23 +127,23 @@ describe('ScuolaOggi', () => {
   it('segue il giorno guardato nella scheda «Oggi» e non la data di gioco, e lo scrive quando non è oggi', async () => {
     // partita al 13 maggio (giorno vuoto), scheda «Oggi» sull'11: le scorciatoie sono quelle dell'11
     const { unmount } = render(<MemoryRouter><ScuolaOggi partita={partita('05-13')} giorno="05-11" /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Domande in classe del 11 maggio: 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Domande in classe dell’11 maggio: 1/ }));
     expect(screen.getByText('Domanda di oggi in classe?')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Domande in classe del 11 maggio/ })).toHaveTextContent('1 quel giorno');
+    expect(screen.getByRole('button', { name: /Domande in classe dell’11 maggio/ })).toHaveTextContent('1 quel giorno');
     unmount();
     // e viceversa: partita all'11, scheda sul 13 vuoto
     const secondo = render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} giorno="05-13" /></MemoryRouter>);
     expect(await screen.findByText('Il 13 maggio nessuna domanda in classe né cruciverba.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Cruciverba del 11 maggio/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Cruciverba dell’11 maggio/ })).toBeNull();
     secondo.unmount();
     // `giorno` null (scheda chiusa): vale la data di gioco
     render(<MemoryRouter><ScuolaOggi partita={partita('05-11')} giorno={null} /></MemoryRouter>);
-    expect(await screen.findByRole('button', { name: /Domande in classe del 11 maggio: 1/ })).toHaveTextContent('1 oggi');
+    expect(await screen.findByRole('button', { name: /Domande in classe dell’11 maggio: 1/ })).toHaveTextContent('1 oggi');
   });
 
   it('scorrendo i giorni filtra gli elenchi già caricati senza rileggerli, e la finestra aperta su un giorno si chiude cambiando giorno', async () => {
     const { rerender } = render(<MemoryRouter><ScuolaOggi partita={partita('05-13')} giorno="05-11" /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Cruciverba del 11 maggio/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Cruciverba dell’11 maggio/ }));
     expect(screen.getByText('PARLARE')).toBeInTheDocument();
     rerender(<MemoryRouter><ScuolaOggi partita={partita('05-13')} giorno="05-14" /></MemoryRouter>);
     expect(screen.queryByText('PARLARE')).not.toBeInTheDocument();

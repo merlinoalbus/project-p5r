@@ -73,7 +73,7 @@ export function ImmaginiCaricate() {
     <section className="card flex flex-col gap-3">
       <TitoloSezione>Immagini caricate</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
-        Le immagini che carichi dal riquadro di una Persona, di un Confidente o di un Arcano hanno la precedenza sulla grafica inclusa nell'app. Da qui le rimuovi per tornare agli asset predefiniti; le mappe scaricate dalla guida si riscaricano al prossimo accesso all'area.
+        Le immagini che carichi dal riquadro di una Persona, di un Confidente o di un Arcano hanno la precedenza sulla grafica inclusa nell'app. Da qui le rimuovi per tornare alla grafica predefinita; le mappe scaricate dalla guida si riscaricano al prossimo accesso all'area.
       </p>
       {elenco.errore && <p className="m-0 testo-13 text-error-testo">{elenco.errore}</p>}
       <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Immagini caricate per ambito">

@@ -109,7 +109,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
       setTestoNuovo('');
       void ricaricaGlossario();
       void ambiti.ricarica();
-      notifica('success', agg.rimossa ? 'Resa tolta: il testo torna senza traduzione.' : nuovo === undefined ? 'Testo del seed ripristinato.' : 'Traduzione salvata.');
+      notifica('success', agg.rimossa ? 'Resa tolta: il testo torna senza traduzione.' : nuovo === undefined ? 'Resa della guida ripristinata.' : 'Traduzione salvata.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
     }
@@ -118,7 +118,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
   return (
     <section ref={sezione} id="traduzioni" className="card flex flex-col gap-3">
       <TitoloSezione>Traduzioni</TitoloSezione>
-      <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
+      <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco. «Ripristina» riporta la resa della guida.</p>
       <div className="flex flex-wrap gap-2 items-center">
         <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={(a) => { setAmbito(a); setQRichiesta(q); }} />
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />

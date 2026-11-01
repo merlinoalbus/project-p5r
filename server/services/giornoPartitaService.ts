@@ -18,6 +18,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { chiudiFortunaPerCambioGiorno } from './fortunaService.js';
+import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo.js';
 
 /** Come si presenta il cambio nello storico: titolo e dettaglio di default se la strada non ne ha di suoi. */
 export interface DescrizioneCambioGiorno {
@@ -45,7 +46,7 @@ export function passaAllaSeraPartita(partitaId: number, descrizione: Descrizione
     prepared("UPDATE partita SET fascia_gioco = 'sera', updated_at = ? WHERE id = ?").run(nowIso(), partitaId);
     registraEvento(
       partitaId, 'percorso',
-      descrizione.titolo ?? `Si fa sera${r.data_gioco ? ` (${r.data_gioco})` : ''}`,
+      descrizione.titolo ?? `Si fa sera${r.data_gioco ? ` (${dataLeggibile(r.data_gioco)})` : ''}`,
       descrizione.dettaglio ?? 'La partita passa dalla fascia «giorno» alla fascia «sera».',
       { giorno: r.data_gioco, da: 'giorno', a: 'sera' },
     );
@@ -61,13 +62,13 @@ export function cambiaGiornoPartita(partitaId: number, data: string | null, desc
     // lo stesso giorno non è un cambio: nemmeno il controllo (un salvataggio del Riepilogo rimanda la data com'è)
     if (da === data) return { cambiato: false, da, a: data };
     if (data !== null && !prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) {
-      throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+      throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso ${dataConArticolo(data)}.`);
     }
     prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = 'giorno', updated_at = ? WHERE id = ?").run(data, nowIso(), partitaId);
     registraEvento(
       partitaId, 'percorso',
-      descrizione.titolo ?? (data ? `Giorno di gioco: ${data}` : 'Giorno di gioco tolto'),
-      descrizione.dettaglio ?? (data ? `La partita passa da ${da ?? 'nessun giorno'} al ${data}, di giorno.` : `Il giorno di gioco ${da ?? ''} è stato tolto.`),
+      descrizione.titolo ?? (data ? `Giorno di gioco: ${dataLeggibile(data)}` : 'Giorno di gioco tolto'),
+      descrizione.dettaglio ?? (data ? `La partita passa ${da ? dataConArticolo(da, 'da') : 'da nessun giorno'} ${dataConArticolo(data, 'a')}, di giorno.` : da ? `Il giorno di gioco (${dataLeggibile(da)}) è stato tolto.` : 'Il giorno di gioco è stato tolto.'),
       { da, a: data },
     );
     chiudiFortunaPerCambioGiorno(partitaId);

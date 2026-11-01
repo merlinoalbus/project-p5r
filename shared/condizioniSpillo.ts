@@ -294,17 +294,35 @@ export function dataLeggibile(d: string): string {
   return `${Number(m[2])} ${NOMI_MESI[m[1]]}`;
 }
 
-/** L13 (O7-4, migrazione 313): «Il messaggio arriva la sera del 28 luglio» / «… dell’8 ottobre», dal messaggio strutturato di un invito: la sola resa. */
-export function fraseMessaggioInvito(m: { data: string; fascia: 'giorno' | 'sera' }): string {
-  const giorno = dataLeggibile(m.data);
-  return `Il messaggio arriva ${m.fascia === 'sera' ? 'la sera' : 'di giorno'} ${eliso(giorno) ? 'dell’' : 'del '}${giorno}.`;
+/** La data leggibile con l'articolo davanti, apostrofato davanti a «8» e «11» (che si leggono «otto», «undici»): «il 12 aprile»,
+ *  «l'11 aprile»; con la preposizione: «del 12» / «dell'11», «al 12» / «all'11», «dal 12» / «dall'11». L'unica resa delle date di gioco
+ *  nelle frasi, per l'interfaccia e per i testi che scrive il server (storico, avvisi) (L7-05). */
+export function dataConArticolo(data: string, preposizione: '' | 'di' | 'a' | 'da' = ''): string {
+  const testo = dataLeggibile(data);
+  // l'unica regola dell'elisione: «8» e «11» si leggono «otto» e «undici» («l’8 ottobre», «dell’11 aprile»)
+  const vocale = /^(8|11)\s/.test(testo);
+  const articolo = preposizione === 'di' ? (vocale ? 'dell’' : 'del ') : preposizione === 'a' ? (vocale ? 'all’' : 'al ') : preposizione === 'da' ? (vocale ? 'dall’' : 'dal ') : (vocale ? 'l’' : 'il ');
+  return articolo + testo;
 }
 
-/** «8 ottobre» e «11 aprile» vogliono l'articolo eliso («l’8 ottobre», «dell’11 aprile»). */
-function eliso(giornoLeggibile: string): boolean { return /^(8|11) /.test(giornoLeggibile); }
-/** «il 2 maggio», «l’11 aprile»: un giorno leggibile con l'articolo. */
-function conArticolo(giornoLeggibile: string): string {
-  return `${eliso(giornoLeggibile) ? 'l’' : 'il '}${giornoLeggibile}`;
+/** L7-05 (F9): le date «MM-GG» rimaste nei testi già scritti (titoli e dettagli dello Storico registrati prima del formato unico), rese in
+ *  lettura nel formato unico, senza toccare i dati: «Percorso 04-12: …» → «Diario del 12 aprile: …», «del 04-11» → «dell’11 aprile»,
+ *  «(04-09)» → «(9 aprile)». Solo le date che esistono nel calendario del gioco; il resto del testo resta com'è. */
+export function dateDiGiocoNelTesto(testo: string): string {
+  return testo.replace(/\b(?:(Percorso) |(del|dal|al|il|nel) )?((?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01]))\b/g, (tutto, percorso: string | undefined, prep: string | undefined, d: string) => {
+    if (!dataValida(d)) return tutto;
+    if (percorso) return `Diario ${dataConArticolo(d, 'di')}`;
+    if (prep === 'del') return dataConArticolo(d, 'di');
+    if (prep === 'dal') return dataConArticolo(d, 'da');
+    if (prep === 'al' || prep === 'nel') return dataConArticolo(d, 'a');
+    if (prep === 'il') return dataConArticolo(d);
+    return dataLeggibile(d);
+  });
+}
+
+/** L13 (O7-4, migrazione 313): «Il messaggio arriva la sera del 28 luglio» / «… dell’8 ottobre», dal messaggio strutturato di un invito: la sola resa. */
+export function fraseMessaggioInvito(m: { data: string; fascia: 'giorno' | 'sera' }): string {
+  return `Il messaggio arriva ${m.fascia === 'sera' ? 'la sera' : 'di giorno'} ${dataConArticolo(m.data, 'di')}.`;
 }
 
 /** Nomi da mostrare al posto delle chiavi: chi li ha li passa, altrimenti resta la chiave. */
@@ -347,8 +365,8 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'gruppo': return (r.modo === 'tutte' ? 'Tutte: ' : 'Almeno una: ') + r.condizioni.map(c => descriviRequisitoSpillo(c, nomi)).join(' · ');
     // L13 (decisione 4): «non: articolo ottenuto X» è l'alternativa d'acquisto (Set A o Set B delle televendite): si legge come tale
     case 'non': return r.condizione.tipo === 'articolo' ? `Non insieme a «${nomi.articoli?.[r.condizione.articolo] ?? 'un altro articolo'}»` : 'Non: ' + descriviRequisitoSpillo(r.condizione, nomi);
-    case 'data': return `dal ${dataLeggibile(r.dal)}`;
-    case 'intervallo': return r.dal === r.al ? `solo ${conArticolo(dataLeggibile(r.dal))}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
+    case 'data': return dataConArticolo(r.dal, 'da');
+    case 'intervallo': return r.dal === r.al ? `solo ${dataConArticolo(r.dal)}` : `solo ${dataConArticolo(r.dal, 'da')} ${dataConArticolo(r.al, 'a')}`;
     case 'fascia': return `solo di ${r.fascia}`;
     case 'piove': return 'solo nei giorni di pioggia';
     case 'meteo': return r.condizione === 'senza-allerta' ? `non disponibile con ${nomi.allerte?.[r.allerta] ?? r.allerta}` : 'non disponibile in caso di pioggia';
@@ -365,10 +383,10 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
     // L13 (O11-1): «relazione romantica con Ann, iniziata entro il 24 dicembre»
-    case 'relazione-romantica': return `relazione romantica con ${nomi.confidenti?.[r.confidente] ?? r.confidente}${r.entro ? `, iniziata entro ${conArticolo(dataLeggibile(r.entro))}` : ''}`;
+    case 'relazione-romantica': return `relazione romantica con ${nomi.confidenti?.[r.confidente] ?? r.confidente}${r.entro ? `, iniziata entro ${dataConArticolo(r.entro)}` : ''}`;
     // L13 (O11-1): «nessuna relazione romantica», «al più una relazione romantica (entro il 24 dicembre)»
     case 'relazioni-romantiche': {
-      const entro = r.entro ? conArticolo(dataLeggibile(r.entro)) : null;
+      const entro = r.entro ? dataConArticolo(r.entro) : null;
       if (r.al_piu === 0) return `nessuna relazione romantica${entro ? ` iniziata entro ${entro}` : ''}`;
       return `al più ${r.al_piu === 1 ? 'una relazione romantica' : `${r.al_piu} relazioni romantiche`}${entro ? ` (entro ${entro})` : ''}`;
     }

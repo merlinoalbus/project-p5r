@@ -697,10 +697,10 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'File' }));
     const file = () => new File([JSON.stringify({ versione: 1, mappe: [] })], 'mappe.json', { type: 'application/json' });
     const messaggi = () => useNotificationStore.getState().notifications.map((n) => n.message);
-    fireEvent.change(screen.getByLabelText('File del pacchetto da importare'), { target: { files: [file()] } });
+    fireEvent.change(screen.getByLabelText('File delle mappe da importare'), { target: { files: [file()] } });
     await waitFor(() => expect(messaggi()).toContain('Importate 1 mappe, 0 spilli, 1 pezzo (3 copie), 0 immagini; 1 copia scartata perché esce dall’immagine della loro mappa; 2 pezzi (5 copie) tolti perché ritagliati da un’immagine poi sostituita.'));
-    await waitFor(() => expect(screen.getByLabelText('File del pacchetto da importare')).toBeEnabled());
-    fireEvent.change(screen.getByLabelText('File del pacchetto da importare'), { target: { files: [file()] } });
+    await waitFor(() => expect(screen.getByLabelText('File delle mappe da importare')).toBeEnabled());
+    fireEvent.change(screen.getByLabelText('File delle mappe da importare'), { target: { files: [file()] } });
     await waitFor(() => expect(messaggi()).toContain('Importate 1 mappe, 0 spilli, 2 pezzi (1 copia), 0 immagini; 2 copie scartate perché escono dall’immagine della loro mappa (con loro 1 pezzo rimasto senza copie o con la zona fuori); 1 pezzo (1 copia) tolto perché ritagliato da un’immagine poi sostituita.'));
   });
 

@@ -17,7 +17,7 @@ import { Modal } from '../shared/Modal';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { DataP5 } from '../shared/DataP5';
-import { dataGiocoTesto } from '../../utils/dateGioco';
+import { dataGiocoConArticolo, dataGiocoTesto } from '../../utils/dateGioco';
 import type { CruciverbaDto, DomandaDto, PartitaDto } from '../../types';
 import { RicompensaDomanda } from '../shared/RicompensaDomanda';
 
@@ -95,8 +95,11 @@ export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Prop
   if (!giorno) return soloDelGiorno ? null : collegamenti;
   const niente = inClasse.length === 0 && dEsame.length === 0 && !cruciOggi;
   const dataTesto = dataGiocoTesto(giorno);
+  // L7-05: con l'articolo giusto anche per l'8 e l'11 («dell’11 maggio»)
+  const delGiorno = dataGiocoConArticolo(giorno, 'di');
+  const ilGiorno = dataGiocoConArticolo(giorno);
   // «Oggi» solo quando il giorno guardato è la data di gioco; per un altro giorno si scrive la data
-  const quando = giorno === partita.dataGioco ? 'Oggi' : `Il ${dataTesto}`;
+  const quando = giorno === partita.dataGioco ? 'Oggi' : ilGiorno.charAt(0).toUpperCase() + ilGiorno.slice(1);
 
   // una lettura fallita (senza dati da mostrare) non è «nessuna domanda»: si dice, con «Riprova», e non si afferma che non c'è niente
   const letturaFallita = Boolean(domande.errore ?? cruciverba.errore);
@@ -108,15 +111,15 @@ export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Prop
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
       {!soloDelGiorno && collegamenti}
-      <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola del ${dataTesto}`}>
+      <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label={`Scuola ${delGiorno}`}>
         {inClasse.length > 0 && (
-          <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} ${giorno === partita.dataGioco ? 'oggi' : 'quel giorno'}`} onClick={() => setAperta('classe')} aria-label={`Domande in classe del ${dataTesto}: ${inClasse.length}`} />
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Domande in classe" dettaglio={`${inClasse.length} ${giorno === partita.dataGioco ? 'oggi' : 'quel giorno'}`} onClick={() => setAperta('classe')} aria-label={`Domande in classe ${delGiorno}: ${inClasse.length}`} />
         )}
         {dEsame.length > 0 && (
-          <PulsanteVisivo compatto icona={<IconaAzione chiave="esame-primo" dimensione={20} />} titolo="Esame" dettaglio={`${dEsame.length} domande`} onClick={() => setAperta('esame')} aria-label={`Domande d’esame del ${dataTesto}: ${dEsame.length}`} />
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="esame-primo" dimensione={20} />} titolo="Esame" dettaglio={`${dEsame.length} domande`} onClick={() => setAperta('esame')} aria-label={`Domande d’esame ${delGiorno}: ${dEsame.length}`} />
         )}
         {cruciOggi && (
-          <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
+          <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba ${delGiorno}`} />
         )}
         {letturaFallita && (
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Domande e cruciverba non letti: riprova"

@@ -91,7 +91,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
         <ul className="m-0 pl-4 tabular-nums">{pronte.map((d, i) => <li key={i}>{d}</li>)}</ul>
       </div>}
       {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
-      {incerto && <p role="alert" className="m-0 text-warning">Il gesto resta nel registro delle operazioni: lì puoi verificarne in sola lettura le ricevute; il comando non viene ripetuto. <Link className="touch inline-flex items-center" to="/impostazioni">Apri il registro delle operazioni</Link></p>}
+      {incerto && <p role="alert" className="m-0 text-warning">L’operazione non è confermata e resta nell’elenco «Operazioni da completare»: lì la controlli, e il comando non si ripete da solo. <Link className="touch inline-flex items-center" to="/impostazioni">Apri le operazioni da completare</Link></p>}
     </div>
   </Modal>;
 }

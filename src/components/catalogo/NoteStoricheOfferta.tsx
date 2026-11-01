@@ -55,7 +55,8 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
   const vuota = !testo.trim();
   return <div className="min-w-0">
     <p className="m-0 whitespace-pre-line break-words"><strong>Nota storica della fonte. </strong>{attuale.testo}</p>
-    <p className="m-0 break-words text-text-secondary">{attuale.fonte ? `Fonte: ${attuale.fonte} · ` : ''}versione {attuale.versione}{!IN_RILASCIO && attuale.modificata ? ' · modificata' : ''}</p>
+    {/* L7-01/L7-04: la fonte serve a chi corregge (nel rilascio no, D10); il numero di revisione della nota non informa nessuno */}
+    {!IN_RILASCIO && (attuale.fonte || attuale.modificata) && <p className="m-0 break-words text-text-secondary">{[attuale.fonte && `Fonte: ${attuale.fonte}`, attuale.modificata && 'modificata'].filter(Boolean).join(' · ')}</p>}
     {!IN_RILASCIO && <div className="mt-1 flex flex-wrap gap-2">
       <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={() => apri('modifica')} />
       {attuale.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => apri('ripristina')} />}

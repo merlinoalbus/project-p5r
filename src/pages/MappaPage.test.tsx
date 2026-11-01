@@ -235,11 +235,11 @@ describe('MappaPage', () => {
     expect(carte.map((c) => c.querySelector('.chip.chip--attivo')?.textContent)).toEqual(['5 pin', 'nessun pin', '3 pin']);
     // il riquadro non sta sopra il disegno (copriva un angolo della pianta): sta nella riga del titolo
     expect(carte[0].querySelector('.relative .chip')).toBeNull();
-    const gruppo = within(screen.getByRole('region', { name: 'Fogli dell’estrazione senza nome' }));
-    const apri = gruppo.getByRole('button', { name: 'Mostra i fogli dell’estrazione senza nome · 1' });
+    const gruppo = within(screen.getByRole('region', { name: 'Planimetrie senza nome e senza pin' }));
+    const apri = gruppo.getByRole('button', { name: 'Mostra le planimetrie senza nome e senza pin · 1' });
     expect(apri).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(apri);
-    expect(within(gruppo.getByRole('list', { name: 'Fogli dell’estrazione senza nome di Palazzo di Kamoshida' })).getAllByRole('listitem')).toHaveLength(1);
+    expect(within(gruppo.getByRole('list', { name: 'Planimetrie senza nome e senza pin di Palazzo di Kamoshida' })).getAllByRole('listitem')).toHaveLength(1);
   });
 
   // UX2-15 (L2, segnalazione dell'utente): in Mappe una sola barra, quella della pagina. Il pannello del luogo non ha riquadri scorrevoli

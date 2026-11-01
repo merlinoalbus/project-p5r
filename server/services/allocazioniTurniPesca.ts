@@ -12,7 +12,7 @@ export interface AllocazioneTurnoPesca {
 const campi=['versione','partitaId','turnoUid','sessioneId','attivita','ordine','firmaOriginaria','turnoPrimaRAW','turnoDopoRAW'];
 const uid=(v:unknown):v is string=>typeof v==='string'&&/^[0-9a-f]{32}$/.test(v);
 const oggetto=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
-const conflitto=():never=>{throw httpErrors.conflict('pesca-allocazione-turno-incoerente','La prova durevole del raccordo del turno non è integra. Nessun UID viene rimosso o riassegnato.');};
+const conflitto=():never=>{throw httpErrors.conflict('pesca-allocazione-turno-incoerente','Il collegamento del turno di pesca non è integro: nessun turno viene tolto o riassegnato.');};
 const idAllocazione=(p:number,id:string):string=>firmaPesca({namespace:'pesca-allocazione-turno-v1',partitaId:p,turnoUid:id}).slice(0,32);
 const senzaUid=(r:RawTurno):RawTurno=>Object.fromEntries(Object.entries(r).filter(([k])=>k!=='uid'));
 

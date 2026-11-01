@@ -6,7 +6,7 @@
 // seconda tabella dei mesi, con lo stesso nome e un'altra forma, e una seconda «MM-GG → GG mese».
 // ============================================================
 
-import { MESI_GIOCO, dataLeggibile } from '../../shared/condizioniSpillo';
+import { MESI_GIOCO, dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo';
 
 /** I nomi dei mesi dell'anno scolastico (Aprile … Marzo), con l'iniziale maiuscola, per le schede del calendario. */
 export const NOMI_MESI_GIOCO: readonly string[] = MESI_GIOCO.map((m) => m.nome.charAt(0).toUpperCase() + m.nome.slice(1));
@@ -28,11 +28,5 @@ export function dataGiocoBreve(data: string): string {
   return mese && g && /^\d{2}$/.test(g) ? `${Number(g)} ${mese.nome.slice(0, 3)}` : data;
 }
 
-/** La data con l'articolo davanti, apostrofato davanti a «8» e «11» (che si leggono «otto», «undici»): «il 12 aprile»,
- *  «l'11 aprile»; con la preposizione: «del 12» / «dell'11», «al 12» / «all'11», «dal 12» / «dall'11». */
-export function dataGiocoConArticolo(data: string, preposizione: '' | 'di' | 'a' | 'da' = ''): string {
-  const testo = dataGiocoTesto(data);
-  const vocale = /^(8|11)\s/.test(testo);
-  const articolo = preposizione === 'di' ? (vocale ? 'dell’' : 'del ') : preposizione === 'a' ? (vocale ? 'all’' : 'al ') : preposizione === 'da' ? (vocale ? 'dall’' : 'dal ') : (vocale ? 'l’' : 'il ');
-  return articolo + testo;
-}
+/** La data con l'articolo davanti («il 12 aprile», «dell'11 aprile»): la stessa resa che usa il server, da `shared/condizioniSpillo`. */
+export const dataGiocoConArticolo = (data: string, preposizione: '' | 'di' | 'a' | 'da' = ''): string => dataConArticolo(data, preposizione);

@@ -22,7 +22,7 @@ import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti, strumentoDi } from '../../shared/esitiAttivita.js';
-import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { dataConArticolo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
 import { simboliNote } from '../../shared/note.js';
 import { normalizzaPrezzoPerFascia, prezzoNellaFascia, type FasciaPrezzo, type PrezzoPerFascia } from '../../shared/catalogo.js';
@@ -48,7 +48,7 @@ function correzioneARango(partitaId: number | undefined, confidente: string, ran
   if (partitaId === undefined) return '';
   const r = prepared("SELECT data, fascia FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango = ? AND origine = 'pagina' ORDER BY id DESC LIMIT 1")
     .get(partitaId, confidente, rango) as { data: string; fascia: string } | undefined;
-  return r ? ` — segnato a mano dalla pagina Confidenti${r.data ? ` il ${r.data}${r.fascia ? ` (${r.fascia})` : ''}` : ''}` : '';
+  return r ? ` — segnato a mano dalla pagina Confidenti${r.data ? ` ${dataConArticolo(r.data)}${r.fascia ? ` (${r.fascia})` : ''}` : ''}` : '';
 }
 
 /** I semafori il cui dettaglio non nomina l'oggetto della condizione («Ancora da completare», «Segna l'articolo…»): la frase completa

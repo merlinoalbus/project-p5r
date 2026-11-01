@@ -22,6 +22,9 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+/** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * La carta di un personaggio: immagine (quella del Confidente se lo è, altrimenti il ritratto),
  * nome, suggerimento, nome in codice, arcano, ruolo e le sue Persona collegate al compendio. «Più
@@ -33,7 +36,7 @@ function Personaggio({ p, idCompendio, onModificato, conId }: { p: PersonaggioDt
   const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
   /** Il segno «(fonte secondaria)» se quel campo del personaggio non viene dalla guida italiana, altrimenti niente. */
-  const nota = (campo: string) => (secondari.has(campo) ? <span className="testo-12 text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
+  const nota = (campo: string) => (!IN_RILASCIO && secondari.has(campo) ? <span className="testo-12 text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
     <li id={conId ? `elemento-${p.chiave}` : undefined} className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
       {/* stesso riquadro per tutti: i Confidenti usano la loro immagine, gli altri (Protagonista, Stanza di Velluto, Jose) il ritratto del personaggio, caricabile allo stesso modo */}
@@ -62,7 +65,7 @@ function Personaggio({ p, idCompendio, onModificato, conId }: { p: PersonaggioDt
             {(p.doppiatori.jp || p.doppiatori.en) && <p className="m-0"><strong>Doppiatori:</strong> {[p.doppiatori.jp ? `JP ${p.doppiatori.jp}` : null, p.doppiatori.en ? `EN ${p.doppiatori.en}` : null].filter(Boolean).join(' · ')}{nota('doppiatori')}</p>}
             <div className="flex flex-wrap gap-2 items-center">
               {p.confidente && <CollegamentoVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${p.confidente}`} />}
-              {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
+              {!IN_RILASCIO && p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           </div>
         )}

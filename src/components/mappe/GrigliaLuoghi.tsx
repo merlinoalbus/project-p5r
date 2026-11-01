@@ -44,10 +44,12 @@ function suggerimentoConteggi(n: NodoGerarchiaDto): string | undefined {
 
 /** I segni del nodo: «Da verificare», «Non ancora aperto». */
 export function SegniNodo({ nodo }: { nodo: NodoGerarchiaDto }) {
-  if (!nodo.daVerificare && nodo.disponibile !== false) return null;
+  // D10 (L7-01): «Da verificare» è un segno per chi prepara i dati, nel rilascio non c'è
+  const daVerificare = !IN_RILASCIO && nodo.daVerificare;
+  if (!daVerificare && nodo.disponibile !== false) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
-      {nodo.daVerificare && <span className="chip chip--attivo" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
+      {daVerificare && <span className="chip chip--attivo" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
       {nodo.disponibile === false && <span className="chip" title={nodo.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
     </div>
   );

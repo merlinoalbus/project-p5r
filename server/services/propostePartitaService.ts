@@ -184,7 +184,7 @@ function saldo(partita: number, causa: Causa, t: Target): SaldoBeneficioDto {
       const richiesta=leggiOggettoRegistro(operazione!.payload_json,'payload della decisione'),decisione=richiesta.decisione as Record<string,unknown>|undefined;
       if(documento.decisione!==app.decisione)throw httpErrors.conflict('saldo-incoerente','Payload e ricevuta della decisione non coincidono.');
       if(app.decisione==='trasferimento'){
-        if(jsonCanonico(richiesta)!==jsonCanonico({tipo:'trasferimento',...(app.trasferimento as object)}))throw httpErrors.conflict('saldo-incoerente','Il payload del trasferimento non coincide con la prova.');
+        if(jsonCanonico(richiesta)!==jsonCanonico({tipo:'trasferimento',...(app.trasferimento as object)}))throw httpErrors.conflict('saldo-incoerente','Il trasferimento richiesto non corrisponde a quello registrato: niente è stato cambiato.');
       }else{
         if(richiesta.operazioneId!==app.operazioneId||!decisione||decisione.tipo!==app.decisione)throw httpErrors.conflict('saldo-incoerente','La decisione non coincide con l’operazione registrata.');
         if(app.decisione==='gia-conteggiata'&&(decisione.quantita!==Math.abs(r.delta_riconosciuto)||jsonCanonico(decisione.proposta)!==jsonCanonico({id:r.id,uid:r.uid})))throw httpErrors.conflict('saldo-incoerente','Il riconoscimento non coincide con quantità e identità approvate.');
@@ -517,9 +517,9 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
     } else if(r.decisione.tipo==='applica-effetto') {
       if(p.tipo!=='effetto-voce'||!p.applicabile)throw httpErrors.conflict('effetto-non-applicabile','Il raccordo della spunta non è più applicabile.');
       const effetto=p.dati.effetto as {tipo?:string}|undefined;
-      if(effetto?.tipo==='pesca'){if(!r.decisione.pesca||!r.decisione.revisionePescaAttesa||r.decisione.acquisto!==undefined||r.decisione.revisioneAcquistiAttesa!==undefined)throw httpErrors.badRequest('pesca-richiesta','La pesca richiede sessione completa e token, senza un acquisto alternativo.');}
+      if(effetto?.tipo==='pesca'){if(!r.decisione.pesca||!r.decisione.revisionePescaAttesa||r.decisione.acquisto!==undefined||r.decisione.revisioneAcquistiAttesa!==undefined)throw httpErrors.badRequest('pesca-richiesta','Per la pesca serve la visita completa, rivista nell’anteprima, e nessun acquisto al suo posto.');}
       else if(r.decisione.pesca!==undefined||r.decisione.revisionePescaAttesa!==undefined)throw httpErrors.badRequest('pesca-inattesa','Questo effetto non dichiara una visita di pesca.');
-      if(effetto?.tipo==='acquisto'){if(!r.decisione.acquisto||!r.decisione.revisioneAcquistiAttesa)throw httpErrors.badRequest('acquisto-richiesto','Una consumazione richiede acquisto completo e token.');}
+      if(effetto?.tipo==='acquisto'){if(!r.decisione.acquisto||!r.decisione.revisioneAcquistiAttesa)throw httpErrors.badRequest('acquisto-richiesto','Per una consumazione serve l’acquisto completo, rivisto nell’anteprima.');}
       else if(r.decisione.acquisto!==undefined||r.decisione.revisioneAcquistiAttesa!==undefined)throw httpErrors.badRequest('acquisto-inatteso','Questo effetto non è un acquisto.');
     } else if(r.decisione.tipo!=='scarta'&&p.tipo==='effetto-voce')throw httpErrors.badRequest('decisione-non-valida','Il già conteggiato si dichiara sulla proposta Dote o yen, dopo il raccordo.');
     if(r.decisione.tipo==='gia-conteggiata'&&(!Number.isInteger(r.decisione.quantita)||r.decisione.quantita<=0||r.decisione.quantita>Math.abs(p.delta)))throw httpErrors.badRequest('quantita-non-valida','Indica la parte di questa proposta già conteggiata, entro il delta mostrato.');
@@ -542,9 +542,9 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     const richiesta={operazioneId:r.operazioneId,decisione:r.decisione},payload=jsonCanonico(richiesta);
     const replay=prepared('SELECT payload_json,ricevuta_json FROM utente.proposta_operazione WHERE partita_id=? AND operazione_id=?').get(partita,r.operazioneId) as {payload_json:string;ricevuta_json:string}|undefined;
     if(replay){
-      if(replay.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','Questo ID appartiene a un’altra decisione.');
+      if(replay.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','Questa decisione è già stata registrata con dati diversi: rileggi la pagina e riprova.');
       const ricevuta=leggiOggettoRegistro(replay.ricevuta_json,'ricevuta operazione');
-      if(ricevuta.operazioneId!==r.operazioneId||ricevuta.partitaId!==partita||ricevuta.decisione!==r.decisione.tipo||jsonCanonico(ricevuta.proposte)!==jsonCanonico(riferimenti(r.decisione))||!Array.isArray(ricevuta.movimenti)||typeof ricevuta.decisaIl!=='string'||ricevuta.movimenti.some((x)=>!x||typeof x!=='object'||!['dote','yen','punti-pesca'].includes(String((x as Record<string,unknown>).tipo))||!Number.isInteger((x as Record<string,unknown>).prima)||!Number.isInteger((x as Record<string,unknown>).delta)||!Number.isInteger((x as Record<string,unknown>).dopo)||Number((x as Record<string,unknown>).prima)+Number((x as Record<string,unknown>).delta)!==Number((x as Record<string,unknown>).dopo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta della decisione non coincide con la propria identità o catena.');
+      if(ricevuta.operazioneId!==r.operazioneId||ricevuta.partitaId!==partita||ricevuta.decisione!==r.decisione.tipo||jsonCanonico(ricevuta.proposte)!==jsonCanonico(riferimenti(r.decisione))||!Array.isArray(ricevuta.movimenti)||typeof ricevuta.decisaIl!=='string'||ricevuta.movimenti.some((x)=>!x||typeof x!=='object'||!['dote','yen','punti-pesca'].includes(String((x as Record<string,unknown>).tipo))||!Number.isInteger((x as Record<string,unknown>).prima)||!Number.isInteger((x as Record<string,unknown>).delta)||!Number.isInteger((x as Record<string,unknown>).dopo)||Number((x as Record<string,unknown>).prima)+Number((x as Record<string,unknown>).delta)!==Number((x as Record<string,unknown>).dopo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta registrata non corrisponde a questa decisione: niente è stato cambiato.');
       return ricevuta as unknown as RicevutaDecisioneProposteDto;
     }
     // decisione A1 (2026-10-25): l'avanzamento si valuta una volta sola, alla fine, dopo tutte le riconciliazioni (le chiusure automatiche delle cause

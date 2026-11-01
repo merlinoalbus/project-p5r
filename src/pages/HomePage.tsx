@@ -23,6 +23,7 @@ import { StellaCinque } from '../components/shared/StellaCinque';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconMaschera } from '../components/shared/iconeGuida';
 import { slug } from '../../shared/slug';
+import { MOLTIPLICATORE_ARCANO, testoMoltiplicatore } from '../../shared/puntiConfidenti';
 import { avanzamentoDote } from '../utils/doti';
 import { useMedia } from '../hooks/useMedia';
 import { InvitoInstallazione } from '../components/layout/InvitoInstallazione';
@@ -35,8 +36,8 @@ import type { PartitaDto } from '../types';
  * diverse per la stessa cosa, nella stessa schermata. Ora si guarda l'asset e l'SVG resta la
  * riserva, come dappertutto. */
 const SCORCIATOIE = [
-  { to: '/compendio', asset: 'ui/nav-compendio', titolo: 'Compendio', dettaglio: '232 Persona', riserva: <IconBook size={22} /> },
-  { to: '/skill', asset: 'ui/nav-skill', titolo: 'Skill', dettaglio: '525 skill in italiano', riserva: <IconBolt size={22} /> },
+  { to: '/compendio', asset: 'ui/nav-compendio', titolo: 'Compendio', dettaglio: 'Le Persona di Royal', riserva: <IconBook size={22} /> },
+  { to: '/skill', asset: 'ui/nav-skill', titolo: 'Skill', dettaglio: 'Effetti in italiano', riserva: <IconBolt size={22} /> },
   { to: '/fusione', asset: 'ui/nav-fusione', titolo: 'Fusione', dettaglio: 'Regole degli Arcani', riserva: <IconFusion size={22} /> },
   { to: '/partita', asset: 'ui/nav-partita', titolo: 'Partita', dettaglio: 'Doti, Confidenti, scorta', riserva: <IconMask size={22} /> },
   { to: '/guida', asset: 'ui/nav-guida', titolo: 'Guida', dettaglio: 'Domande in classe, calendario, Confidenti', riserva: <IconStar size={22} /> },
@@ -115,7 +116,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               <FilaScorrevole className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
                 <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
                 {arcaniInScorta.map((a) => (
-                  <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
+                  <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ${testoMoltiplicatore(MOLTIPLICATORE_ARCANO)}`}>
                     <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
                     {a.nome}
                   </Link>

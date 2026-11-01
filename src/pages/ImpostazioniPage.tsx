@@ -57,7 +57,7 @@ export function ImpostazioniPage() {
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Impostazioni" sottotitolo={IN_RILASCIO
         ? 'Le tue partite, la grafica predefinita e il cestino delle tue partite.'
-        : 'Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API.'} />
+        : 'Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, backup dei dati di gioco, backup della tua istanza e documentazione delle API.'} />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
         <TitoloSezione>Grafica</TitoloSezione>
@@ -68,10 +68,10 @@ export function ImpostazioniPage() {
           <span className="flex flex-col gap-1">
             <span className="font-semibold testo-14">Usa la grafica predefinita in stile Persona 5 Royal</span>
             <span className="testo-13 text-text-secondary">
-              Carte degli Arcani, ritratti dei Confidenti, icone e sfondi inclusi nell'app (cartella <code>public/asset</code>). Le immagini che carichi tu hanno sempre la precedenza; se un elemento grafico manca, l'app mostra il testo. La scelta vale per questo dispositivo.
+              Carte degli Arcani, ritratti dei Confidenti, icone e sfondi inclusi nell'app. Le immagini che carichi tu hanno sempre la precedenza; se un elemento grafico manca, l'app mostra il testo. La scelta vale per questo dispositivo.
             </span>
             <span className="testo-12 text-text-muted">
-              {manifest === null ? 'Elenco degli asset in caricamento…' : manifest.totale === 0 ? 'Nessun asset predefinito incluso in questa versione: l\'app usa i segnaposto testuali.' : `${manifest.totale} asset predefiniti disponibili.`}
+              {manifest === null ? 'Elenco delle immagini in caricamento…' : manifest.totale === 0 ? 'Nessuna immagine predefinita in questa versione: l\'app mostra il testo.' : `${manifest.totale} immagini predefinite disponibili.`}
             </span>
           </span>
         </label>
@@ -134,6 +134,8 @@ export function ImpostazioniPage() {
       <section className="card testo-13 text-text-secondary">
         <TitoloSezione className="mb-1">Informazioni</TitoloSezione>
         <div>Versione app {config?.appVersion} — {config?.gioco}</div>
+        {/* L7-01 (D10): l'unico punto con le fonti dei dati, in entrambe le istanze; le pagine della guida non le ripetono */}
+        <div className="testo-link-esteso">Guida, calendario, Palazzi, città e risposte dalla guida italiana di <a href="https://www.allgamestaff.it/persona-5-royal/indice/" target="_blank" rel="noreferrer">allgamestaff.it</a>; meteo del calendario da wikiwiki.jp; negoziazione dalla raccolta di joyce-chen.</div>
         <div>Dati del compendio derivati da chinhodado/persona5_calculator (Apache-2.0) con verifica su aqiu384/megaten-fusion-tool (Unlicense). Persona 5 Royal è di ATLUS/SEGA.</div>
       </section>
     </div>

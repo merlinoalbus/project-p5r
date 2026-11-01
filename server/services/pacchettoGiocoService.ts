@@ -251,7 +251,7 @@ export function elencaDeposito(): DepositoFileDto {
 export function anteprimaPacchettoDaDeposito(nome: string): AnteprimaPacchettoDto {
   const percorso = percorsoNelDeposito(nome);
   const byte = fs.statSync(percorso).size;
-  if (byte < 100) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» è troppo piccolo per essere un pacchetto di gioco.`);
+  if (byte < 100) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» è troppo piccolo per essere un backup dei dati di gioco.`);
   // la firma sta nei primi sedici byte: si legge solo quella, non tutto il file
   if (!haFirmaSqlite(percorso)) throw httpErrors.badRequest('pacchetto-non-valido', `«${nome}» non è un database SQLite: nella cartella d'appoggio serve il file gioco.db scaricato dall'app.`);
   return conPacchettoAperto(percorso, (db) => anteprimaDalDatabase(db, byte, nome));
@@ -319,10 +319,10 @@ export async function importaPacchettoDaDeposito(nome: string): Promise<EsitoImp
 /** Il file è un pacchetto di gioco: SQLite integro, con i dati di gioco e senza partite. */
 function verificaPacchetto(percorso: string): void {
   if (fs.statSync(percorso).size < 100 || !haFirmaSqlite(percorso)) {
-    throw httpErrors.badRequest('pacchetto-non-valido', 'Il file non è un pacchetto di gioco: carica il file gioco.db scaricato da «Scarica il pacchetto di gioco».');
+    throw httpErrors.badRequest('pacchetto-non-valido', 'Il file non è un backup dei dati di gioco: usa il file gioco.db scaricato da «Scarica backup dati di gioco».');
   }
   const cosa = verificaDatabase(percorso);
-  if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite' ? 'Il file contiene solo partite: un pacchetto di gioco porta i dati di gioco.' : 'Il file contiene anche le partite (vecchio file unico): un pacchetto di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
+  if (cosa !== 'gioco') throw httpErrors.badRequest('pacchetto-con-partite', cosa === 'partite' ? 'Il file contiene solo partite: un backup dei dati di gioco porta i dati di gioco.' : 'Il file contiene anche le partite (vecchio file unico): un backup dei dati di gioco porta solo i dati di gioco. Per quel file usa «Backup e ripristino».');
 }
 
 /** Che cosa cambierebbe importando il pacchetto in `percorso` (un file locale). Lo verifica per intero e non sostituisce nulla. */
@@ -334,8 +334,8 @@ export function anteprimaPacchetto(percorso: string): AnteprimaPacchettoDto {
 /** Il confronto vero e proprio, su un pacchetto già aperto (in un temporaneo o dov'è depositato). */
 function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string): AnteprimaPacchettoDto {
   const tabelle = new Set((db.prepare("SELECT name FROM main.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  if (!tabelle.has('persona')) throw httpErrors.badRequest('pacchetto-non-valido', `${nome ? `«${nome}»` : 'Il file'} non è un pacchetto di gioco: mancano le tabelle di base.`);
-  if (tabelle.has('partita')) throw httpErrors.badRequest('pacchetto-con-partite', `${nome ? `«${nome}»` : 'Il file'} contiene anche le partite: un pacchetto di gioco porta solo i dati di gioco.`);
+  if (!tabelle.has('persona')) throw httpErrors.badRequest('pacchetto-non-valido', `${nome ? `«${nome}»` : 'Il file'} non è un backup dei dati di gioco: mancano le tabelle di base.`);
+  if (tabelle.has('partita')) throw httpErrors.badRequest('pacchetto-con-partite', `${nome ? `«${nome}»` : 'Il file'} contiene anche le partite: un backup dei dati di gioco porta solo i dati di gioco.`);
   const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
   const codice = versioneSchemaCodice();
   const istanza = getDb();
@@ -382,8 +382,8 @@ let rilasciaIstanza: (() => void) | null = null;
 
 /** Prende il lucchetto; rifiuta se un'altra importazione, o un ripristino dell'istanza, è già in corso. */
 function impegna(fase: FaseImportazionePacchetto): string {
-  if (inCorso) throw httpErrors.conflict('importazione-in-corso', `Un'importazione è già in corso da ${inCorso.iniziataIl} (fase: ${inCorso.fase}): attendi che finisca.`);
-  rilasciaIstanza = occupaIstanza("Un'importazione del pacchetto di gioco");
+  if (inCorso) throw httpErrors.conflict('importazione-in-corso', 'Un’importazione del backup dei dati di gioco è già in corso: attendi che finisca.');
+  rilasciaIstanza = occupaIstanza("Un'importazione del backup dei dati di gioco");
   contatore += 1;
   inCorso = { operazione: `${AVVIO}-${contatore}`, iniziataIl: new Date().toISOString(), fase };
   return inCorso.operazione;
