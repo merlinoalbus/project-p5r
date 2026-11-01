@@ -36,17 +36,20 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **Livello consigliato dei Palazzi (D5, 01/11)**: è un livello minimo e massimo di Royal, e il testo con il confronto delle fonti resta intero
   come nota storica del Palazzo, visibile e modificabile solo nella preparazione. Niente medie fra le fonti. I numeri vengono dalla guida
   italiana dove li dice; Kamoshida (minimo 10) e Niijima (minimo 45) vengono da una fonte secondaria, l'unico consiglio numerico scritto nel
-  testo di prima: restano per non perdere ciò che la scheda mostrava e sono da confermare da Roberto (fonte secondaria). Dove nessuna fonte dà
-  un consiglio (Kaneshiro, Shido, Memento) non c'è un numero.
+  testo di prima: restano visibili, confermati da Roberto (01/11, «Sì, mostrali»). Dove nessuna fonte dà un consiglio (Kaneshiro, Shido,
+  Memento) non c'è un numero.
 - **Una regola per dato (L8, 01/11)**: la capienza della scorta (gradini compresi) è un dato del blocco `capienza-scorta`, non il testo delle
   abilità di Igor; il giorno di un'infiltrazione è quello delle voci legate a lei, non una data nel nome; la cattura di una Persona è una
   regola sola per Compendio, alberi di fusione e cicli, con tre stati: provata (un'Ombra catturabile della guida la porta, oppure il compendio
   delle Persona le dà un'area dei Memento), esclusa per documento (speciale, Demone del Tesoro, DLC, del gruppo) e da verificare (nessun dato
-  dice dove si incontra); finché l'utente non decide, le da verificare restano catturabili come prima; «dove si incontra» è un servizio solo,
+  dice dove si incontra); le da verificare restano catturabili (Roberto, 01/11: «Restano catturabili»), e lo stato resta nel dato; «dove si
+  incontra» è un servizio solo,
   con le Ombre della guida e i dedali dei Memento del compendio che le Ombre non dicono (tutti per chi non ha Ombre, come Makami e Scathach),
   senza perdere nulla di quel che la scheda mostrava; «si ottiene per fusione» solo per chi non si incontra da nessuna parte; le Richieste non
-  hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date. I tratti hanno due testi (la guida nelle Sfide, la
-  traduzione della skill nella scheda Persona): restano tutti e due finché l'utente non sceglie.
+  hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date.
+- **Effetto dei tratti (Roberto, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
+  dell'effetto di ciascuno dei 90 tratti, mostrata ovunque (Sfide, scheda Persona, pagine delle skill, fusione, ricerca); si corregge e si
+  ripristina solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
 - **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
   intero ciò che la scheda del giorno mostra (voci con il rango atteso, effetti, trama e vincoli, «Giorno non coperto») sono tolti (181, con
   archivio), quelli che ne ripetevano una parte riscritti col resto (11); restano gli avvisi con un'informazione propria, i casi in dubbio e
@@ -135,7 +138,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   nome barrato in un grigio leggibile (D15, scelta C dell'utente, 01/11), anche nella Partita.
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
 - La pagina Partita mantiene il suo aspetto; eccezioni approvate: finestra «Regala» in Confidenti; riga «Giorno e fascia
-  dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**. Il modulo dei dati
+  dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
+  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (Roberto, 01/11). Il modulo dei dati
   della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
 - **Testi che informano (L7, 01/11)**: un testo visibile compare solo se dice qualcosa a chi gioca. Niente numeri scritti a mano che vanno
@@ -153,7 +157,8 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   la Persona nel compendio personale col livello più alto raggiunto.
 - Le descrizioni delle Persona sono testi originali in italiano sull'origine della figura, non il testo del compendio del gioco.
 - La resa italiana dell'effetto di una skill (condivisa fra skill con lo stesso testo) si modifica e si ripristina solo dalla pagina
-  Traduzioni. **(24/10)**
+  Traduzioni. **(24/10)** Fanno eccezione i tratti: il loro effetto è la descrizione della guida, corretta dalla riga del tratto nelle Sfide
+  (01/11).
 - I dati di gioco che nessuna pagina mostra restano correggibili con Ripristina dal servizio unico `/api/correzioni`, senza pagine
   nuove. **(24/10)**
 
@@ -174,8 +179,9 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - **Doti da segnare con «Applica» nella notifica (D7, 01/11)**: dove l'app dice soltanto «Da segnare nelle Doti» (letture, videogiochi,
   cruciverba, domande, incontri della pagina Confidenti, turni tolti), la notifica ha il pulsante «Applica», che le segna nella scheda; non
   nasce un promemoria persistente e niente si applica da solo.
-- Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro, e lo scalino in più vale solo con il
-  libro letto; l'interruttore «Libro» resta a mano **(01/11)**.
+- Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro e si può spegnere; senza il libro letto è
+  spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (Roberto, 01/11:
+  «Spento senza libro»). L'interruttore «Libro» resta a mano **(01/11)**.
 - **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
   «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.
 - Alla spunta di un incontro si chiede solo «Quante note hai ottenuto?» (le note dell'ultima risposta dopo il passaggio di rango): le

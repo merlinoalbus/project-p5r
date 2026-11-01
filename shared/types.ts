@@ -122,8 +122,10 @@ export interface SkillRiassuntoDto {
   elementoNome: string;
   costo: CostoSkillDto;
   effetto: string;
-  /** Resa italiana dell'effetto (sempre presente: il seed copre il 100%). */
+  /** Effetto da mostrare: la resa italiana di Traduzioni; per un tratto, la descrizione della guida (l'unica, decisione dell'utente del 01/11). */
   effettoNome: string;
+  /** Solo per un tratto della guida: il suo nome nella scheda «Tratti» delle Sfide, dove l'effetto si corregge. */
+  trattoGuida?: string;
 }
 
 /** Come una Persona impara una skill: a un livello, già dall'inizio (livello 0), con il risveglio, con i ranghi del Confidente, con la 3ª forma. */
@@ -702,6 +704,8 @@ export interface DoteSocialePartitaDto {
 export interface ModificatoriDotiDto {
   /** «Anima da cineasta» letto: film e DVD salgono di uno scalino (il server lo applica solo se è vero). */
   animaDaCineasta: boolean;
+  /** Il nome del libro nei dati (catalogo degli oggetti), per dire che cosa serve quando l'interruttore è spento; null se il libro manca. */
+  libroAnimaDaCineasta: string | null;
 }
 
 /** Incremento di una dote: punti assoluti, delta, oppure note (1–3) con modificatori. */

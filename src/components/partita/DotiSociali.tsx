@@ -53,12 +53,14 @@ export function DotiSociali({ partitaId }: Props) {
   const [scegliFortuna, setScegliFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
   // L8-11: «Anima da cineasta» si precompila dalle letture della partita (il libro letto lo accende); si può spegnere per le note che non
-  // vengono da un film o da un DVD. Senza il libro letto lo scalino non vale, anche acceso: lo dice il server, e l'anteprima fa lo stesso
+  // vengono da un film o da un DVD. Decisione dell'utente del 01/11 («Spento senza libro»): senza il libro letto l'interruttore è spento e
+  // disattivato (lo stile di disattivato dei pulsanti), con il motivo nel suggerimento; anche il server non applica lo scalino senza il libro
   const modificatori = useCarica(() => getModificatoriDoti(partitaId), [partitaId]);
   const animaLetto = modificatori.dati?.animaDaCineasta === true;
+  const nomeLibroAnima = modificatori.dati?.libroAnimaDaCineasta ?? 'Anima da cineasta';
   const [cinemaScelto, setCinema] = useState<boolean | null>(null);
-  const cinema = cinemaScelto ?? animaLetto;
-  const cinemaVale = cinema && animaLetto;
+  const cinema = animaLetto && (cinemaScelto ?? true);
+  const cinemaVale = cinema;
   const [selezionata, setSelezionata] = useState<string | null>(null);
   const sugg = useSuggerimenti();
 
@@ -139,7 +141,9 @@ export function DotiSociali({ partitaId }: Props) {
               <div className="flex flex-wrap justify-center gap-2">
                 <PulsanteVisivo id={`fortuna-${partitaId}`} disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={!fortuna.dati} aria-disabled={occupata === 'fortuna' || undefined} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo={`Fortuna ${xFortuna}`} dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label={`Fortuna ${xFortuna}: lettura della fortuna di Chihaya`} title={`Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ${xFortuna} (per difetto) per il resto del giorno`} />
                 <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio={`${simboliNote(3)} = ${puntiLibro} punti`} onClick={() => setLibro((v) => !v)} aria-label={`Libro: ${noteAParole(3)} valgono ${puntiLibro} punti`} title={`Libri a resa maggiorata: ${noteAParole(3)} valgono ${puntiLibro} punti`} />
-                <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema(!cinema)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title={`Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ${xFortuna} di Chihaya`} />
+                <PulsanteVisivo disposizione="colonna" attivo={cinema} disabled={!animaLetto} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema(!cinema)}
+                  aria-label={animaLetto ? 'Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)' : `Anima da cineasta: serve il libro «${nomeLibroAnima}», non ancora letto nella partita`}
+                  title={animaLetto ? `Libro «${nomeLibroAnima}» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ${xFortuna} di Chihaya` : `Serve il libro «${nomeLibroAnima}»: finché non è letto nella partita, film e DVD non salgono di scalino`} />
               </div>
             </div>
             {scegliFortuna && <div className="flex flex-col items-center gap-1.5" role="group" aria-label="Dote della Fortuna">

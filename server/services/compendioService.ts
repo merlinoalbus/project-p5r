@@ -22,6 +22,7 @@ import type { ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
 import { casaOmbra } from '../../shared/ombre.js';
 import { sqlStatoCattura } from './catturePersona.js';
+import { trattoDellaGuida } from './trattiGuida.js';
 import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -133,7 +134,14 @@ interface RigaOggetto { id: number; nome: string; categoria: string; vincolo: st
 export function skillDto(id: number): SkillRiassuntoDto | null {
   const s = prepared('SELECT * FROM skill WHERE id = ?').get(id) as { id: number; nome: string; elemento: string; costo_tipo: 'sp' | 'hp' | 'nessuno'; costo_valore: number; effetto: string } | undefined;
   if (!s) return null;
-  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
+  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, ...effettoMostrato(s) };
+}
+
+/** L'effetto da mostrare: per un tratto della guida il suo testo (l'unica descrizione, decisione dell'utente del 01/11) con la chiave della riga
+ *  delle Sfide dove si corregge; per le altre skill la resa italiana di Traduzioni. */
+export function effettoMostrato(s: { nome: string; elemento: string; effetto: string }): Pick<SkillRiassuntoDto, 'effettoNome' | 'trattoGuida'> {
+  const tratto = trattoDellaGuida(s);
+  return tratto ? { effettoNome: tratto.effetto, trattoGuida: tratto.chiave } : { effettoNome: t('effettoSkill', s.effetto) };
 }
 
 /** I riassunti di più skill con una query sola (id → riassunto; gli id che non esistono mancano): la scorta li chiedeva uno alla volta (P2'). */
@@ -154,7 +162,7 @@ function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto 
 function skillRiassunto(r: RigaSkill): SkillRiassuntoDto {
   return {
     id: r.id, nome: r.nome, nomeIt: t('skill', r.nome), elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento),
-    costo: costoDto(r.costo_tipo, r.costo_valore), effetto: r.effetto, effettoNome: t('effettoSkill', r.effetto),
+    costo: costoDto(r.costo_tipo, r.costo_valore), effetto: r.effetto, ...effettoMostrato(r),
   };
 }
 

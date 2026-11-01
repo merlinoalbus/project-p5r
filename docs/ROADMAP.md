@@ -116,16 +116,14 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo (335).
   - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
     da `area_chiave` (337). Giorno di un'infiltrazione: quello delle voci legate a lei.
-  - Cattura delle Persona: una regola sola per Compendio, alberi e cicli, con tre stati (provata, esclusa per documento, da verificare; le da
-    verificare restano catturabili). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento del compendio.
-  - Forca, Isolamento, Gemelle, cicli e Aojiru leggono i numeri dalle regole condivise. «Anima da cineasta» parte acceso col libro letto e vale
-    solo col libro letto. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi, bagno,
-    gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
+  - Cattura delle Persona: una regola sola per Compendio, alberi e cicli, con tre stati (provata, esclusa per documento, da verificare; le 62
+    da verificare restano catturabili, decisione di Roberto). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento.
+  - Effetto dei 90 tratti: un solo testo, la descrizione della guida, in Sfide, scheda Persona, skill e fusione; si corregge dalla riga delle Sfide.
+  - Livello consigliato: Kamoshida 10 e Niijima 45 visibili, confermati da Roberto.
+  - Forca, Isolamento, Gemelle, cicli e Aojiru leggono i numeri dalle regole condivise. «Anima da cineasta» parte acceso col libro letto ed è
+    spento e disattivato senza. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi,
+    bagno, gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
 - L8, in attesa della scelta di Roberto:
-  - tratti: due testi per 90 tratti, scelta di Roberto in attesa (la scheda «Tratti» delle Sfide mostra il testo della guida, la scheda
-    Persona e le skill la traduzione della skill);
-  - le 62 Persona «da verificare» (nessuna Ombra né area dei Memento: oggi catturabili come prima);
-  - i livelli consigliati di Kamoshida (minimo 10) e Niijima (minimo 45), da fonte secondaria: da confermare;
   - avvisi del giorno: le 13 frasi coperte solo da trama o vincoli (#70, #140, #161, #171, #181, #196–#203), i 10 casi in dubbio e i 13
     conflitti di dati del censimento (Richiesta di Kawakami sulla voce del 19 luglio, «Impeto dell'Arcano Sup.», lettera a Kamoshida, ranghi
     senza voce di Akechi e di Igor, nome del trofeo dell'11 ottobre, data del rango 1 di Hifumi, date di Medjed, scadenza del Palazzo di

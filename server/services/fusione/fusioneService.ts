@@ -6,6 +6,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { partitaNonTrovata, verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
+import { trattoDellaGuida } from '../trattiGuida.js';
 import { assicuraNonDelGruppo } from '../personeDelGruppo.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
@@ -364,7 +365,11 @@ export function ereditaDto(aId: number, bId: number, opz: OpzioniContesto & { li
     slot: an.slot,
     slotScelti: an.slotScelti,
     candidate: an.candidate.map((c): SkillEreditaDto => ({ ...skillDto(c), elementoNome: t('elementoSkill', c.elemento), da: c.da, ereditabile: c.ereditabile, giaAppresa: c.giaAppresa, motivo: c.motivo })),
-    tratti: an.tratti.map((x) => ({ id: x.skill.id, nome: x.skill.nome, nomeIt: t('skill', x.skill.nome), effettoNome: t('effettoSkill', (prepared('SELECT effetto FROM skill WHERE id = ?').get(x.skill.id) as { effetto: string }).effetto), da: x.da })),
+    // l'effetto di un tratto è quello della guida (`trattiGuida`, decisione dell'utente del 01/11); la resa di Traduzioni solo se la guida non lo descrive
+    tratti: an.tratti.map((x) => {
+      const s = prepared('SELECT nome, elemento, effetto FROM skill WHERE id = ?').get(x.skill.id) as { nome: string; elemento: string; effetto: string };
+      return { id: x.skill.id, nome: x.skill.nome, nomeIt: t('skill', x.skill.nome), effettoNome: trattoDellaGuida(s)?.effetto ?? t('effettoSkill', s.effetto), da: x.da };
+    }),
   };
 }
 

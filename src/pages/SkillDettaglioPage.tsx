@@ -15,6 +15,8 @@ import { MenuModifica } from '../components/shared/MenuModifica';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { etichettaApprendimento } from '../utils/apprendimentoSkill';
+import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
+import { slug } from '../../shared/slug';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -38,9 +40,13 @@ export function SkillDettaglioPage() {
             </>}
             azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`la skill «${s.nomeIt}»`}>
               <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} etichetta="Testi della skill" onSalvato={() => void ricarica()} />
-              {/* la resa italiana dell'effetto è condivisa da tutte le skill con lo stesso testo: si modifica solo dalle Traduzioni */}
-              <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Traduzione dell’effetto"
-                to={`/impostazioni?${new URLSearchParams({ traduzione: 'effettoSkill', q: s.effetto }).toString()}`} />
+              {/* la resa italiana dell'effetto è condivisa da tutte le skill con lo stesso testo: si modifica solo dalle Traduzioni. L'effetto di un
+                  tratto è la descrizione della guida (decisione dell'utente del 01/11): si corregge dalla sua riga nella scheda «Tratti» delle Sfide */}
+              {s.trattoGuida
+                ? <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Effetto del tratto"
+                  to={`/guida/sfide?${new URLSearchParams({ scheda: 'tratti', [PARAMETRO_ELEMENTO]: slug(s.trattoGuida) }).toString()}`} />
+                : <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Traduzione dell’effetto"
+                  to={`/impostazioni?${new URLSearchParams({ traduzione: 'effettoSkill', q: s.effetto }).toString()}`} />}
             </MenuModifica>}>
             <p className="m-0 testo-15 min-w-0">{s.effettoNome}</p>
           </IntestazioneScheda>

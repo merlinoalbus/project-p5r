@@ -7,8 +7,8 @@ import { act, render, screen } from '@testing-library/react';
 import { DotiSociali } from './DotiSociali';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 
-const { getDoti, aggiornaDote, getFortuna, impostaFortuna } = vi.hoisted(() => ({ getDoti: vi.fn(), aggiornaDote: vi.fn(), getFortuna: vi.fn(), impostaFortuna: vi.fn() }));
-vi.mock('../../services/api', (vero) => moduloApi(vero, { getDoti, aggiornaDote, getFortuna, impostaFortuna }));
+const { getDoti, aggiornaDote, getFortuna, impostaFortuna, getModificatoriDoti } = vi.hoisted(() => ({ getDoti: vi.fn(), aggiornaDote: vi.fn(), getFortuna: vi.fn(), impostaFortuna: vi.fn(), getModificatoriDoti: vi.fn() }));
+vi.mock('../../services/api', (vero) => moduloApi(vero, { getDoti, aggiornaDote, getFortuna, impostaFortuna, getModificatoriDoti }));
 
 const fortunaSpenta = { attiva: false, dote: null, giorno: null, scaduta: false };
 const fortunaSuFascino = { attiva: true, dote: 'fascino', giorno: '04-12', scaduta: false };
@@ -31,6 +31,8 @@ beforeEach(() => {
   aggiornaDote.mockReset();
   getFortuna.mockReset().mockResolvedValue(fortunaSpenta);
   impostaFortuna.mockReset().mockResolvedValue(fortunaSuFascino);
+  // L8-11: di base il libro «Anima da cineasta» non è letto (interruttore spento e disattivato)
+  getModificatoriDoti.mockReset().mockResolvedValue({ animaDaCineasta: false, libroAnimaDaCineasta: 'Anima da cineasta' });
 });
 
 describe('DotiSociali', () => {
@@ -62,13 +64,14 @@ describe('DotiSociali', () => {
   });
 
   it('«Anima da cineasta» alza di uno scalino l’anteprima e viene inviato al backend', async () => {
+    // L8-11: col libro letto l'interruttore parte acceso (senza libro è spento e disattivato)
+    getModificatoriDoti.mockResolvedValue({ animaDaCineasta: true, libroAnimaDaCineasta: 'Anima da cineasta' });
     getDoti.mockResolvedValue([dote(0, 1, 'Indifferente', 6)]);
     aggiornaDote.mockResolvedValue(dote(3, 1, 'Indifferente', 6));
     render(<DotiSociali partitaId={1} />);
     await screen.findByText('Rango 1 · Indifferente');
-    await act(async () => { screen.getByRole('button', { name: /Anima da cineasta/ }).click(); });
     // 2→3, 3→5, 5→7
-    expect(screen.getByLabelText('Fascino: aggiungi 1 nota (3 punti)')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Fascino: aggiungi 1 nota (3 punti)')).toBeInTheDocument();
     expect(screen.getByLabelText('Fascino: aggiungi 2 note (5 punti)')).toBeInTheDocument();
     expect(screen.getByLabelText('Fascino: aggiungi 3 note (7 punti)')).toBeInTheDocument();
     // con la fortuna, dopo il cinema: 3→4, 5→7, 7→10

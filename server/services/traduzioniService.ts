@@ -15,6 +15,7 @@ import type { TraduzioneDto } from '../../shared/types.js';
 import Database from 'better-sqlite3';
 import { percorsoPacchettoDb } from './pacchetto/pacchettoGioco.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { effettiDeiTrattiDellaGuida } from './trattiGuida.js';
 
 interface RigaTraduzione {
   ambito: string;
@@ -95,13 +96,24 @@ export function elencaTraduzioni(filtro: { ambito?: string; q?: string; soloUten
     parametri.push(`%${filtro.q}%`, `%${filtro.q}%`);
   }
   if (filtro.soloUtente) condizioni.push("fonte = 'utente'");
-  const where = condizioni.length ? `WHERE ${condizioni.join(' AND ')}` : '';
+  // le rese degli effetti dei tratti della guida non si leggono più (`trattiGuida`): non compaiono, così non c'è un secondo testo da correggere
+  condizioni.push("NOT (ambito = 'effettoSkill' AND chiave IN (SELECT value FROM json_each(?)))");
+  parametri.push(JSON.stringify([...effettiDeiTrattiDellaGuida()]));
+  const where = `WHERE ${condizioni.join(' AND ')}`;
   return (getDb().prepare(`SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione ${where} ORDER BY ambito, chiave`).all(...parametri) as RigaTraduzione[]).map(versoDto);
 }
 
-/** Ambiti presenti con il numero di voci. */
+/** Ambiti presenti con il numero di voci (senza le rese degli effetti dei tratti della guida, che non si mostrano). */
 export function elencaAmbiti(): Array<{ ambito: string; voci: number; modificate: number }> {
-  return prepared("SELECT ambito, COUNT(*) AS voci, SUM(CASE WHEN fonte = 'utente' THEN 1 ELSE 0 END) AS modificate FROM traduzione GROUP BY ambito ORDER BY ambito").all() as Array<{ ambito: string; voci: number; modificate: number }>;
+  return prepared(`SELECT ambito, COUNT(*) AS voci, SUM(CASE WHEN fonte = 'utente' THEN 1 ELSE 0 END) AS modificate FROM traduzione
+    WHERE NOT (ambito = 'effettoSkill' AND chiave IN (SELECT value FROM json_each(?))) GROUP BY ambito ORDER BY ambito`).all(JSON.stringify([...effettiDeiTrattiDellaGuida()])) as Array<{ ambito: string; voci: number; modificate: number }>;
+}
+
+/** 409 se la voce è la resa dell'effetto di un tratto della guida: l'effetto di un tratto si corregge solo dalla sua riga nelle Sfide. */
+function rifiutaEffettoDiTratto(ambito: string, chiave: string): void {
+  if (ambito === 'effettoSkill' && effettiDeiTrattiDellaGuida().has(chiave)) {
+    throw httpErrors.conflict('effetto-di-un-tratto', 'L’effetto di un tratto è la descrizione della guida: si corregge dalla scheda «Tratti» delle Sfide.');
+  }
 }
 
 /**
@@ -116,6 +128,7 @@ const MARCA_CREATA = '{"creataDaUtente":true}';
 
 /** Imposta la resa italiana di una voce (diventa fonte='utente'); negli ambiti creabili la scrive anche se la riga non c'è ancora (upsert, riga marcata come creata). */
 export function aggiornaTraduzione(ambito: string, chiave: string, testo: string): TraduzioneDto {
+  rifiutaEffettoDiTratto(ambito, chiave);
   const esiste = prepared('SELECT 1 FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave);
   if (!esiste) {
     const valida = AMBITI_CREABILI[ambito];
@@ -130,6 +143,7 @@ export function aggiornaTraduzione(ambito: string, chiave: string, testo: string
 
 /** Ripristina la resa della guida, letta dal pacchetto di gioco del repository (fonte torna 'seed'). */
 export function ripristinaTraduzione(ambito: string, chiave: string, pacchetto: string = percorsoPacchettoDb()): TraduzioneDto {
+  rifiutaEffettoDiTratto(ambito, chiave);
   const esiste = prepared('SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaTraduzione | undefined;
   if (!esiste) throw httpErrors.notFound('traduzione-non-trovata', `Nessuna voce per ${ambito}/${chiave}.`);
   // una riga creata dall'utente non esisteva nella guida: ripristinarla vuol dire toglierla (la risposta la dà com'era, con `rimossa`)

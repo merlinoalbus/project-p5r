@@ -170,7 +170,9 @@ router.get('/:id/doti', validate({ params: paramsPartita }), (req, res) => {
 router.get('/:id/doti/modificatori', validate({ params: paramsPartita }), (req, res) => {
   const id = Number(req.params.id);
   verificaPartita(id);
-  res.json({ animaDaCineasta: haAnimaDaCineasta(id) } satisfies ModificatoriDotiDto);
+  // il nome del libro come lo dice il catalogo (o la riga del libro), per il suggerimento dell'interruttore spento
+  const libro = prepared("SELECT COALESCE(c.nome, l.nome) AS nome FROM libro l LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave WHERE l.chiave = 'anima-da-cineasta'").get() as { nome: string } | undefined;
+  res.json({ animaDaCineasta: haAnimaDaCineasta(id), libroAnimaDaCineasta: libro?.nome ?? null } satisfies ModificatoriDotiDto);
 });
 router.patch('/:id/doti/:chiave', validate({ params: paramsPartitaChiave, body: bodyDote }), (req, res) => {
   res.json(aggiornaDote(Number(req.params.id), String(req.params.chiave), req.body));
