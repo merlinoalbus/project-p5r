@@ -117,10 +117,12 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     // i punti contano dove il Confidente li conta (rango 1–9 con punti necessari): altrove il regalo si registra e basta
     const conPunti = prima.rango > 0 && prima.rango < 10 && prima.puntiNecessari !== null && prima.puntiNecessari > 0;
     let punti = 0;
+    let puntiDopo = prima.punti;
     if (conPunti) {
       const dopo = aggiornaConfidente(partitaId, confidente, { regalo: true, reazioneRegalo: reazione, bonusArcano: richiesta.bonusArcano, invito: richiesta.invito });
       nuovaGenerazione(partitaId, confidente); // R10-11: un regalo non è un evento del Diario: la base del registro cronologico riparte da qui
       punti = Math.round((dopo.punti - prima.punti) * 100) / 100;
+      puntiDopo = dopo.punti;
     }
     const { id, causa } = inserisciConsegna(partitaId, confidente, {
       catalogo, nome: oggetto.nome, puntiDati: conPunti ? punti : null, rangoAlRegalo: conPunti ? prima.rango : null, acquistoArticolo: articolo, registroId,
@@ -138,7 +140,8 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     const copia = articolo ? ' Segnato anche come comprato.' : copiaConsumata ? ' Usata una copia posseduta.' : '';
     registraEvento(partitaId, 'regalo', `${comeDato} ${conf.nome}: ${oggetto.nome}`,
       `Reazione ${testoReazione(reazione)}. ${conPunti ? `+${punti} punti.` : 'Nessun punto: il rango di questo Confidente non li conta.'}${copia}${quando}`,
-      { confidente, catalogo, consegna: id, reazione, modo, punti, acquisto: articolo, ...(momento.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
+      // L10-05: rango e punti di subito dopo il regalo dicono a «Annulla ultimo» se è ancora l'ultima registrazione (`ultimoAnnullabileConfidente.ts`)
+      { confidente, catalogo, consegna: id, reazione, modo, punti, rango: prima.rango, puntiDopo, acquisto: articolo, ...(momento.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     return { confidente: confidenteDellaPartita(partitaId, confidente), punti, acquistato: articolo, consegna: { id, catalogo, reazione, copiaConsumata, modo } };
   })();

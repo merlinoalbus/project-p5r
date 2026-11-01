@@ -5,7 +5,7 @@
 import type {
   CapienzaScortaDto, CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { DivergenzaDto, EsitoRegaloDto, IncensoIsolamentoDto, ModificatoriDotiDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
+import type { AnnulloUltimoConfidenteDto, DivergenzaDto, EsitoRegaloDto, IncensoIsolamentoDto, ModificatoriDotiDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -88,6 +88,11 @@ export const getConfidentiPartita =(id: number): Promise<ConfidentePartitaDto[]>
  *  tentativo, come per le PATCH (rilievo F7 della validazione, 2026-10-03). */
 export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati, { maxRetries: 0 });
+
+/** L10-05: «Annulla ultimo» del Confidente: toglie l'ultima registrazione annullabile letta dallo storico (`ultimoAnnullabile`: evento e
+ *  `creatoIl`), con le sue ricevute; 409 `niente-da-annullare` se nel frattempo non è più l'ultima. Una scrittura: nessun nuovo tentativo automatico. */
+export const annullaUltimoConfidente = (id: number, chiave: string, ultimo: { evento: number; creatoIl: string }): Promise<AnnulloUltimoConfidenteDto> =>
+  apiPost(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/annulla-ultimo`, { evento: ultimo.evento, creatoIl: ultimo.creatoIl }, { maxRetries: 0 });
 
 /** Il piazzamento agli esami (R9-08): lo legge il server per i punti dei sette Confidenti; `null` lo toglie. Idempotente. */
 export const impostaPiazzamentoEsame = (id: number, esame: string, piazzamento: PiazzamentoEsame | null): Promise<unknown> =>

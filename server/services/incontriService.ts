@@ -31,6 +31,8 @@ import { aggiornaConfidente, nomeDote } from './partiteService.js';
 import { puntiDote } from './puntiDoti.js';
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { verificaPartita } from './verificaPartita.js';
+import { registraEvento } from './storicoService.js';
+import { ultimoAnnullabile } from './ultimoAnnullabileConfidente.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
 
@@ -157,7 +159,7 @@ export function annullaIncontro(partitaId: number, inc: IncontroConfidenteDto): 
  * la Dote è del passaggio di rango). Dice le Doti che i passaggi registrati danno (o quelli tolti davano), da segnare a mano
  * (`doteIncontro`).
  */
-export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
+export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string, dati: ModificaConfidente, momentoDelleRisposte?: { data: string; fascia: string }): ConfidentePartitaDto {
   verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   return getDb().transaction(() => {
     const prima = rangoAttuale(partitaId, chiave);
@@ -166,6 +168,16 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
     nuovaGenerazione(partitaId, chiave); // R10-11: la correzione a mano è prioritaria: la base del registro cronologico riparte da qui
     const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string };
     const momento: MomentoIncontro = { data: partita.data_gioco ?? '', fascia: partita.fascia_gioco ?? '', origine: 'pagina' };
+    // L10-05: i punti aggiunti dalla pagina senza cambio di rango (una risposta, un'uscita) vanno nello storico con ciò che serve ad annullarli
+    // esattamente anche dopo un ricaricamento (`ultimoAnnullabileConfidente.ts`): l'aumento, il rango, i punti di subito dopo e il momento dell'incontro
+    const aumento = Math.round((dto.punti - puntiPrima) * 100) / 100;
+    if (dati.punti === undefined && dto.rango === prima && aumento > 0) {
+      const come = dati.noteRisposta !== undefined ? `Risposta da ${dati.noteRisposta} ${dati.noteRisposta === 1 ? 'nota' : 'note'}.` : dati.uscita ? 'Uscita insieme.' : 'Punti aggiunti.';
+      const quando = momento.data ? ` Giorno di gioco ${momento.data}${momento.fascia ? `, ${momento.fascia}` : ''}.` : '';
+      registraEvento(partitaId, 'confidente-punti', `${dto.nome} (${dto.arcanaNome}): +${aumento.toLocaleString('it-IT', { maximumFractionDigits: 2 })} punti`,
+        `${come} Segnato dalla pagina Confidenti.${quando}`,
+        { confidente: chiave, punti: aumento, rango: dto.rango, puntiDopo: dto.punti, origine: 'pagina', ...(dati.noteRisposta !== undefined ? { noteRisposta: dati.noteRisposta } : {}), ...(dati.uscita ? { uscita: true } : {}), data: momento.data, fascia: momento.fascia });
+    }
     const cambi: Array<{ chiave: string; nome: string; delta: number; note?: number }> = [];
     if (dto.rango > prima) {
       for (let r = prima + 1; r <= dto.rango; r++) for (const d of registraIncontro(partitaId, chiave, momento, r).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta, note: d.note });
@@ -175,9 +187,11 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
     } else if (dati.noteRisposta !== undefined || dati.uscita) {
       for (const d of registraIncontro(partitaId, chiave, momento, null, puntiPrima).doti) cambi.push({ chiave: d.chiave, nome: d.nome, delta: d.delta, note: d.note });
     } else if ((dati.deltaPunti ?? 0) < 0) {
-      // «Annulla ultimo»: tornati ai punti di prima delle risposte di questo momento, l'incontro non c'è stato
+      // «Annulla ultimo»: tornati ai punti di prima delle risposte di quel momento, l'incontro non c'è stato. Il momento è quello delle risposte
+      // annullate (L10-05: lo dice il loro evento nello storico, anche se nel frattempo la partita è andata avanti), altrimenti quello della partita
+      const delleRisposte = momentoDelleRisposte ?? momento;
       const r = prepared("SELECT * FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND data = ? AND fascia = ? AND origine = 'pagina' AND passaggio = 0 AND punti_prima IS NOT NULL ORDER BY id DESC LIMIT 1")
-        .get(partitaId, chiave, momento.data, momento.fascia) as (RigaIncontro & { punti_prima: number }) | undefined;
+        .get(partitaId, chiave, delleRisposte.data, delleRisposte.fascia) as (RigaIncontro & { punti_prima: number }) | undefined;
       if (r && dto.punti <= r.punti_prima + 0.001) cambi.push(...togliRiga(partitaId, r));
     }
     // più Doti uguali (passaggi multipli) si sommano in una riga, in punti; le note restano solo per la Dote di un passaggio solo
@@ -187,6 +201,7 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
       const s = somma.get(c.chiave);
       somma.set(c.chiave, s ? { chiave: c.chiave, nome: s.nome, delta: s.delta + c.delta } : { chiave: c.chiave, nome: c.nome, delta: c.delta, ...(c.note !== undefined ? { note: c.note } : {}) });
     }
-    return { ...dto, doteIncontro: [...somma.values()].filter((c) => c.delta !== 0) };
+    // L10-05: l'ultima registrazione annullabile si rilegge dopo l'evento appena scritto (il DTO di `aggiornaConfidente` è di prima)
+    return { ...dto, ultimoAnnullabile: ultimoAnnullabile(partitaId, chiave), doteIncontro: [...somma.values()].filter((c) => c.delta !== 0) };
   })();
 }

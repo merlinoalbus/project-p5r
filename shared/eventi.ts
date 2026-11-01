@@ -13,6 +13,8 @@ export const TIPI_EVENTO = [
   'dote-rango',
   'confidente-sbloccato',
   'confidente-rango',
+  // L10-05: i punti di una risposta o di un'uscita segnati dalla pagina Confidenti (quelli che «Annulla ultimo» toglie)
+  'confidente-punti',
   // L13 (O10-2): la relazione romantica con un Confidente iniziata o tolta nella partita
   'confidente-relazione',
   'regalo',
@@ -57,6 +59,7 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   'dote-rango': { nome: 'Rango di una Dote sociale', gruppo: 'doti' },
   'confidente-sbloccato': { nome: 'Confidente sbloccato', gruppo: 'confidenti' },
   'confidente-rango': { nome: 'Rango di un Confidente', gruppo: 'confidenti' },
+  'confidente-punti': { nome: 'Punti di un Confidente', gruppo: 'confidenti' },
   'confidente-relazione': { nome: 'Relazione romantica con un Confidente', gruppo: 'confidenti' },
   regalo: { nome: 'Regalo a un Confidente', gruppo: 'confidenti' },
   'compendio-registrata': { nome: 'Persona registrata nel compendio', gruppo: 'persona' },

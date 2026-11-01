@@ -11,7 +11,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto, paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -36,6 +36,7 @@ import { conCestinoPrivato, elencoCestinoPersonale, eliminaCestinoPrivato, ripri
 import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProvenienza, bodyAnnullaProvenienza, bodyAnteprimaRimozioneLegacy, bodyRimozioneLegacy, bodyAnteprimaDecisioneProposte, bodyDecisioneProposte } from '../schemas/acquisti.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
+import { annullaUltimoDelConfidente } from '../services/annullaUltimoConfidente.js';
 import { annullaRegalo, regala } from '../services/regaloAzioneService.js';
 import type { ModificaConfidente, ModificatoriDotiDto, RichiestaRegalo } from '../../shared/types.js';
 import { haAnimaDaCineasta } from '../services/puntiDoti.js';
@@ -214,6 +215,12 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
     return;
   }
   res.json(aggiornaConfidenteDallaPagina(Number(req.params.id), String(req.params.chiave), req.body));
+});
+
+/** L10-05: «Annulla ultimo» del cassetto del Confidente: toglie l'ultima registrazione annullabile, letta dallo storico, se è ancora l'evento dato. */
+router.post('/:id/confidenti/:chiave/annulla-ultimo', validate({ params: paramsPartitaChiave, body: bodyAnnullaUltimoConfidente }), (req, res) => {
+  const b = req.body as { evento: number; creatoIl: string };
+  res.json(annullaUltimoDelConfidente(Number(req.params.id), String(req.params.chiave), b.evento, b.creatoIl));
 });
 
 /** L6: «Invito avvenuto» (PUT) e «Annulla» (DELETE) per un invito di un Confidente (`<confidente>/<MM-GG>`); si registra solo con le condizioni

@@ -8,7 +8,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 
-const { getConfidentiPartita, aggiornaConfidente, getImmagini, confermaRequisitoConfidente, getRichieste, correggiRequisitoRichiesta } = vi.hoisted(() => ({
+const { getConfidentiPartita, aggiornaConfidente, annullaUltimoConfidente, getImmagini, confermaRequisitoConfidente, getRichieste, correggiRequisitoRichiesta } = vi.hoisted(() => ({
+  // L10-05: «Annulla ultimo» è la rotta propria, con l'ultima registrazione letta dallo storico (`ultimoAnnullabile`)
+  annullaUltimoConfidente: vi.fn(),
   getRichieste: vi.fn(),
   correggiRequisitoRichiesta: vi.fn(),
   confermaRequisitoConfidente: vi.fn(),
@@ -20,6 +22,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
   getConfidentiPartita,
   confermaRequisitoConfidente,
   aggiornaConfidente,
+  annullaUltimoConfidente,
   getImmagini,
   caricaImmagine: vi.fn(),
   eliminaImmagine: vi.fn(),
@@ -41,6 +44,7 @@ function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidenteParti
 beforeEach(() => {
   getConfidentiPartita.mockReset();
   aggiornaConfidente.mockReset();
+  annullaUltimoConfidente.mockReset();
   getImmagini.mockReset();
   getImmagini.mockResolvedValue([]);
 });
@@ -72,7 +76,9 @@ describe('ConfidentiPartita', () => {
 
   it('propone il bonus arcano dalla scorta e invia note, moltiplicatori e annulla ultimo', async () => {
     getConfidentiPartita.mockResolvedValue([confidente({ regaliFatti: [], personaArcanoInScorta: true })]);
-    aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 15, mancanti: 5 }));
+    // L10-05: la risposta del server porta l'ultima registrazione annullabile, letta dallo storico (l'evento della risposta appena segnata)
+    const ultimo = { evento: 41, creatoIl: '2026-11-01T10:00:00.000Z', tipo: 'punti' as const, punti: 15 };
+    aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 15, mancanti: 5, ultimoAnnullabile: ultimo }));
     render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
 
     const chip = await screen.findByRole('button', { name: 'Persona Carro ×1,5 · in scorta' });
@@ -92,9 +98,13 @@ describe('ConfidentiPartita', () => {
     await act(async () => { screen.getByRole('button', { name: 'Invito SMS ×1,2' }).click(); });
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (13,5 punti)')).toBeInTheDocument();
 
-    aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 0, mancanti: 20 }));
+    // L10-05: l'annullo passa dalla rotta propria con l'evento dello storico (id e momento di scrittura), non più dal PUT con `deltaPunti`
+    annullaUltimoConfidente.mockResolvedValueOnce({ confidente: confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 0, mancanti: 20, ultimoAnnullabile: null }), annullato: { tipo: 'punti', punti: 15 } });
     await act(async () => { screen.getByRole('button', { name: /annulla l'ultimo incremento/ }).click(); });
-    expect(aggiornaConfidente).toHaveBeenLastCalledWith(1, 'ryuji', { deltaPunti: -15 });
+    expect(annullaUltimoConfidente).toHaveBeenLastCalledWith(1, 'ryuji', ultimo);
+    expect(aggiornaConfidente).toHaveBeenCalledTimes(1);
+    // annullato l'ultimo, niente da annullare: il pulsante si spegne
+    expect(screen.getByRole('button', { name: /annulla l'ultimo incremento/ })).toBeDisabled();
   });
 
   it('senza Persona in scorta il bonus è spento ma forzabile', async () => {

@@ -788,6 +788,33 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Solo nella risposta a una modifica dalla pagina Confidenti: le Doti che gli incontri registrati danno (o quelli tolti
    *  davano), da segnare a mano nelle Doti — l'app non le tocca. */
   doteIncontro?: DoteDaSegnareDto[];
+  /** L10-05: l'ultima registrazione del Confidente che «Annulla ultimo» toglie, letta dallo storico della partita (`evento_partita`); null se
+   *  non ce n'è una annullabile. Resta dopo un ricaricamento della pagina. */
+  ultimoAnnullabile?: UltimoAnnullabileConfidenteDto | null;
+}
+
+/**
+ * L10-05: l'ultima registrazione annullabile di un Confidente, dallo storico: i punti di una risposta o di un'uscita segnati dalla pagina
+ * Confidenti (evento `confidente-punti`) o un regalo dell'azione «Regala» (evento `regalo`, con la sua consegna). Vale solo finché il Confidente è
+ * allo stesso rango e con gli stessi punti di subito dopo quella registrazione: qualunque altro cambiamento dei punti la rende non annullabile.
+ */
+export interface UltimoAnnullabileConfidenteDto {
+  /** L'id dell'evento dello storico: `POST /api/partite/:id/confidenti/:chiave/annulla-ultimo` annulla solo se è ancora l'ultimo. */
+  evento: number;
+  /** Quando l'evento è stato scritto: con l'id lo identifica anche se, annullato, il suo id torna a un evento nuovo (gli id dello storico si riusano). */
+  creatoIl: string;
+  tipo: 'punti' | 'regalo';
+  /** I punti che la registrazione aveva dato (0 per un regalo a un rango che non conta i punti). */
+  punti: number;
+  /** Solo per un regalo: l'oggetto del catalogo e la consegna (`regalo_partita.id`). */
+  regalo?: string;
+  consegna?: number;
+}
+
+/** L10-05: l'esito di «Annulla ultimo»: il Confidente aggiornato (con le Doti da togliere a mano, se l'incontro se n'è andato) e che cosa è stato tolto. */
+export interface AnnulloUltimoConfidenteDto {
+  confidente: ConfidentePartitaDto;
+  annullato: { tipo: 'punti' | 'regalo'; punti: number; regalo?: string };
 }
 
 /**

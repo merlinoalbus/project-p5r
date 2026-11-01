@@ -254,6 +254,8 @@ export const bodyRegala = z.object({
 }).strict();
 /** Ondata 5: `id` = la consegna precisa da annullare (lo stesso oggetto si può ridare); senza, l'ultima di quell'oggetto a quel Confidente. */
 export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600), id: z.number().int().positive().optional() }).strict();
+/** L10-05: «Annulla ultimo» del cassetto del Confidente: l'evento dello storico che la pagina mostra come ultima registrazione annullabile. */
+export const bodyAnnullaUltimoConfidente = z.object({ evento: z.number().int().positive(), creatoIl: z.string().min(1).max(40) }).strict();
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 /** Ondata 5: una riga del registro degli acquisti della partita (annullo per riga). */
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });

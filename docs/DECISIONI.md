@@ -229,6 +229,11 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   nella finestra «Modifica» della partita. Un dato solo per i contenuti scaricabili: lo leggono la Fusione e le condizioni delle voci.
 - Lo storico della partita è scritto dal backend nella stessa transazione della modifica; ogni evento nato da una voce mostra la
   provenienza.
+- «Annulla ultimo» nel cassetto del Confidente si legge dallo storico, così non si perde ricaricando (D6, 01/11): annulla l'ultima
+  registrazione del Confidente (i punti di una risposta o di un'uscita segnati dalla pagina, o un regalo con la sua consegna) solo se rango e
+  punti sono ancora quelli di subito dopo; un cambio di rango o un'altra variazione dei punti la rendono non annullabile. Annullata, il suo
+  evento esce dallo storico e torna annullabile quella di prima. I punti segnati dalla pagina compaiono nello storico come «Punti di un
+  Confidente».
 
 ## 9. Diario (la guida giorno per giorno)
 - La giornata della guida è canone, in ordine esatto; le correzioni alle voci valgono per tutte le partite. Le date dei Palazzi seguono

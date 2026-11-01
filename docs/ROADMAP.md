@@ -139,6 +139,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   memoria e di processi su ogni container, frontend del rilascio in sola lettura, guardia intera del bundle nella costruzione dell'immagine;
   lo User-Agent senza il nome utente (D17). Non fatti per D11: intestazioni nell'nginx della preparazione, limite di frequenza e tetto di
   righe nel rilascio. Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
+- L10-05, prima parte fatta (D6): «Annulla ultimo» del cassetto del Confidente letto dallo storico, resta dopo un ricaricamento. Da fare la
+  seconda parte (un segno ben visibile quando l'invito ×1,2 è acceso), dopo lo schizzo approvato.
 - Aperti: L8 (le voci sopra), L10–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
