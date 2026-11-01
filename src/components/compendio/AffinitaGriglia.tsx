@@ -14,10 +14,29 @@ interface Props {
   etichetta?: string;
   /** Con `compatta`: le dieci caselle su una riga sola che si divide la larghezza (piastrella a riga del Compendio sul telefono). */
   fluida?: boolean;
+  /** L10-04: le caselle basse della piastrella orizzontale del Compendio (sigla a 12 px e segno piccolo), su una fila di dieci dove la
+   *  piastrella è larga e su due file di cinque dove è stretta (`.piastrella-persona__affinita`, che legge la larghezza della piastrella). */
+  piastrella?: boolean;
 }
 
 /** Griglia delle affinità: elemento in alto, codice colorato sotto. */
-export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità', fluida }: Props) {
+export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità', fluida, piastrella }: Props) {
+  if (piastrella) {
+    return (
+      <div className="piastrella-persona__affinita" role="group" aria-label={etichetta}>
+        {affinita.map((a) => {
+          const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
+          return (
+            <span key={a.elemento} className={`flex h-[34px] min-w-0 flex-col items-center justify-center gap-0.5 rounded testo-12 leading-none ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
+              {/* la sigla resta su una riga: nelle caselle da 21 px di 1280 «Arm» e «Nuc» andavano a capo (ne usciva «Ar / m») */}
+              <span style={{ color: coloreTestoElemento(a.elemento) }} className="whitespace-nowrap font-bold tracking-tighter">{a.elementoSigla}</span>
+              <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt={a.codiceNome} className="h-4 w-4 object-contain" fallback={<span>{a.codice === '-' ? '—' : a.codiceSigla}</span>} />
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
   if (compatta) {
     return (
       <div className={`flex gap-1 ${fluida ? 'flex-nowrap' : 'flex-wrap'}`} role="group" aria-label={etichetta}>

@@ -99,7 +99,7 @@ function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
 export function CaratteriEditor() {
   const elenco = useFontStore((s) => s.elenco);
   return (
-    <section className="card flex flex-col gap-3">
+    <section id="caratteri" className="card flex flex-col gap-3">
       <TitoloSezione>Caratteri</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Carica i tuoi font in stile Persona 5 (TTF, OTF, WOFF o WOFF2, fino a 4 MB): restano solo in questa istanza, non vengono mai pubblicati e li usi sotto la tua responsabilità secondo la loro licenza.

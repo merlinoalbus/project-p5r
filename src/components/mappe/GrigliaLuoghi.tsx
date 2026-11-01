@@ -27,6 +27,7 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 import { RicaricaLuoghi } from './ricaricaLuoghi';
 import { etichettaScendi, partiConteggi } from './paroleLuoghi';
 import { testoConteggiPin } from '../../utils/presentazioneMappa';
+import { percentualeSegnati } from '../../../shared/avanzamento';
 import type { NodoGerarchiaDto } from '../../types';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -62,6 +63,28 @@ export function ChipConteggi({ nodo }: { nodo: NodoGerarchiaDto }) {
   return (
     <div className="flex flex-wrap gap-1.5" title={suggerimentoConteggi(nodo)}>
       {parti.map((p) => <span key={p} className="chip">{p}</span>)}
+    </div>
+  );
+}
+
+/** L10-03: quanto è segnato di un Palazzo o di un dedalo nella partita, barra e «N su M punti segnati» con i numeri della sua pagina
+ *  (calcolati dal server con la stessa funzione: l'indice dei Palazzi e la scheda del dedalo). Senza partita il nodo non ha `avanzamento`
+ *  e la riga non c'è. */
+export function AvanzamentoNodo({ nodo }: { nodo: NodoGerarchiaDto }) {
+  const a = nodo.avanzamento;
+  // senza punti da segnare la riga non dice niente («0 su 0»): non c'è
+  if (!a || a.totale === 0) return null;
+  const percentuale = percentualeSegnati(a.segnati, a.totale);
+  // «completato» solo quando sono segnati tutti i punti (schizzo approvato): un Palazzo concluso nel gioco con dei punti ancora da
+  // segnare dice soltanto «N su M punti segnati»
+  const completato = a.segnati >= a.totale;
+  const testo = `${a.segnati} su ${a.totale} punti segnati`;
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="visore-mappa__progresso h-1.5" role="progressbar" aria-label={`${nodo.nome}: punti segnati`} aria-valuemin={0} aria-valuemax={a.totale} aria-valuenow={Math.min(a.segnati, a.totale)} aria-valuetext={`${testo}, ${percentuale}%`}>
+        <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
+      </span>
+      <span className={`testo-12 tabular-nums ${completato ? 'text-success-testo' : 'text-text-secondary'}`}>{testo}{completato ? ' · completato' : ''}</span>
     </div>
   );
 }
@@ -127,6 +150,7 @@ export function CartaLuogo({ nodo, percorso, onScendi }: { nodo: NodoGerarchiaDt
           </div>
           <SegniNodo nodo={nodo} />
           <ChipConteggi nodo={nodo} />
+          <AvanzamentoNodo nodo={nodo} />
           {nodo.tipo === 'area' && (nodo.accanto?.length ?? 0) > 0 && <Infiltrazioni titolo="Infiltrazioni:" elenco={nodo.accanto ?? []} />}
           <div className="mt-auto flex flex-wrap gap-2 pt-1">
             {nodo.casa && <CollegamentoVisivo to={nodo.casa} tono="primario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" aria-label={`Apri ${nodo.nome}`} />}

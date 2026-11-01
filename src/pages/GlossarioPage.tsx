@@ -2,9 +2,10 @@
 // GlossarioPage — termini della localizzazione italiana ufficiale (dalla guida) per categoria
 // ============================================================
 
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
+import { useFiltriIndirizzo } from '../hooks/useFiltriIndirizzo';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { getTermini, URL_TERMINI } from '../services/api';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -23,12 +24,14 @@ const idTermine = (chiave: string) => `elemento-${slug(chiave)}`;
 export function GlossarioPage() {
   useDocumentTitle('Glossario');
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getTermini(), [], { cacheUrl: URL_TERMINI });
-  const [q, setQ] = useState('');
-  const [categoria, setCategoria] = useState('');
+  // L10-04: ricerca e categoria nell'indirizzo (`?q=…&categoria=…`; `elemento` è già della ricerca globale, qui sotto)
+  const { valori: { q, categoria: categoriaChiesta }, imposta } = useFiltriIndirizzo({ q: '', categoria: '' });
   // `?elemento=<chiave>` (la «casa» di un termine nella ricerca globale) porta in vista il termine e lo evidenzia
   useElementoDaIndirizzo(!!dati);
 
   const categorie = useMemo(() => [...new Set((dati ?? []).map((t) => t.categoria))], [dati]);
+  // una categoria che i dati non hanno (indirizzo scritto a mano, o superato) vale come «Tutte»
+  const categoria = dati && !categorie.includes(categoriaChiesta) ? '' : categoriaChiesta;
   // L5-09: il campo segue subito la battuta, l'elenco (centinaia di termini, con filtro, ordine e raggruppamento) si rifà con il testo
   // «differito»: calcolo e disegno a priorità bassa, interrotti alla battuta dopo (stesso criterio di Compendio e Skill)
   const qDifferita = useDeferredValue(q);
@@ -57,11 +60,11 @@ export function GlossarioPage() {
       {/* L7-01/L7-09: la fonte sta solo in Impostazioni → Informazioni; dove si correggono i termini lo deve sapere solo chi prepara i contenuti */}
       <p className="m-0 testo-13 text-text-secondary max-w-[120ch]">Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese.{!IN_RILASCIO && ' Si correggono in Impostazioni → Traduzioni (ambito «termine»).'}</p>
       <div className="flex flex-wrap gap-2 items-center">
-        <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca in italiano o inglese…" />
+        <CampoRicerca valore={q} onCambia={(v) => imposta({ q: v })} segnaposto="Cerca in italiano o inglese…" />
         <div className="flex gap-1.5 flex-wrap">
-          <button type="button" className={`chip touch ${categoria === '' ? 'chip--attivo' : ''}`} onClick={() => setCategoria('')} aria-pressed={categoria === ''}>Tutte</button>
+          <button type="button" className={`chip touch ${categoria === '' ? 'chip--attivo' : ''}`} onClick={() => imposta({ categoria: '' }, { storia: true })} aria-pressed={categoria === ''}>Tutte</button>
           {categorie.map((c) => (
-            <button key={c} type="button" className={`chip touch ${categoria === c ? 'chip--attivo' : ''}`} onClick={() => setCategoria(c)} aria-pressed={categoria === c}>{nomeCategoriaTermine(c)}</button>
+            <button key={c} type="button" className={`chip touch ${categoria === c ? 'chip--attivo' : ''}`} onClick={() => imposta({ categoria: c }, { storia: true })} aria-pressed={categoria === c}>{nomeCategoriaTermine(c)}</button>
           ))}
         </div>
       </div>

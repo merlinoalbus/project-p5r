@@ -28,6 +28,7 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { schedaAccessoMondo } from '../utils/accessoMondo';
 import { soloPalazzi, testoLivelloConsigliato } from '../utils/palazzi';
 import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
+import { percentualeSegnati } from '../../shared/avanzamento';
 
 /**
  * Elenco dei Palazzi: carica i dungeon per la partita attiva tenendo solo i Palazzi (i Memento e
@@ -66,7 +67,7 @@ export function DungeonPage() {
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
                       {anello && (
                         <AnelloAvanzamento quota={anello.quota} dimensione={56} spessore={4} etichetta={anello.etichetta}>
-                          <span className="font-display testo-15 leading-none tabular-nums">{Math.floor(anello.quota * 100)}%</span>
+                          <span className="font-display testo-15 leading-none tabular-nums">{percentualeSegnati(anello.fatti, anello.totale)}%</span>
                         </AnelloAvanzamento>
                       )}
                     </div>

@@ -176,20 +176,24 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
   return (
     // Da 1024 px la pagina prende l'altezza dell'area di lettura e il visore il resto, come la pagina del Palazzo: una schermata.
     <div className="flex flex-col gap-3 lg:min-h-0 lg:flex-1 lg:gap-2">
-      <header className="card flex shrink-0 flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:py-2">
+      {/* L10: sotto i 640 px la testata è una griglia di due righe — briciole a sinistra e comandi (solo icona) a destra, poi ritorno e
+          titolo —: in tre righe con «Indietro» per esteso e i comandi a capo arrivava al 47% della schermata del telefono */}
+      <header className="area-testata card flex shrink-0 flex-col gap-2 max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-x-2 max-sm:py-2.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:py-2">
         {/* da 1024 px briciole e titolo stanno su una riga sola: la testata resta compatta e il visore ha l'altezza (R2-41) */}
-        <div className="flex min-w-0 flex-col gap-1 lg:flex-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
-          <nav aria-label="Dove sei" className="flex flex-wrap items-center gap-1 testo-12 text-text-muted">
+        <div className="flex min-w-0 flex-col gap-1 max-sm:contents lg:flex-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
+          <nav aria-label="Dove sei" className="flex flex-wrap items-center gap-1 testo-12 text-text-muted max-sm:col-start-1 max-sm:row-start-1 max-sm:min-w-0">
             <Link to="/guida/citta" className="touch inline-flex items-center">La città</Link>
             {a.contenitore.tipo !== 'citta' && <><span aria-hidden>›</span><Link to={indirizzoContenitore} className="touch inline-flex items-center">{a.contenitore.nome}</Link></>}
-            {/* da 1024 a 1279 px le briciole si fermano al contenitore: l'ultima tappa è il titolo subito accanto (variante (a) di Stesura) */}
-            <span aria-hidden className="lg:max-xl:hidden">›</span><span className="text-text-secondary lg:max-xl:hidden">{a.nome}</span>
+            {/* da 1024 a 1279 px le briciole si fermano al contenitore: l'ultima tappa è il titolo subito accanto (variante (a) di Stesura);
+                sul telefono anche (L10): il titolo è subito sotto */}
+            <span aria-hidden className="max-sm:hidden lg:max-xl:hidden">›</span><span className="text-text-secondary max-sm:hidden lg:max-xl:hidden">{a.nome}</span>
           </nav>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 max-sm:col-span-2 max-sm:row-start-2">
             {/* da 1024 px il ritorno al contenitore lo fa la briciola accanto; sotto, il ritorno comune delle schede (lotto B): la
-                pagina di prima o, entrando da un collegamento diretto, il contenitore */}
-            <IndietroScheda ripiego={indirizzoContenitore} className="lg:hidden" />
-            <TitoloScheda aria-current="page">{a.nome}</TitoloScheda>
+                pagina di prima o, entrando da un collegamento diretto, il contenitore; sul telefono solo la freccia (L10) */}
+            <IndietroScheda ripiego={indirizzoContenitore} etichettaNascosta="telefono" className="lg:hidden" />
+            {/* sul telefono il titolo sta accanto alla freccia e va a capo dentro di sé (base 0): i chip, se ci sono, vanno sotto */}
+            <TitoloScheda aria-current="page" className="max-sm:grow max-sm:basis-0">{a.nome}</TitoloScheda>
             {/* da 1024 px la versione la dice il segmento premuto della fila, subito sotto (variante 2 di Stesura): qui il chip solo sotto */}
             {scelta && a.planimetrie.length > 1 && <span className="chip testo-12 lg:hidden">Planimetria · {nomeVersione(scelta, indiceScelta)}</span>}
             {!IN_RILASCIO && a.daVerificare && <span className="chip chip--attivo testo-12" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
@@ -199,9 +203,9 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             {covo && <Link to={PAGINA_COVO} className={`chip touch no-underline testo-12 ${conFila ? 'lg:max-xl:hidden' : ''}`} title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link>}
           </div>
         </div>
-        {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5 lg:ml-auto">
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Modifica area</span><span className="md:max-lg:hidden lg:max-xl:hidden 2xl:hidden">Modifica</span></>} aria-label="Modifica area" onClick={() => setFinestra('modifica')} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Aggiungi planimetria</span><span className="md:max-lg:hidden 2xl:hidden">Planimetria</span></>} aria-label="Aggiungi planimetria" onClick={() => setFinestra('aggiungi')} />
+        {!IN_RILASCIO && <div className="area-testata__comandi flex flex-wrap items-center gap-1.5 max-sm:col-start-2 max-sm:row-start-1 max-sm:flex-nowrap lg:ml-auto">
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Modifica area</span><span className="md:max-lg:hidden lg:max-xl:hidden 2xl:hidden">Modifica</span></>} aria-label="Modifica area" title="Modifica area" onClick={() => setFinestra('modifica')} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Aggiungi planimetria</span><span className="md:max-lg:hidden 2xl:hidden">Planimetria</span></>} aria-label="Aggiungi planimetria" title="Aggiungi planimetria" onClick={() => setFinestra('aggiungi')} />
           {/* «Ripristina» ed «Elimina area» (variante accolta da Stesura, §4.3): visibili da 768 a 1023 px e da 1280 px, fantasma — mai primari — e sempre con
               la conferma; sotto i 768 px (UX2-3) e da 1024 a 1279 px (variante (b): la testata sta su una riga) stanno nel menu «Altro» */}
           <span className="hidden flex-wrap items-center gap-1.5 md:max-lg:flex xl:flex">
@@ -215,7 +219,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             d.querySelector('.menu-altro__voci')?.classList.toggle('menu-altro__voci--destra', d.open && d.getBoundingClientRect().right < 230);
           }}>
             {/* un <summary> non può essere un PulsanteVisivo: stesso aspetto (classi e interno del tassello compatto) scritto qui */}
-            <summary className="btn btn-sm btn-visivo btn-ghost btn-visivo--compatto btn-visivo--stretto list-none" aria-label="Altro: azioni dell’area">
+            <summary className="btn btn-sm btn-visivo btn-ghost btn-visivo--compatto btn-visivo--stretto list-none" aria-label="Altro: azioni dell’area" title="Altro: azioni dell’area">
               <span className="btn-visivo__icona" aria-hidden="true"><IconaAzione chiave="tutti" dimensione={20} /></span>
               <span className="btn-visivo__testo"><span className="btn-visivo__titolo">Altro<span className="btn-visivo__freccia btn-visivo__freccia--menu" aria-hidden="true">▸</span></span></span>
             </summary>

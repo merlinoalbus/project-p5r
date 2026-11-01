@@ -88,7 +88,8 @@ export function AreePalazzo(p: Props) {
   return <ElencoAree {...p} />;
 }
 
-/** Le aree come chip in fila (768–1279 px): numero, nome, spunta; evidenziate quelle toccate dall'infiltrazione aperta. */
+/** Le aree come chip in fila (768–1279 px): numero, nome, spunta e, sotto, quanto resta da raccogliere con lo stesso testo del foglio
+ *  e della colonna (L10-03); evidenziate quelle toccate dall'infiltrazione aperta. */
 function FilaAree({ aree, areaScelta, infiltrazioneScelta, completate, onScegliArea, onAggiungiArea }: Props) {
   return (
     <div className="flex items-center gap-2">
@@ -96,13 +97,17 @@ function FilaAree({ aree, areaScelta, infiltrazioneScelta, completate, onScegliA
         {aree.map((a, i) => {
           const completa = areaCompleta(a, completate);
           const toccata = !!infiltrazioneScelta && (a.infiltrazioni ?? []).some((x) => x.chiave === infiltrazioneScelta);
+          const raccolta = testoRaccolta(a.raccolta);
           return (
-            // da 1024 px una riga per chip (al massimo 14rem coi puntini, il nome intero nel suggerimento): andando a capo la fila
-            // nella riga dell'infiltrazione arrivava a 60–90 px (R3-41)
+            // L10-03: due righe in 44 px esatti (nome, e sotto la raccolta), così la fila non cresce. Da 1024 px ogni riga al massimo
+            // 14rem coi puntini, il nome intero nel suggerimento: andando a capo la fila nella riga dell'infiltrazione arrivava a 60–90 px (R3-41)
             <button key={a.slug} type="button" aria-pressed={a.slug === areaScelta} title={a.nome}
-              className={`chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap ${a.slug === areaScelta ? 'chip--attivo' : ''} ${toccata && a.slug !== areaScelta ? 'chip--toccata' : ''} ${completa ? 'chip--icona' : ''}`}
+              className={`chip touch h-[44px] shrink-0 flex-col items-start justify-center gap-0 py-0 lg:max-w-[14rem] ${a.slug === areaScelta ? 'chip--attivo' : ''} ${toccata && a.slug !== areaScelta ? 'chip--toccata' : ''} ${completa ? 'chip--icona' : ''}`}
               onClick={() => onScegliArea(a.slug)}>
-              {completa && <SpuntaCompletata />}{i + 1}. {a.nome}{completa && <TestoCompletata />}
+              <span className="flex max-w-full items-center gap-1.5 whitespace-nowrap">
+                {completa && <SpuntaCompletata />}<span className="min-w-0 lg:overflow-hidden lg:text-ellipsis">{i + 1}. {a.nome}</span>{completa && <TestoCompletata />}
+              </span>
+              <span className="max-w-full whitespace-nowrap font-medium text-text-secondary lg:overflow-hidden lg:text-ellipsis">{raccolta}</span>
             </button>
           );
         })}

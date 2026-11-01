@@ -2200,7 +2200,14 @@ export interface NodoGerarchiaDto {
   senzaArea?: NodoGerarchiaDto[];
   /** Solo «Da collocare»: le planimetrie senza Area, nella forma che «Colloca» già usa. */
   daCollocare?: MappaDaCollocareDto[];
+  /** Solo Palazzo e Dedalo dei Memento, solo con una partita (L10-03): quanto è segnato, con il calcolo della loro pagina. */
+  avanzamento?: AvanzamentoLuogoDto;
 }
+
+/** L10-03: quanto è segnato di un Palazzo (punti segnati su punti in tutto, i numeri dell'indice dei Palazzi) o di un dedalo dei Memento
+ *  (elementi fatti su elementi in tutto, i numeri della percentuale della pagina del dedalo). La carta dice «completato» solo con tutti i
+ *  punti segnati. */
+export interface AvanzamentoLuogoDto { segnati: number; totale: number }
 
 /** `GET /api/mappe/gerarchia`: le radici (Tokyo, e in fondo «Da collocare») e i totali dell'intestazione. */
 export interface GerarchiaMappeDto {

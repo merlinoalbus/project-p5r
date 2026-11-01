@@ -301,7 +301,7 @@ export function PacchettoGioco() {
   const chiudiAnteprima = () => { setAnteprima(null); setOrigine(null); };
 
   return (
-    <section className="card flex flex-col gap-3" aria-label="Backup dei dati di gioco">
+    <section id="backup-dati-di-gioco" className="card flex flex-col gap-3" aria-label="Backup dei dati di gioco">
       <TitoloSezione>Backup dei dati di gioco</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Un solo file, <code>gioco.db</code>: i <strong>dati di gioco</strong> senza le partite, con dentro compendio, guida, catalogo, mappe, luoghi e le immagini.

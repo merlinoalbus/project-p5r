@@ -29,6 +29,8 @@ import { StellaCinque } from '../components/shared/StellaCinque';
 import { CorniceArte } from '../components/compendio/CorniceArte';
 import { LivelloBadge } from '../components/compendio/LivelloBadge';
 import { BadgeStato } from '../components/compendio/PiastrellaPersona';
+import { SegniPartita } from '../components/compendio/SegniPartita';
+import { useSegniPersonaPartita } from '../hooks/useSegniPersonaPartita';
 import { OperatoreRicetta, RicettaRiga } from '../components/fusione/RicettaRiga';
 import { PersonaChip } from '../components/fusione/PersonaChip';
 import { Modal } from '../components/shared/Modal';
@@ -115,6 +117,7 @@ function SchedaPersona() {
   const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId], { cacheUrl: urlPersona(personaId) });
   useDocumentTitle(p ? p.nomeIt : 'Persona');
   const attiva = usePartitaStore((s) => s.attiva);
+  const { segni, ricarica: ricaricaSegni } = useSegniPersonaPartita();
   const [livello, setLivello] = useState<number | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [obiettivoAperto, setObiettivoAperto] = useState(false);
@@ -137,6 +140,8 @@ function SchedaPersona() {
     try {
       await aggiungiPosseduta(attiva.id, p.id, { livello: livelloScelto });
       notifica('success', `${p.nomeIt} aggiunta alla scorta di «${attiva.nome}».`);
+      // il segno «In scorta» della testa (e il Registro, che l'aggiunta aggiorna) si rilegge subito
+      void ricaricaSegni();
     } catch (err) {
       if (isApiError(err, 'persona-gia-posseduta')) notifica('warning', 'Questa Persona è già nella scorta.');
       else notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
@@ -166,6 +171,8 @@ function SchedaPersona() {
             <div className="flex items-center gap-2 flex-wrap">
               {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
               <span className="chip chip--attivo">{p.arcanaNome}</span>
+              {/* L10-04: in scorta e nel Registro della partita attiva, solo se veri (gli stessi segni delle piastrelle del Compendio) */}
+              <SegniPartita segni={segni?.get(p.id)} />
               {p.dlc && <BadgeStato nome="dlc" testo={`DLC${p.dlcSet ? ` ${p.dlcSet}` : ''}`} />}
               {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
               {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}

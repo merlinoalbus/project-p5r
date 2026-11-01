@@ -33,7 +33,7 @@ export function MieiDati() {
   const ricarica = () => { void riepilogo.ricarica(); void elenco.ricarica(); };
 
   return (
-    <section className="card flex flex-col gap-3" aria-label="I miei dati">
+    <section id="miei-dati" className="card flex flex-col gap-3" aria-label="I miei dati">
       <TitoloSezione>I miei dati</TitoloSezione>
       {/* `testo-link-esteso`: il collegamento «Nascosti dalla guida» sta dentro la frase (16 px di altezza): area di tocco da 44 px senza cambiare la riga */}
       <p className="m-0 testo-13 text-text-secondary testo-link-esteso">

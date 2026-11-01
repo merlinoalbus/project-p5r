@@ -237,7 +237,7 @@ export function PreparaEdizione() {
   const depositata = stato?.edizioneDepositata ?? null;
 
   return (
-    <section className="card flex flex-col gap-3" aria-label="Edizione di rilascio">
+    <section id="edizione-di-rilascio" className="card flex flex-col gap-3" aria-label="Edizione di rilascio">
       <h2 className="m-0 testo-15 font-semibold">Edizione di rilascio</h2>
       <p className="m-0 testo-13 text-text-secondary">
         L’istanza pubblica, in sola lettura, riceve i contenuti da qui. «Prepara edizione» lavora su <strong>copie</strong>: non modifica i dati di questa istanza.

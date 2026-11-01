@@ -78,9 +78,11 @@ export function NegozioPage() {
             azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`il negozio «${n.nome}»`}>
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" dettaglio="a questo negozio" onClick={() => { setElementoArticolo(null); setModulo('articolo'); }} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi il negozio" onClick={() => { void getElementoCatalogo('negozio', chiave).then((e) => { setElementoNegozio(e); setModulo('negozio'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} />
-            </MenuModifica>}>
-            {/* Sede, orari, gestore, programma punti: tutto ciò che il negozio è. Lo sblocco della merce
-                sta sugli articoli, e la fonte non è un dato del gioco. */}
+            </MenuModifica>} />
+          {/* Sede, orari, gestore, programma punti: tutto ciò che il negozio è. Lo sblocco della merce sta sugli articoli, e la fonte
+              non è un dato del gioco. L10: subito sotto l'intestazione e non dentro: con queste righe la testata arrivava al 42% della
+              schermata del telefono e al 44% a 1024×690 */}
+          <section className="card py-2.5" aria-label="Il negozio">
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 testo-13 text-text-secondary">
               {/* La sede apre la pagina del quartiere con il luogo evidenziato (`#luogo-…`); senza quartiere
                   resta l'indicazione testuale («Online, dal laptop di Leblanc»). */}
@@ -93,7 +95,7 @@ export function NegozioPage() {
               {n.sconto && <span>{testoSconto(n.sconto, n.sconto.confidenteNome)}</span>}
             </div>
             <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{!IN_RILASCIO && n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
-          </IntestazioneScheda>
+          </section>
           {/* i requisiti mancanti fuori dall'intestazione, che resta entro il 30% della schermata (LAY3-5): possono essere lunghi */}
           {n.disponibilita && n.disponibilita.stato !== 'disponibile' && n.disponibilita.requisiti.length > 0 && (
             <section className="card flex min-w-0 flex-col gap-1" aria-label="Requisiti del negozio">

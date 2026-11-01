@@ -53,7 +53,7 @@ function Indirizzo() { const l = useLocation(); return <output data-testid="indi
 function monta(d = dedalo(), partitaId: number | null = 4, opz: { modifica?: boolean; zona?: string } = {}) {
   const richiami = {
     cambiaStato: vi.fn().mockResolvedValue(true), onPuntoAggiornato: vi.fn(), onTimbri: vi.fn(), onRichiesta: vi.fn(), onRicarica: vi.fn().mockResolvedValue(undefined),
-    onCattura: vi.fn().mockResolvedValue(undefined), onScegliDedalo: vi.fn(), onApriPozzo: vi.fn(), onModifica: vi.fn(),
+    onCattura: vi.fn().mockResolvedValue(undefined), onScegliDedalo: vi.fn(), onModifica: vi.fn(),
   };
   /** Tiene «Modifica la guida» come la pagina. */
   function Prova() {
@@ -249,16 +249,18 @@ it('«Modifica» su una Richiesta e «Aggiungi» nella sezione aprono il modulo 
   await waitFor(() => expect(onRicarica).toHaveBeenCalled());
 });
 
-it('sul telefono: la tendina dei dedali e il menu ⋯ con l\'interruttore e il pozzo', () => {
-  const { onScegliDedalo, onApriPozzo, onModifica } = monta();
-  expect(vociSelettore('Dedalo')).toEqual(['1. Dedalo di Qimranut', '2. Dedalo di Aiyatsbus']);
-  scegliVoce('Dedalo', /^2. Dedalo di Aiyatsbus/);
+// L10-10 (schizzo approvato): il contratto è cambiato, la tendina dei dedali e il pozzo nel menu ⋯ non ci sono più
+it('sul telefono: la griglia dei dedali (il pozzo è solo sfondo) e il menu ⋯ con l\'interruttore', () => {
+  const { onScegliDedalo, onModifica } = monta();
+  const griglia = within(screen.getByRole('group', { name: 'Dedali · 2' }));
+  expect(griglia.getAllByRole('button').map((b) => b.getAttribute('title'))).toEqual(['Dedalo di Qimranut', 'Dedalo di Aiyatsbus']);
+  expect(griglia.getByRole('button', { name: /^1 ?Qimranut/ })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(griglia.getByRole('button', { name: /^2 ?Aiyatsbus/ }));
   expect(onScegliDedalo).toHaveBeenCalledWith('mementos-02-aiyatsbus');
   fireEvent.click(screen.getByRole('button', { name: 'Altro: altri comandi' }));
   expect(screen.getByRole('button', { name: 'Altro: altri comandi' })).toHaveAttribute('aria-expanded', 'true');
   // l'interruttore c'è due volte (riga e menu, uno nascosto dal CSS per formato): quello del menu
   fireEvent.click(screen.getAllByRole('button', { name: 'Modifica la guida' })[1]);
   expect(onModifica).toHaveBeenCalledWith(true);
-  fireEvent.click(screen.getByRole('button', { name: /Pozzo dei Memento/ }));
-  expect(onApriPozzo).toHaveBeenCalled();
+  expect(screen.queryByRole('button', { name: /Pozzo dei Memento/ })).toBeNull();
 });

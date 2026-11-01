@@ -703,6 +703,14 @@
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
   @container (min-width: 760px) { .griglia-affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
 
+  /* ---- L10-04: piastrella orizzontale del Compendio (arte 64 px, nome, arcano e segni, affinità). Le dieci affinità stanno su una fila
+     quando l'interno della piastrella (senza bordo e margine) è largo almeno 300 px: a 1280 e 1366 con tre colonne, a 768 con due
+     (caselle da 21 px e più); più stretta (1024 con tre colonne, 640–767 con due, quattro colonne dai 1536) vanno su due file di cinque,
+     perché le sigle a 12 px non si tocchino ---- */
+  .piastrella-persona { container: piastrella-persona / inline-size; }
+  .piastrella-persona__affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+  @container piastrella-persona (min-width: 300px) { .piastrella-persona__affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
+
   /* ---- Tassello di una Persona con miniatura (Fusione) ---- */
   /* ---- Tasselli Persona (ricette, piani, cicli): miniatura incorniciata, nome P5, tessera del livello, arcano ---- */
   .persona-chip {
@@ -1548,6 +1556,43 @@
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
 
+  /* ---- L10-08: l'indice delle sezioni delle Impostazioni. Da 768 px resta fermo in cima all'area che scorre (che ha 1rem di margine,
+     1,25rem da 1024: la fila sale di tanto per stare attaccata al bordo), su un fondo quasi pieno con il filo sotto; sul telefono sta in
+     testa e scorre con la pagina. Le sezioni si fermano sotto la fila quando ci si arriva con un tocco o con `#sezione` ---- */
+  .indice-sezioni { position: relative; z-index: 20; min-width: 0; }
+  /* la fila scorre con le frecce (e col dito o la rotella): niente barra di scorrimento sotto le chip, che porterebbe la fila da 44 a 58 px
+     e l'intestazione oltre il 30% */
+  .indice-sezioni .fila-scorrevole.fila-scorrevole--sempre { padding-bottom: 0; scrollbar-width: none; }
+  .indice-sezioni .fila-scorrevole.fila-scorrevole--sempre::-webkit-scrollbar { display: none; }
+  .impostazioni-pagina > [id] { scroll-margin-top: 8px; }
+  @media (min-width: 768px) {
+    .indice-sezioni {
+      position: sticky; top: calc(var(--spacing) * -4);
+      /* la fila sta subito sotto il titolo (4 px invece dei 16 fra le sezioni): intestazione entro il 30% anche a 1366×657 */
+      margin-top: calc(var(--spacing) * -3);
+      margin-inline: calc(var(--spacing) * -1); padding: 2px var(--spacing);
+      background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .impostazioni-pagina > [id] { scroll-margin-top: 64px; }
+  }
+  @media (min-width: 1024px) { .indice-sezioni { top: calc(var(--spacing) * -5); } }
+
+  /* ---- L10-10: la griglia dei dedali al telefono, sopra il pozzo attenuato. Ogni voce ha un fondo quasi pieno, così il testo non si
+     legge mai sul disegno (secondario #a3a3b3 almeno 5,8:1, rosso del testo sulla scelta almeno 5:1); la scelta ha il bordo rosso dei chip attivi ---- */
+  .griglia-dedali__voce {
+    background: color-mix(in srgb, var(--color-bg-tertiary) 92%, transparent);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+  .griglia-dedali__voce:hover { border-color: var(--color-border-input); }
+  .griglia-dedali__voce[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-secondary));
+    border-color: var(--color-primary);
+    color: var(--color-primary-testo);
+  }
+  .griglia-dedali__voce:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
+
   /* ---- Luoghi della guida: griglia di carte (3–4 colonne a 1280, 2–3 a 768, 1–2 a 375); scorre solo la pagina ---- */
   .griglia-luoghi {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px;
@@ -2001,6 +2046,32 @@
   .intestazione-scheda__testo { display: flex; flex: 1 1 0; flex-direction: column; gap: 6px; min-width: 0; }
   .intestazione-scheda__titolo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
   .intestazione-scheda__azioni { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; margin-left: auto; }
+  .intestazione-scheda__percorso { min-width: 0; }
+  /* L10 (testata entro il 30%, misurata su tutte le schede): il riquadro ha 10 px sopra e sotto invece di 16, e fra le due righe 4 px. Da
+     640 px non ci sono più due righe: ritorno, corpo e azioni stanno su una riga sola (la barra si scioglie nella griglia), così il
+     ritorno da 44 px non aggiunge una riga sopra il titolo; il riquadro ha 8 px sopra e sotto. Con le briciole (luoghi, mappe senza
+     pianta) la prima riga resta ritorno, briciole e azioni, e il corpo va sotto su tutta la larghezza, come prima */
+  .intestazione-scheda.card { padding-block: 10px; }
+  .intestazione-scheda { gap: 4px; }
+  @media (min-width: 640px) {
+    .intestazione-scheda.card { padding-block: 8px; }
+    .intestazione-scheda { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; }
+    .intestazione-scheda__barra { display: contents; }
+    .intestazione-scheda__indietro { grid-column: 1; grid-row: 1; }
+    .intestazione-scheda__azioni { grid-column: 3; grid-row: 1; }
+    .intestazione-scheda__corpo { grid-column: 2; grid-row: 1; }
+    .intestazione-scheda:not(:has(.intestazione-scheda__indietro)) .intestazione-scheda__corpo { grid-column: 1 / 3; }
+    .intestazione-scheda:not(:has(.intestazione-scheda__azioni)) .intestazione-scheda__corpo { grid-column-end: -1; }
+    .intestazione-scheda:has(.intestazione-scheda__percorso) .intestazione-scheda__percorso { grid-column: 2; grid-row: 1; }
+    .intestazione-scheda:has(.intestazione-scheda__percorso) .intestazione-scheda__corpo { grid-column: 1 / -1; grid-row: 2; }
+  }
+  /* L10: sul telefono i comandi della testata dell'Area («Modifica», «Planimetria», «Altro») sono solo icona, nella riga delle briciole: il
+     nome resta per chi non vede (`aria-label`) e nel suggerimento (`title`, come in `MenuModifica`); a capo, sotto il titolo, portavano la
+     testata al 47% della schermata */
+  @media (max-width: 639px) {
+    .area-testata__comandi .btn-visivo { padding: 3px 6px; gap: 0; }
+    .area-testata__comandi .btn-visivo .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
   @media (max-width: 639px) {
     .intestazione-scheda .menu-modifica > .btn-visivo { padding: 3px 6px; gap: 0; }
     .intestazione-scheda .menu-modifica > .btn-visivo .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -2890,6 +2961,21 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .appunti-fissi__numero { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: var(--radius-full);
     background: var(--color-primary-fondo); color: var(--color-text-on-primary); font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; }
 }
+
+/* ---- L10: le briciole della testata delle schede (`IntestazioneScheda`, prop `percorso`) stanno in una `FilaScorrevole` di una riga, fra
+   il ritorno e le azioni: andando a capo, sul telefono, prendevano due o tre righe da 44 px (il Negozio scolastico arrivava al 45% della
+   schermata). Come ogni fila dell'app, dal lato in cui il percorso continua ci sono la sfumatura e la freccia; la barra di scorrimento
+   non c'è (porterebbe la riga oltre i 44 px). Fuori dai layer di proposito: le briciole portano `flex-wrap` come utility, che vince sul
+   layer `components` ---- */
+.intestazione-scheda__percorso { flex: 1 1 0; min-width: 0; }
+.intestazione-scheda__percorso .fila-scorrevole.fila-scorrevole--sempre { padding-bottom: 0; scrollbar-width: none; }
+.intestazione-scheda__percorso .fila-scorrevole::-webkit-scrollbar { display: none; }
+.intestazione-scheda__percorso .fila-scorrevole > * { flex-wrap: nowrap; white-space: nowrap; }
+/* Dal lato del ritorno la fila ha solo la sfumatura, senza la freccia: due «‹» accanto, «Indietro» e la freccia della fila, sembravano
+   lo stesso comando. Lì la fila si apre già scorsa (le tappe di prima stanno sotto la sfumatura e si raggiungono scorrendo col dito, con la
+   rotella o con Tab); dall'altro lato, quando la fila continua, la freccia resta come in ogni FilaScorrevole */
+.intestazione-scheda__percorso .fila-freccia--prima { display: none !important; }
+.intestazione-scheda__percorso .fila-cornice > .fila-scorrevole[data-scorre] { padding-left: 0; scroll-padding-left: 0; }
 
 /* ============================================================
    Accessibilità (WCAG 2.2) — fuoco nelle file che scorrono e movimento ridotto

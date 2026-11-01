@@ -1,8 +1,8 @@
 // ============================================================
-// ImpostazioniPage — partite, traduzioni, immagini degli Arcani, cestino, informazioni
+// ImpostazioniPage — partite, traduzioni, immagini degli Arcani, cestino, informazioni, con l'indice delle sezioni in testa (L10-08)
 // ============================================================
 
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useConfigStore } from '../stores/configStore';
@@ -27,6 +27,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { SoloPreparazione } from '../components/shared/SoloPreparazione';
+import { IndiceSezioni, type SezioneIndice } from '../components/impostazioni/IndiceSezioni';
 
 /**
  * «Prepara edizione» (L12, passi 7 e 9). Il componente si carica a richiesta e SOLO nella preparazione: con `VITE_MODALITA=rilascio` Vite sostituisce
@@ -38,6 +39,23 @@ const PreparaEdizione = import.meta.env.VITE_MODALITA === 'rilascio'
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/**
+ * L10-08: le sezioni dell'indice in testa, nell'ordine della pagina, con l'id della loro radice. Nel rilascio ci sono solo quelle del
+ * rilascio; l'indice tiene poi soltanto quelle davvero presenti nella pagina («Edizione di rilascio» compare solo con qualcosa da preparare).
+ * Le due schede che compaiono solo con un'operazione da completare («Operazioni da completare», «Rimozioni di pin») non sono sezioni da
+ * indice: sono avvisi del momento.
+ */
+const SEZIONI: readonly SezioneIndice[] = IN_RILASCIO
+  ? [{ id: 'partite', nome: 'Partite' }, { id: 'grafica', nome: 'Grafica' }, { id: 'cestino', nome: 'Cestino' }, { id: 'informazioni', nome: 'Informazioni' }]
+  : [
+    { id: 'partite', nome: 'Partite' }, { id: 'grafica', nome: 'Grafica' }, { id: 'caratteri', nome: 'Caratteri' },
+    { id: 'immagini-arcani', nome: 'Immagini degli Arcani' }, { id: 'immagini-caricate', nome: 'Immagini caricate' },
+    { id: 'traduzioni', nome: 'Traduzioni' }, { id: 'miei-dati', nome: 'I miei dati' }, { id: 'proposte-da-completare', nome: 'Proposte da completare' },
+    { id: 'cestino', nome: 'Cestino' }, { id: 'nascosti', nome: 'Nascosti dalla guida' }, { id: 'backup-dati-di-gioco', nome: 'Backup dei dati di gioco' },
+    { id: 'edizione-di-rilascio', nome: 'Edizione di rilascio' }, { id: 'backup-e-ripristino', nome: 'Backup e ripristino' },
+    { id: 'documentazione-api', nome: 'Documentazione delle API' }, { id: 'informazioni', nome: 'Informazioni' },
+  ];
 
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
@@ -52,14 +70,15 @@ export function ImpostazioniPage() {
   const [parametri] = useSearchParams();
   const traduzioneAmbito = parametri.get('traduzione') ?? undefined;
   const traduzioneQ = parametri.get('q') ?? undefined;
+  const pagina = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Impostazioni" sottotitolo={IN_RILASCIO
-        ? 'Le tue partite, la grafica predefinita e il cestino delle tue partite.'
-        : 'Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, backup dei dati di gioco, backup della tua istanza e documentazione delle API.'} />
+    <div ref={pagina} className="impostazioni-pagina flex flex-col gap-4">
+      {/* L10-08: niente sottotitolo che elencava le sezioni: lo dice l'indice qui sotto, che in più ci porta (intestazione entro il 30%) */}
+      <IntestazionePagina titolo="Impostazioni" />
+      <IndiceSezioni sezioni={SEZIONI} contenitore={pagina} />
       <GestionePartite />
-      <section className="card flex flex-col gap-3">
+      <section id="grafica" className="card flex flex-col gap-3">
         <TitoloSezione>Grafica</TitoloSezione>
         <label className="flex items-start gap-3 cursor-pointer">
           <span className="touch flex items-center justify-center shrink-0">
@@ -80,7 +99,7 @@ export function ImpostazioniPage() {
           (caratteri, immagini, traduzioni, righe nascoste della guida, pacchetto, backup, documentazione delle API) è presente solo nella preparazione.
           `IN_RILASCIO` è una costante di build: nel bundle di rilascio questi componenti e le chiamate all'API che usano non ci sono. */}
       {!IN_RILASCIO && <CaratteriEditor />}
-      {!IN_RILASCIO && <section className="card flex flex-col gap-3">
+      {!IN_RILASCIO && <section id="immagini-arcani" className="card flex flex-col gap-3">
         <TitoloSezione>Immagini degli Arcani</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Tocca una carta per sostituirla con un tuo file: le immagini caricate hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
@@ -100,7 +119,7 @@ export function ImpostazioniPage() {
       {!IN_RILASCIO && <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />}
       {!IN_RILASCIO && <MieiDati />}
       {/* L13 (ondata 4a): le proposte di conversione delle voci del Diario da approvare (solo preparazione) */}
-      {!IN_RILASCIO && <section className="card flex flex-col gap-3" aria-labelledby="titolo-da-completare">
+      {!IN_RILASCIO && <section id="proposte-da-completare" className="card flex flex-col gap-3" aria-labelledby="titolo-da-completare">
         <TitoloSezione id="titolo-da-completare">Proposte da completare</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Le conversioni delle voci del Diario scritte a parole (collegamento, effetti con i valori proposti, certezza e motivo), da applicare, modificare o scartare. Sulla voce, nel Diario, le segna «da completare».</p>
         <CollegamentoVisivo to="/guida/da-completare" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Apri l’elenco" />
@@ -119,7 +138,7 @@ export function ImpostazioniPage() {
         </SoloPreparazione>
       )}
       {!IN_RILASCIO && <BackupIstanza />}
-      {!IN_RILASCIO && <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
+      {!IN_RILASCIO && <section id="documentazione-api" className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
         <TitoloSezione id="titolo-documentazione-api">Documentazione delle API</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">
           Tutte le rotte del server, con parametri, corpi e risposte descritti in italiano (OpenAPI 3.1). La pagina si apre in una nuova
@@ -131,7 +150,7 @@ export function ImpostazioniPage() {
           <CollegamentoVisivo to="/api/openapi.json" target="_blank" rel="noopener" tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Documento OpenAPI" dettaglio="JSON" />
         </div>
       </section>}
-      <section className="card testo-13 text-text-secondary">
+      <section id="informazioni" className="card testo-13 text-text-secondary">
         <TitoloSezione className="mb-1">Informazioni</TitoloSezione>
         <div>Versione app {config?.appVersion} — {config?.gioco}</div>
         {/* L7-01 (D10): l'unico punto con le fonti dei dati, in entrambe le istanze; le pagine della guida non le ripetono */}

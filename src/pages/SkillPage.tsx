@@ -2,10 +2,11 @@
 // SkillPage — elenco delle 525 skill con ricerca ed elemento (client-side)
 // ============================================================
 
-import { memo, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useDeferredValue, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
+import { useFiltriIndirizzo } from '../hooks/useFiltriIndirizzo';
 import { getSkills, urlSkills } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -45,8 +46,8 @@ export function SkillPage() {
   useDocumentTitle('Skill');
   const glossario = useGlossarioStore((s) => s.glossario);
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
-  const [q, setQ] = useState('');
-  const [elemento, setElemento] = useState('');
+  // L10-04: ricerca ed elemento nell'indirizzo (`?q=…&elemento=…`): tornando da una skill il filtro c'è ancora, e si condivide
+  const { valori: { q, elemento }, imposta } = useFiltriIndirizzo({ q: '', elemento: '' }, { elemento: ORDINE_ELEMENTI_SKILL });
 
   // R12-03: il campo segue subito la battuta, l'elenco si rifà con il testo differito (calcolo e disegno interrompibili)
   const qDifferita = useDeferredValue(q);
@@ -54,10 +55,11 @@ export function SkillPage() {
   const filtrate = useMemo(() => {
     if (!dati) return [];
     const testo = qDifferita.trim().toLowerCase();
+    // L10-04: in ordine di nome italiano, quello che si legge in grassetto in ogni riga (prima arrivavano nell'ordine del dataset)
     return dati.filter((s) =>
       (!elemento || s.elemento === elemento)
       && (!testo || s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)),
-    );
+    ).sort((a, b) => a.nomeIt.localeCompare(b.nomeIt, 'it') || a.nome.localeCompare(b.nome, 'it'));
   }, [dati, qDifferita, elemento]);
 
   return (
@@ -67,16 +69,16 @@ export function SkillPage() {
         sottotitolo="Tutte le abilità con effetto, costo ed elemento, e le Persona che le apprendono."
         azioni={<span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>}
       />
-      <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
+      <CampoRicerca valore={q} onCambia={(v) => imposta({ q: v })} segnaposto="Cerca per nome o effetto…" />
       <FilaScorrevole role="group" aria-label="Filtro per elemento">
-        <button type="button" className={`chip chip--icona touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
+        <button type="button" className={`chip chip--icona touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => imposta({ elemento: '' }, { storia: true })} aria-pressed={elemento === ''}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
         {ORDINE_ELEMENTI_SKILL.map((el) => (
           <button
             key={el}
             type="button"
             className="chip chip--icona touch"
             style={elemento === el ? { borderColor: coloreElemento(el), color: coloreTestoElemento(el), background: `color-mix(in srgb, ${coloreElemento(el)} 16%, transparent)` } : undefined}
-            onClick={() => setElemento(el)}
+            onClick={() => imposta({ elemento: el }, { storia: true })}
             aria-pressed={elemento === el}
           >
             <AssetImg nome={`elementi/${el}`} alt="" decorativa className="w-5 h-5 object-contain" fallback={<span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: coloreElemento(el) }} aria-hidden="true" />} />

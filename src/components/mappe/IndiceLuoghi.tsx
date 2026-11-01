@@ -10,7 +10,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { GrigliaLuoghi, ChipConteggi, Infiltrazioni, SegniNodo, type VoceLuogo } from './GrigliaLuoghi';
+import { GrigliaLuoghi, AvanzamentoNodo, ChipConteggi, Infiltrazioni, SegniNodo, type VoceLuogo } from './GrigliaLuoghi';
 import { etichettaScendi, parola } from './paroleLuoghi';
 import { RicaricaLuoghi } from './ricaricaLuoghi';
 import { PlanimetrieDaCollocare } from './PlanimetrieDaCollocare';
@@ -144,6 +144,7 @@ function TestataLivello({ nodo }: { nodo: NodoGerarchiaDto }) {
         <h2 className="m-0 break-words font-display testo-20 leading-tight text-text">{nodo.nome}</h2>
         <SegniNodo nodo={nodo} />
         <ChipConteggi nodo={nodo} />
+        <AvanzamentoNodo nodo={nodo} />
         {nodo.tipo === 'area' && (nodo.accanto?.length ?? 0) > 0 && <Infiltrazioni titolo="Infiltrazioni:" elenco={nodo.accanto ?? []} />}
       </div>
       {nodo.casa && <CollegamentoVisivo to={nodo.casa} tono="primario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" aria-label={`Apri ${nodo.nome}`} />}

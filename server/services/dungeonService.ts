@@ -22,7 +22,7 @@ import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
 import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, togliStatiDeiPin, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
-import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, AvanzamentoLuogoDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -370,6 +370,30 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
   // e i segni della partita (modello e stati), che prima ogni Palazzo rileggeva
   const segni = partitaId !== undefined ? segniPartita(partitaId, null, m) : undefined;
   return (prepared('SELECT * FROM dungeon ORDER BY ordine').all() as RigaDungeon[]).map((r) => riassunto(r, stati, partitaId, palazzi, { segni, m }));
+}
+
+/**
+ * L10-03: quanto è segnato di ogni Palazzo e di ogni dedalo dei Memento nella partita, per le carte di «Luoghi della guida», con lo
+ * stesso calcolo delle loro pagine (un dato, un calcolo): per i Palazzi i punti segnati e i punti in tutto del riassunto di
+ * `elencaDungeon` (`gestiti` e `punti`, i numeri dell'indice dei Palazzi), per i dedali gli elementi fatti e quelli in tutto di
+ * `dedaloDto` (`obiettivi`: timbri, uno per timbro, Richieste e Trama; le Persona no, per scelta dell'utente del 2026-10-11), gli stessi
+ * della percentuale della pagina del dedalo. Chiave: la chiave del Palazzo (`dungeon.chiave`) o del dedalo (`dungeon_area.chiave`).
+ */
+export function avanzamentoDeiLuoghi(partitaId: number): Map<string, AvanzamentoLuogoDto> {
+  const out = new Map<string, AvanzamentoLuogoDto>();
+  for (const d of elencaDungeon(partitaId)) {
+    if (d.tipo !== 'palazzo' || d.gestiti === null) continue;
+    out.set(d.chiave, { segnati: d.gestiti, totale: d.punti });
+  }
+  const stati = statiPartita(partitaId);
+  for (const { chiave } of prepared("SELECT chiave FROM dungeon WHERE tipo = 'mementos' ORDER BY ordine").all() as Array<{ chiave: string }>) {
+    const l = lettureDedali(chiave, partitaId, stati);
+    for (const a of prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as Array<{ chiave: string }>) {
+      const dto = dedaloDto(a.chiave, l);
+      out.set(a.chiave, { segnati: dto.obiettivi.fatti ?? 0, totale: dto.obiettivi.totale });
+    }
+  }
+  return out;
 }
 
 /**

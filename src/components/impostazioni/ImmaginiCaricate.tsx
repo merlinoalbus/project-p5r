@@ -70,7 +70,7 @@ export function ImmaginiCaricate() {
   const nomeAmbito = (a:AmbitoImmagine | 'tutte') => (a === 'tutte' ? 'tutte le immagini caricate' : `le immagini caricate per ${AMBITI.find((x) => x.chiave === a)?.nome ?? a}`);
 
   return (
-    <section className="card flex flex-col gap-3">
+    <section id="immagini-caricate" className="card flex flex-col gap-3">
       <TitoloSezione>Immagini caricate</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Le immagini che carichi dal riquadro di una Persona, di un Confidente o di un Arcano hanno la precedenza sulla grafica inclusa nell'app. Da qui le rimuovi per tornare alla grafica predefinita; le mappe scaricate dalla guida si riscaricano al prossimo accesso all'area.

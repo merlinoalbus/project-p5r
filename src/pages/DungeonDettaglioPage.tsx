@@ -68,7 +68,8 @@ import { CampoTesto } from '../components/shared/Campo';
 import { NoteStoricheOfferta, type EffettoNotaStorica } from '../components/catalogo/NoteStoricheOfferta';
 import { testoLivelloConsigliato } from '../utils/palazzi';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
-import { raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
+import { nomeBreveDedalo, percentualeDedalo, raccoltaDeiDedali, ricalcolaDedalo } from '../utils/dedali';
+import { percentualeSegnati } from '../../shared/avanzamento';
 import { dataGiocoBreve, dataGiocoTesto } from '../utils/dateGioco';
 import { erroreDatePalazzo, type DatePalazzo } from '../../shared/datePalazzo';
 import { SelettoreData } from '../components/shared/SelettoreData';
@@ -168,23 +169,15 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
   );
 }
 
-/** La percentuale di un dedalo (elementi fatti sul totale), o null senza partita o senza elementi. */
-function quotaDedalo(a: AreaDungeonDto): number | null {
-  const o = a.dedalo?.obiettivi;
-  return o && o.fatti !== null && o.totale > 0 ? o.fatti / o.totale : null;
-}
-
-/** Il nome di un dedalo senza «Dedalo di»: nel binario e nella fila basta il nome proprio (progetto approvato: «2 Aiyatsbus 31%»). */
-const nomeBreve = (nome: string): string => nome.replace(/^Dedalo di /i, '');
-
-/** Un dedalo nel binario (da 1024 px) o nella fila (tablet): numero, nome, percentuale e barra, ✓ se completato. */
+/** Un dedalo nel binario (da 1024 px) o nella fila (tablet): numero, nome, percentuale e barra, ✓ se completato. La percentuale è
+ *  quella della regola unica (L10-03, `percentualeDedalo`), la stessa della scheda del dedalo e della sua carta nei Luoghi. */
 function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDungeonDto; scelto: boolean; suggerito: boolean; onScegli: () => void; fila?: boolean }) {
-  const quota = quotaDedalo(a);
+  const percentuale = percentualeDedalo(a);
   const completato = a.dedalo?.completato === true;
   if (fila) {
     return (
       <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome} className={`chip touch shrink-0 ${scelto ? 'chip--attivo' : ''} ${completato ? 'chip--icona' : ''} ${classiSuggerito(suggerito, 'chip')}`}>
-        {completato && <SpuntaCompletata />}{a.ordine + 1} {nomeBreve(a.nome)}{!completato && quota !== null ? ` · ${Math.round(quota * 100)}%` : ''}{completato && <TestoCompletata />}
+        {completato && <SpuntaCompletata />}{a.ordine + 1} {nomeBreveDedalo(a.nome)}{!completato && percentuale !== null ? ` · ${percentuale}%` : ''}{completato && <TestoCompletata />}
       </button>
     );
   }
@@ -193,10 +186,10 @@ function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDun
       className={`touch flex w-full flex-col gap-1 rounded-md border px-2 py-1.5 text-left transition-colors ${scelto ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'} ${classiSuggerito(suggerito)}`}>
       <span className="flex items-baseline gap-1.5 testo-13 leading-tight">
         <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary-testo' : 'text-text-muted'}`}>{a.ordine + 1}</span>
-        <span className="min-w-0 flex-1 font-semibold">{nomeBreve(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
-        <span className="shrink-0 testo-12 tabular-nums text-text-muted">{quota !== null ? `${Math.round(quota * 100)}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
+        <span className="min-w-0 flex-1 font-semibold">{nomeBreveDedalo(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
+        <span className="shrink-0 testo-12 tabular-nums text-text-muted">{percentuale !== null ? `${percentuale}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
       </span>
-      {quota !== null && <span className="visore-mappa__progresso ml-5 h-1" aria-hidden><span className="visore-mappa__progresso-barra" style={{ width: `${Math.round(quota * 100)}%` }} /></span>}
+      {percentuale !== null && <span className="visore-mappa__progresso ml-5 h-1" aria-hidden><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></span>}
     </button>
   );
 }
@@ -502,6 +495,8 @@ export function DungeonDettaglioPage() {
   // R3-41: da 1024 px la riga dell'infiltrazione è una sola, e «Modifica testo» e «Descrizione» si aprono dal suo menu
   const largo = useMedia('(min-width: 1024px)');
   const moltoLargo = useMedia('(min-width: 1280px)');
+  // L10: sotto i 640 px la riga dei dati del Palazzo sta sotto l'intestazione (che così resta entro il 30% della schermata)
+  const stretto = useMedia('(max-width: 639px)');
   // la chiave dell'infiltrazione di cui si corregge il testo o si legge la descrizione: cambiando infiltrazione si chiudono da sé
   const [correggendoInfiltrazione, setCorreggendoInfiltrazione] = useState<string | null>(null);
   const [descrizioneAperta, setDescrizioneAperta] = useState<string | null>(null);
@@ -565,9 +560,10 @@ export function DungeonDettaglioPage() {
   };
   // L'anello conta quel che si raccoglie: collezionabili delle planimetrie (Palazzi) o elementi delle aree dei dedali (Memento, 099).
   // L4 (§1.5, §8.10): nei Palazzi l'anello conta gli oggetti permanenti (numeri del server, percentuale per difetto come la sua); nei
-  // Memento gli obiettivi dei dedali, come prima (R4-30)
+  // Memento gli obiettivi dei dedali, come prima (R4-30). L10-03: la percentuale, per difetto, con la regola unica dei dedali e delle carte
+  // dei Luoghi (`percentualeSegnati`), anche per i Memento (prima arrotondata: 199 su 200 diceva 100%)
   const anello = d ? anelloPalazzo(d, memento) : null;
-  const percentuale = anello ? (memento ? Math.round(anello.quota * 100) : Math.floor(anello.quota * 100)) : null;
+  const percentuale = anello ? percentualeSegnati(anello.fatti, anello.totale) : null;
   const livello = d && !memento ? livelloPalazzo(d) : null;
   const conti = d && !memento ? d.completamento : undefined;
   // le planimetrie complete con la regola unica (L4 §1.5: senza niente da contare è completa); senza i numeri nuovi, il conto di prima
@@ -638,6 +634,51 @@ export function DungeonDettaglioPage() {
       </div>
     </details>
   ) : null;
+  /** La riga dei dati sotto il titolo: finestra, atterraggio, conteggi (nei Memento), chip riassuntivo e «Dettagli dalla guida». Nei
+   *  Memento sta nella piega «Date, mappe e conteggi»; nei Palazzi nella testata, e sotto i 640 px appena sotto (L10). Montata in un
+   *  posto solo per volta, così «Sulla mappa di Tokyo» e i dettagli non sono mai doppi. */
+  const rigaDati = () => d && <>
+    {memento && d.sovrano && <span className="testo-13 text-text-secondary md:hidden">{d.sovrano}</span>}
+    <LineaDelTempo date={d.date} memento={memento} />
+    {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno (nei Palazzi
+        a ogni larghezza, LAY3-5). */}
+    <div className={memento ? 'flex flex-wrap items-center gap-2 lg:contents' : 'contents'}>
+      {/* nei Palazzi «Mappa del Palazzo» non c'è più: il visore è nella scheda stessa (L3, §4.1); nei Memento resta */}
+      {memento && <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa dei Memento" />}
+      {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04). Nei Palazzi sotto i 1024 px sta nei
+          «Dettagli dalla guida» (LAY3-5): qui, intero, mandava a capo la riga; uno solo alla volta (`largo`) */}
+      {(memento || largo) && <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} compatto={!memento} />}
+      {/* nei Palazzi infiltrazioni, collezionabili e punti della guida stanno nei «Dettagli dalla guida» (da 1024 px per R3-41,
+          sotto per LAY3-5: la riga tiene finestra, atterraggio e il chip riassuntivo) */}
+      <span className={`chip ${memento ? '' : 'hidden'}`}>{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
+      <span className={`chip ${memento ? '' : 'hidden'}`} title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori).'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
+      {/* R3-41: da 1024 a 1279 px questo chip sta nei «Dettagli dalla guida»: qui mandava a capo la riga (intestazione da 106 a 137 px);
+          sotto i 1024 px anche (LAY3-5) */}
+      {!memento && <span className="chip max-xl:hidden" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
+        {testoAreePlanimetrie}
+      </span>}
+      {!memento
+        // R3-41 (scelta 3 del PM): da 1024 px livello, Tesoro, Boss e «da verificare» in un solo chip riassuntivo; Tesoro e boss
+        // per esteso stanno nei «Dettagli dalla guida». Con qualcosa da verificare il chip apre quella sezione.
+        ? chipRiassunto()
+        : <>
+      {/* L4 (§4.3, §8.10): Tesoro e boss finale (il «concluso», che governa gli effetti) e il livello raggiunto, in un chip solo */}
+      {conti && conti.tesoro !== null && conti.boss !== null && (
+        <span className={`chip ${livello?.testo === 'Completato' ? 'chip--attivo' : ''}`} title={livello?.perche ?? 'Si conclude col Tesoro del Palazzo raccolto e il boss finale sconfitto; si completa con tutti gli oggetti permanenti fatti.'}
+          aria-label={`${livello ? `${livello.testo}: ` : ''}Tesoro ${conti.tesoro ? 'raccolto' : 'da prendere'}, boss finale ${conti.boss ? 'sconfitto' : 'da sconfiggere'}`}>
+          {livello ? `${livello.testo} · ` : ''}Tesoro {conti.tesoro ? '✓' : '✗'} · Boss {conti.boss ? '✓' : '✗'}
+        </span>
+      )}
+      {/* il chip apre la sezione «Da verificare» (in fondo a «Da raccogliere») e la porta in vista */}
+      {quanteDaVerificare > 0 && <button type="button" className="chip chip--oro touch" title="Pin fatti con una voce non fatta, da prima dell’aggiornamento: tocca per sistemarli"
+        onClick={apriDaVerificare}>{quanteDaVerificare} da verificare</button>}
+      </>}
+      <span className={`chip ${memento ? '' : 'hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
+      {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
+    </div>
+    {/* nei Palazzi, da 1024 px, i «Dettagli dalla guida» stanno nella riga del titolo (R3-41): qui solo sotto i 1024 */}
+    {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
+  </>;
   // Con un'area aperta la colonna di destra mostra **quell'area** (rilievo dell'utente, 2026-10-01: «in ogni area sembrano poi vedersi
   // i raccoglibili di tutte le altre aree»); il resto del Palazzo sta nella piega qui sotto. I numeri restano per planimetria (R3-31).
   const mappeArea = planimetrieArea;
@@ -916,7 +957,11 @@ export function DungeonDettaglioPage() {
                     {/* LAY3-5: sotto i 1024 px nei Palazzi sovrano e arcana al massimo su due righe ciascuno (LAY3-6: l'arcana su una sola
                         tagliava «Giudizio (Judgement)» a 375); tutti e due interi anche nei «Dettagli dalla guida», che si leggono senza mouse */}
                     {d.sovrano && <span className={`break-words lg:min-w-0 lg:max-w-full lg:truncate ${memento ? 'max-md:hidden' : 'max-lg:line-clamp-2'}`} title={d.sovrano}>{d.sovrano}</span>}
-                    {d.arcanaSovranoNome && <span className={`chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate ${memento ? '' : 'max-lg:min-w-0 max-lg:max-w-full max-lg:line-clamp-2'}`} title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
+                    {/* L10: nei Palazzi sotto i 1024 px il taglio a due righe sta sul testo, non sul chip: col taglio sul chip la terza riga
+                        si intravedeva nei 4 px di margine interno, sotto le due righe (Kaneshiro a 375). Il testo intero resta nel suggerimento */}
+                    {d.arcanaSovranoNome && <span className={`chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate ${memento ? '' : 'max-lg:min-w-0 max-lg:max-w-full'}`} title={d.arcanaSovranoNome}>
+                      {memento ? d.arcanaSovranoNome : <span className="max-lg:line-clamp-2">{d.arcanaSovranoNome}</span>}
+                    </span>}
                     {memento && suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                   </div>
                   {/* R3-41: da 1024 px nei Palazzi i «Dettagli dalla guida» chiudono la riga del titolo (aperti vanno a capo, sotto) */}
@@ -924,59 +969,19 @@ export function DungeonDettaglioPage() {
                 </div>
                 {/* Da 1024 px finestra, conteggi e dettagli stanno su una riga; i dettagli aperti vanno a capo, sotto. Nei Memento
                     (2026-10-12) la riga sta in una piega: lo spazio va ai dedali e alle aree, che sono la pagina. */}
-                {(() => { const riga = <>
-                {memento && d.sovrano && <span className="testo-13 text-text-secondary md:hidden">{d.sovrano}</span>}
-                <LineaDelTempo date={d.date} memento={memento} />
-                {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno (nei Palazzi
-                    a ogni larghezza, LAY3-5). */}
-                <div className={memento ? 'flex flex-wrap items-center gap-2 lg:contents' : 'contents'}>
-                  {/* nei Palazzi «Mappa del Palazzo» non c'è più: il visore è nella scheda stessa (L3, §4.1); nei Memento resta */}
-                  {memento && <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa dei Memento" />}
-                  {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04). Nei Palazzi sotto i 1024 px sta nei
-                      «Dettagli dalla guida» (LAY3-5): qui, intero, mandava a capo la riga; uno solo alla volta (`largo`) */}
-                  {(memento || largo) && <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} compatto={!memento} />}
-                  {/* nei Palazzi infiltrazioni, collezionabili e punti della guida stanno nei «Dettagli dalla guida» (da 1024 px per R3-41,
-                      sotto per LAY3-5: la riga tiene finestra, atterraggio e il chip riassuntivo) */}
-                  <span className={`chip ${memento ? '' : 'hidden'}`}>{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
-                  <span className={`chip ${memento ? '' : 'hidden'}`} title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori).'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
-                  {/* R3-41: da 1024 a 1279 px questo chip sta nei «Dettagli dalla guida»: qui mandava a capo la riga (intestazione da 106 a 137 px);
-                      sotto i 1024 px anche (LAY3-5) */}
-                  {!memento && <span className="chip max-xl:hidden" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
-                    {testoAreePlanimetrie}
-                  </span>}
-                  {!memento
-                    // R3-41 (scelta 3 del PM): da 1024 px livello, Tesoro, Boss e «da verificare» in un solo chip riassuntivo; Tesoro e boss
-                    // per esteso stanno nei «Dettagli dalla guida». Con qualcosa da verificare il chip apre quella sezione.
-                    ? chipRiassunto()
-                    : <>
-                  {/* L4 (§4.3, §8.10): Tesoro e boss finale (il «concluso», che governa gli effetti) e il livello raggiunto, in un chip solo */}
-                  {conti && conti.tesoro !== null && conti.boss !== null && (
-                    <span className={`chip ${livello?.testo === 'Completato' ? 'chip--attivo' : ''}`} title={livello?.perche ?? 'Si conclude col Tesoro del Palazzo raccolto e il boss finale sconfitto; si completa con tutti gli oggetti permanenti fatti.'}
-                      aria-label={`${livello ? `${livello.testo}: ` : ''}Tesoro ${conti.tesoro ? 'raccolto' : 'da prendere'}, boss finale ${conti.boss ? 'sconfitto' : 'da sconfiggere'}`}>
-                      {livello ? `${livello.testo} · ` : ''}Tesoro {conti.tesoro ? '✓' : '✗'} · Boss {conti.boss ? '✓' : '✗'}
-                    </span>
-                  )}
-                  {/* il chip apre la sezione «Da verificare» (in fondo a «Da raccogliere») e la porta in vista */}
-                  {quanteDaVerificare > 0 && <button type="button" className="chip chip--oro touch" title="Pin fatti con una voce non fatta, da prima dell’aggiornamento: tocca per sistemarli"
-                    onClick={apriDaVerificare}>{quanteDaVerificare} da verificare</button>}
-                  </>}
-                  <span className={`chip ${memento ? '' : 'hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
-                  {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
-                </div>
-                {/* nei Palazzi, da 1024 px, i «Dettagli dalla guida» stanno nella riga del titolo (R3-41): qui solo sotto i 1024 */}
-                {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
-                </>;
-                return memento
+                {memento
                   ? <details className="testo-12">
                       <summary className="touch cursor-pointer text-text-muted">Date, mappe e conteggi del Memento</summary>
-                      <div className="flex flex-col gap-2.5 pt-1.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>
+                      <div className="flex flex-col gap-2.5 pt-1.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{rigaDati()}</div>
                     </details>
-                  // LAY3-5: nei Palazzi la riga è in fila a ogni larghezza; sotto i 1024 px è la terza riga della griglia
-                  : <div className="flex flex-row flex-wrap items-center gap-x-1.5 gap-y-1.5 max-lg:col-span-2 max-lg:row-start-3 lg:gap-2">{riga}</div>;
-                })()}
+                  // LAY3-5: nei Palazzi la riga è in fila a ogni larghezza; sotto i 1024 px è la terza riga della griglia. L10: sotto i 640 px
+                  // sta subito sotto l'intestazione, non dentro (con lei la testata arrivava al 36% della schermata del telefono)
+                  : !stretto && <div className="flex flex-row flex-wrap items-center gap-x-1.5 gap-y-1.5 max-lg:col-span-2 max-lg:row-start-3 lg:gap-2">{rigaDati()}</div>}
               </div>
             </div>
           </header>}
+          {/* L10: sul telefono la riga di date, «Concluso», Tesoro e boss e «Dettagli dalla guida» del Palazzo, appena sotto l'intestazione */}
+          {!memento && !collegamento && stretto && <div className="flex shrink-0 flex-row flex-wrap items-center gap-x-1.5 gap-y-1.5 px-1" aria-label={`${d.nome}: date e avanzamento`} role="group">{rigaDati()}</div>}
           {/* L4 §8.14 (condizione del PM sulla 112): un Palazzo con la regola della voce e senza voce del boss finale non si conclude mai.
               Il segno lo dice e porta dritto a «Modifica › Boss finale». Sta sotto l'intestazione, non dentro: lì una riga in più l'avrebbe
               portata oltre il 30% della schermata sul telefono. Solo nella preparazione (nel rilascio la voce non si dichiara). */}
@@ -995,8 +1000,9 @@ export function DungeonDettaglioPage() {
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
               solo lì, torna a scorrere la pagina. */}
           {/* ---- I Memento (progetto approvato del 2026-10-12): da 1024 px il binario dei dedali a sinistra e il dedalo a destra,
-              ognuno col suo scorrimento; sul tablet i dedali in fila sopra il dedalo; sul telefono la tendina sta nella scheda del
-              dedalo. Da 1024 px il disegno del pozzo sta fisso in cima al binario; sotto, si apre a richiesta in una finestra. ---- */}
+              ognuno col suo scorrimento; sul tablet i dedali in fila sopra il dedalo, col pozzo a richiesta in una finestra; sul telefono
+              (L10-10) la griglia dei dedali sta nella scheda del dedalo, col pozzo come suo sfondo. Da 1024 px il disegno del pozzo sta
+              fisso in cima al binario. ---- */}
           {memento && (() => {
             const scelto = area.dedalo ? { ...area, dedalo: area.dedalo } : null;
             return (
@@ -1020,7 +1026,7 @@ export function DungeonDettaglioPage() {
                     </FilaScorrevole>
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
                   </div>
-                  {scelto && <AreeDelDedalo key={area.chiave} dedalo={scelto} dedali={d.aree} onScegliDedalo={scegliArea} onApriPozzo={() => setPozzo(true)}
+                  {scelto && <AreeDelDedalo key={area.chiave} dedalo={scelto} dedali={d.aree} onScegliDedalo={scegliArea}
                     partitaId={partitaId} modifica={modifica} onModifica={setModifica} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
                     onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} catturate={catturate} onCattura={cattura}
                     onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} />}

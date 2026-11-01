@@ -21,6 +21,9 @@
 // Ma io ho generato delle immagini da inserire. vorrei poterle inserire e/o modificare», «anche per i palazzi») portano la miniatura caricata
 // dall'utente nell'ambito `dungeon` (una lettura sola per tutti i nodi) e la chiave dove caricarla (`miniatura`).
 //
+// Con una partita le carte dei Palazzi e dei dedali portano anche quanto è segnato (`avanzamento`, L10-03): non si ricalcola qui, lo dà
+// `avanzamentoDeiLuoghi` di `dungeonService` con il calcolo dell'indice dei Palazzi e della pagina del dedalo.
+//
 // Modulo foglia: lo importa soltanto la rotta. Nessuna scrittura. `mappeDaCollocare` esclude le mappe dei Memento di proposito: hanno il loro posto qui.
 // ============================================================
 
@@ -38,6 +41,7 @@ import { chiaviPubblicheDelleMappe } from './percorsiMappe.js';
 import { radiceDelPalazzo } from './alberoMappe.js';
 import { infiltrazioniDelleAree, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
 import { mappeDaCollocare, sbloccoArea } from './areeService.js';
+import { avanzamentoDeiLuoghi } from '../dungeonService.js';
 
 /**
  * Il filtro dei Palazzi, in un solo punto (è quello di `utils/palazzi.ts`, `soloPalazzi`): quando Iweleth diventa solo un dedalo
@@ -96,6 +100,12 @@ function contaPin(pin: RigaPinG[], areaDellaMappa: Map<string, string>): { propr
 export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  // L10-03: con la partita, quanto è segnato di ogni Palazzo e dedalo, con il calcolo delle loro pagine (non si ricalcola qui)
+  const avanzamenti = partitaId === undefined ? null : avanzamentoDeiLuoghi(partitaId);
+  const conAvanzamento = (chiave: string): Pick<NodoGerarchiaDto, 'avanzamento'> => {
+    const a = avanzamenti?.get(chiave);
+    return a ? { avanzamento: a } : {};
+  };
   const ctx = contestoAree();
   const caricate = immaginiCaricateDelleMappe();
   // le miniature delle carte dei Palazzi, dei Memento, dei Dedali e delle aree dei Dedali (O9-5), lette una volta sola per tutti i nodi
@@ -238,6 +248,8 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
       ...(collocabile && mappeEsistenti.has(radice) ? { mappa: chiaveMappa(radice) } : {}),
       ...miniaturaDelLuogo(d.chiave),
       conteggi: { ...conteggiContenitore(radice, figliArea), infiltrazioni: proprie.length },
+      // l'archivio di un Palazzo confluito non è un Palazzo da percorrere: il suo avanzamento è quello del dedalo
+      ...(collocabile ? conAvanzamento(d.chiave) : {}),
       figli: figliArea,
     };
     if (senzaArea.length > 0) nodo.senzaArea = senzaArea;
@@ -278,6 +290,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
         aree: figliAree.length, persone: personeDelDedalo.get(d.chiave) ?? 0, trame: trameDelDedalo.get(d.chiave) ?? 0, richieste: richiesteDelDedalo.get(d.chiave) ?? 0,
         pin: { ...(archivio?.conteggi.pin ?? vuoti()) },
       },
+      ...conAvanzamento(d.chiave),
       figli: archivio ? [...figliAree, archivio] : figliAree,
     };
   };

@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { getCruciverba, impostaCruciverba } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
+import { useFiltriIndirizzo } from '../hooks/useFiltriIndirizzo';
 import { ordineGioco } from '../../shared/condizioniSpillo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -107,8 +108,11 @@ export function CruciverbaPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getCruciverba(partitaId ?? undefined), [partitaId]);
-  const [ricerca, setRicerca] = useState('');
-  const [stato, setStato] = useState<FiltroStato>('tutti');
+  // L10-04: ricerca e stato nell'indirizzo (`?q=…&stato=…`), accanto a `?elemento=` della ricerca globale
+  const { valori: filtri, imposta } = useFiltriIndirizzo<{ q: string; stato: FiltroStato }>({ q: '', stato: 'tutti' }, { stato: STATI.map((s) => s.chiave) });
+  const ricerca = filtri.q;
+  // lo stato si filtra solo con una partita (senza, il comando non c'è)
+  const stato: FiltroStato = partitaId ? filtri.stato : 'tutti';
   const d = dati.dati;
   // `?elemento=<giorno>` (la «casa» di un cruciverba nella ricerca globale) porta in vista la riga e la evidenzia
   useElementoDaIndirizzo(!!d);
@@ -138,7 +142,7 @@ export function CruciverbaPage() {
   // Il rimando azzera i filtri e scorre alla riga evidenziata al giro successivo, quando esiste.
   const vaiAlProssimo = () => {
     if (!prossimo) return;
-    setStato('tutti'); setRicerca('');
+    imposta({ stato: 'tutti', q: '' });
     setTimeout(() => document.getElementById(ancoraGiorno(prossimo.giorno))?.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' }), 0);
   };
   return (
@@ -154,8 +158,8 @@ export function CruciverbaPage() {
           )}
           <section className="filtri-articoli" role="search" aria-label="Filtri dei cruciverba">
             <div className="filtri-articoli__riga">
-              <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca data, indizio o risposta…" />
-              {partitaId && <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={setStato} />}
+              <CampoRicerca valore={ricerca} onCambia={(v) => imposta({ q: v })} segnaposto="Cerca data, indizio o risposta…" />
+              {partitaId && <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={(v) => imposta({ stato: v }, { storia: true })} />}
               <AggiungiAlCatalogo tipo="cruciverba" titolo="Aggiungi un cruciverba" onSalvato={() => void dati.ricarica()} />
             </div>
           </section>

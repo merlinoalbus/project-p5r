@@ -8,7 +8,19 @@
 // ============================================================
 
 import { contoAreaDedalo, contoDedalo } from '../../shared/dedali';
+import { percentualeSegnati } from '../../shared/avanzamento';
 import type { AreaDungeonDto, DungeonDettaglioDto } from '../types';
+
+/** Il nome di un dedalo senza «Dedalo di»: nel binario, nella fila e nella griglia del telefono basta il nome proprio (progetto approvato:
+ *  «2 Aiyatsbus 31%»). */
+export const nomeBreveDedalo = (nome: string): string => nome.replace(/^Dedalo di /i, '');
+
+/** L10-03: la percentuale di un dedalo, elementi fatti su elementi in tutto (timbri, Richieste e Trama), con la regola unica di
+ *  `shared/avanzamento.ts`: la stessa della carta del dedalo in «Luoghi della guida». Null senza partita o senza elementi. */
+export function percentualeDedalo(a: AreaDungeonDto): number | null {
+  const o = a.dedalo?.obiettivi;
+  return o && o.fatti !== null && o.totale > 0 ? percentualeSegnati(o.fatti, o.totale) : null;
+}
 
 /** Il dedalo di `area` con elementi e completamento di ogni sua area ricalcolati dalle voci (`area.punti`), Richieste e timbri. */
 export function ricalcolaDedalo(area: AreaDungeonDto, conPartita: boolean): AreaDungeonDto {

@@ -164,6 +164,12 @@ partita sta in `utente` con `partita_id`.
 - Tre alberi, costruiti in una lettura sola da `mappe/gerarchiaMappe.ts` (`GET /api/mappe/gerarchia`): **Città › Quartiere › Area › Planimetrie**, **Città › Palazzo › Area › Planimetrie** (con le infiltrazioni accanto, `infiltrazione_area`) e **Memento › Dedalo › Area** (le aree del dedalo non hanno planimetrie). Iweleth sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono l'«Archivio del Palazzo» dentro il dedalo.
 - Ogni nodo porta la sua **casa**, l'indirizzo dell'unica pagina che lo mostra, calcolata dal server (`mappe/casaMappa.ts`: `casaDellaMappa`, `casaDellArea`, `casaDelPalazzo`, `casaDelDedalo`, `casaDeiMemento`) e trasportata nei DTO: il client non la ricostruisce. Le mappe dei Memento senza Area (l'entrata `citta-mementos` e ogni figlia della radice `dungeon-mementos` senza Area: la regola è strutturale, mai il nome) sono foglie del nodo Memento, con il visore come casa: oggi resta solo l'entrata (gli otto fogli delle «aree fisse» dei Memento sono stati tolti dalla migrazione 322 e stanno nel Cestino). L'atterraggio dalla mappa di Tokyo (`atterraggioDelPalazzo`) segue la regola del Diario per tipo (`destinazioneDellaVoce`): un Palazzo la sua destinazione unica, i Memento solo una regola d'atterraggio o uno spillo d'ingresso veri, altrimenti nessuno e si apre la scheda dei Memento.
 - L'indice `/guida/mappe` mostra quell'albero (`IndiceLuoghi` → `AlberoGerarchia`); `GET /api/aree/da-collocare` elenca le planimetrie senza posto, che si assegnano con `PUT /api/aree/colloca`.
+- Con la partita i nodi `palazzo` e `dedalo` portano `avanzamento` `{ segnati, totale }` (L10-03), che non si ricalcola nella
+  gerarchia: lo dà `dungeonService.avanzamentoDeiLuoghi`, con `elencaDungeon` per i Palazzi (`gestiti` su `punti`, i numeri dell'indice dei
+  Palazzi) e `dedaloDto` per i dedali (`obiettivi`: timbri, Richieste e Trama, i numeri della pagina del dedalo). Le carte e la testata del
+  livello lo mostrano con `AvanzamentoNodo` (barra e «N su M punti segnati», con «· completato» solo quando N = M); senza partita, o con M = 0, non c'è. La percentuale di un dedalo, dei Memento
+  e dei Palazzi nelle loro pagine viene da una regola sola, `shared/avanzamento.ts` (`percentualeSegnati`, per difetto; nel client
+  `utils/dedali.percentualeDedalo`).
 
 ### Mappe: spilli, visore ed editor
 - **Registro dei tipi di spillo** (`shared/spilli.ts`, condiviso da server e frontend): 41 tipi (`TIPI_SPILLO`) in quattro categorie
@@ -441,7 +447,16 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 
 ## 7. Frontend
 - Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto; bersagli touch ≥ 44px (classe `.touch`).
-- Schede di dettaglio: intestazione comune `IntestazioneScheda` (barra con «Indietro» e azioni, figura, h1 `TitoloScheda`, chip); «Indietro» = `useIndietro` (`navigate(-1)` se c'è una pagina dell'app prima, altrimenti la rotta di ripiego con sostituzione); titoli di sezione `TitoloSezione` (`display` 17 px o `sans`); strumenti di modifica nel menu `MenuModifica` («Modifica ⋯»), l'azione di gioco come pulsante primario.
+- Schede di dettaglio: intestazione comune `IntestazioneScheda` (barra con «Indietro» e azioni, figura, h1 `TitoloScheda`, chip). Da
+  640 px la barra si scioglie in una griglia (`.intestazione-scheda`): ritorno, corpo e azioni su una riga sola; con le briciole
+  (`percorso`, in una `FilaScorrevole` di una riga che si apre sull'ultima tappa visibile, con la sfumatura dai due lati e la freccia
+  solo a destra, perché accanto a «Indietro» due «‹» sembravano lo stesso comando) la prima riga è ritorno, briciole e azioni e il corpo
+  va sotto; sul telefono l'ultima tappa di un luogo non c'è, la dice il titolo. Le righe lunghe di un luogo (orari, eccezioni,
+  sblocco) e di un negozio (sede, orari, gestore, articoli) stanno in una carta subito sotto, non nella testata; da 1280 px la testata
+  del luogo occupa le due colonne. Le testate proprie dell'Area e del Palazzo (con `IndietroScheda` e `TitoloScheda`) sotto i 640 px:
+  nell'Area briciole e comandi solo icona (`.area-testata__comandi`) su una riga e il titolo accanto alla freccia sotto; nel Palazzo la
+  riga di date, chip riassuntivo e «Dettagli dalla guida» (`rigaDati`) sta subito sotto l'intestazione. Ogni testata resta entro il 30%
+  dell'altezza a 1366×657, 1280×689, 1024×690, 768×1024 e 375×812; «Indietro» = `useIndietro` (`navigate(-1)` se c'è una pagina dell'app prima, altrimenti la rotta di ripiego con sostituzione); titoli di sezione `TitoloSezione` (`display` 17 px o `sans`); strumenti di modifica nel menu `MenuModifica` («Modifica ⋯»), l'azione di gioco come pulsante primario.
 - Dati remoti per pagina con `useCarica` (caricamento derivato dalle dipendenze) + `PageState`; stato globale in zustand: config, notifiche, glossario (rese italiane), partite (elenco + attiva, cambio dalla Topbar).
 - Errori e conferme: un solo aspetto per gli errori, `VistaErrore` (titolo, spiegazione, dettaglio, «Riprova» / «Torna alla home»), usato da `PageState`, `ErrorePagina`/`ErroreInRiquadro` ed `ErrorBoundary` (variante `autonoma` a colori fissi, senza tema). Nessun `window.confirm`: `conferma({ titolo, testo, etichetta })` (`stores/confermaStore`) apre il `DialogoConferma` montato una volta in `MainLayout` (fuoco iniziale su «Annulla», tono «pericolo») e risponde con una Promise. `index.html` contiene un'anteprima statica d'avvio (logo «P5», «Caricamento…», CSS in linea) che React sostituisce al montaggio; `SchermataAvvio` ne riusa le classi `.avvio*`.
 - Le pagine si caricano alla prima visita con un `loader` di precarico (`pagina` in `src/router.tsx`): se il file non arriva, si resta dove si era e si segnala la «nuova versione» (`versioneStore`).
@@ -583,6 +598,21 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
   prima che il bundle sia eseguito: allora l'invito indica la voce del menu.
 - Ricerche nelle liste: il filtro usa `useDeferredValue` (Compendio personale, Glossario, Abiti); quella delle Traduzioni, che
   interroga il server, parte 300 ms dopo l'ultimo tasto.
+- Filtri nell'indirizzo (L10-04): Compendio, Skill (`?q=&elemento=`), Glossario (`?q=&categoria=`; `elemento` resta della ricerca
+  globale), Domande (`?q=&tipo=&stato=`) e Cruciverba (`?q=&stato=`) leggono i filtri dall'indirizzo; le ultime quattro con
+  `useFiltriIndirizzo` (valore predefinito = parametro tolto, valori non ammessi = predefinito, più filtri in un aggiornamento solo). La
+  ricerca sostituisce la voce della cronologia, un filtro scelto con un tocco ne aggiunge una (Indietro torna al filtro di prima).
+- Compendio (L10-04): `PiastrellaPersona` è orizzontale (arte da 64 con il cartiglio del livello, nome, arcano, badge, segni,
+  affinità `AffinitaGriglia piastrella` su una fila di dieci o due di cinque secondo la larghezza della piastrella, contenitore
+  `.piastrella-persona`); sotto i 640 px resta la riga del telefono, la vista «Elenco» non cambia. I segni della partita («In scorta ·
+  Liv. N», «Nel Registro · Liv. N», `SegniPartita`) vengono da `useSegniPersonaPartita` (scorta e compendio personale della partita
+  attiva, una lettura per pagina) e stanno anche nella testa della scheda Persona; il nome del collegamento della piastrella li dice.
+- Impostazioni (L10-08): `IndiceSezioni` in testa, una `FilaScorrevole` di collegamenti `#sezione` alle sezioni presenti nella pagina
+  (la pagina dà le candidate con l'id della loro radice, l'indice tiene quelle che trova; nel rilascio le candidate sono quattro); da
+  768 px resta ferma in cima (`.indice-sezioni`, `position: sticky`) e accende la sezione corrente leggendo lo scorrimento del `main`.
+- Memento al telefono (L10-10): sotto i 768 px `AreeDelDedalo` mostra i nove dedali in una griglia 3×3 (`.griglia-dedali__voce`) con
+  il pozzo come sfondo (`MappaMemento decorativo`: niente pulsanti, `aria-hidden`, non toccabile); il pozzo grande resta nella finestra
+  del tablet e nel binario da 1024 px.
 - Rimandi a un elemento di un elenco: `?elemento=<chiave>` (`indirizzoElemento`, `src/utils/pannelloScheda.ts`). Attività e Richieste
   mostrano quel solo elemento, come pagina e nel pannello sopra il diario; libri e film solo nel pannello (come pagina restano l'elenco, e
   le voci del Diario rimandano lì); le altre pagine (domande ed esami, sfide e boss, tratti, Covo, ricette, glossario,

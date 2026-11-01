@@ -36,6 +36,7 @@ import { elencoNomi } from '../../shared/riepilogoEffetti';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
+import { useFiltriIndirizzo } from '../hooks/useFiltriIndirizzo';
 import { piatto } from '../utils/testo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -149,9 +150,13 @@ export function DomandePage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getDomande(partitaId ?? undefined), [partitaId]);
-  const [ricerca, setRicerca] = useState('');
-  const [tipo, setTipo] = useState<FiltroTipo>('tutte');
-  const [stato, setStato] = useState<FiltroStato>('tutte');
+  // L10-04: ricerca, tipo e stato nell'indirizzo (`?q=…&tipo=…&stato=…`), accanto a `?data=` ed `?elemento=` che portano a una domanda
+  const { valori: filtri, imposta } = useFiltriIndirizzo<{ q: string; tipo: FiltroTipo; stato: FiltroStato }>(
+    { q: '', tipo: 'tutte', stato: 'tutte' }, { tipo: TIPI.map((t) => t.chiave), stato: STATI.map((s) => s.chiave) });
+  const ricerca = filtri.q;
+  const tipo = filtri.tipo;
+  // lo stato si filtra solo con una partita (senza, il comando non c'è)
+  const stato: FiltroStato = partitaId ? filtri.stato : 'tutte';
   const d = dati.dati;
   // L4-03: dal Calendario `?data=MM-GG` porta alla prima domanda da quella data in poi (nell'ordine dell'anno scolastico, aprile → marzo)
   const [params] = useSearchParams();
@@ -194,7 +199,7 @@ export function DomandePage() {
   // Il rimando in cima azzera i filtri e porta alla riga evidenziata: la riga c'è solo dopo il render, quindi si scorre al giro successivo.
   const vaiAllaProssima = () => {
     if (!prossima) return;
-    setTipo('tutte'); setStato('tutte'); setRicerca('');
+    imposta({ tipo: 'tutte', stato: 'tutte', q: '' });
     setTimeout(() => document.getElementById(ancoraData(prossima.data))?.scrollIntoView({ behavior: comportamentoScorrimento(), block: 'start' }), 0);
   };
 
@@ -246,13 +251,13 @@ export function DomandePage() {
 
           <section className="filtri-articoli" role="search" aria-label="Filtri delle domande">
             <div className="filtri-articoli__riga">
-              <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca domanda, risposta, chi la fa o data…" />
+              <CampoRicerca valore={ricerca} onCambia={(v) => imposta({ q: v })} segnaposto="Cerca domanda, risposta, chi la fa o data…" />
               <span className="testo-12 text-text-muted">{visibili.length} domande</span>
               <AggiungiAlCatalogo tipo="domanda" titolo="Aggiungi una domanda" onSalvato={() => void dati.ricarica()} />
             </div>
             <div className="filtri-articoli__riga">
-              <Segmenti etichetta="Tipo" valore={tipo} opzioni={TIPI} onCambia={setTipo} />
-              {partitaId && <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={setStato} />}
+              <Segmenti etichetta="Tipo" valore={tipo} opzioni={TIPI} onCambia={(v) => imposta({ tipo: v }, { storia: true })} />
+              {partitaId && <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={(v) => imposta({ stato: v }, { storia: true })} />}
             </div>
           </section>
           {perMese.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessuna domanda con questi filtri.</p>}

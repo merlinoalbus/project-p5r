@@ -51,7 +51,7 @@ export function GestionePartite() {
   };
 
   return (
-    <section className="card flex flex-col gap-3">
+    <section id="partite" className="card flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <TitoloSezione>Partite</TitoloSezione>
         <PulsanteVisivo tono="primario" compatto icona={<IconaScheda chiave="nuova-partita" dimensione={20} />} titolo="Nuova partita" onClick={() => setNuova(true)} />

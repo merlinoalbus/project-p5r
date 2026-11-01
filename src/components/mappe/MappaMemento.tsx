@@ -17,7 +17,7 @@
 // qui, e i pulsanti seguono. Non è un elenco in più: è la stessa cosa vista in due modi.
 // ============================================================
 
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import type { AreaDungeonDto } from '../../types';
 import { STRATI_MEMENTO, urlElementoMemento } from './stratiMemento';
 
@@ -29,6 +29,9 @@ interface Props {
   /** Chiavi dei dedali già raggiunti. Vuoto o assente: si mostrano tutti. */
   sbloccati?: Set<string>;
   className?: string;
+  /** L10-10: solo decorazione (lo sfondo della griglia dei dedali al telefono): niente pulsanti né nomi, nascosto ai lettori di schermo e
+   *  non toccabile; lo strato scelto resta acceso in oro. */
+  decorativo?: boolean;
 }
 
 /** Dove cade uno strato nella discesa.
@@ -49,7 +52,10 @@ function posaDelloStrato(i: number, quanti: number) {
  * decoro, e un pulsante per ogni dedalo raggiunto, nell'ordine del catalogo, col pezzo dello strato
  * corrispondente. Quello `selezionata` si ingrandisce, si accende in oro, passa davanti e mostra il
  * nome; un tocco chiama `onSeleziona`. Con `sbloccati` vuoto o assente si mostrano tutti i dedali. */
-export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, className = '' }: Props) {
+export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, className = '', decorativo = false }: Props) {
+  // un id per pozzo: nella pagina ce ne possono essere più d'uno (binario, sfondo della griglia del telefono, finestra), e un gradiente
+  // con lo stesso id dentro un pozzo nascosto dal CSS lascerebbe gli altri senza cratere
+  const idCratere = `memento-cratere-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   // L'ordine della discesa è quello del catalogo — Qimranut, Aiyatsbus, Chemdah, Kaitul,
   // Akzeriyyuth, Adyeshach, Sheriruth, Iweleth, Da'at — non quello in cui l'API li consegna. Su
   // una mappa che è una discesa, l'ordine *è* l'informazione: si impone, non si spera.
@@ -62,20 +68,20 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
       aperto: !sbloccati || sbloccati.size === 0 || sbloccati.has(a.chiave),
     })), [aree, sbloccati]);
 
-  return <div className={`relative w-full overflow-hidden rounded-lg bg-mappa-memento ${className}`}
-    style={{ aspectRatio: '16 / 10' }}>
+  return <div className={`relative w-full overflow-hidden rounded-lg bg-mappa-memento ${decorativo ? 'pointer-events-none select-none' : ''} ${className}`}
+    style={{ aspectRatio: '16 / 10' }} aria-hidden={decorativo || undefined}>
     {/* Il cratere: centro in basso al centro, anelli concentrici e crepe che si irradiano su
         tutta la larghezza. È questa la forma della schermata del gioco. */}
     <svg viewBox="0 0 160 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
       <defs>
-        <radialGradient id="memento-cratere" cx="50%" cy="100%" r="78%">
+        <radialGradient id={idCratere} cx="50%" cy="100%" r="78%">
           <stop offset="0%" stopColor="#ff5a2a" />
           <stop offset="12%" stopColor="#d5001a" />
           <stop offset="45%" stopColor="#a30015" />
           <stop offset="100%" stopColor="#7a0010" />
         </radialGradient>
       </defs>
-      <rect width="160" height="100" fill="url(#memento-cratere)" />
+      <rect width="160" height="100" fill={`url(#${idCratere})`} />
       {[118, 96, 76, 58, 42, 28, 16].map((r) => <ellipse key={r} cx="80" cy="100" rx={r} ry={r * 0.85}
         fill="none" stroke="#8c0011" strokeWidth="0.6" opacity="0.7" />)}
       {Array.from({ length: 17 }, (_, i) => {
@@ -102,6 +108,13 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
         altrimenti l'oro finisce sotto al successivo e si vede a metà. */}
     {tappe.map((t) => t.aperto && (() => {
       const scelto = t.area.chiave === selezionata;
+      // come decorazione lo strato è un'immagine e basta, nella stessa posa: niente da toccare né da leggere
+      if (decorativo) {
+        return <span key={t.area.chiave} className={`absolute -translate-x-1/2 -translate-y-1/2 ${scelto ? 'z-30' : 'z-10'}`}
+          style={{ left: `${t.posa.x}%`, top: `${t.posa.y}%`, width: `${t.posa.larghezza}%` }}>
+          <img src={urlElementoMemento(t.strato)} alt="" className={`w-full ${scelto ? 'scale-[1.12] drop-shadow-[0_0_12px_rgba(255,210,63,0.95)]' : 'drop-shadow-[0_3px_8px_rgba(0,0,0,0.6)]'}`} />
+        </span>;
+      }
       return <button
         key={t.area.chiave}
         type="button"

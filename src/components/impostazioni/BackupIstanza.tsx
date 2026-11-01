@@ -101,7 +101,7 @@ export function BackupIstanza() {
   };
 
   return (
-    <section className="card flex flex-col gap-3" aria-label="Backup e ripristino">
+    <section id="backup-e-ripristino" className="card flex flex-col gap-3" aria-label="Backup e ripristino">
       <TitoloSezione>Backup e ripristino</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Scarica una copia di tutto e rimettila quando vuoi, anche su un altro dispositivo. L'<strong>istanza completa</strong> contiene i dati di gioco con le

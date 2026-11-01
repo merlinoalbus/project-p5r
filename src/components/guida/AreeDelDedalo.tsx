@@ -7,9 +7,10 @@
 // («pulsanti sparsi in vari punti... un'organizzazione visiva poco efficace e confusionaria»); «in ogni memento ci sono diverse
 // aree... e per ogni area ci sono 4 elementi: Timbri raccolti..., Persone che puoi incontrare... Richieste e eventi di trama».
 // Progetto approvato («Approvo»):
-//   - in cima la scheda del dedalo: disegno del dedalo, nome (sul telefono una tendina con tutti i dedali), il conto per elemento
-//     («Timbri 3/8 · Richieste 1/5 · Trama 1/4 · Persona 3/18 catturate»), la barra e l'interruttore «Gioca» / «Modifica la
-//     guida» (sul telefono nel menu ⋯, con il pozzo);
+//   - in cima la scheda del dedalo: disegno del dedalo, nome, il conto per elemento («Timbri 3/8 · Richieste 1/5 · Trama 1/4 ·
+//     Persona 3/18 catturate»), la barra e l'interruttore «Gioca» / «Modifica la guida» (sul telefono nel menu ⋯). Sul telefono
+//     (L10-10, schizzo approvato) al posto del nome i nove dedali in una griglia 3×3 di pulsanti da 44 px, col pozzo come sfondo
+//     decorativo: prima erano una tendina chiusa e il pozzo stava nel menu ⋯;
 //   - le aree come schede («Area 2 · 2/6», ✓ se completata), un'area per volta; sul telefono le schede restano in vista
 //     scorrendo;
 //   - nell'area, in quest'ordine: Timbri (su tutta la larghezza), Persona, Richieste, Trama; Persona a sinistra e
@@ -27,7 +28,6 @@ import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { Selettore } from '../shared/Selettore';
 import { FilaScorrevole } from '../shared/FilaScorrevole';
 import { TestoRipiegabile } from '../shared/TestoRipiegabile';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
@@ -41,7 +41,9 @@ import { ElencoRichieste, DA_COLLOCARE } from './ElencoRichieste';
 import { TramaDellArea } from './TramaDellArea';
 import { SezioneDellArea } from './SezioneDellArea';
 import { urlStratoDedalo } from '../mappe/stratiMemento';
-import { contiDelDedalo } from '../../utils/dedali';
+import { MappaMemento } from '../mappe/MappaMemento';
+import { contiDelDedalo, nomeBreveDedalo, percentualeDedalo } from '../../utils/dedali';
+import { percentualeSegnati } from '../../../shared/avanzamento';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../../types';
 
@@ -53,11 +55,9 @@ type Dedalo = AreaDungeonDto & { dedalo: NonNullable<AreaDungeonDto['dedalo']> }
 interface Props {
   /** Il dedalo (l'area dei Memento) con le sue aree e le sue voci. */
   dedalo: Dedalo;
-  /** Tutti i dedali, per la tendina del telefono. */
+  /** Tutti i dedali, per la griglia del telefono (L10-10). */
   dedali: ReadonlyArray<AreaDungeonDto>;
   onScegliDedalo: (chiave: string) => void;
-  /** Apre il pozzo dei Memento (sul telefono, dal menu ⋯). */
-  onApriPozzo: () => void;
   partitaId: number | null;
   /** «Modifica la guida» acceso. */
   modifica: boolean;
@@ -83,7 +83,7 @@ function etichettaArea(a: AreaDedaloDto): string {
 }
 
 /** Il dedalo: scheda in cima, schede delle aree, l'area aperta coi suoi quattro elementi e, in «Modifica la guida», gli attrezzi. */
-export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, partitaId, modifica: modificaRichiesta, onModifica, cambiaStato, onPuntoAggiornato, onTimbri, onRichiesta, catturate, onCattura, onRicarica }: Props) {
+export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modifica: modificaRichiesta, onModifica, cambiaStato, onPuntoAggiornato, onTimbri, onRichiesta, catturate, onCattura, onRicarica }: Props) {
   // L12 (passo 8): nel rilascio (sola lettura) «Modifica la guida» non esiste: l'interruttore non si mostra e la modalità resta «Gioca»
   const modifica = !IN_RILASCIO && modificaRichiesta;
   const { aree, daCollocare, obiettivi, completato } = dedalo.dedalo;
@@ -106,7 +106,11 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
   };
   const conti = contiDelDedalo(dedalo, catturate);
   const fatti = obiettivi.fatti ?? 0;
-  const quota = partitaId && obiettivi.totale > 0 ? fatti / obiettivi.totale : null;
+  // L10-03: un solo totale, quello del completamento (timbri, Richieste e Trama; le Persona si contano a parte, «catturate», e non
+  // fanno la percentuale: scelta dell'utente del 2026-10-11). La percentuale viene dalla regola unica, la stessa della carta del dedalo
+  // in «Luoghi della guida» («N su M punti segnati») e della scelta dei dedali al telefono
+  const percentuale = partitaId && obiettivi.totale > 0 ? percentualeSegnati(fatti, obiettivi.totale) : null;
+  const testoSegnati = `${fatti} su ${obiettivi.totale} punti segnati`;
   const elencoAree = aree.map((x) => ({ chiave: x.chiave, nome: x.nome }));
   const senzaArea = dedalo.punti.filter((p) => p.tipo === 'persona' && p.areeDedalo.length === 0);
   /** Il conto di un elemento per la riga della scheda: «fatti/totale» con la partita, il totale senza. */
@@ -132,30 +136,51 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex min-w-0 items-center gap-2">
               <h2 className="m-0 hidden min-w-0 font-display testo-20 uppercase leading-none md:block">{dedalo.nome}{completato && <>{' '}<SpuntaCompletata dimensione={15} /><TestoCompletata /></>}</h2>
-              <span className="min-w-0 flex-1 md:hidden">
-                <Selettore compatto etichetta="Dedalo" valore={dedalo.chiave} ricerca="mai"
-                  opzioni={dedali.map((x) => ({ chiave: x.chiave, nome: `${x.ordine + 1}. ${x.nome}`, dettaglio: x.dedalo?.completato ? 'completato' : x.dedalo && x.dedalo.obiettivi.fatti !== null && x.dedalo.obiettivi.totale > 0 ? `${Math.round((x.dedalo.obiettivi.fatti / x.dedalo.obiettivi.totale) * 100)}%` : undefined }))}
-                  onCambia={onScegliDedalo} />
-              </span>
-              {quota !== null && <span className="shrink-0 font-display testo-17 tabular-nums leading-none">{Math.round(quota * 100)}%</span>}
+              {/* L10-10: sul telefono i dedali sono la griglia qui sotto (prima una tendina): la riga dice quanti sono */}
+              <span id={`dedali-di-${dedalo.chiave}`} className="min-w-0 flex-1 testo-12 uppercase tracking-wide text-text-secondary md:hidden">Dedali · {dedali.length}</span>
+              {percentuale !== null && <span className="shrink-0 font-display testo-17 tabular-nums leading-none" title={`${testoSegnati}: timbri, Richieste e Trama`}>{percentuale}%</span>}
               <span className="hidden md:inline-flex">{interruttore}</span>
-              <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--stretto shrink-0 md:hidden" icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo={<>Altro<FrecciaApertura aperto={menu} /></>} aria-expanded={menu} aria-label="Altro: altri comandi" onClick={() => setMenu((m) => !m)} />
+              {/* il menu ⋯ porta solo l'interruttore (il pozzo è lo sfondo della griglia): nel rilascio, dove l'interruttore non c'è, non c'è nemmeno il menu */}
+              {interruttore && <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--stretto shrink-0 md:hidden" icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo={<>Altro<FrecciaApertura aperto={menu} /></>} aria-expanded={menu} aria-label="Altro: altri comandi" onClick={() => setMenu((m) => !m)} />}
+            </div>
+            {/* L10-10: sotto i 768 px i nove dedali sempre in vista, una griglia 3×3 di pulsanti da 44 px (numero, nome, percentuale); il pozzo
+                ne è lo sfondo, attenuato, non toccabile e nascosto ai lettori di schermo, con lo strato scelto acceso in oro. Il pozzo sta solo
+                dietro i pulsanti, che hanno un fondo quasi pieno: nessun testo si legge sul disegno */}
+            <div className="relative isolate overflow-hidden rounded-md p-1 md:hidden">
+              {/* la posa sta nel riquadro attorno: il pozzo ha già il suo `relative`, e due posizioni sullo stesso elemento si contraddicono */}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 opacity-[0.22]">
+                <MappaMemento decorativo aree={[...dedali]} selezionata={dedalo.chiave} />
+              </div>
+              <div role="group" aria-labelledby={`dedali-di-${dedalo.chiave}`} className="grid grid-cols-3 gap-1.5">
+                {dedali.map((x) => {
+                  const p = percentualeDedalo(x);
+                  const fatto = x.dedalo?.completato === true;
+                  return (
+                    <button key={x.chiave} type="button" aria-pressed={x.chiave === dedalo.chiave} title={x.nome} onClick={() => onScegliDedalo(x.chiave)}
+                      className="griglia-dedali__voce touch flex min-w-0 flex-col items-start justify-center rounded-md px-1.5 text-left leading-tight">
+                      <span className="flex max-w-full items-center gap-1 testo-12 font-semibold">
+                        <span className="shrink-0 font-display">{x.ordine + 1}</span><span className="min-w-0 truncate">{nomeBreveDedalo(x.nome)}</span>{fatto && <SpuntaCompletata dimensione={11} />}
+                      </span>
+                      <span className="testo-12 tabular-nums text-text-secondary">{fatto ? 'completato' : p !== null ? `${p}%` : `${x.dedalo?.obiettivi.totale ?? 0} el.`}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <span className="testo-12 tabular-nums text-text-secondary">
               Timbri {conto(conti.timbri)}{conti.timbri.daImpostare > 0 ? ` (${conti.timbri.daImpostare} ${conti.timbri.daImpostare === 1 ? 'area' : 'aree'} senza totale)` : ''} · Richieste {conto(conti.richieste)} · Trama {conto(conti.trama)} · Persona {partitaId ? `${conti.persona.fatti}/${conti.persona.totale} catturate` : conti.persona.totale}
             </span>
-            {quota !== null && (
-              <span className="visore-mappa__progresso h-1.5" role="progressbar" aria-label={`Elementi di ${dedalo.nome}`} aria-valuemin={0} aria-valuemax={obiettivi.totale} aria-valuenow={fatti}>
-                <span className="visore-mappa__progresso-barra" style={{ width: `${Math.round(quota * 100)}%` }} />
+            {percentuale !== null && (
+              <span className="visore-mappa__progresso h-1.5" role="progressbar" aria-label={`Elementi di ${dedalo.nome}`} aria-valuemin={0} aria-valuemax={obiettivi.totale} aria-valuenow={fatti} aria-valuetext={`${testoSegnati}, ${percentuale}%`}>
+                <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
               </span>
             )}
           </div>
         </div>
-        {/* sul telefono: il menu ⋯ con l'interruttore e il pozzo */}
-        {menu && (
+        {/* sul telefono: il menu ⋯ con l'interruttore */}
+        {menu && interruttore && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border-light pt-2 md:hidden">
             {interruttore}
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo dei Memento" onClick={() => { setMenu(false); onApriPozzo(); }} />
           </div>
         )}
         {/* i dettagli della guida in una piega: lo spazio va all'area */}

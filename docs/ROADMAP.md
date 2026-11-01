@@ -167,11 +167,19 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   della visita. Le frasi dell'anteprima della pesca dette dal server in parole da giocatore.
 - Da applicare: le visite di pesca del Diario si registrano ancora con il modulo di prima (17 campi e spunta); usare il foglio in tre passi
   va deciso da Roberto (nel Diario la domanda sul conto andrebbe lasciata obbligatoria).
-- Aperti: L8 (le voci sopra), L10 (L10-03, L10-04, L10-08, L10-10 con schizzo approvato, D20) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- L10-03/04/08/10 fatti (schizzi approvati per D20): avanzamento «N su M punti segnati» nelle carte dei Palazzi e dei dedali con gli stessi
+  numeri delle loro pagine e la raccolta sotto ogni area nella fila del Palazzo; Compendio a piastrelle orizzontali con i segni della partita
+  («In scorta», «Nel Registro», anche nella scheda Persona), filtri di Skill, Glossario, Domande e Cruciverba nell'indirizzo, skill per nome
+  italiano; indice delle sezioni in testa alle Impostazioni; dedali dei Memento in griglia al telefono, col pozzo come sfondo; testate delle
+  schede di dettaglio, dell'Area e del Palazzo entro il 30% a ogni formato.
+- Aperti: L8 (le voci sopra), L10 (le proposte non ancora fatte) e L11; in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 
 **Lavori aperti**
+- **Testata della Mappa senza planimetria, da verificare.** `MappaPage` mostra `LuogoSenzaPlanimetria` (con le briciole) solo per una mappa
+  senza planimetria che ha per casa il visore: oggi nei dati non ce n'è nessuna. Quando un dato la mostrerà, va misurata (testata entro il
+  30% ai cinque formati) e controllata la fila delle briciole.
 - **Vecchia lista dei contenuti della guida.** `ContenutiGuidaMappa` (con `SchedaContenutoGuida` e `GET /api/mappe/contenuti/:chiave`)
   non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
   `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.

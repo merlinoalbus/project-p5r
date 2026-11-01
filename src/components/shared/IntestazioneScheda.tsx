@@ -19,8 +19,9 @@
 //   stanno nel corpo della scheda.
 // ============================================================
 
-import type { HTMLAttributes, ReactNode } from 'react';
+import { useEffect, useRef, type HTMLAttributes, type ReactNode } from 'react';
 import { IconChevronLeft } from './icons';
+import { FilaScorrevole } from './FilaScorrevole';
 import { useInPannello } from '../scheda/contestoScheda';
 import { useIndietro } from '../../hooks/useIndietro';
 
@@ -74,6 +75,36 @@ interface Props {
   'aria-label'?: string;
 }
 
+/**
+ * Le briciole della testata (L10): una `FilaScorrevole` in una riga sola, con la sfumatura dal lato in cui il percorso continua (verso
+ * destra anche la freccia; verso «Indietro» solo la sfumatura, perché le due «‹» accanto sembravano lo stesso comando: CSS in fondo a
+ * `tailwind.css`). All'apertura la fila parte dall'ultima tappa che si vede, la più vicina alla pagina; quelle di prima si raggiungono
+ * scorrendo. Si scorre la fila di lato, mai la pagina.
+ */
+function BricioleScheda({ children }: { children: ReactNode }) {
+  const posto = useRef<HTMLDivElement>(null);
+  // una volta, all'apertura (al fotogramma dopo, quando la fila ha preso le sue misure): dopo, la posizione la decide chi la scorre
+  useEffect(() => {
+    const fotogramma = requestAnimationFrame(() => {
+      const fila = posto.current?.querySelector<HTMLElement>('.fila-scorrevole');
+      if (!fila || fila.scrollWidth <= fila.clientWidth) return;
+      // la fila parte dall'inizio dell'ultima tappa che si vede (sul telefono quella prima della pagina, che dice il titolo), col suo «›»
+      // davanti: «… › Edificio …»; le tappe di prima restano sotto la sfumatura di sinistra
+      const tappe = [...fila.querySelectorAll<HTMLElement>('a, [aria-current]')].filter((t) => t.getClientRects().length > 0);
+      const ultima = tappe[tappe.length - 1];
+      const f = fila.getBoundingClientRect();
+      const dove = ultima ? fila.scrollLeft + ultima.getBoundingClientRect().left - f.left - 28 : fila.scrollWidth;
+      fila.scrollLeft = Math.max(0, Math.min(dove, fila.scrollWidth - fila.clientWidth));
+    });
+    return () => cancelAnimationFrame(fotogramma);
+  }, []);
+  return (
+    <div ref={posto} className="intestazione-scheda__percorso">
+      <FilaScorrevole className="fila-scorrevole--sempre min-w-0 flex-1 items-center">{children}</FilaScorrevole>
+    </div>
+  );
+}
+
 /** Intestazione di una scheda di dettaglio: ritorno, figura, titolo con chip e metadati, azioni. */
 export function IntestazioneScheda({ titolo, ripiego, percorso, figura, chip, children, azioni, senzaRiquadro, senzaIndietro, className = '', ...resto }: Props) {
   const nelPannello = useInPannello();
@@ -84,8 +115,8 @@ export function IntestazioneScheda({ titolo, ripiego, percorso, figura, chip, ch
           entro il 30%). Nel DOM le azioni vengono prima del titolo, come si vedono: l'ordine del fuoco segue quello visivo */}
       {(conRitorno || percorso || azioni) && (
         <div className="intestazione-scheda__barra">
-          {conRitorno && <IndietroScheda ripiego={ripiego} etichettaNascosta="telefono" />}
-          {percorso}
+          {conRitorno && <IndietroScheda ripiego={ripiego} etichettaNascosta="telefono" className="intestazione-scheda__indietro" />}
+          {percorso && <BricioleScheda>{percorso}</BricioleScheda>}
           {azioni && <div className="intestazione-scheda__azioni">{azioni}</div>}
         </div>
       )}

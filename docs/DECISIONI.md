@@ -134,7 +134,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 
 ## 5. Interfaccia
 - **Tre formati** verificati sul continuo delle larghezze: nessuno sbordo orizzontale; sotto i 768 px file di schede e filtri
-  scorrevoli invece di righe di pulsanti. L'intestazione di una pagina occupa al più il 30% dell'altezza a ogni formato.
+  scorrevoli invece di righe di pulsanti. L'intestazione di una pagina occupa al più il 30% dell'altezza a ogni formato, anche quella delle
+  schede di dettaglio (L10): ritorno, titolo e azioni su una riga, briciole in una riga che scorre (verso «Indietro» solo la sfumatura,
+  senza una seconda freccia), e le righe lunghe (orari di un luogo, sede e orari di un negozio, date e avanzamento del Palazzo al
+  telefono) subito sotto la testata; al telefono i comandi della testata dell'Area sono solo icona.
 - Navigazione: barra in basso (telefono e tablet) con Home, Compendio, Fusione, Partita, Guida; Skill dal chip in testa al Compendio,
   dalle schede Persona, dalla Home senza partita e, da 1024 px, dalla barra laterale. Briciole a due livelli, «Vai al contenuto»,
   fuoco sul titolo dopo ogni cambio di pagina.
@@ -183,6 +186,12 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   Le righe dei compagni sono alte almeno 56 px; a 1024 vanno su due linee, perché la colonna della squadra è stretta.
   Il modulo dei dati della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
+- **Filtri nell'indirizzo (L10-04)**: Compendio, Skill, Glossario, Domande e Cruciverba tengono ricerca e filtri nell'indirizzo, così
+  tornando da una scheda il filtro c'è ancora e si condivide. La ricerca non riempie la cronologia; un filtro scelto con un tocco sì, e
+  Indietro torna al filtro di prima. Le skill sono in ordine di nome italiano.
+- **Impostazioni con l'indice (L10-08, schizzo approvato)**: in testa una fila di chip con le sezioni davvero presenti (nel rilascio solo
+  le sue), ferma in cima da 768 px con la sezione corrente accesa, e l'indirizzo `#sezione`; al telefono sta in testa e scorre con la
+  pagina. Niente sottotitolo che elenca le sezioni: lo dice l'indice.
 - **Testi che informano (L7, 01/11)**: un testo visibile compare solo se dice qualcosa a chi gioca. Niente numeri scritti a mano che vanno
   fuori sincrono (i conteggi si ricavano dai dati o non si scrivono), niente identificativi né percorsi. Le date di gioco si scrivono in un
   modo solo, «12 aprile» (con l'articolo nelle frasi: «del 12 aprile», «dall'11 aprile»), anche nei titoli dello Storico scritti dal server
@@ -194,6 +203,10 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 ## 6. Compendio, skill e traduzioni
 - Statistiche delle Persona possedute: stima del livello (+3 punti per livello in proporzione alla base) più i valori registrati
   dall'utente; nessuna fonte compatibile dà le curve di crescita.
+- **Compendio a piastrelle orizzontali (L10-04, schizzo approvato)**: arte da 64 px con il cartiglio del livello, nome, arcano e affinità
+  su una fila (su due file di cinque dove la piastrella è stretta, come a 1024); due colonne da 640 px, tre da 1024 (nove piastrelle intere
+  a 1280×689), quattro da 1536; sotto i 640 px la riga del telefono. Con una partita attiva, e solo se veri, i segni «In scorta ·
+  Liv. N» (oro) e «Nel Registro · Liv. N» (rosso), anche nella testa della scheda Persona. La vista «Elenco» non cambia.
 - Aggiunta alla scorta: una Persona per partita; skill precompilate con le ultime 8 apprese al livello scelto; l'aggiunta registra
   la Persona nel compendio personale col livello più alto raggiunto.
 - Le descrizioni delle Persona sono testi originali in italiano sull'origine della figura, non il testo del compendio del gioco.
@@ -329,6 +342,16 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   nel compendio, la conferma di «Riapri», le regole della voce (descrittiva, conteggio delle segnate, voce segnata in vista, passi sotto l'Enigma, voce da
   catturare) e le piastrelle di cattura. Restano propri del visore la casella, il conteggio delle da segnare, i pin centrabili e la finestra; propri della scheda i filtri
   per tipo, le planimetrie dell'elenco e la modifica. **(31/10)**
+- **Avanzamento nelle carte dei Luoghi (L10-03, schizzo approvato)**: con una partita le carte dei Palazzi e dei dedali dicono «N su M punti
+  segnati» con una barra (e «· completato» solo quando sono segnati tutti; un Palazzo concluso nel gioco con punti ancora da segnare non
+  ha segni in più), con gli stessi numeri delle loro pagine, calcolati una volta sola dal server: per un Palazzo i punti segnati su
+  tutti i punti dell'indice dei Palazzi, per un dedalo gli elementi che fanno il suo completamento (timbri, uno per timbro, Richieste e
+  Trama). Le Persona del dedalo restano contate a parte («catturate») e non entrano nel totale, come vuole la regola del completamento
+  (2026-10-11): così la percentuale della pagina del dedalo e la riga della carta sono lo stesso calcolo. Ogni percentuale di avanzamento
+  (dedalo, Memento, Palazzo) è per difetto: il 100% compare solo a lavoro finito. Nella fila delle aree del Palazzo (768–1279 px) ogni chip
+  ha una seconda riga con lo stesso testo del foglio («2 da prendere su 2»), sempre in 44 px.
+- **Memento al telefono (L10-10, schizzo approvato)**: sotto i 768 px i nove dedali sono una griglia di pulsanti da 44 px sempre in vista,
+  e il pozzo è solo il loro sfondo, attenuato e non toccabile; «Pozzo dei Memento» non è più nel menu «Altro». Tablet e desktop come prima.
 - Nessuna immagine ufficiale nel repository: le planimetrie le carica l'utente nell'istanza. I pezzi delle planimetrie (zone
   dell'immagine posate sulla mappa con condizioni) si definiscono una volta e si posano più volte.
 - Il Cestino rimette le eliminazioni della guida e delle mappe.

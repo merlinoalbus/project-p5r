@@ -10,6 +10,7 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMedia } from '../hooks/useMedia';
 import { useCarica } from '../hooks/useCarica';
+import { useSegniPersonaPartita } from '../hooks/useSegniPersonaPartita';
 import { getPersone, urlPersone } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
@@ -97,6 +98,8 @@ export function CompendioPage() {
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), [], { cacheUrl: urlPersone({ delGruppo: true }) });
   const [params, setParams] = useSearchParams();
+  // L10-04: scorta e Registro della partita attiva, per i segni delle piastrelle (una lettura per la pagina; niente senza partita)
+  const { segni } = useSegniPersonaPartita();
   // Lotto C: sul telefono le piastrelle diventano righe (arte piccola, nome, arcano e le dieci affinità su una riga):
   // da ~1,5 Persona per schermata a 4 e più, con le stesse informazioni.
   const telefono = useMedia('(max-width: 639px)');
@@ -294,8 +297,9 @@ export function CompendioPage() {
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (
-          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5" aria-label="Persona">
-            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={ricordaUltimaPersona} />)}
+          // L10-04: piastrelle orizzontali, tre colonne da 1024 (nove intere a 1280×689), due da 640, quattro dai 1536
+          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4" aria-label="Persona">
+            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={ricordaUltimaPersona} segni={segni?.get(p.id)} />)}
           </ul>
         ) : (
           <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Persona">

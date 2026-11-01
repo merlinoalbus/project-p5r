@@ -134,7 +134,7 @@ export function Cestino() {
   });
 
   return (
-    <section className="card flex flex-col gap-3" aria-labelledby="titolo-cestino">
+    <section id="cestino" className="card flex flex-col gap-3" aria-labelledby="titolo-cestino">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
           <TitoloSezione id="titolo-cestino">Cestino</TitoloSezione>
