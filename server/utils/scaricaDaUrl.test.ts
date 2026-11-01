@@ -11,6 +11,10 @@ import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { scaricaDaUrl, urlValido } from './scaricaDaUrl.js';
 
+// L9-02: lo scarico rifiuta la rete interna, e il server di prova vive su 127.0.0.1. Solo in questo file il filtro considera pubblico ogni
+// indirizzo (`vi.mock`): il codice dell'app non ha nessuna strada per spegnerlo.
+vi.mock('./reteInterna.js', () => ({ indirizzoInterno: () => false }));
+
 const OPZIONI = { maxByte: 1024, cosa: 'il pacchetto', codiceScaricoFallito: 'scarico-fallito', codiceTroppoGrande: 'troppo-grande', accept: '*/*' };
 
 let server: http.Server;

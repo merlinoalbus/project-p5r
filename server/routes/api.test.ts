@@ -14,6 +14,10 @@ import { createApp } from '../bootstrap.js';
 import type { PersonaDettaglioDto, PersonaPossedutaDto, PersonaRiassuntoDto, SkillDettaglioDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
+// L9-02: lo scarico da URL rifiuta la rete interna, e la «sorgente remota» delle prove è un server su 127.0.0.1. Solo in questo file il
+// filtro considera pubblico ogni indirizzo: il codice dell'app non ha nessuna strada per spegnerlo, e il filtro vero ha le sue prove a parte.
+vi.mock('../utils/reteInterna.js', () => ({ indirizzoInterno: () => false }));
+
 const app = createApp();
 
 describe('API', () => {

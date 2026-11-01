@@ -11,8 +11,9 @@
 #     arrivare all'istanza pubblica; niente Watchtower (il compose di rilascio lo esclude esplicitamente);
 #   - il tag dev'essere nella forma `rilascio-vX.Y.Z` e dev'essere raggiungibile da `main`: un tag su un ramo di lavoro non produce un'immagine pubblica;
 #   - le immagini si pubblicano solo se il gate CI (ci.yml: typecheck, lint, audit) è verde, come per la preparazione;
-#   - il frontend si costruisce con `VITE_MODALITA=rilascio` e `target: rilascio`: il Dockerfile fallisce se la build non è di rilascio o se nel
-#     bundle compare la rotta di «Prepara edizione», e controlla la sintassi della configurazione nginx.
+#   - il frontend si costruisce con `VITE_MODALITA=rilascio` e `target: rilascio`: il Dockerfile fallisce se la build non è di rilascio o se il
+#     bundle che entra nell'immagine non passa la guardia intera (`scripts/verifica-bundle-rilascio.ts`), e controlla la sintassi della
+#     configurazione nginx.
 
 name: Build & Push Docker Images (rilascio)
 

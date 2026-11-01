@@ -446,6 +446,36 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
 - **Identità**: ogni richiesta `/api` (tranne `GET /api/health`) porta il token del proxy di accesso (Cloudflare Access), verificato dal backend (`server/middleware/identita.ts`); il proprietario delle partite è il `sub` del token. Cestino personale, partite e avanzamento sono per utente (`/api/partite/…`, compreso `/api/partite/cestino`).
 - **Nessuna migrazione nel rilascio**: non ci sono né il runner né le cartelle delle migrazioni. «Prepara edizione» produce, in una cartella con `gioco.db`, `partite-vuoto.db`, `font/` e `manifesto.json`; il manifesto porta le versioni degli schemi e l'impronta della struttura delle partite (`server/db/improntaSchema.ts`, un'unica funzione usata dai due lati). A ogni avvio il rilascio (`server/rilascio/edizione.ts`) confronta versioni e impronta col manifesto e, se non coincidono, si ferma: una struttura diversa richiede una nuova edizione e una conversione una tantum su copia, dopo il sì dell'utente.
 
+## 7 ter. Sicurezza ed esercizio
+Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei container.
+- **Immagini SVG** (`server/routes/immagini.ts`, `intestazioniDelFile`): il file di un'immagine SVG caricata esce con
+  `Content-Security-Policy: default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox` e
+  `Content-Disposition: attachment`. Dentro `<img>` e negli sfondi CSS si vede come prima (lì gli script non girano mai); aperto da solo non
+  esegue nulla e si scarica. Gli altri formati e le miniature WebP non cambiano.
+- **«Scarica da URL»** (`server/utils/scaricaDaUrl.ts`, `server/utils/reteInterna.ts`, solo nella preparazione): `http`/`https` di Node con
+  una risoluzione DNS propria, non `fetch`. Si controllano tutti gli indirizzi del nome e ci si connette a quello controllato; un IP scritto
+  nell'URL si controlla prima. Vietati i blocchi a uso speciale dell'IANA: privati, loopback, link-local (metadati del cloud), CGNAT,
+  multicast, riservati, e in IPv6 loopback, ULA, link-local, site-local, multicast e le forme che contengono un IPv4 (mappato, NAT64, 6to4,
+  Teredo). I redirect si seguono a mano, al più `MAX_REDIRECT = 5`, ognuno controllato come il primo e solo verso http/https. Errore
+  400 `indirizzo-non-ammesso`. Lo User-Agent è `project-p5r/<versione> (guida personale di gioco per Persona 5 Royal)`.
+- **Collegamenti alle fonti**: `shared/urlHttp.ts` è l'unica regola (solo URL assoluti http/https), usata da `Fonte`
+  (`src/components/shared/VoceFonte.tsx`, schede di Battaglia, Completamento, Oggetti e Sfide), dai collegamenti in linea del Diario, del
+  Calendario, del Covo, dei Personaggi e delle trasformazioni di Jose, dalle fonti della pesca, dalla scheda del Confidente
+  (`src/utils/fonti.ts`) e da `urlValido` del server. Un testo che non è un indirizzo http/https non diventa un collegamento. I
+  collegamenti in linea non passano da `Fonte` apposta: `urlHttp` è un modulo puro che il bundle di rilascio elimina, mentre importare
+  `VoceFonte` nei moduli dell'avvio aggiungeva un file da precaricare.
+- **Intestazioni del rilascio** (`nginx.rilascio-intestazioni.conf`, incluso in ogni `location` con un suo `add_header`): `nosniff`,
+  `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, una CSP applicata ristretta (`frame-ancestors`, `base-uri`, `object-src`,
+  `form-action`) e la CSP completa in solo rapporto (`Content-Security-Policy-Report-Only`: `default-src`, `script-src`, `style-src`,
+  `img-src`, `font-src`, `connect-src`, `manifest-src`, `media-src`, `worker-src`, `frame-src`, tutte sulla stessa origine, con
+  `'unsafe-inline'` per gli stili e `data:` per le immagini). L'nginx della preparazione non ha intestazioni di sicurezza (D11).
+- **Container**: limiti di memoria e di processi in entrambi i compose (preparazione: backend 4 GiB e 256 processi, frontend 256 MiB e
+  128; rilascio: backend 1 GiB e 256, frontend 256 MiB e 128), motivati nei commenti dei compose. Nel rilascio backend e frontend hanno il
+  filesystem in sola lettura (il frontend con le tmpfs `/var/cache/nginx`, `/run`, `/tmp`) e `no-new-privileges`.
+- **Guardia del bundle di rilascio**: `scripts/verifica-bundle-rilascio.ts` gira nel gate CI (con il confronto con la preparazione) e nello
+  stage di build di `Dockerfile.frontend` con `VITE_MODALITA=rilascio`, sul bundle che entra davvero nell'immagine: una stringa vietata
+  ferma la costruzione.
+
 ## 8. Build, test, deploy
 - Test (Vitest). Aiuti comuni in `test/`: `dbDiProva()` (`test/dbDiProva.ts`, DB del backend in memoria con il pacchetto iniziale caricato e migrato); `test/supertest.ts` (alias di `supertest` in `vitest.config.ts`, chiuso a fine file da `test/setup.ts`); `moduloApi` / `moduloNotifiche` (`test/mockModuli.ts`) per i `vi.mock` del frontend. Il frontend gira in jsdom.
 - Dev: `scripts/start-all.sh` (`npm run dev:server` = `tsx watch`, che **si riavvia da solo** a ogni salvataggio in `server/` e applica subito le migrazioni nuove ai dati di `data/`; `npm run dev:client` = `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`. Le porte vengono da `.env` (`BE_PORT`/`PORT`, `FE_PORT`).
@@ -535,5 +565,5 @@ Lo stesso codice gira in due istanze con stack, volumi e immagini separati. Le c
   sfondo. Lo spostamento (barra trascinata, frecce sulla maniglia ⠿, sempre per intero nello schermo) è `useSpostamentoFinestra`, lo
   stesso della guida del visore.
 - Accessibilità: un `div`/`span` con `aria-label` ha sempre un `role` (lo controlla `src/accessibilita.test.ts`).
-- Runtime (`docker-compose.yml`): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK`, BE solo su rete interna (3101, proxato da nginx su `/api/`), volume `project_p5r_data` su `/data` (DB creato al primo boot dal pacchetto iniziale nell'immagine). La cartella d'appoggio è un volume NFS: lo stack deve definire `NAS_ADDR` e `NAS_PATH`, senza valori predefiniti. I container della preparazione portano la label di Watchtower per l'aggiornamento automatico; quelli del rilascio no.
+- Runtime (`docker-compose.yml`): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK`, BE solo su rete interna (3101, proxato da nginx su `/api/`), volume `project_p5r_data` su `/data` (DB creato al primo boot dal pacchetto iniziale nell'immagine). La cartella d'appoggio è un volume NFS: lo stack deve definire `NAS_ADDR` e `NAS_PATH`, senza valori predefiniti. I container della preparazione portano la label di Watchtower per l'aggiornamento automatico; quelli del rilascio no. Ogni servizio ha `mem_limit` e `pids_limit` (§7 ter).
 - `nginx.conf`: il backend si risolve per nome a ogni richiesta (`resolver 127.0.0.11`, variabile `$backend`), così un container ricreato non lascia nginx sul vecchio indirizzo; `/api/mappe/importa` ha un limite proprio (`client_max_body_size` più largo del resto dell'API; Express lo ferma a 64 MB); `immutable` solo sui file con hash di `/assets/`, gli altri statici si rivalidano.

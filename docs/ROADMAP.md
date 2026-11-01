@@ -133,7 +133,13 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     (come già facevano Compendio e cicli);
   - «Anima da cineasta» si può accendere anche senza il libro letto: appare attivo ma non cambia i punti.
 - L8, ancora da fare: L8-01 (D1: non toccare), L8-03; i gradini della capienza non hanno un editor (si correggono con una migrazione).
-- Aperti: L8 (le voci sopra), L9–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- L9 fatto: gli SVG caricati non eseguono script se aperti da soli (CSP `sandbox` e allegato, nell'app si vedono come prima); «Scarica da
+  URL» non raggiunge la rete interna né con un IP nell'URL, né con un nome, né con un redirect (al più 5, solo http e https); i collegamenti
+  alle fonti passano tutti da `urlHttp`; la CSP completa del rilascio è attiva in solo rapporto accanto a quella applicata di prima; limiti di
+  memoria e di processi su ogni container, frontend del rilascio in sola lettura, guardia intera del bundle nella costruzione dell'immagine;
+  lo User-Agent senza il nome utente (D17). Non fatti per D11: intestazioni nell'nginx della preparazione, limite di frequenza e tetto di
+  righe nel rilascio. Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
+- Aperti: L8 (le voci sopra), L10–L11; in sospeso D20 (schizzi da mostrare) e D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

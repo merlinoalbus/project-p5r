@@ -34,6 +34,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { DotiIncontro } from '../components/partita/DotiIncontro';
 import { sitoDellaFonte } from '../utils/fonti';
+import { urlHttp } from '../../shared/urlHttp';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
 import { REAZIONE_FUORI_ELENCO, annulloDelRegalo, esitoDelRegalo, fraIGraditi, testoReazione } from '../../shared/regali';
@@ -331,10 +332,11 @@ export function ConfidenteDettaglioPage() {
           {/* D10 (L7-01): le fonti servono a chi prepara i dati; nel rilascio stanno solo in Impostazioni → Informazioni */}
           {!IN_RILASCIO && c.fonti.length > 0 && (
             <p className="m-0 testo-12 text-text-muted">Fonti:{' '}{c.fonti.map((f, i) => {
+              const href = urlHttp(f);
               const sito = sitoDellaFonte(f);
               const separatore = i < c.fonti.length - 1 ? ', ' : '';
-              return sito
-                ? <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{sito}{separatore}</a>
+              return href && sito
+                ? <a key={i} href={href} target="_blank" rel="noreferrer" className="credito">{sito}{separatore}</a>
                 : <span key={i}>{f}{separatore}</span>;
             })}</p>
           )}

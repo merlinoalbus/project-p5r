@@ -1,4 +1,5 @@
 import type { BeneficioPescaDto, EsitoProfiloPescaDto, OsservazionePesca, PuntoValutazionePesca } from '../../../shared/pesca';
+import { urlHttp } from '../../../shared/urlHttp';
 import { IntervalloPesca } from './CampiPesca';
 
 /** Nel rilascio i collegamenti alle fonti delle vie non si mostrano (D10, L7-01). */
@@ -38,7 +39,7 @@ export function ProfiliPesca({ profili }: { profili: EsitoProfiloPescaDto[] }) {
     {!!p.incertezze.length && <ul className="m-0 pl-4 text-warning">{p.incertezze.map((s, i) => <li key={i}>{s}</li>)}</ul>}
     <details><summary className="touch cursor-pointer">Che cosa dice la guida</summary><ul className="m-0 flex list-none flex-col gap-2 p-0">{p.vie.map(v => <li key={v.id} className="flex min-w-0 flex-col gap-1 border-t border-border pt-1">
       <span>{v.descrizione}</span><span className="text-text-secondary">{v.esito === 'soddisfatta' ? 'Condizioni rispettate' : v.esito === 'non-applicabile' ? 'Non vale in queste condizioni' : 'Non si sa con quello che hai segnato'}</span>
-      {!IN_RILASCIO && v.fonti.map((f, i) => /^https?:\/\//.test(f) ? <a className="touch break-all text-primary-testo" href={f} target="_blank" rel="noreferrer" key={i}>Fonte {i + 1}</a> : <span className="break-words text-text-secondary" key={i}>{f}</span>)}
+      {!IN_RILASCIO && v.fonti.map((f, i) => { const href = urlHttp(f); return href ? <a className="touch break-all text-primary-testo" href={href} target="_blank" rel="noreferrer" key={i}>Fonte {i + 1}</a> : <span className="break-words text-text-secondary" key={i}>{f}</span>; })}
     </li>)}</ul></details>
   </section>)}</div>;
 }

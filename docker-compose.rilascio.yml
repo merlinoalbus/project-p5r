@@ -13,7 +13,17 @@
 #   - i contenuti (`gioco.db` e i caratteri) stanno nel volume dell'EDIZIONE, montato in SOLA LETTURA (`:ro`): è il primo dei tre livelli con cui
 #     `gioco.db` resta intoccabile (gli altri: file 0444 senza giornale WAL, e il controllo all'avvio che una scrittura di prova fallisca);
 #   - il file delle partite sta in un volume suo, l'unico scrivibile; le copie dell'avanzamento in un altro ancora;
-#   - il filesystem del container è in sola lettura (con una tmpfs per /tmp, dove tsx tiene la sua cache), senza privilegi aggiuntivi.
+#   - il filesystem del container è in sola lettura (con una tmpfs per /tmp, dove tsx tiene la sua cache), senza privilegi aggiuntivi;
+#   - anche il frontend nginx è in sola lettura (L9-06): scrive solo nelle tmpfs della sua cache (/var/cache/nginx), del pid (/run) e di /tmp;
+#     i log vanno su stdout e stderr, come nell'immagine ufficiale.
+#
+# Limiti di memoria e di processi (L9-06), scelti dai consumi misurati e con margine, perché un uso scorretto non tolga risorse al resto dell'host:
+#   - backend 1 GiB, 256 processi: a riposo il backend usa fra 120 e 200 MiB e 27 processi (misura del 01/11 su un backend di rilascio
+#     locale con un'edizione preparata da una copia dei dati, su un host da 24 CPU). Il rilascio non importa niente e il corpo di una richiesta è al più 256 kB; Node dentro un
+#     limite di 1 GiB si dà da solo circa 560 MiB di heap (misurato in node:24.22.1-alpine), più della cache dei dati di gioco. Il numero di
+#     processi cresce con le CPU dell'host (thread di libuv, di V8 e di libvips): 256 lasciano spazio a un host più grande;
+#   - frontend 256 MiB, 128 processi: nginx usa circa 20 MiB e un processo per CPU più il master (25 su 24 CPU); 128 coprono host fino a
+#     oltre cento CPU, e la memoria lascia spazio ai buffer delle connessioni e della compressione.
 #
 # Variabili di stack (Portainer):
 #   VERSIONE_RILASCIO   la versione delle immagini, quella del tag `rilascio-v…` senza il prefisso (es. v1.0.0). OBBLIGATORIA, nessun predefinito
@@ -60,6 +70,8 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    mem_limit: 1g
+    pids_limit: 256
     networks:
       - project_p5r_rilascio_network
     labels:
@@ -74,8 +86,15 @@ services:
     depends_on:
       project_p5r_rilascio_be:
         condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /run
+      - /tmp
     security_opt:
       - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 128
     networks:
       - project_p5r_rilascio_network
       - proxy

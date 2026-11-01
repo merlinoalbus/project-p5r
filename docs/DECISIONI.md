@@ -84,6 +84,18 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
   fisse e nessun aggiornamento automatico.
 - Repository pubblico: niente indirizzi delle istanze, nomi utente, chiavi o dati personali nei documenti; nel deploy restano solo i
   nomi indispensabili, con i valori nelle variabili dello stack.
+- **Il nome del proprietario nei riferimenti alle immagini (D17, 01/11)**: i riferimenti alle immagini nel registro dei container, nei compose
+  e nei workflow, contengono per forza il nome del proprietario del registro; restano così, eccezione accettata dall'utente. Lo User-Agent
+  delle richieste in uscita invece non porta né il nome né l'indirizzo del repository: `project-p5r/<versione> (guida personale di gioco
+  per Persona 5 Royal)`.
+- **Sicurezza ed esercizio (L9, 01/11)**: limiti di memoria e di processi su ogni container, misurati sui consumi con margine (la
+  preparazione ha il backend più largo per l'importazione delle mappe fino a 512 MB); nel rilascio anche il frontend gira in sola lettura. La
+  guardia del bundle di rilascio gira anche nella costruzione dell'immagine, sul bundle che si pubblica.
+- **Rifiutate dall'utente (D11, 01/11)**: niente intestazioni di sicurezza nell'nginx della preparazione e niente limite di frequenza né tetto
+  di righe per partita nel rilascio (L9-03, prima parte, e L9-04). Il limite di frequenza del rilascio resta quello del bordo di Cloudflare.
+- **CSP del rilascio prima in solo rapporto (L9-03, 01/11)**: la policy completa (`default-src`, `script-src`, `connect-src`, …, tutte sulla
+  stessa origine) è in `Content-Security-Policy-Report-Only` accanto alla CSP applicata di prima, che resta com'era. Diventa applicata solo
+  dopo averla osservata senza violazioni inattese nell'istanza vera, dietro il bordo; l'unica attesa è la prova di `Function("")` di Zod.
 
 ## 4. API e tecnica
 - **2026-10-03 — Niente CORS**: il frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha
@@ -99,7 +111,11 @@ sua riconferma: il codice oggi le applica, ma vanno riconfermate prima di costru
 - Il numero di una migrazione non si riserva: si prende il primo libero al momento del commit. I test che chiamano funzioni tolte su
   decisione dell'utente diventano `it.skip` con un commento, non si cancellano. **(24/10)**
 - Immagini caricate: PNG, JPEG, WEBP, GIF, SVG; una per entità, la nuova sostituisce; servite con rivalidazione ETag e URL versionato,
-  così una sostituzione si vede subito.
+  così una sostituzione si vede subito. Un SVG esce con una CSP `sandbox` senza script e come allegato: nell'app si vede come `<img>`,
+  aperto da solo non esegue nulla (L9-01).
+- «Scarica da URL» raggiunge solo siti pubblici: niente indirizzi della rete interna (privati, loopback, link-local, metadati del cloud, gli
+  equivalenti IPv6), controllati dopo la risoluzione DNS e a ogni redirect; redirect al più 5, solo http e https (L9-02).
+- Un collegamento a una fonte nasce solo da un indirizzo http o https, con una regola condivisa (`shared/urlHttp.ts`, L9-05).
 
 ## 5. Interfaccia
 - **Tre formati** verificati sul continuo delle larghezze: nessuno sbordo orizzontale; sotto i 768 px file di schede e filtri

@@ -10,7 +10,7 @@
 // ============================================================
 
 import { createHash } from 'node:crypto';
-import express, { Router } from 'express';
+import express, { Router, type Response } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyDaUrl, paramsImmagine, queryConfermaPezzi, queryFileImmagine, queryImmagini, queryRimozioneImmagini } from '../schemas/immagini.js';
 import { MISURE_AMMESSE, etagMiniatura, miniaturaDi, miniaturaInCache } from '../services/miniatureService.js';
@@ -22,6 +22,20 @@ import { httpErrors } from '../utils/httpError.js';
 import { impostaImmagineMappa, mappaEsiste, scaricaImmagineMappa } from '../services/mappe/mappeService.js';
 
 const router = Router();
+
+/**
+ * L9-01: un SVG caricato è un documento che può contenere script, servito dalla stessa origine dell'app. Dentro un `<img>` o uno sfondo
+ * CSS il browser non esegue mai i suoi script, e lì queste intestazioni non contano: l'app lo vede come prima. Aperto da solo (l'indirizzo
+ * del file in una scheda) senza intestazioni eseguirebbe i suoi script con l'origine dell'app; con la CSP `sandbox` e `script-src 'none'`
+ * non esegue nulla e non carica nulla da fuori, e `Content-Disposition: attachment` lo fa scaricare invece di aprirlo. Gli altri formati
+ * (PNG, JPEG, WEBP, GIF, e le miniature WebP) non portano codice e restano come sono.
+ */
+function intestazioniDelFile(res: Response, mime: string, chiave: string): void {
+  if (mime !== 'image/svg+xml') return;
+  res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox");
+  // il nome del file: la chiave con i soli caratteri sicuri in un'intestazione (le chiavi sono già slug, è una garanzia in più)
+  res.setHeader('Content-Disposition', `attachment; filename="${chiave.replace(/[^A-Za-z0-9._-]/g, '_')}.svg"`);
+}
 
 router.get('/', validate({ query: queryImmagini }), (req, res) => {
   res.json(elencaImmagini((req.query as { ambito?: string }).ambito));
@@ -72,6 +86,7 @@ router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: qu
     res.setHeader('ETag', etag);
     if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
     const f = fileImmagine(ambito, chiave);
+    intestazioniDelFile(res, f.mime, chiave);
     res.type(f.mime);
     res.send(f.contenuto);
     return;
@@ -85,6 +100,7 @@ router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: qu
   const inCache = miniaturaInCache(meta, larghezza as LarghezzaMiniatura);
   if (inCache) {
     res.setHeader('X-Miniatura', inCache.esito);
+    intestazioniDelFile(res, inCache.mime, chiave);
     res.type(inCache.mime);
     res.send(inCache.contenuto);
     return;
@@ -93,6 +109,7 @@ router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: qu
   const f = fileImmagine(ambito, chiave);
   const m = await miniaturaDi({ id: f.id, contenuto: f.contenuto, mime: f.mime, byte: f.byte, createdAt: f.createdAt }, larghezza as LarghezzaMiniatura);
   res.setHeader('X-Miniatura', m.esito);
+  intestazioniDelFile(res, m.mime, chiave);
   res.type(m.mime);
   res.send(m.contenuto);
 });

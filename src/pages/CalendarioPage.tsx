@@ -16,6 +16,7 @@ import { NOMI_MESI_GIOCO, dataGiocoConArticolo, dataGiocoTesto } from '../utils/
 import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
+import { urlHttp } from '../../shared/urlHttp';
 import { MeteoIcona } from '../components/guida/MeteoIcona';
 import { TagAllerte } from '../components/shared/TagAllerta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
@@ -75,7 +76,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
                   <ModificaGuida tipo="evento-voce" chiave={`${e.id}:${v.uid}`} cosa={`il collegamento di «${e.titolo}» con la voce ${dataGiocoConArticolo(v.giorno, 'di')}`} soloIcona onSalvato={onSalvato} />
                 </div>
               ))}
-              {!IN_RILASCIO && e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
+              {!IN_RILASCIO && urlHttp(e.fonte) && <a href={urlHttp(e.fonte) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           ))}
           {g.tempoLibero && <span className="testo-12 text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
@@ -154,7 +155,7 @@ export function CalendarioPage() {
               ) : <p className="m-0 testo-13 text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
                 <div className="testo-13 flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{!IN_RILASCIO && settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
+                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{!IN_RILASCIO && urlHttp(settimanaOggi.url) && <a href={urlHttp(settimanaOggi.url) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
                   <span className="text-text-secondary">{settimanaOggi.riassunto}</span>
                   {/* D10 (L7-01): le incertezze sulle fonti servono a chi prepara i dati */}
                   {!IN_RILASCIO && settimanaOggi.incertezze && <span className="testo-12 text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}

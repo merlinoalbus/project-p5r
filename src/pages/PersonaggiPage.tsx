@@ -21,6 +21,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { urlHttp } from '../../shared/urlHttp';
 
 /** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -65,7 +66,7 @@ function Personaggio({ p, idCompendio, onModificato, conId }: { p: PersonaggioDt
             {(p.doppiatori.jp || p.doppiatori.en) && <p className="m-0"><strong>Doppiatori:</strong> {[p.doppiatori.jp ? `JP ${p.doppiatori.jp}` : null, p.doppiatori.en ? `EN ${p.doppiatori.en}` : null].filter(Boolean).join(' · ')}{nota('doppiatori')}</p>}
             <div className="flex flex-wrap gap-2 items-center">
               {p.confidente && <CollegamentoVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${p.confidente}`} />}
-              {!IN_RILASCIO && p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
+              {!IN_RILASCIO && urlHttp(p.fonte) && <a href={urlHttp(p.fonte) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           </div>
         )}

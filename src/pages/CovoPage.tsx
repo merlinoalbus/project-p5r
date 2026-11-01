@@ -38,6 +38,7 @@ import type { CompletamentoDto } from '../types';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { urlHttp } from '../../shared/urlHttp';
 
 /** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -153,7 +154,7 @@ export function CovoPage() {
               in una spesa complessiva; il totale delle medaglie ottenibili lo dichiara la guida, qui sotto.
             </p>
             <TestoRipiegabile testo={covo.medaglie} massimo={180} className="testo-13 text-text-secondary" />
-            {!IN_RILASCIO && covo.fonte && <a href={covo.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
+            {!IN_RILASCIO && urlHttp(covo.fonte) && <a href={urlHttp(covo.fonte) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
           </section>
 
           {/* Una ricerca sola per tutte e due le colonne: quel che si cerca è «dove salta fuori

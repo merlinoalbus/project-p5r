@@ -35,6 +35,7 @@ import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
+import { urlHttp } from '../../../shared/urlHttp';
 import { Modal } from '../shared/Modal';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { ComandiVoce, TestoSelezioneRiga, type GestoVoce, type SelezioneRiga } from './MenuVoce';
@@ -712,7 +713,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
         {g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-        {!IN_RILASCIO && g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
+        {!IN_RILASCIO && urlHttp(g.fonte) && <a href={urlHttp(g.fonte) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
       </section>
       {/* copiare o spostare voci in un altro giorno (2026-10-12): la scelta a caselle, per chi non usa il mouse; con voci già selezionate
           (clic, Ctrl+clic, Maiusc+clic, «Seleziona») la barra in fondo ha già i comandi */}

@@ -170,8 +170,9 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   return leggiImmagine(ambito, chiave)!;
 }
 
-/** Scarica un'immagine da un URL, senza salvarla: lo scarico condiviso (`scaricaDaUrl`), con il tetto applicato mentre arriva e
- *  l'attesa della risposta distinta dall'inattività. `url` è l'indirizzo d'arrivo, dopo i redirect. */
+/** Scarica un'immagine da un URL, senza salvarla: lo scarico condiviso (`scaricaDaUrl`), con il tetto applicato mentre arriva,
+ *  l'attesa della risposta distinta dall'inattività e nessun indirizzo della rete interna, nemmeno dopo un rinvio (L9-02). `url` è
+ *  l'indirizzo chiesto, quello che resta come origine dell'immagine. */
 export async function scaricaImmagine(url: string): Promise<{ contenuto: Buffer; mime: string; url: URL }> {
   return scaricaDaUrl(url, {
     maxByte: MAX_BYTE_IMMAGINE,
@@ -194,8 +195,9 @@ const VERSIONE_APP = ((): string => {
   }
 })();
 
-/** Come si presenta l'app a una fonte esterna. */
-export const USER_AGENT = `project-p5r/${VERSIONE_APP} (guida personale di gioco per Persona 5 Royal; +https://github.com/merlinoalbus/project-p5r)`;
+/** Come si presenta l'app a una fonte esterna: il nome e la versione dell'app e che cosa è, senza il nome utente né l'indirizzo del
+ *  repository (L9-07, D17). */
+export const USER_AGENT = `project-p5r/${VERSIONE_APP} (guida personale di gioco per Persona 5 Royal)`;
 
 /** Scarica un'immagine da un URL indicato dall'utente e la salva, con l'indirizzo d'origine. Per l'immagine di una mappa che
  *  esiste c'è la strada dell'editor (`scaricaImmagineMappa` in mappeService), che chiede conferma dei pezzi. */

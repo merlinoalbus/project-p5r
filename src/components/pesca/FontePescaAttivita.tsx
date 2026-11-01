@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RegolaPescaDto } from '../../../shared/pesca';
+import { urlHttp } from '../../../shared/urlHttp';
 import { EditorRegolaPesca } from './EditorRegolaPesca';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -22,7 +23,7 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
         comparsa {v.rangoComparsa === null ? 'senza rango stabilito' : `documentata al rango ${v.rangoComparsa}`}; catturabilità documentata al rango {v.rangoCattura}, {v.tentativo === 'primo' ? 'primo' : 'settimo'} tentativo{v.seiCatture ? ', dopo sei catture nella visita' : ''}.
         {v.nota && <p className="m-0 whitespace-pre-line">{v.nota}</p>}
         {/* D10 (L7-01): le fonti servono a chi corregge la regola, non a chi gioca */}
-        {!IN_RILASCIO && <span className="flex flex-wrap gap-2">{v.fonti.filter(f => /^https?:\/\//.test(f)).map((f, i) => <a className="touch inline-flex items-center text-primary-testo" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>}
+        {!IN_RILASCIO && <span className="flex flex-wrap gap-2">{v.fonti.map((f) => urlHttp(f)).filter((f): f is string => f !== null).map((f, i) =><a className="touch inline-flex items-center text-primary-testo" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>}
       </li>)}</ul>
       {!IN_RILASCIO && <p className="m-0 text-text-secondary">Le vie documentate sono sufficienti: un rango inferiore privo di prova resta da verificare.</p>}
     </>}

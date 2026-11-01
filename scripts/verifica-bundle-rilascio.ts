@@ -5,7 +5,8 @@
 //   VITE_MODALITA=rilascio npx vite build --outDir dist-rilascio
 //   npx tsx scripts/verifica-bundle-rilascio.ts dist-rilascio [--confronta dist-preparazione]
 //
-// Non è un test: è un passo di build (`.github/workflows/ci.yml`). Nell'istanza pubblica di rilascio gli utenti non modificano nulla, e il
+// Non è un test: è un passo di build, in due punti (`.github/workflows/ci.yml`, con il confronto con la preparazione, e lo stage di build di
+// `Dockerfile.frontend` con VITE_MODALITA=rilascio, sul bundle che entra davvero nell'immagine, L9-06). Nell'istanza pubblica di rilascio gli utenti non modificano nulla, e il
 // frontend non deve nemmeno contenere gli editor e le chiamate all'API che scrivono i contenuti. Il bundler elimina quel codice solo se la
 // condizione costante di build sta nello stesso modulo (vedi `src/utils/modalita.ts`): un refuso o un modulo nuovo che dimentica la
 // condizione lascia il codice nel bundle SENZA nessun errore a runtime. Questo controllo lo scopre: legge ogni file testuale del `dist` e

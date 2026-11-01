@@ -14,6 +14,10 @@ import type { DungeonDettaglioDto, MappaDto, QuartiereDettaglioDto, QuartiereRia
 import { dbDiProva } from '../../test/dbDiProva.js';
 import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
+// L9-02: lo scarico da URL rifiuta la rete interna, e il sito «esterno» delle prove è un server su 127.0.0.1. Solo in questo file il
+// filtro considera pubblico ogni indirizzo: il codice dell'app non ha nessuna strada per spegnerlo.
+vi.mock('../utils/reteInterna.js', () => ({ indirizzoInterno: () => false }));
+
 const app = createApp();
 
 /** PNG minimo di larghezza×altezza dati (intestazione IHDR valida; il contenuto non viene decodificato). */
