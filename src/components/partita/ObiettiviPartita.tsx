@@ -19,6 +19,7 @@ import type { ReactNode } from 'react';
 import { IconaAzione } from '../shared/IconaAzione';
 import { SegnoStato } from '../shared/SegnoStato';
 import { conferma } from '../../stores/confermaStore';
+import { filtroRicerca } from '../../utils/testo';
 
 interface Props {
   partitaId: number;
@@ -184,8 +185,8 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
   const [note, setNote] = useState(obiettivo?.note ?? '');
   const [occupato, setOccupato] = useState(false);
   const candidati = useMemo(() => {
-    const testo = q.trim().toLowerCase();
-    return (persone.dati ?? []).filter((p) => !p.rara && (!testo || p.nomeIt.toLowerCase().includes(testo) || p.nome.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 12);
+    const trova = filtroRicerca(q);
+    return (persone.dati ?? []).filter((p) => !p.rara && trova(p.nomeIt, p.nome, p.arcanaNome)).slice(0, 12);
   }, [persone.dati, q]);
   const sceltaNome = obiettivo?.nomeIt ?? personaIniziale?.nomeIt ?? (persone.dati ?? []).find((p) => p.id === personaId)?.nomeIt ?? null;
 

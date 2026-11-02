@@ -63,6 +63,7 @@ import {
   pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi,
   type DimensioniMappa, type PezzoDaImportare
 } from './pezziMappa.js';
+import { filtroRicerca } from '../../../shared/testo.js';
 
 interface RigaMappa {
   chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null;
@@ -1545,32 +1546,30 @@ export function eliminaImmagineSpillo(id: number): SpilloDto | SchedaContenutoGu
 
 export interface RiferimentoTrovato { tipo: TipoRiferimento; chiave: string; nome: string; dettaglio: string }
 
-const RICERCHE: Record<TipoRiferimento, string> = {
-  mappa: "SELECT chiave, nome, tipo AS dettaglio FROM mappa WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
-  negozio: "SELECT chiave, nome, tipo AS dettaglio FROM negozio WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
-  punto: "SELECT p.chiave, p.nome, a.nome AS dettaglio FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE lower(p.nome) LIKE ? OR p.chiave LIKE ? ORDER BY p.nome LIMIT ?",
+// le righe candidate di ogni tipo, nell'ordine del nome: il testo cercato si filtra dopo, con la ricerca comune dell'app (`shared/testo.ts`)
+const RICERCHE: Record<Exclude<TipoRiferimento, 'mappa'>, string> = {
+  negozio: "SELECT chiave, nome, tipo AS dettaglio FROM negozio ORDER BY nome",
+  punto: "SELECT p.chiave, p.nome, a.nome AS dettaglio FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave ORDER BY p.nome",
   // L5: il luogo si riconosce dal posto, «Quartiere › Area» (o il solo quartiere se è da collocare)
   luogo: `SELECT l.chiave, l.nome, COALESCE(q.nome, l.quartiere_chiave) || COALESCE(' › ' || a.nome, '') AS dettaglio FROM luogo l LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave
-    LEFT JOIN area a ON a.chiave = l.area_chiave WHERE lower(l.nome) LIKE ? OR l.chiave LIKE ? ORDER BY l.nome LIMIT ?`,
-  confidente: "SELECT chiave, nome, arcana AS dettaglio FROM confidente WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
-  richiesta: "SELECT chiave, nome, '' AS dettaglio FROM richiesta WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
-  attivita: "SELECT chiave, nome, quartiere_chiave AS dettaglio FROM luogo WHERE (lower(nome) LIKE ? OR chiave LIKE ?) AND tipo IN ('attivita', 'servizio', 'scuola') ORDER BY nome LIMIT ?",
+    LEFT JOIN area a ON a.chiave = l.area_chiave ORDER BY l.nome`,
+  confidente: "SELECT chiave, nome, arcana AS dettaglio FROM confidente ORDER BY nome",
+  richiesta: "SELECT chiave, nome, '' AS dettaglio FROM richiesta ORDER BY nome",
+  attivita: "SELECT chiave, nome, quartiere_chiave AS dettaglio FROM luogo WHERE tipo IN ('attivita', 'servizio', 'scuola') ORDER BY nome",
 };
 
-/** Entità collegabili a uno spillo, per tipo e testo (nome o chiave), al massimo `limite` risultati. */
+/** Entità collegabili a uno spillo, per tipo e testo (parola per parola nel nome o nella chiave), al massimo `limite` risultati. */
 export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30): RiferimentoTrovato[] {
   if (!(TIPI_RIFERIMENTO as readonly string[]).includes(tipo)) throw httpErrors.badRequest('riferimento-non-valido', 'Tipo di riferimento non ammesso.');
+  // la ricerca comune dell'app: parola per parola, in qualunque ordine (`shared/testo.ts`)
+  const trova = filtroRicerca(q);
   if(tipo==='mappa'){
-    /** Testo senza accenti e in minuscolo, per il confronto. */
-    const normalizza=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-    const parole=normalizza(q).split(/\s+/).filter(Boolean);
     // L2: una planimetria con un'Area si presenta col posto e l'Area, più la versione se l'Area ne ha più d'una («Shibuya › Sottopasso ·
     // planimetria completa»): è così che la si sceglie come destinazione di un passaggio
     const nomeDi=(m:MappaRiassuntoDto)=>m.area?`${m.area.contenitore.nome} › ${m.area.nome}${m.area.versioneEtichetta?` · ${m.area.versioneEtichetta}`:''}`:m.nomeCompleto??m.nome;
-    return elencaMappe().filter(m=>parole.every(p=>normalizza(nomeDi(m)+' '+(m.nomeCompleto??m.nome)+' '+m.chiave).includes(p))).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:nomeDi(m),dettaglio:m.tipo}));
+    return elencaMappe().filter(m=>trova(nomeDi(m),m.nomeCompleto??m.nome,m.chiave)).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:nomeDi(m),dettaglio:m.tipo}));
   }
-  const testo = `%${q.trim().toLowerCase()}%`;
-  return (prepared(RICERCHE[tipo]).all(testo, testo, limite) as Array<{ chiave: string; nome: string; dettaglio: string | null }>).map((r) => ({
+  return (prepared(RICERCHE[tipo]).all() as Array<{ chiave: string; nome: string; dettaglio: string | null }>).filter((r) => trova(r.nome, r.chiave)).slice(0, limite).map((r) => ({
     tipo, chiave: r.chiave, nome: r.nome, dettaglio: tipo === 'confidente' && r.dettaglio ? t('arcana', r.dettaglio) : r.dettaglio ?? '',
   }));
 }

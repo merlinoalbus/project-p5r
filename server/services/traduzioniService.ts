@@ -16,6 +16,7 @@ import Database from 'better-sqlite3';
 import { percorsoPacchettoDb } from './pacchetto/pacchettoGioco.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { effettiDeiTrattiDellaGuida } from './trattiGuida.js';
+import { filtroRicerca } from '../../shared/testo.js';
 
 interface RigaTraduzione {
   ambito: string;
@@ -91,16 +92,15 @@ export function elencaTraduzioni(filtro: { ambito?: string; q?: string; soloUten
     condizioni.push('ambito = ?');
     parametri.push(filtro.ambito);
   }
-  if (filtro.q) {
-    condizioni.push('(chiave LIKE ? OR testo LIKE ?)');
-    parametri.push(`%${filtro.q}%`, `%${filtro.q}%`);
-  }
+  // il testo cercato si filtra dopo, con la ricerca comune dell'app (parola per parola nella chiave o nel testo, `shared/testo.ts`)
+  const trova = filtroRicerca(filtro.q);
   if (filtro.soloUtente) condizioni.push("fonte = 'utente'");
   // le rese degli effetti dei tratti della guida non si leggono più (`trattiGuida`): non compaiono, così non c'è un secondo testo da correggere
   condizioni.push("NOT (ambito = 'effettoSkill' AND chiave IN (SELECT value FROM json_each(?)))");
   parametri.push(JSON.stringify([...effettiDeiTrattiDellaGuida()]));
   const where = `WHERE ${condizioni.join(' AND ')}`;
-  return (getDb().prepare(`SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione ${where} ORDER BY ambito, chiave`).all(...parametri) as RigaTraduzione[]).map(versoDto);
+  return (getDb().prepare(`SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione ${where} ORDER BY ambito, chiave`).all(...parametri) as RigaTraduzione[])
+    .filter((r) => trova(r.chiave, r.testo)).map(versoDto);
 }
 
 /** Ambiti presenti con il numero di voci (senza le rese degli effetti dei tratti della guida, che non si mostrano). */

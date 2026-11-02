@@ -15,6 +15,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { nomeCategoriaTermine } from '../../shared/categorieTermine';
 import { slug } from '../../shared/slug';
+import { filtroRicerca } from '../utils/testo';
 
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 /** L'id della riga di un termine: la «casa» che la ricerca globale dà al termine è `?elemento=<slug della chiave>`. */
@@ -36,9 +37,9 @@ export function GlossarioPage() {
   // «differito»: calcolo e disegno a priorità bassa, interrotti alla battuta dopo (stesso criterio di Compendio e Skill)
   const qDifferita = useDeferredValue(q);
   const filtrati = useMemo(() => {
-    const testo = qDifferita.trim().toLowerCase();
+    const trova = filtroRicerca(qDifferita);
     return (dati ?? [])
-      .filter((t) => (!categoria || t.categoria === categoria) && (!testo || t.nome.toLowerCase().includes(testo) || t.chiave.toLowerCase().includes(testo) || (t.definizione ?? '').toLowerCase().includes(testo)))
+      .filter((t) => (!categoria || t.categoria === categoria) && trova(t.nome, t.chiave, t.definizione))
       .sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nome.localeCompare(b.nome, 'it'));
   }, [dati, qDifferita, categoria]);
 

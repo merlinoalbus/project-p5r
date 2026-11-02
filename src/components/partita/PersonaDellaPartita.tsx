@@ -12,7 +12,7 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { piatto } from '../../utils/testo';
+import { filtroRicerca } from '../../utils/testo';
 import { statoIstantanea } from '../../utils/istantaneaPersona';
 import type { PersonaPossedutaDto } from '../../types';
 
@@ -69,9 +69,9 @@ export function PersonaDellaPartita({ partitaId }: Props) {
   }, [tutte.dati]);
 
   const lista = useMemo(() => {
-    const testo = piatto(q.trim());
+    const trova = filtroRicerca(q);
     return (tutte.dati ?? []).filter((p) => {
-      if (testo && !piatto(p.nome).includes(testo) && !piatto(p.nomeIt).includes(testo) && !piatto(p.arcanaNome).includes(testo)) return false;
+      if (!trova(p.nome, p.nomeIt, p.arcanaNome)) return false;
       if (arcano && p.arcana !== arcano) return false;
       const inScorta = postedutaPer.has(p.id);
       if (scorta === 'in-scorta' && !inScorta) return false;

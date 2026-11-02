@@ -7,12 +7,14 @@
 // Studia sul Divanetto al piano inferiore. · Studio serale a Leblanc / Spuntando: Turno: Studio serale a Leblanc" deve essere una ricerca
 // basata sui valori di che cosa fare e note.» e poi «ovviamente devo poter visualizzare i risultati del filtro/ricerca in modo comodo...».
 //
-// Il confronto è UNO, qui, per il server (che filtra) e per la pagina (che evidenzia le stesse parti): senza maiuscole né accenti, anche una
-// parte di parola; con più parole, ognuna deve comparire nella voce («che cosa fare» o note), in qualunque ordine. La punteggiatura resta
-// (non è `normalizzaTesto`): «Yogen-Jaya» si trova scrivendo «yogen-jaya» o «yogen».
+// Il confronto è quello comune dell'app (`shared/testo.ts`), per il server (che filtra) e per la pagina (che evidenzia le stesse parti): senza
+// maiuscole né accenti, anche una parte di parola; con più parole, ognuna deve comparire nella voce («che cosa fare» o note), in qualunque
+// ordine; ogni parola si cerca con la punteggiatura («Yogen-Jaya» si trova con «yogen-jaya» o «yogen») o senza («jack o lantern» trova
+// «Jack-o'-Lantern»). Si evidenzia la forma con la punteggiatura: una parola trovata solo senza punteggiatura conta, ma non si evidenzia.
 // ============================================================
 
 import type { FasciaGioco } from './types.js';
+import { corrispondonoParole, paroleRicerca, piatto } from './testo.js';
 import type { TipoAzione } from './effettiAzione.js';
 
 /** Quanti caratteri (senza spazi ai bordi) deve avere il testo cercato perché la ricerca parta: con uno solo troverebbe quasi tutto. */
@@ -53,22 +55,14 @@ export interface RicercaDiarioDto {
   perTipo: Partial<Record<TipoAzione, number>>;
 }
 
-/** Il testo «piatto» per il confronto: senza accenti e minuscolo, con la punteggiatura che resta. */
-export function piattoRicercaDiario(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
-}
+/** Il testo «piatto» per il confronto e l'evidenziazione: quello della ricerca comune dell'app (`shared/testo.ts`). */
+export const piattoRicercaDiario = (s: string): string => piatto(s);
 
-/** Le parole del testo cercato, già piatte e senza doppioni; vuoto se non c'è niente da cercare. */
-export function paroleRicercaDiario(q: string): string[] {
-  return [...new Set(piattoRicercaDiario(q).split(/\s+/).filter((p) => p.length > 0))];
-}
+/** Le parole del testo cercato, già piatte e senza doppioni; vuoto se non c'è niente da cercare (`paroleRicerca`). */
+export const paroleRicercaDiario = (q: string): string[] => paroleRicerca(q);
 
-/** Vero se ogni parola compare in almeno uno dei testi (piatti); senza parole, vero. */
-export function voceCorrispondeRicerca(parole: readonly string[], ...testi: Array<string | null | undefined>): boolean {
-  if (!parole.length) return true;
-  const piatti = testi.flatMap((t) => (t ? [piattoRicercaDiario(t)] : []));
-  return parole.every((p) => piatti.some((t) => t.includes(p)));
-}
+/** Vero se ogni parola compare in almeno uno dei testi, piatta o senza punteggiatura (`corrispondonoParole`); senza parole, vero. */
+export const voceCorrispondeRicerca = (parole: readonly string[], ...testi: Array<string | null | undefined>): boolean => corrispondonoParole(parole, ...testi);
 
 /** Il testo per caratteri (code point) con il suo testo piatto: per ogni carattere piatto l'indice del carattere originale da cui viene, e per
  *  ogni carattere originale il suo inizio nella stringa (più la fine, in coda). */

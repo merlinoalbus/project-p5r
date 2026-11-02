@@ -24,6 +24,7 @@ import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
+import { filtroRicerca } from '../utils/testo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -71,10 +72,12 @@ export function NegoziPage() {
   // informativa dalla presenza attiva sulla mappa e dalla possibilita di acquistare.
   const listaVisibile = useMemo(() => lista ?? [], [lista]);
   const totaleArticoliVisibili = listaVisibile.reduce((somma, negozio) => somma + negozio.articoli, 0);
-  const termineNegozio = termine.toLocaleLowerCase('it');
-  const negoziTrovati = useMemo(() => termineNegozio.length >= 2
-    ? listaVisibile.filter((n) => `${n.nome} ${n.quartiereNome ?? ''} ${n.sedeNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(termineNegozio))
-    : [], [listaVisibile, termineNegozio]);
+  // i negozi con la ricerca comune dell'app, parola per parola (`shared/testo.ts`), dalla stessa soglia di due caratteri degli articoli
+  const negoziTrovati = useMemo(() => {
+    if (termine.length < 2) return [];
+    const trova = filtroRicerca(termine);
+    return listaVisibile.filter((n) => trova(n.nome, n.quartiereNome, n.sedeNome, n.luogo));
+  }, [listaVisibile, termine]);
   const gruppi = useMemo(() => {
     const m = new Map<string, { nome: string; negozi: NegozioRiassuntoDto[] }>();
     for (const n of listaVisibile) {
@@ -113,7 +116,7 @@ export function NegoziPage() {
             titolo={`Dove si trova ${selezioneVisibile.nome}`}
             altezza={300}
           />}
-          {cerca && termineNegozio.length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{negoziTrovati.map(n => <div className="card flex flex-wrap items-center justify-between gap-2" key={n.chiave}><Link className="touch no-underline text-text" to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link><button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={nomePosizione(n)} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button></div>)}</section>}
+          {cerca && termine.length >= 2 &&<section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{negoziTrovati.map(n => <div className="card flex flex-wrap items-center justify-between gap-2" key={n.chiave}><Link className="touch no-underline text-text" to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link><button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={nomePosizione(n)} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button></div>)}</section>}
           {cerca ? (
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (

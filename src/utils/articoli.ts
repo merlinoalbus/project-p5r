@@ -10,7 +10,7 @@
 
 import type { ArticoloDto } from '../types';
 import { compratoNelCiclo } from '../../shared/rifornimento';
-import { piatto } from './testo';
+import { filtroRicerca } from './testo';
 
 export type StatoAcquisto = 'tutti' | 'acquistati' | 'da-acquistare';
 export type FiltroDisponibilita = 'tutti' | 'disponibili' | 'bloccati';
@@ -43,11 +43,11 @@ export function filtroAttivo(f: FiltroArticoli): boolean {
 /** Gli articoli che passano il filtro, nell'ordine in cui arrivano. Stato e disponibilità valgono solo con una partita
  *  (senza, l'articolo non porta `disponibilita` e `acquistato` è sempre falso): lì si ignorano. */
 export function filtraArticoli(articoli: ArticoloDto[], f: FiltroArticoli, conPartita: boolean): ArticoloDto[] {
-  const q = piatto(f.q.trim());
+  const trova = filtroRicerca(f.q);
   const categorie = new Set(f.categorie);
   return articoli.filter((a) => {
-    if (q && ![a.nome, a.effetto, a.negozioNome, ...(a.ricevuti ?? []).map((r) => r.nome),
-      ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : [])].map(piatto).join(' ').includes(q)) return false;
+    if (!trova(a.nome, a.effetto, a.negozioNome, ...(a.ricevuti ?? []).map((r) => r.nome),
+      ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome) : []))) return false;
     if (categorie.size && !categorie.has(a.categoria)) return false;
     if (f.per && a.per !== f.per && a.per !== 'tutti') return false;
     // Ondata 5: ciò che si rifornisce è «acquistato» nel ciclo in corso e torna «da acquistare» con la scorta nuova (come il server)

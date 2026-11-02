@@ -19,7 +19,8 @@ import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } f
 import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
-import { categoriaDelListino, normalizzaNomeOggetto, normalizzaPrezzoPerFascia, prezzoNellaFascia, testoCostoAImporto } from '../../shared/catalogo.js';
+import { categoriaDelListino, normalizzaPrezzoPerFascia, prezzoNellaFascia, testoCostoAImporto } from '../../shared/catalogo.js';
+import { filtroRicerca } from '../../shared/testo.js';
 import { fasciaDellaPartita, fasciaDellaVoce, prezzoDellArticolo, scontoNellaPartita } from './prezziArticoli.js';
 import { normalizzaSconto, prezzoScontato, type ScontoNegozio } from '../../shared/scontiNegozi.js';
 import type { FasciaPrezzo } from '../../shared/catalogo.js';
@@ -347,7 +348,8 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   const acquistati = st?.articoliOttenuti ?? new Set<string>();
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
   const conCatalogo = catalogoOggettiDisponibile();
-  if (filtro.q && !conCatalogo) { cond.push('(a.nome LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like); }
+  // il testo cercato si filtra dopo, sui DTO, con la ricerca comune dell'app (parola per parola, `shared/testo.ts`): con e senza catalogo
+  const trova = filtroRicerca(filtro.q);
   const categorie = [...new Set([...(filtro.categorie ?? []), ...(filtro.categoria ? [filtro.categoria] : [])])];
   if (categorie.length && !conCatalogo) { cond.push(`a.categoria IN (${categorie.map(() => '?').join(',')})`); par.push(...categorie); }
   if (filtro.per && !conCatalogo) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
@@ -374,11 +376,10 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
     }
     return articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture);
   });
+  valutati = valutati.filter((a) => trova(a.nome, a.nomeOriginale, ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
+    ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome) : []), a.effetto, a.negozioNome));
   if (conCatalogo) {
-    const q = normalizzaNomeOggetto(filtro.q ?? '');
-    valutati = valutati.filter((a) => (!q || [a.nome, a.nomeOriginale ?? '', ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
-      ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : []), a.effetto ?? '', a.negozioNome].some((v) => normalizzaNomeOggetto(v).includes(q)))
-      && (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
+    valutati = valutati.filter((a) => (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
   }
   // Ondata 5: ciò che si rifornisce è «acquistato» nel ciclo in corso e torna «da acquistare» con la scorta nuova (`compratoNelCiclo`)
   if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? compratoNelCiclo(a) : !compratoNelCiclo(a)));

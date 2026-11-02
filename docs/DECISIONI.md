@@ -237,6 +237,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   se no; l'arcano sta da solo.
   Il modulo dei dati della partita si apre in una finestra («Modifica»), non in una scheda «Riepilogo».
 - Un selettore solo in tutta l'app, con la ricerca da dieci voci in su.
+- **Ricerca per parole ovunque (02/11)**: ogni ricerca dell'app accetta gli spazi e cerca parola per parola, in qualunque ordine
+  («takemi tae», «amara medicina»); spazi doppi o ai capi non contano; maiuscole e accenti non contano, e la punteggiatura nemmeno
+  («jack o lantern» trova «Jack-o'-Lantern»), anche nel Diario, dove si evidenziano le parole trovate con la loro punteggiatura. Nessuna
+  ricerca che trovava prima smette di trovare; un testo di sola punteggiatura («-», «?») ora si cerca com'è, invece di mostrare tutto.
 - **Filtri nell'indirizzo (L10-04)**: Compendio, Skill, Glossario, Domande e Cruciverba tengono ricerca e filtri nell'indirizzo, così
   tornando da una scheda il filtro c'è ancora e si condivide. La ricerca non riempie la cronologia; un filtro scelto con un tocco sì, e
   Indietro torna al filtro di prima. Le skill sono in ordine di nome italiano.

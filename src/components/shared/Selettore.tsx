@@ -27,7 +27,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { LARGHEZZA_MASSIMA_TENDINA, LARGHEZZA_TENDINA, MEDIA_FOGLIO_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
-import { piatto } from '../../utils/testo';
+import { filtroRicerca } from '../../utils/testo';
 import { testoNoteAParole } from '../../../shared/note';
 import { TestoNote } from './TestoNote';
 
@@ -174,9 +174,9 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const conRicerca = ricerca === 'sempre' || (ricerca === 'auto' && tutte.length >= SOGLIA_RICERCA);
 
   const { filtrate, tagliate } = useMemo(() => {
-    const q = conRicerca ? piatto(testo.trim()) : '';
-    const base = q ? tutte.filter((o) => piatto(o.nome).includes(q) || (o.dettaglio ? piatto(o.dettaglio).includes(q) : false)
-      || (o.gruppo ? piatto(o.gruppo).includes(q) : false) || (o.testoRicerca ? piatto(o.testoRicerca).includes(q) : false)) : tutte;
+    // la ricerca comune dell'app: parola per parola, in qualunque ordine, nel nome, nel dettaglio, nel gruppo o nel testo di ricerca
+    const trova = filtroRicerca(conRicerca ? testo : '');
+    const base = tutte.filter((o) => trova(o.nome, o.dettaglio, o.gruppo, o.testoRicerca));
     return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
   }, [tutte, testo, conRicerca]);
 

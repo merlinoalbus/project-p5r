@@ -40,6 +40,7 @@ import { CatalogoDaCompletare, PannelloPosizione } from '../components/guida/Cat
 import { STATI_LETTURA, formattaYen, haDote, passaStato, type StatoLettura } from '../utils/letture';
 import type { FilmDto, FilmDvdDto } from '../types';
 import { TestoNote } from '../components/shared/TestoNote';
+import { filtroRicerca } from '../utils/testo';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
 const SUPPORTI: ReadonlyArray<{ chiave: SupportoFiltro; nome: string }> = [{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }];
@@ -96,11 +97,11 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
   const progressoDi = coda.valore;
 
   const visibili = useMemo(() => {
-    const q = ricerca.trim().toLocaleLowerCase('it');
+    const trova = filtroRicerca(ricerca);
     return (dati.dati?.film ?? []).filter((f) => {
       if (soloChiave && f.chiave !== soloChiave) return false;
       const progresso = progressoDi(f);
-      if (q && !`${f.nome} ${(f.nomiAltri ?? []).join(' ')} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (!trova(f.nome, ...(f.nomiAltri ?? []), ...f.effettiTesto, f.dettagli)) return false;
       if (supporto !== 'tutti' && f.dove !== supporto) return false;
       if (dote && !haDote(f.effetti, dote)) return false;
       return passaStato(stato, progresso, completatoCon(f, progresso));

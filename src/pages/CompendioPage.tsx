@@ -27,6 +27,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi';
 import type { PersonaRiassuntoDto } from '../types';
+import { filtroRicerca } from '../utils/testo';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 type Immagine = '' | 'con' | 'senza';
@@ -149,9 +150,9 @@ export function CompendioPage() {
 
   const filtrate = useMemo(() => {
     if (!dati) return [];
-    const testo = qDifferita.trim().toLowerCase();
+    const trova = filtroRicerca(qDifferita);
     const lista = dati.filter((p) =>
-      (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))
+      trova(p.nome, p.nomeIt, p.arcanaNome)
       && (!arcana || p.arcana === arcana)
       && p.livello >= Math.min(livelloMin, livelloMax) && p.livello <= Math.max(livelloMin, livelloMax)
       && (mostraDlc || !p.dlc)

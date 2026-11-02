@@ -37,7 +37,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { useFiltriIndirizzo } from '../hooks/useFiltriIndirizzo';
-import { piatto } from '../utils/testo';
+import { filtroRicerca } from '../utils/testo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
@@ -169,7 +169,7 @@ export function DomandePage() {
   }, [d, dataCercata]);
   // dalla ricerca globale e dalle ricompense degli oggetti: porta in vista la domanda o l'esame citato da `?elemento=` a dati arrivati
   useElementoDaIndirizzo(!!d, '', chiaveDaData);
-  const q = piatto(ricerca.trim());
+  const trova = useMemo(() => filtroRicerca(ricerca), [ricerca]);
   const prossimeId = useMemo(() => new Set((d?.prossime ?? []).map((x) => x.id)), [d]);
   const visibili = useMemo(() => (d?.domande ?? []).filter((x) => {
     if (tipo === 'classe' && x.tipo !== 'classe') return false;
@@ -177,9 +177,9 @@ export function DomandePage() {
     if (tipo === 'tv' && x.tipo !== 'tv') return false;
     if (stato === 'da-fare' && x.fatta) return false;
     if (stato === 'fatte' && !x.fatta) return false;
-    if (q && !piatto(`${x.domanda} ${x.risposte.map((r) => `${r.domanda ?? ''} ${r.testo}`).join(' ')} ${x.chi} ${dataGiocoTesto(x.data)} ${x.data}`).includes(q)) return false;
+    if (!trova(x.domanda, ...x.risposte.flatMap((r) => [r.domanda, r.testo]), x.chi, dataGiocoTesto(x.data), x.data)) return false;
     return true;
-  }), [d, tipo, stato, q]);
+  }), [d, tipo, stato, trova]);
   const perMese = useMemo(() => {
     const m = new Map<string, DomandaDto[]>();
     for (const x of visibili) {

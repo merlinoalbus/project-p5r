@@ -18,6 +18,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import type { SkillRiassuntoDto } from '../types';
+import { filtroRicerca } from '../utils/testo';
 
 /**
  * Una skill dell'elenco. Memoizzata (R12-03): digitando nella ricerca le righe già disegnate hanno la stessa skill e non si rifanno;
@@ -54,11 +55,11 @@ export function SkillPage() {
 
   const filtrate = useMemo(() => {
     if (!dati) return [];
-    const testo = qDifferita.trim().toLowerCase();
+    const trova = filtroRicerca(qDifferita);
     // L10-04: in ordine di nome italiano, quello che si legge in grassetto in ogni riga (prima arrivavano nell'ordine del dataset)
     return dati.filter((s) =>
       (!elemento || s.elemento === elemento)
-      && (!testo || s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)),
+      && trova(s.nome, s.nomeIt, s.effettoNome),
     ).sort((a, b) => a.nomeIt.localeCompare(b.nomeIt, 'it') || a.nome.localeCompare(b.nome, 'it'));
   }, [dati, qDifferita, elemento]);
 

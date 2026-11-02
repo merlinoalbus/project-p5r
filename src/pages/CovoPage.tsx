@@ -39,6 +39,7 @@ import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { urlHttp } from '../../shared/urlHttp';
+import { filtroRicerca } from '../utils/testo';
 
 /** Nel rilascio la provenienza dei dati non si mostra (D10, L7-01). */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -116,9 +117,8 @@ export function CovoPage() {
   const ricarica = () => void dati.ricarica();
   const [ricerca, setRicerca] = useState('');
   const covo = dati.dati?.covo;
-  const q = ricerca.trim().toLocaleLowerCase('it');
-  const sfide = useMemo(() => (covo?.sfide ?? []).filter((s) => !q || `${s.nome} ${s.requisito}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
-  const premi = useMemo(() => (covo?.premi ?? []).filter((p) => !q || `${p.nome} ${p.sblocco ?? ''} ${p.effetto ?? ''} ${(p.oggettiRicompensa ?? []).map((o) => o.nome).join(' ')}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
+  const sfide = useMemo(() => { const trova = filtroRicerca(ricerca); return (covo?.sfide ?? []).filter((s) => trova(s.nome, s.requisito)); }, [covo, ricerca]);
+  const premi = useMemo(() => { const trova = filtroRicerca(ricerca); return (covo?.premi ?? []).filter((p) => trova(p.nome, p.sblocco, p.effetto, ...(p.oggettiRicompensa ?? []).map((o) => o.nome))); }, [covo, ricerca]);
   const c = covo ? conti(covo) : null;
   // L4-02: il premio citato da `?elemento=` (la casa delle ricompense «covo» nelle schede degli oggetti) in vista, a dati arrivati
   useElementoDaIndirizzo(!!covo);
