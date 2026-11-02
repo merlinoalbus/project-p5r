@@ -2488,7 +2488,13 @@
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
-.selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
+.selettore__pulsante { display:flex; flex-wrap:wrap; align-items:center; column-gap:8px; row-gap:2px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
+/* Il dettaglio sta a destra del nome finché al nome resta almeno la sua parola più lunga (`min-width:min-content`, il nome va a capo fra
+   le parole come prima); se non ci sta (il committente di una Richiesta, una frase) scende sulla riga sotto e lì va a capo. Prima il
+   dettaglio non si restringeva mai: una frase lunga schiacciava il nome a una lettera per riga e allargava l'elenco oltre la tendina
+   (segnalazione dell'utente, 2026-11-02, selettore «Richiesta» degli effetti della voce). */
+.selettore__nome { flex:1 1 0; min-width:min-content; overflow-wrap:break-word; }
+.selettore__dettaglio { flex:0 1 auto; min-width:0; margin-left:auto; overflow-wrap:anywhere; }
 .selettore__scelta:focus-visible { outline:2px solid var(--color-primary-testo); outline-offset:2px; }
 /* la voce evidenziata (col mouse o con le frecce, `aria-activedescendant`) ha anche una barra sul bordo: il solo velo rosso al 18% non
    basta a chi naviga da tastiera, perché il fuoco vero resta sul pulsante o sul campo */

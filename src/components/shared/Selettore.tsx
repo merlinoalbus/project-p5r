@@ -8,7 +8,7 @@
 // di 10 voci», poi estesa «a tutti i selettori nell'app» per coerenza). Il testo scritto serve
 // solo a filtrare — il valore è **sempre** una voce dell'elenco, mai quello che hai digitato.
 //
-// Le voci possono avere un gruppo (intestazione nell'elenco) e un dettaglio (in grigio a destra).
+// Le voci possono avere un gruppo (intestazione nell'elenco) e un dettaglio (in grigio a destra; sotto il nome se non ci sta accanto).
 // `vuoto` aggiunge in testa la voce «nessuna scelta» con chiave ''. Da tastiera: frecce, Home/Fine, Invio, Esc, Tab.
 //
 // Accessibilità (WCAG 2.2, schema APG del combobox con listbox): il fuoco resta sul pulsante (o sul campo di ricerca) e la voce
@@ -321,8 +321,8 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- la tastiera sceglie dal pulsante o dal campo (aria-activedescendant), il fuoco non entra nelle voci
                 <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
                   <div className="selettore__pulsante touch">
-                    <span className="min-w-0 flex-1 break-words"><TestoNote testo={o.nome} /></span>
-                    {o.dettaglio && <span className="text-text-muted testo-12 shrink-0">{o.dettaglio}</span>}
+                    <span className="selettore__nome"><TestoNote testo={o.nome} /></span>
+                    {o.dettaglio && <span className="selettore__dettaglio text-text-muted testo-12">{o.dettaglio}</span>}
                   </div>
                 </li>,
               ];
