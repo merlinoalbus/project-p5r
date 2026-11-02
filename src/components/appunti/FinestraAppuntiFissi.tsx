@@ -20,13 +20,25 @@
 //     attualmente ci sta in memoria) e mi fa indicare un breve testo di riferimento») legge gli appunti di sistema (`readText`, dentro il
 //     gesto) e apre il modulo con il solo titolo, già col fuoco, e l'anteprima del testo letto; se il browser non li lascia leggere
 //     (permesso negato, telefono senza l'API, contesto non sicuro) o sono vuoti, lo stesso modulo ha il campo del testo da incollare a mano e
-//     un avviso che dice perché. Per ogni appunto la matita: titolo, testo, sposta su/giù, elimina con conferma. Con molti appunti, la
-//     ricerca per titolo.
+//     un avviso che dice perché. Per ogni appunto la matita: titolo, testo, categoria, sposta su/giù, elimina con conferma. Con molti
+//     appunti, la ricerca per titolo.
+//   - Categorie (richiesta dell'utente, 2026-11-02: «voglio poter raggruppare per categorie (chiudibili e apribili) gli Appunti Fissi nonchè
+//     riordinarli con click e trascina all'interno di gruppi o della lista di Appunti fissi»): in cima la lista senza categoria (col suo
+//     titolo solo se ci sono categorie), poi le categorie nel loro ordine. L'intestazione di una categoria la apre e la chiude (ricordato per
+//     dispositivo); la sua matita la rinomina o la elimina (gli appunti passano in fondo alla lista senza categoria); «Categoria» ne crea una.
+//   - Riordino: la maniglia ⠿ di ogni appunto lo trascina dentro il suo gruppo, in un altro o nella lista senza categoria (`useRiordinoCollegato`,
+//     come le fasce del Diario: col mouse subito, col dito dopo una pressione lunga, la colonna scorre da sola vicino ai bordi); rilasciato in
+//     una categoria chiusa va in fondo e la categoria si apre. Da tastiera, sulla maniglia, ↑/↓ di un posto, e dal primo o dall'ultimo posto
+//     al gruppo prima o dopo; Esc annulla. Le categorie si riordinano allo stesso modo dalla loro maniglia. Durante la ricerca il riordino è
+//     fermo (la maniglia dice perché); la categoria si cambia anche dalla matita dell'appunto.
 // ============================================================
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as KeyboardEventReact, type PointerEvent as PointerEventReact, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { useAppuntiFissiStore } from '../../stores/appuntiFissiStore';
+import { appuntiDelGruppo, useAppuntiFissiStore } from '../../stores/appuntiFissiStore';
+import { useRiordinoCollegato, type RiordinoCollegato } from '../../hooks/useRiordino';
+import { Maniglia } from '../shared/Maniglia';
+import { IconGiu } from '../shared/iconeGuida';
 import { useAppuntiDiarioStore } from '../../stores/appuntiDiarioStore';
 import { notifica } from '../../stores/notificationStore';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
@@ -37,9 +49,10 @@ import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDisposit
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { CampoRicerca } from '../shared/CampoRicerca';
+import { Selettore } from '../shared/Selettore';
 import { Spinner } from '../shared/PageState';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
-import { LIMITE_TESTO_APPUNTO, LIMITE_TITOLO_APPUNTO, type AppuntoFissoDto } from '../../../shared/appuntiFissi';
+import { LIMITE_NOME_CATEGORIA, LIMITE_TESTO_APPUNTO, LIMITE_TITOLO_APPUNTO, type AppuntoFissoDto, type CategoriaAppuntiDto } from '../../../shared/appuntiFissi';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -144,8 +157,27 @@ const RE_RIGA_BLOCCO = /P5R-DIARIO-VOCI\.\d+\./;
 export const FinestraAppuntiFissi: StrumentoDiModifica<typeof FinestraAppuntiFissiReale> = IN_RILASCIO ? NienteInRilascio : FinestraAppuntiFissiReale;
 
 /** Che cosa sta facendo il corpo: niente, l'aggiunta (con la proposta del Diario, col testo letto dagli appunti di sistema — `daAppunti`: si
- *  chiede solo il titolo — o col testo da incollare a mano e il perché in `avviso`), la modifica di un appunto. */
-type Modulo = { tipo: 'aggiungi'; titolo: string; testo: string; n: number; daAppunti?: boolean; avviso?: string } | { tipo: 'modifica'; id: number } | null;
+ *  chiede solo il titolo — o col testo da incollare a mano e il perché in `avviso`), la modifica di un appunto, la categoria nuova (`id` null)
+ *  o la modifica di una categoria. */
+type Modulo = { tipo: 'aggiungi'; titolo: string; testo: string; n: number; daAppunti?: boolean; avviso?: string } | { tipo: 'modifica'; id: number }
+  | { tipo: 'categoria'; id: number | null } | null;
+
+/** Un gruppo a schermo: la lista senza categoria (`categoria` null) o una categoria, con i suoi appunti in ordine. `chiave` è il nome
+ *  dell'elenco per il riordino («senza», «c<id>»). */
+interface Gruppo { chiave: string; categoria: CategoriaAppuntiDto | null; appunti: AppuntoFissoDto[] }
+const GRUPPO_SENZA = 'senza';
+const chiaveGruppo = (categoriaId: number) => `c${categoriaId}`;
+
+/** La linea del rilascio di un trascinamento sopra la riga (o sotto, per il fondo), come nel Diario; nessuna se si rilascerebbe dov'è già. */
+function segnoRilascio(r: RiordinoCollegato, lista: string, ids: readonly string[], id: string): string {
+  const { trascinato, rilascio } = r;
+  if (trascinato === null || rilascio?.lista !== lista) return '';
+  const dove = rilascio.indice;
+  if (ids.indexOf(trascinato) === dove) return '';
+  const resto = ids.filter((x) => x !== trascinato);
+  if (resto[dove] === id) return 'appunti-fissi__rilascio-sopra';
+  return dove >= resto.length && resto[resto.length - 1] === id ? 'appunti-fissi__rilascio-sotto' : '';
+}
 
 function FinestraAppuntiFissiReale() {
   const stato = useAppuntiFissiStore((s) => s.stato);
@@ -153,6 +185,8 @@ function FinestraAppuntiFissiReale() {
   const caricamento = useAppuntiFissiStore((s) => s.caricamento);
   const errore = useAppuntiFissiStore((s) => s.errore);
   const proposta = useAppuntiFissiStore((s) => s.proposta);
+  const categorie = useAppuntiFissiStore((s) => s.categorie);
+  const chiuse = useAppuntiFissiStore((s) => s.chiuse);
   const telefono = useMedia(TELEFONO);
   const idTitolo = useId();
   const finestra = useRef<HTMLElement | null>(null);
@@ -296,7 +330,8 @@ function FinestraAppuntiFissiReale() {
     useAppuntiFissiStore.getState().apri();
   };
   const tasti = (e: KeyboardEventReact<HTMLElement>) => {
-    if (e.key !== 'Escape' || e.nativeEvent.isComposing) return;
+    // un Esc già usato più in basso (la maniglia che annulla un trascinamento) non riduce la finestra
+    if (e.key !== 'Escape' || e.nativeEvent.isComposing || e.defaultPrevented) return;
     // Esc riduce a icona (le bozze restano); `preventDefault` dice al Diario che il tasto è già stato usato (non annulla la sua selezione)
     e.preventDefault();
     e.stopPropagation();
@@ -326,26 +361,217 @@ function FinestraAppuntiFissiReale() {
     const come = voci ? (tocco ? ': «Incolla qui» nel menu ⋯ di una voce del Diario lo incolla' : ': Ctrl+V nel Diario lo incolla') : '';
     notifica('success', `Copiato «${a.titolo}»${come}.`, 5000);
   };
-  /** Un passo su o giù; il fuoco resta sul gesto, o va sull'opposto se al bordo il gesto sparisce. */
-  const sposta = (a: AppuntoFissoDto, verso: -1 | 1) => {
-    void useAppuntiFissiStore.getState().sposta(a.id, verso).then(() => requestAnimationFrame(() => {
+  const [cerca, setCerca] = useState('');
+  const conRicerca = (elenco?.length ?? 0) >= SOGLIA_RICERCA;
+  const q = conRicerca ? perCercare(cerca.trim()) : '';
+  /** I gruppi a schermo: prima la lista senza categoria, poi le categorie nel loro ordine, ognuno con i suoi appunti in ordine. */
+  const gruppi = useMemo<Gruppo[]>(() => {
+    if (!elenco) return [];
+    return [
+      { chiave: GRUPPO_SENZA, categoria: null, appunti: appuntiDelGruppo(elenco, null) },
+      ...(categorie ?? []).map((c) => ({ chiave: chiaveGruppo(c.id), categoria: c, appunti: appuntiDelGruppo(elenco, c.id) })),
+    ];
+  }, [elenco, categorie]);
+  /** Gli appunti che la ricerca trova (tutti, senza ricerca). */
+  const trovato = (a: AppuntoFissoDto) => !q || perCercare(a.titolo).includes(q);
+  /** L'appunto con la matita aperta: resta a vista anche se la ricerca non lo trova (la sua bozza non si nasconde). */
+  const inModificaId = modulo?.tipo === 'modifica' ? modulo.id : null;
+  const aVista = (a: AppuntoFissoDto) => trovato(a) || a.id === inModificaId;
+  /** Un gruppo si vede aperto: la lista senza categoria sempre, una categoria se non è chiusa sul dispositivo; durante la ricerca tutte. */
+  const aperto = (gr: Gruppo) => gr.categoria === null || q !== '' || !chiuse.includes(gr.categoria.id);
+
+  // ---- riordino: appunti dentro e fra i gruppi, categorie fra loro ----
+  const [spostando, setSpostando] = useState(false);
+  const bloccoRiordino = q ? 'Svuota la ricerca per spostare' : spostando ? 'Un momento: sto salvando l’ultimo spostamento' : null;
+  /** Uno spostamento salvato: il riordino è fermo finché il server non risponde; un rifiuto si dice (la copia a schermo torna com'era). */
+  const esegui = async (fai: () => Promise<void>, errore: string) => {
+    setSpostando(true);
+    try { await fai(); } catch (err) { notifica('error', err instanceof Error && err.message ? err.message : errore); } finally { setSpostando(false); }
+  };
+  /** Un passo su o giù nel suo gruppo dalla matita (`i` è il suo posto lì), fermo come il trascinamento durante la ricerca o un salvataggio;
+   *  il fuoco resta sul gesto, o va sull'opposto se al bordo il gesto sparisce. */
+  const sposta = (a: AppuntoFissoDto, i: number, verso: -1 | 1) => {
+    if (bloccoRiordino) { notifica('info', `${bloccoRiordino}.`); return; }
+    void esegui(() => useAppuntiFissiStore.getState().sposta(a.id, a.categoriaId, i + verso), 'Non spostato.').then(() => requestAnimationFrame(() => {
       // il gesto si ritrova dall'id dell'appunto e dalla sua chiave, non dal nome: due appunti possono avere lo stesso titolo
       const trova = (v: -1 | 1) => finestra.current?.querySelector<HTMLButtonElement>(`button[data-appunto="${a.id}"][data-gesto="${v === -1 ? 'su' : 'giu'}"]`) ?? undefined;
       (trova(verso) ?? trova(verso === -1 ? 1 : -1))?.focus();
-    })).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Non spostato.'));
+    }));
   };
-  const [cerca, setCerca] = useState('');
-  const conRicerca = (elenco?.length ?? 0) >= SOGLIA_RICERCA;
-  const visibili = useMemo(() => {
-    if (!elenco) return [];
-    const q = conRicerca ? perCercare(cerca.trim()) : '';
-    return q ? elenco.filter((a) => perCercare(a.titolo).includes(q)) : elenco;
-  }, [elenco, cerca, conRicerca]);
+  const riordino = useRiordinoCollegato(
+    gruppi.map((gr) => ({ nome: gr.chiave, ids: gr.appunti.map((a) => String(a.id)) })),
+    bloccoRiordino,
+    async (id, lista, indice) => {
+      const gr = gruppi.find((x) => x.chiave === lista);
+      const mosso = elenco?.find((a) => a.id === Number(id));
+      if (!gr || !mosso) return;
+      const arrivo = gr.categoria?.id ?? null;
+      // la bozza della matita aperta vive nella riga dell'appunto, che in un altro gruppo si rimonta: prima si chiede se lasciarla
+      if (arrivo !== mosso.categoriaId && mosso.id === inModificaId && !(await lasciaModulo())) return;
+      const s = useAppuntiFissiStore.getState();
+      // rilasciato in una categoria chiusa: va in fondo e la categoria si apre, così si vede dov'è andato (come le fasce del Diario)
+      let posto = indice;
+      if (gr.categoria && !aperto(gr)) { posto = gr.appunti.length; s.alterna(gr.categoria.id, true); }
+      await esegui(() => s.sposta(mosso.id, arrivo, posto), 'Non spostato.');
+    },
+  );
+  const riordinoCategorie = useRiordinoCollegato(
+    [{ nome: 'categorie', ids: (categorie ?? []).map((c) => chiaveGruppo(c.id)) }],
+    bloccoRiordino,
+    (id, _lista, indice) => esegui(() => useAppuntiFissiStore.getState().spostaCategoria(Number(id.slice(1)), indice), 'Categoria non spostata.'),
+  );
 
   if (stato === 'chiusa') return null;
   const n = elenco?.length ?? 0;
+  const nCategorie = categorie?.length ?? 0;
   const ridotta = stato === 'ridotta';
   const pulsante = 'btn btn-ghost btn-sm touch shrink-0';
+  const conManiglie = n > 1 || nCategorie > 0;
+  const trovati = q ? gruppi.reduce((t, gr) => t + gr.appunti.filter(trovato).length, 0) : n;
+  const listaCategorie = categorie ?? [];
+
+  /** La riga di un appunto: maniglia, tocco che copia, matita; sotto, aperto, il modulo di modifica (titolo, testo, categoria, posto, elimina). */
+  const rigaAppunto = (a: AppuntoFissoDto, gr: Gruppo, i: number) => {
+    const inModifica = modulo?.tipo === 'modifica' && modulo.id === a.id;
+    const id = String(a.id);
+    return (
+      <li key={a.id} ref={riordino.riga(id)} hidden={!aVista(a)}
+        className={`flex flex-col gap-1.5 ${riordino.trascinato === id ? 'opacity-50' : ''} ${segnoRilascio(riordino, gr.chiave, gr.appunti.map((x) => String(x.id)), id)}`}>
+        <div className="appunti-fissi__voce">
+          {conManiglie && <Maniglia etichetta={`Sposta «${a.titolo}»`} id={id} riordino={riordino} />}
+          <button type="button" className="appunti-fissi__copia" onClick={() => void copia(a)} aria-label={`Copia «${a.titolo}» negli appunti`}
+            title="Copia negli appunti">
+            <span className="flex min-w-0 items-baseline gap-2">
+              <strong className="testo-14 truncate">{a.titolo}</strong>
+              {copiato === a.id && <span className="appunti-fissi__copiato testo-12 shrink-0" aria-hidden="true">Copiato</span>}
+            </span>
+            <span className="testo-12 text-text-muted truncate">{anteprima(a.testo)}</span>
+          </button>
+          <button type="button" className={`${pulsante} self-center ${inModifica ? 'btn-primary' : ''}`} aria-label={`Modifica «${a.titolo}»`} title="Modifica, sposta o elimina"
+            aria-expanded={inModifica}
+            onClick={async () => { if (inModifica) { void lasciaModulo(); return; } if (await lasciaModulo()) setModulo({ tipo: 'modifica', id: a.id }); }}>
+            <IconaAzione chiave="modifica" dimensione={20} />
+          </button>
+        </div>
+        {inModifica && (
+          <ModuloAppunto key={`m${a.id}`} titoloIniziale={a.titolo} testoIniziale={a.testo} categorie={listaCategorie} categoriaIniziale={a.categoriaId}
+            etichetta={`Modifica «${a.titolo}»`} onSporco={segnaSporco}
+            onAnnulla={() => void lasciaModulo()}
+            onSalva={async (d) => {
+              const s = useAppuntiFissiStore.getState();
+              await s.modifica(a.id, { titolo: d.titolo, testo: d.testo, ...(d.categoriaId !== a.categoriaId ? { categoriaId: d.categoriaId } : {}) });
+              // portato in un'altra categoria, chiusa: la categoria si apre, l'appunto si vede in fondo (senza cambio di categoria lo stato
+              // ricordato non si tocca, nemmeno se a schermo la categoria è aperta solo per la ricerca)
+              if (d.categoriaId !== null && d.categoriaId !== a.categoriaId) s.alterna(d.categoriaId, true);
+              sporco.current = false;
+              setModulo(null);
+              notifica('success', 'Appunto salvato.');
+            }}
+            altri={(
+              <>
+                {i > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su «${a.titolo}»`}
+                  data-appunto={a.id} data-gesto="su" onClick={() => sposta(a, i, -1)} />}
+                {i < gr.appunti.length - 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù «${a.titolo}»`}
+                  data-appunto={a.id} data-gesto="giu" onClick={() => sposta(a, i, 1)} />}
+                <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label={`Elimina «${a.titolo}»`}
+                  onClick={async () => {
+                    if (!(await conferma({ titolo: 'Eliminare l’appunto?', testo: `«${a.titolo}» esce dagli appunti fissi su tutti i dispositivi. Non va nel Cestino.`, etichetta: 'Elimina' }))) return;
+                    try {
+                      await useAppuntiFissiStore.getState().elimina(a.id);
+                      sporco.current = false;
+                      setModulo(null);
+                      notifica('success', `Eliminato «${a.titolo}».`);
+                      requestAnimationFrame(() => finestra.current?.focus({ preventScroll: true }));
+                    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Non eliminato.'); }
+                  }} />
+              </>
+            )} />
+        )}
+      </li>
+    );
+  };
+
+  /** Gli appunti di un gruppo; un gruppo vuoto dice come riempirlo (la lista senza categoria vuota si vede solo se ci sono categorie). */
+  const corpoGruppo = (gr: Gruppo, idCorpo: string) => {
+    const vuoto = gr.appunti.length === 0;
+    return (
+      <div id={idCorpo} hidden={!aperto(gr)} className="flex flex-col gap-1.5">
+        {!vuoto && (
+          <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={gr.categoria ? `Appunti di «${gr.categoria.nome}»: un tocco copia negli appunti` : 'Appunti fissi: un tocco copia negli appunti'}>
+            {gr.appunti.map((a, i) => rigaAppunto(a, gr, i))}
+          </ul>
+        )}
+        {vuoto && gr.categoria && !q && n > 0 && <p className="appunti-fissi__vuoto m-0 testo-12 text-text-muted">Nessun appunto: trascinane qui uno con ⠿, o scegli la categoria dalla matita di un appunto.</p>}
+        {vuoto && !gr.categoria && !q && <p className="appunti-fissi__vuoto m-0 testo-12 text-text-muted">Nessun appunto senza categoria: trascinane qui uno con ⠿ per toglierlo dalla sua categoria.</p>}
+      </div>
+    );
+  };
+
+  /** Una categoria: maniglia (riordino fra le categorie), intestazione che apre e chiude, matita (rinomina, elimina), poi i suoi appunti. */
+  const rigaCategoria = (gr: Gruppo) => {
+    const c = gr.categoria!;
+    const chiave = gr.chiave;
+    const vista = aperto(gr);
+    const inModifica = modulo?.tipo === 'categoria' && modulo.id === c.id;
+    const idCorpo = `${idTitolo}-${chiave}`;
+    // durante la ricerca restano solo le categorie con qualche appunto trovato
+    const nascosta = q !== '' && !gr.appunti.some(aVista);
+    // categoria d'arrivo vuota o chiusa: non ha righe su cui mostrare la linea, quindi è lei a evidenziarsi
+    const bersaglio = riordino.trascinato !== null && riordino.rilascio?.lista === chiave && (gr.appunti.length === 0 || !vista);
+    const idsCategorie = listaCategorie.map((x) => chiaveGruppo(x.id));
+    return (
+      <section key={chiave} hidden={nascosta} aria-label={`Categoria «${c.nome}»`}
+        ref={(el) => { riordino.lista(chiave)(el); riordinoCategorie.riga(chiave)(el); }}
+        className={`appunti-fissi__gruppo appunti-fissi__categoria ${bersaglio ? 'appunti-fissi__gruppo--bersaglio' : ''} ${riordinoCategorie.trascinato === chiave ? 'opacity-50' : ''} ${segnoRilascio(riordinoCategorie, 'categorie', idsCategorie, chiave)}`}>
+        <div className="appunti-fissi__testa">
+          {nCategorie > 1 && <Maniglia etichetta={`Sposta la categoria «${c.nome}»`} id={chiave} riordino={riordinoCategorie} />}
+          <button type="button" className="appunti-fissi__interruttore touch" aria-expanded={vista} aria-controls={idCorpo}
+            title={vista ? `Chiudi la categoria «${c.nome}»` : `Apri la categoria «${c.nome}»`}
+            onClick={async () => {
+              if (q) return;
+              // chiudendo la categoria, la bozza della matita aperta su un suo appunto si nasconderebbe: prima si chiede se lasciarla
+              if (vista && gr.appunti.some((a) => a.id === inModificaId) && !(await lasciaModulo())) return;
+              useAppuntiFissiStore.getState().alterna(c.id);
+            }} aria-disabled={q !== '' || undefined}>
+            <span className="appunti-fissi__freccia" aria-hidden="true"><IconGiu size={18} /></span>
+            <strong className="testo-14 truncate">{c.nome}</strong>
+            <span className="testo-12 text-text-muted tabular-nums shrink-0">{gr.appunti.length}</span>
+          </button>
+          <button type="button" className={`${pulsante} ${inModifica ? 'btn-primary' : ''}`} aria-label={`Modifica la categoria «${c.nome}»`} title="Rinomina o elimina la categoria"
+            aria-expanded={inModifica}
+            onClick={async () => { if (inModifica) { void lasciaModulo(); return; } if (await lasciaModulo()) setModulo({ tipo: 'categoria', id: c.id }); }}>
+            <IconaAzione chiave="modifica" dimensione={20} />
+          </button>
+        </div>
+        {inModifica && (
+          <ModuloCategoria key={`c${c.id}`} nomeIniziale={c.nome} etichetta={`Modifica la categoria «${c.nome}»`} onSporco={segnaSporco}
+            onAnnulla={() => void lasciaModulo()}
+            onSalva={async (nome) => {
+              await useAppuntiFissiStore.getState().rinominaCategoria(c.id, nome);
+              sporco.current = false;
+              setModulo(null);
+              notifica('success', 'Categoria salvata.');
+            }}
+            altri={(
+              <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label={`Elimina la categoria «${c.nome}»`}
+                onClick={async () => {
+                  const k = gr.appunti.length;
+                  const resto = k === 0 ? '' : k === 1 ? ' Il suo appunto passa in fondo alla lista senza categoria.' : ` I suoi ${k} appunti passano in fondo alla lista senza categoria.`;
+                  if (!(await conferma({ titolo: 'Eliminare la categoria?', testo: `«${c.nome}» esce dagli appunti fissi su tutti i dispositivi.${resto}`, etichetta: 'Elimina' }))) return;
+                  try {
+                    await useAppuntiFissiStore.getState().eliminaCategoria(c.id);
+                    sporco.current = false;
+                    setModulo(null);
+                    notifica('success', `Eliminata la categoria «${c.nome}».`);
+                    requestAnimationFrame(() => finestra.current?.focus({ preventScroll: true }));
+                  } catch (err) { notifica('error', err instanceof Error ? err.message : 'Categoria non eliminata.'); }
+                }} />
+            )} />
+        )}
+        {corpoGruppo(gr, idCorpo)}
+      </section>
+    );
+  };
 
   return createPortal(
     <>
@@ -375,19 +601,41 @@ function FinestraAppuntiFissiReale() {
 
         <div className="appunti-fissi__corpo">
           {modulo?.tipo === 'aggiungi' && (
-            <ModuloAppunto key={modulo.n} titoloIniziale={modulo.titolo} testoIniziale={modulo.testo} etichetta="Nuovo appunto" onSporco={segnaSporco}
-              daAppunti={modulo.daAppunti} avviso={modulo.avviso}
+            <ModuloAppunto key={modulo.n} titoloIniziale={modulo.titolo} testoIniziale={modulo.testo} categorie={listaCategorie} categoriaIniziale={null}
+              etichetta="Nuovo appunto" onSporco={segnaSporco} daAppunti={modulo.daAppunti} avviso={modulo.avviso}
               onAnnulla={() => void lasciaModulo()}
               onSalva={async (d) => {
-                const nuovo = await useAppuntiFissiStore.getState().aggiungi(d);
+                const s = useAppuntiFissiStore.getState();
+                const nuovo = await s.aggiungi(d);
+                // salvato in una categoria chiusa: la categoria si apre, l'appunto nuovo si vede in fondo
+                if (d.categoriaId !== null) s.alterna(d.categoriaId, true);
                 sporco.current = false;
                 setModulo(null);
                 useAppuntiFissiStore.getState().togliProposta();
                 notifica('success', `Salvato negli appunti fissi: «${nuovo.titolo}».`);
               }} />
           )}
-          {/* in una riga a sé: il campo cresce in larghezza, non in altezza nella colonna del corpo */}
-          {conRicerca && <div className="flex shrink-0"><CampoRicerca valore={cerca} onCambia={setCerca} segnaposto="Cerca per titolo" /></div>}
+          {/* in una riga a sé: il campo cresce in larghezza, non in altezza nella colonna del corpo; accanto, «Categoria» ne crea una */}
+          {elenco !== null && (
+            <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+              {conRicerca && <CampoRicerca valore={cerca} onCambia={setCerca} segnaposto="Cerca per titolo" />}
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Categoria" aria-label="Nuova categoria"
+                title="Crea una categoria per raggruppare gli appunti" aria-expanded={modulo?.tipo === 'categoria' && modulo.id === null}
+                onClick={async () => {
+                  if (modulo?.tipo === 'categoria' && modulo.id === null) { void lasciaModulo(); return; }
+                  if (await lasciaModulo()) setModulo({ tipo: 'categoria', id: null });
+                }} />
+            </div>
+          )}
+          {modulo?.tipo === 'categoria' && modulo.id === null && (
+            <ModuloCategoria nomeIniziale="" etichetta="Nuova categoria" onSporco={segnaSporco} onAnnulla={() => void lasciaModulo()}
+              onSalva={async (nome) => {
+                const nuova = await useAppuntiFissiStore.getState().aggiungiCategoria(nome);
+                sporco.current = false;
+                setModulo(null);
+                notifica('success', `Categoria «${nuova.nome}» creata: trascina qui gli appunti con ⠿, o sceglila dalla matita di un appunto.`);
+              }} />
+          )}
           {errore && (
             <div className="flex flex-col gap-2 testo-13" role="alert">
               <p className="m-0 text-error-testo">{errore}</p>
@@ -401,63 +649,31 @@ function FinestraAppuntiFissiReale() {
               Nessun appunto ancora. Copia un testo e tocca <strong>+</strong> per salvarlo con un titolo, oppure dal menu ⋯ di una voce del Diario scegli «Salva negli appunti fissi».
             </p>
           )}
-          {elenco !== null && elenco.length > 0 && visibili.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun appunto con «{cerca.trim()}» nel titolo.</p>}
-          {visibili.length > 0 && (
-            <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label="Appunti fissi: un tocco copia negli appunti">
-              {visibili.map((a) => {
-                const i = elenco!.indexOf(a);
-                const inModifica = modulo?.tipo === 'modifica' && modulo.id === a.id;
-                return (
-                  <li key={a.id} className="flex flex-col gap-1.5">
-                    <div className="appunti-fissi__voce">
-                      <button type="button" className="appunti-fissi__copia" onClick={() => void copia(a)} aria-label={`Copia «${a.titolo}» negli appunti`}
-                        title="Copia negli appunti">
-                        <span className="flex min-w-0 items-baseline gap-2">
-                          <strong className="testo-14 truncate">{a.titolo}</strong>
-                          {copiato === a.id && <span className="appunti-fissi__copiato testo-12 shrink-0" aria-hidden="true">Copiato</span>}
-                        </span>
-                        <span className="testo-12 text-text-muted truncate">{anteprima(a.testo)}</span>
-                      </button>
-                      <button type="button" className={`${pulsante} self-center ${inModifica ? 'btn-primary' : ''}`} aria-label={`Modifica «${a.titolo}»`} title="Modifica, sposta o elimina"
-                        aria-expanded={inModifica}
-                        onClick={async () => { if (inModifica) { void lasciaModulo(); return; } if (await lasciaModulo()) setModulo({ tipo: 'modifica', id: a.id }); }}>
-                        <IconaAzione chiave="modifica" dimensione={20} />
-                      </button>
-                    </div>
-                    {inModifica && (
-                      <ModuloAppunto key={`m${a.id}`} titoloIniziale={a.titolo} testoIniziale={a.testo} etichetta={`Modifica «${a.titolo}»`} onSporco={segnaSporco}
-                        onAnnulla={() => void lasciaModulo()}
-                        onSalva={async (d) => {
-                          await useAppuntiFissiStore.getState().modifica(a.id, d);
-                          sporco.current = false;
-                          setModulo(null);
-                          notifica('success', 'Appunto salvato.');
-                        }}
-                        altri={(
-                          <>
-                            {i > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su «${a.titolo}»`}
-                              data-appunto={a.id} data-gesto="su" onClick={() => sposta(a, -1)} />}
-                            {i >= 0 && i < n - 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù «${a.titolo}»`}
-                              data-appunto={a.id} data-gesto="giu" onClick={() => sposta(a, 1)} />}
-                            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label={`Elimina «${a.titolo}»`}
-                              onClick={async () => {
-                                if (!(await conferma({ titolo: 'Eliminare l’appunto?', testo: `«${a.titolo}» esce dagli appunti fissi su tutti i dispositivi. Non va nel Cestino.`, etichetta: 'Elimina' }))) return;
-                                try {
-                                  await useAppuntiFissiStore.getState().elimina(a.id);
-                                  sporco.current = false;
-                                  setModulo(null);
-                                  notifica('success', `Eliminato «${a.titolo}».`);
-                                  requestAnimationFrame(() => finestra.current?.focus({ preventScroll: true }));
-                                } catch (err) { notifica('error', err instanceof Error ? err.message : 'Non eliminato.'); }
-                              }} />
-                          </>
-                        )} />
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          {elenco !== null && elenco.length > 0 && trovati === 0 && <p className="m-0 testo-13 text-text-muted">Nessun appunto con «{cerca.trim()}» nel titolo.</p>}
+          {gruppi.length > 0 && (() => {
+            const senza = gruppi[0];
+            const bersaglioSenza = riordino.trascinato !== null && riordino.rilascio?.lista === GRUPPO_SENZA && senza.appunti.length === 0;
+            return (
+              <>
+                {/* la lista senza categoria: in cima, col suo titolo solo se ci sono categorie; con categorie resta a schermo anche vuota (è il
+                    posto dove rilasciare per togliere la categoria): comparire solo durante il trascinamento sposterebbe le righe sotto il puntatore */}
+                <section ref={riordino.lista(GRUPPO_SENZA)} aria-label="Senza categoria" hidden={(senza.appunti.length === 0 && (nCategorie === 0 || n === 0)) || (q !== '' && !senza.appunti.some(aVista))}
+                  className={`appunti-fissi__gruppo ${bersaglioSenza ? 'appunti-fissi__gruppo--bersaglio' : ''}`}>
+                  {nCategorie > 0 && (
+                    <h3 className="appunti-fissi__gruppo-nome m-0 testo-13 text-text-secondary">
+                      Senza categoria<span className="text-text-muted tabular-nums"> · {senza.appunti.length}</span>
+                    </h3>
+                  )}
+                  {corpoGruppo(senza, `${idTitolo}-senza`)}
+                </section>
+                {nCategorie > 0 && (
+                  <div ref={riordinoCategorie.lista('categorie')} className="flex flex-col gap-2">
+                    {gruppi.slice(1).map((gr) => rigaCategoria(gr))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         <button type="button" className={`appunti-fissi__maniglia ${telefono ? 'appunti-fissi__maniglia--verticale' : ''}`}
@@ -486,11 +702,14 @@ function FinestraAppuntiFissiReale() {
 interface PropsModulo {
   titoloIniziale: string;
   testoIniziale: string;
+  /** Le categorie fra cui scegliere (nessuna: il campo non c'è) e quella di partenza (null: senza categoria). */
+  categorie: readonly CategoriaAppuntiDto[];
+  categoriaIniziale: number | null;
   /** Il nome del gruppo per il lettore di schermo. */
   etichetta: string;
   /** Il modulo dice qui se ha modifiche non salvate. */
   onSporco: (sporco: boolean) => void;
-  onSalva: (d: { titolo: string; testo: string }) => Promise<void>;
+  onSalva: (d: { titolo: string; testo: string; categoriaId: number | null }) => Promise<void>;
   onAnnulla: () => void;
   /** Altri comandi accanto a Salva e Annulla (sposta, elimina). */
   altri?: ReactNode;
@@ -500,9 +719,10 @@ interface PropsModulo {
   avviso?: string;
 }
 
-function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onSalva, onAnnulla, altri, daAppunti = false, avviso }: PropsModulo) {
+function ModuloAppunto({ titoloIniziale, testoIniziale, categorie, categoriaIniziale, etichetta, onSporco, onSalva, onAnnulla, altri, daAppunti = false, avviso }: PropsModulo) {
   const [titolo, setTitolo] = useState(titoloIniziale);
   const [testo, setTesto] = useState(testoIniziale);
+  const [categoria, setCategoria] = useState<number | null>(categoriaIniziale);
   const [occupato, setOccupato] = useState(false);
   const [problema, setProblema] = useState<string | null>(null);
   const id = useId();
@@ -518,14 +738,15 @@ function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onS
       voci: leggiAppunti({ testo: testoIniziale })?.voci.length ?? 0,
     };
   }, [daAppunti, testoIniziale]);
-  useEffect(() => { onSporco(titolo !== titoloIniziale || testo !== testoIniziale); }, [titolo, testo, titoloIniziale, testoIniziale, onSporco]);
+  useEffect(() => { onSporco(titolo !== titoloIniziale || testo !== testoIniziale || categoria !== categoriaIniziale); },
+    [titolo, testo, categoria, titoloIniziale, testoIniziale, categoriaIniziale, onSporco]);
   const salva = async () => {
     const t = titolo.trim();
     if (!t) { setProblema('Scrivi un titolo.'); return; }
     if (!testo.trim()) { setProblema('Incolla o scrivi il testo dell’appunto.'); return; }
     setProblema(null);
     setOccupato(true);
-    try { await onSalva({ titolo: t, testo }); } catch (err) {
+    try { await onSalva({ titolo: t, testo, categoriaId: categoria }); } catch (err) {
       setProblema(err instanceof Error && err.message ? err.message : 'Appunto non salvato.');
     } finally { setOccupato(false); }
   };
@@ -558,6 +779,58 @@ function ModuloAppunto({ titoloIniziale, testoIniziale, etichetta, onSporco, onS
             placeholder="Incolla qui il testo copiato dal Diario" spellCheck={false} />
         </label>
       )}
+      {/* la categoria: l'alternativa al trascinamento per portare l'appunto in un altro gruppo (va in fondo a quel gruppo) */}
+      {(categorie.length > 0 || categoriaIniziale !== null) && (
+        <Selettore etichetta="Categoria" etichettaSopra valore={categoria === null ? '' : String(categoria)} vuoto="Senza categoria"
+          opzioni={categorie.map((c) => ({ chiave: String(c.id), nome: c.nome }))} onCambia={(v) => setCategoria(v ? Number(v) : null)} />
+      )}
+      {problema && <p className="m-0 testo-13 text-error-testo" role="alert">{problema}</p>}
+      <div className="flex flex-wrap gap-1.5">
+        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Salva" disabled={occupato} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
+        {altri}
+      </div>
+    </form>
+  );
+}
+
+// ---- il modulo di una categoria (nuova e modifica) ----
+
+interface PropsModuloCategoria {
+  nomeIniziale: string;
+  /** Il nome del gruppo per il lettore di schermo. */
+  etichetta: string;
+  /** Il modulo dice qui se ha modifiche non salvate. */
+  onSporco: (sporco: boolean) => void;
+  onSalva: (nome: string) => Promise<void>;
+  onAnnulla: () => void;
+  /** Altri comandi accanto a Salva e Annulla (elimina). */
+  altri?: ReactNode;
+}
+
+function ModuloCategoria({ nomeIniziale, etichetta, onSporco, onSalva, onAnnulla, altri }: PropsModuloCategoria) {
+  const [nome, setNome] = useState(nomeIniziale);
+  const [occupato, setOccupato] = useState(false);
+  const [problema, setProblema] = useState<string | null>(null);
+  const id = useId();
+  useEffect(() => { onSporco(nome !== nomeIniziale); }, [nome, nomeIniziale, onSporco]);
+  const salva = async () => {
+    const t = nome.trim();
+    if (!t) { setProblema('Scrivi il nome della categoria.'); return; }
+    setProblema(null);
+    setOccupato(true);
+    try { await onSalva(t); } catch (err) {
+      setProblema(err instanceof Error && err.message ? err.message : 'Categoria non salvata.');
+    } finally { setOccupato(false); }
+  };
+  return (
+    <form role="group" aria-label={etichetta} className="flex flex-col gap-2 rounded-md border border-border p-2" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+      <label className="campo" htmlFor={`${id}-n`}>
+        <span className="campo__etichetta">Nome della categoria</span>
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il modulo si apre per scrivere il nome: il fuoco ci va subito */}
+        <input id={`${id}-n`} className="form-input" value={nome} maxLength={LIMITE_NOME_CATEGORIA} autoFocus onChange={(e) => setNome(e.target.value)}
+          placeholder="Per esempio SCUOLA" enterKeyHint="done" />
+      </label>
       {problema && <p className="m-0 testo-13 text-error-testo" role="alert">{problema}</p>}
       <div className="flex flex-wrap gap-1.5">
         <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Salva" disabled={occupato} />

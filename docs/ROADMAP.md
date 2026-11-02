@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 343 migrazioni di gioco (l'ultima è la 343), 66 delle partite (l'ultima è la 066).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 343 migrazioni di gioco (l'ultima è la 343), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -36,7 +36,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   trofei, sblocchi, Persona, inviti, letture, pesca, domande, esami) e la spunta che li applica e li annulla.
 - Voci con condizione «Si fa solo se», effetti con condizione «Vale solo se», voci con alternative (televendite), esiti scelti alla
   spunta, ricevute della spunta.
-- Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione.
+- Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
+  apribili e riordinati trascinando.
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
 
 ## Mondo, mappe e luoghi
