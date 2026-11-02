@@ -2967,6 +2967,25 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .appunti-fissi__copia:active { transform: scale(0.98); }
   .appunti-fissi__copia:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
   .appunti-fissi__copiato { color: var(--color-success); font-weight: 600; }
+  /* i gruppi (2026-11-02): la lista senza categoria e le categorie, ognuna nel suo riquadro. Durante un trascinamento una linea sopra (o
+     sotto, per il fondo) la riga dice dove andrà l'appunto; un gruppo d'arrivo vuoto o chiuso, che non ha righe, si evidenzia lui */
+  .appunti-fissi__gruppo { display: flex; flex-direction: column; gap: 6px; min-width: 0; border-radius: var(--radius-md); }
+  .appunti-fissi__gruppo[hidden] { display: none; }
+  .appunti-fissi__categoria { padding: 4px; border: 1px solid var(--color-border); background: var(--color-bg-tertiary); }
+  .appunti-fissi__gruppo--bersaglio { outline: 2px solid var(--color-primary); outline-offset: 1px; }
+  .appunti-fissi__gruppo-nome { padding: 0 2px; font-weight: 600; }
+  .appunti-fissi__testa { display: flex; align-items: center; gap: 2px; min-width: 0; }
+  .appunti-fissi__interruttore { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 4px; border: 0;
+    border-radius: var(--radius-sm); background: transparent; color: var(--color-text); text-align: left; cursor: pointer; }
+  .appunti-fissi__interruttore:hover { background: var(--color-surface); }
+  .appunti-fissi__interruttore:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: -2px; }
+  .appunti-fissi__interruttore[aria-disabled="true"] { cursor: default; }
+  .appunti-fissi__freccia { display: inline-flex; flex-shrink: 0; color: var(--color-text-muted); transition-property: transform; transition-duration: 150ms; transition-timing-function: ease-out; }
+  .appunti-fissi__interruttore[aria-expanded="false"] .appunti-fissi__freccia { transform: rotate(-90deg); }
+  .appunti-fissi__vuoto { padding: 8px 10px; border: 1px dashed var(--color-border); border-radius: var(--radius-md); }
+  .appunti-fissi__rilascio-sopra { box-shadow: 0 -3px 0 0 var(--color-primary); }
+  .appunti-fissi__rilascio-sotto { box-shadow: 0 3px 0 0 var(--color-primary); }
+  @media (prefers-reduced-motion: reduce) { .appunti-fissi__freccia { transition: none; } }
   /* l'anteprima del testo letto dagli appunti nel modulo del «+»: a capo come nel testo, scorre da sé (fino a un terzo della vista) */
   .appunti-fissi__anteprima { max-height: min(12rem, 33vh); overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere;
     padding: 6px 8px; border: 1px solid var(--color-border-light); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text-secondary); }

@@ -359,6 +359,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Copia, Taglia e Incolla delle voci con gli appunti di sistema, e appunti fissi delle voci che si ripetono: solo nella preparazione.
   Dopo un incolla si esce dalla selezione come con «Fine», anche dalla scelta a caselle, e le fasce chiuse delle voci arrivate si
   riaprono **(01/11)**.
+- Appunti fissi per categorie: la lista senza categoria in cima (col titolo solo se ci sono categorie, e a schermo anche vuota, come posto
+  dove rilasciare), poi le categorie nel loro ordine, che si aprono e si chiudono dall'intestazione; le categorie chiuse si ricordano per
+  dispositivo. Un appunto e una categoria si spostano trascinando la maniglia ⠿ (col dito dopo una pressione lunga) o con le frecce sulla
+  maniglia; rilasciato in una categoria chiusa, l'appunto va in fondo e la categoria si apre; la categoria si cambia anche dalla matita
+  dell'appunto (in fondo a quel gruppo). Durante la ricerca il riordino è fermo. Eliminando una categoria i suoi appunti non si perdono:
+  passano in fondo alla lista senza categoria. Nomi unici senza distinguere maiuscole né accenti **(02/11)**.
 - Gli oggetti citati da una voce si aprono in un pannello sopra il Diario, con ritorno alla stessa posizione.
 - I 173 eventi del calendario restano eventi collegati per chiave alle voci, non diventano voci. **(24/10)**
 
