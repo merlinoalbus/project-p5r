@@ -2,9 +2,9 @@
 // visitaPesca — le regole pure del modulo «Registra una visita» in tre passi (L10-09)
 // ============================================================
 //
-// Il foglio del registro della pesca (`RegistraVisitaPesca`) raccoglie gli stessi dati del modulo unico `PreparazioneSessionePesca`, che
-// «Da applicare» usa ancora per la pesca delle voci del Diario: qui si decidono soltanto i valori di partenza (giorno e fascia della
-// partita, ordine dopo l'ultima visita di quella fascia, «visita nuova») e i gesti dei contatori dei pesci. L'elenco dei pesci
+// Il foglio della pesca (`RegistraVisitaPesca`, nel registro della pesca e, dal 01/11, in «Da applicare» per la pesca delle voci del
+// Diario) raccoglie gli stessi dati del modulo unico di prima: qui si decidono soltanto i valori di partenza (giorno e fascia della
+// partita o della voce, ordine dopo l'ultima visita di quella fascia, «visita nuova») e i gesti dei contatori dei pesci. L'elenco dei pesci
 // (`SPECIE_PESCA`) e le osservazioni incompatibili (`incoerenzeOsservazionePesca`) stanno in `shared/pesca.ts`, una volta sola per il
 // server e per i moduli. La richiesta che ne esce ha la forma di sempre (`NuovaSessionePesca`): il server la valida e la scrive come
 // prima, dopo l'anteprima firmata.

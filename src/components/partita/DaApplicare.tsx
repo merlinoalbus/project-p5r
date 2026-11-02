@@ -13,7 +13,8 @@ import { PreparazioneAcquistoAojiru, RiepilogoConsumoPreparato } from '../catalo
 import { Modal } from '../shared/Modal';
 import { decidiProposteConRegistro, gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPartita';
 import { GestiPartita } from './GestiPartita';
-import { PreparazioneSessionePesca, RiepilogoSessionePreparata } from '../pesca/PreparazioneSessionePesca';
+import { RiepilogoSessionePreparata } from '../pesca/PreparazioneSessionePesca';
+import { RegistraVisitaPesca } from '../pesca/RegistraVisitaPesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -243,12 +244,18 @@ function DaApplicareNelContesto(props: PropsDaApplicare) {
     {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch testo-13">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 testo-12">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.tipo === 'dote' ? testoPunti(p.deltaApplicato, { segno: true }) : `${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}`}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.tipo === 'dote' ? testoPunti(p.deltaRiconosciuto) : p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
     {ricevuta && <p role="status" className="m-0 testo-13 text-success">{ricevuta}</p>}
     {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
-    <Modal aperta={consumo !== null} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>
-      {consumo && effettoConsumo?.tipo === 'pesca' && uidVoce && uidEffetto ? <PreparazioneSessionePesca key={consumo.uid} partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }} giorno={typeof consumo.dati.giorno === 'string' ? consumo.dati.giorno : undefined} fascia={consumo.dati.fascia === 'sera' || consumo.dati.fascia === 'giorno' ? consumo.dati.fascia : undefined} confermaScrive={false}
-        onConferma={async r => {
+    {/* la pesca della voce: il foglio in tre passi della pesca (decisione dell'utente del 01/11), con giorno e fascia della voce; alla fine
+        passa la richiesta firmata alla decisione della voce («Confermi?»), come prima */}
+    {consumo && effettoConsumo?.tipo === 'pesca' && uidVoce && uidEffetto && <RegistraVisitaPesca key={consumo.uid} partitaId={partitaId} collega={null}
+      voce={{ fonte: { tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }, giorno: typeof consumo.dati.giorno === 'string' ? consumo.dati.giorno : undefined,
+        fascia: consumo.dati.fascia === 'sera' || consumo.dati.fascia === 'giorno' ? consumo.dati.fascia : undefined,
+        onConferma: async r => {
           const { revisionePescaAttesa, ...pesca } = r;
           await prepara({ tipo: 'applica-effetto', proposta: riferimento(consumo), pesca, revisionePescaAttesa });
-        }} /> : consumo && effettoConsumo?.tipo === 'acquisto' && uidVoce && uidEffetto ? <PreparazioneAcquistoAojiru key={consumo.uid} partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }} articolo={effettoConsumo.articolo}
+        } }}
+      onChiudi={() => { if (!occupato) setConsumo(null); }} />}
+    <Modal aperta={consumo !== null && !(effettoConsumo?.tipo === 'pesca' && uidVoce && uidEffetto)} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>
+      {consumo && effettoConsumo?.tipo === 'acquisto' && uidVoce && uidEffetto ? <PreparazioneAcquistoAojiru key={consumo.uid} partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }} articolo={effettoConsumo.articolo}
         onRecuperato={async () => { if (vivo.current) { setConsumo(null); await elenco.ricarica(); await onCambiato?.(); } }}
         giorno={typeof consumo.dati.giorno === 'string' ? consumo.dati.giorno : null} fascia={consumo.dati.fascia === 'sera' ? 'sera' : 'giorno'} titoloConferma="Rivedi la proposta completa" esitoConferma="Dati preparati: rivedi il riepilogo della proposta." confermaScrive={false}
         onConferma={async (r) => {

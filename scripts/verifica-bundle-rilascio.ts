@@ -110,6 +110,9 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Incolla dagli appunti', cosa: 'finestra di caricamento delle miniature dei Luoghi (L13, O9-5, FinestraCaricaImmagine)' },
   { testo: 'la miniatura di ', cosa: 'comando «Miniatura» delle carte dei Palazzi, dei Dedali e delle loro aree (L13, O9-5)' },
   { testo: 'Boss finale da dichiarare', cosa: 'segno e collegamento a «Modifica › Boss finale» della scheda del Palazzo (L4 §8.14)' },
+  // D19 (01/11): le viste interne della Fusione (`?strumenti=1`) esistono solo nella preparazione
+  { testo: 'Due arcani', cosa: 'vista interna «Due arcani» della Fusione (D19)' },
+  { testo: 'Matrice completa', cosa: 'vista interna «Matrice completa» della Fusione (D19)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

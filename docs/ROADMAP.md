@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 340 migrazioni di gioco (l'ultima è la 340), 64 delle partite (l'ultima è la 064).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 343 migrazioni di gioco (l'ultima è la 343), 66 delle partite (l'ultima è la 066).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -107,8 +107,11 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Decisioni dell'utente (01/11): D1 non toccare (L8-01 resta com'è); D2 procedere; D3, D4, D5, D6 sì come proposto; D7 pulsante
   «Applica» nella notifica; D8 e D9 no (nessun tracciamento del Covo; l'annullo dell'incenso resta com'è); D10 sì; D11 no; D12 sì;
   D13 no; D14 copia della produzione in sola lettura prima delle misure di L8; D15 opzione C (segno a sinistra e nome barrato in grigio); D16 non serve riconfermare;
-  D17 sì; D18 procedere; D19 da motivare all'utente prima di farlo; D20 prima gli schizzi.
-- L8 (coerenza dei dati), stato attuale (migrazioni 335–340):
+  D17 sì; D18 procedere; D19 «Tesoro in Ricette speciali», fatto (la tabella dei Demoni del Tesoro è una sezione delle «Ricette speciali»
+  per tutti; «Due arcani» e «Matrice completa» restano nascoste con `?strumenti=1` e nel rilascio non esistono); D20 prima gli schizzi.
+  Altre decisioni del 01/11, fatte: la pesca di «Da applicare» con il foglio in tre passi; «Colloca …» rilegge le aree quando l'elenco
+  dei contenitori cambia.
+- L8 (coerenza dei dati), stato attuale (migrazioni 335–343, utente 065–066):
   - Requisiti, date e livelli della guida che l'app sa usare (D4, 340): sblocco degli 8 Speciali, condizioni delle Gemelle e di Lavenza,
     rango 9 di Maruki entro il 17 novembre per tre finali (Royal, standard come negazione, negativo 3), arco dei Palazzi di 3 ricette, livello consigliato come numero (6 Battaglie Sfida,
     2 boss, Mietitore), 17 sfide del Covo che contano uno stato della partita (attività, lavori, contatori, cruciverba, timbri, yen spesi,
@@ -119,7 +122,18 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     trofei (Big Bang Burger, fuoricampo, miglior caffè e curry), i punti della pesca sono un saldo senza il guadagnato, i punti del negozio dei vestiti usati sono un saldo, le statistiche delle
     Persona sono stime salvo i valori osservati, i fiori dei Memento e le statistiche di battaglia non si tengono; Maid Café e gioco
     dell'artiglio non sono attività del DB, il Jazz Club non si conta.
-  - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339).
+  - Avvisi del giorno: un dato del giorno, modificabile dall'editor del giorno; non ripetono più le voci, la trama e i vincoli (339, e 343
+    per i casi decisi il 01/11: le 13 coperte da trama o vincoli, Yoshida del 17/07, Sumire del 12/01, i doppioni di Medjed, Kaneshiro,
+    Akechi e Igor, la maid del 20/07; Niijima del 31/10 riscritto; resta il 9/04).
+  - Conflitti di dati del censimento degli avvisi, decisi il 01/11: voci del rango 1 di Akechi (10/06) e del rango 10 di Igor (24/12),
+    «Impeto dell'Arcano superiore» al rango 6 di Igor, sblocco di «Medicina amara» sulla voce del rango 7 di Takemi (28/05) e della maid
+    sulla voce del rango 8 di Kawakami (19/07) (341), lo sblocco scritto nelle partite che avevano già spuntato la voce del 28/05 come
+    dalla spunta (utente 066); termine di Kaneshiro all'8 luglio, Medjed annunciato il 23/07 con scadenza il 20/08, scadenza di Niijima il
+    19/11, con le date vecchie allineate anche nei riassunti delle settimane 11, 13, 15 e 28, nella trama del 21/06 e nella nota del Palazzo di
+    Kaneshiro (il titolo dell'evento 51, «in 3 settimane», resta per decisione dell'utente; il blocco storico `finestre-dungeon` non si tocca), lettera a Kamoshida il 21/04 e furto del Tesoro il 22/04 in due eventi, Biliardo dal rango 2 di Akechi
+    (vale dal rango 2 in su, anche con la voce del rango 3 del 13/08) (342). Hifumi: nessuna modifica (requisito e voce dicono due cose
+    diverse). Okumura ed elezioni restano come la trama; le date dei Palazzi si correggono da «Correggi la scheda».
+  - Archivio degli acquisti: tolte le 15 righe della partita 3, che non c'è più (utente 065).
   - Livello consigliato dei Palazzi: minimo e massimo, con il confronto delle fonti nella nota storica del Palazzo (335).
   - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
     da `area_chiave` (337). Giorno di un'infiltrazione: quello delle voci legate a lei.
@@ -131,27 +145,17 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
     spento e disattivato senza. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi,
     bagno, gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
 - L8, in attesa della scelta di Roberto:
-  - avvisi del giorno: le 13 frasi coperte solo da trama o vincoli (#70, #140, #161, #171, #181, #196–#203), i 10 casi in dubbio e i 13
-    conflitti di dati del censimento (Richiesta di Kawakami sulla voce del 19 luglio, «Impeto dell'Arcano Sup.», lettera a Kamoshida, ranghi
-    senza voce di Akechi e di Igor, nome del trofeo dell'11 ottobre, data del rango 1 di Hifumi, date di Medjed, scadenza del Palazzo di
-    Niijima, termine del ricatto di Kaneshiro, conto alla rovescia di Okumura, giorno delle elezioni, rango 5 di Kasumi);
   - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida (la scheda le mostra tutte e due);
   - alberi di fusione: le Persona DLC dei pacchetti posseduti non sono più proposte «da catturare», ma solo se in scorta o nel Registro
     (come già facevano Compendio e cicli);
-  - attività Biliardo: la guida delle sfide del Covo la dice «sbloccata al Rango 2 con Akechi», ma l'attività non ha condizioni;
-  - prezzi dei consumabili diversi fra la pagina Oggetti della guida e il listino (nessuno corretto, il listino resta com'è): Dango lunare
-    640 ¥ (allgamestaff, Oggetti) contro 800 ¥ (allgamestaff, elenco dei negozi, Super Muramasa); Agodashi Oden 800 ¥ (Oggetti) contro
-    900 ¥ (elenco dei negozi, Triple Seven); Homunculus 120.000 ¥ (Oggetti) contro 5.000 ¥ (listino di Tanaka, samurai-gamers); per questi
-    tre c'è la nota storica sulla fonte, sull'offerta e sull'oggetto. Daifuku alla fragola 29.800 ¥ (Oggetti) contro il baratto con una
-    Cartolina del Mercante Sakai (allgamestaff, scambi): i 29.800 ¥ sono il prezzo del «Set della dolce delizia» delle Televendite del
-    22 gennaio, che è nel listino con lo stesso prezzo.
+  - le date dei Palazzi si correggono in «Correggi la scheda», ma non hanno un «Ripristina» (come nome, sovrano e note della stessa scheda).
 - L8, ancora da fare: L8-01 (D1: non toccare); i gradini della capienza non hanno un editor (si correggono con una migrazione).
 - L9 fatto: gli SVG caricati non eseguono script se aperti da soli (CSP `sandbox` e allegato, nell'app si vedono come prima); «Scarica da
   URL» non raggiunge la rete interna né con un IP nell'URL, né con un nome, né con un redirect (al più 5, solo http e https); i collegamenti
   alle fonti passano tutti da `urlHttp`; la CSP completa del rilascio è attiva in solo rapporto accanto a quella applicata di prima; limiti di
   memoria e di processi su ogni container, frontend del rilascio in sola lettura, guardia intera del bundle nella costruzione dell'immagine;
   lo User-Agent senza il nome utente (D17). Non fatti per D11: intestazioni nell'nginx della preparazione, limite di frequenza e tetto di
-  righe nel rilascio. Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
+  righe nel rilascio (il tetto, confermato il 01/11: «Sì, niente tetto»). Da fare dopo l'osservazione nell'istanza vera: passare la CSP completa da solo rapporto ad applicata.
 - L10-01, L10-02, L10-05 fatti, dagli schizzi approvati: da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
   partita e Storico stanno in una schermata (scorre solo l'elenco, nella sua area; in Denaro e squadra la colonna di denaro e oggetti scorre tutta,
   scelta dell'utente del 01/11, e a 1024 le righe dei compagni vanno su due linee); a 375 px la prima voce di «Oggi» sale da 778 a 720
@@ -162,8 +166,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   fascia della partita già messi, ordine calcolato con «Cambia», domanda sul conto delle attività solo se ci sono visite contate senza
   dettaglio, pesci a contatore, il resto in «Altri dettagli», niente spunta di conferma; «Aggiungi a questa visita già segnata» è un comando
   della visita. Le frasi dell'anteprima della pesca dette dal server in parole da giocatore.
-- Da applicare: le visite di pesca del Diario si registrano ancora con il modulo di prima (17 campi e spunta); usare il foglio in tre passi
-  va deciso da Roberto (nel Diario la domanda sul conto andrebbe lasciata obbligatoria).
+- Da applicare: la pesca di una voce del Diario si completa con il foglio in tre passi, con giorno e fascia della voce, la domanda sul conto
+  sempre obbligatoria per una visita nuova e la scelta di aggiungere la voce a una visita già segnata quel giorno e in quella fascia (allora
+  vale il turno di quella visita); la richiesta firmata va
+  alla decisione della voce, come prima. Il modulo unico di prima è tolto.
 - L10-03/04/08/10 fatti (schizzi approvati per D20): avanzamento «N su M punti segnati» nelle carte dei Palazzi e dei dedali con gli stessi
   numeri delle loro pagine e la raccolta sotto ogni area nella fila del Palazzo; Compendio a piastrelle orizzontali con i segni della partita
   («In scorta», «Nel Registro», anche nella scheda Persona), filtri di Skill, Glossario, Domande e Cruciverba nell'indirizzo, skill per nome
@@ -187,23 +193,16 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   - L11-07: i punti aperti su bagno, centro battute e Big Bang Burger erano già allineati alle migrazioni 233, 314 e 319; commenti
     superati corretti (Iweleth fra i Palazzi, il numero delle schede della Partita, i Palazzi del Meta-Nav, documenti tolti dal
     repository); le decisioni «(24/10)» non si riconfermano (D16).
-- Da L11-06, da decidere con Roberto: nella finestra «Colloca …» di una planimetria da collocare (`FinestraCollocaPlanimetria`) le aree del contenitore
-  scelto si rileggono solo al cambio della scelta; se l'elenco dei contenitori cambia a finestra aperta la lettura non si rifà. Il
-  comportamento è rimasto quello di prima; rileggere anche a quel cambio va deciso.
 - Dipendenze di sviluppo: aggiornate le versioni corrette di vitest e `@vitest/coverage-v8` (4.1.12), `fast-uri` (3.1.9) e `undici`
   (7.30.1). Resta l'avviso su `minimatch` (GHSA-g3hv-75wg-m249, gravità moderata, solo strumenti di sviluppo: ESLint, typescript-eslint,
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
-- Edizione di rilascio con schema partite 64: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
+- Edizione di rilascio con schema partite 66: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
   copia e col sì di Roberto; finché resta l'edizione attuale il rilascio funziona.
-- Da L11-04, da decidere con l'utente: nell'archivio immutabile `acquisto_legacy_valutazione` della copia della produzione restano 15 righe
-  della partita 3, che non c'è più né fra le partite né nel Cestino. Dalla 064 nessuna partita nuova può più prendere l'id 3, quindi non si
-  mostrano più a nessuno; toglierle chiede di aggirare il blocco dell'archivio (che vieta le cancellazioni) e si fa solo con il sì
-  dell'utente.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
   censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.
-- Aperti: L8 (le voci sopra) e L10 (le proposte non ancora fatte); in sospeso D19 (motivazione data, risposta dell'utente da avere). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
+- Aperti: L8 (le voci sopra) e L10 (le proposte non ancora fatte). Restano da decidere anche i ritratti tondi ritagliati (`RitrattoPersonaggio`, `SceltaQuale`) e le
   immagini a copertura nel CSS (`.illustrazione-segno__immagine`, `.carta-arcano-mini`), contro la regola «immagini mai ritagliate». Restano attenuati con l'opacità, fuori da D15, i luoghi «non ancora» di `QuartierePage`
   e le Persona in deposito (`.riga-persona--deposito`): da rivedere per il contrasto.
 

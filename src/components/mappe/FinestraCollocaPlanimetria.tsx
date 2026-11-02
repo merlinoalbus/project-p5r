@@ -52,15 +52,17 @@ function FinestraCollocaPlanimetriaReale({ mappa, contenitori, onChiudi, onCollo
   const [occupato, setOccupato] = useState(false);
   const contenitore = contenitori.find((c) => idContenitore(c) === scelto);
   const soloQuartieri = contenitori.every((c) => c.tipo === 'quartiere');
-  // le aree note dal chiamante; altrimenti, per un quartiere, dalla sua scheda
+  // le aree note dal chiamante; altrimenti, per un quartiere, dalla sua scheda. Dipende dal contenitore scelto com'è nell'elenco di
+  // adesso (decisione dell'utente del 01/11): se l'elenco cambia a finestra aperta (aree nuove, un contenitore tolto) la lettura si rifà.
+  // `useCarica` confronta le dipendenze serializzate, quindi un elenco ricostruito con gli stessi valori non fa rileggere.
   const aree = useCarica(async () => {
     if (!contenitore) return null;
     if (contenitore.aree) return contenitore.aree;
     if (contenitore.tipo === 'quartiere') return (await getQuartiere(contenitore.chiave)).aree.map((a) => ({ slug: a.slug, nome: a.nome }));
     return [];
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- `contenitore` viene da `scelto` e da `contenitori`; `contenitori` resta fuori di proposito, come prima: se cambia a finestra aperta la lettura non si rifà (punto aperto in ROADMAP)
-  }, [scelto]);
-  const pronto = !!contenitore && (area === NUOVA ? !!nuova.trim() : !!area) && !occupato;
+  }, [contenitore]);
+  // un'area scelta che dopo la rilettura non c'è più non si manda
+  const pronto = !!contenitore && (area === NUOVA ? !!nuova.trim() : !!area && !!aree.dati?.some((a) => a.slug === area)) && !occupato;
   const salva = async () => {
     if (!pronto || !contenitore) return;
     setOccupato(true);

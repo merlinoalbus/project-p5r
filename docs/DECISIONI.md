@@ -51,8 +51,29 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   ripristina solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
 - **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
   intero ciò che la scheda del giorno mostra (voci con il rango atteso, effetti, trama e vincoli, «Giorno non coperto») sono tolti (181, con
-  archivio), quelli che ne ripetevano una parte riscritti col resto (11); restano gli avvisi con un'informazione propria, i casi in dubbio e
-  quelli coperti solo da trama o vincoli, che aspettano una decisione a parte.
+  archivio), quelli che ne ripetevano una parte riscritti col resto (11). Anche quelli coperti solo da trama o vincoli sono tolti (l'utente,
+  01/11: «Sì, toglile»), come i casi in dubbio decisi: Yoshida del 17 luglio e Sumire del 12 gennaio («Togli l'avviso»), i doppioni rimasti
+  dopo l'allineamento delle date (Medjed, Kaneshiro), quelli che le voci nuove di Akechi e di Igor dicono già e quello del 20 luglio sulla
+  Richiesta della maid, che la voce del 19 luglio sblocca; quello di Niijima del 31 ottobre dice solo la scadenza. Resta l'avviso del 9 aprile sui salvataggi di Persona 5 («Anticipo utile, resta»): anticipa la voce del 12
+  aprile. Restano gli avvisi con un'informazione propria.
+- **Conflitti di dati del censimento degli avvisi (decisioni dell'utente, 01/11)**: il ricatto di Kaneshiro scade l'8 luglio, l'ultimo giorno
+  della finestra del Palazzo (vincolo del 19 giugno, trame del 20 e del 21 giugno, riassunti delle settimane, nota del Palazzo, evento della
+  scadenza all'8 luglio; il risveglio del cuore è il 9 luglio; il titolo dell'evento del 20 giugno, «in 3 settimane», resta per scelta dell'utente); Medjed annuncia l'attacco il
+  23 luglio (anche nel riassunto della settimana) e la scadenza è il 20 agosto, l'ultimo giorno utile, perché il 21 è il giorno
+  dell'attacco; la scadenza del Palazzo di Niijima è il 19 novembre (anche nel riassunto della settimana), il 20 è l'interrogatorio. Le date
+  vecchie sono tutte allineate («Sì, allineali tutti»); il blocco storico delle finestre della guida resta com'era. La lettera a Kamoshida e il furto sono due eventi del calendario («Separo i due eventi»): «Invio della lettera di sfida a
+  Kamoshida» il 21 aprile, il giorno della voce che la invia, e «Furto del Tesoro di Kamoshida» il 22, con il confronto e la voce del furto
+  (le voci validate non cambiano). «Medicina amara» si sblocca dal rango 7 di Takemi («Dal rango 7 di Takemi»): l'effetto di sblocco sta
+  sulla voce del 28 maggio, che non cambia in nient'altro, e le partite che l'avevano già spuntata ricevono lo sblocco come dalla spunta
+  («Migrazione automatica», utente 066); il rango 8 di Kawakami (voce del 19 luglio) sblocca «Le fatiche di una maid in
+  cattedra» («Sì: sblocca la maid»). Il rango 1 di Akechi è una voce del Diario del 10 giugno, sera, dopo la trasmissione («Sì, aggiungi la voce»); il rango 10
+  di Igor è una voce del 24 dicembre, con Impeto dell'Arcano supremo e la fusione di Vishnu («Sì, aggiungi»); l'abilità del rango 6 di Igor
+  si chiama «Impeto dell'Arcano superiore», per distinguerla dal «supremo» del 10. Il Biliardo si sblocca al rango 2 di Akechi («Sì, rango 2
+  di Akechi», una condizione dell'attività): vale con il rango 2 o più, quindi anche dalla voce del rango 3 del 13 agosto, senza una voce
+  apposta per il rango 2. Il requisito del rango 1 di Hifumi («Disponibile dal 25 giugno») e la voce del 2 luglio dicono
+  due cose diverse, da quando si può e il giorno della guida («Niente: due cose diverse»). Le date di Okumura (i «22 giorni» della trama del
+  19 settembre) e delle elezioni restano quelle della trama («per il momento lascia quella della trama»); le date di apertura e di scadenza
+  dei Palazzi si modificano da interfaccia, in «Correggi la scheda» del Palazzo.
 - **Requisiti, date e prezzi della guida (L8-03, D4 di Roberto: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
   liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare
   (migrazione 340): lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
@@ -67,7 +88,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   di Akechi non sia un requisito del finale Royal (né il suo contrario del finale standard) è una lettura del testo della guida, non una
   decisione di Roberto. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
   loro punto unico; i testi della guida restano. I prezzi non diventano campi nuovi: hanno già il loro punto unico nel catalogo e nei listini,
-  e i prezzi della pagina Oggetti diversi dal listino restano note, in attesa di Roberto (ROADMAP).
+  e i prezzi della pagina Oggetti diversi dal listino restano note storiche, con il listino com'è (l'utente, 01/11: «Lascia la nota»).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
   attribuzioni in `NOTICE`. Il foglio Royal della negoziazione (raccolta joyce-chen, senza licenza dichiarata) è copiato nel
   repository per scelta dell'utente, con attribuzione in `NOTICE`.
@@ -85,6 +106,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **Un id di partita non si riusa (L11-04, 01/11)**: `partita` ha AUTOINCREMENT (utente 064) e il suo contatore parte dal più alto id che
   il file conosca (partite, ogni colonna `partita_id`, Cestino); la partita nuova prende un id oltre anche quello. Una partita nel Cestino
   si può ripristinare anche dopo averne create altre, e l'archivio degli acquisti senza chiave esterna non si mescola con una partita nuova.
+  L'archivio resta immutabile; l'unica eccezione sono le 15 righe della partita 3, che non c'era più né fra le partite né nel Cestino, tolte
+  una volta dalla utente 065 (l'utente, 01/11: «Toglile»).
 - **Censimento delle partite, solo come avviso (L11-04, decisione dell'utente del 01/11: «al massimo warning»)**: ogni tabella del file
   delle partite e ogni sua colonna dal nome di riferimento va classificata, come riferimento ai dati di gioco (`RIFERIMENTI_PARTITE`,
   controllato dall'anteprima dell'«Importa») o con il motivo per cui non lo è (`CENSIMENTO_PARTITE`). Una tabella o una colonna non
@@ -114,7 +137,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   preparazione ha il backend più largo per l'importazione delle mappe fino a 512 MB); nel rilascio anche il frontend gira in sola lettura. La
   guardia del bundle di rilascio gira anche nella costruzione dell'immagine, sul bundle che si pubblica.
 - **Rifiutate dall'utente (D11, 01/11)**: niente intestazioni di sicurezza nell'nginx della preparazione e niente limite di frequenza né tetto
-  di righe per partita nel rilascio (L9-03, prima parte, e L9-04). Il limite di frequenza del rilascio resta quello del bordo di Cloudflare.
+  di righe per partita nel rilascio (L9-03, prima parte, e L9-04; per il tetto di righe confermato il 01/11: «Sì, niente tetto»). Il limite di
+  frequenza del rilascio resta quello del bordo di Cloudflare.
 - **CSP del rilascio prima in solo rapporto (L9-03, 01/11)**: la policy completa (`default-src`, `script-src`, `connect-src`, …, tutte sulla
   stessa origine) è in `Content-Security-Policy-Report-Only` accanto alla CSP applicata di prima, che resta com'era. Diventa applicata solo
   dopo averla osservata senza violazioni inattese nell'istanza vera, dietro il bordo; l'unica attesa è la prova di `Function("")` di Zod.
@@ -252,6 +276,9 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   né statistiche dei materiali.
 - Le Persona che richiedono un oggetto (Black Frost, Bugs) hanno solo l'etichetta «Richiede l'oggetto»: il motore le propone comunque.
 - Piani salvati come istantanea calcolata; l'avanzamento si legge dalla scorta. Valori casuali (Forca, Allarme) li inserisce l'utente.
+- **Demoni del Tesoro in «Ricette speciali» (D19, 01/11)**: la tabella dei modificatori dei Demoni del Tesoro è una sezione visibile della
+  vista «Ricette speciali», per tutti e anche nel rilascio (la ✎ di modifica solo nella preparazione). «Due arcani» e «Matrice completa»
+  restano strumenti nascosti (`?strumenti=1`) della preparazione; nel rilascio non esistono.
 
 ## 8. Partita: Doti, Confidenti, Fortuna, denaro, avanzamento
 - **Doti sociali a note**: 1♪ = 2, 2♪ = 3, 3♪ = 5 punti (7 con un libro a resa maggiorata), Fortuna ×1,5 per difetto; soglie cumulative
@@ -382,6 +409,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Nessuna immagine ufficiale nel repository: le planimetrie le carica l'utente nell'istanza. I pezzi delle planimetrie (zone
   dell'immagine posate sulla mappa con condizioni) si definiscono una volta e si posano più volte.
 - Il Cestino rimette le eliminazioni della guida e delle mappe.
+- «Colloca …» di una planimetria da collocare rilegge le aree del contenitore scelto anche quando l'elenco dei quartieri e dei Palazzi
+  cambia a finestra aperta (decisione dell'utente del 01/11); un'area scelta che dopo la rilettura non c'è più non si manda.
 - L'editor delle mappe copia e incolla gli spilli con gli appunti di sessione, mai con quelli di sistema. Niente «Da posizionare» nel
   pannello dell'Area né «Schermate di riferimento» nell'editor.
 
@@ -437,9 +466,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   contatore non collegati o visite contate prima). Il tocco su «Registra la visita» è la conferma, senza spunta: la protezione è
   l'anteprima obbligatoria, perché il server registra solo con la firma dell'anteprima della stessa richiesta (`revisionePescaAttesa`) e la
   ricalcola prima di scrivere. Aggiungere una registrazione a una visita già segnata è un comando della visita. Le frasi dell'anteprima
-  (`esitoPrevisto`, `conseguenze`) le scrive il server in parole da giocatore. «Da applicare» completa la pesca di una voce già fatta
-  ancora con il modulo di prima (`PreparazioneSessionePesca`, campi in un solo modulo e spunta): passare al foglio in tre passi va deciso
-  da Roberto (punto aperto in ROADMAP). Le tre osservazioni incompatibili (tentativi oltre rango + 2, pesce dopo i tentativi fatti, uscita senza ritirare i premi con la Perizia
+  (`esitoPrevisto`, `conseguenze`) le scrive il server in parole da giocatore. «Da applicare» completa la pesca di una voce già fatta con
+  lo stesso foglio in tre passi (decisione dell'utente del 01/11): giorno e fascia sono quelli della voce e non si cambiano (si scelgono solo
+  se la voce non li ha), per una visita nuova «L'avevi già contata nelle attività?» si fa sempre, senza risposta già scelta, e va data per
+  andare avanti; al primo passo la voce si può invece aggiungere a una visita già segnata quel giorno e in quella fascia (con i dati della
+  visita com'erano): allora la domanda non si fa e vale il turno di quella visita. Il
+  foglio non scrive: «Rivedi la proposta completa» passa la richiesta con la firma dell'anteprima della pesca alla decisione della voce
+  (`applica-effetto`), che ha la sua anteprima «Confermi?». Le tre osservazioni incompatibili (tentativi oltre rango + 2, pesce dopo i tentativi fatti, uscita senza ritirare i premi con la Perizia
   ricevuta) sono una regola sola (`incoerenzeOsservazionePesca`), letta dallo schema del server e detta prima dell'anteprima dal foglio in tre passi e da «Correggi la visita».
 
 ## 13. Grafica

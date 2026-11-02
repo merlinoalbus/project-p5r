@@ -1,5 +1,6 @@
 // ============================================================
 // FusionePage — calcolatore A + B, ricette per ottenere una Persona, fusioni con una Persona, piani, ricerca per skill, cicli, Forca e Isolamento, ricette speciali
+// con la tabella dei Demoni del Tesoro (D19); «Due arcani» e «Matrice completa» solo nella preparazione, con `?strumenti=1`
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -26,14 +27,19 @@ import { PersonaChip } from '../components/fusione/PersonaChip';
 import { OperatoreRicetta } from '../components/fusione/RicettaRiga';
 import { IconaScheda, type ChiaveScheda } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
-type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+// costante di build, nello stesso modulo perché il bundler tolga le viste interne dal rilascio (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali';
 const VISTE: Array<[Vista, string, ChiaveScheda]> = [
   ['calcolatore', 'Calcolatore A + B', 'fusione-calcolatore'], ['ricette', 'Come ottenere', 'fusione-ricette'], ['con', 'Cosa produce', 'fusione-con'], ['piani', 'Piano di fusione', 'fusione-piani'],
   ['skill', 'Cerca per skill', 'fusione-skill'], ['cicli', 'Cicli di fusione', 'fusione-cicli'], ['forca', 'Forca e Isolamento', 'fusione-forca'], ['speciali', 'Ricette speciali', 'fusione-speciali'],
 ];
-/** Viste di calcolo interne (tabelle degli arcani e dei Demoni del Tesoro): non per l'utente finale, raggiungibili con `?strumenti=1`. */
-const VISTE_STRUMENTI: Array<[Vista, string, ChiaveScheda]> = [['coppia', 'Due arcani', 'fusione-calcolatore'], ['matrice', 'Matrice completa', 'fusione-calcolatore'], ['tesori', 'Demoni del Tesoro', 'fusione-speciali']];
+/** Viste di calcolo interne (tabella degli arcani a coppie e per intero): non per l'utente finale, raggiungibili con `?strumenti=1` e solo
+ *  nella preparazione (D19, 01/11: nel rilascio non esistono). La tabella dei Demoni del Tesoro è una sezione delle «Ricette speciali». */
+const VISTE_STRUMENTI: Array<[Vista, string, ChiaveScheda]> = IN_RILASCIO ? [] : [['coppia', 'Due arcani', 'fusione-calcolatore'], ['matrice', 'Matrice completa', 'fusione-calcolatore']];
 
 /** Calcolatore di fusione (A + B, ricette per ottenere una Persona, fusioni con una Persona) e regole degli Arcani. */
 export function FusionePage() {
@@ -67,8 +73,9 @@ export function FusionePage() {
   };
   const [a, setA] = useState('');
   const [b, setB] = useState('');
-  const vistaParam = params.get('vista');
-  const strumenti = params.get('strumenti') === '1';
+  // `?vista=tesori` (la vista interna di prima) porta alle «Ricette speciali», che ora contengono la tabella dei Demoni del Tesoro
+  const vistaParam = params.get('vista') === 'tesori' ? 'speciali' : params.get('vista');
+  const strumenti = !IN_RILASCIO && params.get('strumenti') === '1';
   const visteMostrate = strumenti ? [...VISTE, ...VISTE_STRUMENTI] : VISTE;
   const vista: Vista = visteMostrate.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
   /** Cambia vista scrivendola nel parametro `vista` dell'URL e lasciando gli altri parametri come sono. */
@@ -135,7 +142,7 @@ export function FusionePage() {
           <RicettePersona key={`con-${idParam('con') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="con" inizialeId={idParam('con')} />
         )}
 
-        {dati && vista === 'coppia' && (
+        {!IN_RILASCIO && dati && vista === 'coppia' && (
           <div className="card flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 items-center">
               <Selettore etichetta="Primo arcano" valore={a} vuoto="Primo arcano…" opzioni={dati.arcani.map((k) => ({ chiave: k, nome: nome(k) }))} onCambia={setA} />
@@ -165,7 +172,7 @@ export function FusionePage() {
           </div>
         )}
 
-        {dati && vista === 'matrice' && (
+        {!IN_RILASCIO && dati && vista === 'matrice' && (
           <div className="card area-scorrevole-x p-0">
             <table className="tabella testo-12">
               <thead>
@@ -191,6 +198,7 @@ export function FusionePage() {
 
         {dati && vista === 'speciali' && (
           <div className="flex flex-col gap-3">
+            <TitoloSezione variante="display">Ricette a più ingredienti</TitoloSezione>
             <p className="m-0 testo-13 text-text-secondary">{dati.speciali.length} ricette speciali: fusioni a più ingredienti prescritte dal gioco, in ordine di livello del risultato.</p>
             <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Ricette speciali">
               {[...dati.speciali].sort((x, y) => (perId.get(x.risultato.id)?.livello ?? 0) - (perId.get(y.risultato.id)?.livello ?? 0) || x.risultato.nomeIt.localeCompare(y.risultato.nomeIt)).map((r) => (
@@ -211,40 +219,40 @@ export function FusionePage() {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
 
-        {dati && vista === 'tesori' && (
-          <div className="card area-scorrevole-x p-0">
-            <p className="m-0 px-3 pt-3 testo-12 text-text-secondary">Fondendo un Demone del Tesoro con una Persona, il risultato è la Persona dello stesso arcano spostata di tanti ranghi quanti indicati (+ verso l'alto, − verso il basso).</p>
-            <table className="tabella testo-12">
-              <thead>
-                <tr>
-                  <th className="sticky left-0 bg-bg z-10">Arcano</th>
-                  {dati.tesori.nomi.map((n, i) => {
-                    const id = persone.dati?.find((p) => p.nome === n)?.id;
-                    return (
-                      <th key={n} title={n}>
-                        <div className="flex items-center justify-center gap-1">
-                          <span>{dati.tesori.nomiIt[i] ?? n}</span>
-                          {id !== undefined && <ModificaGuida tipo="tesoro" chiave={String(id)} cosa={`il Demone del Tesoro «${dati.tesori.nomiIt[i] ?? n}»`} soloIcona onSalvato={() => void ricarica()} />}
-                        </div>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {dati.arcani.map((k) => (
-                  <tr key={k}>
-                    <th className="sticky left-0 bg-bg z-10 text-left">{nome(k)}</th>
-                    {(dati.tesori.modificatori[k] ?? []).map((m, i) => (
-                      <td key={i} className={m > 0 ? 'text-success font-semibold' : 'text-error-testo font-semibold'}>{m > 0 ? `+${m}` : m}</td>
-                    ))}
+            {/* D19 (01/11): la tabella dei Demoni del Tesoro, prima vista interna, è una sezione delle ricette speciali, per tutti */}
+            <TitoloSezione variante="display" className="mt-2">Demoni del Tesoro</TitoloSezione>
+            <p className="m-0 testo-13 text-text-secondary">Fondendo un Demone del Tesoro con una Persona, il risultato è la Persona dello stesso arcano spostata di tanti ranghi quanti indicati (+ verso l'alto, − verso il basso).</p>
+            <div className="card area-scorrevole-x p-0">
+              <table className="tabella testo-12" aria-label="Modificatori di rango dei Demoni del Tesoro per arcano">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 bg-bg z-10">Arcano</th>
+                    {dati.tesori.nomi.map((n, i) => {
+                      const id = persone.dati?.find((p) => p.nome === n)?.id;
+                      return (
+                        <th key={n} title={n}>
+                          <div className="flex items-center justify-center gap-1">
+                            <span>{dati.tesori.nomiIt[i] ?? n}</span>
+                            {id !== undefined && <ModificaGuida tipo="tesoro" chiave={String(id)} cosa={`il Demone del Tesoro «${dati.tesori.nomiIt[i] ?? n}»`} soloIcona onSalvato={() => void ricarica()} />}
+                          </div>
+                        </th>
+                      );
+                    })}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {dati.arcani.map((k) => (
+                    <tr key={k}>
+                      <th className="sticky left-0 bg-bg z-10 text-left">{nome(k)}</th>
+                      {(dati.tesori.modificatori[k] ?? []).map((m, i) => (
+                        <td key={i} className={m > 0 ? 'text-success font-semibold' : 'text-error-testo font-semibold'}>{m > 0 ? `+${m}` : m}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </PageState>

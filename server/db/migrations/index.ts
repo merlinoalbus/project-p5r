@@ -429,6 +429,12 @@ import { migration338 } from './338_refuso_yongen_jaya_9_aprile.js';
 import { migration339 } from './339_avvisi_del_giorno.js';
 // 2026-11-01 (L8-03, D4 «Solo i campi che l'app può usare: requisiti, date, prezzi»): requisiti, date e livelli strutturati accanto ai testi della guida
 import { migration340 } from './340_campi_strutturati_della_guida.js';
+// 2026-11-01 (decisioni dell'utente sul censimento L8-02: «Sì, aggiungi la voce», «Sì, aggiungi», «Impeto dell'Arcano superiore», «Dal rango 7 di Takemi»): voci dei ranghi 1 di Akechi e 10 di Igor, nome del rango 6 di Igor, sblocchi di «Medicina amara» e della maid
+import { migration341 } from './341_voci_akechi_igor_e_impeto_superiore.js';
+// 2026-11-01 (decisioni dell'utente: Kaneshiro «8 luglio», Medjed 23/07 e 20/08, Niijima «19 novembre», lettera «Sì, al 21 aprile» e «Separo i due eventi», Biliardo «Sì, rango 2 di Akechi»)
+import { migration342 } from './342_date_di_kaneshiro_medjed_niijima_e_lettera.js';
+// 2026-11-01 (decisioni dell'utente: «Sì, toglile», «Togli l'avviso» e i doppioni dopo l'allineamento): avvisi del giorno decisi
+import { migration343 } from './343_avvisi_del_giorno_decisi.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -454,5 +460,5 @@ export const migrations: Migration[] = [
   migration300, migration301, migration302, migration303, migration304, migration305, migration306, migration307, migration308, migration309,
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
-  migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340,
+  migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
 ];
