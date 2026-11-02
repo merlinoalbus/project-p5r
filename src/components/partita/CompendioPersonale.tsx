@@ -11,6 +11,7 @@ import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TesseraKpi } from '../shared/TesseraKpi';
+import { filtroRicerca } from '../../utils/testo';
 
 interface Props {
   partitaId: number;
@@ -29,8 +30,8 @@ export function CompendioPersonale({ partitaId }: Props) {
   // disegna a priorità bassa e lo interrompe alla battuta dopo (stesso criterio di Compendio e Skill)
   const qDifferita = useDeferredValue(q);
   const lista = useMemo(() => {
-    const testo = qDifferita.trim().toLowerCase();
-    return (tutte.dati ?? []).filter((p) => (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)) && (!soloMancanti || !setRegistrate.has(p.id)));
+    const trova = filtroRicerca(qDifferita);
+    return (tutte.dati ?? []).filter((p) => trova(p.nome, p.nomeIt, p.arcanaNome) && (!soloMancanti || !setRegistrate.has(p.id)));
   }, [tutte.dati, qDifferita, soloMancanti, setRegistrate]);
 
   const totale = tutte.dati?.length ?? 0;

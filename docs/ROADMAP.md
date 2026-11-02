@@ -66,7 +66,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Ricerca e strumenti
 - Ricerca globale su 29 tipi di cose (personaggi, tratti, cruciverba e glossario compresi), dalla barra in alto; ogni risultato porta
-  all'elemento nella sua pagina.
+  all'elemento nella sua pagina. Tutte le ricerche dell'app, anche quelle dentro le pagine e nei selettori, cercano parola per parola.
 - Impostazioni: partite, traduzioni, correzioni, Cestino, caratteri, grafica predefinita, backup dei dati di gioco («Importa»), copia
   dell'istanza, documentazione delle API, «Prepara edizione» del rilascio; «Informazioni» con le fonti dei dati, l'unico punto che le cita.
 - Interfaccia per desktop, tablet e telefono; installabile come web app a schermo intero, con l'invito la prima volta che la Home si apre da telefono o tablet.

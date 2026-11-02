@@ -14,7 +14,7 @@ import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { normalizzaTesto } from '../utils/testo';
+import { filtroRicerca } from '../utils/testo';
 import { slug } from '../../shared/slug';
 import type { SfideDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -151,7 +151,7 @@ function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => vo
   const [categoria, setCategoria] = useState('');
   const t = d.tratti;
   const categorie = useMemo(() => [...new Set(t.elenco.map((x) => x.categoria).filter((c): c is string => !!c))], [t]);
-  const visibili = useMemo(() => { const n = normalizzaTesto(q); return t.elenco.filter((x) => (!categoria || x.categoria === categoria) && (!n || normalizzaTesto(`${x.nome} ${x.nomeEn ?? ''} ${x.effetto} ${x.personaggio ?? ''}`).includes(n))); }, [t, q, categoria]);
+  const visibili = useMemo(() => { const trova = filtroRicerca(q); return t.elenco.filter((x) => (!categoria || x.categoria === categoria) && trova(x.nome, x.nomeEn, x.effetto, x.personaggio)); }, [t, q, categoria]);
   return (
     <div className="flex flex-col gap-2 testo-13">
       <div className="flex items-start gap-2">

@@ -7,6 +7,7 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import type { SkillRiassuntoDto } from '../../types';
 import { useFreccePerElenco } from '../../hooks/useFreccePerElenco';
+import { filtroRicerca, paroleRicerca } from '../../utils/testo';
 
 interface Props {
   skill: SkillRiassuntoDto[];
@@ -23,11 +24,11 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
   const [q, setQ] = useState('');
   const { rif, suTasto } = useFreccePerElenco();
   const candidate = useMemo(() => {
-    const testo = q.trim().toLowerCase();
-    if (!testo) return [];
+    if (paroleRicerca(q).length === 0) return [];
+    const trova = filtroRicerca(q);
     const ids = new Set(scelte.map((s) => s.id));
     return skill
-      .filter((s) => (!senzaTratti || s.elemento !== 'trait') && !ids.has(s.id) && (s.nomeIt.toLowerCase().includes(testo) || s.nome.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)))
+      .filter((s) => (!senzaTratti || s.elemento !== 'trait') && !ids.has(s.id) && trova(s.nomeIt, s.nome, s.effettoNome))
       .slice(0, 10);
   }, [q, skill, scelte, senzaTratti]);
   return (

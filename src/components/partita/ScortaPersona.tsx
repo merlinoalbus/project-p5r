@@ -25,6 +25,7 @@ import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
 import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDispositivo';
+import { filtroRicerca, paroleRicerca } from '../../utils/testo';
 
 interface Props {
   partitaId: number;
@@ -52,11 +53,11 @@ export function ScortaPersona({ partitaId }: Props) {
   /** Se l'arcano ricordato non c'è più fra le Persona, il filtro non vale (altrimenti l'elenco resterebbe vuoto senza spiegazione). */
   const arcanoValido = vista.arcano !== '' && arcani.includes(vista.arcano) ? vista.arcano : '';
   const visibili = useMemo(() => {
-    const testo = vista.q.trim().toLowerCase();
+    const trova = filtroRicerca(vista.q);
     const filtrate = (dati ?? []).filter((p) =>
       (vista.presenza === 'tutte' || (vista.presenza === 'squadra' ? p.inSquadra : !p.inSquadra))
       && (arcanoValido === '' || p.arcanaNome === arcanoValido)
-      && (testo === '' || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)));
+      && trova(p.nome, p.nomeIt, p.arcanaNome));
     return [...filtrate].sort((a, b) => (vista.ordine === 'arcano' ? a.arcanaNome.localeCompare(b.arcanaNome, 'it') : 0) || b.livello - a.livello || a.nomeIt.localeCompare(b.nomeIt, 'it'));
   }, [dati, vista.q, vista.presenza, vista.ordine, arcanoValido]);
   const filtriAttivi = (vista.presenza !== 'tutte' ? 1 : 0) + (arcanoValido !== '' ? 1 : 0) + (vista.ordine !== 'livello' ? 1 : 0);
@@ -389,8 +390,8 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
   const [q, setQ] = useState('');
   const [occupato, setOccupato] = useState<number | null>(null);
   const filtrate = useMemo(() => {
-    const testo = q.trim().toLowerCase();
-    return (dati ?? []).filter((p) => !p.rara && (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 40);
+    const trova = filtroRicerca(q);
+    return (dati ?? []).filter((p) => !p.rara && trova(p.nome, p.nomeIt, p.arcanaNome)).slice(0, 40);
   }, [dati, q]);
 
   /** Aggiunge la Persona alla scorta e la passa a `onAggiunta`; se è già posseduta lo segnala come avviso. */
@@ -472,9 +473,9 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const [occupato, setOccupato] = useState(false);
 
   const candidate = useMemo(() => {
-    const testo = ricerca.trim().toLowerCase();
-    if (!testo || !tutteSkill) return [];
-    return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && (s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo))).slice(0, 8);
+    if (paroleRicerca(ricerca).length === 0 || !tutteSkill) return [];
+    const trova = filtroRicerca(ricerca);
+    return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && trova(s.nome, s.nomeIt)).slice(0, 8);
   }, [ricerca, tutteSkill, skillIds]);
 
   /** Salva livello, squadra, note, skill e bonus; invia anche i valori reali scritti qui, oppure

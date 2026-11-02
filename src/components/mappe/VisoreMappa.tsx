@@ -38,6 +38,7 @@ import { descrizioneImmagineMappa, nomeFiglieMappa, nomeTipoMappa, titoloMappeVi
 import { AzioniStato, GalleriaSpillo, ImmagineRiferimento, MerceNelPopup, SchedaSpillo, type StatoPuntoMappa } from './SchedaSpillo';
 import { nomePin, parolaSegnato, passaggioConArrivo, segnoSpillo } from '../../utils/paroleSpillo';
 import { sistemaEtichette } from './etichetteSpilli';
+import { filtroRicerca } from '../../utils/testo';
 
 export type { StatoPuntoMappa } from './SchedaSpillo';
 
@@ -715,6 +716,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   /** Il pezzo della copia selezionata: la sua zona si evidenzia. */
   const pezzoSelezionatoId = strumentiPezzi ? posate.find((x) => x.copia.id === strumentiPezzi.selezionatoId)?.pezzo.id ?? null : null;
   const ricercaNorm = (scelta ? scelta.ricerca ?? '' : ricerca).trim().toLowerCase();
+  // la ricerca dei pin è quella comune dell'app: parola per parola, in qualunque ordine (`shared/testo.ts`)
+  const trovaPin = useMemo(() => filtroRicerca(ricercaNorm), [ricercaNorm]);
   /** Uno spillo che non soddisfa le sue condizioni non c'è **di regola**, e ricompare solo se lo si chiede.
    *
    * La distinzione è quella che conta, ed è la decisione dell'utente: la mappa attiva mostra il
@@ -751,8 +754,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const inScelta = scelta !== undefined;
   // L5 §2: lo spillo chiesto esplicitamente dall'indirizzo o da «Sulla mappa» resta in vista anche se chiuso (fuori dall'editor)
   const spilloChiesto = editor ? null : selezioneIniziale ?? null;
-  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto && !s.daVerificare)) && (mostraNonDisponibili || s.id === spilloChiesto || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
-    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm, spilloChiesto]);
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto && !s.daVerificare)) && (mostraNonDisponibili || s.id === spilloChiesto || !(filtraBloccati && nascostoPerCondizioni(s))))) && trovaPin(s.nome, nomePin(s))),
+    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, trovaPin, spilloChiesto]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || s.id === spilloChiesto || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
   // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento

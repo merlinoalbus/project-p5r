@@ -32,7 +32,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { SegnoStato } from '../components/shared/SegnoStato';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
-import { piatto } from '../utils/testo';
+import { filtroRicerca } from '../utils/testo';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { Note } from '../components/shared/TestoNote';
 
@@ -116,14 +116,14 @@ export function CruciverbaPage() {
   const d = dati.dati;
   // `?elemento=<giorno>` (la «casa» di un cruciverba nella ricerca globale) porta in vista la riga e la evidenzia
   useElementoDaIndirizzo(!!d);
-  const q = piatto(ricerca.trim());
+  const trova = useMemo(() => filtroRicerca(ricerca), [ricerca]);
   const visibili = useMemo(() => (d?.cruciverba ?? []).filter((c) => {
     if (stato === 'da-fare' && c.fatto) return false;
     if (stato === 'fatti' && !c.fatto) return false;
     // la risposta entra nella ricerca: chi la cerca la sa già, e vuole trovare il giorno
-    if (q && !piatto(`${formattaDataGioco(c.giorno)} ${c.giorno} ${c.indizio} ${c.risposta} ${c.rispostaEn ?? ''}`).includes(q)) return false;
+    if (!trova(formattaDataGioco(c.giorno), c.giorno, c.indizio, c.risposta, c.rispostaEn)) return false;
     return true;
-  }), [d, stato, q]);
+  }), [d, stato, trova]);
   const perMese = useMemo(() => {
     const m = new Map<string, CruciverbaDto[]>();
     for (const c of visibili) {

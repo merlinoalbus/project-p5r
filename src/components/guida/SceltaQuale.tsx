@@ -13,7 +13,7 @@ import { chiaviPresenti, urlImmagineVersionata } from '../shared/immaginiCache';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { slug } from '../../../shared/slug';
-import { piatto } from '../../utils/testo';
+import { filtroRicerca } from '../../utils/testo';
 import { NOME_QUALE, elencoQuale } from '../../utils/elencoQuale';
 import type { TipoRiferimentoAzione } from '../../../shared/effettiAzione';
 import type { ElenchiAzioneDto, VoceElencoAzione } from '../../types';
@@ -71,8 +71,8 @@ export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia
   const tutte = useMemo(() => elencoQuale(tipo, elenchi, soloTurni), [tipo, elenchi, soloTurni]);
   const ricerca = tutte.length > 8;
   const filtrate = useMemo(() => {
-    const t = piatto(testo.trim());
-    const f = t ? tutte.filter((v) => piatto(`${v.nome} ${v.dettaglio ?? ''}`).includes(t)) : tutte;
+    const trova = filtroRicerca(testo);
+    const f = tutte.filter((v) => trova(v.nome, v.dettaglio));
     // la voce già scelta resta sempre in vista, anche se la ricerca non la trova
     const scelta = tutte.find((v) => v.chiave === valore);
     const mostrate = f.slice(0, TETTO);

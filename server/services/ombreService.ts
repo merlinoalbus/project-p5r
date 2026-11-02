@@ -19,7 +19,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { personeRegistrate } from './catturePersona.js';
 import { statoPalazzi } from './palazziService.js';
 import { casaDelDedalo, casaDelPalazzo } from './mappe/casaMappa.js';
-import { normalizza } from '../../shared/maschere.js';
+import { filtroRicerca } from '../../shared/testo.js';
 import { eCodiceAffinita, eChiaveElemento, ELEMENTI, PERSONALITA_OMBRA, type PersonalitaOmbra } from '../../shared/elementi.js';
 import { casaOmbra } from '../../shared/ombre.js';
 import type { DoveSiIncontraDto, OmbraDettaglioDto, OmbraLuogoDto, OmbraRaggiungibilitaDto, OmbraResistenzaDto, OmbraSchedaDto, OmbreVerificaDto } from '../../shared/ombre.js';
@@ -158,11 +158,11 @@ export function elencaOmbre(f: FiltroOmbre = {}): OmbraSchedaDto[] {
   const luoghi = luoghiDelleOmbre(f.partita === undefined ? null : palazziConclusi(f.partita));
   const perPersona = affinitaDellePersone([...new Set(righe.flatMap((r) => (r.persona_id !== null ? [r.persona_id] : [])))]);
   const registrate = f.partita === undefined ? null : personeRegistrate(f.partita);
-  const testo = f.q ? normalizza(f.q) : '';
+  const trova = filtroRicerca(f.q);
   return righe
     .filter((r) => (!f.dungeon || (luoghi.get(r.chiave) ?? []).some((l) => l.dungeon === f.dungeon)) && (!f.personalita || r.personalita === f.personalita) && (f.persona === undefined || r.persona_id === f.persona))
     .map((r) => scheda(r, persone, { affinita: affinitaDellOmbra(r, perPersona), luoghi: luoghi.get(r.chiave) ?? [], registrata: registrate && r.persona_id !== null ? registrate.has(r.persona_id) : null }))
-    .filter((o) => !testo || normalizza([o.nome, ...o.nomiAltri, o.persona?.nome ?? '', o.persona?.nomeIt ?? ''].join(' ')).includes(testo));
+    .filter((o) => trova(o.nome, ...o.nomiAltri, o.persona?.nome, o.persona?.nomeIt));
 }
 
 /**

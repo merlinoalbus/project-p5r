@@ -15,7 +15,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
-import { normalizza } from '../../shared/maschere.js';
+import { filtroRicerca, paroleRicerca } from '../../shared/testo.js';
 import { UMORI, type UmoreNegoziazione } from '../../shared/elementi.js';
 import {
   ATTESI_CONTRATTO, collegamentoSolido, confrontaConContratto, costruisciIndice, leggiCorrispondenze, leggiNoteVariante, riconcilia, valutaCellaApp, valutaCellaRoyal,
@@ -82,13 +82,9 @@ function intestazione(varianti: RigaNegVariante[]): { testo: string; testoOrigin
   return { testo: principale.testo_originale, testoOrigine: 'nessuna', principale: principale.chiave };
 }
 
-/** Vero se il testo (normalizzato) compare in una variante della famiglia o in una sua risposta. */
-function famigliaContiene(c: Corpus, varianti: RigaNegVariante[], ricerca: string): boolean {
-  for (const v of varianti) {
-    if (normalizza(`${v.testo ?? ''} ${v.testo_originale}`).includes(ricerca)) return true;
-    for (const r of c.indice.risposteDi.get(v.chiave) ?? []) if (normalizza(`${r.testo ?? ''} ${r.testo_originale}`).includes(ricerca)) return true;
-  }
-  return false;
+/** Vero se ogni parola cercata compare nelle varianti della famiglia o nelle loro risposte (la ricerca comune dell'app, `shared/testo.ts`). */
+function famigliaContiene(c: Corpus, varianti: RigaNegVariante[], trova: (...testi: Array<string | null | undefined>) => boolean): boolean {
+  return trova(...varianti.flatMap((v) => [v.testo, v.testo_originale, ...(c.indice.risposteDi.get(v.chiave) ?? []).flatMap((r) => [r.testo, r.testo_originale])]));
 }
 
 function carteDi(umori: ReadonlyArray<UmoreNegoziazione>): NegUmoreDto[] {
@@ -114,14 +110,15 @@ function carteDi(umori: ReadonlyArray<UmoreNegoziazione>): NegUmoreDto[] {
 export function negoziazione(f: FiltroNegoziazione = {}): NegoziazioneDto {
   const c = corpus();
   const { umori, ombra } = risolviUmori(f);
-  const ricerca = f.q ? normalizza(f.q) : '';
+  const trova = filtroRicerca(f.q);
+  const cercando = paroleRicerca(f.q).length > 0;
   const domande: NegDomandaDto[] = [];
   if (umori.length > 0) {
     for (const d of c.righe.domande) {
       if (f.domanda && d.chiave !== f.domanda) continue;
       const varianti = c.indice.variantiDi.get(d.chiave) ?? [];
       if (varianti.length === 0) continue;
-      if (ricerca && !famigliaContiene(c, varianti, ricerca)) continue;
+      if (cercando && !famigliaContiene(c, varianti, trova)) continue;
       const { testo, testoOrigine, principale } = intestazione(varianti);
       domande.push({ chiave: d.chiave, ordine: d.ordine, testo, testoOrigine, principale, varianti: varianti.map((v) => varianteDto(c, v, umori)) });
     }
@@ -154,13 +151,14 @@ export function negoziazioneCompatta(f: FiltroNegoziazione = {}): NegoziazioneCo
   const c = corpus();
   const { umori, ombra } = risolviUmori(f);
   if (umori.length !== 1 && !(umori.length === 0 && ombra)) throw httpErrors.badRequest('umore-richiesto', 'La forma compatta vale per un umore solo: indica `umore` o `ombra`.');
-  const ricerca = f.q ? normalizza(f.q) : '';
+  const trova = filtroRicerca(f.q);
+  const cercando = paroleRicerca(f.q).length > 0;
   const domande: NegDomandaCompattaDto[] = [];
   if (umori.length === 1) {
     for (const d of c.righe.domande) {
       const varianti = c.indice.variantiDi.get(d.chiave) ?? [];
       if (varianti.length === 0) continue;
-      if (ricerca && !famigliaContiene(c, varianti, ricerca)) continue;
+      if (cercando && !famigliaContiene(c, varianti, trova)) continue;
       const { testo, testoOrigine, principale } = intestazione(varianti);
       const v = varianti.find((x) => x.chiave === principale) ?? varianti[0]!;
       const dto = varianteDto(c, v, umori);

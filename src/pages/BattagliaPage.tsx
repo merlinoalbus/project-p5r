@@ -15,7 +15,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { normalizzaTesto } from '../utils/testo';
+import { filtroRicerca } from '../utils/testo';
 import type { BattagliaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
@@ -104,9 +104,9 @@ function SchedaOmbre() {
   const dungeons = useMemo(() => [...new Map(ombre.flatMap((o) => o.luoghi.map((l) => [l.dungeon, l.dungeonNome] as const))).entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')), [ombre]);
   const elementi = useMemo(() => [...new Set(ombre.flatMap((o) => o.debolezze))], [ombre]);
   const visibili = useMemo(() => {
-    const t = normalizzaTesto(q);
+    const trova = filtroRicerca(q);
     return ombre.filter((o) => (!dungeon || o.luoghi.some((l) => l.dungeon === dungeon)) && (!elemento || o.debolezze.includes(elemento)) && (!personalita || o.personalita === personalita)
-      && (!t || normalizzaTesto([o.nome, ...o.nomiAltri, o.persona?.nome ?? '', o.persona?.nomeIt ?? '', ...o.luoghi.map(luogoBreve)].join(' ')).includes(t)));
+      && trova(o.nome, ...o.nomiAltri, o.persona?.nome, o.persona?.nomeIt, ...o.luoghi.map(luogoBreve)));
   }, [ombre, q, dungeon, elemento, personalita]);
   return (
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>

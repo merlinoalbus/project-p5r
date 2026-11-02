@@ -13,7 +13,7 @@ import { useSchede } from '../hooks/useSchede';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { normalizzaTesto } from '../utils/testo';
+import { filtroRicerca } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -131,11 +131,10 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
 /** Gli abiti: introduzione, la carta della lavanderia e la tabella degli abiti con ricerca (nome, personaggio, dove) e il ritratto di chi li indossa. */
 function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const [q, setQ] = useState('');
-  // L5-09: il testo normalizzato di ogni abito si calcola una volta per i dati (non a ogni battuta), e l'elenco si rifà con il testo «differito»
-  // (il campo segue subito la battuta; calcolo e disegno a priorità bassa, interrotti alla battuta dopo)
-  const indice = useMemo(() => d.abiti.elenco.map((x) => ({ x, testo: normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`) })), [d]);
+  // L5-09: l'elenco si rifà con il testo «differito» (il campo segue subito la battuta; calcolo e disegno a priorità bassa, interrotti alla
+  // battuta dopo). La ricerca è quella comune dell'app, parola per parola (`shared/testo.ts`).
   const qDifferita = useDeferredValue(q);
-  const visibili = useMemo(() => { const n = normalizzaTesto(qDifferita); return indice.filter((r) => !n || r.testo.includes(n)).map((r) => r.x); }, [indice, qDifferita]);
+  const visibili = useMemo(() => { const trova = filtroRicerca(qDifferita); return d.abiti.elenco.filter((x) => trova(x.nome, ...(x.nomiAltri ?? []), x.per, x.dove)); }, [d, qDifferita]);
   return (
     <div className="flex flex-col gap-2 testo-13">
       <div className="prosa-misurata flex items-start gap-2">

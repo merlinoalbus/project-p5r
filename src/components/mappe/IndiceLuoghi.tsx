@@ -28,6 +28,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { getGerarchiaMappe } from '../../services/api';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { testoConteggiPin } from '../../utils/presentazioneMappa';
+import { filtroRicerca, paroleRicerca } from '../../utils/testo';
 import type { GerarchiaMappeDto, NodoGerarchiaDto } from '../../types';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
@@ -63,8 +64,6 @@ function risolviRamo(inizio: NodoGerarchiaDto, ramo: string[]): NodoGerarchiaDto
 // ---- la ricerca ----
 
 interface Trovato { nodo: NodoGerarchiaDto; percorso: string; sezione: Sezione; ramo: string[] }
-
-const normalizza = (t: string): string => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
 /** Tutti i nodi dell'albero (figli, infiltrazioni accanto alle aree e senza area) col percorso dei nomi e la scheda/ramo da cui si raggiungono. */
 function appiattisci(radici: NodoGerarchiaDto[]): Trovato[] {
@@ -180,7 +179,8 @@ export function IndiceLuoghi() {
   };
 
   const trovati = useMemo(() => (g ? appiattisci(g.radici) : []), [g]);
-  const testoCercato = normalizza(ricerca);
+  // le parole cercate (vuoto con un testo di soli spazi): la ricerca comune dell'app, `shared/testo.ts`
+  const testoCercato = paroleRicerca(ricerca).join(' ');
 
   const schede: Array<{ chiave: Sezione; etichetta: string }> = g ? [
     { chiave: 'citta', etichetta: `Città (${parola(g.totali.quartieri, 'quartiere', 'quartieri')})` },
@@ -215,7 +215,8 @@ export function IndiceLuoghi() {
 
 /** I nodi che hanno il testo nel nome, come carte col percorso in piccolo. */
 function Risultati({ trovati, testo, scendi }: { trovati: Trovato[]; testo: string; scendi: (t: Trovato) => void }) {
-  const corrispondenti = trovati.filter((t) => normalizza(t.nodo.nome).includes(testo));
+  const trova = filtroRicerca(testo);
+  const corrispondenti = trovati.filter((t) => trova(t.nodo.nome));
   if (corrispondenti.length === 0) return <p className="card m-0 p-3 text-text-secondary" role="status">Nessun luogo con questo nome.</p>;
   const mostrati = corrispondenti.slice(0, MASSIMO_RISULTATI);
   const voci: VoceLuogo[] = mostrati.map((t) => ({ nodo: t.nodo, percorso: t.percorso || undefined, onScendi: etichettaScendi(t.nodo) ? () => scendi(t) : undefined }));

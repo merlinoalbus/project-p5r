@@ -40,6 +40,7 @@ import type { LibroDto } from '../types';
 import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo';
 import { TestoNote } from '../components/shared/TestoNote';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
+import { filtroRicerca } from '../utils/testo';
 
 /**
  * Pagina dei libri: carica il catalogo per la partita attiva, mostra i conteggi di lettura,
@@ -88,12 +89,12 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
   const valoreDi = coda.valore;
 
   const visibili = useMemo(() => {
-    const q = ricerca.trim().toLocaleLowerCase('it');
+    const trova = filtroRicerca(ricerca);
     return (dati.dati?.libri ?? []).filter((l) => {
       if (soloChiave && l.chiave !== soloChiave) return false;
       const progresso = valoreDi(l);
       // Nella ricerca entrano negozi, Richieste che lo danno e posizioni (L13 O7-4: il vecchio testo «dove» non c'è più, lo dicono loro).
-      if (q && !`${l.nome} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${(l.ricompensaDi ?? []).map((r) => r.nome).join(' ')} ${l.posizioni.map((p) => p.etichetta).join(' ')} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (!trova(l.nome, ...(l.nomiAltri ?? []), ...l.negozi.map((n) => n.negozioNome), ...(l.ricompensaDi ?? []).map((r) => r.nome), ...l.posizioni.map((p) => p.etichetta), ...l.effettiTesto)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });

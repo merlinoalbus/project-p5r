@@ -32,6 +32,7 @@ import type { VideogiocoDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { TestoNote } from '../components/shared/TestoNote';
 import { PromemoriaLibri } from '../components/shared/PromemoriaLibri';
+import { filtroRicerca, paroleRicerca } from '../utils/testo';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
@@ -108,8 +109,10 @@ export function VideogiochiPage() {
 
   const salvaGioco = (nuovo: VideogiocoDto) => dati.imposta((correnti) => ({ ...correnti, videogiochi: correnti.videogiochi.map((x) => (x.chiave === nuovo.chiave ? nuovo : x)) }));
 
-  const q = ricerca.trim().toLocaleLowerCase('it');
-  const visibili = useMemo(() => giochi.filter((g) => !q || `${g.nome} ${(g.nomiAltri ?? []).join(' ')} ${g.sedeNome ?? ''} ${g.luogo} ${g.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)), [giochi, q]);
+  const visibili = useMemo(() => {
+    const trova = filtroRicerca(ricerca);
+    return giochi.filter((g) => trova(g.nome, ...(g.nomiAltri ?? []), g.sedeNome, g.luogo, ...g.effettiTesto));
+  }, [giochi, ricerca]);
   const daFare = visibili.filter((g) => !g.fatto);
   const fatti = visibili.filter((g) => g.fatto);
   const roundFatti = giochi.reduce((s, g) => s + g.progresso, 0);
@@ -164,7 +167,7 @@ export function VideogiochiPage() {
           <section className="flex flex-col gap-2" aria-label="Da giocare">
             <TitoloSezione variante="display">Da giocare · {daFare.length}</TitoloSezione>
             {daFare.length === 0
-              ? <p className="m-0 testo-13 text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
+              ? <p className="m-0 testo-13 text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : paroleRicerca(ricerca).length > 0 ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">
                   {daFare.map((g) => <Scheda key={`${partitaId}:${g.chiave}`} g={g} partitaId={partitaId} onSalvata={salvaGioco} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>}

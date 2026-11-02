@@ -9,6 +9,7 @@ import type { PersonaRiassuntoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { useFreccePerElenco } from '../../hooks/useFreccePerElenco';
+import { filtroRicerca, paroleRicerca } from '../../utils/testo';
 
 interface Props {
   etichetta: string;
@@ -26,10 +27,10 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
   const [q, setQ] = useState('');
   const { rif, suTasto } = useFreccePerElenco();
   const candidate = useMemo(() => {
-    const testo = q.trim().toLowerCase();
-    if (!testo) return [];
+    if (paroleRicerca(q).length === 0) return [];
+    const trova = filtroRicerca(q);
     return persone
-      .filter((p) => (!senzaRare || !p.rara) && (p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)))
+      .filter((p) => (!senzaRare || !p.rara) && trova(p.nome, p.nomeIt, p.arcanaNome))
       .sort((a, b) => a.livello - b.livello)
       .slice(0, 12);
   }, [q, persone, senzaRare]);

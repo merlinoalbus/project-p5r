@@ -50,7 +50,7 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { SegnoStato } from '../components/shared/SegnoStato';
 import { coloreElemento, coloreTestoElemento } from '../utils/elementi';
 import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
-import { piatto } from '../utils/testo';
+import { filtroRicerca, paroleRicerca } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
@@ -255,7 +255,8 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
   /** Scrive il dedalo scelto nel parametro `dedalo` dell'URL (lo toglie se vuoto) senza aggiungere voci alla cronologia. */
   const impostaDedalo = (k: string) => setParams((p) => { const n = new URLSearchParams(p); if (k) n.set('dedalo', k); else n.delete('dedalo'); return n; }, { replace: true });
   const d = dati.dati;
-  const q = piatto(ricerca.trim());
+  const trova = useMemo(() => filtroRicerca(ricerca), [ricerca]);
+  const cercando = paroleRicerca(ricerca).length > 0;
   const visibili = useMemo(() => (d?.richieste ?? [])
     .filter((r) => {
       if (dedalo && r.areaChiave !== dedalo) return false;
@@ -263,18 +264,18 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
       if (accettazione === 'non-accettate' && r.stato !== null) return false;
       if (completamento === 'completate' && r.stato !== 'completata') return false;
       if (completamento === 'da-completare' && r.stato === 'completata') return false;
-      if (q && !piatto(`${r.nome} ${r.bersaglio.nome} ${r.bersaglio.formaDemoniaca} ${r.confidente?.nome ?? ''} ${r.areaNome ?? ''} ${r.committente}`).includes(q)) return false;
+      if (!trova(r.nome, r.bersaglio.nome, r.bersaglio.formaDemoniaca, r.confidente?.nome, r.areaNome, r.committente)) return false;
       return true;
     })
     // Le completate in fondo: restano consultabili, ma non davanti a quelle da fare.
-    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, q]);
+    .sort((a, b) => Number(a.stato === 'completata') - Number(b.stato === 'completata')), [d, dedalo, accettazione, completamento, trova]);
   const accettate = useMemo(() => (d?.richieste ?? []).filter((r) => r.stato === 'accettata').length, [d]);
   // dai dati correnti: la riga arriva dopo un `await`, e due cambi di stato ravvicinati non devono annullarsi
   const aggiorna = (r: RichiestaDto) => dati.imposta((attuale) => {
     const richieste = attuale.richieste.map((x) => (x.chiave === r.chiave ? r : x));
     return { ...attuale, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: attuale.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) };
   });
-  const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
+  const filtriAttivi = cercando || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
   const fogli = useSchede<Foglio>({ chiavi: FOGLI.map(([k]) => k), attiva: foglio,
     onScegli: (k) => setParams((p) => { const n = new URLSearchParams(p); if (k === 'richieste') n.delete('foglio'); else n.set('foglio', k); return n; }, { replace: true }) });
 

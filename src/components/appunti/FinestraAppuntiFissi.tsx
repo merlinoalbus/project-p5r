@@ -46,6 +46,7 @@ import { useMedia } from '../../hooks/useMedia';
 import { copiaTesto } from '../../utils/scritturaAppunti';
 import { leggiAppunti } from '../../utils/appuntiDiario';
 import { leggiMemoriaJson, scriviMemoriaJson } from '../../utils/memoriaDispositivo';
+import { filtroRicerca, paroleRicerca } from '../../utils/testo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { CampoRicerca } from '../shared/CampoRicerca';
@@ -113,8 +114,6 @@ function leggiGeometria(telefono: boolean): Geometria {
 /** Ricorda la geometria; senza memoria del dispositivo si riparte dal posto predefinito. */
 const scriviGeometria = (g: Geometria): void => scriviMemoriaJson(CHIAVE_GEOMETRIA, g);
 
-/** Il testo per cercare: minuscolo e senza accenti. */
-const perCercare = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('it');
 /** L'anteprima della riga: la prima voce («• …») di un testo copiato dal Diario, altrimenti la prima riga che dice qualcosa (non il titolo
  *  «Diario P5R · …» né il blocco delle voci in fondo). */
 function anteprima(testo: string): string {
@@ -363,7 +362,9 @@ function FinestraAppuntiFissiReale() {
   };
   const [cerca, setCerca] = useState('');
   const conRicerca = (elenco?.length ?? 0) >= SOGLIA_RICERCA;
-  const q = conRicerca ? perCercare(cerca.trim()) : '';
+  // la ricerca comune dell'app, parola per parola (`shared/testo.ts`): `q` sono le parole cercate, vuoto senza ricerca
+  const q = conRicerca ? paroleRicerca(cerca).join(' ') : '';
+  const trovaTitolo = filtroRicerca(q);
   /** I gruppi a schermo: prima la lista senza categoria, poi le categorie nel loro ordine, ognuno con i suoi appunti in ordine. */
   const gruppi = useMemo<Gruppo[]>(() => {
     if (!elenco) return [];
@@ -373,7 +374,7 @@ function FinestraAppuntiFissiReale() {
     ];
   }, [elenco, categorie]);
   /** Gli appunti che la ricerca trova (tutti, senza ricerca). */
-  const trovato = (a: AppuntoFissoDto) => !q || perCercare(a.titolo).includes(q);
+  const trovato = (a: AppuntoFissoDto) => trovaTitolo(a.titolo);
   /** L'appunto con la matita aperta: resta a vista anche se la ricerca non lo trova (la sua bozza non si nasconde). */
   const inModificaId = modulo?.tipo === 'modifica' ? modulo.id : null;
   const aVista = (a: AppuntoFissoDto) => trovato(a) || a.id === inModificaId;

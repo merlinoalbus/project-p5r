@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, normalizzaNomeOggetto, type GruppoOggetto } from '../../../shared/catalogo';
+import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, type GruppoOggetto } from '../../../shared/catalogo';
+import { filtroRicerca } from '../../utils/testo';
 import { descriviVoceEffetto, leggiVociEffetto } from '../../../shared/effettiCatalogo';
 import type { CatalogoOggettoDto } from '../../types';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
@@ -78,11 +79,11 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
   const categorie = useMemo(() => [...new Set((dati.dati ?? []).filter((o) => !gruppo || CATEGORIA_OGGETTO[o.categoria].gruppo === gruppo).map((o) => o.categoria))]
     .map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome })), [dati.dati, gruppo]);
   const visibili = useMemo(() => {
-    const ricerca = normalizzaNomeOggetto(q);
+    const trova = filtroRicerca(q);
     return (dati.dati ?? []).filter((o) => (!gruppo || CATEGORIA_OGGETTO[o.categoria].gruppo === gruppo)
       && (!categoria || o.categoria === categoria)
       && (!per || (per === 'nessuno' ? !o.statistiche?.per : o.statistiche?.per === per))
-      && (!ricerca || [o.nome, o.nomeOriginale ?? '', ...o.nomiAltri, o.effetto].some((n) => normalizzaNomeOggetto(n).includes(ricerca))))
+      && trova(o.nome, o.nomeOriginale, ...o.nomiAltri, o.effetto))
       .sort((a, b) => {
         if (ordine === 'prezzo') {
           if (a.prezzoMinimo === null && b.prezzoMinimo !== null) return 1;

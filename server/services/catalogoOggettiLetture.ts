@@ -1,7 +1,8 @@
 // Letture del catalogo condivise dai consumatori: nessuna dipendenza da negozi, letture o avanzamento.
 // Il dettaglio aggregato vive in catalogoOggettiService; questa base evita cicli fra i servizi.
 import { prepared } from '../db/dbService.js';
-import { casaOggetto, eCategoriaOggetto, normalizzaCostoScambio, normalizzaNomeOggetto, type CategoriaOggetto } from '../../shared/catalogo.js';
+import { casaOggetto, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
+import { filtroRicerca } from '../../shared/testo.js';
 import type { CatalogoOggettoDto, ContenutoOggettoDto, CostoOggettoDto, OggettiGuidaDto, RicompensaOggettoDto, RiferimentoOggettoDto } from '../../shared/types.js';
 import { httpErrors } from '../utils/httpError.js';
 import { nodiCatalogoGuida } from '../../shared/riferimentiCatalogoGuida.js';
@@ -94,8 +95,9 @@ export function elencaCatalogoOggetti(filtro: { categoria?: CategoriaOggetto; q?
   if (!filtro.nascosti) condizioni.push('c.nascosto = 0');
   if (filtro.categoria) { condizioni.push('c.categoria = ?'); parametri.push(filtro.categoria); }
   const righe = prepared(`${sqlCatalogo()}${condizioni.length ? ` WHERE ${condizioni.join(' AND ')}` : ''} ORDER BY c.nome COLLATE NOCASE,c.chiave`).all(...parametri) as RigaCatalogoOggetto[];
-  const q = normalizzaNomeOggetto(filtro.q ?? '');
-  return righe.map(dtoOggetto).filter((o) => !q || [o.nome, ...o.nomiAltri, o.nomeOriginale ?? '', o.effetto].some((n) => normalizzaNomeOggetto(n).includes(q)))
+  // la ricerca comune dell'app: parola per parola, in qualunque ordine (`shared/testo.ts`)
+  const trova = filtroRicerca(filtro.q);
+  return righe.map(dtoOggetto).filter((o) => trova(o.nome, ...o.nomiAltri, o.nomeOriginale, o.effetto))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'it') || a.chiave.localeCompare(b.chiave));
 }
 
