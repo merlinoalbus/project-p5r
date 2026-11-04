@@ -1688,7 +1688,9 @@ export interface ElenchiAzioneDto {
    *  chiavi degli oggetti del catalogo che lo strumento dà (base e con il bonus), perché l'editor avvisi subito di un «oggetto ricevuto» doppio. */
   /** (revisione) `strumento` e `oggetti` anche per una creazione senza versione con il bonus (la fabbricazione di Kawakami), con `senzaBonus`:
    *  la voce dice strumento e quantità, alla spunta non si chiede niente. */
-  attivita: Array<VoceElencoAzione & { turni: boolean; esiti?: { modo: 'scelta' | 'automatico'; elenco: Array<{ chiave: string; nome: string; bonusDi?: string; strumento?: string; oggetti?: string[]; senzaBonus?: true }> } }>;
+  /** 2026-11-04: `gemelloTempo`, il nome del gemello per il tempo dell'esito (`gemelloPerIlTempo`), che vale alla spunta se il tempo del giorno
+   *  della voce non permette l'esito della voce. */
+  attivita: Array<VoceElencoAzione & { turni: boolean; esiti?: { modo: 'scelta' | 'automatico'; elenco: Array<{ chiave: string; nome: string; bonusDi?: string; strumento?: string; oggetti?: string[]; senzaBonus?: true; gemelloTempo?: string }> } }>;
   negozi: VoceElencoAzione[];
   doti: VoceElencoAzione[];
 }

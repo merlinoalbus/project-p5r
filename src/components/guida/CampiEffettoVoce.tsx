@@ -264,7 +264,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       // 2026-10-27 («L'oggetto è stato già scelto, la quantità anche»): un'attività con esiti che hanno la versione con il bonus si sceglie per
       // strumento (gli esiti base) e quantità; alla spunta resta solo «Bonus» sì/no. Un esito con il bonus già scritto nella voce si mostra
       // come il suo strumento: cambiando strumento o quantità si scrive la versione base
-      // (revisione) con esiti misti (strumenti ed esiti a sé) si propongono anche gli esiti a sé, come esito atteso da confermare alla spunta:
+      // (revisione) con esiti misti (strumenti ed esiti a sé) si propongono anche gli esiti a sé, come esito della voce (vale alla spunta):
       // un'attività di soli strumenti dice «Strumento» e non lascia la voce senza (`soloStrumenti` del server, 409 `strumento-da-scegliere`)
       // (revisione) uno strumento è anche la creazione senza versione con il bonus (`strumento` con `senzaBonus`: la fabbricazione di Kawakami):
       // stesso schema, strumento e quantità qui; alla spunta niente da chiedere
@@ -284,7 +284,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
           }} />
           {strumenti && (
             <div className="flex flex-wrap items-end gap-2">
-              <Selettore className="min-w-[12rem] flex-1" etichetta={soloStrumentiQui ? 'Strumento' : 'Strumento o esito atteso'} valore={baseDi(e.esito)}
+              <Selettore className="min-w-[12rem] flex-1" etichetta={soloStrumentiQui ? 'Strumento' : 'Strumento o esito'} valore={baseDi(e.esito)}
                 vuoto={soloStrumentiQui ? 'Da scegliere' : 'Nessuno: lo scegli alla spunta'}
                 opzioni={conCorrente(strumenti.map((x) => ({ chiave: x.chiave, nome: x.strumento ?? x.nome })), baseDi(e.esito), soloStrumentiQui ? 'Strumento non più dichiarato' : 'Esito non più dichiarato')}
                 onCambia={(v) => onCambia(v ? turnoStrumento(v, e.quantita ?? 1) : { tipo: 'turno', attivita: e.attivita })} />
@@ -292,7 +292,9 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
               {e.esito && eStrumento(baseDi(e.esito)) && <CampoQuantita etichetta="Quantità" valore={e.quantita ?? 1} onCambia={(q) => onCambia(turnoStrumento(baseDi(e.esito), q))} />}
             </div>
           )}
-          {!strumenti && esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
+          {/* 2026-11-04 («mi chiede di rimettere un dato che dovrebbe già avere»): l'esito scritto qui vale alla spunta senza chiederlo di nuovo
+              (con il tempo del giorno: piove → la sua versione con la pioggia); la spunta lo chiede solo se quel giorno non è possibile */}
+          {!strumenti && esiti?.modo === 'scelta' && <Selettore etichetta="Esito del turno" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
             opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
           {/* L13 (ondata 9, O9-2): nel modo automatico l'esito si ricava dal giorno (predefinito, nessun esito nella voce) o lo dichiara la voce,
               e allora prevale sul calcolo del giorno («Per il momento vale quello che riporta il testo sul bagno») */}

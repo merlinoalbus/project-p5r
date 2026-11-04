@@ -155,7 +155,13 @@ export interface NomiEffettiAzione {
   senzaBonus?: Record<string, true>;
   /** L13 (ondata 7, O7-2): i nomi degli esami, per chiave («Esame di metà semestre 1»). */
   esami?: Record<string, string>;
+  /** 2026-11-04: per gli esiti legati al tempo («attività/esito»), il nome del gemello per il tempo (`gemelloPerIlTempo`), che vale alla
+   *  spunta se il tempo del giorno della voce non permette l'esito della voce. */
+  gemelliTempo?: Record<string, string>;
 }
+
+/** «; se il tempo non lo permette, «Studio con la Bistecca nostalgica e la pioggia»», o vuoto senza gemello per il tempo. */
+export const fraseGemello = (gemello: string | undefined): string => (gemello ? `; se il tempo non lo permette, «${gemello}»` : '');
 
 /**
  * Le parti di un effetto, separate: il nome dell'elemento (la Dote, il libro, l'attività) e che cosa ne viene («♪♪», «completato»,
@@ -170,7 +176,8 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
     return { nome, dettaglio: e.almeno === null ? (e.categoria === 'film' ? 'completato (al cinema: una visione)' : 'completato') : `almeno ${e.almeno} ${e.categoria === 'film' ? (e.almeno === 1 ? 'visione o serata' : 'visioni o serate') : e.almeno === 1 ? 'sessione' : 'sessioni'}`, doti: '', esito: '' };
   }
   // L13 (ondata 7, O7-2): un esame che la guida non ha più si dice tale, mai con la chiave
-  if (e.tipo === 'esame') return { nome: nomi.esami?.[e.esame] ?? 'Esame non più nella guida', dettaglio: 'piazzamento da scegliere alla spunta', doti: '', esito: '' };
+  // 2026-11-04: il piazzamento già segnato in Partita vale da solo alla spunta
+  if (e.tipo === 'esame') return { nome: nomi.esami?.[e.esame] ?? 'Esame non più nella guida', dettaglio: 'piazzamento segnato in Partita, o da scegliere alla spunta', doti: '', esito: '' };
   const nome = nomi.attivita?.[e.attivita] ?? e.attivita;
   const modo = nomi.modiEsiti?.[e.attivita];
   // 2026-10-27: un esito con la versione con il bonus è lo strumento della voce, con le creazioni; il bonus lo dice l'interruttore alla spunta
@@ -178,7 +185,9 @@ export function partiEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {
   const esito = strumento ? `${strumento}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}${nomi.senzaBonus?.[`${e.attivita}/${e.esito}`] ? '' : ', bonus sì o no alla spunta'}`
     // L13 (ondata 9, O9-2): nel modo automatico l'esito dichiarato dalla voce vale da solo, senza conferma alla spunta
     : e.esito && modo === 'automatico' ? `esito ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'non più dichiarato dall’attività'} (${ORIGINE_ESITO_AUTOMATICO.voce})`
-      : e.esito ? `esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''}, lo confermi alla spunta`
+      // 2026-11-04: anche nel modo «scelta» l'esito della voce vale da solo alla spunta, o il suo gemello per il tempo se il tempo di quel giorno
+      // non lo permette (`esitoDellaVoceNelMomento`)
+      : e.esito ? `esito ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'non più dichiarato dall’attività'}${e.quantita && e.quantita > 1 ? ` ×${e.quantita}` : ''} (${ORIGINE_ESITO_AUTOMATICO.voce}${fraseGemello(nomi.gemelliTempo?.[`${e.attivita}/${e.esito}`])})`
         : nomi.conBonus?.[e.attivita] ? 'strumento e quantità da scegliere nell’editor della voce'
           : modo === 'scelta' ? 'esito da scegliere alla spunta' : modo === 'automatico' ? `esito automatico ${ORIGINE_ESITO_AUTOMATICO.giorno}` : '';
   const doti = e.doti?.length ? e.doti.map((d) => `${nomeDote(d.dote)} ${simboliNote(d.note)}`).join('; ') : '';

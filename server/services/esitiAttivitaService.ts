@@ -20,7 +20,7 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import {
-  coppiaBonus, dotiEsitoConPunti, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita,
+  coppiaBonus, dotiEsitoConPunti, esitoLegatoAlTempo, gemelloPerIlTempo, leggiEsitiAttivita, nomeStrumento, soloStrumenti, strumentoDi, strumentoSenzaBonus, type DoteEsito, type EsitiAttivita,
   type EsitiAttivitaDto, type EsitoAttivita, type EsitoDisponibileDto, type SceltaEsitoSpunta, type SceltaEsitoVoceDto
 } from '../../shared/esitiAttivita.js';
 import { CHIAVI_DOTI, eDote, nomeDote, type DoteChiave } from '../../shared/doti.js';
@@ -28,6 +28,7 @@ import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { simboliPossibili } from '../../shared/note.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { statoAlGiorno, statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { meteoOra } from './meteoService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { scelteAlternativeDellaVoce } from './alternativeAcquistiService.js';
@@ -156,10 +157,12 @@ export function esitiDto(esiti: EsitiAttivita, st: StatoDisponibilita | null, at
     promemoria: attivita ? promemoriaAttivita(attivita, st) : [] };
 }
 
-/** Lo stato della partita al momento di una voce: il giorno (e quindi il giorno della settimana) e la fascia della voce. */
+/** Lo stato della partita al momento di una voce: il giorno (e quindi il giorno della settimana), la fascia e il meteo della voce. 2026-11-04:
+ *  anche il meteo è quello del giorno e della fascia della voce (segnato nella partita o della guida); prima restava quello del giorno corrente
+ *  della partita, e la pioggia di oggi decideva gli esiti di una voce di un altro giorno. */
 export function statoAlMomento(partitaId: number, momento: { data: string; fascia: 'giorno' | 'sera' } | null, base?: StatoDisponibilita): StatoDisponibilita {
   const st = base ?? statoDisponibilitaPartita(partitaId);
-  return momento ? { ...statoAlGiorno(st, momento.data), fasciaGioco: momento.fascia } : st;
+  return momento ? { ...statoAlGiorno(st, momento.data), fasciaGioco: momento.fascia, meteoOra: meteoOra(partitaId, momento.data, momento.fascia) } : st;
 }
 
 /**
@@ -199,6 +202,22 @@ export function risolviEsitoTurno(attivita: string, esiti: EsitiAttivita, scelta
   return { tipo: 'turno', esito: { chiave: e.chiave, nome: e.nome, ...segno }, doti: e.doti };
 }
 
+/**
+ * L'esito che la voce dichiara per un turno nel modo «scelta», nel momento della voce (`st`: giorno, fascia e meteo della voce; segnalazione
+ * dell'utente del 2026-11-04: la spunta chiedeva di nuovo un esito che la voce aveva già). Vale lui, se è possibile. Se non lo è per il tempo,
+ * vale il suo gemello per il tempo (`gemelloPerIlTempo`), se possibile: la voce dice «Studio con la Bistecca nostalgica» e quel giorno nella
+ * partita piove, quindi vale «Studio con la Bistecca nostalgica e la pioggia». Con un esito legato al tempo e il meteo di quel giorno non
+ * segnato l'app non sa quale valga. Null in questi casi: allora la spunta chiede l'esito.
+ */
+export function esitoDellaVoceNelMomento(esiti: EsitiAttivita, esitoVoce: string, st: StatoDisponibilita): string | null {
+  const dichiarato = esiti.esiti.find((e) => e.chiave === esitoVoce);
+  if (!dichiarato || (!st.meteoOra && esitoLegatoAlTempo(dichiarato))) return null;
+  const possibile = (e: EsitoAttivita): boolean => esitoDisponibile(e, st).disponibile;
+  if (possibile(dichiarato)) return esitoVoce;
+  const gemello = gemelloPerIlTempo(esiti, esitoVoce);
+  return gemello && possibile(gemello) ? gemello.chiave : null;
+}
+
 /** L'effetto chiede una scelta alla spunta? Un turno di un'attività con esiti nel modo «scelta», o una Dote a valori possibili. 2026-10-27
  *  (revisione): non il turno con uno strumento SENZA versione con il bonus (la fabbricazione di Kawakami): la voce dice già esito e
  *  quantità, e non c'è niente da chiedere (vale l'esito della voce, `risolviScelteSpunta`). */
@@ -224,7 +243,8 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
   // lo stato si calcola una volta sola e solo se serve (una voce con più articoli senza alternative non lo chiede)
   let calcolato: StatoDisponibilita | undefined;
   const stato = (): StatoDisponibilita => (calcolato ??= statoAlMomento(partitaId, momento));
-  const esiti = da.map(({ uid, effetto: e }): { posizione: number; scelta: SceltaEsitoVoceDto } => {
+  /** La scelta che la spunta chiede per un effetto, o null se il dato c'è già e la spunta lo usa da sola (`risolviScelteSpunta`). */
+  const sceltaDellEffetto = (uid: string, e: EffettoVoceDto['effetto']): { posizione: number; scelta: SceltaEsitoVoceDto } | null => {
     const st = stato();
     const posizione = effetti.findIndex((x) => x.uid === uid);
     // le note possibili con i punti che la spunta proporrà per ciascuna (la stessa conversione di `applicaEffettiAzione`)
@@ -234,8 +254,9 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
         punti: e.possibili!.map((note) => ({ note, punti: puntiDote(partitaId, e.dote, note, origine) })) } };
     }
     if (e.tipo === 'esame') {
-      // L13 (ondata 7, O7-2): tutti i piazzamenti con il loro premio (Doti con i punti che la spunta proporrà, e il trofeo del primo posto);
-      // preselezionato quello già segnato da Partita per lo stesso esame
+      // L13 (ondata 7, O7-2): tutti i piazzamenti con il loro premio (Doti con i punti che la spunta proporrà, e il trofeo del primo posto).
+      // Il piazzamento già segnato da Partita per lo stesso esame non si chiede di nuovo (2026-11-04): la spunta usa quello
+      if (piazzamentoDellEsame(partitaId, e.esame)) return null;
       const esame = premiDellEsame(e.esame);
       const origine = origineNoteDellaVoce(partitaId, voce);
       const nomeTrofeo = prepared('SELECT nome FROM trofeo WHERE chiave = ?').pluck();
@@ -261,13 +282,18 @@ export function scelteEsitoDellaVoce(partitaId: number, momento: { data: string;
     // 2026-10-27: lo strumento della voce ha una versione con il bonus: la spunta chiede solo «Bonus» sì/no, e parte sempre da «no» (il bonus
     // arriva a caso: lo dice chi gioca, decisione 22). Senza lo strumento nella voce, si sceglie nell'editor della voce, non alla spunta
     const coppia = coppiaBonus(a.esiti, t.esito);
+    // l'esito dichiarato dalla voce (o il suo gemello per il tempo) possibile nel momento non si chiede: vale quello (2026-11-04)
+    if (!coppia && t.esito && esitoDellaVoceNelMomento(a.esiti!, t.esito, st) !== null) return null;
     const bonus = coppia ? { bonus: { base: coppia.base.chiave, conBonus: coppia.bonus.chiave, nome: nomeStrumento(coppia.base), quantita: t.quantita ?? 1 } } : {};
     // (revisione) solo se TUTTI gli esiti sono strumenti: con esiti misti la voce senza esito si spunta scegliendo l'esito, come prima
     const daScegliere = !t.esito && soloStrumenti(a.esiti) ? { strumentoDaScegliere: true as const } : {};
     const preselezionato = coppia ? coppia.base.chiave : t.esito && elenco.some((x) => x.chiave === t.esito) ? t.esito : null;
     return { posizione, scelta: { effettoUid: uid, tipo: 'turno', attivita: t.attivita, attivitaNome: a.nome, preselezionato, esiti: elenco,
       ...(dto.promemoria.length ? { promemoria: dto.promemoria } : {}), ...bonus, ...daScegliere } };
-  });
+  };
+  // 2026-11-04 (segnalazione dell'utente: «mi chiede di rimettere un dato che dovrebbe già avere»): un effetto il cui dato c'è già (l'esito
+  // dichiarato dalla voce e possibile nel momento, il piazzamento già segnato nella partita) non si chiede
+  const esiti = da.flatMap(({ uid, effetto: e }) => { const x = sceltaDellEffetto(uid, e); return x ? [x] : []; });
   return [...esiti, ...scelteAlternativeDellaVoce(effetti, stato)].sort((a, b) => a.posizione - b.posizione).map((x) => x.scelta);
 }
 
@@ -299,7 +325,8 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
       out.set(uid, { tipo: 'dote', note: s.note });
     } else if (e.tipo === 'esame') {
       // L13 (ondata 7, O7-2): senza il piazzamento la spunta non passa; nel raccordo di un effetto aggiunto a una voce già spuntata nessuno sceglie
-      const s = per.get(uid);
+      // 2026-11-04: senza scelta vale il piazzamento già segnato nella partita per lo stesso esame (la spunta non lo chiede di nuovo)
+      const s = per.get(uid) ?? (() => { const gia = piazzamentoDellEsame(partitaId, e.esame); return gia ? { effettoUid: uid, tipo: 'esame' as const, piazzamento: gia } : undefined; })();
       if (!s || s.tipo !== 'esame') {
         if (opz.storico) throw httpErrors.conflict('piazzamento-da-scegliere', 'Il piazzamento all’esame si sceglie alla spunta. Togli e rimetti la spunta della voce per sceglierlo.');
         throw httpErrors.conflict('piazzamento-da-scegliere', 'Scegli il piazzamento ottenuto all’esame prima di spuntare.');
@@ -324,11 +351,16 @@ export function risolviScelteSpunta(partitaId: number, momento: { data: string; 
         continue;
       }
       const s = per.get(uid);
-      // (revisione) lo strumento senza versione con il bonus non chiede niente: vale l'esito della voce, con le sue condizioni
-      const scelta = s?.tipo === 'turno' ? s.esito : strumentoSenzaBonus(a.esiti, e.esito) ? e.esito : opz.storico && a.esiti.modo === 'scelta' && e.esito ? e.esito : undefined;
       // 2026-10-27: lo strumento con la versione con il bonus lo dice la voce; alla spunta si sceglie solo se con il bonus o no (la versione
       // base o quella con il bonus dello STESSO strumento). Senza strumento nella voce la spunta si ferma: lo si sceglie nell'editor
       const coppia = coppiaBonus(a.esiti, e.esito);
+      // 2026-11-04: senza scelta, nel modo «scelta», vale l'esito dichiarato dalla voce, o il suo gemello per il tempo, se possibile nel momento
+      // (`esitoDellaVoceNelMomento`: la spunta non lo chiede di nuovo); nel raccordo storico, altrimenti, l'esito della voce com'è (il suo motivo,
+      // se non è possibile, lo dice `risolviEsitoTurno`). Lo strumento con la versione con il bonus chiede sempre «Bonus» sì/no
+      const dallaVoce = a.esiti.modo !== 'scelta' || !e.esito ? undefined
+        : (!coppia ? esitoDellaVoceNelMomento(a.esiti, e.esito, stato()) : null) ?? (opz.storico ? e.esito : undefined);
+      // (revisione) lo strumento senza versione con il bonus non chiede niente: vale l'esito della voce, con le sue condizioni
+      const scelta = s?.tipo === 'turno' ? s.esito : strumentoSenzaBonus(a.esiti, e.esito) ? e.esito : dallaVoce;
       if (coppia && scelta !== undefined && scelta !== coppia.base.chiave && scelta !== coppia.bonus.chiave) throw httpErrors.badRequest('esito-fuori-strumento', `«${a.nome}»: la voce indica ${nomeStrumento(coppia.base)}; alla spunta si sceglie solo se con il bonus o no.`);
       if (!coppia && !e.esito && soloStrumenti(a.esiti) && !opz.storico) throw httpErrors.conflict('strumento-da-scegliere', `«${a.nome}»: la voce non dice che cosa si crea. Scegli strumento e quantità nell’editor della voce, poi spunta.`);
       if (opz.storico && a.esiti.modo === 'scelta' && scelta === undefined) throw httpErrors.conflict('esito-da-scegliere', `«${a.nome}»: l'esito si sceglie alla spunta. Togli e rimetti la spunta della voce per sceglierlo.`);

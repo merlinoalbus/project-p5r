@@ -214,6 +214,36 @@ export function coppiaBonus(esiti: EsitiAttivita | null | undefined, chiave: str
   return base && bonus ? { base, bonus } : null;
 }
 
+/** Le condizioni sul tempo atmosferico: la pioggia e le allerte. */
+const condizioneDelTempo = (c: EsitoAttivita['condizioni'][number]): boolean => c.tipo === 'piove' || c.tipo === 'meteo';
+/** Un valore in JSON con le chiavi in ordine (quelle undefined escluse): due esiti uguali si riconoscono anche se scritti in un altro ordine. */
+function jsonOrdinato(v: unknown): string {
+  if (Array.isArray(v)) return `[${v.map(jsonOrdinato).join(',')}]`;
+  if (v && typeof v === 'object') {
+    const o = v as Record<string, unknown>;
+    return `{${Object.keys(o).filter((k) => o[k] !== undefined).sort().map((k) => `${JSON.stringify(k)}:${jsonOrdinato(o[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(v);
+}
+/** L'esito senza quello che cambia col tempo: chiave, nome, condizioni sul tempo e note delle Doti (con la pioggia ♪♪♪ al posto di ♪♪). */
+const esitoSenzaTempo = (e: EsitoAttivita): string =>
+  jsonOrdinato({ ...e, chiave: undefined, nome: undefined, condizioni: e.condizioni.filter((c) => !condizioneDelTempo(c)), doti: e.doti.map((d) => d.dote).sort() });
+/** L'esito dipende dal tempo (ha condizioni sulla pioggia o sulle allerte)? */
+export const esitoLegatoAlTempo = (e: EsitoAttivita): boolean => e.condizioni.some(condizioneDelTempo);
+
+/**
+ * 2026-11-04: il gemello per il tempo di un esito legato al tempo: l'UNICO altro esito legato al tempo uguale in tutto tranne nome, condizioni
+ * sul tempo e note delle Doti («Studio con la Bistecca nostalgica» ↔ «… e la pioggia»). Null se l'esito non è legato al tempo o se il
+ * gemello non c'è o non è unico. La spunta lo usa quando l'esito della voce non vale per il tempo di quel giorno.
+ */
+export function gemelloPerIlTempo(esiti: EsitiAttivita, chiave: string): EsitoAttivita | null {
+  const e = esiti.esiti.find((x) => x.chiave === chiave);
+  if (!e || !esitoLegatoAlTempo(e)) return null;
+  const impronta = esitoSenzaTempo(e);
+  const gemelli = esiti.esiti.filter((x) => x.chiave !== chiave && esitoLegatoAlTempo(x) && esitoSenzaTempo(x) === impronta);
+  return gemelli.length === 1 ? gemelli[0]! : null;
+}
+
 /** 2026-10-27: l'attività dichiara esiti con una versione con il bonus? Allora lo strumento (l'esito) e la quantità si scelgono nella voce e
  *  alla spunta resta solo l'interruttore «Bonus». */
 export const haVersioniBonus = (esiti: EsitiAttivita | null | undefined): boolean => !!esiti?.esiti.some((e) => e.bonusDi);

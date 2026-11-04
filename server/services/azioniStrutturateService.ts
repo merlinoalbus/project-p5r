@@ -21,7 +21,7 @@ import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE
 import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
-import { leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti, strumentoDi } from '../../shared/esitiAttivita.js';
+import { gemelloPerIlTempo, leggiEsitiAttivita, nomeStrumento, prodottiDelloStrumento, soloStrumenti, strumentoDi } from '../../shared/esitiAttivita.js';
 import { dataConArticolo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { contenutoArticoli, mappaIncompatibili } from './alternativeAcquistiService.js';
 import { simboliNote } from '../../shared/note.js';
@@ -181,8 +181,9 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
 }
 
 /** L13: i nomi degli esiti («attività/esito») e il modo di ogni attività che li dichiara, per la frase del turno. */
-function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus' | 'senzaBonus'> {
+function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti' | 'conBonus' | 'senzaBonus' | 'gemelliTempo'> {
   const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {}, strumenti: Record<string, string> = {}, conBonus: Record<string, true> = {}, senzaBonus: Record<string, true> = {};
+  const gemelliTempo: Record<string, string> = {};
   // `SELECT *`: su uno schema di prima della 233 la colonna non c'è e nessuna attività ha esiti
   for (const r of prepared('SELECT * FROM attivita').all() as Array<{ chiave: string; esiti_json?: string | null }>) {
     const e = leggiEsitiAttivita(r.esiti_json);
@@ -196,9 +197,12 @@ function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti' | 'strumenti
       const s = strumentoDi(e, x.chiave);
       if (s) strumenti[`${r.chiave}/${x.chiave}`] = nomeStrumento(s.base);
       if (s && !s.bonus) senzaBonus[`${r.chiave}/${x.chiave}`] = true;
+      // 2026-11-04: il gemello per il tempo, che vale alla spunta se il tempo di quel giorno non permette l'esito della voce
+      const g = gemelloPerIlTempo(e, x.chiave);
+      if (g) gemelliTempo[`${r.chiave}/${x.chiave}`] = g.nome;
     }
   }
-  return { esiti, modiEsiti, strumenti, conBonus, senzaBonus };
+  return { esiti, modiEsiti, strumenti, conBonus, senzaBonus, gemelliTempo };
 }
 
 /** I nomi di libri, film, videogiochi e attività per descrivere gli effetti: una lettura per richiesta. */
@@ -278,7 +282,10 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const esitiDi = (json: string | null) => { const e = leggiEsitiAttivita(json); return e ? { esiti: { modo: e.modo, elenco: e.esiti.map((x) => {
     const prodotti = prodottiDelloStrumento(e, x.chiave);
     // (revisione) `senzaBonus`: lo strumento non ha la versione con il bonus (la fabbricazione di Kawakami): alla spunta non si chiede niente
-    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(prodotti ? { strumento: prodotti.strumento, oggetti: prodotti.oggetti, ...(prodotti.conBonus ? {} : { senzaBonus: true as const }) } : {}) };
+    // 2026-11-04: `gemelloTempo`, il nome del gemello per il tempo (vale alla spunta se il tempo del giorno della voce non permette l'esito)
+    const gemello = gemelloPerIlTempo(e, x.chiave);
+    return { chiave: x.chiave, nome: x.nome, ...(x.bonusDi ? { bonusDi: x.bonusDi } : {}), ...(prodotti ? { strumento: prodotti.strumento, oggetti: prodotti.oggetti, ...(prodotti.conBonus ? {} : { senzaBonus: true as const }) } : {}),
+      ...(gemello ? { gemelloTempo: gemello.nome } : {}) };
   }) } } : {}; };
   // L13 (decisione 2): gli yen che film, attività e Richieste portano già (`yenDeiDati`, la stessa definizione del controllo del server), perché
   // l'editor della voce avvisi subito di un effetto «yen» che li conterebbe due volte

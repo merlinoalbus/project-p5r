@@ -59,7 +59,7 @@ export function pianoCollegamentoVoceEsiti(voceUid: string, attivita: string, es
   const a = esitiDellAttivita(attivita);
   if (!a?.esiti) throw httpErrors.conflict('attivita-senza-esiti', 'L’attività non dichiara esiti: non c’è niente a cui collegare la voce.');
   // ondata 9 (O9-2): anche nel modo automatico la voce può dichiarare l'esito, che prevale sul calcolo del giorno
-  if (esitoAtteso !== null && !a.esiti.esiti.some((e) => e.chiave === esitoAtteso)) throw httpErrors.badRequest('esito-sconosciuto', 'L’esito atteso non è fra quelli che l’attività dichiara.');
+  if (esitoAtteso !== null && !a.esiti.esiti.some((e) => e.chiave === esitoAtteso)) throw httpErrors.badRequest('esito-sconosciuto', 'L’esito della voce non è fra quelli che l’attività dichiara.');
   const fonte = leggiEffettiVoce(voceUid);
   if (fonte.stato !== 'convertita') throw httpErrors.conflict('effetti-da-correggere', 'La voce ha effetti da correggere prima di qualunque collegamento.');
   const doteDegliEsiti = new Set(a.esiti.esiti.flatMap((e) => e.doti.map((d) => d.dote)));
