@@ -439,6 +439,11 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   la Cartolina si spedisce. Dei regali si modificano anche l'oggetto del catalogo collegato, dove si compra, costo e nota **(24/10)**.
 - Esiti delle attività in una colonna dell'attività; si scelgono alla spunta. Fabbricazione: lo strumento e la quantità stanno nella
   voce, alla spunta solo l'interruttore «Bonus» sì/no; ogni fabbricazione è uno strumento.
+- La spunta non chiede un dato che ha già **(04/11)**: l'esito scritto nella voce vale da solo; se il giorno della voce nella partita non
+  lo permette per il tempo, vale il suo unico gemello che differisce solo per tempo e note (la Bistecca nostalgica con la pioggia). Con il
+  meteo di quel giorno non segnato, un esito legato al tempo si chiede. Lo stesso per il piazzamento d'esame già segnato in Partita. La
+  spunta chiede solo quando il dato manca o quel giorno non vale. Il set delle televendite si sceglie sempre: si ricompra ogni domenica.
+  Gli esiti e le condizioni di una voce si valutano col giorno, la fascia e il meteo della voce, non con quelli correnti della partita.
 - Lotteria: esito «vinto / non vinto» alla spunta e trofeo; gli yen della vincita a mano; un solo chiosco.
 - **Doti delle attività**: ogni attività che dà Doti le ha strutturate, fisse o negli esiti, e il turno le porta nel promemoria
   «Applica»: con la spunta della voce sulla voce, con il + del contatore in Partita → Progressi sotto l'attività (lo stesso «Applica»).
