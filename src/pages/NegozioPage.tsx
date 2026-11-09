@@ -85,9 +85,9 @@ export function NegozioPage() {
               schermata del telefono e al 44% a 1024×690 */}
           <section className="card py-2.5" aria-label="Il negozio">
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 testo-13 text-text-secondary">
-              {/* La sede apre la pagina del quartiere con il luogo evidenziato (`#luogo-…`); senza quartiere
-                  resta l'indicazione testuale («Online, dal laptop di Leblanc»). */}
-              {(n.sedeChiave || n.luogoChiave || n.luogo) && <span><strong className="text-text">Dove:</strong> {n.sedeChiave && n.luogoChiave ? <Link to={urlLuogo(n.sedeChiave)}>{n.sedeNome ?? n.sedeChiave}</Link> : null}{n.sedeChiave && n.luogoChiave ? ' · ' : ''}{n.luogoChiave && <Link to={`/guida/citta/${n.luogoChiave}`}>{n.quartiereNome ?? n.luogoChiave}</Link>}{n.luogo && !n.sedeChiave ? `${n.luogoChiave ? ' · ' : ''}${n.luogo}` : ''}</span>}
+              {/* Il «dove» è uno solo, la sede: apre la pagina del suo luogo, con il quartiere che ne deriva. Senza sede (online, TV,
+                  dentro un Palazzo) non si scrive niente. */}
+              {n.sedeChiave && <span><strong className="text-text">Dove:</strong> <Link to={urlLuogo(n.sedeChiave)}>{n.sedeNome ?? n.sedeChiave}</Link>{n.quartiereChiave && <>{' · '}<Link to={`/guida/citta/${n.quartiereChiave}`}>{n.quartiereNome ?? n.quartiereChiave}</Link></>}</span>}
               <span><strong className="text-text">Orari:</strong> {n.orariTesto}</span>
               {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
               {/* la guida del quiz dei lavori che si fanno qui (il Triple Seven): in oro se oggi, nella partita, c'è il quiz */}

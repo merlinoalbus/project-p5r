@@ -305,7 +305,9 @@ export function elenchiAzione(): ElenchiAzioneDto {
       turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta',
       ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json))
     })),
-    negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
+    // il dettaglio che distingue due negozi con lo stesso nome è dove stanno: quartiere e luogo-sede (nessuno per chi non ha una sede)
+    negozi: pulite(voci(`SELECT n.chiave, n.nome, CASE WHEN l.chiave IS NULL THEN NULL ELSE COALESCE(q.nome || ' · ', '') || l.nome END AS dettaglio
+      FROM negozio n LEFT JOIN luogo l ON l.chiave = n.sede_chiave LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE n.nascosto = 0 ORDER BY n.ordine`)),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
   };
 }

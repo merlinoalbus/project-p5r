@@ -1305,7 +1305,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     const l = selezionato.dettaglio.luogo;
                     const n = selezionato.dettaglio.negozio;
                     const casaNegozio = n ? l.negozi?.find((x) => x.chiave === n.chiave)?.casa : undefined;
-                    return <CollegamentoVisivo to={casaNegozio ?? l.casa!} tono="secondario" compatto icona={<IconaAzione chiave={n ? 'negozio' : 'scheda'} dimensione={20} />} titolo={l.nome} dettaglio={n && n.nome !== l.nome ? n.nome : l.orariTesto ?? l.quando ?? undefined} />;
+                    return <CollegamentoVisivo to={casaNegozio ?? l.casa!} tono="secondario" compatto icona={<IconaAzione chiave={n ? 'negozio' : 'scheda'} dimensione={20} />} titolo={l.nome} dettaglio={n && n.nome !== l.nome ? n.nome : l.orariTesto ?? undefined} />;
                   })()}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && !selezionato.dettaglio.luogo?.casa && (
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo={selezionato.dettaglio.negozio.nome} />

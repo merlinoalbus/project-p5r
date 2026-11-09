@@ -85,9 +85,8 @@ function aggiungiLuogo(r: Raccolta, chiaveLuogo: string): void {
 /** Aggiunge un negozio con il suo quartiere, i luoghi che lo ospitano e lo spillo sulla mappa. */
 function aggiungiNegozio(r: Raccolta, chiaveNegozio: string): void {
   r.negozi.add(chiaveNegozio);
-  // `negozio.luogo_chiave` è il quartiere; il luogo puntuale è la sede (072)
-  const n = prepared('SELECT luogo_chiave, sede_chiave FROM negozio WHERE chiave = ?').get(chiaveNegozio) as { luogo_chiave: string | null; sede_chiave: string | null } | undefined;
-  if (n?.luogo_chiave) { r.quartieri.add(n.luogo_chiave); r.mappe.add(`citta-${n.luogo_chiave}`); }
+  // il luogo puntuale è la sede (072), e porta con sé il quartiere e la sua mappa; senza sede (online, Niijima) niente quartiere
+  const n = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ?').get(chiaveNegozio) as { sede_chiave: string | null } | undefined;
   if (n?.sede_chiave) aggiungiLuogo(r, n.sede_chiave);
   const sp = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(chiaveNegozio) as { id: number } | undefined;
   if (sp) r.spilli.add(sp.id);
@@ -226,9 +225,9 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
     } else if (rif?.tipo === 'attivita') {
       r.attivita.add(rif.chiave);
       segna('attivita', rif.chiave, a.azione, a.fascia);
-      // `attivita.luogo_chiave` è il quartiere che ospita l'attività
-      const att = prepared('SELECT luogo_chiave,tipo FROM attivita WHERE chiave = ?').get(rif.chiave) as { luogo_chiave: string | null; tipo: string } | undefined;
-      if (att?.luogo_chiave) { r.quartieri.add(att.luogo_chiave); r.mappe.add(`citta-${att.luogo_chiave}`); }
+      // il quartiere che ospita l'attività è quello del luogo-sede (`attivita.sede_chiave`)
+      const att = prepared('SELECT l.quartiere_chiave AS quartiere, a.tipo FROM attivita a LEFT JOIN luogo l ON l.chiave = a.sede_chiave WHERE a.chiave = ?').get(rif.chiave) as { quartiere: string | null; tipo: string } | undefined;
+      if (att?.quartiere) { r.quartieri.add(att.quartiere); r.mappe.add(`citta-${att.quartiere}`); }
       if (conCatalogo && att?.tipo === 'videogioco') {
         if (!articoli) articoli = indiceArticoli();
         for (const art of articoli.get(`videogioco/${rif.chiave}`) ?? []) { r.articoli.add(art.chiave); aggiungiNegozio(r, art.negozio); }

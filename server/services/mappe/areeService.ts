@@ -265,7 +265,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
       if (lp?.soloEventi) continue;
       // un pin agganciato a un negozio di un altro quartiere (la sua sede): da rivedere, col nome del pin, nessun cambio senza il sì
       const sedeNegozio = s.riferimento_tipo === 'negozio' ? luoghi.sediNegozi.get(s.riferimento_chiave) : undefined;
-      const quartiereSede = lp?.luogo.quartiere_chiave ?? (sedeNegozio?.sede ? luoghi.righe.get(sedeNegozio.sede)?.quartiere_chiave ?? sedeNegozio.quartiere : sedeNegozio?.quartiere ?? null);
+      const quartiereSede = lp?.luogo.quartiere_chiave ?? (sedeNegozio?.sede ? luoghi.righe.get(sedeNegozio.sede)?.quartiere_chiave ?? null : null);
       const altroQuartiere = !!quartiereArea && !!sedeNegozio && !!quartiereSede && quartiereSede !== quartiereArea;
       const nomi = nomiCondizioniMemo();
       const delPin = luoghi.st ? valutaInsiemeSpillo(leggiCondizioniSalvate(s.condizioni_json).map((c) => condizioneConTesto(c, nomi)), luoghi.st, nomi) : undefined;

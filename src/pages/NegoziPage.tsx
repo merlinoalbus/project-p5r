@@ -76,12 +76,12 @@ export function NegoziPage() {
   const negoziTrovati = useMemo(() => {
     if (termine.length < 2) return [];
     const trova = filtroRicerca(termine);
-    return listaVisibile.filter((n) => trova(n.nome, n.quartiereNome, n.sedeNome, n.luogo));
+    return listaVisibile.filter((n) => trova(n.nome, n.quartiereNome, n.sedeNome));
   }, [listaVisibile, termine]);
   const gruppi = useMemo(() => {
     const m = new Map<string, { nome: string; negozi: NegozioRiassuntoDto[] }>();
     for (const n of listaVisibile) {
-      const k = n.luogoChiave ?? (n.tipo === 'online' ? '__online' : n.tipo === 'ambulante' ? '__ambulanti' : '__altro');
+      const k = n.quartiereChiave ?? (n.tipo === 'online' ? '__online' : n.tipo === 'ambulante' ? '__ambulanti' : '__altro');
       const g = m.get(k) ?? { nome: n.quartiereNome ?? (k === '__online' ? 'Online' : k === '__ambulanti' ? 'Ambulanti' : 'Quartiere da assegnare'), negozi: [] };
       g.negozi.push(n); m.set(k, g);
     }
@@ -140,7 +140,7 @@ export function NegoziPage() {
                         <Link to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`} className="no-underline text-text flex flex-1 flex-col gap-1 touch">
                           <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase testo-18 leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
                           <span className="testo-12 text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{!IN_RILASCIO && n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
-                          <span className="testo-12 text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
+                          <span className="testo-12 text-text-muted">{[n.sedeNome, n.orariTesto].filter(Boolean).join(' · ')}</span>
                         </Link>
                         <div className="flex flex-wrap items-center gap-2">
                           <button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={nomePosizione(n)} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>

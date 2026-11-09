@@ -26,7 +26,7 @@ import { RANGO_MASSIMO_CONFIDENTE } from '../../../../shared/puntiConfidenti';
 const OPZIONI_TIPO = Object.entries(NOME_TIPO_NEGOZIO).map(([chiave, nome]) => ({ chiave, nome }));
 
 /**
- * I campi di un negozio: nome, tipo, sede (con il quartiere), come trovarlo, gestore, Confidente (dall'elenco
+ * I campi di un negozio: nome, tipo, sede (il quartiere se ne deriva), gestore, Confidente (dall'elenco
  * caricato), orari, programma punti (spuntandolo nasce come «Punti» a calcolo manuale; togliendo la spunta sparisce)
  * e note.
  */
@@ -46,9 +46,8 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
         <Blocco largo>
           <SelettoreIcone compatto etichetta="Tipo" valore={testoDi(dati.tipo)} opzioni={OPZIONI_TIPO} disabilitato={disabilitato} onCambia={(tipo) => imposta({ tipo })} />
         </Blocco>
-        <SceltaLuogo etichetta="Sede" valore={{ sede: (dati.sede_chiave as string | null) ?? null, quartiere: (dati.luogo_chiave as string | null) ?? null }} disabilitato={disabilitato}
-          onCambia={(v) => imposta({ sede_chiave: v.sede, luogo_chiave: v.quartiere })} />
-        <Campo nome="luogo" etichetta="Come trovarlo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={200} aiuto="Facoltativo: «vicino alla stazione», «piano interrato»" />
+        <SceltaLuogo etichetta="Sede" valore={(dati.sede_chiave as string | null) ?? null} disabilitato={disabilitato}
+          onCambia={(sede) => imposta({ sede_chiave: sede })} />
         <Campo nome="gestore" etichetta="Chi lo gestisce" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} />
         <Blocco>
           <Selettore etichetta="Confidente" valore={testoDi(dati.confidente_chiave)} vuoto="Nessun Confidente" disabilitato={disabilitato || confidenti.caricamento}

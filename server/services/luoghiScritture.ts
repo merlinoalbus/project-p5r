@@ -121,7 +121,9 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
   const listini = lettureListiniCondivisi();
   if (tipo === 'negozio') chiave = listinoDelNegozio(chiave, listini);
   const negozi = tipo === 'negozio' ? negoziEquivalenti(chiave, listini) : [];
-  const r = prepared(`SELECT chiave, nome, ${tipo === 'luogo' ? 'quartiere_chiave' : 'luogo_chiave'} AS quartiere FROM ${tipo} WHERE chiave = ?`).get(chiave) as { chiave: string; nome: string; quartiere: string | null } | undefined;
+  // il quartiere di un negozio è quello del luogo-sede (nessuno se non ne ha)
+  const r = prepared(tipo === 'luogo' ? 'SELECT chiave, nome, quartiere_chiave AS quartiere FROM luogo WHERE chiave = ?'
+    : 'SELECT n.chiave, n.nome, l.quartiere_chiave AS quartiere FROM negozio n LEFT JOIN luogo l ON l.chiave = n.sede_chiave WHERE n.chiave = ?').get(chiave) as { chiave: string; nome: string; quartiere: string | null } | undefined;
   if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${tipo === 'luogo' ? 'Il luogo' : 'Il negozio'} '${chiave}' non esiste.`);
   const conti = tipo === 'luogo' ? riepilogo(tipo, chiave) : negozi.map((k) => riepilogo('negozio', k)).reduce((a, b) => ({
     pin: a.pin + b.pin, negozi: a.negozi + b.negozi, attivita: a.attivita + b.attivita,

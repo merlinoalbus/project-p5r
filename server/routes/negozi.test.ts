@@ -34,10 +34,10 @@ describe('API negozi e inventario', () => {
     expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(articoliVisibili());
     expect(articoliVisibili()).toBeGreaterThan(500);
     const u = n.find((x) => x.chiave === 'untouchable')!;
-    expect(u).toMatchObject({ nome: 'Untouchable', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', articoli: 218 });
+    expect(u).toMatchObject({ nome: 'Untouchable', quartiereChiave: 'shibuya', quartiereNome: 'Shibuya', articoli: 218 });
     expect(u.confidente).toEqual({ chiave: 'iwai', nome: expect.stringContaining('Iwai') });
     expect(n.find((x) => x.chiave === 'clinica-takemi')?.confidente?.chiave).toBe('takemi');
-    expect(n.find((x) => x.chiave === 'tanaka-affari-loschi')?.luogoChiave).toBeNull();
+    expect(n.find((x) => x.chiave === 'tanaka-affari-loschi')?.quartiereChiave).toBeNull();
     const d = (await request(app).get('/api/compendio/negozi/untouchable')).body.data as NegozioDettaglioDto;
     expect(d.articoliElenco).toHaveLength(218);
     // la 250 unisce le due Kogatana nere nella scheda «materiale» (Oggetti chiave e materiali) e vi conserva le statistiche dell'arma (Joker)
@@ -139,10 +139,10 @@ describe('API negozi e inventario', () => {
   it('calcola il totale disponibile prima di applicare il limite di 300 risultati', async () => {
     const db = getDb();
     db.exec(`CREATE TEMP TABLE backup_tutte_condizioni_articoli_negozi_test AS SELECT chiave, condizioni_json FROM articolo;
-      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, condizioni_json, orari_json FROM negozio`);
+      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, sblocco_json, orari_json FROM negozio`);
     try {
       // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (069)
-      db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET condizioni_json = '[]', orari_json = NULL");
+      db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET sblocco_json = '[]', orari_json = NULL");
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;
       const ricerca = (await request(app).get(`/api/compendio/articoli?partita=${id}`)).body.data as RicercaArticoliDto;
       expect(ricerca.totale).toBe(articoliVisibili());
@@ -153,8 +153,8 @@ describe('API negozi e inventario', () => {
       db.exec(`UPDATE articolo SET condizioni_json = (
         SELECT b.condizioni_json FROM backup_tutte_condizioni_articoli_negozi_test b WHERE b.chiave = articolo.chiave
       );
-      UPDATE negozio SET condizioni_json = (
-        SELECT b.condizioni_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
+      UPDATE negozio SET sblocco_json = (
+        SELECT b.sblocco_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
       ), orari_json = (
         SELECT b.orari_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
       );

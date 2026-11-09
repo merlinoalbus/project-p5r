@@ -11,6 +11,8 @@ interface SedeAttivita {
   chiave: string;
   nome: string;
   quartiere_chiave: string | null;
+  /** Il nome del quartiere della sede: il quartiere di un'attività è sempre quello del suo luogo-sede. */
+  quartiere_nome?: string | null;
   condizioni_json: string | null;
   orari_json: string | null;
 }
@@ -21,7 +23,7 @@ export interface SediAttivita {
 
 /** Lettura per richiesta: le attività condividono le sedi e gli inviti, senza passare da luoghiService. */
 export function sediAttivita(): SediAttivita {
-  const righe = prepared('SELECT chiave, nome, quartiere_chiave, condizioni_json, orari_json FROM luogo').all() as SedeAttivita[];
+  const righe = prepared('SELECT l.chiave, l.nome, l.quartiere_chiave, q.nome AS quartiere_nome, l.condizioni_json, l.orari_json FROM luogo l LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave').all() as SedeAttivita[];
   return { luoghi: new Map(righe.map((r) => [r.chiave, r])), inviti: invitiPerSblocco() };
 }
 

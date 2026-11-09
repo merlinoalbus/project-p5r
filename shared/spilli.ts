@@ -166,7 +166,9 @@ export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
  * reinserirlo in copia a ogni reseed. */
 export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
   spostamento: ['mappa', 'luogo', 'punto'],
-  citta: ['negozio', 'attivita', 'luogo', 'confidente'],
+  // `attivita` non si offre più: un'attività sta in un luogo (`attivita.sede_chiave`) e il pin punta al luogo. Un pin vecchio che ancora
+  // cita `attivita` (backup di prima della migrazione 344) si legge ancora (`TIPI_RIFERIMENTO`, `mappeService`), ma non si scrive più.
+  citta: ['negozio', 'luogo', 'confidente'],
   consumabile: ['punto'],
   informativo: ['punto'],
 };
@@ -214,13 +216,13 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   negozio: { nome: 'Negozio', colore: '#22c55e', collezionabile: false, riferimento: 'negozio' },
   ristorante: { nome: 'Ristorante', colore: '#a16207', collezionabile: false, riferimento: 'luogo' },
   /** Distributore automatico di bevande: etichetta «Bevande» sulla mappa del gioco (SP e cure a poco prezzo). */
-  distributore: { nome: 'Bevande', colore: '#06b6d4', collezionabile: false, riferimento: 'luogo' },
+  distributore: { nome: 'Bevande', colore: '#06b6d4', collezionabile: false, riferimento: 'negozio' },
   /** Distributore di sigarette o tabaccaio: etichetta «Sigarette» sulla mappa del gioco (punto di riferimento, non si compra nulla). */
   sigarette: { nome: 'Sigarette', colore: '#78716c', collezionabile: false, riferimento: 'luogo' },
   /** Espositore delle riviste di annunci di lavoro (Sottopasso di Shibuya, konbini): etichetta «Cercalavoro». */
   cercalavoro: { nome: 'Cercalavoro', colore: '#d97706', collezionabile: false, riferimento: 'luogo' },
   /** Posto dove si fa un lavoro part-time (fioraio, Ore no Beko, konbini, Bar Crossroads…). */
-  lavoro: { nome: 'Lavoro part-time', colore: '#0d9488', collezionabile: false, riferimento: 'attivita' },
+  lavoro: { nome: 'Lavoro part-time', colore: '#0d9488', collezionabile: false, riferimento: 'luogo' },
   terme: { nome: 'Bagno pubblico', colore: '#67e8f9', collezionabile: false, riferimento: 'luogo' },
   lavanderia: { nome: 'Lavanderia', colore: '#c4b5fd', collezionabile: false, riferimento: 'luogo' },
   cinema: { nome: 'Cinema', colore: '#1e3a8a', collezionabile: false, riferimento: 'luogo' },

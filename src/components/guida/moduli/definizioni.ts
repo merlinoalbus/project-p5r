@@ -27,8 +27,8 @@ export const negozio: DefinizioneModulo = {
   iniziali: (e) => ({
     sblocco_json: jsonDi(e?.dati.sblocco_json, []),
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro',
-    sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
-    luogo: testoDi(e?.dati.luogo), gestore: testoDi(e?.dati.gestore), confidente_chiave: (e?.dati.confidente_chiave as string | null) ?? null,
+    sede_chiave: (e?.dati.sede_chiave as string | null) ?? null,
+    gestore: testoDi(e?.dati.gestore), confidente_chiave: (e?.dati.confidente_chiave as string | null) ?? null,
     // L5 (R5-12b): gli orari sono del luogo; il negozio ha solo la sua eccezione (null = valgono quelli della sede)
     eccezione_orari_json: e?.dati.eccezione_orari_json ? normalizzaOrari(jsonDi(e.dati.eccezione_orari_json, ORARI_SEMPRE)) : null,
     programma_punti_json: jsonDi<ProgrammaPunti | null>(e?.dati.programma_punti_json, null),
@@ -49,7 +49,7 @@ export const negozio: DefinizioneModulo = {
     const s = d.sconto_json as ScontoNegozio | null;
     return {
       ...senzaTemporanei(d),
-      nome: testoDi(d.nome).trim(), luogo: testoDi(d.luogo).trim(), gestore: testoOnull(d.gestore), note: testoOnull(d.note),
+      nome: testoDi(d.nome).trim(), gestore: testoOnull(d.gestore), note: testoOnull(d.note),
       programma_punti_json: p ? { nome: p.nome.trim(), unita: p.unita.trim(), calcolo: p.calcolo } : null,
       sconto_json: s ? normalizzaSconto(s) : null,
     };
@@ -180,7 +180,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         _esitiRaw: e?.dati.esiti_json ?? null,
         _esitiDaRisolvere: e?.dati.esiti_json != null && normalizzaEsitiAttivita(jsonDi<unknown>(e.dati.esiti_json, null)) === null,
 
-        sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
+        sede_chiave: (e?.dati.sede_chiave as string | null) ?? null,
         costo: numeroDi(e?.dati.costo), paga_yen: numeroDi(e?.dati.paga_yen), paga_massima: numeroDi(e?.dati.paga_massima),
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),
         tracciamento: testoDi(e?.dati.tracciamento) || tracciamentoPerTipo(tipo),

@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 343 migrazioni di gioco (l'ultima è la 343), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -52,7 +52,9 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Cestino delle eliminazioni della guida e delle mappe.
 
 ## Negozi, oggetti e attività
-- Negozi con orari, sede, listini condivisi, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`).
+- Negozi con orari, sede, listini condivisi, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è
+  la sola sede; quartiere e raggruppamenti si ricavano da lì. Ancora aperti: le macchine come punti vendita propri e la fine del
+  listino condiviso, la finestra unica di modifica del posto.
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
 - Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
@@ -214,6 +216,15 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - **Vecchia lista dei contenuti della guida.** `ContenutiGuidaMappa` (con `SchedaContenutoGuida` e `GET /api/mappe/contenuti/:chiave`)
   non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
   `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.
+
+- **Un solo «dove» dei negozi: punti da decidere.** (1) La Lotteria di Shibuya (dal 18 aprile) e lo stand di Chihaya (dal 23 giugno)
+  avevano una data solo in `negozio.condizioni_json`, mai letta dalla presenza del negozio: la colonna è tolta e la data resta
+  nell'archivio `archivio-frasi-l11`; scriverla nello sblocco del negozio la renderebbe efficace. (2) La Biblioteca di Shujin ha due pin
+  (334 e 346) e il primario è il 334; le Gabbie di Battuta hanno il pin 1587. (3) tre offerte di Mercante Sakai adottate dall'utente
+  (`ofuda-della-magia`, `distintivo-dellangelo`, `mazza-fervente`) tengono una nota che ripete costo e intervallo, già strutturati: le
+  migrazioni non toccano le righe dell'utente, la toglie lui se vuole; i testi superati di Tanaka (dal 19 dicembre, grado Nero) stanno solo nell'archivio, non come nota storica (lo schema delle note
+  storiche non ha un legame con il negozio). (4) In un backup precedente al 7/11 alcuni negozi non hanno sede (`chiosco-bevande-sottopasso`,
+  `lotteria-shibuya`, attività `estrazione-lotteria`): dopo la 346 non hanno quartiere finché non si indica la loro sede.
 
 **Riservato all'utente**
 - Collaudo automatico completo della ricerca globale: lo esegue l'utente.

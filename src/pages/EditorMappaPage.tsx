@@ -594,7 +594,7 @@ function PannelloEditor(p: PropsPannello) {
 
 interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
-const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
+const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
 
 /** «Porta a»: la mappa d'arrivo e, se si vuole, uno spillo di quella mappa. Elenchi con ricerca, mai un punto da cliccare a mano. */
 function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, onCambia }: { valore: DestinazioneSpillo | null; mappaCorrente: string; albero: MappaRiassuntoDto[]; disabilitato: boolean; onCambia: (d: DestinazioneSpillo | null) => void }) {
@@ -613,7 +613,7 @@ function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, 
   );
 }
 
-/** «Collegato a»: un negozio, un'attività, un luogo o un Confidente, scelto da un elenco con ricerca. */
+/** «Collegato a»: un negozio, un luogo o un Confidente, scelto da un elenco con ricerca. Un pin già salvato con un'attività si legge ancora. */
 function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo: TipoRiferimento; chiave: string } | null; disabilitato: boolean; onCambia: (r: { tipo: TipoRiferimento; chiave: string } | null) => void }) {
   const [tipo, setTipo] = useState<TipoRiferimento>(valore?.tipo ?? 'negozio');
   const voci = useCarica(() => cercaRiferimenti(tipo, '', 100), [tipo]);

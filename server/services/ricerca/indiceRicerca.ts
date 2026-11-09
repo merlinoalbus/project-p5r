@@ -296,10 +296,12 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
   // i videogiochi sono già nel loro tipo (dal catalogo): le attività con lo stesso nome non si indicizzano due volte
   attivita: (ctx) => {
     const luoghi = luoghiVisibili(ctx);
-    return q<{ chiave: string; nome: string; sede_chiave: string | null; luogo_chiave: string | null }>(ctx,
-      "SELECT chiave, nome, sede_chiave, luogo_chiave FROM attivita WHERE nascosto = 0 AND tipo <> 'videogioco' ORDER BY ordine").map((a) => {
+    // il quartiere è quello del luogo-sede, anche quando la sede è nascosta (e quindi non è nell'elenco dei luoghi visibili)
+    return q<{ chiave: string; nome: string; sede_chiave: string | null; quartiere_chiave: string | null }>(ctx,
+      `SELECT a.chiave, a.nome, a.sede_chiave, l.quartiere_chiave FROM attivita a LEFT JOIN luogo l ON l.chiave = a.sede_chiave
+       WHERE a.nascosto = 0 AND a.tipo <> 'videogioco' ORDER BY a.ordine`).map((a) => {
       const sede = a.sede_chiave ? luoghi.get(a.sede_chiave) : undefined;
-      const quartiere = a.luogo_chiave ? ctx.aree.nomiQuartieri.get(a.luogo_chiave) : undefined;
+      const quartiere = a.quartiere_chiave ? ctx.aree.nomiQuartieri.get(a.quartiere_chiave) : undefined;
       return {
         tipo: 'attivita', chiave: a.chiave, nome: a.nome, casa: `/guida/attivita?elemento=${encodeURIComponent(a.chiave)}`,
         percorso: sede ? [...percorsoDelLuogo(sede, ctx), sede.nome] : quartiere ? [NOME_CITTA, quartiere] : [],

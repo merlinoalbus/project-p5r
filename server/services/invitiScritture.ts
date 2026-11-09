@@ -168,8 +168,10 @@ export function ripristinaInvito(confidente: string, data: string): InvitoDto {
   return dtoDi(r.chiave);
 }
 
-/** Le tabelle con una colonna `condizioni_json` che può citare un invito (le stesse dell'importazione delle condizioni). */
+/** Le tabelle con una colonna di condizioni che può citare un invito (le stesse dell'importazione delle condizioni). */
 const TABELLE_CON_CONDIZIONI = ['quartiere', 'luogo', 'negozio', 'articolo', 'attivita', 'libro', 'film', 'spillo', 'copia_pezzo', 'confidente_invito'] as const;
+/** La colonna delle condizioni: `condizioni_json` ovunque, tranne il negozio, le cui condizioni proprie stanno in `sblocco_json`. */
+const COLONNA_CONDIZIONI = (t: (typeof TABELLE_CON_CONDIZIONI)[number]): string => (t === 'negozio' ? 'sblocco_json' : 'condizioni_json');
 
 /** Elimina un invito creato dall'utente: finisce nel Cestino. 409 se è della guida, se una partita l'ha registrato o se qualcosa lo cita. */
 export function eliminaInvito(confidente: string, data: string): { eliminato: true; chiave: string } {
@@ -183,7 +185,7 @@ export function eliminaInvito(confidente: string, data: string): { eliminato: tr
   }
   const cita = `%"invito":"${r.chiave.replace(/[\\%_"]/g, (c) => `\\${c}`)}"%`;
   for (const t of TABELLE_CON_CONDIZIONI) {
-    if (prepared(`SELECT 1 FROM ${t} WHERE condizioni_json LIKE ? ESCAPE '\\' ${t === 'confidente_invito' ? 'AND chiave <> ?' : ''} LIMIT 1`).get(...(t === 'confidente_invito' ? [cita, r.chiave] : [cita]))) {
+    if (prepared(`SELECT 1 FROM ${t} WHERE ${COLONNA_CONDIZIONI(t)} LIKE ? ESCAPE '\\' ${t === 'confidente_invito' ? 'AND chiave <> ?' : ''} LIMIT 1`).get(...(t === 'confidente_invito' ? [cita, r.chiave] : [cita]))) {
       throw httpErrors.conflict('invito-in-uso', `La condizione di un altro dato (${t}) cita questo invito: prima si cambia quella.`);
     }
   }

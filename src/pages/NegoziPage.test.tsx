@@ -10,10 +10,10 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { ArticoloDto, PartitaDto } from '../types';
 
 const negoziBase = [
-  { chiave:'u-vuoto', nome:'Bottega nuova', luogoChiave:'shibuya', quartiereNome:'Shibuya', tipo:'altro', luogo:'Stazione', articoli:0, verificati:0 },
-  { chiave:'officina', nome:'Officina', luogoChiave:'kichijoji', quartiereNome:'Kichijoji', tipo:'misto', luogo:'Viale', articoli:2, verificati:2 },
+  { chiave:'u-vuoto', nome:'Bottega nuova', quartiereChiave:'shibuya', quartiereNome:'Shibuya', tipo:'altro', articoli:0, verificati:0 },
+  { chiave:'officina', nome:'Officina', quartiereChiave:'kichijoji', quartiereNome:'Kichijoji', tipo:'misto', articoli:2, verificati:2 },
 ];
-const libreriaBloccata = { chiave:'libreria-segreta', nome:'Libreria segreta', luogoChiave:'jinbocho', quartiereNome:'Jinbocho', tipo:'libri', luogo:'Vicolo', articoli:4, verificati:4, disponibilita: { stato: 'bloccato' as const, requisiti: [] } };
+const libreriaBloccata = { chiave:'libreria-segreta', nome:'Libreria segreta', quartiereChiave:'jinbocho', quartiereNome:'Jinbocho', tipo:'libri', articoli:4, verificati:4, disponibilita: { stato: 'bloccato' as const, requisiti: [] } };
 
 const { getNegozi, ricercaArticoli, impostaAcquisto, posizioni } = vi.hoisted(() => ({
   getNegozi: vi.fn(),

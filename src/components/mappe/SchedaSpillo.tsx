@@ -289,7 +289,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
         <p className="m-0 testo-12 text-text-secondary">
           {/* L5 (T5): la pagina del luogo, col suo nome; gli orari dal luogo */}
-          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary-testo">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
+          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary-testo">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
         </p>
       )}
       {negozio && (

@@ -34,7 +34,7 @@ describe('API città e attività', () => {
     // 22 della guida + Taisho Store, il venditore ambulante e il distributore del sottopasso (072)
     expect(s.luoghi).toHaveLength(25);
     const u = s.luoghi.find((l) => l.nome === 'Untouchable')!;
-    expect(u).toMatchObject({ chiave: 'shibuya/untouchable', tipo: 'negozio', quando: 'sera', verificato: true });
+    expect(u).toMatchObject({ chiave: 'shibuya/untouchable', tipo: 'negozio', orari: expect.objectContaining({ fasce: ['sera'] }), verificato: true });
     expect(u.confidenti).toEqual([{ chiave: 'iwai', nome: expect.stringContaining('Iwai') }]);
     const y = (await request(app).get('/api/compendio/citta/yongen-jaya')).body.data as QuartiereDettaglioDto;
     expect(y.luoghi.some((l) => l.piatti !== null && l.piatti.length > 0)).toBe(true);
@@ -89,7 +89,7 @@ describe('API città e attività', () => {
     expect(a.lavori).toHaveLength(4);
     expect(a.libri).toHaveLength(46);
     expect(a.film).toHaveLength(30);
-    expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
+    expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ quartiereChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
     expect(a.lavori.every((x) => x.tipo === 'lavoro' && x.doti.length > 0)).toBe(true);
     // L13 (O7-4, migrazione 313): la Dote di un libro la dicono gli effetti
     const conDote = (l: LibroDto) => l.effetti.some((e) => e.effetto.famiglia === 'dote');

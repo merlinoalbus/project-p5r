@@ -147,6 +147,26 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'il dedalo della Richiesta (`area_chiave`) con il suo nome; i nomi diversi da quello del dedalo restano nell’archivio «archivio-frasi-l11»',
   },
   {
+    schema: 'main', tabella: 'negozio', colonna: 'luogo_chiave', tolta: 'L1 · migrazione 346',
+    sostituitaDa: 'la sede del negozio (`sede_chiave`) e il quartiere della sua sede (`luogo.quartiere_chiave`): un negozio senza sede (quello del Palazzo di Niijima) non ha quartiere; i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio', colonna: 'luogo', tolta: 'L1 · migrazione 346',
+    sostituitaDa: 'la sede del negozio (`sede_chiave`) con il suo quartiere e la sua Area; ciò che il testo diceva in più (per esempio «edificio principale 1P») sta nelle note del negozio, e il testo originale resta nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio', colonna: 'condizioni_json', tolta: 'L1 · migrazione 346',
+    sostituitaDa: 'lo sblocco del negozio (`sblocco_json`) e le condizioni della sua sede; il valore che la presenza del negozio non leggeva non entra nello sblocco e resta nell’archivio «archivio-frasi-l11» (per le righe presenti quando la migrazione è girata)',
+  },
+  {
+    schema: 'main', tabella: 'attivita', colonna: 'luogo_chiave', tolta: 'L1 · migrazione 346',
+    sostituitaDa: 'la sede dell’attività (`sede_chiave`) e il quartiere della sua sede (`luogo.quartiere_chiave`); i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  ...(['effetto', 'statistiche', 'effetto_json'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'articolo', colonna, tolta: 'L1 · migrazione 346',
+    sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
+  })),
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

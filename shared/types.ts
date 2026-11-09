@@ -9,7 +9,6 @@
 // ============================================================
 
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
-import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
 import type { StatoTanakaFileDto } from './tanakaDecisione.js';
@@ -1888,8 +1887,8 @@ export interface NegozioRiassuntoDto {
   condizioni?: CondizioneSpilloDto[];
   chiave: string;
   nome: string;
-  luogo: string;
-  luogoChiave: string | null;
+  /** Il quartiere del negozio, derivato dal luogo-sede (`sedeChiave` → luogo → quartiere); null senza sede (Niijima). */
+  quartiereChiave: string | null;
   quartiereNome: string | null;
   tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'ambulante' | 'distributore' | 'materiali' | 'misto' | 'altro';
   gestore: string | null;
@@ -2251,10 +2250,7 @@ export interface LuogoDto {
   tipo: TipoLuogo;
   nome: string;
   cosaOffre: string;
-  quando: 'giorno' | 'sera' | 'entrambe' | null;
-  /** I giorni della settimana in cui il luogo è attivo (migrazione 080, `giorni_json`); vuoto = nessuna limitazione. */
-  giorni: GiornoChiave[];
-  /** La frase generata dai giorni («giovedì, sabato e domenica»); vuota quando non c'è limitazione. */
+  /** La frase generata dai giorni degli `orari` («giovedì, sabato e domenica»); vuota quando non c'è limitazione. */
   giorniTesto: string;
   sblocco: string | null;
   confidenti: Array<{ chiave: string; nome: string }>;
@@ -2262,8 +2258,6 @@ export interface LuogoDto {
   attivita: Array<{ chiave: string; nome: string }>;
   /** I negozi che hanno qui la loro sede (`negozio.sede_chiave`). */
   negozi: Array<{ chiave: string; nome: string }>;
-  /** Il primo negozio della sede, per i collegamenti che ne vogliono uno solo; null se nessuno. */
-  negozio: string | null;
   /** Riga della guida o dell'utente (migrazione 071). */
   origine: 'seed' | 'utente';
   piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null;
@@ -2381,7 +2375,9 @@ export interface AttivitaDto {
   nome: string;
   tipo: 'mini-gioco' | 'lavoro' | 'studio' | 'lettura' | 'film' | 'dvd' | 'videogioco' | 'allenamento' | 'cibo' | 'sfida' | 'altro';
   luogo: string;
-  luogoChiave: string | null;
+  /** Il quartiere dell'attività, derivato dal luogo-sede (`sedeChiave` → luogo → quartiere); null per le attività senza sede. */
+  quartiereChiave: string | null;
+  quartiereNome: string | null;
   fascia: 'giorno' | 'sera' | 'entrambe' | null;
   costo: number | null;
   sblocco: string | null;
@@ -3294,7 +3290,7 @@ export interface DettaglioSpilloDto {
     /** §8.11: per una voce permanente o rigenerabile con pin, quanti dei suoi pin sono fatti nella partita (k/N; «in corso» se
      *  0 < k < N); null per una voce senza pin (il suo stato è il suo) o senza partita. */
     avanzamento?: AvanzamentoVoceDto | null };
-  luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null;
+  luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string;
     /** L5: gli orari del luogo in parole, la presenza, la pagina del luogo e tutti i negozi della sede. */
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;

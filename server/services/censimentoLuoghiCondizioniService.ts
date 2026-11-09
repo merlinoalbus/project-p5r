@@ -10,8 +10,8 @@ import type {
 /** Allowlist statica: mai SELECT *, snapshot, descrizioni, immagini o tabelle delle partite. */
 const CAMPI = {
   luogo: ['chiave', 'nome', 'tipo', 'quartiere_chiave', 'area_chiave', 'condizioni_json', 'orari_json', 'note', 'fonte', 'origine', 'nascosto', 'solo_eventi_confidente', 'fonte_condizioni_json'],
-  negozio: ['chiave', 'nome', 'tipo', 'condizioni_json', 'sblocco_json', 'luogo', 'luogo_chiave', 'sede_chiave', 'orari_json', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto', 'listino_condiviso'],
-  attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
+  negozio: ['chiave', 'nome', 'tipo', 'sblocco_json', 'sede_chiave', 'orari_json', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto', 'listino_condiviso'],
+  attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'luogo', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
   articolo: ['chiave', 'nome', 'negozio_chiave', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave', 'articolo_condiviso'],
   quartiere: ['chiave', 'nome', 'sblocco_data', 'fonte', 'condizioni_json', 'condizioni_guida_json', 'fonte_condizioni_json', 'fonte_condizioni_guida_json'],
   area: ['chiave', 'nome', 'quartiere_chiave', 'dungeon_chiave', 'citta_chiave', 'origine'],
