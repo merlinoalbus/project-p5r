@@ -51,7 +51,7 @@ import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.j
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import {
-  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA,
+  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_AMMESSI_PER_CATEGORIA,
   TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo
 } from '../../../shared/spilli.js';
 import type {
@@ -1232,7 +1232,7 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
  * migrazione non lo riallinea: lo si riconosce solo se è identico a quello che il pin ha adesso.
  */
 function riferimentoAmmesso(categoria: ReturnType<typeof categoriaSpillo>, rif: { tipo: string; chiave: string }, attuale?: { tipo: string | null; chiave: string | null }): boolean {
-  if (RIFERIMENTI_PER_CATEGORIA[categoria].includes(rif.tipo as TipoRiferimento)) return true;
+  if (RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(rif.tipo as TipoRiferimento)) return true;
   return categoria === 'citta' && rif.tipo === 'attivita' && attuale?.tipo === 'attivita' && (attuale.chiave ?? '') === rif.chiave;
 }
 
@@ -1707,7 +1707,7 @@ function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } 
   const r = rif?.tipo === 'attivita' && categoria === 'citta'
     ? (prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(rif.chiave) ? { tipo: 'luogo' as const, chiave: rif.chiave } : null)
     : rif;
-  return r && r.tipo !== 'punto' && RIFERIMENTI_PER_CATEGORIA[categoria].includes(r.tipo) ? r : null;
+  return r && r.tipo !== 'punto' && RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(r.tipo) ? r : null;
 }
 
 /** Le voci della guida che un pin del pacchetto dichiara: il campo `voci` (098), o `voce` di un pacchetto della 094-097, o il

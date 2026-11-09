@@ -158,7 +158,8 @@ export function gruppoConteggioSpillo(tipo: string): GruppoConteggioSpillo {
 export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
   return TIPI_SPILLO.filter((t) => CATEGORIA_PER_TIPO[t] === categoria);
 }
-/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso).
+/** A che cosa può collegarsi uno spillo di quella categoria (`null` è sempre ammesso). NON usarla nel codice vivo: serve solo alla migrazione 065
+ *  (registrata, quindi invariata); il codice vivo legge `RIFERIMENTI_AMMESSI_PER_CATEGORIA`.
  *
  * Uno spostamento **porta** a una mappa (la destinazione), ma può anche **essere** un luogo o un
  * punto della Guida — la stazione è un luogo di tipo `trasporto`, la scorciatoia un punto — ed è
@@ -166,11 +167,17 @@ export function tipiDellaCategoria(categoria: CategoriaSpillo): TipoSpillo[] {
  * reinserirlo in copia a ogni reseed. */
 export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
   spostamento: ['mappa', 'luogo', 'punto'],
-  // `attivita` non si offre più: un'attività sta in un luogo (`attivita.sede_chiave`) e il pin punta al luogo. Un pin vecchio che ancora
-  // cita `attivita` (backup di prima della migrazione 344) si legge ancora (`TIPI_RIFERIMENTO`, `mappeService`), ma non si scrive più.
-  citta: ['negozio', 'luogo', 'confidente'],
+  citta: ['negozio', 'attivita', 'luogo', 'confidente'],
   consumabile: ['punto'],
   informativo: ['punto'],
+};
+
+/** I riferimenti che un pin può avere OGGI, per categoria: come `RIFERIMENTI_PER_CATEGORIA` ma senza `attivita` (un'attività sta in un luogo,
+ *  `attivita.sede_chiave`, e il pin punta al luogo; un pin vecchio che ancora cita `attivita` si legge, `TIPI_RIFERIMENTO`, ma non si scrive più).
+ *  È la lista del codice vivo: `RIFERIMENTI_PER_CATEGORIA` qui sopra resta invariata perché serve solo alla migrazione 065, che è registrata. */
+export const RIFERIMENTI_AMMESSI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRiferimento[]> = {
+  ...RIFERIMENTI_PER_CATEGORIA,
+  citta: ['negozio', 'luogo', 'confidente'],
 };
 
 /** Gli elementi fissi del mondo: l'arredo — una porta, una scala, un forziere, un passaggio, una stanza sicura.

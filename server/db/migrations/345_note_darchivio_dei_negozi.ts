@@ -444,9 +444,11 @@ function pianoDelleNoteDiOfferta(db: AppDatabase): PianoArticolo[] {
 /** Tutto ciò che questa migrazione cambierebbe nello stato attuale del database (sola lettura). */
 export function pianoNote(db: AppDatabase): Piano {
   const sblocco: PianoSblocco[] = [];
+  // un negozio adottato o creato dall'utente (origine diversa da `seed`) non si tocca, come le sue offerte: né la nota né lo sblocco
+  const adottati = new Set(db.prepare(`SELECT chiave FROM main.negozio WHERE chiave IN (${NEGOZI.map(() => '?').join(',')}) AND origine <> 'seed'`).pluck().all(...NEGOZI) as string[]);
   const tanaka = db.prepare('SELECT sblocco_json FROM main.negozio WHERE chiave = ?').pluck().get(TANAKA) as string | null | undefined;
   let termineStrutturato = false;
-  if (tanaka !== undefined) {
+  if (tanaka !== undefined && !adottati.has(TANAKA)) {
     const lista = leggi<Condizione[]>(tanaka);
     if (lista && lista.some((x) => JSON.stringify(x) === JSON.stringify(TERMINE_TANAKA))) {
       termineStrutturato = true;
@@ -458,7 +460,7 @@ export function pianoNote(db: AppDatabase): Piano {
       logger.warn({ migrazione: 'L1-06-345', negozio: TANAKA }, 'sblocco_json non leggibile: il termine del 30 gennaio resta nella nota');
     }
   }
-  const negozi = NEGOZI.map((n) => pianoDiUnNegozio(db, n, termineStrutturato)).filter((p): p is PianoNota => p !== null);
+  const negozi = NEGOZI.filter((n) => !adottati.has(n)).map((n) => pianoDiUnNegozio(db, n, termineStrutturato)).filter((p): p is PianoNota => p !== null);
   const note = pianoDelleNoteDiOfferta(db);
   return { negozi, articoli: note.filter((a) => a.azione === 'dedupe'), articoliTenuti: note.filter((a) => a.azione !== 'dedupe'), sblocco };
 }

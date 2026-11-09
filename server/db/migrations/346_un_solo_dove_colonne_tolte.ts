@@ -52,7 +52,8 @@ export const COLONNE_TOLTE = [
 // ---------------------------------------------------------------------------
 
 export type MotivoLuogo = 'quartiere' | 'quartiere e Area della sede' | 'quartiere e nome della sede' | 'nome o descrizione del quartiere' | 'già nella nota' | 'già nel nome del negozio' | 'informazione unica' | 'regola generale';
-interface EsitoLuogo { testo: string; motivo: MotivoLuogo; frase?: string }
+/** `contiene`: per i motivi «già nella nota» e «già nel nome del negozio», la parola che la nota (GN) o il nome del negozio (NN) deve contenere davvero perché il testo vada solo in archivio. */
+interface EsitoLuogo { testo: string; motivo: MotivoLuogo; frase?: string; contiene?: string }
 
 const Q: MotivoLuogo = 'quartiere';
 const QA: MotivoLuogo = 'quartiere e Area della sede';
@@ -80,7 +81,7 @@ const ESITI_LUOGO: Readonly<Record<string, EsitoLuogo>> = {
   'farmacia-aohige': { testo: 'Shibuya, Central Street', motivo: QA },
   'triple-seven': { testo: 'Shibuya, Central Street', motivo: QA },
   // la sede sta nell'Area «Tornello della linea Ginza»: il testo diceva «Sottopasso», e la nota lo dice già («nel sottopasso della stazione»)
-  'panetteria-yon-germain': { testo: 'Shibuya, Sottopasso', motivo: GN },
+  'panetteria-yon-germain': { testo: 'Shibuya, Sottopasso', motivo: GN, contiene: 'sottopasso' },
   'chiosco-kiyasuku': { testo: 'Shibuya, Sottopasso', motivo: QA },
   'venditore-ambulante': { testo: 'Shibuya, Central Street', motivo: QA },
   'yumenoshima': { testo: 'Yongen-Jaya', motivo: Q },
@@ -113,17 +114,17 @@ const ESITI_LUOGO: Readonly<Record<string, EsitoLuogo>> = {
   // senza sede (il solo): il posto è nel Palazzo, e nessun altro dato lo dice
   'negozio-palazzo-niijima': { testo: 'Palazzo di Niijima, dungeon del casinò', motivo: UN, frase: 'Si trova nel Palazzo di Niijima, nel dungeon del casinò.' },
   // la sede è il Leblanc: il resto («dal laptop», «televisore») è già nella nota del negozio
-  'tanaka-affari-loschi': { testo: 'Online, dal laptop di Leblanc', motivo: GN },
-  'home-shopping-tv': { testo: 'Leblanc, televisore', motivo: GN },
+  'tanaka-affari-loschi': { testo: 'Online, dal laptop di Leblanc', motivo: GN, contiene: 'laptop' },
+  'home-shopping-tv': { testo: 'Leblanc, televisore', motivo: GN, contiene: 'televisore' },
   // i distributori condividono la sede del luogo con tutti gli altri: il resto distingue la macchina
   'distributore-shujin-edificio': { testo: 'Aoyama-Itchome, edificio principale 1P', motivo: UN, frase: 'Edificio principale 1P.' },
-  'distributore-shujin-cortile': { testo: 'Aoyama-Itchome, cortile della scuola', motivo: NN },
-  'distributore-shujin-cancello-1': { testo: 'Aoyama-Itchome, cancello della scuola', motivo: NN },
-  'distributore-shujin-cancello-2': { testo: 'Aoyama-Itchome, cancello della scuola', motivo: NN },
+  'distributore-shujin-cortile': { testo: 'Aoyama-Itchome, cortile della scuola', motivo: NN, contiene: 'cortile' },
+  'distributore-shujin-cancello-1': { testo: 'Aoyama-Itchome, cancello della scuola', motivo: NN, contiene: 'cancello' },
+  'distributore-shujin-cancello-2': { testo: 'Aoyama-Itchome, cancello della scuola', motivo: NN, contiene: 'cancello' },
   'distributore-shibuya-sottopasso': { testo: 'Shibuya, sottopasso', motivo: QA },
   'distributore-shibuya-sala-giochi': { testo: 'Shibuya, sala giochi di Central Street', motivo: QN },
-  'distributore-yongen-bagno': { testo: 'Yongen-Jaya, vicino al bagno pubblico', motivo: NN },
-  'distributore-yongen-tabaccaio': { testo: 'Yongen-Jaya, accanto al tabaccaio', motivo: NN },
+  'distributore-yongen-bagno': { testo: 'Yongen-Jaya, vicino al bagno pubblico', motivo: NN, contiene: 'bagno' },
+  'distributore-yongen-tabaccaio': { testo: 'Yongen-Jaya, accanto al tabaccaio', motivo: NN, contiene: 'tabaccaio' },
   'distributore-akihabara-1': { testo: 'Akihabara', motivo: Q },
   'distributore-akihabara-2': { testo: 'Akihabara', motivo: Q },
   'distributore-akihabara-3': { testo: 'Akihabara', motivo: Q },
@@ -140,7 +141,7 @@ const ESITI_LUOGO: Readonly<Record<string, EsitoLuogo>> = {
 };
 
 export interface RigaLuogo {
-  chiave: string; luogo: string | null; note: string | null; sede_chiave: string | null; sede_nome: string | null; area_nome: string | null; quartiere_chiave: string | null; quartiere_nome: string | null;
+  chiave: string; nome?: string | null; luogo: string | null; note: string | null; sede_chiave: string | null; sede_nome: string | null; area_nome: string | null; quartiere_chiave: string | null; quartiere_nome: string | null;
 }
 export interface DecisioneLuogo { testo: string; azione: 'archivio' | 'nota'; motivo: MotivoLuogo; frase: string | null }
 
@@ -165,12 +166,12 @@ export function decidiLuogo(r: RigaLuogo): DecisioneLuogo {
   const noto = ESITI_LUOGO[r.chiave];
   // l'esito tabellare vale solo se la sede che ne spiega il testo c'è ancora: senza sede (un backup in cui il negozio non l'ha) il «dove» non è
   // ridetto da nessun altro dato e il testo segue la regola generale, cioè passa in nota
-  // Per i motivi «già nella nota» (panetteria-yon-germain, tanaka-affari-loschi, home-shopping-tv) e «già nel nome del negozio» (i cinque distributori)
-  // non c'è un controllo sul contenuto: l'esito vale per identità del testo, e sulla copia del 7/11 la nota o il nome dicono davvero quel che il testo diceva
-  // (nome «Distributore del cortile»/«del cancello»/«del bagno pubblico»/«del tabaccaio»; note «nel sottopasso della stazione», «dal laptop del Leblanc»,
-  // «al televisore del Leblanc»); il testo originale è comunque sempre in archivio.
+  // Per i motivi «già nella nota» e «già nel nome del negozio» l'esito vale solo se la nota (o il nome) contiene davvero la parola dell'informazione
+  // (`contiene`): altrimenti il testo segue la regola generale e passa in nota. Il testo originale è comunque sempre in archivio.
   const dipendeDallaSede = noto && (noto.motivo === 'quartiere' || noto.motivo === 'quartiere e Area della sede' || noto.motivo === 'quartiere e nome della sede' || noto.motivo === 'nome o descrizione del quartiere');
-  if (noto && noto.testo === testo && !(dipendeDallaSede && r.quartiere_chiave === null)) {
+  const dove = noto?.motivo === 'già nella nota' ? r.note : noto?.motivo === 'già nel nome del negozio' ? (r.nome ?? null) : null;
+  const dettoAltrove = !noto?.contiene || (!!dove && normalizza(dove).includes(normalizza(noto.contiene)));
+  if (noto && noto.testo === testo && !(dipendeDallaSede && r.quartiere_chiave === null) && dettoAltrove) {
     return { testo, azione: noto.frase && !notaContiene(r.note, noto.frase) ? 'nota' : 'archivio', motivo: noto.motivo, frase: noto.frase ?? null };
   }
   const resto = restoGenerico(r, testo);
@@ -179,7 +180,7 @@ export function decidiLuogo(r: RigaLuogo): DecisioneLuogo {
 
 /** Le righe dei negozi per classificare il testo «dove» (sola lettura; esportata per la prova; richiede la colonna `negozio.luogo`). */
 export function righeLuogo(db: AppDatabase): RigaLuogo[] {
-  return db.prepare(`SELECT n.chiave, n.luogo, n.note, n.sede_chiave, l.nome AS sede_nome, a.nome AS area_nome, q.chiave AS quartiere_chiave, q.nome AS quartiere_nome
+  return db.prepare(`SELECT n.chiave, n.nome, n.luogo, n.note, n.sede_chiave, l.nome AS sede_nome, a.nome AS area_nome, q.chiave AS quartiere_chiave, q.nome AS quartiere_nome
     FROM main.negozio n LEFT JOIN main.luogo l ON l.chiave = n.sede_chiave LEFT JOIN main.area a ON a.chiave = l.area_chiave LEFT JOIN main.quartiere q ON q.chiave = l.quartiere_chiave
     ORDER BY n.ordine, n.chiave`).all() as RigaLuogo[];
 }

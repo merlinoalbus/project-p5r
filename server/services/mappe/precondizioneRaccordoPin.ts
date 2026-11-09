@@ -4,7 +4,7 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { tabellaTolta } from '../../db/fontiTolte.js';
 import { normalizzaRequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { ammetteCondizioni, categoriaSpillo, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO } from '../../../shared/spilli.js';
+import { ammetteCondizioni, categoriaSpillo, RIFERIMENTI_AMMESSI_PER_CATEGORIA, TIPI_SPILLO } from '../../../shared/spilli.js';
 
 export interface PinDelRaccordo {
   id: number; origine: string; riferimento_tipo: string | null; riferimento_chiave: string | null;
@@ -50,7 +50,7 @@ export function verificaPin(pin: PinDelRaccordo, destinazioni: unknown[], ripres
   if (pin.origine !== 'utente' || !riferimentoAmmesso
     || pin.collezionabile !== 0 || pin.mappa_chiave === null || destinazioni.length !== 0
     || !(TIPI_SPILLO as readonly string[]).includes(pin.tipo)
-    || !RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(pin.tipo)].includes('luogo')) {
+    || !RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoriaSpillo(pin.tipo)].includes('luogo')) {
     throw httpErrors.conflict('raccordo-pin-non-ammesso', 'Il pin non è più un pin personale senza riferimento e destinazione, compatibile con il raccordo a un luogo.');
   }
   // I negozi non ammettono condizioni proprie: NULL e array vuoto sono leciti, senza riscriverli.

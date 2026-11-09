@@ -17,20 +17,10 @@
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
-import { categoriaSpillo, tipiDellaCategoria } from '../../../shared/spilli.js';
+import { RIFERIMENTI_PER_CATEGORIA, categoriaSpillo, tipiDellaCategoria } from '../../../shared/spilli.js';
 import { logger } from '../../utils/logger.js';
 
 const TOLLERANZA = 8;
-
-/** Copia congelata di `RIFERIMENTI_PER_CATEGORIA` com'era quando la migrazione fu scritta (con `attivita` fra i riferimenti della città): il modulo
- *  vivo l'ha cambiata (L1-02, `attivita` non si offre più) e un backup di prima della 065 con pin «attività» non deve vederseli azzerare prima
- *  della 344. Non si aggiorna: l'effetto della migrazione resta quello di allora. */
-const RIFERIMENTI_PER_CATEGORIA: Record<string, readonly string[]> = {
-  spostamento: ['mappa', 'luogo', 'punto'],
-  citta: ['negozio', 'attivita', 'luogo', 'confidente'],
-  consumabile: ['punto'],
-  informativo: ['punto'],
-};
 
 export const migration065: Migration = {
   id: 65,
@@ -73,5 +63,5 @@ export const migration065: Migration = {
 
 /** Vero se uno spillo della categoria può avere un riferimento di quel tipo (`RIFERIMENTI_PER_CATEGORIA`). */
 function ammesso(categoria: string, riferimento: string): boolean {
-  return (RIFERIMENTI_PER_CATEGORIA[categoria] ?? []).includes(riferimento);
+  return ((RIFERIMENTI_PER_CATEGORIA as Record<string, readonly string[]>)[categoria] ?? []).includes(riferimento);
 }

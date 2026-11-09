@@ -2,7 +2,7 @@
 // Test registro dei tipi di spillo — conteggio, completezza delle definizioni, colori distinti, gruppi della palette, tipi «dialogo» e della città
 // ============================================================
 
-import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoCitabile, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
+import { CATEGORIE_SPILLO, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_AMMESSI_PER_CATEGORIA, TIPI_SPILLO, categoriaSpillo, eStrutturale, parolaDelloStato, ritornoDelloStato, spilloPerPunto, statoCitabile, statoDelPin, statoDelTipo, tipiDellaCategoria } from './spilli.js';
 
 describe('registro dei tipi di spillo', () => {
   it('conta 41 tipi distinti (il «Tesoro» generico è stato tolto), ognuno con nome, colore esadecimale e riserva nel registro', () => {
@@ -23,7 +23,7 @@ describe('registro dei tipi di spillo', () => {
     expect(DEFINIZIONI_SPILLO.nemico.collezionabile).toBe(false);
     for (const t of TIPI_SPILLO) {
       const rif = DEFINIZIONI_SPILLO[t].riferimento;
-      if (rif) expect(RIFERIMENTI_PER_CATEGORIA[categoriaSpillo(t)], t).toContain(rif);
+      if (rif) expect(RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoriaSpillo(t)], t).toContain(rif);
       expect(DEFINIZIONI_SPILLO[t].collezionabile, t).toBe(categoriaSpillo(t) === 'consumabile');
     }
   });
