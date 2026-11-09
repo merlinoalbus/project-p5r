@@ -15,10 +15,10 @@
 //      originale va sempre in `dati_guida.archivio-frasi-l11`. La classificazione dei 67 testi noti è nella tabella `ESITI_LUOGO` (chiave, testo,
 //      motivo): vale solo se il testo del database è uguale a quello atteso (guardia per identità); un testo nuovo o cambiato segue la regola
 //      generale (resto = ciò che non è quartiere, Area o nome della sede).
-//  (b) `negozio.condizioni_json` non vuota (mantra-ganda: Gemelle rango 3, identica a quella della sua sede; lotteria-shibuya: dal 04-18;
-//      chihaya-shinjuku: dal 06-23) va solo in archivio: la presenza del negozio non la leggeva (la leggevano gli incensi e il censimento) e
-//      spostarla in `negozio.sblocco_json` renderebbe efficace una condizione che non lo era, cambiando la disponibilità del negozio. Le date
-//      restano nell'archivio per chi voglia applicarle (la data di Lotteria e quella di Chihaya compaiono già sulle singole offerte).
+//  (b) `negozio.condizioni_json` non vuota (mantra-ganda: Gemelle rango 3, identica a quella della sua sede, quindi solo archivio; lotteria-shibuya:
+//      dal 04-18, «da lunedì 18/4» per la guida; chihaya-shinjuku: dal 06-23, l'incontro che sblocca il banco) passa in `negozio.sblocco_json`, dove
+//      la presenza del negozio la legge (prima la leggevano solo gli incensi e il censimento): il negozio vale dalla data, e le offerte avevano già
+//      la loro. Una condizione già identica nella sede o nello sblocco non si ripete; il valore originale va in archivio.
 //  (c) le sette colonne si tolgono con `ALTER TABLE … DROP COLUMN` (SQLite lo accetta anche per `luogo_chiave`, che aveva un `REFERENCES quartiere`,
 //      perché nessun indice, vista o trigger le cita). Prima si archivia tutto ciò che le colonne contenevano (righe archiviate = righe tolte; per
 //      le tre di `articolo` ogni valore non vuoto, se per caso ce ne fosse).
@@ -201,7 +201,14 @@ const vuota = (json: string | null): boolean => json === null || ['', '[]', 'nul
 // la migrazione
 // ---------------------------------------------------------------------------
 
-const TABELLE_INTATTE = ['luogo', 'quartiere', 'spillo', 'cestino', 'catalogo_oggetto', 'ricompensa_oggetto'] as const;
+/** La sede, per identità, degli elementi che in un backup vecchio hanno il solo quartiere (sede mancante): la sede che hanno nei dati del 7/11 pomeriggio. */
+const SEDI_PER_IDENTITA: ReadonlyArray<{ tabella: 'negozio' | 'attivita'; chiave: string; sede: string; quartiere: string }> = [
+  { tabella: 'negozio', chiave: 'lotteria-shibuya', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya' },
+  { tabella: 'negozio', chiave: 'chiosco-bevande-sottopasso', sede: 'shibuya/u-chiosco-dei-succhi-del-sottopasso', quartiere: 'shibuya' },
+  { tabella: 'attivita', chiave: 'estrazione-lotteria', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya' },
+];
+
+const TABELLE_INTATTE = ['luogo','quartiere', 'spillo', 'cestino', 'catalogo_oggetto', 'ricompensa_oggetto'] as const;
 const SENZA: Record<'negozio' | 'articolo' | 'attivita', readonly string[]> = {
   negozio: ['luogo_chiave', 'luogo', 'condizioni_json', 'note', 'sblocco_json'], articolo: ['effetto', 'statistiche', 'effetto_json'], attivita: ['luogo_chiave'],
 };
@@ -221,6 +228,18 @@ export const migration346: Migration = {
     if (daTogliere.length === 0) return;
     for (const t of ['negozio', 'attivita', 'articolo', 'luogo', 'area', 'quartiere', 'dati_guida']) if (!esisteTabella(db, t)) errore(`manca la tabella ${t}`);
     const c = (tabella: string, colonna: string): boolean => haColonna(db, tabella, colonna);
+
+    // (0) la sede dei tre elementi che, in un backup di prima del 7/11 pomeriggio, avevano il solo quartiere: nei dati attuali stanno in un luogo
+    // (creato dall'utente), che qui si cerca per identità. Vale solo se la sede manca, il vecchio quartiere è quello atteso e il luogo c'è e sta in quel
+    // quartiere: altrimenti non si inventa niente (in un backup senza quei luoghi la riga resta senza quartiere, e il verbale lo dice).
+    const sediAssegnate: Array<{ tabella: string; chiave: string; sede: string }> = [];
+    for (const s of SEDI_PER_IDENTITA) {
+      if (!c(s.tabella, 'luogo_chiave')) continue;
+      const luogoEsiste = db.prepare('SELECT 1 FROM main.luogo WHERE chiave = ? AND quartiere_chiave = ?').get(s.sede, s.quartiere);
+      if (!luogoEsiste) continue;
+      const fatto = db.prepare(`UPDATE main.${s.tabella} SET sede_chiave = ? WHERE chiave = ? AND sede_chiave IS NULL AND luogo_chiave = ?`).run(s.sede, s.chiave, s.quartiere).changes;
+      if (fatto === 1) sediAssegnate.push({ tabella: s.tabella, chiave: s.chiave, sede: s.sede });
+    }
 
     // le impronte di prima (tutto tranne le colonne dichiarate) e i conteggi
     const prima = new Map<string, string>();
@@ -254,23 +273,23 @@ export const migration346: Migration = {
       if (luogo.classificati !== conteggi.negozio) errore('non tutti i negozi sono stati classificati');
     }
 
-    // (b) le condizioni storiche del negozio vanno solo in archivio (nessuna scrittura in `sblocco_json`: vedi l'intestazione); si distinguono
-    // quelle già uguali nella sede e quelle che il negozio dichiarava soltanto qui
-    // `soloArchivio`: condizioni che il negozio dichiarava solo in questa colonna, mai lette dalla presenza del negozio (la leggevano soltanto gli incensi
-    // e il censimento): spostarle in `sblocco_json` le renderebbe efficaci e cambierebbe la disponibilità del negozio (la Lotteria di Shibuya prima del 18 aprile,
-    // lo stand di Chihaya prima del 23 giugno), quindi restano nell'archivio finché l'utente non decide di applicarle
-    const condizioni = { soloArchivio: [] as Array<{ chiave: string; condizioni: Condizione[] }>, giaNellaSede: [] as string[], nonLeggibili: [] as string[] };
+    // (b) le condizioni storiche del negozio, confermate dalla guida (Lotteria di Shibuya «da lunedì 18/4»; Chihaya: incontro del 23 giugno, che è lo
+    // sblocco del banco), passano in `sblocco_json`, dove la presenza del negozio le legge; quelle già uguali nella sede o nello sblocco non si ripetono.
+    // Il valore originale va comunque in archivio. Effetto: la presenza del negozio vale dalla data (le offerte avevano già la loro data).
+    const condizioni = { spostate: [] as Array<{ chiave: string; condizioni: Condizione[] }>, giaNellaSede: [] as string[], nonLeggibili: [] as string[] };
     const archivioCondizioni: Record<string, string> = {};
     if (c('negozio', 'condizioni_json')) {
       const righe = db.prepare(`SELECT n.chiave, n.condizioni_json, n.sblocco_json, l.condizioni_json AS sede FROM main.negozio n LEFT JOIN main.luogo l ON l.chiave = n.sede_chiave
         WHERE n.condizioni_json IS NOT NULL ORDER BY n.chiave`).all() as Array<{ chiave: string; condizioni_json: string; sblocco_json: string | null; sede: string | null }>;
+      const scriviSblocco = db.prepare('UPDATE main.negozio SET sblocco_json = ? WHERE chiave = ? AND sblocco_json IS ?');
       for (const r of righe.filter((x) => !vuota(x.condizioni_json))) {
         archivioCondizioni[r.chiave] = r.condizioni_json;
         const proprie = lista(r.condizioni_json); const sede = lista(r.sede) ?? []; const sblocco = lista(r.sblocco_json);
         if (!proprie || !sblocco) { condizioni.nonLeggibili.push(r.chiave); continue; }
         const nuove = proprie.filter((x) => !sede.some((s) => uguali(s, x)) && !sblocco.some((s) => uguali(s, x)));
         if (nuove.length === 0) { condizioni.giaNellaSede.push(r.chiave); continue; }
-        condizioni.soloArchivio.push({ chiave: r.chiave, condizioni: nuove });
+        if (scriviSblocco.run(JSON.stringify([...sblocco, ...nuove]), r.chiave, r.sblocco_json).changes !== 1) errore(`lo sblocco di ${r.chiave} non si aggiorna`);
+        condizioni.spostate.push({ chiave: r.chiave, condizioni: nuove });
       }
     }
 
@@ -304,7 +323,7 @@ export const migration346: Migration = {
     for (const t of ['negozio', 'articolo', 'attivita'] as const) if (improntaTabella(db, t, SENZA[t]) !== prima.get(t)) errore(`le altre colonne di ${t} sono cambiate`);
     for (const t of TABELLE_INTATTE) if (prima.has(t) && improntaTabella(db, t) !== prima.get(t)) errore(`la tabella ${t} è cambiata`);
     const attesiNote = new Set(luogo.note.map((n) => n.chiave));
-    const attesiSblocco = new Set<string>(); // lo sblocco dei negozi non cambia in questa migrazione
+    const attesiSblocco = new Set(condizioni.spostate.map((s) => s.chiave));
     for (const r of db.prepare('SELECT chiave, note, sblocco_json FROM main.negozio').all() as Array<{ chiave: string; note: string | null; sblocco_json: string | null }>) {
       const p = notePrima.get(r.chiave);
       if (!p) return errore(`il negozio ${r.chiave} è nuovo`);
@@ -315,10 +334,10 @@ export const migration346: Migration = {
     registraAudit(db, 'audit-l1-07-11-un-solo-dove', {
       migrazione: 'L1-07/08/11 · 346',
       colonneTolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`),
-      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo,
+      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo, sediAssegnate,
       quartieri: { negozi: quartieriNegozi.length, attivita: quartieriAttivita.length, discrepanze: discrepanze.length },
     });
     if (condizioni.nonLeggibili.length > 0) logger.warn({ migrazione: 'L1-346', negozi: condizioni.nonLeggibili }, 'condizioni del negozio non leggibili: non sono passate a sblocco_json, restano nell’archivio');
-    logger.info({ migrazione: 'L1-07/08/11-346', tolte: daTogliere.length, luogo: { ...luogo, note: luogo.note.length }, condizioni: { soloArchivio: condizioni.soloArchivio.map((s) => s.chiave), giaNellaSede: condizioni.giaNellaSede }, discrepanze: discrepanze.length }, 'un solo dove: colonne tolte');
+    logger.info({ migrazione: 'L1-07/08/11-346', tolte: daTogliere.length, luogo: { ...luogo, note: luogo.note.length }, condizioni: { spostate: condizioni.spostate.map((s) => s.chiave), giaNellaSede: condizioni.giaNellaSede }, discrepanze: discrepanze.length }, 'un solo dove: colonne tolte');
   },
 };

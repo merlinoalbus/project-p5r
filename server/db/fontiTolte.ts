@@ -156,7 +156,7 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
   },
   {
     schema: 'main', tabella: 'negozio', colonna: 'condizioni_json', tolta: 'L1 · migrazione 346',
-    sostituitaDa: 'lo sblocco del negozio (`sblocco_json`) e le condizioni della sua sede; il valore che la presenza del negozio non leggeva non entra nello sblocco e resta nell’archivio «archivio-frasi-l11» (per le righe presenti quando la migrazione è girata)',
+    sostituitaDa: 'lo sblocco del negozio (`sblocco_json`) e le condizioni della sua sede; la condizione propria del negozio passa nello sblocco; il valore originale resta nell’archivio «archivio-frasi-l11» (per le righe presenti quando la migrazione è girata)',
   },
   {
     schema: 'main', tabella: 'attivita', colonna: 'luogo_chiave', tolta: 'L1 · migrazione 346',

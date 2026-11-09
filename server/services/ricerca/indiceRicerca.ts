@@ -149,7 +149,7 @@ function percorsoDelLuogo(l: { quartiere_chiave: string; area_chiave: string | n
 /** Le righe di luogo che servono ai tipi derivati: non nascoste, per chiave. */
 interface LuogoIndicizzato { chiave: string; nome: string; quartiere_chiave: string; area_chiave: string | null }
 function luoghiVisibili(ctx: ContestoIndice): Map<string, LuogoIndicizzato> {
-  return new Map(q<LuogoIndicizzato>(ctx, 'SELECT chiave, nome, quartiere_chiave, area_chiave FROM luogo WHERE nascosto = 0 ORDER BY ordine').map((l) => [l.chiave, l]));
+  return new Map(q<LuogoIndicizzato>(ctx, 'SELECT chiave, nome, quartiere_chiave, area_chiave FROM luogo WHERE nascosto = 0 ORDER BY ordine, rowid').map((l) => [l.chiave, l]));
 }
 
 /** L'immagine (di un luogo) è la planimetria predefinita della sua Area; i luoghi senza Area non ne hanno. */

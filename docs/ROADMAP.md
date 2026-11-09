@@ -217,14 +217,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
   `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.
 
-- **Un solo «dove» dei negozi: punti da decidere.** (1) La Lotteria di Shibuya (dal 18 aprile) e lo stand di Chihaya (dal 23 giugno)
-  avevano una data solo in `negozio.condizioni_json`, mai letta dalla presenza del negozio: la colonna è tolta e la data resta
-  nell'archivio `archivio-frasi-l11`; scriverla nello sblocco del negozio la renderebbe efficace. (2) La Biblioteca di Shujin ha due pin
-  (334 e 346) e il primario è il 334; le Gabbie di Battuta hanno il pin 1587. (3) tre offerte di Mercante Sakai adottate dall'utente
-  (`ofuda-della-magia`, `distintivo-dellangelo`, `mazza-fervente`) tengono una nota che ripete costo e intervallo, già strutturati: le
-  migrazioni non toccano le righe dell'utente, la toglie lui se vuole; i testi superati di Tanaka (dal 19 dicembre, grado Nero) stanno solo nell'archivio, non come nota storica (lo schema delle note
-  storiche non ha un legame con il negozio). (4) In un backup precedente al 7/11 alcuni negozi non hanno sede (`chiosco-bevande-sottopasso`,
-  `lotteria-shibuya`, attività `estrazione-lotteria`): dopo la 346 non hanno quartiere finché non si indica la loro sede.
+- **Un solo «dove» dei negozi: due residui.** (1) Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà
+  anche per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati. (2) Un backup precedente alle 16 del 7/11 non
+  ha i due luoghi creati quel pomeriggio: i negozi `chiosco-bevande-sottopasso` e `lotteria-shibuya` e l'attività `estrazione-lotteria` restano senza
+  quartiere (la 346 dà loro la sede per identità quando il luogo c'è); il testo del «dove» dei due negozi sta nella nota, quello dell'attività nel suo `luogo`.
 
 **Riservato all'utente**
 - Collaudo automatico completo della ricerca globale: lo esegue l'utente.

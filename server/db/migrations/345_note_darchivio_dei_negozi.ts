@@ -7,30 +7,38 @@
 // strutturato. Quasi tutto ripete ciò che i dati strutturati dicono già (sede, orari, prezzi, costi, condizioni, esiti): un testo che ripete si
 // toglie con archivio (DECISIONI «AD9»), ciò che è unico resta o si struttura, ciò che contraddice i dati si toglie con archivio.
 //
+// PRINCIPIO (richiesta dell'utente): ogni dato della guida ancora valido sta in forma strutturata; solo ciò che i dati smentiscono resta in archivio.
 // COME: ogni riga del blocco (e, quando una riga ha più parti, ogni parte) si confronta con la riga o la colonna strutturata che la copre. Una
-// parte si toglie SOLO se il dato che la copre c'è e coincide (stesso oggetto, stesso prezzo o costo, stessa condizione); altrimenti RESTA e il
-// verbale dice perché. Il resto della nota (il primo paragrafo) non si tocca, salvo due frasi che la migrazione dimostra ripetute:
+// parte si toglie SOLO se il dato che la copre c'è e coincide (stesso oggetto, stesso prezzo o costo, stessa condizione); una parte valida che
+// nessun dato modella NON resta nel blocco d'archivio: diventa una frase normale in coda al primo paragrafo della nota (iniziale maiuscola, punto
+// finale), e l'intestazione e la frase standard del blocco spariscono (nessun blocco, se nessuna parte resta). Un indirizzo che non è fra le fonti
+// si aggiunge a `negozio.fonte` (separatore « ; »). Il testo originale di ogni nota cambiata resta INTERO nell'archivio. Il primo paragrafo non si
+// tocca, salvo due frasi che la migrazione dimostra ripetute:
 //   - `venditore-ambulante`: «Gli articoli si sbloccano in base al Rango Fascino (2, 3 e 5)» (i ranghi delle Doti dell'offerta sono 2, 3 e 5);
 //   - `tanaka-affari-loschi`: le due frasi sul «30 gennaio», che da qui è una condizione strutturata dello sblocco del negozio.
 // Per ogni negozio:
-//   - venditore-ambulante, mercante-sakai, jose: le righe che ripetono sede, orari, prezzi, costi, intervalli, condizioni dei Dedali si tolgono; le
-//     righe di jose sulla posizione («veicolo particolare…») e sul modo in cui appare non sono in nessun dato e restano, come l'indirizzo di una
-//     seconda pagina fonte che non è fra le fonti del negozio;
+//   - venditore-ambulante, mercante-sakai, jose: le righe che ripetono sede, orari, prezzi, costi, intervalli, condizioni dei Dedali si tolgono; di
+//     jose restano, come frasi, la posizione («veicolo particolare…») e il «casualmente… dopo la prima richiesta» (il catalogo che cambia col Dedalo
+//     è già nelle condizioni delle offerte); gli indirizzi mancanti vanno in `fonte`;
 //   - gachapon-akihabara: il passaggio della Replica d'arma al Balsamo vitale dopo cinque scambi c'è già nel modello degli esiti
 //     (`ricompensa_oggetto` dell'offerta «Scambio: Mothman muschiato»), quindi la nota non serve più; la soglia «dal 5° scambio» che la vecchia
 //     riga dichiarava è quella che la nota dell'offerta definisce sbagliata (dal 6°);
 //   - tanaka-affari-loschi: il termine «30 gennaio» diventa la condizione `non(data dal 01-31)` nello sblocco del negozio (accanto a «laptop
-//     riparato»), le frasi sul termine si tolgono, e si tolgono con archivio le righe che contraddicono i dati (il «grado Nero» dei prodotti
-//     iniziali, «Dal 19 dicembre» come apertura); restano «un solo ordine alla volta» e il come si ripara il Laptop (il Set di strumenti da PC).
+//     riparato»), le frasi sul termine si tolgono, si tolgono con archivio le righe che contraddicono i dati (il «grado Nero» dei prodotti
+//     iniziali, «Dal 19 dicembre» come apertura) e «un solo ordine alla volta» (il rifornimento `consegna` lo implementa già: `shared/rifornimento.ts`,
+//     «la consegna: un ordine alla volta, qualunque sia la quantità»); il come si ripara il Laptop non è modellato e diventa la frase «Il Laptop si
+//     ripara con il Set di strumenti da PC di Akihabara.».
 // Le note delle offerte (`articolo.nota`) che ripetono il costo e l'intervallo di Sakai (12), il costo dello scambio (2) o la condizione di
-// sblocco del Dedalo di Jose (37) si tolgono con archivio, ciascuna dopo la prova puntuale, SOLO se l'offerta è di origine `seed`: un'offerta adottata
-// o creata dall'utente (origine diversa, 3 di Sakai nella copia del 7/11: ofuda-della-magia, distintivo-dellangelo, mazza-fervente) non si tocca,
-// quindi le note tolte sono 48 su quella copia. Le altre note di offerta (Tanaka, Gachapon) restano.
+// sblocco del Dedalo di Jose (37) si tolgono con archivio, ciascuna dopo la prova puntuale (51 sulla copia del 7/11, comprese le 3 offerte di Sakai
+// adottate dall'utente: ofuda-della-magia, distintivo-dellangelo, mazza-fervente, la cui nota ripete davvero costo e intervallo). Le tre note di
+// Tanaka «rango cliente Iniziale» perdono quella parte (è il grado di base, soglia 0 yen, e l'offerta non ha una condizione `rango-cliente`): la
+// prima diventa vuota, le altre due restano «Esclusivo Royal.». Le note di Gachapon restano. I NEGOZI di origine diversa da `seed` non si toccano
+// (né nota né sblocco né fonte).
 //
 // IL TESTO TOLTO resta intero in `dati_guida.archivio-frasi-l11` (colonne `negozio.note` e `articolo.nota`, prima copia mai sovrascritta); il
 // verbale riga per riga (azione e motivo) è in `dati_guida.audit-l1-06-note-darchivio`. Idempotente: una seconda esecuzione non trova più nulla da
-// togliere. Gli orari, i costi, le condizioni e le altre colonne di `negozio` e `articolo` non cambiano (impronte prima e dopo); l'unica altra
-// scrittura è lo sblocco di Tanaka. Nessun `updated_at` cambia, nessun import da `server/services/`.
+// togliere. Gli orari, i costi, le condizioni e le altre colonne di `negozio` e `articolo` non cambiano (impronte prima e dopo); le altre scritture
+// sono lo sblocco di Tanaka e le fonti dei negozi. Nessun `updated_at` cambia, nessun import da `server/services/`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -54,18 +62,25 @@ const TERMINE_TANAKA = { tipo: 'non', condizione: { tipo: 'data', dal: '01-31' }
 // Tipi del piano (esportati: la prova li stampa come tabella riga per riga)
 // ---------------------------------------------------------------------------
 
+/** dedupe/contraddizione: la parte si toglie con archivio; tenuto: la parte è valida e non modellata, resta come frase della nota (`frase`, se la
+ *  parte va riscritta; altrimenti il testo stesso). */
 export type Azione = 'dedupe' | 'contraddizione' | 'tenuto';
-export interface Segmento { testo: string; azione: Azione; motivo: string }
-/** Una riga del blocco: le sue parti (una sola se non si divide) e il separatore con cui le parti tenute si rimettono insieme. */
-export interface RigaEsaminata { segmenti: Segmento[]; separatore: string }
+export interface Segmento { testo: string; azione: Azione; motivo: string; frase?: string }
+/** Una riga del blocco: le sue parti (una sola se non si divide), il separatore con cui le parti tenute si rimettono insieme e gli indirizzi
+ *  che vanno aggiunti alle fonti del negozio. */
+export interface RigaEsaminata { segmenti: Segmento[]; separatore: string; aggiungiFonti?: string[] }
 export interface PianoNota {
   negozio: ChiaveNegozio;
   originale: string;
   nuova: string;
+  fonteOriginale: string;
+  /** La `fonte` nuova, o null se non cambia. */
+  fonteNuova: string | null;
   paragrafo: Segmento[];
   righe: RigaEsaminata[];
 }
-export interface PianoArticolo { articolo: string; negozio: string; originale: string; azione: Azione; motivo: string }
+/** `nuova` assente = la nota dell'offerta diventa vuota (NULL); presente = la nota si riscrive così. */
+export interface PianoArticolo { articolo: string; negozio: string; originale: string; azione: Azione; motivo: string; nuova?: string }
 export interface PianoSblocco { negozio: string; prima: string | null; dopo: string }
 export interface Piano { negozi: PianoNota[]; articoli: PianoArticolo[]; articoliTenuti: PianoArticolo[]; sblocco: PianoSblocco[] }
 
@@ -84,7 +99,9 @@ interface Contesto {
   /** La nota com'è nel database, e la stessa in forma NFC (con cui si confrontano le righe). */
   notaGrezza: string | null; nota: string;
   sblocco: Condizione[]; orari: { giorni?: string[]; fasce?: string[]; chiusoConPioggia?: boolean } | null;
-  programma: { calcolo?: string } | null; areaNome: string | null; quartiereNome: string | null; fonti: Set<string>; articoli: ArticoloCtx[];
+  programma: { calcolo?: string } | null; areaNome: string | null; quartiereNome: string | null;
+  /** La `fonte` del negozio com'è, e l'insieme degli indirizzi di negozio e offerte. */
+  fonteNegozio: string; fonti: Set<string>; articoli: ArticoloCtx[];
 }
 
 function leggi<T>(json: string | null): T | null {
@@ -137,7 +154,7 @@ function leggiContesto(db: AppDatabase, chiave: ChiaveNegozio): Contesto | null 
   });
   return {
     chiave, notaGrezza: n.note, nota: (n.note ?? '').normalize('NFC'), sblocco: leggi<Condizione[]>(n.sblocco_json) ?? [], orari: leggi<Contesto['orari']>(n.orari_json),
-    programma: leggi<Contesto['programma']>(n.programma_punti_json), areaNome: n.area_nome, quartiereNome: n.quartiere_nome, fonti, articoli,
+    programma: leggi<Contesto['programma']>(n.programma_punti_json), areaNome: n.area_nome, quartiereNome: n.quartiere_nome, fonteNegozio: n.fonte, fonti, articoli,
   };
 }
 
@@ -163,20 +180,39 @@ const rangoCliente = (a: ArticoloCtx): string => {
 };
 const importoFiori = (a: ArticoloCtx): number | null => (a.costo?.tipo === 'fiori' && typeof a.costo.importo === 'number' ? a.costo.importo : null);
 
-/** Una riga d'indirizzi: si toglie solo se ogni indirizzo è già fra le fonti del negozio o delle sue offerte. */
+/** Una riga d'indirizzi: si toglie sempre; gli indirizzi che non sono già fra le fonti del negozio o delle sue offerte si aggiungono a `negozio.fonte`. */
 function esaminaUrl(c: Contesto, testo: string): RigaEsaminata | null {
   const url = testo.split(/[\s;]+/).filter(Boolean);
   if (url.length === 0 || !url.every((u) => /^https?:\/\//.test(u))) return null;
   const mancanti = url.filter((u) => !c.fonti.has(u));
-  return rigaUnica(mancanti.length === 0
-    ? dedupe(testo, 'gli indirizzi sono già le fonti del negozio e delle sue offerte (`fonte`)')
-    : tenuto(testo, `l'indirizzo ${mancanti.join(' ; ')} non è fra le fonti del negozio né delle offerte`));
+  return {
+    segmenti: [dedupe(testo, mancanti.length === 0
+      ? 'gli indirizzi sono già le fonti del negozio e delle sue offerte (`fonte`)'
+      : `indirizzo spostato nelle fonti del negozio (\`fonte\`): ${mancanti.join(' ; ')}`)],
+    separatore: '', ...(mancanti.length > 0 ? { aggiungiFonti: mancanti } : {}),
+  };
+}
+
+/** La `fonte` del negozio con gli indirizzi in più (separatore « ; », come nelle fonti con più indirizzi); null se non c'è niente da aggiungere. */
+function fonteConAggiunte(fonte: string, indirizzi: string[]): string | null {
+  const presenti = fonte.split(/\s*;\s*/).filter(Boolean);
+  const nuovi = [...new Set(indirizzi)].filter((u) => !presenti.includes(u));
+  return nuovi.length === 0 ? null : [...presenti, ...nuovi].join(' ; ');
+}
+
+/** Una parte valida che nessun dato modella: resta come frase della nota (iniziale maiuscola, punto finale). */
+function inFrase(testo: string): string {
+  const t = testo.trim();
+  const m = t.charAt(0).toUpperCase() + t.slice(1);
+  return /[.!?]$/.test(m) ? m : `${m}.`;
 }
 
 function esaminaVenditore(c: Contesto, testo: string): RigaEsaminata {
   if (testo === 'Central Street, Shibuya') {
-    return rigaUnica(c.areaNome === 'Central Street' && c.quartiereNome === 'Shibuya'
-      ? dedupe(testo, `la sede è nell'Area «${c.areaNome}» del quartiere «${c.quartiereNome}»`) : tenuto(testo, 'la sede non è in Central Street, Shibuya'));
+    if (c.areaNome === 'Central Street' && c.quartiereNome === 'Shibuya') return rigaUnica(dedupe(testo, `la sede è nell'Area «${c.areaNome}» del quartiere «${c.quartiereNome}»`));
+    // una sede senza Area (una base più vecchia): il quartiere è quello della sede e «Central Street» lo dice già il primo paragrafo della nota
+    if (c.quartiereNome === 'Shibuya' && c.nota.includes('Central Street')) return rigaUnica(dedupe(testo, 'il quartiere è quello della sede (Shibuya) e «Central Street» è già nel primo paragrafo della nota'));
+    return rigaUnica(tenuto(testo, 'la sede non è in Central Street, Shibuya'));
   }
   if (testo === 'Sera, dal lunedì al venerdì (non nei giorni di pioggia)') {
     const o = c.orari;
@@ -230,7 +266,14 @@ function esaminaJose(c: Contesto, testo: string): RigaEsaminata {
     const offerte = new Set(esito.flatMap((e) => e.offerte.map((a) => a.chiave)));
     return rigaUnica(dedupe(testo, `${offerte.size} offerte: costo in Fiori (\`costo_json\`) e condizione «Dedalo di ${dedalo} aperto» (\`condizioni_json\`); descrizione dall'oggetto del catalogo`));
   }
-  return esaminaUrl(c, testo) ?? rigaUnica(tenuto(testo, 'la posizione e il modo in cui il negozio appare non sono in nessun dato strutturato'));
+  const casuale = /^(Casualmente durante l['’]esplorazione dei Memento, dopo aver completato la prima richiesta); (il catalogo cambia in base al Dedalo raggiunto)$/.exec(testo);
+  if (casuale) {
+    const conDedalo = c.articoli.some((a) => dedaloDi(a) !== null);
+    return rigaDi('; ',
+      tenuto(casuale[1] ?? '', 'il modo in cui il negozio appare non è in nessun dato strutturato: resta come frase della nota'),
+      conDedalo ? dedupe(casuale[2] ?? '', 'ogni offerta ha la condizione del suo Dedalo (`condizioni_json`, evento «Dedalo aperto»)') : tenuto(casuale[2] ?? '', 'nessuna offerta ha la condizione del Dedalo'));
+  }
+  return esaminaUrl(c, testo) ?? rigaUnica(tenuto(testo, 'la posizione e il modo in cui il negozio appare non sono in nessun dato strutturato: resta come frase della nota'));
 }
 
 function esaminaGachapon(c: Contesto, testo: string): RigaEsaminata {
@@ -276,7 +319,10 @@ const RANGHI_CLIENTE = [{ chiave: 'iniziale', spesa: 0 }, { chiave: 'nero', spes
 
 function esaminaTanaka(c: Contesto, testo: string, termineStrutturato: boolean): RigaEsaminata {
   if (testo === 'Online, dal Laptop del protagonista (dopo averlo riparato con il Set di strumenti da PC di Akihabara)') {
-    return rigaUnica(tenuto(testo, 'lo sblocco dice «Laptop riparato» ma non come: il Set di strumenti da PC di Akihabara non è in nessun dato'));
+    return rigaUnica({
+      testo, azione: 'tenuto', frase: 'Il Laptop si ripara con il Set di strumenti da PC di Akihabara.',
+      motivo: 'dato valido non modellato: lo sblocco dice «Laptop riparato» ma non come (il Set di strumenti da PC di Akihabara); «Online, dal Laptop» è già la sede (Leblanc), il tipo del negozio (online) e il primo paragrafo',
+    });
   }
   if (testo === 'Dal 19 dicembre al 30 gennaio; consegna in 3 giorni per ordine, un solo ordine alla volta') {
     const consegne = c.articoli.filter((a) => a.consegnaInTreGiorni).length;
@@ -285,7 +331,9 @@ function esaminaTanaka(c: Contesto, testo: string, termineStrutturato: boolean):
         ? contraddizione('Dal 19 dicembre al 30 gennaio', 'la guida [samurai-gamers] dà il negozio aperto fino al 19/12 in Persona 5 e fino al 30/1 in Royal: il termine è ora la condizione `non(data dal 01-31)` dello sblocco; «dal 19 dicembre» non è un’apertura')
         : tenuto('Dal 19 dicembre al 30 gennaio', 'il termine non è ancora nello sblocco'),
       consegne > 0 ? dedupe('consegna in 3 giorni per ordine', `\`rifornimento_json\` consegna in 3 giorni su ${consegne} offerte`) : tenuto('consegna in 3 giorni per ordine', 'nessuna offerta con consegna in 3 giorni'),
-      tenuto('un solo ordine alla volta', 'non è in nessun dato strutturato'));
+      consegne > 0
+        ? dedupe('un solo ordine alla volta', `il rifornimento di tipo \`consegna\` delle ${consegne} offerte lo implementa già (\`shared/rifornimento.ts\`: «un ordine alla volta, il successivo solo dopo la consegna», riga 33 e riga 187; a parole «Un ordine alla volta: il successivo dopo la consegna, in 3 giorni»)`)
+        : tenuto('un solo ordine alla volta', 'nessuna offerta ha il rifornimento di tipo consegna'));
   }
   const parti = testo.split(' · ');
   const ricevi = /^Ricevi: (.+)$/.exec(parti[0] ?? '');
@@ -372,6 +420,15 @@ function esaminaParagrafo(c: Contesto, paragrafo: string, termineStrutturato: bo
       segmenti.push(dedupe(frase.trim(), 'le Doti Fascino delle offerte (`condizioni_json`, tipo `dote`) hanno proprio i ranghi 2, 3 e 5'));
     }
   }
+  if (c.chiave === 'jose') {
+    // dalla migrazione 305 le aperture dei Dedali sono calcolate (`dungeon_area.condizioni_json`, `esitoAperturaDedalo`): la frase che le dice «da segnare
+    // in Partita → Progressi, non dedotte dalla data» è smentita dai dati e si toglie (il testo intero resta nell'archivio)
+    const frase = ' Le aperture effettive dei dedali si segnano in Partita → Progressi; non sono dedotte dalla data.';
+    if (testo.split(frase).length === 2) {
+      testo = testo.replace(frase, '');
+      segmenti.push(contraddizione(frase.trim(), 'dalla migrazione 305 l’apertura di un Dedalo è una condizione calcolata (`dungeon_area.condizioni_json`), non un segno a mano'));
+    }
+  }
   if (c.chiave === TANAKA && termineStrutturato) {
     for (const frase of [' Attivo fino al 30 gennaio secondo fonte non italiana.', ' In Persona 5 Royal la disponibilità del negozio è estesa fino al 30 gennaio']) {
       if (testo.split(frase).length === 2) {
@@ -390,29 +447,41 @@ function pianoDiUnNegozio(db: AppDatabase, chiave: ChiaveNegozio, termineStruttu
   const { paragrafo, righe } = dividiNota(c.nota);
   const par = esaminaParagrafo(c, paragrafo, termineStrutturato);
   const esaminate = (righe ?? []).filter((r) => r !== '').map((r) => esaminaRiga(c, r, termineStrutturato));
-  const tenute = esaminate
-    .map((r) => r.segmenti.filter((s) => s.azione === 'tenuto').map((s) => s.testo).join(r.separatore === '' ? ' ' : r.separatore))
-    .filter((t) => t !== '');
-  const nuova = tenute.length > 0 ? `${par.testo}\n\n${INTESTAZIONE}\n${STANDARD}\n${tenute.join('\n')}` : par.testo;
-  if (nuova === c.nota) return null;
-  return { negozio: chiave, originale: c.notaGrezza, nuova, paragrafo: par.segmenti, righe: esaminate };
+  // ciò che resta del blocco diventa frasi normali in coda al primo paragrafo; l'intestazione e la frase standard spariscono
+  const frasi = esaminate.flatMap((r) => r.segmenti.filter((s) => s.azione === 'tenuto').map((s) => s.frase ?? inFrase(s.testo)));
+  const aperta = par.testo.trimEnd();
+  const nuova = frasi.length > 0 ? `${/[.!?]$/.test(aperta) ? aperta : `${aperta}.`} ${frasi.join(' ')}` : par.testo;
+  const fonteNuova = fonteConAggiunte(c.fonteNegozio, esaminate.flatMap((r) => r.aggiungiFonti ?? []));
+  if (nuova === c.nota && fonteNuova === null) return null;
+  return { negozio: chiave, originale: c.notaGrezza, nuova, fonteOriginale: c.fonteNegozio, fonteNuova, paragrafo: par.segmenti, righe: esaminate };
 }
 
-/** Le note di offerta che ripetono un dato: Sakai (12 «Scambio…» e 2 «Testo di prima…») e Jose (37 «Aver sbloccato il Dedalo…»); le offerte di origine
- *  diversa da `seed` restano `tenuto` e non si toccano. */
+/** Le note di offerta che ripetono un dato: Sakai (12 «Scambio…» e 2 «Testo di prima…») e Jose (37 «Aver sbloccato il Dedalo…»), qualunque sia l'origine
+ *  dell'offerta: la nota si toglie solo dopo la prova puntuale che il costo e l'intervallo (o il Dedalo) sono già nei dati strutturati. */
 function pianoDelleNoteDiOfferta(db: AppDatabase): PianoArticolo[] {
   const piano: PianoArticolo[] = [];
-  // le offerte che l'utente ha adottato o creato (origine diversa da `seed`) non si toccano: il loro testo è suo
-  const adottate = new Set(db.prepare("SELECT chiave FROM main.articolo WHERE negozio_chiave IN ('mercante-sakai', 'jose') AND origine <> 'seed'").pluck().all() as string[]);
-  for (const negozio of ['mercante-sakai', 'jose'] as const) {
+  for (const negozio of ['mercante-sakai', 'jose', TANAKA] as const) {
     const c = leggiContesto(db, negozio);
     if (!c) continue;
     for (const a of c.articoli) {
       if (!a.nota) continue;
       const originale = a.nota;
-      const voce = (azione: Azione, motivo: string): void => { piano.push({ articolo: a.chiave, negozio, originale, azione, motivo }); };
-      if (adottate.has(a.chiave)) { voce('tenuto', 'offerta adottata o creata dall’utente: la nota non si tocca'); continue; }
+      const voce = (azione: Azione, motivo: string, nuova?: string): void => { piano.push({ articolo: a.chiave, negozio, originale, azione, motivo, ...(nuova !== undefined ? { nuova } : {}) }); };
       const nota = originale.normalize('NFC');
+      if (negozio === TANAKA) {
+        // «rango cliente Iniziale» è il grado di base (soglia 0 yen): lo dicono l'assenza di una condizione `rango-cliente` e il programma a gradi del negozio
+        const iniziale = /^rango cliente Iniziale(?:, (.+))?$/.exec(nota);
+        if (iniziale) {
+          const ok = a.condizioni.every((x) => x.tipo !== 'rango-cliente') && c.programma?.calcolo === 'rango-cliente';
+          const resto = iniziale[1];
+          if (!ok) voce('tenuto', 'l’offerta ha una condizione `rango-cliente` o il negozio non ha il programma a gradi');
+          else if (resto === undefined) voce('dedupe', 'grado di base (Iniziale, soglia 0 yen): nessuna condizione `rango-cliente` sull’offerta e `programma_punti_json` a gradi; la nota si svuota');
+          else voce('dedupe', `«rango cliente Iniziale» è il grado di base (nessuna condizione \`rango-cliente\`, \`programma_punti_json\` a gradi); resta «${inFrase(resto)}», dato valido non modellato`, inFrase(resto));
+          continue;
+        }
+        voce('tenuto', 'nota non riconosciuta');
+        continue;
+      }
       if (negozio === 'mercante-sakai') {
         const scambio = /^Scambio: (.+)\. (\d{1,2})\/(\d{1,2}) - (\d{1,2})\/(\d{1,2})\.$/.exec(nota);
         if (scambio) {
@@ -479,7 +548,7 @@ export const migration345: Migration = {
     if (piano.negozi.length === 0 && piano.articoli.length === 0 && piano.sblocco.length === 0) return;
 
     // le impronte di prima: negozio senza note e sblocco, articolo senza nota, e le tabelle che non devono cambiare
-    const prima = new Map<string, string>([['negozio', improntaTabella(db, 'negozio', ['note', 'sblocco_json'])], ['articolo', improntaTabella(db, 'articolo', ['nota'])]]);
+    const prima = new Map<string, string>([['negozio', improntaTabella(db, 'negozio', ['note', 'sblocco_json', 'fonte'])], ['articolo', improntaTabella(db, 'articolo', ['nota'])]]);
     for (const t of TABELLE_INTATTE) if (esisteTabella(db, t)) prima.set(t, improntaTabella(db, t));
     const articoliPrima = db.prepare('SELECT COUNT(*) FROM main.articolo').pluck().get() as number;
 
@@ -488,12 +557,14 @@ export const migration345: Migration = {
     }
     const noteNegozi: Record<string, string> = {};
     for (const p of piano.negozi) {
-      if (db.prepare('UPDATE main.negozio SET note = ? WHERE chiave = ? AND note = ?').run(p.nuova, p.negozio, p.originale).changes !== 1) errore(`la nota di ${p.negozio} non si aggiorna`);
+      if (db.prepare('UPDATE main.negozio SET note = ?, fonte = ? WHERE chiave = ? AND note = ? AND fonte = ?').run(p.nuova, p.fonteNuova ?? p.fonteOriginale, p.negozio, p.originale, p.fonteOriginale).changes !== 1) {
+        errore(`la nota o la fonte di ${p.negozio} non si aggiorna`);
+      }
       noteNegozi[p.negozio] = p.originale;
     }
     const noteOfferte: Record<string, string> = {};
     for (const a of piano.articoli) {
-      if (db.prepare('UPDATE main.articolo SET nota = NULL WHERE chiave = ? AND nota = ?').run(a.articolo, a.originale).changes !== 1) errore(`la nota dell’offerta ${a.articolo} non si aggiorna`);
+      if (db.prepare('UPDATE main.articolo SET nota = ? WHERE chiave = ? AND nota = ?').run(a.nuova ?? null, a.articolo, a.originale).changes !== 1) errore(`la nota dell’offerta ${a.articolo} non si aggiorna`);
       noteOfferte[a.articolo] = a.originale;
     }
 
@@ -506,15 +577,18 @@ export const migration345: Migration = {
 
     // i controlli: cambia solo ciò che è dichiarato
     if (db.prepare('SELECT COUNT(*) FROM main.articolo').pluck().get() !== articoliPrima) errore('il numero delle offerte è cambiato');
-    if (improntaTabella(db, 'negozio', ['note', 'sblocco_json']) !== prima.get('negozio')) errore('le altre colonne di negozio sono cambiate');
+    if (improntaTabella(db, 'negozio', ['note', 'sblocco_json', 'fonte']) !== prima.get('negozio')) errore('le altre colonne di negozio sono cambiate');
     if (improntaTabella(db, 'articolo', ['nota']) !== prima.get('articolo')) errore('le altre colonne di articolo sono cambiate');
     for (const t of TABELLE_INTATTE) if (prima.has(t) && improntaTabella(db, t) !== prima.get(t)) errore(`la tabella ${t} è cambiata`);
 
     registraAudit(db, 'audit-l1-06-note-darchivio', {
       migrazione: 'L1-06 · 345',
       sblocco: piano.sblocco,
-      negozi: piano.negozi.map((p) => ({ negozio: p.negozio, paragrafo: p.paragrafo, righe: p.righe.flatMap((r) => r.segmenti), caratteriPrima: p.originale.length, caratteriDopo: p.nuova.length })),
-      offerteSenzaNota: piano.articoli.map((a) => ({ articolo: a.articolo, motivo: a.motivo })),
+      negozi: piano.negozi.map((p) => ({
+        negozio: p.negozio, paragrafo: p.paragrafo, righe: p.righe.flatMap((r) => r.segmenti), caratteriPrima: p.originale.length, caratteriDopo: p.nuova.length,
+        fonteOriginale: p.fonteOriginale, fonteNuova: p.fonteNuova,
+      })),
+      offerteCambiate: piano.articoli.map((a) => ({ articolo: a.articolo, nuova: a.nuova ?? null, motivo: a.motivo })),
       offerteConNotaTenuta: piano.articoliTenuti.map((a) => ({ articolo: a.articolo, motivo: a.motivo })),
     });
     logger.info({
