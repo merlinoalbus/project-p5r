@@ -27,7 +27,7 @@
 // delle chiavi esterne del runner lo stato è quello di prima.
 //
 //  (0) PRIMA di tutto, solo per un backup vecchio: la sede dei tre elementi che avevano il solo quartiere (lotteria-shibuya, chiosco-bevande-sottopasso,
-//      attività estrazione-lotteria). Se i due luoghi che l'utente ha creato dai pin in ottobre mancano e i loro pin (uid) sono ancora scollegati, si
+//      attività estrazione-lotteria). Se i due luoghi creati dai pin 1466 e 1486 mancano e i loro pin (uid) sono ancora scollegati, si
 //      ricreano com'erano nei suoi dati e i pin si ricollegano; poi la sede si dà per identità. Verbale: `sediAssegnate`, `luoghiCreati`, `pinCollegati`.
 //
 // COSA NON CAMBIA (impronte di ogni riga prima e dopo, escluse le sole colonne dichiarate e i soli effetti del passo 0): le altre colonne di `negozio`,
@@ -205,7 +205,7 @@ const vuota = (json: string | null): boolean => json === null || ['', '[]', 'nul
 // la migrazione
 // ---------------------------------------------------------------------------
 
-/** La sede, per identità, degli elementi che in un backup vecchio hanno il solo quartiere (sede mancante): la sede che hanno nei dati del 7/11 pomeriggio. */
+/** La sede, per identità, degli elementi che in un backup vecchio hanno il solo quartiere (sede mancante): la sede che hanno nei dati dell'istanza di cui questa migrazione è stata provata (copia del 7/11 16:25). */
 const SEDI_PER_IDENTITA: ReadonlyArray<{ tabella: 'negozio' | 'attivita'; chiave: string; sede: string; quartiere: string }> = [
   { tabella: 'negozio', chiave: 'lotteria-shibuya', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya' },
   { tabella: 'negozio', chiave: 'chiosco-bevande-sottopasso', sede: 'shibuya/u-chiosco-dei-succhi-del-sottopasso', quartiere: 'shibuya' },
@@ -218,8 +218,8 @@ const PIN_DEI_LUOGHI: Record<string, string> = {
   'shibuya/u-chiosco-dei-succhi-del-sottopasso': 'f18174c2eb726e4a3d8648c138e2dbb2',
 };
 
-/** I due luoghi che l'utente ha creato dai pin in ottobre (il banco della lotteria il 26, il chiosco delle bevande l'ultimo ritocco il 29), com'erano nei suoi dati
- *  del 7/11: servono a dare la sede ai tre elementi di un backup vecchio. */
+/** I due luoghi creati dai pin 1466 e 1486, com'erano nei dati dell'istanza (copia del 7/11 16:25, tutte le colonne): servono a dare la sede ai tre elementi
+ *  di un database in cui i due luoghi mancano e i loro pin sono ancora scollegati (backup vecchio). */
 const LUOGHI_DELL_UTENTE: Record<string, { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; confidenti_json: string; piatti_json: string | null;
   note: string | null; fonte: string; verificato: number; origine: string; nascosto: number; seed_json: string | null; updated_at: string; condizioni_json: string; area_chiave: string;
   orari_json: string | null; solo_eventi_confidente: string | null; fonte_condizioni_json: string | null }> = {
@@ -259,7 +259,7 @@ export const migration346: Migration = {
     for (const t of ['negozio', 'attivita', 'articolo', 'luogo', 'area', 'quartiere', 'dati_guida']) if (!esisteTabella(db, t)) errore(`manca la tabella ${t}`);
     const c = (tabella: string, colonna: string): boolean => haColonna(db, tabella, colonna);
 
-    // (0) la sede dei tre elementi che, in un backup di prima dell'ottobre in cui l'utente ha creato due luoghi dai pin, avevano il solo quartiere: nei
+    // (0) la sede dei tre elementi che, in un backup vecchio in cui i due luoghi creati dai pin 1466 e 1486 mancano, avevano il solo quartiere: nei
     // dati attuali stanno in un luogo (creato dall'utente), che qui si cerca per identità. Vale solo se la sede manca, il vecchio quartiere è quello
     // atteso e il luogo c'è e sta in quel quartiere; se il luogo manca si ricrea (vedi sotto) solo quando il pin da cui nacque è ancora scollegato (il
     // segno del backup vecchio): altrimenti non si inventa niente (la riga resta senza quartiere, e il verbale lo dice).
@@ -268,7 +268,7 @@ export const migration346: Migration = {
     const pinCollegati: Array<{ uid: string; luogo: string }> = [];
     for (const s of SEDI_PER_IDENTITA) {
       if (!c(s.tabella, 'luogo_chiave')) continue;
-      // un backup di prima dell'ottobre non ha i due luoghi che l'utente ha poi creato dai pin 1466 e 1486: si ricreano com'erano nei suoi dati (le
+      // un backup vecchio non ha i due luoghi creati dai pin 1466 e 1486: si ricreano com'erano nei dati dell'istanza (le
       // stesse righe) e il pin si ricollega al suo luogo, ma solo se il luogo manca, il pin (per uid) esiste ancora SCOLLEGATO (in un'istanza in cui il luogo
       // è stato eliminato, il Cestino ha tolto anche i suoi pin e il luogo è nel Cestino: non si tocca), il quartiere e l'Area ci sono e la riga da
       // collocare ha il solo quartiere
