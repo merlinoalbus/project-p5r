@@ -5,7 +5,8 @@
 // L13 (ondata 6, lotto O6-2): un dato in un solo punto. Giorni, fasce, eccezioni e luoghi si modificano da «Modifica disponibilità»
 // (l'editor strutturato, raggiungibile da qui), lo sblocco dai requisiti di rango; qui restano le note e le fonti. È la `FinestraModifica`
 // comune: corpo che scorre, piè fisso, conferma prima di chiudere con modifiche non salvate. «Salva» chiede l'anteprima al server (che
-// controlla che riga e storico non siano cambiati) e salva nello stesso gesto; il ripristino di una versione mostra prima che cosa riporta.
+// controlla che riga e storico non siano cambiati), salva nello stesso gesto e chiude; il ripristino di una versione mostra prima che cosa
+// riporta. Il motivo è facoltativo: senza, lo storico registra un testo standard (`MOTIVO_NON_INDICATO`).
 // ============================================================
 
 import { useState } from 'react';
@@ -15,7 +16,7 @@ import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaInformazioniConfidente, getInformazioniConfidente, salvaInformazioniConfidente } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { CHIUDI_SENZA_SALVARE, conferma } from '../../stores/confermaStore';
+import { CHIUDI_SENZA_SALVARE, RIPRISTINA_CON_MODIFICHE, conferma } from '../../stores/confermaStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { COLONNE_STORICHE_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from '../../../shared/disponibilitaConfidenti';
 import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, EditorInformazioniConfidenteDto, InformazioniConfidente, InformazioniConfidenteRaw } from '../../../shared/disponibilitaConfidenti';
@@ -41,14 +42,14 @@ export const EditorDisponibilita: StrumentoDiModifica<typeof EditorDisponibilita
 function EditorDisponibilitaReale({ chiave, onChiudi, onSalvato, onApriDisponibilita }: Props) {
   const dati = useCarica(() => getInformazioniConfidente(chiave), [chiave]);
   const c = dati.dati;
-  // il modulo si monta quando i dati ci sono: i valori iniziali sono quelli letti (e si rimonta dopo «salvato» o «rileggi», con la chiave)
+  // il modulo si monta quando i dati ci sono: i valori iniziali sono quelli letti (e si rimonta dopo «rileggi», con la chiave)
   const [versioneLetta, setVersioneLetta] = useState(0);
   const titolo = `Informazioni di ${c?.confidente.nome ?? chiave}`;
   if (!c) {
     return <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={() => undefined} salvabile={false} caricamento={dati.caricamento} erroreCaricamento={dati.caricamento ? null : dati.errore ?? 'Informazioni non disponibili.'}>{null}</FinestraModifica>;
   }
   return <ModuloInformazioni key={`${c.revisioneAttesa}:${versioneLetta}`} chiave={chiave} titolo={titolo} c={c} onChiudi={onChiudi} onApriDisponibilita={onApriDisponibilita}
-    onSalvato={async (corrente) => { dati.imposta(corrente); setVersioneLetta((v) => v + 1); await onSalvato(); }}
+    onSalvato={async () => { await onSalvato(); onChiudi(); }}
     onRileggi={async () => { await dati.ricarica(); setVersioneLetta((v) => v + 1); }} />;
 }
 
@@ -57,7 +58,7 @@ const ugualiElenchi = (a: string[], b: string[]) => a.length === b.length && a.e
 
 function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi, onApriDisponibilita }: {
   chiave: string; titolo: string; c: EditorInformazioniConfidenteDto; onChiudi: () => void;
-  onSalvato: (corrente: EditorInformazioniConfidenteDto) => Promise<void>; onRileggi: () => Promise<void>; onApriDisponibilita?: () => void;
+  onSalvato: () => Promise<void>; onRileggi: () => Promise<void>; onApriDisponibilita?: () => void;
 }) {
   const nuova = c.correnteRaw === null;
   const fontiIlleggibili = !nuova && c.valori.fonti === undefined;
@@ -78,7 +79,9 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
   if (valori.note !== iniziali.note) patch.note = valori.note;
   if (valori.noteGenerali !== iniziali.noteGenerali) patch.noteGenerali = valori.noteGenerali;
   if (!ugualiElenchi(valori.fonti, iniziali.fonti) || (fontiIlleggibili && fontiToccate)) patch.fonti = valori.fonti;
-  const sporca = modalita === 'modifica' && (nuova ? JSON.stringify(valori) !== JSON.stringify(vuote()) || motivo.trim() !== '' : Object.keys(patch).length > 0);
+  const modificata = nuova ? JSON.stringify(valori) !== JSON.stringify(vuote()) : Object.keys(patch).length > 0;
+  // anche passando allo storico la bozza resta in memoria: chiudere o ripristinare da lì la perderebbe
+  const sporca = modificata || motivo.trim() !== '';
   useBozzaSporca('editor-disponibilita', `informazioni di ${c.confidente.nome}`, sporca);
 
   const cambiaFonti = (fonti: string[]) => { setValori((v) => ({ ...v, fonti })); setFontiToccate(true); setErrore(null); };
@@ -92,18 +95,26 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
       const esito = await salvaInformazioniConfidente(chiave, { ...azione, anteprimaAttesa: anteprima.anteprimaAttesa, operazioneId: crypto.randomUUID() });
       notifica('success', esito.esito === 'gia-eseguita' ? `Operazione già eseguita (versione ${esito.versione}).`
         : esito.esito === 'invariata' ? 'Informazioni già coincidenti: nessuna modifica.' : 'Informazioni aggiornate.');
-      await onSalvato(esito.corrente);
+      await onSalvato();
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
-  const salva = () => {
+  const salva = async () => {
     if (occupato) return;
     if (modalita === 'storico') {
-      if (ripristino) void esegui({ azione: 'ripristina-versione', versione: ripristino.versione, revisioneAttesa: c.revisioneAttesa }, ripristino.anteprima);
+      if (!ripristino || (sporca && !(await conferma(RIPRISTINA_CON_MODIFICHE)))) return;
+      void esegui({ azione: 'ripristina-versione', versione: ripristino.versione, revisioneAttesa: c.revisioneAttesa }, ripristino.anteprima);
       return;
     }
-    void esegui(nuova ? { azione: 'crea-informazioni', valori, motivo, revisioneAttesa: c.revisioneAttesa }
-      : { azione: 'modifica-manuale', valori: patch, motivo, revisioneAttesa: c.revisioneAttesa });
+    // un motivo vuoto non si manda: lo storico registra il testo standard
+    const conMotivo = motivo.trim() ? { motivo } : {};
+    void esegui(nuova ? { azione: 'crea-informazioni', valori, ...conMotivo, revisioneAttesa: c.revisioneAttesa }
+      : { azione: 'modifica-manuale', valori: patch, ...conMotivo, revisioneAttesa: c.revisioneAttesa });
+  };
+  /** Rilegge dal server: il modulo riparte dai valori letti, quindi una bozza si perde solo dopo la conferma. */
+  const rileggi = async () => {
+    if (sporca && !(await conferma({ titolo: 'Rileggere senza salvare?', testo: 'Ci sono modifiche non salvate: rileggendo si perdono.', etichetta: 'Rileggi comunque', icona: 'ricalcola' }))) return;
+    await onRileggi();
   };
   /** Sceglie una versione e chiede subito al server che cosa riporterebbe il ripristino. */
   const scegliVersione = async (v: number | null) => {
@@ -122,15 +133,14 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
 
   const salvabile = modalita === 'storico'
     ? !!ripristino && ripristino.versione === versione && ripristino.anteprima.campiCambiati.length > 0
-    : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0);
+    : modificata;
   const scelta = c.versioni.find((v) => v.id === versione);
 
   return (
-    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={salvabile} occupato={occupato} sporca={sporca}
+    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={salvabile} occupato={occupato} sporca={sporca} errore={errore && `${errore} La bozza resta disponibile.`}
       titoloSalva={modalita === 'storico' ? 'Ripristina' : nuova ? 'Crea' : 'Salva'}
-      azioniExtra={<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi" disabled={occupato} onClick={() => void onRileggi()} />}>
+      azioniExtra={<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi" disabled={occupato} onClick={() => void rileggi()} />}>
       <div className="flex flex-col gap-3 min-w-0 testo-13">
-        {errore && <p className="m-0 text-error-testo whitespace-pre-wrap" role="alert">{errore} La bozza resta disponibile.</p>}
         {c.errori.length > 0 && <ul className="m-0 pl-5 text-warning">{c.errori.map((e) => <li key={e}>{e}</li>)}</ul>}
         {/* il rimando: quando e dove si incontra ha una sola sede, l'editor strutturato */}
         {onApriDisponibilita && (
@@ -168,8 +178,8 @@ function ModuloInformazioni({ chiave, titolo, c, onChiudi, onSalvato, onRileggi,
               ))}
               <PulsanteVisivo compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una fonte" onClick={() => cambiaFonti([...valori.fonti, ''])} />
             </fieldset>
-            <CampoTesto tipo="lungo" etichetta="Motivo della modifica" obbligatorio valore={motivo} disabilitato={occupato} massimo={1000}
-              aiuto="Resta nello storico, con i valori di prima." onCambia={(m) => { setMotivo(m); setErrore(null); }} />
+            <CampoTesto tipo="lungo" etichetta="Motivo della modifica" valore={motivo} disabilitato={occupato} massimo={1000}
+              aiuto="Facoltativo. Resta nello storico, con i valori di prima." onCambia={(m) => { setMotivo(m); setErrore(null); }} />
           </SezioneCampi>
         )}
 

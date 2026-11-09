@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 350 migrazioni di gioco (l'ultima è la 367), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -24,8 +24,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Più partite, una attiva, cambio dalla barra in alto; dati della partita in una finestra (`/partita`), con il salvataggio di Persona 5 e i
   contenuti scaricabili posseduti (li leggono la Fusione e lo Scaffale con lo scatolone del Leblanc).
 - Scorta e compendio personale, Persona della partita, statistiche stimate e registrate.
-- Confidenti con rango, punti in note, semafori dei requisiti, inviti, relazione romantica, regali con reazione, doni ricevuti;
-  scheda del Confidente (`/confidenti/:chiave`).
+- Confidenti con rango, punti in note, semafori dei requisiti con frase generata e nota, inviti, relazione romantica, regali con reazione,
+  doni ricevuti; scheda del Confidente (`/confidenti/:chiave`), con le date fisse di un rango (Ryuji 7).
 - Doti sociali con note e soglie, promemoria «Applica», interruttore della Fortuna.
 - Denaro con i movimenti automatici delle voci e quelli a mano; oggetti ottenuti, copie, consumi e uscite.
 - Progressi, trofei, storico degli eventi con la provenienza, completamento (`/guida/completamento`).

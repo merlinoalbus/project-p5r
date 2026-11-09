@@ -305,6 +305,16 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La Dote che un Confidente dà arriva solo al passaggio di rango, non a ogni uscita.
 - Requisiti dei Confidenti solo dalla guida Royal: un semaforo è ciò che il gioco impone (non la data consigliata, non i bonus). Le date
   di rango 1 valgono solo se la guida le dichiara come sblocco. I requisiti non verificabili diventano eventi della partita da segnare.
+- **Un Confidente ha una data di avvio sola**: «Disponibile dal» è il requisito di rango 1 di tipo data (18 Confidenti su 23), letto dalla
+  disponibilità e dalla scheda. La frase del requisito si genera dalla condizione; la colonna `testo` tiene solo ciò che la condizione non dice
+  (la nota) e, per un avviso, l'avviso stesso; «Ripristina» riporta la nota della guida da `dati_guida.requisiti-nota-guida-v1`.
+- **Date fisse di un rango**: l'eccezione `solo-date-rango` dice in quali giorni un rango si può fare, al posto dei giorni della settimana. La
+  usa il Rango 7 di Ryuji, con le 24 date del suo messaggio nella guida. L'avvio del Rango 10 di Kawakami («il primo giorno di scuola dopo il
+  Rango 9») non si sa calcolare: resta nelle note, e il calcolo non cambia.
+- **Ingressi fuori dalla spunta**: oltre alla spunta del Diario restano, dichiarati, l'invito avvenuto, la Persona messa in scorta dalla
+  scheda, la registrazione nel compendio e l'Allarme delle fusioni.
+- Gli editor della pagina Confidente (informazioni, requisiti, ranghi, disponibilità) sono finestre uguali con un solo Salva a piè di
+  finestra; i requisiti salvano insieme tutti i ranghi cambiati, e il motivo di una modifica alle informazioni è facoltativo.
 - Relazione romantica: dato della partita per Confidente, con il giorno d'inizio; si segna dalla scheda o scegliendo alla spunta del
   passaggio al rango 9; vale per gli incontri dopo il rango 9 e per i doni «se fidanzata».
 - **2026-10-25 — Fortuna e pesca**: la Fortuna è uno stato momentaneo della partita, acceso dall'interazione con Chihaya o

@@ -36,7 +36,7 @@ const NOME_ESITO: Record<ValutazioneCondizioneDto['esito'], string> = { vero: 'N
  * Le condizioni di un elemento: con l'esito, una riga per condizione (che cosa manca, se manca); senza, la frase di ognuna. Niente se non ci
  * sono condizioni. `titolo` è l'etichetta piccola sopra («Nella partita», «Quando si sblocca»).
  */
-export function CondizioniGuida({ titolo, condizioni, esito, className = '' }: { titolo: string; condizioni: readonly CondizioneSpilloDto[]; esito?: RispostaValutaCondizioniDto; className?: string }) {
+export function CondizioniGuida({ titolo, condizioni, esito, className = '' }: { titolo: string; condizioni: ReadonlyArray<CondizioneSpilloDto & { nota?: string }>; esito?: RispostaValutaCondizioniDto; className?: string }) {
   if (!condizioni.length) return null;
   return (
     <div className={`flex min-w-0 flex-col gap-0.5 testo-13 ${className}`}>
@@ -49,6 +49,7 @@ export function CondizioniGuida({ titolo, condizioni, esito, className = '' }: {
               {v && <SegnoEsito v={v} />}
               <span className="min-w-0 break-words">
                 {maiuscola(v ? (v.esito === 'falso' && v.manca ? v.manca : v.testo) : c.testo)}
+                {c.nota && <span className="block testo-12 text-text-secondary">Nota: {c.nota}</span>}
               </span>
             </li>
           );

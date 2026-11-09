@@ -166,6 +166,14 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'articolo', colonna, tolta: 'L1 · migrazione 346',
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
+  ...(['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7 · migrazione 364',
+    sostituitaDa: 'la disponibilità strutturata del Confidente (modo, giorni, fasce, eccezioni), i luoghi per chiave e i requisiti di rango; ciò che la prosa diceva in più sta nelle note; i testi di prima restano nell’archivio «archivio-frasi-l11»',
+  })),
+  {
+    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7 · migrazione 364',
+    sostituitaDa: 'il requisito di rango 1 di tipo «data» (`confidente_requisito`): «Disponibile dal» si legge da lì; i valori di prima restano nell’archivio «archivio-frasi-l11»',
+  },
   {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',

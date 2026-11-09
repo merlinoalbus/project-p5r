@@ -27,7 +27,7 @@ import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { condizioniDellaGuida, fraseDellaRegola } from './condizioni/fraseCondizioni.js';
-import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js';
+import { condizioneDelRequisito, notaDelRequisito, type RigaRequisito } from './semaforiService.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, StatoCattura, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -116,7 +116,13 @@ function confidenteDellePersonalizzazioni(progressione: readonly unknown[], nomi
   const nome = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck().get(CONFIDENTE_ARMI) as string | undefined;
   if (!nome) return null;
   const avvio = (prepared('SELECT tipo, dati_json, testo FROM confidente_requisito WHERE confidente_chiave = ? AND rango = 1 ORDER BY indice').all(CONFIDENTE_ARMI) as Array<Pick<RigaRequisito, 'tipo' | 'dati_json' | 'testo'>>)
-    .flatMap((r) => { const c = condizioneDelRequisito(r); return c ? [condizioneConTesto(c, nomi)] : []; });
+    .flatMap((r) => {
+      const c = condizioneDelRequisito(r);
+      if (!c) return [];
+      const conTesto = condizioneConTesto(c, nomi);
+      const nota = notaDelRequisito(r, conTesto.testo);
+      return [nota ? { ...conTesto, nota } : conTesto];
+    });
   const ranghi = progressione.flatMap((x) => {
     const rango = x !== null && typeof x === 'object' ? (x as { rango?: unknown }).rango : undefined;
     return typeof rango === 'number' && Number.isInteger(rango) && rango >= 1 && rango <= RANGO_MASSIMO_CONFIDENTE

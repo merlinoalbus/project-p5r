@@ -12,7 +12,8 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { meteoOra } from './meteoService.js';
 import { verificaPartita } from './verificaPartita.js';
-import { alternativeAllaPioggia, richiedeNonPioggia, strutturaDaColonne, valutaDisponibilita } from '../../shared/disponibilitaStrutturata.js';
+import { logger } from '../utils/logger.js';
+import { alternativeAllaPioggia, eccezioniIlleggibili, richiedeNonPioggia, strutturaDaColonne, valutaDisponibilita } from '../../shared/disponibilitaStrutturata.js';
 import type { ContestoDisponibilita, DisponibilitaConfidenteDto, DisponibilitaStrutturata, EsitoDisponibilita, LuogoConfidente } from '../../shared/disponibilitaStrutturata.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { giorniDiGiocoFra } from '../../shared/date.js';
@@ -20,8 +21,13 @@ import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { eRomanzabile, relazioneAlRango, relazioneRomantica } from './relazioneRomanticaService.js';
 
 export const CHIAVE_SEED_DISPONIBILITA = (confidente: string) => `disponibilita-struttura-seed-v1:${confidente}`;
-export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; dal: string | null; motivo_senza_luogo: string; fonte: string | null }
-const COLONNE = 'modo, giorni_settimana_json, fasce_orarie_json, eccezioni_json, dal, motivo_senza_luogo, fonte';
+export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; motivo_senza_luogo: string; fonte: string | null }
+const COLONNE = 'modo, giorni_settimana_json, fasce_orarie_json, eccezioni_json, motivo_senza_luogo, fonte';
+
+/** L7-06 (Q14, migrazione 364): la data di un requisito di tipo «data» (`dati_json`), se è una data; la fonte unica di «Disponibile dal». */
+function dalDelRequisito(datiJson: string): string | null {
+  try { const d = (JSON.parse(datiJson) as { dal?: unknown }).dal; return typeof d === 'string' && /^\d{2}-\d{2}$/.test(d) ? d : null; } catch { return null; }
+}
 
 export function rigaStruttura(confidente: string): RigaStruttura {
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(confidente)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${confidente}' non esiste.`);
@@ -75,13 +81,15 @@ function contestoDellaPartita(partitaId: number, confidente: string, stato?: Sta
 /** La disponibilità del Confidente; con la partita, anche se è disponibile adesso. `statoDellaPartita` dà il valutatore sullo stato della partita
  *  (`valutatoreDellaPartita` di disponibilitaService), chiesto solo dopo la verifica della partita. */
 export function disponibilitaConfidente(confidente: string, partitaId?: number, statoDellaPartita?: (partitaId: number) => StatoDelRamo): DisponibilitaConfidenteDto {
-  const struttura = strutturaDaColonne(rigaStruttura(confidente));
+  const riga = rigaStruttura(confidente);
+  const date = (prepared("SELECT dati_json FROM confidente_requisito WHERE confidente_chiave = ? AND rango = 1 AND tipo = 'data' ORDER BY indice").pluck().all(confidente) as string[]).flatMap((j) => dalDelRequisito(j) ?? []);
+  const struttura = strutturaDaColonne(riga, date.at(-1) ?? null);
   const dto: DisponibilitaConfidenteDto = {
     confidente, struttura, luoghi: luoghiDelConfidente(confidente), modificata: !!prepared('SELECT 1 FROM dati_guida WHERE chiave = ?').get(CHIAVE_SEED_DISPONIBILITA(confidente)),
     ranghiNonConLaPioggia: ranghiSenzaPioggiaDi(confidente),
     romanzabile: eRomanzabile(confidente),
   };
-  // «oggi» sulla struttura effettiva (con il «dal» del requisito di rango 1 dove la struttura non ne ha uno), la stessa del Diario e dei semafori
+  // «oggi» sulla struttura effettiva, la stessa del Diario e dei semafori
   if (partitaId !== undefined) {
     verificaPartita(partitaId); // prima dello stato: solo le partite del proprietario della richiesta
     const contesto = contestoDellaPartita(partitaId, confidente, statoDellaPartita?.(partitaId));
@@ -95,11 +103,19 @@ let strutture: Map<string, DisponibilitaStrutturata> | null = null;
 registraCacheDiGioco(() => { strutture = null; });
 function tutteLeStrutture(): Map<string, DisponibilitaStrutturata> {
   if (!strutture) {
-    // R9-04/4: il «dal» di un Confidente senza una data propria nella struttura è la data del suo requisito di rango 1 (tipo «data»): prima di quel giorno non c'è
+    // R9-04/4, L7-06: il «dal» di un Confidente è la data del suo requisito di rango 1 (tipo «data»): prima di quel giorno non c'è
     const dalRequisito = new Map((prepared("SELECT confidente_chiave, dati_json FROM confidente_requisito WHERE rango = 1 AND tipo = 'data' ORDER BY indice").all() as Array<{ confidente_chiave: string; dati_json: string }>)
-      .flatMap((r) => { try { const d = (JSON.parse(r.dati_json) as { dal?: unknown }).dal; return typeof d === 'string' && /^\d{2}-\d{2}$/.test(d) ? [[r.confidente_chiave, d] as const] : []; } catch { return []; } }));
+      .flatMap((r) => {
+        const d = dalDelRequisito(r.dati_json);
+        if (!d) logger.warn({ confidente: r.confidente_chiave }, 'requisito di rango 1 con una data illeggibile: il Confidente non ha una data di avvio');
+        return d ? [[r.confidente_chiave, d] as const] : [];
+      }));
     strutture = new Map((prepared(`SELECT confidente_chiave AS chiave, ${COLONNE} FROM confidente_disponibilita`).all() as Array<RigaStruttura & { chiave: string }>)
-      .map((r) => { const s = strutturaDaColonne(r); return [r.chiave, s.dal === null ? { ...s, dal: dalRequisito.get(r.chiave) ?? null } : s] as const; }));
+      .map((r) => {
+        const illeggibili = eccezioniIlleggibili(r.eccezioni_json);
+        if (illeggibili > 0) logger.warn({ confidente: r.chiave, illeggibili }, 'eccezioni della disponibilità illeggibili: non si applicano');
+        return [r.chiave, strutturaDaColonne(r, dalRequisito.get(r.chiave) ?? null)] as const;
+      }));
   }
   return strutture;
 }
