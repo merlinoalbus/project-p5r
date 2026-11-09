@@ -208,6 +208,25 @@ const SEDI_PER_IDENTITA: ReadonlyArray<{ tabella: 'negozio' | 'attivita'; chiave
   { tabella: 'attivita', chiave: 'estrazione-lotteria', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya' },
 ];
 
+/** I due luoghi che l'utente ha creato il 7/11 pomeriggio (26 e 29 ottobre nei suoi dati), com'erano: servono a dare la sede ai tre elementi di un backup vecchio. */
+const LUOGHI_DELL_UTENTE: Record<string, { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; confidenti_json: string; piatti_json: string | null;
+  note: string | null; fonte: string; verificato: number; origine: string; nascosto: number; seed_json: string | null; updated_at: string; condizioni_json: string; area_chiave: string;
+  orari_json: string | null; solo_eventi_confidente: string | null; fonte_condizioni_json: string | null }> = {
+  'shibuya/u-banco-della-lotteria-di-shibuya': {
+    chiave: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere_chiave: 'shibuya', ordine: 27, tipo: 'attivita', nome: 'Chiosco della lotteria',
+    cosa_offre: 'Biglietti della lotteria e verifica delle estrazioni.', confidenti_json: '[]', piatti_json: null, note: null, fonte: '', verificato: 1, origine: 'utente',
+    nascosto: 0, seed_json: null, updated_at: '2026-10-26T15:59:34.095Z', condizioni_json: '[]', area_chiave: 'citta/shibuya/piazza-della-stazione', orari_json: null,
+    solo_eventi_confidente: null, fonte_condizioni_json: null,
+  },
+  'shibuya/u-chiosco-dei-succhi-del-sottopasso': {
+    chiave: 'shibuya/u-chiosco-dei-succhi-del-sottopasso', quartiere_chiave: 'shibuya', ordine: 28, tipo: 'negozio', nome: 'Chiosco delle bevande', cosa_offre: 'Succhi Aojiru.',
+    confidenti_json: '[]', piatti_json: null, note: null, fonte: '', verificato: 1, origine: 'utente', nascosto: 0, seed_json: null, updated_at: '2026-10-29T21:52:27.688Z',
+    condizioni_json: '[]', area_chiave: 'citta/shibuya/sottopasso',
+    orari_json: '{"giorni":["domenica"],"fasce":[],"chiusoConPioggia":false,"nota":"Solo la domenica, di giorno e di sera: la guida lo visita il 1° maggio di giorno e il 17 luglio di sera; il meteo non è indicato."}',
+    solo_eventi_confidente: null, fonte_condizioni_json: null,
+  },
+};
+
 const TABELLE_INTATTE = ['luogo','quartiere', 'spillo', 'cestino', 'catalogo_oggetto', 'ricompensa_oggetto'] as const;
 const SENZA: Record<'negozio' | 'articolo' | 'attivita', readonly string[]> = {
   negozio: ['luogo_chiave', 'luogo', 'condizioni_json', 'note', 'sblocco_json'], articolo: ['effetto', 'statistiche', 'effetto_json'], attivita: ['luogo_chiave'],
@@ -233,8 +252,24 @@ export const migration346: Migration = {
     // (creato dall'utente), che qui si cerca per identità. Vale solo se la sede manca, il vecchio quartiere è quello atteso e il luogo c'è e sta in quel
     // quartiere: altrimenti non si inventa niente (in un backup senza quei luoghi la riga resta senza quartiere, e il verbale lo dice).
     const sediAssegnate: Array<{ tabella: string; chiave: string; sede: string }> = [];
+    const luoghiCreati: string[] = [];
     for (const s of SEDI_PER_IDENTITA) {
       if (!c(s.tabella, 'luogo_chiave')) continue;
+      // un backup di prima delle 16 del 7/11 non ha i due luoghi che l'utente ha creato quel pomeriggio: si ricreano com'erano nei suoi dati (le stesse
+      // righe), ma solo se il luogo manca, il quartiere e l'Area ci sono e la riga da collocare ha il solo quartiere
+      if (!db.prepare('SELECT 1 FROM main.luogo WHERE chiave = ?').get(s.sede)) {
+        const l = LUOGHI_DELL_UTENTE[s.sede];
+        const serve = l && db.prepare(`SELECT 1 FROM main.${s.tabella} WHERE chiave = ? AND sede_chiave IS NULL AND luogo_chiave = ?`).get(s.chiave, s.quartiere);
+        const areaEsiste = l && db.prepare('SELECT 1 FROM main.area WHERE chiave = ?').get(l.area_chiave);
+        const quartiereEsiste = db.prepare('SELECT 1 FROM main.quartiere WHERE chiave = ?').get(s.quartiere);
+        if (l && serve && areaEsiste && quartiereEsiste && !db.prepare('SELECT 1 FROM main.luogo WHERE ordine = ? AND quartiere_chiave = ?').get(l.ordine, l.quartiere_chiave)) {
+          db.prepare(`INSERT INTO main.luogo (chiave, quartiere_chiave, ordine, tipo, nome, cosa_offre, confidenti_json, piatti_json, note, fonte, verificato, origine, nascosto,
+            seed_json, updated_at, condizioni_json, area_chiave, orari_json, solo_eventi_confidente, fonte_condizioni_json)
+            VALUES (@chiave, @quartiere_chiave, @ordine, @tipo, @nome, @cosa_offre, @confidenti_json, @piatti_json, @note, @fonte, @verificato, @origine, @nascosto,
+            @seed_json, @updated_at, @condizioni_json, @area_chiave, @orari_json, @solo_eventi_confidente, @fonte_condizioni_json)`).run(l);
+          luoghiCreati.push(s.sede);
+        }
+      }
       const luogoEsiste = db.prepare('SELECT 1 FROM main.luogo WHERE chiave = ? AND quartiere_chiave = ?').get(s.sede, s.quartiere);
       if (!luogoEsiste) continue;
       const fatto = db.prepare(`UPDATE main.${s.tabella} SET sede_chiave = ? WHERE chiave = ? AND sede_chiave IS NULL AND luogo_chiave = ?`).run(s.sede, s.chiave, s.quartiere).changes;
@@ -334,7 +369,7 @@ export const migration346: Migration = {
     registraAudit(db, 'audit-l1-07-11-un-solo-dove', {
       migrazione: 'L1-07/08/11 · 346',
       colonneTolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`),
-      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo, sediAssegnate,
+      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo, sediAssegnate, luoghiCreati,
       quartieri: { negozi: quartieriNegozi.length, attivita: quartieriAttivita.length, discrepanze: discrepanze.length },
     });
     if (condizioni.nonLeggibili.length > 0) logger.warn({ migrazione: 'L1-346', negozi: condizioni.nonLeggibili }, 'condizioni del negozio non leggibili: non sono passate a sblocco_json, restano nell’archivio');

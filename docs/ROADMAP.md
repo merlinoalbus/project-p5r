@@ -217,10 +217,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
   `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.
 
-- **Un solo «dove» dei negozi: due residui.** (1) Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà
-  anche per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati. (2) Un backup precedente alle 16 del 7/11 non
-  ha i due luoghi creati quel pomeriggio: i negozi `chiosco-bevande-sottopasso` e `lotteria-shibuya` e l'attività `estrazione-lotteria` restano senza
-  quartiere (la 346 dà loro la sede per identità quando il luogo c'è); il testo del «dove» dei due negozi sta nella nota, quello dell'attività nel suo `luogo`.
+- **Un solo «dove» dei negozi: un residuo.** Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà anche
+  per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati.
 
 **Riservato all'utente**
 - Collaudo automatico completo della ricerca globale: lo esegue l'utente.

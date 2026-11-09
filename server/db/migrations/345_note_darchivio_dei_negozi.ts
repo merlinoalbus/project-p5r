@@ -13,9 +13,11 @@
 // nessun dato modella NON resta nel blocco d'archivio: diventa una frase normale in coda al primo paragrafo della nota (iniziale maiuscola, punto
 // finale), e l'intestazione e la frase standard del blocco spariscono (nessun blocco, se nessuna parte resta). Un indirizzo che non è fra le fonti
 // si aggiunge a `negozio.fonte` (separatore « ; »). Il testo originale di ogni nota cambiata resta INTERO nell'archivio. Il primo paragrafo non si
-// tocca, salvo due frasi che la migrazione dimostra ripetute:
+// tocca, salvo tre casi che la migrazione dimostra:
 //   - `venditore-ambulante`: «Gli articoli si sbloccano in base al Rango Fascino (2, 3 e 5)» (i ranghi delle Doti dell'offerta sono 2, 3 e 5);
-//   - `tanaka-affari-loschi`: le due frasi sul «30 gennaio», che da qui è una condizione strutturata dello sblocco del negozio.
+//   - `tanaka-affari-loschi`: le due frasi sul «30 gennaio», che da qui è una condizione strutturata dello sblocco del negozio;
+//   - `jose`: «Le aperture effettive dei dedali si segnano in Partita → Progressi; non sono dedotte dalla data», smentita dalla migrazione 305
+//     (l'apertura di un Dedalo è una condizione calcolata, `dungeon_area.condizioni_json`).
 // Per ogni negozio:
 //   - venditore-ambulante, mercante-sakai, jose: le righe che ripetono sede, orari, prezzi, costi, intervalli, condizioni dei Dedali si tolgono; di
 //     jose restano, come frasi, la posizione («veicolo particolare…») e il «casualmente… dopo la prima richiesta» (il catalogo che cambia col Dedalo
