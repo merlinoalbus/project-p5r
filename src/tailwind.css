@@ -2706,6 +2706,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .immagine-entita { position: relative; overflow: visible; }
 .immagine-entita > * { overflow: hidden; border-radius: inherit; }
 .immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+/* Piastrella del Compendio: la fascia alta dell'arte, sotto il cartiglio del livello, lascia passare il tocco al collegamento della piastrella; ingrandisce solo il resto dell'arte */
+.immagine-entita--sotto-cartiglio { pointer-events: none; }
+.immagine-entita--sotto-cartiglio::after { pointer-events: auto; left: 0; top: 16px; width: 100%; height: calc(100% - 16px); transform: none; }
 
 /* Un collegamento **dentro una frase** resta alto quanto la riga di testo in cui vive: allargarlo
    vorrebbe dire allargare l'interlinea del paragrafo, e il criterio 2.5.8 lo esclude proprio per

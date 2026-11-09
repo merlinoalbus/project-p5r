@@ -119,10 +119,10 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
       </Link>
       {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + margine interno 10 px di `p-2.5` = 11 px; il riquadro lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
       <div className="pointer-events-none absolute left-[11px] top-[11px] h-16 w-16">
-        <span className="pointer-events-auto inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} forma="quadrata" /></span>
+        <span className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} forma="quadrata" className="immagine-entita--sotto-cartiglio" /></span>
         {/* il cartiglio sta sopra l'arte, fuori dal collegamento: il livello lo scrive lui stesso e lo dice il nome del collegamento (qui `decorativo`, così non si legge
-            due volte). Eredita `pointer-events: none` dal riquadro: non è un bersaglio, il tocco passa all'arte o al collegamento che ha sotto (L11-07: era una copia del
-            collegamento da 50-63×24 px, sovrapposta al pulsante dell'immagine) */}
+            due volte). Non è un bersaglio: sotto c'è la fascia dell'arte che lascia passare il tocco, quindi toccarlo apre la scheda come il resto della piastrella;
+            l'ingrandimento sta nei 64×48 px sotto la fascia (`immagine-entita--sotto-cartiglio`) */}
         <span className="absolute -left-1.5 -top-2 inline-flex"><LivelloBadge livello={p.livello} decorativo /></span>
         {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-7 h-7 object-contain drop-shadow" fallback={null} />}
       </div>
