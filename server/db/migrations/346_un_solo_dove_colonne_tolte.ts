@@ -26,8 +26,12 @@
 // Il runner tiene `foreign_keys` spento durante la migrazione: `articolo` non è mai ricostruita né cancellata (niente cascata), e dopo il controllo
 // delle chiavi esterne del runner lo stato è quello di prima.
 //
-// COSA NON CAMBIA (impronte di ogni riga prima e dopo, escluse le sole colonne dichiarate): le altre colonne di `negozio`, `articolo` e `attivita`,
-// i luoghi, i quartieri, i pin, il Cestino. Il quartiere ricavato dalla sede coincide col vecchio `luogo_chiave` (le eccezioni, se ci fossero, si
+//  (0) PRIMA di tutto, solo per un backup vecchio: la sede dei tre elementi che avevano il solo quartiere (lotteria-shibuya, chiosco-bevande-sottopasso,
+//      attività estrazione-lotteria). Se i due luoghi che l'utente ha creato dai pin in ottobre mancano e i loro pin (uid) sono ancora scollegati, si
+//      ricreano com'erano nei suoi dati e i pin si ricollegano; poi la sede si dà per identità. Verbale: `sediAssegnate`, `luoghiCreati`, `pinCollegati`.
+//
+// COSA NON CAMBIA (impronte di ogni riga prima e dopo, escluse le sole colonne dichiarate e i soli effetti del passo 0): le altre colonne di `negozio`,
+// `articolo` e `attivita`, i luoghi, i quartieri, i pin, il Cestino. Il quartiere ricavato dalla sede coincide col vecchio `luogo_chiave` (le eccezioni, se ci fossero, si
 // scrivono nel verbale e in `dati_guida.archivio-frasi-l11`: nulla si perde). Idempotente: ogni parte si salta se la sua colonna non c'è più.
 // Verbale: `dati_guida.audit-l1-07-11-un-solo-dove`. Nessun import da `server/services/`; non si scrive in `utente`.
 // ============================================================
@@ -208,7 +212,14 @@ const SEDI_PER_IDENTITA: ReadonlyArray<{ tabella: 'negozio' | 'attivita'; chiave
   { tabella: 'attivita', chiave: 'estrazione-lotteria', sede: 'shibuya/u-banco-della-lotteria-di-shibuya', quartiere: 'shibuya' },
 ];
 
-/** I due luoghi che l'utente ha creato il 7/11 pomeriggio (26 e 29 ottobre nei suoi dati), com'erano: servono a dare la sede ai tre elementi di un backup vecchio. */
+/** Il pin (per uid: pin 1466 «Lotteria» e pin 1486 «Chiosco dei succhi») da cui l'utente ha creato ciascun luogo: scollegato in un backup di prima della creazione. */
+const PIN_DEI_LUOGHI: Record<string, string> = {
+  'shibuya/u-banco-della-lotteria-di-shibuya': '86ffed9e0a978ac75135618c5c6e53d7',
+  'shibuya/u-chiosco-dei-succhi-del-sottopasso': 'f18174c2eb726e4a3d8648c138e2dbb2',
+};
+
+/** I due luoghi che l'utente ha creato dai pin in ottobre (il banco della lotteria il 26, il chiosco delle bevande l'ultimo ritocco il 29), com'erano nei suoi dati
+ *  del 7/11: servono a dare la sede ai tre elementi di un backup vecchio. */
 const LUOGHI_DELL_UTENTE: Record<string, { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; confidenti_json: string; piatti_json: string | null;
   note: string | null; fonte: string; verificato: number; origine: string; nascosto: number; seed_json: string | null; updated_at: string; condizioni_json: string; area_chiave: string;
   orari_json: string | null; solo_eventi_confidente: string | null; fonte_condizioni_json: string | null }> = {
@@ -248,26 +259,34 @@ export const migration346: Migration = {
     for (const t of ['negozio', 'attivita', 'articolo', 'luogo', 'area', 'quartiere', 'dati_guida']) if (!esisteTabella(db, t)) errore(`manca la tabella ${t}`);
     const c = (tabella: string, colonna: string): boolean => haColonna(db, tabella, colonna);
 
-    // (0) la sede dei tre elementi che, in un backup di prima del 7/11 pomeriggio, avevano il solo quartiere: nei dati attuali stanno in un luogo
-    // (creato dall'utente), che qui si cerca per identità. Vale solo se la sede manca, il vecchio quartiere è quello atteso e il luogo c'è e sta in quel
-    // quartiere: altrimenti non si inventa niente (in un backup senza quei luoghi la riga resta senza quartiere, e il verbale lo dice).
+    // (0) la sede dei tre elementi che, in un backup di prima dell'ottobre in cui l'utente ha creato due luoghi dai pin, avevano il solo quartiere: nei
+    // dati attuali stanno in un luogo (creato dall'utente), che qui si cerca per identità. Vale solo se la sede manca, il vecchio quartiere è quello
+    // atteso e il luogo c'è e sta in quel quartiere; se il luogo manca si ricrea (vedi sotto) solo quando il pin da cui nacque è ancora scollegato (il
+    // segno del backup vecchio): altrimenti non si inventa niente (la riga resta senza quartiere, e il verbale lo dice).
     const sediAssegnate: Array<{ tabella: string; chiave: string; sede: string }> = [];
     const luoghiCreati: string[] = [];
+    const pinCollegati: Array<{ uid: string; luogo: string }> = [];
     for (const s of SEDI_PER_IDENTITA) {
       if (!c(s.tabella, 'luogo_chiave')) continue;
-      // un backup di prima delle 16 del 7/11 non ha i due luoghi che l'utente ha creato quel pomeriggio: si ricreano com'erano nei suoi dati (le stesse
-      // righe), ma solo se il luogo manca, il quartiere e l'Area ci sono e la riga da collocare ha il solo quartiere
+      // un backup di prima dell'ottobre non ha i due luoghi che l'utente ha poi creato dai pin 1466 e 1486: si ricreano com'erano nei suoi dati (le
+      // stesse righe) e il pin si ricollega al suo luogo, ma solo se il luogo manca, il pin (per uid) esiste ancora SCOLLEGATO (in un'istanza in cui il luogo
+      // è stato eliminato, il Cestino ha tolto anche i suoi pin e il luogo è nel Cestino: non si tocca), il quartiere e l'Area ci sono e la riga da
+      // collocare ha il solo quartiere
       if (!db.prepare('SELECT 1 FROM main.luogo WHERE chiave = ?').get(s.sede)) {
         const l = LUOGHI_DELL_UTENTE[s.sede];
+        const pinUid = PIN_DEI_LUOGHI[s.sede];
         const serve = l && db.prepare(`SELECT 1 FROM main.${s.tabella} WHERE chiave = ? AND sede_chiave IS NULL AND luogo_chiave = ?`).get(s.chiave, s.quartiere);
         const areaEsiste = l && db.prepare('SELECT 1 FROM main.area WHERE chiave = ?').get(l.area_chiave);
         const quartiereEsiste = db.prepare('SELECT 1 FROM main.quartiere WHERE chiave = ?').get(s.quartiere);
-        if (l && serve && areaEsiste && quartiereEsiste && !db.prepare('SELECT 1 FROM main.luogo WHERE ordine = ? AND quartiere_chiave = ?').get(l.ordine, l.quartiere_chiave)) {
+        const pinScollegato = !!pinUid && !!db.prepare('SELECT 1 FROM main.spillo WHERE uid = ? AND riferimento_tipo IS NULL').get(pinUid);
+        const nelCestino = !!(esisteTabella(db, 'cestino') && db.prepare("SELECT 1 FROM main.cestino WHERE tipo = 'luogo' AND chiave = ?").get(s.sede));
+        if (l && serve && areaEsiste && quartiereEsiste && pinScollegato && !nelCestino && !db.prepare('SELECT 1 FROM main.luogo WHERE ordine = ? AND quartiere_chiave = ?').get(l.ordine, l.quartiere_chiave)) {
           db.prepare(`INSERT INTO main.luogo (chiave, quartiere_chiave, ordine, tipo, nome, cosa_offre, confidenti_json, piatti_json, note, fonte, verificato, origine, nascosto,
             seed_json, updated_at, condizioni_json, area_chiave, orari_json, solo_eventi_confidente, fonte_condizioni_json)
             VALUES (@chiave, @quartiere_chiave, @ordine, @tipo, @nome, @cosa_offre, @confidenti_json, @piatti_json, @note, @fonte, @verificato, @origine, @nascosto,
             @seed_json, @updated_at, @condizioni_json, @area_chiave, @orari_json, @solo_eventi_confidente, @fonte_condizioni_json)`).run(l);
           luoghiCreati.push(s.sede);
+          if (db.prepare("UPDATE main.spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ? WHERE uid = ? AND riferimento_tipo IS NULL").run(s.sede, pinUid).changes === 1) pinCollegati.push({ uid: pinUid as string, luogo: s.sede });
         }
       }
       const luogoEsiste = db.prepare('SELECT 1 FROM main.luogo WHERE chiave = ? AND quartiere_chiave = ?').get(s.sede, s.quartiere);
@@ -369,7 +388,7 @@ export const migration346: Migration = {
     registraAudit(db, 'audit-l1-07-11-un-solo-dove', {
       migrazione: 'L1-07/08/11 · 346',
       colonneTolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`),
-      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo, sediAssegnate, luoghiCreati,
+      luogo, condizioni, archiviate, valoriNelleColonneDiArticolo: valoriArticolo, sediAssegnate, luoghiCreati, pinCollegati,
       quartieri: { negozi: quartieriNegozi.length, attivita: quartieriAttivita.length, discrepanze: discrepanze.length },
     });
     if (condizioni.nonLeggibili.length > 0) logger.warn({ migrazione: 'L1-346', negozi: condizioni.nonLeggibili }, 'condizioni del negozio non leggibili: non sono passate a sblocco_json, restano nell’archivio');
