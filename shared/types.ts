@@ -452,6 +452,8 @@ export interface RicettaFusioneDto {
   tipo: TipoFusione;
   /** Costo stimato in yen: somma sugli ingredienti di 27·L² + 126·L + 2147. */
   costo: number;
+  /** Ingredienti (id) Persona DLC mai entrate in scorta nella partita: il primo richiamo è gratuito. `costo` li conta a prezzo pieno. */
+  primoRichiamo: number[];
 }
 
 /** Esito della fusione diretta A+B. */
@@ -507,6 +509,8 @@ export interface PianoFusioneDto {
 export interface PianiFusioneDto {
   persona: PersonaFusioneDto;
   piani: PianoFusioneDto[];
+  /** Vero se la ricerca si è fermata al tetto di calcolo: `piani` sono i migliori trovati fin lì. */
+  troncata: boolean;
   opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null; slotFortunato: boolean };
   /** Skill richieste (propagate lungo la catena). */
   skillRichieste: Array<{ id: number; nome: string; nomeIt: string; elemento: string; elementoNome: string }>;
@@ -4110,7 +4114,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];
-export type FormatoCampoCorrezione = 'condizioni' | 'giorno';
+export type FormatoCampoCorrezione = 'condizioni' | 'giorno' | 'persone' | 'persone-in-ordine';
 export interface CampoCorrezioneDto {
   /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione e di `campi` nel ripristino. */
   percorso: string;
@@ -4121,9 +4125,12 @@ export interface CampoCorrezioneDto {
   /** Lunghezza massima di un testo o valore massimo di un numero, quando c'è. */
   max?: number;
   opzioni?: Array<{ chiave: string; nome: string }>;
-  /** L8-03: un testo con una forma propria. `condizioni`: il JSON di un elenco di condizioni del vocabolario unico (si scrive con l'editor
-   *  delle condizioni); `giorno`: un giorno del calendario di gioco «MM-GG». Il server lo ricontrolla. */
+  /** Un campo con una forma propria. `condizioni`: il JSON di un elenco di condizioni del vocabolario unico (si scrive con l'editor delle
+   *  condizioni); `giorno`: un giorno del calendario di gioco «MM-GG»; `persone` e `persone-in-ordine`: un elenco di Persona scelte da `opzioni`
+   *  (nome canonico come chiave, nome italiano come etichetta), con la seconda forma se conta la posizione. Il server lo ricontrolla. */
   formato?: FormatoCampoCorrezione;
+  /** Quante voci deve avere almeno un elenco per poter essere salvato. Il server lo ricontrolla. */
+  minimoVoci?: number;
   /** Il valore che le pagine mostrano adesso, e quello della guida (identici se il campo non è corretto). */
   valore: ValoreCampoCorrezione;
   valoreGuida: ValoreCampoCorrezione;

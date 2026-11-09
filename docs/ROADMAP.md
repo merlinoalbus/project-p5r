@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 348 migrazioni di gioco (l'ultima è la 382), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -15,7 +15,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Fusione
 - Fusione diretta e inversa, ricette speciali e Demoni del Tesoro, costo di evocazione (`/fusione`).
-- Alberi di fusione ricorsivi ordinati per costo, a partire da scorta, Registro e Persona catturabili.
+- Alberi di fusione ricorsivi ordinati per costo (fino a 4 fusioni, con un tetto di calcolo dichiarato), a partire da scorta, Registro e
+  Persona catturabili; cicli di fusione cercati e salvati fino a 15 anelli; costi di evocazione mostrati come «circa».
 - Eredità delle skill, ricerca per skill desiderate con propagazione a catena negli alberi.
 - Bonus della Stanza di Velluto: sconti del Registro, EXP dei Confidenti, Forca, Isolamento con incensi, Gemelle, Allarme.
 - Piani salvati e obiettivi per Persona.

@@ -4,9 +4,9 @@
 //
 // Due oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
 // `seed_json`, `updated_at` della migrazione 213), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
-//   - `persona` (259 righe, chiave = id): il livello, l'Arcano, le cinque statistiche di base e le skill con i loro livelli. Le skill sono un elenco di testi
-//     «<nome della skill> @ <livello>» (livello 0 = innata) oppure «<nome> @ risveglio|rango|terza-forma» (le skill che non si imparano a un livello): si riscrive
-//     l'elenco intero in `persona_skill`. Le affinità si correggono dal loro editor (`affinitaPersonaService`) e non stanno qui; non si correggono l'identità
+//   - `persona` (259 righe, chiave = id): il livello, l'Arcano, le cinque statistiche di base e le skill con i loro livelli. Le skill viaggiano fra registro e
+//     editor come testi «<nome della skill> @ <livello>» (livello 0 = innata) oppure «<nome> @ risveglio|rango|terza-forma» (le skill che non si imparano a un
+//     livello): è una codifica di trasporto che l'utente non vede mai (`skillPersonaLogica`). Si riscrive l'elenco intero in `persona_skill`. Le affinità si correggono dal loro editor (`affinitaPersonaService`) e non stanno qui; non si correggono l'identità
 //     (nome, forme, personaggio) né gli altri dati.
 //   - `skill` (525 righe, chiave = id): il costo (tipo e valore), l'effetto (il testo canonico della guida, in inglese) e le Persona che la danno come carta con
 //     l'esecuzione. Il nome della skill è la chiave delle traduzioni e delle Persona: non si corregge.
@@ -23,6 +23,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import type { CampoDef } from './registro.js';
 import type { ContestoPropagazione, DefRiga, Valori } from './righe.js';
+import { opzioniDaNomi, opzioniPersone } from './righeComuni.js';
 
 const num = (v: ValoreCampoCorrezione | undefined): number => (typeof v === 'number' ? v : 0);
 const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
@@ -44,7 +45,7 @@ interface SkillScritta { nome: string; livello: number | null; modo: string }
 /** «nome @ livello» → la riga di `persona_skill`: il livello è un intero 0-99 (0 = innata), oppure uno dei modi senza livello. */
 function leggiSkill(testo: string): SkillScritta {
   const i = testo.lastIndexOf(' @ ');
-  if (i < 1) throw httpErrors.badRequest('skill-non-valida', `La skill «${testo}» deve essere scritta «nome @ livello».`, { campo: 'skill' });
+  if (i < 1) throw httpErrors.badRequest('skill-non-valida', 'Una riga delle skill non è valida: scegli la skill dall\'elenco e come si impara.', { campo: 'skill' });
   const nome = testo.slice(0, i).trim();
   const dopo = testo.slice(i + 3).trim();
   if ((MODI_SENZA_LIVELLO as readonly string[]).includes(dopo)) return { nome, livello: null, modo: dopo };
@@ -61,7 +62,7 @@ const persona: DefRiga = {
     { p: 'livello', e: 'Livello', t: 'numero', max: 99 } as CampoDef,
     { p: 'arcana', e: 'Arcano', t: 'scelta', opzioni: (prepared('SELECT chiave FROM arcana ORDER BY chiave').pluck().all() as string[]).map((c) => ({ chiave: c, nome: c })) } as CampoDef,
     ...STATISTICHE.map(([p, e]): CampoDef => ({ p, e, t: 'numero', max: 99, gruppo: 'Statistiche di base' })),
-    { p: 'skill', e: 'Skill (nome @ livello)', t: 'elenco' } as CampoDef,
+    { p: 'skill', e: 'Skill e livelli a cui si imparano', t: 'elenco', opzioni: opzioniDaNomi('skill', prepared('SELECT nome FROM skill').pluck().all() as string[]) } as CampoDef,
   ],
   leggi: (chiave) => {
     const r = rigaPersona(chiave);
@@ -159,7 +160,7 @@ const skill: DefRiga = {
     { p: 'costo_tipo', e: 'Tipo di costo', t: 'scelta', opzioni: [{ chiave: 'sp', nome: 'SP' }, { chiave: 'hp', nome: 'HP (percentuale)' }, { chiave: 'nessuno', nome: 'Nessun costo' }] } as CampoDef,
     { p: 'costo_valore', e: 'Valore del costo', t: 'numero', max: 999 } as CampoDef,
     { p: 'effetto', e: 'Effetto (testo canonico, in inglese)', t: 'testolungo', max: 600 } as CampoDef,
-    { p: 'fonti', e: 'Persona che la danno come carta con l’esecuzione (nome)', t: 'elenco' } as CampoDef,
+    { p: 'fonti', e: 'Persona che la danno come carta con l’esecuzione', t: 'elenco', formato: 'persone', opzioni: opzioniPersone() } as CampoDef,
   ],
   leggi: (chiave) => {
     const r = rigaSkill(chiave);

@@ -494,7 +494,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'POST /api/partite/:id/cicli': {
     sommario: 'Salva un ciclo di fusione',
-    descrizione: 'Ricalcola e valida gli anelli nella partita: da 2 a 5, ognuno una fusione che produce davvero il risultato indicato, ognuno parte dal risultato del precedente e l\'ultimo rigenera la Persona di partenza. Il modo del partner (registro, scorta, cattura) e il costo (somma dei partner da evocare dal registro, con lo sconto della partita) li calcola il server. Il nome predefinito è «Ciclo per <Persona>»; il salvataggio va nello storico (`ciclo-salvato`).',
+    descrizione: 'Ricalcola e valida gli anelli nella partita: da 2 a 15, ognuno una fusione che produce davvero il risultato indicato, ognuno parte dal risultato del precedente e l\'ultimo rigenera la Persona di partenza. Il modo del partner (registro, scorta, cattura) e il costo (somma dei partner da evocare dal registro, con lo sconto della partita) li calcola il server. Il nome predefinito è «Ciclo per <Persona>»; il salvataggio va nello storico (`ciclo-salvato`).',
     risposta: '`CicloSalvatoDto` salvato',
     errori: [PARTITA, [400, 'ciclo-non-valido'], [404, 'persona-non-trovata']],
   },

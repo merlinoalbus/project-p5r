@@ -47,7 +47,7 @@ server/
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod, tipizzato: il gestore riceve `req.body`, `req.params` e `req.query` col tipo dell'uscita degli schemi; `corpoDelServizio<T>()` per i corpi che il servizio completa da sé; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
   openapi/            documentazione dell'API: rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
   db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (copie di avvio di entrambi i file: al più 7 e 2 GiB), schemaMemo.ts (presenza di tabelle e colonne ricordata per `schema_version`), schemaUtente.ts (DDL di base delle tabelle delle partite; le successive vengono dalle migrazioni utente), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni), fontiTolte.ts (registro delle strutture eliminate, §5 ter), acquistiLegacy.ts e conversioneEffettiAzione.ts (conversioni dei dati di prima), dati/
-  db/migrations/      dati di gioco: 001 … 346 (registro in index.ts, append-only; `index.test.ts` pretende id consecutivi); i manifesti e i dati congelati delle migrazioni stanno accanto ai file (`*Manifest.ts`, `*.json`, `dati/`)
+  db/migrations/      dati di gioco: 001 … 382 (registro in index.ts, append-only; `index.test.ts` pretende id consecutivi); i manifesti e i dati congelati delle migrazioni stanno accanto ai file (`*Manifest.ts`, `*.json`, `dati/`)
   db/migrazioniUtente/ partite: 001 … 067 (registro in index.ts, sequenza separata, `PRAGMA utente.user_version`)
   routes/             20 montaggi in `routes/index.ts` (`ROUTER_DI_AREA`): compendio, disponibilitaStrutturata e confidentiScritture (stesso prefisso del compendio), traduzioni, partite, immagini, fusione, mappe, font, impostazioni, catalogo, catalogoOggetti, condizioni, aree, luoghi, ricerca, regolePesca (`/api/pesca`), pesca (`/api/partite/:id/pesca`), correzioni, appuntiFissi (`/api/appunti-fissi`, solo preparazione)
   services/           un servizio per dominio (`*Service.ts`) e sei cartelle: `condizioni/` (valutatore unico), `fusione/` (motore), `mappe/` (gerarchia, case, immagini, pin), `pacchetto/` (primo avvio, `regoleAllAvvio`), `ricerca/` (indice e stato), `ripristino/` (registro dei blocchi correggibili)
@@ -115,7 +115,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
   restano sempre; fra le altre, la prima che sfora toglie anche le più vecchie (una serie continua, salvo una copia vuota o fuori tetto
   che precede una protetta). La copia dell'istanza (Impostazioni)
   porta `database/gioco.db` e `database/partite.db`.
-- Due famiglie di dati (346 migrazioni di gioco e 67 delle partite):
+- Due famiglie di dati (348 migrazioni di gioco e 67 delle partite):
   - **dati di gioco** in `main` (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill`, `oggetto`, tabelle di fusione, `confidente` + `confidente_rango`, `dote_sociale` + `dote_sociale_rango`, `traduzione` con `fonte` `seed` o `utente`, e tutto il mondo e la guida di §5 ter). Le immagini stanno nella tabella `immagine` di `gioco.db` (079);
   - **dati utente** in `utente` (`partita` con indice parziale «una sola attiva» e le impostazioni dei contenuti, `dlc_posseduti_json` — i set di `dlc_set` posseduti, letti dalla Fusione e dalla condizione `dlc-posseduto` — e `salvataggio_p5` (utente 061), scritte dalla finestra «Modifica» della partita, `RiepilogoPartita`, con `PUT /partite/:id`, `compendio_partita`, `persona_posseduta` + `persona_posseduta_skill`, `confidente_partita`, `dote_sociale_partita` e le tabelle delle migrazioni utente: inviti, acquisti e proposte, pesca, Fortuna, piazzamento agli esami, punti cronologici…), sempre con `partita_id` e ON DELETE CASCADE.
 - Statistiche per livello: `shared/statistiche.ts` — +3 punti per livello ripartiti in proporzione alle statistiche base; il BE espone per ogni Persona posseduta `statistiche` (registrate dall'utente oppure stimate al livello) e `statisticheBaseLivello`.
@@ -456,13 +456,13 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
   gli ingredienti in scorta valgono 0 (`costoRicettaConScorta`, che ripartisce il costo scontato del server sugli ingredienti da evocare).
 - API pubblica del motore: `creaContesto(dlcPosseduti)`, `fondi(a, b, ctx)`, `ricettePer(target, ctx)`, `fusioniCon(persona, ctx)`,
   `ricettaSpeciale`, `costoFusione`, `livelloFusione`, `arcanaRisultato`, `personaFusione(id)`, `invalidaMotoreFusione`.
-- Pagina `FusionePage` (`/fusione?vista=…`): otto viste per tutti; «Ricette speciali» (`speciali`) contiene anche la tabella dei Demoni del
+- Pagina `FusionePage` (`/fusione?vista=…`): otto viste per tutti, in una fila di piastrelle da 768 px e in un selettore sotto; «Ricette speciali» (`speciali`) contiene anche la tabella dei Demoni del
   Tesoro (D19; `?vista=tesori`, la vista interna di prima, porta lì). «Due arcani» (`coppia`) e «Matrice completa» (`matrice`) sono viste
   interne con `?strumenti=1`, solo nella preparazione: con `IN_RILASCIO` escono dal bundle di rilascio, e la guardia del bundle ne vieta le
   etichette.
 - `server/services/fusione/alberoFusione.ts`: `pianiFusione(target, ctx, disponibilita, opzioni)` → piani ordinati per costo; foglie
   `scorta` (0 yen, un esemplare per volta), `registro` (prezzo di evocazione), `cattura` (Persona catturabile secondo `sqlPersonaCatturabile`, ≤ livelloMax); nodi `fusione` con
-  2 ingredienti (o N per le ricette speciali). Stima ottimistica memoizzata + ricerca in profondità con potatura (branch-and-bound sulle N migliori),
+  2 ingredienti (o N per le ricette speciali). Stima ottimistica memoizzata per Persona e profondità + ricerca in profondità con potatura (branch-and-bound sulle N migliori), con un tetto deterministico di visite oltre il quale restituisce i migliori piani trovati (`troncata`),
   ampiezza per nodo 12 (almeno 40 con skill richieste); `pianoCoerente` verifica ogni nodo col motore. La disponibilità viene da `persona_posseduta` e `compendio_partita` della partita.
 - `server/services/fusione/eredita.ts`: snapshot skill/apprese/tratti/tipi/matrice; `slotEreditabili(totale)`, `elementoEreditabile(tipo, elemento)`,
   `skillAlLivello`, `skillPosseduta`, `analisiEredita(risultato, ingredienti)` (candidate con motivo, slot, tratti), `copre(analisi, skillIds)`.

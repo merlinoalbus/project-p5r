@@ -60,7 +60,7 @@ async function scegli(etichetta: string, testo: string, nome: string) {
 
 describe('Calcolatore', () => {
   it('sceglie due Persona, chiama l\'API con la partita e mostra risultato, tipo e costo', async () => {
-    const esito: EsitoFusioneDto = { a: fus(arsene), b: fus(pixie), ricetta: { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227 }, motivo: null, dlcPosseduti: [], sconto: 0, bonusConfidente: null };
+    const esito: EsitoFusioneDto = { a: fus(arsene), b: fus(pixie), ricetta: { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227, primoRichiamo: [] }, motivo: null, dlcPosseduti: [], sconto: 0, bonusConfidente: null };
     getFondi.mockResolvedValue(esito);
     render(<MemoryRouter><Calcolatore persone={persone} partitaId={7} inScorta={new Set([1, 2])} /></MemoryRouter>);
     await scegli('Prima Persona', 'ars', 'Arsène');
@@ -95,8 +95,8 @@ describe('RicettePersona', () => {
     const dati: RicetteFusioneDto = {
       persona: fus(jack), totale: 2, totaleSenzaFiltri: 3, livelloMax: null, dlcPosseduti: [], sconto: 0,
       ricette: [
-        { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227 },
-        { ingredienti: [fus(regent), fus(pixie)], risultato: fus(jack), tipo: 'tesoro', costo: 9000 },
+        { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227, primoRichiamo: [] },
+        { ingredienti: [fus(regent), fus(pixie)], risultato: fus(jack), tipo: 'tesoro', costo: 9000, primoRichiamo: [] },
       ],
     };
     getRicettePer.mockResolvedValue(dati);

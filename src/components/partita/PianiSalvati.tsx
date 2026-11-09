@@ -10,7 +10,7 @@ import { notifica } from '../../stores/notificationStore';
 import { EmptyState, Spinner } from '../shared/PageState';
 import { AlberoPiano } from '../fusione/AlberoPiano';
 import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
 import type { PianoSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -47,7 +47,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
           <button type="button" className="chip chip--icona touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'}<IconaAzione chiave="modifica" dimensione={13} /></button>
         )}
         {piano.obiettivoId && <Link to="/partita?scheda=obiettivi" className="chip no-underline" title={`Obiettivo ${piano.obiettivoStato ?? ''}`}>Obiettivo{piano.obiettivoStato === 'raggiunto' ? ' raggiunto' : ''}</Link>}
-        <span className="ml-auto font-black tabular-nums">{formattaYen(piano.costo)}</span>
+        <span className="ml-auto font-black tabular-nums">{formattaCostoEvocazione(piano.costo)}</span>
       </div>
       <div className="testo-13 text-text-secondary flex flex-wrap gap-x-3 gap-y-1">
         <span>{piano.piano.fusioni} {piano.piano.fusioni === 1 ? 'fusione' : 'fusioni'} · profondità {piano.piano.profondita}</span>

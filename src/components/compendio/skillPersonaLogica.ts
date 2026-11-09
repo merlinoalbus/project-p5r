@@ -2,8 +2,9 @@
 // skillPersonaLogica — le skill di una Persona come righe dell'editor e come testi del registro (L11 · R11-15/3)
 // ============================================================
 //
-// Il registro dei ripristini (`persona`, campo `skill`) scrive le skill come testi «<nome canonico> @ <livello>» (livello 0 = innata) oppure
-// «<nome> @ risveglio|rango|terza-forma». Qui la conversione nei due sensi e il controllo che il server rifarebbe (stesso senso, stesso italiano).
+// Fra il registro dei ripristini (`persona`, campo `skill`) e l'editor le skill viaggiano come testi «<nome canonico> @ <livello>» (livello 0 = innata) oppure
+// «<nome> @ risveglio|rango|terza-forma»: è una codifica interna di trasporto, che l'utente non vede mai (sceglie da selettori e legge `descriviSkill`).
+// Qui la conversione nei due sensi e il controllo che il server rifarebbe (stesso senso, stesso italiano).
 // ============================================================
 
 export type Modo = 'livello' | 'iniziale' | 'risveglio' | 'rango' | 'terza-forma';
@@ -13,7 +14,7 @@ export const NOMI_MODO: Record<Modo, string> = { livello: 'A un livello', inizia
 export const MODI_SENZA_LIVELLO: Modo[] = ['risveglio', 'rango', 'terza-forma'];
 export const RIGA_VUOTA: RigaSkill = { nome: '', modo: 'livello', livello: null };
 
-/** «nome @ livello» → la riga dell'editor (il livello 0 è «Innata»). */
+/** Il testo di trasporto → la riga dell'editor (il livello 0 è «Innata»). */
 export function leggiSkill(testo: string): RigaSkill {
   const i = testo.lastIndexOf(' @ ');
   if (i < 0) return { nome: testo.trim(), modo: 'livello', livello: null };
@@ -26,11 +27,20 @@ export function leggiSkill(testo: string): RigaSkill {
   return { nome, modo: 'livello', livello: Number.isFinite(n) ? n : null };
 }
 
-/** La riga dell'editor → «nome @ livello». */
+/** La riga dell'editor → il testo di trasporto. */
 export function scriviSkill(r: RigaSkill): string {
   if (r.modo === 'iniziale') return `${r.nome} @ 0`;
   if (r.modo === 'livello') return `${r.nome} @ ${r.livello ?? ''}`;
   return `${r.nome} @ ${r.modo}`;
+}
+
+/** L'elenco di skill a parole, per chi lo legge («Agi (livello 5) · Dia (Innata)»). */
+export function descriviSkill(voci: readonly string[], nomeDi: (nome: string) => string): string {
+  return voci.map((testo) => {
+    const r = leggiSkill(testo);
+    if (r.modo !== 'livello') return `${nomeDi(r.nome)} (${NOMI_MODO[r.modo]})`;
+    return r.livello === null ? nomeDi(r.nome) : `${nomeDi(r.nome)} (livello ${r.livello})`;
+  }).join(' · ');
 }
 
 /** Il primo problema dell'elenco di skill, in italiano (`null` se va bene). `nomeDi` rende il nome da mostrare (di default quello canonico). */

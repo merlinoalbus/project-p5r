@@ -41,12 +41,13 @@ export function prezzoEvocazioneRegistro(livello: number): number {
 
 /**
  * L7-07: quanto costa davvero una ricetta, dato il suo costo dal server (prezzi di evocazione degli ingredienti, già scontati dal Registro):
- * gli ingredienti in scorta valgono 0 (DECISIONI §7). Il costo si ripartisce sugli ingredienti in proporzione al loro prezzo di evocazione,
- * così lo sconto del Registro resta applicato; con nessuno in scorta è il costo del server, con tutti in scorta è 0.
+ * gli ingredienti in scorta valgono 0 (DECISIONI §7), come quelli al primo richiamo gratuito di una Persona DLC. Il costo si ripartisce sugli
+ * ingredienti in proporzione al loro prezzo di evocazione, così lo sconto del Registro resta applicato; con nessuno gratuito è il costo del
+ * server, con tutti gratuiti è 0.
  */
-export function costoRicettaConScorta(costo: number, ingredienti: ReadonlyArray<{ livello: number; inScorta: boolean }>): number {
+export function costoRicettaConScorta(costo: number, ingredienti: ReadonlyArray<{ livello: number; inScorta: boolean; primoRichiamo?: boolean }>): number {
   const totale = ingredienti.reduce((t, i) => t + prezzoEvocazioneRegistro(i.livello), 0);
-  const daEvocare = ingredienti.reduce((t, i) => t + (i.inScorta ? 0 : prezzoEvocazioneRegistro(i.livello)), 0);
+  const daEvocare = ingredienti.reduce((t, i) => t + (i.inScorta || i.primoRichiamo ? 0 : prezzoEvocazioneRegistro(i.livello)), 0);
   if (totale === 0 || daEvocare === totale) return costo;
   return Math.round(costo * daEvocare / totale);
 }
