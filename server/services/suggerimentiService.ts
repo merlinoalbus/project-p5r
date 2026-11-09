@@ -172,7 +172,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   const fatte = spuntePartita(partitaId, data);
   // Un'azione bloccata dai requisiti non è un suggerimento: la si esclude come fa la Guida (`statoAzione`).
   const conf = new Map(confidenti(partitaId).map((c) => [c.chiave, c]));
-  // la giornata com'è (canone): le voci che si spuntano e non sono ancora fatte; eventi e promemoria non suggeriscono nulla
+  // la giornata com'è (canone): le voci che si spuntano e non sono ancora fatte; i promemoria non suggeriscono nulla
   const azioni = righeDelGiorno(data).filter((v) => v.genere === 'azione' && !fatte.has(v.uid)).map((r) => voceBase(r))
     .filter((a) => statoAzione(a, conf).tipo !== 'bloccata');
   const r = nuovaRaccolta();

@@ -58,8 +58,8 @@ export interface EffettiAppunti {
 /**
  * Una voce negli appunti: tutti i campi del modulo della voce, gli effetti e le infiltrazioni. Ciò che la lega ad altro e che una copia
  * non eredita (eventi del calendario, proposte «da completare», proposta d'infiltrazioni salvata) e le spunte delle partite NON viaggiano:
- * il piano dell'incolla li rilegge dal file per uid e li dice prima (`RilievoIncolla`). Il vecchio campo `produce_json` non si legge né si
- * scrive più (la fonte è `effetti`): non viaggia.
+ * il piano dell'incolla li rilegge dal file per uid e li dice prima (`RilievoIncolla`). Gli effetti viaggiano solo in `effetti`
+ * (il vecchio campo `produce_json` non esiste più).
  */
 export interface VoceAppunti {
   /** L'uid della voce copiata o tagliata. */

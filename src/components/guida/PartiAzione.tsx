@@ -5,7 +5,7 @@
 // Dal 2026-09-30 un'azione della guida e una cosa da fare aggiunta dall'utente sono la stessa cosa, una voce della giornata
 // canone per tutte le partite («devo poter modificare al 100% gli eventi della guida»; «le modifiche diventano nuovo canone»):
 // tipo, collegamento, rango atteso, note, effetti della spunta, stato nella partita. La riga `Azione` di GiornoGuida li
-// mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
+// mostra con questi pezzi; i promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
 import { Suspense, useState, type MouseEvent, type ReactNode } from 'react';

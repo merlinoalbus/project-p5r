@@ -167,6 +167,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
   {
+    schema: 'main', tabella: 'voce_giornata', colonna: 'produce_json', tolta: 'L6 · migrazione 362 (o utente 68 su un’istanza nuova)',
+    sostituitaDa: 'gli effetti della voce (`voce_effetto`: un solo punto di modifica; per l’incontro dei Confidenti `confidente_dote_incontro`, per i turni le attività); il valore di prima (uid → testo) resta nell’archivio «archivio-frasi-l11», colonna «voce_giornata.produce_json», e il contenuto grezzo di allora in `voce_effetto_transizione.raw_json`',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

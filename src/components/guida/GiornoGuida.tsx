@@ -28,6 +28,7 @@ import { useRiordinoCollegato } from '../../hooks/useRiordino';
 import { MeteoIcona } from './MeteoIcona';
 import { TagAllerte } from '../shared/TagAllerta';
 import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
+import { IconGiu } from '../shared/iconeGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { urlHttp } from '../../../shared/urlHttp';
@@ -57,7 +58,7 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
 /** La fascia come complemento di tempo, per i testi («di giorno», «di sera»). */
 const nomeFascia = (f: FasciaGioco) => (f === 'giorno' ? 'di giorno' : 'di sera');
-/** Vero per le voci che non sono azioni (eventi, scadenze, promemoria), che si mostrano senza spunta. */
+/** Vero per le voci che non sono azioni (i promemoria), che si mostrano senza spunta. */
 const eEvento = (v: AzionePercorsoDto): v is AzionePercorsoDto & { genere: Exclude<GenereVoce, 'azione'> } => v.genere !== 'azione';
 
 interface Props {
@@ -85,13 +86,16 @@ interface Props {
   /** Da 768 px la giornata scorre in un'area interna (scheda «Oggi» con `riempi`): la barra delle voci selezionate si ferma sul fondo di
    *  quell'area, non 72 px più su per scavalcare la barra di navigazione, che lì sta già fuori dall'area. */
   scorreDentro?: boolean;
+  /** L6-07, solo la Home: la scheda del giorno è più bassa (fonte e «Copia o sposta voci» sulla riga della data, trama ripiegabile) perché la
+   *  prima voce del giorno stia entro la piega a tutti i formati. Assente nella Partita e nel Diario: lì la scheda resta com'è. */
+  inAlto?: boolean;
 }
 
 /** Richiesta di conferma prima di un gesto che non si disfa (eliminare una voce). */
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, richiestaEvidenziata = 0, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, richiestaEvidenziata = 0, compatto, fasciaCorrente, onAllerteModificate, selezioneAlClic = !compatto, scorreDentro = false, inAlto = false }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash, search, key: chiaveNavigazione } = useLocation();
@@ -128,6 +132,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'center' });
   }, [g.giorno, hash]);
   const [occupato, setOccupato] = useState(false);
+  /** Il giorno la cui trama è aperta per intero (solo `inAlto`, dove la trama lunga parte a due righe). */
+  const [tramaAperta, setTramaAperta] = useState<string | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [soggetto, setSoggetto] = useState<SoggettoVoce | null>(null);
   const [conferma, setConferma] = useState<Conferma | null>(null);
@@ -182,6 +188,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
   const scegli = (uid: string[], dentro: boolean) => sel.scegli(uid, dentro);
   // su tablet e telefono Copia, Taglia e Incolla qui stanno nel menu della voce (lì la tastiera non c'è)
   const tocco = useMedia('(pointer: coarse)');
+  const telefono = useMedia('(max-width: 767px)');
   const taglio = useAppuntiDiarioStore((s) => s.taglio);
   const partita = partitaId ?? undefined;
   // la chiave del menu porta il giorno: cambiando giorno nessun menu resta aperto su una voce che non c'è più
@@ -278,10 +285,10 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
       const esito = await eliminaVoceGiornata(v.uid);
       if (esito?.avvisi.length) notifica('warning', esito.avvisi.join(' '));
     };
-    const che = { azione: ['la voce', 'Voce eliminata'], evento: ['l\'evento', 'Evento eliminato'], scadenza: ['la scadenza', 'Scadenza eliminata'], promemoria: ['il promemoria', 'Promemoria eliminato'] }[v.genere];
+    const che = { azione: ['la voce', 'Voce eliminata'], promemoria: ['il promemoria', 'Promemoria eliminato'] }[v.genere];
     chiedi({
       titolo: `Eliminare ${che[0]}?`,
-      testo: <>«{v.azione}» esce dalla guida per tutte le partite e finisce nel Cestino, con spunte, fonti e collegamenti da ripristinare. Le spunte e le fonti d’acquisto della voce vengono rimosse nello stesso gesto, usando le proprie ricevute; le altre fonti della consumazione rimangono. Le eventuali correzioni ai saldi Doti e yen compaiono come pulsante sulla voce.</>,
+      testo: <>«{v.azione}» esce dalla guida per tutte le partite e finisce nel Cestino, con spunte, fonti e collegamenti da ripristinare.{v.validataConSpunte && <> <strong>È una voce del Diario validato, già spuntata in una partita: eliminarla toglie quelle spunte.</strong></>} Le spunte e le fonti d’acquisto della voce vengono rimosse nello stesso gesto, usando le proprie ricevute; le altre fonti della consumazione rimangono. Le eventuali correzioni ai saldi Doti e yen compaiono come pulsante sulla voce.</>,
       scelte: [{ titolo: 'Metti nel Cestino', tono: 'pericolo', icona: 'elimina', esegui: via, ok: `${che[1]} dalla guida e conservata nel Cestino.` }],
     });
   };
@@ -394,7 +401,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
             ? voci.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
                 aria-label={`${tutteScelte ? 'Togli dalla scelta' : 'Scegli'} tutte le voci ${nomeFascia(f)}`} onClick={() => scegli(voci.map((v) => v.uid), !tutteScelte)} />
             // C9: aggiungendo in una fascia chiusa la fascia si riapre, così la voce nuova si vede al suo posto
-            : !IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => { useFasceDiarioStore.getState().apri(g.giorno, [f]); apri({ tipo: 'nuova', fascia: f }); }} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
+            : !IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto className="aggiungi-voce" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato} onClick={() => { useFasceDiarioStore.getState().apri(g.giorno, [f]); apri({ tipo: 'nuova', fascia: f }); }} aria-label={`Aggiungi ${nomeFascia(f)}`} />}
         </div>
         {/* le voci restano montate anche a fascia chiusa (`hidden`): spunte in corso, finestre aperte dalla riga, selezione e incolla non si perdono */}
         <div id={idCorpo} hidden={!vista} className="flex flex-col gap-1">
@@ -407,7 +414,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
                   <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={scelte.has(v.uid)} onChange={(e) => scegli([v.uid], e.target.checked)} />
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="line-clamp-2">{v.azione}</span>
-                    {(v.genere !== 'azione' || v.riferimentoTesto) && <span className="testo-12 text-text-muted">{[v.genere !== 'azione' ? { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' }[v.genere] : null, v.riferimentoTesto].filter(Boolean).join(' · ')}</span>}
+                    {(v.genere !== 'azione' || v.riferimentoTesto) && <span className="testo-12 text-text-muted">{[v.genere !== 'azione' ? 'Promemoria' : null, v.riferimentoTesto].filter(Boolean).join(' · ')}</span>}
                   </span>
                 </label>
               </li>
@@ -415,7 +422,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           </ul>
         )}
         {scelte ? (voci.length === 0 && <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
-          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un evento.'}</p>
+          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno{IN_RILASCIO ? '.' : ': con «Aggiungi» metti una cosa da fare o un promemoria.'}</p>
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
@@ -432,31 +439,70 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     );
   };
 
+  // L6-07 (solo la Home, `inAlto`): «Copia o sposta voci» e la fonte stanno sulla riga della data, e la trama lunga si ripiega a due righe
+  const copiaOSposta = !IN_RILASCIO && !caselle && selezionateAVista === 0 && g.azioni.length > 0 && (
+    <PulsanteVisivo tono="fantasma" compatto className={inAlto ? 'copia-voci' : 'self-end'} icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
+      aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={bloccata} onClick={() => { setMenu(null); setCaselleDi(g.giorno); }} />
+  );
+  const fonte = !IN_RILASCIO && urlHttp(g.fonte) ? <a href={urlHttp(g.fonte) ?? undefined} target="_blank" rel="noreferrer" className={`credito touch inline-flex items-center ${inAlto ? '' : 'self-start'}`}>fonte</a> : null;
+  const tramaLunga = inAlto && g.trama.length > 110;
+  // Vincoli e avvisi del giorno stanno dietro lo stesso tocco della trama (solo Home): ripiegati, il tocco dice quanti avvisi ci sono
+  const conExtra = inAlto && (g.vincoli.length > 0 || g.avvisi.length > 0);
+  const faseLunga = inAlto && g.fase.length > 28;
+  const tramaIntera = tramaAperta === g.giorno;
+  const nAvvisi = g.avvisi.length;
+  const etichettaExtra = nAvvisi > 0 ? `${nAvvisi} ${nAvvisi === 1 ? 'avviso' : 'avvisi'}` : g.vincoli.length > 0 ? 'Vincoli' : null;
+  const cosaSiApre = [faseLunga ? 'fase' : null, tramaLunga ? 'trama' : null, g.vincoli.length > 0 ? 'vincoli' : null, nAvvisi > 0 ? 'avvisi' : null].filter(Boolean).join(', ');
+  /** I tre comandi della scheda in alto: trama (con vincoli e avvisi) aperta o ripiegata, fonte, «Copia o sposta voci». Sul telefono stanno sulla
+   *  riga della data, da 768 px accanto alla trama (a due righe nella colonna che resta). */
+  const comandiScheda = inAlto && (
+    <span className="flex shrink-0 items-center gap-1">
+      {(tramaLunga || conExtra || faseLunga) && (
+        <button type="button" className={`chip chip--icona touch ${etichettaExtra && !tramaIntera && nAvvisi > 0 ? 'chip--attivo' : ''}`} aria-expanded={tramaIntera} onClick={() => setTramaAperta(tramaIntera ? null : g.giorno)}
+          aria-label={tramaIntera ? `Giorno: ripiega (${cosaSiApre})` : `Giorno: mostra ${cosaSiApre}${etichettaExtra && nAvvisi > 0 ? ` (${etichettaExtra})` : ''}`} title={tramaIntera ? 'Ripiega' : `Mostra ${cosaSiApre}`}>
+          <span className="fascia-giornata__freccia" style={tramaIntera ? undefined : { transform: 'rotate(-90deg)' }} aria-hidden="true"><IconGiu size={18} /></span>
+          {!tramaIntera && etichettaExtra && <span className="testo-12">{etichettaExtra}</span>}
+        </button>
+      )}
+      {fonte}
+      {copiaOSposta}
+    </span>
+  );
   return (
     <div ref={radice} className="flex flex-col gap-3 rounded-lg outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-      <section className={`card flex flex-col gap-1 testo-13 ${compatto ? 'py-3' : ''}`}>
+      <section className={`card flex flex-col gap-1 testo-13 ${compatto && !inAlto ? 'py-3' : ''} ${inAlto ? 'scheda-giorno--in-alto' : ''}`}>
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
-          <span className="chip">{g.fase}</span>
-          {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
+          <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} compatta={inAlto} /></h2>
+          {telefono && comandiScheda && <span className="ml-auto">{comandiScheda}</span>}
+          {/* solo Home, ripiegata: la fase su una riga (il nome intero nel suggerimento) e il meteo del giorno come sole icona (il testo nel suggerimento e
+              nel nome accessibile), così una fase lunga e un meteo doppio non mandano a capo la riga; aperta, per intero */}
+          {inAlto && !tramaIntera
+            ? <span className="chip min-w-0 max-w-full flex-1 basis-0 sm:flex-none sm:basis-auto" title={g.fase}><span className="truncate">{g.fase}</span></span>
+            : <span className="chip">{g.fase}</span>}
+          {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto={!inAlto || tramaIntera} />}
           {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
           <TagAllerte allerte={g.allerte} modifica={!IN_RILASCIO && onAllerteModificate ? { data: g.giorno, onSalvato: () => void onAllerteModificate() } : undefined} />
           {partitaId && (consigliate > 0 || bloccate > 0) && (
             <span className="testo-12 text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
           )}
         </div>
-        {g.trama ? <p className="m-0">{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>}
-        {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
-        {g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
+        {inAlto && !telefono
+          ? (
+            <div className="flex items-start gap-2">
+              {g.trama ? <p className={`m-0 min-w-0 flex-1 ${tramaLunga && !tramaIntera ? 'line-clamp-2' : ''}`}>{g.trama}</p> : <p className="m-0 min-w-0 flex-1 text-text-muted">Nessun evento di trama annotato.</p>}
+              {comandiScheda}
+            </div>
+          )
+          // sul telefono la trama lunga parte a una riga (il tocco sulla freccia la apre: `comandiScheda`), dal tablet in su a due
+          : (g.trama ? <p className={`m-0 ${tramaLunga && !tramaIntera ? (inAlto ? 'line-clamp-1' : 'line-clamp-2') : ''}`}>{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>)}
+        {(!inAlto || tramaIntera) && g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
+        {(!inAlto || tramaIntera) && g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary-testo">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
         {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-        {!IN_RILASCIO && urlHttp(g.fonte) && <a href={urlHttp(g.fonte) ?? undefined} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
+        {!inAlto && fonte}
       </section>
       {/* copiare o spostare voci in un altro giorno (2026-10-12): la scelta a caselle, per chi non usa il mouse; con voci già selezionate
           (clic, Ctrl+clic, Maiusc+clic, «Seleziona») la barra in fondo ha già i comandi */}
-      {!IN_RILASCIO && !caselle && selezionateAVista === 0 && g.azioni.length > 0 && (
-        <PulsanteVisivo tono="fantasma" compatto className="self-end" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia o sposta voci"
-          aria-label="Scegli voci da copiare o spostare in un altro giorno" disabled={bloccata} onClick={() => { setMenu(null); setCaselleDi(g.giorno); }} />
-      )}
+      {!inAlto && copiaOSposta}
       {sezione('giorno')}
       {sezione('sera')}
       {/* la barra delle voci selezionate: in fondo, ferma sopra la barra di navigazione mentre si scorre (non sposta le righe in cima) */}

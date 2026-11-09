@@ -51,4 +51,6 @@ export interface RicevutaDecisioneProposteDto extends AvanzamentoGiornataDto {
   // `giornoAvanzato` / `fasciaAvanzata` (ereditati) compaiono solo nella risposta di una decisione che ha chiuso l'ultima decisione aperta di una
   // fascia o giornata già spuntata per intero: la partita è passata alla sera o al giorno dopo. Non fanno parte della ricevuta salvata (una
   // ripetizione dello stesso gesto restituisce la ricevuta senza).
+  /** Solo nella risposta: ciò che il raccordo non ha potuto riportare com'era (una lettura cambiata dopo la spunta). Non entra nella ricevuta salvata. */
+  avvisi?: string[];
 }

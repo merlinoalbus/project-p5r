@@ -439,6 +439,9 @@ import { migration343 } from './343_avvisi_del_giorno_decisi.js';
 import { migration344 } from './344_pin_attivita_su_luogo.js';
 import { migration345 } from './345_note_darchivio_dei_negozi.js';
 import { migration346 } from './346_un_solo_dove_colonne_tolte.js';
+// 2026-11-09 (lotto L6 «Diario»): via `voce_giornata.produce_json` con controllo e archivio (362; se la migrazione utente 015 non è ancora passata la toglie la utente 68), vincolo del 1° giugno «Furto consigliato» (386)
+import { migration362 } from './362_produce_json_tolta.js';
+import { migration386 } from './386_vincolo_del_primo_giugno.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -466,4 +469,5 @@ export const migrations: Migration[] = [
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
   migration344, migration345, migration346,
+  migration362, migration386,
 ];

@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 348 migrazioni di gioco (l'ultima è la 386), 68 delle partite (l'ultima è la 068).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -39,6 +39,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
   apribili e riordinati trascinando.
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
+- Ancora aperto: le voci e le Doti mancanti dopo il 1° giugno (giorni scoperti, passaggi di rango, Doti da testo), in attesa dell'approvazione
+  dell'elenco per blocchi; nessuna è stata applicata.
+- Difetto aperto, indipendente dal Diario: il primo avvio da `pacchetto/gioco.db` su una cartella vuota si ferma alla migrazione 330, che legge
+  `utente.spunta_voce_partita` prima che la migrazione delle partite 015 la crei.
 
 ## Mondo, mappe e luoghi
 - Mappa di viaggio di Tokyo con quartieri, Palazzi e luoghi; pagine di quartiere, Area e luogo (`/guida/citta`, `/guida/luogo/…`).

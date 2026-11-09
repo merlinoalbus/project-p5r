@@ -29,7 +29,7 @@ const voce = async (data: string, uid: string, partita?: number) =>
   ((await request(app).get(`/api/compendio/percorso/${data}${partita ? `?partita=${partita}` : ''}`).expect(200)).body.data.azioni as AzionePercorsoDto[]).find((v) => v.uid === uid)!;
 /** Le colonne di una voce che nessun gesto sull'insieme d'infiltrazioni deve toccare (l'impronta della voce, §6.1.9). */
 const improntaVoce = (uid: string) => JSON.stringify(prepared(`SELECT uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo,
-  rango_atteso, produce_json, indice_guida, created_at, updated_at FROM voce_giornata WHERE uid = ?`).get(uid));
+  rango_atteso, indice_guida, created_at, updated_at FROM voce_giornata WHERE uid = ?`).get(uid));
 /** Crea una voce di Palazzo nel giorno dato e ne restituisce l'uid. */
 const nuovaVoce = async (data: string, azione: string, palazzo: string) =>
   ((await request(app).post(`/api/compendio/percorso/${data}/voci`).send({ azione, tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: palazzo } }).expect(201)).body.data as AzionePercorsoDto).uid;
