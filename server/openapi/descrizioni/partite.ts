@@ -22,33 +22,13 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'POST /api/partite/cestino/:uid/ripristina': {
     sommario: 'Rimette una voce del cestino personale (anche una partita eliminata)',
-    descrizione: 'Identità = UID della voce (32 cifre esadecimali). Una voce di un altro utente è «non più nel cestino» (404), come una voce che non esiste. Ripristino atomico: un registro incoerente o un\'identità già presente causano rollback con 409.',
+    descrizione: 'Identità = UID della voce (32 cifre esadecimali). Una voce di un altro utente è «non più nel cestino» (404), come una voce che non esiste. Ripristino atomico: un registro incoerente o un\'identità già presente causano rollback con 409. Il registro resta esclusivamente nel file utente. Fonte, negozio e voce conservano decisioni e movimenti successivi e riconciliano T−B senza applicare delta; l’intera partita recupera il proprio blocco e saldo originali. Nessun nuovo UUID o fusione. È l’unica superficie delle voci personali, in preparazione e in rilascio.',
     risposta: '`EsitoRipristinoCestinoDto`', senzaCorpo: true, errori: [[404, 'cestino-non-trovato'], [409, 'cestino-non-ripristinabile']],
   },
   'DELETE /api/partite/cestino/:uid': {
     sommario: 'Toglie per sempre una voce del cestino personale',
-    descrizione: 'Solo la fotografia della voce: nessun dato di gioco né di altre partite cambia.',
+    descrizione: 'Identità UID, nessun id del file di gioco. Elimina solo la fotografia della voce, senza modificare dati di gioco né di altre partite e senza applicare nuovi delta.',
     risposta: 'Nessun contenuto (204)', errori: [[404, 'cestino-non-trovato']],
-  },
-  'GET /api/partite/:id/cestino': {
-    sommario: 'Il cestino personale di una partita',
-    descrizione: 'Le voci personali (fonti di acquisto, pesca, Persone della scorta) eliminate da quella partita, dalla più recente. Come `/api/partite/cestino` ma limitato alla partita.',
-    risposta: '`VoceCestinoUnificatoDto[]`', errori: [PARTITA],
-  },
-  'DELETE /api/partite/:id/cestino': {
-    sommario: 'Svuota il cestino personale di una partita',
-    descrizione: 'Toglie per sempre le voci personali di quella partita; le altre partite dello stesso utente non si toccano.',
-    risposta: '`{ eliminati }`', errori: [PARTITA],
-  },
-  'POST /api/partite/:id/cestino/:uid/ripristina': {
-    sommario: 'Rimette una voce del cestino personale di una partita',
-    descrizione: 'Come `POST /api/partite/cestino/:uid/ripristina`, ma la voce deve essere di quella partita (altrimenti 404 `cestino-non-trovato`).',
-    risposta: '`EsitoRipristinoCestinoDto`', senzaCorpo: true, errori: [PARTITA, [404, 'cestino-non-trovato'], [409, 'cestino-non-ripristinabile']],
-  },
-  'DELETE /api/partite/:id/cestino/:uid': {
-    sommario: 'Toglie per sempre una voce del cestino personale di una partita',
-    descrizione: 'Solo la fotografia della voce di quella partita.',
-    risposta: 'Nessun contenuto (204)', errori: [PARTITA, [404, 'cestino-non-trovato']],
   },
   'GET /api/partite/:id/acquisti': {
     sommario: 'Presenze storiche e consumazioni confermate della partita',

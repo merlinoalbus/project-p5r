@@ -448,7 +448,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                 onClick={() => setNuovoPunto({ nome: '', tipo: 'meccanismo', contenitore: p.chiave, dove: pl })} />}
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
-              <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
+              <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} larga etichetta="Modifica"
                 iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)), carattere: carattereScelto, planimetria: planimetriaAMano })}
                 onSalva={async (b) => {
                   // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo

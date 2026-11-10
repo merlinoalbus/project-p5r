@@ -78,7 +78,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
   const apriPannello = useApriPannello();
   const uid = (a as { uid?: string }).uid;
   // 2026-10-24 (scelta dell'utente): il cartellino di un Confidente apre il cassetto «Gestione del Confidente» sopra il diario, con la
-  // partita attiva (level up, note, regali, risposte migliori, scheda completa); senza partita resta il collegamento alla scheda
+  // partita attiva (avanzamento, note, regali, risposte migliori, scheda completa); senza partita resta il collegamento alla scheda
   const partitaAttiva = usePartitaStore((s) => s.attiva?.id ?? null);
   const [cassetto, setCassetto] = useState<string | null>(null);
   const confidente = a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;

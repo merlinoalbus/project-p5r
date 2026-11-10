@@ -11,7 +11,8 @@
 // l'intestazione di una pagina che c'è (`PageState`) o in un riquadro.
 //
 // `autonoma`: la variante di `ErrorBoundary`, che sta sopra tutto e deve leggersi anche se il tema non c'è (scelta documentata
-// in ErrorBoundary.tsx): stessa struttura, colori scritti a mano con i valori dei token, nessuno store, nessun asset caricato da sé.
+// in ErrorBoundary.tsx): stessa struttura, colori dei token del tema con il valore del token come ripiego (`var(--color-…, #valore)`), nessuno store, nessun asset
+// caricato da sé. Il dettaglio tecnico lungo scorre in un'area col bordo visibile e `overscroll-behavior: contain`.
 // ============================================================
 
 import type { ReactNode } from 'react';
@@ -47,22 +48,22 @@ export function VistaErrore({ titolo, spiegazione, dettaglio, azioni, livello = 
   const altezzaFigura = compatta ? 'max-h-[96px]' : 'max-h-[150px]';
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-3 text-center ${fisso ? 'min-h-dvh p-6 font-sans bg-[#0b0b0e] text-[#ececf1]' : compatta ? 'py-8 px-4' : 'flex-1 min-h-[40vh] p-6'}`}
+      className={`flex flex-col items-center justify-center gap-3 text-center ${fisso ? 'min-h-dvh p-6 font-sans bg-[color:var(--color-bg,#0b0b0e)] text-[color:var(--color-text,#ececf1)]' : compatta ? 'py-8 px-4' : 'flex-1 min-h-[40vh] p-6'}`}
       role="alert"
     >
       {fisso ? (
         autonoma.illustrazione
           ? <img src={autonoma.illustrazione} alt="" className={`${altezzaFigura} w-auto object-contain`} draggable={false} />
-          : <IconAlert size={32} className="text-[#ef4444]" />
+          : <IconAlert size={32} className="text-[color:var(--color-error-testo,#fb7c7c)]" />
       ) : (
         <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className={`${altezzaFigura} w-auto object-contain`} fallback={<IconAlert size={32} className="text-error-testo" />} />
       )}
-      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[#ef4444]' : 'text-error-testo'}`}>
+      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[color:var(--color-error-testo,#fb7c7c)]' : 'text-error-testo'}`}>
         {titolo}
       </Titolo>
-      {spiegazione && <p className={`m-0 max-w-[460px] ${fisso ? 'text-[#a3a3b3]' : 'text-text-secondary'}`}>{spiegazione}</p>}
+      {spiegazione && <p className={`m-0 max-w-[460px] ${fisso ? 'text-[color:var(--color-text-secondary,#a3a3b3)]' : 'text-text-secondary'}`}>{spiegazione}</p>}
       {dettaglio && (
-        <p className={`m-0 max-w-[460px] max-h-[120px] overflow-y-auto whitespace-pre-wrap break-words testo-13 ${fisso ? 'text-[#8e8ea0]' : 'text-text-muted'}`}>
+        <p className={`m-0 max-w-[460px] max-h-[120px] overflow-y-auto overscroll-contain rounded-md border px-3 py-2 whitespace-pre-wrap break-words testo-13 ${fisso ? 'border-[color:var(--color-border,#34343f)] text-[color:var(--color-text-muted,#8e8ea0)]' : 'border-border text-text-muted'}`}>
           {dettaglio}
         </p>
       )}

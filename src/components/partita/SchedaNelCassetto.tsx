@@ -13,7 +13,7 @@
 // «Dove si trova» (`/guida/mondo/:tipo/:chiave`) apre quella scheda DENTRO il cassetto, al posto della precedente, con in alto «← Torna a
 // <scheda precedente>»; anche i collegamenti dentro quelle schede restano nel cassetto (stessa tecnica: ognuna legge la sua posizione
 // virtuale). La scheda del Confidente sotto resta montata (nascosta): tornando ritrova lo scorrimento e ciò che era aperto. La pila si
-// azzera chiudendo il cassetto o tornando al Level up (la vista si smonta). Restano navigazione vera: i collegamenti con Ctrl/Cmd/Maiusc/Alt
+// azzera chiudendo il cassetto o tornando all'Avanzamento (la vista si smonta). Restano navigazione vera: i collegamenti con Ctrl/Cmd/Maiusc/Alt
 // o clic centrale (apertura in un'altra scheda del browser), quelli verso pagine che non sono schede (la mappa intera, le planimetrie, la
 // guida della città…: sono azioni esplicite di aprire quella pagina) e gli spostamenti programmatici verso pagine non-scheda.
 // ============================================================
@@ -35,7 +35,7 @@ interface Props {
   chiave: string;
   /** I parametri con cui aprire la scheda (es. `?requisiti=5` da «Correggi» dei requisiti). */
   searchIniziale?: string;
-  /** Torna alla vista «Level up» del cassetto: la usa «Aggiorna il rango» della scheda, che fuori dal cassetto porta alla pagina dei
+  /** Torna alla vista «Avanzamento» del cassetto: la usa «Aggiorna il rango» della scheda, che fuori dal cassetto porta alla pagina dei
    *  Confidenti (dentro, quella funzione è già qui accanto). */
   onLevelUp: () => void;
 }
@@ -138,7 +138,7 @@ export function SchedaNelCassetto({ chiave, searchIniziale = '', onLevelUp }: Pr
     apri(verso, opzioni?.replace === true);
   }, [navigate, apri, indietro]);
 
-  /** Un clic semplice su un collegamento: alla scheda «Confidenti» della partita («Aggiorna il rango») torna al Level up del cassetto; a una
+  /** Un clic semplice su un collegamento: alla scheda «Confidenti» della partita («Aggiorna il rango») torna all'Avanzamento del cassetto; a una
    *  scheda riconosciuta o al bivio «Dove si trova» la apre dentro il cassetto. Gli altri collegamenti navigano come sempre. */
   const intercetta = (e: MouseEvent<HTMLDivElement>) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

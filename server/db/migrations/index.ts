@@ -464,6 +464,8 @@ import { migration371 } from './371_serate_cantante_jazz.js';
 import { migration385 } from './385_piatti_senza_frasi_non_reperiti.js';
 import { migration360 } from './360_luoghi_collocati_e_frasi_dei_pin.js';
 import { migration361 } from './361_sblocco_data_dei_quartieri_tolta.js';
+import { migration383 } from './383_tesori_da_vendere_nel_catalogo.js';
+import { migration384 } from './384_ombre_sciagura_elenco_e_ricompense.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -497,4 +499,5 @@ export const migrations: Migration[] = [
   migration364, migration365, migration366, migration367,
   migration368, migration369, migration370, migration371, migration385,
   migration360, migration361,
+  migration383, migration384,
 ];

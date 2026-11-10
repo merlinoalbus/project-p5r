@@ -1,6 +1,7 @@
 // Letture del catalogo condivise dai consumatori: nessuna dipendenza da negozi, letture o avanzamento.
 // Il dettaglio aggregato vive in catalogoOggettiService; questa base evita cicli fra i servizi.
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { casaOggetto, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
 import { filtroRicerca } from '../../shared/testo.js';
 import type { CatalogoOggettoDto, ContenutoOggettoDto, CostoOggettoDto, OggettiGuidaDto, RicompensaOggettoDto, RiferimentoOggettoDto } from '../../shared/types.js';
@@ -20,7 +21,7 @@ export interface RigaCatalogoOggetto {
 function analizza(json: string | null): unknown { try { return json ? JSON.parse(json) as unknown : null; } catch { return null; } }
 /** Nessuna query alle colonne nuove finché M7 non è registrata e applicata. */
 export function catalogoOggettiDisponibile(): boolean {
-  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'catalogo_oggetto'").get();
+  return haTabellaMain(getDb(), 'catalogo_oggetto');
 }
 export function nomiAltriOggetto(json: string): string[] {
   const v = analizza(json); return Array.isArray(v) ? v.filter((n): n is string => typeof n === 'string') : [];
@@ -231,7 +232,7 @@ export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzio
   const out = new Map<string, RicompensaOggettoDto[]>();
   const chiavi = fonti === undefined ? undefined : [...new Set(fonti)];
   if (chiavi?.length === 0 || !catalogoOggettiDisponibile()) return out;
-  const descrivi = opzioni.condizione && prepared("SELECT 1 FROM pragma_table_info('ricompensa_oggetto') WHERE name = 'condizioni_json'").get() ? opzioni.condizione : null;
+  const descrivi = opzioni.condizione && haColonnaMain(getDb(), 'ricompensa_oggetto', 'condizioni_json') ? opzioni.condizione : null;
   const righe = prepared(`SELECT r.fonte_chiave,c.chiave,c.nome,r.quantita,r.nota${descrivi ? ',r.condizioni_json' : ''} FROM ricompensa_oggetto r
     JOIN catalogo_oggetto c ON c.chiave = r.catalogo_chiave WHERE r.fonte_tipo = ? ${chiavi ? 'AND r.fonte_chiave IN (SELECT value FROM json_each(?))' : ''}
     ORDER BY r.fonte_chiave,r.ordine,c.chiave`).all(tipo, ...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<RicompensaOggettoDto & { fonte_chiave: string; condizioni_json?: string | null }>;

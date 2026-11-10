@@ -123,7 +123,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   // quella, il Confidente aggiornato porta la registrazione di prima, se c'è.
   // Il Confidente a cui si sta regalando (finestra unica «Regala»).
   const [regaloPer, setRegaloPer] = useState<string | null>(null);
-  // La vista del cassetto (Level up o Scheda completa, con i parametri della scheda); vale per il Confidente aperto, poi torna al Level up.
+  // La vista del cassetto (Avanzamento o Scheda completa, con i parametri della scheda); vale per il Confidente aperto, poi torna all'Avanzamento.
   const [vista, setVista] = useState<{ chiave: string; tipo: 'levelup' | 'scheda'; search: string } | null>(null);
   // Il rango appena raggiunto con «+» o «Sali al rango N», per Confidente: finché resta quello, le risposte mostrate sono dell'evento
   // appena giocato (le note che dà valgono già verso il rango dopo); scendendo o salendo ancora si torna al prossimo evento.
@@ -250,7 +250,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const trovato = richiesto ? tutti.find((c) => c.chiave === richiesto) ?? null : null;
   const cassettoAperto = trovato !== null;
   const aperturaConCronologia = useRef(false);
-  // Alla chiusura del cassetto (✕, Esc o Indietro) si riparte dal Level up: la vista si azzera, le finestre aperte dal cassetto (note,
+  // Alla chiusura del cassetto (✕, Esc o Indietro) si riparte dall'Avanzamento: la vista si azzera, le finestre aperte dal cassetto (note,
   // «Regala») si chiudono con lui, e se si era nella Scheda completa si rileggono i Confidenti (lì si possono consegnare regali; la
   // conferma dei requisiti, nel cassetto, è in sola lettura). La rilettura non smonta niente: i dati restano mentre arrivano quelli nuovi
   const vistaCorrente = useRef(vista);
@@ -313,7 +313,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   // (cambiavano solo il colore del pulsante e i numeri). Acceso, una fascia oro ferma in cima al cassetto (fuori dal corpo che scorre) lo dice
   // con il moltiplicatore della regola unica e lo spegne; spento, il cassetto è come prima. L'oro è una fascia piena: la targa «Oggi» accanto
   // al nome è un cartellino.
-  // «Spegni» sparisce con la fascia: il fuoco torna all'interruttore «Invito SMS» (nella vista Level up) o, se non c'è (Scheda completa), alla
+  // «Spegni» sparisce con la fascia: il fuoco torna all'interruttore «Invito SMS» (nella vista Avanzamento) o, se non c'è (Scheda completa), alla
   // finestra del cassetto, mai a <body> fuori dalla finestra modale.
   const spegniInvito = (e: MouseEvent<HTMLButtonElement>) => {
     const finestra = e.currentTarget.closest<HTMLElement>('[role="dialog"]');
@@ -345,7 +345,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       anteprima={(cosa) => anteprima(c, cosa, bonusArcanoDi(c))} azioni={azioniDi(c)} />
   );
 
-  /** Il cassetto del Confidente aperto: le due viste (Level up, Scheda completa) e il loro contenuto. Tornando al Level up dalla scheda
+  /** Il cassetto del Confidente aperto: le due viste (Avanzamento, Scheda completa) e il loro contenuto. Tornando all'Avanzamento dalla scheda
    * si rileggono i Confidenti della partita (dalla scheda si possono consegnare regali; i requisiti sono in sola lettura). */
   const contenutoCassetto = (c: ConfidentePartitaDto) => {
     const v = vista?.chiave === c.chiave ? vista : { chiave: c.chiave, tipo: 'levelup' as const, search: '' };
@@ -356,7 +356,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     // L6-01: le due viste sono schede con le frecce (Inizio e Fine, Tab sulla vista aperta); i pulsanti restano quelli di prima
     return (
       <SchedeTab chiavi={VISTE_CONFIDENTE} attiva={v.tipo} onScegli={vai} etichetta={`Viste di ${c.nome}`} className="flex gap-1.5"
-        scheda={(k, a) => <button type="button" {...a} className={`chip touch ${v.tipo === k ? 'chip--attivo' : ''}`}>{k === 'levelup' ? 'Level up' : 'Scheda completa'}</button>}>
+        scheda={(k, a) => <button type="button" {...a} className={`chip touch ${v.tipo === k ? 'chip--attivo' : ''}`}>{k === 'levelup' ? 'Avanzamento' : 'Scheda completa'}</button>}>
         {(pannello) => (
           <div {...pannello(v.tipo)} className="flex flex-col gap-4">
             {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} onLevelUp={() => vai('levelup')} />}

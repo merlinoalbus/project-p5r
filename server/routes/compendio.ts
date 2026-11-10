@@ -10,7 +10,7 @@ import { aggiornaGiorno, leggiGiorno, ripristinaGiorno } from '../services/giorn
 import { METEO_GIORNO } from '../../shared/giorno.js';
 import { correggiAffinita, ripristinaAffinita } from '../services/affinitaPersonaService.js';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi.js';
-import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
+import { collegaSchedaAllaVoce, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioOmbra, doveSiIncontraPersona, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
@@ -22,7 +22,7 @@ import {
   impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea
 } from '../services/dungeonService.js';
 import {
-  bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea,
+  bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon,bodyNuovaArea,
   bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea,
   paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce
 } from '../schemas/guidaDungeon.js';
@@ -52,7 +52,7 @@ import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
 import { datiGuidaCorretti } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
-import { impostaAtterraggi, impostaFinestra } from '../services/atterraggioPalazziService.js';
+import { impostaAtterraggi } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, PersonaggiDto } from '../../shared/types.js';
 import { corpoDelServizio, validate } from '../middleware/validate.js';
 import {
@@ -376,10 +376,6 @@ router.get('/dungeon/:chiave', validate({ params: paramsChiaveGuida, query: quer
   const q = req.query;
   res.json(dettaglioDungeon(String(req.params.chiave), q.partita, q.infiltrazione ?? null));
 });
-/** L4 (§3.2): i gruppi di copie di una voce secondo la regola dell'utente (R4-15), in sola lettura; nessuna fusione in L4. */
-router.get('/dungeon/:chiave/copie', validate({ params: paramsChiaveGuida }), (req, res) => {
-  res.json(copieDelPalazzo(String(req.params.chiave)));
-});
 /** L4 (§2.3, §4.3): «Schede da sistemare» — «Crea la voce» (POST, col tipo) o «Collega a una voce» (PUT, con la voce). */
 router.post('/schede/:id/voce', validate({ params: z.object({ id: idParam }), body: bodyCreaVoceDallaScheda }), (req, res) => {
   res.status(201).json(creaVoceDallaScheda(Number(req.params.id), req.body.tipo));
@@ -394,12 +390,6 @@ router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyD
 /** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
 router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(ripristinaDungeon(String(req.params.chiave)));
-});
-/** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04); con L13 O6-3
- *  anche furto consigliato e lettera, insieme. La pagina modifica le date da «Correggi la scheda» (`PUT /dungeon/:chiave` con `date`). */
-router.put('/dungeon/:chiave/finestra', validate({ params: paramsChiaveGuida, body: bodyFinestraDungeon }), (req, res) => {
-  const { dal, al, furtoConsigliato, letteraEntro } = req.body;
-  res.json(impostaFinestra(String(req.params.chiave), dal, al, furtoConsigliato !== undefined && letteraEntro !== undefined ? { furtoConsigliato, letteraEntro } : undefined));
 });
 /** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
 router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {

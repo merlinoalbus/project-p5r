@@ -15,7 +15,8 @@
 // Una chiave che non si risolve (fonte tolta o cambiata) lascia l'evento alla data della sua riga.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { esami } from './domandeService.js';
 
 export interface FonteEvento { data: string; tipo: 'esame' | 'scadenza' | 'sblocco' | 'vacanza' | 'consiglio' }
@@ -52,7 +53,7 @@ export function risolutoreFonti(): (chiave: string | null | undefined) => FonteE
     if ((p[0] === 'furto' || p[0] === 'lettera') && p.length === 2) {
       const { colonna, tipo } = DATE_PALAZZO[p[0]];
       // la colonna del furto arriva con la 308: su uno schema di prima la chiave non si risolve
-      if (!prepared("SELECT 1 FROM pragma_table_info('dungeon', 'main') WHERE name = ?").get(colonna)) return null;
+      if (!haColonnaMain(getDb(), 'dungeon', colonna)) return null;
       const d = prepared(`SELECT ${colonna} FROM dungeon WHERE chiave = ?`).pluck().get(p[1]) as string | null | undefined;
       return d ? { data: d, tipo } : null;
     }

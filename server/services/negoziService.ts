@@ -11,6 +11,7 @@
 import { condizioneConTesto, leggiCondizioniSalvate, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { nuovaValutazioneLegacy } from '../db/acquistiLegacy.js';
 import { conCestinoPrivato } from './cestinoService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -492,7 +493,7 @@ export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid:
  */
 export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
   verificaPartita(partitaId);
-  const riga = (prepared("SELECT 1 AS c FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()
+  const riga = (haTabellaUtente(getDb(), 'registro_acquisti')
     ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
   if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');

@@ -83,7 +83,8 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
 /**
  * L6-08: la migrazione utente 015, registrata e non modificabile, prepara SQL su `main.voce_giornata.produce_json`. Un file delle partite nuovo accanto a
  * un file di gioco che quella colonna non l'ha più (la 362 l'ha tolta) non partirebbe: la colonna torna vuota solo per quel passaggio, e la utente 69 la
- * toglie di nuovo subito dopo la 015. Le istanze con le partite già oltre la 15 non passano mai di qui.
+ * toglie di nuovo subito dopo la 015. Le istanze con le partite già oltre la 15 non passano mai di qui. Va chiamata subito prima di applicare le
+ * migrazioni delle partite, in tutti e due gli ordini di `runMigrations`.
  */
 function rimettiProduceJsonPerLaUtente015(db: AppDatabase, listaUtente: Migration[]): void {
   if (!listaUtente.some((m) => m.id === 15) || !listaUtente.some((m) => m.id === 69)) return;
@@ -92,17 +93,42 @@ function rimettiProduceJsonPerLaUtente015(db: AppDatabase, listaUtente: Migratio
   if (colonne.length > 0 && !colonne.some((c) => c.name === 'produce_json')) db.exec(`ALTER TABLE main.voce_giornata ADD COLUMN produce_json TEXT NOT NULL DEFAULT '[]'`);
 }
 
-/** Le migrazioni dei dati di gioco (`main`), poi quelle delle partite (`utente`). */
+/** Dalla 066 di gioco le partite stanno nel loro file: prima di quella, è la 066 stessa a riempirlo copiando le righe da `main`. */
+const GIOCO_CON_PARTITE_SEPARATE = 66;
+
+/** Vero se `partite.db` è nuovo di zecca (mai migrato e senza tabelle) accanto a un file di gioco che non contiene più le partite. */
+function fileDellePartiteNuovo(db: AppDatabase): boolean {
+  if ((db.pragma('main.user_version', { simple: true }) as number) < GIOCO_CON_PARTITE_SEPARATE) return false;
+  if ((db.pragma('utente.user_version', { simple: true }) as number) !== 0) return false;
+  return !db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' LIMIT 1").get();
+}
+
+/**
+ * Di norma le migrazioni dei dati di gioco (`main`), poi quelle delle partite (`utente`). Con un file delle partite nuovo (primo avvio dal
+ * pacchetto iniziale, o `partite.db` tolto) l'ordine si inverte: alcune migrazioni di gioco leggono le tabelle delle partite, e il pacchetto è
+ * fermo a una versione precedente a queste, quindi il loro schema deve già esistere (lo stesso che hanno trovato le istanze cresciute in linea).
+ */
 export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations, listaUtente: Migration[] = allUtente, origine: OrigineContinuita = 'continuita-migrazione'): void {
+  // Va letto prima della continuità, che crea le sue tabelle nel file delle partite.
+  // Senza migrazioni di gioco da applicare (es. lo schema delle partite di un'edizione) l'ordine non conta e non si segnala nulla.
+  const partiteDaCreare = list.length > 0 && fileDellePartiteNuovo(db);
   const continuita = listaUtente.some(m => m.id === 30 && m.name === 'continuita_acquisti');
   if (continuita) {
     // Solo append alla prova durevole, prima che il main possa cambiare prezzi/identità.
     // Nessun bump anticipato: la 030 ordinaria adotta il bootstrap dopo le sue dipendenze.
     if ((db.pragma('utente.user_version', { simple: true }) as number) < 30) preparaContinuitaLegacy(db, origine);
   }
-  applica(db, 'main', list);
-  rimettiProduceJsonPerLaUtente015(db, listaUtente);
-  applica(db, 'utente', listaUtente);
+  if (partiteDaCreare) {
+    // Normale al primo avvio; su un'istanza già usata vuol dire che `partite.db` è sparito e la nuova nasce vuota: nel log deve vedersi.
+    logger.warn('partite.db nuovo: il suo schema si crea prima delle migrazioni di gioco');
+    rimettiProduceJsonPerLaUtente015(db, listaUtente);
+    applica(db, 'utente', listaUtente);
+    applica(db, 'main', list);
+  } else {
+    applica(db, 'main', list);
+    rimettiProduceJsonPerLaUtente015(db, listaUtente);
+    applica(db, 'utente', listaUtente);
+  }
   // La verifica dell'archivio storico degli acquisti gira solo dentro la migrazione utente 030 che lo crea (`completaContinuitaLegacy`),
   // non a ogni avvio: un archivio che non torna non deve impedire al server di partire (decisione dell'utente: «va bene che giri solo
   // la prima volta»). Le operazioni che lo toccano (cestino, importazione) la richiamano da sé.

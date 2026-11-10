@@ -10,6 +10,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
@@ -80,7 +81,7 @@ function scriviPiazzamento(partitaId: number, esameChiave: string, piazzamento: 
 
 /** Il trofeo è rivendicato da qualcos'altro nella partita (un effetto «trofeo» di una voce spuntata, un turno con un esito che lo dà)? */
 function trofeoRivendicatoAltrove(partitaId: number, trofeo: string): boolean {
-  const esiste = (t: string) => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(t);
+  const esiste = (t: string) => haTabellaUtente(getDb(), t);
   if (esiste('effetto_stato_voce') && prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id = ? AND tipo = 'trofeo' AND chiave = ?").get(partitaId, trofeo)) return true;
   return esiste('trofeo_esito_turno') && !!prepared('SELECT 1 FROM utente.trofeo_esito_turno WHERE partita_id = ? AND trofeo_chiave = ?').get(partitaId, trofeo);
 }

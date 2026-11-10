@@ -232,7 +232,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
                     onClick={() => void esegui(area.chiave, async () => { await spostaAreaDedalo(area.chiave, -1); await onRicarica(); }, 'Spostamento non riuscito.')} />
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta dopo l’area ${area.nome}`} disabled={occupata === area.chiave || i === aree.length - 1}
                     onClick={() => void esegui(area.chiave, async () => { await spostaAreaDedalo(area.chiave, 1); await onRicarica(); }, 'Spostamento non riuscito.')} />
-                  <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} compatto etichetta="Modifica area"
+                  <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} etichetta="Modifica area"
                     iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
                     onSalva={async (b) => { await aggiornaAreaDedalo(area.chiave, { nome: b.nome, descrizione: b.descrizione }); await onRicarica(); }}
                     elimina={{ avviso: `Se ne va per tutte le partite: le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area. ${NEL_CESTINO}`, onElimina: async () => { await eliminaAreaDedalo(area.chiave); setParams((p) => { const n = new URLSearchParams(p); n.delete('zona'); return n; }, { replace: true }); await onRicarica(); } }}>

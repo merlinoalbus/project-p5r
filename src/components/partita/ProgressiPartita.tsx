@@ -215,7 +215,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                 <div className="flex min-w-0 flex-col gap-3">
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
                     <TitoloSezione variante="display" id="progressi-squadra" className="flex flex-wrap items-center gap-2">Automatici dalla squadra <Automatico /></TitoloSezione>
-                    <p className="m-0 testo-12 text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
+                    <p className="m-0 testo-12 text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="link-in-riga text-primary-testo">Denaro e squadra</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {dallaSquadra.map((e) => (
                         <li key={e.chiave} className="progressi-partita__riga">
@@ -246,7 +246,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                   )}
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
                     <TitoloSezione variante="display" id="progressi-contatori" className="flex flex-wrap items-center gap-2">Dalle letture <Automatico /></TitoloSezione>
-                    <p className="m-0 testo-12 text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>
+                    <p className="m-0 testo-12 text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="link-in-riga text-primary-testo">Letture e giochi</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.contatori.map((c) => (
                         <li key={c.chiave} className="progressi-partita__riga">

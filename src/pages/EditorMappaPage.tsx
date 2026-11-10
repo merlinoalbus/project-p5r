@@ -15,7 +15,7 @@ import { Selettore } from '../components/shared/Selettore';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 
-import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -843,6 +843,7 @@ interface PropsFormMappa { mappa: MappaDto; albero: MappaRiassuntoDto[]; occupat
 
 /** Proprietà della mappa (nome, tipo, genitore, ordine, note); il nome dedotto da confermare si segnala sotto il campo Nome. */
 function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMappa) {
+  const idModulo = useId();
   const [nome, setNome] = useState(mappa.nome);
   const [tipo, setTipo] = useState<TipoMappa>(mappa.tipo);
   const [genitore, setGenitore] = useState<string>(mappa.genitore ?? '');
@@ -864,9 +865,10 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
   const titoloMostrato = nomePresentazioneMappa(mappa);
   const nomeDaConfermare = !mappa.nomeRivisto && titoloMostrato !== mappa.nome;
   return (
+    <>
     <section className="visore-mappa__sezione" aria-label="Proprietà della mappa">
       <h3 className="visore-mappa__intestazione">Mappa</h3>
-      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
+      <form id={idModulo} className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, ...(dellArea ? {} : { tipo, genitore: genitore || null }), ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.mappa.nome} /></label>
         {nomeDaConfermare && <p className="editor-mappa__avviso" role="status">In alto si legge «{titoloMostrato}»: è il nome ricavato dai dati dell’estrazione. Salva per usare «{mappa.nome}» dappertutto.</p>}
         <div className="grid grid-cols-2 gap-2">
@@ -878,18 +880,20 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
           <label className="editor-mappa__campo">Ordine<input className="form-input" type="number" min={0} value={ordine} onChange={(e) => setOrdine(e.target.value)} /></label>
         </div>
         {dellArea && mappa.area
-          ? <p className="m-0 testo-12 text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa}>pagina dell’area</Link>.</p>
+          ? <p className="m-0 testo-12 text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa} className="link-in-riga">pagina dell’area</Link>.</p>
           : (
             <div className="editor-mappa__campo">
               <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />
             </div>
           )}
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={LIMITI_GUIDA.mappa.note} /></label>
-        <div className="flex flex-wrap gap-1.5">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />
-          <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina mappa" disabled={occupato} onClick={onElimina} />
-        </div>
       </form>
     </section>
+    {/* piè fermo sul bordo basso del pannello (AD10): «Salva mappa» è sempre in vista; «Salva» è del modulo (`form`) */}
+    <div className="editor-mappa__piede">
+      <PulsanteVisivo type="submit" form={idModulo} tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" dettaglio={!modificata && nomeDaConfermare ? 'conferma il nome' : undefined} disabled={occupato || (!modificata && !nomeDaConfermare)} />
+      <PulsanteVisivo tono="pericolo" compatto className="ml-auto" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina mappa" disabled={occupato} onClick={onElimina} />
+    </div>
+    </>
   );
 }

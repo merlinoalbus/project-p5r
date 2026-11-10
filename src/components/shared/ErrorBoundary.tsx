@@ -2,7 +2,7 @@
 // ErrorBoundary — fallback autonomo per errori React runtime
 // ============================================================
 // Palette self-contained: deve funzionare anche se il tema non è caricato. Per questo la vista (`VistaErrore` in variante
-// `autonoma`) e i pulsanti qui sotto hanno i colori scritti a mano, con i valori dei token del tema; la struttura e i testi sono
+// `autonoma`) e i pulsanti qui sotto hanno i colori dei token del tema con il valore del token come ripiego; la struttura e i testi sono
 // quelli di tutti gli errori dell'app (titolo, spiegazione, dettaglio, «Riprova» / «Ricarica l'app» / «Torna alla home»).
 //
 // La conferma per le bozze non salvate non usa né `window.confirm` né `DialogoConferma` (che vive in `MainLayout`, smontato

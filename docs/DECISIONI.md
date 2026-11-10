@@ -32,21 +32,24 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Equipaggiamento del dataset e articoli dei negozi: nessun abbinamento fondato solo sul nome; identità distinte finché l'equivalenza
   non è documentata.
 - Dati non decidibili dalle fonti restano senza effetto, con il motivo annotato: niente dati inventati. **(24/10)**
+- **Tesori da vendere nel catalogo (Q17)**: i 140 Tesori della guida sono oggetti `altro/…` del catalogo, con prezzo di vendita e reperibilità
+  letti dalla riga della guida (nella descrizione, «tesoro, rivendibile per … ¥ · …»; nessuna stima). Non hanno offerte nei negozi: il prezzo
+  minimo dell'elenco degli oggetti conta solo le offerte, e il prezzo di vendita di un Tesoro sta nella descrizione.
 - **Livello consigliato dei Palazzi (D5, 01/11)**: è un livello minimo e massimo di Royal, e il testo con il confronto delle fonti resta intero
   come nota storica del Palazzo, visibile e modificabile solo nella preparazione. Niente medie fra le fonti. I numeri vengono dalla guida
   italiana dove li dice; Kamoshida (minimo 10) e Niijima (minimo 45) vengono da una fonte secondaria, l'unico consiglio numerico scritto nel
-  testo di prima: restano visibili, confermati da Roberto (01/11, «Sì, mostrali»). Dove nessuna fonte dà un consiglio (Kaneshiro, Shido,
+  testo di prima: restano visibili, confermati dall'utente (01/11, «Sì, mostrali»). Dove nessuna fonte dà un consiglio (Kaneshiro, Shido,
   Memento) non c'è un numero.
 - **Una regola per dato (L8, 01/11)**: la capienza della scorta (gradini compresi) è un dato del blocco `capienza-scorta`, non il testo delle
   abilità di Igor; il giorno di un'infiltrazione è quello delle voci legate a lei, non una data nel nome; la cattura di una Persona è una
   regola sola per Compendio, alberi di fusione e cicli, con tre stati: provata (un'Ombra catturabile della guida la porta, oppure il compendio
   delle Persona le dà un'area dei Memento), esclusa per documento (speciale, Demone del Tesoro, DLC, del gruppo) e da verificare (nessun dato
-  dice dove si incontra); le da verificare restano catturabili (Roberto, 01/11: «Restano catturabili»), e lo stato resta nel dato; «dove si
+  dice dove si incontra); le da verificare restano catturabili (utente, 01/11: «Restano catturabili»), e lo stato resta nel dato; «dove si
   incontra» è un servizio solo,
   con le Ombre della guida e i dedali dei Memento del compendio che le Ombre non dicono (tutti per chi non ha Ombre, come Makami e Scathach),
   senza perdere nulla di quel che la scheda mostrava; «si ottiene per fusione» solo per chi non si incontra da nessuna parte; le Richieste non
   hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date.
-- **Effetto dei tratti (Roberto, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
+- **Effetto dei tratti (utente, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
   dell'effetto di ciascuno dei 90 tratti, mostrata ovunque (Sfide, scheda Persona, pagine delle skill, fusione, ricerca); si corregge e si
   ripristina solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
 - **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
@@ -74,7 +77,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   due cose diverse, da quando si può e il giorno della guida («Niente: due cose diverse»). Le date di Okumura (i «22 giorni» della trama del
   19 settembre) e delle elezioni restano quelle della trama («per il momento lascia quella della trama»); le date di apertura e di scadenza
   dei Palazzi si modificano da interfaccia, in «Correggi la scheda» del Palazzo.
-- **Requisiti, date e prezzi della guida (L8-03, D4 di Roberto: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
+- **Requisiti, date e prezzi della guida (L8-03, D4 dell'utente: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
   liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare
   (migrazione 340): lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
   sono), le condizioni dei boss segreti (Nuova Partita+, una nuova condizione del vocabolario letta da Partita → Modifica), i requisiti dei
@@ -86,7 +89,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   campo si corregge e si ripristina dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
   stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Che il rango 8
   di Akechi non sia un requisito del finale Royal (né il suo contrario del finale standard) è una lettura del testo della guida, non una
-  decisione di Roberto. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
+  decisione dell'utente. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
   loro punto unico; i testi della guida restano. I prezzi non diventano campi nuovi: hanno già il loro punto unico nel catalogo e nei listini,
   e i prezzi della pagina Oggetti diversi dal listino restano note storiche, con il listino com'è (l'utente, 01/11: «Lascia la nota»).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
@@ -201,6 +204,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   rosso d'errore come testo `#fb7c7c`. I colori degli spilli restano quelli autorati, anche gli otto molto chiari: è una scelta, non una dimenticanza.
 - Pulsanti con figura: i pulsanti di solo testo sono convertiti; restano di testo gli «Annulla» delle finestre e i pulsanti a solo
   simbolo con nome accessibile. Ogni chiave d'icona nasce con una riserva SVG in codice.
+- «Salva» sta sempre in vista, a ogni formato. Ogni modulo di modifica è la `FinestraModifica` comune (piè fisso con Elimina / Annulla / Salva,
+  corpo che scorre da solo): anche le correzioni della guida (`CorrezioneGuida`: voce, infiltrazione, scheda del Palazzo, boss finale, area del
+  dedalo) e il totale dei timbri, che prima si aprivano in linea con «Salva» dopo i campi. Fa eccezione il pannello dell'editor di mappa, che
+  resta accanto alla mappa: «Salva» ed «Elimina» di spillo e mappa stanno in un piè fisso sul bordo basso del pannello (`.editor-mappa__piede`).
 - Conferme con `DialogoConferma`, mai `window.confirm`; una sola vista d'errore. Le finestre (`Modal`) non si chiudono cliccando lo sfondo
   (selezionando del testo si chiudevano per errore); la ricerca globale e il pannello delle schede si chiudono dallo sfondo solo se il
   gesto comincia e finisce lì.
@@ -210,15 +217,18 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Accessibilità (L6, WCAG 2.2 AA): testo ad almeno 4,5:1 anche nei chip degli elementi e delle affinità (tinte schiarite per il testo,
   colore pieno per bordi e icone); caselle di spunta nel rosso del tema; file di schede con le frecce, Home e Fine; lo scorrimento animato
   si spegne con «riduci movimento»; pin e ritagli dell'editor si spostano anche con le frecce e con i campi X/Y. Pin e frecce delle file
-  hanno un bersaglio di 44 px senza cambiare aspetto né posizione: il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
+  hanno un bersaglio di 44 px senza cambiare aspetto né posizione (i cartellini di Tokyo che si toccano alla misura del momento diventano
+  una pastiglia «+n» con l'elenco dei nomi, salvo sulla mappa piccola della pagina Partita, che non cambia disposizione; un collegamento isolato dentro una frase ha un'area trasparente da 44 px, una fila di
+  collegamenti righe da 44 px): il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
   così la punta resta sul punto), il gruppo un'imbottitura uguale sui quattro lati; la freccia di una fila, col mouse, ha un riquadro di
   clic da 44 px attorno al cerchio, sul tocco è il pulsante a essere da 44, e lo spazio ai capi della fila resta quello di prima. Le voci «fatte» ed
   «esaurite» non sono più attenuate: hanno a sinistra il segno dello stato (spunta rossa, o cerchio barrato grigio per «esaurito») e il
   nome barrato in un grigio leggibile (D15, scelta C dell'utente, 01/11), anche nella Partita.
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
-- La pagina Partita mantiene il suo aspetto; eccezioni approvate: finestra «Regala» in Confidenti; riga «Giorno e fascia
+- La pagina Partita mantiene il suo aspetto; eccezioni approvate: la vista «Avanzamento» del cassetto del Confidente (era «Level up»: nome
+  italiano ovunque, solo l'etichetta); finestra «Regala» in Confidenti; riga «Giorno e fascia
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
-  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (Roberto, 01/11); gli schizzi
+  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (utente, 01/11); gli schizzi
   L10-01, L10-02 e L10-05 approvati dall'utente (01/11): da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
   partita e Storico riempiono l'altezza come Oggi, Doti e Letture (intestazione e schede ferme, comandi in una fila ferma, l'elenco in
   un'area con bordo; Confidenti su 3 colonne a 1024 e 4 da 1280, Compendio e Persona su due colonne di righe da 44 px, Storico con una voce
@@ -305,7 +315,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   cruciverba, domande, incontri della pagina Confidenti, turni tolti), la notifica ha il pulsante «Applica», che le segna nella scheda; non
   nasce un promemoria persistente e niente si applica da solo.
 - Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro e si può spegnere; senza il libro letto è
-  spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (Roberto, 01/11:
+  spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (utente, 01/11:
   «Spento senza libro»). L'interruttore «Libro» resta a mano **(01/11)**.
 - **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
   «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.

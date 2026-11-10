@@ -2606,6 +2606,11 @@ export interface NegoziazioneDomandaDto {
   }>;
 }
 
+/** Una riga dell'elenco delle Ombre sciagura: il Palazzo o il Dedalo (come lo scrive la guida) e le Ombre che vi compaiono; `soloMemento` è l'asterisco della guida. */
+export interface OmbreSciaguraLuogoDto { sezione: 'palazzi' | 'dedali'; luogo: string; ombre: Array<{ nome: string; soloMemento?: boolean }> }
+/** L'oggetto raro rilasciato da un'Ombra sciagura. */
+export interface OmbreSciaguraRicompensaDto { ombra: string; oggetto: string }
+
 export interface BattagliaDto {
   fonti: { principale: string; note: string };
   sistema: { urlFonte: string; avvioScontro: string; comandi: string[]; esitiColpo: { debole: string; critico: string; tecnico: string; block: string; resiste: string }; unoMore: string; statiAlterati: Array<{ stato: string; effetto: string }>; notaFineBattaglia: string };
@@ -2625,7 +2630,11 @@ export interface BattagliaDto {
      *  compare fra i verdetti non è indifferente: non è stata verificata. */
     domande?: NegoziazioneDomandaDto[];
   };
-  ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
+  ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string;
+    /** L13-04 (migrazione 384): le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` finché la 384 non è applicata. */
+    elenco: OmbreSciaguraLuogoDto[] | null;
+    /** L13-04 (migrazione 384): l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente finché la 384 non è applicata. */
+    ricompenseElenco?: OmbreSciaguraRicompensaDto[]; incertezze: string };
   /** `livelloMinimo` (L8-03, migrazione 340): il livello consigliato più basso come numero, da confrontare col livello della partita. */
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; livelloMinimo?: number | null; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
@@ -3071,9 +3080,6 @@ export interface DivergenzaDto {
 /** L4 (§2.3, §4.3): una scheda della guida senza mappa e senza voce (i dati di prima): «Schede da sistemare» della scheda del Palazzo,
  *  con «Crea la voce» o «Collega a una voce». Mai cancellata senza cestino. */
 export interface SchedaDaSistemareDto { id: number; nome: string; descrizione: string; tipo: string; infiltrazione: string; infiltrazioneNome: string; posizione: { x: number; y: number } | null }
-
-/** L4 (§3.2): un gruppo di copie di una voce secondo la regola dell'utente (R4-15: stesso testo, stessi pin, stessa infiltrazione). */
-export interface GruppoCopieDto { infiltrazione: string; voci: Array<{ chiave: string; nome: string; ordine: number }>; pin: number[] }
 
 /**
  * Una regola di atterraggio di un Palazzo (2026-10-04): quando vale e dove si atterra toccandolo sulla mappa di Tokyo. Le regole

@@ -1,4 +1,5 @@
 import type { AppDatabase } from '../db/dbService.js';
+import { haColonna } from '../db/colonne.js';
 import { campiAutonomiAttivitaPesca } from '../../shared/attivitaPesca.js';
 import { httpErrors } from '../utils/httpError.js';
 import { storiaGenericaAttivita } from './vincoliAttivitaConfidente.js';
@@ -23,8 +24,7 @@ export function verificaAttivitaPesca(db:AppDatabase,r:Record<string,unknown>,pr
 export function verificaCollegamentiPescaImportati(db:AppDatabase,attuale?:AppDatabase):void {
   verificaAllocazioniTurniPescaImportate(db);
   if(attuale)verificaAllocazioniTurniPescaImportate(attuale);
-  const cols=db.prepare("SELECT name FROM pragma_table_info('attivita','main')").all() as Array<{name:string}>;
-  if(!cols.some(c=>c.name==='pesca_regola_chiave'))return;
+  if(!haColonna(db,'attivita','pesca_regola_chiave'))return;
   for(const r of db.prepare('SELECT * FROM main.attivita WHERE pesca_regola_chiave IS NOT NULL OR pesca_ruolo IS NOT NULL').iterate() as Iterable<Record<string,unknown>>){
     verificaAttivitaPesca(db,r,r);
     if(attuale){const prima=attuale.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(r.chiave) as Record<string,unknown>|undefined;

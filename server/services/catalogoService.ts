@@ -19,6 +19,7 @@ import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/co
 import { isDeepStrictEqual } from 'node:util';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
@@ -153,7 +154,7 @@ function assicuraIdentitaLettura(tipo: TipoCatalogo, chiave: string, nome: strin
 /** Prima di M7 non legge/scrive la colonna nuova, neppure negli snapshot dei gesti esistenti. */
 function campiDisponibili(tipo: TipoCatalogo): readonly string[] {
   // un file di gioco di prima della 254 non ha lo sconto del negozio: non si legge né si scrive
-  if (tipo === 'negozio' && !prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get()) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
+  if (tipo === 'negozio' && !haColonnaMain(getDb(), 'negozio', 'sconto_json')) return CAMPI.negozio.filter((c) => c !== 'sconto_json');
   return tipo === 'articolo' && !catalogoOggettiDisponibile() ? CAMPI[tipo].filter((c) => c !== 'catalogo_chiave' && c !== 'costo_json') : CAMPI[tipo];
 }
 

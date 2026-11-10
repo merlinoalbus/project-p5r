@@ -8,6 +8,7 @@
 
 import type { Statement } from 'better-sqlite3';
 import type { AppDatabase } from '../../db/dbService.js';
+import { haColonnaMain, haTabellaMain, haTabellaUtente } from '../../db/schemaMemo.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { puntoDescrittivo, sqlVoceDescrittiva } from '../../../shared/spilli.js';
 import type { EffettiDelGestoDto, StatoPunto, VoceDelGestoDto } from '../../../shared/types.js';
@@ -70,10 +71,6 @@ export interface ModelloAvanzamento {
   condivisi: Map<number, string[]>;
 }
 
-/** Vero se la colonna c'è (le migrazioni e i test possono trovare lo schema di prima). */
-function colonna(db: AppDatabase, tabella: string, nome: string): boolean {
-  return (db.prepare(`PRAGMA main.table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === nome);
-}
 
 // ---- Il modello in memoria (L5-04) ----
 //
@@ -120,8 +117,9 @@ export function modelloAvanzamento(db: AppDatabase): ModelloAvanzamento {
 
 /** Il modello letto dal DB, ogni volta da capo. */
 function costruisciModello(db: AppDatabase): ModelloAvanzamento {
-  const conCarattere = colonna(db, 'punto_interesse', 'carattere');
-  const conDedalo = colonna(db, 'punto_interesse', 'area_dedalo_chiave');
+  // le migrazioni e i test possono trovare lo schema di prima: le colonne opzionali si controllano
+  const conCarattere = haColonnaMain(db, 'punto_interesse', 'carattere');
+  const conDedalo = haColonnaMain(db, 'punto_interesse', 'area_dedalo_chiave');
   const voci = new Map<string, VoceDelModello>();
   for (const r of db.prepare(`SELECT p.chiave, p.tipo, p.nome, p.ordine, p.esauribile, p.area_chiave, a.dungeon_chiave, ${conDedalo ? 'p.area_dedalo_chiave' : 'NULL AS area_dedalo_chiave'}, ${conCarattere ? 'p.carattere' : 'NULL AS carattere'}
     FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave`).all() as Array<{ chiave: string; tipo: string; nome: string; ordine: number; esauribile: number; area_chiave: string; dungeon_chiave: string; area_dedalo_chiave: string | null; carattere: string | null }>) {
@@ -136,8 +134,8 @@ function costruisciModello(db: AppDatabase): ModelloAvanzamento {
     infiltrazioni.set(r.chiave, { chiave: r.chiave, nome: r.nome, palazzo: r.dungeon_chiave, ordine: r.ordine });
     (infiltrazioniDelPalazzo.get(r.dungeon_chiave) ?? infiltrazioniDelPalazzo.set(r.dungeon_chiave, []).get(r.dungeon_chiave)!).push(r.chiave);
   }
-  const conTabella = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get();
-  const conUid = colonna(db, 'spillo', 'uid');
+  const conTabella = haTabellaMain(db, 'spillo_voce');
+  const conUid = haColonnaMain(db, 'spillo', 'uid');
   const legami = db.prepare(`SELECT DISTINCT v.id, v.voce, s.mappa_chiave AS mappa, ${conUid ? 's.uid' : 'NULL'} AS uid FROM (${conTabella ? 'SELECT spillo_id AS id, voce_chiave AS voce FROM spillo_voce UNION ' : ''}
     SELECT id, riferimento_chiave FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave IS NOT NULL) v JOIN spillo s ON s.id = v.id ORDER BY 1, 2`).all() as Array<{ id: number; voce: string; mappa: string | null; uid: string | null }>;
   const pin = new Map<number, VociDelPinModello>();
@@ -216,13 +214,13 @@ export interface StatiDellaPartita {
 /** La tabella delle divergenze conservate (utente 022) c'è? */
 export function conDivergenze(db: AppDatabase): boolean {
   return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && !!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'divergenza_partita'").get();
+    && haTabellaUtente(db, 'divergenza_partita');
 }
 
 /** La tabella dello stato per infiltrazione dei pin condivisi (utente 023) c'è? */
 export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
   return !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && !!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'spillo_partita_infiltrazione'").get();
+    && haTabellaUtente(db, 'spillo_partita_infiltrazione');
 }
 
 /**
@@ -236,7 +234,7 @@ export function conStatoPerInfiltrazione(db: AppDatabase): boolean {
  */
 export function togliStatiDeiPin(db: AppDatabase, uidDaTogliere: string, parametri: ReadonlyArray<string | number>): void {
   const conRaccolti = !!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()
-    && !!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'spillo_partita'").get();
+    && haTabellaUtente(db, 'spillo_partita');
   if (conRaccolti) db.prepare(`DELETE FROM utente.spillo_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
   if (conDivergenze(db)) db.prepare(`DELETE FROM utente.divergenza_partita WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
   if (conStatoPerInfiltrazione(db)) db.prepare(`DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid IN (${uidDaTogliere})`).run(...parametri);
@@ -474,8 +472,7 @@ export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { i
 /** Le partite (e il loro file) ci sono? Senza `utente` attaccato, chi allinea gli stati non fa niente. */
 function conPartite(db: AppDatabase): boolean {
   if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) return false;
-  const tabelle = new Set((db.prepare("SELECT name FROM utente.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  return tabelle.has('punto_partita') && tabelle.has('spillo_partita') && tabelle.has('partita');
+  return haTabellaUtente(db, 'punto_partita') && haTabellaUtente(db, 'spillo_partita') && haTabellaUtente(db, 'partita');
 }
 
 /** I passi di un Enigma, nel loro ordine. */

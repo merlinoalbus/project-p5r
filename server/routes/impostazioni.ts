@@ -23,7 +23,7 @@ import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaD
 import { depositaCopia } from '../services/depositoService.js';
 import { avviaPreparazioneEdizione, statoEdizione } from '../services/edizioneService.js';
 import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
-import { elencoCestino, elencoCestinoUnificato, eliminaDalCestino, eliminaCestinoPrivato, ripristinaDalCestino, ripristinaCestinoPrivato, svuotaCestino, svuotaCestinoUnificato } from '../services/cestinoService.js';
+import { elencoCestino, elencoCestinoUnificato, eliminaDalCestino, ripristinaDalCestino, svuotaCestino, svuotaCestinoUnificato } from '../services/cestinoService.js';
 import { elencaTuttiNascosti } from '../services/catalogoService.js';
 import { paramsId } from '../schemas/compendio.js';
 
@@ -137,14 +137,8 @@ router.get('/cestino/nascosti', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(elencaTuttiNascosti());
 });
-const paramsCestinoPrivato = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
-router.post('/cestino/partite/:uid/ripristina', validate({ params: paramsCestinoPrivato }), (req, res) => {
-  res.json(ripristinaCestinoPrivato(String(req.params.uid)));
-});
-router.delete('/cestino/partite/:uid', validate({ params: paramsCestinoPrivato }), (req, res) => {
-  eliminaCestinoPrivato(String(req.params.uid));
-  res.status(204).end();
-});
+// Le voci personali (partite, fonti di acquisto, pesca, Persone della scorta) si rimettono e si tolgono da `/api/partite/cestino/:uid…`,
+// l'unica superficie che le tocca; qui le voci di gioco, per id, e l'elenco unificato che le somma alle personali.
 router.post('/cestino/:id/ripristina', validate({ params: paramsId }), (req, res) => {
   res.json(ripristinaDalCestino(Number(req.params.id)));
 });

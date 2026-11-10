@@ -15,6 +15,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { entitaDellaRadice } from './mappe/alberoMappe.js';
@@ -150,7 +151,7 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       preparaRimozioneArticoliAcquistati(articoli);
       prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
       // Ondata 5: le copie del registro degli acquisti vanno nello stesso cestino del loro segno «ottenuto»
-      if (prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
+      if (haTabellaUtente(getDb(), 'registro_acquisti')) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
       prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(chiave);
       prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(chiave);
       prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(chiave);

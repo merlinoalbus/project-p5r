@@ -19,7 +19,8 @@
 // cedute, rimaste) dalla stessa lettura della scelta dell'esito e di «Regala» (`dettaglioCopie`). Sola lettura: nessuna scrittura, anche nel rilascio.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { verificaPartita } from './verificaPartita.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
@@ -45,7 +46,7 @@ export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
     WHERE rp.partita_id = ? AND rp.stato = 'completata' ORDER BY r.ordine, ro.ordine, ro.catalogo_chiave`).all(partitaId) as
     Array<{ catalogo_chiave: string; quantita: number; chiave: string; richiesta_nome: string; nome: string | null; categoria: string | null }> : [];
   // i turni con un esito che dà oggetti: il nome dell'attività e dell'esito si leggono da dove vivono (l'esito tolto dall'elenco resta con la chiave)
-  const daTurni = prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'oggetto_esito_turno'").get()
+  const daTurni = haTabellaUtente(getDb(), 'oggetto_esito_turno')
     ? prepared(`SELECT o.catalogo_chiave, o.quantita, o.attivita_chiave, o.ordine, o.esito_chiave, a.nome AS attivita_nome, ${nome} AS nome, ${categoria} AS categoria
       FROM utente.oggetto_esito_turno o LEFT JOIN main.attivita a ON a.chiave = o.attivita_chiave ${unisciCatalogo('o.catalogo_chiave')}
       WHERE o.partita_id = ? ORDER BY o.creato_il, o.attivita_chiave, o.ordine, o.catalogo_chiave`).all(partitaId) as

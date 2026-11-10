@@ -15,7 +15,8 @@
 // (`shared/esitiAttivita.ts`): la stessa regola per gli oggetti dati e per quelli consumati.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
@@ -38,7 +39,7 @@ export function nomeOggettoCatalogo(chiave: string): string {
 const TABELLA = 'oggetto_esito_turno';
 
 /** La tabella c'è? (Uno schema di prima della utente 053 non ha oggetti dagli esiti: niente da scrivere né da togliere.) */
-const conTabella = (): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(TABELLA);
+const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 /**
  * Registrando il turno `ordine` dell'attività con l'esito `esito`: gli oggetti del catalogo che l'esito dà entrano fra quelli ottenuti.

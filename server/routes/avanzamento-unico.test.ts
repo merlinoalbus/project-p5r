@@ -345,7 +345,9 @@ describe('L4 — avanzamento unico', () => {
     ]).toEqual([0, 0]);
   });
 
-  it('§3.2, R4-15 — le copie secondo la regola dell’utente: vuote a Madarame; con voci uguali sugli stessi pin nella stessa infiltrazione, trovate', async () => {
+  // Saltato (L12-04, Q20): la rotta `GET /dungeon/:chiave/copie` e `copieDelPalazzo` non esistono più, nessuno le chiamava (in L4 non c'è
+  // fusione). Il corpo originale è conservato, non eseguito (zero test).
+  it.skip('§3.2, R4-15 — le copie secondo la regola dell’utente: vuote a Madarame; con voci uguali sugli stessi pin nella stessa infiltrazione, trovate', async () => {
     expect((await request(app).get('/api/compendio/dungeon/madarame/copie').expect(200)).body.data).toEqual([]);
     const a = await nuova(inf[5], 'Doppione', 'forziere');
     const b = await nuova(inf[5], 'Doppione', 'forziere');
