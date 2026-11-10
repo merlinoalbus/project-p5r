@@ -27,7 +27,9 @@ const app = createApp();
 const per = async (categoria: string) =>
   (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as Array<Record<string, unknown>>;
 
-  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+// Saltato: chiama `/api/catalogo/oggetti-di/:categoria`, tolta in L11 B7 per decisione dell'utente (inventario delle superfici, 23/10) e senza
+// una rotta che la sostituisca con lo stesso contratto (l'archivio unico `/api/catalogo-oggetti` ha categorie e campi diversi). Non va eseguito né
+// cancellato.
 describe.skip('API oggetti selezionabili', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());

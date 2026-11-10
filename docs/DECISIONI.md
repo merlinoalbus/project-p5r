@@ -384,6 +384,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   visioni comprese): una lettura torna al valore di prima solo se vale ancora quello scritto dalla spunta, altrimenti resta e la spunta lo
   dice; le Doti restano a mano e il loro promemoria se ne va. La spunta di una voce di Palazzo non segna i passi (restano Entra/Esci).
 - Un giorno è «coperto» se ha almeno una voce: si calcola, la colonna `giorno.coperto` non si legge più.
+- Dopo il 1° giugno il Diario ha le voci e le Doti della guida approvate per blocchi (L6-09, 10/11): un passaggio di rango ha la sua voce,
+  anche per le Gemelle (una voce per rango; la voce che riassumeva più ranghi resta per il più alto e le sue spunte valgono anche per i
+  ranghi di prima); un trofeo sta su una voce sola, quella del giorno della guida; la Dote di un incontro sta nella Dote per incontro del
+  Confidente, quella di un'attività, di un libro, di un film o di un videogioco nell'elemento collegato quando l'elemento la porta, e allora
+  non si ripete come effetto della voce; l'effetto `dote` della voce resta dove l'elemento non ne ha (la pesca a Ichigaya).
+  Un dato che la guida non dà con certezza resta fuori (il film del 5 agosto con Yusuke).
 - Il server non rifiuta una coppia tipo/collegamento fuori dalla regola, avvisa solo se è nuova: le voci-eccezione già salvate restano com'erano.
 - Una voce del Diario validato già spuntata dice, nell'editor e nella conferma d'eliminazione, che modificarla tocca quelle spunte.
 - Nella Home la prima casella del giorno sta entro la piega a ogni formato: trama, vincoli e avvisi si ripiegano dietro la freccia della scheda,
@@ -567,6 +573,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La cella del prezzo nel catalogo degli oggetti dice «Nessuna offerta in yen» solo per un oggetto che si ottiene con uno scambio non in
   yen; altrimenti, senza offerte in yen, resta vuota.
 - Lo sconto di un negozio dal rango di un Confidente (Clinica di Takemi) è un dato del negozio; il prezzo resta quello dell'offerta.
+- La data da cui un negozio è aperto è un dato del negozio (il suo sblocco), non ripetuto sulle offerte: un'offerta porta solo le condizioni
+  sue (stagione, data successiva, rango…). I negozi di Shibuya aperti dal 18 aprile e la Lotteria la portano così.
 - **Televendite**: Set A e Set B sono due articoli distinti; ogni domenica si compra un set o nessuno, scelto alla spunta; senza set non
   c'è consegna (la voce della consegna è dovuta solo con un set comprato la domenica prima).
 - Regali: reazione strutturata (+3/+2/+1), ogni regalo a un Confidente regalabile già incontrato, regalo ripetibile con consumo di copie;

@@ -4,8 +4,8 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 384 migrazioni di gioco (l'ultima è la 384), 70 delle partite
-(l'ultima è la 070).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 386 migrazioni di gioco (l'ultima è la 386), 71 delle partite
+(l'ultima è la 071).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -42,8 +42,9 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Modifica completa delle voci; copia, taglio e incolla (anche fra giorni) e appunti fissi nella preparazione, raggruppati in categorie
   apribili e riordinati trascinando.
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
-- Ancora aperto: le voci e le Doti mancanti dopo il 1° giugno (giorni scoperti, passaggi di rango, Doti da testo), in attesa dell'approvazione
-  dell'elenco per blocchi; nessuna è stata applicata.
+- Dopo il 1° giugno le voci e le Doti della guida dell'elenco approvato il 10/11 (385): gli otto giorni prima scoperti, i passaggi di rango
+  mancanti (le Gemelle con una voce per rango), Aojiru, letture, scambi di Sakai, l'avanzamento dei videogiochi, Sae e il suo trofeo al 20/11,
+  «Occhio di falco» al 4/8, la pesca del 29/11. Resta fuori il film del 5 agosto con Yusuke: la guida non dice quale.
 
 ## Mondo, mappe e luoghi
 - Mappa di viaggio di Tokyo con quartieri, Palazzi e luoghi; pagine di quartiere, Area e luogo (`/guida/citta`, `/guida/luogo/…`).
@@ -243,8 +244,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   30% ai cinque formati) e controllata la fila delle briciole.
 - **Tre luoghi ancora da collocare.** Libreria Nagiuri, Odaiba Seaside Park e Stazione di Shibuya stanno in quartieri con Aree, ma nessun pin
   indica la loro: si collocano dall'editor o dalla pagina del quartiere quando si vede in gioco dove stanno.
-- **Un solo «dove» dei negozi: un residuo.** Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà anche
-  per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati.
 
 **Riservato all'utente**
 - Collaudo automatico completo della ricerca globale: lo esegue l'utente.
