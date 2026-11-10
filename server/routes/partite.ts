@@ -29,6 +29,7 @@ import { impostaStatoRichiesta, riepilogoRichieste } from '../services/richieste
 import { oggettiOttenutiPartita } from '../services/oggettiOttenutiService.js';
 import { annullaConsumoIsolamento } from '../services/consumiOggettiService.js';
 import { impostaTimbri } from '../services/timbriService.js';
+import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
 import { bodySessioneVideogioco } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
@@ -321,10 +322,12 @@ router.delete('/:id/consumi/:consumoId', validate({ params: paramsPartitaConsumo
   annullaConsumoIsolamento(id, Number(req.params.consumoId));
   res.json(oggettiOttenutiPartita(id));
 });
-/** I timbri raccolti in un dedalo dei Memento (0 = azzera). */
-router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ area: z.string().min(1).max(200), raccolti: z.number().int().min(0).max(999) }) }), (req, res) => {
+/** I timbri raccolti in un dedalo dei Memento (L10-02: `dedalo` è la chiave del dedalo; 0 = azzera). */
+// un client di prima della L10-02 manda ancora `area`: lo si dice (400 `timbri-campo-dedalo`), invece del solo «corpo non valido»
+router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ dedalo: z.string().min(1).max(200).optional(), area: z.unknown().optional(), raccolti: z.number().int().min(0).max(LIMITI_GUIDA.dedalo.timbri) }) }), (req, res) => {
   const b = req.body;
-  res.json(impostaTimbri(Number(req.params.id), b.area, b.raccolti));
+  if (b.dedalo === undefined) throw httpErrors.badRequest('timbri-campo-dedalo', b.area !== undefined ? 'I timbri si contano per dedalo: il campo è ora `dedalo` (la chiave del dedalo dei Memento), non più `area`.' : 'Manca `dedalo`, la chiave del dedalo dei Memento.');
+  res.json(impostaTimbri(Number(req.params.id), b.dedalo, b.raccolti));
 });
 router.put('/:id/punti', validate({ params: paramsPartita, body: bodyStatoPunto }), (req, res) => {
   const b = req.body;

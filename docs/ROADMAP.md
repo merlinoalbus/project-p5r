@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 350 migrazioni di gioco (l'ultima è la 375), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 354 migrazioni di gioco (l'ultima è la 379), 68 delle partite (l'ultima è la 069).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -156,6 +156,15 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Palazzi, da fare a mano dall'editor: i pin Tesoro di Futaba (prima di quel Palazzo) e di Maruki; i 101 abbinamenti pin–voce non collegati
   dei sei Palazzi non validati (`dati_guida.audit-l9-03-pin-e-voci`, con il motivo di ognuno; il forziere della Sala d'ingresso di Maruki è
   univoco nei dati ma la guida ne descrive due).
+- Memento: timbri per dedalo con la fonte (Aiyatsbus 8, Kaitul 20, Akzeriyyuth 25, Adyeshach 30, Sheriruth 30, Da'at 40); Qimranut, Chemdah e
+  Iweleth senza totale, perché la guida non dà un numero (per Qimranut dice solo che ci sono). Nessun totale generale si impone (scelta
+  di Roberto del 10/11): la scheda dei Memento dice una volta la somma dei dedali (153) e il totale dichiarato dalla guida (123). Il 150 della
+  guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio.
+- Memento: i requisiti di Palazzo delle Richieste seguono le pagine dei Dedali (17 Richieste, 15 aggiunte dalla 378); nei Memento Eligor sta solo in
+  Chemdah, con una voce sola (scelta di Roberto del 10/11), ed Eligor e Reggente stanno fra le Ombre di Chemdah nel blocco della battaglia (379).
+- **Primo avvio da una cartella dati vuota, da correggere:** con il pacchetto iniziale `pacchetto/gioco.db` l'avvio si ferma alla migrazione di gioco
+  330 (`scaffale_con_lo_scatolone`: «no such table: utente.spunta_voce_partita»), anche con il codice di prima dei Palazzi e dei Memento,
+  perché le migrazioni delle partite girano dopo quelle di gioco. Un `partite.db` nuovo accanto a un `gioco.db` già usato parte.
 - Palazzi, da verificare in gioco: i forzieri di Shido tratti dalla guida inglese (per esempio «Life Jacket, Diamante, Granato» nel Ponte
   piscina, dove la guida italiana descrive la Camicia inamovibile).
 - Palazzi, restano com'erano per mancanza di fonte: i nomi inglesi di quattro forzieri di Shido (Soul Food, Life Jacket, Parapsy Ring,

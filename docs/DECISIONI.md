@@ -425,6 +425,16 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   (2026-10-11): così la percentuale della pagina del dedalo e la riga della carta sono lo stesso calcolo. Ogni percentuale di avanzamento
   (dedalo, Memento, Palazzo) è per difetto: il 100% compare solo a lavoro finito. Nella fila delle aree del Palazzo (768–1279 px) ogni chip
   ha una seconda riga con lo stesso testo del foglio («2 da prendere su 2»), sempre in 44 px.
+- **Timbri per dedalo (Q8, 09/11; scelta di Roberto del 10/11: «Numeri per dedalo»)**: ogni dedalo ha il totale che gli dà la guida; i tre
+  per cui la guida non dà un numero (Qimranut, Chemdah, Iweleth) non contano i timbri e lo dicono, senza valori inventati. Nessun totale
+  generale si impone: la scheda dei Memento dice una volta, come informazione, la somma dei dedali (153) e il totale dichiarato (123); il 150
+  della guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio. I timbri contano nel completamento del dedalo, uno per timbro, e nessuna voce di Trama ripete il loro numero.
+- **Eligor nei Memento (scelta di Roberto del 10/11: «Solo a Chemdah»)**: il Cavaliere bellicoso sta solo nel Dedalo di Chemdah, come la «Guida
+  ai Memento» (r.287); la pagina di Aiyatsbus che lo elenca (r.125) non vale. Il Palazzo di Kamoshida non cambia.
+- **Requisiti di Palazzo delle Richieste (Q9, 09/11)**: valgono le pagine dei Dedali; il Palazzo serve a raggiungere il bersaglio, quindi sta fra
+  le condizioni per completare la Richiesta, non fra quelle che la sbloccano. La pagina «Richieste nei Memento» dà solo date e ranghi.
+- **Richieste**: il posto si cambia in un punto solo, la sezione «Dove» del modulo; il nome del bersaglio è facoltativo con un'Ombra del
+  compendio, e vale quello dell'Ombra. **(09/11)**
 - **Memento al telefono (L10-10, schizzo approvato)**: sotto i 768 px i nove dedali sono una griglia di pulsanti da 44 px sempre in vista,
   e il pozzo è solo il loro sfondo, attenuato e non toccabile; «Pozzo dei Memento» non è più nel menu «Altro». Tablet e desktop come prima.
 - Nessuna immagine ufficiale nel repository: le planimetrie le carica l'utente nell'istanza. I pezzi delle planimetrie (zone

@@ -7,20 +7,22 @@
 // («pulsanti sparsi in vari punti... un'organizzazione visiva poco efficace e confusionaria»); «in ogni memento ci sono diverse
 // aree... e per ogni area ci sono 4 elementi: Timbri raccolti..., Persone che puoi incontrare... Richieste e eventi di trama».
 // Progetto approvato («Approvo»):
-//   - in cima la scheda del dedalo: disegno del dedalo, nome, il conto per elemento («Timbri 3/8 · Richieste 1/5 · Trama 1/4 ·
-//     Persona 3/18 catturate»), la barra e l'interruttore «Gioca» / «Modifica la guida» (sul telefono nel menu ⋯). Sul telefono
+//   - in cima la scheda del dedalo: disegno del dedalo, nome, il conto per elemento («Richieste 1/5 · Trama 1/4 · Persona 3/18
+//     catturate»), la barra, i timbri del dedalo (L10-02: la guida li dà per dedalo, non per area; la fila a un tocco per timbro sta
+//     qui, col suo conto) e l'interruttore «Gioca» / «Modifica la guida» (sul telefono nel menu ⋯). Sul telefono
 //     (L10-10, schizzo approvato) al posto del nome i nove dedali in una griglia 3×3 di pulsanti da 44 px, col pozzo come sfondo
 //     decorativo: prima erano una tendina chiusa e il pozzo stava nel menu ⋯;
 //   - le aree come schede («Area 2 · 2/6», ✓ se completata), un'area per volta; sul telefono le schede restano in vista
 //     scorrendo;
-//   - nell'area, in quest'ordine: Timbri (su tutta la larghezza), Persona, Richieste, Trama; Persona a sinistra e
+//   - nell'area, in quest'ordine: Persona, Richieste, Trama (i timbri non sono più dell'area, L10-02); Persona a sinistra e
 //     Richieste con Trama a destra da 1280 px (fra 1024 e 1279 non c'era posto: una colonna);
+//   - L10-05: «Modifica area» apre il modulo sotto la riga e lo porta in vista (al telefono si apriva sotto il bordo);
 //   - in «Gioca» solo i comandi per segnare; in «Modifica la guida» anche riordinare, correggere, aggiungere ed eliminare aree,
 //     Richieste, Persona e voci, le Richieste da collocare e le Persona senza area.
 // L'area aperta sta nell'indirizzo (`zona`); senza, la prima non completata.
 // ============================================================
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchParams } from '../scheda/routerScheda';
 import { creaAreaDedalo, eliminaAreaDedalo, aggiornaAreaDedalo, spostaAreaDedalo } from '../../services/api';
@@ -36,8 +38,8 @@ import { ModuloRichiesta } from './ModuloRichiesta';
 import { ModuloPersona } from './ModuloPersona';
 import { PersoneDellArea } from './PersoneDellArea';
 import { ArchivioDelPalazzo } from './ArchivioDelPalazzo';
-import { TimbriDellArea } from './TimbriDellArea';
-import { ElencoRichieste, DA_COLLOCARE } from './ElencoRichieste';
+import { TimbriDelDedalo } from './TimbriDelDedalo';
+import { ElencoRichieste } from './ElencoRichieste';
 import { TramaDellArea } from './TramaDellArea';
 import { SezioneDellArea } from './SezioneDellArea';
 import { urlStratoDedalo } from '../mappe/stratiMemento';
@@ -45,6 +47,7 @@ import { MappaMemento } from '../mappe/MappaMemento';
 import { contiDelDedalo, nomeBreveDedalo, percentualeDedalo } from '../../utils/dedali';
 import { percentualeSegnati } from '../../../shared/avanzamento';
 import { NEL_CESTINO } from '../../utils/cestino';
+import { comportamentoScorrimento } from '../../utils/movimento';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto, StatoPunto, StatoRichiesta } from '../../types';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -64,8 +67,8 @@ interface Props {
   onModifica: (acceso: boolean) => void;
   cambiaStato: (p: PuntoInteresseDto, stato: StatoPunto | null) => Promise<boolean>;
   onPuntoAggiornato: (p: PuntoInteresseDto) => void;
-  /** I timbri raccolti in un'area sono cambiati (dalla risposta del server). */
-  onTimbri: (areaDedalo: string, raccolti: number) => void;
+  /** I timbri raccolti nel dedalo sono cambiati (dalla risposta del server; `dedalo` è la sua chiave). */
+  onTimbri: (dedalo: string, raccolti: number) => void;
   /** Lo stato di una Richiesta nella partita è cambiato (dalla risposta del server). */
   onRichiesta: (chiave: string, stato: StatoRichiesta | null) => void;
   /** Le Persona registrate nel compendio della partita (id): le catturate (2026-10-12); null senza partita. */
@@ -97,6 +100,15 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
   const [personaSenzaArea, setPersonaSenzaArea] = useState<PuntoInteresseDto | null>(null);
   const chiesta = params.get('zona');
   const area = aree.find((a) => a.chiave === chiesta) ?? aree.find((a) => a.completata !== true) ?? aree[0] ?? null;
+  /** L10-05 (rilievo P M1): l'area di cui è aperto il modulo «Modifica area», che si porta in vista appena aperto; al telefono si apriva
+   *  sotto il bordo della schermata. Il margine di scorrimento tiene conto delle schede delle aree, ferme in cima, e della barra in basso. */
+  const [correggendoArea, setCorreggendoArea] = useState<string | null>(null);
+  // uscendo da «Modifica la guida» il modulo si chiude e non si riapre rientrando (anche se è la pagina a spegnere la modalità)
+  const areaInCorrezione = modifica ? correggendoArea : null;
+  /** Cambia la modalità della pagina; uscendo da «Modifica la guida» dimentica il modulo dell'area aperto. */
+  const cambiaModalita = (acceso: boolean) => { if (!acceso) setCorreggendoArea(null); onModifica(acceso); };
+  const moduloArea = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { if (areaInCorrezione) moduloArea.current?.scrollIntoView?.({ block: 'nearest', behavior: comportamentoScorrimento() }); }, [areaInCorrezione]);
   /** Apre un'area mettendola nell'indirizzo (il dedalo resta). */
   const scegliArea = (k: string) => setParams((p) => { const n = new URLSearchParams(p); n.set('zona', k); return n; }, { replace: true });
   /** Esegue un'operazione tenendo occupata la chiave; l'errore va in notifica. */
@@ -119,8 +131,8 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
   /** L'interruttore «Gioca» / «Modifica la guida». */
   const interruttore = IN_RILASCIO ? null : (
     <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-border" role="group" aria-label="Modalità della pagina">
-      <button type="button" className={`touch px-3 testo-12 ${!modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={!modifica} onClick={() => onModifica(false)}>Gioca</button>
-      <button type="button" className={`touch border-l border-border px-3 testo-12 ${modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={modifica} onClick={() => onModifica(true)}>Modifica la guida</button>
+      <button type="button" className={`touch px-3 testo-12 ${!modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={!modifica} onClick={() => cambiaModalita(false)}>Gioca</button>
+      <button type="button" className={`touch border-l border-border px-3 testo-12 ${modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={modifica} onClick={() => cambiaModalita(true)}>Modifica la guida</button>
     </span>
   );
 
@@ -167,8 +179,9 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
                 })}
               </div>
             </div>
+            {/* i timbri hanno il loro conto nella fila qui sotto (L10-02): qui non si ripetono */}
             <span className="testo-12 tabular-nums text-text-secondary">
-              Timbri {conto(conti.timbri)}{conti.timbri.daImpostare > 0 ? ` (${conti.timbri.daImpostare} ${conti.timbri.daImpostare === 1 ? 'area' : 'aree'} senza totale)` : ''} · Richieste {conto(conti.richieste)} · Trama {conto(conti.trama)} · Persona {partitaId ? `${conti.persona.fatti}/${conti.persona.totale} catturate` : conti.persona.totale}
+              Richieste {conto(conti.richieste)} · Trama {conto(conti.trama)} · Persona {partitaId ? `${conti.persona.fatti}/${conti.persona.totale} catturate` : conti.persona.totale}
             </span>
             {percentuale !== null && (
               <span className="visore-mappa__progresso h-1.5" role="progressbar" aria-label={`Elementi di ${dedalo.nome}`} aria-valuemin={0} aria-valuemax={obiettivi.totale} aria-valuenow={fatti} aria-valuetext={`${testoSegnati}, ${percentuale}%`}>
@@ -177,6 +190,9 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
             )}
           </div>
         </div>
+        {/* L10-02: i timbri del dedalo, a un tocco per timbro, col totale della guida e la sua fonte */}
+        <TimbriDelDedalo key={`timbri-${dedalo.chiave}`} dedalo={{ chiave: dedalo.chiave, nome: dedalo.nome, timbri: dedalo.dedalo.timbri, timbriFonte: dedalo.dedalo.timbriFonte }}
+          partitaId={partitaId} modifica={modifica} onTimbri={onTimbri} onRicarica={onRicarica} />
         {/* sul telefono: il menu ⋯ con l'interruttore */}
         {menu && interruttore && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border-light pt-2 md:hidden">
@@ -232,20 +248,29 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
                     onClick={() => void esegui(area.chiave, async () => { await spostaAreaDedalo(area.chiave, -1); await onRicarica(); }, 'Spostamento non riuscito.')} />
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta dopo l’area ${area.nome}`} disabled={occupata === area.chiave || i === aree.length - 1}
                     onClick={() => void esegui(area.chiave, async () => { await spostaAreaDedalo(area.chiave, 1); await onRicarica(); }, 'Spostamento non riuscito.')} />
-                  <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} compatto etichetta="Modifica area"
-                    iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
-                    onSalva={async (b) => { await aggiornaAreaDedalo(area.chiave, { nome: b.nome, descrizione: b.descrizione }); await onRicarica(); }}
-                    elimina={{ avviso: `Se ne va per tutte le partite: le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area. ${NEL_CESTINO}`, onElimina: async () => { await eliminaAreaDedalo(area.chiave); setParams((p) => { const n = new URLSearchParams(p); n.delete('zona'); return n; }, { replace: true }); await onRicarica(); } }}>
-                    {(b, cambia) => <>
-                      <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.areaDedalo.nome} onCambia={(v) => cambia({ nome: v })} />
-                      <CampoCorrezione etichetta="Dettagli dell’area" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.areaDedalo.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-                    </>}
-                  </CorrezioneGuida>
+                  {areaInCorrezione !== area.chiave && (
+                    <button type="button" className="touch shrink-0 rounded px-1.5 testo-12 text-text-muted hover:text-text" aria-label={`Modifica area: l’area «${area.nome}»`}
+                      title={`Correggi l’area «${area.nome}»`} onClick={() => setCorreggendoArea(area.chiave)}>✎<span className="ml-1">Modifica area</span></button>
+                  )}
+                  {/* il modulo sotto la riga, portato in vista (L10-05): i margini di scorrimento lasciano fuori le schede delle aree ferme in cima
+                      e la barra in basso del telefono */}
+                  {areaInCorrezione === area.chiave && (
+                    <div ref={moduloArea} className="basis-full scroll-mt-20 scroll-mb-24 lg:scroll-mb-4">
+                      <CorrezioneGuida key={area.chiave} cosa={`l’area «${area.nome}»`} aperta onChiudi={() => setCorreggendoArea(null)}
+                        iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
+                        onSalva={async (b) => { await aggiornaAreaDedalo(area.chiave, { nome: b.nome, descrizione: b.descrizione }); await onRicarica(); }}
+                        elimina={{ avviso: `Se ne va per tutte le partite: le sue voci di Trama con quel che ne avevano segnato. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area. ${NEL_CESTINO}`, onElimina: async () => { await eliminaAreaDedalo(area.chiave); setParams((p) => { const n = new URLSearchParams(p); n.delete('zona'); return n; }, { replace: true }); await onRicarica(); } }}>
+                        {(b, cambia) => <>
+                          <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.areaDedalo.nome} onCambia={(v) => cambia({ nome: v })} />
+                          <CampoCorrezione etichetta="Dettagli dell’area" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.areaDedalo.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
+                        </>}
+                      </CorrezioneGuida>
+                    </div>
+                  )}
                 </>;
               })()}
             </div>
           )}
-          <TimbriDellArea key={`timbri-${area.chiave}`} area={area} partitaId={partitaId} modifica={modifica} onTimbri={onTimbri} onRicarica={onRicarica} />
           {/* Persona a sinistra, Richieste e Trama a destra (progetto approvato) da 1280 px: fra 1024 e 1279 la colonna del dedalo, accanto
               al menu e al binario, è larga circa 500 px (misurato a 1024×690) e le due colonne vi stavano strette; sotto, una colonna */}
           <div className="grid grid-cols-1 items-start gap-2.5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -256,8 +281,8 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
                 azioni={modifica ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" aria-label={`Aggiungi una Richiesta in ${area.nome}`} onClick={() => setModulo({ chiave: null, area: area.chiave })} /> : undefined}>
                 {area.richieste.length === 0
                   ? <p className="m-0 testo-12 text-text-muted">Nessuna Richiesta in quest’area.</p>
-                  : <ElencoRichieste richieste={area.richieste} dedalo={dedalo.chiave} area={area.chiave} aree={elencoAree} partitaId={partitaId} modifica={modifica}
-                      onRichiesta={onRichiesta} onModifica={(k) => setModulo({ chiave: k, area: null })} onRicarica={onRicarica} />}
+                  : <ElencoRichieste richieste={area.richieste} dedalo={dedalo.chiave} partitaId={partitaId} modifica={modifica}
+                      onRichiesta={onRichiesta} onModifica={(k) => setModulo({ chiave: k, area: null })} />}
               </SezioneDellArea>
               {(() => {
                 const voci = dedalo.punti.filter((p) => p.tipo !== 'persona' && p.areaDedalo === area.chiave);
@@ -281,9 +306,9 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, partitaId, modif
       {modifica && (
         <section className="flex flex-col gap-2.5 rounded-lg border border-dashed border-border-light p-2.5" aria-label={`Attrezzi di ${dedalo.nome}`}>
           {daCollocare.length > 0 && (
-            <SezioneDellArea chiave="richieste" titolo="Richieste da collocare" conto={String(daCollocare.length)} nota="non contano finché non stanno in un’area">
-              <ElencoRichieste richieste={daCollocare} dedalo={dedalo.chiave} area={DA_COLLOCARE} aree={elencoAree} partitaId={partitaId} modifica
-                onRichiesta={onRichiesta} onModifica={(k) => setModulo({ chiave: k, area: null })} onRicarica={onRicarica} />
+            <SezioneDellArea chiave="richieste" titolo="Richieste da collocare" conto={String(daCollocare.length)} nota="non contano finché non stanno in un’area: l’area si sceglie in «Modifica»">
+              <ElencoRichieste richieste={daCollocare} dedalo={dedalo.chiave} partitaId={partitaId} modifica
+                onRichiesta={onRichiesta} onModifica={(k) => setModulo({ chiave: k, area: null })} />
             </SezioneDellArea>
           )}
           {senzaArea.length > 0 && (

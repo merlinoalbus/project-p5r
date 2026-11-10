@@ -190,7 +190,9 @@ export interface DatiDungeonApi { nome?: string; sovrano?: string; note?: string
   date?: { dal: string; al: string | null; furtoConsigliato: string | null; letteraEntro: string | null };
   /** L4 §8.14: la voce «Boss» che conclude il Palazzo («Modifica › Boss finale»); null = nessuna. */
   voceBossFinale?: string | null }
-export interface DatiAreaApi { nome?: string; descrizione?: string }
+/** Nome e descrizione di un'area della guida (un'infiltrazione o un dedalo); L10-02: per un dedalo dei Memento anche il totale dei timbri
+ *  (`timbriTotale`, null = la guida non dà un numero: niente da contare), rifiutato per gli altri. */
+export interface DatiAreaApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
   /** L'Enigma di cui la voce è un passo (095); null = voce dell'area. */
   contenitore?: string | null;
@@ -208,8 +210,8 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   carattere?: CarattereVoce | null;
   /** L3 RG-4: la planimetria del Palazzo a cui agganciare a mano una voce senza pin; null toglie l'aggancio (torna la planimetria 1). */
   planimetria?: string | null }
-/** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
-export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
+/** Nome e dettagli di un'area di un dedalo (099); i timbri sono del dedalo (L10-02: `aggiornaArea` con `timbriTotale`). */
+export interface DatiAreaDedaloApi { nome?: string; descrizione?: string }
 
 /** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note) e la voce del boss finale; risponde con la scheda aggiornata. */
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
@@ -217,7 +219,8 @@ export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<D
 export const ripristinaDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina`, {});
 /** L9-08: «Ripristina» delle date del Palazzo; il boss finale non si tocca. */
 export const ripristinaDateDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina-date`, {});
-/** Corregge nome e descrizione di un'area della guida del Palazzo; risponde con l'area aggiornata. */
+/** Corregge nome e descrizione di un'area della guida (infiltrazione o dedalo) e, per un dedalo dei Memento, il totale dei timbri; risponde
+ *  con l'area aggiornata (senza stato di partita). */
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);
 /** Aggiunge una voce (punto di interesse) all'area; risponde con la voce creata. */
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
@@ -251,7 +254,7 @@ export const eliminaArea = (chiave: string): Promise<void> => apiDelete(`/compen
 /* ---- Le aree dei dedali dei Memento (099): Dedalo → Aree → Elementi ---- */
 /** Un'area nuova in fondo al dedalo; risponde con l'area creata (senza stato di partita). */
 export const creaAreaDedalo = (dedalo: string, dati: DatiAreaDedaloApi & { nome: string }): Promise<AreaDedaloDto> => apiPost(`/compendio/dedali/${encodeURIComponent(dedalo)}/aree`, dati);
-/** Corregge nome, dettagli e totale dei timbri di un'area del dedalo. */
+/** Corregge nome e dettagli di un'area del dedalo. */
 export const aggiornaAreaDedalo = (chiave: string, dati: DatiAreaDedaloApi): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}`, dati);
 /** Un posto su (-1) o giù (+1) fra le aree del dedalo. Relativo: nessun nuovo tentativo. */
 export const spostaAreaDedalo = (chiave: string, verso: -1 | 1): Promise<AreaDedaloDto> => apiPut(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });
@@ -259,7 +262,8 @@ export const spostaAreaDedalo = (chiave: string, verso: -1 | 1): Promise<AreaDed
 /** I campi di una Richiesta che il modulo scrive; `dedalo`/`areaDedalo` null = in nessun dedalo / da collocare. */
 export interface DatiRichiestaApi {
   nome?: string; committente?: string; dedalo?: string | null; areaDedalo?: string | null; piano?: string;
-  bersaglio?: RichiestaDto['bersaglio']; ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
+  /** L10-04: con un'Ombra il nome del bersaglio può restare vuoto (vale quello dell'Ombra); senza Ombra è obbligatorio. */
+  bersaglio?: RichiestaDto['bersaglio']; confidente?: string | null; note?: string;
   /** L13 (ondata 3): sblocco, scadenza e proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
   condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[]; areaDedalo?: string | null } | null;
   ombra?: string | null; yen?: number | null; esperienza?: number | null; oggetti?: Array<{ chiave: string; quantita: number }>;
@@ -280,8 +284,6 @@ export const correggiRequisitoRichiesta = (confidente: string, rango: number, in
 /** Toglie un requisito di un Confidente che cita una Richiesta, per tutte le partite. */
 export const togliRequisitoRichiesta = (confidente: string, rango: number, indice: number): Promise<void> =>
   apiDelete(`/compendio/confidenti/${encodeURIComponent(confidente)}/requisiti/${rango}/${indice}`);
-/** Colloca una Richiesta in un'area di un dedalo, o la toglie dall'area (null: resta nel dedalo, da collocare). */
-export const collocaRichiesta = (chiave: string, areaDedalo: string | null): Promise<RichiestaDto> => apiPut(`/compendio/richieste/${encodeURIComponent(chiave)}/area`, { areaDedalo });
 /** Elimina l'area del dedalo per tutte le partite: le voci con lei, le Richieste restano da collocare. */
 export const eliminaAreaDedalo = (chiave: string): Promise<void> => apiDelete(`/compendio/aree-dedalo/${encodeURIComponent(chiave)}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */

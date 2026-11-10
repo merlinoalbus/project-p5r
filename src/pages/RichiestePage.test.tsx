@@ -17,10 +17,10 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { getRichieste, impostaStat
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una richiesta di Mishima nel dedalo dato (bersaglio Nakanohara, debole al Tuono), senza stato; `extra` sovrascrive i campi. */
-const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, areaDedalo: null, areaDedaloNome: null, ricompense: ['485 PE'], confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, completamentoCondizioni: [], ...extra });
+const ric = (chiave: string, nome: string, areaChiave: string, areaNome: string, extra: Partial<RichiestaDto> = {}): RichiestaDto => ({ chiave, nome, committente: 'Mishima', areaChiave, piano: 'Area 1', bersaglio: { nome: 'Nakanohara', livello: null, formaDemoniaca: 'Obariyon', debolezze: ['Tuono'], resistenze: [], vulnerabileConfusione: true }, areaNome, areaOrdine: 1, areaDedalo: null, areaDedaloNome: null, confidente: null, note: '', fonte: 'https://www.allgamestaff.it/x', stato: null, condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, completamentoCondizioni: [], ...extra });
 const dati: RichiesteDto = {
   dedali: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', ordine: 0, totale: 1, completate: 0 }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', ordine: 1, totale: 1, completate: 0 }],
-  richieste: [ric('a', 'Un ex piuttosto appiccicoso', 'mementos-01-qimranut', 'Dedalo di Qimranut'), ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { confidente: { chiave: 'ryuji', nome: 'Ryuji', rango: 2 }, bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco'], resistenze: [], vulnerabileConfusione: false } })],
+  richieste: [ric('a', 'Un ex piuttosto appiccicoso', 'mementos-01-qimranut', 'Dedalo di Qimranut'), ric('b', 'Bullismo sui bulli', 'mementos-02-aiyatsbus', 'Dedalo di Aiyatsbus', { confidente: { chiave: 'ryuji', nome: 'Ryuji' }, bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco'], resistenze: [], vulnerabileConfusione: false } })],
   jose: { introduzione: 'Jose studia gli umani.', fiori: { descrizione: 'Valuta dei Mementos.' }, timbri: null, bossSegreto: null, scambi: [{ nome: 'Fiala', effetto: 'Vertigini', costo: 30, requisito: 'Aiyatsbus' }] }, completate: 0, totale: 2,
   collocazioni: [{ chiave: 'mementos-01-qimranut', nome: 'Dedalo di Qimranut', aree: [{ chiave: 'q-1', nome: 'Area 1' }] }, { chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', aree: [] }],
 };
@@ -33,7 +33,9 @@ describe('RichiestePage', () => {
     render(<MemoryRouter><RichiestePage /></MemoryRouter>);
     expect(await screen.findByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
     expect(getRichieste).toHaveBeenCalledWith(7);
-    expect(screen.getByText(/rango 2/)).toBeInTheDocument();
+    // L10-01: il Confidente senza rango
+    expect(screen.getByText('Ryuji')).toBeInTheDocument();
+    expect(screen.queryByText(/rango \d/)).toBeNull();
     expect(screen.queryByText('fonte')).toBeNull();
     // Jose sta in un foglio suo
     expect(screen.queryByRole('heading', { name: 'Jose: fiori, timbri e scambi' })).toBeNull();

@@ -14,9 +14,9 @@
 //
 // I Memento non hanno aree fisse: al posto della colonna delle aree c'è il pozzo disegnato, e la
 // colonna di destra sono le **aree del dedalo** (099, richiesta dell'utente del 2026-10-11) — ognuna
-// con i suoi elementi: voci della guida, Richieste e timbri — che fanno la percentuale; un'area è
-// completata quando lo sono tutti, il dedalo quando lo sono tutte. La pianta della guida non c'è: i
-// piani si generano.
+// con i suoi elementi: voci della guida e Richieste — che con i timbri del dedalo (L10-02) fanno la
+// percentuale; un'area è completata quando lo sono tutti, il dedalo quando lo sono tutte e i suoi timbri
+// sono tutti raccolti. La pianta della guida non c'è: i piani si generano.
 //
 // Qui la disposizione e lo stato dell'indirizzo; gli indirizzi della scheda stanno in `useNavigazionePalazzo`, i gesti di stato nella
 // partita in `useStatiPalazzo`, i moduli di modifica in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
@@ -67,6 +67,7 @@ import { dimenticaEntrata, indirizzoDiUscita, istantaneaPalazzo, leggiEntrata, l
 import { NoteStoricheOfferta, type EffettoNotaStorica } from '../components/catalogo/NoteStoricheOfferta';
 import { testoLivelloConsigliato } from '../utils/palazzi';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
+import { sommaTimbriDeiDedali } from '../utils/dedali';
 import { percentualeSegnati } from '../../shared/avanzamento';
 import type { AreaDungeonDto, AreaRiassuntoDto, PlanimetriaAreaDto } from '../types';
 import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDellArea';
@@ -131,6 +132,10 @@ export function DungeonDettaglioPage() {
   const memento = d?.tipo === 'mementos';
   // L4 (§4.3): le divergenze conservate «da verificare» del Palazzo nella partita; si chiedono solo quando la scheda dice che ce ne sono
   const quanteDaVerificare = !memento ? d?.daVerificare ?? 0 : 0;
+  // L10-02: la somma dei timbri dei dedali accanto al totale che la guida dichiara per i Memento, solo se le due cifre sono diverse
+  const sommaTimbri = memento ? sommaTimbriDeiDedali(d?.aree ?? []) : null;
+  const timbriDiscordanti = memento && d?.timbriDichiarati && sommaTimbri !== null && sommaTimbri !== d.timbriDichiarati.totale
+    ? { somma: sommaTimbri, dichiarati: d.timbriDichiarati.totale, fonte: d.timbriDichiarati.fonte } : null;
   const divergenze = useCarica(() => (partitaId && quanteDaVerificare > 0 ? getDivergenze(partitaId, chiave) : Promise.resolve([])), [partitaId, chiave, quanteDaVerificare]);
   const [daVerificare, setDaVerificare] = useState<DivergenzaDaVerificare | null>(null);
   const sezioneDaVerificare = useRef<HTMLDetailsElement>(null);
@@ -435,6 +440,13 @@ export function DungeonDettaglioPage() {
       <span className={`chip ${memento ? '' : 'hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
       {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
     </div>
+    {/* L10-02 (Q8 A): i totali dei dedali vengono ognuno dalla sua pagina della guida, e la loro somma non è il totale che la guida dichiara
+        per tutti i Memento: nulla si forza, la scheda lo dice una volta, qui, con le due cifre (solo se sono diverse) */}
+    {memento && timbriDiscordanti && (
+      <p className="m-0 basis-full testo-12 text-text-secondary text-pretty">
+        Timbri: i totali dei dedali, ognuno dalla sua pagina della guida, sommano {timbriDiscordanti.somma}; la guida ne dichiara {timbriDiscordanti.dichiarati} in tutto. Valgono i totali dei dedali. Fonte: {timbriDiscordanti.fonte}.
+      </p>
+    )}
     {/* nei Palazzi, da 1024 px, i «Dettagli dalla guida» stanno nella riga del titolo (R3-41): qui solo sotto i 1024 */}
     {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
   </>;

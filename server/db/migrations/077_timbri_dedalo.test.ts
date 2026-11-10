@@ -20,7 +20,8 @@ it('legge «20 Timbri totali» e lascia nullo ciò che la guida non dichiara', (
   expect(db.prepare("SELECT name FROM utente.sqlite_master WHERE type = 'table' AND name = 'timbri_dedalo_partita'").get()).toBeTruthy();
 });
 
-it('nel pacchetto i totali dei timbri sono per area e li imposta l\'utente (101): nessuno ancora; quello di sei dedali resta nella descrizione', () => {
+// L10-02 (migrazione 377): il totale è di nuovo del dedalo e la frase «N Timbri totali» esce dalle sei descrizioni
+it.skip('nel pacchetto i totali dei timbri sono per area e li imposta l\'utente (101): nessuno ancora; quello di sei dedali resta nella descrizione', () => {
   const db = dbDiProva();
   // la 099 aveva messo il totale del dedalo nell'Area 1; con le aree reali (101) si svuota: la guida non dice quanti per area
   expect(db.prepare("SELECT COUNT(*) FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE d.dungeon_chiave = 'mementos' AND ad.timbri_totale IS NOT NULL").pluck().get()).toBe(0);

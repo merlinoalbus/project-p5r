@@ -5,12 +5,13 @@
 // Progetto approvato dall'utente («Approvo»): ogni area ha quattro elementi — Timbri, Persona, Richieste, Trama — e ognuno sta in
 // un riquadro con la sua icona (`ui/sezione-<chiave>`, consegna di Codex del 2026-10-12; senza il
 // file, un segno disegnato qui), il nome, il conto e una nota breve.
+// L10-02: i timbri non sono più dell'area ma del dedalo (`TimbriDelDedalo`, nella scheda del dedalo): qui restano Persona, Richieste e Trama.
 // ============================================================
 
 import type { ReactNode } from 'react';
 import { AssetImg } from '../shared/AssetImg';
 
-export type ChiaveSezione = 'timbri' | 'persona' | 'richieste' | 'trama';
+export type ChiaveSezione = 'persona' | 'richieste' | 'trama';
 
 /** Il segno di riserva di una sezione, se l'icona di Codex non c'è: l'iniziale in un tondo. */
 function Riserva({ chiave }: { chiave: ChiaveSezione }) {

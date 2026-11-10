@@ -23,7 +23,7 @@ vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof i
 const richiesta: RichiestaDto = {
   chiave: 'bulli', nome: 'Bullismo sui bulli', committente: 'Mishima', areaChiave: 'aiy', piano: 'Area 3',
   bersaglio: { nome: 'Kazuo', livello: 10, formaDemoniaca: 'Ippon-Datara', debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento'], vulnerabileConfusione: false },
-  ricompense: ['485 PE', 'Pozione'], confidente: { chiave: 'ryuji', nome: 'Ryuji Sakamoto', rango: 2 }, areaNome: 'Dedalo di Aiyatsbus', areaOrdine: 1,
+  confidente: { chiave: 'ryuji', nome: 'Ryuji Sakamoto' }, areaNome: 'Dedalo di Aiyatsbus', areaOrdine: 1,
   areaDedalo: 'aiy-1', areaDedaloNome: 'Area 1', note: 'Facile.', fonte: '', stato: null,
   condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, completamentoCondizioni: [],
 };
@@ -54,13 +54,13 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
   const { onChiudi, onCambiata } = monta('bulli');
   expect(await screen.findByRole('dialog', { name: 'Modifica: Bullismo sui bulli' })).toBeInTheDocument();
   expect(campo('Nome')).toHaveValue('Bullismo sui bulli');
-  // debolezze e resistenze sono tessere con l'icona dell'elemento (accese se la voce nomina l'elemento da solo), le ricompense righe a campo
+  // debolezze e resistenze sono tessere con l'icona dell'elemento (accese se la voce nomina l'elemento da solo); le ricompense in testo
+  // non ci sono più (L10-01)
   const debolezze = within(screen.getByRole('group', { name: 'Debolezze' }));
   expect(debolezze.getByRole('button', { name: 'Fuoco' })).toHaveAttribute('aria-pressed', 'true');
   expect(debolezze.getByRole('button', { name: 'Ghiaccio' })).toHaveAttribute('aria-pressed', 'true');
   expect(debolezze.getByRole('button', { name: 'Vento' })).toHaveAttribute('aria-pressed', 'false');
-  expect(screen.getByRole('textbox', { name: 'Ricompense: voce 1' })).toHaveValue('485 PE');
-  expect(screen.getByRole('textbox', { name: 'Ricompense: voce 2' })).toHaveValue('Pozione');
+  expect(screen.queryByText(/Altre ricompense/)).toBeNull();
   expect(valoreSelettore('Dedalo')).toBe('Dedalo di Aiyatsbus');
   expect(valoreSelettore('Area del dedalo')).toBe('Area 1');
   expect(valoreSelettore('Confidente')).toBe('Ryuji Sakamoto');
@@ -70,16 +70,16 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
   // si accende «Sacro» fra le resistenze: il nome canonico si aggiunge in coda, «Vento» resta com'era
   fireEvent.click(within(screen.getByRole('group', { name: 'Resistenze' })).getByRole('button', { name: 'Sacro' }));
   fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '12' } });
-  // L13: il rango del Confidente rimasto nella colonna di prima entra fra le condizioni di sblocco (un dato in un solo punto)
-  expect(screen.getAllByTestId('condizioni')[0]).toHaveTextContent('1');
+  // L10-01: niente più rango accanto al Confidente: le condizioni sono solo quelle salvate
+  expect(screen.getAllByTestId('condizioni')[0]).toHaveTextContent('0');
   api.aggiornaRichiesta.mockResolvedValue(richiesta);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', {
     nome: 'Bullismo sui bulli', committente: 'Mishima', dedalo: 'aiy', areaDedalo: 'aiy-2', piano: 'Area 3',
     bersaglio: { nome: 'Kazuo', formaDemoniaca: 'Ippon-Datara', livello: 12, debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento', 'Sacro'], vulnerabileConfusione: false },
-    ricompense: ['485 PE', 'Pozione'], confidente: 'ryuji', confidenteRango: null, note: 'Facile.',
+    confidente: 'ryuji', note: 'Facile.',
     // L13: gli oggetti della ricompensa non cambiati non si mandano (il server non tocca le righe né le loro note)
-    condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 2 }], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null,
+    condizioni: [], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null,
     // O7-1: le condizioni proprie di completamento si mandano sempre (vuote = solo il Dedalo aperto)
     completamentoCondizioni: [],
   }));
@@ -99,7 +99,7 @@ it('cambiando dedalo l’area torna «da collocare»; senza dedalo non c’è ar
   scegliVoce('Confidente', 'Nessun Confidente');
   api.aggiornaRichiesta.mockResolvedValue(richiesta);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
-  await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({ dedalo: null, areaDedalo: null, confidente: null, confidenteRango: null })));
+  await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({ dedalo: null, areaDedalo: null, confidente: null })));
 });
 
 it('una nuova nasce nel dedalo e nell’area dati; senza nome o bersaglio, o con numeri sbagliati, non parte e lo dice', async () => {

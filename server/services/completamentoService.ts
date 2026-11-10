@@ -17,7 +17,7 @@ import { giorniDiGiocoFra } from '../../shared/date.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 import { registrazioniCompendio } from './fusione/fusioneService.js';
 import { fattiPartita } from './cruciverbaService.js';
-import { timbriPartita } from './timbriService.js';
+import { timbriRaccoltiInTutto } from './timbriService.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number;
   /** L13 (O7-4, migrazione 313): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
@@ -104,7 +104,7 @@ const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utent
  * le attività `videogioco` (lo stesso criterio del contatore `videogiochi-completati`, `disponibilitaService`), i Confidenti (tutti quelli del
  * DB, al rango massimo `RANGO_MASSIMO_CONFIDENTE`), le Richieste, le Persona del Compendio (`registrazioniCompendio`, la regola dello sconto
  * del Registro). Gli stati sono quelli che leggono le condizioni (`st`) o, dove le condizioni non li leggono, le letture dei servizi che li
- * tengono (cruciverba risolti `fattiPartita`, timbri `timbriPartita`). Null se il conteggio non si sa dire.
+ * tengono (cruciverba risolti `fattiPartita`, timbri `timbriRaccoltiInTutto`). Null se il conteggio non si sa dire.
  */
 export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibilita, partitaId: number): { fatti: number; obiettivo: number } | null {
   switch (c.tipo) {
@@ -137,7 +137,8 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
       return { fatti: r.registrate, obiettivo: r.totale };
     }
     case 'cruciverba-risolti': return { fatti: fattiPartita(partitaId).size, obiettivo: c.obiettivo };
-    case 'timbri-raccolti': return { fatti: [...timbriPartita(partitaId).values()].reduce((n, x) => n + x, 0), obiettivo: c.obiettivo };
+    // L10-02 (377): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 069)
+    case 'timbri-raccolti': return { fatti: timbriRaccoltiInTutto(partitaId), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {
       const fatti = !tabellaUtente('persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;

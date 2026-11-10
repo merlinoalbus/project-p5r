@@ -55,8 +55,8 @@ describe('Persona e Trama nei Memento', () => {
     const area = prima.dedalo.aree[0];
     const persone = prima.punti.filter((p) => p.tipo === 'persona' && p.areeDedalo.includes(area.chiave));
     const trama = prima.punti.filter((p) => p.tipo === 'trama' && p.areaDedalo === area.chiave);
-    // il totale è fatto di Trama, Richieste e timbri: le Persona non ci sono
-    expect(area.elementi.totale).toBe(trama.length + area.richieste.length + (area.timbri?.totale ?? 0));
+    // il totale dell'area è fatto di Trama e Richieste (L10-02, 377: i timbri sono del dedalo): le Persona non ci sono
+    expect(area.elementi.totale).toBe(trama.length + area.richieste.length);
     const anello = (await scheda(partita)).raccolta;
     const pixie = persone.find((p) => p.persona?.nome === 'Pixie')!;
     await request(app).put(`/api/partite/${partita}/compendio/${pixie.persona!.id}`).send({ registrata: true }).expect(200);

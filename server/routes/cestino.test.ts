@@ -168,7 +168,8 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     expect((prepared('SELECT contenuto FROM immagine WHERE ambito = ? AND chiave = ?').get('mappa', m.chiave) as { contenuto: Buffer }).contenuto.equals(contenuto)).toBe(true);
   });
 
-  it('un\'area di un dedalo dei Memento, con le voci, le Richieste che vi stavano e i timbri', async () => {
+  // L10-02 (377): i timbri sono del dedalo e non se ne vanno con un'area del dedalo
+  it('un\'area di un dedalo dei Memento, con le voci e le Richieste che vi stavano', async () => {
     const ad = prepared(`SELECT ad.chiave, ad.nome, ad.dedalo_chiave, (SELECT count(*) FROM punto_interesse p WHERE p.area_dedalo_chiave = ad.chiave) AS voci
       FROM area_dedalo ad ORDER BY voci DESC LIMIT 1`).get() as { chiave: string; nome: string; dedalo_chiave: string; voci: number };
     expect(ad.voci).toBeGreaterThan(0);
@@ -177,15 +178,12 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     expect(richiesta).toBeDefined();
     prepared('UPDATE richiesta SET area_dedalo_chiave = ? WHERE chiave = ?').run(ad.chiave, richiesta);
     segnaProgressi((prepared('SELECT chiave FROM punto_interesse WHERE area_dedalo_chiave = ?').all(ad.chiave) as Array<{ chiave: string }>).map((r) => r.chiave));
-    prepared('UPDATE area_dedalo SET timbri_totale = 3 WHERE chiave = ?').run(ad.chiave);
-    prepared('INSERT OR REPLACE INTO utente.timbri_dedalo_partita (partita_id, area_chiave, raccolti, updated_at) VALUES (?, ?, 2, ?)').run(PARTITA, ad.chiave, ADESSO);
     const prima = impronta();
 
     await request(app).delete(`/api/compendio/aree-dedalo/${encodeURIComponent(ad.chiave)}`).expect(204);
     expect(prepared('SELECT area_dedalo_chiave FROM richiesta WHERE chiave = ?').get(richiesta)).toEqual({ area_dedalo_chiave: null });
     const [v] = await cestino();
     expect(v).toMatchObject({ tipo: 'area-dedalo', chiave: ad.chiave, nome: ad.nome, partite: 'presente' });
-    expect(v.contenuto.find((c) => c.tabella === 'timbri_dedalo_partita')?.quante).toBe(1);
 
     expect((await ripristina(v.id)).saltate).toEqual([]);
     expect(diverse(prima, impronta())).toEqual([]);

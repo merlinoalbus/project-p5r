@@ -50,7 +50,8 @@ export function snapshotFonteProposta(db: AppDatabase, p: Pick<ChiaveProposta, '
     const [tipo, chiave] = separa(p.riga_chiave);
     if (tipo === 'articolo') fonte = articolo(chiave);
     else if (tipo === 'ricetta') fonte = scegli(ricetta(chiave), ['attrezzo', 'quantita', 'resa', 'prodotti']);
-    else if (tipo === 'richiesta') fonte = scegli(uno('SELECT * FROM richiesta WHERE chiave = ?', chiave), ['ricompense_json']);
+    // L10-01 (376): `ricompense_json` non c'è più; della Richiesta conta solo che ci sia, i premi sono i collegamenti
+    else if (tipo === 'richiesta') fonte = scegli(uno('SELECT * FROM richiesta WHERE chiave = ?', chiave), []);
     else if (tipo === 'domanda') fonte = scegli(uno('SELECT * FROM domanda WHERE chiave = ?', chiave), ['ricompensa']);
     else if (tipo === 'esame') fonte = scegli(uno('SELECT * FROM esame WHERE chiave = ?', chiave), ['chiave']);
     else if (tipo === 'confidente') fonte = scegli(uno('SELECT * FROM confidente WHERE chiave = ?', chiave), ['chiave']);
@@ -77,17 +78,18 @@ export function snapshotConVersioneSalvata(db: AppDatabase, p: ChiaveProposta): 
 
 /**
  * Uno snapshot salvato prima di L11 (R11-02/10) porta nella fonte la copia `nome_it`, che la colonna tolta non ha più: non è un cambiamento della
- * fonte. Si toglie dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata».
+ * fonte. Si toglie dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata». Lo stesso
+ * per `ricompense_json` di una Richiesta, tolta dalla 376 (L10-01): il testo è in archivio, i premi sono i collegamenti, che si confrontano.
  */
-function senzaNomeIt(salvato: unknown): unknown {
+const COLONNE_TOLTE_DALLE_FONTI = ['nome_it', 'ricompense_json'] as const;
+function senzaColonneTolte(salvato: unknown): unknown {
   const s = record(salvato), fonte = record(s.fonte);
-  if (!('nome_it' in fonte)) return salvato;
-  const { nome_it: _tolto, ...resto } = fonte;
-  return { ...s, fonte: resto };
+  if (!COLONNE_TOLTE_DALLE_FONTI.some((c) => c in fonte)) return salvato;
+  return { ...s, fonte: Object.fromEntries(Object.entries(fonte).filter(([k]) => !(COLONNE_TOLTE_DALLE_FONTI as readonly string[]).includes(k))) };
 }
 
 export function snapshotPropostaCoincide(db: AppDatabase, p: ChiaveProposta): boolean {
-  const salvato = senzaNomeIt(parse(p.fonte_snapshot_json));
+  const salvato = senzaColonneTolte(parse(p.fonte_snapshot_json));
   return versioneSnapshot(p) !== null && !record(salvato).invalida
     && isDeepStrictEqual(salvato, snapshotConVersioneSalvata(db, p));
 }

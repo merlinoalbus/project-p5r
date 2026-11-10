@@ -16,9 +16,11 @@
 //  - «Dove»: dedalo e area;
 //  - «Il bersaglio»: l'Ombra del compendio se c'è (livello e affinità si leggono da lì e il modulo li mostra: un dato in un solo punto; i
 //    campi propri restano salvati, non si azzerano, e valgono solo dove la scheda non sa), altrimenti i campi propri;
-//  - «Ricompense»: oggetti del catalogo con le copie, yen ed esperienza come numeri, il testo per quel che non è nel catalogo.
-// Il rango del Confidente che un tempo stava accanto al Confidente collegato è una condizione di sblocco: aprendo una Richiesta che lo ha
-// ancora, entra fra le condizioni (se non c'è già) e al salvataggio la colonna si svuota.
+//  - «Ricompense»: oggetti del catalogo con le copie, yen ed esperienza come numeri.
+// L10-01 (migrazione 376): il rango del Confidente (0/33) e le ricompense in testo (vuote in 33/33) non ci sono più: un rango richiesto è
+// una condizione di sblocco, una ricompensa è un oggetto del catalogo. L10-04: con l'Ombra scelta il nome del bersaglio è facoltativo
+// (vuoto vale il nome dell'Ombra) e non si copia mai dall'Ombra nel bersaglio salvato (rapporto E §1.5). L10-05: Scadenza e Proroga con
+// l'etichetta visibile; spiegazioni brevi e le parti facoltative vuote ripiegate, perché al telefono la finestra stia sotto 4,7 schermate.
 // ============================================================
 
 import { useState } from 'react';
@@ -33,7 +35,7 @@ import { Modal } from '../shared/Modal';
 import { PageState } from '../shared/PageState';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
-import { CampoTesto, SezioneCampi } from '../shared/Campo';
+import { Campo, CampoTesto, SezioneCampi } from '../shared/Campo';
 import { ElencoElementi } from '../shared/ElencoElementi';
 import { SceltaDaCatalogo } from '../shared/SceltaDaCatalogo';
 import { FinestraModifica } from '../shared/FinestraModifica';
@@ -41,7 +43,6 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { CondizioniEditor } from './CondizioniEditor';
 import { CampoQuantita } from './CampiEffettoVoce';
-import { CampoElenco } from './moduli/campi';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../types';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
@@ -58,28 +59,26 @@ const TERZO_SEMESTRE: RequisitoSpillo = { tipo: 'evento', evento: 'terzo-semestr
 interface Bozza {
   nome: string; committente: string; dedalo: string; areaDedalo: string; piano: string;
   bersaglio: string; formaDemoniaca: string; livello: string; debolezze: string[]; resistenze: string[]; confusione: boolean;
-  ricompense: string[]; confidente: string; note: string;
+  confidente: string; note: string;
   condizioni: RequisitoSpillo[]; scadenzaData: string; prorogaData: string; prorogaCondizioni: RequisitoSpillo[];
   ombra: string; yen: string; esperienza: string; oggetti: Array<{ chiave: string; quantita: number }>;
   /** O7-1: le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga ('' = resta dov'è). */
   completamento: RequisitoSpillo[]; prorogaArea: string;
 }
 
-/** La bozza di partenza: i campi della Richiesta, o vuoti (con dedalo e area dati) per una nuova. Il rango del Confidente rimasto nella
- *  colonna di prima entra fra le condizioni di sblocco (un dato in un solo punto). */
+/** La bozza di partenza: i campi della Richiesta, o vuoti (con dedalo e area dati) per una nuova. */
 function bozzaDa(r: RichiestaDto | null, iniziale: { dedalo?: string | null; areaDedalo?: string | null }): Bozza {
   const condizioni = normalizzaCondizioniSpillo(r?.condizioni ?? []);
-  const c = r?.confidente;
-  if (c?.rango && !condizioni.some((x) => x.tipo === 'confidente' && x.confidente === c.chiave)) condizioni.unshift({ tipo: 'confidente', confidente: c.chiave, rango: c.rango });
   // con un'Ombra del compendio il bersaglio della risposta mostra i valori della sua scheda: il modulo modifica i campi PROPRI salvati
-  // (`daOmbra.propri`), che restano e valgono dove la scheda non sa; mai i valori letti dall'Ombra, che si correggono nella sua scheda
+  // (`daOmbra.propri`), che restano e valgono dove la scheda non sa; mai i valori letti dall'Ombra, che si correggono nella sua scheda.
+  // L10-04: anche il nome: con l'Ombra il nome proprio può essere vuoto (la risposta mostra quello dell'Ombra) e resta vuoto qui
   const propri = r?.bersaglio.daOmbra?.propri ?? r?.bersaglio;
   return {
     nome: r?.nome ?? '', committente: r?.committente ?? '',
     dedalo: r ? r.areaChiave ?? NESSUNO : iniziale.dedalo ?? NESSUNO, areaDedalo: r ? r.areaDedalo ?? NESSUNO : iniziale.areaDedalo ?? NESSUNO, piano: r?.piano ?? '',
-    bersaglio: r?.bersaglio.nome ?? '', formaDemoniaca: r?.bersaglio.formaDemoniaca ?? '', livello: propri?.livello ? String(propri.livello) : '',
+    bersaglio: propri?.nome ?? '', formaDemoniaca: r?.bersaglio.formaDemoniaca ?? '', livello: propri?.livello ? String(propri.livello) : '',
     debolezze: [...(propri?.debolezze ?? [])], resistenze: [...(propri?.resistenze ?? [])], confusione: r?.bersaglio.vulnerabileConfusione ?? false,
-    ricompense: [...(r?.ricompense ?? [])], confidente: c?.chiave ?? NESSUNO, note: r?.note ?? '',
+    confidente: r?.confidente?.chiave ?? NESSUNO, note: r?.note ?? '',
     condizioni, scadenzaData: r?.scadenzaData ?? '', prorogaData: r?.proroga?.data ?? '', prorogaCondizioni: normalizzaCondizioniSpillo(r?.proroga?.condizioni ?? []),
     ombra: r?.ombra?.chiave ?? NESSUNO, yen: r?.yen ? String(r.yen) : '', esperienza: r?.esperienza ? String(r.esperienza) : '',
     oggetti: (r?.oggettiRicompensa ?? []).map((o) => ({ chiave: o.chiave, quantita: o.quantita ?? 1 })),
@@ -179,7 +178,8 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
   const ombra = ombre.find((o) => o.chiave === b.ombra) ?? null;
   const nomeOggetto = (k: string) => oggetti.find((o) => o.chiave === k)?.nome ?? k;
 
-  /** I dati da mandare, controllati: nome e bersaglio obbligatori, numeri nei loro limiti, la proroga solo con una scadenza. */
+  /** I dati da mandare, controllati: nome obbligatorio, bersaglio obbligatorio senza Ombra, numeri nei loro limiti, la proroga solo con
+   *  una scadenza. */
   const datiDaMandare = () => {
     if (!b.nome.trim()) throw new Error('Il nome della Richiesta è obbligatorio.');
     if (!b.bersaglio.trim() && !ombra) throw new Error('Il nome del bersaglio è obbligatorio (o scegli l’Ombra del compendio).');
@@ -187,10 +187,11 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
     return {
       nome: b.nome.trim(), committente: b.committente.trim(),
       dedalo: b.dedalo || null, areaDedalo: b.dedalo && b.areaDedalo ? b.areaDedalo : null, piano: b.piano.trim(),
-      // i campi propri si mandano sempre come sono: con l'Ombra non si azzerano (valgono dove la sua scheda non sa, e tornano se la si toglie)
-      bersaglio: { nome: (b.bersaglio.trim() || ombra?.nome) ?? '', formaDemoniaca: b.formaDemoniaca.trim(), livello: intero(b.livello, 1, 99, 'Livello del bersaglio'),
+      // i campi propri si mandano sempre come sono: con l'Ombra non si azzerano (valgono dove la sua scheda non sa, e tornano se la si toglie);
+      // L10-04: il nome resta quello scritto, anche vuoto con l'Ombra: il nome dell'Ombra non si copia nel bersaglio salvato
+      bersaglio: { nome: b.bersaglio.trim(), formaDemoniaca: b.formaDemoniaca.trim(), livello: intero(b.livello, 1, 99, 'Livello del bersaglio'),
         debolezze: voci(b.debolezze), resistenze: voci(b.resistenze), vulnerabileConfusione: b.confusione },
-      ricompense: voci(b.ricompense), confidente: b.confidente || null, confidenteRango: null, note: b.note.trim(),
+      confidente: b.confidente || null, note: b.note.trim(),
       condizioni: b.condizioni, scadenzaData: b.scadenzaData || null,
       // l'area della proroga solo se cambiata: una Richiesta salvata per altro non perde quella salvata (anche un'area nel cestino, che il
       // modulo non vede e torna valida col ripristino)
@@ -244,14 +245,21 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
       </SezioneCampi>
       <SezioneCampi titolo="Sblocco e scadenza">
         <div className="campo--largo flex min-w-0 flex-col gap-1">
-          <span className="testo-13 text-text-secondary">Quando si sblocca: tutte le condizioni vere (data, Confidente, Palazzo, Richiesta completata, «Sblocco ricevuto» da una voce del Diario…). Senza condizioni è disponibile da subito.</span>
+          <span className="testo-13 text-text-secondary">Si sblocca con tutte le condizioni vere; nessuna = disponibile da subito.</span>
           <CondizioniEditor condizioni={b.condizioni} onCambia={(c) => cambia({ condizioni: c })} disabilitato={occupato} massimo={20} />
         </div>
-        <SelettoreData etichetta="Scadenza" valore={b.scadenzaData} facoltativa onCambia={(v) => cambia({ scadenzaData: v, ...(v ? {} : { prorogaData: '' }) })} disabilitato={occupato} />
-        {b.scadenzaData && <SelettoreData etichetta="Proroga fino al" valore={b.prorogaData} facoltativa onCambia={(v) => cambia({ prorogaData: v, ...(v && !b.prorogaCondizioni.length ? { prorogaCondizioni: [TERZO_SEMESTRE] } : {}) })} disabilitato={occupato} />}
+        {/* L10-05 (rilievo P M4): l'etichetta visibile sopra giorno e mese; il nome resta anche al gruppo dei due selettori */}
+        <Campo etichetta="Scadenza" senzaGruppo>
+          <SelettoreData etichetta="Scadenza" valore={b.scadenzaData} facoltativa onCambia={(v) => cambia({ scadenzaData: v, ...(v ? {} : { prorogaData: '' }) })} disabilitato={occupato} />
+        </Campo>
+        {b.scadenzaData && (
+          <Campo etichetta="Proroga fino al" senzaGruppo>
+            <SelettoreData etichetta="Proroga fino al" valore={b.prorogaData} facoltativa onCambia={(v) => cambia({ prorogaData: v, ...(v && !b.prorogaCondizioni.length ? { prorogaCondizioni: [TERZO_SEMESTRE] } : {}) })} disabilitato={occupato} />
+          </Campo>
+        )}
         {b.scadenzaData && b.prorogaData && (
           <div className="campo--largo flex min-w-0 flex-col gap-1">
-            <span className="testo-13 text-text-secondary">La proroga vale solo con queste condizioni (per esempio «Terzo semestre avviato»).</span>
+            <span className="testo-13 text-text-secondary">La proroga vale solo con queste condizioni.</span>
             <CondizioniEditor condizioni={b.prorogaCondizioni} onCambia={(c) => cambia({ prorogaCondizioni: c })} disabilitato={occupato} massimo={20} />
           </div>
         )}
@@ -264,7 +272,7 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
       </SezioneCampi>
       <SezioneCampi titolo="Per completarla">
         <div className="campo--largo flex min-w-0 flex-col gap-1">
-          <span className="testo-13 text-text-secondary">Si completa col Dedalo del bersaglio aperto nella partita. Se serve altro (per esempio il Palazzo che apre la sua area), scrivilo qui.</span>
+          <span className="testo-13 text-text-secondary">Oltre al Dedalo del bersaglio aperto nella partita (nessuna = basta quello):</span>
           <CondizioniEditor condizioni={b.completamento} onCambia={(c) => cambia({ completamento: c })} disabilitato={occupato} massimo={20} />
         </div>
       </SezioneCampi>
@@ -277,7 +285,9 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
       <SezioneCampi titolo="Il bersaglio">
         <Selettore etichettaSopra etichetta="Ombra del compendio" valore={b.ombra} disabilitato={occupato} opzioni={[{ chiave: NESSUNO, nome: '— nessuna: campi propri —' }, ...ombre.map((o) => ({ chiave: o.chiave, nome: o.nome, dettaglio: o.livello ? `Liv. ${o.livello}` : undefined }))]}
           onCambia={(v) => cambia({ ombra: v })} />
-        <CampoTesto etichetta="Bersaglio (nome nella Richiesta)" obbligatorio={!ombra} valore={b.bersaglio} massimo={R.nome} onCambia={(v) => cambia({ bersaglio: v })} disabilitato={occupato} />
+        {/* L10-04: con l'Ombra il nome è facoltativo (vuoto vale il suo) */}
+        <CampoTesto etichetta="Bersaglio (nome nella Richiesta)" obbligatorio={!ombra} valore={b.bersaglio} massimo={R.nome} onCambia={(v) => cambia({ bersaglio: v })} disabilitato={occupato}
+          aiuto={ombra ? `Vuoto: vale «${ombra.nome}».` : undefined} />
         <CampoTesto etichetta="Forma demoniaca" valore={b.formaDemoniaca} massimo={R.voce} onCambia={(v) => cambia({ formaDemoniaca: v })} disabilitato={occupato} />
         <label className="touch campo--largo flex items-center gap-2 testo-13">
           <input type="checkbox" className="h-5 w-5" checked={b.confusione} disabled={occupato} onChange={(e) => cambia({ confusione: e.target.checked })} />Confusione utile (confondendolo dà yen)
@@ -304,8 +314,16 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
           </details>
         ) : <>
           <CampoTesto etichetta="Livello" tipo="numero" valore={b.livello} massimo={2} aiuto="Da 1 a 99; vuoto se non si sa." onCambia={(v) => cambia({ livello: v })} disabilitato={occupato} />
-          <ElencoElementi etichetta="Debolezze" valore={b.debolezze} maxVoci={R.voci} massimo={R.voce} onCambia={(v) => cambia({ debolezze: v })} disabilitato={occupato} />
-          <ElencoElementi etichetta="Resistenze" valore={b.resistenze} maxVoci={R.voci} massimo={R.voce} onCambia={(v) => cambia({ resistenze: v })} disabilitato={occupato} />
+          {/* L10-05: le venti tessere degli elementi (circa 540 px al telefono) in una piega che dice i valori scelti: si apre per cambiarli */}
+          <details className="campo--largo min-w-0">
+            <summary className="touch testo-13 text-text-secondary">
+              <span className="text-text-muted">Debolezze:</span> {voci(b.debolezze).join(', ') || 'nessuna'} · <span className="text-text-muted">Resistenze:</span> {voci(b.resistenze).join(', ') || 'nessuna'}
+            </summary>
+            <div className="flex min-w-0 flex-col gap-2 pt-2">
+              <ElencoElementi etichetta="Debolezze" valore={b.debolezze} maxVoci={R.voci} massimo={R.voce} onCambia={(v) => cambia({ debolezze: v })} disabilitato={occupato} />
+              <ElencoElementi etichetta="Resistenze" valore={b.resistenze} maxVoci={R.voci} massimo={R.voce} onCambia={(v) => cambia({ resistenze: v })} disabilitato={occupato} />
+            </div>
+          </details>
         </>}
       </SezioneCampi>
       <SezioneCampi titolo="Ricompense">
@@ -328,7 +346,6 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, ombre, o
         </div>
         <CampoTesto etichetta="Yen" tipo="numero" valore={b.yen} massimo={9} aiuto="Vuoto se la Richiesta non dà yen." onCambia={(v) => cambia({ yen: v })} disabilitato={occupato} />
         <CampoTesto etichetta="Esperienza (PE)" tipo="numero" valore={b.esperienza} massimo={6} aiuto="Vuoto se non si sa." onCambia={(v) => cambia({ esperienza: v })} disabilitato={occupato} />
-        <CampoElenco etichetta="Altre ricompense (testo, per ciò che non è nel catalogo)" voci={b.ricompense} max={R.voce} onCambia={(v) => cambia({ ricompense: v })} disabilitato={occupato} />
       </SezioneCampi>
     </FinestraModifica>
   );

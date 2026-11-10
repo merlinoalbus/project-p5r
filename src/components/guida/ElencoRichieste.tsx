@@ -6,23 +6,21 @@
 // lo stato `completata` della Richiesta nella partita, «—» nessuno stato. Correggere una Richiesta, aggiungerne una e spostarla
 // in un'altra area (o lasciarla da collocare) si fa solo in «Modifica la guida» (`ModuloRichiesta`, lo stesso della pagina delle
 // Richieste). Lo stesso elenco serve alle Richieste da collocare, che non contano finché non stanno in un'area.
+// L10-05: un solo punto per spostare una Richiesta, la sezione «Dove» del modulo (dedalo e area, anche da /guida/richieste e per una
+// Richiesta nuova): il selettore dell'area che stava su ogni riga, e la sua rotta, non ci sono più. «Modifica» apre il modulo.
 // ============================================================
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { collocaRichiesta, impostaStatoRichiesta } from '../../services/api';
+import { impostaStatoRichiesta } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { Selettore } from '../shared/Selettore';
 import { SegnoStato } from '../shared/SegnoStato';
 import type { RichiestaDelDedaloDto, StatoRichiesta } from '../../types';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
-
-/** La chiave che nel selettore dell'area di una Richiesta vale «nessuna area». */
-export const DA_COLLOCARE = '';
 
 /** I tre stati del comando, nell'ordine: nessuno, accettata, fatta. */
 const STATI: ReadonlyArray<{ stato: StatoRichiesta | null; etichetta: string; titolo: string }> = [
@@ -35,26 +33,19 @@ interface Props {
   richieste: RichiestaDelDedaloDto[];
   /** Il dedalo: il nome della Richiesta porta alla pagina delle Richieste filtrata su di lui. */
   dedalo: string;
-  /** L'area in cui stanno (o `DA_COLLOCARE`). */
-  area: string;
-  /** Le aree del dedalo, per spostare una Richiesta (in «Modifica la guida»). */
-  aree: ReadonlyArray<{ chiave: string; nome: string }>;
   partitaId: number | null;
   modifica: boolean;
   /** Lo stato di una Richiesta nella partita è cambiato (dalla risposta del server). */
   onRichiesta: (chiave: string, stato: StatoRichiesta | null) => void;
-  /** Apre il modulo della Richiesta. */
+  /** Apre il modulo della Richiesta (correzione, area e dedalo in «Dove»). */
   onModifica: (chiave: string) => void;
-  /** Rilegge la scheda (Richiesta spostata). */
-  onRicarica: () => Promise<void>;
 }
 
-/** L'elenco: per ogni Richiesta il nome, il comando a tre stati (con una partita) e, in «Modifica la guida», correzione e area. */
-export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modifica: modificaRichiesta, onRichiesta, onModifica, onRicarica }: Props) {
-  // L12 (passo 8): nel rilascio (sola lettura) le Richieste non si correggono né si spostano di area; lo stato (partita) si cambia come sempre
+/** L'elenco: per ogni Richiesta il nome, il comando a tre stati (con una partita) e, in «Modifica la guida», «Modifica». */
+export function ElencoRichieste({ richieste, dedalo, partitaId, modifica: modificaRichiesta, onRichiesta, onModifica }: Props) {
+  // L12 (passo 8): nel rilascio (sola lettura) le Richieste non si correggono; lo stato (partita) si cambia come sempre
   const modifica = !IN_RILASCIO && modificaRichiesta;
   const [occupata, setOccupata] = useState<string | null>(null);
-  const opzioniArea = [{ chiave: DA_COLLOCARE, nome: '— da collocare —' }, ...aree.map((a) => ({ chiave: a.chiave, nome: a.nome }))];
   /** Esegue un'operazione su una Richiesta tenendola occupata; l'errore va in notifica. */
   const esegui = async (k: string, fai: () => Promise<unknown>, errore: string) => {
     setOccupata(k);
@@ -103,15 +94,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
             </span>
           )}
           {!partitaId && r.stato === null && <span className="testo-12 text-text-muted">da fare</span>}
-          {modifica && (
-            <span className="flex basis-full flex-wrap items-center gap-1.5">
-              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={() => onModifica(r.chiave)} />
-              <span className="min-w-[180px]">
-                <Selettore compatto etichetta={`Area di ${r.nome}`} valore={area} opzioni={opzioniArea} disabilitato={occupata === r.chiave}
-                  onCambia={(k) => { if (k !== area) void esegui(r.chiave, async () => { await collocaRichiesta(r.chiave, k || null); await onRicarica(); notifica('success', k ? `«${r.nome}» in ${aree.find((a) => a.chiave === k)?.nome ?? 'un’altra area'}.` : `«${r.nome}» è da collocare.`); }, 'Richiesta non spostata.'); }} />
-              </span>
-            </span>
-          )}
+          {modifica && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={() => onModifica(r.chiave)} />}
         </li>
         );
       })}

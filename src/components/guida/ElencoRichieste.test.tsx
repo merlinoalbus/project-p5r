@@ -1,15 +1,15 @@
 /** @vitest-environment jsdom */
 // ============================================================
-// Test ElencoRichieste — il comando a tre stati (— / Accettata / Fatta) e, in «Modifica la guida», correzione e area
+// Test ElencoRichieste — il comando a tre stati (— / Accettata / Fatta) e, in «Modifica la guida», «Modifica» (L10-05: l'area si sceglie
+// solo nel modulo, sezione «Dove»)
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ElencoRichieste } from './ElencoRichieste';
-import { selettore } from '../../../test/selettore';
 import type { RichiestaDelDedaloDto } from '../../types';
 
-const api = vi.hoisted(() => ({ impostaStatoRichiesta: vi.fn(), collocaRichiesta: vi.fn() }));
+const api = vi.hoisted(() => ({ impostaStatoRichiesta: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
@@ -17,8 +17,8 @@ const richieste: RichiestaDelDedaloDto[] = [{ chiave: 'r1', nome: 'Un ex appicci
 
 /** Disegna l'elenco e restituisce i richiami. */
 function monta(partitaId: number | null = 4, modifica = false, elenco: RichiestaDelDedaloDto[] = richieste) {
-  const r = { onRichiesta: vi.fn(), onModifica: vi.fn(), onRicarica: vi.fn().mockResolvedValue(undefined) };
-  render(<MemoryRouter><ElencoRichieste richieste={elenco}dedalo="mementos-01-qimranut" area="q-1" aree={[{ chiave: 'q-1', nome: 'Banchina' }]} partitaId={partitaId} modifica={modifica} {...r} /></MemoryRouter>);
+  const r = { onRichiesta: vi.fn(), onModifica: vi.fn() };
+  render(<MemoryRouter><ElencoRichieste richieste={elenco} dedalo="mementos-01-qimranut" partitaId={partitaId} modifica={modifica} {...r} /></MemoryRouter>);
   return r;
 }
 
@@ -73,7 +73,7 @@ it('O7-1: col Dedalo del bersaglio chiuso «Fatta» è spento col perché, e le 
   expect(api.impostaStatoRichiesta).toHaveBeenCalledWith(4, 'r1', null);
 });
 
-it('senza partita niente stati; in «Modifica la guida» «Modifica» e l\'area', () => {
+it('senza partita niente stati; in «Modifica la guida» «Modifica», senza il selettore dell\'area (L10-05)', () => {
   monta(null);
   expect(screen.queryByRole('radiogroup')).toBeNull();
   expect(screen.queryByRole('button', { name: /^Modifica la Richiesta/ })).toBeNull();
@@ -81,5 +81,5 @@ it('senza partita niente stati; in «Modifica la guida» «Modifica» e l\'area'
   const { onModifica } = monta(4, true);
   fireEvent.click(screen.getByRole('button', { name: 'Modifica la Richiesta «Il treno fantasma»' }));
   expect(onModifica).toHaveBeenCalledWith('r2');
-  expect(selettore('Area di Un ex appiccicoso')).toBeInTheDocument();
+  expect(screen.queryByText('Area di Un ex appiccicoso')).toBeNull();
 });

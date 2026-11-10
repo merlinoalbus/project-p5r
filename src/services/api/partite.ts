@@ -162,8 +162,9 @@ export const getOggettiOttenuti = (id: number): Promise<OggettiOttenutiDto> => a
 /** Ondata 5 (lotto F-bis): annulla l'uso di un incenso in un Isolamento (la copia torna); risponde con gli oggetti ottenuti aggiornati. */
 export const annullaConsumoIsolamento = (id: number, consumoId: number): Promise<OggettiOttenutiDto> => apiDelete(`/partite/${id}/consumi/${consumoId}`);
 
-/** I timbri raccolti in un dedalo dei Memento (0 = azzera); 400 se la guida non ne dichiara il totale. */
-export const impostaTimbri = (id: number, area: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { area, raccolti });
+/** I timbri raccolti in un dedalo dei Memento (L10-02: `dedalo` è la chiave del dedalo; 0 = azzera); 400 `timbri-non-dichiarati` se il dedalo
+ *  non ha un totale, 400 `non-un-dedalo` per una chiave che non è un dedalo dei Memento. */
+export const impostaTimbri = (id: number, dedalo: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { dedalo, raccolti });
 
 /** Stato di un punto di interesse nella partita (null = riaperto). */
 export const impostaStatoPunto = (id: number, punto: string, stato: StatoPunto | null): Promise<PuntoInteresseDto> => apiPut(`/partite/${id}/punti`, { punto, stato });

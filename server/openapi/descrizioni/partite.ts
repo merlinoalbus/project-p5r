@@ -309,13 +309,13 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/richieste': {
     sommario: 'Stato di una Richiesta dei Memento',
-    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico. L13: «accettata» solo se lo stato calcolato è disponibile o da verificare (409 `richiesta-non-disponibile` con il motivo: bloccata, scaduta o già completata). L13 (ondata 7, O7-1): «completata» solo col bersaglio raggiungibile: il Dedalo dove sta oggi (quello della proroga, se passata la scadenza vi si è spostato) aperto nella partita (409 `dedalo-non-aperto`, col motivo) e nessuna condizione propria di completamento falsa (409 `richiesta-non-completabile`); le condizioni di sblocco non lo fermano, e toglierla da completata resta sempre possibile. Decisione 3: completandola, gli yen della Richiesta nascono come proposta «Applica» (`da_applicare` con causa `richiesta`) e i suoi oggetti del catalogo entrano fra gli oggetti ottenuti (`GET /api/partite/:id/oggetti-ottenuti`); togliendo il completamento la proposta aperta si chiude (quella applicata ha la sua inversa) e gli oggetti non ci sono più.',
+    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico. L13: «accettata» solo se lo stato calcolato è disponibile (409 `richiesta-non-disponibile` con il motivo: bloccata, scaduta o già completata). L13 (ondata 7, O7-1): «completata» solo col bersaglio raggiungibile: il Dedalo dove sta oggi (quello della proroga, se passata la scadenza vi si è spostato) aperto nella partita (409 `dedalo-non-aperto`, col motivo) e nessuna condizione propria di completamento falsa (409 `richiesta-non-completabile`); le condizioni di sblocco non lo fermano, e toglierla da completata resta sempre possibile. Decisione 3: completandola, gli yen della Richiesta nascono come proposta «Applica» (`da_applicare` con causa `richiesta`) e i suoi oggetti del catalogo entrano fra gli oggetti ottenuti (`GET /api/partite/:id/oggetti-ottenuti`); togliendo il completamento la proposta aperta si chiude (quella applicata ha la sua inversa) e gli oggetti non ci sono più.',
     risposta: '`RichiestaDto` con lo stato nella partita e `statoPartita` ricalcolato',
     errori: [PARTITA, [404, 'richiesta-non-trovata'], [409, 'richiesta-non-disponibile'], [409, 'dedalo-non-aperto'], [409, 'richiesta-non-completabile']],
   },
   'GET /api/partite/:id/richieste/riepilogo': {
     sommario: 'Riepilogo leggero delle Richieste della partita (per la Home)',
-    descrizione: 'L13: quante Richieste sono accettate (e non completate né scadute) e quante di quelle ancora da fare (accettate, disponibili o da verificare) scadono entro `giorniAvviso` giorni di gioco. Lo stesso stato calcolato di `GET /api/compendio/richieste?partita=…`, senza bersagli, ricompense, dedali né Jose. Sola lettura.',
+    descrizione: 'L13: quante Richieste sono accettate (e non completate né scadute) e quante di quelle ancora da fare (accettate o disponibili) scadono entro `giorniAvviso` giorni di gioco. Lo stesso stato calcolato di `GET /api/compendio/richieste?partita=…`, senza bersagli, ricompense, dedali né Jose. Sola lettura.',
     risposta: '`RiepilogoRichiesteDto`',
     errori: [PARTITA],
   },
@@ -332,10 +332,10 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     errori: [PARTITA, [404, 'consumo-non-trovato'], [409, 'consumo-di-un-turno']],
   },
   'PUT /api/partite/:id/timbri': {
-    sommario: 'Timbri raccolti in un\'area di un dedalo dei Memento',
-    descrizione: 'Imposta quanti timbri la partita ha raccolto nell\'area del dedalo `area` (099: i timbri sono un elemento delle aree; 0 azzera); il valore si ferma al totale dell\'area. Vale solo per le aree dei dedali che hanno timbri (400 altrimenti; 400 anche per la chiave di un dedalo o di un\'area di un Palazzo). Raggiungere il totale salendo registra l\'evento `timbri-dedalo` nello storico, ogni volta che accade.',
+    sommario: 'Timbri raccolti in un dedalo dei Memento',
+    descrizione: 'L10-02 (migrazione 377): imposta quanti timbri la partita ha raccolto nel dedalo `dedalo` (la chiave del dedalo; 0 azzera); il valore si ferma al totale del dedalo (`dungeon_area.timbri_totale`, la guida dà i timbri per dedalo). Vale solo per i dedali dei Memento che hanno un totale: 400 `timbri-non-dichiarati` col motivo per un dedalo senza (la guida non dà un numero), 400 `non-un-dedalo` per un\'area di un dedalo o un\'infiltrazione di un Palazzo, 400 `timbri-campo-dedalo` per il corpo di prima (`area` al posto di `dedalo`). Cambiare il totale del dedalo non tocca i raccolti salvati: la lettura li tiene entro il totale. Raggiungere il totale salendo registra l\'evento `timbri-dedalo` nello storico, ogni volta che accade.',
     risposta: '`TimbriDedaloDto`',
-    errori: [PARTITA, [404, 'area-dedalo-non-trovata'], [400, 'non-un-area-del-dedalo'], [400, 'timbri-non-validi'], [400, 'timbri-non-dichiarati']],
+    errori: [PARTITA, [404, 'dedalo-non-trovato'], [400, 'non-un-dedalo'], [400, 'timbri-non-validi'], [400, 'timbri-non-dichiarati'], [400, 'timbri-campo-dedalo']],
   },
   'PUT /api/partite/:id/punti': {
     sommario: 'Stato di un punto d\'interesse di un Palazzo',

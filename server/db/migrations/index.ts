@@ -445,6 +445,12 @@ import { migration373 } from './373_iweleth_tipi_e_lettera_di_shido.js';
 // 2026-11-10 (lotto L9): pin e voci collegati dove l'abbinamento è univoco (374), voci dei Palazzi non validati secondo la guida (375)
 import { migration374 } from './374_pin_e_voci_se_univoci.js';
 import { migration375 } from './375_voci_dei_palazzi_non_validati.js';
+// 2026-11-10 (lotto L10): via tre colonne vuote di Richieste e Ombre (376), i timbri per dedalo (377), il Palazzo per completare otto Richieste
+// secondo le pagine dei Dedali (378), Eligor nel Dedalo di Chemdah (379)
+import { migration376 } from './376_richieste_e_ombre_colonne_vuote_tolte.js';
+import { migration377 } from './377_timbri_per_dedalo.js';
+import { migration378 } from './378_requisiti_di_palazzo_delle_richieste.js';
+import { migration379 } from './379_eligor_nel_dedalo_di_chemdah.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -471,5 +477,5 @@ export const migrations: Migration[] = [
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
-  migration344, migration345, migration346, migration372, migration373, migration374, migration375,
+  migration344, migration345, migration346, migration372, migration373, migration374, migration375, migration376, migration377, migration378, migration379,
 ];

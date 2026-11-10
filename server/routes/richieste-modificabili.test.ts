@@ -37,20 +37,21 @@ describe('le Richieste modificabili', () => {
 
   it('ogni Richiesta del pacchetto si risalva com\'è (i tetti stanno sopra i dati veri)', async () => {
     for (const r of (await elenco()).richieste) {
+      // L10-01 (376): niente più ricompense in testo né rango del Confidente
       const corpo = { nome: r.nome, committente: r.committente, dedalo: r.areaChiave, areaDedalo: r.areaDedalo, piano: r.piano,
-        bersaglio: r.bersaglio, ricompense: r.ricompense, confidente: r.confidente?.chiave ?? null, confidenteRango: r.confidente?.rango ?? null, note: r.note };
+        bersaglio: r.bersaglio, confidente: r.confidente?.chiave ?? null, note: r.note };
       const risposta = await request(app).put(`/api/compendio/richieste/${r.chiave}`).send(corpo);
       expect(risposta.status, `${r.chiave}: ${JSON.stringify(risposta.body)}`).toBe(200);
-      const { dedalo: _d, confidenteRango: _c, ...campi } = corpo;
+      const { dedalo: _d, ...campi } = corpo;
       expect(risposta.body.data).toEqual({ ...r, ...campi, confidente: r.confidente, stato: null });
     }
   });
 
   it('si aggiunge in un\'area di un dedalo, o da collocare, o senza dedalo; la chiave nasce dal nome e resta; va in fondo', async () => {
     const area = `${QIMRANUT}-area-1`;
-    const nuova = (await request(app).post('/api/compendio/richieste').send({ nome: 'Il cartello capovolto', committente: 'Mishima', areaDedalo: area, bersaglio, ricompense: ['Perla', ''], confidente: 'mishima', confidenteRango: 3 }).expect(201)).body.data as RichiestaDto;
+    const nuova = (await request(app).post('/api/compendio/richieste').send({ nome: 'Il cartello capovolto', committente: 'Mishima', areaDedalo: area, bersaglio, confidente: 'mishima' }).expect(201)).body.data as RichiestaDto;
     expect(nuova).toMatchObject({ chiave: 'il-cartello-capovolto', areaChiave: QIMRANUT, area: 'Dedalo di Qimranut', areaDedalo: area, areaDedaloNome: 'Area 1',
-      bersaglio: { ...bersaglio, debolezze: ['Fuoco'] }, ricompense: ['Perla'], confidente: { chiave: 'mishima', rango: 3 } });
+      bersaglio: { ...bersaglio, debolezze: ['Fuoco'] }, confidente: { chiave: 'mishima' } });
     const ordini = (prepared('SELECT chiave, ordine FROM richiesta ORDER BY ordine DESC LIMIT 1').get() as { chiave: string }).chiave;
     expect(ordini).toBe('il-cartello-capovolto');
     // lo stesso nome (anche con altre maiuscole) no: i requisiti dei Confidenti citano per nome; uno diverso con lo stesso slug ha un'altra chiave
@@ -76,13 +77,12 @@ describe('le Richieste modificabili', () => {
     expect(collocazioni[0]).toEqual({ chiave: QIMRANUT, nome: 'Dedalo di Qimranut', aree: [{ chiave: area, nome: 'Area 1' }, { chiave: `${QIMRANUT}-area-2`, nome: 'Area 2' }] });
   });
 
-  it('si corregge: solo i campi mandati; cambiando dedalo resta da collocare nel nuovo e va in fondo; togliendo il Confidente va via il rango', async () => {
+  it('si corregge: solo i campi mandati; cambiando dedalo resta da collocare nel nuovo e va in fondo; il Confidente si toglie', async () => {
     const r = (await elenco()).richieste.find((x) => x.areaChiave === AIYATSBUS && x.confidente)!;
     const corretta = (await request(app).put(`/api/compendio/richieste/${r.chiave}`).send({ committente: 'Un altro', note: 'Note nuove' }).expect(200)).body.data as RichiestaDto;
     expect(corretta).toMatchObject({ chiave: r.chiave, nome: r.nome, committente: 'Un altro', note: 'Note nuove', bersaglio: r.bersaglio, areaDedalo: r.areaDedalo, confidente: r.confidente });
     const spostata = (await request(app).put(`/api/compendio/richieste/${r.chiave}`).send({ dedalo: QIMRANUT, confidente: null }).expect(200)).body.data as RichiestaDto;
     expect(spostata).toMatchObject({ areaChiave: QIMRANUT, area: 'Dedalo di Qimranut', areaDedalo: null, confidente: null });
-    expect(prepared('SELECT confidente_rango FROM richiesta WHERE chiave = ?').pluck().get(r.chiave)).toBeNull();
     expect(prepared('SELECT ordine FROM richiesta WHERE chiave = ?').pluck().get(r.chiave)).toBe(prepared('SELECT MAX(ordine) FROM richiesta').pluck().get());
     // con un'area la Richiesta passa nell'area; senza dedalo esce dai Memento
     expect((await request(app).put(`/api/compendio/richieste/${r.chiave}`).send({ areaDedalo: `${QIMRANUT}-area-1` }).expect(200)).body.data).toMatchObject({ areaDedalo: `${QIMRANUT}-area-1` });
@@ -90,7 +90,8 @@ describe('le Richieste modificabili', () => {
     expect((await request(app).put('/api/compendio/richieste/nessuna').send({ note: 'x' })).status).toBe(404);
   });
 
-  it('la prosa della guida sul dove («Dedalo di Aiyatsbus (Area 7) / …») resta finché il dedalo non cambia', async () => {
+  // la colonna `richiesta.area` non c'è più dalla 337 (L8-09) e la rotta `PUT /richieste/:chiave/area` dalla L10-05: cerca strutture tolte
+  it.skip('la prosa della guida sul dove («Dedalo di Aiyatsbus (Area 7) / …») resta finché il dedalo non cambia', async () => {
     const r = prepared("SELECT chiave, area FROM richiesta WHERE area LIKE 'Dedalo di Aiyatsbus (%'").get() as { chiave: string; area: string };
     const area = `${AIYATSBUS}-area-1`;
     expect((await request(app).put(`/api/compendio/richieste/${r.chiave}`).send({ note: 'altro', dedalo: AIYATSBUS }).expect(200)).body.data).toMatchObject({ area: r.area });
