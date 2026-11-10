@@ -76,14 +76,16 @@ export function esitiDellAttivita(chiave: string): { nome: string; esiti: EsitiA
 
 interface ArticoloEsito { chiave: string; nome: string; prezzo: number | null; prezzoPerFascia: PrezzoPerFascia | null; condizioni: RequisitoSpillo[] }
 /** L'articolo che fa tentare l'esito: il nome è quello del catalogo (la colonna `nome` dell'articolo può essere vuota), prezzo (con quello
- *  per fascia, Ondata 5 lotto E) e condizioni dal listino. */
+ *  per fascia, Ondata 5 lotto E) e condizioni: lo sblocco del negozio (L6-09, migrazione 386: la data d'apertura di un negozio sta lì, non
+ *  ripetuta sulle sue offerte) e poi quelle del listino. */
 function articoloEsito(chiave: string): ArticoloEsito | null {
   const perFascia = sqlPrezzoPerFascia('a');
   const a = prepared(catalogoOggettiDisponibile()
-    ? `SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?`
-    : `SELECT a.chiave, COALESCE(NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json FROM articolo a WHERE a.chiave = ?`)
-    .get(chiave) as { chiave: string; nome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; condizioni_json: string | null } | undefined;
-  return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(a.prezzo_per_fascia_json), condizioni: leggiCondizioniSalvate(a.condizioni_json) } : null;
+    ? `SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json, n.sblocco_json FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave LEFT JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?`
+    : `SELECT a.chiave, COALESCE(NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo, ${perFascia} AS prezzo_per_fascia_json, a.condizioni_json, n.sblocco_json FROM articolo a LEFT JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?`)
+    .get(chiave) as { chiave: string; nome: string; prezzo: number | null; prezzo_per_fascia_json: string | null; condizioni_json: string | null; sblocco_json: string | null } | undefined;
+  return a ? { chiave: a.chiave, nome: a.nome, prezzo: a.prezzo, prezzoPerFascia: normalizzaPrezzoPerFascia(a.prezzo_per_fascia_json),
+    condizioni: [...leggiCondizioniSalvate(a.sblocco_json), ...leggiCondizioniSalvate(a.condizioni_json)] } : null;
 }
 
 /** Ondata 5 (lotto G): il trofeo dell'esito con il suo nome; un trofeo tolto dall'elenco si dice tale (registrando il turno non si segna). */
