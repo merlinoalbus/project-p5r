@@ -300,9 +300,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   «Modificato» o «corretta da te», «Guida: …» sotto il campo corretto, il censimento delle condizioni), e i dati che servivano solo al
   ritorno alla guida sono tolti dalla migrazione 388, con archivio. `DELETE /api/catalogo/:tipo/:chiave` elimina solo le righe create
   dall'utente (luoghi e negozi vanno nel Cestino come prima): una riga della guida, corretta o no, si nasconde («Nascondi dagli
-  elenchi»). Restano il Cestino, «Importa», il ripristino dell'istanza, l'annullo delle spunte del Diario, lo «Storico e ripristino»
-  delle versioni delle Informazioni dei Confidenti, «Rimetti il precedente» di una voce da rivedere e il carattere di una voce dei
-  Palazzi che torna alla regola del tipo: non sono un ritorno al valore della guida.
+  elenchi»). Solo una riga della guida ha la copia della guida: un'offerta che non è della guida (creata dall'utente o da una
+  migrazione con origine utente) resta tale anche quando le si collega un oggetto, e quindi si elimina come ogni riga aggiunta; la migrazione 389 ha tolto
+  la copia scritta per errore a ogni offerta la cui copia era la fotografia di una riga con origine utente. Restano il Cestino,
+  «Importa», il ripristino dell'istanza, l'annullo delle spunte del Diario, lo «Storico e ripristino» delle versioni delle Informazioni
+  dei Confidenti, «Rimetti il precedente» di una voce da rivedere e il carattere di una voce dei Palazzi che torna alla regola del tipo:
+  non sono un ritorno al valore della guida.
 
 ## 7. Fusione
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).

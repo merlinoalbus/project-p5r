@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 388 migrazioni di gioco (l'ultima è la 388), 73 delle partite
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 389 migrazioni di gioco (l'ultima è la 389), 73 delle partite
 (l'ultima è la 073).
 
 ## Compendio e skill
