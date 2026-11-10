@@ -24,7 +24,6 @@ import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { tracciamentoPerTipo } from '../../shared/attivita.js';
-import { articoloDelListino, lettureListiniCondivisi, listinoDelNegozio } from './listiniCondivisi.js';
 import { catalogoOggettiDisponibile, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { conCestino } from './cestinoService.js';
@@ -36,6 +35,7 @@ import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAtti
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { verificaDomandaEsame } from './esamiCollegamento.js';
 import { normalizzaSconto } from '../../shared/scontiNegozi.js';
+import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaPuntoVendita, verificaNuovoPuntoVendita, verificaPuntoVenditaNascosto } from './invariantiPuntoVendita.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 // Dalla voce 5 (2026-09-12) il negozio non ha più `sblocco`, `fonte` e `condizioni_json` fra i campi
@@ -112,13 +112,6 @@ function riga(tipo: TipoCatalogo, chiave: string): Riga {
   const r = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE chiave = ?`).get(chiave) as Riga | undefined;
   if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${PROFILO[tipo].nomeTipo} '${chiave}' non esiste.`);
   return r;
-}
-
-/** Gli indirizzi storici aprono lo stesso punto di modifica, non una copia non più letta. */
-function chiaveCondivisa(tipo: TipoCatalogo, chiave: string): string {
-  if (tipo !== 'negozio' && tipo !== 'articolo') return chiave;
-  const l = lettureListiniCondivisi();
-  return tipo === 'negozio' ? listinoDelNegozio(chiave, l) : articoloDelListino(chiave, l);
 }
 
 /** Una riga come elemento del catalogo: i soli campi scrivibili del tipo (`CAMPI`, assenti come null), il titolo dalla
@@ -376,7 +369,7 @@ export function elencaTuttiNascosti(): ElementoCatalogoDto[] {
 
 /** Una riga qualunque del catalogo (anche del seed), per il modulo di modifica. */
 export function leggiElemento(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
-  return dto(tipo, riga(tipo, chiaveCondivisa(tipo, chiave)));
+  return dto(tipo, riga(tipo, chiave));
 }
 
 /** L'ordine da dare a una riga nuova: uno più del massimo, fra le righe dello stesso genitore dove l'ordine è relativo
@@ -445,9 +438,9 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
 
 function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
-  if (tipo === 'articolo' && typeof grezzi.negozio_chiave === 'string') grezzi = { ...grezzi, negozio_chiave: chiaveCondivisa('negozio', grezzi.negozio_chiave) };
   if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
+  if (tipo === 'negozio') verificaNuovoPuntoVendita(grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, null);
   if (tipo === 'domanda' && typeof dati.data === 'string' && typeof dati.tipo === 'string') verificaDomandaEsame(null, { data: dati.data, tipo: dati.tipo });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), dati);
@@ -502,11 +495,11 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
 
 function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
-  chiave = chiaveCondivisa(tipo, chiave);
-  if (tipo === 'articolo' && typeof grezzi.negozio_chiave === 'string') grezzi = { ...grezzi, negozio_chiave: chiaveCondivisa('negozio', grezzi.negozio_chiave) };
   const r = riga(tipo, chiave);
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
   verificaRiferimenti(tipo, grezzi, r);
+  if (tipo === 'negozio') verificaModificaPuntoVendita(r, grezzi);
+  if (tipo === 'luogo') verificaModificaLuogo(r, grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, r);
   if (tipo === 'domanda') verificaDomandaEsame({ id: Number(r.id), data: String(r.data), tipo: String(r.tipo) }, { data: String(dati.data ?? r.data), tipo: String(dati.tipo ?? r.tipo) });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...dati }, r);
@@ -538,8 +531,8 @@ function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, gr
 
 /** Nasconde (o rimostra) una riga: usato per le voci del seed che nel gioco non esistono. */
 export function nascondiElemento(tipo: TipoCatalogo, chiave: string, nascosta: boolean): ElementoCatalogoDto {
-  chiave = chiaveCondivisa(tipo, chiave);
   const r = riga(tipo, chiave);
+  if (tipo === 'negozio' && nascosta) verificaPuntoVenditaNascosto(r);
   const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(campiDisponibili(tipo).map((c) => [c, r[c] ?? null]))) : null);
   prepared(`UPDATE ${TABELLA[tipo]} SET nascosto = ?, seed_json = ?, updated_at = ? WHERE chiave = ?`).run(nascosta ? 1 : 0, seedJson, nowIso(), chiave);
   invalidaCacheDiGioco();
@@ -562,6 +555,7 @@ function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
 export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null } {
   const r = riga(tipo, chiave);
   if (r.origine === 'utente' && r.seed_json === null) {
+    if (tipo === 'luogo' || tipo === 'negozio') verificaEliminazioneDiVendita(tipo, chiave);
     // R10-23/3: l'eliminazione passa dal Cestino (si rimette dalla sezione Cestino), non è più una cancellazione a mano
     conCestino({ tipo, chiave, nome: dto(tipo, r).nome }, () => getDb().transaction(() => {
       // gli articoli di un negozio creato dall'utente se ne vanno con lui (chiave esterna a cascata)
@@ -586,7 +580,6 @@ export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): Elemento
 }
 
 function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
-  chiave = chiaveCondivisa(tipo, chiave);
   const r = riga(tipo, chiave);
   if (r.origine === 'utente' && r.seed_json === null) throw httpErrors.badRequest('creata-da-te', 'Questa riga l’hai creata tu: non c’è un valore della guida da rimettere. Per toglierla usa «Elimina».');
   let fotografia: unknown = null;
@@ -635,6 +628,8 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...valori }, r);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...valori }, r);
   verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);
+  if (tipo === 'negozio') verificaModificaPuntoVendita(r, valori);
+  if (tipo === 'luogo') verificaModificaLuogo(r, valori);
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
   const risultato = dto(tipo, riga(tipo, chiave));
   if (conservaFonteConfidente) risultato.avvisi = ['La fotografia precede il collegamento al Confidente: fonte, requisiti e campi operativi correnti sono stati conservati. Gli altri valori sono stati ripristinati.'];

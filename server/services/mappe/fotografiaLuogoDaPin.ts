@@ -17,7 +17,6 @@ export interface FotografiaLuogoDaPin {
   luoghi: Riga[];
   aree: Riga[];
   relazioni: { destinazioni: Riga[]; legamiVoci: Riga[]; voci: Riga[]; legamiImmagini: Riga[]; immagini: Riga[] };
-  sediPin: Riga[];
   riferimentiCandidata: Riga[];
   stati: Riga;
   cestino: Riga;
@@ -99,9 +98,7 @@ function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, qu
     if (t === 'area') return r.chiave === area;
     if (t === 'quartiere') return r.chiave === quartiere;
     if (t === 'spillo_voce' || t === 'spillo_immagine' || t === 'spillo_destinazione') return r.spillo_id === pin.id;
-    if (t === 'negozio_sede_spillo') return r.spillo_uid === pin.uid || r.luogo_chiave === chiave;
     if (t === 'negozio' || t === 'attivita') return r.sede_chiave === chiave;
-    if (t === 'negozio_luogo_extra') return r.luogo_chiave === chiave;
     return false;
   };
   if (principale) {
@@ -180,12 +177,9 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
     testo(l, 'chiave'); testo(l, 'nome'); testo(l, 'tipo');
     if (l.area_chiave !== null && !aree.some(a => a.chiave === l.area_chiave)) conflitto('Un luogo del quartiere ha una collocazione incoerente.');
   }
-  const sediPin = db.prepare('SELECT * FROM negozio_sede_spillo WHERE spillo_uid = ? ORDER BY spillo_uid').all(pin.uid) as Riga[];
-  if (sediPin.length) conflitto('Il pin ha già una sede commerciale strutturata: rivedila prima di creare un luogo.');
   const riferimentiCandidata = db.prepare(`SELECT 'spillo' AS tabella, uid AS identita FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = @chiave
     UNION ALL SELECT 'negozio', chiave FROM negozio WHERE sede_chiave = @chiave
     UNION ALL SELECT 'attivita', chiave FROM attivita WHERE sede_chiave = @chiave
-    UNION ALL SELECT 'negozio_luogo_extra', negozio_chiave FROM negozio_luogo_extra WHERE luogo_chiave = @chiave
     ORDER BY tabella, identita`).all({ chiave }) as Riga[];
   if (riferimentiCandidata.length) conflitto('La chiave prevista è già usata da collegamenti strutturati: nessuna identità viene assorbita.');
   const legamiVoci = db.prepare('SELECT * FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').all(id) as Riga[];
@@ -196,7 +190,7 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
   )) ORDER BY i.ambito, i.chiave, i.id`).all(id) as Riga[];
   const stati = fotografiaStati(db, pin);
   const cestino = fotografiaCestino(db, pin, areaChiave, quartiereChiave, chiave, nuovo.nome, new Set(legamiVoci.map(v => String(v.voce_chiave))));
-  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, sediPin, riferimentiCandidata, stati, cestino };
+  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, riferimentiCandidata, stati, cestino };
 }
 
 /** Formato dedicato: i booleani dei nuovi input e delle presenze non appartengono al vecchio hash v1/v2.

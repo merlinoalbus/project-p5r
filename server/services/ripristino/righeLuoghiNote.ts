@@ -1,23 +1,19 @@
 // ============================================================
-// righeLuoghiNote — posizioni di libri e film, sedi dei listini e legami delle note storiche, correggibili e ripristinabili (L11 · R11-17/1, gruppo «Luoghi e note»)
+// righeLuoghiNote — posizioni di libri e film e legami delle note storiche, correggibili e ripristinabili (L11 · R11-17/1, gruppo «Luoghi e note»)
 // ============================================================
 //
-// Quattro oggetti «a riga» del registro dei ripristini (`righe.ts`). Sono elenchi di righe figlie: l'oggetto è il padre (il libro, il film, il negozio,
-// la nota) e il valore della guida è la fotografia `seed_json` presa alla prima correzione, che sta in una tabella-fotografia propria con una riga per
-// padre (migrazione 227: `libro_posizione_foto`, `film_posizione_foto`, `negozio_sede_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un
-// `seed_json` per altro e un oggetto con zero righe non potrebbe tenere la propria fotografia sulle righe).
+// Tre oggetti «a riga» del registro dei ripristini (`righe.ts`). Sono elenchi di righe figlie: l'oggetto è il padre (il libro, il film, la nota) e il
+// valore della guida è la fotografia `seed_json` presa alla prima correzione, che sta in una tabella-fotografia propria con una riga per padre (migrazione
+// 227: `libro_posizione_foto`, `film_posizione_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un `seed_json` per altro e un oggetto con zero
+// righe non potrebbe tenere la propria fotografia sulle righe).
 //
 //   - `libro-posizioni` (`libro_posizione`) e `film-posizioni` (`film_posizione`): dove si ottiene un libro, dove si guarda un film. Ogni posizione è un
 //     «posto» (quartiere, luogo, negozio o attività, scelto per NOME), il nome da mostrare e, per i film, il ruolo (cinema, noleggio, visione). Le posizioni
 //     sono a posti numerati: il posto N è la riga con `ordine` N-1, così svuotare un posto non sposta gli altri e «Rimetti questo» di un posto è esatto.
 //     Si può aggiungere una posizione (posto libero) e toglierne una (posto «Nessuno»); la fotografia è l'elenco intero.
-//   - `negozio-sedi` (`negozio_luogo_extra` con `negozio_sede_spillo`): gli altri luoghi in cui un negozio vende lo stesso listino (i distributori) e, per
-//     ognuno, il pin che li conferma sulla mappa. Le sedi e i legami sono CHIAVI (dei luoghi, delle offerte, degli oggetti): i nomi servono solo a mostrarli,
-//     così rinominare un luogo o un oggetto non rende la fotografia diversa da ciò che è. La sede principale del negozio non sta qui (si corregge dal negozio). Il pin deve essere un pin DI QUESTO
-//     negozio sull'Area del luogo (è la condizione con cui i listini lo leggono, `listiniCondivisi`): l'elenco propone solo quelli, e un altro valore si rifiuta.
-//     Un pin è la sede di un solo luogo. Una sede con più pin si corregge dall'editor delle mappe.
 //   - `nota-storica-legami` (`nota_storica_legame`): le offerte e gli oggetti del catalogo a cui si riferisce una nota storica. Il testo della nota ha già il
-//     suo editor (`noteStoricheService`); qui si corregge dove compare.
+//     suo editor (`noteStoricheService`); qui si corregge dove compare. I legami sono CHIAVI: i nomi servono solo a mostrarli, così rinominare un oggetto non
+//     rende la fotografia diversa da ciò che è.
 // I lettori (pagine, listini, acquisti, condizioni, mappe) leggono le stesse tabelle: `correggi` e `ripristina` svuotano le copie in memoria.
 // ============================================================
 
@@ -240,183 +236,6 @@ const filmPosizioni = posizioniDef({
   titolo: nomeFilm, prefisso: 'Dove si vede',
 });
 
-// ---- Sedi dei listini ----
-
-const FOTO_SEDI = 'negozio_sede_foto';
-interface RigaSede { luogo: string; nome: string; quartiere: string; area: string | null }
-const sediDi = (negozio: string): RigaSede[] => prepared(
-  `SELECT e.luogo_chiave AS luogo, l.nome AS nome, q.nome AS quartiere, l.area_chiave AS area
-   FROM negozio_luogo_extra e JOIN luogo l ON l.chiave = e.luogo_chiave JOIN quartiere q ON q.chiave = l.quartiere_chiave
-   WHERE e.negozio_chiave = ? ORDER BY l.ordine, l.chiave`).all(negozio) as RigaSede[];
-const etichettaLuogo = (r: { nome: string; quartiere: string }): string => `${r.nome} — ${r.quartiere}`;
-
-const luogoEsiste = (chiave: string): boolean => !!prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(chiave);
-/** Il nome per mostrare un luogo («Nome — Quartiere»); se non esiste più, la chiave con la dicitura. */
-function nomeLuogo(chiave: string): string {
-  const r = prepared('SELECT l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ?').get(chiave) as { nome: string; quartiere: string } | undefined;
-  return r ? etichettaLuogo(r) : `${chiave} — luogo che non esiste più`;
-}
-
-/** I luoghi da scegliere come sede: il valore è la CHIAVE del luogo, il nome («Nome — Quartiere») serve solo a mostrarlo. Quelli non nascosti più gli indicati (anche spariti). */
-function luoghiScegliibili(inUso: string[]): Array<{ chiave: string; nome: string }> {
-  const righe = prepared(`SELECT l.chiave AS luogo, l.nome AS nome, q.nome AS quartiere, l.nascosto AS nascosto FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave ORDER BY q.ordine, l.ordine`)
-    .all() as Array<{ luogo: string; nome: string; quartiere: string; nascosto: number }>;
-  const out = righe.filter((r) => r.nascosto === 0 || inUso.includes(r.luogo)).map((r) => ({ chiave: r.luogo, nome: etichettaLuogo(r) }));
-  for (const k of inUso) if (!righe.some((r) => r.luogo === k)) out.push({ chiave: k, nome: nomeLuogo(k) });
-  return out;
-}
-/** Solo per leggere le fotografie scritte con le etichette: etichetta → chiave del luogo; null per le etichette ambigue (due luoghi con lo stesso nome nello stesso quartiere). */
-function mappaLuoghi(): Map<string, string | null> {
-  const m = new Map<string, string | null>();
-  for (const r of prepared('SELECT l.chiave AS luogo, l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave').all() as Array<{ luogo: string; nome: string; quartiere: string }>) {
-    const e = etichettaLuogo(r);
-    m.set(e, m.has(e) ? null : r.luogo);
-  }
-  return m;
-}
-
-interface RigaPin { uid: string; nome: string; mappa: string; area: string | null }
-/** I pin di questo negozio (con la mappa e l'Area), per scegliere quello che conferma una sede. */
-const pinDelNegozio = (negozio: string): RigaPin[] => prepared(
-  `SELECT s.uid AS uid, s.nome AS nome, m.nome AS mappa, m.area_chiave AS area FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave
-   WHERE s.riferimento_tipo = 'negozio' AND s.riferimento_chiave = ? AND s.uid IS NOT NULL ORDER BY m.nome, s.nome, s.id`).all(negozio) as RigaPin[];
-
-/** Le opzioni di pin per una sede: i pin del negozio sull'Area del luogo (più quelli indicati), con un numero dove il nome si ripete. */
-function opzioniPin(negozio: string, area: string | null, indicati: string[]): Array<{ chiave: string; nome: string }> {
-  const tutti = pinDelNegozio(negozio);
-  const scelti = tutti.filter((p) => (area !== null && p.area === area) || indicati.includes(p.uid));
-  const quanti = new Map<string, number>();
-  for (const p of scelti) quanti.set(`${p.nome} — ${p.mappa}`, (quanti.get(`${p.nome} — ${p.mappa}`) ?? 0) + 1);
-  const visti = new Map<string, number>();
-  const out: Array<{ chiave: string; nome: string }> = [{ chiave: '', nome: 'Nessun pin' }];
-  for (const p of scelti) {
-    const base = `${p.nome} — ${p.mappa}`;
-    const n = (visti.get(base) ?? 0) + 1; visti.set(base, n);
-    out.push({ chiave: p.uid, nome: (quanti.get(base) ?? 1) > 1 ? `${base} (${n} di ${quanti.get(base)})` : base });
-  }
-  for (const uid of indicati) if (uid !== '' && !out.some((o) => o.chiave === uid)) out.push({ chiave: uid, nome: 'Un pin che non è più di questo negozio' });
-  return out;
-}
-
-const pinDi = (negozio: string, luogo: string): string[] => prepared('SELECT spillo_uid FROM negozio_sede_spillo WHERE negozio_chiave = ? AND luogo_chiave = ? ORDER BY spillo_uid').pluck().all(negozio, luogo) as string[];
-const kPin = (luogo: string) => `pin/${luogo}`;
-const luogoDaPin = (percorso: string): string | null => (percorso.startsWith('pin/') ? percorso.slice(4) : null);
-const areaDelLuogo = (luogo: string): string | null => (prepared('SELECT area_chiave FROM luogo WHERE chiave = ?').pluck().get(luogo) as string | null | undefined) ?? null;
-
-/** I luoghi per cui mostrare il pin: le sedi di adesso e quelle della fotografia. */
-function luoghiConPin(negozio: string, seme: Valori | null): string[] {
-  const l = new Set(sediDi(negozio).map((s) => s.luogo));
-  if (seme) for (const k of Object.keys(seme)) { const x = luogoDaPin(k); if (x) l.add(x); }
-  return [...l];
-}
-
-/** La fotografia delle sedi tiene le CHIAVI dei luoghi. Una scritta con le etichette («Nome — Quartiere»), prima di questa forma, si porta alle chiavi (le etichette ambigue restano com'erano). */
-function normalizzaSedi(guida: Valori): Valori {
-  if (!Array.isArray(guida.sedi)) return guida;
-  const mappa = mappaLuoghi();
-  const posto = new Map((prepared('SELECT chiave FROM luogo ORDER BY ordine, chiave').pluck().all() as string[]).map((k, i) => [k, i]));
-  // nell'ordine con cui `sediDi` le legge (l'ordine delle sedi non è un dato: due elenchi con le stesse sedi sono lo stesso valore)
-  const sedi = (guida.sedi as string[]).map((e) => (typeof e !== 'string' || luogoEsiste(e) ? e : (mappa.get(e) ?? e)));
-  sedi.sort((a, b) => (posto.get(a) ?? Number.MAX_SAFE_INTEGER) - (posto.get(b) ?? Number.MAX_SAFE_INTEGER));
-  return { ...guida, sedi };
-}
-const semeSedi = (chiave: string): Valori | null => { const s = semeDi(FOTO_SEDI, 'negozio_chiave', chiave); return s ? normalizzaSedi(s) : null; };
-
-const negozioSedi: DefRiga = {
-  modalita: 'riga', etichetta: 'Sedi del listino', tabella: FOTO_SEDI, colonnaChiave: 'negozio_chiave',
-  chiavi: () => (prepared('SELECT chiave FROM negozio ORDER BY ordine').pluck().all() as string[]),
-  esiste: (chiave) => !!prepared('SELECT 1 FROM negozio WHERE chiave = ?').get(chiave),
-  normalizzaGuida: normalizzaSedi,
-  campi: (chiave) => {
-    const seme = semeSedi(chiave);
-    const sedi = sediDi(chiave);
-    const sediGuida = seme?.sedi;
-    const luoghiGuida = Array.isArray(sediGuida) ? sediGuida.filter((x): x is string => typeof x === 'string') : [];
-    const out: CampoDef[] = [{ p: 'sedi', e: 'Altri luoghi in cui si vende (oltre alla sede del negozio)', t: 'elenco', opzioni: luoghiScegliibili([...sedi.map((s) => s.luogo), ...luoghiGuida]) }];
-    for (const luogo of luoghiConPin(chiave, seme)) {
-      const r = prepared('SELECT l.nome AS nome, q.nome AS quartiere, l.area_chiave AS area FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ?').get(luogo) as { nome: string; quartiere: string; area: string | null } | undefined;
-      const indicati = [...pinDi(chiave, luogo), ...(typeof seme?.[kPin(luogo)] === 'string' ? [seme[kPin(luogo)] as string] : [])];
-      out.push({
-        p: kPin(luogo), e: 'Pin che conferma la sede', t: 'scelta', gruppo: `Sede: ${r ? etichettaLuogo(r) : 'un luogo che non esiste più'}`,
-        opzioni: opzioniPin(chiave, r?.area ?? null, indicati),
-      });
-    }
-    return out;
-  },
-  leggi: (chiave) => {
-    const v: Valori = { sedi: sediDi(chiave).map((s) => s.luogo) };
-    for (const luogo of luoghiConPin(chiave, semeSedi(chiave))) v[kPin(luogo)] = pinDi(chiave, luogo)[0] ?? '';
-    return v;
-  },
-  scrivi: (chiave, v) => {
-    assicuraFoto(FOTO_SEDI, 'negozio_chiave', chiave);
-    if (v.sedi !== undefined) {
-      const attuali = sediDi(chiave);
-      const volute = new Set(Array.isArray(v.sedi) ? v.sedi : []);
-      if ([...volute].some((k) => !luogoEsiste(k))) throw invalido('sedi', 'Una sede non è un luogo dell’elenco: scegline uno dai suggerimenti.');
-      for (const s of attuali) {
-        if (volute.has(s.luogo)) continue;
-        prepared('DELETE FROM negozio_sede_spillo WHERE negozio_chiave = ? AND luogo_chiave = ?').run(chiave, s.luogo);
-        prepared('DELETE FROM negozio_luogo_extra WHERE negozio_chiave = ? AND luogo_chiave = ?').run(chiave, s.luogo);
-      }
-      for (const luogo of volute) prepared('INSERT OR IGNORE INTO negozio_luogo_extra (negozio_chiave, luogo_chiave) VALUES (?, ?)').run(chiave, luogo);
-    }
-    const sedi = new Set(sediDi(chiave).map((s) => s.luogo));
-    for (const [k, valore] of Object.entries(v)) {
-      const luogo = luogoDaPin(k);
-      if (!luogo || !sedi.has(luogo)) continue; // il pin di una sede che non c'è più non ha dove stare
-      prepared('DELETE FROM negozio_sede_spillo WHERE negozio_chiave = ? AND luogo_chiave = ?').run(chiave, luogo);
-      const uid = str(valore) ?? '';
-      if (uid === '') continue;
-      // un pin è la sede di un solo luogo: se stava altrove nello stesso negozio (la stessa correzione lo sposta), si libera
-      prepared('DELETE FROM negozio_sede_spillo WHERE spillo_uid = ?').run(uid);
-      prepared('INSERT INTO negozio_sede_spillo (spillo_uid, negozio_chiave, luogo_chiave) VALUES (?, ?, ?)').run(uid, chiave, luogo);
-    }
-  },
-  nome: (chiave) => `Sedi del listino di «${(prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave}»`,
-  valida: (chiave, fusi) => {
-    const attuali = sediDi(chiave);
-    const scelti = Array.isArray(fusi.sedi) ? fusi.sedi : [];
-    const principale = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | null | undefined;
-    const volute: string[] = [];
-    for (const luogo of scelti) {
-      if (!luogoEsiste(luogo)) throw invalido('sedi', 'Una sede scelta non è un luogo dell’elenco: scegli dai suggerimenti.');
-      if (volute.includes(luogo)) throw invalido('sedi', `«${nomeLuogo(luogo)}» compare due volte.`);
-      if (luogo === principale) throw invalido('sedi', `«${nomeLuogo(luogo)}» è già la sede del negozio: qui vanno gli altri luoghi.`);
-      volute.push(luogo);
-    }
-    const prima = new Map(attuali.map((s) => [s.luogo, pinDi(chiave, s.luogo)]));
-    for (const [k, valore] of Object.entries(fusi)) {
-      const luogo = luogoDaPin(k);
-      if (!luogo || !volute.includes(luogo) || typeof valore !== 'string' || valore === '') continue;
-      const gia = prima.get(luogo) ?? [];
-      if (gia.length > 1 && valore !== gia[0]) throw httpErrors.conflict('piu-pin-per-sede', 'Questa sede ha più di un pin: si corregge dall’editor delle mappe.');
-      if (gia.length === 1 && gia[0] === valore) continue; // il pin che c'era non si ricontrolla
-      const p = pinDelNegozio(chiave).find((x) => x.uid === valore);
-      if (!p) throw invalido(k, 'Il pin scelto non è un pin di questo negozio.');
-      const area = areaDelLuogo(luogo);
-      if (area === null || p.area !== area) throw invalido(k, 'Il pin scelto non sta sull’Area di questo luogo: scegli un pin dell’elenco.');
-      for (const altro of volute) {
-        if (altro !== luogo && fusi[kPin(altro)] === valore) throw invalido(k, 'Lo stesso pin non può confermare due sedi.');
-      }
-      const usato = prepared('SELECT negozio_chiave AS negozio FROM negozio_sede_spillo WHERE spillo_uid = ?').get(valore) as { negozio: string } | undefined;
-      if (usato && usato.negozio !== chiave) throw httpErrors.conflict('pin-gia-sede', 'Quel pin conferma già la sede di un altro negozio.');
-    }
-  },
-  // la fotografia rimette luoghi e pin: i luoghi devono esistere (la sede è una chiave esterna) e i pin non devono confermare altro
-  verificaRipristino: (chiave, guida) => {
-    if (Array.isArray(guida.sedi)) {
-      for (const k of guida.sedi) if (!luogoEsiste(k)) throw httpErrors.conflict('sede-originale-mancante', 'Un luogo della guida non esiste più: non si può rimettere.');
-    }
-    for (const [k, valore] of Object.entries(guida)) {
-      if (!luogoDaPin(k) || typeof valore !== 'string' || valore === '') continue;
-      if (!prepared('SELECT 1 FROM spillo WHERE uid = ?').get(valore)) throw httpErrors.conflict('pin-originale-mancante', 'Un pin della guida non esiste più: non si può rimettere.');
-      const usato = prepared('SELECT negozio_chiave AS negozio FROM negozio_sede_spillo WHERE spillo_uid = ?').get(valore) as { negozio: string } | undefined;
-      if (usato && usato.negozio !== chiave) throw httpErrors.conflict('pin-gia-sede', 'Un pin della guida conferma adesso la sede di un altro negozio: non si può rimettere.');
-    }
-  },
-};
-
 // ---- Legami delle note storiche ----
 
 const FOTO_NOTE = 'nota_storica_legame_foto';
@@ -549,5 +368,5 @@ const notaStoricaLegami: DefRiga = {
 };
 
 export const DEFINIZIONI_LUOGHI_NOTE: {
-  'libro-posizioni': DefRiga; 'film-posizioni': DefRiga; 'negozio-sedi': DefRiga; 'nota-storica-legami': DefRiga;
-} = { 'libro-posizioni': libroPosizioni, 'film-posizioni': filmPosizioni, 'negozio-sedi': negozioSedi, 'nota-storica-legami': notaStoricaLegami };
+  'libro-posizioni': DefRiga; 'film-posizioni': DefRiga; 'nota-storica-legami': DefRiga;
+} = { 'libro-posizioni': libroPosizioni, 'film-posizioni': filmPosizioni, 'nota-storica-legami': notaStoricaLegami };

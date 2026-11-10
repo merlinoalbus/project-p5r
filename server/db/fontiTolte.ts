@@ -167,6 +167,30 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
   {
+    schema: 'main', tabella: 'negozio', colonna: 'listino_condiviso', tolta: 'L2 · migrazione 354',
+    sostituitaDa: 'le offerte proprie di ogni punto vendita: ogni macchina ha il suo listino e la sua scorta; i valori, se ce n’erano, restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'articolo', colonna: 'articolo_condiviso', tolta: 'L2 · migrazione 354',
+    sostituitaDa: 'l’offerta del punto vendita: ogni macchina ha la sua riga e la sua scorta; i valori, se ce n’erano, restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio_luogo_extra', colonna: null, tolta: 'L2 · migrazione 354',
+    sostituitaDa: 'la sede unica di ogni punto vendita (`negozio.sede_chiave`): una macchina in un altro posto è un punto vendita proprio; le righe restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio_sede_spillo', colonna: null, tolta: 'L2 · migrazione 354',
+    sostituitaDa: 'il riferimento del pin al suo punto vendita (`spillo.riferimento_chiave`), che ha una sede sola; le righe restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio_sede_foto', colonna: null, tolta: 'L2 · migrazione 354',
+    sostituitaDa: 'niente: era la copia di partenza delle sedi aggiuntive dei listini, che non esistono più; le righe restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'utente', tabella: 'registro_acquisti', colonna: 'sede_chiave', tolta: 'L2 · migrazione utente 68',
+    sostituitaDa: 'la sede del punto vendita dell’offerta comprata: la scorta è dell’offerta; un acquisto fatto in una sede aggiuntiva passa all’offerta della macchina che quella sede è diventata; i valori eventuali restano nel verbale «audit-utente-068-sede» e nella copia di avvio',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

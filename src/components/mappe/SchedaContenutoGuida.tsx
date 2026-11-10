@@ -35,7 +35,7 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
       onAcquistiCambiati={onCambiato}
       onRaccolto={(s, valore) => esegui(() => impostaSpilloRaccolto(partitaId!, s.id, valore))}
       onStatoPunto={(_s, voce, stato) => esegui(() => impostaStatoPunto(partitaId!, voce, stato))}
-      onAcquisto={(s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto, s.dettaglio?.negozio?.sedeChiave))} />
+      onAcquisto={(_s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto))} />
     {/* L12 (passo 8): nel rilascio (sola lettura) il contenuto della guida non si modifica */}
     {!IN_RILASCIO && <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={modifica ? 'Chiudi modifica' : 'Modifica contenuto'} disabled={occupato} onClick={() => setModifica(v => !v)} />}
     {!IN_RILASCIO && modifica && <EditorContenuto key={spillo.id} spillo={spillo} occupato={occupato} esegui={esegui} />}

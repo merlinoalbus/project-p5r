@@ -88,7 +88,7 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
   const conteggi = a ? [
     ['Immagini', a.contenuti.immagini], ['Voci collegate', a.contenuti.voci],
     ['Destinazioni entranti', a.contenuti.destinazioniEntranti], ['Atterraggi', a.contenuti.atterraggi],
-    ['Sedi', a.contenuti.sedi], ['Stati nelle partite', a.contenuti.stati],
+    ['Stati nelle partite', a.contenuti.stati],
     ['Divergenze', a.contenuti.divergenze], ['Stati per infiltrazione', a.contenuti.statiInfiltrazione],
     ['Condizioni che citano il pin', a.contenuti.condizioniRiferite],
   ] as const : [];

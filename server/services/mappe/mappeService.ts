@@ -21,6 +21,7 @@ import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { destinazioneDaRighe, destinazionePerPacchetto, leggiDestinazioneSpillo, righeDestinazioni, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare, type RigaDestinazione } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
+import { TIPO_MACCHINA } from '../../../shared/puntoVendita.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
@@ -47,6 +48,7 @@ import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImm
 import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { areaDisponibilePerPartita } from './disponibilitaAree.js';
 import { convertiManualiImportati } from '../condizioni/importazione.js';
+import { verificaPinDiVendita } from '../invariantiPuntoVendita.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
@@ -280,7 +282,7 @@ function percorsoDi(r: RigaMappa, aree: ContestoAree = contestoAree()): Array<{ 
  * lo stato della partita, luogo o attività con il negozio che vi ha sede, negozio, Confidente con immagine, richiesta con lo
  * stato. Null se manca il riferimento, se l'entità non esiste o se il tipo non ha un dettaglio.
  */
-function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, ctx: ContestoSpilli = {}, sedeScelta?: string): DettaglioSpilloDto | null {
+function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, ctx: ContestoSpilli = {}): DettaglioSpilloDto | null {
   if (!tipo || !chiave) return null;
   const partitaId = ctx.partitaId;
   switch (tipo) {
@@ -324,7 +326,9 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const luoghi = luoghiDi(ctx);
       const casa = casaDelLuogo(l.chiave);
       const sedi = luoghi.negozi.get(l.chiave) ?? [];
-      const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx, chiave) : null;
+      // un luogo con più macchine: il pin di luogo non dice quale, e la merce e la scorta della prima sarebbero un'attribuzione per ordine; le macchine stanno nella pagina del luogo
+      const piuMacchine = l.tipo === TIPO_MACCHINA && sedi.length > 1;
+      const negozio = sedi[0] && !piuMacchine ? negozioDettaglio(sedi[0].chiave, ctx) : null;
       const riga = luoghi.righe.get(l.chiave);
       const orari = orariDelLuogo(riga?.orari_json ?? null);
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre,
@@ -332,9 +336,9 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
         negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }
     case 'negozio': {
-      const n = negozioDettaglio(chiave, ctx, sedeScelta);
+      const n = negozioDettaglio(chiave, ctx);
       if (!n) return null;
-      const sede = sedeScelta ?? n.sedeChiave ?? null;
+      const sede = n.sedeChiave ?? null;
       return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#negozio-${encodeURIComponent(n.chiave)}` : null } };
     }
     case 'confidente': {
@@ -355,14 +359,14 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
 }
 
 /** Il negozio nella scheda di uno spillo: disponibilità e articoli (con «comprato» per la partita); null se il negozio non c'è più. */
-function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): NonNullable<DettaglioSpilloDto['negozio']> | null {
+function negozioDettaglio(chiave: string, ctx: ContestoSpilli): NonNullable<DettaglioSpilloDto['negozio']> | null {
   // lo stato della partita è già nel contesto della risposta: prima ogni pin di negozio lo ricalcolava da capo (rilievo P1);
   // gli acquisti si leggono alla prima occorrenza e restano per gli altri pin
   const partitaId = ctx.partitaId;
-  const contesto = { listini: luoghiDi(ctx).listini, ...(partitaId !== undefined && ctx.st ? { st: ctx.st, acquistati: (ctx.acquistati ??= acquistiDellaPartita(partitaId)) } : {}) };
+  const contesto = partitaId !== undefined && ctx.st ? { st: ctx.st, acquistati: (ctx.acquistati ??= acquistiDellaPartita(partitaId)) } : {};
   let n: ReturnType<typeof dettaglioNegozio>;
   try {
-    n = dettaglioNegozio(chiave, partitaId, contesto, sede);
+    n = dettaglioNegozio(chiave, partitaId, contesto);
   } catch (err) {
     // un pin che cita un negozio tolto resta un pin senza negozio; ogni altro errore (SQL, partita inesistente) deve vedersi
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
@@ -373,7 +377,7 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): N
       chiave: a.chiave, nome: a.nome, categoria: a.categoria, prezzo: a.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null,
       disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo,
       costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti,
-    // Ondata 5 (decisione 21): regola, scorta della sede del pin e acquisti per chiave, come nella pagina del negozio («Compra», «Annulla»)
+    // Ondata 5 (decisione 21): regola, scorta e acquisti per chiave, come nella pagina del negozio («Compra», «Annulla»)
     rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}), acquistiRegistrati: a.acquistiRegistrati ?? [],
     // revisione della chiusura dell'ondata 5 (B1): lo sconto che vale adesso (Clinica di Takemi), lo stesso importo che l'acquisto da qui scala
     ...(a.prezzoScontato ? { prezzoScontato: a.prezzoScontato } : {}) })) };
@@ -524,8 +528,8 @@ function identitaSpillo(s: { tipo: string; nome: string; x: number; y: number; r
 function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: DettaglioSpilloDto | null): DisponibilitaDto | undefined {
   // Non si guarda `dettaglio.tipo`: il pin può puntare al punto vendita (`riferimento_tipo = 'negozio'`, come i distributori e alcuni
   // negozi) oppure al luogo della sede (`'luogo'`), e in entrambi i casi `dettaglioRiferimento` mette il punto vendita in
-  // `dettaglio.negozio`: per un pin di negozio quello citato (con la sede del pin), per un pin di luogo il primo negozio che ha lì la
-  // sede. Cercandolo per tipo, la funzione non farebbe niente sui pin dell'altro genere — e passerebbe verde, perché non rompere non
+  // `dettaglio.negozio`: per un pin di negozio quello citato, per un pin di luogo il primo negozio che ha lì la
+  // sede (nessuno se il luogo ha più macchine e non si sa quale). Cercandolo per tipo, la funzione non farebbe niente sui pin dell'altro genere — e passerebbe verde, perché non rompere non
   // è funzionare.
   const negozio = dettaglio?.negozio?.disponibilita;
   return conDisponibilitaNegozio(esito, negozio);
@@ -540,7 +544,7 @@ type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione'
  */
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
   const lp = r.riferimento_tipo === 'luogo' || r.riferimento_tipo === 'negozio' || r.riferimento_tipo === 'attivita' ? luogoDelPin(r, luoghiDi(ctx)) : null;
-  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx, lp?.luogo.chiave);
+  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx);
   // le voci della guida del pin (098): le sue righe di `spillo_voce`, o il riferimento «punto» degli elementi senza mappa di prima
   const voci = vociDelPin(r.id).flatMap((chiave) => {
     const v = dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiave ? dettaglio.punto : (dettaglioRiferimento('punto', chiave, ctx)?.punto ?? null);
@@ -1282,6 +1286,7 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
   dati = applicaRegoleCategoria(dati.tipo, dati);
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
+  verificaPinDiVendita({ id: null, mappa: mappaChiave, tipo: dati.tipo, riferimento: dati.riferimento ?? null });
   verificaCondizioni(dati.condizioni, true);
   const destinazione = verificaDestinazioneSpillo(dati.destinazione);
   const adesso = nowIso();
@@ -1321,7 +1326,8 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
     // voci, immagini, destinazione, origine, nome e coordinate restano esattamente quelli letti.
     if (raccordo.areaLuogo !== undefined) applicaAreaRaccordoPin(getDb(), raccordo.riferimentoLuogo, raccordo.areaLuogo);
     if (r.riferimento_tipo !== 'luogo' || r.riferimento_chiave !== raccordo.riferimentoLuogo) {
-      const esito = prepared("UPDATE spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ?, updated_at = ? WHERE id = ? AND riferimento_tipo IS NULL AND riferimento_chiave IS NULL").run(raccordo.riferimentoLuogo, nowIso(), id);
+      verificaPinDiVendita({ id: r.id, mappa: r.mappa_chiave, tipo: r.tipo, riferimento: { tipo: 'luogo', chiave: raccordo.riferimentoLuogo } }, { mappa: r.mappa_chiave, tipo: r.tipo, riferimento: null });
+      const esito =prepared("UPDATE spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ?, updated_at = ? WHERE id = ? AND riferimento_tipo IS NULL AND riferimento_chiave IS NULL").run(raccordo.riferimentoLuogo, nowIso(), id);
       if (esito.changes !== 1) throw httpErrors.conflict('raccordo-precondizione-cambiata', 'Il riferimento è cambiato: nessuna parte del raccordo è stata applicata.');
     }
     if (raccordo.areaLuogo !== undefined) invalidaCacheDiGioco();
@@ -1354,6 +1360,9 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
   if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento, { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave });
+  const riferimentoPrima = r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave } : null;
+  verificaPinDiVendita({ id: r.id, mappa: dati.mappa ?? r.mappa_chiave, tipo: tipoFinale, riferimento: dati.riferimento === undefined ? riferimentoPrima : dati.riferimento },
+    { mappa: r.mappa_chiave, tipo: r.tipo, riferimento: riferimentoPrima });
   // lo stato di un altro pin vale solo per i pin di una mappa (una scheda della guida senza mappa no: 2026-10-03), e non può
   // far dipendere il pin da se stesso né chiudere un giro (scelta dell'utente)
   verificaCondizioni(dati.condizioni, r.mappa_chiave !== null);

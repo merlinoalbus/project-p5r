@@ -227,7 +227,7 @@ const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, 
 export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
   .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
 /** Ondata 5: `soloPresenza` (solo con `fatto: false`) toglie il segno «ottenuto» senza un giorno registrato, non un acquisto del registro. */
-export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional(), soloPresenza: z.literal(true).optional() })
+export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), soloPresenza: z.literal(true).optional() }).strict()
   .refine((b) => !(b.soloPresenza && b.fatto), { message: '`soloPresenza` vale solo per togliere un segno (`fatto: false`).', path: ['soloPresenza'] });
 export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
@@ -251,7 +251,7 @@ export const bodyRegalo = z.object({
 export const bodyRegala = z.object({
   confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600),
   bonusArcano: z.boolean().optional(), invito: z.boolean().optional(),
-  acquisto: z.object({ articolo: z.string().min(1).max(200), sede: z.string().min(1).max(300).optional() }).strict().optional(),
+  acquisto: z.object({ articolo: z.string().min(1).max(200) }).strict().optional(),
 }).strict();
 /** Ondata 5: `id` = la consegna precisa da annullare (lo stesso oggetto si può ridare); senza, l'ultima di quell'oggetto a quel Confidente. */
 export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600), id: z.number().int().positive().optional() }).strict();
@@ -262,8 +262,6 @@ export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });
 /** Ondata 5 (lotto F-bis): una riga del registro dei consumi della partita (l'uso di un incenso in un Isolamento, da annullare). */
 export const paramsPartitaConsumo = z.object({ id: idParam, consumoId: idParam });
-/** Ondata 5: la sede in cui si guarda l'articolo (listino condiviso), per restituirlo con la sua presenza e la sua scorta. */
-export const queryRigaAcquisto = z.object({ sede: z.string().min(1).max(300).optional() }).strict();
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
 

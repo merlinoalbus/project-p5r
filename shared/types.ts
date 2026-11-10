@@ -854,7 +854,7 @@ export interface RichiestaRegalo {
   catalogo: string;
   bonusArcano?: boolean;
   invito?: boolean;
-  acquisto?: { articolo: string; sede?: string };
+  acquisto?: { articolo: string };
 }
 
 /** L'esito di «Regala»: il Confidente aggiornato, i punti dati (0 dove non contano) e l'articolo segnato comprato (null se nessuno). */
@@ -1934,7 +1934,7 @@ export interface ArticoloDto {
   nomiAltri?: string[];
   nomeOriginale?: string | null;
   costoDaVerificare?: boolean;
-  /** Sede effettiva per acquistare da un listino condiviso, senza ereditare la presenza della sede principale. */
+  /** La sede del negozio che vende l'offerta; null senza sede. */
   sedeChiave?: string | null;
   catalogo?: RiferimentoOggettoDto | null;
   costo?: CostoOggettoDto | null;
@@ -1988,14 +1988,12 @@ export interface ScortaArticoloDto {
   /** Il negozio spedisce (Tanaka) e ha in viaggio un ordine di un giorno precedente: nessun nuovo ordine fino all'arrivo (`torna`). */
   ordineInViaggio?: boolean;
   /**
-   * Tutti gli acquisti registrati dell'offerta (e delle vecchie chiavi del suo listino condiviso), dal più vecchio; `nelCiclo` = contano nel
-   * ciclo in corso. Quelli della pagina del negozio si annullano uno per uno, qualunque sia il ciclo; quelli di una voce togliendone la spunta.
-   * `articolo`: la chiave con cui l'acquisto è segnato (`negozioNome` quando è una vecchia chiave del listino condiviso); `altraSede`: il
-   * luogo, quando l'acquisto è di un'altra sede dello stesso listino (ogni sede ha la sua scorta: qui non conta); `dopoLaData`: il giorno
-   * dell'acquisto viene dopo la data della partita (la data è tornata indietro) e non conta in nessun ciclo.
+   * Tutti gli acquisti registrati dell'offerta, dal più vecchio; `nelCiclo` = contano nel ciclo in corso. Quelli della pagina del negozio si
+   * annullano uno per uno, qualunque sia il ciclo; quelli di una voce togliendone la spunta. `articolo`: la chiave con cui l'acquisto è segnato;
+   * `dopoLaData`: il giorno dell'acquisto viene dopo la data della partita (la data è tornata indietro) e non conta in nessun ciclo.
    */
   righe: Array<{ id: number; articolo: string; giorno: string; fascia: 'giorno' | 'sera'; quantita: number; fonte: 'negozio' | 'voce'; voceUid: string | null; nelCiclo: boolean;
-    dopoLaData: boolean; altraSede?: string; negozioNome?: string }>;
+    dopoLaData: boolean }>;
   /** Le chiavi con il segno «ottenuto» che nessuna riga porta (segnate prima del registro, o senza una data di gioco): si tolgono con `soloPresenza`. */
   senzaGiorno: string[];
 }
@@ -3299,7 +3297,7 @@ export interface DettaglioSpilloDto {
     sconto?: NegozioRiassuntoDto['sconto'];
     /** L5: la sezione del negozio nella pagina della sede, o null. */
     sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; prezzoPerFascia?: PrezzoPerFascia | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[];
-      /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta della sede del pin e gli acquisti segnati sulle singole chiavi, come
+      /** Ondata 5 (decisione 21): la regola di rifornimento, la scorta e gli acquisti segnati sulle singole chiavi, come
        *  nella pagina del negozio (`ArticoloDto`): la mappa mostra lo stesso dato nello stesso modo («Compra», «rimasti N di Q», «Annulla»). */
       rifornimento?: ArticoloDto['rifornimento']; scorta?: ArticoloDto['scorta']; acquistiRegistrati?: ArticoloDto['acquistiRegistrati'];
       /** Revisione della chiusura dell'ondata 5 (B1): il prezzo con lo sconto del negozio che vale adesso nella partita, come nel listino. */
@@ -3929,6 +3927,10 @@ export interface OffertaOggettoDto {
   articolo: string;
   negozio: string;
   negozioNome: string;
+  /** Il tipo del punto vendita: il nome di una macchina (`distributore`) dice già dov'è, quello di un negozio no. */
+  negozioTipo: NegozioRiassuntoDto['tipo'];
+  /** Il quartiere del punto vendita, da cui si raggruppa «Dove si compra»; null senza sede. */
+  quartiereNome: string | null;
   sedeCasa: string | null;
   sedeChiave: string | null;
   sedeNome: string | null;
@@ -4106,7 +4108,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'negoziazione-variante', 'negoziazione-risposta', 'negoziazione-verdetto', 'negoziazione-umore',
   'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo',
   'oggetto-compendio', 'note-categorie-attivita', 'sinonimo-ricerca', 'abbreviazione-ricerca',
-  'libro-posizioni', 'film-posizioni', 'negozio-sedi', 'nota-storica-legami'] as const;
+  'libro-posizioni', 'film-posizioni', 'nota-storica-legami'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

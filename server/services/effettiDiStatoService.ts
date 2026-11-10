@@ -188,7 +188,7 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
   else if (e.tipo === 'cruciverba') impostaCruciverba(p, e.data, segna);
-  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, undefined, { ...(opz.st ? { st: opz.st } : {}), ...(opz.senzaDisponibilita ? { senzaDisponibilita: true } : {}),
+  else if (e.tipo === 'articolo') impostaAcquisto(p, e.articolo, segna, { ...(opz.st ? { st: opz.st } : {}), ...(opz.senzaDisponibilita ? { senzaDisponibilita: true } : {}),
     ...(voceUid && effettoUid ? { voce: { voceUid, effettoUid, ...(e.quantita ? { quantita: e.quantita } : {}) } } : {}) });
   else impostaStatoRichiesta(p, e.richiesta, segna ? 'completata' : (statoRichiesta as 'completata' | null));
 }

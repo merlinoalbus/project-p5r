@@ -119,14 +119,13 @@ export const impostaMeteoGiorno = (id: number, data: string, mod: { giorno?: Met
 export const getSuggerimenti = (id: number): Promise<SuggerimentiOggiDto> => apiGet(`/partite/${id}/suggerimenti`);
 
 /** Articolo acquistato/ottenuto (o riaperto) nella partita. */
-export const impostaAcquisto = (id: number, articolo: string, fatto: boolean, sede?: string | null): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto, ...(sede ? { sede } : {}) });
+export const impostaAcquisto = (id: number, articolo: string, fatto: boolean): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto });
 /** Ondata 5: toglie il segno «ottenuto» che nessun acquisto del registro porta (segnato prima del registro o senza una data di gioco). */
-export const togliSegnoSenzaGiorno = (id: number, articolo: string, sede?: string | null): Promise<ArticoloDto> =>
-  apiPut(`/partite/${id}/acquisti`, { articolo, fatto: false, soloPresenza: true, ...(sede ? { sede } : {}) });
-/** Ondata 5: annulla un solo acquisto della pagina del negozio (una riga del registro della partita); restituisce l'articolo aggiornato nella
- *  sede in cui lo si guarda (`sede`, per un listino condiviso: presenza, orari e scorta di quel luogo). */
-export const annullaRigaAcquisto = (id: number, rigaId: number, sede?: string | null): Promise<ArticoloDto> =>
-  apiDelete(`/partite/${id}/registro-acquisti/${rigaId}${queryString({ sede })}`);
+export const togliSegnoSenzaGiorno = (id: number, articolo: string): Promise<ArticoloDto> =>
+  apiPut(`/partite/${id}/acquisti`, { articolo, fatto: false, soloPresenza: true });
+/** Ondata 5: annulla un solo acquisto della pagina del negozio (una riga del registro della partita); restituisce l'articolo aggiornato. */
+export const annullaRigaAcquisto = (id: number, rigaId: number): Promise<ArticoloDto> =>
+  apiDelete(`/partite/${id}/registro-acquisti/${rigaId}`);
 
 /** Cruciverba risolto (o riaperto) nella partita. */
 export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto }, senzaRipetizione);

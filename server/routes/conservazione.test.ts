@@ -30,6 +30,8 @@ describe('Conservazione catalogo e spunte', () => {
     expect(dopo.articoli).toBe(n.articoli - 1);
     expect(dopo.articoliElenco.some((x: { chiave: string }) => x.chiave === a)).toBe(false);
     expect((await request(app).get(`/api/catalogo/articolo/${encodeURIComponent(a)}`)).status).toBe(200);
+    // l'unico punto vendita di un luogo si nasconde solo se il luogo dichiara l'attesa (I4, `shared/puntoVendita.ts`)
+    await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`).send({ note: 'In attesa: prova' });
     await request(app).put('/api/catalogo/negozio/untouchable/nascosta').send({ nascosta: true });
     expect((await request(app).get('/api/compendio/negozi/untouchable')).status).toBe(404);
     const ricerca = (await request(app).get('/api/compendio/articoli?q=Untouchable')).body.data;
@@ -37,7 +39,7 @@ describe('Conservazione catalogo e spunte', () => {
   });
 
   it('nomi massimi duplicati producono chiavi distinte e terminano', async () => {
-    const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'n'.repeat(160) })).body.data;
+    const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'n'.repeat(160), sede_chiave: 'shibuya/untouchable' })).body.data;
     const body = { nome: 'a'.repeat(160), negozio_chiave: n.chiave };
     const a = await request(app).post('/api/catalogo/articolo').send(body);
     const b = await request(app).post('/api/catalogo/articolo').send(body);

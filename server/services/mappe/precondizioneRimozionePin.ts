@@ -51,7 +51,6 @@ export function fotografiaRimozionePin(db: AppDatabase, id: number): {
   const atterraggi = leggi(db, 'main', 'dungeon_atterraggio', 'spillo_id=?', [id]);
   const voci = leggi(db, 'main', 'spillo_voce', 'spillo_id=?', [id]);
   const punti = leggi(db, 'main', 'punto_interesse', "chiave IN (SELECT voce_chiave FROM main.spillo_voce WHERE spillo_id=?) OR (?='punto' AND chiave=?)", [id, pin.riferimento_tipo, pin.riferimento_chiave]);
-  const sedi = leggi(db, 'main', 'negozio_sede_spillo', 'spillo_uid=?', [pin.uid]);
   const immagini = leggi(db, 'main', 'spillo_immagine', 'spillo_id=?', [id]);
   const sorgenti = leggi(db, 'main', 'immagine', "EXISTS (SELECT 1 FROM main.spillo_immagine si WHERE si.spillo_id=? AND ((immagine.ambito='spillo' AND immagine.chiave=si.immagine_chiave) OR si.asset=immagine.ambito||'/'||immagine.chiave))", [id]);
   const miniature = leggi(db, 'main', 'immagine_miniatura', "immagine_id IN (SELECT i.id FROM main.immagine i JOIN main.spillo_immagine si ON si.spillo_id=? AND ((i.ambito='spillo' AND i.chiave=si.immagine_chiave) OR si.asset=i.ambito||'/'||i.chiave))", [id]);
@@ -90,10 +89,10 @@ export function fotografiaRimozionePin(db: AppDatabase, id: number): {
     partite: db.prepare('SELECT id FROM utente.partita ORDER BY id').all(), puntiPartita: leggi(db, 'utente', 'punto_partita'),
     pinPartita: leggi(db, 'utente', 'spillo_partita'), divergenze: leggi(db, 'utente', 'divergenza_partita'), infiltrazioni: leggi(db, 'utente', 'spillo_partita_infiltrazione'),
   } : null;
-  const revisioneRimozioneAttesa = createHash('sha256').update(canonico({ versione: 1, pin, mappa, area, guida, percorso, destinazioni, atterraggi, voci, punti, sedi, immagini, sorgenti, miniature, riferimentiImmagini, condizioni, stati, divergenze, infiltrazioni, modello, cestino })).digest('hex');
+  const revisioneRimozioneAttesa = createHash('sha256').update(canonico({ versione: 1, pin, mappa, area, guida, percorso, destinazioni, atterraggi, voci, punti, immagini, sorgenti, miniature, riferimentiImmagini, condizioni, stati, divergenze, infiltrazioni, modello, cestino })).digest('hex');
   return { pin, immaginiCondivise, contesto: typeof pin.mappa_chiave === 'string' ? nomePercorso(pin.mappa_chiave, db) : String(guida.righe[0]?.nome ?? ''), dto: {
     spillo: { id, uid: pin.uid, nome: pin.nome, mappa: m && typeof pin.mappa_chiave === 'string' ? { chiave: chiaveMappa(pin.mappa_chiave, db), nome: String(m.nome) } : null, areaGuida: typeof pin.area_guida_chiave === 'string' ? pin.area_guida_chiave : null },
-    contenuti: { immagini: immagini.righe.length, voci: punti.righe.length, destinazioniEntranti: destinazioni.righe.filter(d => d.spillo_arrivo_id === id).length, atterraggi: atterraggi.righe.length, sedi: sedi.righe.length,
+    contenuti: { immagini: immagini.righe.length, voci: punti.righe.length, destinazioniEntranti: destinazioni.righe.filter(d => d.spillo_arrivo_id === id).length, atterraggi: atterraggi.righe.length,
       stati: stati.righe.length, divergenze: divergenze.righe.length, statiInfiltrazione: infiltrazioni.righe.length, condizioniRiferite: condizioni.righe.length, riallineamento }, revisioneRimozioneAttesa,
   } };
 }

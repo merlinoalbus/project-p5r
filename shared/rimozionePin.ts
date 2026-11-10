@@ -3,7 +3,7 @@ export interface RichiestaRimozionePin { spilloUid: string; revisioneRimozioneAt
 export interface PrecondizioneRimozionePinDto {
   spillo: { id: number; uid: string; nome: string; mappa: { chiave: string; nome: string } | null; areaGuida: string | null };
   contenuti: {
-    immagini: number; voci: number; destinazioniEntranti: number; atterraggi: number; sedi: number;
+    immagini: number; voci: number; destinazioniEntranti: number; atterraggi: number;
     stati: number; divergenze: number; statiInfiltrazione: number; condizioniRiferite: number; riallineamento: boolean;
   };
   revisioneRimozioneAttesa: string;

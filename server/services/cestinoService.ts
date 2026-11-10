@@ -111,6 +111,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   ricompensa_oggetto: ['ricompensa collegata', 'ricompense collegate'], ricetta_materiale: ['materiale collegato', 'materiali collegati'],
   proposta_abbinamento: ['proposta di abbinamento', 'proposte di abbinamento'],
   negozio_luogo_extra: ['sede del listino', 'sedi del listino'], negozio_sede_spillo: ['sede confermata di un pin', 'sedi confermate dei pin'],
+  negozio_sede_foto: ['copia di partenza delle sedi di un listino', 'copie di partenza delle sedi dei listini'],
   dungeon_area: ['infiltrazione', 'infiltrazioni'], punto_interesse: ['voce della guida', 'voci della guida'],
   marcatore_mappa: ['segnaposto di una voce', 'segnaposto delle voci'], spillo: ['pin', 'pin'], spillo_voce: ['collegamento pin-voce', 'collegamenti pin-voce'],
   spillo_immagine: ['schermata di un pin', 'schermate dei pin'], spillo_destinazione: ['destinazione di un pin', 'destinazioni dei pin'],

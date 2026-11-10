@@ -62,6 +62,8 @@ describe('API catalogo (Fase 16.1)', () => {
     ricaricaPacchetto(initDb());
     expect((prepared('SELECT nome FROM negozio WHERE chiave = ?').get('untouchable') as { nome: string }).nome).toBe('Untouchable (armeria di Iwai)');
 
+    // l'unico punto vendita di un luogo si nasconde solo se il luogo dichiara l'attesa (I4, `shared/puntoVendita.ts`)
+    await request(app).put(`/api/catalogo/luogo/${encodeURIComponent('shibuya/untouchable')}`).send({ note: 'In attesa: prova' });
     const nascosto = (await request(app).put('/api/catalogo/negozio/untouchable/nascosta').send({ nascosta: true })).body.data as ElementoCatalogoDto;
     expect(nascosto.nascosta).toBe(true);
 
@@ -85,7 +87,7 @@ describe('API catalogo (Fase 16.1)', () => {
   });
 
   it('elimina davvero una riga creata dall’utente, con i suoi articoli', async () => {
-    const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Bancarella di prova' })).body.data as ElementoCatalogoDto;
+    const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Bancarella di prova', sede_chiave: 'shibuya/untouchable' })).body.data as ElementoCatalogoDto;
     const a = (await request(app).post('/api/catalogo/articolo').send({ negozio_chiave: n.chiave, nome: 'Oggetto di prova' })).body.data as ElementoCatalogoDto;
     expect((await request(app).delete(`/api/catalogo/negozio/${n.chiave}`)).body.data).toMatchObject({ esito: 'eliminata' });
     expect((await request(app).get(`/api/catalogo/negozio/${n.chiave}`)).status).toBe(404);

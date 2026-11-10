@@ -26,7 +26,6 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { articoloDelListino, lettureListiniCondivisi } from './listiniCondivisi.js';
 import type { CopieOggettoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti, type DonoConfidenteOttenuto } from './doniConfidenti.js';
 
@@ -64,7 +63,6 @@ export interface DettaglioCopie { comprate: number; ricevute: number; regalate: 
  *  della partita già letti da chi chiama per molti oggetti (`doniConfidentiOttenuti(partitaId)`, revisione di O11-1: una sola valutazione per
  *  elenco); senza, si leggono i soli doni di questo oggetto. */
 export function dettaglioCopie(partitaId: number, catalogo: string, doni?: readonly DonoConfidenteOttenuto[]): DettaglioCopie {
-  const letture = lettureListiniCondivisi();
   const oggettoDi = prepared('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck();
   const nelSet = prepared("SELECT quantita FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ? AND catalogo_chiave = ?").pluck();
   const costoDi = prepared('SELECT costo_json FROM main.articolo WHERE chiave = ?').pluck();
@@ -75,13 +73,11 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
   // costo dell'offerta (un dato in un solo punto), senza una riga in più in un altro registro
   let cedute = 0;
   for (const [chiave, n] of copiePerArticolo(partitaId)) {
-    // una vecchia chiave di un listino condiviso vale l'offerta del listino
-    const canonica = articoloDelListino(chiave, letture);
-    const oggetto = (oggettoDi.get(canonica) ?? oggettoDi.get(chiave)) as string | null | undefined;
+    const oggetto = oggettoDi.get(chiave) as string | null | undefined;
     if (oggetto === catalogo) comprate += n;
-    const contenuto = (nelSet.get(canonica, catalogo) ?? (canonica !== chiave ? nelSet.get(chiave, catalogo) : undefined)) as number | null | undefined;
+    const contenuto = nelSet.get(chiave, catalogo) as number | null | undefined;
     if (typeof contenuto === 'number' && contenuto > 0) comprate += n * contenuto;
-    const costo = (costoDi.get(canonica) ?? costoDi.get(chiave)) as string | null | undefined;
+    const costo = costoDi.get(chiave) as string | null | undefined;
     if (costo) {
       try {
         const c = JSON.parse(costo) as { tipo?: unknown; oggetti?: unknown };

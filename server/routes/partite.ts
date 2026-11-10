@@ -14,7 +14,7 @@ import {
   bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato,
   bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita,
   paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
-  paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  paramsPartitaConsumo, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
   bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -280,12 +280,11 @@ router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyM
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
   const b = req.body;
-  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede, b.soloPresenza ? { soloPresenza: true } : {}));
+  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.soloPresenza ? { soloPresenza: true } : {}));
 });
 /** Ondata 5 (decisione 21): annulla un solo acquisto della pagina del negozio (una riga del registro), qualunque sia il suo ciclo. */
-router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto, query: queryRigaAcquisto }), (req, res) => {
-  const q = req.query;
-  res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId), q.sede));
+router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto }), (req, res) => {
+  res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId)));
 });
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {
