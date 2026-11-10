@@ -11,7 +11,8 @@
 // Diario (`azioniStrutturateService`, che mostrano il prezzo del listino con quello della fascia accanto).
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { prezzoNellaFascia, type FasciaPrezzo } from '../../shared/catalogo.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { normalizzaSconto, prezzoScontato, scontoAttivo, type ScontoNegozio } from '../../shared/scontiNegozi.js';
@@ -20,7 +21,7 @@ const eFascia = (v: unknown): v is FasciaPrezzo => v === 'giorno' || v === 'sera
 
 /** Vero se il file di gioco ha la colonna del prezzo per fascia (migrazione 260); uno schema di prima legge solo `prezzo`. */
 function conPrezzoPerFascia(): boolean {
-  return !!prepared("SELECT 1 FROM pragma_table_info('articolo', 'main') WHERE name = 'prezzo_per_fascia_json'").get();
+  return haColonnaMain(getDb(), 'articolo', 'prezzo_per_fascia_json');
 }
 
 /** La colonna del prezzo per fascia da mettere in una SELECT sull'articolo con l'alias dato (`NULL` su uno schema di prima della 260). */
@@ -42,7 +43,7 @@ export function fasciaDellaPartita(partitaId: number): FasciaPrezzo | null {
 
 /** Vero se il file di gioco ha la colonna dello sconto del negozio (migrazione 254); uno schema di prima non sconta niente. */
 function conSconto(): boolean {
-  return !!prepared("SELECT 1 FROM pragma_table_info('negozio', 'main') WHERE name = 'sconto_json'").get();
+  return haColonnaMain(getDb(), 'negozio', 'sconto_json');
 }
 
 /** Il rango del Confidente nella partita (null se la partita non lo ha ancora). */

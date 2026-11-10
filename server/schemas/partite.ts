@@ -10,6 +10,7 @@ import { bodyRegistraSessionePesca } from './pesca.js';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../shared/limitiFusione.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
@@ -43,10 +44,8 @@ export const bodyCreaPartita = z.object({ ...campiPartita, attiva: z.boolean().o
 export const bodyAggiornaPartita = z.object(campiPartita).partial();
 
 export const paramsPartita = z.object({ id: idParam });
-/** L12: l'UID di una voce del cestino personale (32 cifre esadecimali), da solo o dentro una partita. */
-const uidCestino = z.string().regex(/^[0-9a-f]{32}$/);
-export const paramsCestinoPersonale = z.object({ uid: uidCestino }).strict();
-export const paramsPartitaCestino = z.object({ id: idParam, uid: uidCestino }).strict();
+/** L12: l'UID di una voce del cestino personale (32 cifre esadecimali): `/api/partite/cestino/:uid`. */
+export const paramsCestinoPersonale = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
 export const paramsPartitaChiave = z.object({ id: idParam, chiave: z.string().trim().min(1).max(40) });
 export const paramsPartitaPersona = z.object({ id: idParam, personaId: idParam });
 export const paramsPartitaPosseduta = z.object({ id: idParam, possedutaId: idParam });
@@ -201,11 +200,11 @@ export const bodyIsolamento = z.object({
 });
 export const bodySalvaCiclo = z.object({
   personaId: z.number().int().positive(),
-  anelli: z.array(z.object({ ingredienteId: z.number().int().positive(), partnerId: z.number().int().positive(), risultatoId: z.number().int().positive() })).min(2).max(5),
+  anelli: z.array(z.object({ ingredienteId: z.number().int().positive(), partnerId: z.number().int().positive(), risultatoId: z.number().int().positive() })).min(ANELLI_MINIMI_CICLO).max(ANELLI_MASSIMI_CICLO),
   nome: z.string().max(80).optional(),
   note: z.string().max(2000).optional(),
 });
-export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
+export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(ANELLI_MASSIMI_CICLO - 1).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
 export const paramsPartitaCiclo = z.object({ id: idParam, cicloId: idParam });
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
 /** Spunta di una voce della giornata, per uid (le 32 cifre esadecimali di `voce_giornata.uid`). */

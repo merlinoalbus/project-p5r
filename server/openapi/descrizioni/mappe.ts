@@ -16,12 +16,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     risposta: '`RisoluzioneMappaDto`: `{ tipo: "mappa", mappa, casa }` (L2: `casa` è l\'unica pagina che mostra la mappa — La città, il quartiere, l\'Area con `?planimetria=` se la versione non è la predefinita, o il visore) oppure `{ tipo: "guida", area, dungeon, mappaPalazzo, nome }`',
     errori: [[404, 'mappa-non-trovata']],
   },
-  'GET /api/mappe/contenuti/:chiave': {
-    sommario: 'Contenuti della guida di una mappa: aree, collegamenti, punti e planimetrie di ogni area',
-    descrizione: 'Per la mappa radice di un Palazzo le aree di tutto il Palazzo, altrimenti quelle legate alla mappa. Per ogni area: i collegamenti, i punti (gli elementi della guida più le voci che nessun elemento rappresenta, con i passi degli Enigmi subito sotto il loro Enigma) e le planimetrie. Con `partita` le schede portano anche lo stato di quella partita. Da L4 (§2.3), nei Palazzi i punti sono **le voci** della guida (`punto:<chiave>`, con stato nella partita, carattere, esauribilità e la «posizione da collocare» della scheda senza mappa che hanno assorbito, finché non hanno un pin): le schede senza mappa legate a una voce non compaiono più come elementi a sé, quelle senza voce stanno nelle «Schede da sistemare» della scheda del Palazzo. I dedali dei Memento restano come prima.',
-    risposta: '`ContenutiMappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
-  },
   'GET /api/mappe/accesso/:tipo/:chiave': {
     sommario: '«Apri sulla mappa»: dove si trova sulle mappe un\'entità della guida',
     descrizione: 'Segue solo associazioni registrate, mai una somiglianza di nome: pin che citano l\'entità, mappe che la hanno come propria o fra le loro entità, sedi dei negozi, ingresso configurato del quartiere. Se non portano da nessuna parte si allarga al posto che l\'entità dichiara (il quartiere di un luogo o di un negozio, il Palazzo di un\'area) e la provenienza lo dice (`posto-dichiarato`). Una mappa che contiene già il pin esatto non compare una seconda volta come accesso generico. Articoli e negozi nascosti sono un 404.',
@@ -59,7 +53,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/riferimenti': {
     sommario: 'Entità collegabili a uno spillo nell\'editor, per tipo e testo',
-    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Al più `limite` risultati (30 se non indicato).',
+    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Negozi, luoghi e attività nascosti non si propongono; `includi` (la chiave già collegata al pin) mette in testa quella voce anche se è nascosta, con «nascosto» nel `dettaglio`. Al più `limite` risultati (30 se non indicato).',
     risposta: 'Elenco di `{ tipo, chiave, nome, dettaglio }`',
   },
   'PUT /api/mappe/ordine': {

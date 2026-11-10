@@ -12,6 +12,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -95,7 +96,7 @@ export interface ContenutiPartita {
  * salvataggio (prima della 061) il salvataggio vale «no»; un JSON dei set che non si legge vale «nessuno», mai un errore.
  */
 export function contenutiDellaPartita(partitaId: number): ContenutiPartita {
-  const conSalvataggio = !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
+  const conSalvataggio = haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
   const r = prepared(`SELECT dlc_posseduti_json, nuova_partita_plus${conSalvataggio ? ', salvataggio_p5' : ''} FROM partita WHERE id = ?`).get(partitaId) as { dlc_posseduti_json: string; nuova_partita_plus: number; salvataggio_p5?: number } | undefined;
   let set: unknown;
   try { set = JSON.parse(r?.dlc_posseduti_json ?? '[]'); } catch { set = []; }
@@ -121,7 +122,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const dataGioco = partita?.data_gioco ?? null;
   const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   // L6: gli inviti registrati (la tabella nasce con la migrazione utente 025: su uno schema di prima nessun invito)
-  const conInviti = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'invito_partita'").get();
+  const conInviti = haTabellaUtente(getDb(), 'invito_partita');
   const invitiRegistrati = new Set(conInviti ? (prepared('SELECT invito_chiave FROM invito_partita WHERE partita_id = ?').all(partitaId) as Array<{ invito_chiave: string }>).map((r) => r.invito_chiave) : []);
   // L13: gli sblocchi (la tabella nasce con la migrazione utente 046: su uno schema di prima nessuno sblocco)
   const sblocchiRicevuti = new Set(sblocchiDellaPartita(partitaId));
@@ -170,7 +171,7 @@ export function statoPartitaEssenziale(partitaId: number, ranghiConfidenti: Map<
 
 /** Le chiavi degli sblocchi ricevuti nella partita («richiesta:chiave», «attivita:chiave»); vuoto se lo schema non ha ancora la tabella. */
 export function sblocchiDellaPartita(partitaId: number): string[] {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sblocco_partita'").get()) return [];
+  if (!haTabellaUtente(getDb(), 'sblocco_partita')) return [];
   return (prepared("SELECT bersaglio_tipo || ':' || bersaglio_chiave AS k FROM utente.sblocco_partita WHERE partita_id = ?").all(partitaId) as Array<{ k: string }>).map((r) => r.k);
 }
 
@@ -186,15 +187,24 @@ export function condizioneDelRequisito(r: Pick<RigaRequisito, 'tipo' | 'dati_jso
   return normalizzaRequisitoSpillo({ ...dati, tipo: r.tipo });
 }
 
+/** L7-02: la nota propria di un requisito (colonna `testo`), da mostrare sotto la frase generata. Vuota per un avviso (la sua frase è il dato) e se ripete
+ *  la frase generata (una riga aggiunta a mano prima della migrazione 359). */
+export function notaDelRequisito(r: { tipo: string; testo: string }, frase: string): string {
+  return r.tipo === 'avviso' || r.testo.trim() === frase.trim() ? '' : r.testo.trim();
+}
+
 /**
  * Il semaforo di un requisito di rango sullo stato della partita, col valutatore unico (letto «come requisito»: un evento non segnato è
- * «da segnare»): per tipo dice verde o rosso con il dettaglio di che cosa manca; gli avvisi non bloccano.
+ * «da segnare»): per tipo dice verde o rosso con il dettaglio di che cosa manca; gli avvisi non bloccano. La frase è generata; la nota, se c'è, l'accompagna.
  */
 export function valuta(r: RigaRequisito, st: StatoValutazione): SemaforoRequisitoDto {
   const c = condizioneDelRequisito(r);
-  if (!c) return { indice: r.indice, tipo: r.tipo, testo: r.testo, confermato: false, stato: 'grigio', dettaglio: 'Requisito non leggibile: correggilo dalla pagina del Confidente', manuale: false };
+  if (!c) return { indice: r.indice, tipo: r.tipo, testo: r.testo || 'Requisito non leggibile', confermato: false, stato: 'grigio', dettaglio: 'Requisito non leggibile: correggilo dalla pagina del Confidente', manuale: false };
   const nomi = nomiCondizioniMemo();
-  return valutaCondizione(condizioneConTesto(c, nomi), r.indice, st, { comeRequisito: true, nomi });
+  const conTesto = condizioneConTesto(c, nomi);
+  const esito = valutaCondizione(conTesto, r.indice, st, { comeRequisito: true, nomi });
+  const nota = notaDelRequisito(r, conTesto.testo);
+  return nota ? { ...esito, nota } : esito;
 }
 
 /** Lo stato di una condizione sullo stato della partita, col valutatore unico letto «come requisito»: lo usa la disponibilità per i rami di un

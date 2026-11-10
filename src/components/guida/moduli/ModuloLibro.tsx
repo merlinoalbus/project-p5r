@@ -1,5 +1,5 @@
 // ============================================================
-// ModuloLibro — titolo, prezzo, sessioni, dettagli, effetti dichiarati e condizioni
+// ModuloLibro — titolo, sessioni, dettagli, effetti dichiarati e condizioni
 // ============================================================
 //
 // Un titolo solo (il nome italiano era uguale per tutti i 46 libri); «dove si compra» non si
@@ -14,7 +14,7 @@ import { Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 
-/** I campi di un libro: titolo, prezzo, sessioni di lettura, dettagli ed effetti dichiarati (le condizioni le aggiunge il guscio). */
+/** I campi di un libro: titolo, sessioni di lettura, dettagli ed effetti dichiarati (le condizioni le aggiunge il guscio). */
 export function ModuloLibro({ dati, imposta, disabilitato }: PropsModulo) {
   const nomi = useNomiPerEffetti();
   return (

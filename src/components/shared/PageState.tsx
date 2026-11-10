@@ -96,14 +96,35 @@ interface EmptyStateProps {
   illustrazione?: string;
   /** Il livello del titolo: h2 (default, lo stato vuoto sta sotto l'h1 della pagina), h1 quando è la pagina intera (la 404) o h3 sotto un h2. */
   livello?: 1 | 2 | 3;
+  /** La pagina intera che non deve superare il 30% dell'altezza della schermata (la 404): illustrazione piccola e, da 640 px in su,
+   *  illustrazione e testo affiancati; niente altezza minima. */
+  compatta?: boolean;
 }
 
 /** Stato vuoto illustrato con messaggio, suggerimento e azione facoltativa. */
-export function EmptyState({ icon, title, hint, action, illustrazione, livello = 2 }: EmptyStateProps) {
+export function EmptyState({ icon, title, hint, action, illustrazione, livello = 2, compatta = false }: EmptyStateProps) {
   const dedicata = illustrazione ? `illustrazioni/${illustrazione}` : null;
   const [urlDedicata, urlNeutra] = useAssetMulti([dedicata, ILLUSTRAZIONE_NEUTRA]);
   const nome = urlDedicata ? dedicata : urlNeutra ? ILLUSTRAZIONE_NEUTRA : null;
   const Titolo = livello === 1 ? 'h1' : livello === 3 ? 'h3' : 'h2';
+  if (compatta) {
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center sm:text-left">
+        <AssetImg
+          nome={nome}
+          alt=""
+          decorativa
+          className="max-h-[min(80px,9dvh)] sm:max-h-[min(120px,16dvh)] w-auto object-contain"
+          fallback={icon ? <div className="text-text-muted testo-40 leading-none">{icon}</div> : null}
+        />
+        <div className="flex flex-col items-center sm:items-start gap-2">
+          <Titolo className="m-0 font-decor uppercase tracking-wide testo-28 leading-none text-text">{title}</Titolo>
+          {hint && <p className="m-0 testo-14 text-text-muted max-w-[420px]">{hint}</p>}
+          {action && <div className="mt-1 flex gap-2">{action}</div>}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3 text-center">
       <AssetImg

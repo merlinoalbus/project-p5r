@@ -33,7 +33,7 @@ export interface NegozioCensimentoDto extends OrigineCensimentoDto {
 
 export interface AttivitaCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; tipo: string | null;
-  luogo: string | null; sede_chiave: string | null;
+  sede_chiave: string | null;
   fascia: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
 }
@@ -46,7 +46,7 @@ export interface ArticoloCensimentoDto extends OrigineCensimentoDto {
 }
 
 export interface QuartiereCensimentoDto {
-  chiave: string; nome: string; sblocco_data: string | null; fonte: string | null;
+  chiave: string; nome: string; fonte: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
   condizioni_guida_json: JsonCensimentoCondizioniDto;
   fonte_condizioni_json: JsonCensimentoCondizioniDto;

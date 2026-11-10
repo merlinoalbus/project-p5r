@@ -93,8 +93,9 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     }))) return;
     setOccupato(true);
     try {
-      const { giornoAvanzato, fasciaAvanzata, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && conoscenza);
+      const { giornoAvanzato, fasciaAvanzata, avvisiSpunta, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && conoscenza);
       onCambiata(esito);
+      if (avvisiSpunta?.length) notifica('warning', avvisiSpunta.join(' '));
       // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta è la sua
       // (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
       avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata', partitaId);

@@ -14,11 +14,6 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     descrizione: 'Per ognuno degli otto tipi (negozio, articolo, libro, film, attività, luogo, domanda, cruciverba): righe create dall\'utente, righe della guida corrette, righe nascoste e totale della tabella. È il riepilogo della sezione «Catalogo» delle Impostazioni.',
     risposta: '`RiepilogoCatalogoDto`',
   },
-  'GET /api/catalogo/oggetti': {
-    sommario: 'Tutti gli oggetti che l\'app conosce, senza filtro di categoria',
-    descrizione: 'Indirizzo storico del catalogo unico: identità visibili di ogni categoria, con nomi e proprietà canonici. La selezione e i salvataggi usano la chiave del catalogo.',
-    risposta: 'Elenco di `CatalogoOggettoDto`',
-  },
   'GET /api/catalogo/:tipo': {
     sommario: 'Righe di un tipo toccate dall\'utente, o le sole nascoste',
     descrizione: 'Senza query: le righe create o corrette dall\'utente e quelle nascoste, ordinate per nome (domande e cruciverba per chiave, cioè per giorno). Con `nascosti=1` (o `true`): le sole righe nascoste, per la pagina «Rimossi»; `negozio` restringe agli articoli di quel negozio e vale solo per il tipo `articolo`.',

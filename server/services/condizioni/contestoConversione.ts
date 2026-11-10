@@ -47,6 +47,39 @@ function selezioneNomi(db: Database.Database, tabella: string): string {
   return `SELECT chiave, nome${colonne.includes('nome_it') ? ', nome_it' : ''} FROM ${tabella}`;
 }
 
+/** Vero se la condizione è una data, anche dentro un gruppo. */
+function contieneData(condizione: unknown): boolean {
+  if (typeof condizione !== 'object' || condizione === null) return false;
+  const c = condizione as { tipo?: unknown; condizioni?: unknown };
+  return c.tipo === 'data' || (c.tipo === 'gruppo' && Array.isArray(c.condizioni) && c.condizioni.some(contieneData));
+}
+
+/** Vero se il `condizioni_json` di un quartiere contiene una data; un JSON illeggibile vale «non datato». */
+function condizioniConData(json: string | null): boolean {
+  if (!json) return false;
+  try {
+    const valore = JSON.parse(json) as unknown;
+    return Array.isArray(valore) && valore.some(contieneData);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * I quartieri «datati» per la conversione delle frasi. Le migrazioni 036, 052, 064 e 070 girano prima o dopo la 037 che crea `sblocco_data` e comunque
+ * prima della 356 che la toglie: finché la colonna c'è, vale lei. Senza la colonna vale la condizione del quartiere (`condizioni_json`, posteriore alla
+ * 036: se manca, nessun quartiere è datato). Per effetto della 356 Ikebukuro, Odaiba e Maihama non contano più come datati (la loro condizione è un
+ * luogo), Kanda-Jinbocho e Roppongi sì (la condizione ha una data); Shinjuku, Kichijoji, Akihabara e Suidobashi restano.
+ */
+function quartieriDatati(db: Database.Database): Set<string> {
+  if (!haTabella(db, 'quartiere')) return new Set();
+  const colonne = (db.prepare('PRAGMA table_info(quartiere)').all() as Array<{ name: string }>).map((c) => c.name);
+  if (colonne.includes('sblocco_data')) return new Set((db.prepare('SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL').all() as Array<{ chiave: string }>).map((r) => r.chiave));
+  if (!colonne.includes('condizioni_json')) return new Set();
+  const righe = db.prepare('SELECT chiave, condizioni_json FROM quartiere').all() as Array<{ chiave: string; condizioni_json: string | null }>;
+  return new Set(righe.filter((r) => condizioniConData(r.condizioni_json)).map((r) => r.chiave));
+}
+
 /** Il contesto di base: le funzioni di ricerca sui dati della Guida. Ogni riga vi aggiunge negozio, gestore e chiave. */
 export function contestoConversione(db: Database.Database): ContestoConversione {
   /** Ricerca di ripiego per le tabelle che mancano: non trova mai nulla. */
@@ -62,7 +95,7 @@ export function contestoConversione(db: Database.Database): ContestoConversione 
     articolo: ha('articolo') ? cercaPerNome(db, selezioneNomi(db, 'articolo')) : vuoto,
     attivita: ha('attivita') ? cercaPerNome(db, 'SELECT chiave, nome FROM attivita') : vuoto,
     quartiereDatato: (q) => {
-      if (!datati) datati = new Set(ha('quartiere') ? (db.prepare('SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL').all() as Array<{ chiave: string }>).map((r) => r.chiave) : []);
+      if (!datati) datati = quartieriDatati(db);
       return datati.has(q);
     },
     libriJinbocho: () => (ha('libro') ? (db.prepare("SELECT chiave FROM libro WHERE dove LIKE '%Jinbocho%' ORDER BY ordine").all() as Array<{ chiave: string }>).map((r) => r.chiave) : []),

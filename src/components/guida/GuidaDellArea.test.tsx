@@ -15,6 +15,9 @@ const { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, 
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { collegaPinAlPunto, spostaPunto, creaPunto, eliminaPunto, aggiornaPunto, spostaPuntiInArea, copiaPuntiInArea }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero, { notifica }));
+// la conferma dell'eliminazione passa da `conferma()` (DialogoConferma in primo piano): la finestra di modifica ha il piè fisso con «Elimina»
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 /** I pin si scelgono sulla mappa della pagina (2026-10-18): qui si guarda che cosa la guida le comunica e si «tocca» un pin da lì. */
 const onCollegamento = vi.fn<(c: CollegamentoPin | null) => void>();
 /** L'ultimo collegamento comunicato alla pagina. */
@@ -83,10 +86,11 @@ it('una voce si elimina dalla sua modifica, dopo una conferma che dice che cosa 
   const { onRicarica } = monta([punto({})]);
   fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
   fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
-  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-  expect(screen.getByText(/I pin collegati restano sulla mappa, col loro «raccolto»\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   eliminaPunto.mockResolvedValue(undefined);
-  fireEvent.click(screen.getByRole('button', { name: 'Confermo' }));
+  conferma.mockResolvedValue(true);
+  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+  await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
+  expect(conferma.mock.calls[0][0].testo).toMatch(/I pin collegati restano sulla mappa, col loro «raccolto»\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./);
   await waitFor(() => expect(eliminaPunto).toHaveBeenCalledWith('p1'));
   await waitFor(() => expect(onRicarica).toHaveBeenCalled());
 });

@@ -10,7 +10,6 @@ import { eliminaNelCestino } from '../services/luoghiScritture.js';
 
 /** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
 const queryConferma = z.object({ conferma: z.enum(['0', '1']).optional() });
-import { elencaCatalogoOggetti } from '../services/catalogoOggettiLetture.js';
 import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, paramsElementoCatalogo, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TipoCatalogo } from '../../shared/types.js';
@@ -34,14 +33,6 @@ function corpoPerTipo(tipo: TipoCatalogo, corpo: unknown, parziale: boolean): Re
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
 router.get('/', (_req, res) => {
   res.json(riepilogoCatalogo());
-});
-
-/** **Tutto** quello che l'app conosce, senza filtro di categoria.
- *
- * Un negozio non vende una categoria, vende una cosa: chi compila cerca «Il magnifico ladro», non
- * «libro». La categoria arriva con l'oggetto scelto, invece di doverla indovinare prima. */
-router.get('/oggetti', (_req, res) => {
-  res.json(elencaCatalogoOggetti());
 });
 
 /** Le righe toccate dall'utente; con `?nascosti=1` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */

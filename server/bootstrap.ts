@@ -22,7 +22,7 @@ import { config } from './config.js';
 import { getRequestLogger, requestContextMiddleware } from './middleware/requestContext.js';
 import { responseShapeMiddleware } from './middleware/responseShape.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { indiceRicercaDopoScritture } from './middleware/indiceRicerca.js';
+import { cacheDiGiocoDopoScritture } from './middleware/cacheDiGiocoDopoScritture.js';
 import { creaMiddlewareIdentita, type OpzioniIdentita } from './middleware/identita.js';
 import { controlloAppartenenzaPartite } from './middleware/appartenenzaPartita.js';
 import { httpErrors } from './utils/httpError.js';
@@ -126,8 +126,8 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
     for (const [prefisso, r] of router) app.use(prefisso, r);
     logger.info({ ammesse, escluse }, 'istanza di rilascio: rotte montate dall\'elenco del giocatore');
   } else {
-    // l'indice della ricerca si svuota dopo ogni scrittura riuscita sui dati di gioco (prima dei router: vede ogni risposta)
-    app.use('/api', indiceRicercaDopoScritture);
+    // le cache dei dati di gioco (indice della ricerca compreso) si svuotano dopo ogni scrittura riuscita sui dati di gioco (prima dei router: vede ogni risposta)
+    app.use('/api', cacheDiGiocoDopoScritture);
     for (const [prefisso, router] of ROUTER_DI_AREA) app.use(prefisso, router);
   }
 

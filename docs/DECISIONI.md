@@ -32,21 +32,24 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Equipaggiamento del dataset e articoli dei negozi: nessun abbinamento fondato solo sul nome; identità distinte finché l'equivalenza
   non è documentata.
 - Dati non decidibili dalle fonti restano senza effetto, con il motivo annotato: niente dati inventati. **(24/10)**
+- **Tesori da vendere nel catalogo (Q17)**: i 140 Tesori della guida sono oggetti `altro/…` del catalogo, con prezzo di vendita e reperibilità
+  letti dalla riga della guida (nella descrizione, «tesoro, rivendibile per … ¥ · …»; nessuna stima). Non hanno offerte nei negozi: il prezzo
+  minimo dell'elenco degli oggetti conta solo le offerte, e il prezzo di vendita di un Tesoro sta nella descrizione.
 - **Livello consigliato dei Palazzi (D5, 01/11)**: è un livello minimo e massimo di Royal, e il testo con il confronto delle fonti resta intero
   come nota storica del Palazzo, visibile e modificabile solo nella preparazione. Niente medie fra le fonti. I numeri vengono dalla guida
   italiana dove li dice; Kamoshida (minimo 10) e Niijima (minimo 45) vengono da una fonte secondaria, l'unico consiglio numerico scritto nel
-  testo di prima: restano visibili, confermati da Roberto (01/11, «Sì, mostrali»). Dove nessuna fonte dà un consiglio (Kaneshiro, Shido,
+  testo di prima: restano visibili, confermati dall'utente (01/11, «Sì, mostrali»). Dove nessuna fonte dà un consiglio (Kaneshiro, Shido,
   Memento) non c'è un numero.
 - **Una regola per dato (L8, 01/11)**: la capienza della scorta (gradini compresi) è un dato del blocco `capienza-scorta`, non il testo delle
   abilità di Igor; il giorno di un'infiltrazione è quello delle voci legate a lei, non una data nel nome; la cattura di una Persona è una
   regola sola per Compendio, alberi di fusione e cicli, con tre stati: provata (un'Ombra catturabile della guida la porta, oppure il compendio
   delle Persona le dà un'area dei Memento), esclusa per documento (speciale, Demone del Tesoro, DLC, del gruppo) e da verificare (nessun dato
-  dice dove si incontra); le da verificare restano catturabili (Roberto, 01/11: «Restano catturabili»), e lo stato resta nel dato; «dove si
+  dice dove si incontra); le da verificare restano catturabili (utente, 01/11: «Restano catturabili»), e lo stato resta nel dato; «dove si
   incontra» è un servizio solo,
   con le Ombre della guida e i dedali dei Memento del compendio che le Ombre non dicono (tutti per chi non ha Ombre, come Makami e Scathach),
   senza perdere nulla di quel che la scheda mostrava; «si ottiene per fusione» solo per chi non si incontra da nessuna parte; le Richieste non
   hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date.
-- **Effetto dei tratti (Roberto, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
+- **Effetto dei tratti (utente, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
   dell'effetto di ciascuno dei 90 tratti, mostrata ovunque (Sfide, scheda Persona, pagine delle skill, fusione, ricerca); si corregge e si
   ripristina solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
 - **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
@@ -74,7 +77,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   due cose diverse, da quando si può e il giorno della guida («Niente: due cose diverse»). Le date di Okumura (i «22 giorni» della trama del
   19 settembre) e delle elezioni restano quelle della trama («per il momento lascia quella della trama»); le date di apertura e di scadenza
   dei Palazzi si modificano da interfaccia, in «Correggi la scheda» del Palazzo.
-- **Requisiti, date e prezzi della guida (L8-03, D4 di Roberto: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
+- **Requisiti, date e prezzi della guida (L8-03, D4 dell'utente: «Solo i campi che l'app può usare: requisiti, date, prezzi»)**: dei testi
   liberi di Sfide, Aiuto in battaglia, Trofei e finali e Oggetti diventano campi strutturati solo quelli che la partita sa valutare
   (migrazione 340): lo sblocco degli Speciali (le condizioni, la frase generata; il testo della guida si vede solo dove le condizioni non ci
   sono), le condizioni dei boss segreti (Nuova Partita+, una nuova condizione del vocabolario letta da Partita → Modifica), i requisiti dei
@@ -86,7 +89,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   campo si corregge e si ripristina dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
   stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Che il rango 8
   di Akechi non sia un requisito del finale Royal (né il suo contrario del finale standard) è una lettura del testo della guida, non una
-  decisione di Roberto. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
+  decisione dell'utente. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
   loro punto unico; i testi della guida restano. I prezzi non diventano campi nuovi: hanno già il loro punto unico nel catalogo e nei listini,
   e i prezzi della pagina Oggetti diversi dal listino restano note storiche, con il listino com'è (l'utente, 01/11: «Lascia la nota»).
 - Dataset del compendio: chinhodado/persona5_calculator (Apache-2.0) con verifica incrociata su aqiu384/megaten-fusion-tool,
@@ -201,6 +204,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   rosso d'errore come testo `#fb7c7c`. I colori degli spilli restano quelli autorati, anche gli otto molto chiari: è una scelta, non una dimenticanza.
 - Pulsanti con figura: i pulsanti di solo testo sono convertiti; restano di testo gli «Annulla» delle finestre e i pulsanti a solo
   simbolo con nome accessibile. Ogni chiave d'icona nasce con una riserva SVG in codice.
+- «Salva» sta sempre in vista, a ogni formato. Ogni modulo di modifica è la `FinestraModifica` comune (piè fisso con Elimina / Annulla / Salva,
+  corpo che scorre da solo): anche le correzioni della guida (`CorrezioneGuida`: voce, infiltrazione, scheda del Palazzo, boss finale, area del
+  dedalo) e il totale dei timbri, che prima si aprivano in linea con «Salva» dopo i campi. Fa eccezione il pannello dell'editor di mappa, che
+  resta accanto alla mappa: «Salva» ed «Elimina» di spillo e mappa stanno in un piè fisso sul bordo basso del pannello (`.editor-mappa__piede`).
 - Conferme con `DialogoConferma`, mai `window.confirm`; una sola vista d'errore. Le finestre (`Modal`) non si chiudono cliccando lo sfondo
   (selezionando del testo si chiudevano per errore); la ricerca globale e il pannello delle schede si chiudono dallo sfondo solo se il
   gesto comincia e finisce lì.
@@ -210,15 +217,18 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Accessibilità (L6, WCAG 2.2 AA): testo ad almeno 4,5:1 anche nei chip degli elementi e delle affinità (tinte schiarite per il testo,
   colore pieno per bordi e icone); caselle di spunta nel rosso del tema; file di schede con le frecce, Home e Fine; lo scorrimento animato
   si spegne con «riduci movimento»; pin e ritagli dell'editor si spostano anche con le frecce e con i campi X/Y. Pin e frecce delle file
-  hanno un bersaglio di 44 px senza cambiare aspetto né posizione: il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
+  hanno un bersaglio di 44 px senza cambiare aspetto né posizione (i cartellini di Tokyo che si toccano alla misura del momento diventano
+  una pastiglia «+n» con l'elenco dei nomi, salvo sulla mappa piccola della pagina Partita, che non cambia disposizione; un collegamento isolato dentro una frase ha un'area trasparente da 44 px, una fila di
+  collegamenti righe da 44 px): il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
   così la punta resta sul punto), il gruppo un'imbottitura uguale sui quattro lati; la freccia di una fila, col mouse, ha un riquadro di
   clic da 44 px attorno al cerchio, sul tocco è il pulsante a essere da 44, e lo spazio ai capi della fila resta quello di prima. Le voci «fatte» ed
   «esaurite» non sono più attenuate: hanno a sinistra il segno dello stato (spunta rossa, o cerchio barrato grigio per «esaurito») e il
   nome barrato in un grigio leggibile (D15, scelta C dell'utente, 01/11), anche nella Partita.
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
-- La pagina Partita mantiene il suo aspetto; eccezioni approvate: finestra «Regala» in Confidenti; riga «Giorno e fascia
+- La pagina Partita mantiene il suo aspetto; eccezioni approvate: la vista «Avanzamento» del cassetto del Confidente (era «Level up»: nome
+  italiano ovunque, solo l'etichetta); finestra «Regala» in Confidenti; riga «Giorno e fascia
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
-  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (Roberto, 01/11); gli schizzi
+  l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (utente, 01/11); gli schizzi
   L10-01, L10-02 e L10-05 approvati dall'utente (01/11): da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
   partita e Storico riempiono l'altezza come Oggi, Doti e Letture (intestazione e schede ferme, comandi in una fila ferma, l'elenco in
   un'area con bordo; Confidenti su 3 colonne a 1024 e 4 da 1280, Compendio e Persona su due colonne di righe da 44 px, Storico con una voce
@@ -275,7 +285,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).
 - Il costo di un piano è la somma dei prezzi di evocazione dal Registro; una Persona in scorta vale 0 ma si usa una volta sola. Anche
   nella fusione diretta e nelle ricette il costo si chiama «evocazione dal Registro» e un ingrediente in scorta vale 0.
-- Il filtro «fino al livello del protagonista» è attivabile, non imposto.
+- Il filtro «fino al livello del protagonista» è attivabile, non imposto: spento di partenza in tutte le viste (Ricette, Cerca per skill,
+  Piani, Cicli).
+- Il prezzo di evocazione è una stima della fonte (`docs/riferimenti/bonus-velluto.md`): ogni cifra mostrata è «circa N ¥», uno 0 resta esatto.
+- Primo richiamo delle Persona DLC gratuito (guida, «Palazzo di Kamoshida» e settimana 1), per ogni Persona DLC mai entrata in scorta nella
+  partita: vale 0 nei piani (una volta sola per piano) e nelle ricette. I cicli restano a prezzo pieno: il loro costo è per giro e si ripete.
+- Una Persona registrata senza livello (Diario, cattura, registrazione a mano) si rievoca dal Registro al livello base, con le skill apprese
+  fino a lì; il Registro non cambia.
+- I cicli si cercano e si salvano fino a 15 anelli (`shared/limitiFusione.ts`). I piani arrivano a 4 fusioni di profondità, con un tetto
+  di calcolo: oltre, valgono i migliori trovati e la vista lo dice.
+- Le date di Metatron (25/11), Yoshitsune (23/12), Satana (20/11) e Vohu Manah (18/11) sono note della Persona, come le altre: il motore
+  non le applica. Le 20 celle della matrice dei Demoni del Tesoro che discordano con la guida e le note di Chimera e Alilat restano come
+  sono finché non si verificano in gioco.
+- Esecuzione alla Sedia elettrica: `skill_fonte_esecuzione` registra le carte dell'esito con Allarme. Eigaon resta l'esito con Allarme di
+  Rangda: la guida la mette nella colonna normale insieme a Maeiga, ma una Persona ha un solo esito normale.
 - I bonus si modellano solo con una fonte (affidabilità in `docs/riferimenti/bonus-velluto.md`). La fusione non trasferisce livelli
   né statistiche dei materiali.
 - Le Persona che richiedono un oggetto (Black Frost, Bugs) hanno solo l'etichetta «Richiede l'oggetto»: il motore le propone comunque.
@@ -292,7 +315,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   cruciverba, domande, incontri della pagina Confidenti, turni tolti), la notifica ha il pulsante «Applica», che le segna nella scheda; non
   nasce un promemoria persistente e niente si applica da solo.
 - Nella scheda Doti l'interruttore «Anima da cineasta» parte acceso se la partita ha letto il libro e si può spegnere; senza il libro letto è
-  spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (Roberto, 01/11:
+  spento e disattivato, con il suggerimento «Serve il libro …» (il nome del libro dai dati), e lo scalino in più non vale (utente, 01/11:
   «Spento senza libro»). L'interruttore «Libro» resta a mano **(01/11)**.
 - **«Applica» è un gesto unico (31/10)**: l'anteprima non scrive nulla e mostra i movimenti del server; «Annulla» non lascia tracce;
   «Conferma» registra in una sola transazione la dichiarazione «non conteggiata» e l'applicazione.
@@ -305,6 +328,16 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La Dote che un Confidente dà arriva solo al passaggio di rango, non a ogni uscita.
 - Requisiti dei Confidenti solo dalla guida Royal: un semaforo è ciò che il gioco impone (non la data consigliata, non i bonus). Le date
   di rango 1 valgono solo se la guida le dichiara come sblocco. I requisiti non verificabili diventano eventi della partita da segnare.
+- **Un Confidente ha una data di avvio sola**: «Disponibile dal» è il requisito di rango 1 di tipo data (18 Confidenti su 23), letto dalla
+  disponibilità e dalla scheda. La frase del requisito si genera dalla condizione; la colonna `testo` tiene solo ciò che la condizione non dice
+  (la nota) e, per un avviso, l'avviso stesso; «Ripristina» riporta la nota della guida da `dati_guida.requisiti-nota-guida-v1`.
+- **Date fisse di un rango**: l'eccezione `solo-date-rango` dice in quali giorni un rango si può fare, al posto dei giorni della settimana. La
+  usa il Rango 7 di Ryuji, con le 24 date del suo messaggio nella guida. L'avvio del Rango 10 di Kawakami («il primo giorno di scuola dopo il
+  Rango 9») non si sa calcolare: resta nelle note, e il calcolo non cambia.
+- **Ingressi fuori dalla spunta**: oltre alla spunta del Diario restano, dichiarati, l'invito avvenuto, la Persona messa in scorta dalla
+  scheda, la registrazione nel compendio e l'Allarme delle fusioni.
+- Gli editor della pagina Confidente (informazioni, requisiti, ranghi, disponibilità) sono finestre uguali con un solo Salva a piè di
+  finestra; i requisiti salvano insieme tutti i ranghi cambiati, e il motivo di una modifica alle informazioni è facoltativo.
 - Relazione romantica: dato della partita per Confidente, con il giorno d'inizio; si segna dalla scheda o scegliendo alla spunta del
   passaggio al rango 9; vale per gli incontri dopo il rango 9 e per i doni «se fidanzata».
 - **2026-10-25 — Fortuna e pesca**: la Fortuna è uno stato momentaneo della partita, acceso dall'interazione con Chihaya o
@@ -335,7 +368,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La giornata della guida è canone, in ordine esatto; le correzioni alle voci valgono per tutte le partite. Le date dei Palazzi seguono
   il percorso della guida italiana, con nota della differenza dalle date Royal. **(24/10)**
 - La voce è l'unico gesto che produce effetti sulla partita; ciò che una voce ha applicato si toglie togliendo la spunta (letture e
-  visioni comprese). La spunta di una voce di Palazzo non segna i passi (restano Entra/Esci).
+  visioni comprese): una lettura torna al valore di prima solo se vale ancora quello scritto dalla spunta, altrimenti resta e la spunta lo
+  dice; le Doti restano a mano e il loro promemoria se ne va. La spunta di una voce di Palazzo non segna i passi (restano Entra/Esci).
+- Un giorno è «coperto» se ha almeno una voce: si calcola, la colonna `giorno.coperto` non si legge più.
+- Il server non rifiuta una coppia tipo/collegamento fuori dalla regola, avvisa solo se è nuova: le voci-eccezione già salvate restano com'erano.
+- Una voce del Diario validato già spuntata dice, nell'editor e nella conferma d'eliminazione, che modificarla tocca quelle spunte.
+- Nella Home la prima casella del giorno sta entro la piega a ogni formato: trama, vincoli e avvisi si ripiegano dietro la freccia della scheda,
+  che ne dice il numero; il Diario e la pagina Partita mostrano la scheda per intero.
 - Gli effetti di una voce sono un solo elenco, tutti allo stesso livello, con un editor per tipo. Tipi di effetto anche per yen,
   oggetto ricevuto, trofeo, sblocco di una Richiesta o di un lavoro, Persona (solo Compendio o anche scorta), Persona tolta, punti del
   Confidente in note, uscita di un oggetto (restituito o venduto).
@@ -423,6 +462,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   cambia a finestra aperta (decisione dell'utente del 01/11); un'area scelta che dopo la rilettura non c'è più non si manda.
 - L'editor delle mappe copia e incolla gli spilli con gli appunti di sessione, mai con quelli di sistema. Niente «Da posizionare» nel
   pannello dell'Area né «Schermate di riferimento» nell'editor.
+- Posizionare un luogo su una planimetria dà l'Area solo a un luogo che non ne ha una. Un luogo che sta in un'altra Area dello stesso
+  quartiere non si sposta: il server risponde `luogo-di-altra-area` e l'Area si cambia dal modulo del luogo.
+- Un luogo si colloca da una migrazione solo se tutti i suoi pin indicano una sola Area del suo quartiere. Libreria Nagiuri, Odaiba Seaside Park
+  e Stazione di Shibuya restano da collocare: il pin della prima sta sull'illustrazione del quartiere, le altre due non hanno pin.
+- Lo sblocco di un quartiere è solo la sua condizione (`quartiere.condizioni_json`) con gli inviti (decisione dell'utente del 9/11).
+  Nella conversione delle frasi un quartiere conta come datato se la sua condizione contiene una data: Ikebukuro, Odaiba e Maihama non
+  contano più, Kanda/Jinbocho e Roppongi sì.
 
 ## 11. Negozi, oggetti, regali e attività
 - Il «dove» di un negozio o di un'attività è uno solo: la sede (`sede_chiave`, un luogo). Il quartiere si ricava dal luogo della sede e
@@ -484,14 +530,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Iwai non è un dono che arriva da sé: la guida lo lega alla vendita della medaglia del 4 maggio e alla restituzione del 6 maggio, voci del
   periodo validato.
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
+- Lavori con il quiz o il bouquet (Triple Seven, Rafflesia): le Doti e la paga stanno solo negli esiti, come a Ore no Beko; l'esito si sceglie
+  alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede.
+- Dove le due pagine della guida concordano sulle date, un articolo le segue (Razione militare: dal 17/4 al 14/8 e dal 7/12 al 19/12). Requisiti e
+  clienti del Crossroads restano come sono finché non si verifica in gioco. Un piatto senza dati non dice che i dati mancano: la colonna Prezzo
+  ed Effetto compaiono solo se almeno un piatto li ha.
 
 ## 12. Domande, esami, negoziazione, pesca
 - Il premio di ogni domanda in classe e dei quiz TV è quello della guida (Conoscenza ♪, con le eccezioni documentate) e vive negli
   effetti della voce del Diario che segna la domanda; i risultati degli esami hanno la loro voce, con il piazzamento scelto alla spunta.
-  Le risposte senza punti danno 0 punti.
+  Le risposte senza punti danno 0 punti. Il testo «Che cosa dà» si modifica solo dove c'è già (la domanda del 25 aprile), non si offre per le altre.
 - Domande d'esame solo nelle righe di `domanda`, con la data. **(24/10)**
 - Negoziazione: si cerca la domanda (è l'unica cosa che si legge mentre l'Ombra parla); il carattere è un colore.
-- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti.
+- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti. Le 21 serate
+  della cantante al Jazz Club sono eventi di tipo consiglio.
 - Pesca, «Registra una visita» (L10-09, D18): tre passi (Quando, Cosa hai pescato, Riepilogo) con gli stessi dati del modulo unico di
   prima. Giorno e fascia partono da quelli della partita, l'ordine dopo l'ultima visita di quella fascia (si corregge con «Cambia»), il
   riepilogo li ripete per primi. «L'avevi già contata nelle attività?» compare solo se ci sono visite contate senza dettaglio (turni del

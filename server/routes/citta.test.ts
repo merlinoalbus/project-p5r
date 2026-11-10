@@ -89,8 +89,8 @@ describe('API città e attività', () => {
     expect(a.lavori).toHaveLength(4);
     expect(a.libri).toHaveLength(46);
     expect(a.film).toHaveLength(30);
-    expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ quartiereChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
-    expect(a.lavori.every((x) => x.tipo === 'lavoro' && x.doti.length > 0)).toBe(true);
+    expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ quartiereChiave: 'kichijoji', fascia: 'sera', costo: 800, verificato: true });
+    expect(a.lavori.every((x) => x.tipo === 'lavoro')).toBe(true);
     // L13 (O7-4, migrazione 313): la Dote di un libro la dicono gli effetti
     const conDote = (l: LibroDto) => l.effetti.some((e) => e.effetto.famiglia === 'dote');
     expect(a.libri.filter(conDote).length).toBeGreaterThanOrEqual(20);

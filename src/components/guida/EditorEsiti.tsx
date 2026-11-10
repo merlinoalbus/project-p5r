@@ -157,7 +157,11 @@ export function EditorEsiti({ esiti, onCambia, disabilitato, chiaviSalvate }: Pr
   return (
     <section className="flex min-w-0 flex-col gap-2 rounded-md border border-border p-3" aria-label="Esiti dell’attività">
       <strong className="testo-14">Esiti scelti alla spunta</strong>
-      <p className="m-0 testo-13 text-text-secondary">Per le attività il cui risultato cambia (una sfida vinta o persa, i colpi riusciti, il giorno della settimana): chi gioca sceglie l’esito alla spunta del Diario e al + del contatore, e le Doti dell’esito diventano il promemoria «Applica». Prezzo e ranghi di una sfida stanno nell’articolo del negozio: qui si cita l’articolo. Il trofeo e gli oggetti di un esito (la lotteria vinta, i distintivi delle sfide) si segnano da soli registrando il turno.</p>
+      <p className="m-0 testo-12 text-text-muted">Se il risultato cambia (sfida vinta o persa): si sceglie alla spunta del Diario e al + del contatore.</p>
+      <details className="testo-12 text-text-muted">
+        <summary className="touch cursor-pointer">Che cosa fa un esito</summary>
+        <p className="m-0">Le Doti dell’esito diventano il promemoria «Applica». Prezzo e ranghi di una sfida stanno nell’articolo del negozio: qui si cita l’articolo. Il trofeo e gli oggetti di un esito (la lotteria vinta, i distintivi delle sfide) si segnano da soli registrando il turno.</p>
+      </details>
       {esiti && <Selettore etichetta="Come si decide l’esito" valore={esiti.modo} ricerca="mai" disabilitato={disabilitato} opzioni={MODI_ESITI.map((m) => ({ chiave: m.chiave, nome: m.nome }))} onCambia={(modo) => onCambia({ ...esiti, modo: modo === 'automatico' ? 'automatico' : 'scelta' })} />}
       {!valido && <p role="alert" className="m-0 testo-13 text-error-testo">Gli esiti non sono ancora validi: ogni esito ha un nome, chiavi distinte, al più {LIMITI_ESITI.doti} Doti diverse; nel modo automatico ogni esito ha una condizione o un articolo; le versioni con il bonus valgono solo nel modo «scelta», una per esito base.</p>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

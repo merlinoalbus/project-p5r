@@ -28,6 +28,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaMain, haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
@@ -44,14 +45,14 @@ import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
 /** Il Confidente riceve regali: la colonna della 255, o (su un file di gioco più vecchio) un elenco di regali. */
 export function confidenteRegalabile(chiave: string): boolean {
-  const conColonna = (prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile');
+  const conColonna = haColonnaMain(getDb(), 'confidente', 'regalabile');
   if (conColonna) return !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave);
   return !!prepared('SELECT 1 FROM confidente_regalo WHERE confidente_chiave = ?').get(chiave);
 }
 
 /** La reazione del Confidente all'oggetto: quella del suo elenco (la più alta se l'oggetto vi compare due volte), null se non c'è. */
 export function reazioneInElenco(confidente: string, catalogo: string): ReazioneRegalo | null {
-  const conColonna = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((c) => c.name === 'reazione');
+  const conColonna = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   const righe = prepared(`SELECT ${conColonna ? 'reazione' : 'NULL AS reazione'}, sconsigliato FROM confidente_regalo WHERE confidente_chiave = ? AND catalogo_chiave = ?`)
     .all(confidente, catalogo) as Array<{ reazione: number | null; sconsigliato: number }>;
   if (!righe.length) return null;
@@ -62,7 +63,7 @@ export function reazioneInElenco(confidente: string, catalogo: string): Reazione
 
 /** L'ultima riga del registro degli acquisti di quell'articolo dalla pagina del negozio (per riconoscere quella che il regalo ha appena scritto). */
 const ultimaRigaNegozio = (partita: number, articolo: string): number => {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()) return 0;
+  if (!haTabellaUtente(getDb(), 'registro_acquisti')) return 0;
   return (prepared("SELECT COALESCE(MAX(id), 0) FROM utente.registro_acquisti WHERE partita_id = ? AND articolo_chiave = ? AND fonte = 'negozio'").pluck().get(partita, articolo) as number);
 };
 

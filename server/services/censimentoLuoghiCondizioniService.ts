@@ -11,9 +11,9 @@ import type {
 const CAMPI = {
   luogo: ['chiave', 'nome', 'tipo', 'quartiere_chiave', 'area_chiave', 'condizioni_json', 'orari_json', 'note', 'fonte', 'origine', 'nascosto', 'solo_eventi_confidente', 'fonte_condizioni_json'],
   negozio: ['chiave', 'nome', 'tipo', 'sblocco_json', 'sede_chiave', 'orari_json', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto'],
-  attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'luogo', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
+  attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
   articolo: ['chiave', 'nome', 'negozio_chiave', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave'],
-  quartiere: ['chiave', 'nome', 'sblocco_data', 'fonte', 'condizioni_json', 'condizioni_guida_json', 'fonte_condizioni_json', 'fonte_condizioni_guida_json'],
+  quartiere: ['chiave', 'nome', 'fonte', 'condizioni_json', 'condizioni_guida_json', 'fonte_condizioni_json', 'fonte_condizioni_guida_json'],
   area: ['chiave', 'nome', 'quartiere_chiave', 'dungeon_chiave', 'citta_chiave', 'origine'],
   mappa: ['chiave', 'nome', 'tipo', 'origine', 'area_chiave', 'genitore_chiave'],
   spillo: ['id', 'uid', 'nome', 'tipo', 'origine', 'mappa_chiave', 'area_guida_chiave', 'ruolo_guida', 'riferimento_tipo', 'riferimento_chiave', 'condizioni_json'],

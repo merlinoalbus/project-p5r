@@ -439,6 +439,9 @@ import { migration343 } from './343_avvisi_del_giorno_decisi.js';
 import { migration344 } from './344_pin_attivita_su_luogo.js';
 import { migration345 } from './345_note_darchivio_dei_negozi.js';
 import { migration346 } from './346_un_solo_dove_colonne_tolte.js';
+// 2026-11-10 (lotto L2 «Macchine e fine del listino condiviso»): un luogo dei distributori per Area alla Shujin (347), Central Street (348),
+// macchine della Shujin (349), Tornello (350), Shinjuku (351), nomi dei pin di Kichijoji (352), testi che ripetevano le offerte (353),
+// listino condiviso e sedi aggiuntive tolti (354)
 import { migration347 } from './347_shujin_un_luogo_per_area.js';
 import { migration348 } from './348_central_street_tre_macchine.js';
 import { migration349 } from './349_macchine_shujin.js';
@@ -447,6 +450,33 @@ import { migration351 } from './351_shinjuku_tre_macchine.js';
 import { migration352 } from './352_nomi_pin_kichijoji.js';
 import { migration353 } from './353_testi_che_ripetono_offerte.js';
 import { migration354 } from './354_listino_condiviso_tolto.js';
+// 2026-11-09 (lotto L5 «Mondo e mappe»): tre luoghi da collocare e le frasi residue dei pin (355), via `quartiere.sblocco_data` (356)
+import { migration355 } from './355_luoghi_collocati_e_frasi_dei_pin.js';
+import { migration356 } from './356_sblocco_data_dei_quartieri_tolta.js';
+// 2026-11-09 (lotto L6 «Diario»): via `voce_giornata.produce_json` con controllo e archivio (357; se la migrazione utente 015 non è ancora passata la toglie la utente 69)
+import { migration357 } from './357_produce_json_tolta.js';
+// 2026-11-09 (lotto L7 «Confidenti»): prosa della disponibilità e «dal» tolti (358), testo dei requisiti generato (359), Doti degli incontri e
+// Riverbero di Yusuke (360), date del messaggio di Ryuji per il Rango 7 (361)
+import { migration358 } from './358_prosa_disponibilita_tolta.js';
+import { migration359 } from './359_testo_requisiti_generato.js';
+import { migration360 } from './360_doti_incontri_e_riverbero.js';
+import { migration361 } from './361_date_messaggio_ryuji_r7.js';
+// 2026-11-09 (lotto L8 «Attività, collezioni, pesca»): `attivita.luogo` e `doti_json` tolte (362), colonne vuote di libri, film, trofei e pesca (363),
+// esiti dei lavori, costo del bagno e Razione militare (364), serate della cantante (365)
+import { migration362 } from './362_attivita_luogo_e_doti_tolte.js';
+import { migration363 } from './363_colonne_vuote_di_libri_film_trofei_pesca.js';
+import { migration364 } from './364_esiti_lavori_costo_bagno_razione_militare.js';
+import { migration365 } from './365_serate_cantante_jazz.js';
+// 2026-11-09 (lotto L11 «Compendio e fusioni»): Confidente al massimo, carte di Apsaras e livelli del gruppo (366), date delle Persona (367)
+import { migration366 } from './366_compendio_flag_carte_livelli.js';
+import { migration367 } from './367_compendio_date_delle_persona.js';
+// 2026-11-10 (lotto L13): Tesori da vendere nel catalogo (368), Ombre sciagura con le ricompense (369)
+import { migration368 } from './368_tesori_da_vendere_nel_catalogo.js';
+import { migration369 } from './369_ombre_sciagura_elenco_e_ricompense.js';
+// 2026-11-09 (lotto L8, L8-07): i piatti senza le frasi «non reperiti» (370)
+import { migration370 } from './370_piatti_senza_frasi_non_reperiti.js';
+// 2026-11-09 (lotto L6, L6-10): vincolo del 1° giugno «Furto consigliato del Palazzo di Madarame» (371)
+import { migration371 } from './371_vincolo_del_primo_giugno.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -475,4 +505,6 @@ export const migrations: Migration[] = [
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
   migration344, migration345, migration346,
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
+  migration355, migration356, migration357, migration358, migration359, migration360, migration361, migration362, migration363, migration364,
+  migration365, migration366, migration367, migration368, migration369, migration370, migration371,
 ];

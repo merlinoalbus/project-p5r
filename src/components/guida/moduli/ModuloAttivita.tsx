@@ -10,6 +10,8 @@
 // (`SezioneCampi`, una colonna sotto 768 px, due da lì): Attività, Confidente e Pesca (solo se collegati), Dove e quando, Costo e paga,
 // Effetti ed esiti, Guida del quiz (solo per i lavori o se c'è già). Il guscio (`ModuloCatalogo`) è la `FinestraModifica` comune:
 // piè fisso con Salva e Annulla, conferma alla chiusura con modifiche. Valori, regole e corpo verso l'API sono quelli di prima.
+// I campi rari (Confidente, pesca, sessioni, conteggio) stanno in «Altri dati», ripiegati con il loro riepilogo; le voci degli effetti e le
+// condizioni partono chiuse.
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
@@ -23,7 +25,7 @@ import type { QuizAttivita } from '../../../../shared/quizAttivita';
 import { SceltaLuogo } from '../SceltaLuogo';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA, tracciamentoPerTipo } from '../../../../shared/attivita';
 import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
-import { jsonDi, testoDi, testoOnull, type PropsModulo } from './base';
+import { jsonDi, numeroDi, testoDi, testoOnull, type PropsModulo } from './base';
 import { EditorEsiti } from '../EditorEsiti';
 import { normalizzaEsitiAttivita, type EsitiAttivita } from '../../../../shared/esitiAttivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
@@ -33,7 +35,7 @@ import type { FonteConfidenteAttivitaDto } from '../../../../shared/types';
 import { FonteConfidenteAttivita } from '../../confidenti/FonteConfidenteAttivita';
 import { FontePescaAttivita } from '../../pesca/FontePescaAttivita';
 import { Blocco, Campo } from './campi';
-import { SezioneCampi } from '../../shared/Campo';
+import { SezioneCampi, SezioneRipiegata } from '../../shared/Campo';
 import { useNomiPerEffetti } from './nomiPerEffetti';
 import { AvvisoNomiPerEffetti } from './AvvisoNomiPerEffetti';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
@@ -50,7 +52,7 @@ const ICONA_FASCIA: Record<string, ReactNode> = {
 const OPZIONI_FASCIA: OpzioneIcone[] = FASCE_ATTIVITA.map((f) => ({ chiave: f.chiave, nome: f.nome, icona: ICONA_FASCIA[f.chiave] }));
 const NOMI_CAMPI: Record<string, string> = {
   tipo: 'Tipo videogioco', fascia: 'Fascia propria', condizioni_json: 'Condizioni proprie', effetti_json: 'Effetti propri',
-  doti_json: 'Doti storiche', tracciamento: 'Conteggio', sessioni: 'Sessioni', quiz_json: 'Quiz', costo: 'Costo',
+  tracciamento: 'Conteggio', sessioni: 'Sessioni', quiz_json: 'Quiz', costo: 'Costo',
   paga_yen: 'Paga in yen', paga_massima: 'Paga massima', esiti_json: 'Esiti scelti alla spunta',
   confidente_chiave: 'Progressione del Confidente',
 };
@@ -71,32 +73,38 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
   const ruoloPesca = dati.pesca_ruolo;
   const fontePesca = dati._fontePesca as RegolaPescaDto | null;
   const [confermaPesca, setConfermaPesca] = useState<string | null>(null);
-  const giaCollegata = !!dati._confidenteIniziale && confidente === dati._confidenteIniziale;
   const rawDaRisolvere = [
     ...(dati._effettiDaRisolvere ? ['effetti_json'] : []), ...(dati._quizDaRisolvere ? ['quiz_json'] : []),
     ...(dati._condizioniDaRisolvere ? ['condizioni_json'] : []),
   ];
-  const incompatibiliConfidente = confidente ? [...new Set([...campiAutonomiAttivitaConfidente({ ...dati, fascia: testoOnull(dati.fascia), doti_json: dati.doti_json ?? dati._dotiStoriche }, giaCollegata), ...rawDaRisolvere])] : [];
-  const incompatibiliPesca = pesca ? [...new Set([...campiAutonomiAttivitaPesca({ ...dati, fascia: testoOnull(dati.fascia), doti_json: dati.doti_json ?? dati._dotiStoriche }), ...rawDaRisolvere])] : [];
+  const incompatibiliConfidente = confidente ? [...new Set([...campiAutonomiAttivitaConfidente({ ...dati, fascia: testoOnull(dati.fascia) }), ...rawDaRisolvere])] : [];
+  const incompatibiliPesca = pesca ? [...new Set([...campiAutonomiAttivitaPesca({ ...dati, fascia: testoOnull(dati.fascia) }), ...rawDaRisolvere])] : [];
   const incompatibili = [...new Set([...incompatibiliConfidente, ...incompatibiliPesca])];
   const campiPropri = (!confidente && !pesca) || incompatibili.length > 0;
-  const valoreIncompatibile = (c: string): unknown => c === 'doti_json' ? dati.doti_json ?? dati._dotiStoriche : dati[`_${c.replace('_json', '')}DaRisolvere`] ? dati[`_${c.replace('_json', '')}Raw`] : dati[c];
+  const valoreIncompatibile = (c: string): unknown => dati[`_${c.replace('_json', '')}DaRisolvere`] ? dati[`_${c.replace('_json', '')}Raw`] : dati[c];
   const firmaPesca = JSON.stringify([pesca, ruoloPesca, incompatibiliPesca.map(c => [c, valoreIncompatibile(c)])]);
   const fonte = dati._fonteConfidente as FonteConfidenteAttivitaDto | null;
   const opzioniConfidenti = nomi.confidenti.some((c) => c.chiave === confidente) || !confidente
-    ? nomi.confidenti : [...nomi.confidenti, { chiave: confidente, nome: fonte?.nome ?? confidente }];
+    ? nomi.confidenti : [...nomi.confidenti, { chiave: confidente, nome: fonte?.nome ?? 'Confidente collegato' }];
+  // sulla riga ripiegata: che cosa c'è di diverso dal caso comune, e come si conta
+  const sessioniProprie = numeroDi(dati.sessioni) ?? 1;
+  const riepilogoAltri = [
+    confidente ? `Confidente: ${opzioniConfidenti.find((c) => c.chiave === confidente)?.nome ?? 'collegato'}` : '',
+    pesca ? 'Fonte pesca' : '',
+    campiPropri && !videogioco && sessioniProprie > 1 ? `${sessioniProprie} sessioni` : '',
+    campiPropri && !videogioco ? TRACCIAMENTI_ATTIVITA.find((t) => t.chiave === dati.tracciamento)?.nome ?? '' : '',
+  ].filter(Boolean).join(' · ');
   const normalizzaFonte = () => {
     if (pesca) return;
     imposta({ fascia: null, tracciamento: 'nessuno', sessioni: 1, costo: null, paga_yen: null, paga_massima: null,
-      effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false,
-      ...(!giaCollegata ? { doti_json: [] } : {}) });
+      effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
     impostaCondizioni?.([]);
   };
   const normalizzaPesca = () => {
     if (!pesca || confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi') || confermaPesca !== firmaPesca || !impostaCondizioni) return;
     imposta({ fascia: 'entrambe', tracciamento: ruoloPesca === 'visita' ? 'svolta' : 'nessuno', sessioni: 1,
       costo: null, paga_yen: null, paga_massima: null,
-      doti_json: [], effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
+      effetti_json: [], quiz_json: null, _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
     impostaCondizioni([]);
     setConfermaPesca(null);
   };
@@ -119,6 +127,10 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
             <SelettoreIcone compatto etichetta="Tipo" valore={tipo} opzioni={OPZIONI_TIPO} disabilitato={disabilitato} onCambia={cambiaTipo} />
           </Blocco>
         )}
+        <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
+      </SezioneCampi>
+      {/* i campi rari: subito dopo l'attività, così le sezioni Confidente e Pesca che fanno comparire nascono qui sotto; si aprono da soli se c'è da risolvere qualcosa che sta dentro */}
+      <SezioneRipiegata titolo="Altri dati" riepilogo={riepilogoAltri} aperta={incompatibili.includes('sessioni') || incompatibili.includes('tracciamento') || (!!confidente && !!pesca) || (videogioco && !!pesca)}>
         {(!videogioco || !!confidente) && <Blocco>
           <Selettore etichetta="Progressione del Confidente" valore={confidente} opzioni={opzioniConfidenti} vuoto="Attività autonoma"
             disabilitato={disabilitato} onCambia={(chiave) => imposta({ confidente_chiave: chiave || null })} />
@@ -128,16 +140,21 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
             opzioni={[{ chiave: REGOLA_PESCA, nome: 'Ichigaya · Persona 5 Royal' }, ...(pesca && pesca !== REGOLA_PESCA ? [{ chiave: pesca, nome: `${pesca} · riferimento conservato` }] : [])]}
             onCambia={v => { setConfermaPesca(null); imposta(v ? { pesca_regola_chiave: v } : { pesca_regola_chiave: null, pesca_ruolo: null }); }} />
         </Blocco>
-        <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
-      </SezioneCampi>
+        {campiPropri && !videogioco && <Campo nome="sessioni" etichetta="Sessioni" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Se si completa in più volte" />}
+        {campiPropri && !videogioco && (
+          <Blocco>
+            <Selettore etichetta="Come si conta nella partita" valore={testoDi(dati.tracciamento)} ricerca="mai" disabilitato={disabilitato}
+              opzioni={TRACCIAMENTI_ATTIVITA.map((t) => ({ chiave: t.chiave, nome: t.nome }))} onCambia={(tracciamento) => imposta({ tracciamento })} />
+          </Blocco>
+        )}
+      </SezioneRipiegata>
       {confidente && <SezioneCampi titolo="Confidente">
         <div className="campo--largo flex min-w-0 flex-col gap-2">
-          <p className="m-0 text-sm">La guida degli incontri e delle Doti viene dal Confidente. Cambiare questa scelta conserva i campi: risolvi quelli incompatibili prima di salvare. Rimuovere il collegamento conserva i valori attuali.</p>
-          {fonte?.chiave === confidente ? <div className="flex flex-col gap-1"><p className="m-0 text-xs text-text-muted">Guida attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FonteConfidenteAttivita fonte={fonte} /></div> : <Link className="touch inline-flex self-start items-center text-primary-testo" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}
+          <p className="m-0 text-sm">La guida degli incontri e delle Doti viene dal Confidente.</p>
+          {fonte?.chiave === confidente ? <details className="testo-13"><summary className="touch cursor-pointer">Guida salvata, senza le modifiche in corso</summary><FonteConfidenteAttivita fonte={fonte} /></details> : <Link className="touch inline-flex self-start items-center text-primary-testo" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}
           {incompatibiliConfidente.length > 0 && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Da risolvere: {incompatibiliConfidente.map((c) => NOMI_CAMPI[c] ?? c).join(', ')}.</p>
-            {incompatibiliConfidente.includes('doti_json') && <p className="m-0 whitespace-pre-wrap break-words">Doti storiche: {JSON.stringify(dati.doti_json ?? dati._dotiStoriche)}</p>}
-            <p className="m-0">Il comando seguente toglie fascia, condizioni, effetti e sblocco propri, quiz, costo e paghe numeriche; imposta nessun conteggio e una sessione{!giaCollegata ? ' e svuota le Doti storiche' : ''}. Comprende le parti non leggibili riportate sotto. I testi di paga, premi e altri effetti vanno risolti nei rispettivi campi. Dettagli e note personali restano.</p>
+            <p className="m-0">Il comando seguente toglie fascia, condizioni, effetti e sblocco propri, quiz, costo e paghe numeriche; imposta nessun conteggio e una sessione. Comprende le parti non leggibili riportate sotto. I testi di paga, premi e altri effetti vanno risolti nei rispettivi campi. Dettagli e note personali restano.</p>
             <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la progressione del Confidente e rimuovi i campi propri elencati"
               disabled={disabilitato || !impostaCondizioni || !!pesca} onClick={normalizzaFonte} />
           </div>}
@@ -148,14 +165,14 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
           <Selettore etichetta="Ruolo nella pesca" valore={testoDi(ruoloPesca)} vuoto="Scegli il ruolo" disabilitato={disabilitato}
             opzioni={[{ chiave: 'visita', nome: 'Visita: un solo turno' }, { chiave: 'obiettivi', nome: 'Obiettivi della stessa visita: nessun turno aggiuntivo' }]}
             onCambia={v => { setConfermaPesca(null); imposta({ pesca_ruolo: v || null }); }} />
-          <p className="m-0 text-sm">Condizioni, profili e quote provengono dalla fonte pesca. Cambiare la scelta conserva tutti gli altri campi; rimuovere il collegamento rimuove soltanto regola e ruolo. I contatori personali non vengono toccati.</p>
-          {fontePesca?.chiave === pesca && (ruoloPesca === 'visita' || ruoloPesca === 'obiettivi') && <div className="flex min-w-0 flex-col gap-1"><p className="m-0 text-xs text-text-muted">Fonte attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FontePescaAttivita fonte={{ regola: fontePesca, ruolo: ruoloPesca }} /></div>}
+          <p className="m-0 text-sm">Condizioni, profili e quote provengono dalla fonte pesca.</p>
+          {fontePesca?.chiave === pesca && (ruoloPesca === 'visita' || ruoloPesca === 'obiettivi') && <details className="min-w-0 testo-13"><summary className="touch cursor-pointer">Fonte salvata, senza le modifiche in corso</summary><FontePescaAttivita fonte={{ regola: fontePesca, ruolo: ruoloPesca }} /></details>}
           {confidente && <p role="alert" className="m-0 text-error-testo">La fonte Confidente e la fonte pesca sono incompatibili. Rimuovi esplicitamente uno dei due collegamenti: nessuna scelta viene eliminata automaticamente.</p>}
           {videogioco && <p role="alert" className="m-0 text-error-testo">Il modulo Videogioco richiede round e conteggio per sessioni; la fonte pesca richiede un turno per visita oppure nessun turno aggiuntivo per gli obiettivi. Rimuovi il collegamento pesca per conservare questa classificazione.</p>}
           {!!incompatibiliPesca.length && <div className="flex min-w-0 flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Campi propri incompatibili con la fonte pesca: {incompatibiliPesca.map(c => NOMI_CAMPI[c] ?? c).join(', ')}.</p>
             <dl className="m-0 flex min-w-0 flex-col gap-1">{incompatibiliPesca.map(c => <div key={c}><dt>{NOMI_CAMPI[c] ?? c}</dt><dd className="m-0 whitespace-pre-wrap break-all testo-12">{typeof valoreIncompatibile(c) === 'string' ? String(valoreIncompatibile(c)) : JSON.stringify(valoreIncompatibile(c)) ?? 'null'}</dd></div>)}</dl>
-            <p className="m-0">Il comando rimuove esplicitamente condizioni proprie, effetti e Doti storiche, costo, paghe, sblocco e altri effetti in prosa e quiz. Imposta giorno e sera, una sessione e {ruoloPesca === 'visita' ? 'un turno per visita' : ruoloPesca === 'obiettivi' ? 'nessun conteggio aggiuntivo' : 'il conteggio del ruolo che devi scegliere'}. Dettagli, regole, premi e note rimangono.</p>
+            <p className="m-0">Il comando rimuove esplicitamente condizioni proprie, effetti, costo, paghe, sblocco e altri effetti in prosa e quiz. Imposta giorno e sera, una sessione e {ruoloPesca === 'visita' ? 'un turno per visita' : ruoloPesca === 'obiettivi' ? 'nessun conteggio aggiuntivo' : 'il conteggio del ruolo che devi scegliere'}. Dettagli, regole, premi e note rimangono.</p>
             <label className="touch flex items-start gap-2"><input className="h-5 w-5 shrink-0" type="checkbox" checked={confermaPesca === firmaPesca} disabled={disabilitato || !!confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onChange={e => setConfermaPesca(e.target.checked ? firmaPesca : null)} /><span>Ho riletto i valori mostrati e confermo la rimozione di questi campi propri.</span></label>
             <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la fonte pesca e rimuovi i campi propri dichiarati"
               disabled={disabilitato || !!confidente || videogioco || !impostaCondizioni || confermaPesca !== firmaPesca || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onClick={normalizzaPesca} />
@@ -170,13 +187,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         </Blocco>}
         <SceltaLuogo etichetta="Dove si svolge" valore={(dati.sede_chiave as string | null) ?? null} disabilitato={disabilitato}
           onCambia={(sede) => imposta({ sede_chiave: sede })} />
-        {campiPropri && <Campo nome="sessioni" etichetta={videogioco ? 'Round per finirlo' : 'Sessioni'} tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto={videogioco ? 'Quanti round servono per completarlo' : 'Se si completa in più volte'} />}
-        {campiPropri && !videogioco && (
-          <Blocco>
-            <Selettore etichetta="Come si conta nella partita" valore={testoDi(dati.tracciamento)} ricerca="mai" disabilitato={disabilitato}
-              opzioni={TRACCIAMENTI_ATTIVITA.map((t) => ({ chiave: t.chiave, nome: t.nome }))} onCambia={(tracciamento) => imposta({ tracciamento })} />
-          </Blocco>
-        )}
+        {campiPropri && videogioco && <Campo nome="sessioni" etichetta="Round per finirlo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quanti round servono per completarlo" />}
       </SezioneCampi>
       {/* il costo per tutti (non per i videogiochi), la paga solo per i lavori: senza nessuno dei due la sezione non c'è */}
       {campiPropri && ((!videogioco && tipo !== 'videogioco') || lavoro || incompatibili.includes('paga_yen') || incompatibili.includes('paga_massima')) && (
@@ -191,11 +202,10 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
             poi». Le Doti di un turno dalla voce del Diario entrano nelle ricevute e si applicano con «Applica» (`motoreDiario.beneficiLegacy`);
             quelle del + del contatore restano un promemoria da segnare a mano (`avvisaDotiDaSegnare` in Progressi) */}
         <Blocco largo>
-          <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
+          <EditorEffetti ripiegate voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}
             conRipetuto={testoDi(dati.tracciamento) === 'svolta'}
-            aiuto={testoDi(dati.tracciamento) === 'svolta'
-              ? 'Il gioco dà questi punti a ogni turno: spuntando la voce della giornata si applicano con «Applica» sulla voce; col contatore in Partita → Progressi l\'app te li ricorda e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
-              : undefined} />
+            aiuto={testoDi(dati.tracciamento) === 'svolta' ? 'A ogni turno: il primo vale per le voci senza la spunta, dal secondo per quelle con «vale dalla seconda volta in poi».' : undefined}
+            aiutoEsteso={testoDi(dati.tracciamento) === 'svolta' ? { titolo: 'Come si applicano', testo: 'Spuntando la voce della giornata si applicano con «Applica» sulla voce; col contatore in Partita → Progressi l\'app te li ricorda e li segni tu nella scheda Doti. Un lavoro che dà sempre la stessa Dote ha le due voci uguali.' } : undefined} />
         </Blocco>
         {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}
         {!videogioco && !confidente && !pesca && (testoDi(dati.tracciamento) === 'svolta' || dati.esiti_json != null) && <>

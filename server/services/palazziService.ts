@@ -35,6 +35,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
@@ -60,7 +61,7 @@ export function palazzoDiOgniMappa(): Map<string, string> {
 /** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`, migrazione 112; L4 §8.14); vuota su uno schema
  *  di prima. Un Palazzo senza voce non c'è nella mappa. */
 export function vociBossFinale(): Map<string, string> {
-  if (!(prepared('PRAGMA main.table_info(dungeon)').all() as Array<{ name: string }>).some((c) => c.name === 'voce_boss_finale')) return new Map();
+  if (!haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale')) return new Map();
   return new Map((prepared('SELECT chiave, voce_boss_finale FROM dungeon WHERE voce_boss_finale IS NOT NULL').all() as Array<{ chiave: string; voce_boss_finale: string }>).map((r) => [r.chiave, r.voce_boss_finale]));
 }
 
@@ -68,10 +69,9 @@ interface SpilloCollezionabile { id: number; uid: string | null; tipo: string; m
 
 /** I collezionabili sulle planimetrie di ogni Palazzo. */
 function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, SpilloCollezionabile[]> {
-  const colonne = new Set((prepared('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map((c) => c.name));
   const out = new Map<string, SpilloCollezionabile[]>();
   // l'uid c'è dalla 067; le voci che si segnano le legge `vociDiOgniPin`, che si adatta allo schema (098, 094, o il solo riferimento «punto»)
-  const righe = prepared(`SELECT id, ${colonne.has('uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
+  const righe = prepared(`SELECT id, ${haColonnaMain(getDb(), 'spillo', 'uid') ? 'uid' : 'NULL AS uid'}, tipo, mappa_chiave FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL`).all() as Array<{ id: number; uid: string | null; tipo: string; mappa_chiave: string }>;
   const voci = vociDiOgniPin(true);
   for (const r of righe) {
     const dungeon = palazzi.get(r.mappa_chiave);
@@ -97,7 +97,7 @@ export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: str
 /** La regola del boss di ogni dungeon (`dungeon.regola_boss`, migrazione 113): i Palazzi con la regola dei Memento; vuota su uno schema
  *  di prima. */
 function palazziColBossDellaGuida(): Set<string> {
-  if (!(prepared('PRAGMA main.table_info(dungeon)').all() as Array<{ name: string }>).some((c) => c.name === 'regola_boss')) return new Set();
+  if (!haColonnaMain(getDb(), 'dungeon', 'regola_boss')) return new Set();
   return new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo' AND regola_boss = 'memento'").pluck().all() as string[]);
 }
 
@@ -194,7 +194,7 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string, opzioni: { 
   const radice = radiceDelPalazzo(dungeon);
   if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(radice)) return null;
   const palazzi = palazzoDiOgniMappa();
-  const destinazioni = prepared("SELECT 1 FROM sqlite_master WHERE name = 'spillo_destinazione'").get()
+  const destinazioni = haTabellaMain(getDb(), 'spillo_destinazione')
     ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
     : new Map<number, string>();
   const spilli = prepared('SELECT id, mappa_chiave, riferimento_tipo, riferimento_chiave, seed_identita_json, condizioni_json FROM spillo WHERE mappa_chiave IS NOT NULL ORDER BY id')

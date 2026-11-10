@@ -39,9 +39,12 @@ export const COLONNE_STORICHE_CONFIDENTE: ReadonlyArray<{ colonna: keyof Informa
   { colonna: 'sblocco_requisiti', etichetta: 'Requisiti descritti nella guida' },
 ];
 
+/** Il motivo che resta nello storico quando una revisione non ne indica uno: il campo è facoltativo. */
+export const MOTIVO_NON_INDICATO = 'Nessun motivo indicato.';
+
 export type AzioneInformazioniConfidente =
-  | { azione: 'modifica-manuale'; valori: Partial<InformazioniConfidente>; motivo: string; revisioneAttesa: string }
-  | { azione: 'crea-informazioni'; valori: InformazioniConfidente; motivo: string; revisioneAttesa: string }
+  | { azione: 'modifica-manuale'; valori: Partial<InformazioniConfidente>; motivo?: string; revisioneAttesa: string }
+  | { azione: 'crea-informazioni'; valori: InformazioniConfidente; motivo?: string; revisioneAttesa: string }
   | { azione: 'ripristina-versione'; versione: number; revisioneAttesa: string };
 export type SalvaInformazioniConfidente = AzioneInformazioniConfidente & { anteprimaAttesa: string; operazioneId: string };
 

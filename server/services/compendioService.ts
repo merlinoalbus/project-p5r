@@ -3,6 +3,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
@@ -27,7 +28,7 @@ import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { condizioniDellaGuida, fraseDellaRegola } from './condizioni/fraseCondizioni.js';
-import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js';
+import { condizioneDelRequisito, notaDelRequisito, type RigaRequisito } from './semaforiService.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, StatoCattura, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -116,7 +117,13 @@ function confidenteDellePersonalizzazioni(progressione: readonly unknown[], nomi
   const nome = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck().get(CONFIDENTE_ARMI) as string | undefined;
   if (!nome) return null;
   const avvio = (prepared('SELECT tipo, dati_json, testo FROM confidente_requisito WHERE confidente_chiave = ? AND rango = 1 ORDER BY indice').all(CONFIDENTE_ARMI) as Array<Pick<RigaRequisito, 'tipo' | 'dati_json' | 'testo'>>)
-    .flatMap((r) => { const c = condizioneDelRequisito(r); return c ? [condizioneConTesto(c, nomi)] : []; });
+    .flatMap((r) => {
+      const c = condizioneDelRequisito(r);
+      if (!c) return [];
+      const conTesto = condizioneConTesto(c, nomi);
+      const nota = notaDelRequisito(r, conTesto.testo);
+      return [nota ? { ...conTesto, nota } : conTesto];
+    });
   const ranghi = progressione.flatMap((x) => {
     const rango = x !== null && typeof x === 'object' ? (x as { rango?: unknown }).rango : undefined;
     return typeof rango === 'number' && Number.isInteger(rango) && rango >= 1 && rango <= RANGO_MASSIMO_CONFIDENTE
@@ -585,7 +592,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: leggiScelteDialogo(d.scelte_json).map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) }));
   const conCatalogo = catalogoOggettiDisponibile();
   // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
-  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
     .all(chiave) as Array<{
       ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null;
@@ -617,7 +624,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
       nota: g.nota };
   });
-  const regalabile = (prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((x) => x.name === 'regalabile')
+  const regalabile = haColonnaMain(getDb(), 'confidente', 'regalabile')
     ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
   // L13 (ondata 6, O6-2, migrazione 307): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
   const disp = prepared('SELECT note, note_generali, fonti_json FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string; note_generali: string; fonti_json: string } | undefined;

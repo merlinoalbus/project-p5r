@@ -38,7 +38,7 @@ beforeEach(() => {
 describe('PianiFusione', () => {
   it('chiama l\'API con le opzioni e disegna l\'albero con modi, costi e conteggi', async () => {
     const dati: PianiFusioneDto = {
-      persona: fus(jack), sconto: 0, opzioni: { profondita: 3, alternative: 3, catture: true, livelloMax: 20, slotFortunato: false }, disponibilita: { scorta: 1, registro: 1 }, motivo: null, skillRichieste: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja', elemento: 'support', elementoNome: 'Supporto' }],
+      persona: fus(jack), sconto: 0, troncata: false, opzioni: { profondita: 3, alternative: 3, catture: true, livelloMax: 20, slotFortunato: false }, disponibilita: { scorta: 1, registro: 1 }, motivo: null, skillRichieste: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja', elemento: 'support', elementoNome: 'Supporto' }],
       piani: [{
         costo: 3956, profondita: 1, catture: 0, evocazioni: 1, fusioni: 1,
         radice: { persona: fus(jack), modo: 'fusione', tipo: 'normale', costo: 3956, skillPortate: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja' }], skillDaLivello: [], figli: [
@@ -50,19 +50,19 @@ describe('PianiFusione', () => {
     getPianiFusione.mockResolvedValue(dati);
     render(<MemoryRouter><PianiFusione persone={[jack, succube, saki]} partitaId={7} livelloProtagonista={20} inizialeId={88} /></MemoryRouter>);
     expect(await screen.findByText('Piano 1')).toBeInTheDocument();
-    expect(getPianiFusione).toHaveBeenCalledWith(88, { partita: 7, profondita: 3, alternative: 3, catture: true, limitaLivello: true, skill: [], slotFortunato: false });
+    expect(getPianiFusione).toHaveBeenCalledWith(88, { partita: 7, profondita: 3, alternative: 3, catture: true, limitaLivello: false, skill: [], slotFortunato: false });
     expect(screen.getAllByText('Tarukaja')).toHaveLength(2);
     expect(screen.getByText(/1 fusione · profondità 1 · 1 dal Registro/)).toBeInTheDocument();
     expect(screen.getByText('In scorta')).toBeInTheDocument();
-    expect(screen.getByText(/Dal Registro · 3\D?956 ¥/)).toBeInTheDocument();
+    expect(screen.getByText(/Dal Registro · circa 3\D?956 ¥/)).toBeInTheDocument();
     expect(screen.getByText('Fusione normale')).toBeInTheDocument();
     // cambio opzioni → nuova chiamata
     await act(async () => { screen.getByRole('button', { name: 'Ammetti catture' }).click(); });
-    expect(getPianiFusione).toHaveBeenLastCalledWith(88, { partita: 7, profondita: 3, alternative: 3, catture: false, limitaLivello: true, skill: [], slotFortunato: false });
+    expect(getPianiFusione).toHaveBeenLastCalledWith(88, { partita: 7, profondita: 3, alternative: 3, catture: false, limitaLivello: false, skill: [], slotFortunato: false });
   });
 
   it('senza piani mostra il suggerimento; senza partita il limite di livello è disabilitato', async () => {
-    getPianiFusione.mockResolvedValue({ persona: fus(jack), opzioni: { profondita: 3, alternative: 3, catture: false, livelloMax: null, slotFortunato: false }, disponibilita: { scorta: 0, registro: 0 }, motivo: null, piani: [], skillRichieste: [], sconto: 0 } satisfies PianiFusioneDto);
+    getPianiFusione.mockResolvedValue({ persona: fus(jack), troncata: false, opzioni: { profondita: 3, alternative: 3, catture: false, livelloMax: null, slotFortunato: false }, disponibilita: { scorta: 0, registro: 0 }, motivo: null, piani: [], skillRichieste: [], sconto: 0 } satisfies PianiFusioneDto);
     render(<MemoryRouter><PianiFusione persone={[jack]} partitaId={null} livelloProtagonista={null} inizialeId={88} /></MemoryRouter>);
     expect(await screen.findByText(/Nessun piano trovato/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Fino al livello/ })).toBeDisabled();

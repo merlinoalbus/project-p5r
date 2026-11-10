@@ -15,7 +15,8 @@
 // `disponibilitaStrutturataService` senza un giro di import.
 // ============================================================
 
-import { nowIso, prepared } from '../db/dbService.js';
+import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { registraEvento } from './storicoService.js';
@@ -26,7 +27,7 @@ let romanzabili: Set<string> | null = null;
 registraCacheDiGioco(() => { romanzabili = null; });
 export function confidentiRomanzabili(): ReadonlySet<string> {
   if (!romanzabili) {
-    const conColonna = !!prepared("SELECT 1 FROM pragma_table_info('confidente') WHERE name = 'romanzabile'").get();
+    const conColonna = haColonnaMain(getDb(), 'confidente', 'romanzabile');
     romanzabili = new Set(conColonna ? prepared('SELECT chiave FROM confidente WHERE romanzabile = 1').pluck().all() as string[] : []);
   }
   return romanzabili;
@@ -43,7 +44,7 @@ export function relazioniDellaPartita(partitaId: number): ReadonlySet<string> {
 }
 
 /** La colonna del giorno d'inizio (utente 060) c'è: su uno schema di prima la relazione si legge senza giorno (null). */
-const conGiornoDInizio = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('confidente_partita', 'utente') WHERE name = 'relazione_romantica_dal'").get();
+const conGiornoDInizio = (): boolean => haColonnaUtente(getDb(), 'confidente_partita', 'relazione_romantica_dal');
 
 /**
  * L13 (ondata 11, O11-1; risposta dell'utente del 2026-10-31 «Sì, in automatico» sui doni «se fidanzata»): le relazioni romantiche della

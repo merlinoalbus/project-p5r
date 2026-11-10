@@ -43,7 +43,7 @@ export function CorrezioneSchedaPalazzo({ d, memento, onChiudi, onSalvato }: { d
   // L13 O6-3: «senza fine» solo dove il gioco non fissa una scadenza, come vuole il server: i Memento e i Palazzi col boss dei Memento (Iweleth)
   const senzaFinePossibile = memento || d.regolaBoss === 'memento';
   return (
-    <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
+    <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} larga etichetta="Correggi la scheda"
       {...(onChiudi ? { aperta: true, onChiudi } : {})}
       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloMin: numeroInBozza(d.livelloConsigliato.min), livelloMax: numeroInBozza(d.livelloConsigliato.max), note: d.note, ...bozzaDate(d.date) })}
       onSalva={async (b) => {

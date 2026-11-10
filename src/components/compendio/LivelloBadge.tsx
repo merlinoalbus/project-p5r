@@ -7,7 +7,7 @@ interface Props {
   /** Dimensione: piccola per piastrelle ed elenchi, grande per la scheda. */
   grande?: boolean;
   className?: string;
-  /** true: il livello lo dice già il nome di chi lo contiene (il collegamento della piastrella): niente ruolo né etichetta, per non farlo leggere due volte; il suggerimento al passaggio resta. */
+  /** true: il livello lo dice già il nome di chi lo contiene (il collegamento della piastrella): niente ruolo né etichetta, per non farlo leggere due volte. */
   decorativo?: boolean;
 }
 

@@ -18,7 +18,7 @@ const FINESTRE = new Map([['kamoshida', { dal: '04-12', al: '05-02' }], ['madara
 
 /**
  * Stato di disponibilità di base per le prove: tutte le doti al rango 1, Sojiro al rango 1 e Iwai a 0, Ryuji in squadra e
- * Akechi fuori, mercoledì 20 aprile di giorno col sereno, tre quartieri con la loro data di sblocco e l'arco calcolato
+ * Akechi fuori, mercoledì 20 aprile di giorno col sereno, tre quartieri col loro nome e l'arco calcolato
  * dalle finestre dei Palazzi; i campi passati in `sovrascrivi` sostituiscono quelli predefiniti.
  */
 function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilita {
@@ -27,7 +27,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
     arcaniInScorta: new Set(), personeConAbilita: new Set(), palazziConclusi: new Map(), richiesteCompletate: new Set(),
     ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), membriSquadra: new Set<string>(['ryuji']), membriFuoriSquadra: new Set<string>(['akechi']), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOra: { meteo: 'sereno', origine: 'guida' }, conferme: new Set(),
     giornoSettimana: 'mercoledi',
-    sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
+    sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara' }], ['shinjuku', { nome: 'Shinjuku' }], ['kichijoji', { nome: 'Kichijoji' }]]),
     articoliOttenuti: new Set(), letture: new Set(), contatori: new Map(), attivitaSvolte: new Map(), spesaPerNegozio: new Map(), puntiNegozio: new Map(), eventi: new Set(),
     arcoCorrente: arcoAllaData('04-20', FINESTRE),
     ...sovrascrivi,

@@ -57,7 +57,7 @@ export function Griglia({ children }: { children: ReactNode }) {
 }
 
 /** Un elenco di testi come righe in ordine: ogni voce ha il suo campo e «Togli», in fondo «Aggiungi» (L11 · B11, modifica dei testi della guida). */
-export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 2000, lungo = true }: {
+export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 2000, lungo = true, affiancabile = false }: {
   etichetta: string;
   voci: string[];
   onCambia: (voci: string[]) => void;
@@ -66,13 +66,15 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
   max?: number;
   /** Le voci sono frasi: si scrivono in un campo a più righe. */
   lungo?: boolean;
+  /** Occupa mezza riga invece di tutta (due elenchi corti vicini, da 768 px; sotto resta una colonna): L6-07, `EditorGiorno`. */
+  affiancabile?: boolean;
 }) {
   /** Cambia il testo della voce in posizione `i`. */
   const cambia = (i: number, testo: string) => onCambia(voci.map((v, j) => (j === i ? testo : v)));
   // le voci si tolgono una per una: la chiave di riga è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(voci.length);
   return (
-    <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
+    <fieldset className={`regole-editor ${affiancabile ? '' : 'campo--largo'} flex min-w-0 flex-col gap-2`}>
       <legend>{etichetta}</legend>
       {voci.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna voce.</p>}
       {voci.map((v, i) => (

@@ -242,7 +242,8 @@ export interface RequisitiConfidenteDto {
   confidente: string;
   ranghi: Array<{
     rango: number;
-    requisiti: Array<{ indice: number; condizione: Condizione; testo: string; descrizione: string }>;
+    /** `descrizione` è la frase generata dalla condizione; `nota` è il testo proprio del requisito, '' se non ne ha (L7-02). */
+    requisiti: Array<{ indice: number; condizione: Condizione; descrizione: string; nota: string }>;
     /** Il rango è diverso da come lo dà la guida (si può ripristinare). */
     modificato: boolean;
   }>;
@@ -452,6 +453,8 @@ export interface RicettaFusioneDto {
   tipo: TipoFusione;
   /** Costo stimato in yen: somma sugli ingredienti di 27·L² + 126·L + 2147. */
   costo: number;
+  /** Ingredienti (id) Persona DLC mai entrate in scorta nella partita: il primo richiamo è gratuito. `costo` li conta a prezzo pieno. */
+  primoRichiamo: number[];
 }
 
 /** Esito della fusione diretta A+B. */
@@ -507,6 +510,8 @@ export interface PianoFusioneDto {
 export interface PianiFusioneDto {
   persona: PersonaFusioneDto;
   piani: PianoFusioneDto[];
+  /** Vero se la ricerca si è fermata al tetto di calcolo: `piani` sono i migliori trovati fin lì. */
+  troncata: boolean;
   opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null; slotFortunato: boolean };
   /** Skill richieste (propagate lungo la catena). */
   skillRichieste: Array<{ id: number; nome: string; nomeIt: string; elemento: string; elementoNome: string }>;
@@ -728,6 +733,8 @@ export interface SemaforoRequisitoDto {
   /** Il tipo della condizione valutata (`RequisitoSpillo['tipo']`), o «manuale» per i requisiti dei Confidenti che si confermano a mano. */
   tipo: string;
   testo: string;
+  /** L7-02: la nota propria di un requisito di rango, se ne ha una (`testo` è la frase generata). */
+  nota?: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Viene dal **negozio**, non dall'articolo: l'articolo la eredita perche' a bottega chiusa non
    *  si compra niente, ma non e' un problema suo e il suo cartellino non deve dirlo. */
@@ -1203,6 +1210,8 @@ export interface DoteDaSegnareDto {
 }
 
 export interface DomandeDto {
+  /** Solo togliendo la spunta dalla Guida: ciò che l'annullo della voce collegata non ha potuto riportare com'era. */
+  avvisiSpunta?: string[];
   /** Solo nella risposta di una spunta: la nota di Conoscenza della risposta giusta, da segnare nelle Doti (assente quando la spunta è passata dalla voce del Diario: lì la Conoscenza è un «Applica»). */
   daSegnare?: DoteDaSegnareDto[];
   /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
@@ -1243,7 +1252,7 @@ export interface OggettiGuidaDto {
   /** L8-03: `confidente` è il Confidente della personalizzazione (Iwai) letto dal DB, con le condizioni del suo rango 1 (`confidente_requisito`,
    *  il punto unico dei requisiti dei Confidenti) e la condizione di ogni rango della progressione, per lo stato nella partita. */
   personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string;
-    confidente?: { chiave: string; nome: string; avvio: CondizioneSpilloDto[]; ranghi: Array<{ rango: number; condizione: CondizioneSpilloDto }> } | null };
+    confidente?: { chiave: string; nome: string; avvio: Array<CondizioneSpilloDto & { nota?: string }>; ranghi: Array<{ rango: number; condizione: CondizioneSpilloDto }> } | null };
   abiti: { introduzione: string; elenco: Array<IdentitaOggettoGuida & { nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
   scambi: Array<{ venditore: string; dove: string; quando: string; offerte: Array<{ ricevi: string; dai: string; note: string | null }>; fonte: string; verificato: boolean }>;
   /** Dopo M7 gli scambi aprono il listino esistente, non una seconda tabella commerciale. Testi precedenti nelle note del negozio. */
@@ -1520,7 +1529,7 @@ export interface StatoAzioneDto {
 export type GenereVoce = 'azione' | 'promemoria';
 
 /**
- * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o evento
+ * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o promemoria
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
@@ -1538,6 +1547,13 @@ export interface DialogoVoceDto {
 export interface ApplicatoDallaSpuntaDto { id: string; testo: string; applicatoIl: string }
 
 export interface AzionePercorsoDto {
+  /** L6-02: vero solo se la voce è di un giorno del diario validato (fino a `ULTIMO_GIORNO_VALIDATO`) E almeno una partita ha la sua spunta:
+   *  modificarla o eliminarla tocca spunte già fatte, e l'editor e la conferma d'eliminazione lo dicono. Il server la scrive sempre
+   *  (opzionale solo perché le voci costruite a mano, nei test del client, non la portano: assente vale falso). */
+  validataConSpunte?: boolean;
+  /** L6-03: solo nella risposta di creazione e modifica, quando tipo e collegamento formano una coppia nuova diversa da quella attesa dal tipo
+   *  (`RIFERIMENTO_DI_TIPO`): un avviso in italiano, mai un rifiuto; la voce è salvata com'è. Una voce salvata senza cambiare tipo né collegamento non lo porta. */
+  avvisoCollegamento?: string;
   /** Solo riferimenti strutturati già presenti: nessuna riscrittura del testo o classificazione per somiglianza. */
   oggettoRiferimento?: RiferimentoOggettoDto | null;
   oggettiCitati?: RiferimentoOggettoDto[];
@@ -1556,7 +1572,7 @@ export interface AzionePercorsoDto {
   giorno: string;
   fascia: 'giorno' | 'sera';
   genere: GenereVoce;
-  /** Il testo della voce (il titolo, per un evento). */
+  /** Il testo della voce (il titolo, per un promemoria). */
   azione: string;
   tipo: 'confidente' | 'dote' | 'palazzo' | 'richiesta' | 'acquisto' | 'lavoro' | 'libro' | 'dvd' | 'attivita' | 'esame' | 'trama' | 'velluto' | 'altro';
   riferimento: RiferimentoAzioneDto | null;
@@ -1618,7 +1634,7 @@ export interface AzionePercorsoDto {
   scelteEsito?: SceltaEsitoVoceDto[];
   /** Fatta nella partita. */
   fatta: boolean;
-  /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): Doti, punti e turni si annullano togliendola, le letture restano. */
+  /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): punti, turni e letture si annullano togliendola; le Doti restano a mano. */
   effetti: EffettiAzioneDto | null;
   /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
   stato: StatoAzioneDto | null;
@@ -1873,7 +1889,7 @@ export interface PercorsoGiornoDto {
   precedente: string | null;
   successivo: string | null;
   dataCorrente: string | null;
-  /** Azioni fatte nella partita (eventi, scadenze e promemoria non si spuntano e non contano). */
+  /** Azioni fatte nella partita (i promemoria non si spuntano e non contano). */
   fatte: number;
   /** Con una partita: il meteo del giorno nella partita, di giorno e di sera (Partita → Oggi). */
   meteoPartita: MeteoGiornoDto | null;
@@ -2016,6 +2032,8 @@ export interface RicercaArticoliDto {
 // ---- Cruciverba di Leblanc (Fase 7.5) ----
 
 export interface CruciverbaDto {
+  /** Solo togliendo la spunta dalla Guida: ciò che l'annullo della voce collegata non ha potuto riportare com'era. */
+  avvisiSpunta?: string[];
   /** Solo nella risposta di una spunta: la nota di Conoscenza del cruciverba, da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   /** 'MM-GG' del calendario di gioco. */
@@ -2222,7 +2240,6 @@ export interface QuartiereRiassuntoDto {
   illustrazione: IllustrazioneDto;
   /** Quante Aree ha il quartiere (L2). */
   aree: number;
-  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
@@ -2322,7 +2339,6 @@ export interface LuogoDettaglioDto extends LuogoDto {
 export interface QuartiereDettaglioDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;
-  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
@@ -2372,7 +2388,6 @@ export interface AttivitaDto {
   chiave: string;
   nome: string;
   tipo: 'mini-gioco' | 'lavoro' | 'studio' | 'lettura' | 'film' | 'dvd' | 'videogioco' | 'allenamento' | 'cibo' | 'sfida' | 'altro';
-  luogo: string;
   /** Il quartiere dell'attività, derivato dal luogo-sede (`sedeChiave` → luogo → quartiere); null per le attività senza sede. */
   quartiereChiave: string | null;
   quartiereNome: string | null;
@@ -2381,8 +2396,6 @@ export interface AttivitaDto {
   sblocco: string | null;
   /** Round richiesti per completare un videogioco; null per le altre attività. */
   sessioni: number | null;
-  /** `dote` nulla = effetto su una Dote variabile/non confermata, spiegato in `condizione`. */
-  doti: Array<{ dote: DoteChiave | null; note: number | null; condizione: string | null }>;
   /** Paga in yen a turno e massimo dichiarato (migrazione 075); solo per i lavori. */
   pagaYen: number | null;
   pagaMassima: number | null;
@@ -2425,7 +2438,7 @@ export interface LibroDto {
   chiave: string;
   nome: string;
   /** L13 (O7-4, migrazione 313): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
-   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo (con la nota della guida dove l'articolo non c'è). */
+   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo. */
   prezzo: number | null;
   /** Le Richieste che danno il libro in ricompensa (`ricompensa_oggetto`). */
   ricompensaDi?: Array<{ tipo: 'richiesta'; chiave: string; nome: string }>;
@@ -2434,7 +2447,7 @@ export interface LibroDto {
   sbloccaLuogo: string | null;
   sbloccaLuogoNome: string | null;
   /** L6 (R6-11): i posti che leggerlo apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (non
-   *  dalla frase `sblocca`, che resta nota, né dall'effetto «sblocca-luogo»). Vuoto se non apre niente. */
+   *  dall'effetto «sblocca-luogo»). Vuoto se non apre niente. */
   apre?: Array<Omit<PostoApertoDto, 'tipo'> & { tipo: 'luogo' | 'quartiere' }>;
   sessioni: number | null;
   dettagli: string | null;
@@ -2593,6 +2606,11 @@ export interface NegoziazioneDomandaDto {
   }>;
 }
 
+/** Una riga dell'elenco delle Ombre sciagura: il Palazzo o il Dedalo (come lo scrive la guida) e le Ombre che vi compaiono; `soloMemento` è l'asterisco della guida. */
+export interface OmbreSciaguraLuogoDto { sezione: 'palazzi' | 'dedali'; luogo: string; ombre: Array<{ nome: string; soloMemento?: boolean }> }
+/** L'oggetto raro rilasciato da un'Ombra sciagura. */
+export interface OmbreSciaguraRicompensaDto { ombra: string; oggetto: string }
+
 export interface BattagliaDto {
   fonti: { principale: string; note: string };
   sistema: { urlFonte: string; avvioScontro: string; comandi: string[]; esitiColpo: { debole: string; critico: string; tecnico: string; block: string; resiste: string }; unoMore: string; statiAlterati: Array<{ stato: string; effetto: string }>; notaFineBattaglia: string };
@@ -2612,7 +2630,11 @@ export interface BattagliaDto {
      *  compare fra i verdetti non è indifferente: non è stata verificata. */
     domande?: NegoziazioneDomandaDto[];
   };
-  ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
+  ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string;
+    /** L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` finché la 369 non è applicata. */
+    elenco: OmbreSciaguraLuogoDto[] | null;
+    /** L13-04 (migrazione 369): l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente finché la 369 non è applicata. */
+    ricompenseElenco?: OmbreSciaguraRicompensaDto[]; incertezze: string };
   /** `livelloMinimo` (L8-03, migrazione 340): il livello consigliato più basso come numero, da confrontare col livello della partita. */
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; livelloMinimo?: number | null; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
   demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
@@ -3058,9 +3080,6 @@ export interface DivergenzaDto {
 /** L4 (§2.3, §4.3): una scheda della guida senza mappa e senza voce (i dati di prima): «Schede da sistemare» della scheda del Palazzo,
  *  con «Crea la voce» o «Collega a una voce». Mai cancellata senza cestino. */
 export interface SchedaDaSistemareDto { id: number; nome: string; descrizione: string; tipo: string; infiltrazione: string; infiltrazioneNome: string; posizione: { x: number; y: number } | null }
-
-/** L4 (§3.2): un gruppo di copie di una voce secondo la regola dell'utente (R4-15: stesso testo, stessi pin, stessa infiltrazione). */
-export interface GruppoCopieDto { infiltrazione: string; voci: Array<{ chiave: string; nome: string; ordine: number }>; pin: number[] }
 
 /**
  * Una regola di atterraggio di un Palazzo (2026-10-04): quando vale e dove si atterra toccandolo sulla mappa di Tokyo. Le regole
@@ -4112,7 +4131,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];
-export type FormatoCampoCorrezione = 'condizioni' | 'giorno';
+export type FormatoCampoCorrezione = 'condizioni' | 'giorno' | 'persone' | 'persone-in-ordine';
 export interface CampoCorrezioneDto {
   /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione e di `campi` nel ripristino. */
   percorso: string;
@@ -4123,9 +4142,12 @@ export interface CampoCorrezioneDto {
   /** Lunghezza massima di un testo o valore massimo di un numero, quando c'è. */
   max?: number;
   opzioni?: Array<{ chiave: string; nome: string }>;
-  /** L8-03: un testo con una forma propria. `condizioni`: il JSON di un elenco di condizioni del vocabolario unico (si scrive con l'editor
-   *  delle condizioni); `giorno`: un giorno del calendario di gioco «MM-GG». Il server lo ricontrolla. */
+  /** Un campo con una forma propria. `condizioni`: il JSON di un elenco di condizioni del vocabolario unico (si scrive con l'editor delle
+   *  condizioni); `giorno`: un giorno del calendario di gioco «MM-GG»; `persone` e `persone-in-ordine`: un elenco di Persona scelte da `opzioni`
+   *  (nome canonico come chiave, nome italiano come etichetta), con la seconda forma se conta la posizione. Il server lo ricontrolla. */
   formato?: FormatoCampoCorrezione;
+  /** Quante voci deve avere almeno un elenco per poter essere salvato. Il server lo ricontrolla. */
+  minimoVoci?: number;
   /** Il valore che le pagine mostrano adesso, e quello della guida (identici se il campo non è corretto). */
   valore: ValoreCampoCorrezione;
   valoreGuida: ValoreCampoCorrezione;

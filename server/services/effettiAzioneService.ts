@@ -7,9 +7,8 @@
 // e, per un incontro con un Confidente, aggiunge le note della risposta scelta. **Le Doti non le
 // tocca** (scelta dell'utente, 2026-09-30: si segnano solo a mano): `doti`, e le Doti di letture,
 // turni e incontro, sono ciò che il gioco dà, da ricordare. Ciò che ha applicato si scrive
-// (`EffettiAzioneDto`) per toglierlo identico togliendo la spunta: punti del Confidente e turni. Le
-// letture no: la spunta dice «l'ho fatto quel giorno», la lettura «l'ho letto», e si disfa dalla
-// pagina dove quel dato vive.
+// (`EffettiAzioneDto`) per toglierlo identico togliendo la spunta: punti del Confidente, turni e
+// letture (che tornano a `prima` solo se l'avanzamento vale ancora `dopo`, `annullaLetture`).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
@@ -23,7 +22,7 @@ import { origineNoteDellaVoce, puntiDote } from './puntiDoti.js';
 import { avanzamentoLettura, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 import { z } from 'zod';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import { testoOrigineEsito, type SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
@@ -213,8 +212,32 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(esami.length ? { esami } : {}), ...(relazione ? { relazione } : {}) };
 }
 
-/** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati, l'incontro e il piazzamento agli esami (le Doti no). */
-export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): void {
+/** Riporta le letture della ricevuta com'erano (`prima`), ognuna solo se l'avanzamento della partita vale ancora quello che la spunta aveva
+ *  scritto (`dopo`): se dopo è cambiato (a mano, da un'altra spunta) resta e lo dice un avviso. Si scorre al contrario di come la spunta le
+ *  ha applicate: due visioni dello stesso film nella stessa voce (0→1, poi 1→2) tornano 2→1 e 1→0, non si fermano alla prima. Una ricevuta con
+ *  `prima` = `dopo` non ha mosso niente e non fa niente. Passa da `impostaLettura`, l'unico punto che scrive l'avanzamento: rifà da sé il registro
+ *  dei conseguimenti (`effetto_lettura_partita`, anche una visione per volta al cinema). Le Doti non si toccano: restano a mano, e le proposte
+ *  «Applica» della voce le chiude `riconciliaBeneficiVoce`. Restituisce gli avvisi. */
+function annullaLetture(partitaId: number, letture: NonNullable<EffettiAzioneDto['letture']>): string[] {
+  const avvisi: string[] = [];
+  for (const l of [...letture].reverse()) {
+    if (l.dopo === l.prima) continue;
+    let attuale: number;
+    try { attuale = avanzamentoLettura(partitaId, l.categoria, l.chiave).avanzamento; }
+    catch (err) {
+      // la riga non è più nel catalogo (nascosta o tolta dopo la spunta): non c'è un avanzamento da riportare, e la spunta si toglie comunque
+      if (err instanceof HttpError && err.status === 404) { avvisi.push(`${l.nome}: non è più nel catalogo, l'avanzamento resta com'è.`); continue; }
+      throw err;
+    }
+    if (attuale !== l.dopo) { avvisi.push(`${l.nome}: l'avanzamento è cambiato dopo la spunta (ora ${attuale}, la spunta lo aveva portato a ${l.dopo}) e resta com'è.`); continue; }
+    impostaLettura(partitaId, l.categoria, l.chiave, { avanzamento: l.prima });
+  }
+  return avvisi;
+}
+
+/** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati, l'incontro, il piazzamento agli esami, la
+ *  relazione e le letture (che tornano a `prima` se nessuno le ha cambiate dopo). Le Doti no: si segnano a mano. Restituisce gli avvisi. */
+export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): string[] {
   if (!schemaRicevutaLegacy.safeParse(e).success) throw httpErrors.conflict('ricevuta-spunta-illeggibile', 'La ricevuta storica non è riconoscibile: nessun annullo è stato eseguito.');
   annullaEffetti(partitaId, e);
   for (const t of e.turni ?? []) togliTurno(partitaId, t.attivita, t.ordine);
@@ -223,6 +246,7 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
   for (const x of e.esami ?? []) annullaPiazzamentoDallaSpunta(partitaId, x);
   // L13 (O10-2): la relazione romantica torna com'era, solo se nella partita vale ancora quella della spunta
   if (e.relazione) annullaRelazioneDallaSpunta(partitaId, e.relazione);
+  return annullaLetture(partitaId, e.letture ?? []);
 }
 
 /** Le Doti di un effetto per lo storico: note e punti insieme («Coraggio ♪ · 2 punti»), mai un «+N» nudo. */

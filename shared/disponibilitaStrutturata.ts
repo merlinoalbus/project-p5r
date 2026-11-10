@@ -30,6 +30,9 @@ export type EccezioneDisponibilita =
   | { tipo: 'giorni-rango'; rango: number; giorni: GiornoDisponibilita[] }
   /** I giorni del calendario di gioco («MM-GG») in cui non si incontra. */
   | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' }
+  /** L7-07 (migrazione 361): l'incontro del rango indicato si fa solo in questi giorni del calendario di gioco («MM-GG»), che prendono il posto dei
+   *  giorni della settimana; le fasce restano quelle del rango (Ryuji, rango 7: le sere del suo messaggio). Una per rango. */
+  | { tipo: 'solo-date-rango'; rango: number; date: string[] }
   /** L13 (ondata 10, O10-2): con la relazione romantica iniziata nella partita le fasce sono queste, al posto delle generali e di quelle di un
    *  rango (`fascia-rango`). Una sola per Confidente; ha senso per un Confidente romanzabile (Takemi: «solo di sera», migrazione 325). */
   | { tipo: 'con-relazione'; fasce: FasciaDisponibilita[] };
@@ -39,7 +42,7 @@ export interface DisponibilitaStrutturata {
   giorni: GiornoDisponibilita[];
   fasce: FasciaDisponibilita[];
   eccezioni: EccezioneDisponibilita[];
-  /** 'MM-GG' da cui è disponibile, se diverso dallo sblocco (le Gemelle, dal 18/5). */
+  /** 'MM-GG' da cui è disponibile: la data del requisito di rango 1 di tipo «data» (L7-06, migrazione 358: una sola fonte); null se il rango 1 non ne ha. */
   dal: string | null;
   motivoSenzaLuogo: string;
   fonte: string | null;
@@ -125,13 +128,24 @@ function eccezioneLeggibile(e: unknown): e is EccezioneDisponibilita {
     case 'fascia-rango': return typeof o.rango === 'number' && Array.isArray(o.fasce);
     case 'giorni-rango': return typeof o.rango === 'number' && Array.isArray(o.giorni);
     case 'date': return Array.isArray(o.date) && o.date.every((d) => typeof d === 'string');
+    case 'solo-date-rango': return typeof o.rango === 'number' && Array.isArray(o.date) && o.date.every((d) => typeof d === 'string');
     case 'con-relazione': return Array.isArray(o.fasce);
     default: return false;
   }
 }
 
-/** Legge la struttura dalle colonne della riga; una colonna illeggibile dà una struttura vuota di quel campo, mai un'eccezione. */
-export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; dal: string | null; motivo_senza_luogo: string; fonte: string | null }): DisponibilitaStrutturata {
+/** Quante eccezioni salvate non si sanno leggere (le righe `pioggia` rimaste da prima della 306 non contano): chi legge il DB lo dice nel log. */
+export function eccezioniIlleggibili(testo: string): number {
+  try {
+    const v = JSON.parse(testo) as unknown;
+    if (!Array.isArray(v)) return 1;
+    return v.filter((e) => !eccezioneLeggibile(e) && (e as { tipo?: unknown } | null)?.tipo !== 'pioggia').length;
+  } catch { return 1; }
+}
+
+/** Legge la struttura dalle colonne della riga; una colonna illeggibile dà una struttura vuota di quel campo, mai un'eccezione. `dal` non è una colonna
+ *  (L7-06): lo passa chi lo ha letto dal requisito di rango 1. */
+export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; motivo_senza_luogo: string; fonte: string | null }, dal: string | null = null): DisponibilitaStrutturata {
   const lista = <T>(testo: string, ammessi: readonly T[]): T[] => {
     try { const v = JSON.parse(testo) as unknown; return Array.isArray(v) ? v.filter((x): x is T => (ammessi as readonly unknown[]).includes(x)) : []; } catch { return []; }
   };
@@ -144,7 +158,7 @@ export function strutturaDaColonne(r: { modo: string; giorni_settimana_json: str
   return {
     modo: (MODI_DISPONIBILITA as readonly string[]).includes(r.modo) ? r.modo as ModoDisponibilita : 'settimanale',
     giorni: lista(r.giorni_settimana_json, GIORNI_DISPONIBILITA), fasce: lista(r.fasce_orarie_json, FASCE_DISPONIBILITA),
-    eccezioni, dal: r.dal, motivoSenzaLuogo: r.motivo_senza_luogo, fonte: r.fonte,
+    eccezioni, dal, motivoSenzaLuogo: r.motivo_senza_luogo, fonte: r.fonte,
   };
 }
 
@@ -166,9 +180,15 @@ export function valutaDisponibilita(s: DisponibilitaStrutturata, c: ContestoDisp
   const prossimo = (c.rango ?? 0) + 1;
   // un giorno del calendario escluso vale qualunque sia il giorno della settimana
   if (s.eccezioni.some((e) => e.tipo === 'date' && e.date.includes(c.data!))) return { stato: 'non-disponibile', causa: 'date', motivo: `${conArticoloMaiuscolo(c.data)} non si incontra.` };
+  // L7-07: se il rango successivo si incontra solo in certe date, fuori da quelle non c'è; una data elencata vale al posto del giorno della settimana
+  const soloDate = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'solo-date-rango' }> => e.tipo === 'solo-date-rango' && e.rango === prossimo);
+  if (soloDate && !soloDate.date.includes(c.data)) {
+    const prossima = soloDate.date.filter((d) => ordineGioco(d) > ordineGioco(c.data!)).sort((a, b) => ordineGioco(a) - ordineGioco(b))[0];
+    return { stato: 'non-disponibile', causa: 'date', motivo: `Per il rango ${prossimo} si incontra solo in date precise: ${prossima ? `la prossima è ${dataConArticolo(prossima)}` : 'non ne restano altre'}.` };
+  }
   // i giorni del rango successivo, se ha i suoi, prendono il posto di quelli generali
   const giorniRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'giorni-rango' }> => e.tipo === 'giorni-rango' && e.rango === prossimo);
-  const giornoOk = giornoAmmesso(giorniRango ? giorniRango.giorni : s.giorni, c);
+  const giornoOk = soloDate ? true : giornoAmmesso(giorniRango ? giorniRango.giorni : s.giorni, c);
   if (giornoOk === null) return { stato: 'sconosciuto', motivo: 'Il giorno non è una data del calendario di gioco.' };
   if (!giornoOk) return { stato: 'non-disponibile', causa: 'giorno', motivo: giorniRango ? `Per il rango ${prossimo} non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` : `Non è disponibile di ${NOME_GIORNO[SIGLE[giornoDellaSettimana(c.data)!]!]}.` };
   const fasceRango = s.eccezioni.find((e): e is Extract<EccezioneDisponibilita, { tipo: 'fascia-rango' }> => e.tipo === 'fascia-rango' && e.rango === prossimo);

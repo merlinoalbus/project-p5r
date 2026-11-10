@@ -19,7 +19,7 @@ import { allerteDelGiorno, meteoDelGiorno, testoMeteo } from './meteoService.js'
 import { giornoDellaSettimana } from '../../shared/date.js';
 import { dataConArticolo } from '../../shared/condizioniSpillo.js';
 
-interface Riga { data: string; ordine: number; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
+interface Riga { data: string; ordine: number; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string }
 /** Una riga di `giorno` (R9-15) come la vede il percorso: il meteo è il testo del giorno unico, lo stesso del calendario. */
 interface RigaGiorno extends Omit<Riga, 'meteo'> { meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null }
 const comeRiga = ({ meteo_giorno, meteo_sera, nota_meteo, ...r }: RigaGiorno): Riga => ({ ...r, meteo: testoMeteo({ meteo_giorno, meteo_sera, nota_meteo }) });
@@ -34,17 +34,19 @@ function dataCorrente(partitaId: number | undefined): string | null {
 const sigla = (data: string): string | null => giornoDellaSettimana(data)?.slice(0, 3).toLowerCase() ?? null;
 
 /** Indice di tutti i giorni (leggero) con conteggi delle azioni e delle azioni fatte; giorno corrente della partita.
- *  Le azioni contate sono le voci che si spuntano (eventi, scadenze e promemoria no). */
+ *  Le azioni contate sono le voci che si spuntano (i promemoria no). */
 export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conteggi = conteggiGiornate(partitaId);
-  const righe = (prepared('SELECT data, ordine, fase, meteo_giorno, meteo_sera, nota_meteo, avvisi_json, coperto FROM giorno ORDER BY ordine').all() as Array<Pick<RigaGiorno, 'data' | 'ordine' | 'fase' | 'meteo_giorno' | 'meteo_sera' | 'nota_meteo' | 'avvisi_json' | 'coperto'>>)
+  const righe = (prepared('SELECT data, ordine, fase, meteo_giorno, meteo_sera, nota_meteo, avvisi_json FROM giorno ORDER BY ordine').all() as Array<Pick<RigaGiorno, 'data' | 'ordine' | 'fase' | 'meteo_giorno' | 'meteo_sera' | 'nota_meteo' | 'avvisi_json'>>)
     .map(({ meteo_giorno, meteo_sera, nota_meteo, ...r }) => ({ ...r, meteo: testoMeteo({ meteo_giorno, meteo_sera, nota_meteo }) }));
+  // «coperto» si calcola, non si legge da un flag: il giorno è coperto dalla guida se ha almeno una voce (una sola lettura per tutti i giorni)
+  const conVoci = new Set((prepared('SELECT DISTINCT data FROM voce_giornata').all() as Array<{ data: string }>).map((r) => r.data));
   const giorni = righe.map((r) => {
     const c = conteggi.get(r.data) ?? { azioni: 0, fatte: 0 };
     return {
       giorno: r.data, giornoSettimana: sigla(r.data) ?? '', fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
-      avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1,
+      avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: conVoci.has(r.data),
     };
   });
   return { giorni, dataCorrente: dataCorrente(partitaId), totaleGiorni: giorni.length, giorniCoperti: giorni.filter((g) => g.coperto).length };
@@ -62,7 +64,7 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
   const prec = prepared('SELECT data FROM giorno WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
-    giorno: r.data, giornoSettimana: sigla(r.data) ?? '', fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
+    giorno: r.data, giornoSettimana: sigla(r.data) ?? '', fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: !!prepared('SELECT 1 FROM voce_giornata WHERE data = ? LIMIT 1').get(data),
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
     meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
     allerte: allerteDelGiorno(data),

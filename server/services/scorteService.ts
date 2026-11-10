@@ -14,7 +14,8 @@
 // ha una sede e ogni macchina ha le sue offerte, quindi le righe di un'offerta sono già quelle del suo punto vendita.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import { descriviRifornimento, descriviStatoScorta, normalizzaRifornimento, numeroGiorno, statoScorta, type RegolaRifornimento } from '../../shared/rifornimento.js';
 import type { ScortaArticoloDto } from '../../shared/types.js';
@@ -29,7 +30,7 @@ export interface ArticoloConRegola { chiave: string; quantita: number | null; ri
 
 /** Il registro esiste (partite.db già migrato alla 051): prima della migrazione nessuna scorta, tutto come prima. */
 function conRegistro(): boolean {
-  return !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get();
+  return haTabellaUtente(getDb(), 'registro_acquisti');
 }
 
 /** La regola dell'articolo, o null se non ne ha (né la colonna c'è ancora). */

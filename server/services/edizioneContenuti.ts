@@ -24,6 +24,7 @@
 // ============================================================
 
 import type Database from 'better-sqlite3';
+import { haColonna, haTabella } from '../db/colonne.js';
 import { applicaCorrezioni, correzioniDelBloccoDi } from './datiGuida.js';
 import { foglieCondizione, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type {
@@ -48,19 +49,9 @@ const testo = (v: unknown): string | null => (typeof v === 'string' && v !== '' 
 
 // ---- Schema ----
 
-/** Vero se la tabella esiste nello schema principale. */
-export function haTabella(db: Db, tabella: string): boolean {
-  return !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(tabella);
-}
-
 /** Le colonne di una tabella dello schema principale (nome e tipo dichiarato). */
 function colonneDi(db: Db, tabella: string): Array<{ name: string; type: string }> {
   return db.prepare(`PRAGMA main.table_info(${q(tabella)})`).all() as Array<{ name: string; type: string }>;
-}
-
-/** Vero se la tabella (nello schema principale) ha la colonna. */
-export function haColonna(db: Db, tabella: string, colonna: string): boolean {
-  return colonneDi(db, tabella).some((c) => c.name === colonna);
 }
 
 /** I nomi delle tabelle dello schema principale (senza quelle interne di SQLite), in ordine. */

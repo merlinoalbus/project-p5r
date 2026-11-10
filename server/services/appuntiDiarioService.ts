@@ -24,6 +24,7 @@
 
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { avvisiDisponibilitaDellaVoce, collocaInFascia, compatta, eGiornoDelDiarioValidato, eliminaVoce, fasciaDi, rigaVoce, ripristinaOrdineVoce, righeDelGiorno, ULTIMO_GIORNO_VALIDATO, vociDelGiorno, type RigaVoce } from './giornataService.js';
@@ -43,14 +44,13 @@ import {
 import type { FasciaGioco, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 
 const TIPI_RIF = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave));
-const GENERI = new Set(['azione', 'promemoria', 'evento', 'scadenza']);
+const GENERI = new Set(['azione', 'promemoria']);
 const nuovoId = (): string => randomBytes(16).toString('hex');
 const nomeFascia = (f: FasciaGioco): string => (f === 'sera' ? 'di sera' : 'di giorno');
 /** «giorno 18 aprile»: con «giorno» davanti la preposizione non cambia con il numero («del giorno 11 aprile»). */
 const giornoTesto = (data: string): string => `giorno ${dataLeggibile(data)}`;
 /** Il testo della voce per i messaggi, tagliato. */
 const breve = (testo: string): string => (testo.length > 70 ? `${testo.slice(0, 70)}…` : testo);
-const haTabella = (schema: 'main' | 'utente', nome: string): boolean => !!prepared(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(nome);
 
 /** L'ordine di ogni giorno nel calendario di gioco (le date `MM-GG` attraversano l'anno). */
 function ordineDeiGiorni(): Map<string, number> {
@@ -252,9 +252,9 @@ function pianoCopia(v: VoceAppunti, indice: number, giorno: string, fasciaDest: 
     testo: `«${breve(azione)}»: ${inf.scartate.length === 1 ? 'un’infiltrazione non esiste più o non è' : `${inf.scartate.length} infiltrazioni non esistono più o non sono`} del Palazzo della voce: la copia ne resta senza.` });
   // ciò che la copia non eredita, detto prima (la voce d'origine, se c'è ancora, lo tiene)
   if (prepared('SELECT 1 FROM voce_giornata WHERE uid = ?').get(v.uid)) {
-    const eventi = haTabella('main', 'evento_calendario_voce') ? prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
+    const eventi = haTabellaMain(getDb(), 'evento_calendario_voce') ? prepared('SELECT COUNT(*) FROM evento_calendario_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
     if (eventi) mio({ codice: 'eventi-calendario', gravita: 'conferma', voceIndice: indice, testo: `«${breve(azione)}» è collegata a ${eventi === 1 ? 'un evento' : `${eventi} eventi`} del calendario: la copia nasce senza il collegamento (resta all’originale).` });
-    const proposte = haTabella('main', 'proposta_conversione_voce') ? prepared("SELECT COUNT(*) FROM proposta_conversione_voce WHERE voce_uid = ? AND stato = 'aperta'").pluck().get(v.uid) as number : 0;
+    const proposte = haTabellaMain(getDb(), 'proposta_conversione_voce') ? prepared("SELECT COUNT(*) FROM proposta_conversione_voce WHERE voce_uid = ? AND stato = 'aperta'").pluck().get(v.uid) as number : 0;
     if (proposte) mio({ codice: 'proposte-aperte', gravita: 'conferma', voceIndice: indice,
       testo: `«${breve(azione)}» ha ${proposte === 1 ? 'una proposta «da completare» aperta: resta all’originale, la copia non la ha' : `${proposte} proposte «da completare» aperte: restano all’originale, la copia non le ha`}.` });
     const proposta = conLegami() && d.infiltrazioni.length === 0 ? prepared('SELECT COUNT(*) FROM proposta_infiltrazione_voce WHERE voce_uid = ?').pluck().get(v.uid) as number : 0;
@@ -346,7 +346,7 @@ function inserisciCopia(
   fascia: FasciaGioco, ordine: number, opz: { verifica: boolean; operazione: string }
 ): { uid: string; mappaEffetti: Record<string, string> } {
   const uid = nuovoId(), adesso = nowIso();
-  // `produce_json` resta al suo valore predefinito: gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
+  // gli effetti stanno solo in `voce_effetto` (come in `creaVoce`); senza `indice_guida`
   // (la copia non discende dalla guida di quel giorno) e senza il segno «da rivedere». Il nome del collegamento si copia SEMPRE: la guida
   // ha voci col solo nome, senza collegamento («Cammino del Santo Graal»), e un collegamento che non esiste più lascia il suo nome (il
   // rilievo `riferimento-non-valido` lo dice prima)

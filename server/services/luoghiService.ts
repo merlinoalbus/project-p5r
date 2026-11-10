@@ -10,7 +10,8 @@
 // Le letture in blocco stanno in `lettureLuoghi`: una risposta con molti luoghi le fa una volta.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
@@ -95,7 +96,7 @@ export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: Stato
   const aree = contestoAree();
   const negozi = prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ sede: string | null; chiave: string; nome: string }>;
   const sedi = negozi.flatMap((n) => n.sede !== null ? [{ ...n, sede: n.sede }] : []);
-  const conEccezione = (prepared('PRAGMA table_info(negozio)').all() as Array<{ name: string }>).some((c) => c.name === 'eccezione_orari_json');
+  const conEccezione = haColonnaMain(getDb(), 'negozio', 'eccezione_orari_json');
   return {
     st: stDato !== undefined ? stDato : partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
     righe: new Map((prepared('SELECT * FROM luogo').all() as RigaLuogo[]).map((r) => [r.chiave, r])),
@@ -217,7 +218,7 @@ export function rigaLuogo(chiave: string): RigaLuogo | null {
 
 /** I luoghi di un'Area di L2 (`luogo.area_chiave`, non nascosti), nell'ordine, come DTO; vuoto su uno schema senza la colonna. */
 export function luoghiDellArea(area: string, l: LettureLuoghi): LuogoDto[] {
-  if (!(prepared('PRAGMA table_info(luogo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_chiave')) return [];
+  if (!haColonnaMain(getDb(), 'luogo', 'area_chiave')) return [];
   return (prepared('SELECT * FROM luogo WHERE area_chiave = ? AND nascosto = 0 ORDER BY ordine').all(area) as RigaLuogo[]).map((r) => luogoDto(r, l));
 }
 
@@ -231,7 +232,7 @@ export function luoghiDelQuartiere(quartiere: string, l: LettureLuoghi): LuogoDt
  * non provata: si salva solo con «Colloca»). Vuoto su uno schema senza `luogo.area_chiave`.
  */
 export function luoghiDaCollocare(quartiere: string, l: LettureLuoghi): Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }> {
-  if (!(prepared('PRAGMA table_info(luogo)').all() as Array<{ name: string }>).some((c) => c.name === 'area_chiave')) return [];
+  if (!haColonnaMain(getDb(), 'luogo', 'area_chiave')) return [];
   const areeDelQuartiere = [...l.aree.aree.values()].filter((a) => a.quartiere_chiave === quartiere);
   const proposta = areeDelQuartiere.length === 1 ? { slug: areeDelQuartiere[0].slug, nome: areeDelQuartiere[0].nome } : null;
   return (prepared('SELECT * FROM luogo WHERE quartiere_chiave = ? AND nascosto = 0 AND area_chiave IS NULL ORDER BY ordine').all(quartiere) as RigaLuogo[])

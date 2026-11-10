@@ -4,15 +4,17 @@
 //
 // Un piano è un albero: la radice è il bersaglio; ogni nodo è ottenuto in uno di questi modi:
 //   - 'scorta'    → la Persona è già nella scorta della partita (costo 0; ogni esemplare si usa una sola volta);
-//   - 'registro'  → si evoca dal Registro del Prigioniero (compendio personale), prezzo 27·L² + 126·L + 2147;
+//   - 'registro'  → si evoca dal Registro del Prigioniero (compendio personale), prezzo 27·L² + 126·L + 2147 (0 al primo richiamo di una Persona DLC);
 //   - 'cattura'   → si negozia con l'Ombra (Persona normale con livello ≤ livello del protagonista), costo 0 yen ma segnalata;
 //   - 'fusione'   → si fonde con due ingredienti (figli), ognuno a sua volta un piano.
 // Nel gioco la fusione in sé è gratuita: il costo di un piano è la somma dei prezzi di evocazione delle foglie 'registro'.
-// Ricerca: stima ottimistica h(p) per programmazione dinamica (ignorando il consumo della scorta), poi ricerca in profondità
-// con potatura (branch-and-bound) sulle N migliori alternative, tenendo conto che un esemplare della scorta si usa una volta.
+// Ricerca: stima ottimistica h(p) (ignorando il consumo della scorta), poi ricerca in profondità con potatura (branch-and-bound)
+// sulle N migliori alternative, tenendo conto che un esemplare della scorta si usa una volta.
 // Vincoli: profondità massima, livello massimo del risultato di ogni fusione (livello del protagonista), DLC del contesto.
+// La ricerca gira nel gestore sincrono della richiesta: un contatore di visite (`TETTO_VISITE_PIANI`) la ferma sempre allo stesso punto.
 // ============================================================
 
+import { PROFONDITA_MASSIMA_PIANO } from '../../../shared/limitiFusione.js';
 import { costoFusione, fondi, ricettaSpeciale, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione, type TipoFusione } from './motoreFusione.js';
 import { elementoEreditabile, skillAlLivello, skillPerId, slotEreditabili, tipoEredita, type SkillEredita } from './eredita.js';
 
@@ -51,6 +53,8 @@ export interface Disponibilita {
   registro: Set<number>;
   /** id Persona → skill effettivamente possedute dagli esemplari in scorta (unione), per la propagazione. */
   skillScorta?: Map<number, Set<number>>;
+  /** id Persona DLC mai entrate in scorta nella partita: la prima evocazione è gratuita. */
+  primoRichiamo?: Set<number>;
 }
 
 export interface OpzioniAlbero {
@@ -68,9 +72,30 @@ export interface OpzioniAlbero {
   skill?: number[];
   /** Conta anche lo slot assegnato a caso dal gioco (ottimistico); predefinito: solo gli slot a scelta. */
   slotFortunato?: boolean;
+  /** Visite massime della ricerca; predefinito `TETTO_VISITE_PIANI`. */
+  tetto?: number;
+}
+
+/** Esito di una ricerca: i piani migliori e se la ricerca si è fermata al tetto prima di esaurire le alternative. */
+export interface EsitoRicercaPiani {
+  piani: Piano[];
+  troncata: boolean;
 }
 
 const INFINITO = Number.POSITIVE_INFINITY;
+
+/** Una chiamata di `piani` copia la scorta usata e ordina le combinazioni: quanto esaminare questo numero di ricette (misurato). */
+const PESO_CHIAMATA_PIANI = 12;
+
+/**
+ * Visite ammesse a una ricerca: una per espansione più una per ogni ricetta o skill esaminata, così il contatore segue il lavoro. Valore
+ * misurato sui casi peggiori (profondità 4, 8 alternative, con e senza catture e skill richieste, Registro vuoto, reale e pieno): il blocco
+ * resta sotto i 7 secondi e ogni caso che la ricerca senza tetto concludeva con dei piani ne restituisce ancora.
+ */
+const TETTO_VISITE_PIANI = 80_000_000;
+
+/** Chiave in `scortaUsata` del primo richiamo gratuito già speso nel piano: negativa, per non confondersi con gli esemplari in scorta. */
+const chiavePrimoRichiamo = (id: number): number => -id;
 
 /** Prezzo di evocazione dal Registro. */
 export function prezzoEvocazione(p: PersonaFusione): number {
@@ -88,6 +113,21 @@ interface Ricerca {
   raggiungibili: Map<string, Set<number>>;
   /** cache delle skill innate al livello base. */
   innate: Map<number, SkillEredita[]>;
+  /** Visite fatte e visite ammesse in tutta la ricerca. */
+  visite: number;
+  tetto: number;
+  /** Vero appena il tetto ha impedito di espandere qualcosa. */
+  troncata: boolean;
+}
+
+/** Conta una visita e dice se si può espandere: a tetto raggiunto segna la ricerca come troncata. */
+function puoEspandere(r: Ricerca): boolean {
+  if (r.visite >= r.tetto) {
+    r.troncata = true;
+    return false;
+  }
+  r.visite++;
+  return true;
 }
 
 /** Le ricette che producono p, memorizzate per la ricerca: si scartano quelle il cui risultato supera il livello massimo. */
@@ -119,7 +159,7 @@ function skillFoglia(r: Ricerca, p: PersonaFusione, modo: ModoNodo): Set<number>
 }
 
 /** Skill che p può avere al termine di un piano entro `prof` fusioni (innate, dalla scorta, o ereditabili a catena). */
-function raggiungibili(r: Ricerca, p: PersonaFusione, prof: number, inCorso: Set<number>): Set<number> {
+function raggiungibili(r: Ricerca, p: PersonaFusione, prof: number): Set<number> {
   const chiave = `${p.id}|${prof}`;
   const nota = r.raggiungibili.get(chiave);
   if (nota) return nota;
@@ -127,21 +167,23 @@ function raggiungibili(r: Ricerca, p: PersonaFusione, prof: number, inCorso: Set
   for (const s of r.disp.skillScorta?.get(p.id) ?? []) out.add(s);
   // Skill apprese salendo di livello: soddisfano la richiesta con l'allenamento.
   for (const s of skillAlLivello(p.id, 99)) out.add(s.id);
-  if (prof > 0 && !inCorso.has(p.id) && !p.rara) {
-    inCorso.add(p.id);
+  if (prof > 0 && !p.rara && puoEspandere(r)) {
     const tipo = tipoEredita(p.id);
     for (const ric of ricetteDi(r, p)) {
       for (const ing of ric.ingredienti) {
-        for (const sid of raggiungibili(r, ing, prof - 1, inCorso)) {
+        const dellIngrediente = raggiungibili(r, ing, prof - 1);
+        r.visite += dellIngrediente.size;
+        for (const sid of dellIngrediente) {
           if (out.has(sid)) continue;
           const sk = r.innate.get(ing.id)?.find((x) => x.id === sid) ?? skillInfo(sid);
           if (sk && !sk.unica && elementoEreditabile(tipo, sk.elemento)) out.add(sid);
         }
       }
     }
-    inCorso.delete(p.id);
   }
-  if (inCorso.size === 0) r.raggiungibili.set(chiave, out);
+  // Il valore dipende solo da Persona e profondità: la profondità scende a ogni passo, e passare due volte dalla stessa Persona non aggiunge
+  // skill a quelle che ha già a profondità maggiore. A tetto raggiunto l'esito è parziale e non si ricorda.
+  if (!r.troncata) r.raggiungibili.set(chiave, out);
   return out;
 }
 
@@ -162,7 +204,7 @@ function ripartisciSkill(r: Ricerca, p: PersonaFusione, ric: RicettaFusione, ric
   const tipo = tipoEredita(p.id);
   const perIngrediente = ric.ingredienti.map(() => new Set<number>());
   const daLivello: number[] = [];
-  const reach = ric.ingredienti.map((ing) => raggiungibili(r, ing, prof, new Set()));
+  const reach = ric.ingredienti.map((ing) => raggiungibili(r, ing, prof));
   let daEreditare = 0;
   for (const sid of richieste) {
     if (innate.has(sid)) continue;
@@ -192,7 +234,10 @@ function ripartisciSkill(r: Ricerca, p: PersonaFusione, ric: RicettaFusione, ric
 function costoFoglia(r: Ricerca, p: PersonaFusione, scortaUsata?: Map<number, number>): { modo: ModoNodo; costo: number } | null {
   const inScorta = (r.disp.scorta.get(p.id) ?? 0) - (scortaUsata?.get(p.id) ?? 0);
   if (inScorta > 0) return { modo: 'scorta', costo: 0 };
-  if (r.disp.registro.has(p.id)) return { modo: 'registro', costo: prezzoEvocazione(p) };
+  if (r.disp.registro.has(p.id)) {
+    const gratuita = (r.disp.primoRichiamo?.has(p.id) ?? false) && !scortaUsata?.has(chiavePrimoRichiamo(p.id));
+    return { modo: 'registro', costo: gratuita ? 0 : prezzoEvocazione(p) };
+  }
   // L8-07: «da catturare» con la regola unica (`PersonaFusione.catturabile`), la stessa del Compendio e dei cicli: rispetto a prima gli alberi
   // non propongono più da catturare le Persona DLC, che si hanno dal pacchetto scaricabile e mai da un incontro
   if (r.opz.catture && p.catturabile && (r.opz.livelloMax === null || p.livello <= r.opz.livelloMax)) return { modo: 'cattura', costo: 0 };
@@ -200,26 +245,27 @@ function costoFoglia(r: Ricerca, p: PersonaFusione, scortaUsata?: Map<number, nu
 }
 
 /** Stima ottimistica (limite inferiore) del costo per ottenere p entro `prof` fusioni, ignorando il consumo della scorta. */
-function stima(r: Ricerca, p: PersonaFusione, prof: number, inCorso: Set<number>): number {
+function stima(r: Ricerca, p: PersonaFusione, prof: number): number {
   const chiave = `${p.id}|${prof}`;
   const nota = r.stima.get(chiave);
   if (nota !== undefined) return nota;
   let migliore = costoFoglia(r, p)?.costo ?? INFINITO;
-  if (prof > 0 && migliore > 0 && !inCorso.has(p.id)) {
-    inCorso.add(p.id);
-    for (const ric of ricetteDi(r, p)) {
+  if (prof > 0 && migliore > 0 && puoEspandere(r)) {
+    const ricette = ricetteDi(r, p);
+    r.visite += ricette.length;
+    for (const ric of ricette) {
       let tot = 0;
       for (const ing of ric.ingredienti) {
-        tot += stima(r, ing, prof - 1, inCorso);
+        tot += stima(r, ing, prof - 1);
         if (tot >= migliore) break;
       }
       if (tot < migliore) migliore = tot;
       if (migliore === 0) break;
     }
-    inCorso.delete(p.id);
   }
-  // Solo i valori calcolati fuori da un ciclo di ricorsione sono definitivi.
-  if (inCorso.size === 0) r.stima.set(chiave, migliore);
+  // Il valore dipende solo da Persona e profondità: la profondità scende a ogni passo, e ripassare dalla stessa Persona costa almeno quanto
+  // averla già a profondità maggiore. A tetto raggiunto il valore è parziale e non si ricorda.
+  if (!r.troncata) r.stima.set(chiave, migliore);
   return migliore;
 }
 
@@ -230,6 +276,7 @@ interface Parziale {
 
 /** Tutti i piani per p entro `prof` fusioni con costo < `limite`, dato l'uso corrente della scorta; ordinati per costo. */
 function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<number, number>, limite: number, antenati: Set<number>, quanti: number, richieste: Set<number> = new Set()): Parziale[] {
+  r.visite += PESO_CHIAMATA_PIANI;
   const esiti: Parziale[] = [];
   const foglia = costoFoglia(r, p, scortaUsata);
   const portate = [...richieste];
@@ -242,15 +289,18 @@ function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<num
     if (portate.every((sid) => possedute.has(sid) || apprese.has(sid))) {
       const usata = new Map(scortaUsata);
       if (foglia.modo === 'scorta') usata.set(p.id, (usata.get(p.id) ?? 0) + 1);
+      if (foglia.modo === 'registro' && foglia.costo === 0) usata.set(chiavePrimoRichiamo(p.id), 1);
       esiti.push({ nodo: { persona: p, modo: foglia.modo, costo: foglia.costo, figli: [], skillPortate: portate, skillDaLivello: daLivello }, scortaUsata: usata });
       if (foglia.costo === 0 && foglia.modo === 'scorta' && daLivello.length === 0) return esiti; // già in scorta con tutto: nessuna fusione può fare meglio
     }
   }
-  if (prof === 0 || antenati.has(p.id)) return esiti;
+  if (prof === 0 || antenati.has(p.id) || !puoEspandere(r)) return esiti;
   const ampiezza = r.opz.ampiezza ?? 12;
-  const candidate = ricetteDi(r, p)
+  const ricette = ricetteDi(r, p);
+  r.visite += ricette.length;
+  const candidate = ricette
     .filter((ric) => !ric.ingredienti.some((i) => antenati.has(i.id) || i.id === p.id))
-    .map((ric) => ({ ric, h: ric.ingredienti.reduce((tot, i) => tot + stima(r, i, prof - 1, new Set()), 0) }))
+    .map((ric) => ({ ric, h: ric.ingredienti.reduce((tot, i) => tot + stima(r, i, prof - 1), 0) }))
     .filter((c) => c.h < limite)
     .sort((a, b) => a.h - b.h)
     .slice(0, richieste.size > 0 ? Math.max(ampiezza, 40) : ampiezza);
@@ -310,10 +360,17 @@ function firma(nodo: NodoPiano): string {
 /**
  * Migliori piani per ottenere `target`. Il bersaglio già in scorta restituisce il solo piano 'scorta'.
  * Le Persona rare non hanno piani (non si fondono: solo scorta/registro); una speciale ha come unica fusione la sua ricetta.
+ * Al tetto di visite la ricerca smette di espandere e restituisce i migliori piani già trovati, con `troncata` vero.
  */
-export function pianiFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniAlbero): Piano[] {
-  const r: Ricerca = { ctx, disp, opz: { ...opz, profondita: Math.max(0, Math.min(6, opz.profondita)) }, ricette: new Map(), stima: new Map(), raggiungibili: new Map(), innate: new Map() };
-  const grezzi = piani(r, target, r.opz.profondita, new Map(), INFINITO, new Set(), Math.max(1, opz.alternative), new Set(opz.skill ?? []));
+export function ricercaPiani(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniAlbero): EsitoRicercaPiani {
+  const r: Ricerca = { ctx, disp, opz: { ...opz, profondita: Math.max(0, Math.min(PROFONDITA_MASSIMA_PIANO, opz.profondita)) }, ricette: new Map(), stima: new Map(), raggiungibili: new Map(), innate: new Map(), visite: 0, tetto: opz.tetto ?? TETTO_VISITE_PIANI, troncata: false };
+  // Si scende una fusione alla volta: i piani corti costano poco, e se il tetto ferma una passata più profonda restano quelli già trovati.
+  // Una passata completa contiene già quelle meno profonde.
+  let grezzi: Parziale[] = [];
+  for (let prof = Math.min(1, r.opz.profondita); prof <= r.opz.profondita && !r.troncata; prof++) {
+    const trovati = piani(r, target, prof, new Map(), INFINITO, new Set(), Math.max(1, opz.alternative), new Set(opz.skill ?? []));
+    grezzi = r.troncata ? [...grezzi, ...trovati] : trovati;
+  }
   const visti = new Set<string>();
   const out: Piano[] = [];
   for (const g of grezzi.sort((a, b) => a.nodo.costo - b.nodo.costo)) {
@@ -325,7 +382,12 @@ export function pianiFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
     if (out.length >= opz.alternative) break;
   }
   // A pari costo: meno catture, meno fusioni.
-  return out.sort((a, b) => a.costo - b.costo || a.catture - b.catture || a.fusioni - b.fusioni);
+  return { piani: out.sort((a, b) => a.costo - b.costo || a.catture - b.catture || a.fusioni - b.fusioni), troncata: r.troncata };
+}
+
+/** I piani di `ricercaPiani`, senza dire se la ricerca si è fermata al tetto. */
+export function pianiFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniAlbero): Piano[] {
+  return ricercaPiani(target, ctx, disp, opz).piani;
 }
 
 /** Verifica di coerenza: ogni nodo 'fusione' del piano è riproducibile con il motore. */

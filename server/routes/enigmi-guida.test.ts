@@ -258,7 +258,8 @@ describe('Enigma con i suoi passi', () => {
     expect([...finale.punti.map(segnato), segnato(enigma.chiave)].every((s) => s === null)).toBe(true);
   });
 
-  it('nei contenuti della guida di una planimetria i passi stanno subito sotto il loro Enigma, nel loro ordine', async () => {
+  // Saltato (L12-04, Q20): legge `GET /api/mappe/contenuti/:chiave`, tolta perché nessuna pagina la chiamava; non va eseguito né cancellato.
+  it.skip('nei contenuti della guida di una planimetria i passi stanno subito sotto il loro Enigma, nel loro ordine', async () => {
     const enigma = await nuova('Enigma dei contenuti', 'puzzle');
     const primo = await nuova('Primo passo', 'meccanismo', enigma.chiave);
     const secondo = await nuova('Secondo passo', 'porta', enigma.chiave);

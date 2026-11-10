@@ -269,7 +269,7 @@ describe('API — la giornata della guida è canone', () => {
   });
 
   it('ogni voce della guida, rimandata invariata come fa la finestra, risponde 200 e resta com\'era', async () => {
-    const prima = prepared('SELECT uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json FROM voce_giornata ORDER BY uid').all();
+    const prima = prepared('SELECT uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso FROM voce_giornata ORDER BY uid').all();
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as PercorsoIndiceDto;
     const rifiutate: string[] = [];
     let provate = 0;
@@ -282,7 +282,7 @@ describe('API — la giornata della guida è canone', () => {
     }
     expect(rifiutate).toEqual([]);
     expect(provate).toBeGreaterThan(900);
-    expect(prepared('SELECT uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json FROM voce_giornata ORDER BY uid').all()).toEqual(prima);
+    expect(prepared('SELECT uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso FROM voce_giornata ORDER BY uid').all()).toEqual(prima);
   }, 180_000);
 
   it('il nome di un collegamento scelto dall\'utente segue le rinomine del pacchetto', async () => {

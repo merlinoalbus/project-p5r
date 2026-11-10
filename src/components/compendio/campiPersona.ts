@@ -10,7 +10,7 @@
 import { createElement } from 'react';
 import type { EditorCampoSpeciale } from '../guida/ModificaGuida';
 import { CampoArcanoPersona, CampoSkillPersona } from './EditorCampiPersona';
-import { problemaSkill } from './skillPersonaLogica';
+import { descriviSkill, problemaSkill } from './skillPersonaLogica';
 
 /** Un numero intero da 1 a 99 (livello e statistiche di base): il server rifiuta il resto. */
 const numero1a99 = (etichetta: string): EditorCampoSpeciale => ({
@@ -26,8 +26,9 @@ export function campiPersona(delGruppo: boolean): Record<string, EditorCampoSpec
       disegna: (campo, valore, imposta, occupato) => createElement(CampoArcanoPersona, { campo, valore, imposta, occupato }),
     },
     skill: {
-      disegna: (_campo, valore, imposta, occupato) => createElement(CampoSkillPersona, { valore, imposta, occupato, delGruppo }),
+      disegna: (campo, valore, imposta, occupato) => createElement(CampoSkillPersona, { campo, valore, imposta, occupato, delGruppo }),
       errore: (v) => (Array.isArray(v) ? problemaSkill(v) : null),
+      leggiElenco: (campo, voci) => descriviSkill(voci, (n) => campo.opzioni?.find((o) => o.chiave === n)?.nome ?? n),
     },
   };
 }

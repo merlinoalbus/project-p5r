@@ -8,9 +8,9 @@
 // hanno refusi, frasi tagliate a metà e titoli discutibili, e vanno corretti **dove si leggono**,
 // non in una schermata a parte — altrimenti bisogna ricordarsi che cosa non andava.
 //
-// Perciò qui non c'è un modulo: c'è la matita accanto al testo. Chiusa non si vede quasi; aperta
-// mostra i campi di quel pezzo e basta. Le correzioni sono dati di gioco, valgono per tutte le
-// partite ed entrano nel pacchetto quando lo si rigenera.
+// Perciò qui non c'è un modulo a parte: c'è la matita accanto al testo. Chiusa non si vede quasi; aperta
+// è la finestra di modifica comune (`FinestraModifica`) con i campi di quel pezzo e basta, e il piè fisso
+// con Elimina / Annulla / Salva. Le correzioni sono dati di gioco, valgono per tutte le partite.
 //
 // **La bozza vive dentro questo componente**, e non nella pagina (rilievo della revisione,
 // 2026-09-18). Tenuta fuori era una sola per tutta la schermata: bastava scrivere in un'area e poi
@@ -18,10 +18,10 @@
 // chiave sbagliata. Qui ogni matita ha la sua, e si azzera da sé quando il modulo si chiude.
 // ============================================================
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { notifica } from '../../stores/notificationStore';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
+import { conferma } from '../../stores/confermaStore';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { CampoTesto } from '../shared/Campo';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { NienteInRilascio } from '../shared/SoloPreparazione';
@@ -53,7 +53,8 @@ interface Props<T extends Record<string, string>> {
   onSalva: (bozza: T) => Promise<unknown>;
   /** Se c'è, compare «Elimina» con conferma; il testo è quello che si legge prima di cancellare. */
   elimina?: { avviso: string; onElimina: () => Promise<unknown> };
-  compatto?: boolean;
+  /** Finestra larga (860 px) invece che stretta (520 px): per i moduli con molti campi (la voce, la scheda del Palazzo). */
+  larga?: boolean;
   /** Testo accanto alla matita. Serve dove il comando finisce da solo su una riga: un glifo
       isolato sembra un refuso, due parole dicono che cosa fa. */
   etichetta?: string;
@@ -75,7 +76,7 @@ interface Props<T extends Record<string, string>> {
 // L12 (passo 8): nel rilascio (sola lettura) la matita di correzione non esiste; la condizione è costante di build, `CorrezioneGuidaReale` esce dal bundle.
 // Il componente è generico: l'asserzione di tipo conserva `T` (con `StrumentoDiModifica` si perderebbe).
 export const CorrezioneGuida = (IN_RILASCIO ? NienteInRilascio : CorrezioneGuidaReale) as typeof CorrezioneGuidaReale;
-function CorrezioneGuidaReale<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta, aperta, onChiudi, classeEtichetta }: Props<T>) {
+function CorrezioneGuidaReale<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, etichetta, aperta, onChiudi, classeEtichetta, larga }: Props<T>) {
   const controllata = aperta !== undefined;
   // aperta da fuori: la bozza parte dai valori del momento dell'apertura, come col pulsante
   const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(() => {
@@ -84,37 +85,11 @@ function CorrezioneGuidaReale<T extends Record<string, string>>({ cosa, iniziale
     return { partenza: v, corrente: v };
   });
   const [occupato, setOccupato] = useState(false);
-  const [conferma, setConferma] = useState(false);
   // modulo aperto con un testo cambiato e non ancora salvato: «Aggiorna» e la chiusura della scheda lo nominano e chiedono conferma
   const modificato = bozza !== null && JSON.stringify(bozza.corrente) !== JSON.stringify(bozza.partenza);
   useBozzaSporca('correzione-guida', `correzione «${cosa}»`, modificato);
-  /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
-  const chiudi = () => { setBozza(null); setConferma(false); onChiudi?.(); };
-
-  // Lotto C: aperto il modulo (col pulsante o da un menu, come «Correggi la scheda» e «Modifica testo» del Palazzo), il fuoco va al primo
-  // campo; chiuso, torna da dove si era partiti (il pulsante «Modifica ⋯» o la matita) se il fuoco era rimasto nel modulo che sparisce.
-  const modulo = useRef<HTMLFormElement | null>(null);
-  const matita = useRef<HTMLButtonElement | null>(null);
-  const origine = useRef<HTMLElement | null>(null);
-  const aperto = bozza !== null;
-  useEffect(() => {
-    if (!aperto) return;
-    // da dove si è aperto (il fuoco già nel modulo vuol dire che lo si è già annotato: il secondo effetto di StrictMode)
-    const ora = document.activeElement;
-    if (!(ora && modulo.current?.contains(ora))) origine.current = ora instanceof HTMLElement && ora !== document.body ? ora : null;
-    modulo.current?.querySelector<HTMLElement>('input:not([disabled]), textarea:not([disabled]), select:not([disabled])')?.focus();
-    // chiuso il modulo (o smontato, quando è chi lo apre a toglierlo): il DOM è già cambiato, si guarda al fotogramma dopo. La matita
-    // va letta allora, non adesso: è il pulsante che ricompare al posto del modulo
-    const pulsanteMatita = matita;
-    return () => {
-      requestAnimationFrame(() => {
-        const adesso = document.activeElement;
-        if (adesso !== null && adesso !== document.body) return;
-        const da = origine.current;
-        (da?.isConnected ? da : pulsanteMatita.current)?.focus();
-      });
-    };
-  }, [aperto]);
+  /** Chiude il modulo: scarta la bozza. */
+  const chiudi = () => { setBozza(null); onChiudi?.(); };
 
   /** Salva la bozza con `onSalva`; a buon fine chiude il modulo e notifica, altrimenti lascia la bozza aperta e notifica l'errore. */
   const salva = async () => {
@@ -124,39 +99,39 @@ function CorrezioneGuidaReale<T extends Record<string, string>>({ cosa, iniziale
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Correzione non salvata.'); }
     finally { setOccupato(false); }
   };
+  /** «Elimina» del piè: la domanda dice che cosa si perde (`avviso`); al sì elimina, notifica e chiude. */
+  const eliminaConConferma = async () => {
+    if (!elimina) return;
+    if (!(await conferma({ titolo: `Eliminare ${cosa}?`, testo: elimina.avviso, etichetta: 'Elimina' }))) return;
+    setOccupato(true);
+    try { await elimina.onElimina(); notifica('success', `Eliminato: ${cosa}.`); chiudi(); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Eliminazione non riuscita.'); }
+    finally { setOccupato(false); }
+  };
 
-  if (!bozza) {
-    if (controllata) return null;
-    return (
-      <button ref={matita} type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'testo-12' : 'testo-12'}`}
+  // Il modulo aperto è la `FinestraModifica` comune (AD10): titolo e «Chiudi» in testa, campi nel corpo che scorre, piè fisso con
+  // Elimina / Annulla / Salva sempre in vista a ogni formato (prima il modulo si apriva in linea e «Salva» stava dopo i campi: a 375 px
+  // fuori dallo schermo). Il fuoco entra nella finestra e alla chiusura torna a chi l'ha aperta (`Modal`).
+  const finestra = bozza && (
+    <FinestraModifica titolo={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} nomeModulo={`Correggi ${cosa}`} stretta={!larga}
+      onChiudi={chiudi} onSalva={salva} salvabile={modificato} occupato={occupato} sporca={modificato}
+      onElimina={elimina ? () => void eliminaConConferma() : undefined}>
+      <div className="flex flex-wrap items-end gap-2">
+        {children(bozza.corrente, (patch) => setBozza((b) => (b ? { ...b, corrente: { ...b.corrente, ...patch } } : b)))}
+      </div>
+    </FinestraModifica>
+  );
+  if (controllata) return finestra || null;
+  return (
+    <>
+      <button type="button" className="touch shrink-0 rounded px-1.5 text-text-muted hover:text-text testo-12"
         // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
         // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
         aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
         onClick={() => { const v = iniziale(); setBozza({ partenza: v, corrente: v }); }}>
         ✎{etichetta ? <span className={`ml-1 ${classeEtichetta ?? ''}`}>{etichetta}</span> : null}
       </button>
-    );
-  }
-  return (
-    <form ref={modulo} className="flex w-full flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] px-2 py-2"
-      aria-label={`Correggi ${cosa}`} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
-      <div className="flex flex-wrap items-end gap-2">
-        {children(bozza.corrente, (patch) => setBozza((b) => (b ? { ...b, corrente: { ...b.corrente, ...patch } } : b)))}
-      </div>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato || !modificato} />
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={chiudi} />
-        <span className="flex-1" />
-        {elimina && !conferma && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => setConferma(true)} />}
-        {elimina && conferma && (
-          <span className="flex flex-wrap items-center gap-1.5 testo-12">
-            {elimina.avviso}
-            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Confermo" disabled={occupato}
-              onClick={() => { setOccupato(true); void elimina.onElimina().then(() => { notifica('success', `Eliminato: ${cosa}.`); chiudi(); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Eliminazione non riuscita.')).finally(() => setOccupato(false)); }} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="No" onClick={() => setConferma(false)} />
-          </span>
-        )}
-      </div>
-    </form>
+      {finestra}
+    </>
   );
 }

@@ -4,7 +4,7 @@
 //
 // «Devi visualizzare l'icona e permettermi di valorizzare per fasce temporali o giorni specifici il punto di atterraggio
 // dell'icona della mappa rispetto al mappamondo delle planimetrie.» La finestra (voce di `finestre-dungeon`) si cambia con
-// `PUT /dungeon/:chiave/finestra`; le regole d'atterraggio (`dungeon_atterraggio`, 097) con `PUT /dungeon/:chiave/atterraggi`, e
+// `PUT /dungeon/:chiave` (campo `date`; la rotta `/finestra` è stata tolta, i suoi casi qui sono `it.skip`); le regole d'atterraggio (`dungeon_atterraggio`, 097) con `PUT /dungeon/:chiave/atterraggi`, e
 // il riassunto del Palazzo dice dove si atterra nel giorno della partita: la prima regola che lo copre.
 // ============================================================
 
@@ -64,7 +64,9 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
   });
   afterAll(() => closeDb());
 
-  it('097 porta la finestra di Kamoshida all\'11 aprile; la finestra si cambia, anche senza fine, e torna nel riassunto', async () => {
+  // Saltato (L12-04, Q20): la rotta `PUT /dungeon/:chiave/finestra` non esiste più, nessuno la chiamava; le date del Palazzo si scrivono da
+  // `PUT /dungeon/:chiave` con `date`, che passa dalla stessa `impostaFinestra`. Il corpo originale è conservato, non eseguito (zero test).
+  it.skip('097 porta la finestra di Kamoshida all\'11 aprile; la finestra si cambia, anche senza fine, e torna nel riassunto', async () => {
     expect(finestreDungeon().get('kamoshida')).toEqual({ dal: '04-11', al: '05-02' });
     expect((await kamoshida()).finestra).toEqual({ dal: '04-11', al: '05-02' });
     // L13 O6-3: un Palazzo ha una scadenza («senza fine» solo i Memento e Iweleth)
@@ -85,7 +87,8 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     expect((await kamoshida()).finestra).toEqual({ dal: '04-11', al: '05-02' });
   });
 
-  it('un Palazzo senza voce nella finestra ne riceve una', async () => {
+  // Saltato (L12-04, Q20): vedi sopra, la rotta `finestra` non esiste più.
+  it.skip('un Palazzo senza voce nella finestra ne riceve una', async () => {
     const blocco = JSON.parse(prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").pluck().get() as string) as { finestre: Array<{ dungeon: string }> };
     const senza = { ...blocco, finestre: blocco.finestre.filter((f) => f.dungeon !== 'madarame') };
     prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'finestre-dungeon'").run(JSON.stringify(senza));
@@ -94,7 +97,8 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     prepared("UPDATE dati_guida SET json = ? WHERE chiave = 'finestre-dungeon'").run(JSON.stringify(blocco));
   });
 
-  it('la finestra rifiuta date impossibili, fine prima dell\'inizio e dungeon che non esistono', async () => {
+  // Saltato (L12-04, Q20): vedi sopra, la rotta `finestra` non esiste più.
+  it.skip('la finestra rifiuta date impossibili, fine prima dell\'inizio e dungeon che non esistono', async () => {
     expect((await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '02-30', al: null })).body.error.code).toBe('data-non-valida');
     expect((await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '05-02', al: '04-11' })).body.error.code).toBe('fine-prima-di-inizio');
     expect((await request(app).put('/api/compendio/dungeon/nessuno/finestra').send({ dal: '04-11', al: null })).status).toBe(404);

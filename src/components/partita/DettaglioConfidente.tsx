@@ -1,12 +1,12 @@
 // ============================================================
-// DettaglioConfidente — la vista «Level up» del cassetto del Confidente nella scheda «Confidenti» della partita
+// DettaglioConfidente — la vista «Avanzamento» del cassetto del Confidente nella scheda «Confidenti» della partita
 // ============================================================
 //
 // Progetto approvato dall'utente (2026-10-24, tavole 3 e 4 del canvas). Gerarchia: chi è (ritratto grande, nome, carta dell'arcano in
 // miniatura) → a che rango sta (targa: − RANGO N +, barra dei punti, quanto manca) → che cosa serve per salire («Verso il rango N+1»:
 // requisiti, moltiplicatori) → le risposte migliori dell'evento → la registrazione (Risposta ♪ / ♪♪ / ♪♪♪, Regala, Uscita, Annulla
 // ultimo) → il resto (prossima abilità, regali graditi, sblocco, note). Quando il cassetto è largo abbastanza (`.dettaglio-confidente__colonne`,
-// container query) le risposte stanno nella colonna destra accanto al level up; in una colonna sola (telefono) stanno subito prima delle
+// container query) le risposte stanno nella colonna destra accanto all'avanzamento; in una colonna sola (telefono) stanno subito prima delle
 // note ♪: prima si legge la risposta, poi si registra.
 //
 // Stati della targa: in corso (barra e «mancano»); Pronto (soglia raggiunta: il + diventa «Sali al rango N+1»); Bloccato (il + è spento,
@@ -81,7 +81,7 @@ function SegnoInvito() {
   return <span className="chip chip--oro segno-invito" aria-hidden="true">{testoMoltiplicatore(MOLTIPLICATORE_INVITO)}</span>;
 }
 
-/** La vista «Level up»: testata con la targa del rango, «Verso il rango N+1», risposte migliori, registrazione dei punti, il resto. */
+/** La vista «Avanzamento»: testata con la targa del rango, «Verso il rango N+1», risposte migliori, registrazione dei punti, il resto. */
 export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, motivoOggi, appenaSalito, anteprima, moltiplicatori, invito = false, azioni }: Props) {
   const aPunti = aPuntiDi(c);
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
