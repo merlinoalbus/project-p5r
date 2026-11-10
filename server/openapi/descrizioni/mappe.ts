@@ -16,12 +16,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     risposta: '`RisoluzioneMappaDto`: `{ tipo: "mappa", mappa, casa }` (L2: `casa` è l\'unica pagina che mostra la mappa — La città, il quartiere, l\'Area con `?planimetria=` se la versione non è la predefinita, o il visore) oppure `{ tipo: "guida", area, dungeon, mappaPalazzo, nome }`',
     errori: [[404, 'mappa-non-trovata']],
   },
-  'GET /api/mappe/contenuti/:chiave': {
-    sommario: 'Contenuti della guida di una mappa: aree, collegamenti, punti e planimetrie di ogni area',
-    descrizione: 'Per la mappa radice di un Palazzo le aree di tutto il Palazzo, altrimenti quelle legate alla mappa. Per ogni area: i collegamenti, i punti (gli elementi della guida più le voci che nessun elemento rappresenta, con i passi degli Enigmi subito sotto il loro Enigma) e le planimetrie. Con `partita` le schede portano anche lo stato di quella partita. Da L4 (§2.3), nei Palazzi i punti sono **le voci** della guida (`punto:<chiave>`, con stato nella partita, carattere, esauribilità e la «posizione da collocare» della scheda senza mappa che hanno assorbito, finché non hanno un pin): le schede senza mappa legate a una voce non compaiono più come elementi a sé, quelle senza voce stanno nelle «Schede da sistemare» della scheda del Palazzo. I dedali dei Memento restano come prima.',
-    risposta: '`ContenutiMappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
-  },
   'GET /api/mappe/accesso/:tipo/:chiave': {
     sommario: '«Apri sulla mappa»: dove si trova sulle mappe un\'entità della guida',
     descrizione: 'Segue solo associazioni registrate, mai una somiglianza di nome: pin che citano l\'entità, mappe che la hanno come propria o fra le loro entità, sedi dei negozi, ingresso configurato del quartiere. Se non portano da nessuna parte si allarga al posto che l\'entità dichiara (il quartiere di un luogo o di un negozio, il Palazzo di un\'area) e la provenienza lo dice (`posto-dichiarato`). Una mappa che contiene già il pin esatto non compare una seconda volta come accesso generico. Articoli e negozi nascosti sono un 404.',

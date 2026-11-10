@@ -220,8 +220,7 @@ partita sta in `utente` con `partita_id`.
 
   Con le modali condivide lo spostamento (`useSpostamentoFinestra`). Si rilegge in silenzio quando cambiano gli stati dei pin della mappa
   o la `versione` della pagina ospite (`MappaIncorporata`: la scheda la cambia anche a ogni cattura con le piastrelle). La vecchia lista
-  dei contenuti della guida non ha più componente: resta la sola rotta `GET /api/mappe/contenuti/:chiave`, che nessuna pagina chiama
-  (la leggono i test del server). Una sezione chiesta alla radice di un Palazzo o dei Memento (`?area=`) si apre nella sua scheda, che
+  dei contenuti della guida non c'è più, né componente né rotta. Una sezione chiesta alla radice di un Palazzo o dei Memento (`?area=`) si apre nella sua scheda, che
   mostra dedali, descrizioni e voci (la radice dei Memento non ha collegamenti, schede dei pin né fogli dei dedali).
 - **Editor** (`EditorMappaPage`, `/guida/mappe/:chiave/modifica`): aggiungi, sposta, copia e incolla spilli (appunti di sessione in
   `sessionStorage`, mai quelli di sistema), condizioni di visibilità dal vocabolario unico (anche lo stato di un altro pin e di una

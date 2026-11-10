@@ -42,8 +42,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Calendario degli eventi (`/guida/calendario`) collegato alle voci.
 - Ancora aperto: le voci e le Doti mancanti dopo il 1° giugno (giorni scoperti, passaggi di rango, Doti da testo), in attesa dell'approvazione
   dell'elenco per blocchi; nessuna è stata applicata.
-- Difetto aperto, indipendente dal Diario: il primo avvio da `pacchetto/gioco.db` su una cartella vuota si ferma alla migrazione 330, che legge
-  `utente.spunta_voce_partita` prima che la migrazione delle partite 015 la crei.
 
 ## Mondo, mappe e luoghi
 - Mappa di viaggio di Tokyo con quartieri, Palazzi e luoghi; pagine di quartiere, Area e luogo (`/guida/citta`, `/guida/luogo/…`).
@@ -221,11 +219,6 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - **Testata della Mappa senza planimetria, da verificare.** `MappaPage` mostra `LuogoSenzaPlanimetria` (con le briciole) solo per una mappa
   senza planimetria che ha per casa il visore: oggi nei dati non ce n'è nessuna. Quando un dato la mostrerà, va misurata (testata entro il
   30% ai cinque formati) e controllata la fila delle briciole.
-- **Rotta `GET /api/mappe/contenuti/:chiave` senza chiamanti.** I componenti che la usavano sono stati tolti; la rotta (con
-  `contenutiMappa`, `schedeContenutiGuida` e il client `getContenutiMappa`) resta perché i test del server la usano per leggere lo stato dei
-  punti dei Palazzi (`avanzamento-unico.test.ts`, `enigmi-guida.test.ts`, `organizzazioneMappe.test.ts`): si toglie con l'adeguamento di
-  quei test, su decisione dell'utente.
-
 - **Tre luoghi ancora da collocare.** Libreria Nagiuri, Odaiba Seaside Park e Stazione di Shibuya stanno in quartieri con Aree, ma nessun pin
   indica la loro: si collocano dall'editor o dalla pagina del quartiere quando si vede in gioco dove stanno.
 - **Un solo «dove» dei negozi: un residuo.** Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà anche

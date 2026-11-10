@@ -1,13 +1,13 @@
 // ============================================================
-// Route /api/mappe — mappe, spilli, percorsi, contenuti della guida, accesso ai luoghi, piante dei quartieri, import/export
+// Route /api/mappe — mappe, spilli, percorsi, accesso ai luoghi, piante dei quartieri, import/export
 // ============================================================
 //
 // Le mappe e gli spilli sono dati di gioco condivisi fra le partite; lo stato per partita (raccolto, ottenuto, acquistato) passa
 // dal parametro `partita` delle letture e dalle rotte di /api/partite. Le rotte dei marcatori, che qui c'erano, sono uscite con
-// la verifica completa (O10, 2026-10-04).
+// la verifica completa (O10, 2026-10-04); quella dei contenuti della guida di una mappa, senza chiamanti, con L12-04 (Q20).
 // ============================================================
 
-import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
+import { risolviPercorsoMappa } from '../services/mappe/contenutiGuidaService.js';
 import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
 import { impostaInfiltrazioniDellaPlanimetria, presentazioneDellaPlanimetria, stanzaDellaPlanimetria } from '../services/mappe/areeService.js';
 import { TIPI_ACCESSO_MONDO } from '../../shared/accessoMondo.js';
@@ -41,7 +41,6 @@ const router = Router();
 // Chiave libera ma limitata: un indirizzo scritto a mano che non corrisponde a nulla resta un 404 «mappa-non-trovata», non un 400.
 const paramsChiaveLibera = z.object({ chiave: z.string().min(1).max(200) });
 router.get('/risolvi/:chiave', validate({ params: paramsChiaveLibera }), (req,res) => res.json(risolviPercorsoMappa(String(req.params.chiave))));
-router.get('/contenuti/:chiave', validate({ params: paramsChiaveLibera, query: queryMappa }), (req,res) => res.json(contenutiMappa(String(req.params.chiave), req.query.partita)));
 
 /** Accesso comune ai luoghi da città, Palazzi, negozi e articoli. */
 router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(TIPI_ACCESSO_MONDO), chiave: z.string().min(1).max(200) }) }), (req, res) => {

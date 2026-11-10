@@ -94,7 +94,6 @@ export const ROTTE_DEL_GIOCATORE: readonly string[] = [
 
   // ---- mappe e aree: le letture di chi consulta ----
   'GET /api/mappe/risolvi/:chiave',
-  'GET /api/mappe/contenuti/:chiave',
   'GET /api/mappe/accesso/:tipo/:chiave',
   'GET /api/mappe/albero',
   'GET /api/mappe/gerarchia',

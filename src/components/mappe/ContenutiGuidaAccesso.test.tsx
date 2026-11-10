@@ -8,17 +8,23 @@ import { MemoryRouter } from 'react-router-dom';
 import type { FC } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import type { PartitaDto } from '../../types';
-import type { ContenutiMappaDto, SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
+import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
 
 // Saltati (L12-04, Q20): `ContenutiGuidaMappa` e `SchedaContenutoGuida` sono stati tolti, nessuna pagina li montava. Segnaposto locale tipizzato,
 // SOLO perché il file compili: i casi sono `it.skip` e non si eseguono; i corpi originali sono conservati qui sotto (zero test).
 const ContenutiGuidaMappa: FC<{ mappa: string; area?: string | null; dungeon?: string }> = () => null;
+// Idem per `ContenutiMappaDto` e `getContenutiMappa`, tolti con `GET /api/mappe/contenuti/:chiave`: la funzione resta fuori dal modulo finto,
+// che rifiuta i nomi che il modulo vero non ha.
+type ContenutiMappaDto = { mappa: string; aree: Array<{ chiave: string; nome: string; descrizione: string; mappe: Array<{ chiave: string; nome: string }>; punti: Array<Record<string, unknown>>; collegamenti?: SchedaContenutoGuidaDto[] }> };
 const api = vi.hoisted(() => ({
   getContenutiMappa: vi.fn(), aggiornaSpillo: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(),
   aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
-vi.mock('../../services/api', (vero) => moduloApi(vero, { ...api, getElenchiRegole: vi.fn(async () => ({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] })) }));
+vi.mock('../../services/api', (vero) => {
+  const { getContenutiMappa: _tolta, ...vere } = api;
+  return moduloApi(vero, { ...vere, getElenchiRegole: vi.fn(async () => ({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] })) });
+});
 
 const ID = 427;
 let descrizione: string;

@@ -19,7 +19,9 @@ const AlberoLuoghi: FC<{ mappe: MappaRiassuntoDto[]; genitore?: string; espandib
 // Idem per `ContenutiGuidaMappa`, tolto da L12-04 (Q20: nessuna pagina lo montava); i tre casi che lo usano sono `it.skip`, corpi conservati.
 const ContenutiGuidaMappa: FC<{ mappa: string; area?: string | null; dungeon?: string }> = () => null;
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
-vi.mock('../../services/api', (vero) => moduloApi(vero, api));
+// `getContenutiMappa` è uscita dal barrel con `GET /api/mappe/contenuti/:chiave` (L12-04, Q20): resta qui solo per i casi `it.skip` che la citano,
+// fuori dal modulo finto (che rifiuta i nomi che il modulo vero non ha)
+vi.mock('../../services/api', (vero) => { const { getContenutiMappa: _tolta, ...vere } = api; return moduloApi(vero, vere); });
 /** Riassunto minimo di una mappa di tipo «luogo» con la chiave, il genitore e il nome dati (nome predefinito = chiave), senza immagine né spilli. */
 function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,radiceDi:null,versione:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:`/guida/mappe/${chiave}`}; }
 /** Rotta di arrivo dei test: scrive a schermo percorso e query dell'indirizzo corrente, per verificare dove ha portato un reindirizzamento. */

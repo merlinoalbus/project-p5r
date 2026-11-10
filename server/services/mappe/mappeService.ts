@@ -627,18 +627,6 @@ function elementoSpilloDto(r:RigaSpillo,ctx:ContestoSpilli={}):SpilloDto|SchedaC
   return r.area_guida_chiave?{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave}:spilloDto(r,ctx);
 }
 /**
- * Le schede degli elementi della guida (spilli senza mappa) delle aree date, per id. Prima si calcolavano quelle di tutte le aree
- * (187 elementi, con le loro condizioni) per ogni mappa aperta, che ne mostra una o due (rilievo P4 della verifica, 2026-10-03).
- */
-export function schedeContenutiGuida(partitaId: number | undefined, aree: readonly string[]): Map<number, SchedaContenutoGuidaDto> {
-  // senza aree niente da descrivere: lo stato della partita (il pezzo costoso) non serve. La partita la verifica chi chiama.
-  if (aree.length === 0) return new Map();
-  const ctx = contestoSpilli(partitaId);
-  const righe = prepared(`SELECT * FROM spillo WHERE area_guida_chiave IN (${aree.map(() => '?').join(',')}) ORDER BY id`).all(...aree) as RigaSpillo[];
-  return new Map(righe.map((r) => [r.id, { ...dettagliSpillo(r, ctx), areaGuida: r.area_guida_chiave! }]));
-}
-
-/**
  * Gli spilli di altre mappe che portano su questa.
  *
  * Il collegamento è scritto in due posti, e vanno letti tutti e due: la destinazione vera
@@ -687,7 +675,7 @@ export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string 
  *  dalla rotta omonima (`GET /api/mappe/albero` non arriverebbe mai alla mappa «albero»). `struttura-server.test.ts` verifica che
  *  l'elenco copra tutte le rotte del router. */
 export const CHIAVI_MAPPA_RISERVATE: ReadonlySet<string> = new Set([
-  'accesso', 'albero', 'contenuti', 'entita', 'esporta', 'gerarchia', 'importa', 'ordine', 'piante-citta',
+  'accesso', 'albero', 'entita', 'esporta', 'gerarchia', 'importa', 'ordine', 'piante-citta',
   'pezzi', 'riferimenti', 'risolvi', 'spilli',
 ]);
 
