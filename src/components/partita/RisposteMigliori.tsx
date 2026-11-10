@@ -1,5 +1,5 @@
 // ============================================================
-// RisposteMigliori — le risposte da dare nell'evento di rango del Confidente aperto nel cassetto, in evidenza accanto al level up
+// RisposteMigliori — le risposte da dare nell'evento di rango del Confidente aperto nel cassetto, in evidenza accanto all'avanzamento
 // ============================================================
 //
 // Quali dialoghi servono ADESSO: la scheda del Confidente (`ConfidenteDettaglioPage`, «Prossimo passo: rango N») mostra aperti i dialoghi

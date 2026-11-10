@@ -146,8 +146,8 @@ describe('CittaPage', () => {
     // entrare è una promessa che la mappa non mantiene.
     usePartitaStore.setState({ attiva: { id: 3, nome: 'Prova', dataGioco: '04-11' } as PartitaDto });
     api.getQuartieri.mockResolvedValue([
-      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
-      { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', sbloccoData: '09-01', descrizione: '' },
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '' },
+      { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', descrizione: '' },
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
     const mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });

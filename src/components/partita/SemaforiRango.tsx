@@ -39,6 +39,7 @@ export function SemaforiRango({ semafori, onConferma, onCorreggi, occupato, comp
             <span className="min-w-0 flex-1">
               <span className="block">{r.testo}</span>
               <span className="block testo-12 text-text-muted">{r.dettaglio}</span>
+              {r.nota && <span className="block testo-12 text-text-secondary">Nota: {r.nota}</span>}
             </span>
             {/* un requisito su una Richiesta che non c'è più si corregge: un'altra Richiesta, o lo si toglie («Requisito correggibile») */}
             {r.tipo === 'richiesta' && r.stato === 'grigio' && r.manuale === false && onCorreggi && (

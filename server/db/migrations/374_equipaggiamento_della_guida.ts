@@ -1,5 +1,5 @@
 // ============================================================
-// 357 — l'equipaggiamento della guida senza scheda, le offerte dell'Untouchable che mancavano, le armi a distanza riclassificate (L4-03)
+// 374 — l'equipaggiamento della guida senza scheda, le offerte dell'Untouchable che mancavano, le armi a distanza riclassificate (L4-03)
 // ============================================================
 //
 // Rapporto N §2.1 (censimento per nome delle pagine d'inventario) e K §4.2 (Untouchable):
@@ -31,8 +31,8 @@ import {
   type RigaArma, type RigaProtezione, type Sblocco,
 } from './equipaggiamentoL4.js';
 
-const errore = (motivo: string): never => { throw new Error(`357: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L4-03 · 357';
+const errore = (motivo: string): never => { throw new Error(`374: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L4-03 · 374';
 const NEGOZIO = 'untouchable';
 const RIFORNIMENTO_UNTOUCHABLE = JSON.stringify({ tipo: 'giorno', origine: 'fallback-utente' });
 
@@ -55,8 +55,8 @@ function fotografia(db: AppDatabase, tabella: string, senza: readonly string[], 
   return JSON.stringify(righe);
 }
 
-export const migration357: Migration = {
-  id: 357,
+export const migration374: Migration = {
+  id: 374,
   name: 'equipaggiamento_della_guida',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -150,6 +150,6 @@ export const migration357: Migration = {
     };
     if (conteggi.schede + conteggi.offerte + conteggi.riclassificate + conteggi.alias === 0) return;
     registraAudit(db, 'audit-l4-03-equipaggiamento', { migrazione: MIGRAZIONE, conteggi, fonti: [FONTE_ARMI_DISTANZA, FONTE_ARMI_MISCHIA, FONTE_PROTEZIONI], schede, offerte, riclassificate, alias });
-    logger.info({ migrazione: 'L4-03-357', ...conteggi }, 'equipaggiamento della guida');
+    logger.info({ migrazione: 'L4-03-374', ...conteggi }, 'equipaggiamento della guida');
   },
 };

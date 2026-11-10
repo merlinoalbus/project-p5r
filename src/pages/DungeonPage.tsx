@@ -42,7 +42,7 @@ export function DungeonPage() {
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Palazzi" sottotitolo="I Palazzi (Iweleth è un dedalo dei Memento): infiltrazioni e punti di interesse (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati."
+          <IntestazionePagina titolo="Palazzi" sottotitolo="Infiltrazioni e punti di interesse di ogni Palazzo; con una partita segni ciò che hai ottenuto. Iweleth è un dedalo dei Memento."
             // L4-04: i Memento non stanno fra i Palazzi ma hanno la loro pagina: ci si va da qui
             azioni={<CollegamentoVisivo to="/guida/dungeon/mementos" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Memento" dettaglio="dedali e Richieste" />} />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">

@@ -5,7 +5,7 @@
 // Dal 2026-09-30 un'azione della guida e una cosa da fare aggiunta dall'utente sono la stessa cosa, una voce della giornata
 // canone per tutte le partite («devo poter modificare al 100% gli eventi della guida»; «le modifiche diventano nuovo canone»):
 // tipo, collegamento, rango atteso, note, effetti della spunta, stato nella partita. La riga `Azione` di GiornoGuida li
-// mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
+// mostra con questi pezzi; i promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
 import { Suspense, useState, type MouseEvent, type ReactNode } from 'react';
@@ -78,7 +78,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
   const apriPannello = useApriPannello();
   const uid = (a as { uid?: string }).uid;
   // 2026-10-24 (scelta dell'utente): il cartellino di un Confidente apre il cassetto «Gestione del Confidente» sopra il diario, con la
-  // partita attiva (level up, note, regali, risposte migliori, scheda completa); senza partita resta il collegamento alla scheda
+  // partita attiva (avanzamento, note, regali, risposte migliori, scheda completa); senza partita resta il collegamento alla scheda
   const partitaAttiva = usePartitaStore((s) => s.attiva?.id ?? null);
   const [cassetto, setCassetto] = useState<string | null>(null);
   const confidente = a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;

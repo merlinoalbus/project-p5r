@@ -61,6 +61,8 @@ export interface StrumentiPezzi {
 export interface StrumentiEditor {
   strumento: StrumentoEditor;
   selezionatoId: number | null;
+  /** L'id dell'istruzione sulle frecce scritta nel modulo dello spillo: la descrizione del pin selezionato per i lettori di schermo. */
+  idIstruzioniFrecce?: string;
   onSeleziona: (id: number | null) => void;
   /** Click sulla mappa con lo strumento «aggiungi» o «incolla»: coordinate in percentuale dell'immagine. */
   onClickMappa: (x: number, y: number) => void;
@@ -1019,7 +1021,6 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     <div role="presentation" className={`visore-mappa ${incorporato ? 'visore-mappa--incorporato' : 'visore-mappa--intero'} ${pannelloAperto ? '' : 'visore-mappa--pannello-chiuso'} ${paginaScorre ? 'visore-mappa--pagina-scorre' : ''} ${className ?? ''}`} data-testid="visore-mappa"
       style={{ '--proporzione-immagine': `${nat.w} / ${nat.h}` } as CSSProperties}
       onKeyDown={editor ? spostaConFrecce : undefined}>
-      {editor && <span id={`${idIstruzioni}-sposta`} className="sr-only">Con lo spillo selezionato, le frecce lo spostano di un pixel dell’immagine, con Maiusc di dieci; la posizione si scrive anche nel pannello.</span>}
       {/* in modalità scelta la mappa sta dentro la voce della guida, che porta i comandi: la testata ruberebbe la tela */}
       {!scelta && <header className="visore-mappa__barra">
         <nav className="visore-mappa__percorso" aria-label="Percorso della mappa">
@@ -1224,7 +1225,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
                   aria-label={scelta ? `${s.tipoNome}: ${nomePin(s)}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${nomePin(s)}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${s.daVerificare ? ' (da verificare)' : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
-                  aria-describedby={editor?.strumento === 'seleziona' && attivo ? `${idIstruzioni}-sposta` : undefined}
+                  aria-describedby={editor?.strumento === 'seleziona' && attivo ? editor.idIstruzioniFrecce : undefined}
                   disabled={scelta?.occupato}
                   title={nomePin(s)}
                   onPointerDown={(e) => {

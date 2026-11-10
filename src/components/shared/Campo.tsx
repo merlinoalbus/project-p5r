@@ -150,3 +150,22 @@ export function SezioneCampi({ titolo, children, className }: { titolo: string; 
     </fieldset>
   );
 }
+
+/**
+ * Una sezione di una finestra che parte ripiegata (`<details>`): i campi rari non allungano il modulo e restano montati, quindi niente si
+ * perde salvando. `riepilogo` dice sulla riga chiusa che cosa contiene; `aperta` la apre quando dentro c'è qualcosa da risolvere e non la
+ * richiude da sola quando il problema sparisce (chi sta scrivendo non perde il campo).
+ */
+export function SezioneRipiegata({ titolo, riepilogo, aperta, children, className }: { titolo: string; riepilogo?: ReactNode; aperta?: boolean; children: ReactNode; className?: string }) {
+  const el = useRef<HTMLDetailsElement | null>(null);
+  useLayoutEffect(() => { if (aperta && el.current) el.current.open = true; }, [aperta]);
+  return (
+    <details ref={el} className={`finestra-ripiegata ${className ?? ''}`}>
+      <summary className="finestra-ripiegata__testa">
+        <span className="finestra-sezione__titolo">{titolo}</span>
+        {riepilogo && <span className="finestra-ripiegata__riepilogo">{riepilogo}</span>}
+      </summary>
+      <div className="finestra-sezione__campi">{children}</div>
+    </details>
+  );
+}

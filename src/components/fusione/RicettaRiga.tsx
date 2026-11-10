@@ -5,7 +5,7 @@
 import { PersonaChip } from './PersonaChip';
 import { IconSpunta } from '../shared/iconeGuida';
 import type { RicettaFusioneDto } from '../../types';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
 import { costoRicettaConScorta } from '../../../shared/bonusVelluto';
 
 const NOME_TIPO: Record<RicettaFusioneDto['tipo'], string> = {
@@ -33,7 +33,8 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
   const scorta = inScorta ?? new Set<number>();
   const tuttiInScorta = ricetta.ingredienti.every((i) => scorta.has(i.id));
   const inScortaAlcuni = ricetta.ingredienti.some((i) => scorta.has(i.id));
-  const costo = costoRicettaConScorta(ricetta.costo, ricetta.ingredienti.map((i) => ({ livello: i.livello, inScorta: scorta.has(i.id) })));
+  const primoRichiamo = ricetta.ingredienti.some((i) => ricetta.primoRichiamo.includes(i.id) && !scorta.has(i.id));
+  const costo = costoRicettaConScorta(ricetta.costo, ricetta.ingredienti.map((i) => ({ livello: i.livello, inScorta: scorta.has(i.id), primoRichiamo: ricetta.primoRichiamo.includes(i.id) })));
   return (
     <li className={`ricetta-riga ${tuttiInScorta ? 'ricetta-riga--pronta' : ''}`}>
       <span className="ricetta-riga__persone">
@@ -52,8 +53,8 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
       </span>
       <span className="ricetta-riga__dati">
         <span className="ricetta-riga__tipo">{NOME_TIPO[ricetta.tipo]}</span>
-        {/* L7-07: il «costo» è il prezzo di evocazione dal Registro degli ingredienti, e un ingrediente in scorta vale 0 */}
-        <span className="ricetta-riga__costo" title={inScortaAlcuni ? 'Prezzo di evocazione dal Registro degli ingredienti che non hai: quelli in scorta valgono 0' : 'Prezzo di evocazione dal Registro degli ingredienti'}><span className="sr-only">Evocazione dal Registro: </span>{formattaYen(costo)}</span>
+        {/* L7-07: il «costo» è il prezzo di evocazione dal Registro degli ingredienti: un ingrediente in scorta o al primo richiamo DLC vale 0 */}
+        <span className="ricetta-riga__costo whitespace-nowrap" title={`${inScortaAlcuni ? 'Prezzo di evocazione dal Registro degli ingredienti che non hai: quelli in scorta valgono 0' : 'Prezzo di evocazione dal Registro degli ingredienti'}${primoRichiamo ? '. Il primo richiamo di una Persona DLC è gratuito' : ''}`}><span className="sr-only">Evocazione dal Registro: </span>{formattaCostoEvocazione(costo)}</span>
         {tuttiInScorta && <span className="chip chip--attivo chip--icona testo-12" title="Hai tutti gli ingredienti nella scorta"><IconSpunta size={14} /> Pronta</span>}
       </span>
     </li>

@@ -10,7 +10,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { SelettorePersona } from './SelettorePersona';
 import { Spinner } from '../shared/PageState';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../../shared/limitiFusione';
 // L8-10: i punti dell'Allarme nel testo si leggono dalla regola del calcolo
 import { puntiAllarmeFusione } from '../../../shared/bonusVelluto';
 import { NOME_MODO_PARTNER } from '../../utils/cicli';
@@ -38,7 +39,7 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
         <span className="testo-13 text-text-secondary">
           {ciclo.lunghezza} anelli · {ciclo.evocazioni} dal Registro{ciclo.catture > 0 ? ` · ${ciclo.catture} da catturare` : ''}{ciclo.dallaScorta > 0 ? ` · ${ciclo.dallaScorta} dalla scorta (solo la prima volta)` : ''}
         </span>
-        <span className="ml-auto font-black tabular-nums testo-16" title="Costo di una iterazione (evocazioni dal Registro)">{formattaYen(ciclo.costo)} / giro</span>
+        <span className="ml-auto font-black tabular-nums testo-16" title="Costo di una iterazione (evocazioni dal Registro)">{formattaCostoEvocazione(ciclo.costo)} / giro</span>
         {onSalva && <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva ciclo'} onClick={onSalva} disabled={salvato} />}
       </div>
       <ol className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Anelli del ciclo ${indice + 1}`}>
@@ -49,7 +50,7 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
             <OperatoreRicetta tipo="piu" />
             <span className="inline-flex flex-col items-start gap-0.5">
               <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
-              <span className={`chip chip--icona testo-12 ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
+              <span className={`chip chip--icona testo-12 ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaCostoEvocazione(a.partnerCosto)}` : ''}</span>
             </span>
             <OperatoreRicetta tipo="risultato" />
             <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />
@@ -64,8 +65,8 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
   );
 }
 
-/** Anelli ammessi (2–15): oltre i 5 la ricerca esamina più candidati e può richiedere qualche secondo. */
-const LUNGHEZZE = Array.from({ length: 14 }, (_, i) => i + 2);
+/** Anelli ammessi: oltre i 5 la ricerca esamina più candidati e può richiedere qualche secondo. */
+const LUNGHEZZE = Array.from({ length: ANELLI_MASSIMI_CICLO - ANELLI_MINIMI_CICLO + 1 }, (_, i) => i + ANELLI_MINIMI_CICLO);
 
 /**
  * Vista dei cicli di fusione: scelta della Persona di partenza (preselezionata da `inizialeId`), opzioni di ricerca
@@ -81,7 +82,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
   const [partnerDistinti, setPartnerDistinti] = useState(true);
   const [alternative, setAlternative] = useState(5);
   const [catture, setCatture] = useState(false);
-  const [limitaLivello, setLimitaLivello] = useState(true);
+  const [limitaLivello, setLimitaLivello] = useState(false);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
   // della Persona scelta la lettura usa solo l'id
   const idScelta = scelta?.id;

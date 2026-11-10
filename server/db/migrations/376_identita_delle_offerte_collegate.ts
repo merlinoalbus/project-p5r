@@ -1,5 +1,5 @@
 // ============================================================
-// 359 — nome, categoria e «per chi» di un'offerta valgono solo senza legame (L4-07)
+// 376 — nome, categoria e «per chi» di un'offerta valgono solo senza legame (L4-07)
 // ============================================================
 //
 // Un'offerta collegata a un oggetto del catalogo legge nome, categoria e destinatario dall'oggetto (`negoziService.articoloDto`, decisione
@@ -21,8 +21,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, registraAudit, righeArchiviate } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`359: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L4-07 · 359';
+const errore = (motivo: string): never => { throw new Error(`376: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L4-07 · 376';
 const COLONNE = ['nome', 'categoria', 'per'] as const;
 type Colonna = (typeof COLONNE)[number];
 const VUOTO = { nome: '', categoria: 'altro', per: null } as const;
@@ -49,8 +49,8 @@ const senzaLegame = (db: AppDatabase): string => db.prepare(`SELECT json_group_a
 
 interface Riga { chiave: string; nome: string; categoria: string; per: string | null; c_nome: string; c_categoria: string; c_sottocategoria: string | null; c_statistiche: string | null }
 
-export const migration359: Migration = {
-  id: 359,
+export const migration376: Migration = {
+  id: 376,
   name: 'identita_delle_offerte_collegate',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -102,7 +102,7 @@ export const migration359: Migration = {
       divergenze: Object.fromEntries(COLONNE.map((c) => [c, { quante: divergenze[c].length, chiavi: divergenze[c] }])),
     };
     registraAudit(db, 'audit-l4-07-identita-offerte', { migrazione: MIGRAZIONE, ...dettagli });
-    logger.info({ migrazione: 'L4-07-359', cambiate: cambiate.size, divergenze: Object.fromEntries(COLONNE.map((c) => [c, divergenze[c].length])) },
+    logger.info({ migrazione: 'L4-07-376', cambiate: cambiate.size, divergenze: Object.fromEntries(COLONNE.map((c) => [c, divergenze[c].length])) },
       'identità delle offerte collegate dal catalogo');
   },
 };

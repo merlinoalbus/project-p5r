@@ -21,11 +21,14 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 import type { CampoCorrezioneDto, SchedaCorrezioneDto, TipoModificabile, ValoreCampoCorrezione } from '../../types';
 import { SceltaCatalogoOggetto } from '../catalogo/SceltaCatalogoOggetto';
+import { CampoListaPersona } from '../compendio/CampoListaPersona';
+import { eListaPersona, problemaListaPersona } from '../compendio/listaPersonaLogica';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
 import { Selettore } from '../shared/Selettore';
+import { TestoCheCresce } from '../shared/Campo';
 import { Blocco, CampoElenco, Griglia } from './moduli/campi';
 import { dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate } from '../../../shared/condizioniSpillo';
 
@@ -36,9 +39,10 @@ type Bozza = Record<string, ValoreCampoCorrezione>;
 const CondizioniEditor = lazy(() => import('./CondizioniEditor').then((m) => ({ default: m.CondizioniEditor })));
 
 /** Il valore come testo per «Guida: …» e per la conferma del ripristino (le frasi lunghe si accorciano). */
-function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione): string {
+function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione, speciale?: EditorCampoSpeciale): string {
   if (v === null || v === '') return '(vuoto)';
   if (typeof v === 'boolean') return v ? 'sì' : 'no';
+  if (Array.isArray(v) && v.length > 0 && speciale?.leggiElenco) return speciale.leggiElenco(c, v);
   // le voci di un elenco da opzioni sono chiavi: si mostrano i nomi
   if (Array.isArray(v)) return v.length === 0 ? '(elenco vuoto)' : v.map((x) => c.opzioni?.find((o) => o.chiave === x)?.nome ?? x).join(' · ');
   if (c.tipo === 'scelta') return c.opzioni?.find((o) => o.chiave === v)?.nome ?? String(v);
@@ -60,7 +64,7 @@ function validoCampo(c: CampoCorrezioneDto, v: ValoreCampoCorrezione | undefined
       return typeof v === 'string' && (v.trim() !== '' || !!c.nullable || c.valoreGuida === '' || c.formato === 'condizioni');
     case 'numero': return v === null ? !!c.nullable : typeof v === 'number' && Number.isInteger(v) && v >= 0 && (c.max === undefined || v <= c.max);
     case 'booleano': return typeof v === 'boolean';
-    case 'elenco': return Array.isArray(v);
+    case 'elenco': return Array.isArray(v) && !(eListaPersona(c.formato) && problemaListaPersona(v, c));
     case 'scelta': return typeof v === 'string';
     case 'oggetto': return v === null ? !!c.nullable : typeof v === 'string' && v !== '';
   }
@@ -74,6 +78,8 @@ export interface EditorCampoSpeciale {
   disegna?: (campo: CampoCorrezioneDto, valore: ValoreCampoCorrezione | undefined, imposta: (v: ValoreCampoCorrezione) => void, occupato: boolean) => ReactNode;
   /** Il motivo, in italiano, per cui il valore non si può salvare (`null` se va bene): blocca «Salva» (il server ricontrolla comunque). */
   errore?: (valore: ValoreCampoCorrezione | undefined) => string | null;
+  /** Come si legge un elenco non vuoto in «Guida: …» e nella conferma del ripristino, se le sue voci non sono chiavi delle opzioni. */
+  leggiElenco?: (campo: CampoCorrezioneDto, voci: string[]) => string;
 }
 
 export interface PropsModificaGuida {
@@ -176,6 +182,7 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
   const campoStandard = (c: CampoCorrezioneDto, v: ValoreCampoCorrezione | undefined) => {
     switch (c.tipo) {
       case 'elenco':
+        if (eListaPersona(c.formato)) return <CampoListaPersona key={c.percorso} campo={c} valore={v} imposta={(voci) => imposta(c.percorso, voci)} occupato={occupato} />;
         return <CampoElenco key={c.percorso} etichetta={c.etichetta} voci={Array.isArray(v) ? v : []} disabilitato={occupato} onCambia={(voci) => imposta(c.percorso, voci)} />;
       case 'booleano':
         return (
@@ -221,7 +228,9 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
         return (
           <label key={c.percorso} className="editor-mappa__campo sm:col-span-2">
             {c.etichetta}
-            <textarea className="form-input min-h-[88px]" rows={3} maxLength={c.max ?? 6000} disabled={occupato} value={typeof v === 'string' ? v : ''} onChange={(e) => imposta(c.percorso, e.target.value)} />
+            {/* L6-07 (P §D4): l'area di testo cresce con ciò che contiene, come ogni area di testo dei moduli (`TestoCheCresce`): niente riquadro
+                che scorre da 86 px dentro la finestra (il riassunto di una settimana a 375 px ne misurava 313) */}
+            <TestoCheCresce righe={3} massimo={c.max ?? 6000} disabilitato={occupato} valore={typeof v === 'string' ? v : ''} onCambia={(testo) => imposta(c.percorso, testo)} />
           </label>
         );
       case 'testo':
@@ -240,7 +249,7 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
     if (!c.modificato) return null;
     return (
       <div key={`${c.percorso}-guida`} className="flex flex-wrap items-center gap-2 testo-12 text-text-muted sm:col-span-2">
-        <span className="min-w-0 flex-1 break-words">Guida: {mostra(c, c.valoreGuida)}</span>
+        <span className="min-w-0 flex-1 break-words">Guida: {mostra(c, c.valoreGuida, campiSpeciali?.[c.percorso])}</span>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti questo" disabled={occupato} onClick={() => setConferma({ campi: [c.percorso] })} />
       </div>
     );
@@ -289,7 +298,7 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
             <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 testo-13">
               <p className="m-0 font-semibold">Perdi la tua versione:</p>
               <ul className="m-0 flex list-none flex-col gap-1 p-0">
-                {daPerdere.map((c) => <li key={c.percorso} className="break-words"><span className="text-text-muted">{c.etichetta}:</span> {mostra(c, c.valore)}</li>)}
+                {daPerdere.map((c) => <li key={c.percorso} className="break-words"><span className="text-text-muted">{c.etichetta}:</span> {mostra(c, c.valore, campiSpeciali?.[c.percorso])}</li>)}
               </ul>
               {cambiati.length > 0 && <p className="m-0 text-text-muted">Anche le modifiche di questa finestra non ancora salvate vanno perse.</p>}
               <div className="flex flex-wrap gap-2">

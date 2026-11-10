@@ -1,5 +1,5 @@
 // ============================================================
-// 358 — gli Strumenti del cercatore all'Akiba e i cinque oggetti del laghetto senza scheda (L4-04)
+// 375 — gli Strumenti del cercatore all'Akiba e i cinque oggetti del laghetto senza scheda (L4-04)
 // ============================================================
 //
 // Rapporto K E15 e E19, pagina «Oggetti chiave essenziali» della guida (righe 391-406) e «Pesca al laghetto di Ichigaya» (righe 176-182):
@@ -21,7 +21,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`358: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`375: ${motivo}; nessuna modifica applicata.`); };
 const FONTE_OGGETTI_CHIAVE = 'https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/';
 const LAGHETTO = (punti: string) => `Laghetto di pesca Ichigaya, in cambio di ${punti} punti della pesca`;
 
@@ -37,8 +37,8 @@ const SCHEDE: ReadonlyArray<{ chiave: string; nome: string; effetto: string; des
 const OFFERTA = { chiave: 'akiba/strumenti-del-cercatore', negozio: 'akiba', scheda: 'altro/strumenti-del-cercatore', prezzo: 2000,
   condizioni: JSON.stringify([{ tipo: 'data', dal: '09-01' }]), rifornimento: JSON.stringify({ tipo: 'mai', origine: 'fallback-utente' }) } as const;
 
-export const migration358: Migration = {
-  id: 358,
+export const migration375: Migration = {
+  id: 375,
   name: 'strumenti_e_laghetto',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -70,8 +70,8 @@ export const migration358: Migration = {
     const create = schede.filter((s) => s.esito === 'scheda creata').length;
     if ((db.prepare('SELECT COUNT(*) FROM main.catalogo_oggetto').pluck().get() as number) !== primaSchede + create) errore('il catalogo non ha le schede attese');
     if (create === 0 && !offerta.startsWith('offerta creata')) return;
-    registraAudit(db, 'audit-l4-04-strumenti-laghetto', { migrazione: 'L4-04 · 358', conteggi: { schede: create, offerte: offerta.startsWith('offerta creata') ? 1 : 0 },
+    registraAudit(db, 'audit-l4-04-strumenti-laghetto', { migrazione: 'L4-04 · 375', conteggi: { schede: create, offerte: offerta.startsWith('offerta creata') ? 1 : 0 },
       fonte: FONTE_OGGETTI_CHIAVE, schede, offerta: { chiave: OFFERTA.chiave, esito: offerta }, fuori: 'Stecca jump, Set di freccette, Boilie sospetto: Q18, invariati finché non sono verificati in gioco' });
-    logger.info({ migrazione: 'L4-04-358', schede: create, offerta }, 'strumenti del cercatore e oggetti del laghetto');
+    logger.info({ migrazione: 'L4-04-375', schede: create, offerta }, 'strumenti del cercatore e oggetti del laghetto');
   },
 };

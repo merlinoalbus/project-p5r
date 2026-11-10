@@ -34,20 +34,26 @@ function effettiDellaLettura(o: CatalogoOggettoDto): string {
  *  dati ripetevano (migrazione 287) né con «Non dichiarato», che sarebbe falso. */
 const EFFETTO_DEL_REGALO = 'Si regala ai Confidenti';
 
+/** La descrizione di un Tesoro nel catalogo comincia sempre così (premi delle Battaglie Sfida, Tesori della guida). */
+const DESCRIZIONE_DI_TESORO = /^tesoro, /;
+
 /** La cella «Effetto»: il testo dell'effetto, le statistiche di armi e protezioni (`statistiche.testo`, migrazione 275) o le voci della
- *  lettura; «Non dichiarato» solo se non c'è nessuno dei tre (e l'oggetto non è un regalo). Il `title` dice le note a parole («1 nota»), la
+ *  lettura; per un Tesoro, che serve solo a essere rivenduto, la sua descrizione («tesoro, …»: prezzo di rivendita ed eventualmente dove si
+ *  trova; premi delle Sfide e migrazione 368); «Non dichiarato» se non c'è nessuno di questi (e l'oggetto non è un regalo). Il `title` dice le note a parole («1 nota»), la
  *  cella le mostra come ♪, con il nome accessibile («3 note») anche per le voci della lettura (revisione del lotto F, rilievo 5). */
 function CellaEffetto({ o }: { o: CatalogoOggettoDto }) {
   const lettura = o.effetto ? '' : effettiDellaLettura(o);
   const statistiche = typeof o.statistiche?.testo === 'string' ? o.statistiche.testo : '';
   const regalo = !o.effetto && !statistiche && !lettura && o.categoria === 'regalo';
+  const tesoro = !o.effetto && !statistiche && !lettura && !regalo && DESCRIZIONE_DI_TESORO.test(o.descrizione ?? '');
   return (
     <td className="tabella-oggetti__effetto break-words" title={o.effetto ? testoNoteAParole(noteInSimboli(o.effetto)) : lettura ? testoNoteAParole(lettura) : undefined}>
       {o.effetto && <TestoNote testo={o.effetto} daParole="conteggi" />}
       {statistiche && <span className="block testo-12 text-text-secondary">{statistiche}</span>}
       {lettura && <span className="block"><TestoNote testo={lettura} /></span>}
       {regalo && <span className="text-text-secondary">{EFFETTO_DEL_REGALO}</span>}
-      {!o.effetto && !statistiche && !lettura && !regalo && 'Non dichiarato'}
+      {tesoro && <span className="text-text-secondary">{o.descrizione}</span>}
+      {!o.effetto && !statistiche && !lettura && !regalo && !tesoro && 'Non dichiarato'}
     </td>
   );
 }

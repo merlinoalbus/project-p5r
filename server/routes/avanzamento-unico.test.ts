@@ -10,7 +10,6 @@ import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { modelloAvanzamento, pinFattoPerLaVoce, statiDellaPartita, voceDaiPin, voceFatta } from '../services/mappe/statiGuida.js';
 import type { DivergenzaDto, DungeonDettaglioDto, MappaDto, PuntoInteresseDto } from '../../shared/types.js';
-import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
@@ -218,14 +217,9 @@ describe('L4 — avanzamento unico', () => {
     expect(m.aree.flatMap((a) => a.punti).filter((p) => 'carattere' in p)).toEqual([]);
   });
 
-  it('§2.3 — le schede senza mappa: assorbite nella voce nei contenuti della guida; quelle senza voce da sistemare («Collega a una voce», «Crea la voce»)', async () => {
-    const legata = prepared("SELECT s.id, s.riferimento_chiave AS voce, s.area_guida_chiave AS area FROM spillo s JOIN dungeon_area a ON a.chiave = s.area_guida_chiave WHERE s.mappa_chiave IS NULL AND s.riferimento_tipo = 'punto' AND a.dungeon_chiave = 'kamoshida' LIMIT 1").get() as { id: number; voce: string; area: string } | undefined;
-    const mappa = prepared("SELECT chiave FROM mappa WHERE chiave = 'dungeon-kamoshida'").pluck().get() as string;
-    const contenuti = (await request(app).get(`/api/mappe/contenuti/${mappa}?partita=${partita}`).expect(200)).body.data as ContenutiMappaDto;
-    const punti = contenuti.aree.flatMap((a) => a.punti);
-    // nessuna scheda come elemento a sé: solo voci
-    expect(punti.every((p) => typeof p.id === 'string' && String(p.id).startsWith('punto:') && !p.scheda)).toBe(true);
-    if (legata) expect(punti.find((p) => p.id === `punto:${legata.voce}`)).toMatchObject({ carattere: expect.anything() });
+  // L12-04 (Q20): la prima metà leggeva i contenuti della guida da `GET /api/mappe/contenuti/:chiave`, tolta perché nessuna pagina la chiamava;
+  // resta la parte sulle schede senza voce, che la scheda del Palazzo mostra ancora
+  it('§2.3 — le schede senza mappa e senza voce sono da sistemare («Collega a una voce», «Crea la voce»)', async () => {
     // una scheda da sistemare, fatta apposta
     const area = inf[1];
     prepared("INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, collezionabile, ordine, origine, updated_at, area_guida_chiave, ruolo_guida, uid) VALUES (NULL, 'forziere', 'Scheda orfana', 'Senza voce', 11, 22, 1, 0, 'seed', 'x', ?, 'punto', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')").run(area);
@@ -345,7 +339,9 @@ describe('L4 — avanzamento unico', () => {
     ]).toEqual([0, 0]);
   });
 
-  it('§3.2, R4-15 — le copie secondo la regola dell’utente: vuote a Madarame; con voci uguali sugli stessi pin nella stessa infiltrazione, trovate', async () => {
+  // Saltato (L12-04, Q20): la rotta `GET /dungeon/:chiave/copie` e `copieDelPalazzo` non esistono più, nessuno le chiamava (in L4 non c'è
+  // fusione). Il corpo originale è conservato, non eseguito (zero test).
+  it.skip('§3.2, R4-15 — le copie secondo la regola dell’utente: vuote a Madarame; con voci uguali sugli stessi pin nella stessa infiltrazione, trovate', async () => {
     expect((await request(app).get('/api/compendio/dungeon/madarame/copie').expect(200)).body.data).toEqual([]);
     const a = await nuova(inf[5], 'Doppione', 'forziere');
     const b = await nuova(inf[5], 'Doppione', 'forziere');

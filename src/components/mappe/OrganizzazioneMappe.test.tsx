@@ -13,12 +13,15 @@ import type { MappaRiassuntoDto } from '../../types';
 import type { FC } from 'react';
 import { MappaIncorporata } from './MappaIncorporata';
 import { RisolviMappa } from './RisolviMappa';
-import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
 // Segnaposto locale tipizzato, SOLO perché il file compili: `AlberoLuoghi` è stato eliminato da L11/B5 (decisione del PM del 24/10). I casi che
 // lo usano sono `it.skip` e non si eseguono; i corpi originali sono conservati qui sotto.
 const AlberoLuoghi: FC<{ mappe: MappaRiassuntoDto[]; genitore?: string; espandibile?: boolean }> = () => null;
+// Idem per `ContenutiGuidaMappa`, tolto da L12-04 (Q20: nessuna pagina lo montava); i tre casi che lo usano sono `it.skip`, corpi conservati.
+const ContenutiGuidaMappa: FC<{ mappa: string; area?: string | null; dungeon?: string }> = () => null;
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
-vi.mock('../../services/api', (vero) => moduloApi(vero, api));
+// `getContenutiMappa` è uscita dal barrel con `GET /api/mappe/contenuti/:chiave` (L12-04, Q20): resta qui solo per i casi `it.skip` che la citano,
+// fuori dal modulo finto (che rifiuta i nomi che il modulo vero non ha)
+vi.mock('../../services/api', (vero) => moduloApi(vero, Object.fromEntries(Object.entries(api).filter(([nome]) => nome !== 'getContenutiMappa'))));
 /** Riassunto minimo di una mappa di tipo «luogo» con la chiave, il genitore e il nome dati (nome predefinito = chiave), senza immagine né spilli. */
 function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { return {chiave,genitore,nome,nomeRivisto:false,tipo:'luogo',ordine:0,immagineUrl:null,asset:null,radiceDi:null,versione:null,origine:'utente',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:`/guida/mappe/${chiave}`}; }
 /** Rotta di arrivo dei test: scrive a schermo percorso e query dell'indirizzo corrente, per verificare dove ha portato un reindirizzamento. */
@@ -106,7 +109,7 @@ it('L3: un alias di un’infiltrazione apre la sua casa, la scheda del Palazzo c
   render(<MemoryRouter initialEntries={['/vecchia']}><Routes><Route path="/vecchia" element={<RisolviMappa chiave="vecchia">{child}</RisolviMappa>}/><Route path="/guida/dungeon/:chiave" element={<Indirizzo/>}/></Routes></MemoryRouter>);
   expect(await screen.findByText('/guida/dungeon/kamoshida?infiltrazione=kamoshida-01')).toBeInTheDocument();expect(child).not.toHaveBeenCalled();
 });
-it('i contenuti mantengono testo e punti senza inventare coordinate o attività',async()=>{
+it.skip('i contenuti mantengono testo e punti senza inventare coordinate o attività',async()=>{
   api.getContenutiMappa.mockResolvedValue({mappa:'palazzo',aree:[{chiave:'biblioteca',nome:'Biblioteca',descrizione:'Descrizione conservata',note:'Nota conservata',mappe:[],punti:[{id:7,nome:'Libro',descrizione:'Descrizione del libro',tipo:'nota',riferimento:null,collezionabile:true,soloPosizione:false}]}]});
   render(<MemoryRouter><ContenutiGuidaMappa mappa="palazzo" area="biblioteca" dungeon="castello"/></MemoryRouter>);
   const sezione=await screen.findByRole('region',{name:'Contenuti della guida'});
@@ -116,7 +119,7 @@ it('i contenuti mantengono testo e punti senza inventare coordinate o attività'
   expect(within(sezione).getByText('Biblioteca').closest('details')).toHaveAttribute('open');
 });
 
-it('L3 (AP3-4): una planimetria dell’infiltrazione porta dritto alla sua casa nella scheda del Palazzo, con l’infiltrazione', async () => {
+it.skip('L3 (AP3-4): una planimetria dell’infiltrazione porta dritto alla sua casa nella scheda del Palazzo, con l’infiltrazione', async () => {
   api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'biblioteca', nome: 'Biblioteca', descrizione: '', note: '', mappe: [{ chiave: 'nativo-biblioteca', nome: 'Biblioteca 1' }], punti: [] }] });
   api.risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'castello-biblioteca-1', casa: '/guida/dungeon/castello/area/biblioteca' });
   render(<MemoryRouter initialEntries={['/guida/mappe/palazzo']}><Routes>
@@ -128,7 +131,7 @@ it('L3 (AP3-4): una planimetria dell’infiltrazione porta dritto alla sua casa 
   expect(api.risolviMappa).toHaveBeenCalledWith('nativo-biblioteca');
 });
 
-it('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
+it.skip('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
   /** Costruisce un punto della guida di tipo «nota» con id `punto:…` e il contenitore indicato (null = voce di primo livello, altrimenti l'Enigma di cui è un passo). */
   const voce = (id: string, nome: string, contenitore: string | null) => ({ id, nome, descrizione: '', tipo: 'nota', riferimento: { tipo: 'punto', chiave: id.slice(6) }, collezionabile: false, soloPosizione: false, ruolo: 'punto', contenitore });
   api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'sala', nome: 'Sala', descrizione: '', note: '', mappe: [], punti: [voce('punto:e', 'La porta della torre', null), voce('punto:a', 'Tira la leva', 'punto:e'), voce('punto:f', 'Forziere', null)] }] });

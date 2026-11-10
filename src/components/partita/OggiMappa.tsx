@@ -33,13 +33,15 @@ interface Props {
   oggi: Oggi;
   /** Riempie l'altezza della colonna invece di usare un'altezza fissa. */
   riempi?: boolean;
+  /** I cartellini vicini di Tokyo diventano un «+n» (Home); spento nella pagina Partita, che non cambia disposizione (DECISIONI). */
+  raggruppaVicini?: boolean;
 }
 
 /** La colonna della mappa, sullo stato condiviso `oggi`: al livello di Tokyo la `MappaTokyo` della
  * città (quartieri e radici del Metaverso caricati solo lì, alla data della partita attiva), il cui
  * clic su un cartellino d'atlante scende di livello senza cambiare pagina; sotto Tokyo la
  * `MappaIncorporata` sulla mappa corrente, centrata sullo spillo scelto, con «Torna a Tokyo». */
-export function OggiMappa({ oggi, riempi }: Props) {
+export function OggiMappa({ oggi, riempi, raggruppaVicini = false }: Props) {
   const { mappa } = oggi;
   const attiva = usePartitaStore((s) => s.attiva);
   const suTokyo = mappa.chiave === 'tokyo';
@@ -75,6 +77,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
       </div>
       {suTokyo ? (
         <MappaTokyo
+          raggruppaVicini={raggruppaVicini}
           riempi={riempi}
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}

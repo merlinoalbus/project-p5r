@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 import { condizioneSpillo as condizioneDiUnPin } from './mappe.js';
-import { categoriaArticolo, dataGioco, dote } from './comuni.js';
+import { categoriaArticolo, dataGioco } from './comuni.js';
 import { foglieCondizione } from '../../shared/condizioniSpillo.js';
 import { TIPI_CATALOGO } from '../../shared/types.js';
 import { FASCE_ORARIO, GIORNI_SETTIMANA_CHIAVI } from '../../shared/orariNegozio.js';
@@ -131,14 +131,13 @@ export const datiArticolo = z.object({
   nota: testo(600).nullable().optional(),
 });
 
-/** Campi di un libro scrivibili dall'utente. L13 (O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca` ed `effetto_json` non ci sono
- *  più (come ogni chiave sconosciuta, si scartano): che cosa dà e che cosa apre lo dicono gli effetti, dove si ottiene articoli e posizioni. */
+/** Campi di un libro scrivibili dall'utente. L13 (O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` e il prezzo non ci
+ *  sono più (come ogni chiave sconosciuta, si scartano): che cosa dà e che cosa apre lo dicono gli effetti, dove si ottiene e quanto costa articoli e posizioni. */
 const datiLibro = z.object({
   // Le condizioni sono la disponibilità, «dal 18 aprile» (migrazione 052).
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   /** Gli effetti dichiarati (migrazione 074): la Dote che alza, che cosa apre. L'unico punto. */
   effetti_json: effettiJson,
   sessioni: z.number().int().min(1).max(9).nullable().optional(),
@@ -190,7 +189,6 @@ const datiAttivitaBase = z.object({
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   tipo: z.enum(chiaviDi(TIPI_ATTIVITA)).default('altro'),
-  luogo: testo(300).default(''),
   /** La sede: un luogo della città (migrazione 072). È l'unico «dove» dell'attività: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
   fascia: z.enum(chiaviDi(FASCE_ATTIVITA)).nullable().optional(),
@@ -201,13 +199,6 @@ const datiAttivitaBase = z.object({
   dettagli: testo(4000).nullable().optional(),
   effetti_json: effettiJson,
   tracciamento: z.enum(chiaviDi(TRACCIAMENTI_ATTIVITA)).optional(),
-  // Le Doti di un'attivita' sono un elenco: `[{dote, note, condizione}]`. Si accetta gia'
-  // strutturato e si salva come JSON, come fa il seed.
-  doti_json: z.array(z.object({
-    dote: dote.nullable(),
-    note: z.number().int().min(0).max(9).nullable(),
-    condizione: testo(400).nullable(),
-  })).max(10).transform((v) => JSON.stringify(v)).optional(),
   quiz_json: quizJson,
   /** L13: gli esiti scelti alla spunta (`shared/esitiAttivita.ts`), validi per intero o rifiutati; null = nessun esito dichiarato. */
   esiti_json: z.unknown().superRefine((v, ctx) => {

@@ -20,7 +20,7 @@ import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import { t, vociAmbito } from '../traduzioniService.js';
 import type { CampoDef } from './registro.js';
 import type { DefRiga, Valori } from './righe.js';
-import { colonna, rigaDaColonne } from './righeComuni.js';
+import { colonna, opzioniPersone, rigaDaColonne } from './righeComuni.js';
 
 const arcaniOrdinati = (): string[] => prepared('SELECT chiave FROM arcana ORDER BY ordine').pluck().all() as string[];
 const nomeArcano = (chiave: string): string => t('arcana', chiave);
@@ -72,7 +72,8 @@ const fusioneSpeciale: DefRiga = {
   modalita: 'riga', etichetta: 'Ricetta speciale', tabella: 'fusione_speciale', colonnaChiave: 'CAST(risultato_id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(risultato_id AS TEXT) FROM fusione_speciale ORDER BY risultato_id').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM fusione_speciale WHERE CAST(risultato_id AS TEXT) = ?').get(chiave),
-  campi: () => [{ p: 'ingredienti', e: 'Ingredienti, nell’ordine della ricetta (nome della Persona)', t: 'elenco' } as CampoDef],
+  // la Persona risultato non è un ingrediente di sé stessa (`valida`): non si propone
+  campi: (chiave) => [{ p: 'ingredienti', e: 'Ingredienti, nell’ordine della ricetta', t: 'elenco', formato: 'persone-in-ordine', minimoVoci: 2, opzioni: opzioniPersone('CAST(id AS TEXT) <> ?', chiave) } as CampoDef],
   leggi: (chiave) => ({ ingredienti: ingredientiDi(chiave) }),
   scrivi: (chiave, v) => {
     if (v.ingredienti === undefined) return;
@@ -156,7 +157,9 @@ const dlcSet: DefRiga = {
   modalita: 'riga', etichetta: 'Set di contenuti scaricabili', tabella: 'dlc_set', colonnaChiave: 'CAST(id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM dlc_set ORDER BY ordine').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM dlc_set WHERE CAST(id AS TEXT) = ?').get(chiave),
-  campi: () => [{ p: 'persone', e: 'Persona del set (nome)', t: 'elenco' } as CampoDef],
+  // una Persona che sta già in un altro set non si propone (`valida`)
+  campi: (chiave) => [{ p: 'persone', e: 'Persona del set', t: 'elenco', formato: 'persone', minimoVoci: 1,
+    opzioni: opzioniPersone('id NOT IN (SELECT persona_id FROM dlc_set_persona WHERE CAST(set_id AS TEXT) <> ?)', chiave) } as CampoDef],
   leggi: (chiave) => ({ persone: personeDelSet(chiave) }),
   scrivi: (chiave, v) => {
     if (v.persone === undefined) return;

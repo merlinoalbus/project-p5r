@@ -1,5 +1,5 @@
 // ============================================================
-// 356 — via `negozio.orari_json` (L4-02; risposta dell'utente a Q6: la raccomandazione)
+// 373 — via `negozio.orari_json` (L4-02; risposta dell'utente a Q6: la raccomandazione)
 // ============================================================
 //
 // Gli orari di un punto vendita con sede sono quelli del luogo, salvo l'eccezione del punto vendita (`eccezione_orari_json`, R5-12b): la
@@ -22,11 +22,11 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella, righeConValore } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, registraAudit, righeArchiviate } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`356: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L4-02 · 356';
+const errore = (motivo: string): never => { throw new Error(`373: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L4-02 · 373';
 
-export const migration356: Migration = {
-  id: 356,
+export const migration373: Migration = {
+  id: 373,
   name: 'orari_del_negozio_tolti',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -57,6 +57,6 @@ export const migration356: Migration = {
       inArchivioSenzaTrasferimento: ['untouchable', 'big-bang-burger', 'mercante-sakai'].filter((k) => k in righe),
       motivo: 'Q6: Untouchable in archivio; Big Bang Burger e Mercante Sakai non confermati come orari dalla guida (nota sulle sfide serali; finestre di date degli scambi)' };
     registraAudit(db, 'audit-l4-02-orari-negozio', { migrazione: MIGRAZIONE, ...dettagli });
-    logger.info({ migrazione: 'L4-02-356', archiviate: dettagli.archiviate, eccezioni: senzaSede }, 'orari del negozio tolti');
+    logger.info({ migrazione: 'L4-02-373', archiviate: dettagli.archiviate, eccezioni: senzaSede }, 'orari del negozio tolti');
   },
 };

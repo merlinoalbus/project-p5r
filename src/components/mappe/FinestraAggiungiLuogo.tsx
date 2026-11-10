@@ -137,7 +137,7 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellAre
           </div>}
           {modo === 'esistente'
             ? <Selettore className="selettore--in-linea" etichetta="Luogo" valore={esistente} segnaposto="Scegli il luogo…" ricerca="sempre" disabilitato={q.caricamento}
-              opzioni={luoghi.map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: l.pin ? 'ha già un pin' : 'da posizionare' }))} onCambia={setEsistente} />
+              opzioni={luoghi.map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: `${l.area?.nome ?? 'da collocare'} · ${l.pin ? 'ha già un pin' : 'da posizionare'}` }))} onCambia={setEsistente} />
             // L13 (O7-5): i campi del luogo nuovo sono quelli del modulo del luogo (`CampiLuogo`), non una copia
             : <div className="griglia-campi">
               <CampiLuogo valore={{ ...nuovo, orari }} onCambia={(p) => {

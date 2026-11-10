@@ -12,7 +12,8 @@
 // riceve un umore dedotto da un nome del foglio Royal.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { filtroRicerca, paroleRicerca } from '../../shared/testo.js';
@@ -30,12 +31,11 @@ interface Corpus { righe: RigheNegoziazione; indice: IndiceNegoziazione }
 let cache: Corpus | null = null;
 export const invalidaNegoziazione = registraCacheDiGioco(() => { cache = null; });
 
-const tabellaEsiste = (nome: string): boolean => !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 
 /** Le righe delle quattro tabelle, lette una volta (il DB di gioco cambia solo per migrazione o importazione, che svuotano la cache). */
 function corpus(): Corpus {
   if (cache) return cache;
-  if (!tabellaEsiste('negoziazione_domanda')) throw httpErrors.notFound('negoziazione-non-disponibile', 'La negoziazione per umore non è caricata in questo database di gioco.');
+  if (!haTabellaMain(getDb(), 'negoziazione_domanda')) throw httpErrors.notFound('negoziazione-non-disponibile', 'La negoziazione per umore non è caricata in questo database di gioco.');
   const righe: RigheNegoziazione = {
     domande: prepared('SELECT chiave, ordine FROM negoziazione_domanda ORDER BY ordine').all() as RigaNegDomanda[],
     varianti: prepared('SELECT * FROM negoziazione_variante ORDER BY domanda_chiave, ordine').all() as RigaNegVariante[],
@@ -88,7 +88,7 @@ function famigliaContiene(c: Corpus, varianti: RigaNegVariante[], trova: (...tes
 }
 
 function carteDi(umori: ReadonlyArray<UmoreNegoziazione>): NegUmoreDto[] {
-  if (!tabellaEsiste('negoziazione_umore')) return [];
+  if (!haTabellaMain(getDb(), 'negoziazione_umore')) return [];
   const righe = prepared('SELECT umore, nome, descrizione, esempi_json, da_evitare_json, fonte FROM negoziazione_umore').all() as Array<{ umore: string; nome: string; descrizione: string; esempi_json: string; da_evitare_json: string; fonte: string }>;
   const leggi = (json: string): unknown => { try { return JSON.parse(json) as unknown; } catch { return null; } };
   return umori.flatMap((u) => {

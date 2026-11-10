@@ -1,5 +1,5 @@
 // ============================================================
-// regoleNegoziService — la regola comune di un genere di punto vendita (L4-01, migrazione 355): pezzi, rifornimento e condizioni
+// regoleNegoziService — la regola comune di un genere di punto vendita (L4-01, migrazione 372): pezzi, rifornimento e condizioni
 // ============================================================
 //
 // Oggi una sola regola, quella dei distributori («lunedì, 2 pezzi, non col caldo»). Un'offerta che la segue (`articolo.regola_comune` = 1) ha
@@ -22,7 +22,7 @@ import type { RegolaTipoNegozioDto } from '../../shared/types.js';
 
 interface RigaRegola { tipo: string; quantita: number | null; rifornimento_json: string | null; condizioni_json: string | null; fonte: string }
 
-/** La tabella c'è (gioco.db migrato alla 355): prima, nessuna regola e nessun segno. */
+/** La tabella c'è (gioco.db migrato alla 372): prima, nessuna regola e nessun segno. */
 function conRegole(): boolean {
   return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'regola_tipo_negozio'").get()
     && !!prepared("SELECT 1 FROM pragma_table_info('articolo', 'main') WHERE name = 'regola_comune'").get();
@@ -87,7 +87,7 @@ export function allineaSegnoDelNegozio(negozio: string): void {
   for (const a of prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave = ?').pluck().all(negozio) as string[]) allineaSegnoRegola(a);
 }
 
-/** Il segno di un'offerta, per l'editor (false prima della 355). */
+/** Il segno di un'offerta, per l'editor (false prima della 372). */
 export function segueRegolaComune(articolo: string): boolean {
   if (!conRegole()) return false;
   return (prepared('SELECT regola_comune FROM main.articolo WHERE chiave = ?').pluck().get(articolo) as number | undefined) === 1;

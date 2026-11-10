@@ -40,7 +40,7 @@ export type { RequisitoDisponibilita };
 // l'ordine del calendario di gioco (aprile → marzo) e la lettura della data di sblocco dei quartieri stanno nel modulo condiviso
 export { ordineGioco, dataSbloccoQuartiere };
 
-export interface SbloccoQuartiere { nome: string; dal: string | null }
+export interface SbloccoQuartiere { nome: string }
 
 /** Stato della partita per la disponibilità: quello dei semafori dei Confidenti più tutto ciò che le condizioni chiedono. */
 export interface StatoDisponibilita extends StatoPartitaSemafori {
@@ -59,8 +59,7 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   spesaPerNegozio: Map<string, number>;
   puntiNegozio: Map<string, number>;
   giornoSettimana: string | null;
-  /** I quartieri con il nome e la data della guida (`sblocco_data`): la data vale solo per un quartiere senza condizione salvata
-   *  (L6: la condizione del quartiere è `quartiere.condizioni_json`, con gli inviti). */
+  /** I quartieri col loro nome (L6: lo sblocco è `quartiere.condizioni_json`, con gli inviti). */
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
   /** L'arco della storia in cui si trova la partita, dalla data di gioco e dalle finestre dei Palazzi. */
   arcoCorrente: string | null;
@@ -85,10 +84,10 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   postiInCorso?: Set<string>;
 }
 
-/** Ogni quartiere con il nome e la data di sblocco (`sblocco_data`, null se non ne ha una). */
+/** Ogni quartiere col suo nome. */
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
-  const righe = prepared('SELECT chiave, nome, sblocco_data FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco_data: string | null }>;
-  return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: q.sblocco_data }]));
+  const righe = prepared('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>;
+  return new Map(righe.map((q) => [q.chiave, { nome: q.nome }]));
 }
 
 /** L'arco raggiunto a una data: l'ultimo Palazzo la cui finestra è già cominciata; prima del primo si è comunque nel primo. */

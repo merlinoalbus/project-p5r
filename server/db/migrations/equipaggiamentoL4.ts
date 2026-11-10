@@ -1,5 +1,5 @@
 // ============================================================
-// equipaggiamentoL4 — le righe della guida per la migrazione 357 (L4-03): armi a distanza, armi da mischia e protezioni senza scheda
+// equipaggiamentoL4 — le righe della guida per la migrazione 374 (L4-03): armi a distanza, armi da mischia e protezioni senza scheda
 // ============================================================
 //
 // Dati trascritti dalle tabelle delle pagine d'inventario della guida italiana (rapporto N §2.1, censimento per nome): ogni valore ha la sua

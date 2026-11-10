@@ -78,6 +78,7 @@ export function FusionePage() {
   const strumenti = !IN_RILASCIO && params.get('strumenti') === '1';
   const visteMostrate = strumenti ? [...VISTE, ...VISTE_STRUMENTI] : VISTE;
   const vista: Vista = visteMostrate.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
+  const iconaVista = visteMostrate.find(([k]) => k === vista)?.[2] ?? 'fusione-calcolatore';
   /** Cambia vista scrivendola nel parametro `vista` dell'URL e lasciando gli altri parametri come sono. */
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const skillParam = (params.get('skill') ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
@@ -93,7 +94,7 @@ export function FusionePage() {
     return r?.risultato ?? null;
   }, [dati, a, b]);
 
-  /** La riga della tabella che dà il risultato della coppia scelta (a == b è la regola «stesso arcano», che non sta in tabella): serve a correggerla. */
+  /** La riga della tabella da correggere per la coppia scelta, solo per arcani diversi: con a == b il risultato viene dalla regola «stesso arcano» qui sopra, non dalla riga della diagonale (che in tabella c'è). */
   const rigaCoppia = useMemo(() => (dati && a && b && a !== b ? dati.tabella.find((t) => (t.a === a && t.b === b) || (t.a === b && t.b === a)) ?? null : null), [dati, a, b]);
 
   const matrice = useMemo(() => {
@@ -110,14 +111,22 @@ export function FusionePage() {
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : partiteCaricate ? ' (nessuna: solo contenuti base)' : ''}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} inCaricamento={!partiteCaricate || (attiva !== null && !velluto.dati)} errore={velluto.dati ? null : velluto.errore} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
-      <FilaScorrevole role="group" aria-label="Sezioni della fusione">
-        {visteMostrate.map(([k, l, icona]) => (
-          // L'immagine sopra la parola, come nelle schede della Partita: l'iconcina da 16 px
-          // accanto a un'etichetta lunga era un dettaglio che spariva, e otto pastiglie di testo
-          // si leggevano tutte uguali. Rilievo dell'utente: «rapporto grafica/testo pessimo».
-          <button key={k} type="button" className={`piastrella-scheda touch ${vista === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k} title={l}><IconaScheda chiave={icona} dimensione={28} /><span>{l}</span></button>
-        ))}
-      </FilaScorrevole>
+      {/* Telefono (L11-07): la vista corrente con l'elenco di tutte, su una riga da 44 px. La fila di piastrelle ne lasciava metà fuori schermo e una griglia 4×2
+          con icone e nomi costerebbe due file di piastrelle: il selettore è la forma che lascia più spazio al contenuto. */}
+      <div className="flex items-center gap-2 md:hidden">
+        <IconaScheda chiave={iconaVista} dimensione={28} />
+        <Selettore className="selettore--viste min-w-0 flex-1" etichetta="Sezione" valore={vista} opzioni={visteMostrate.map(([chiave, nome]) => ({ chiave, nome }))} onCambia={(k) => setVista(k as Vista)} ricerca="mai" valoreNelNome />
+      </div>
+      <div className="hidden md:block">
+        <FilaScorrevole role="group" aria-label="Sezioni della fusione">
+          {visteMostrate.map(([k, l, icona]) => (
+            // L'immagine sopra la parola, come nelle schede della Partita: l'iconcina da 16 px
+            // accanto a un'etichetta lunga era un dettaglio che spariva, e otto pastiglie di testo
+            // si leggevano tutte uguali. Rilievo dell'utente: «rapporto grafica/testo pessimo».
+            <button key={k} type="button" className={`piastrella-scheda touch ${vista === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k} title={l}><IconaScheda chiave={icona} dimensione={28} /><span>{l}</span></button>
+          ))}
+        </FilaScorrevole>
+      </div>
 
       <PageState isLoading={inPrimoCaricamento || persone.inPrimoCaricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
         {persone.dati && vista === 'calcolatore' && (

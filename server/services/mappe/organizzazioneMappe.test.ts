@@ -8,10 +8,13 @@ import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { migrations } from '../../db/migrations/index.js';
 import { caricaPacchetto } from '../pacchetto/pacchettoGioco.js';
-import { contenutiMappa, risolviPercorsoMappa } from './contenutiGuidaService.js';
+import { risolviPercorsoMappa } from './contenutiGuidaService.js';
 import { importaMappe, dettaglioMappa, esportaMappe } from './mappeService.js';
 /** `mappaPerEntita` è stata tolta (L11 · B9, la rotta `GET /api/mappe/entita/...` non c'è più): serve solo al test messo da parte con `it.skip`, perché compili. */
 const mappaPerEntita = (_tipo: string, _chiave: string): null => null;
+/** `contenutiMappa` è stata tolta con `GET /api/mappe/contenuti/:chiave` (L12-04, Q20: nessuna pagina la chiamava): serve solo al test messo da
+ *  parte con `it.skip`, perché compili. */
+const contenutiMappa = (_chiave: string): { aree: Array<{ chiave: string; punti: Array<Record<string, unknown>> }> } => ({ aree: [] });
 import { risolviAccessoMondo } from './accessoMondoService.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 import { chiaveMappa } from './percorsiMappe.js';
@@ -38,8 +41,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(db.prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual(n);
   expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
   expect(db.prepare('SELECT count(*) n FROM spillo WHERE area_guida_chiave IS NOT NULL').get()).toEqual({n:187});
-  const d=db.prepare('SELECT chiave FROM dungeon').all() as Array<{chiave:string}>;
-  expect(d.reduce((n,d)=>n+contenutiMappa('dungeon-'+d.chiave).aree.reduce((n,a)=>n+a.punti.length,0),0)).toBe(688);
+  // L12-04 (Q20): il conteggio dei punti dei contenuti della guida usava `contenutiMappa`, tolta con `GET /api/mappe/contenuti/:chiave`
  });
  it('ricaricare il pacchetto base invariato dopo nuove mappe conserva ID e dipendenti dei vecchi pacchetti',()=>{
   const db=dbDiProva();
@@ -80,7 +82,9 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(dettaglioMappa(nodo.chiave).contesti).toEqual(nodo.contesti);
  });
 
- it('API guida mantiene immagini, condizioni e stato modificabili sullo stesso ID senza esporre coordinate',async()=>{
+ // Saltato (L12-04, Q20): legge lo stato dei punti da `GET /api/mappe/contenuti/:chiave` e da `contenutiMappa`, tolte perché nessuna pagina le
+ // chiamava; non va eseguito né cancellato.
+ it.skip('API guida mantiene immagini, condizioni e stato modificabili sullo stesso ID senza esporre coordinate',async()=>{
   const db=dbDiProva();const app=createApp();
   const old=db.prepare("SELECT s.* FROM spillo s WHERE area_guida_chiave IS NOT NULL AND ruolo_guida='punto' LIMIT 1").get() as {id:number;area_guida_chiave:string;x:number;y:number};
   const t='2026-09-06T00:00:00Z';const partita=Number(db.prepare("INSERT INTO partita(nome,data_gioco,created_at,updated_at) VALUES('Guida','04-09',?,?)").run(t,t).lastInsertRowid);

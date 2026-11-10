@@ -13,7 +13,8 @@ export function leggiRegolaPesca(chiave:string=REGOLA_PESCA):RegolaPescaDto {
   if(!r)return {...base,stato:'non-collegata',motivi:['La regola della guida non è presente; non viene ricreata dal lettore.']};
   try{
     const dati=schemaDefinizioneRegolaPesca.safeParse(jsonPesca(String(r.dati_json),'regola della pesca'));
-    if(!dati.success || r.versione!==1 || base.origine===null || canonicoPesca(jsonPesca(String(r.fonti_json),'fonti della pesca'))!==canonicoPesca(dati.data.fonti))return {...base,stato:'illeggibile',motivi:['Schema, versione o fonti della regola non sono coerenti.']};
+    // le fonti sono quelle di `dati_json.fonti`: la colonna `fonti_json` che le ripeteva è uscita con la 363
+    if(!dati.success || r.versione!==1 || base.origine===null)return {...base,stato:'illeggibile',motivi:['Schema o versione della regola non sono coerenti.']};
     return {...base,dati:dati.data,fonti:dati.data.fonti,stato:'collegata',motivi:[]};
   }catch{return {...base,stato:'illeggibile',motivi:['La regola o le sue fonti non sono leggibili; il contenuto è conservato.']};}
 }
@@ -25,7 +26,7 @@ export function salvaRegolaPesca(chiave:string,input:RichiestaSalvaRegolaPesca):
     if(!prima)throw httpErrors.notFound('pesca-regola-assente','La regola non esiste; non viene ricreata per nome.');
     if(firmaPesca(prima)!==input.revisioneAttesa)throw httpErrors.conflict('pesca-regola-cambiata','La regola è cambiata: rileggi i dati prima di salvarla.');
     const baseline=prima.seed_json??canonicoPesca(prima);
-    prepared('UPDATE main.regola_pesca SET nome=?,dati_json=?,fonti_json=?,origine=\'utente\',seed_json=?,updated_at=? WHERE chiave=?').run(parsed.data.nome,canonicoPesca(parsed.data.dati),canonicoPesca(parsed.data.dati.fonti),baseline,nowIso(),chiave);
+    prepared('UPDATE main.regola_pesca SET nome=?,dati_json=?,origine=\'utente\',seed_json=?,updated_at=? WHERE chiave=?').run(parsed.data.nome,canonicoPesca(parsed.data.dati),baseline,nowIso(),chiave);
     return leggiRegolaPesca(chiave);
   }).immediate();
 }

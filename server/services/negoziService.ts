@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Dalla voce 4 del piano «struttura, non frasi» (2026-09-12) la disponibilità di un negozio è
-// **solo i suoi orari** (oggi quelli della sede o la sua eccezione, migrazione 356): un negozio che non è ancora aperto non è
+// **solo i suoi orari** (oggi quelli della sede o la sua eccezione, migrazione 373): un negozio che non è ancora aperto non è
 // un posto che non c'è, e le condizioni di sblocco vivono sugli articoli (070). Il negozio ha una
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
@@ -11,6 +11,7 @@
 import { condizioneConTesto, leggiCondizioniSalvate, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { nuovaValutazioneLegacy } from '../db/acquistiLegacy.js';
 import { conCestinoPrivato } from './cestinoService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -75,7 +76,7 @@ function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).ma
  * la guida la distingue; senza sede (online, televisione, dentro un Palazzo) restano i suoi. Il testo dice da dove vengono.
  */
 function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string } {
-  // L4-02 (migrazione 356): gli orari propri sono solo l'eccezione, anche per chi non ha sede (il negozio del Palazzo di Niijima)
+  // L4-02 (migrazione 373): gli orari propri sono solo l'eccezione, anche per chi non ha sede (il negozio del Palazzo di Niijima)
   if (r.eccezione_orari_json) { const o = leggiOrari(r.eccezione_orari_json); return { orari: o, testo: descriviOrari(o) }; }
   if (r.sede_chiave) { const o = orariDelLuogo(r.sede_orari_json ?? null); return { orari: o, testo: descriviOrariDelLuogo(o) }; }
   const o = leggiOrari(null);
@@ -503,7 +504,7 @@ export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid:
  */
 export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
   verificaPartita(partitaId);
-  const riga = (prepared("SELECT 1 AS c FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()
+  const riga = (haTabellaUtente(getDb(), 'registro_acquisti')
     ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
   if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');

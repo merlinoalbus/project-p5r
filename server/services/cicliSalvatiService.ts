@@ -11,6 +11,7 @@ import { contestoDa, personaOErrore, rangoArcana, scontoPartita } from './fusion
 import { fondi } from './fusione/motoreFusione.js';
 import { prezzoEvocazione } from './fusione/alberoFusione.js';
 import { bonusLivelliFusione, prezzoScontato } from '../../shared/bonusVelluto.js';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../shared/limitiFusione.js';
 import type { AnelloCicloDto, CicloSalvatoDto, PersonaFusioneDto } from '../../shared/types.js';
 
 interface RigaCiclo { id: number; partita_id: number; persona_id: number; nome: string; note: string; anelli_json: string; costo: number; iterazioni: number; anello_corrente: number; created_at: string; updated_at: string; persona_nome: string; arcana: string }
@@ -29,9 +30,9 @@ function personaDto(id: number): PersonaFusioneDto {
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
 }
 
-/** Ricalcola e valida gli anelli: fusioni valide, catena continua, ritorno al bersaglio, lunghezza 2–5. */
+/** Ricalcola e valida gli anelli: fusioni valide, catena continua, ritorno al bersaglio, numero di anelli nei limiti di `limitiFusione`. */
 function anelliValidati(partitaId: number, personaId: number, input: AnelloInput[]): AnelloCicloDto[] {
-  if (input.length < 2 || input.length > 5) throw httpErrors.badRequest('ciclo-non-valido', 'Un ciclo ha da 2 a 5 anelli.');
+  if (input.length < ANELLI_MINIMI_CICLO || input.length > ANELLI_MASSIMI_CICLO) throw httpErrors.badRequest('ciclo-non-valido', `Un ciclo ha da ${ANELLI_MINIMI_CICLO} a ${ANELLI_MASSIMI_CICLO} anelli.`);
   const { ctx } = contestoDa({ partitaId });
   const registro = new Set((prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').all(partitaId) as Array<{ persona_id: number }>).map((r) => r.persona_id));
   const scorta = new Set((prepared('SELECT persona_id FROM persona_posseduta WHERE partita_id = ?').all(partitaId) as Array<{ persona_id: number }>).map((r) => r.persona_id));

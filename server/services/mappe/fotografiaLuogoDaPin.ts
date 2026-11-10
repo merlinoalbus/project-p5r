@@ -3,6 +3,7 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { tabellaTolta } from '../../db/fontiTolte.js';
+import { haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
 import { pinCompatibileConNuovoLuogo, type LuogoNuovoDaPin } from '../../../shared/luogoDaPin.js';
 import { canonico, verificaPin, type PinDelRaccordo } from './precondizioneRaccordoPin.js';
@@ -24,9 +25,6 @@ export interface FotografiaLuogoDaPin {
 
 function conflitto(messaggio: string): never { throw httpErrors.conflict('luogo-da-pin-conflitto', messaggio); }
 function oggetto(v: unknown): Riga | null { return v !== null && typeof v === 'object' && !Array.isArray(v) && !Buffer.isBuffer(v) ? v as Riga : null; }
-function tabella(db: AppDatabase, schema: 'main' | 'utente', nome: string): boolean {
-  return !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(nome);
-}
 function testo(r: Riga, campo: string): string {
   if (typeof r[campo] !== 'string' || !r[campo]) conflitto('Un’identità del contesto non è leggibile. Rivedi il pin prima di creare il luogo.');
   return r[campo] as string;
@@ -88,8 +86,8 @@ function passiDelRegistro(db: AppDatabase, schema: 'main' | 'utente', raw: unkno
 }
 
 function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, quartiere: string, chiave: string, nome: string, voci: Set<string>): Riga {
-  const principale = tabella(db, 'main', 'cestino');
-  const partite = tabella(db, 'utente', 'cestino_partite');
+  const principale = haTabella(db, 'cestino', 'main');
+  const partite = haTabella(db, 'cestino_partite', 'utente');
   const pertinente = (t: string, r: Riga): boolean => {
     if (t === 'spillo') return r.id === pin.id || r.uid === pin.uid
       || (['luogo', 'attivita'].includes(String(r.riferimento_tipo)) && r.riferimento_chiave === chiave);
@@ -132,12 +130,12 @@ function fotografiaStati(db: AppDatabase, pin: PinLuogoDaPin): Riga {
   }
   const stati: Riga = {};
   for (const t of ['spillo_partita', 'spillo_partita_infiltrazione', 'divergenza_partita'] as const) {
-    const presente = tabella(db, 'utente', t);
+    const presente = haTabella(db, t, 'utente');
     if (t === 'spillo_partita' && !presente) conflitto('Lo stato dei pin non è disponibile.');
     const ordine = t === 'spillo_partita_infiltrazione' ? ', infiltrazione_chiave' : t === 'divergenza_partita' ? ', voce_chiave' : '';
     stati[t] = { presente, righe: presente ? db.prepare(`SELECT * FROM utente.${t} WHERE spillo_uid = ? ORDER BY partita_id${ordine}`).all(pin.uid) : [] };
   }
-  const presente = tabella(db, 'utente', 'punto_partita');
+  const presente = haTabella(db, 'punto_partita', 'utente');
   if (!presente) conflitto('Lo stato delle voci non è disponibile.');
   stati.punto_partita = { presente, righe: db.prepare(`SELECT p.* FROM utente.punto_partita p WHERE EXISTS (
     SELECT 1 FROM main.spillo_voce sv WHERE sv.spillo_id = ? AND sv.voce_chiave = p.punto_chiave

@@ -3,6 +3,8 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabella } from '../db/colonne.js';
+import { haColonnaMain, haColonnaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { getProprietario, getProprietarioEmail, PROPRIETARIO_UNICO } from '../middleware/requestContext.js';
 import { partitaNonTrovata } from './verificaPartita.js';
@@ -41,7 +43,7 @@ interface RigaPartita {
 }
 
 /** La colonna del salvataggio di Persona 5 c'è (migrazione utente 061)? Su uno schema di prima il dato non si scrive e vale «no». */
-const conSalvataggioP5 = (): boolean => !!prepared("SELECT 1 FROM pragma_table_info('partita', 'utente') WHERE name = 'salvataggio_p5'").get();
+const conSalvataggioP5 = (): boolean => haColonnaUtente(getDb(), 'partita', 'salvataggio_p5');
 
 /** Una riga della tabella `partita` per l'API: flag booleani, DLC posseduti dal JSON, fascia («sera» o «giorno») e meteo del momento. */
 function partitaDto(r: RigaPartita): PartitaDto {
@@ -128,7 +130,7 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
     const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
     const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
-    const conContatore = !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'").get();
+    const conContatore = haTabella(getDb(), 'sqlite_sequence', 'utente');
     const contatore = conContatore ? (prepared("SELECT COALESCE(MAX(seq), 0) AS m FROM utente.sqlite_sequence WHERE name = 'partita'").get() as { m: number }).m : 0;
     const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco, contatore) + 1;
     const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
@@ -189,8 +191,6 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       || (dati.dlcPosseduti !== undefined && JSON.stringify(dati.dlcPosseduti) !== JSON.stringify([...(JSON.parse(r.dlc_posseduti_json) as number[])].sort((a, b) => a - b)));
     if (contenutiCambiati) proponiStatiMancanti();
     if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
-      // la riga di Joker nella squadra ricopia lo stesso numero (la fonte resta la partita): mai due livelli diversi nel file
-      prepared("UPDATE membro_squadra_partita SET livello = ? WHERE partita_id = ? AND personaggio_chiave = 'joker'").run(dati.livelloProtagonista, id);
       registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
     }
     if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
@@ -350,7 +350,7 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
 
 /** Ondata 5 (RG-11): le chiavi dei Confidenti che ricevono regali; senza la colonna della 255 quelli con un elenco di regali. */
 export function confidentiRegalabili(): string[] {
-  if ((prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((c) => c.name === 'regalabile')) {
+  if (haColonnaMain(getDb(), 'confidente', 'regalabile')) {
     return prepared('SELECT chiave FROM confidente WHERE regalabile = 1').pluck().all() as string[];
   }
   return prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo').pluck().all() as string[];
@@ -599,14 +599,17 @@ export function compendioPartita(partitaId: number): CompendioPartitaDto[] {
 
 interface Istantanea { livello: number; bonus: Statistiche; osservate: Osservazione | null; skillIds: number[]; trattoSkillId: number | null; carica: boolean }
 
-/** Istantanea registrata nel compendio (null se la Persona non è registrata o non ha livello). */
-function istantaneaCompendio(partitaId: number, personaId: number): Istantanea | null {
+/** L'istantanea come si legge dal compendio: una registrazione a mano o da cattura non ha fissato il livello né le skill (null). */
+interface IstantaneaRegistrata extends Omit<Istantanea, 'livello' | 'skillIds'> { livello: number | null; skillIds: number[] | null }
+
+/** Istantanea registrata nel compendio (null solo se la Persona non è registrata). */
+function istantaneaCompendio(partitaId: number, personaId: number): IstantaneaRegistrata | null {
   const r = prepared(`${SQL_COMPENDIO} WHERE cp.partita_id = ? AND cp.persona_id = ? AND cp.registrata = 1`).get(partitaId, personaId) as RigaCompendio | undefined;
-  if (!r || r.livello_registrato === null) return null;
+  if (!r) return null;
   return {
     livello: r.livello_registrato, bonus: { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna },
     osservate: osservateDaRiga(r),
-    skillIds: r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : [], trattoSkillId: r.tratto_skill_id, carica: r.carica === 1,
+    skillIds: r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : null, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1,
   };
 }
 
@@ -792,8 +795,9 @@ function verificaSkill(skillIds: number[] | undefined): void {
 
 /**
  * Aggiunge una Persona alla scorta della partita (una sola per Persona: 409 se c'è già). Le skill e il tratto si verificano;
- * con `daRegistro` i valori non indicati vengono dall'istantanea del compendio (400 se la Persona non è registrata),
- * altrimenti dal livello base, senza bonus e con le ultime 8 skill apprese fino al livello. In transazione: la riga, gli slot,
+ * con `daRegistro` i valori non indicati vengono dall'istantanea del compendio (400 solo se la Persona non è registrata). Ciò che
+ * l'istantanea non ha fissato, e tutto senza `daRegistro`, vale come una Persona appena ottenuta: livello base, nessun bonus e le
+ * ultime 8 skill apprese fino al livello. In transazione: la riga, gli slot,
  * l'evento nello storico e — se non è un'evocazione dal Registro — la registrazione nel compendio; poi gli obiettivi.
  */
 export function aggiungiPosseduta(partitaId: number, personaId: number, dati: DatiPosseduta): PersonaPossedutaDto {

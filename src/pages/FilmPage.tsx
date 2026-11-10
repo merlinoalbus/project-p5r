@@ -139,17 +139,20 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{film.effettiTesto.length ? <ul className="m-0 list-none p-0">{film.effettiTesto.map((t, i) => <li key={i}><TestoNote testo={t} /></li>)}</ul> : 'Nessun effetto dichiarato'}</dd>
-        {!cinema && <><dt className="text-text-muted">Visioni</dt><dd className="m-0">{film.totaleSessioni} per completarlo</dd></>}
         {!!film.negozi?.length && <><dt className="text-text-muted">In vendita da</dt><dd className="m-0 flex flex-wrap gap-1">{film.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{n.prezzo === null ? '' : ` · ${formattaYen(n.prezzo)}`}</Link>)}</dd></>}
         {!film.negozi?.length && film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{formattaYen(film.prezzo)}</dd></>}
       </dl>
-      {film.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{film.notaPrezzo}</p>}
-      {film.dettagli && <p className="m-0 text-xs text-text-secondary"><TestoNote testo={film.dettagli} daParole="conteggi" /></p>}
+      {/* prezzo e dettagli a richiesta (aperti solo nel pannello sopra il diario, che mostra un titolo solo): al telefono erano la parte più alta della scheda */}
+      {(film.notaPrezzo || film.dettagli) && <details className="text-xs text-text-secondary" open={!!soloChiave}>
+        <summary className="touch cursor-pointer">Dettagli</summary>
+        {film.notaPrezzo && <p className="m-0">{film.notaPrezzo}</p>}
+        {film.dettagli && <p className="m-0"><TestoNote testo={film.dettagli} daParole="conteggi" /></p>}
+      </details>}
+      {/* «dove si vede» si corregge dal pannello che si apre qui: un solo ingresso */}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(film.chiave); setPosizioneSelezionata(0); }} aria-label={`Mostra posizione di ${titolo}`} />
         <CorreggiElemento tipo="film" chiave={film.chiave} onSalvato={() => void dati.ricarica()} />
-        <ModificaGuida tipo="film-posizioni" chiave={film.chiave} cosa={`dove si vede «${titolo}»`} etichetta="Posizioni" onSalvato={() => void dati.ricarica()} />
       </div>
     </li>;
   };

@@ -12,9 +12,9 @@
 //     tenere allineati a memoria è il modo in cui divergono;
 //  2. **il non segnato non è uno zero** — un membro senza riga è uno di cui non hai scritto niente,
 //     e la scheda deve poterlo dire invece di mostrare un livello che non hai mai confermato;
-//  3. **Joker ha due case per lo stesso numero**, qui e in `partita.livello_protagonista`, che la
-//     fusione legge: se divergono, l'app propone Persona che non puoi evocare — o te ne nasconde di
-//     evocabili — e nessuno dei due errori si vede finché non serve.
+//  3. **il livello di Joker ha una casa sola**, `partita.livello_protagonista`, che la fusione legge:
+//     se la scheda ne mostrasse un altro, l'app proporrebbe Persona che non puoi evocare — o te ne
+//     nasconderebbe di evocabili — e nessuno dei due errori si vedrebbe finché non serve.
 
 import request from 'supertest';
 import { closeDb } from '../db/dbService.js';

@@ -4,7 +4,7 @@
 
 import { PersonaChip } from './PersonaChip';
 import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
 import type { NodoPianoDto } from '../../types';
 
 const NOME_MODO: Record<NodoPianoDto['modo'], string> = { scorta: 'In scorta', registro: 'Dal Registro', cattura: 'Da catturare', fusione: 'Fusione' };
@@ -30,7 +30,7 @@ export function NodoPiano({ nodo, radice, inScorta }: Props) {
         <span className={`chip chip--icona testo-12 ${classeModo}`}>
           <IconaAzione chiave={ICONA_MODO[nodo.modo]} dimensione={13} />
           {nodo.modo === 'fusione' ? `${NOME_MODO.fusione} ${NOME_TIPO[nodo.tipo ?? 'normale']}` : NOME_MODO[nodo.modo]}
-          {nodo.modo === 'registro' && ` · ${formattaYen(nodo.costo)}`}
+          {nodo.modo === 'registro' && ` · ${nodo.costo === 0 ? 'primo richiamo gratuito' : formattaCostoEvocazione(nodo.costo)}`}
         </span>
         {nodo.skillPortate.map((s) => (
           <span key={s.id} className={`chip testo-12 ${nodo.skillDaLivello.some((d) => d.id === s.id) ? 'text-warning' : 'chip--attivo'}`} title={nodo.skillDaLivello.some((d) => d.id === s.id) ? 'La apprende salendo di livello' : nodo.modo === 'fusione' ? 'Da ereditare in questa fusione' : 'Posseduta'}>

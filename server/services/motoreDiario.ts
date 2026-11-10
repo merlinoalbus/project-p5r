@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
@@ -51,11 +52,12 @@ interface RigaProposta {id:string;voce_uid:string;tipo:string;chiave:string|null
 export interface PorteEffettiLegacy {
   /** `scelte`: L13, le scelte d'esito già risolte nella stessa posizione di `produce` (undefined dove l'effetto non ne chiede). */
   applicaLegacy:(partitaId:number,produce:EffettoLegacyVoce[],scelte?:ReadonlyArray<SceltaRisolta|undefined>)=>EffettiAzioneDto|null;
-  annullaLegacy:(partitaId:number,ricevuta:EffettiAzioneDto)=>void;
+  /** Gli avvisi dell'annullo (una lettura il cui avanzamento è cambiato dopo la spunta e resta). */
+  annullaLegacy:(partitaId:number,ricevuta:EffettiAzioneDto)=>string[];
 }
 const righeEffetti=(uid:string):RigaEffetto[]=>prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(uid) as RigaEffetto[];
-// `voce_giornata.produce_json` non si legge più (F2: un solo punto di modifica, la fonte `voce_effetto`): il RAW storico che la fonte
-// conserva è quello del registro di transizione (`raw_json`, copiato dalla 136), e una voce nuova nasce senza RAW ('[]').
+// Gli effetti di una voce stanno solo in `voce_effetto` (F2: un solo punto di modifica): il RAW storico che la fonte conserva è quello del
+// registro di transizione (`raw_json`, copiato dalla 136), e una voce nuova nasce senza RAW ('[]'). La vecchia colonna `produce_json` non c'è più (L6-08).
 function voce(uid:string):{uid:string;data:string;fascia:'giorno'|'sera';ordine:number;azione:string;genere:string} {
   const v=prepared('SELECT uid,data,fascia,ordine,azione,genere FROM main.voce_giornata WHERE uid=?').get(uid) as ReturnType<typeof voce>|undefined;
   if(!v)throw httpErrors.notFound('voce-non-trovata','La voce del Diario non è più presente.');return v;
@@ -130,7 +132,7 @@ function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEf
     const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
     if(giaComprato&&!altraVoceHaLArticolo(p,x.articolo,uid))return null;
     // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
-    const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
+    const conCatalogo=haTabellaMain(getDb(),'catalogo_oggetto');
     const a=prepared(conCatalogo
       ?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?"
       :"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?")
@@ -1050,8 +1052,11 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   // Prima della restituzione e prima di chiudere ricevute e proposte aperte: sono loro a dire che cosa la spunta aveva applicato
   if(spunta)segnaYenDellaSpuntaFuoriRegistro(p,uid,righeEffetti(uid).map((e)=>({uid:e.uid,tipo:e.tipo,chiave:e.chiave})));
   restituisciYenAutomaticiDellaVoce(p,uid,'spunta-tolta');
-  if(legacyDaAnnullare)porte.annullaLegacy(p,legacyDaAnnullare);
-  for(const r of extra)if(r)porte.annullaLegacy(p,r);
+  // le ricevute si annullano in ordine inverso a quello in cui sono nate: le extra (raccordi, versioni nuove) più recenti prima della spunta
+  // originaria, così una lettura (0→1 dalla spunta, 1→2 da un raccordo) torna 2→1 e 1→0 e non si ferma alla prima
+  const avvisiLegacy:string[]=[];
+  for(const r of [...extra].reverse())if(r)avvisiLegacy.push(...porte.annullaLegacy(p,r));
+  if(legacyDaAnnullare)avvisiLegacy.push(...porte.annullaLegacy(p,legacyDaAnnullare));
   // L13 (decisione 18): i turni della spunta che l'annullo non ha tolto (la voce rimessa dal cestino ha le ricevute già annullate, e il suo
   // turno resta) non tengono gli yen mossi dalla spunta: togliendola la spesa o la paga torna sempre
   restituisciYenDeiTurniDellaVoce(p,uid,'spunta-tolta');
@@ -1080,7 +1085,7 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
       .run(id,p,uid,effettoUid,jsonCanonico({voceUid:uid,effettoUid,benefici:[],annulloLegacyIntegrale:true,spunta:identitaSpunta}),adesso,adesso);
   }
   spegniFortunaDaVoce(p,uid);
-  const avvisi=annullaEffettiDiStato(p,uid);
+  const avvisi=[...avvisiLegacy,...annullaEffettiDiStato(p,uid)];
   prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND voce_uid=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,uid);
   return avvisi;
 }

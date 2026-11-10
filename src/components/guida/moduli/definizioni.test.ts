@@ -10,7 +10,7 @@ import type { ElementoCatalogoDto } from '../../../types';
 const riga = (tipo: ElementoCatalogoDto['tipo'], dati: Record<string, unknown>): ElementoCatalogoDto => ({ tipo, chiave: 'k', nome: 'n', origine: 'seed', modificata: false, nascosta: false, aggiornata: null, dati });
 
 describe('negozio', () => {
-  // L5 (R5-12b) e L4-02 (356): gli orari sono del luogo della sede; il punto vendita ha solo la sua eccezione (`eccezione_orari_json`)
+  // L5 (R5-12b) e L4-02 (373): gli orari sono del luogo della sede; il punto vendita ha solo la sua eccezione (`eccezione_orari_json`)
   it('parte senza orari propri e senza programma punti; legge l’eccezione degli orari salvata come JSON', () => {
     expect(def.negozio.iniziali(null)).toMatchObject({ tipo: 'altro', eccezione_orari_json: null, programma_punti_json: null, sede_chiave: null });
     expect(def.negozio.iniziali(null)).not.toHaveProperty('orari_json');

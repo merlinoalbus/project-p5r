@@ -4,7 +4,8 @@ import { z } from 'zod';
 // disponibilità strutturata e dai requisiti di rango. Un campo in più (anche uno di prima) è un 400.
 const informazioni = z.object({ note: z.string(), noteGenerali: z.string(), fonti: z.array(z.string()) }).strict();
 const revisioneAttesa = z.string().regex(/^[a-f0-9]{64}$/);
-const motivo = z.string().refine(v => v.trim().length > 0, 'Indica il motivo della modifica.');
+// Facoltativo: una revisione senza motivo registra `MOTIVO_NON_INDICATO` (`disponibilitaConfidentiService`).
+const motivo = z.string().optional();
 const azioni = [
   z.object({ azione: z.literal('modifica-manuale'), valori: informazioni.partial().refine(v => Object.keys(v).length > 0, 'Seleziona almeno un campo.'), motivo, revisioneAttesa }).strict(),
   z.object({ azione: z.literal('crea-informazioni'), valori: informazioni, motivo, revisioneAttesa }).strict(),

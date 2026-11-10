@@ -1,5 +1,5 @@
 // ============================================================
-// 355 — la regola comune dei distributori in un punto solo (L4-01; risposta dell'utente a Q5: A, con la modifica della Decisione 21)
+// 372 — la regola comune dei distributori in un punto solo (L4-01; risposta dell'utente a Q5: A, con la modifica della Decisione 21)
 // ============================================================
 //
 // «Lunedì, 2 pezzi, non col caldo» stava ripetuta in ogni offerta delle macchine. Da qui vive in una riga di `regola_tipo_negozio` (tipo
@@ -20,7 +20,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`355: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`372: ${motivo}; nessuna modifica applicata.`); };
 
 /** La regola dei distributori della guida (Distributori automatici; Decisione 21, migrazioni 243-244). */
 export const REGOLA_DISTRIBUTORI = {
@@ -39,8 +39,8 @@ function canonico(json: string | null): string | null {
   try { return JSON.stringify(ordina(JSON.parse(json))); } catch { return `illeggibile:${json}`; }
 }
 
-export const migration355: Migration = {
-  id: 355,
+export const migration372: Migration = {
+  id: 372,
   name: 'regola_comune_dei_distributori',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -93,7 +93,7 @@ export const migration355: Migration = {
       WHERE n.tipo = ? AND json_valid(a.rifornimento_json) AND json_extract(a.rifornimento_json, '$.daVerificare') = 1`).pluck().get(REGOLA_DISTRIBUTORI.tipo) as number;
     const dettagli = { offerte: offerte.length, seguono: seguono.length, eccezioni: eccezioni.length, daVerificare, cambiati,
       chiaviCheSeguono: seguono, eccezioniPerRiga: eccezioni };
-    registraAudit(db, 'audit-l4-01-regola-comune', { migrazione: 'L4-01 · 355', ...dettagli });
-    logger.info({ migrazione: 'L4-01-355', offerte: offerte.length, seguono: seguono.length, eccezioni: eccezioni.length, daVerificare }, 'regola comune dei distributori');
+    registraAudit(db, 'audit-l4-01-regola-comune', { migrazione: 'L4-01 · 372', ...dettagli });
+    logger.info({ migrazione: 'L4-01-372', offerte: offerte.length, seguono: seguono.length, eccezioni: eccezioni.length, daVerificare }, 'regola comune dei distributori');
   },
 };

@@ -110,7 +110,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     await request(app).put(`/api/catalogo/articolo/${encodeURIComponent('untouchable/kogatana-nera')}/nascosta`).send({ nascosta: false });
   });
 
-  // L4-02 (356): gli orari propri di un punto vendita sono solo l'eccezione a quelli del luogo della sede (`negozio.orari_json` non c'è più)
+  // L4-02 (373): gli orari propri di un punto vendita sono solo l'eccezione a quelli del luogo della sede (`negozio.orari_json` non c'è più)
   it('scrivendo la sede il quartiere segue; gli orari e il programma punti si salvano come valori', async () => {
     const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Bottega di prova', tipo: 'misto', sede_chiave: 'kichijoji/jazz-jin', eccezione_orari_json: { giorni: ['domenica'], fasce: ['sera'] }, programma_punti_json: { nome: 'Punti', unita: 'punti', calcolo: 'manuale' } })).body.data as ElementoCatalogoDto;
     expect(n.dati).toMatchObject({ sede_chiave: 'kichijoji/jazz-jin' });

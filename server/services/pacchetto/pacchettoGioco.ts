@@ -21,6 +21,7 @@ import path from 'node:path';
 import { config } from '../../config.js';
 import { logger } from '../../utils/logger.js';
 import { resolveDbPath, type AppDatabase } from '../../db/dbService.js';
+import { haColonna, haTabella } from '../../db/colonne.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
@@ -66,7 +67,7 @@ export function regoleAllAvvio(db: AppDatabase, modo: 'rigido' | 'tollerante' = 
  */
 export function assorbiImmaginiSuDisco(db: AppDatabase): number {
   const cartella = path.join(config.dataDir, 'immagini');
-  if (!fs.existsSync(cartella) || !haColonnaContenuto(db)) return 0;
+  if (!fs.existsSync(cartella) || !haColonna(db, 'immagine', 'contenuto')) return 0; // le immagini dentro il DB arrivano con la migrazione 079
   const inMemoria = !(db.pragma('database_list') as Array<{ name: string; file: string }>).find((d) => d.name === 'main')?.file;
   if (inMemoria) return 0;
   const n = assorbiFileDelleRighe(db, [cartella]);
@@ -80,11 +81,6 @@ export function assorbiImmaginiSuDisco(db: AppDatabase): number {
   }
   logger.info({ assorbite: n, destinazione }, 'immagini su disco assorbite nel database; la cartella è stata messa da parte');
   return n;
-}
-
-/** Vero se la tabella `immagine` del database di gioco ha già la colonna `contenuto` (le immagini dentro il DB, migrazione 079). */
-function haColonnaContenuto(db: AppDatabase): boolean {
-  return (db.prepare('PRAGMA main.table_info(immagine)').all() as Array<{ name: string }>).some((c) => c.name === 'contenuto');
 }
 
 /** Il pacchetto iniziale (in git): schema e dati senza immagini; è ciò che il primo avvio copia e ciò che i test caricano. */
@@ -199,7 +195,7 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
     db.transaction(() => {
       const nomi = (db.prepare("SELECT name FROM pacchetto.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'").all() as Array<{ name: string }>).map((r) => r.name);
       for (const t of nomi) {
-        if (NON_DAL_PACCHETTO.has(t) || SOLO_SCHEMA.has(t) || !db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(t)) continue;
+        if (NON_DAL_PACCHETTO.has(t) || SOLO_SCHEMA.has(t) || !haTabella(db, t)) continue;
         const colonne = (db.prepare(`PRAGMA main.table_info("${t}")`).all() as Array<{ name: string }>).map((c) => c.name);
         const nelPacchetto = new Set((db.prepare(`PRAGMA pacchetto.table_info("${t}")`).all() as Array<{ name: string }>).map((c) => c.name));
         const comuni = colonne.filter((c) => nelPacchetto.has(c)).map((c) => `"${c}"`).join(', ');
@@ -215,8 +211,8 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
       // Le copie dei pezzi (103) vivono in un'altra tabella dei loro ritagli: un pacchetto della 102 porta i ritagli con la posa
       // accanto e nessuna copia, e la loro posa diventa la prima copia (come nella migrazione); in ogni caso nessuna copia resta
       // senza il suo ritaglio (nota N2 del validatore).
-      if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'copia_pezzo'").get() && nomi.includes('pezzo_mappa')) {
-        const conPosa = (db.prepare('PRAGMA pacchetto.table_info("pezzo_mappa")').all() as Array<{ name: string }>).some((c) => c.name === 'x');
+      if (haTabella(db, 'copia_pezzo') && nomi.includes('pezzo_mappa')) {
+        const conPosa = haColonna(db, 'pezzo_mappa', 'x', 'pacchetto');
         if (conPosa && !nomi.includes('copia_pezzo')) {
           db.prepare('DELETE FROM main.copia_pezzo').run();
           righe += db.prepare(`INSERT INTO main.copia_pezzo (uid, pezzo_id, etichetta, x, y, rotazione, specchio_orizzontale, specchio_verticale, condizioni_json, ordine, updated_at)

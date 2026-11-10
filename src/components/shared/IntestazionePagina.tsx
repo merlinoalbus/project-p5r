@@ -65,7 +65,7 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
       ) : (
         <button type="button" className="btn btn-ghost btn-sm self-start -ml-2" onClick={indietro.onClick}><IconChevronLeft size={16} /> {indietro.etichetta}</button>
       ))}
-      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-wrap max-md:flex-nowrap max-md:items-center max-md:gap-2 max-md:h-11 max-md:overflow-x-auto max-md:[scrollbar-width:none]' : 'flex-wrap'}`}>
+      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-wrap max-md:flex-nowrap max-md:items-center max-md:gap-2 max-md:h-11 max-md:overflow-x-auto max-md:[overscroll-behavior-x:contain] max-md:[scrollbar-width:none]' : 'flex-wrap'}`}>
         {/* Titolo e sottotitolo partono da 14rem e crescono (non da 0, come con `flex-1`): con le azioni larghe accanto, sul telefono la
             colonna del testo scendeva a ~44 px, una parola per riga (il Compendio in errore, lotto B punto 9); ora le azioni vanno a capo */}
         <div className={`min-w-0 flex flex-col gap-2 ${azioniInRiga ? (azioniAccanto ? 'shrink-0' : 'md:shrink-0') : 'grow basis-[min(100%,14rem)]'}`}>

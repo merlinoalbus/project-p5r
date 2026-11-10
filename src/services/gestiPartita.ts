@@ -452,7 +452,11 @@ export const eseguiAcquistoConRegistro = (id: number, dati: RichiestaRegistraAcq
 export const eseguiPescaConRegistro = (id: number, dati: OperazioneClientPesca, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazionePescaDto> => esegui(id, { tipo: 'pesca', dati }, bersaglio) as Promise<RicevutaOperazionePescaDto>;
 export const annullaFonteConRegistro = (id: number, dati: RichiestaAnnullaProvenienza, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'annullo-fonte', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
 export const rimuoviLegacyConRegistro = (id: number, dati: RichiestaRimozioneLegacy, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'rimozione-legacy', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
-export const decidiProposteConRegistro = (id: number, dati: RichiestaDecisioneProposte, bersaglio: BersaglioGestoPartita): Promise<RicevutaDecisioneProposteDto> => esegui(id, { tipo: 'decisione-proposte', dati }, bersaglio) as Promise<RicevutaDecisioneProposteDto>;
+export const decidiProposteConRegistro = (id: number, dati: RichiestaDecisioneProposte, bersaglio: BersaglioGestoPartita): Promise<RicevutaDecisioneProposteDto> => (esegui(id, { tipo: 'decisione-proposte', dati }, bersaglio) as Promise<RicevutaDecisioneProposteDto>).then((r) => {
+  // L6-01: ciò che il raccordo non ha potuto riportare com'era (una lettura cambiata dopo la spunta)
+  if (r.avvisi?.length) notifica('warning', r.avvisi.join(' '));
+  return r;
+});
 export function eseguiSpuntaAcquistiConRegistro(id: number, voceUid: string, dati: CorpoSpuntaAcquisti, bersaglio: BersaglioGestoPartita): Promise<AzionePercorsoDto> {
   if ('uid' in dati) return Promise.reject(new Error('La voce è indicata due volte nella richiesta.'));
   return esegui(id, { tipo: 'spunta-acquisti', dati: { ...dati, uid: voceUid } }, bersaglio) as Promise<AzionePercorsoDto>;

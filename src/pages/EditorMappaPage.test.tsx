@@ -65,7 +65,7 @@ describe('EditorMappaPage', () => {
     api.getMappa.mockResolvedValue(base);
     // elenchi della Guida per le condizioni di visibilità
     api.getConfidenti.mockResolvedValue([{ chiave: 'sojiro', nome: 'Sojiro Sakura' }, { chiave: 'ann', nome: 'Ann Takamaki' }]);
-    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', sbloccoData:'08-31', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
+    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
     api.getRichieste.mockResolvedValue({ richieste: [{ chiave: 'zio-ingordo', nome: 'Lo zio ingordo' }], jose: null, completate: 0, totale: 1 });
     api.getDungeons.mockResolvedValue([{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', ordine: 1 }, { chiave: 'madarame', nome: 'Palazzo di Madarame', tipo: 'palazzo', ordine: 2 }]);
     // gli elenchi chiusi di negozi, attività, luoghi e Confidenti per gli spilli di città
@@ -107,7 +107,7 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Cerca Elenco: Punto vendita'), { target: { value: 'untou' } });
     expect(within(form.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Untouchablearmi']);
     fireEvent.click(form.getByRole('option', { name: /Untouchable/ }));
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Armeria', tipo: 'negozio', descrizione: '', riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [], destinazione: null }));
     const elimina = await screen.findByRole('button', { name: 'Elimina' });
     await waitFor(() => expect(elimina).not.toBeDisabled());
@@ -177,7 +177,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'confidente', condizioni: [expect.objectContaining({ tipo: 'data' })] })));
     // un negozio resta senza: la sezione sparisce (che non si salvino lo dice il test qui sotto)
     scegliVoce('Segno sulla mappa', 'Negozio');
@@ -196,7 +196,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
     scegliVoce('Segno sulla mappa', 'Negozio');
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'negozio', condizioni: [] })));
   });
 
@@ -234,7 +234,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(gruppo.getByRole('option', { name: /Akihabara/ }));
     fireEvent.click(form.getByRole('button', { name: 'Togli il gruppo' }));
     expect(form.queryByRole('group', { name: 'Gruppo ALMENO UNA' })).toBeNull();
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', riferimento: null, condizioni: [{ tipo: 'non', condizione: { tipo: 'palazzo', dungeon: 'madarame' } }], destinazione: null }));
   });
 
@@ -260,7 +260,7 @@ describe('EditorMappaPage', () => {
     const riga = form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): non raccolto' });
     // fa sparire il pin quando non vale
     expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ condizioni: [{ tipo: 'spillo', spillo: 'b'.repeat(32), segnato: false }] })));
   });
 
@@ -286,7 +286,7 @@ describe('EditorMappaPage', () => {
     const riga = form.getByRole('group', { name: 'Condizione: Voce «Leve delle sbarre» (Palazzo di Kamoshida › 6. Corridoio delle Sbarre): non segnata' });
     // fa sparire il pin quando non vale
     expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ condizioni: [{ tipo: 'voce-guida', voce: 'kamoshida-06/1', segnata: false }] })));
   });
 
@@ -371,9 +371,9 @@ describe('EditorMappaPage', () => {
     // le voci della guida del pin (098), con «Scollega»
     expect(within(form.getByRole('list', { name: 'Voci della guida del pin' })).getByText('Condotto')).toBeInTheDocument();
     expect(form.getByRole('button', { name: 'Scollega la voce Condotto' })).toBeInTheDocument();
-    expect(form.getByRole('button', { name: 'Salva spillo' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Salva spillo' })).toBeDisabled();
     fireEvent.change(form.getByLabelText('Descrizione'), { target: { value: 'Passa dietro le cucine' } });
-    fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(21, { nome: 'Condotto', tipo: 'scorciatoia', descrizione: 'Passa dietro le cucine', riferimento: null, condizioni: [], destinazione: null }));
   });
 
@@ -397,9 +397,9 @@ describe('EditorMappaPage', () => {
     useNotificationStore.setState({ notifications: [] });
     monta('/guida/mappe/magazzino/modifica');
     fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
-    const form = within(await screen.findByRole('region', { name: 'Proprietà della mappa' }));
+    await screen.findByRole('region', { name: 'Proprietà della mappa' });
     scegliVoce('Mappa genitore', /^Shibuya/);
-    fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('magazzino', expect.objectContaining({ genitore: 'citta-shibuya' })));
     const avviso = within(await screen.findByRole('alert', { name: 'La mappa non si sposta lì' }));
     expect(avviso.getByText(testo)).toBeInTheDocument();
@@ -420,7 +420,7 @@ describe('EditorMappaPage', () => {
     const form = within(await screen.findByRole('region', { name: 'Proprietà della mappa' }));
     expect(vociSelettore('Mappa genitore')).toEqual(['— nessuna (radice) —', 'Tokyo']);
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
-    fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));
     // L11 (R11-02/8, migrazione 210): «Scarica dalla guida» non c'è più nemmeno sul quartiere (scarico tolto su decisione dell'utente);
     // la sezione File esporta e importa il JSON delle mappe
@@ -798,7 +798,7 @@ describe('EditorMappaPage', () => {
     expect(form.queryByText('Mappa genitore')).toBeNull();
     expect(form.getByRole('link', { name: 'pagina dell’area' })).toHaveAttribute('href', areaSottopasso.casa);
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Sottopasso intero' } });
-    fireEvent.click(form.getByRole('button', { name: /Salva mappa/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Salva mappa/ }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalled());
     const [, dati] = api.aggiornaMappa.mock.calls[0];
     expect(dati).toMatchObject({ nome: 'Sottopasso intero' });
@@ -915,7 +915,7 @@ it('una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» at
   fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
   const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
   expect(scheda.getByRole('status')).toHaveTextContent('In alto si legge «Sottopasso — planimetria completa»');
-  const salva = scheda.getByRole('button', { name: /Salva mappa/ });
+  const salva = screen.getByRole('button', { name: /Salva mappa/ });
   expect(salva).toBeEnabled();
   fireEvent.click(salva);
   await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', expect.objectContaining({ nome: 'Sottopasso' })));
@@ -927,7 +927,7 @@ it('una mappa già rivista non mostra l’avviso e torna a «Salva» solo dopo u
   fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
   const scheda = within(screen.getByRole('region', { name: 'Proprietà della mappa' }));
   expect(scheda.queryByRole('status')).toBeNull();
-  expect(scheda.getByRole('button', { name: /Salva mappa/ })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /Salva mappa/ })).toBeDisabled();
 });
 
 // ---- La vista del giorno corrente (interruttore acceso/spento) ----

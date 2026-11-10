@@ -123,16 +123,17 @@ export const libro: DefinizioneModulo = {
   conCondizioni: true,
   conVerificato: true,
   iniziali: (e) => ({
-    nome: testoDi(e?.dati.nome), prezzo: numeroDi(e?.dati.prezzo), sessioni: numeroDi(e?.dati.sessioni) ?? 1, dettagli: testoDi(e?.dati.dettagli),
+    nome: testoDi(e?.dati.nome), sessioni: numeroDi(e?.dati.sessioni) ?? 1, dettagli: testoDi(e?.dati.dettagli),
     effetti_json: normalizzaVociEffetto(jsonDi(e?.dati.effetti_json, [])), verificato: verificatoDi(e),
   }),
   valido: (d) => testoDi(d.nome).trim().length > 0 && (numeroDi(d.sessioni) ?? 1) >= 1,
-  prepara: (d) => ({ ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), prezzo: numeroDi(d.prezzo), sessioni: numeroDi(d.sessioni) ?? 1, dettagli: testoOnull(d.dettagli) }),
+  prepara: (d) => ({ ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), sessioni: numeroDi(d.sessioni) ?? 1, dettagli: testoOnull(d.dettagli) }),
 };
 
 export const film: DefinizioneModulo = {
   conCondizioni: true,
   conVerificato: true,
+  condizioniRipiegate: true,
   iniziali: (e) => {
     const dove = testoDi(e?.dati.dove) === 'dvd' ? 'dvd' : 'cinema';
     return {
@@ -163,18 +164,17 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
   return {
     conCondizioni: true,
     conVerificato: true,
+    condizioniRipiegate: true,
     iniziali: (e) => {
       const tipo = tipoFisso ?? (testoDi(e?.dati.tipo) || 'altro');
       const quiz = normalizzaQuiz(jsonDi<unknown>(e?.dati.quiz_json, null));
       return {
         nome: testoDi(e?.dati.nome), tipo, fascia: e ? testoOnull(e.dati.fascia) : 'entrambe',
         confidente_chiave: testoOnull(e?.dati.confidente_chiave),
-        _confidenteIniziale: testoOnull(e?.dati.confidente_chiave),
         _fonteConfidente: e?.dati._fonteConfidente ?? null,
         pesca_regola_chiave: e?.dati.pesca_regola_chiave ?? null,
         pesca_ruolo: e?.dati.pesca_ruolo ?? null,
         _fontePesca: e?.dati._fontePesca ?? null,
-        _dotiStoriche: e?.dati.doti_json ?? [],
         _effettiRaw: e?.dati.effetti_json ?? null, _quizRaw: e?.dati.quiz_json ?? null,
         _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
         _quizDaRisolvere: !jsonSenzaPerdite(e?.dati.quiz_json, normalizzaQuiz),
@@ -198,9 +198,8 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
       && !d._effettiDaRisolvere && !d._quizDaRisolvere && !d._esitiDaRisolvere
       && (d.esiti_json == null || normalizzaEsitiAttivita(d.esiti_json) !== null)
       && (!testoOnull(d.pesca_regola_chiave) ? !testoOnull(d.pesca_ruolo) : (d.tipo !== 'videogioco' && !testoOnull(d.confidente_chiave) && (d.pesca_ruolo === 'visita' || d.pesca_ruolo === 'obiettivi')
-        && campiAutonomiAttivitaPesca({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche }).length === 0))
-      && (!testoOnull(d.confidente_chiave) || campiAutonomiAttivitaConfidente({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche },
-        !!d._confidenteIniziale && d.confidente_chiave === d._confidenteIniziale).length === 0),
+        && campiAutonomiAttivitaPesca({ ...d, fascia: testoOnull(d.fascia) }).length === 0))
+      && (!testoOnull(d.confidente_chiave) || campiAutonomiAttivitaConfidente({ ...d, fascia: testoOnull(d.fascia) }).length === 0),
     prepara: (d) => {
       const quiz = d.quiz_json as QuizAttivita | null;
       return {
@@ -247,8 +246,12 @@ export const luogo: DefinizioneModulo = {
 /**
  * `nullable`: vuoto = null (lo schema lo ammette); altrimenti vuoto = '' (lo schema vuole una stringa, come `ricompensa` e `note` della domanda).
  * `data` (L13, O7-5): un giorno del calendario di gioco scelto con `SelettoreData` ('MM-GG'), non più digitato.
+ * `soloSePresente`: il campo compare solo se la riga aveva già un valore all'apertura; altrimenti non si offre, e il corpo resta com'è (vuoto).
  */
-export interface CampoGenerico { nome: string; etichetta: string; tipo: 'testo' | 'testolungo' | 'data'; opzioni?: Record<string, string>; aiuto?: string; obbligatorio?: boolean; nullable?: boolean; /** L'etichetta della scelta vuota: il campo a opzioni parte vuoto invece che dalla prima voce. */ vuoto?: string }
+export interface CampoGenerico { nome: string; etichetta: string; tipo: 'testo' | 'testolungo' | 'data'; opzioni?: Record<string, string>; aiuto?: string; obbligatorio?: boolean; nullable?: boolean; /** L'etichetta della scelta vuota: il campo a opzioni parte vuoto invece che dalla prima voce. */ vuoto?: string; soloSePresente?: boolean }
+
+/** Il valore temporaneo che ricorda se la riga aveva già il campo `soloSePresente` all'apertura (non sparisce mentre lo si svuota). */
+export const presenteDi = (nome: string): string => `_${nome}Presente`;
 
 /** I campi di domande e cruciverba, nell'ordine. La risposta non è qui: sta in «Risposte giuste», l'editor a righe. */
 export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverba'>, CampoGenerico[]> = {
@@ -257,7 +260,8 @@ export const CAMPI_GENERICI: Record<Extract<TipoCatalogo, 'domanda' | 'cruciverb
     { nome: 'tipo', etichetta: 'Quando', tipo: 'testo', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', tv: 'Quiz in TV', altro: 'Altro' } },
     { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', vuoto: 'Non indicato', opzioni: { 'Prof. Ushimaru': 'Prof. Ushimaru', 'Prof. Kawakami': 'Prof. Kawakami', 'Prof. Hiruta': 'Prof. Hiruta', 'Prof. Inui': 'Prof. Inui', 'Prof. Chuono': 'Prof. Chuono', 'Prof. Maruki': 'Prof. Maruki', 'Prof. Usami': 'Prof. Usami', 'Game show in TV': 'Game show in TV' } },
     { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo', obbligatorio: true },
-    { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza ♪' },
+    // il premio di una domanda vive negli effetti della voce del Diario: il testo resta solo sulle righe che lo hanno già, modificabile e svuotabile
+    { nome: 'ricompensa', etichetta: 'Che cosa dà secondo la guida', tipo: 'testo', aiuto: 'Il premio applicato viene dagli effetti della voce del Diario', soloSePresente: true },
     { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
   ],
   cruciverba: [
@@ -280,7 +284,10 @@ function generico(tipo: 'domanda' | 'cruciverba'): DefinizioneModulo {
     conVerificato: false,
     iniziali: (e) => {
       const d: Dati = {};
-      for (const c of campi) d[c.nome] = testoDi(e?.dati[c.nome]) || (c.opzioni && !c.vuoto ? Object.keys(c.opzioni)[0] : '');
+      for (const c of campi) {
+        d[c.nome] = testoDi(e?.dati[c.nome]) || (c.opzioni && !c.vuoto ? Object.keys(c.opzioni)[0] : '');
+        if (c.soloSePresente) d[presenteDi(c.nome)] = testoDi(d[c.nome]).trim().length > 0;
+      }
       if (tipo === 'domanda') d.risposte_json = jsonDi<Risposta[]>(e?.dati.risposte_json, []);
       return d;
     },

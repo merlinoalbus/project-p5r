@@ -141,7 +141,7 @@ describe('API negozi e inventario', () => {
     db.exec(`CREATE TEMP TABLE backup_tutte_condizioni_articoli_negozi_test AS SELECT chiave, condizioni_json FROM articolo;
       CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, sblocco_json, eccezione_orari_json FROM negozio`);
     try {
-      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (dal 356 solo l'eccezione del negozio; quelli
+      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (dalla 373 solo l'eccezione del negozio; quelli
       // della sede restano, e la partita nuova parte di giorno)
       db.exec(`UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET sblocco_json = '[]', eccezione_orari_json = '{"giorni":[],"fasce":[],"chiusoConPioggia":false,"nota":null}'`);
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;

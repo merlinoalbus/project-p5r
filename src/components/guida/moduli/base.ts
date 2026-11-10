@@ -37,6 +37,8 @@ export interface DefinizioneModulo {
   conCondizioni: boolean;
   /** La tabella ha `verificato`: il guscio offre la spunta «Confermato». */
   conVerificato: boolean;
+  /** Le condizioni partono ripiegate con il riepilogo (si aprono da sole se c'è qualcosa da risolvere). */
+  condizioniRipiegate?: boolean;
 }
 
 export interface ModuloCompleto extends DefinizioneModulo { Componente: ComponentType<PropsModulo> }

@@ -1,9 +1,9 @@
 // ============================================================
-// RisposteVoce — fra le note di una voce Confidente del diario, le risposte migliori del suo level up
+// RisposteVoce — fra le note di una voce Confidente del diario, le risposte migliori del suo avanzamento
 // ============================================================
 //
 // Progetto dei Confidenti approvato dall'utente (2026-10-24, tavola 4): guardando la voce dal diario si vedono fra le sue note le
-// informazioni per un level up ottimale. Una voce con «Rango atteso N» mostra le scelte dell'evento del rango N (`a.dialogo`) con la
+// informazioni per un avanzamento ottimale. Una voce con «Rango atteso N» mostra le scelte dell'evento del rango N (`a.dialogo`) con la
 // migliore in evidenza. Con una partita, se il Confidente vi sta a un rango diverso (`a.rangoPartita`) e il suo prossimo evento è un altro
 // (`a.dialogoPartita`), sotto c'è il rimando alle risposte di quell'evento. Senza rango atteso («Nessuno») la voce non prevede una salita
 // di rango e il blocco non c'è (scelta dell'utente, 2026-10-24).
@@ -45,7 +45,7 @@ export function RisposteVoce({ a }: { a: AzionePercorsoDto }) {
   const secondario = a.dialogoPartita;
   return (
     <div className="risposte-voce" role="group" aria-label={`Risposte migliori, evento del rango ${d.rango}`}>
-      <span className="risposte-voce__titolo">Level up al rango {d.rango} · risposte migliori</span>
+      <span className="risposte-voce__titolo">Avanzamento al rango {d.rango} · risposte migliori</span>
       {d.note && <span className="testo-12 text-text-muted">{d.note}</span>}
       <ScelteEvento d={d} />
       {a.rangoPartita !== undefined && a.rangoPartita + 1 !== d.rango && (
