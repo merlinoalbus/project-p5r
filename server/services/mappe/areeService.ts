@@ -5,7 +5,7 @@
 // Un'Area raccoglie le planimetrie (versioni) della stessa zona di un quartiere — o della città, per lo staff che nessuna fonte
 // colloca — e ne dice nome, ordine e planimetria predefinita (tabella `area`, migrazione 109). Questo servizio la legge per le
 // pagine (elenco del contenitore, pagina dell'Area, planimetrie da collocare) e la scrive (creazione con la prima planimetria,
-// versioni, rinomina, ordine, ripristino, eliminazione nel cestino, collocazione). Le rotte sono generiche sul contenitore
+// versioni, rinomina, ordine, eliminazione nel cestino, collocazione). Le rotte sono generiche sul contenitore
 // (`/api/aree/:contenitore/:chiave/…`): `citta`, con la chiave di un quartiere o `tokyo` per la città (L2), e `dungeon`, con la
 // chiave di un Palazzo (L3, migrazione 110: le «stanze» dei Palazzi, legate alle infiltrazioni in `infiltrazione_area`). Nei Palazzi
 // le planimetrie nascono di tipo `area` sotto `dungeon-<k>`, senza un punto sull'illustrazione (lì non ci sono passaggi), e l'Area
@@ -184,7 +184,7 @@ function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco, partita
     illustrazione: a.planimetria_predefinita ? illustrazioneDellaMappa(a.planimetria_predefinita, getDb(), ctx.caricate) : { immagineUrl: null, asset: null },
     numeroPlanimetrie: planimetrie.length, numeroSpilli: chiavi.reduce((n, k) => n + (ctx.spilli.get(k) ?? 0), 0),
     passaggio: passaggio ? { spillo: passaggio.id, x: passaggio.x, y: passaggio.y } : null,
-    ingresso: ctx.ingressi.has(a.chiave), origine: a.origine, modificata: a.seed_json !== null, daVerificare: a.da_verificare === 1,
+    ingresso: ctx.ingressi.has(a.chiave), origine: a.origine, daVerificare: a.da_verificare === 1,
     casa: casaDellArea(a) ?? '',
     infiltrazioni: ctx.infiltrazioni.get(a.chiave) ?? [],
     raccolta,
@@ -422,15 +422,15 @@ export function aggiungiPlanimetria(contenitore: ContenitoreRotta, chiave: strin
   return dettaglioArea(contenitore, chiave, slugArea);
 }
 
-/** La copia dei valori della guida, presa alla prima correzione di un'Area del pacchetto (come `luogo.seed_json`, 071). */
+/** La copia dei valori della guida, presa alla prima correzione di un'Area del pacchetto (come `luogo.seed_json`, 071): la leggono il nome
+ *  della «stanza» (rivisto dall'utente o no) e l'importazione delle mappe, che non sovrascrive un'Area corretta. */
 function seedJson(a: RigaArea): string {
   return JSON.stringify({ nome: a.nome, nome_rivisto: a.nome_rivisto, planimetria_predefinita: a.planimetria_predefinita });
 }
 
 /**
  * Corregge un'Area: il nome (lo slug, e quindi l'indirizzo, non cambia), la planimetria predefinita (una delle sue) e «Tieni» per
- * un'Area da verificare (`daVerificare: false`). La prima correzione di un'Area della guida ne conserva i valori, che «Ripristina»
- * rimette (R2-28).
+ * un'Area da verificare (`daVerificare: false`). La prima correzione di un'Area della guida ne conserva i valori (`seedJson`).
  */
 export function aggiornaArea(contenitore: ContenitoreRotta, chiave: string, slugArea: string, dati: { nome?: string; predefinita?: string; daVerificare?: false }): AreaDettaglioDto {
   const c = contenitoreDaRotta(contenitore, chiave);
@@ -464,22 +464,6 @@ export function aggiornaSbloccoArea(contenitore: ContenitoreRotta, chiave: strin
   const a = rigaArea(contenitoreDaRotta(contenitore, chiave), slugArea);
   const normalizzate = normalizzaCondizioniSpillo(condizioni);
   prepared('UPDATE area SET condizioni_json = ?, updated_at = ? WHERE chiave = ?').run(normalizzate.length ? JSON.stringify(normalizzate) : null, nowIso(), a.chiave);
-  invalidaCacheDiGioco();
-  return dettaglioArea(contenitore, chiave, slugArea);
-}
-
-/** Rimette i valori della guida di un'Area corretta (R2-28); 409 se l'Area è dell'utente o non è stata corretta. */
-export function ripristinaArea(contenitore: ContenitoreRotta, chiave: string, slugArea: string): AreaDettaglioDto {
-  const c = contenitoreDaRotta(contenitore, chiave);
-  const a = rigaArea(c, slugArea);
-  if (a.origine === 'utente') throw httpErrors.conflict('area-dell-utente', 'L’area l’hai creata tu: non ci sono valori della guida da rimettere.');
-  if (a.seed_json === null) throw httpErrors.conflict('area-non-modificata', 'L’area ha già i valori della guida.');
-  const prima = JSON.parse(a.seed_json) as { nome: string; nome_rivisto: number; planimetria_predefinita: string | null };
-  // la predefinita di prima, se è ancora una sua versione; altrimenti resta quella di adesso
-  const predefinita = prima.planimetria_predefinita && prepared('SELECT 1 FROM mappa WHERE chiave = ? AND area_chiave = ?').get(prima.planimetria_predefinita, a.chiave)
-    ? prima.planimetria_predefinita : a.planimetria_predefinita;
-  prepared('UPDATE area SET nome = ?, nome_rivisto = ?, planimetria_predefinita = ?, seed_json = NULL, updated_at = ? WHERE chiave = ?')
-    .run(prima.nome, prima.nome_rivisto, predefinita, nowIso(), a.chiave);
   invalidaCacheDiGioco();
   return dettaglioArea(contenitore, chiave, slugArea);
 }
@@ -838,7 +822,7 @@ export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: stri
     if (!altra.area || altra.genitore_chiave !== p.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso posto: un’area raccoglie solo planimetrie dello stesso Palazzo o quartiere.');
     if (altra.area.chiave === area.chiave) return;
     // come la stanza di prima, che «nasceva col nome dato» se quella planimetria non ne aveva una: un'Area di una planimetria sola
-    // prende il nome dato, come correzione (`aggiornaArea` salva i valori del seed alla prima modifica: «Ripristina» la riporta), ma
+    // prende il nome dato, come correzione (`aggiornaArea` salva i valori del seed alla prima modifica), ma
     // mai sopra un nome dato dall'utente, che resta (L3 §3.6.1)
     const sola = (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(altra.area.chiave) as number) < 2;
     const rivista = altra.area.nome_rivisto === 1 && !(altra.area.origine === 'seed' && altra.area.seed_json === null);

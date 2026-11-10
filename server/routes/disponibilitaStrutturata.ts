@@ -8,7 +8,7 @@ import { validate } from '../middleware/validate.js';
 import { paramsChiaveGuida } from '../schemas/guidaDungeon.js';
 import { disponibilitaConfidente } from '../services/disponibilitaStrutturataService.js';
 import { valutatoreDellaPartita } from '../services/disponibilitaService.js';
-import { ripristinaDisponibilita, salvaDisponibilita } from '../services/disponibilitaStrutturataScritture.js';
+import { salvaDisponibilita } from '../services/disponibilitaStrutturataScritture.js';
 import { FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
@@ -43,10 +43,6 @@ router.get('/confidenti/:chiave/disponibilita-strutturata', validate({ params: p
 router.put('/confidenti/:chiave/disponibilita-strutturata', validate({ params: paramsChiaveGuida, body: bodyDisponibilita }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(salvaDisponibilita(String(req.params.chiave), req.body));
-});
-/** «Ripristina»: la struttura torna come la dà la fonte G-036. */
-router.post('/confidenti/:chiave/disponibilita-strutturata/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
-  res.json(ripristinaDisponibilita(String(req.params.chiave)));
 });
 
 export default router;

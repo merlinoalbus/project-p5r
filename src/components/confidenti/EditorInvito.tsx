@@ -4,13 +4,13 @@
 //
 // Il giorno (mese e giorno del calendario di gioco) è la chiave dell'invito: si sceglie alla creazione e dopo non si cambia. Il posto che apre è un
 // quartiere, un luogo o un'Area, scelto per nome. Le condizioni sono quelle del vocabolario unico (lo stesso editor dei requisiti dei ranghi); il
-// server rifiuta quelle che citano l'invito stesso. Un invito della guida cambiato porta «Ripristina», che rimette posto, condizioni e nota.
-// Rotte: POST `/api/compendio/confidenti/:chiave/inviti`, PUT `…/inviti/:data`, POST `…/inviti/:data/ripristina`.
+// server rifiuta quelle che citano l'invito stesso. Un invito della guida cambiato porta il chip «Modificato» nell'elenco.
+// Rotte: POST `/api/compendio/confidenti/:chiave/inviti`, PUT `…/inviti/:data`.
 // ============================================================
 
 import { useState } from 'react';
 import { dataLeggibile, dataValida, type Condizione } from '../../../shared/condizioniSpillo';
-import { creaInvitoConfidente, getAreeCitta, getLuoghi, getQuartieri, modificaInvitoConfidente, ripristinaInvitoConfidente } from '../../services/api';
+import { creaInvitoConfidente, getAreeCitta, getLuoghi, getQuartieri, modificaInvitoConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
@@ -92,7 +92,6 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
   return (
     <Modal titolo={invito ? `Invito di ${confidente.nome}: ${invito.data ? dataLeggibile(invito.data) : ''}` : `Nuovo invito di ${confidente.nome}`} aperta larga onChiudi={chiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        {invito?.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaInvitoConfidente(confidente.chiave, invito.data!), 'Invito ripristinato come nella guida.')} />}
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={invito ? 'Salva' : 'Crea l’invito'} disabled={occupato || !sporca || !dataOk || posto === '' || condizioni.length > 20} onClick={() => void salva()} />
       </div>

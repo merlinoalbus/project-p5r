@@ -7,7 +7,7 @@
 //   - l'apertura c'è sempre; la scadenza può mancare («senza fine») solo dove il gioco non ne fissa una (i Memento e i Palazzi col boss dei
 //     Memento, Iweleth); furto e lettera possono mancare (la guida non li dà);
 //   - nell'ordine del calendario di gioco: apertura ≤ furto consigliato ≤ lettera ≤ scadenza, per le date che ci sono.
-// La applica `impostaFinestra` (unico scrittore delle colonne, salvo «Ripristina» che rimette i valori fotografati) e la mostra in anticipo il modulo «Correggi la scheda».
+// La applica `impostaFinestra` (unico scrittore delle colonne) e la mostra in anticipo il modulo «Correggi la scheda».
 //
 // Il termine della lettera di sfida (L9-08, scelta Q22 dell'utente): la guida (`guida-esplorazione-dungeon`) dice che la lettera va inviata entro il
 // giorno prima della scadenza. Dove non c'è una data scritta, `letteraDelPalazzo` la calcola in lettura: è un valore mostrato, non un dato. Non

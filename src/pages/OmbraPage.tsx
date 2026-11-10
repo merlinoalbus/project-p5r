@@ -77,7 +77,7 @@ export function OmbraPage() {
     <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Ombra', ripiego: '/guida/battaglia' }}>
       {o && (
         <div className="flex flex-col gap-3">
-          {/* L11 · R11-15/4: un solo punto di modifica dell'Ombra (nome, personalità, livello, negoziabilità, note, affinità proprie), con «Ripristina» ai valori della guida */}
+          {/* L11 · R11-15/4: un solo punto di modifica dell'Ombra (nome, personalità, livello, negoziabilità, note, affinità proprie) */}
           <IntestazioneScheda ripiego="/guida/battaglia" titolo={o.nome}
             chip={o.origine === 'utente' ? <span className="chip testo-12">corretta</span> : undefined}
             azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`l’Ombra «${o.nome}»`}>

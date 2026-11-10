@@ -15,7 +15,7 @@ import { useAssetStore } from '../stores/assetStore';
 import type { AreaDettaglioDto, PlanimetriaAreaDto } from '../types';
 import type { ReactNode } from 'react';
 
-const api = vi.hoisted(() => ({ getArea: vi.fn(), eliminaAreaMondo: vi.fn(), ripristinaAreaMondo: vi.fn() }));
+const api = vi.hoisted(() => ({ getArea: vi.fn(), eliminaAreaMondo: vi.fn() }));
 vi.mock('../services/api', (vero) => moduloApi(vero, api));
 // il visore ha i suoi test (VisoreMappa, MappaIncorporata): qui conta che cosa la pagina gli passa
 vi.mock('../components/mappe/MappaIncorporata', () => ({
@@ -36,7 +36,7 @@ const planimetria = (chiave: string, etichetta: string | null, ordine: number, n
 const sottopasso: AreaDettaglioDto = {
   chiave: 'citta/shibuya/sottopasso', contenitore: { tipo: 'quartiere', chiave: 'shibuya', nome: 'Shibuya' }, slug: 'sottopasso', nome: 'Sottopasso', nomeRivisto: false, ordine: 1,
   predefinita: 'shibuya-sottopasso', illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 2, numeroSpilli: 4, passaggio: null, ingresso: false,
-  origine: 'seed', modificata: false, daVerificare: false, casa: '/guida/citta/shibuya/sottopasso',
+  origine: 'seed', daVerificare: false, casa: '/guida/citta/shibuya/sottopasso',
   planimetrie: [planimetria('shibuya-sottopasso', null, 0, 4, true), planimetria('shibuya-sottopasso-speciale', 'planimetria completa', 1, 0)],
   elementi: [{ tipo: 'negozio', chiave: 'untouchable', nome: 'Untouchable', spillo: 42, planimetria: 'shibuya-sottopasso' }],
   vicine: [{ nome: 'Central Street', quartiereNome: 'Shibuya', casa: '/guida/citta/shibuya/central-street' }, { nome: 'Vicoli', quartiereNome: 'Yongen-Jaya', casa: '/guida/citta/yongen-jaya/vicoli' }],

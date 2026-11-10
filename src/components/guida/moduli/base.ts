@@ -2,7 +2,7 @@
 // base — il contratto di un modulo del catalogo e le letture elementari dei valori
 // ============================================================
 //
-// `ModuloCatalogo` è il guscio (finestra, Salva, Ripristina, Nascondi); ogni tipo ha il suo
+// `ModuloCatalogo` è il guscio (finestra, Salva, Elimina, Nascondi); ogni tipo ha il suo
 // modulo, che dichiara tre cose: con quali valori parte (`iniziali`), quando è salvabile
 // (`valido`) e che cosa manda all'API (`prepara`). Lo stato è un solo oggetto con i nomi delle
 // colonne, com'è nell'API: i valori temporanei (l'oggetto collegato, la via «a mano») stanno

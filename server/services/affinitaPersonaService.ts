@@ -1,10 +1,11 @@
 // ============================================================
-// affinitaPersonaService — correggere le affinità di una Persona e rimetterle come le dà la guida (L8 · R8-10/1)
+// affinitaPersonaService — correggere le affinità di una Persona (L8 · R8-10/1)
 // ============================================================
 //
 // Le affinità stanno in `persona_affinita(persona_id, elemento, codice)` e le leggono dal compendio la scheda Persona, l'Ombra, la Battaglia e le
 // operazioni della Stanza di Velluto: correggerle qui le cambia ovunque, senza altra copia. Ogni riga conserva il valore della guida
-// (`seed_codice`, migrazione 186) e dice se è stata corretta (`origine`: `seed` o `utente`). «Ripristina» rimette `seed_codice` in `codice`.
+// (`seed_codice`, migrazione 186) e dice se è stata corretta (`origine`: `seed` o `utente`): la scheda lo dice («corrette da te», «Guida: …»);
+// non c'è un ritorno al valore della guida (decisione dell'utente del 10/11).
 // Le differenze proprie di un'Ombra (`ombra.affinita_proprie_json`) non si toccano: restano sopra la griglia della Persona.
 // ============================================================
 
@@ -39,18 +40,6 @@ export function correggiAffinita(personaId: number, mod: ModificaAffinitaPersona
       const guida = r.seed_codice ?? r.codice;
       aggiorna.run(a.codice, guida, a.codice === guida ? 'seed' : 'utente', personaId, a.elemento);
     }
-  })();
-  invalidaCacheDiGioco();
-  return dettaglioPersona(personaId);
-}
-
-/** «Ripristina»: tutte le affinità corrette tornano al valore della guida. 409 se la Persona non è stata corretta. */
-export function ripristinaAffinita(personaId: number): PersonaDettaglioDto {
-  esiste(personaId);
-  const corrette = (prepared("SELECT COUNT(*) AS n FROM persona_affinita WHERE persona_id = ? AND origine = 'utente'").get(personaId) as { n: number }).n;
-  if (corrette === 0) throw httpErrors.conflict('affinita-della-guida', 'Le affinità di questa Persona non sono state corrette: sono già quelle della guida.');
-  getDb().transaction(() => {
-    prepared("UPDATE persona_affinita SET codice = COALESCE(seed_codice, codice), origine = 'seed' WHERE persona_id = ? AND origine = 'utente'").run(personaId);
   })();
   invalidaCacheDiGioco();
   return dettaglioPersona(personaId);

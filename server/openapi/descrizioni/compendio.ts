@@ -99,12 +99,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`PersonaDettaglioDto` aggiornato',
     errori: [[400, 'validation-error'], [404, 'persona-non-trovata']],
   },
-  'POST /api/compendio/persona/:id/affinita/ripristina': {
-    sommario: 'Riporta le affinità di una Persona a quelle della guida',
-    descrizione: 'Rimette in `codice` il valore conservato in `seed_codice` di ogni riga corretta e riporta l\'origine a «seed». 409 `affinita-della-guida` se nessuna affinità della Persona è stata corretta.',
-    risposta: '`PersonaDettaglioDto` aggiornato',
-    errori: [[404, 'persona-non-trovata'], [409, 'affinita-della-guida']],
-  },
   'GET /api/compendio/skill': {
     sommario: 'Elenco delle skill con filtri',
     descrizione: 'Ordinate per nome. `elemento` filtra in SQL; `q` cerca poi su nome canonico, nome italiano ed effetto (originale e tradotto) con la ricerca normalizzata.',
@@ -164,33 +158,21 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
-    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, solo-date-rango, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `solo-date-rango` dice gli unici giorni in cui si incontra quel rango; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), motivoSenzaLuogo, luoghi (chiavi). «Dal» non si scrive qui: è il requisito di rango 1 di tipo data. Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, solo-date-rango, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `solo-date-rango` dice gli unici giorni in cui si incontra quel rango; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), motivoSenzaLuogo, luoghi (chiavi). «Dal» non si scrive qui: è il requisito di rango 1 di tipo data. Alla prima modifica conserva la fotografia della fonte G-036, che dà `modificata`. I luoghi si cambiano passando dal luogo (`aggiornaElemento`); una chiave inesistente è 400. Una sola transazione; no-store.',
     risposta: '`DisponibilitaConfidenteDto` aggiornato',
     errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [400, 'eccezione-doppia'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
   },
-  'POST /api/compendio/confidenti/:chiave/disponibilita-strutturata/ripristina': {
-    sommario: 'Riporta la disponibilità strutturata alla fonte G-036',
-    descrizione: 'Rimette la struttura conservata alla prima modifica e toglie la fotografia. I luoghi non si ripristinano da qui: si ripristinano dal luogo. 409 `disponibilita-della-guida` se non è stata modificata.',
-    risposta: '`DisponibilitaConfidenteDto`',
-    errori: [[404, 'confidente-non-trovato'], [409, 'disponibilita-della-guida'], [409, 'disponibilita-fotografia-illeggibile']],
-  },
   'GET /api/compendio/giorni/:data': {
     sommario: 'Il giorno di gioco come lo vede l’editor (meteo nelle due fasce, nota, trama, vincoli)',
-    descrizione: 'Sola lettura. `data` è MM-GG. `modificato` è vero se il giorno è stato cambiato rispetto alla guida. Il giorno della settimana non si salva: si calcola dalla data.',
+    descrizione: 'Sola lettura. `data` è MM-GG. Il giorno della settimana non si salva: si calcola dalla data.',
     risposta: '`GiornoModificabileDto`',
     errori: [[404, 'giorno-non-trovato']],
   },
   'PUT /api/compendio/giorni/:data': {
     sommario: 'Cambia il giorno di gioco: meteo di giorno e di sera, nota, flag «da verificare», trama, vincoli, avvisi',
-    descrizione: 'Corpo strict e parziale. L8-02: `avvisi` (elenco di frasi, le vuote tolte) è l’unico punto di modifica degli avvisi del giorno che la scheda del giorno mostra; una fotografia di prima senza gli avvisi li riceve quando cambiano. Alla prima modifica la riga conserva com’era la guida (`seed_json`) e passa a origine «utente»; calendario, meteo della guida e guida del percorso leggono la stessa riga. Una modifica che non cambia niente non scrive.',
+    descrizione: 'Corpo strict e parziale. L8-02: `avvisi` (elenco di frasi, le vuote tolte) è l’unico punto di modifica degli avvisi del giorno che la scheda del giorno mostra; una fotografia di prima senza gli avvisi li riceve quando cambiano. La riga modificata passa a origine «utente»; calendario, meteo della guida e guida del percorso leggono la stessa riga. Una modifica che non cambia niente non scrive.',
     risposta: '`GiornoModificabileDto` aggiornato',
     errori: [[404, 'giorno-non-trovato']],
-  },
-  'POST /api/compendio/giorni/:data/ripristina': {
-    sommario: 'Riporta il giorno di gioco alla guida',
-    descrizione: 'Rimette i campi conservati alla prima modifica, toglie la fotografia e riporta l’origine a «seed». 409 `giorno-della-guida` se il giorno non è stato modificato.',
-    risposta: '`GiornoModificabileDto`',
-    errori: [[404, 'giorno-non-trovato'], [409, 'giorno-della-guida'], [409, 'giorno-fotografia-illeggibile']],
   },
   'GET /api/compendio/confidenti/:chiave/ranghi': {
     sommario: 'I ranghi del Confidente: modo di avanzamento e soglia in punti',
@@ -200,15 +182,9 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/ranghi/:rango': {
     sommario: 'Cambia il modo e la soglia di un rango del Confidente',
-    descrizione: 'Corpo strict `{ modo, puntiNecessari }`. Un rango «a punti» ha una soglia maggiore di zero, gli altri modi soglia zero (G-020). Alla prima modifica conserva la fotografia della guida per «Ripristina»; la fonte diventa «utente». Vale per tutte le partite.',
+    descrizione: 'Corpo strict `{ modo, puntiNecessari }`. Un rango «a punti» ha una soglia maggiore di zero, gli altri modi soglia zero (G-020). Alla prima modifica conserva la fotografia della guida, che dà `modificato`; la fonte diventa «utente». Vale per tutte le partite.',
     risposta: 'Elenco di `RangoConfidenteDto` aggiornato',
     errori: [[400, 'modo-non-valido'], [400, 'soglia-non-valida'], [400, 'soglia-incoerente'], [404, 'confidente-non-trovato'], [404, 'rango-non-trovato']],
-  },
-  'POST /api/compendio/confidenti/:chiave/ranghi/:rango/ripristina': {
-    sommario: 'Riporta il rango del Confidente alla guida',
-    descrizione: 'Rimette modo, soglia e fonte conservati alla prima modifica e toglie la fotografia. 409 `rango-della-guida` se il rango non è stato modificato.',
-    risposta: 'Elenco di `RangoConfidenteDto`',
-    errori: [[404, 'confidente-non-trovato'], [409, 'rango-della-guida'], [409, 'confidente-fotografia-illeggibile']],
   },
   'GET /api/compendio/confidenti/:chiave/abilita': {
     sommario: 'Le abilità del Confidente per rango',
@@ -218,55 +194,31 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/abilita/:rango': {
     sommario: 'Sostituisce le abilità di un rango del Confidente',
-    descrizione: 'Corpo strict `{ abilita: [{ nome, descrizione }] }` (da 0 a 20, nome obbligatorio), nell’ordine dato. Alla prima modifica conserva la fotografia per «Ripristina». Vale per tutte le partite.',
+    descrizione: 'Corpo strict `{ abilita: [{ nome, descrizione }] }` (da 0 a 20, nome obbligatorio), nell’ordine dato. Alla prima modifica conserva la fotografia della guida, che dà `modificato`. Vale per tutte le partite.',
     risposta: 'Elenco di `AbilitaRangoDto` aggiornato',
     errori: [[400, 'rango-non-valido'], [400, 'abilita-non-valide'], [404, 'confidente-non-trovato']],
   },
-  'POST /api/compendio/confidenti/:chiave/abilita/:rango/ripristina': {
-    sommario: 'Riporta le abilità del rango alla guida',
-    descrizione: 'Rimette l’elenco conservato alla prima modifica e toglie la fotografia. 409 `abilita-della-guida` se il rango non è stato modificato.',
-    risposta: 'Elenco di `AbilitaRangoDto`',
-    errori: [[404, 'confidente-non-trovato'], [409, 'abilita-della-guida']],
-  },
-  'POST /api/compendio/confidenti/:chiave/doti-incontro/:rango/ripristina': {
-    sommario: 'Riporta la Dote a ogni incontro del passaggio alla guida',
-    descrizione: 'La scrittura della Dote (`PUT …/doti-incontro`) conserva com’era il passaggio alla prima modifica; qui lo si rimette. 409 `dote-della-guida` se il passaggio non è stato modificato.',
-    risposta: '`ConfidenteDettaglioDto` aggiornato',
-    errori: [[404, 'confidente-non-trovato'], [409, 'dote-della-guida']],
-  },
   'PUT /api/compendio/confidenti/:chiave/dialoghi/:id': {
     sommario: 'Cambia le note e le scelte di un dialogo del Confidente, con i punti',
-    descrizione: 'Corpo strict `{ note?, scelte? }`; una scelta ha testo, punti (0-100 o nessuno), testo dei punti, romantica e avviso; le scelte si rinumerano da 1. Alla prima modifica conserva la fotografia per «Ripristina». Vale per tutte le partite.',
+    descrizione: 'Corpo strict `{ note?, scelte? }`; una scelta ha testo, punti (0-100 o nessuno), testo dei punti, romantica e avviso; le scelte si rinumerano da 1. Alla prima modifica conserva la fotografia della guida, che dà `modificato`. Vale per tutte le partite.',
     risposta: '`DialogoModificatoDto`',
     errori: [[400, 'scelte-non-valide'], [404, 'confidente-non-trovato'], [404, 'dialogo-non-trovato']],
   },
-  'POST /api/compendio/confidenti/:chiave/dialoghi/:id/ripristina': {
-    sommario: 'Riporta il dialogo del Confidente alla guida',
-    descrizione: 'Rimette note e scelte conservate alla prima modifica e toglie la fotografia. 409 `dialogo-della-guida` se il dialogo non è stato modificato.',
-    risposta: '`DialogoModificatoDto`',
-    errori: [[404, 'confidente-non-trovato'], [404, 'dialogo-non-trovato'], [409, 'dialogo-della-guida']],
-  },
   'POST /api/compendio/confidenti/:chiave/inviti': {
     sommario: 'Crea un invito del Confidente per un giorno, con il posto che apre',
-    descrizione: 'Corpo strict `{ data: "MM-GG", apre: { tipo: quartiere|luogo|area, chiave }, condizioni, nota }`. La chiave dell’invito è `<confidente>/<data>`: un solo invito per giorno. Le condizioni sono quelle del vocabolario unico e devono riferirsi a dati esistenti. L’invito nasce senza fotografia della guida: si può togliere (Cestino) e non ha «Ripristina».',
+    descrizione: 'Corpo strict `{ data: "MM-GG", apre: { tipo: quartiere|luogo|area, chiave }, condizioni, nota }`. La chiave dell’invito è `<confidente>/<data>`: un solo invito per giorno. Le condizioni sono quelle del vocabolario unico e devono riferirsi a dati esistenti. L’invito nasce senza fotografia della guida: si può togliere (Cestino).',
     risposta: '`InvitoDto` (201)',
     errori: [[400, 'data-non-valida'], [400, 'condizione-circolare'], [404, 'confidente-non-trovato'], [404, 'posto-non-trovato'], [404, 'condizione-non-trovata'], [409, 'invito-esistente']],
   },
   'PUT /api/compendio/confidenti/:chiave/inviti/:data': {
     sommario: 'Cambia il posto aperto, le condizioni e la nota di un invito',
-    descrizione: 'Corpo strict `{ apre, condizioni, nota }`; la data è la chiave e non si cambia. Per un invito della guida la fotografia resta com’era e `modificato` diventa vero: «Ripristina» rimette posto, condizioni e nota. Vale per tutte le partite.',
+    descrizione: 'Corpo strict `{ apre, condizioni, nota }`; la data è la chiave e non si cambia. Per un invito della guida la fotografia resta com’era e `modificato` diventa vero. Vale per tutte le partite.',
     risposta: '`InvitoDto`',
     errori: [[400, 'condizione-circolare'], [404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [404, 'posto-non-trovato'], [404, 'condizione-non-trovata']],
   },
-  'POST /api/compendio/confidenti/:chiave/inviti/:data/ripristina': {
-    sommario: 'Riporta l’invito del Confidente alla guida',
-    descrizione: 'Rimette posto, condizioni e nota dalla fotografia della guida. 409 `invito-della-guida` se l’invito non è stato modificato, 409 `invito-creato-dall-utente` se non viene dalla guida.',
-    risposta: '`InvitoDto`',
-    errori: [[404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [409, 'invito-della-guida'], [409, 'invito-creato-dall-utente'], [409, 'invito-fotografia-illeggibile'], [409, 'invito-fotografia-incompleta']],
-  },
   'DELETE /api/compendio/confidenti/:chiave/inviti/:data': {
     sommario: 'Toglie un invito creato dall’utente (finisce nel Cestino)',
-    descrizione: 'Solo gli inviti creati dall’utente: uno della guida si modifica o si ripristina (409 `invito-della-guida`). 409 `invito-in-uso` se una partita l’ha già registrato, se un effetto di una voce del Diario lo cita o se la condizione di un altro dato lo cita. Risponde 204.',
+    descrizione: 'Solo gli inviti creati dall’utente: uno della guida si modifica (409 `invito-della-guida`). 409 `invito-in-uso` se una partita l’ha già registrato, se un effetto di una voce del Diario lo cita o se la condizione di un altro dato lo cita. Risponde 204.',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [409, 'invito-della-guida'], [409, 'invito-in-uso']],
   },
@@ -275,7 +227,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/oggetti-guida': {
     sommario: 'Oggetti della guida: consumabili, chiave e materiali, fabbricazione, abiti, scambi',
     descrizione: 'Mantiene le sezioni storiche della guida. Dopo M7, consumabili, chiave/materiali e abiti leggono nome/alias/riferimento dal catalogo per la chiave della fonte; offerte e prezzo derivano dai listini, vecchi prezzi senza vendita solo come nota. Ricette con prodottiCatalogo e materialiCatalogo, nomi/quantità dai legami; resa non dichiarata della ricetta resta null, non una unità. JSON guida conservato; personalizzazione, lavanderia e prosa degli scambi restano distinti. Il crosswalk per nome è usato solo prima di M7.',
-    risposta: '`OggettiGuidaDto`; dopo M7 scambi è vuoto e listiniScambi elenca chiave/nome corrente, sede, numero delle offerte visibili e casa del negozio. Il collegamento storico del negozio risolve la sua sede L5. Nessun listino duplicato, prezzo o acquisto calcolato dal testo della guida; indicazioni precedenti conservate nelle note del negozio e nel suo ripristino. Prima di M7 il contratto storico resta invariato.',
+    risposta: '`OggettiGuidaDto`; dopo M7 scambi è vuoto e listiniScambi elenca chiave/nome corrente, sede, numero delle offerte visibili e casa del negozio. Il collegamento storico del negozio risolve la sua sede L5. Nessun listino duplicato, prezzo o acquisto calcolato dal testo della guida; indicazioni precedenti conservate nelle note del negozio. Prima di M7 il contratto storico resta invariato.',
     errori: [[404, 'oggetti-non-disponibili']],
   },
   'GET /api/compendio/personaggi': {
@@ -484,15 +436,9 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/citta/:chiave/sblocco': {
     sommario: 'Modifica la condizione propria dello sblocco di un quartiere',
-    descrizione: 'Sostituisce la condizione strutturata del quartiere con quelle inviate. Gli inviti dei Confidenti restano separati e continuano a essere gestiti dalla pagina del Confidente; la copia della guida usata da «Ripristina» non viene sovrascritta.',
+    descrizione: 'Sostituisce la condizione strutturata del quartiere con quelle inviate. Gli inviti dei Confidenti restano separati e continuano a essere gestiti dalla pagina del Confidente; la copia della guida (migrazione 120, letta da `modificato` e dal censimento delle condizioni) non viene sovrascritta.',
     risposta: '`SbloccoDto` aggiornato',
     errori: [[404, 'quartiere-non-trovato']],
-  },
-  'POST /api/compendio/citta/:chiave/sblocco/ripristina': {
-    sommario: 'Ripristina lo sblocco del quartiere dalla guida',
-    descrizione: 'Riporta la condizione propria del quartiere alla copia salvata dalla guida nella migrazione 120; non modifica gli inviti e non cancella lo snapshot.',
-    risposta: '`SbloccoDto` aggiornato',
-    errori: [[404, 'quartiere-non-trovato'], [409, 'sblocco-guida-assente']],
   },
   'PUT /api/compendio/citta/:chiave/ingresso': {
     sommario: 'Imposta l\'ingresso del quartiere: un\'Area del quartiere e un punto',
@@ -565,7 +511,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   // ---- Palazzi e Memento ----
   'GET /api/compendio/dungeon': {
     sommario: 'Elenco dei Palazzi e dei Memento',
-    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e, per i Palazzi, i due livelli del completamento (§8.10, decisione dell\'utente del 2026-10-20): `concluso` (Tesoro e boss finale: governa ingressi, mappa di Tokyo, requisiti e condizioni) e `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e segno «Completato»), ciascuno col perché. Per i Palazzi anche `voceBossFinale`, `bossFinaleCorretto`, `regolaBoss` (§8.14–8.15: `memento` = nessun boss finale da dichiarare, né anello né effetti di Palazzo e senza `concluso`: Iweleth, che vive come dedalo dei Memento) e `bossFinaleDaDichiarare` (regola della voce senza voce dichiarata: il Palazzo non si conclude finché non la si sceglie con «Modifica › Boss finale»).',
+    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e, per i Palazzi, i due livelli del completamento (§8.10, decisione dell\'utente del 2026-10-20): `concluso` (Tesoro e boss finale: governa ingressi, mappa di Tokyo, requisiti e condizioni) e `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e segno «Completato»), ciascuno col perché. Per i Palazzi anche `voceBossFinale`, `regolaBoss` (§8.14–8.15: `memento` = nessun boss finale da dichiarare, né anello né effetti di Palazzo e senza `concluso`: Iweleth, che vive come dedalo dei Memento) e `bossFinaleDaDichiarare` (regola della voce senza voce dichiarata: il Palazzo non si conclude finché non la si sceglie con «Modifica › Boss finale»).',
     risposta: 'Elenco di `DungeonRiassuntoDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -589,24 +535,10 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/dungeon/:chiave': {
     sommario: 'Corregge i testi della scheda di un Palazzo',
-    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. Le date (`date`: apertura `dal`, scadenza `al`, furto consigliato e termine della lettera, giorni MM-GG del calendario di gioco) sono quelle della finestra del Palazzo e le scrive `impostaFinestra`, l\'unico scrittore, con la regola di `shared/datePalazzo`: `al` nullo («senza fine») solo nei Memento e a Iweleth (400 `scadenza-necessaria`), apertura ≤ furto ≤ lettera ≤ scadenza (400 `fine-prima-di-inizio` per la finestra rovesciata, `date-rovesciate` per il resto); con una data sbagliata non si salva niente. L8-04: `livelloConsigliato` è `{ min, max }`, interi da 1 a 99 o null (la fonte non lo dice); il minimo sopra il massimo dà 400 `livello-rovesciato`; il confronto delle fonti è la nota storica del Palazzo (`noteLivello` della scheda), che si modifica come le altre note storiche. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: nessun boss finale da dichiarare (400 `boss-finale-dei-memento`).',
+    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. Le date (`date`: apertura `dal`, scadenza `al`, furto consigliato e termine della lettera, giorni MM-GG del calendario di gioco) sono quelle della finestra del Palazzo e le scrive `impostaFinestra`, l\'unico scrittore, con la regola di `shared/datePalazzo`: `al` nullo («senza fine») solo nei Memento e a Iweleth (400 `scadenza-necessaria`), apertura ≤ furto ≤ lettera ≤ scadenza (400 `fine-prima-di-inizio` per la finestra rovesciata, `date-rovesciate` per il resto); con una data sbagliata non si salva niente. L8-04: `livelloConsigliato` è `{ min, max }`, interi da 1 a 99 o null (la fonte non lo dice); il minimo sopra il massimo dà 400 `livello-rovesciato`; il confronto delle fonti è la nota storica del Palazzo (`noteLivello` della scheda), che si modifica come le altre note storiche. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude). Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: nessun boss finale da dichiarare (400 `boss-finale-dei-memento`).',
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
     errori: [[404, 'dungeon-non-trovato'], [404, 'punto-non-trovato'], [400, 'voce-non-boss'], [400, 'voce-di-un-altro-palazzo'], [400, 'boss-finale-dei-memento'], [400, 'livello-rovesciato'],
-      [400, 'data-non-valida'], [400, 'scadenza-necessaria'], [400, 'fine-prima-di-inizio'], [400, 'date-rovesciate'], [409, 'fotografia-illeggibile']],
-  },
-  'POST /api/compendio/dungeon/:chiave/ripristina': {
-    sommario: '«Ripristina» della scheda di un Palazzo (L4 §8.14)',
-    descrizione: 'La voce del boss finale torna quella della guida (G-027, migrazione 112); se quella voce non c\'è più resta nessuna. Le date non si toccano. 409 se il boss finale non è stato cambiato, o se la copia conservata non si legge (`fotografia-illeggibile`).',
-    risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
-    senzaCorpo: true,
-    errori: [[404, 'dungeon-non-trovato'], [409, 'niente-da-ripristinare'], [409, 'fotografia-illeggibile']],
-  },
-  'POST /api/compendio/dungeon/:chiave/ripristina-date': {
-    sommario: '«Ripristina» delle date di un Palazzo (L9-08)',
-    descrizione: 'Apertura, scadenza, furto consigliato e termine della lettera tornano esattamente quelli fotografati alla prima correzione (`dateCorrette` della scheda), anche nulli. Il boss finale non si tocca. 409 se le date non sono state corrette, o se la copia conservata non si legge (`fotografia-illeggibile`, il valore resta).',
-    risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
-    senzaCorpo: true,
-    errori: [[404, 'dungeon-non-trovato'], [409, 'niente-da-ripristinare'], [409, 'fotografia-illeggibile']],
+      [400, 'data-non-valida'], [400, 'scadenza-necessaria'], [400, 'fine-prima-di-inizio'], [400, 'date-rovesciate']],
   },
   'PUT /api/compendio/dungeon/:chiave/atterraggi': {
     sommario: 'Sostituisce le regole di atterraggio dalla mappa di Tokyo',
@@ -664,7 +596,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave/requisiti': {
     sommario: 'I requisiti di un Confidente, rango per rango',
-    descrizione: 'Per l\'editor della pagina del Confidente: sempre i ranghi da 1 a 10, anche quelli senza requisiti. Ogni requisito è una condizione del vocabolario unico, con la sua frase e la descrizione generata in italiano; `modificato` dice se il rango differisce dalla copia della guida (e quindi si può ripristinare). Dato di gioco: vale per tutte le partite.',
+    descrizione: 'Per l\'editor della pagina del Confidente: sempre i ranghi da 1 a 10, anche quelli senza requisiti. Ogni requisito è una condizione del vocabolario unico, con la sua frase e la descrizione generata in italiano; `modificato` dice se il rango differisce dalla copia della guida. Dato di gioco: vale per tutte le partite.',
     risposta: '`RequisitiConfidenteDto`',
     errori: [[404, 'confidente-non-trovato']],
   },
@@ -679,13 +611,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. `testo` è la nota propria del requisito, facoltativa; la frase si genera dalla condizione (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
     risposta: '`RequisitiConfidenteDto` aggiornato',
     errori: [[404, 'confidente-non-trovato']],
-  },
-  'POST /api/compendio/confidenti/:chiave/requisiti/:rango/ripristina': {
-    sommario: 'Riporta i requisiti di un rango a come li dà la guida',
-    descrizione: 'Rimette nel rango le righe della copia della guida (tabella `confidente_requisito_guida`) e toglie le conferme a mano delle partite sugli indici che non esistono più nella guida. 409 se la copia della guida non è nel file di gioco.',
-    risposta: '`RequisitiConfidenteDto` aggiornato',
-    senzaCorpo: true,
-    errori: [[404, 'confidente-non-trovato'], [409, 'guida-non-disponibile']],
   },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango/:indice': {
     sommario: 'Corregge un requisito di un Confidente che cita una Richiesta',

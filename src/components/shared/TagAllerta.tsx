@@ -34,7 +34,7 @@ export function TagAllerta({ allerta: a, compatto }: { allerta: AllertaGiornoDto
 
 /**
  * I tag delle allerte di un giorno, uno per allerta; niente se il giorno non ne ha. Con `modifica` (R11-15/1) accanto a ogni tag c'è la matita
- * per correggere l'allerta di quel giorno e rimetterla com'è nella guida (`ModificaGuida`, tipo `allerta-meteo`); un'allerta corretta lo dice.
+ * per correggere l'allerta di quel giorno (`ModificaGuida`, tipo `allerta-meteo`); un'allerta corretta lo dice.
  * Senza `modifica` il tag non si tocca (scelta «Solo il nome»): così nelle intestazioni cliccabili e nella pagina Partita non cambia niente.
  */
 export function TagAllerte({ allerte, compatto, modifica }: { allerte: readonly AllertaGiornoDto[]; compatto?: boolean; modifica?: { data: string; onSalvato: () => void } }) {

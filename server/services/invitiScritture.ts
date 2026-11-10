@@ -1,11 +1,12 @@
 // ============================================================
-// invitiScritture — gli editor degli inviti dei Confidenti: crea, modifica, «Ripristina», elimina (L9 R9-07c/1-2)
+// invitiScritture — gli editor degli inviti dei Confidenti: crea, modifica, elimina (L9 R9-07c/1-2)
 // ============================================================
 //
 // Un invito (`confidente_invito`) è un dato del Confidente: la sua chiave è `<confidente>/<MM-GG>`, quindi la data non si cambia (un invito di un
 // altro giorno è un altro invito). Gli inviti della guida portano la propria fotografia in `seed_json` (com'erano alla nascita): la modifica non la
-// tocca e segna la riga `origine = 'utente'`; «Ripristina» riscrive i campi dalla fotografia e rimette `origine = 'seed'`. Un invito creato qui non ha
-// fotografia: si può togliere (finisce nel Cestino); uno della guida no (si modifica o si ripristina). Non si toglie un invito che una partita ha già
+// tocca e segna la riga `origine = 'utente'` (il segno «Modificato»); la fotografia dice anche che l'invito è della guida. Non c'è un ritorno ai
+// valori della guida (decisione dell'utente del 10/11). Un invito creato qui non ha fotografia: si può togliere (finisce nel Cestino); uno della
+// guida no (si modifica). Non si toglie un invito che una partita ha già
 // registrato, né uno citato da un effetto di una voce del Diario o dalla condizione di un altro dato: prima si cambia quello.
 // ============================================================
 
@@ -143,31 +144,6 @@ export function modificaInvito(confidente: string, data: string, corpo: CorpoInv
   return dtoDi(r.chiave);
 }
 
-interface FotografiaInvito { apre_tipo?: unknown; apre_chiave?: unknown; condizioni?: unknown; nota?: unknown; messaggio_data?: unknown; messaggio_fascia?: unknown }
-
-/** «Ripristina»: rimette posto, condizioni e nota com'erano nella guida. 409 se l'invito non è della guida o non è stato modificato. */
-export function ripristinaInvito(confidente: string, data: string): InvitoDto {
-  const r = rigaDelConfidente(confidente, data);
-  if (r.seed_json === null) throw httpErrors.conflict('invito-creato-dall-utente', 'Questo invito non viene dalla guida: non c’è niente da ripristinare.');
-  if (r.origine !== 'utente') throw httpErrors.conflict('invito-della-guida', 'Questo invito non è stato modificato: è già come lo dà la guida.');
-  let f: FotografiaInvito;
-  try { f = JSON.parse(r.seed_json) as FotografiaInvito; }
-  catch { throw httpErrors.conflict('invito-fotografia-illeggibile', 'La fotografia della guida di questo invito non è leggibile: l’invito resta com’è.'); }
-  const tipi: readonly unknown[] = ['quartiere', 'luogo', 'area'];
-  if (!tipi.includes(f.apre_tipo) || typeof f.apre_chiave !== 'string' || !Array.isArray(f.condizioni) || typeof f.nota !== 'string') {
-    throw httpErrors.conflict('invito-fotografia-incompleta', 'La fotografia della guida di questo invito è incompleta: l’invito resta com’è.');
-  }
-  verificaPosto({ tipo: f.apre_tipo as TipoPostoInvito, chiave: f.apre_chiave });
-  const condizioni = condizioniVerificate(r.chiave, f.condizioni as RequisitoSpillo[]);
-  // una fotografia di prima della 313 non ha il messaggio: nessuno
-  const messaggioData = typeof f.messaggio_data === 'string' && dataValida(f.messaggio_data) ? f.messaggio_data : null;
-  const messaggioFascia = messaggioData && (f.messaggio_fascia === 'giorno' || f.messaggio_fascia === 'sera') ? f.messaggio_fascia : null;
-  prepared("UPDATE confidente_invito SET apre_tipo = ?, apre_chiave = ?, condizioni_json = ?, nota = ?, messaggio_data = ?, messaggio_fascia = ?, origine = 'seed', updated_at = ? WHERE chiave = ?")
-    .run(f.apre_tipo, f.apre_chiave, condizioni, f.nota, messaggioFascia ? messaggioData : null, messaggioFascia, nowIso(), r.chiave);
-  invalidaCacheDiGioco();
-  return dtoDi(r.chiave);
-}
-
 /** Le tabelle con una colonna di condizioni che può citare un invito (le stesse dell'importazione delle condizioni). */
 const TABELLE_CON_CONDIZIONI = ['quartiere', 'luogo', 'negozio', 'articolo', 'attivita', 'libro', 'film', 'spillo', 'copia_pezzo', 'confidente_invito'] as const;
 /** La colonna delle condizioni: `condizioni_json` ovunque, tranne il negozio, le cui condizioni proprie stanno in `sblocco_json`. */
@@ -176,7 +152,7 @@ const COLONNA_CONDIZIONI = (t: (typeof TABELLE_CON_CONDIZIONI)[number]): string 
 /** Elimina un invito creato dall'utente: finisce nel Cestino. 409 se è della guida, se una partita l'ha registrato o se qualcosa lo cita. */
 export function eliminaInvito(confidente: string, data: string): { eliminato: true; chiave: string } {
   const r = rigaDelConfidente(confidente, data);
-  if (r.seed_json !== null) throw httpErrors.conflict('invito-della-guida', 'Un invito della guida non si toglie: si modifica o si ripristina.');
+  if (r.seed_json !== null) throw httpErrors.conflict('invito-della-guida', 'Un invito della guida non si toglie: si modifica.');
   if (prepared('SELECT 1 FROM utente.invito_partita WHERE invito_chiave = ? LIMIT 1').get(r.chiave)) {
     throw httpErrors.conflict('invito-in-uso', 'Una partita ha già registrato questo invito: non si può togliere.');
   }

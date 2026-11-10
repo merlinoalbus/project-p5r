@@ -27,8 +27,8 @@ export function convertiManualiImportati(valore: unknown, origine: string, conve
 /** Le sole tabelle di dati di gioco che contengono elenchi di condizioni; i nomi sono costanti dell'app, non input SQL. */
 const TABELLE_CONDIZIONI = ['quartiere', 'luogo', 'negozio', 'articolo', 'attivita', 'libro', 'film', 'spillo', 'copia_pezzo', 'confidente_invito'] as const;
 
-/** Il catalogo conserva nel proprio snapshot i campi di riga (compreso `condizioni_json`). Si recupera anche questa copia,
- * altrimenti «Ripristina» reintrodurrebbe il formato vecchio. Descrizioni, orari e tutti gli altri campi non si interpretano. */
+/** Il catalogo conserva nel proprio snapshot i campi di riga (compreso `condizioni_json`). Si converte anche questa copia, così nessun dato
+ * del file resta nel formato vecchio. Descrizioni, orari e tutti gli altri campi non si interpretano. */
 function convertiSnapshotCatalogo(valore: unknown, origine: string, conversioni: string[]): unknown {
   if (!valore || typeof valore !== 'object' || Array.isArray(valore)) return valore;
   const snapshot = valore as Record<string, unknown>;

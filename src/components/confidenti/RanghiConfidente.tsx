@@ -1,21 +1,20 @@
 // ============================================================
-// RanghiConfidente — come si sale di rango (modo e soglia in punti), con «Modifica» e «Ripristina» (R9-07/1, R11-15/2)
+// RanghiConfidente — come si sale di rango (modo e soglia in punti), con «Modifica» (R9-07/1, R11-15/2)
 // ============================================================
 //
 // Un rango alla volta: la riga mostra il passaggio («Dal rango 2 al rango 3»), il modo e la soglia; la matita apre la `FinestraModifica` comune
 // con il modo e, solo per «a punti», la soglia. Le regole sono quelle del server (G-020: a punti = soglia maggiore di zero, gli altri modi soglia zero),
-// che le ricontrolla. Il dato è di gioco e vale per tutte le partite; un rango cambiato porta il chip «Modificato» e «Ripristina» lo rimette alla guida.
-// Rotte: GET/PUT `/api/compendio/confidenti/:chiave/ranghi[/:rango]`, POST `…/ranghi/:rango/ripristina`.
+// che le ricontrolla. Il dato è di gioco e vale per tutte le partite; un rango cambiato porta il chip «Modificato».
+// Rotte: GET/PUT `/api/compendio/confidenti/:chiave/ranghi[/:rango]`.
 // ============================================================
 
 import { useState } from 'react';
 import { MODI_RANGO, type ModoRango, type RangoConfidenteDto } from '../../../shared/confidentiScritture';
-import { getRanghiConfidente, ripristinaRangoConfidente, salvaRangoConfidente } from '../../services/api';
+import { getRanghiConfidente, salvaRangoConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { formattaPunti } from '../../utils/punti';
-import { RIPRISTINA_CON_MODIFICHE, conferma } from '../../stores/confermaStore';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { CampoTesto } from '../shared/Campo';
 import { Selettore } from '../shared/Selettore';
@@ -80,13 +79,8 @@ function EditorRango({ chiave, nome, rango, onChiudi, onSalvato }: { chiave: str
     finally { setOccupato(false); }
   };
   const salva = () => esegui(() => salvaRangoConfidente(chiave, rango.rango, { modo, puntiNecessari: punti }), 'Rango salvato: vale per tutte le partite.');
-  const ripristina = async () => {
-    if (occupato || (sporca && !(await conferma(RIPRISTINA_CON_MODIFICHE)))) return;
-    await esegui(() => ripristinaRangoConfidente(chiave, rango.rango), 'Rango ripristinato come nella guida.');
-  };
   return (
-    <FinestraModifica stretta titolo={`${passaggio(rango.rango)}: ${nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={modificato && valido} occupato={occupato} sporca={sporca} errore={errore}
-      azioniExtra={rango.modificato ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" aria-label={`Ripristina come nella guida: ${passaggio(rango.rango).toLowerCase()}`} disabled={occupato} onClick={() => void ripristina()} /> : undefined}>
+    <FinestraModifica stretta titolo={`${passaggio(rango.rango)}: ${nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={modificato && valido} occupato={occupato} sporca={sporca} errore={errore}>
       <div className="flex flex-col gap-3 min-w-0">
         <Selettore etichettaSopra etichetta="Come si sale" valore={modo} opzioni={MODI_RANGO.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => { setModo(v as ModoRango); setErrore(null); }} disabilitato={occupato} ricerca="mai" />
         {modo === 'punti' && <CampoTesto tipo="numero" etichetta="Punti necessari per salire" valore={soglia} disabilitato={occupato} errore={valido ? undefined : 'Scrivi un numero intero di punti da 1 a 9999.'} onCambia={(v) => { setSoglia(v); setErrore(null); }} />}

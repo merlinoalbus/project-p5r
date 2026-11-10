@@ -8,16 +8,13 @@
 // ============================================================
 
 import { useState } from 'react';
-import { aggiornaDungeon, ripristinaDateDungeon } from '../../services/api';
-import { conferma } from '../../stores/confermaStore';
+import { aggiornaDungeon } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { erroreDatePalazzo, type DatePalazzo } from '../../../shared/datePalazzo';
 import { Campo, CampoTesto, SezioneCampi } from '../shared/Campo';
 import { FinestraModifica } from '../shared/FinestraModifica';
-import { IconaAzione } from '../shared/IconaAzione';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SelettoreData } from '../shared/SelettoreData';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import type { DungeonDettaglioDto } from '../../types';
@@ -103,23 +100,8 @@ function FinestraScheda({ d, memento, onChiudi, onSalvato }: Props & { onChiudi:
     finally { setOccupato(false); }
   };
 
-  /** L9-08 (Q22): le date tornano quelle della guida; il resto della scheda non cambia. Chiude la finestra, che ha la bozza delle date vecchie. */
-  const ripristina = async () => {
-    const ok = await conferma({ titolo: 'Ripristinare le date della guida?', testo: modificata ? 'Le date corrette a mano si perdono, e con loro le modifiche non salvate in questa finestra.' : 'Le date corrette a mano si perdono.', etichetta: 'Ripristina' });
-    if (!ok) return;
-    setOccupato(true);
-    try {
-      await ripristinaDateDungeon(d.chiave);
-      await onSalvato();
-      notifica('success', `Date ripristinate: ${cosa}.`);
-      onChiudi();
-    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Date non ripristinate.'); }
-    finally { setOccupato(false); }
-  };
-
   return (
-    <FinestraModifica titolo={`Correggi la scheda — ${d.nome}`} nomeModulo={`Correggi ${cosa}`} onChiudi={onChiudi} onSalva={salva} salvabile={modificata && !errore} occupato={occupato} sporca={modificata}
-      azioniExtra={d.dateCorrette ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina le date" disabled={occupato} onClick={() => void ripristina()} /> : undefined}>
+    <FinestraModifica titolo={`Correggi la scheda — ${d.nome}`} nomeModulo={`Correggi ${cosa}`} onChiudi={onChiudi} onSalva={salva} salvabile={modificata && !errore} occupato={occupato} sporca={modificata}>
       <SezioneCampi titolo="Scheda">
         <CampoTesto etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.dungeon.nome} onCambia={(v) => cambia({ nome: v })} />
         <CampoTesto etichetta="Sovrano" valore={b.sovrano} massimo={LIMITI_GUIDA.dungeon.sovrano} onCambia={(v) => cambia({ sovrano: v })} />

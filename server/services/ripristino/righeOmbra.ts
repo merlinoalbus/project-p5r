@@ -1,5 +1,5 @@
 // ============================================================
-// righeOmbra — l'Ombra, correggibile e ripristinabile (L11 · R11-15/4)
+// righeOmbra — l'Ombra, correggibile (L11 · R11-15/4)
 // ============================================================
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): l'Ombra (`ombra`, una riga per Ombra). Il valore della guida è la fotografia
@@ -167,12 +167,6 @@ const ombraLuogo: DefRiga = {
     return `Dove si incontra «${ombra}»: ${nomePosto(String(v.posto))}`;
   },
   valida: (chiave, fusi) => { if (typeof fusi.posto === 'string') esigiPostoLibero(chiave, fusi.posto, 'luogo-gia-presente'); },
-  // il posto della guida deve esistere ancora e non essere occupato da un'altra riga della stessa fonte
-  verificaRipristino: (chiave, guida) => {
-    if (typeof guida.posto !== 'string') return;
-    if (!postiScelta().some((p) => p.chiave === guida.posto)) throw httpErrors.conflict('luogo-originale-mancante', 'Il posto della guida non esiste più: non si può rimettere.');
-    esigiPostoLibero(chiave, guida.posto, 'luogo-originale-occupato');
-  },
 };
 
 // ---- Voci della guida (ombra_voce) ----

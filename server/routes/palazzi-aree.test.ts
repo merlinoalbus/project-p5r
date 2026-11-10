@@ -236,7 +236,8 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     await request(app).put('/api/aree/colloca').send({ mappa: unaDiDue, dungeon: 'madarame', area: sola.slug }).expect(200);
   });
 
-  it('§3.6.1 — la rotta vecchia `/stanza` con `con` e `nome`: l’area d’arrivo di una sola planimetria prende il nome come correzione (Ripristina la riporta), mai sopra un nome dell’utente', async () => {
+  // adeguato il 10/11: «Ripristina» dell'Area non c'è più (decisione dell'utente); la fotografia conserva il nome della guida
+  it('§3.6.1 — la rotta vecchia `/stanza` con `con` e `nome`: l’area d’arrivo di una sola planimetria prende il nome come correzione, mai sopra un nome dell’utente', async () => {
     const sole = prepared(`SELECT a.chiave, a.slug, a.nome, m.chiave AS mappa FROM area a JOIN mappa m ON m.area_chiave = a.chiave WHERE a.dungeon_chiave = 'iweleth' AND a.origine = 'seed'
       AND (SELECT COUNT(*) FROM mappa x WHERE x.area_chiave = a.chiave) = 1 ORDER BY a.ordine LIMIT 3`).all() as Array<{ chiave: string; slug: string; nome: string; mappa: string }>;
     const [da, verso, rivista] = sole;
@@ -244,8 +245,7 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     // la stanza: la versione di `da` entra nell'area di `verso`, che prende il nome dato (come correzione dell'area del seed)
     await request(app).put(`/api/mappe/${encodeURIComponent(chiaveMappa(da.mappa))}/stanza`).send({ con: chiaveMappa(verso.mappa), nome: 'Nome dato' }).expect(200);
     expect(prepared('SELECT nome, nome_rivisto, seed_json IS NOT NULL AS corretta FROM area WHERE chiave = ?').get(verso.chiave)).toEqual({ nome: 'Nome dato', nome_rivisto: 1, corretta: 1 });
-    await request(app).post(`/api/aree/dungeon/iweleth/${verso.slug}/ripristina`).expect(200);
-    expect(prepared('SELECT nome FROM area WHERE chiave = ?').pluck().get(verso.chiave)).toBe(verso.nome);
+    expect((JSON.parse(prepared('SELECT seed_json FROM area WHERE chiave = ?').pluck().get(verso.chiave) as string) as { nome: string }).nome).toBe(verso.nome);
     // un nome dato dall'utente resta: la rotta lo lascia e risponde col nome di adesso
     await request(app).put(`/api/aree/dungeon/iweleth/${rivista.slug}`).send({ nome: 'Nome dell’utente' }).expect(200);
     const altra = prepared("SELECT m.chiave FROM mappa m WHERE m.area_chiave = ?").pluck().get(verso.chiave) as string;

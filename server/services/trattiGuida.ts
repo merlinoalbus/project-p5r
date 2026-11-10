@@ -5,7 +5,7 @@
 // I 90 tratti hanno la loro scheda nella guida (blocco `dati_guida.sfide`, `tratti.elenco`: nome, `nomeEn` = nome canonico della skill del
 // tratto, effetto, categoria, «di chi»). La descrizione della guida è l'UNICA descrizione dell'effetto, mostrata ovunque: la scheda «Tratti»
 // delle Sfide, la scheda Persona, le pagine delle skill, la fusione. Il punto di modifica è la riga del tratto nelle Sfide (correzione del
-// tipo `tratto`, con «Ripristina» al valore della guida); la resa `traduzione/effettoSkill` della skill di un tratto non si legge più, non
+// tipo `tratto`); la resa `traduzione/effettoSkill` della skill di un tratto non si legge più, non
 // compare in Traduzioni e non si scrive (`traduzioniService`). Nessun testo da tenere allineato a mano: i nomi coincidono già (90 su 90).
 // ============================================================
 

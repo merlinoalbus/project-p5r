@@ -4,19 +4,17 @@
 //
 // È la `FinestraModifica` comune: corpo che scorre, piè fisso, conferma prima di chiudere con modifiche non salvate. Si apre un rango alla
 // volta, ma le bozze stanno a livello di finestra: cambiare rango non le perde e «Salva» scrive in una transazione tutti i ranghi modificati
-// (`PUT /api/compendio/confidenti/:chiave/requisiti`). «Ripristina dalla guida» è un'azione del rango aperto, solo se quel rango è diverso dalla
-// guida: scrive subito e tocca solo quel rango (chiede conferma se ne perde la bozza), le bozze degli altri restano.
+// (`PUT /api/compendio/confidenti/:chiave/requisiti`). Un rango diverso dalla guida porta il segno «Modificato».
 // ============================================================
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Condizione } from '../../../shared/condizioniSpillo';
 import type { RequisitiConfidenteDto } from '../../types';
-import { getRequisitiConfidente, ripristinaRequisitiRango, salvaRequisitiConfidente } from '../../services/api';
+import { getRequisitiConfidente, salvaRequisitiConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { notifica } from '../../stores/notificationStore';
-import { RIPRISTINA_CON_MODIFICHE, conferma } from '../../stores/confermaStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { FrecciaApertura, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -71,7 +69,6 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
   const [bozze, setBozze] = useState<Record<number, Condizione[]>>({});
   const idPannello = useId();
   const rigaIniziale = useRef<HTMLElement | null>(null);
-  const testaAperta = useRef<HTMLButtonElement | null>(null);
 
   const ranghi = useMemo(() => dati.dati?.ranghi ?? [], [dati.dati]);
   // l'elenco salvato di ogni rango, con identità stabile: l'editor delle condizioni rivaluta l'anteprima quando l'elenco cambia
@@ -99,20 +96,6 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
     finally { setOccupato(false); }
   };
 
-  const ripristina = async (r: Rango) => {
-    if (occupato || (modificata(r) && !(await conferma(RIPRISTINA_CON_MODIFICHE)))) return;
-    setOccupato(true); setErrore(null);
-    try {
-      dati.imposta(await ripristinaRequisitiRango(confidente.chiave, r.rango));
-      setBozze((prima) => { const altre = { ...prima }; delete altre[r.rango]; return altre; });
-      notifica('success', `Rango ${r.rango} ripristinato come nella guida.`);
-      await onSalvato();
-      // il pulsante premuto è sparito con il rango tornato uguale alla guida: il fuoco non si perde
-      testaAperta.current?.focus();
-    } catch (e) { setErrore(e instanceof Error ? e.message : 'Ripristino dei requisiti non riuscito.'); }
-    finally { setOccupato(false); }
-  };
-
   return (
     <FinestraModifica titolo={`Requisiti di ${confidente.nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && !troppe} occupato={occupato} sporca={sporca}
       caricamento={dati.inPrimoCaricamento} errore={errore ?? (troppe ? `Il rango ${troppe.rango} ha più di ${MASSIMO_CONDIZIONI} condizioni: togline qualcuna.` : null)}>
@@ -124,8 +107,7 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
           return (
             <section key={r.rango} ref={r.rango === rangoIniziale ? rigaIniziale : undefined} className="rounded border border-border min-w-0">
               <h3 className="m-0 font-normal testo-14">
-                {/* non `disabled` durante un salvataggio: il fuoco deve poter tornare qui dopo un ripristino */}
-                <button type="button" ref={aperto ? testaAperta : undefined} className="touch flex w-full flex-wrap items-center gap-2 p-3 text-left" aria-disabled={occupato || undefined} aria-expanded={aperto} aria-controls={aperto ? idRiga : undefined}
+                <button type="button" className="touch flex w-full flex-wrap items-center gap-2 p-3 text-left" aria-disabled={occupato || undefined} aria-expanded={aperto} aria-controls={aperto ? idRiga : undefined}
                   onClick={() => { if (!occupato) setRangoAperto(aperto ? null : r.rango); }}>
                   <strong>Rango {r.rango}<FrecciaApertura aperto={aperto} /></strong>
                   <span className="min-w-0 testo-13 text-text-secondary">{r.requisiti.map((c) => c.descrizione).join(' · ') || 'Nessuna condizione'}</span>
@@ -134,11 +116,10 @@ function EditorRequisitiReale({ confidente, rangoIniziale, onChiudi, onSalvato }
               </h3>
               {aperto && (
                 <div id={idRiga} className="flex flex-col gap-3 p-3 pt-0 min-w-0">
-                  {/* si rimonta quando il server cambia il rango (ripristino): le righe tengono uno stato loro */}
+                  {/* si rimonta quando il server cambia il rango (salvataggio): le righe tengono uno stato loro */}
                   <CondizioniEditor key={JSON.stringify(r)} condizioni={bozze[r.rango] ?? salvate.get(r.rango) ?? []} disabilitato={occupato} massimo={MASSIMO_CONDIZIONI}
                     onCambia={(condizioni) => { setBozze((prima) => ({ ...prima, [r.rango]: condizioni })); setErrore(null); }} />
                   <NoteDelRango rango={r} condizioni={bozze[r.rango] ?? salvate.get(r.rango) ?? []} />
-                  {r.modificato && <PulsanteVisivo compatto tono="fantasma" className="self-end" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina dalla guida" aria-label={`Ripristina dalla guida il rango ${r.rango}`} disabled={occupato} onClick={() => void ripristina(r)} />}
                 </div>
               )}
             </section>

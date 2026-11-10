@@ -181,7 +181,7 @@ export function SfidePage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'battaglie') as Scheda;
   const d = dati.dati;
-  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  /** Dopo una correzione dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?scheda=<scheda>&elemento=<chiave>` (la «casa» di una sfida nella ricerca globale) porta in vista la carta e la evidenzia
   useElementoDaIndirizzo(!!d, scheda);

@@ -415,7 +415,7 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
 
 /** Le note comuni a una categoria di attività (R9-14/1: la frase dei videogiochi sta qui una volta sola), per chiave di categoria. */
 function noteCategorieAttivita(): Record<string, string> {
-  // il blocco con le correzioni dell'utente sopra (R11-17/1: la frase si corregge e si ripristina dal registro dei ripristini)
+  // il blocco con le correzioni dell'utente sopra (R11-17/1: la frase si corregge dal registro delle correzioni)
   const v = datiGuidaCorretti<Record<string, unknown>>('note-categorie-attivita');
   if (v === null || typeof v !== 'object') return {};
   return Object.fromEntries(Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1].trim() !== ''));

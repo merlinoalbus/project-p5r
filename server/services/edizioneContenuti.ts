@@ -7,8 +7,9 @@
 // 1. `unisciCorrezioniGuida` — le correzioni dell'utente ai blocchi JSON della guida stanno in `correzione_dati_guida` e si applicano IN
 //    LETTURA sopra il blocco (`datiGuidaCorretti`). L'edizione deve avere UN valore solo: le correzioni si scrivono dentro i blocchi di
 //    `dati_guida` (con la stessa funzione che le applica in lettura, `applicaCorrezioni` di `datiGuida.ts`, senza una seconda copia della
-//    logica), poi la tabella nella copia si svuota. Si tolgono anche le fotografie che servivano solo a «Ripristina» (le chiavi
-//    `confidente-seed-v1:*` di `dati_guida` e le righe delle tabelle-fotografia `…_foto`): nel rilascio non esiste nessun «Ripristina».
+//    logica), poi la tabella nella copia si svuota. Si tolgono anche le fotografie della guida che servono solo alla preparazione (le chiavi
+//    `confidente-seed-v1:*` di `dati_guida` e le righe delle tabelle-fotografia `…_foto`: il segno «Modificato» e il valore della guida
+//    delle schede di correzione, che nel rilascio non ci sono).
 //    **Non si toccano** le colonne `seed_json` e `origine` delle tabelle di contenuto: portano la provenienza che le letture usano per
 //    dire «creato da te» / «modificato» (`inviti.ts` `daUtente` = `seed_json IS NULL`, `luoghiService.ts` `modificato`, `catalogoService.ts`
 //    conteggi per origine); azzerarle cambierebbe il significato delle righe (una riga della guida diventerebbe «creata dall'utente») e
@@ -228,14 +229,14 @@ function contaRighe(db: Db, tabella: string): number {
   return haTabella(db, tabella) ? (db.prepare(`SELECT COUNT(*) FROM main.${q(tabella)}`).pluck().get() as number) : 0;
 }
 
-/** Le tabelle-fotografia di «Ripristina»: nome che finisce in `_foto` e colonna `seed_json` (migrazione 227: una riga per padre). */
+/** Le tabelle-fotografia della guida: nome che finisce in `_foto` e colonna `seed_json` (migrazione 227: una riga per padre). */
 function tabelleFotografia(db: Db): string[] {
   return tabelleDi(db).filter((t) => t.endsWith('_foto') && haColonna(db, t, 'seed_json'));
 }
 
 /**
- * Scrive le correzioni della guida dentro i blocchi di `dati_guida` della COPIA, svuota `correzione_dati_guida` e toglie le fotografie di
- * «Ripristina». Restituisce i conteggi prima e dopo. Un blocco che non si legge resta com'è, con le sue correzioni, ed è un problema BLOCCANTE
+ * Scrive le correzioni della guida dentro i blocchi di `dati_guida` della COPIA, svuota `correzione_dati_guida` e toglie le fotografie della
+ * guida che servono solo alla preparazione. Restituisce i conteggi prima e dopo. Un blocco che non si legge resta com'è, con le sue correzioni, ed è un problema BLOCCANTE
  * (l'edizione non esce); un blocco che non c'è più, o una correzione che la guida non accoglie più, è un AVVISO e quelle correzioni non entrano.
  */
 export function unisciCorrezioniGuida(db: Db, raccolta: RaccoltaProblemi): UnioneCorrezioniEdizioneDto {
@@ -294,7 +295,7 @@ export function unisciCorrezioniGuida(db: Db, raccolta: RaccoltaProblemi): Union
         esito.correzioniOrfane += voce.orfane;
       }
     }
-    // le fotografie di «Ripristina»: nel rilascio non c'è nessun «Ripristina» che le legga
+    // le fotografie della guida: nel rilascio non c'è nessuna scheda di correzione né segno «Modificato» che le legga
     if (haGuida) db.prepare('DELETE FROM main.dati_guida WHERE chiave LIKE ?').run(`${PREFISSO_FOTOGRAFIE_CONFIDENTI}%`);
     for (const t of fotografie) db.prepare(`DELETE FROM main.${q(t)}`).run();
   })();

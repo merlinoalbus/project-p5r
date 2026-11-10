@@ -94,7 +94,7 @@ export const CHIUDI_SENZA_SALVARE: OpzioniConferma = {
   icona: 'chiudi',
 };
 
-/** Riportare un dato com'era nella guida quando la finestra ha anche modifiche non salvate. */
+/** Rimettere una versione dello storico (Informazioni del Confidente) quando la finestra ha anche modifiche non salvate. */
 export const RIPRISTINA_CON_MODIFICHE: OpzioniConferma = {
   titolo: 'Ripristinare con modifiche non salvate?',
   testo: 'Ci sono modifiche non salvate: ripristinando perdi anche quelle.',

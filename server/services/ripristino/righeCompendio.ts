@@ -1,5 +1,5 @@
 // ============================================================
-// righeCompendio — le regole di fusione del compendio, correggibili e ripristinabili (L11 · R11-17/1, gruppo Compendio)
+// righeCompendio — le regole di fusione del compendio, correggibili (L11 · R11-17/1, gruppo Compendio)
 // ============================================================
 //
 // Sei oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
@@ -11,7 +11,7 @@
 //   - `tesoro` (9, chiave = id della Persona): il modificatore di rango per ognuno dei 24 Arcani (da -2 a +2).
 //   - `eredita-tipo` (12 tipi di skill, chiave = tipo): per ognuna delle dodici colonne, se il tipo può ereditare quell'elemento.
 //   - `dlc-set` (13, chiave = id): le Persona del set (nomi); una Persona sta in un solo set.
-// Il motore di fusione legge queste tabelle e le tiene in memoria: `correggi` e `ripristina` svuotano le copie (`invalidaCacheDiGioco`).
+// Il motore di fusione legge queste tabelle e le tiene in memoria: `correggi` svuota le copie (`invalidaCacheDiGioco`).
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';

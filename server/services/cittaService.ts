@@ -84,15 +84,6 @@ export function aggiornaSbloccoQuartiere(chiave: string, condizioni: ReadonlyArr
   return dettaglioQuartiere(chiave);
 }
 
-/** Ripristina la condizione propria dalla copia immutabile della guida creata dalla migrazione 120. */
-export function ripristinaSbloccoQuartiere(chiave: string): QuartiereDettaglioDto {
-  const guida = prepared('SELECT condizioni_guida_json, fonte_condizioni_guida_json FROM quartiere WHERE chiave = ?').get(chiave) as { condizioni_guida_json: string | null; fonte_condizioni_guida_json: string | null } | undefined;
-  if (!guida) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
-  if (guida.condizioni_guida_json === null) throw httpErrors.conflict('guida-non-disponibile', 'La condizione della guida non è disponibile per questo quartiere.');
-  prepared('UPDATE quartiere SET condizioni_json = ?, fonte_condizioni_json = ? WHERE chiave = ?').run(guida.condizioni_guida_json, guida.fonte_condizioni_guida_json, chiave);
-  return dettaglioQuartiere(chiave);
-}
-
 /** Quartieri in ordine con conteggi dei luoghi (non nascosti); con una partita, anche se sono già nel mondo. */
 export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const righe = (prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0 AND l.verificato = 1) AS verificati

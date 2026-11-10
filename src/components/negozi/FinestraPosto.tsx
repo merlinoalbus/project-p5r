@@ -9,14 +9,14 @@
 //
 // Niente parte finché non si salva: «Salva» manda tutto in una transazione (`PUT /api/catalogo/posto/…`), «Annulla» butta la bozza. Un
 // punto vendita nuovo nasce con la sede nel luogo e che cosa vende dal genere del posto (una macchina per un distributore); «Duplica» copia
-// il punto vendita scelto con offerte proprie (la sorgente resta com'è, la copia è tua). Ripristina, Nascondi ed Elimina di luogo e punto
+// il punto vendita scelto con offerte proprie (la sorgente resta com'è, la copia è tua). Nascondi ed Elimina di luogo e punto
 // vendita sono gesti immediati come prima: con la bozza pulita, poi la finestra rilegge.
 // Formati: da 1024 px due colonne; sotto, le voci a capo sopra il pannello; sotto i 768 px la finestra è il foglio dal basso, un punto
 // vendita per volta. Un solo scorrimento, quello del corpo della finestra.
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { eliminaNelCestino, getPosto, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo, salvaPosto } from '../../services/api';
+import { eliminaNelCestino, getPosto, isApiError, nascondiElementoCatalogo, salvaPosto } from '../../services/api';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
@@ -326,10 +326,10 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
     }
   };
 
-  /** Un gesto immediato (ripristina, nascondi, elimina): solo con la bozza pulita, poi si rilegge. */
-  const immediato = async (gesto: () => Promise<unknown>, fatto: string, su?: string) => {
+  /** Un gesto immediato (nascondi): solo con la bozza pulita, poi si rilegge. */
+  const immediato = async (gesto: () => Promise<unknown>, fatto: string) => {
     setOccupato(true);
-    try { await gesto(); notifica('success', fatto); onSalvato({ creati: [], chiudi: false }); onRileggi(su); }
+    try { await gesto(); notifica('success', fatto); onSalvato({ creati: [], chiudi: false }); onRileggi(); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
     finally { setOccupato(false); }
   };
@@ -355,12 +355,10 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
       setOccupato(false);
     }
   };
-  const azioniDi = (tipo: 'luogo' | 'negozio', e: ElementoCatalogoDto | null, su?: string) => {
+  const azioniDi = (tipo: 'luogo' | 'negozio', e: ElementoCatalogoDto | null) => {
     if (!e) return null;
     const ferme = occupato || sporca;
     return <div className="flex flex-wrap items-center gap-1.5">
-      {e.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina i valori della guida" disabled={ferme}
-        onClick={() => void immediato(() => ripristinaElementoCatalogo(tipo, e.chiave), 'Ripristinati i valori della guida.', su)} />}
       {e.origine === 'seed' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="bloccato" dimensione={20} />} titolo="Nascondi dagli elenchi" disabled={ferme}
         onClick={() => void immediato(() => nascondiElementoCatalogo(tipo, e.chiave, true), 'Nascosto: lo ritrovi in Impostazioni › Nascosti dalla guida.')} />}
       <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={tipo === 'luogo' ? 'Elimina il luogo' : 'Elimina il punto vendita'} disabled={ferme}
@@ -410,7 +408,7 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
                 <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={bozza.luogo.verificato === true} disabled={occupato} onChange={(e) => impostaLuogo({ verificato: e.target.checked })} />
                 <span>Confermato <span className="text-text-muted">· senza la spunta compare come «da fonte secondaria»</span></span>
               </label>
-              {azioniDi('luogo', posto.luogo, 'luogo')}
+              {azioniDi('luogo', posto.luogo)}
             </section>
           ) : (
             <section className="flex flex-col gap-5" aria-label={`Punto vendita ${testoDi(punto.dati.nome)}`}>
@@ -429,7 +427,7 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
                     // il fuoco non resta sul pulsante che sparisce: va su «Il luogo», che ora si vede
                     requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.posto__voce')?.focus());
                   }} />
-                : azioniDi('negozio', punto.elemento, punto.chiave)}
+                : azioniDi('negozio', punto.elemento)}
             </section>
           )}
         </div>

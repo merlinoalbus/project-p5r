@@ -4,7 +4,7 @@
 //
 // Quartiere, trofeo, Dote sociale (con i suoi cinque ranghi) e trasformazione di Jose. La correzione è un UPDATE sul posto: tutti i lettori
 // esistenti restano com'erano. Il valore della guida è la fotografia `seed_json` della riga, presa alla prima correzione (colonne
-// `origine`, `seed_json`, `updated_at` della migrazione 178), che `ripristinaService` gestisce in modo uguale per tutti i tipi.
+// `origine`, `seed_json`, `updated_at` della migrazione 178), che `ripristinoService` gestisce in modo uguale per tutti i tipi.
 // ============================================================
 
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
@@ -24,9 +24,6 @@ import { DEFINIZIONI_SCUOLA } from './righeScuola.js';
 
 export type Valori = Record<string, ValoreCampoCorrezione>;
 
-/** Il contesto di una propagazione: `ripristino` dice se si sta rimettendo la guida; `traccia` (chiavi che iniziano con «~») si conserva nella fotografia e non è un campo. */
-export interface ContestoPropagazione { ripristino: boolean; traccia: Valori }
-
 export interface DefRiga {
   modalita: 'riga';
   etichetta: string;
@@ -45,11 +42,9 @@ export interface DefRiga {
   nome(chiave: string, valori: Valori): string;
   /** Invarianti sull'insieme dei valori dopo la correzione (lancia). */
   valida?(chiave: string, fusi: Valori): void;
-  /** Dopo una correzione o un ripristino, le copie del dato altrove (nella stessa transazione). */
-  propaga?(chiave: string, prima: Valori, dopo: Valori, ctx: ContestoPropagazione): void;
-  /** Prima di rimettere la fotografia (lancia 409 se un riferimento della guida non esiste più). */
-  verificaRipristino?(chiave: string, guida: Valori): void;
-  /** Porta nella forma di oggi una fotografia scritta in una forma precedente (letta da `ripristinaService` ogni volta che apre la fotografia). */
+  /** Dopo una correzione, le copie del dato altrove (nella stessa transazione). */
+  propaga?(chiave: string, prima: Valori, dopo: Valori): void;
+  /** Porta nella forma di oggi una fotografia scritta in una forma precedente (letta da `ripristinoService` ogni volta che apre la fotografia). */
   normalizzaGuida?(guida: Valori, chiave: string): Valori;
 }
 
@@ -76,27 +71,16 @@ const quartiere: DefRiga = {
   },
   nome: (_chiave, v) => String(v.nome),
   // Il nome del quartiere ha una copia nella sua mappa (`mappa.nome`) e, da lì, nei percorsi delle mappe (`mappa_percorso`): la mappa segue il
-  // quartiere finché i due nomi erano uguali (se l'utente ha dato un altro nome alla mappa, resta il suo). Vale in entrambi i sensi, quindi anche
-  // per il ripristino. I percorsi si rifanno con la funzione unica, che tiene gli indirizzi di prima come alias.
-  // Gli indirizzi che la sincronizzazione crea come alias per via del cambio di nome (quelli di prima, che restano validi) si ricordano nella
-  // fotografia (`~alias`): rimettendo il nome della guida si tolgono con quelli provvisori, perché il ripristino deve lasciare le mappe com'erano.
-  propaga: (chiave, prima, dopo, ctx) => {
+  // quartiere finché i due nomi erano uguali (se l'utente ha dato un altro nome alla mappa, resta il suo). I percorsi si rifanno con la funzione
+  // unica, che tiene gli indirizzi di prima come alias (restano validi).
+  propaga: (chiave, prima, dopo) => {
     if (prima.nome === dopo.nome) return;
     const mappa = chiaveImmagineQuartiere(chiave);
     const r = prepared('SELECT nome FROM mappa WHERE chiave = ?').get(mappa) as { nome: string } | undefined;
     if (!r || r.nome !== prima.nome) return;
-    const aliasPrima = new Set(prepared('SELECT chiave FROM mappa_alias').pluck().all() as string[]);
     // il nome della mappa segue quello del quartiere: non è una modifica della mappa, quindi `updated_at` non si tocca
     prepared('UPDATE mappa SET nome = ? WHERE chiave = ?').run(String(dopo.nome), mappa);
     sincronizzaPercorsiMappe(getDb());
-    const nuovi = (prepared('SELECT chiave FROM mappa_alias').pluck().all() as string[]).filter((a) => !aliasPrima.has(a));
-    const ricordati = Array.isArray(ctx.traccia['~alias']) ? ctx.traccia['~alias'] : [];
-    if (ctx.ripristino) {
-      for (const a of new Set([...nuovi, ...ricordati])) prepared('DELETE FROM mappa_alias WHERE chiave = ?').run(a);
-      ctx.traccia['~alias'] = [];
-    } else {
-      ctx.traccia['~alias'] = [...new Set([...ricordati, ...nuovi])];
-    }
   },
 };
 
@@ -216,12 +200,6 @@ const trasformazione: DefRiga = {
     for (const col of ['cristallo_chiave', 'anello_chiave']) {
       const v = fusi[col];
       if (typeof v === 'string' && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(v)) throw httpErrors.badRequest('valore-non-valido', `L'oggetto '${v}' non esiste nel catalogo.`);
-    }
-  },
-  verificaRipristino: (_chiave, guida) => {
-    for (const col of ['cristallo_chiave', 'anello_chiave']) {
-      const v = guida[col];
-      if (typeof v === 'string' && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(v)) throw httpErrors.conflict('oggetto-originale-mancante', `L'oggetto '${v}' della guida non esiste più nel catalogo: non si può rimettere.`);
     }
   },
 };

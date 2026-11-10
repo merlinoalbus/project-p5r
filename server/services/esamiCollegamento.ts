@@ -96,7 +96,7 @@ export function giorniPossibiliPerRisultati(chiave: string): string[] {
 }
 
 /**
- * Una domanda d'esame (tipo esame-medio / esame-finale) che si crea, si corregge o si ripristina deve cadere nella finestra di un esame, e la
+ * Una domanda d'esame (tipo esame-medio / esame-finale) che si crea o si corregge deve cadere nella finestra di un esame, e la
  * correzione non deve lasciare un esame senza domande. `prima` è la riga di adesso (null per una nuova), `dopo` i valori che avrà.
  */
 export function verificaDomandaEsame(prima: { id: number; data: string; tipo: string } | null, dopo: { data: string; tipo: string }): void {

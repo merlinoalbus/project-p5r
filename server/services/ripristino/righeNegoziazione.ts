@@ -1,9 +1,9 @@
 // ============================================================
-// righeNegoziazione — il corpus della negoziazione, correggibile e ripristinabile (L11 · R11-17/1, gruppo Negoziazione)
+// righeNegoziazione — il corpus della negoziazione, correggibile (L11 · R11-17/1, gruppo Negoziazione)
 // ============================================================
 //
 // Quattro oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne
-// `origine`, `seed_json`, `updated_at` della migrazione 222). Il lettore unico (`negoziazioneService`) tiene il corpus in memoria: `correggi` e `ripristina`
+// `origine`, `seed_json`, `updated_at` della migrazione 222). Il lettore unico (`negoziazioneService`) tiene il corpus in memoria: `correggi`
 // svuotano la copia (`invalidaCacheDiGioco`).
 //   - `negoziazione-variante` (chiave = chiave della variante): la resa italiana del testo della domanda e la sua provenienza. Il testo originale, la fonte, il
 //     localizzatore e le note non si correggono (sono la fonte).

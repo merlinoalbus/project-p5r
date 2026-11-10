@@ -1,18 +1,18 @@
 // ============================================================
-// ModificaGuida — correggere un testo della guida dove si legge, e rimetterlo com'era (L11 · B11)
+// ModificaGuida — correggere un testo della guida dove si legge (L11 · B11)
 // ============================================================
 //
 // Un solo componente per tutti gli oggetti che non hanno una pagina di catalogo propria: quartieri, trofei, Doti, personaggi, sfide,
 // completamento e Covo, testi degli oggetti, Jose, trasformazioni. Il pulsante sta accanto al dato; al clic chiede all'API la scheda
 // dell'oggetto (`GET /api/correzioni/:tipo/:chiave`: i campi che si possono correggere, il valore di adesso e quello della guida) e apre una
-// finestra. «Salva» invia i soli campi cambiati; «Ripristina» rimette il valore della guida (di tutti i campi o di uno) dopo una conferma
-// che mostra la versione che si perde. Non c'è cestino, né «Da rivedere», né una seconda superficie di approvazione: si sostituisce un valore.
+// finestra. «Salva» invia i soli campi cambiati; sotto un campo corretto si legge il valore della guida. Non c'è un gesto per rimetterlo
+// (decisione dell'utente del 10/11), né cestino, né «Da rivedere», né una seconda superficie di approvazione: si sostituisce un valore.
 // La bozza non salvata si segnala con `useBozzaSporca`.
 // ============================================================
 
 import { Fragment, lazy, Suspense, useState, type ReactNode } from 'react';
 import { uguali } from '../../../shared/percorsoGuida';
-import { correggiGuida, getSchedaCorrezione, ripristinaGuida } from '../../services/api';
+import { correggiGuida, getSchedaCorrezione } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
@@ -38,7 +38,7 @@ type Bozza = Record<string, ValoreCampoCorrezione>;
  *  porterebbe, con le sue dipendenze, nel pezzo principale dell'applicazione. */
 const CondizioniEditor = lazy(() => import('./CondizioniEditor').then((m) => ({ default: m.CondizioniEditor })));
 
-/** Il valore come testo per «Guida: …» e per la conferma del ripristino (le frasi lunghe si accorciano). */
+/** Il valore come testo per «Guida: …» (le frasi lunghe si accorciano). */
 function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione, speciale?: EditorCampoSpeciale): string {
   if (v === null || v === '') return '(vuoto)';
   if (typeof v === 'boolean') return v ? 'sì' : 'no';
@@ -78,7 +78,7 @@ export interface EditorCampoSpeciale {
   disegna?: (campo: CampoCorrezioneDto, valore: ValoreCampoCorrezione | undefined, imposta: (v: ValoreCampoCorrezione) => void, occupato: boolean) => ReactNode;
   /** Il motivo, in italiano, per cui il valore non si può salvare (`null` se va bene): blocca «Salva» (il server ricontrolla comunque). */
   errore?: (valore: ValoreCampoCorrezione | undefined) => string | null;
-  /** Come si legge un elenco non vuoto in «Guida: …» e nella conferma del ripristino, se le sue voci non sono chiavi delle opzioni. */
+  /** Come si legge un elenco non vuoto in «Guida: …», se le sue voci non sono chiavi delle opzioni. */
   leggiElenco?: (campo: CampoCorrezioneDto, voci: string[]) => string;
 }
 
@@ -92,7 +92,7 @@ export interface PropsModificaGuida {
   soloIcona?: boolean;
   /** Testo accanto alla matita (default «Modifica»). */
   etichetta?: string;
-  /** Alla chiusura della finestra, se qualcosa è cambiato (salvato o rimesso): la pagina rilegge i suoi dati. */
+  /** Alla chiusura della finestra, se qualcosa è stato salvato: la pagina rilegge i suoi dati. */
   onSalvato: () => void;
   className?: string;
   /** Campi disegnati o controllati dalla pagina, per percorso. */
@@ -104,23 +104,18 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
   const [bozza, setBozza] = useState<Bozza>({});
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
-  /** Il ripristino chiede conferma: `campi` assente = tutto l'oggetto. */
-  const [conferma, setConferma] = useState<{ campi?: string[] } | null>(null);
-  /** Dall'apertura è stato rimesso almeno un valore della guida: alla chiusura la pagina deve rileggere. */
-  const [rimesso, setRimesso] = useState(false);
 
   const cambiati = scheda ? scheda.campi.filter((c) => !uguali(bozza[c.percorso], c.valore)) : [];
   const tuttiValidi = cambiati.every((c) => validoCampo(c, bozza[c.percorso]) && !campiSpeciali?.[c.percorso]?.errore?.(bozza[c.percorso]));
   useBozzaSporca('modifica-guida', `modifica di ${cosa}`, cambiati.length > 0);
 
   /** Mette in finestra la scheda ricevuta e riparte dai suoi valori. */
-  const carica = (s: SchedaCorrezioneDto) => { setScheda(s); setBozza(valoriDi(s)); setErrore(null); setConferma(null); };
-  /** Chiude la finestra scartando la bozza. La pagina rilegge i suoi dati se qualcosa è cambiato (salvato adesso o rimesso prima di chiudere):
-   *  non prima, perché certe pagine nascondono il contenuto mentre rileggono e la finestra sparirebbe a metà. */
+  const carica = (s: SchedaCorrezioneDto) => { setScheda(s); setBozza(valoriDi(s)); setErrore(null); };
+  /** Chiude la finestra scartando la bozza. La pagina rilegge i suoi dati se qualcosa è stato salvato: non prima, perché certe pagine
+   *  nascondono il contenuto mentre rileggono e la finestra sparirebbe a metà. */
   const chiudi = (cambiato = false) => {
-    const rileggi = cambiato || rimesso;
-    setScheda(null); setConferma(null); setErrore(null); setRimesso(false);
-    if (rileggi) onSalvato();
+    setScheda(null); setErrore(null);
+    if (cambiato) onSalvato();
   };
 
   /** Chiede la scheda all'API al clic (non una per riga all'apertura della pagina) e apre la finestra. */
@@ -143,24 +138,6 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
       chiudi(true);
     } catch (err) {
       setErrore(err instanceof Error ? err.message : 'Correzione non salvata.');
-    } finally {
-      setOccupato(false);
-    }
-  };
-
-  /** Rimette il valore della guida (tutto o i campi indicati); a buon fine la finestra mostra la scheda aggiornata. */
-  const ripristina = async (campi?: string[]) => {
-    if (!scheda) return;
-    setOccupato(true);
-    setErrore(null);
-    try {
-      const esito = await ripristinaGuida(tipo, scheda.chiave, campi);
-      notifica('success', `Valori della guida rimessi: ${cosa}.`);
-      carica(esito.scheda);
-      setRimesso(true);
-    } catch (err) {
-      setErrore(err instanceof Error ? err.message : 'Ripristino non riuscito.');
-      setConferma(null);
     } finally {
       setOccupato(false);
     }
@@ -244,18 +221,11 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
     }
   };
 
-  /** Sotto un campo corretto: che cosa dice la guida e il gesto per rimetterlo. */
+  /** Sotto un campo corretto: che cosa dice la guida (solo da leggere: non c'è un gesto per rimetterlo, decisione dell'utente del 10/11). */
   const rigaGuida = (c: CampoCorrezioneDto) => {
     if (!c.modificato) return null;
-    return (
-      <div key={`${c.percorso}-guida`} className="flex flex-wrap items-center gap-2 testo-12 text-text-muted sm:col-span-2">
-        <span className="min-w-0 flex-1 break-words">Guida: {mostra(c, c.valoreGuida, campiSpeciali?.[c.percorso])}</span>
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti questo" disabled={occupato} onClick={() => setConferma({ campi: [c.percorso] })} />
-      </div>
-    );
+    return <p key={`${c.percorso}-guida`} className="m-0 break-words testo-12 text-text-muted sm:col-span-2">Guida: {mostra(c, c.valoreGuida, campiSpeciali?.[c.percorso])}</p>;
   };
-
-  const daPerdere = scheda && conferma ? scheda.campi.filter((c) => c.modificato && (!conferma.campi || conferma.campi.includes(c.percorso))) : [];
 
   // i campi in ordine, con un'intestazione quando cambia il gruppo
   const corpo: ReactNode[] = [];
@@ -274,39 +244,23 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
     {scheda && (
       <Modal titolo={`${scheda.nome}`} aperta onChiudi={() => chiudi()} larga
         azioni={<>
-          {/* «Annulla» della finestra resta di solo testo (ROADMAP 12.8); dopo «Rimetti questo» diventa «Chiudi», con l'icona */}
-          {rimesso
-            ? <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={() => chiudi()} />
-            : <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => chiudi()}>Annulla</button>}
-          {scheda.modificata && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" disabled={occupato} onClick={() => setConferma({})} />}
+          {/* «Annulla» della finestra resta di solo testo (ROADMAP 12.8) */}
+          <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => chiudi()}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || cambiati.length === 0 || !tuttiValidi} onClick={() => void salva()} />
         </>}>
         <div className="flex flex-col gap-3">
           <p className="m-0 testo-12 text-text-muted">
             {scheda.modificata
-              ? 'Hai corretto questo oggetto: «Ripristina i valori della guida» (o «Rimetti questo» sotto un campo) rimette quello che diceva la guida.'
-              : 'Salvando, la correzione vale in tutta l’app e resta anche dopo gli aggiornamenti; potrai rimettere il valore della guida.'}
+              ? 'Hai corretto questo oggetto: sotto ogni campo corretto c’è quello che dice la guida.'
+              : 'Salvando, la correzione vale in tutta l’app e resta anche dopo gli aggiornamenti.'}
             {scheda.nota ? ` ${scheda.nota}` : ''}
           </p>
           {scheda.guidaCambiata.length > 0 && (
             <p role="status" className="m-0 rounded-md border border-warning p-2 testo-12">
-              La guida è cambiata dopo la tua correzione ({scheda.guidaCambiata.map((p) => scheda.campi.find((c) => c.percorso === p)?.etichetta ?? p).join(', ')}): la tua versione resta in uso finché non la rimetti.
+              La guida è cambiata dopo la tua correzione ({scheda.guidaCambiata.map((p) => scheda.campi.find((c) => c.percorso === p)?.etichetta ?? p).join(', ')}): resta in uso la tua versione.
             </p>
           )}
           <Griglia>{corpo}</Griglia>
-          {conferma && (
-            <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 testo-13">
-              <p className="m-0 font-semibold">Perdi la tua versione:</p>
-              <ul className="m-0 flex list-none flex-col gap-1 p-0">
-                {daPerdere.map((c) => <li key={c.percorso} className="break-words"><span className="text-text-muted">{c.etichetta}:</span> {mostra(c, c.valore, campiSpeciali?.[c.percorso])}</li>)}
-              </ul>
-              {cambiati.length > 0 && <p className="m-0 text-text-muted">Anche le modifiche di questa finestra non ancora salvate vanno perse.</p>}
-              <div className="flex flex-wrap gap-2">
-                <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rimetti la guida" disabled={occupato} onClick={() => void ripristina(conferma.campi)} />
-                <PulsanteVisivo icona={<IconaAzione chiave="annulla" dimensione={22} />} titolo="No" disabled={occupato} onClick={() => setConferma(null)} />
-              </div>
-            </div>
-          )}
           {/* TestoNote: il messaggio del server può portare note come ♪ («Dote e note (da ♪ a ♪♪♪)»), da leggere a parole */}
           {errore && <p role="alert" className="m-0 text-sm text-error-testo"><TestoNote testo={errore} /> La finestra resta aperta.</p>}
         </div>

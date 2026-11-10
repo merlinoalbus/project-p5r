@@ -113,7 +113,7 @@ export function CovoPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const covoNelMondo = useCovoNellaPartita(partitaId, attiva);
   const covoChiuso = covoNelMondo ? !covoNelMondo.disponibile : false;
-  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  /** Dopo una correzione dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   const [ricerca, setRicerca] = useState('');
   const covo = dati.dati?.covo;

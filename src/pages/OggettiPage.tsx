@@ -242,7 +242,7 @@ function SezioniDellaGuida({ scheda }: { scheda: Exclude<Scheda, 'catalogo'> }) 
   const d = dati.dati;
   // L4-02: la ricetta citata da `?elemento=` (la casa delle ricompense «ricetta» nelle schede degli oggetti) in vista, a dati arrivati
   useElementoDaIndirizzo(!!d && scheda === 'fabbricazione', scheda);
-  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la sezione rilegge i suoi dati. */
+  /** Dopo una correzione dei testi della guida (L11 · B11): la sezione rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>{d && <>
     {scheda === 'fabbricazione' && <SchedaFabbricazione d={d} onModificato={ricarica} />}

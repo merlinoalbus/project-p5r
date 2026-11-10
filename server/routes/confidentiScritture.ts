@@ -1,15 +1,14 @@
 // ============================================================
-// Route /api/compendio/confidenti/:chiave/{ranghi,abilita,dialoghi,doti-incontro/…/ripristina} — gli editor dei Confidenti (L9 R9-07/1-4)
+// Route /api/compendio/confidenti/:chiave/{ranghi,abilita,dialoghi,inviti} — gli editor dei Confidenti (L9 R9-07/1-4)
 // ============================================================
 
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { paramsChiaveGuida } from '../schemas/guidaDungeon.js';
-import { abilitaDelConfidente, impostaAbilita, impostaDialogo, impostaRango, MODI_RANGO, ranghiDelConfidente, ripristinaAbilita, ripristinaDialogo, ripristinaDoteIncontro, ripristinaRango } from '../services/confidentiScritture.js';
-import { dettaglioConfidente } from '../services/compendioService.js';
+import { abilitaDelConfidente, impostaAbilita, impostaDialogo, impostaRango, MODI_RANGO, ranghiDelConfidente } from '../services/confidentiScritture.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
-import { creaInvito, eliminaInvito, modificaInvito, ripristinaInvito } from '../services/invitiScritture.js';
+import { creaInvito, eliminaInvito, modificaInvito } from '../services/invitiScritture.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
 
 const router = Router();
@@ -23,26 +22,11 @@ router.put('/confidenti/:chiave/ranghi/:rango', validate({ params: paramsRango, 
   const p = req.params;
   res.json(impostaRango(p.chiave, p.rango, req.body));
 });
-router.post('/confidenti/:chiave/ranghi/:rango/ripristina', validate({ params: paramsRango }), (req, res) => {
-  const p = req.params;
-  res.json(ripristinaRango(p.chiave, p.rango));
-});
 
 router.get('/confidenti/:chiave/abilita', validate({ params: paramsChiaveGuida }), (req, res) => { res.json(abilitaDelConfidente(String(req.params.chiave))); });
 router.put('/confidenti/:chiave/abilita/:rango', validate({ params: paramsRango, body: z.object({ abilita: z.array(z.object({ nome: z.string().trim().min(1).max(200), descrizione: z.string().max(2000) }).strict()).max(20) }).strict() }), (req, res) => {
   const p = req.params;
   res.json(impostaAbilita(p.chiave, p.rango, req.body.abilita));
-});
-router.post('/confidenti/:chiave/abilita/:rango/ripristina', validate({ params: paramsRango }), (req, res) => {
-  const p = req.params;
-  res.json(ripristinaAbilita(p.chiave, p.rango));
-});
-
-/** «Ripristina» della Dote a ogni incontro (la scrittura è `PUT …/doti-incontro`, che ora conserva la fotografia). */
-router.post('/confidenti/:chiave/doti-incontro/:rango/ripristina', validate({ params: paramsRango }), (req, res) => {
-  const p = req.params;
-  ripristinaDoteIncontro(p.chiave, p.rango);
-  res.json(dettaglioConfidente(p.chiave));
 });
 
 // migrazione 309: i punti solo numerici, da 0 a 3 note (null = la guida non ne dà), e quelli del ramo amore dove la guida dà altro
@@ -51,10 +35,6 @@ const scelta = z.object({ testo: z.string().trim().min(1).max(500), punti: punti
 router.put('/confidenti/:chiave/dialoghi/:id', validate({ params: paramsDialogo, body: z.object({ note: z.string().max(4000).optional(), scelte: z.array(scelta).max(40).optional() }).strict() }), (req, res) => {
   const p = req.params;
   res.json(impostaDialogo(p.chiave, p.id, req.body));
-});
-router.post('/confidenti/:chiave/dialoghi/:id/ripristina', validate({ params: paramsDialogo }), (req, res) => {
-  const p = req.params;
-  res.json(ripristinaDialogo(p.chiave, p.id));
 });
 
 /** Gli inviti del Confidente (R9-07c/1-2): la data è la chiave, quindi sta nel percorso e non si cambia. */
@@ -73,10 +53,6 @@ router.post('/confidenti/:chiave/inviti', validate({ params: paramsChiaveGuida, 
 router.put('/confidenti/:chiave/inviti/:data', validate({ params: paramsInvito, body: corpoInvito }), (req, res) => {
   const p = req.params;
   res.json(modificaInvito(p.chiave, p.data, req.body));
-});
-router.post('/confidenti/:chiave/inviti/:data/ripristina', validate({ params: paramsInvito }), (req, res) => {
-  const p = req.params;
-  res.json(ripristinaInvito(p.chiave, p.data));
 });
 router.delete('/confidenti/:chiave/inviti/:data', validate({ params: paramsInvito }), (req, res) => {
   const p = req.params;

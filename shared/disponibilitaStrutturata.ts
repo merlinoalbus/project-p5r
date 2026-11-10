@@ -7,7 +7,7 @@
 // e, se non ha un luogo, perché. Il testo libero resta nelle note. Il valutatore dice se, in un dato momento, il Confidente è disponibile: lo usano la
 // scheda, i semafori e il Diario.
 // L13 (ondata 6, migrazione 306): la pioggia non è più un'eccezione della disponibilità. Ha una sola fonte, i requisiti di rango (`meteo non-piove`
-// in `confidente_requisito`, col «Ripristina» da `confidente_requisito_guida`): chi chiama dice nel contesto se l'incontro del rango successivo non si
+// in `confidente_requisito`): chi chiama dice nel contesto se l'incontro del rango successivo non si
 // fa con la pioggia (`nonConLaPioggia`), e il valutatore lo applica.
 // L13 (ondata 10, O10-2, migrazione 325): l'eccezione `con-relazione` dà le fasce con la relazione romantica iniziata nella partita; chi chiama
 // dice nel contesto se la relazione c'è (`relazioneRomantica`, letta in un punto solo: `relazioneRomanticaService`).
@@ -55,7 +55,7 @@ export interface DisponibilitaConfidenteDto {
   confidente: string;
   struttura: DisponibilitaStrutturata;
   luoghi: LuogoConfidente[];
-  /** Vero se la struttura è stata cambiata rispetto alla fonte G-036: «Ripristina» la riporta com'era. */
+  /** Vero se la struttura è stata cambiata rispetto alla fonte G-036 (il segno «Modificata»). */
   modificata: boolean;
   /** I ranghi il cui incontro non si fa con la pioggia, letti dai requisiti di rango (la fonte unica della pioggia): solo da mostrare. */
   ranghiNonConLaPioggia: number[];

@@ -16,7 +16,7 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 /** Un'Area del Palazzo di prova: conta solo slug e nome. */
 const areaPalazzo = (slug: string, nome: string): AreaRiassuntoDto => ({
   chiave: `dungeon/kamoshida/${slug}`, contenitore: { tipo: 'dungeon', chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, slug, nome, nomeRivisto: false, ordine: 0, predefinita: `m-${slug}`,
-  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: false,
+  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', daVerificare: false,
   casa: `/guida/dungeon/kamoshida/area/${slug}`, infiltrazioni: [],
 });
 const AREE = [areaPalazzo('cancello', 'Cancello'), areaPalazzo('torre-alta', 'Torre alta'), areaPalazzo('cortile', 'Cortile')];

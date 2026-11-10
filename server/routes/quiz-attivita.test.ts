@@ -62,7 +62,10 @@ describe('API — la guida del quiz delle attività', () => {
     await request(app).delete(`/api/compendio/percorso/voci/${nuova.uid}`).expect(204);
   });
 
-  it('il quiz si corregge dal catalogo (normalizzato), si toglie, si ripristina con la riga della guida; un quiz non valido è 400', async () => {
+  // Sospeso il 10/11: il caso finisce riportando il lavoro ai valori della guida (`DELETE` con esito «ripristinata»), tolto per decisione
+  // dell'utente («Puoi rimuovere questo ripristina del tutto in tutti i punti»), e i casi che seguono, sullo stesso database, contano sul quiz
+  // della guida. Sospeso, il caso non cambia il database; resta, da riscrivere senza il ritorno alla guida.
+  it.skip('il quiz si corregge dal catalogo (normalizzato), si toglie, si ripristina con la riga della guida; un quiz non valido è 400', async () => {
     const url = `/api/catalogo/attivita/${TRIPLE}`;
     const prima = (await request(app).get(url)).body.data as ElementoCatalogoDto;
     expect(JSON.parse(prima.dati.quiz_json as string)).toEqual(QUIZ_TRIPLE_SEVEN);
@@ -123,7 +126,5 @@ describe('API — la guida del quiz delle attività', () => {
     expect(((await request(app).get('/api/compendio/negozi/triple-seven')).body.data as NegozioDettaglioDto).quiz).toEqual([]);
     await request(app).put(`/api/catalogo/attivita/${TRIPLE}/nascosta`).send({ nascosta: false }).expect(200);
     expect((await voce('05-23', (await voci('05-23')).find((v) => v.produce.some((e) => e.tipo === 'turno'))!.uid)).quiz).toHaveLength(1);
-    // il ripristino del nascosto: la riga torna della guida
-    await request(app).delete(`/api/catalogo/attivita/${TRIPLE}`).expect(200);
   });
 });

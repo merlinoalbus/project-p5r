@@ -63,7 +63,7 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   );
 }
 
-/** La matita di una sezione di testo della guida (R11-15/4): corregge i testi e li rimette com'erano; le tabelle e le fonti non si correggono. */
+/** La matita di una sezione di testo della guida (R11-15/4): corregge i testi; le tabelle e le fonti non si correggono. */
 function ModificaSezione({ sezione, cosa, onModificato }: { sezione: string; cosa: string; onModificato: () => void }) {
   return <ModificaGuida tipo="battaglia-sezione" chiave={sezione} cosa={cosa} soloIcona onSalvato={onModificato} />;
 }

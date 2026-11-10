@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
-import { aggiornaTraduzione, getAmbitiTraduzioni, getTraduzioni, ripristinaTraduzione } from '../../services/api';
+import { aggiornaTraduzione, getAmbitiTraduzioni, getTraduzioni } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useGlossarioStore } from '../../stores/glossarioStore';
 import { notifica } from '../../stores/notificationStore';
@@ -35,7 +35,7 @@ interface PropsTraduzioniEditor {
   qIniziale?: string;
 }
 
-/** Editor: scegli l'ambito, cerca, modifica in linea, ripristina il testo del seed. */
+/** Editor: scegli l'ambito, cerca, modifica in linea. */
 export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniEditor = {}) {
   const ambiti = useCarica(() => getAmbitiTraduzioni(), []);
   const [ambito, setAmbito] = useState(ambitoIniziale ?? 'arcana');
@@ -93,23 +93,18 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
     ? { ambito, chiave: qIniziale, testo: '', extra: null, fonte: 'seed', updatedAt: '' }
     : null;
 
-  /**
-   * Salva il testo `nuovo` della voce o, se manca, la riporta al testo del seed; poi sostituisce la voce
-   * nell'elenco, chiude la modifica e ricarica glossario e conteggi degli ambiti.
-   */
-  const applica = async (t: TraduzioneDto, nuovo?: string) => {
+  /** Salva il testo `nuovo` della voce; poi sostituisce la voce nell'elenco, chiude la modifica e ricarica glossario e conteggi degli ambiti. */
+  const applica = async (t: TraduzioneDto, nuovo: string) => {
     try {
-      const agg = nuovo === undefined ? await ripristinaTraduzione(t.ambito, t.chiave) : await aggiornaTraduzione(t.ambito, t.chiave, nuovo);
-      // dai dati correnti (forma funzionale): la risposta arriva dopo un `await`, e un'altra voce salvata nel frattempo si perderebbe
-      // una riga creata da te (non esisteva nella guida) con «Ripristina» sparisce; una scritta per la prima volta si aggiunge all'elenco
-      voci.imposta((correnti) => (agg.rimossa
-        ? correnti.filter((v) => v.chiave !== agg.chiave)
-        : correnti.some((v) => v.chiave === agg.chiave) ? correnti.map((v) => (v.chiave === agg.chiave ? agg : v)) : [...correnti, agg]));
+      const agg = await aggiornaTraduzione(t.ambito, t.chiave, nuovo);
+      // dai dati correnti (forma funzionale): la risposta arriva dopo un `await`, e un'altra voce salvata nel frattempo si perderebbe;
+      // una resa scritta per la prima volta si aggiunge all'elenco
+      voci.imposta((correnti) => (correnti.some((v) => v.chiave === agg.chiave) ? correnti.map((v) => (v.chiave === agg.chiave ? agg : v)) : [...correnti, agg]));
       setInModifica(null);
       setTestoNuovo('');
       void ricaricaGlossario();
       void ambiti.ricarica();
-      notifica('success', agg.rimossa ? 'Resa tolta: il testo torna senza traduzione.' : nuovo === undefined ? 'Resa della guida ripristinata.' : 'Traduzione salvata.');
+      notifica('success', 'Traduzione salvata.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
     }
@@ -118,7 +113,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
   return (
     <section ref={sezione} id="traduzioni" className="card flex flex-col gap-3">
       <TitoloSezione>Traduzioni</TitoloSezione>
-      <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco. «Ripristina» riporta la resa della guida.</p>
+      <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco.</p>
       <div className="flex flex-wrap gap-2 items-center">
         <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={(a) => { setAmbito(a); setQRichiesta(q); }} />
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />
@@ -153,7 +148,6 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
                   <span className="flex-1 testo-14">{t.testo}</span>
                   {t.fonte === 'utente' && <span className="chip chip--attivo">modificata</span>}
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => { setInModifica(t); setTesto(t.testo); }} />
-                  {t.fonte === 'utente' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ripristina" onClick={() => void applica(t)} />}
                 </div>
               )}
             </li>

@@ -12,7 +12,7 @@ import type { AreaDungeonDto, AreaRiassuntoDto } from '../../types';
 /** Un'Area del Palazzo di prova: slug, nome, infiltrazioni che la toccano, raccolta (`presi` null = senza partita) e versioni. */
 const areaPalazzo = (slug: string, nome: string, infiltrazioni: Array<{ chiave: string; nome: string; ordine: number }>, raccolta: { n: number; presi: number | null } | null, numeroPlanimetrie = 1): AreaRiassuntoDto => ({
   chiave: `dungeon/kamoshida/${slug}`, contenitore: { tipo: 'dungeon', chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, slug, nome, nomeRivisto: false, ordine: 0, predefinita: `m-${slug}`,
-  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie, numeroSpilli: raccolta?.n ?? 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: false,
+  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie, numeroSpilli: raccolta?.n ?? 0, passaggio: null, ingresso: false, origine: 'seed', daVerificare: false,
   casa: `/guida/dungeon/kamoshida/area/${slug}`, infiltrazioni, raccolta: raccolta ?? undefined,
 });
 /** Un'infiltrazione di prova con le aree che tocca (solo gli slug contano qui). */

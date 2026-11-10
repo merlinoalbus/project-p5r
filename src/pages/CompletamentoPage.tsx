@@ -133,7 +133,7 @@ export function CompletamentoPage() {
   const [tipo, setTipo] = useState('');
   const [soloDaFare, setSoloDaFare] = useState(false);
   const d = dati.dati;
-  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  /** Dopo una correzione dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?elemento=<chiave>` (la «casa» di un trofeo nella ricerca globale) porta in vista il trofeo e lo evidenzia
   useElementoDaIndirizzo(!!d && scheda === 'trofei', scheda);

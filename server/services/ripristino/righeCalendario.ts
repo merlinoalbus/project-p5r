@@ -1,5 +1,5 @@
 // ============================================================
-// righeCalendario — gli eventi propri del Calendario e le allerte meteo, correggibili e ripristinabili (L11 · R11-15/1)
+// righeCalendario — gli eventi propri del Calendario e le allerte meteo, correggibili (L11 · R11-15/1)
 // ============================================================
 //
 // Due oggetti «a riga» del registro dei ripristini (`righe.ts`): il valore della guida è la fotografia `seed_json` presa alla prima correzione

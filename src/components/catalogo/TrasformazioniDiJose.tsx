@@ -8,7 +8,7 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /**
  * Le trasformazioni di Jose di un oggetto o del suo listino. Con `onModificata` ogni riga ha il gesto «Modifica» (L11 · B11, R11-15/5: cristallo,
- * anello, «solo in Nuova Partita+» e fonte, con «Ripristina» ai valori della guida); chi la mostra rilegge i suoi dati alla chiusura.
+ * anello, «solo in Nuova Partita+» e fonte); chi la mostra rilegge i suoi dati alla chiusura.
  */
 export function TrasformazioniDiJose({ trasformazioni, onModificata }: { trasformazioni: TrasformazioneOggettoDto[]; onModificata?: () => void }) {
   if (!trasformazioni.length) return null;

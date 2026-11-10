@@ -1,5 +1,5 @@
 // ============================================================
-// righeLuoghiNote — posizioni di libri e film e legami delle note storiche, correggibili e ripristinabili (L11 · R11-17/1, gruppo «Luoghi e note»)
+// righeLuoghiNote — posizioni di libri e film e legami delle note storiche, correggibili (L11 · R11-17/1, gruppo «Luoghi e note»)
 // ============================================================
 //
 // Tre oggetti «a riga» del registro dei ripristini (`righe.ts`). Sono elenchi di righe figlie: l'oggetto è il padre (il libro, il film, la nota) e il
@@ -9,12 +9,12 @@
 //
 //   - `libro-posizioni` (`libro_posizione`) e `film-posizioni` (`film_posizione`): dove si ottiene un libro, dove si guarda un film. Ogni posizione è un
 //     «posto» (quartiere, luogo, negozio o attività, scelto per NOME), il nome da mostrare e, per i film, il ruolo (cinema, noleggio, visione). Le posizioni
-//     sono a posti numerati: il posto N è la riga con `ordine` N-1, così svuotare un posto non sposta gli altri e «Rimetti questo» di un posto è esatto.
+//     sono a posti numerati: il posto N è la riga con `ordine` N-1, così svuotare un posto non sposta gli altri e il valore della guida di un posto è esatto.
 //     Si può aggiungere una posizione (posto libero) e toglierne una (posto «Nessuno»); la fotografia è l'elenco intero.
 //   - `nota-storica-legami` (`nota_storica_legame`): le offerte e gli oggetti del catalogo a cui si riferisce una nota storica. Il testo della nota ha già il
 //     suo editor (`noteStoricheService`); qui si corregge dove compare. I legami sono CHIAVI: i nomi servono solo a mostrarli, così rinominare un oggetto non
 //     rende la fotografia diversa da ciò che è.
-// I lettori (pagine, listini, acquisti, condizioni, mappe) leggono le stesse tabelle: `correggi` e `ripristina` svuotano le copie in memoria.
+// I lettori (pagine, listini, acquisti, condizioni, mappe) leggono le stesse tabelle: `correggi` svuota le copie in memoria.
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
@@ -275,7 +275,7 @@ const CAMPI_LEGAMI = [['articoli', 'articolo'], ['oggetti', 'catalogo']] as cons
 /**
  * La fotografia tiene le CHIAVI degli elementi. Una scritta con le etichette, prima di questa forma, si porta alle chiavi: prima dai legami che la nota ha adesso
  * (così un'etichetta ambigua si scioglie con quello che è già legato), poi dalla dicitura «non esiste più», poi dall'elenco di tutti gli elementi.
- * Un'etichetta che non si scioglie resta com'era: il ripristino la rifiuta (`verificaRipristino`).
+ * Un'etichetta che non si scioglie resta com'era (la scheda la mostra come valore della guida).
  */
 function normalizzaLegami(guida: Valori, nota: string): Valori {
   const out: Valori = { ...guida };
@@ -349,19 +349,6 @@ const notaStoricaLegami: DefRiga = {
         if (!attuali.includes(k) && !legameEsiste(tipo, k)) throw invalido(campo, 'Una voce scelta non è nell’elenco: scegli dai suggerimenti.');
         if (visti.has(k)) throw invalido(campo, `«${etichettaLegame(tipo, k)}» compare due volte.`);
         visti.add(k);
-      }
-    }
-  },
-  // la fotografia rimette chiavi: ognuna deve essere un elemento che esiste o un legame che la nota ha già (una voce non sciolta resterebbe un'etichetta scritta come chiave)
-  verificaRipristino: (chiave, guida) => {
-    for (const [campo, tipo] of CAMPI_LEGAMI) {
-      const elenco = guida[campo];
-      if (!Array.isArray(elenco)) continue;
-      const attuali = legamiDi(chiave, tipo);
-      for (const k of elenco) {
-        if (typeof k !== 'string' || (!legameEsiste(tipo, k) && !attuali.includes(k))) {
-          throw httpErrors.conflict('legame-originale-mancante', `Una voce della guida («${String(k)}») non corrisponde più a nessun elemento: non si può rimettere.`);
-        }
       }
     }
   },

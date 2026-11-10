@@ -251,6 +251,18 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'le condizioni di sblocco della Richiesta (`condizioni_json`, una condizione sul rango del Confidente); i valori rimasti stanno nell’archivio «archivio-frasi-l11»',
   },
   {
+    schema: 'main', tabella: 'dungeon', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    sostituitaDa: 'niente: era la fotografia del boss finale e delle date del Palazzo per «Ripristina», tolto (decisione dell’utente del 10/11); i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'giorno', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    sostituitaDa: 'niente: era la fotografia del giorno di gioco per «Ripristina», tolto (decisione dell’utente del 10/11); l’origine «utente» della riga resta; i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'catalogo_oggetto', colonna: 'seed_json', tolta: 'via «Ripristina» · migrazione 388',
+    sostituitaDa: 'niente: era la fotografia dell’oggetto per «Ripristina», tolto (decisione dell’utente del 10/11); l’origine «utente» della riga resta; i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },
