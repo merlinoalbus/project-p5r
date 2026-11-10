@@ -1,5 +1,5 @@
 // ============================================================
-// Migrazione 383 — i Tesori da vendere della guida entrano nel catalogo degli oggetti (L13-03, decisione Q17 = A)
+// Migrazione 368 — i Tesori da vendere della guida entrano nel catalogo degli oggetti (L13-03, decisione Q17 = A)
 // ============================================================
 //
 // La pagina «Tesori» della guida (https://www.allgamestaff.it/persona-5-royal/tesori/) elenca 140 Tesori, oggetti che servono solo a essere
@@ -23,16 +23,16 @@
 // CONSERVATIVA E IDEMPOTENTE: una riga si inserisce solo se non c'è già una riga con la sua identità (`fonte_tipo` `guida` e `fonte_chiave`
 // `tesori/…`); nessuna riga esistente cambia, salvo la descrizione vuota del Diamante. Su un file di gioco senza `catalogo_oggetto` o senza
 // `dati_guida` la migrazione passa e dice «niente da fare» nel log. Non tocca `partite.db`, né il Diario, né i Palazzi.
-// Audit in `dati_guida.audit-383-tesori-da-vendere`: fonte, conteggi (140 = 14 già presenti + 126 inseriti), chiavi, omonimi e discordanze.
+// Audit in `dati_guida.audit-368-tesori-da-vendere`: fonte, conteggi (140 = 14 già presenti + 126 inseriti), chiavi, omonimi e discordanze.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { esisteTabella } from './pulizieL11.js';
 
-const AUDIT = 'audit-383-tesori-da-vendere';
+const AUDIT = 'audit-368-tesori-da-vendere';
 const FONTE_URL = 'https://www.allgamestaff.it/persona-5-royal/tesori/';
-const errore = (motivo: string): never => { throw new Error(`383: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`368: ${motivo}; nessuna modifica applicata.`); };
 
 const palazzo = (nome: string): string => `Palazzi: Palazzo di ${nome}`;
 const KAMOSHIDA = palazzo('Kamoshida'); const MADARAME = palazzo('Madarame'); const KANESHIRO = palazzo('Kaneshiro'); const FUTABA = palazzo('Futaba');
@@ -198,13 +198,13 @@ const slug = (nome: string): string => norm(nome).replace(/'/g, '').replace(/[^a
 const yen = (n: number): string => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const descrizioneTesoro = (prezzo: number, luogo: string): string => `tesoro, rivendibile per ${yen(prezzo)} ¥ · ${luogo}`;
 
-export const migration383: Migration = {
-  id: 383,
+export const migration368: Migration = {
+  id: 368,
   name: 'tesori_da_vendere_nel_catalogo',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
     if (!esisteTabella(db, 'catalogo_oggetto') || !esisteTabella(db, 'dati_guida')) {
-      logger.warn({ migrazione: 383 }, 'catalogo degli oggetti o dati della guida assenti: niente da fare');
+      logger.warn({ migrazione: 368 }, 'catalogo degli oggetti o dati della guida assenti: niente da fare');
       return;
     }
     // le costanti della migrazione devono dire 140 = 14 + 126, con nomi e posizioni tutti distinti
@@ -270,10 +270,10 @@ export const migration383: Migration = {
     if (impronteAltre() !== altrePrima) errore('una riga del catalogo diversa dai Tesori è cambiata');
 
     db.prepare('INSERT INTO main.dati_guida (chiave, json) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json').run(AUDIT, JSON.stringify({
-      migrazione: 383, voce: 'L13-03', decisione: 'Q17 = A', fonte: FONTE_URL,
+      migrazione: 368, voce: 'L13-03', decisione: 'Q17 = A', fonte: FONTE_URL,
       conteggi: { righeDellaGuida: 140, giaPresentiNelCatalogo: GIA_PRESENTI.length, daInserire: TESORI.length, inseriti: inserite.length, giaInseritiPrima: giaPrima.length },
       inseriti: inserite, giaInseritiPrima: giaPrima, chiaveCambiataPerOccupazione: chiaveCambiata, omonimiNelCatalogo: omonimi, giaPresenti: presenti,
     }));
-    logger.info({ migrazione: 383, inseriti: inserite.length, giaInseritiPrima: giaPrima.length, omonimi: omonimi.length, presenti: presenti.length }, 'Tesori da vendere nel catalogo');
+    logger.info({ migrazione: 368, inseriti: inserite.length, giaInseritiPrima: giaPrima.length, omonimi: omonimi.length, presenti: presenti.length }, 'Tesori da vendere nel catalogo');
   },
 };

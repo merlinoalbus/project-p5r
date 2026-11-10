@@ -67,8 +67,8 @@ function condizioniConData(json: string | null): boolean {
 
 /**
  * I quartieri «datati» per la conversione delle frasi. Le migrazioni 036, 052, 064 e 070 girano prima o dopo la 037 che crea `sblocco_data` e comunque
- * prima della 361 che la toglie: finché la colonna c'è, vale lei. Senza la colonna vale la condizione del quartiere (`condizioni_json`, posteriore alla
- * 036: se manca, nessun quartiere è datato). Per effetto della 361 Ikebukuro, Odaiba e Maihama non contano più come datati (la loro condizione è un
+ * prima della 356 che la toglie: finché la colonna c'è, vale lei. Senza la colonna vale la condizione del quartiere (`condizioni_json`, posteriore alla
+ * 036: se manca, nessun quartiere è datato). Per effetto della 356 Ikebukuro, Odaiba e Maihama non contano più come datati (la loro condizione è un
  * luogo), Kanda-Jinbocho e Roppongi sì (la condizione ha una data); Shinjuku, Kichijoji, Akihabara e Suidobashi restano.
  */
 function quartieriDatati(db: Database.Database): Set<string> {

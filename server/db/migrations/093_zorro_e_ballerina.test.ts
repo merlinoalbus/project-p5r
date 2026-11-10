@@ -15,7 +15,7 @@ const giorno = () => prepared("SELECT uid, ordine, azione, tipo, riferimento_tip
 /** Uid della voce del 25 aprile che corrisponde alla prima voce della guida (`indice_guida = 1`). */
 const uidGuida = () => prepared("SELECT uid FROM voce_giornata WHERE data = '04-25' AND indice_guida = 1").pluck().get() as string;
 
-// L6-08: queste prove ricostruiscono il 25 aprile com'era alla 092 scrivendo `voce_giornata.produce_json`, e la 362 (o la utente 69) la toglie dal file
+// L6-08: queste prove ricostruiscono il 25 aprile com'era alla 092 scrivendo `voce_giornata.produce_json`, e la 357 (o la utente 69) la toglie dal file
 // finale su cui girano (`caricaPacchetto` applica tutte le migrazioni): restano nel repository, in `it.skip`, finché non si riscrivono su un file alla 092.
 it.skip('sul canone di produzione (092): la lettura di Zorro e, subito dopo, la restituzione con il prestito della Ballerina (la voce dell\'utente), senza leggerla; le spunte restano', () => {
   initDb(':memory:');

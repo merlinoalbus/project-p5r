@@ -82,7 +82,7 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
 
 /**
  * L6-08: la migrazione utente 015, registrata e non modificabile, prepara SQL su `main.voce_giornata.produce_json`. Un file delle partite nuovo accanto a
- * un file di gioco che quella colonna non l'ha più (la 362 l'ha tolta) non partirebbe: la colonna torna vuota solo per quel passaggio, e la utente 69 la
+ * un file di gioco che quella colonna non l'ha più (la 357 l'ha tolta) non partirebbe: la colonna torna vuota solo per quel passaggio, e la utente 69 la
  * toglie di nuovo subito dopo la 015. Le istanze con le partite già oltre la 15 non passano mai di qui. Va chiamata subito prima di applicare le
  * migrazioni delle partite, in tutti e due gli ordini di `runMigrations`.
  */

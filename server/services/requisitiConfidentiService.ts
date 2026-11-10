@@ -8,7 +8,7 @@
 // posto, oppure lo si toglie. I requisiti sono dati di gioco (`gioco.db`): valgono per tutte le partite.
 // L6 (§6.1, R6-07): un requisito è una condizione del vocabolario unico; dalla pagina del Confidente si modifica un rango alla volta
 // («Modifica requisiti») e si torna al valore della guida («Ripristina», dalla copia `confidente_requisito_guida`, migrazione 119).
-// L7-02 (migrazione 365): la frase di un requisito si genera dalla condizione (`descriviRequisitoSpillo`, una sola sede del dato); la colonna `testo` è
+// L7-02 (migrazione 359): la frase di un requisito si genera dalla condizione (`descriviRequisitoSpillo`, una sola sede del dato); la colonna `testo` è
 // la NOTA propria del requisito, vuota se non racconta altro. Solo l'`avviso` tiene lì la sua frase, perché è il dato.
 // ============================================================
 
@@ -138,7 +138,7 @@ export function impostaRequisitiRanghi(confidente: string, ranghi: ReadonlyArray
   return requisitiDelConfidente(confidente);
 }
 
-/** La nota da usare al ripristino, per riga della copia della guida (`requisiti-nota-guida-v1`, migrazione 365); null su uno schema di prima. Una mappa illeggibile è un 409: la prosa di prima non torna da sola. */
+/** La nota da usare al ripristino, per riga della copia della guida (`requisiti-nota-guida-v1`, migrazione 359); null su uno schema di prima. Una mappa illeggibile è un 409: la prosa di prima non torna da sola. */
 function noteDellaGuida(): Record<string, string> | null {
   const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get('requisiti-nota-guida-v1') as { json: string } | undefined;
   if (!r) return null;

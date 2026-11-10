@@ -1,5 +1,5 @@
 // ============================================================
-// Migrazione 380 — Confidente al massimo, carte di Apsaras e livelli delle Persona del gruppo (L11, «Compendio e fusioni»)
+// Migrazione 366 — Confidente al massimo, carte di Apsaras e livelli delle Persona del gruppo (L11, «Compendio e fusioni»)
 // ============================================================
 //
 // Correzioni al compendio dal confronto con la guida italiana:
@@ -19,7 +19,7 @@
 // COSA (conservativa, idempotente): un dato si scrive solo se è ancora il valore atteso e della guida (`origine = 'seed'`, `seed_json IS NULL`).
 // Una catena del gruppo si corregge solo se la sua prima forma è ancora della guida; le carte di Apsaras e la coppia si scrivono insieme o per
 // niente. Il resto di `persona` e `skill_fonte_esecuzione`, le altre tabelle del compendio e tutte quelle delle partite restano identici (impronte
-// prima e dopo). Il prima e il dopo di ogni dato nell'audit `dati_guida.audit-380-compendio-flag-carte-livelli`.
+// prima e dopo). Il prima e il dopo di ogni dato nell'audit `dati_guida.audit-366-compendio-flag-carte-livelli`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -29,9 +29,9 @@ import { conta, esisteTabella, improntaTabella } from './pulizieL11.js';
 import { diverseFuori, improntaPartite, righePerChiave } from './decisioniDati0111.js';
 import { dellaGuida, scriviAuditCompendio, type EsitoDato, type RigaCorreggibile } from './auditCompendioL11.js';
 
-const AUDIT = 'audit-380-compendio-flag-carte-livelli';
+const AUDIT = 'audit-366-compendio-flag-carte-livelli';
 const DECISIONI = 'confronto del compendio con la guida italiana (L11-04): pagine «Come ottenere tutte le Personae» e «Carte abilità»';
-const errore = (motivo: string): never => { throw new Error(`380: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`366: ${motivo}; nessuna modifica applicata.`); };
 
 /** Le Persona che richiedono il Confidente al massimo e non avevano il segno. */
 const SEGNI: ReadonlyArray<{ id: number; nome: string; perche: string }> = [
@@ -77,8 +77,8 @@ function rilieviNonApplicati(db: AppDatabase): unknown[] {
   ];
 }
 
-export const migration380: Migration = {
-  id: 380,
+export const migration366: Migration = {
+  id: 366,
   name: 'compendio_flag_carte_livelli',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -165,11 +165,11 @@ export const migration380: Migration = {
     const regolaDopo = fuoriDallaRegola(db);
     if (regolaDopo > regolaPrima) errore(`skill_fonte_esecuzione non segue più oggetto_allarme: ${regolaPrima} coppie fuori dalla regola prima, ${regolaDopo} dopo`);
 
-    scriviAuditCompendio(db, AUDIT, 380, DECISIONI, {
+    scriviAuditCompendio(db, AUDIT, 366, DECISIONI, {
       esiti, rilieviNonApplicati: rilieviNonApplicati(db),
       fontiEsecuzione: { coppie: conta(db, 'SELECT COUNT(*) FROM main.skill_fonte_esecuzione'), fuoriDallaRegola: regolaDopo },
       personeConSegno: conta(db, 'SELECT COUNT(*) FROM main.persona WHERE richiede_confidente_max = 1'),
     }, personeToccate.size + fontiToccate.size > 0);
-    logger.info({ migrazione: 380, esiti: esiti.map((e) => `${e.chiave}: ${e.esito}`) }, 'compendio: Confidente al massimo, carte di Apsaras, livelli del gruppo');
+    logger.info({ migrazione: 366, esiti: esiti.map((e) => `${e.chiave}: ${e.esito}`) }, 'compendio: Confidente al massimo, carte di Apsaras, livelli del gruppo');
   },
 };

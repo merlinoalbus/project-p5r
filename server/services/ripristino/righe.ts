@@ -135,7 +135,7 @@ const trofeo: DefRiga = {
     return { nome: r.nome, nome_en: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? '' : String(r.mancabile),
       condizioni_json: r.condizioni_json ?? '[]', fonte: r.fonte, verificato: r.verificato === 1 };
   },
-  // una fotografia di prima della 313 non ha le condizioni: nessuna; una di prima della 369 ha ancora il `quando` tolto: non è più un campo
+  // una fotografia di prima della 313 non ha le condizioni: nessuna; una di prima della 363 ha ancora il `quando` tolto: non è più un campo
   normalizzaGuida: ({ quando: _quando, ...guida }) => ({ condizioni_json: '[]', ...guida }),
   scrivi: (chiave, v) => {
     for (const col of ['nome', 'tipo', 'descrizione', 'come', 'fonte'] as const) if (v[col] !== undefined) prepared(`UPDATE trofeo SET ${col} = ? WHERE chiave = ?`).run(str(v[col]) ?? '', chiave);

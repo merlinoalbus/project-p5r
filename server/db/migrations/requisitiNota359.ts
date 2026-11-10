@@ -1,5 +1,5 @@
 // ============================================================
-// requisitiNota365 — l'elenco chiuso delle 189 righe di `confidente_requisito` per la migrazione 365 (L7-02)
+// requisitiNota359 — l'elenco chiuso delle 189 righe di `confidente_requisito` per la migrazione 359 (L7-02)
 // ============================================================
 //
 // Per ogni riga: il testo com'era (guardia per identità) e l'esito, letto a mano riga per riga il 9/11:

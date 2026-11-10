@@ -54,7 +54,7 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
   // L13 (ondata 7, O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
   // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense (il prezzo del
-  // libro è quello dell'articolo: colonna uscita con la 369)
+  // libro è quello dell'articolo: colonna uscita con la 363)
   libro: ['condizioni_json', 'nome', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'sede_chiave', 'fascia',
@@ -253,7 +253,7 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
 
 /** Le regole che valgono su ogni scrittura, prima di toccare la tabella: tracciamento dal tipo su un'attività nuova, dove il modulo non
  *  lo dice, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Che cosa dà un'attività lo dicono solo gli effetti e gli
- *  esiti: i campi vecchi (`doti_json`, tolto con la 368) non esistono più. Non tocca l'oggetto ricevuto. */
+ *  esiti: i campi vecchi (`doti_json`, tolto con la 362) non esistono più. Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
   const d = { ...dati };
   const pesca=tipo==='attivita'&&(d.pesca_regola_chiave!==undefined?d.pesca_regola_chiave:esistente?.pesca_regola_chiave)!=null;

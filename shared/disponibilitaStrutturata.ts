@@ -30,7 +30,7 @@ export type EccezioneDisponibilita =
   | { tipo: 'giorni-rango'; rango: number; giorni: GiornoDisponibilita[] }
   /** I giorni del calendario di gioco («MM-GG») in cui non si incontra. */
   | { tipo: 'date'; date: string[]; effetto: 'non-disponibile' }
-  /** L7-07 (migrazione 367): l'incontro del rango indicato si fa solo in questi giorni del calendario di gioco («MM-GG»), che prendono il posto dei
+  /** L7-07 (migrazione 361): l'incontro del rango indicato si fa solo in questi giorni del calendario di gioco («MM-GG»), che prendono il posto dei
    *  giorni della settimana; le fasce restano quelle del rango (Ryuji, rango 7: le sere del suo messaggio). Una per rango. */
   | { tipo: 'solo-date-rango'; rango: number; date: string[] }
   /** L13 (ondata 10, O10-2): con la relazione romantica iniziata nella partita le fasce sono queste, al posto delle generali e di quelle di un
@@ -42,7 +42,7 @@ export interface DisponibilitaStrutturata {
   giorni: GiornoDisponibilita[];
   fasce: FasciaDisponibilita[];
   eccezioni: EccezioneDisponibilita[];
-  /** 'MM-GG' da cui è disponibile: la data del requisito di rango 1 di tipo «data» (L7-06, migrazione 364: una sola fonte); null se il rango 1 non ne ha. */
+  /** 'MM-GG' da cui è disponibile: la data del requisito di rango 1 di tipo «data» (L7-06, migrazione 358: una sola fonte); null se il rango 1 non ne ha. */
   dal: string | null;
   motivoSenzaLuogo: string;
   fonte: string | null;

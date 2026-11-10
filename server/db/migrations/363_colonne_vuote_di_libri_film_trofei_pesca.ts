@@ -1,5 +1,5 @@
 // ============================================================
-// 369 — via le colonne vuote o doppie di libri, film, trofei e regola della pesca (L8-02)
+// 363 — via le colonne vuote o doppie di libri, film, trofei e regola della pesca (L8-02)
 // ============================================================
 //
 // `libro`: `prezzo`, `dote`, `note`, `disponibile_dal`, `sblocca`, `effetto_json` (svuotate dalla 313: prezzo, Dote e sblocco stanno in articoli, condizioni ed effetti);
@@ -9,7 +9,7 @@
 // riga le ha uguali a `dati_json.fonti` (altrimenti la colonna resta, con il motivo: i lettori guardano già solo `dati_json`). La fotografia `seed_json` della regola
 // perde la copia, se la ripeteva. `film.dove` e `film.periodo` restano intatte (impronta di tutte le altre colonne). SQLite accetta il `DROP COLUMN` anche con il CHECK
 // proprio della colonna; nessun indice, vista o trigger le cita. `server/db/fontiTolte.ts` riceve le voci. Idempotente: una colonna già tolta si salta.
-// Verbale: `dati_guida.audit-l8-369-colonne-vuote`. Nessun import da `server/services/`; non si scrive in `utente`.
+// Verbale: `dati_guida.audit-l8-363-colonne-vuote`. Nessun import da `server/services/`; non si scrive in `utente`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -18,8 +18,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`369: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L8-02 · 369';
+const errore = (motivo: string): never => { throw new Error(`363: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L8-02 · 363';
 
 const COLONNE_VUOTE = [
   ...(['prezzo', 'dote', 'note', 'disponibile_dal', 'sblocca', 'effetto_json'] as const).map((colonna) => ({ tabella: 'libro', colonna })),
@@ -43,8 +43,8 @@ function fontiDei(json: unknown): unknown[] | null {
   try { const d = JSON.parse(json) as { fonti?: unknown }; return Array.isArray(d.fonti) ? d.fonti : null; } catch { return null; }
 }
 
-export const migration369: Migration = {
-  id: 369,
+export const migration363: Migration = {
+  id: 363,
   name: 'colonne_vuote_di_libri_film_trofei_pesca',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -88,8 +88,8 @@ export const migration369: Migration = {
     }
 
     if (tolte.length === 0 && rimaste.length === 0) return;
-    registraAudit(db, 'audit-l8-369-colonne-vuote', { migrazione: MIGRAZIONE, colonneTolte: tolte, colonneRimaste: rimaste });
-    if (rimaste.length > 0) logger.warn({ migrazione: 369, rimaste }, 'colonne con un valore non tolte: restano nel database e l’app non le legge più');
-    logger.info({ migrazione: 369, tolte, rimaste: rimaste.map((r) => r.colonna) }, 'colonne vuote o doppie di libri, film, trofei e pesca tolte');
+    registraAudit(db, 'audit-l8-363-colonne-vuote', { migrazione: MIGRAZIONE, colonneTolte: tolte, colonneRimaste: rimaste });
+    if (rimaste.length > 0) logger.warn({ migrazione: 363, rimaste }, 'colonne con un valore non tolte: restano nel database e l’app non le legge più');
+    logger.info({ migrazione: 363, tolte, rimaste: rimaste.map((r) => r.colonna) }, 'colonne vuote o doppie di libri, film, trofei e pesca tolte');
   },
 };

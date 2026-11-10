@@ -69,7 +69,7 @@ interface RigaAttivita {
   esiti_json?: string | null }
 // L13 (ondata 7, O7-4, migrazione 313): disponibilità, Doti, sblocco e «dove» dei libri, periodo e Doti dei film non si leggono più dalle
 // colonne in prosa: le dicono condizioni, effetti, articoli, posizioni e ricompense. Le colonne vuote del libro e `film.note_successive` sono
-// uscite dallo schema con la 369; `film.dove` è un dato vivo (cinema o DVD).
+// uscite dallo schema con la 363; `film.dove` è un dato vivo (cinema o DVD).
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
@@ -134,7 +134,7 @@ function provenienzaDelLibro(chiave: string): string {
   return (posizioniLibri().get(chiave) ?? []).map((p) => p.etichetta).join(', ') || 'Provenienza non indicata';
 }
 
-/** Il «dove» di un'attività nel registro della partita: il nome della sua sede, un luogo (un solo «dove», migrazione 368). */
+/** Il «dove» di un'attività nel registro della partita: il nome della sua sede, un luogo (un solo «dove», migrazione 362). */
 const nomeSedeAttivita = (sede: string | null): string =>
   (sede ? prepared('SELECT nome FROM luogo WHERE chiave = ?').pluck().get(sede) as string | undefined : undefined) ?? 'Sede non indicata';
 

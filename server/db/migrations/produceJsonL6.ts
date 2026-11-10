@@ -1,10 +1,10 @@
 // ============================================================
-// produceJsonL6 — gli attrezzi di L6-08: controllo e archivio di `voce_giornata.produce_json` (migrazioni 362 e utente 69)
+// produceJsonL6 — gli attrezzi di L6-08: controllo e archivio di `voce_giornata.produce_json` (migrazioni 357 e utente 69)
 // ============================================================
 //
 // `voce_giornata.produce_json` è la copia storica degli effetti di una voce, non si legge né si scrive più (gli effetti stanno in `voce_effetto`;
 // il suo contenuto grezzo di allora è in `voce_effetto_transizione.raw_json`, che non si tocca). Prima di toglierla (risposta dell'utente Q12 = A:
-// «prima il controllo, poi la rimozione con archivio») si fanno due cose, qui in comune fra la migrazione di gioco 362 e quella delle partite 69:
+// «prima il controllo, poi la rimozione con archivio») si fanno due cose, qui in comune fra la migrazione di gioco 357 e quella delle partite 69:
 //  (1) il CONTROLLO: per ogni elemento di ogni `produce_json` diverso da «[]» si cerca l'equivalente strutturato (lo stesso effetto della stessa
 //      voce; il dato del Confidente per l'incontro; le Doti dell'attività del turno, dell'esame o del videogioco della voce; la stessa opera già
 //      letta in un'altra voce). Ciò che non ha un effetto identico nella stessa voce si elenca per intero nel verbale (uid, giorno, ordine, elemento,

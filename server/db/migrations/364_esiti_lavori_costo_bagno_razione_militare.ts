@@ -1,5 +1,5 @@
 // ============================================================
-// 370 — esiti del Triple Seven e del Fioraio Rafflesia, costo del bagno pubblico, date della Razione militare (L8-03; risposta Q18)
+// 364 — esiti del Triple Seven e del Fioraio Rafflesia, costo del bagno pubblico, date della Razione militare (L8-03; risposta Q18)
 // ============================================================
 //
 // Fonte: https://www.allgamestaff.it/persona-5-royal/lavori-part-time/ (ricompense citate); bagno: tutorial della soluzione, «La tariffa d'accesso è di 500 Yen»; Razione militare:
@@ -10,7 +10,7 @@
 // le mostrerebbe due volte. Nel Triple Seven esce da `dettagli` anche il paragrafo «Valore non confermato…», smentito dalla guida («ogni turno aumenta Fascino di 2 punti»).
 // Crossroads: invariata (Q18). Le guardie sono per identità (valore atteso prima di scrivere): una riga diversa resta com'è, e il verbale lo dice.
 // Nessuna voce, spunta o riga di `utente`; `registro_acquisti` non si tocca. Le righe non elencate di `attivita` e `articolo` restano identiche (impronta).
-// Idempotente: una riga già al valore nuovo non si scrive. Verbale: `dati_guida.audit-l8-370-esiti-e-costi`. Nessun import da `server/services/`.
+// Idempotente: una riga già al valore nuovo non si scrive. Verbale: `dati_guida.audit-l8-364-esiti-e-costi`. Nessun import da `server/services/`.
 // ============================================================
 
 import { createHash } from 'node:crypto';
@@ -20,8 +20,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`370: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L8-03 · 370';
+const errore = (motivo: string): never => { throw new Error(`364: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L8-03 · 364';
 
 type DoteEsito = { dote: string; note: 1 | 2 | 3 };
 const esito = (chiave: string, nome: string, gruppo: string | null, dote: DoteEsito, paga?: number): Record<string, unknown> =>
@@ -63,8 +63,8 @@ function improntaSenzaRighe(db: AppDatabase, tabella: string, escluse: readonly 
 
 interface RigaLavoro { esiti_json: string | null; effetti_json: string | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; origine: string; seed_json: string | null }
 
-export const migration370: Migration = {
-  id: 370,
+export const migration364: Migration = {
+  id: 364,
   name: 'esiti_lavori_costo_bagno_razione_militare',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -83,8 +83,8 @@ export const migration370: Migration = {
         continue;
       }
       const dettagli = l.nota === null || r.dettagli === null ? r.dettagli : r.dettagli.slice(0, -l.nota.length);
-      archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'attivita.effetti_json.370', { [l.chiave]: r.effetti_json as string });
-      if (dettagli !== r.dettagli) archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'attivita.dettagli.370', { [l.chiave]: r.dettagli as string });
+      archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'attivita.effetti_json.364', { [l.chiave]: r.effetti_json as string });
+      if (dettagli !== r.dettagli) archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'attivita.dettagli.364', { [l.chiave]: r.dettagli as string });
       let seed = r.seed_json;
       if (seed !== null) {
         // la fotografia di «Ripristina»: stessi effetti (vuoti) e senza la frase smentita; se non è quella attesa resta, e il verbale lo dice
@@ -120,7 +120,7 @@ export const migration370: Migration = {
     if (improntaSenzaRighe(db, 'articolo', [RAZIONE]) !== prima.articolo) errore('altre righe di articolo sono cambiate');
 
     if (toccate.attivita.length === 0 && toccate.articolo.length === 0 && esiti.length === 0) return;
-    registraAudit(db, 'audit-l8-370-esiti-e-costi', { migrazione: MIGRAZIONE, toccate, esiti });
-    logger.info({ migrazione: 370, toccate, esiti: esiti.length }, 'esiti dei lavori, costo del bagno e date della Razione militare');
+    registraAudit(db, 'audit-l8-364-esiti-e-costi', { migrazione: MIGRAZIONE, toccate, esiti });
+    logger.info({ migrazione: 364, toccate, esiti: esiti.length }, 'esiti dei lavori, costo del bagno e date della Razione militare');
   },
 };

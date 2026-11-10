@@ -1,5 +1,5 @@
 // ============================================================
-// storicoDisponibilitaL7 — lo storico dell'editor delle informazioni del Confidente, per le migrazioni del lotto L7 (364, 367)
+// storicoDisponibilitaL7 — lo storico dell'editor delle informazioni del Confidente, per le migrazioni del lotto L7 (358, 361)
 // ============================================================
 //
 // Lo storico (`dati_guida` `confidente-disponibilita-editor-v1:<chiave>`) è una catena che deve finire sulla riga di adesso: se una migrazione cambia la
@@ -13,11 +13,11 @@ import type { AppDatabase } from '../dbService.js';
 
 const STORICO = 'confidente-disponibilita-editor-v1:';
 
-/** Le otto colonne della fotografia, nell'ordine dello storico (le prime cinque non sono più nella tabella dopo la 364). */
+/** Le otto colonne della fotografia, nell'ordine dello storico (le prime cinque non sono più nella tabella dopo la 358). */
 export const CAMPI_FOTOGRAFIA = ['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti', 'note', 'note_generali', 'fonti_json'] as const;
 export type Fotografia = Record<typeof CAMPI_FOTOGRAFIA[number], string>;
 
-/** I valori vuoti dei campi storici: quelli della riga di adesso dopo la 364. */
+/** I valori vuoti dei campi storici: quelli della riga di adesso dopo la 358. */
 export const STORICI_VUOTI = { giorni_json: '[]', fasce_json: '[]', luogo: '', sblocco_data: '', sblocco_requisiti: '' } as const;
 
 /** Come l'impronta dello storico dell'editor (`disponibilitaConfidentiService`): JSON canonico, SHA-256. */

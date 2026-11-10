@@ -285,7 +285,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
 }
 
 /**
- * L13-04 (migrazione 384): le Ombre sciagura per Palazzo e per Dedalo, e l'oggetto raro di ognuna raggruppato per oggetto (52 coppie in una ventina
+ * L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, e l'oggetto raro di ognuna raggruppato per oggetto (52 coppie in una ventina
  * di righe, non 52). Due tabelle adattive: sul telefono ogni riga diventa una scheda con l'etichetta della colonna, senza scorrimenti interni.
  */
 function ElencoSciagura({ elenco, ricompense }: {

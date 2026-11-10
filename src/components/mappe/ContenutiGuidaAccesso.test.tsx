@@ -22,7 +22,7 @@ const api = vi.hoisted(() => ({
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
 vi.mock('../../services/api', (vero) => {
-  const { getContenutiMappa: _tolta, ...vere } = api;
+  const vere = Object.fromEntries(Object.entries(api).filter(([nome]) => nome !== 'getContenutiMappa'));
   return moduloApi(vero, { ...vere, getElenchiRegole: vi.fn(async () => ({ articoli: [], letture: [], arcani: [], persone: [], abilita: [], squadra: [], attivita: [], negozi: [], eventi: [], contatori: [] })) });
 });
 

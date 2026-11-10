@@ -1,5 +1,5 @@
 // ============================================================
-// 362 — via `voce_giornata.produce_json`, la copia storica degli effetti delle voci (L6-08, lotto L6 «Diario»)
+// 357 — via `voce_giornata.produce_json`, la copia storica degli effetti delle voci (L6-08, lotto L6 «Diario»)
 // ============================================================
 //
 // Richiesta dell'utente (risposta Q12 = A): «prima il controllo, poi la rimozione con archivio». `produce_json` non si legge né si scrive più dal
@@ -37,7 +37,7 @@ export const AUDIT_PRODUCE_JSON = 'audit-l6-08-produce-json';
 /** La migrazione utente che prepara SQL su `main.voce_giornata.produce_json`. */
 const UTENTE_CHE_LEGGE_LA_COLONNA = 15;
 
-const errore = (motivo: string): never => { throw new Error(`362: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`357: ${motivo}; nessuna modifica applicata.`); };
 
 /** La versione dello schema delle partite; null se il file delle partite non è attaccato (allora la 015 non può più girare). */
 export function versioneUtente(db: AppDatabase): number | null {
@@ -51,8 +51,8 @@ export const lasciaTogliereLaColonna = (db: AppDatabase): boolean => {
   return v === null || v >= UTENTE_CHE_LEGGE_LA_COLONNA;
 };
 
-export const migration362: Migration = {
-  id: 362,
+export const migration357: Migration = {
+  id: 357,
   name: 'produce_json_tolta',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -68,7 +68,7 @@ export const migration362: Migration = {
 
     // (1) il controllo, (2) l'archivio
     const controllo = controllaProduce(db);
-    const archivio = archiviaProduce(db, 'L6-08 · 362');
+    const archivio = archiviaProduce(db, 'L6-08 · 357');
     if (archivio.voci !== controllo.voci) errore('le voci archiviate non sono quelle controllate');
 
     // (3) la colonna, solo se nessun SQL vivo la cita più
@@ -87,12 +87,12 @@ export const migration362: Migration = {
     if (improntaPartite(db) !== partitePrima) errore('le tabelle delle partite sono cambiate');
 
     registraAudit(db, AUDIT_PRODUCE_JSON, {
-      migrazione: 'L6-08 · 362',
+      migrazione: 'L6-08 · 357',
       colonnaTolta: tolta, versioneUtente: versioneUtente(db),
       motivoSeNonTolta: tolta ? null : 'la migrazione utente 015 non è ancora passata: la colonna resta e la toglie la migrazione utente 69',
       archivio, controllo,
     });
-    if (controllo.senzaEquivalente > 0) logger.warn({ migrazione: 'L6-08-362', elementi: controllo.senzaEquivalente }, 'elementi di produce_json senza alcun equivalente strutturato: sono nell’archivio e nel verbale');
-    logger.info({ migrazione: 'L6-08-362', tolta, voci: archivio.voci, elementi: controllo.elementi, perClasse: controllo.perClasse }, 'produce_json archiviata');
+    if (controllo.senzaEquivalente > 0) logger.warn({ migrazione: 'L6-08-357', elementi: controllo.senzaEquivalente }, 'elementi di produce_json senza alcun equivalente strutturato: sono nell’archivio e nel verbale');
+    logger.info({ migrazione: 'L6-08-357', tolta, voci: archivio.voci, elementi: controllo.elementi, perClasse: controllo.perClasse }, 'produce_json archiviata');
   },
 };

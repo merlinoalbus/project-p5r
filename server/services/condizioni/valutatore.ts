@@ -180,7 +180,7 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     case 'quartiere': {
       const n = nomi();
       const nome = st.sbloccoQuartieri?.get(r.quartiere)?.nome ?? r.quartiere;
-      // L6 (R6-09): la condizione del quartiere, con gli inviti. Senza condizione né inviti (L5, migrazione 361: la data accanto alla condizione non c'è
+      // L6 (R6-09): la condizione del quartiere, con gli inviti. Senza condizione né inviti (L5, migrazione 356: la data accanto alla condizione non c'è
       // più; oggi vale per la sola entrata dei Memento) lo sblocco non risulta
       const stato = esitoDelPosto(`quartiere:${r.quartiere}`, () => condizioneEffettivaQuartiere(r.quartiere, invitiDelloStato(st)), st, n);
       if (stato !== null) return esito('quartiere', stato, stato === 'verde' ? `${nome}: sbloccato` : stato === 'rosso' ? `${nome}: non ancora sbloccato` : `${nome}: non si sa ancora`);

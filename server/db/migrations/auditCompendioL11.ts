@@ -2,7 +2,7 @@
 // auditCompendioL11 — gli attrezzi comuni delle migrazioni sui dati del compendio (L11, «Compendio e fusioni»)
 // ============================================================
 //
-// Le migrazioni 380 e 382 usano le impronte di `decisioniDati0111.ts`, ma il suo `scriviAudit` ha il motivo fisso sulle decisioni del 01/11:
+// Le migrazioni 366 e 367 usano le impronte di `decisioniDati0111.ts`, ma il suo `scriviAudit` ha il motivo fisso sulle decisioni del 01/11:
 // qui c'è lo stesso audit, nella stessa forma, con il motivo della migrazione. Nessun import da `server/services/`.
 // ============================================================
 

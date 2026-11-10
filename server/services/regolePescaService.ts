@@ -13,7 +13,7 @@ export function leggiRegolaPesca(chiave:string=REGOLA_PESCA):RegolaPescaDto {
   if(!r)return {...base,stato:'non-collegata',motivi:['La regola della guida non è presente; non viene ricreata dal lettore.']};
   try{
     const dati=schemaDefinizioneRegolaPesca.safeParse(jsonPesca(String(r.dati_json),'regola della pesca'));
-    // le fonti sono quelle di `dati_json.fonti`: la colonna `fonti_json` che le ripeteva è uscita con la 369
+    // le fonti sono quelle di `dati_json.fonti`: la colonna `fonti_json` che le ripeteva è uscita con la 363
     if(!dati.success || r.versione!==1 || base.origine===null)return {...base,stato:'illeggibile',motivi:['Schema o versione della regola non sono coerenti.']};
     return {...base,dati:dati.data,fonti:dati.data.fonti,stato:'collegata',motivi:[]};
   }catch{return {...base,stato:'illeggibile',motivi:['La regola o le sue fonti non sono leggibili; il contenuto è conservato.']};}

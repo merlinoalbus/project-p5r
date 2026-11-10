@@ -1,5 +1,5 @@
 // ============================================================
-// Migrazione 382 — le date da cui si ottengono quattro Persona (L11, «Compendio e fusioni»)
+// Migrazione 367 — le date da cui si ottengono quattro Persona (L11, «Compendio e fusioni»)
 // ============================================================
 //
 // La guida «Come ottenere tutte le Personae» dice da quale giorno si possono fondere Metatron, Yoshitsune, Satan e Vohu Manah; la scheda non lo
@@ -11,7 +11,7 @@
 //
 // COSA (conservativa, idempotente): la nota si scrive solo se è ancora vuota e la Persona è della guida (`origine = 'seed'`, `seed_json IS NULL`);
 // la resa si aggiunge solo se manca, e non si sovrascrive mai. Il resto di `persona` e di `traduzione`, le altre tabelle del compendio e tutte quelle
-// delle partite restano identici (impronte prima e dopo). Il prima e il dopo di ogni dato nell'audit `dati_guida.audit-382-compendio-date-persona`.
+// delle partite restano identici (impronte prima e dopo). Il prima e il dopo di ogni dato nell'audit `dati_guida.audit-367-compendio-date-persona`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -20,10 +20,10 @@ import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { diverseFuori, improntaPartite, righePerChiave } from './decisioniDati0111.js';
 import { dellaGuida, scriviAuditCompendio, type EsitoDato, type RigaCorreggibile } from './auditCompendioL11.js';
 
-const AUDIT = 'audit-382-compendio-date-persona';
+const AUDIT = 'audit-367-compendio-date-persona';
 const DECISIONI = 'risposta dell\'utente alla domanda sulle date delle Persona (L11-05): codice in persona.nota e resa in traduzione, tesoro_modificatore fermo';
 const AMBITO = 'notaPersona';
-const errore = (motivo: string): never => { throw new Error(`382: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`367: ${motivo}; nessuna modifica applicata.`); };
 
 /** Le Persona con la data scritta dalla guida: il codice in `persona.nota` e la sua resa italiana. */
 const DATE: ReadonlyArray<{ id: number; nome: string; nota: string; resa: string; perche: string }> = [
@@ -36,8 +36,8 @@ const DATE: ReadonlyArray<{ id: number; nome: string; nota: string; resa: string
 /** Le tabelle del compendio che questa migrazione non deve cambiare. */
 const INTATTE = ['skill', 'persona_skill', 'persona_affinita', 'skill_fonte_esecuzione'] as const;
 
-export const migration382: Migration = {
-  id: 382,
+export const migration367: Migration = {
+  id: 367,
   name: 'compendio_date_delle_persona',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -87,10 +87,10 @@ export const migration382: Migration = {
     if (tesoroDopo !== tesoroPrima) errore('la tabella tesoro_modificatore è cambiata');
     if (improntaPartite(db) !== partitePrima) errore('le tabelle delle partite sono cambiate');
 
-    scriviAuditCompendio(db, AUDIT, 382, DECISIONI, {
+    scriviAuditCompendio(db, AUDIT, 367, DECISIONI, {
       esiti,
       tesoroModificatore: { righeCambiate: 0, improntaPrima: tesoroPrima, improntaDopo: tesoroDopo, motivo: 'le 20 celle segnalate dall\'analisi non si toccano finché non sono verificate in gioco' },
     }, personeToccate.size + traduzioniToccate.size > 0);
-    logger.info({ migrazione: 382, esiti: esiti.map((e) => `${e.chiave}: ${e.esito}`) }, 'compendio: date delle Persona');
+    logger.info({ migrazione: 367, esiti: esiti.map((e) => `${e.chiave}: ${e.esito}`) }, 'compendio: date delle Persona');
   },
 };

@@ -1,17 +1,17 @@
 // ============================================================
-// 365 — il testo dei requisiti dei Confidenti diventa la nota (L7-02)
+// 359 — il testo dei requisiti dei Confidenti diventa la nota (L7-02)
 // ============================================================
 //
 // `confidente_requisito.testo` ripeteva in gran parte `dati_json` e in parte raccontava altro. La frase ora si genera dalla condizione (`descriviRequisitoSpillo`: una sola
 // sede del dato, e il nome della Richiesta citata è vivo); la colonna resta come NOTA propria del requisito: vuota se ripeteva la struttura, altrimenti col solo testo che
 // informa, senza ripetere data o nome della Richiesta (DECISIONI §2: una frase che ripete una condizione strutturata si toglie con archivio; quella che racconta altro resta).
 //
-// Il dato è un elenco CHIUSO scritto a mano, 189/189 righe (`requisitiNota365.ts`): chiave, testo atteso, esito. La guardia scrive solo se la riga ha ancora il testo
+// Il dato è un elenco CHIUSO scritto a mano, 189/189 righe (`requisitiNota359.ts`): chiave, testo atteso, esito. La guardia scrive solo se la riga ha ancora il testo
 // atteso; ogni scostamento va nel verbale e la riga resta. Le righe `avviso` restano: la frase È il dato.
 // `confidente_requisito_guida` non si tocca (impronta prima e dopo): siccome «Ripristina» copia da lì, in `dati_guida.requisiti-nota-guida-v1` si scrive per ogni sua riga la
 // nota da usare al ripristino (`confidente|rango|indice` → nota).
 //
-// Originali in `dati_guida.archivio-frasi-l11` («confidente_requisito.testo»), verbale con l'esito di ogni riga in `dati_guida.audit-l7-365-testo-requisiti`. Idempotente:
+// Originali in `dati_guida.archivio-frasi-l11` («confidente_requisito.testo»), verbale con l'esito di ogni riga in `dati_guida.audit-l7-359-testo-requisiti`. Idempotente:
 // una riga già al testo voluto non si scrive. Nessun import da `server/services/`; non si scrive in `utente`.
 // ============================================================
 
@@ -19,16 +19,16 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, registraAudit } from './archivioL1.js';
-import { ESITI_GUIDA_DIVERSI, ESITI_REQUISITI, chiaveRequisito, notaDellEsito } from './requisitiNota365.js';
+import { ESITI_GUIDA_DIVERSI, ESITI_REQUISITI, chiaveRequisito, notaDellEsito } from './requisitiNota359.js';
 
-const errore = (motivo: string): never => { throw new Error(`365: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L7-02 · 365';
+const errore = (motivo: string): never => { throw new Error(`359: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L7-02 · 359';
 export const CHIAVE_NOTE_GUIDA = 'requisiti-nota-guida-v1';
 
 type Riga = { confidente_chiave: string; rango: number; indice: number; tipo: string; testo: string };
 
-export const migration365: Migration = {
-  id: 365,
+export const migration359: Migration = {
+  id: 359,
   name: 'testo_requisiti_generato',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -83,7 +83,7 @@ export const migration365: Migration = {
     if (conGuida && improntaGuida !== improntaTabella(db, 'confidente_requisito_guida')) errore('la copia della guida è cambiata');
 
     const conteggi = { confrontate: esiti.length + scostamenti.length, scritte, generate: esiti.filter((e) => e.esito === 'generato').length, note: esiti.filter((e) => e.esito === 'nota').length, avvisi: esiti.filter((e) => e.esito === 'avviso').length, scostamenti: scostamenti.length, fuoriElenco: fuoriElenco.length, mappaGuida: Object.keys(mappa).length, scostamentiGuida: scostamentiGuida.length };
-    if (scritte > 0 || mappaEsistente !== mappaJson) registraAudit(db, 'audit-l7-365-testo-requisiti', { migrazione: MIGRAZIONE, conteggi, improntaGuida, esiti, scostamenti, fuoriElenco, scostamentiGuida });
-    logger.info({ migrazione: 365, ...conteggi }, 'requisiti dei Confidenti: il testo è la nota');
+    if (scritte > 0 || mappaEsistente !== mappaJson) registraAudit(db, 'audit-l7-359-testo-requisiti', { migrazione: MIGRAZIONE, conteggi, improntaGuida, esiti, scostamenti, fuoriElenco, scostamentiGuida });
+    logger.info({ migrazione: 359, ...conteggi }, 'requisiti dei Confidenti: il testo è la nota');
   },
 };

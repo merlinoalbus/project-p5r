@@ -188,7 +188,7 @@ export function condizioneDelRequisito(r: Pick<RigaRequisito, 'tipo' | 'dati_jso
 }
 
 /** L7-02: la nota propria di un requisito (colonna `testo`), da mostrare sotto la frase generata. Vuota per un avviso (la sua frase è il dato) e se ripete
- *  la frase generata (una riga aggiunta a mano prima della migrazione 365). */
+ *  la frase generata (una riga aggiunta a mano prima della migrazione 359). */
 export function notaDelRequisito(r: { tipo: string; testo: string }, frase: string): string {
   return r.tipo === 'avviso' || r.testo.trim() === frase.trim() ? '' : r.testo.trim();
 }

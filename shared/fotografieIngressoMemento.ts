@@ -1,5 +1,5 @@
 /** Proiezione informativa L26: non contiene valori delle fotografie né autorizza una bonifica. */
-// 'sblocco_data' resta perché la migrazione registrata `ingressoMemento130.ts` lo usa come nome di campo atteso, anche se la colonna è stata tolta (361).
+// 'sblocco_data' resta perché la migrazione registrata `ingressoMemento130.ts` lo usa come nome di campo atteso, anche se la colonna è stata tolta (356).
 export type CampoFotografiaL26 = 'chiave' | 'origine' | 'nascosto' | 'tipo' | 'quartiere_chiave'
   | 'area_chiave' | 'sblocco' | 'fonte' | 'quando' | 'giorni' | 'giorni_json' | 'condizioni_json'
   | 'orari_json' | 'note' | 'fonte_condizioni_json' | 'sblocco_data'

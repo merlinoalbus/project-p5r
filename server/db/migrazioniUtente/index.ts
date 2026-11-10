@@ -92,7 +92,7 @@ import { utente066 } from './066_sblocco_di_medicina_amara_nelle_spunte.js';
 import { utente067 } from './067_categorie_degli_appunti_fissi.js';
 // 2026-11-10 (L2-10): `registro_acquisti.sede_chiave` tolta: la scorta è dell'offerta
 import { utente068 } from './068_registro_senza_sede.js';
-// 2026-11-09 (lotto L6 «Diario», L6-08): via `voce_giornata.produce_json` se la migrazione di gioco 362 l'ha lasciata perché la 015 non era ancora passata (istanza nuova)
+// 2026-11-09 (lotto L6 «Diario», L6-08): via `voce_giornata.produce_json` se la migrazione di gioco 357 l'ha lasciata perché la 015 non era ancora passata (istanza nuova)
 import { utente069 } from './069_produce_json_tolta_se_resta.js';
 
 export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045, utente046, utente047, utente048, utente049, utente050, utente051, utente052, utente053, utente054, utente055, utente056, utente057, utente058, utente059, utente060, utente061, utente062, utente063, utente064, utente065, utente066, utente067, utente068, utente069];

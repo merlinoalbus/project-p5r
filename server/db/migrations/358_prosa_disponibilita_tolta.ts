@@ -1,5 +1,5 @@
 // ============================================================
-// 364 — via la prosa della disponibilità dei Confidenti e il «dal» (L7-01, L7-06; risposta Q14 A)
+// 358 — via la prosa della disponibilità dei Confidenti e il «dal» (L7-01, L7-06; risposta Q14 A)
 // ============================================================
 //
 // `confidente_disponibilita` diceva ancora in prosa ciò che la struttura dice già: `giorni_json`, `fasce_json`, `luogo`, `sblocco_data`, `sblocco_requisiti` (la 307 le
@@ -17,11 +17,11 @@
 //  (b) il `dal`: se è uguale al requisito di rango 1 esce e basta; se è diverso, o il requisito non c'è, il valore va in archivio e nel verbale, e il requisito non si tocca.
 //  (c) archivio in `dati_guida.archivio-frasi-l11` di ogni valore non vuoto delle sei colonne (righe archiviate = righe tolte), poi `ALTER TABLE … DROP COLUMN`.
 //  (d) lo storico dell'editor (`confidente-disponibilita-editor-v1:<chiave>`): la riga di adesso ha ora i campi storici vuoti, e se questo la cambia (o cambia la nota) la
-//      catena riceve la revisione «migrazione-364-<chiave>». Storico incoerente = la nota non cambia, la riga è detta nel verbale (il valore tolto è comunque in archivio).
+//      catena riceve la revisione «migrazione-358-<chiave>». Storico incoerente = la nota non cambia, la riga è detta nel verbale (il valore tolto è comunque in archivio).
 // `server/db/fontiTolte.ts` riceve le sei voci.
 //
 // COSA NON CAMBIA: le altre colonne delle 23 righe (impronta prima e dopo, esclusa `note`), i requisiti di rango, le partite. Idempotente: senza le colonne non fa nulla.
-// Verbale: `dati_guida.audit-l7-364-prosa-disponibilita`. Nessun import da `server/services/`; non si scrive in `utente`.
+// Verbale: `dati_guida.audit-l7-358-prosa-disponibilita`. Nessun import da `server/services/`; non si scrive in `utente`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -31,12 +31,12 @@ import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 import { aggiungiRevisione, CAMPI_FOTOGRAFIA, leggiStorico, notaConFrase, STORICI_VUOTI, type Fotografia } from './storicoDisponibilitaL7.js';
 
-const errore = (motivo: string): never => { throw new Error(`364: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`358: ${motivo}; nessuna modifica applicata.`); };
 
 const COLONNE_PROSA = ['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti'] as const;
 type ColonnaProsa = typeof COLONNE_PROSA[number];
-const MIGRAZIONE = 'L7-01/06 · 364';
-const MOTIVO_REVISIONE = 'Migrazione 364: le colonne in prosa della disponibilità escono dalla tabella (la struttura e i requisiti di rango dicono giorni, fasce, luogo e sblocco); ciò che dicevano in più passa nelle note.';
+const MIGRAZIONE = 'L7-01/06 · 358';
+const MOTIVO_REVISIONE = 'Migrazione 358: le colonne in prosa della disponibilità escono dalla tabella (la struttura e i requisiti di rango dicono giorni, fasce, luogo e sblocco); ciò che dicevano in più passa nelle note.';
 
 /** Esito della prosa di una riga: il testo atteso, la frase da portare in nota (se c'è) e il perché di ogni parte. */
 interface EsitoProsa { confidente: string; colonna: ColonnaProsa; atteso: string; frase?: string; motivo: string }
@@ -74,8 +74,8 @@ function dataDelRango1(db: AppDatabase, chiave: string): string | null {
   return null;
 }
 
-export const migration364: Migration = {
-  id: 364,
+export const migration358: Migration = {
+  id: 358,
   name: 'prosa_disponibilita_tolta',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -130,7 +130,7 @@ export const migration364: Migration = {
         if (db.prepare('UPDATE main.confidente_disponibilita SET note = ? WHERE confidente_chiave = ? AND note = ?').run(notaNuova, chiave, note).changes !== 1) errore(`la nota di ${chiave} non si aggiorna`);
         noteCambiate.push({ chiave, dopo: notaNuova });
       }
-      if (storico.stato === 'coerente') storici.push({ chiave, esito: `revisione ${aggiungiRevisione(db, chiave, storico.registro, 364, MOTIVO_REVISIONE, prima, dopo)} aggiunta` });
+      if (storico.stato === 'coerente') storici.push({ chiave, esito: `revisione ${aggiungiRevisione(db, chiave, storico.registro, 358, MOTIVO_REVISIONE, prima, dopo)} aggiunta` });
     }
 
     // (c) archivio, poi le colonne
@@ -150,9 +150,9 @@ export const migration364: Migration = {
     if (improntaTabella(db, 'confidente_disponibilita', ['note']) !== impronteAltre) errore('le altre colonne sono cambiate');
     if (improntaTabella(db, 'confidente_requisito') !== improntaRequisiti) errore('i requisiti di rango sono cambiati');
 
-    registraAudit(db, 'audit-l7-364-prosa-disponibilita', { migrazione: MIGRAZIONE, colonneTolte: daTogliere, esiti, noteCambiate, storici, dal: dalPrima, archiviate, righe: numeroRighe });
+    registraAudit(db, 'audit-l7-358-prosa-disponibilita', { migrazione: MIGRAZIONE, colonneTolte: daTogliere, esiti, noteCambiate, storici, dal: dalPrima, archiviate, righe: numeroRighe });
     const dalDiversi = dalPrima.filter((d) => d.requisito !== d.dal);
-    if (dalDiversi.length > 0) logger.warn({ migrazione: 364, dalDiversi }, '«dal» diverso dal requisito di rango 1: il valore è nell’archivio, da ora vale il requisito');
-    logger.info({ migrazione: 364, tolte: daTogliere.length, note: noteCambiate.map((n) => n.chiave), storici, dal: dalPrima }, 'disponibilità dei Confidenti: prosa e «dal» tolti');
+    if (dalDiversi.length > 0) logger.warn({ migrazione: 358, dalDiversi }, '«dal» diverso dal requisito di rango 1: il valore è nell’archivio, da ora vale il requisito');
+    logger.info({ migrazione: 358, tolte: daTogliere.length, note: noteCambiate.map((n) => n.chiave), storici, dal: dalPrima }, 'disponibilità dei Confidenti: prosa e «dal» tolti');
   },
 };

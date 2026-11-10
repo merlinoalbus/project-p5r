@@ -1,5 +1,5 @@
 // ============================================================
-// 366 — le Doti degli incontri mancanti e il Riverbero di Yusuke (L7-03)
+// 360 — le Doti degli incontri mancanti e il Riverbero di Yusuke (L7-03)
 // ============================================================
 //
 // La 088 aveva copiato in `confidente_dote_incontro` solo le voci che portavano la Dote: restavano fuori incontri che la guida dice, una riga per rango, nelle pagine dei
@@ -9,7 +9,7 @@
 // rango 3 di Sojiro viene dal caffè, un'azione: non è una Dote dell'incontro. Le Doti restano a mano: questo dato alimenta il promemoria, non applica niente.
 // Yusuke, rango 3: «Riverbero» (guida, pagina di Yusuke, tabella «Abilità»; descrizione uguale a quella delle altre abilità con lo stesso nome). Al rango 3 non ci sono
 // abilità: `ordine` 0 non collide con niente (la chiave è confidente, rango, ordine, e la lettura è ORDER BY rango, ordine) e non serve rinumerare.
-// Verbale: `dati_guida.audit-l7-366-doti-e-riverbero`. Nessun import da `server/services/`; non si scrive in `utente`. Idempotente.
+// Verbale: `dati_guida.audit-l7-360-doti-e-riverbero`. Nessun import da `server/services/`; non si scrive in `utente`. Idempotente.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -17,7 +17,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`366: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`360: ${motivo}; nessuna modifica applicata.`); };
 
 const DOTI: ReadonlyArray<{ confidente: string; dote: string; righe: ReadonlyArray<readonly [number, number]> }> = [
   { confidente: 'ohya', dote: 'fascino', righe: [[7, 3], [8, 3]] },
@@ -27,8 +27,8 @@ const DOTI: ReadonlyArray<{ confidente: string; dote: string; righe: ReadonlyArr
 ];
 const RIVERBERO = { confidente: 'yusuke', rango: 3, ordine: 0, nome: 'Riverbero', descrizione: 'Chance di proseguire l\'attacco se il colpo di Joker non abbatte il nemico.' } as const;
 
-export const migration366: Migration = {
-  id: 366,
+export const migration360: Migration = {
+  id: 360,
   name: 'doti_incontri_e_riverbero',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -67,7 +67,7 @@ export const migration366: Migration = {
     } else if (conNome.rango !== RIVERBERO.rango) abilita = `già presente al rango ${conNome.rango}: resta`;
     if (abilita !== 'aggiunta' && improntaTabella(db, 'confidente_abilita') !== improntaPrima) errore('le abilità sono cambiate senza motivo');
 
-    if (scritte > 0 || esiti.length > 0) registraAudit(db, 'audit-l7-366-doti-e-riverbero', { migrazione: 'L7-03 · 366', scritte, esiti, riverbero: abilita });
-    logger.info({ migrazione: 366, scritte, riverbero: abilita }, 'Doti degli incontri e Riverbero di Yusuke');
+    if (scritte > 0 || esiti.length > 0) registraAudit(db, 'audit-l7-360-doti-e-riverbero', { migrazione: 'L7-03 · 360', scritte, esiti, riverbero: abilita });
+    logger.info({ migrazione: 360, scritte, riverbero: abilita }, 'Doti degli incontri e Riverbero di Yusuke');
   },
 };

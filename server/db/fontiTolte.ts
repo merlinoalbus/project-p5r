@@ -167,35 +167,35 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
   ...(['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7 · migrazione 364',
+    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7 · migrazione 358',
     sostituitaDa: 'la disponibilità strutturata del Confidente (modo, giorni, fasce, eccezioni), i luoghi per chiave e i requisiti di rango; ciò che la prosa diceva in più sta nelle note; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   })),
   {
-    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7 · migrazione 364',
+    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7 · migrazione 358',
     sostituitaDa: 'il requisito di rango 1 di tipo «data» (`confidente_requisito`): «Disponibile dal» si legge da lì; i valori di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'luogo', tolta: 'L8 · migrazione 368',
+    schema: 'main', tabella: 'attivita', colonna: 'luogo', tolta: 'L8 · migrazione 362',
     sostituitaDa: 'la sede dell’attività (`sede_chiave`) con il suo quartiere; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
-    schema: 'main', tabella: 'attivita', colonna: 'doti_json', tolta: 'L8 · migrazione 368',
+    schema: 'main', tabella: 'attivita', colonna: 'doti_json', tolta: 'L8 · migrazione 362',
     sostituitaDa: 'gli effetti strutturati e gli esiti dell’attività (`effetti_json`, `esiti_json`); i valori di prima restano nell’archivio «archivio-frasi-l11»',
   },
   ...(['prezzo', 'dote', 'note', 'disponibile_dal', 'sblocca', 'effetto_json'] as const).map((colonna): FonteTolta => ({
-    schema: 'main', tabella: 'libro', colonna, tolta: 'L8 · migrazione 369',
+    schema: 'main', tabella: 'libro', colonna, tolta: 'L8 · migrazione 363',
     sostituitaDa: 'gli articoli delle librerie (prezzo e dove si compra), le condizioni e gli effetti del libro; la colonna era vuota in tutti i libri',
   })),
   {
-    schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8 · migrazione 369',
+    schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8 · migrazione 363',
     sostituitaDa: 'gli effetti del film (le voci «ripetuto» dicono quanto vale rivederlo); la colonna era vuota in tutti i film',
   },
   {
-    schema: 'main', tabella: 'trofeo', colonna: 'quando', tolta: 'L8 · migrazione 369',
+    schema: 'main', tabella: 'trofeo', colonna: 'quando', tolta: 'L8 · migrazione 363',
     sostituitaDa: 'le condizioni del trofeo (`condizioni_json`), da cui la pagina genera la frase; la colonna era vuota in tutti i trofei',
   },
   {
-    schema: 'main', tabella: 'regola_pesca', colonna: 'fonti_json', tolta: 'L8 · migrazione 369',
+    schema: 'main', tabella: 'regola_pesca', colonna: 'fonti_json', tolta: 'L8 · migrazione 363',
     sostituitaDa: 'le fonti dentro la regola (`dati_json.fonti`): la colonna era la loro copia esatta',
   },
   {
@@ -223,11 +223,11 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'la sede del punto vendita dell’offerta comprata: la scorta è dell’offerta; un acquisto fatto in una sede aggiuntiva passa all’offerta della macchina che quella sede è diventata; i valori eventuali restano nel verbale «audit-utente-068-sede» e nella copia di avvio',
   },
   {
-    schema: 'main', tabella: 'voce_giornata', colonna: 'produce_json', tolta: 'L6 · migrazione 362 (o utente 69 su un’istanza nuova)',
+    schema: 'main', tabella: 'voce_giornata', colonna: 'produce_json', tolta: 'L6 · migrazione 357 (o utente 69 su un’istanza nuova)',
     sostituitaDa: 'gli effetti della voce (`voce_effetto`: un solo punto di modifica; per l’incontro dei Confidenti `confidente_dote_incontro`, per i turni le attività); il valore di prima (uid → testo) resta nell’archivio «archivio-frasi-l11», colonna «voce_giornata.produce_json», e il contenuto grezzo di allora in `voce_effetto_transizione.raw_json`',
   },
   {
-    schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5 · migrazione 361',
+    schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5 · migrazione 356',
     sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti: quando la condizione ha una data, è quella a valere; le date di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {

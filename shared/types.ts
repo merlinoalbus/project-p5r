@@ -2631,9 +2631,9 @@ export interface BattagliaDto {
     domande?: NegoziazioneDomandaDto[];
   };
   ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string;
-    /** L13-04 (migrazione 384): le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` finché la 384 non è applicata. */
+    /** L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, come nella tabella della guida; `null` finché la 369 non è applicata. */
     elenco: OmbreSciaguraLuogoDto[] | null;
-    /** L13-04 (migrazione 384): l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente finché la 384 non è applicata. */
+    /** L13-04 (migrazione 369): l'oggetto raro che ogni Ombra sciagura rilascia, nell'ordine della guida; assente finché la 369 non è applicata. */
     ricompenseElenco?: OmbreSciaguraRicompensaDto[]; incertezze: string };
   /** `livelloMinimo` (L8-03, migrazione 340): il livello consigliato più basso come numero, da confrontare col livello della partita. */
   mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; livelloMinimo?: number | null; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };

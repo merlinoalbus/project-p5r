@@ -39,7 +39,7 @@ const DESCRIZIONE_DI_TESORO = /^tesoro, /;
 
 /** La cella «Effetto»: il testo dell'effetto, le statistiche di armi e protezioni (`statistiche.testo`, migrazione 275) o le voci della
  *  lettura; per un Tesoro, che serve solo a essere rivenduto, la sua descrizione («tesoro, …»: prezzo di rivendita ed eventualmente dove si
- *  trova; premi delle Sfide e migrazione 383); «Non dichiarato» se non c'è nessuno di questi (e l'oggetto non è un regalo). Il `title` dice le note a parole («1 nota»), la
+ *  trova; premi delle Sfide e migrazione 368); «Non dichiarato» se non c'è nessuno di questi (e l'oggetto non è un regalo). Il `title` dice le note a parole («1 nota»), la
  *  cella le mostra come ♪, con il nome accessibile («3 note») anche per le voci della lettura (revisione del lotto F, rilievo 5). */
 function CellaEffetto({ o }: { o: CatalogoOggettoDto }) {
   const lettura = o.effetto ? '' : effettiDellaLettura(o);

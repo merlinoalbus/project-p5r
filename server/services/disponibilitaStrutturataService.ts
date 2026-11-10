@@ -24,7 +24,7 @@ export const CHIAVE_SEED_DISPONIBILITA = (confidente: string) => `disponibilita-
 export interface RigaStruttura { modo: string; giorni_settimana_json: string; fasce_orarie_json: string; eccezioni_json: string; motivo_senza_luogo: string; fonte: string | null }
 const COLONNE = 'modo, giorni_settimana_json, fasce_orarie_json, eccezioni_json, motivo_senza_luogo, fonte';
 
-/** L7-06 (Q14, migrazione 364): la data di un requisito di tipo «data» (`dati_json`), se è una data; la fonte unica di «Disponibile dal». */
+/** L7-06 (Q14, migrazione 358): la data di un requisito di tipo «data» (`dati_json`), se è una data; la fonte unica di «Disponibile dal». */
 function dalDelRequisito(datiJson: string): string | null {
   try { const d = (JSON.parse(datiJson) as { dal?: unknown }).dal; return typeof d === 'string' && /^\d{2}-\d{2}$/.test(d) ? d : null; } catch { return null; }
 }

@@ -1,5 +1,5 @@
 // ============================================================
-// Migrazione 384 — l'elenco delle Ombre sciagura e le loro ricompense nel blocco «battaglia» (L13-04)
+// Migrazione 369 — l'elenco delle Ombre sciagura e le loro ricompense nel blocco «battaglia» (L13-04)
 // ============================================================
 //
 // `dati_guida.battaglia.ombreSciagura.elenco` era `null` e `incertezze` diceva che la guida non fornisce un elenco; `doveCompaiono` ripeteva
@@ -21,7 +21,7 @@
 // passa e dice «niente da fare». Nei dati solo fatti: nomi di Ombre, luoghi, oggetti; nessuna prosa della guida.
 //
 // Le altre chiavi di `dati_guida`, le correzioni dell'utente, il Diario, i Palazzi e le spunte delle partite restano identici (impronte prima e
-// dopo). Audit in `dati_guida.audit-384-ombre-sciagura`: fonte, conteggi (19 righe, 52 Ombre, 52 ricompense) ed esito di ogni campo.
+// dopo). Audit in `dati_guida.audit-369-ombre-sciagura`: fonte, conteggi (19 righe, 52 Ombre, 52 ricompense) ed esito di ogni campo.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -29,11 +29,11 @@ import type { AppDatabase } from '../dbService.js';
 import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 
-const AUDIT = 'audit-384-ombre-sciagura';
+const AUDIT = 'audit-369-ombre-sciagura';
 const FONTE_URL = 'https://www.allgamestaff.it/persona-5-royal/ombre-sciagura/';
 /** Le tabelle che non devono cambiare: Diario, effetti, Palazzi e loro aree, catalogo. */
 const INTATTE = ['voce_giornata', 'voce_effetto', 'voce_infiltrazione', 'dungeon', 'dungeon_area', 'giorno', 'catalogo_oggetto'] as const;
-const errore = (motivo: string): never => { throw new Error(`384: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`369: ${motivo}; nessuna modifica applicata.`); };
 
 type Oggetto = Record<string, unknown>;
 const eOggetto = (v: unknown): v is Oggetto => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -99,12 +99,12 @@ function improntaAltriBlocchi(db: AppDatabase): string {
 /** L'impronta delle correzioni dell'utente (`correzione_dati_guida` è WITHOUT ROWID: si ordina per la chiave, non per `rowid`). */
 const improntaCorrezioni = (db: AppDatabase): string => JSON.stringify(db.prepare('SELECT * FROM main.correzione_dati_guida ORDER BY blocco, percorso').all());
 
-export const migration384: Migration = {
-  id: 384,
+export const migration369: Migration = {
+  id: 369,
   name: 'ombre_sciagura_elenco_e_ricompense',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
-    if (!esisteTabella(db, 'dati_guida')) { logger.warn({ migrazione: 384 }, 'dati della guida assenti: niente da fare'); return; }
+    if (!esisteTabella(db, 'dati_guida')) { logger.warn({ migrazione: 369 }, 'dati della guida assenti: niente da fare'); return; }
 
     // i conti delle costanti: 19 righe (10 + 9) e 52 ricompense, una per Ombra (i nomi scritti sono 54, vedi sopra)
     const nomi = new Set(ELENCO.flatMap((r) => r.ombre.map((x) => x.nome)));
@@ -137,7 +137,7 @@ export const migration384: Migration = {
     try { const v = testo === undefined ? null : JSON.parse(testo) as unknown; blocco = eOggetto(v) ? v : null; } catch { blocco = null; }
     const sciagura = blocco && eOggetto(blocco.ombreSciagura) ? blocco.ombreSciagura : null;
     if (!blocco || !sciagura) {
-      logger.warn({ migrazione: 384 }, 'blocco «battaglia» o sezione Ombre sciagura assenti: niente da fare');
+      logger.warn({ migrazione: 369 }, 'blocco «battaglia» o sezione Ombre sciagura assenti: niente da fare');
       esiti.blocco = !blocco ? 'blocco «battaglia» assente o illeggibile: niente da fare' : 'sezione `ombreSciagura` assente: niente da fare';
     } else {
       /** Una correzione dell'utente sul campo: il testo della guida non si cambia sotto di lei. */
@@ -164,7 +164,7 @@ export const migration384: Migration = {
     }
 
     db.prepare('INSERT INTO main.dati_guida (chiave, json) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json').run(AUDIT, JSON.stringify({
-      migrazione: 384, voce: 'L13-04', fonte: FONTE_URL, conteggi, scritto, esiti, ombreDellElencoSenzaRicompensaConLoStessoNome: senzaRicompensa,
+      migrazione: 369, voce: 'L13-04', fonte: FONTE_URL, conteggi, scritto, esiti, ombreDellElencoSenzaRicompensaConLoStessoNome: senzaRicompensa,
     }));
 
     // le verifiche: le altre chiavi della guida, le correzioni dell'utente, il Diario, i Palazzi, il catalogo e le spunte identici
@@ -172,6 +172,6 @@ export const migration384: Migration = {
     if (correzioniPrima !== null && improntaCorrezioni(db) !== correzioniPrima) errore('le correzioni dell\'utente sono cambiate');
     for (const t of INTATTE) if (prima.has(t) && improntaTabella(db, t) !== prima.get(t)) errore(`la tabella ${t} è cambiata`);
     if (contaSpunte() !== spuntePrima) errore('le spunte delle partite sono cambiate');
-    logger.info({ migrazione: 384, scritto, esiti }, 'Ombre sciagura: elenco e ricompense nel blocco «battaglia»');
+    logger.info({ migrazione: 369, scritto, esiti }, 'Ombre sciagura: elenco e ricompense nel blocco «battaglia»');
   },
 };

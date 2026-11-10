@@ -1,5 +1,5 @@
 // ============================================================
-// 361 — via la data di sblocco accanto alla condizione del quartiere (L5-04, lotto «Mondo e mappe»)
+// 356 — via la data di sblocco accanto alla condizione del quartiere (L5-04, lotto «Mondo e mappe»)
 // ============================================================
 //
 // Lo sblocco di un quartiere è la sua condizione (`quartiere.condizioni_json`, con gli inviti dei Confidenti). `quartiere.sblocco_data` (7 righe, ricavata
@@ -21,7 +21,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella, righeConValore } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`361: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`356: ${motivo}; nessuna modifica applicata.`); };
 
 const COLONNA_ARCHIVIO = 'quartiere.sblocco_data';
 const TABELLE_INTATTE = ['luogo', 'spillo', 'negozio', 'articolo', 'attivita', 'cestino'] as const;
@@ -57,8 +57,8 @@ function dipendenzeDellaColonna(db: AppDatabase): string[] {
     WHERE type IN ('index', 'view', 'trigger') AND sql LIKE '%sblocco_data%' AND (tbl_name = 'quartiere' OR (type = 'view' AND sql LIKE '%quartiere%'))`).pluck().all() as string[]);
 }
 
-export const migration361: Migration = {
-  id: 361,
+export const migration356: Migration = {
+  id: 356,
   name: 'sblocco_data_dei_quartieri_tolta',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -79,7 +79,7 @@ export const migration361: Migration = {
       return { quartiere, sbloccoData: data, confronto: confrontaData(data, dateCondizione), dateDellaCondizione: dateCondizione, condizioni };
     });
 
-    const archiviateNuove = archiviaSenzaSovrascrivere(db, 'L5-04 · 361', COLONNA_ARCHIVIO, righe);
+    const archiviateNuove = archiviaSenzaSovrascrivere(db, 'L5-04 · 356', COLONNA_ARCHIVIO, righe);
     const presenti = righeArchiviate(db, COLONNA_ARCHIVIO);
     if (!Object.keys(righe).every((k) => k in presenti)) errore('l’archivio delle date non ha tutte le righe');
 
@@ -89,7 +89,7 @@ export const migration361: Migration = {
     if (improntaTabella(db, 'quartiere') !== prima.get('quartiere')) errore('le altre colonne di quartiere sono cambiate');
     for (const t of TABELLE_INTATTE) if (prima.has(t) && improntaTabella(db, t) !== prima.get(t)) errore(`la tabella ${t} è cambiata`);
 
-    registraAudit(db, 'audit-l5-04-sblocco-data', { migrazione: 'L5-04 · 361', righeConValore: date.length, archiviateNuove, date });
-    logger.info({ migrazione: 'L5-04-361', date: date.map((d) => `${d.quartiere}: ${d.sbloccoData} (${d.confronto})`) }, 'data di sblocco dei quartieri tolta: vale la condizione');
+    registraAudit(db, 'audit-l5-04-sblocco-data', { migrazione: 'L5-04 · 356', righeConValore: date.length, archiviateNuove, date });
+    logger.info({ migrazione: 'L5-04-356', date: date.map((d) => `${d.quartiere}: ${d.sbloccoData} (${d.confronto})`) }, 'data di sblocco dei quartieri tolta: vale la condizione');
   },
 };

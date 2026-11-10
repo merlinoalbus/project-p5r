@@ -1,11 +1,11 @@
 // ============================================================
-// 385 — i piatti senza le frasi «non reperiti nelle fonti consultate» (L8-07)
+// 370 — i piatti senza le frasi «non reperiti nelle fonti consultate» (L8-07)
 // ============================================================
 //
 // Una frase che dice che un dato manca non informa: ramen, monjayaki e la sfida Big Bang Burger perdono l'effetto (il piatto resta), e a Leblanc esce solo la coda delle due frasi («… non
 // reperite/i …»): il bonus («Bonus temporanei in battaglia …») resta. La patata dolce ha già l'effetto vuoto. Guardia per identità sul JSON atteso di ogni riga; il valore di prima va in
-// archivio (`luogo.piatti_json.385`); la fotografia `seed_json`, se ripete il JSON atteso, cambia insieme (altrimenti «Ripristina» riporterebbe le frasi). Righe non elencate: identiche.
-// Idempotente: una riga già pulita non si scrive. Verbale: `dati_guida.audit-l8-385-piatti`. Nessun import da `server/services/`; non si scrive in `utente`.
+// archivio (`luogo.piatti_json.370`); la fotografia `seed_json`, se ripete il JSON atteso, cambia insieme (altrimenti «Ripristina» riporterebbe le frasi). Righe non elencate: identiche.
+// Idempotente: una riga già pulita non si scrive. Verbale: `dati_guida.audit-l8-370-piatti`. Nessun import da `server/services/`; non si scrive in `utente`.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -13,8 +13,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`385: ${motivo}; nessuna modifica applicata.`); };
-const MIGRAZIONE = 'L8-07 · 385';
+const errore = (motivo: string): never => { throw new Error(`370: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L8-07 · 370';
 const piatti = (...voci: Array<[string, string]>): string => JSON.stringify(voci.map(([nome, effetto]) => ({ nome, prezzo: null, effetto })));
 
 const RIGHE: ReadonlyArray<{ chiave: string; atteso: string; nuovo: string }> = [
@@ -28,8 +28,8 @@ const RIGHE: ReadonlyArray<{ chiave: string; atteso: string; nuovo: string }> = 
   { chiave: 'tsukishima/tsukishima-monjayaki', atteso: piatti(['Monjayaki', 'Dettagli su effetti non reperiti nelle fonti consultate.']), nuovo: piatti(['Monjayaki', '']) },
 ];
 
-export const migration385: Migration = {
-  id: 385,
+export const migration370: Migration = {
+  id: 370,
   name: 'piatti_senza_frasi_non_reperiti',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -42,7 +42,7 @@ export const migration385: Migration = {
       if (!riga) { resta.push({ chiave: r.chiave, motivo: 'riga assente' }); continue; }
       if (riga.piatti_json === r.nuovo) continue;
       if (riga.piatti_json !== r.atteso) { resta.push({ chiave: r.chiave, motivo: 'piatti diversi da quelli attesi: restano' }); continue; }
-      archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'luogo.piatti_json.385', { [r.chiave]: r.atteso });
+      archiviaSenzaSovrascrivere(db, MIGRAZIONE, 'luogo.piatti_json.370', { [r.chiave]: r.atteso });
       let seed = riga.seed_json;
       if (seed !== null) {
         try {
@@ -56,7 +56,7 @@ export const migration385: Migration = {
     }
     if (improntaTabella(db, 'luogo', ['piatti_json', 'seed_json']) !== altre) errore('le altre colonne di luogo sono cambiate');
     if (pulite.length === 0 && resta.length === 0) return;
-    registraAudit(db, 'audit-l8-385-piatti', { migrazione: MIGRAZIONE, pulite, resta });
-    logger.info({ migrazione: 385, pulite, resta }, 'piatti senza le frasi «non reperiti»');
+    registraAudit(db, 'audit-l8-370-piatti', { migrazione: MIGRAZIONE, pulite, resta });
+    logger.info({ migrazione: 370, pulite, resta }, 'piatti senza le frasi «non reperiti»');
   },
 };

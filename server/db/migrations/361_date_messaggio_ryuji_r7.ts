@@ -1,5 +1,5 @@
 // ============================================================
-// 367 — le date del messaggio di Ryuji per il Rango 7; il Rango 10 di Kawakami in nota (L7-07; risposta Q25 A)
+// 361 — le date del messaggio di Ryuji per il Rango 7; il Rango 10 di Kawakami in nota (L7-07; risposta Q25 A)
 // ============================================================
 //
 // Ryuji: l'evento del Rango 7 si avvia solo in certe sere, quando manda il suo messaggio. La pagina della guida dà l'elenco («Requisiti importanti»): maggio 18, 20, 25, 27;
@@ -8,7 +8,7 @@
 // alla `fascia-rango` sera che resta; guardia su `eccezioni_json` atteso. La fotografia di «Ripristina» (`disponibilita-struttura-seed-v1:ryuji`), se c'è e ha il valore
 // atteso, riceve la stessa eccezione: altrimenti resta e si dice nel verbale.
 // Kawakami: l'avvio del Rango 10 («il primo giorno di scuola dopo il Rango 9») non è calcolabile con il vocabolario: frase in `note`, con la revisione nello storico se c'è.
-// Non si scrivono voci né spunte: cambia solo il semaforo calcolato. Verbale: `dati_guida.audit-l7-367-date-ryuji`. Nessun import da `server/services/`; non si scrive in `utente`. Idempotente.
+// Non si scrivono voci né spunte: cambia solo il semaforo calcolato. Verbale: `dati_guida.audit-l7-361-date-ryuji`. Nessun import da `server/services/`; non si scrive in `utente`. Idempotente.
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
@@ -17,7 +17,7 @@ import { esisteTabella, haColonna } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 import { aggiungiRevisione, leggiStorico, notaConFrase, STORICI_VUOTI, type Fotografia } from './storicoDisponibilitaL7.js';
 
-const errore = (motivo: string): never => { throw new Error(`367: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`361: ${motivo}; nessuna modifica applicata.`); };
 
 const ATTESE = '[{"tipo":"fascia-rango","rango":7,"fasce":["sera"]}]';
 const SOLO_DATE = { tipo: 'solo-date-rango', rango: 7, date: ['05-18', '05-20', '05-25', '05-27', '06-22', '06-29', '07-01', '07-06', '07-29', '08-12', '08-17', '09-21', '10-02', '10-07', '11-02', '11-04', '11-09', '11-11', '11-16', '11-30', '12-02', '12-07', '12-09', '01-13'] } as const;
@@ -25,10 +25,10 @@ const NUOVE = JSON.stringify([...JSON.parse(ATTESE) as unknown[], SOLO_DATE]);
 const SEED = 'disponibilita-struttura-seed-v1:ryuji';
 const FRASE_KAWAKAMI = 'Il Rango 10 si sblocca con una sequenza automatica il primo giorno di scuola dopo il Rango 9; da lì si può avviare in qualsiasi giorno.';
 const NOTA_KAWAKAMI = 'Discordanza con Royal: le fonti Royal danno l\'avvio il 24/5 («Operazione Maidwatch») e la prima chiamata il 27/5; la guida italiana dà lo sblocco il 4/6 e il rango 1 l\'8/6. Per scelta dell\'utente (24/10) restano le date della guida italiana.';
-const MOTIVO = 'Migrazione 367: in nota l’avvio del Rango 10, che le condizioni non sanno calcolare.';
+const MOTIVO = 'Migrazione 361: in nota l’avvio del Rango 10, che le condizioni non sanno calcolare.';
 
-export const migration367: Migration = {
-  id: 367,
+export const migration361: Migration = {
+  id: 361,
   name: 'date_messaggio_ryuji_r7',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -69,12 +69,12 @@ export const migration367: Migration = {
         else {
           if (db.prepare('UPDATE main.confidente_disponibilita SET note = ? WHERE confidente_chiave = ? AND note = ?').run(dopo.note, 'kawakami', k.note).changes !== 1) errore('la nota di Kawakami non si aggiorna');
           scritte++;
-          esiti.push({ riga: 'kawakami', esito: `nota con il Rango 10${storico.stato === 'coerente' ? `, revisione ${aggiungiRevisione(db, 'kawakami', storico.registro, 367, MOTIVO, prima, dopo)} nello storico` : ''}` });
+          esiti.push({ riga: 'kawakami', esito: `nota con il Rango 10${storico.stato === 'coerente' ? `, revisione ${aggiungiRevisione(db, 'kawakami', storico.registro, 361, MOTIVO, prima, dopo)} nello storico` : ''}` });
         }
       }
     }
 
-    if (scritte > 0 || esiti.length > 0) registraAudit(db, 'audit-l7-367-date-ryuji', { migrazione: 'L7-07 · 367', scritte, esiti, date: SOLO_DATE.date });
-    logger.info({ migrazione: 367, scritte, esiti }, 'date del messaggio di Ryuji per il Rango 7');
+    if (scritte > 0 || esiti.length > 0) registraAudit(db, 'audit-l7-361-date-ryuji', { migrazione: 'L7-07 · 361', scritte, esiti, date: SOLO_DATE.date });
+    logger.info({ migrazione: 361, scritte, esiti }, 'date del messaggio di Ryuji per il Rango 7');
   },
 };

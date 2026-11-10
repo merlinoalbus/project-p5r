@@ -1,5 +1,5 @@
 // ============================================================
-// 386 — il vincolo del 1° giugno: «Furto consigliato del Palazzo di Madarame» (L6-10, scelta esplicita dell'utente)
+// 371 — il vincolo del 1° giugno: «Furto consigliato del Palazzo di Madarame» (L6-10, scelta esplicita dell'utente)
 // ============================================================
 //
 // Unica eccezione al validato, per scelta dell'utente. Il testo che l'utente chiama «voce del 1° giugno» non è una riga di `voce_giornata`: è l'unico
@@ -25,10 +25,10 @@ const DOPO = JSON.stringify(['Furto consigliato del Palazzo di Madarame']);
 const AUDIT = 'audit-l6-10-vincolo-primo-giugno';
 const COLONNA_ARCHIVIO = 'giorno.vincoli_json';
 
-const errore = (motivo: string): never => { throw new Error(`386: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`371: ${motivo}; nessuna modifica applicata.`); };
 
-export const migration386: Migration = {
-  id: 386,
+export const migration371: Migration = {
+  id: 371,
   name: 'vincolo_del_primo_giugno',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -40,8 +40,8 @@ export const migration386: Migration = {
     if (attuale === undefined || attuale === DOPO) return;
     if (attuale !== PRIMA) {
       // il giorno non è com'era atteso (l'utente o un'altra migrazione l'hanno cambiato): non si scrive, si dichiara
-      registraAudit(db, AUDIT, { migrazione: 'L6-10 · 386', esito: 'non applicata: vincoli_json diverso da quello atteso', giorno: GIORNO, trovato: attuale, atteso: PRIMA });
-      logger.warn({ migrazione: 'L6-10-386', giorno: GIORNO, trovato: attuale }, 'vincolo del 1° giugno diverso da quello atteso: non scritto');
+      registraAudit(db, AUDIT, { migrazione: 'L6-10 · 371', esito: 'non applicata: vincoli_json diverso da quello atteso', giorno: GIORNO, trovato: attuale, atteso: PRIMA });
+      logger.warn({ migrazione: 'L6-10-371', giorno: GIORNO, trovato: attuale }, 'vincolo del 1° giugno diverso da quello atteso: non scritto');
       return;
     }
 
@@ -53,7 +53,7 @@ export const migration386: Migration = {
     const partitePrima = improntaPartite(db);
     const giorni = db.prepare('SELECT COUNT(*) FROM main.giorno').pluck().get() as number;
 
-    archiviaSenzaSovrascrivere(db, 'L6-10 · 386', COLONNA_ARCHIVIO, { [GIORNO]: PRIMA });
+    archiviaSenzaSovrascrivere(db, 'L6-10 · 371', COLONNA_ARCHIVIO, { [GIORNO]: PRIMA });
     // guardia per identità anche nell'UPDATE (stesso giorno, stesso valore di prima): una sola riga, solo `vincoli_json`
     if (db.prepare('UPDATE main.giorno SET vincoli_json = ? WHERE data = ? AND vincoli_json = ?').run(DOPO, GIORNO, PRIMA).changes !== 1) errore(`il giorno ${GIORNO} non si scrive`);
 
@@ -69,7 +69,7 @@ export const migration386: Migration = {
     if (altre.length) errore(`altre righe di dati_guida sono cambiate: ${altre.join(', ')}`);
     if (improntaPartite(db) !== partitePrima) errore('le tabelle delle partite sono cambiate');
 
-    registraAudit(db, AUDIT, { migrazione: 'L6-10 · 386', esito: 'applicata', giorno: GIORNO, prima: PRIMA, dopo: DOPO, giorniCambiati: 1, altriGiorniInvariati: giorni - 1 });
-    logger.info({ migrazione: 'L6-10-386', giorno: GIORNO }, 'vincolo del 1° giugno riscritto');
+    registraAudit(db, AUDIT, { migrazione: 'L6-10 · 371', esito: 'applicata', giorno: GIORNO, prima: PRIMA, dopo: DOPO, giorniCambiati: 1, altriGiorniInvariati: giorni - 1 });
+    logger.info({ migrazione: 'L6-10-371', giorno: GIORNO }, 'vincolo del 1° giugno riscritto');
   },
 };

@@ -1,5 +1,5 @@
 // ============================================================
-// 360 — tre luoghi da collocare e la frase residua dell'estrazione nei pin (L5-02, lotto «Mondo e mappe»)
+// 355 — tre luoghi da collocare e la frase residua dell'estrazione nei pin (L5-02, lotto «Mondo e mappe»)
 // ============================================================
 //
 // COSA, in quest'ordine:
@@ -25,7 +25,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`360: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`355: ${motivo}; nessuna modifica applicata.`); };
 
 export const LUOGHI_DA_COLLOCARE = ['kanda-jinbocho/nagiuri', 'odaiba/odaiba-seaside-park', 'shibuya/stazione-shibuya'] as const;
 
@@ -113,8 +113,8 @@ function perCategoria(pin: readonly PinConFrase[]): Record<string, { righe: numb
 const descrizioni = (db: AppDatabase): Map<number, string> => new Map((db.prepare('SELECT id, descrizione FROM main.spillo').all() as Array<{ id: number; descrizione: string }>).map((r) => [r.id, r.descrizione]));
 const areeDeiLuoghi = (db: AppDatabase): Map<string, string | null> => new Map((db.prepare('SELECT chiave, area_chiave FROM main.luogo').all() as Array<{ chiave: string; area_chiave: string | null }>).map((r) => [r.chiave, r.area_chiave]));
 
-export const migration360: Migration = {
-  id: 360,
+export const migration355: Migration = {
+  id: 355,
   name: 'luoghi_collocati_e_frasi_dei_pin',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -148,7 +148,7 @@ export const migration360: Migration = {
     const senzaUid = conFrase.filter((p) => p.uid === null).map((p) => p.id);
     const altrove = idConFraseAltrove(db);
     const righeOriginali = Object.fromEntries(daTogliere.map((p) => [p.uid as string, p.descrizione]));
-    const archiviateNuove = archiviaSenzaSovrascrivere(db, 'L5-02 · 360', COLONNA_ARCHIVIO, righeOriginali);
+    const archiviateNuove = archiviaSenzaSovrascrivere(db, 'L5-02 · 355', COLONNA_ARCHIVIO, righeOriginali);
     const presenti = righeArchiviate(db, COLONNA_ARCHIVIO);
     if (!Object.keys(righeOriginali).every((k) => k in presenti)) errore('l’archivio delle descrizioni non ha tutte le righe');
     const scriviDescrizione = db.prepare('UPDATE main.spillo SET descrizione = ? WHERE id = ? AND uid = ? AND descrizione = ?');
@@ -174,11 +174,11 @@ export const migration360: Migration = {
     const verbalePresente = !!db.prepare('SELECT 1 FROM main.dati_guida WHERE chiave = ?').get(AUDIT);
     if (verbalePresente && collocati.length === 0 && daTogliere.length === 0) return;
     registraAudit(db, AUDIT, {
-      migrazione: 'L5-02 · 360',
+      migrazione: 'L5-02 · 355',
       luoghi: luoghi.map((l) => ({ chiave: l.chiave, pinEsaminati: l.pin.map((p) => ({ id: p.id, uid: p.uid, mappa: p.mappa })), esito: l.esito, area: l.area, motivo: l.motivo })),
       conteggiLuoghi: { collocati: collocati.length, daCollocare: luoghi.filter((l) => l.esito === 'da collocare').length, giaCollocati: luoghi.filter((l) => l.esito === 'già collocato').length },
       frase: { tolta: daTogliere.length, perCategoria: perCategoria(daTogliere), conCoda, archiviateNuove, senzaUid, fraseInMezzoNonToccati: altrove },
     });
-    logger.info({ migrazione: 'L5-02-360', collocati: collocati.map((l) => l.chiave), frasiTolte: daTogliere.length, conCoda: conCoda.map((p) => p.id), senzaUid, fraseInMezzo: altrove }, 'luoghi da collocare esaminati e frase dell’estrazione tolta dai pin');
+    logger.info({ migrazione: 'L5-02-355', collocati: collocati.map((l) => l.chiave), frasiTolte: daTogliere.length, conCoda: conCoda.map((p) => p.id), senzaUid, fraseInMezzo: altrove }, 'luoghi da collocare esaminati e frase dell’estrazione tolta dai pin');
   },
 };
