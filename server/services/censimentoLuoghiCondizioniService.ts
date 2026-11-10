@@ -4,21 +4,19 @@ import { entitaDellaRadice } from './mappe/alberoMappe.js';
 import type {
   AreaCensimentoDto, AreaGuidaCensimentoDto, ArticoloCensimentoDto, AttivitaCensimentoDto, CensimentoLuoghiCondizioniDto, DestinazioneSpilloCensimentoDto,
   JsonCensimentoCondizioniDto, LuogoCensimentoDto, MappaCensimentoDto, NegozioCensimentoDto,
-  PinCensimentoDto, QuartiereCensimentoDto, SedeExtraCensimentoDto, SedePinCensimentoDto,
+  PinCensimentoDto, QuartiereCensimentoDto,
 } from '../../shared/censimentoLuoghiCondizioni.js';
 
 /** Allowlist statica: mai SELECT *, snapshot, descrizioni, immagini o tabelle delle partite. */
 const CAMPI = {
   luogo: ['chiave', 'nome', 'tipo', 'quartiere_chiave', 'area_chiave', 'condizioni_json', 'orari_json', 'note', 'fonte', 'origine', 'nascosto', 'solo_eventi_confidente', 'fonte_condizioni_json'],
-  negozio: ['chiave', 'nome', 'tipo', 'sblocco_json', 'sede_chiave', 'orari_json', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto', 'listino_condiviso'],
+  negozio: ['chiave', 'nome', 'tipo', 'sblocco_json', 'sede_chiave', 'orari_json', 'eccezione_orari_json', 'note', 'fonte', 'origine', 'nascosto'],
   attivita: ['chiave', 'nome', 'tipo', 'condizioni_json', 'luogo', 'sede_chiave', 'fascia', 'fonte', 'origine', 'nascosto'],
-  articolo: ['chiave', 'nome', 'negozio_chiave', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave', 'articolo_condiviso'],
+  articolo: ['chiave', 'nome', 'negozio_chiave', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave'],
   quartiere: ['chiave', 'nome', 'sblocco_data', 'fonte', 'condizioni_json', 'condizioni_guida_json', 'fonte_condizioni_json', 'fonte_condizioni_guida_json'],
   area: ['chiave', 'nome', 'quartiere_chiave', 'dungeon_chiave', 'citta_chiave', 'origine'],
   mappa: ['chiave', 'nome', 'tipo', 'origine', 'area_chiave', 'genitore_chiave'],
   spillo: ['id', 'uid', 'nome', 'tipo', 'origine', 'mappa_chiave', 'area_guida_chiave', 'ruolo_guida', 'riferimento_tipo', 'riferimento_chiave', 'condizioni_json'],
-  negozio_luogo_extra: ['negozio_chiave', 'luogo_chiave'],
-  negozio_sede_spillo: ['spillo_uid', 'negozio_chiave', 'luogo_chiave'],
   dungeon_area: ['chiave', 'nome', 'dungeon_chiave'],
   spillo_destinazione: ['spillo_id', 'mappa_chiave', 'spillo_arrivo_id'],
 } as const;
@@ -66,9 +64,7 @@ export function censimentoLuoghiCondizioni(): CensimentoLuoghiCondizioniDto {
     const quartieri = leggi<QuartiereCensimentoDto>('quartiere');
     const aree = leggi<AreaCensimentoDto>('area');
     const mappe = leggi<MappaCensimentoDto>('mappa');
-    const pinGrezzi = leggi<Omit<PinCensimentoDto, 'contesto' | 'contestoGuida' | 'luogoRisolto' | 'luoghiAssociati' | 'riferimento' | 'anomalieLegami'>>('spillo');
-    const sediExtra = leggi<SedeExtraCensimentoDto>('negozio_luogo_extra');
-    const sediPin = leggi<SedePinCensimentoDto>('negozio_sede_spillo');
+    const pinGrezzi = leggi<Omit<PinCensimentoDto, 'contesto' | 'contestoGuida' | 'luogoRisolto' | 'riferimento' | 'anomalieLegami'>>('spillo');
     const areeGuida = leggi<AreaGuidaCensimentoDto>('dungeon_area');
     const destinazioniSpilli = leggi<DestinazioneSpilloCensimentoDto>('spillo_destinazione');
     const perChiave = <T extends { chiave: string }>(righe: T[]): Map<string, T> => new Map(righe.map((r) => [r.chiave, r]));
@@ -101,7 +97,6 @@ export function censimentoLuoghiCondizioni(): CensimentoLuoghiCondizioniDto {
       const contestoGuida = p.area_guida_chiave ? { dungeon_area_chiave: p.area_guida_chiave,
         dungeon_chiave: guida.get(p.area_guida_chiave)?.dungeon_chiave ?? null, nome: guida.get(p.area_guida_chiave)?.nome ?? null } : null;
       let luogoRisolto: PinCensimentoDto['luogoRisolto'] = null;
-      const associati = new Set<string>();
       const anomalieLegami: PinCensimentoDto['anomalieLegami'] = [];
       const tipo = p.riferimento_tipo, chiave = p.riferimento_chiave;
       if (chiave && (tipo === 'luogo' || tipo === 'attivita')) {
@@ -111,35 +106,18 @@ export function censimentoLuoghiCondizioni(): CensimentoLuoghiCondizioniDto {
           if (sede && l.has(sede)) luogoRisolto = { chiave: sede, via: 'sede-attivita', negozio: null };
         }
       } else if (chiave && tipo === 'negozio') {
-        let listino = chiave;
-        const visti = new Set<string>();
-        while (n.get(listino)?.listino_condiviso) {
-          if (visti.has(listino)) { anomalieLegami.push('ciclo-listino'); break; }
-          visti.add(listino); listino = n.get(listino)!.listino_condiviso!;
-        }
-        if (!n.has(listino)) anomalieLegami.push('listino-assente');
-        const legamePin = sediPin.find((s) => s.spillo_uid === p.uid);
-        const valido = legamePin && legamePin.negozio_chiave === chiave && l.has(legamePin.luogo_chiave)
-          && p.mappa_chiave !== null && m.get(p.mappa_chiave)?.area_chiave != null
-          && m.get(p.mappa_chiave)?.area_chiave === l.get(legamePin.luogo_chiave)?.area_chiave;
-        if (legamePin && !valido) anomalieLegami.push('sede-pin-incoerente');
-        if (!anomalieLegami.includes('ciclo-listino') && n.has(listino)) {
-          const sede = valido ? legamePin.luogo_chiave : n.get(listino)?.sede_chiave;
-          if (sede && l.has(sede)) luogoRisolto = { chiave: sede, via: valido ? 'sede-pin' : listino === chiave ? 'sede-negozio' : 'sede-listino', negozio: listino };
-        }
-        for (const extra of sediExtra) {
-          if (extra.negozio_chiave === chiave || extra.negozio_chiave === listino) associati.add(extra.luogo_chiave);
-        }
+        if (!n.has(chiave)) anomalieLegami.push('negozio-assente');
+        const sede = n.get(chiave)?.sede_chiave;
+        if (sede && l.has(sede)) luogoRisolto = { chiave: sede, via: 'sede-negozio', negozio: chiave };
       }
-      if (luogoRisolto) associati.add(luogoRisolto.chiave);
       const indice = tipo ? destinazioni.get(tipo) : undefined;
       // Il vecchio riferimento attivita può riferirsi direttamente a luogo: corrispondenza strutturale già usata dal visore.
       const riferimento = chiave && tipo ? { tipo, chiave,
         nome: (tipo === 'attivita' ? l.get(chiave)?.nome : undefined) ?? indice?.get(chiave)?.nome ?? null,
         esiste: tipo === 'attivita' && l.has(chiave) ? true : indice ? indice.has(chiave) : null } : null;
-      return { ...p, contesto, contestoGuida, luogoRisolto, luoghiAssociati: [...associati].sort(), riferimento, anomalieLegami };
+      return { ...p, contesto, contestoGuida, luogoRisolto, riferimento, anomalieLegami };
     });
     return { versione: 1, versioneSchemaGioco, completo: true, limiteRighe: null, schema,
-      luoghi, negozi, attivita, articoli, quartieri, aree, mappe, pin, sediExtra, sediPin, areeGuida, destinazioniSpilli };
+      luoghi, negozi, attivita, articoli, quartieri, aree, mappe, pin, areeGuida, destinazioniSpilli };
   }).deferred();
 }

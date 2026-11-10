@@ -2,8 +2,8 @@
 // CampoElencoDaOpzioni — un elenco di voci scelte per NOME da un elenco chiuso con ricerca (L11 · R11-17/1, gruppo «Luoghi e note»)
 // ============================================================
 //
-// Per i campi `elenco` della finestra di correzione (`ModificaGuida`) le cui voci sono nomi di cose che esistono già: le sedi di un listino, le offerte e gli
-// oggetti a cui si riferisce una nota storica. Le voci scelte stanno in righe, ognuna con «Togli» (bersaglio da 44 px); per aggiungerne si apre l'elenco di
+// Per i campi `elenco` della finestra di correzione (`ModificaGuida`) le cui voci sono nomi di cose che esistono già: le offerte e gli oggetti a cui si
+// riferisce una nota storica. Le voci scelte stanno in righe, ognuna con «Togli» (bersaglio da 44 px); per aggiungerne si apre l'elenco di
 // ciò che manca e si cerca scrivendo un pezzo del nome (il valore è sempre una voce dell'elenco, mai quello che hai digitato). Le opzioni vengono dal server
 // con la scheda (`opzioni` del campo); il server ricontrolla ogni voce.
 // ============================================================

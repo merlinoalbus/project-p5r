@@ -429,6 +429,19 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   non si salva; il testo libero «Come trovarlo» non esiste più (se portava un'informazione in più sta nella nota del negozio). Senza
   sede non c'è quartiere (oggi solo il negozio del Palazzo di Niijima). Un pin di città punta al punto vendita o al luogo, mai a
   un'«attività». Effetto e statistiche di un'offerta sono quelli del suo oggetto nel catalogo.
+- Ogni macchina documentata è un punto vendita (riga `negozio`) con offerte e scorta proprie e una sola sede: non esistono listini
+  condivisi né sedi aggiuntive. Il luogo dice dove, il punto vendita che cosa si compra, il pin quale. Il pin indica la macchina se
+  si sa quale; quando le fonti non lo dicono resta sul luogo, senza attribuzioni per ordine o posizione (Akihabara, Shinjuku, il
+  terzo pin dell'edificio della Shujin): quel pin non mostra la merce di una macchina scelta, porta alla pagina del luogo con tutte le
+  macchine. Una macchina può non avere pin: esiste nel suo luogo e in «Dove si compra». Le due macchine
+  del Tornello della linea Ginza sono punti vendita propri con i listini di prima, per indicazione dell'utente, senza segno «da
+  verificare». Il prezzo che la guida dà incerto (Arginade e Acqua della rinascita a Shinjuku) resta senza valore, col motivo nella
+  nota dell'offerta. Regole sulle scritture nuove in `shared/puntoVendita.ts`: una sede per punto vendita, pin nell'Area della sede,
+  un pin per punto vendita; un luogo che vende non resta senza punti vendita (spostati o nascosti), salvo una riga «In attesa: motivo»
+  nelle sue note, nemmeno eliminandoli; un luogo con punti vendita si elimina solo dopo averli spostati o eliminati; una planimetria
+  non cambia Area se un suo pin di punto vendita ne uscirebbe; nascondere un luogo intero, reversibile, nasconde con lui i suoi punti
+  vendita. Un luogo nuovo che vende può nascere senza punto vendita finché
+  l'editor del posto non li crea insieme.
 - La disponibilità di negozi e articoli «a un dato momento» è l'insieme delle condizioni della guida italiana Royal; il «disponibile
   dal» mostrato si ricava dalla condizione strutturata.
 - Il catalogo degli oggetti è separato dall'equipaggiamento con statistiche; un oggetto ha una sola identità e un solo testo

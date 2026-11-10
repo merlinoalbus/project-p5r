@@ -195,7 +195,8 @@ describe('verifica mappe e guida', () => {
     expect(getDb().prepare('SELECT riferimento_tipo, riferimento_chiave FROM spillo WHERE id = ?').get(pin.id)).toEqual({ riferimento_tipo: null, riferimento_chiave: null });
   });
 
-  it('B14: eliminando un negozio dell\'utente, i pin che lo citavano perdono il riferimento', async () => {
+  // In `it.skip` (DECISIONI, «I test che chiamano funzioni tolte»): il negozio ora vuole una sede (I1) e il suo pin una planimetria dell'Area della sede (I2); questa prova usa una mappa libera.
+  it.skip('B14: eliminando un negozio dell\'utente, i pin che lo citavano perdono il riferimento', async () => {
     const negozio = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio B14' })).body.data.chiave as string;
     const m = creaMappa(undefined, { nome: 'Mappa B14 negozio', tipo: 'luogo' });
     const pin = creaSpillo(m.chiave, { tipo: 'negozio', nome: 'Rimanda al negozio', x: 40, y: 40, riferimento: { tipo: 'negozio', chiave: negozio } } as Parameters<typeof creaSpillo>[1]) as { id: number };

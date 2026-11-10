@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 354 migrazioni di gioco (l'ultima è la 354), 68 delle partite (l'ultima è la 068).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -52,9 +52,11 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Cestino delle eliminazioni della guida e delle mappe.
 
 ## Negozi, oggetti e attività
-- Negozi con orari, sede, listini condivisi, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è
-  la sola sede; quartiere e raggruppamenti si ricavano da lì. Ancora aperti: le macchine come punti vendita propri e la fine del
-  listino condiviso, la finestra unica di modifica del posto.
+- Negozi con orari, sede, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è la sola sede;
+  quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Ancora
+  aperti: la finestra unica di modifica del posto; i pin che restano sul luogo finché non si vede in gioco quale macchina indicano
+  (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759); un luogo nuovo che vende nasce ancora senza punto vendita, finché
+  l'editor del posto non li crea insieme.
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
 - Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
@@ -200,7 +202,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   (7.30.1). Resta l'avviso su `minimatch` (GHSA-g3hv-75wg-m249, gravità moderata, solo strumenti di sviluppo: ESLint, typescript-eslint,
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
-- Edizione di rilascio con schema partite 66: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
+- Edizione di rilascio con schema partite 68: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
   copia e col sì di Roberto; finché resta l'edizione attuale il rilascio funziona.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del

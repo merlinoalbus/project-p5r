@@ -20,7 +20,7 @@ import { improntaDato, jsonCanonico, leggiJsonRegistro, leggiOggettoRegistro, le
 interface RigaAcquisto { id:string;partita_id:number;articolo_chiave:string;giorno:string;fascia:'giorno'|'sera';ordine:number;prezzo_yen:number;identita_json:string;dati_json:string;legacy_firma:string|null;legacy_raw_json:string|null;created_at:string }
 interface RigaFonte {id:string;partita_id:number;acquisto_id:string;tipo:'manuale'|'diario';voce_uid:string|null;effetto_uid:string|null;effetto_ordine:number|null;fonte_json:string;operazione_id:string;created_at:string}
 interface RigaLegacy {partita_id:number;articolo_chiave:string;updated_at:string}
-export interface PorteDisponibilitaAcquisto { valutaCorrente:(partitaId:number,articolo:string,sede?:string)=>{disponibilita:DisponibilitaDto;revisione:string} }
+export interface PorteDisponibilitaAcquisto { valutaCorrente:(partitaId:number,articolo:string)=>{disponibilita:DisponibilitaDto;revisione:string} }
 const righeAcquisti=(p:number):RigaAcquisto[]=>prepared('SELECT * FROM utente.acquisto_registrato WHERE partita_id=? ORDER BY CASE WHEN substr(giorno,1,2)<\'04\' THEN 1 ELSE 0 END,giorno,CASE fascia WHEN \'giorno\' THEN 0 ELSE 1 END,ordine,id').all(p) as RigaAcquisto[];
 const righeFonti=(p:number):RigaFonte[]=>prepared('SELECT * FROM utente.acquisto_provenienza WHERE partita_id=? ORDER BY id').all(p) as RigaFonte[];
 const righeLegacy=(p:number):RigaLegacy[]=>prepared('SELECT partita_id,articolo_chiave,updated_at FROM utente.acquisto_partita WHERE partita_id=? ORDER BY articolo_chiave').all(p) as RigaLegacy[];
@@ -119,7 +119,7 @@ function offerta(chiave:string):{identita:IdentitaAcquisto;raw:Record<string,unk
   const r=prepared('SELECT a.*,n.nome AS negozio_nome,c.nome AS catalogo_nome FROM main.articolo a LEFT JOIN main.negozio n ON n.chiave=a.negozio_chiave LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?').get(chiave) as Record<string,unknown>|undefined;
   if(!r)throw httpErrors.notFound('articolo-non-trovato','L’offerta non esiste: non viene ricreata.');
   if(!eOffertaAojiru({chiave,catalogoChiave:r.catalogo_chiave as string|null}))throw httpErrors.conflict('offerta-non-aojiru','Questa identità non corrisponde all’offerta Aojiru riconosciuta.');
-  if(r.prezzo!==PREZZO_AOJIRU||r.costo_json!=null||r.articolo_condiviso!=null)throw httpErrors.conflict('offerta-variata','Prezzo o identità dell’offerta sono diversi: nessuna regola viene imposta alla variante.');
+  if(r.prezzo!==PREZZO_AOJIRU||r.costo_json!=null)throw httpErrors.conflict('offerta-variata','Prezzo o identità dell’offerta sono diversi: nessuna regola viene imposta alla variante.');
   return {identita:{articolo:chiave,nome:String(r.catalogo_nome??r.nome),negozio:typeof r.negozio_chiave==='string'?r.negozio_chiave:null,negozioNome:String(r.negozio_nome??'Offerta precedente'),catalogo:typeof r.catalogo_chiave==='string'?r.catalogo_chiave:null},raw:r};
 }
 export function verificaOffertaConsumo(chiave:string):void {offerta(chiave);}

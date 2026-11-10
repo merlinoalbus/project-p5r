@@ -152,7 +152,8 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
       setEliminazione(null);
       onSalvato();
     } catch (err) {
-      if (isApiError(err) && err.status === 409) setEliminazione({ riepilogo: testoRiepilogo(err.details) || err.message });
+      // solo il riepilogo dei contenuti si conferma; gli altri 409 (`luogo-con-punti-vendita`, `luogo-senza-punto-vendita`) dicono che cosa fare prima
+      if (isApiError(err) && (err.code === 'luogo-con-contenuti' || err.code === 'negozio-con-acquisti')) setEliminazione({ riepilogo: testoRiepilogo(err.details) || err.message });
       else notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
     } finally {
       setOccupato(false);

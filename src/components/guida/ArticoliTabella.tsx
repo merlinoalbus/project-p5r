@@ -54,21 +54,21 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
   /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
   const cambia = async (articolo: string, fatto: boolean) => {
     setOccupato(true);
-    try { onCambiato(await impostaAcquisto(partitaId!, articolo, fatto, a.sedeChiave)); }
+    try { onCambiato(await impostaAcquisto(partitaId!, articolo, fatto)); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { setOccupato(false); }
   };
   /** Annulla un solo acquisto del ciclo (una riga del registro) e passa al genitore l'articolo aggiornato. */
   const annullaRiga = async (rigaId: number) => {
     setOccupato(true);
-    try { onCambiato(await annullaRigaAcquisto(partitaId!, rigaId, a.sedeChiave)); }
+    try { onCambiato(await annullaRigaAcquisto(partitaId!, rigaId)); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
     finally { setOccupato(false); }
   };
   /** Toglie il segno «ottenuto» senza un giorno registrato (di prima del registro, o senza data di gioco) e passa al genitore l'articolo aggiornato. */
   const togliSegno = async (articolo: string) => {
     setOccupato(true);
-    try { onCambiato(await togliSegnoSenzaGiorno(partitaId!, articolo, a.sedeChiave)); }
+    try { onCambiato(await togliSegnoSenzaGiorno(partitaId!, articolo)); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
     finally { setOccupato(false); }
   };
@@ -98,7 +98,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
           if (!articolo) throw new Error('Operazione registrata; l’articolo non è più presente nel listino.');
           onCambiato(articolo); await onContenutoCambiato?.();
         }}
-        acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)}
+        bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)}
         rifornimento={a.rifornimento} scorta={a.scorta} onAnnullaRiga={(id) => void annullaRiga(id)} onTogliSegno={(k) => void togliSegno(k)} />}
       {!IN_RILASCIO && onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
     </div>

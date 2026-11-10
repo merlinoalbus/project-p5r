@@ -107,7 +107,7 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     if (offertaScelta) {
       const rigaPrima = ultimaRigaNegozio(partitaId, offertaScelta);
       const eraOttenuto = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, offertaScelta);
-      impostaAcquisto(partitaId, offertaScelta, true, richiesta.acquisto?.sede);
+      impostaAcquisto(partitaId, offertaScelta, true);
       const rigaDopo = ultimaRigaNegozio(partitaId, offertaScelta);
       if (rigaDopo > rigaPrima) { articolo = offertaScelta; registroId = rigaDopo; }
       else if (!eraOttenuto && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, offertaScelta)) articolo = offertaScelta;

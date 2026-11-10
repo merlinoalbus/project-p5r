@@ -64,7 +64,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
   const catalogo = oggettiPerFonte('guida');
   const offerte = new Map<string, Array<{ chiave: string; negozio: string }>>();
   for (const a of prepared(`SELECT a.catalogo_chiave,a.chiave,a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
-    WHERE a.catalogo_chiave IS NOT NULL AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{ catalogo_chiave: string; chiave: string; negozio_chiave: string }>) {
+    WHERE a.catalogo_chiave IS NOT NULL AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{ catalogo_chiave: string; chiave: string; negozio_chiave: string }>) {
     const v = offerte.get(a.catalogo_chiave) ?? []; v.push({ chiave: a.chiave, negozio: a.negozio_chiave }); offerte.set(a.catalogo_chiave, v);
   }
   const identita = (o: CatalogoOggettoDto) => ({ catalogo: { chiave: o.chiave, nome: o.nome, casa: o.casa }, nome: o.nome, nomiAltri: o.nomiAltri });
@@ -613,7 +613,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}),
       nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
       // la sede si dice solo se è un posto diverso dal negozio («High Sense (High Sense)» non informa)
-      dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
+      dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.negozioTipo !== 'distributore' && o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
       costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
       nota: g.nota };
   });

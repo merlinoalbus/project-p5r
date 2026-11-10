@@ -29,12 +29,11 @@ import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatal
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import { condizioniDiSblocco } from './sbloccoLuoghi.js';
-import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { compratoNelCiclo } from '../../shared/rifornimento.js';
 import { noteStoricheDi } from './noteStoricheService.js';
-import { momentoDellaVoce, presenzeSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
+import { momentoDellaVoce, presenzaSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
 import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, ScortaArticoloDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
@@ -162,7 +161,7 @@ function scontoDelNegozio(json: string | null): NegozioRiassuntoDto['sconto'] {
  *
  *  Ondata 5 (decisione 21): con una regola di rifornimento e un limite di pezzi, un requisito in più, la scorta del ciclo in corso («Rimasti 1
  *  di 3», «Esaurito: torna lunedì 25 aprile»), calcolata dal registro degli acquisti (`scorteService`): esaurita, l'articolo è bloccato. */
-function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDiOfferta(r, st)): DisponibilitaDto {
+function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDellArticolo(r, st)): DisponibilitaDto {
   // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
   const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
   const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
@@ -173,10 +172,6 @@ function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: 
   return { stato: daScorta.stato === 'rosso' ? 'bloccato' : esito.stato, requisiti: [...requisiti, daScorta] };
 }
 
-/** Ondata 5: la scorta dell'offerta con le vecchie chiavi del suo listino condiviso (una scorta sola, ogni riga con la chiave del suo segno). */
-function scortaDiOfferta(r: RigaArticolo, st: StatoDisponibilita | undefined): ScortaArticoloDto | null {
-  return scortaDellArticolo(r, st, articoliEquivalenti(r.chiave, lettureListiniCondivisi()));
-}
 /** La riga del negozio, con quel che descrive l'oggetto **letto dall'oggetto**, non copiato.
  *
  * Un articolo collegato non ha una descrizione propria: nome, effetto, statistiche e «per chi»
@@ -213,14 +208,10 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
   const oggetto = r.catalogo_chiave ? catalogo?.get(r.catalogo_chiave) : undefined;
   const costo = costoOggetto(r.costo_json ?? null);
   const acquisti = st?.partitaId === undefined ? undefined : acquistiArticolo(st.partitaId, r.chiave, st.acquisti);
-  const acquistiRegistrati = articoliEquivalenti(r.chiave, lettureListiniCondivisi()).filter((chiave) => st?.partitaId !== undefined
-    && (chiave === r.chiave ? acquisti : acquistiArticolo(st.partitaId, chiave, st.acquisti))?.presenzaStorica != null).map((articolo) => {
-    const origine = prepared('SELECT n.nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').get(articolo) as { nome: string } | undefined;
-    return { articolo, negozioNome: origine?.nome ?? 'Offerta precedente' };
-  });
+  const acquistiRegistrati = acquisti?.presenzaStorica != null ? [{ articolo: r.chiave, negozioNome: r.negozio_nome ?? 'Offerta precedente' }] : [];
   const condizioniArticolo = regole(r.condizioni_json);
   // Ondata 5: la scorta del ciclo in corso (con la partita), letta una volta e passata alla disponibilità
-  const scorta = st ? scortaDiOfferta(r, st) : null;
+  const scorta = st ? scortaDellArticolo(r, st) : null;
   return { ricevuti, condizioni: condizioniArticolo, rifornimento: rifornimentoDellArticolo(r), ...(st ? { scorta } : {}), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
     catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
     nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
@@ -238,7 +229,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
     noteStoriche: noteStoricheDi('articolo', r.chiave),
-    acquistato: acquisti?.acquistato === true || articoliEquivalenti(r.chiave, lettureListiniCondivisi()).some(k => acquistati.has(k)), acquistiRegistrati, acquisti,
+    acquistato: acquisti?.acquistato === true || acquistati.has(r.chiave), acquistiRegistrati, acquisti,
     ...(st ? { disponibilita: disponibilitaArticolo(r, st, scorta) } : {}) };
 }
 
@@ -252,14 +243,11 @@ function acquistiPartita(partitaId: number | undefined): Set<string> {
 /** Negozi in ordine con conteggi canonici dell'intero catalogo; con la partita, la presenza dagli orari. */
 export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
-  const listini = lettureListiniCondivisi();
-  return (prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 ORDER BY n.ordine`).all() as RigaNegozio[])
-    .filter((r) => !listini.negozi.has(r.chiave))
-    .map((r) => riassunto(r, st));
+  return (prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 ORDER BY n.ordine`).all() as RigaNegozio[]).map((r) => riassunto(r, st));
 }
 
 /** Lo stato della partita già calcolato da chi chiama: una mappa con molti negozi lo passa invece di farlo ricalcolare per ogni pin. */
-export interface ContestoNegozio { st?: StatoDisponibilita; acquistati?: Set<string>; listini?: LettureListiniCondivisi }
+export interface ContestoNegozio { st?: StatoDisponibilita; acquistati?: Set<string> }
 
 /** Gli acquisti segnati nella partita (con la verifica della partita), per costruire un `ContestoNegozio`. */
 export function acquistiDellaPartita(partitaId: number): Set<string> {
@@ -268,15 +256,12 @@ export function acquistiDellaPartita(partitaId: number): Set<string> {
 
 /** Porta del dominio acquisti: legge il momento corrente, senza fingere di ricostruire progressi passati.
  * Mappe e insiemi dello stato entrano interamente nella revisione, non vengono ridotti a oggetti vuoti. */
-export function disponibilitaAcquistoCorrente(partitaId: number, articolo: string, sede?: string) {
+export function disponibilitaAcquistoCorrente(partitaId: number, articolo: string) {
   verificaPartita(partitaId);
-  const listini = lettureListiniCondivisi();
-  const chiave = articoloDelListino(articolo, listini);
-  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ? AND a.nascosto=0 AND n.nascosto=0`).get(chiave) as RigaArticolo | undefined;
-  if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’offerta da valutare non esiste.');
-  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(r.negozio_chiave) as RigaNegozio | undefined;
+  const fonte = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ? AND a.nascosto=0 AND n.nascosto=0`).get(articolo) as RigaArticolo | undefined;
+  if (!fonte) throw httpErrors.notFound('articolo-non-trovato', 'L’offerta da valutare non esiste.');
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(fonte.negozio_chiave) as RigaNegozio | undefined;
   if (!negozio) throw httpErrors.notFound('negozio-non-trovato', 'Il negozio dell’offerta non esiste.');
-  const fonte = conSede(r, negozioNellaSede(negozio, sede, listini));
   const stato = statoDisponibilitaPartita(partitaId);
   const canonico = (v: unknown): unknown => {
     if (v instanceof Map) return [...v].map(([k, x]) => [canonico(k), canonico(x)]).sort((a, b) => JSON.stringify(a[0]).localeCompare(JSON.stringify(b[0])));
@@ -290,45 +275,24 @@ export function disponibilitaAcquistoCorrente(partitaId: number, articolo: strin
 
 /** La scheda di un negozio non nascosto con i suoi articoli non nascosti, nell'ordine; con la partita, acquisti e
  *  disponibilità (presi da `contesto` se chi chiama li ha già). 404 se il negozio non c'è o è nascosto. */
-export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio, sede?: string): NegozioDettaglioDto {
-  const listini = contesto?.listini ?? lettureListiniCondivisi();
-  const origine = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
-  if (!origine) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
-  const canonica = listinoDelNegozio(chiave, listini);
-  const principale = canonica === chiave ? origine : prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(canonica) as RigaNegozio | undefined;
-  if (!principale) throw httpErrors.notFound('negozio-non-trovato', 'Il listino condiviso non è disponibile.');
-  const n = negozioNellaSede(principale, sede, listini);
+export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio): NegozioDettaglioDto {
+  const n = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
+  if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
   // lo stato della partita (rilievo P1 della verifica): dal contesto se c'è, altrimenti calcolato qui
   const st = partitaId === undefined ? undefined : contesto?.st ?? statoDisponibilitaPartita(partitaId);
   const acquistati = partitaId === undefined ? new Set<string>() : contesto?.acquistati ?? st?.articoliOttenuti ?? acquistiPartita(partitaId);
   const riepilogo = riassunto(n, st);
-  const righeArticoli = prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(canonica) as RigaArticolo[];
+  const righeArticoli = prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[];
   const catalogo = identitaArticoli(righeArticoli);
   const ricevuti = ricompensePerFonte('articolo', righeArticoli.map((r) => r.chiave));
   const letture = partitaId === undefined ? undefined : nuoveLettureSconti(partitaId);
-  const articoli = righeArticoli.map((r) => articoloDto(conSede(r, n), acquistati, st, catalogo, ricevuti.get(r.chiave), letture));
+  const articoli = righeArticoli.map((r) => articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
   // la guida del quiz dei lavori che si fanno qui (richiesta dell'utente, 2026-10-17: il quiz dei codici a barre al Triple Seven)
   const quiz = n.sede_chiave ? [...attivitaConQuiz()].filter(([, a]) => a.sede === n.sede_chiave).map(([c, a]) => quizVoceDto(c, a, st?.dataGioco ?? null)) : [];
-  // «acquistati»: ciò che si rifornisce conta se comprato nel ciclo in corso della sede (`compratoNelCiclo`), il resto se ottenuto
+  // «acquistati»: ciò che si rifornisce conta se comprato nel ciclo in corso (`compratoNelCiclo`), il resto se ottenuto
   return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter(compratoNelCiclo).length, quiz,
     ...(n.chiave === 'jose' ? { trasformazioni: trasformazioniDiJose(st) } : {}) };
-}
-
-/** Stesso listino, presenza della sede scelta: Shibuya non eredita gli orari della scuola. */
-function negozioNellaSede(n: RigaNegozio, sede: string | undefined, listini: LettureListiniCondivisi): RigaNegozio {
-  if (!sede || sede === n.sede_chiave) return n;
-  if (!listini.sedi.some((s) => s.negozio === n.chiave && s.luogo === sede)) throw httpErrors.badRequest('sede-listino-non-valida', 'Il listino non appartiene al luogo indicato.');
-  const l = prepared(`SELECT l.chiave,l.nome,l.quartiere_chiave,l.orari_json,l.condizioni_json,q.nome AS quartiere_nome
-    FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ? AND l.nascosto = 0`).get(sede) as
-    { chiave: string; nome: string; quartiere_chiave: string; orari_json: string | null; condizioni_json: string | null; quartiere_nome: string } | undefined;
-  if (!l) throw httpErrors.notFound('luogo-non-trovato', 'La sede del listino non è disponibile.');
-  return { ...n, sede_chiave: l.chiave, sede_nome: l.nome, quartiere_chiave: l.quartiere_chiave, quartiere_nome: l.quartiere_nome,
-    sede_orari_json: l.orari_json, sede_condizioni_json: l.condizioni_json };
-}
-
-function conSede(r: RigaArticolo, n: RigaNegozio): RigaArticolo {
-  return { ...r, negozio_sblocco: n.sblocco_json, negozio_sede: n.sede_chiave, sede_orari_json: n.sede_orari_json, sede_condizioni_json: n.sede_condizioni_json };
 }
 
 export interface FiltroArticoli {
@@ -345,7 +309,6 @@ export interface FiltroArticoli {
 
 /** Ricerca degli articoli in tutti i negozi per testo, categorie e destinatario; con la partita anche per stato d'acquisto e disponibilità (massimo 300 risultati, totale calcolato prima del limite). */
 export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): RicercaArticoliDto {
-  const listini = lettureListiniCondivisi();
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
   const acquistati = st?.articoliOttenuti ?? new Set<string>();
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
@@ -360,24 +323,8 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   const ricevuti = ricompensePerFonte('articolo', righe.map((r) => r.chiave));
   // «Rango Confidente 3» senza nome è il Confidente del negozio: la ricerca deve valutarlo come la scheda.
   // Stato e disponibilità si filtrano dopo la valutazione: sono fatti della partita, non colonne.
-  const sediValutate = new Map<string, RigaNegozio>();
   const letture = partitaId === undefined ? undefined : nuoveLettureSconti(partitaId);
-  let valutati = righe.filter((r) => !listini.articoli.has(r.chiave)).map((r) => {
-    const sedi = listini.sedi.filter((s) => s.negozio === r.negozio_chiave);
-    if (st && sedi.length > 0 && disponibilitaArticolo(r, st).stato !== 'disponibile') {
-      for (const sede of sedi) {
-        const k = `${sede.negozio}\0${sede.luogo}`;
-        let n = sediValutate.get(k);
-        if (!n) {
-          const principale = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(sede.negozio) as RigaNegozio;
-          n = negozioNellaSede(principale, sede.luogo, listini); sediValutate.set(k, n);
-        }
-        const variante = conSede(r, n);
-        if (disponibilitaArticolo(variante, st).stato === 'disponibile') return articoloDto(variante, acquistati, st, catalogo, ricevuti.get(r.chiave), letture);
-      }
-    }
-    return articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture);
-  });
+  let valutati = righe.map((r) => articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave), letture));
   valutati = valutati.filter((a) => trova(a.nome, a.nomeOriginale, ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
     ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome) : []), a.effetto, a.negozioNome));
   if (conCatalogo) {
@@ -393,15 +340,12 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
 
 /**
  * L13 (decisione 4): la disponibilità di un articolo nello stato dato (per la scelta fra i set alternativi di una voce: lo stato al giorno della
- * voce, `statoAlMomento`), con la stessa regola di `impostaAcquisto` (listino condiviso, presenza del negozio nella sua sede, condizioni
- * dell'articolo). null se l'articolo non c'è.
+ * voce, `statoAlMomento`), con la stessa regola di `impostaAcquisto` (presenza del negozio nella sua sede, condizioni dell'articolo). null se
+ * l'articolo non c'è.
  */
 export function disponibilitaArticoloNelloStato(articoloChiave: string, st: StatoDisponibilita): ReturnType<typeof disponibilitaArticolo> | null {
-  const listini = lettureListiniCondivisi();
-  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloDelListino(articoloChiave, listini)) as RigaArticolo | undefined;
-  if (!riga) return null;
-  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(riga.negozio_chiave) as RigaNegozio | undefined;
-  return negozio ? disponibilitaArticolo(conSede(riga, negozioNellaSede(negozio, undefined, listini)), st) : null;
+  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
+  return riga ? disponibilitaArticolo(riga, st) : null;
 }
 
 /** Le opzioni di `impostaAcquisto` per i gesti che non sono la pagina del negozio (gli effetti di stato di una voce del Diario). */
@@ -446,17 +390,10 @@ function togliPresenza(partitaId: number, articoloChiave: string, nome: string):
  * presenza di prima del registro (nessuna riga) si toglie come prima. Un articolo comprato soltanto da voci del Diario non si toglie dal
  * negozio: si toglie la spunta della voce.
  */
-export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string, opz: OpzioniAcquisto = {}): ArticoloDto {
+export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, opz: OpzioniAcquisto = {}): ArticoloDto {
   verificaPartita(partitaId);
-  const listini = lettureListiniCondivisi();
-  const canonica = articoloDelListino(articoloChiave, listini);
-  if (!prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(articoloChiave)) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
-  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(canonica) as RigaArticolo | undefined;
-  if (!riga) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
-  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(riga.negozio_chiave) as RigaNegozio;
-  // Togliere una spunta resta possibile anche da una scheda vecchia, dopo che la sede aggiuntiva è stata rimossa.
-  const sedeDaUsare = !fatto && sede && sede !== negozio.sede_chiave && !listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede) ? undefined : sede;
-  const r = conSede(riga, negozioNellaSede(negozio, sedeDaUsare, listini));
+  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
+  if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
   const st = opz.st ?? statoDisponibilitaPartita(partitaId);
   const catalogo = identitaArticoli([r]);
   const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
@@ -480,20 +417,18 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
       nuovaValutazioneLegacy(getDb(), { partita_id: partitaId, articolo_chiave: articoloChiave, updated_at: adesso });
     }
-    // Ogni riga porta la chiave con cui l'acquisto è segnato (`articoloChiave`, la stessa di `acquisto_partita`): il segno «ottenuto» e la
-    // riga che lo porta restano della stessa chiave anche per le vecchie chiavi di un listino condiviso (la scorta le legge insieme).
+    // Ogni riga porta la chiave con cui l'acquisto è segnato (`articoloChiave`, la stessa di `acquisto_partita`).
     if (fatto) {
       // la riga del registro: il giorno della voce, o quello corrente della partita (senza una data di gioco non si data niente: il segno
       // resta senza riga, e l'interfaccia lo mostra con il suo «Annulla», `soloPresenza`)
       const momento = opz.voce ? momentoDellaVoce(opz.voce.voceUid) : momentoCorrente(partitaId);
-      // la pagina del negozio registra la sede in cui si compra (ogni sede del listino ha la sua scorta); una voce del Diario la principale
       if (momento) scriviRiga(partitaId, articoloChiave, { ...momento, quantita: opz.voce?.quantita ?? 1, fonte: opz.voce ? 'voce' : 'negozio',
-        ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : { sede: r.negozio_sede ?? null }), ottenutoQui: !era });
+        ...(opz.voce ? { voceUid: opz.voce.voceUid, effettoUid: opz.voce.effettoUid } : {}), ottenutoQui: !era });
     } else if (opz.soloPresenza) {
       // il segno senza giorno: se lo porta una riga non è «senza giorno» (409); se restano acquisti registrati, il segno passa al più vecchio
       // (l'oggetto resta ottenuto per quegli acquisti); senza acquisti se ne va, con la sua fotografia nel cestino
       if (era) {
-        if (!presenzeSenzaRiga(partitaId, [articoloChiave]).length) throw httpErrors.conflict('presenza-del-registro', `Il segno «ottenuto» di «${prodotto.nome}» viene da un acquisto registrato: si annulla quell'acquisto.`);
+        if (!presenzaSenzaRiga(partitaId, articoloChiave)) throw httpErrors.conflict('presenza-del-registro', `Il segno «ottenuto» di «${prodotto.nome}» viene da un acquisto registrato: si annulla quell'acquisto.`);
         const erede = righeDellArticolo(partitaId, articoloChiave)[0];
         if (erede) prepared('UPDATE utente.registro_acquisti SET ottenuto_qui = 1 WHERE id = ?').run(erede.id);
         else togliPresenza(partitaId, articoloChiave, prodotto.nome);
@@ -505,7 +440,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
         // senza la sua riga (spunta di prima del registro) il segno se ne va come prima, salvo acquisti registrati dopo
         togliOttenuto = riga ? togliRiga(partitaId, riga.id).tolgoOttenuto : righeDellArticolo(partitaId, articoloChiave).length === 0;
       } else {
-        const riga = ultimaRigaDelNegozio(partitaId, articoloChiave, r.negozio_sede ?? null);
+        const riga = ultimaRigaDelNegozio(partitaId, articoloChiave);
         if (riga) togliOttenuto = togliRiga(partitaId, riga.id).tolgoOttenuto;
         else if (righeDellArticolo(partitaId, articoloChiave).length > 0) throw httpErrors.conflict('acquisto-della-voce', `«${prodotto.nome}» risulta comprato da una voce del Diario: si annulla togliendo la spunta della voce.`);
         else togliOttenuto = true;
@@ -533,12 +468,10 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
  * chi chiama (`effettiDiStatoService`); nessun controllo di disponibilità (la voce spuntata attesta l'acquisto). Idempotente per voce ed effetto.
  */
 export function registraCopiaDaVoce(partitaId: number, articoloChiave: string, voce: { voceUid: string; effettoUid: string; quantita?: number }): void {
-  // la riga porta la chiave dell'effetto (quella del segno «ottenuto», come `impostaAcquisto` e la migrazione utente 051); la scorta legge
-  // insieme le chiavi dello stesso listino condiviso
-  const canonica = articoloDelListino(articoloChiave, lettureListiniCondivisi());
-  const offerta = prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(canonica) as { catalogo_chiave: string | null } | undefined;
-  if (!offerta || !prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(articoloChiave)) return;
-  if (eOffertaAojiru({ chiave: canonica, catalogoChiave: offerta.catalogo_chiave })) return;
+  // la riga porta la chiave dell'effetto (quella del segno «ottenuto», come `impostaAcquisto` e la migrazione utente 051)
+  const offerta = prepared('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(articoloChiave) as { catalogo_chiave: string | null } | undefined;
+  if (!offerta) return;
+  if (eOffertaAojiru({ chiave: articoloChiave, catalogoChiave: offerta.catalogo_chiave })) return;
   const momento = momentoDellaVoce(voce.voceUid);
   if (momento) scriviRiga(partitaId, articoloChiave, { ...momento, quantita: voce.quantita ?? 1, fonte: 'voce', voceUid: voce.voceUid, effettoUid: voce.effettoUid, ottenutoQui: false });
 }
@@ -555,17 +488,15 @@ export function togliCopiaDaVoce(partitaId: number, voceUid: string, effettoUid:
 /**
  * Ondata 5 (annullo per riga): toglie un acquisto della pagina del negozio dal registro, qualunque sia il suo ciclo. Quelli di una voce del
  * Diario si annullano togliendo la spunta della voce (409). Se la riga portava l'ultimo segno «ottenuto», se ne va anche quello, come con la
- * spunta tolta. Restituisce l'articolo aggiornato nella sede in cui lo si sta guardando (`sede`, come `impostaAcquisto`: la principale o una
- * sede aggiuntiva del listino; una sede che il listino non ha più vale la principale, perché annullare resta sempre possibile).
+ * spunta tolta. Restituisce l'articolo aggiornato.
  */
-export function annullaRigaDelRegistro(partitaId: number, rigaId: number, sede?: string): ArticoloDto {
+export function annullaRigaDelRegistro(partitaId: number, rigaId: number): ArticoloDto {
   verificaPartita(partitaId);
   const riga = (prepared("SELECT 1 AS c FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()
     ? prepared('SELECT * FROM utente.registro_acquisti WHERE partita_id = ? AND id = ?').get(partitaId, rigaId) : undefined) as { articolo_chiave: string; fonte: string } | undefined;
   if (!riga) throw httpErrors.notFound('acquisto-non-trovato', 'Questo acquisto non risulta nel registro della partita.');
   if (riga.fonte !== 'negozio') throw httpErrors.conflict('acquisto-della-voce', 'Questo acquisto viene da una voce del Diario: si annulla togliendo la spunta della voce.');
-  // la riga può portare una vecchia chiave del listino condiviso: l'offerta restituita è quella del listino (la sua scorta legge entrambe)
-  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloDelListino(riga.articolo_chiave, lettureListiniCondivisi())) as RigaArticolo | undefined;
+  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(riga.articolo_chiave) as RigaArticolo | undefined;
   getDb().transaction(() => {
     const { tolgoOttenuto } = togliRiga(partitaId, rigaId);
     if (tolgoOttenuto) {
@@ -575,9 +506,5 @@ export function annullaRigaDelRegistro(partitaId: number, rigaId: number, sede?:
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
   if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’acquisto è stato tolto; l’articolo non è più nel listino.');
-  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(r.negozio_chiave) as RigaNegozio;
-  const listini = lettureListiniCondivisi();
-  const sedeValida = sede && (sede === negozio.sede_chiave || listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede)) ? sede : undefined;
-  const conLaSede = conSede(r, negozioNellaSede(negozio, sedeValida, listini));
-  return articoloDto(conLaSede, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), identitaArticoli([conLaSede]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
+  return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), identitaArticoli([r]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
 }

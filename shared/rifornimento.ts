@@ -249,7 +249,7 @@ export const ePezzoUnico = (regola: RegolaRifornimento | null | undefined): bool
 
 /**
  * «Acquistato» per i filtri e i conteggi dei negozi (censimento dell'ondata 5, §3: «comprato in questo ciclo»): ciò che si rifornisce è
- * acquistato se nel ciclo in corso della sua sede ne è stato comprato almeno un pezzo, e torna «da acquistare» quando la scorta si rinnova;
+ * acquistato se nel ciclo in corso ne è stato comprato almeno un pezzo, e torna «da acquistare» quando la scorta si rinnova;
  * il pezzo unico e ciò che non ha una regola restano acquistati una volta ottenuti. Il campo `acquistato` dell'offerta resta «ottenuto
  * almeno una volta»: lo leggono il segno barrato del pezzo unico, la condizione «articolo», le televendite e i regali.
  */

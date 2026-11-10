@@ -139,21 +139,6 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
   areaDellaMappa(MAPPA_VENDITORE);
   const negozi = new Map((db.prepare('SELECT * FROM negozio ORDER BY chiave').all() as Riga[]).map(r => [String(r.chiave), r]));
   const pertinenti = new Set([...negozi].filter(([, r]) => r.sede_chiave === LUOGO_VENDITORE).map(([k]) => k));
-  let aggiunti: boolean;
-  do { aggiunti = false; for (const [k, n] of negozi) if (!pertinenti.has(k) && typeof n.listino_condiviso === 'string' && pertinenti.has(n.listino_condiviso)) { pertinenti.add(k); aggiunti = true; } } while (aggiunti);
-  const sede = (chiave: string): string | null => {
-    let corrente = chiave; const visti = new Set<string>();
-    while (true) {
-      if (visti.has(corrente)) conflittoArea('Un listino pertinente contiene un ciclo.');
-      visti.add(corrente); const n = negozi.get(corrente);
-      if (!n) conflittoArea('Un listino pertinente ha un riferimento mancante.');
-      if (!n.listino_condiviso) return typeof n.sede_chiave === 'string' ? n.sede_chiave : null;
-      corrente = String(n.listino_condiviso);
-    }
-  };
-  for (const chiave of pertinenti) if (sede(chiave) !== LUOGO_VENDITORE) conflittoArea('Le sedi di un listino pertinente sono discordanti.');
-  const sediPin = db.prepare('SELECT * FROM negozio_sede_spillo ORDER BY spillo_uid').all() as Riga[];
-  const sediPerUid = new Map(sediPin.map(r => [String(r.spillo_uid), r]));
   const collocazioni: Riga[] = [];
   const aggiungi = (r: Riga, mappaChiave: unknown, idPin: number | null) => {
     if (typeof mappaChiave !== 'string') conflittoArea('Una collocazione pertinente non ha planimetria.');
@@ -162,20 +147,12 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
     collocazioni.push(r);
   };
   const pinCorrenti = db.prepare('SELECT * FROM spillo ORDER BY id').all() as Riga[];
-  for (const s of sediPin.filter(s => s.luogo_chiave === LUOGO_VENDITORE)) {
-    const p = pinCorrenti.find(p => p.uid === s.spillo_uid);
-    if (!p || p.riferimento_tipo !== 'negozio' || p.riferimento_chiave !== s.negozio_chiave || !negozi.has(String(s.negozio_chiave))) {
-      conflittoArea('Una sede specifica del luogo ha un collegamento non risolvibile.');
-    }
-  }
   for (const p of pinCorrenti) {
-    const s = sediPerUid.get(String(p.uid));
     const diretta = ['luogo', 'attivita'].includes(String(p.riferimento_tipo)) && p.riferimento_chiave === LUOGO_VENDITORE;
-    const specifica = p.riferimento_tipo === 'negozio' && s?.negozio_chiave === p.riferimento_chiave;
-    const daNegozio = p.riferimento_tipo === 'negozio' && (specifica ? s?.luogo_chiave === LUOGO_VENDITORE : pertinenti.has(String(p.riferimento_chiave)));
-    if (diretta || daNegozio) aggiungi({ pin: p, sedePin: specifica ? s : null }, p.mappa_chiave, Number(p.id));
+    const daNegozio = p.riferimento_tipo === 'negozio' && pertinenti.has(String(p.riferimento_chiave));
+    if (diretta || daNegozio) aggiungi({ pin: p }, p.mappa_chiave, Number(p.id));
   }
-  // le associazioni mappa → entità (`mappa_entita`, colonne `mappa.entita_*`) sono state tolte da L11 · B9: restano i pin, le sedi e il cestino
+  // le associazioni mappa → entità (`mappa_entita`, colonne `mappa.entita_*`) sono state tolte da L11 · B9: restano i pin e il cestino
   for (const c of db.prepare('SELECT registro_json FROM cestino').all() as Array<{ registro_json: string }>) {
     const passi = leggiJson(c.registro_json);
     if (!Array.isArray(passi)) conflittoArea('Un registro del cestino non è leggibile: occorre riconciliarlo prima del raccordo.');
@@ -206,7 +183,6 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
           || (p.tabella === 'spillo' && ((['luogo', 'attivita'].includes(String(r?.riferimento_tipo)) && r?.riferimento_chiave === LUOGO_VENDITORE)
             || (r?.riferimento_tipo === 'negozio' && pertinenti.has(String(r.riferimento_chiave)))))
           || (p.tabella === 'negozio' && (pertinenti.has(String(r?.chiave)) || r?.sede_chiave === LUOGO_VENDITORE))
-          || (p.tabella === 'negozio_sede_spillo' && r?.luogo_chiave === LUOGO_VENDITORE)
           || (p.tabella === 'mappa' && mappeUsate.has(String(r?.chiave))) || (p.tabella === 'area' && r?.chiave === areaChiave)) {
           conflittoArea('Il cestino conserva una fotografia pertinente: nessuna modifica automatica al suo ripristino.');
         }
@@ -214,7 +190,7 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
     }
   }
   return { area, quartiere, mappe: [...mappeUsate].sort(([a], [b]) => a.localeCompare(b)),
-    negozi: [...pertinenti].sort().map(k => negozi.get(k)), sediPin: sediPin.filter(s => s.luogo_chiave === LUOGO_VENDITORE), collocazioni };
+    negozi: [...pertinenti].sort().map(k => negozi.get(k)), collocazioni };
 }
 
 /** Dopo impronta/preflight nella stessa transazione. Nessun normalizzatore, nessun effetto sugli altri campi del luogo. */

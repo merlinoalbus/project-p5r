@@ -103,7 +103,7 @@ function indiceArticoli(): Map<string, Array<{ chiave: string; negozio: string }
       JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave
       JOIN articolo a ON a.catalogo_chiave = c.chiave JOIN negozio n ON n.chiave = a.negozio_chiave
       WHERE f.fonte_tipo IN ('libro','film','videogioco')
-        AND c.nascosto = 0 AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL`).all() as Array<{
+        AND c.nascosto = 0 AND a.nascosto = 0 AND n.nascosto = 0`).all() as Array<{
           fonte_tipo: string; fonte_chiave: string; chiave: string; negozio_chiave: string;
         }>;
     for (const r of righe) {
