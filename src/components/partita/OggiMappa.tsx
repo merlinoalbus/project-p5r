@@ -33,7 +33,7 @@ interface Props {
   oggi: Oggi;
   /** Riempie l'altezza della colonna invece di usare un'altezza fissa. */
   riempi?: boolean;
-  /** I cartellini vicini di Tokyo diventano un «+n» (Home); spento nella pagina Partita, che non cambia disposizione (DECISIONI). */
+  /** I cartellini vicini di Tokyo diventano un «+n» (Home e scheda «Oggi» della pagina Partita). */
   raggruppaVicini?: boolean;
 }
 
