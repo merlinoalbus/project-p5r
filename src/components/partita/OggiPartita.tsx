@@ -48,7 +48,7 @@ export function OggiPartita({ partita, riempi, onGiorno }: Props) {
           // telefono di L10-02 (riga dei giorni su una linea, sezione della fascia con 8 px di imbottitura) valgono solo qui, in tailwind.css
           <div className={`oggi-partita grid grid-cols-1 gap-4 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
             <OggiGuida oggi={oggi} riempi={riempi} />
-            <OggiMappa oggi={oggi} riempi={riempi} />
+            <OggiMappa oggi={oggi} riempi={riempi} raggruppaVicini />
           </div>
         )}
       </PageState>
