@@ -5,7 +5,10 @@
 // `libro`: `prezzo`, `dote`, `note`, `disponibile_dal`, `sblocca`, `effetto_json` (svuotate dalla 313: prezzo, Dote e sblocco stanno in articoli, condizioni ed effetti);
 // `film.note_successive`, `trofeo.quando`, anch'esse vuote; `regola_pesca.fonti_json`, copia esatta di `dati_json.fonti`.
 //
-// Guardie: una colonna esce solo se è vuota in TUTTE le righe (una riga di un'istanza con un valore la fa restare, e il verbale lo dice); le fonti della pesca solo se ogni
+// Una colonna con un valore in qualche riga (sui dati reali nessuna; nel pacchetto iniziale la riga di Zorro ha ancora prezzo, Dote, note e «disponibile dal») esce
+// lo stesso: prima ogni valore va nell'archivio `dati_guida.archivio-frasi-l11` (colonna «<tabella>.<colonna>», senza sovrascrivere, riletto), e il verbale dice
+// per ogni valore se il suo posto strutturato lo porta già (offerta del catalogo, effetto «dote», condizione di data). Un valore senza posto strutturato
+// resta solo nell'archivio: la migrazione non scrive dati nuovi, che la guida dovrebbe confermare. Le fonti della pesca escono solo se ogni
 // riga le ha uguali a `dati_json.fonti` (altrimenti la colonna resta, con il motivo: i lettori guardano già solo `dati_json`). La fotografia `seed_json` della regola
 // perde la copia, se la ripeteva. `film.dove` e `film.periodo` restano intatte (impronta di tutte le altre colonne). SQLite accetta il `DROP COLUMN` anche con il CHECK
 // proprio della colonna; nessun indice, vista o trigger le cita. `server/db/fontiTolte.ts` riceve le voci. Idempotente: una colonna già tolta si salta.
@@ -32,6 +35,34 @@ function righeConValore(db: AppDatabase, tabella: string, colonna: string): Arra
   return (db.prepare(`SELECT chiave, "${colonna}" AS v FROM main.${tabella} WHERE "${colonna}" IS NOT NULL AND TRIM(CAST("${colonna}" AS TEXT)) NOT IN ('', '[]', 'null') ORDER BY rowid`).all() as Array<{ chiave: string; v: unknown }>);
 }
 
+const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+/** «18 aprile» → «04-18»; null se il testo non è una data così. */
+function dataDiGioco(testo: unknown): string | null {
+  const m = /^\s*(\d{1,2})\s+([a-zà-ù]+)\s*$/i.exec(String(testo));
+  const mese = m ? MESI.indexOf((m[2] ?? '').toLowerCase()) : -1;
+  return m && mese >= 0 ? `${String(mese + 1).padStart(2, '0')}-${(m[1] ?? '').padStart(2, '0')}` : null;
+}
+const elenco = (json: unknown): Array<Record<string, unknown>> => {
+  try { const v = JSON.parse(String(json ?? '[]')) as unknown; return Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object') : []; } catch { return []; }
+};
+
+/** Dove il valore di una colonna di `libro` sta già in forma strutturata; null se non c'è un posto che lo porti (il valore resta solo in archivio). */
+function postoStrutturato(db: AppDatabase, tabella: string, colonna: string, chiave: string, v: unknown): string | null {
+  if (tabella !== 'libro') return null;
+  const riga = db.prepare('SELECT * FROM main.libro WHERE chiave = ?').get(chiave) as Record<string, unknown> | undefined;
+  if (!riga) return null;
+  const doti = elenco(riga.effetti_json).map((e) => (e.effetto && typeof e.effetto === 'object' ? e.effetto as Record<string, unknown> : {})).filter((e) => e.famiglia === 'dote');
+  if (colonna === 'prezzo' && riga.catalogo_chiave && db.prepare('SELECT 1 FROM main.articolo WHERE catalogo_chiave = ? AND prezzo = ?').get(riga.catalogo_chiave, v)) return `offerta del catalogo «${String(riga.catalogo_chiave)}» allo stesso prezzo`;
+  if (colonna === 'dote' && doti.some((d) => d.dote === v)) return 'effetto «dote» del libro (effetti_json)';
+  // la colonna `dote` può essere già uscita (viene prima nell'elenco): basta un effetto «dote» con le stesse note
+  if (colonna === 'note' && doti.some((d) => Number(d.note) === Number(v))) return 'effetto «dote» del libro con le stesse note (effetti_json)';
+  if (colonna === 'disponibile_dal') {
+    const data = dataDiGioco(v);
+    if (data && elenco(riga.condizioni_json).some((c) => c.tipo === 'data' && c.dal === data)) return `condizione di data dal ${data} (condizioni_json)`;
+  }
+  return null;
+}
+
 function togli(db: AppDatabase, tabella: string, colonna: string): void {
   db.exec(`ALTER TABLE main.${tabella} DROP COLUMN "${colonna}"`);
   if (haColonna(db, tabella, colonna)) errore(`la colonna ${tabella}.${colonna} esiste ancora`);
@@ -51,11 +82,19 @@ export const migration363: Migration = {
     if (!esisteTabella(db, 'dati_guida')) return;
     const tolte: string[] = [];
     const rimaste: Array<{ colonna: string; righe: unknown }> = [];
+    const archiviate: Array<{ colonna: string; righe: Array<{ chiave: string; v: unknown; postoStrutturato: string | null }> }> = [];
 
     for (const { tabella, colonna } of COLONNE_VUOTE) {
       if (!esisteTabella(db, tabella) || !haColonna(db, tabella, colonna)) continue;
       const conValore = righeConValore(db, tabella, colonna);
-      if (conValore.length > 0) { rimaste.push({ colonna: `${tabella}.${colonna}`, righe: conValore }); continue; }
+      if (conValore.length > 0) {
+        // prima l'archivio (mai sovrascritto), riletto: poi la colonna esce come quelle vuote
+        const nome = `${tabella}.${colonna}`;
+        archiviaSenzaSovrascrivere(db, MIGRAZIONE, nome, Object.fromEntries(conValore.map((r) => [r.chiave, String(r.v)])));
+        const inArchivio = righeArchiviate(db, nome);
+        if (!conValore.every((r) => r.chiave in inArchivio)) errore(`l’archivio di ${nome} non ha tutte le righe`);
+        archiviate.push({ colonna: nome, righe: conValore.map((r) => ({ ...r, postoStrutturato: postoStrutturato(db, tabella, colonna, r.chiave, r.v) })) });
+      }
       const impronta = improntaTabella(db, tabella, [colonna]);
       togli(db, tabella, colonna);
       if (improntaTabella(db, tabella) !== impronta) errore(`le altre colonne di ${tabella} sono cambiate`);
@@ -88,8 +127,10 @@ export const migration363: Migration = {
     }
 
     if (tolte.length === 0 && rimaste.length === 0) return;
-    registraAudit(db, 'audit-l8-363-colonne-vuote', { migrazione: MIGRAZIONE, colonneTolte: tolte, colonneRimaste: rimaste });
-    if (rimaste.length > 0) logger.warn({ migrazione: 363, rimaste }, 'colonne con un valore non tolte: restano nel database e l’app non le legge più');
-    logger.info({ migrazione: 363, tolte, rimaste: rimaste.map((r) => r.colonna) }, 'colonne vuote o doppie di libri, film, trofei e pesca tolte');
+    registraAudit(db, 'audit-l8-363-colonne-vuote', { migrazione: MIGRAZIONE, colonneTolte: tolte, colonneRimaste: rimaste, valoriArchiviati: archiviate });
+    if (rimaste.length > 0) logger.warn({ migrazione: 363, rimaste }, 'colonne non tolte: restano nel database e l’app non le legge più');
+    const senzaPosto = archiviate.flatMap((a) => a.righe.filter((r) => r.postoStrutturato === null).map((r) => `${a.colonna}:${r.chiave}`));
+    if (senzaPosto.length > 0) logger.warn({ migrazione: 363, senzaPosto }, 'valori senza posto strutturato: restano solo nell’archivio');
+    logger.info({ migrazione: 363, tolte, archiviate: archiviate.map((a) => a.colonna), rimaste: rimaste.map((r) => r.colonna) }, 'colonne vuote o doppie di libri, film, trofei e pesca tolte');
   },
 };

@@ -187,7 +187,7 @@ partita sta in `utente` con `partita_id`.
   «Cercalavoro»…). L'icona è l'asset `ui/spillo-<tipo>` con riserva SVG in codice (`IconaSpillo`); i colori sono quelli del registro.
 - **Posizioni** in percentuale dell'immagine, valide a ogni zoom e schermo; cambiare l'immagine di base mantiene gli spilli.
 - **Pannello del visore e dell'editor**: l'`aside` è l'unica area che scorre (l'elenco dei pin e la merce nel foglio non hanno un
-  proprio scorrimento). Nell'editor il piè del modulo del pin («Salva spillo», «Copia», «Elimina») resta fisso in fondo al pannello a ogni formato.
+  proprio scorrimento). Nell'editor il piè del modulo del pin («Salva spillo», «Elimina») resta fisso in fondo al pannello a ogni formato, anche scorrendo; «Copia» sta nel corpo del modulo e, scelto un pin, il pannello si porta sulla sua scheda.
 - **Visore** (`VisoreMappa`): zoom da «adatta» (calcolato dall'area visibile) fino a 8 volte, con rotellina, pulsanti, pinch (anche
   con un dito su uno spillo; finito il pinch il dito rimasto sposta) e doppio clic sulla tela per tornare ad «adatta» (su spilli e
   gruppi il doppio tocco non tocca la vista); durante trascinamento e pinch la vista si muove senza ridisegnare la mappa, e lo stato
@@ -455,7 +455,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 | `confidente_disponibilita.giorni_json`, `.fasce_json`, `.luogo`, `.sblocco_data`, `.sblocco_requisiti` | 358 | la disponibilità strutturata e i requisiti di rango; i fatti che dicevano in più stanno nella nota; archivio `dati_guida` |
 | `confidente_disponibilita.dal` | 358 | il requisito di rango 1 di tipo data |
 | `attivita.luogo`, `attivita.doti_json` | 362 | la sede dell'attività; le Doti in `effetti_json` o negli esiti; archivio `dati_guida` |
-| `libro.prezzo`, `.dote`, `.note`, `.disponibile_dal`, `.sblocca`, `.effetto_json` | 363 | offerta del catalogo, condizioni ed effetti del libro; erano vuote in tutte le righe |
+| `libro.prezzo`, `.dote`, `.note`, `.disponibile_dal`, `.sblocca`, `.effetto_json` | 363 | offerta del catalogo, condizioni ed effetti del libro; vuote sui dati reali, i valori rimasti in una copia (la riga di Zorro del pacchetto iniziale) vanno in `archivio-frasi-l11` prima della rimozione |
 | `film.note_successive`, `trofeo.quando` | 363 | gli effetti del film e le condizioni del trofeo (`condizioni_json`); erano vuote in tutte le righe |
 | `regola_pesca.fonti_json` | 363 | `dati_json.fonti`, di cui era la copia esatta |
 | `quartiere.sblocco_data` | 356 | la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti; le 7 date in `archivio-frasi-l11` |

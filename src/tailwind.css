@@ -2687,21 +2687,14 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
-/* Il piè dei moduli del pannello (mappa): «Salva» e «Elimina» restano sul bordo basso del pannello, che è l'unico scroller (AD10).
+/* Il piè dei moduli del pannello (spillo, mappa): «Salva» e «Elimina» restano sul bordo basso del pannello, che è l'unico scroller (AD10).
    Sticky nel pannello e non una finestra: la mappa accanto resta visibile e toccabile. Sta accanto alla scheda, nel contenuto della
    sezione (non dentro il modulo, che comincia sotto gli strumenti): così si ferma sul bordo anche se il modulo è ancora fuori vista.
-   `bottom:-10px` annulla il padding del pannello. Il piè dello spillo sta invece dentro la sua scheda, con le regole sotto. */
+   `bottom:-10px` annulla il padding del pannello. */
 .editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 0; border-top:1px solid var(--color-border); background:#131419; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
 /* scroll-padding: il fuoco da tastiera non finisce sotto le sezioni in alto o sotto il piè del modulo */
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; scroll-padding-block:120px 130px; }
-/* Il piè del modulo dello spillo (L5-05): sempre in vista in fondo al pannello, che è l'unico elemento che scorre. Il -10 di `bottom` è il
-   padding del pannello (come il `top` delle sezioni); i margini negativi lo portano ai bordi della scheda. Sta nel flusso del modulo, quindi
-   l'ultimo campo si scorre sopra di lui e non ci finisce sotto. */
-.visore-mappa__scheda .editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; align-items:stretch; gap:6px; margin:4px -10px -10px; padding:8px 10px; border-top:1px solid var(--color-primary); background:color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); box-shadow:0 -6px 10px -6px rgb(0 0 0 / .55); }
-/* tre azioni su una riga anche nel pannello da 340 px: icone più piccole; Salva, la prima, prende lo spazio che avanza */
-.visore-mappa__scheda .editor-mappa__piede .btn-visivo { --btn-visivo-icona:24px; padding-inline:4px 8px; gap:4px; }
-.visore-mappa__scheda .editor-mappa__piede > :first-child { flex:1 1 auto; }
 @media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }

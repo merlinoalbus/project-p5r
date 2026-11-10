@@ -680,6 +680,7 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
 
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
 function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onCreaLuogoDaPin, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
+  const idModulo = useId();
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
@@ -750,7 +751,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Crea luogo da questo pin"
     disabled={occupato || modificato || !s.uid} onClick={onCreaLuogoDaPin} />;
   const creaMappaCollegata = categoria === 'spostamento' && !destinazione && !aggiunta;
-  const luogoDalPiede = categoria !== 'citta' && azioneLuogo;
+  const azioneLuogoNelCorpo = categoria !== 'citta' && azioneLuogo;
   /** Invio del modulo dello spillo: blocca il salvataggio se un gruppo di condizioni è vuoto o incompleto (lo notifica), altrimenti salva i dati composti sopra. */
   const salva = (e: FormEvent) => {
     e.preventDefault();
@@ -758,21 +759,21 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     void onSalva(dati);
   };
   const schedaRef = useRef<HTMLElement | null>(null);
-  const piedeRef = useRef<HTMLDivElement | null>(null);
-  // Il piè è ancorato al modulo: se il modulo parte sotto il bordo del pannello (a ≤860 px, pannello basso sotto la mappa) il pannello si porta
-  // sulla scheda appena si sceglie il pin, subito sotto le sezioni che restano ferme in alto, così «Salva spillo» è già in vista.
+  // «Salva spillo» sta nel piè fermo sul bordo del pannello; in più, se la scheda appena scelta parte sotto il bordo (a ≤860 px, pannello basso
+  // sotto la mappa), il pannello si porta su di lei, subito sotto le sezioni che restano ferme in alto, così si vede che cosa si salva.
   useLayoutEffect(() => {
     const scheda = schedaRef.current;
     const pannello = scheda?.closest<HTMLElement>('.visore-mappa__pannello');
-    const piede = piedeRef.current;
-    if (!scheda || !pannello || !piede) return;
+    if (!scheda || !pannello) return;
     const bordo = pannello.getBoundingClientRect();
-    // 1 px di tolleranza: con zoom o densità non interi il piè fermo sul bordo può misurare una frazione di pixel in più
-    if (piede.getBoundingClientRect().bottom <= bordo.bottom + 1) return;
+    const piede = pannello.querySelector('.editor-mappa__piede')?.getBoundingClientRect().height ?? 0;
+    // la scheda è in vista se comincia sopra il piè (1 px di tolleranza per zoom e densità non interi)
+    if (scheda.getBoundingClientRect().top <= bordo.bottom - piede + 1) return;
     const sezioni = pannello.querySelector('.editor-mappa__sezioni')?.getBoundingClientRect().height ?? 0;
     pannello.scrollTop += scheda.getBoundingClientRect().top - bordo.top - sezioni;
   }, []);
   return (
+    <>
     <section ref={schedaRef} className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
         <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
@@ -786,7 +787,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       {categoria === 'spostamento' && destinazione && (
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" dettaglio={s.destinazioneNomi?.mappa ?? undefined} onClick={() => onVai(destinazione.mappa)} />
       )}
-      <form className="flex flex-col gap-2" onSubmit={salva}>
+      <form id={idModulo} className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} readOnly={!!luogo} aria-describedby={luogo ? 'spillo-dal-luogo' : undefined} /></label>
         {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 testo-12 text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
           <Link to={luogo.casa!} className="touch inline-flex items-center text-primary-testo">Modifica il luogo</Link></p>}
@@ -821,21 +822,24 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {categoria === 'consumabile' && <p className="m-0 testo-12 text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
 
-        {/* Le azioni che creano qualcos'altro stanno sopra il piè: lì restano solo Salva, Copia ed Elimina, che non vanno oltre due righe */}
-        {(creaMappaCollegata || luogoDalPiede) && <div className="flex flex-wrap gap-1.5">
+        {/* le azioni sul pin (non il salvataggio) stanno nel corpo; «Salva» ed «Elimina» nel piè fermo del pannello (AD10) */}
+        <div className="flex flex-wrap gap-1.5">
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
           {creaMappaCollegata && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
-          {luogoDalPiede}
-        </div>}
+          {azioneLuogoNelCorpo}
+        </div>
         {/* nel mondo la mappa di destinazione non nasce dallo spillo: si aggiunge come area o planimetria e poi si sceglie qui sopra (L2, R2-27) */}
         {categoria === 'spostamento' && !destinazione && aggiunta && <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>}
         {modificato && creaMappaCollegata && <span className="editor-mappa__avviso">Salva le modifiche prima di creare la mappa collegata.</span>}
-        <div ref={piedeRef} className="editor-mappa__piede">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
-          <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
-        </div>
       </form>
     </section>
+    {/* il piè sta fuori dalla scheda, accanto: sticky nel contenuto del pannello (non nel modulo, che comincia sotto gli strumenti) e
+        quindi sul bordo basso del pannello anche quando il modulo è ancora fuori vista o si scorre; «Salva» è del modulo (`form`) */}
+    <div className="editor-mappa__piede">
+      <PulsanteVisivo type="submit" form={idModulo} tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
+      <PulsanteVisivo tono="pericolo" compatto className="ml-auto" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
+    </div>
+    </>
   );
 }
 

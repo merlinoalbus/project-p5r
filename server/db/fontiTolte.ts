@@ -184,7 +184,7 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
   },
   ...(['prezzo', 'dote', 'note', 'disponibile_dal', 'sblocca', 'effetto_json'] as const).map((colonna): FonteTolta => ({
     schema: 'main', tabella: 'libro', colonna, tolta: 'L8 · migrazione 363',
-    sostituitaDa: 'gli articoli delle librerie (prezzo e dove si compra), le condizioni e gli effetti del libro; la colonna era vuota in tutti i libri',
+    sostituitaDa: 'gli articoli delle librerie (prezzo e dove si compra), le condizioni e gli effetti del libro; vuota sui dati reali, i valori rimasti in una copia restano nell’archivio «archivio-frasi-l11»',
   })),
   {
     schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8 · migrazione 363',
