@@ -38,7 +38,7 @@ import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citta';
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { indirizzoElemento } from '../utils/pannelloScheda';
-import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
+import { definizioneTipoLuogo, luogoHaSegno } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
 import { compratoNelCiclo } from '../../shared/rifornimento';
 import { testoSconto } from '../../shared/scontiNegozi';
@@ -225,10 +225,11 @@ export function LuogoPage() {
                     )}
                   </>
                   : <div className="flex flex-col items-start gap-2">
-                    <p className="m-0 testo-13 text-text-muted">{l.area ? `Non ancora posizionato su una planimetria di ${l.area.nome}.` : 'Non ancora posizionato: prima va collocato in un’area del quartiere.'}</p>
+                    {/* L5-06: un genere il cui segno non porta al luogo (Altro, Punto di interesse) non si posiziona con un pin */}
+                    <p className="m-0 testo-13 text-text-muted">{l.area ? (luogoHaSegno(l.tipo) ? `Non ancora posizionato su una planimetria di ${l.area.nome}.` : `È in ${l.area.nome}: questo genere di posto non ha un segno sulla mappa che porti al luogo.`) : 'Non ancora posizionato: prima va collocato in un’area del quartiere.'}</p>
                     {/* L5 (F5): «Posiziona» (il tocco sul punto di una planimetria dell'area) o, senza area, «Colloca» */}
                     {!IN_RILASCIO && (l.area
-                      ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Posiziona" onClick={() => void apriPosiziona()} />
+                      ? luogoHaSegno(l.tipo) && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Posiziona" onClick={() => void apriPosiziona()} />
                       : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="pianta" dimensione={20} />} titolo="Colloca" onClick={() => void apriColloca()} />)}
                   </div>}
               </section>

@@ -42,6 +42,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Mondo, mappe e luoghi
 - Mappa di viaggio di Tokyo con quartieri, Palazzi e luoghi; pagine di quartiere, Area e luogo (`/guida/citta`, `/guida/luogo/…`).
+  Un luogo nuovo si crea da «Aggiungi luogo», dal quartiere (area e punto facoltativi) o dall'area.
 - Palazzi (`/guida/dungeon`) con Aree, planimetrie, infiltrazioni, guida delle aree collegata ai pin, stato «concluso» e «completato».
 - Memento con dedali, aree, Persona, Richieste e trama.
 - Visore ed editor delle mappe (`/guida/mappe`): spilli in quattro categorie, condizioni di visibilità, pezzi delle planimetrie,

@@ -2,9 +2,9 @@
 // CampiLuogo — i campi comuni di un luogo nuovo o da correggere: nome, tipo a tessere, che cosa offre, orari (L13, O7-5)
 // ============================================================
 //
-// Censimento del 25/10: «tre moduli diversi per creare un luogo». Questi campi sono UNO e li usano tutti e tre i punti d'ingresso: il
-// modulo del luogo (`ModuloLuogo`: Aggiungi un luogo dal quartiere, Correggi il luogo), «Aggiungi luogo» della planimetria
-// (`FinestraAggiungiLuogo`, che poi chiede il punto) e «Crea un luogo da questo pin» (`FinestraLuogoDaPin`, che poi mostra l'anteprima).
+// Censimento del 25/10: «tre moduli diversi per creare un luogo». Questi campi sono UNO e li usano tutti: il modulo del luogo
+// (`ModuloLuogo`: il luogo in «Il posto»), «Aggiungi luogo» (`FinestraAggiungiLuogo`, il solo ingresso per crearne uno dal quartiere e
+// dall'area, L5-06) e «Crea un luogo da questo pin» dell'editor della mappa (`FinestraLuogoDaPin`, che poi mostra l'anteprima).
 // Ognuno manda il suo corpo di sempre alla sua rotta: cambia solo che campi, etichette, limiti e regola degli orari sono scritti una volta.
 //
 // Sta in un file suo, con la condizione costante di build nello stesso modulo (vedi `utils/modalita.ts`): le due finestre della mappa lo
