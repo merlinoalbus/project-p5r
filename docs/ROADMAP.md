@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 387 migrazioni di gioco (l'ultima è la 387), 73 delle partite
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 388 migrazioni di gioco (l'ultima è la 388), 73 delle partite
 (l'ultima è la 073).
 
 ## Compendio e skill
@@ -12,7 +12,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   descrizione originale in italiano, immagine; filtri e ricerca su nome canonico e italiano.
 - Elenco e scheda delle skill (`/skill`), glossario dei termini (`/compendio/glossario`).
 - Persona dei membri del gruppo con le loro forme, nel compendio.
-- Rese italiane modificabili da Impostazioni → Traduzioni; ogni dato correggibile ha «Modifica» e «Ripristina».
+- Rese italiane modificabili da Impostazioni → Traduzioni; ogni dato correggibile ha «Modifica»; nessuno ha un ritorno al valore della guida (decisione dell'utente del 10/11).
 
 ## Fusione
 - Fusione diretta e inversa, ricette speciali e Demoni del Tesoro, costo di evocazione (`/fusione`).
@@ -166,7 +166,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Palazzi, scelte dell'utente applicate:
   - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida: la scheda le mostra tutte e due;
   - alberi di fusione: le Persona DLC entrano solo se il pacchetto è posseduto, e non sono proposte «da catturare» (come Compendio e cicli);
-  - le date dei Palazzi si correggono nella finestra di «Correggi la scheda», con «Ripristina le date» (nome, sovrano e note non lo hanno);
+  - le date dei Palazzi si correggono nella finestra di «Correggi la scheda», senza un ritorno alle date della guida;
   - biglietto da visita calcolato dalla scadenza, salvo Shido (scritto) e Maruki (la guida non lo nomina); forzieri e mini-boss di Iweleth
     col tipo di prima; le 15 infiltrazioni senza Area restano; le Persona aggiunte a mano a un dedalo compaiono nelle Ombre.
 - Palazzi, da fare a mano dall'editor: i pin Tesoro di Futaba (prima di quel Palazzo) e di Maruki; i 101 abbinamenti pin–voce non collegati
@@ -243,6 +243,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - **Testata della Mappa senza planimetria, da verificare.** `MappaPage` mostra `LuogoSenzaPlanimetria` (con le briciole) solo per una mappa
   senza planimetria che ha per casa il visore: oggi nei dati non ce n'è nessuna. Quando un dato la mostrerà, va misurata (testata entro il
   30% ai cinque formati) e controllata la fila delle briciole.
+- **Casi di test sospesi con la via di «Ripristina» (10/11).** Cinque casi che finivano col ritorno ai valori della guida sono in `it.skip`
+  col motivo scritto, da riscrivere senza quel ritorno: `server/routes/catalogo.test.ts` (riga del seed corretta, nascosta e rimessa),
+  `server/routes/quiz-attivita.test.ts` (quiz corretto e rimesso), `server/routes/struttura-server.test.ts` (i luoghi; la correzione di alcuni
+  campi), `src/components/impostazioni/TraduzioniEditor.test.tsx` (due ripristini ravvicinati, da rifare su «Salva»).
 - **Tre luoghi ancora da collocare.** Libreria Nagiuri, Odaiba Seaside Park e Stazione di Shibuya stanno in quartieri con Aree, ma nessun pin
   indica la loro: si collocano dall'editor o dalla pagina del quartiere quando si vede in gioco dove stanno.
 

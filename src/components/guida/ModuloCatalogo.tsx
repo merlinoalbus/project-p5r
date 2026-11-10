@@ -1,10 +1,9 @@
 // ============================================================
-// ModuloCatalogo — il guscio del catalogo: finestra, Salva, Ripristina/Elimina, Nascondi; i campi li mette il modulo del tipo
+// ModuloCatalogo — il guscio del catalogo: finestra, Salva, Elimina, Nascondi; i campi li mette il modulo del tipo
 // ============================================================
 //
 // Quello che aggiungi resta anche quando i dati della guida vengono aggiornati: la riga è marcata
-// come tua. Correggendo una riga della guida, l'originale viene conservato e «Ripristina» lo
-// rimette. Ogni tipo ha il suo modulo in `moduli/` (negozio, articolo, libro, film, attività,
+// come tua. Correggendo una riga della guida, la riga resta «corretta da te». Ogni tipo ha il suo modulo in `moduli/` (negozio, articolo, libro, film, attività,
 // videogioco, luogo, domanda, cruciverba): questo file sa solo salvare e chiudere.
 // ============================================================
 
@@ -12,9 +11,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CondizioniEditor } from './CondizioniEditor';
 import { dataConArticolo, descriviRequisitoSpillo, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
-import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
+import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { CHIUDI_SENZA_SALVARE, conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
+import { CHIUDI_SENZA_SALVARE, conferma } from '../../stores/confermaStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
 import { FinestraModifica } from '../shared/FinestraModifica';
@@ -50,7 +49,7 @@ interface Props {
  * La finestra di creazione o correzione di un elemento del catalogo. Prende dal modulo del tipo (`MODULI`) i dati
  * iniziali, i campi, la validazione e la preparazione del corpo; aggiunge le condizioni (se il tipo le prevede, lette
  * dal JSON salvato), la spunta «Confermato» e i comandi del guscio: «Salva» (attivo solo con dati e condizioni validi),
- * «Ripristina i valori della guida» per le righe corrette, «Elimina» (nel cestino per luoghi e negozi, L5) e «Nascondi» per quelle della guida.
+ * «Elimina» (nel cestino per luoghi e negozi, L5) e «Nascondi» per quelle della guida.
  */
 // L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloCatalogoReale` esce dal bundle
 export const ModuloCatalogo: StrumentoDiModifica<typeof ModuloCatalogoReale> = IN_RILASCIO ? NienteInRilascio : ModuloCatalogoReale;
@@ -97,7 +96,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
         return;
       }
       await aggiornaElementoCatalogo(tipo, elemento.chiave, corpo);
-      notifica('success', lettura ? `${nome.singolare} corretto. Il titolo si ripristina dalla pagina dell’oggetto.` : `${nome.singolare} corretto: «Ripristina» rimette i dati della guida.`);
+      notifica('success', `${nome.singolare} corretto.`);
       onSalvato();
     } catch (err) {
       const messaggio = err instanceof Error ? err.message : 'Salvataggio fallito.';
@@ -108,31 +107,11 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
     }
   };
 
-  // L5 (M §3.2): due gesti, due rotte. «Ripristina i valori della guida» rimette i dati della guida (`POST …/ripristina`, ogni tipo, mai
-  // elimina); «Elimina» di un luogo o di un negozio va nel cestino (con la conferma e, se ha contenuti, il riepilogo del server); gli altri
-  // tipi eliminano le righe create dall'utente come prima (fino a L11)
+  // L5 (M §3.2): «Elimina» di un luogo o di un negozio va nel cestino (con la conferma e, se ha contenuti, il riepilogo del server); gli altri
+  // tipi eliminano le righe create dall'utente come prima (fino a L11). Non c'è un ritorno ai valori della guida (decisione dell'utente del 10/11).
   const nelCestino = tipo === 'luogo' || tipo === 'negozio';
   /** La finestra di conferma dell'eliminazione nel cestino; `riepilogo` è quel che il server ha detto che se ne va (409). */
   const [eliminazione, setEliminazione] = useState<{ riepilogo: string | null } | null>(null);
-  /** Rimette i valori della guida su una riga corretta. */
-  const ripristina = async () => {
-    if (!elemento) return;
-    if (statoModulo !== statoIniziale && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
-    setOccupato(true);
-    setErroreSalvataggio(null);
-    try {
-      const ripristinato = await ripristinaElementoCatalogo(tipo, elemento.chiave);
-      notifica('success', 'Ripristinati i valori della guida.');
-      if (ripristinato.avvisi?.length) notifica('warning', ripristinato.avvisi.join(' '), 12000);
-      onSalvato();
-    } catch (err) {
-      const messaggio = err instanceof Error ? err.message : 'Operazione fallita.';
-      setErroreSalvataggio(messaggio);
-      notifica('error', messaggio);
-    } finally {
-      setOccupato(false);
-    }
-  };
   /** Elimina la riga creata dall'utente (tipi diversi da luogo e negozio). */
   const elimina = async () => {
     if (!elemento) return;
@@ -209,8 +188,8 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
   const eliminabile = !nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata));
 
   // L13 (O7-5, censimento del 25/10): la finestra è la `FinestraModifica` comune — corpo che scorre da solo, piè fisso con «Elimina» a
-  // sinistra, «Ripristina» e «Nascondi» accanto (prima «Nascondi» stava in fondo al corpo che scorre), «Annulla» e «Salva» a destra, e la
-  // conferma prima di chiudere con modifiche non salvate (X, Esc, «Annulla»). Gesti, rotte e corpi sono quelli di prima.
+  // sinistra, «Nascondi» accanto (prima stava in fondo al corpo che scorre), «Annulla» e «Salva» a destra, e la
+  // conferma prima di chiudere con modifiche non salvate (X, Esc, «Annulla»).
   return (
     <FinestraModifica
       titolo={titolo}
@@ -220,26 +199,21 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
       occupato={occupato}
       sporca={statoModulo !== statoIniziale}
       onElimina={eliminabile ? () => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina()) : undefined}
-      azioniExtra={<>
-        {!nuovo && elemento.modificata && (
-          <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'} disabled={occupato} onClick={() => void ripristina()} />
-        )}
-        {!nuovo && elemento.origine === 'seed' && (
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={elemento.nascosta ? 'sbloccato' : 'bloccato'} dimensione={20} />} titolo={elemento.nascosta ? 'Mostra di nuovo' : 'Nascondi dagli elenchi'} disabled={occupato} onClick={() => void nascondi()} />
-        )}
-      </>}
+      azioniExtra={!nuovo && (elemento.origine === 'seed' || elemento.modificata) ? (
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={elemento.nascosta ? 'sbloccato' : 'bloccato'} dimensione={20} />} titolo={elemento.nascosta ? 'Mostra di nuovo' : 'Nascondi dagli elenchi'} disabled={occupato} onClick={() => void nascondi()} />
+      ) : undefined}
     >
       <div className="flex flex-col gap-5">
         {!nuovo && (
           <p className="m-0 testo-12 text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
-            {elemento.modificata && (lettura ? 'Il ripristino riguarda sessioni, effetti e condizioni della lettura.' : 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.')}
-            {elemento.origine === 'seed' && !elemento.modificata && 'Riga della guida: la correzione si salva nei dati di gioco e si può ripristinare.'}
+            {elemento.modificata && 'Riga della guida corretta da te.'}
+            {elemento.origine === 'seed' && !elemento.modificata && 'Riga della guida: la correzione si salva nei dati di gioco.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
         )}
         {lettura && <p className="m-0 testo-12 text-text-muted">Cambiare il titolo aggiorna tutti i riferimenti; il prezzo sta nell’offerta del negozio.
-          {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link></>}
+          {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per vedere le offerte</Link></>}
         </p>}
         <Componente dati={datiModulo} imposta={imposta} impostaCondizioni={impostaCondizioni} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una

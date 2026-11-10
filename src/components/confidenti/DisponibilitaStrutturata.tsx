@@ -3,7 +3,7 @@
 // ============================================================
 //
 // La scheda mostra la struttura (come si incontra, giorni, fasce, eccezioni, «dal» dal requisito di rango 1) e i luoghi per nome, non più il testo libero (che resta nelle note).
-// L'editor scrive la struttura e i luoghi col PUT della rotta strutturata; «Ripristina» riporta la struttura alla fonte. Il vecchio editor delle informazioni
+// L'editor scrive la struttura e i luoghi col PUT della rotta strutturata. Il vecchio editor delle informazioni
 // continua a scrivere solo il testo e le note. Mai un blocco: l'esito «oggi» è un'informazione.
 // L13 (ondata 6, migrazione 306): la pioggia non si modifica qui, sta nei requisiti di rango (fonte unica); la scheda la elenca accanto alle
 // eccezioni, letta da lì. Eccezioni nuove: i giorni di un rango (al posto di quelli generali) e i giorni del calendario in cui non si incontra.
@@ -17,7 +17,7 @@ import { dataValida, ordineGioco } from '../../../shared/condizioniSpillo';
 import { CampoTesto } from '../shared/Campo';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
-import { getDisponibilitaStrutturata, getLuoghi, ripristinaDisponibilitaStrutturata, salvaDisponibilitaStrutturata } from '../../services/api';
+import { getDisponibilitaStrutturata, getLuoghi, salvaDisponibilitaStrutturata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
@@ -145,7 +145,7 @@ const campiDisponibilitaDa = (d: DisponibilitaConfidenteDto): CampiDisponibilita
 /** Solo per scrivere il corpo mentre i dati arrivano: la finestra non lo mostra finché `campi` è nullo. */
 const CAMPI_VUOTI: CampiDisponibilita = { modo: 'settimanale', giorni: [], fasce: [], eccezioni: [], motivo: '', luoghi: [] };
 
-/** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. Nel rilascio (sola lettura) non esiste (costante di build). */
+/** L'editor: struttura e luoghi, salvati col PUT. Nel rilascio (sola lettura) non esiste (costante di build). */
 export const EditorDisponibilitaStrutturata: StrumentoDiModifica<typeof EditorDisponibilitaStrutturataReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaStrutturataReale;
 function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato }: { chiave: string; nome: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave), [chiave]);
@@ -193,8 +193,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
 
   return (
     <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dateCompilate} occupato={occupato} sporca={sporca}
-      caricamento={!campi} erroreCaricamento={campi ? null : d.errore}
-      azioniExtra={dati?.modificata ?<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
+      caricamento={!campi} erroreCaricamento={campi ? null : d.errore}>
     <div className="flex flex-col gap-3 testo-13">
       <Selettore etichettaSopra etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (

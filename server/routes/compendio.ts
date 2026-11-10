@@ -6,9 +6,9 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
-import { aggiornaGiorno, leggiGiorno, ripristinaGiorno } from '../services/giorniService.js';
+import { aggiornaGiorno, leggiGiorno } from '../services/giorniService.js';
 import { METEO_GIORNO } from '../../shared/giorno.js';
-import { correggiAffinita, ripristinaAffinita } from '../services/affinitaPersonaService.js';
+import { correggiAffinita } from '../services/affinitaPersonaService.js';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi.js';
 import { collegaSchedaAllaVoce, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
@@ -18,7 +18,7 @@ import { paramsOmbra, queryOmbra, queryOmbre } from '../schemas/ombre.js';
 import { negoziazione, negoziazioneCompatta, verificaNegoziazione } from '../services/negoziazioneService.js';
 import { queryNegoziazione } from '../schemas/negoziazione.js';
 import {
-  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDateDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
+  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
   impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea
 } from '../services/dungeonService.js';
 import {
@@ -26,10 +26,10 @@ import {
   bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea,
   paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce
 } from '../schemas/guidaDungeon.js';
-import { correggiRequisitoRichiesta, impostaRequisitiRanghi, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
+import { correggiRequisitoRichiesta, impostaRequisitiRanghi, impostaRequisitiRango, requisitiDelConfidente, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { setDlcConPersone } from '../services/setDlcService.js';
-import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere, ripristinaSbloccoQuartiere } from '../services/cittaService.js';
+import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
 import { elencaInviti } from '../services/inviti.js';
 import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
@@ -309,10 +309,6 @@ router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().mi
 router.put('/citta/:chiave/sblocco', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), body: z.object({ condizioni: z.array(condizioneSpillo).max(20) }).strict() }), (req, res) => {
   res.json(aggiornaSbloccoQuartiere(String(req.params.chiave), req.body.condizioni));
 });
-/** L6: ripristina la condizione propria dalla copia della guida. */
-router.post('/citta/:chiave/sblocco/ripristina', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
-  res.json(ripristinaSbloccoQuartiere(String(req.params.chiave)));
-});
 router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
   res.json(attivitaTutte(req.query.partita));
 });
@@ -382,14 +378,6 @@ router.put('/schede/:id/voce', validate({ params: z.object({ id: idParam }), bod
 /* ---- Correzione dei testi della guida: la sezione dei Palazzi non è più in sola lettura ---- */
 router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyDungeon }), (req, res) => {
   res.json(aggiornaDungeon(String(req.params.chiave), req.body));
-});
-/** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
-router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
-  res.json(ripristinaDungeon(String(req.params.chiave)));
-});
-/** L9-08: «Ripristina» delle date del Palazzo — tornano quelle di prima della prima correzione; il boss finale non si tocca. */
-router.post('/dungeon/:chiave/ripristina-date', validate({ params: paramsChiaveGuida }), (req, res) => {
-  res.json(ripristinaDateDungeon(String(req.params.chiave)));
 });
 /** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
 router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {
@@ -506,11 +494,6 @@ router.put('/confidenti/:chiave/requisiti/:rango', validate({ params: paramsRang
   const p = req.params;
   res.json(impostaRequisitiRango(p.chiave, p.rango, req.body.requisiti));
 });
-/** L6: il rango torna come lo dà la guida. */
-router.post('/confidenti/:chiave/requisiti/:rango/ripristina', validate({ params: paramsRangoConfidente }), (req, res) => {
-  const p = req.params;
-  res.json(ripristinaRequisitiRango(p.chiave, p.rango));
-});
 /** Un requisito che cita una Richiesta (per esempio eliminata, «da correggere»): cita un'altra Richiesta (scelta dell'utente,
  *  2026-10-11: «Requisito correggibile»). */
 router.put('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params: paramsRequisitoConfidente, body: bodyRequisitoRichiesta }), (req, res) => {
@@ -529,7 +512,7 @@ router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveG
   res.json(impostaDotiIncontro(String(req.params.chiave), req.body.ranghi));
 });
 
-// ---- Il giorno di gioco modificabile (L9 R9-19): meteo nelle due fasce, nota, trama e vincoli, con «Ripristina» ----
+// ---- Il giorno di gioco modificabile (L9 R9-19): meteo nelle due fasce, nota, trama e vincoli ----
 const paramsGiorno = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) });
 const bodyGiorno = z.object({
   meteoGiorno: z.enum(METEO_GIORNO).nullable().optional(),
@@ -547,12 +530,8 @@ router.get('/giorni/:data', validate({ params: paramsGiorno }), (req, res) => {
 router.put('/giorni/:data', validate({ params: paramsGiorno, body: bodyGiorno }), (req, res) => {
   res.json(aggiornaGiorno(String(req.params.data), req.body));
 });
-/** «Ripristina»: il giorno torna come lo dà la guida. */
-router.post('/giorni/:data/ripristina', validate({ params: paramsGiorno }), (req, res) => {
-  res.json(ripristinaGiorno(String(req.params.data)));
-});
 
-// ---- Le affinità di una Persona modificabili (L8 R8-10/1): correggere la griglia e rimetterla com'è nella guida ----
+// ---- Le affinità di una Persona modificabili (L8 R8-10/1): correggere la griglia ----
 const bodyAffinitaPersona = z.object({
   affinita: z.array(z.object({
     elemento: z.enum(ELEMENTI_AFFINITA.map((e) => e.chiave)),
@@ -567,10 +546,6 @@ const bodyAffinitaPersona = z.object({
 });
 router.put('/persona/:id/affinita', validate({ params: paramsId, body: bodyAffinitaPersona }), (req, res) => {
   res.json(correggiAffinita(Number(req.params.id), req.body));
-});
-/** «Ripristina»: le affinità corrette tornano quelle della guida. */
-router.post('/persona/:id/affinita/ripristina', validate({ params: paramsId }), (req, res) => {
-  res.json(ripristinaAffinita(Number(req.params.id)));
 });
 
 export default router;

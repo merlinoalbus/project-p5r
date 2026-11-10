@@ -34,13 +34,13 @@ import type { StatoAcquistiArticoloDto } from './acquisti.js';
 import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce, StatoEffettoDiStatoDto, ApplicazioneStatoPartitaDto } from './effettiVoce.js';
 
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
- *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
+ *  in `nota_storica` (migrazione 139) e si modifica dall'app; la copia della guida (`seed_json`) dice se è «modificata». */
 export interface NotaStoricaOfferta {
   id: string;
   versione: number;
   fonte: string;
   testo: string;
-  /** Testo o fonte diversi da come li dà la guida (si può ripristinare). */
+  /** Testo o fonte diversi da come li dà la guida (il segno «modificata» accanto alla fonte). */
   modificata?: boolean;
 }
 
@@ -143,7 +143,7 @@ export interface RicettaSpecialeDto {
 
 /** Scheda completa di una Persona. */
 export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
-  /** R8-10/1: le affinità come le dà la guida, solo se l'utente ne ha corretta almeno una (altrimenti null): «Ripristina» le rimette. */
+  /** R8-10/1: le affinità come le dà la guida, solo se l'utente ne ha corretta almeno una (altrimenti null): la scheda le mostra accanto a quelle corrette. */
   affinitaGuida: AffinitaDto[] | null;
   /** Testo originale sull'origine della figura (mai il testo del gioco), con fonte sintetica. */
   descrizione: string;
@@ -237,14 +237,14 @@ export type RequisitoRango = Condizione & {
  * niente più elenco parallelo e niente `manuale` («niente condizioni manuali», 2026-09-05; migrazione 090). Un'avvertenza da controllare
  * nel gioco è un `avviso`, che non blocca mai. */
 
-/** L6 (§6.1): i requisiti di un Confidente per rango, per l'editor della sua pagina («Modifica requisiti», «Ripristina»). */
+/** L6 (§6.1): i requisiti di un Confidente per rango, per l'editor della sua pagina («Modifica requisiti»). */
 export interface RequisitiConfidenteDto {
   confidente: string;
   ranghi: Array<{
     rango: number;
     /** `descrizione` è la frase generata dalla condizione; `nota` è il testo proprio del requisito, '' se non ne ha (L7-02). */
     requisiti: Array<{ indice: number; condizione: Condizione; descrizione: string; nota: string }>;
-    /** Il rango è diverso da come lo dà la guida (si può ripristinare). */
+    /** Il rango è diverso da come lo dà la guida (il segno «Modificato» dell'editor). */
     modificato: boolean;
   }>;
 }
@@ -294,7 +294,7 @@ export interface InvitoDto {
   /** L13 (O7-4, migrazione 313): quando arriva il messaggio dell'invito (MM-GG e fascia), se la guida lo dice; la frase la genera la pagina. */
   messaggio: { data: string; fascia: 'giorno' | 'sera' } | null;
   fonte: string;
-  /** R9-07c: un invito della guida cambiato dall'utente (si può «Ripristinare»). */
+  /** R9-07c: un invito della guida cambiato dall'utente (il chip «Modificato»). */
   modificato: boolean;
   /** R9-07c: un invito creato dall'utente (l'unico che si può togliere, dal Cestino). */
   daUtente: boolean;
@@ -317,7 +317,7 @@ export interface SbloccoDto {
   manca: string | null;
   /** Gli inviti che lo aprono (in sola lettura qui: si gestiscono dalla pagina del Confidente). */
   inviti: InvitoDto[];
-  /** La condizione salvata è diversa da quella della guida (si può ripristinare). */
+  /** La condizione salvata è diversa da quella della guida (il segno «modificato»). */
   modificato: boolean;
 }
 
@@ -351,10 +351,8 @@ export interface DialogoConfidenteDto {
 export interface RegaloConfidenteDto {
   /** Posizione del regalo nella scheda del Confidente: con la chiave del Confidente è l'indirizzo `<confidente>:<ordine>` di `/api/correzioni/regalo`. */
   ordine: number;
-  /** Il regalo è stato corretto (oggetto, dove, costo, reazione o nota diversi da come li dà la guida): si può ripristinare. */
+  /** Il regalo è stato corretto (oggetto, dove, costo, reazione o nota diversi da come li dà la guida): il chip «Modificato». */
   modificato: boolean;
-  /** Ripristina esclusivamente la rettifica storica del costo, con anteprima del valore salvato. */
-  ripristinoCosto?: { ordine: number; precedente: string; attuale: string | null };
   /** Nome della guida conservato per riconoscere le consegne storiche non ancora collegate. */
   nomeStorico?: string;
   catalogo?: RiferimentoOggettoDto | null;
@@ -594,8 +592,6 @@ export interface TraduzioneDto {
   extra: Record<string, unknown> | null;
   fonte: 'seed' | 'utente';
   updatedAt: string;
-  /** Solo nella risposta di «Ripristina» su una riga creata dall'utente (non esisteva nella guida): la riga è stata tolta. */
-  rimossa?: boolean;
 }
 
 // ---- Partite ----
@@ -649,7 +645,7 @@ export interface AllertaGiornoDto {
   effetti: string[];
   /** Le fasce in cui vale, prima giorno poi sera (la notte torrida solo di sera, l'ondata di calore solo di giorno). */
   fasce: FasciaGioco[];
-  /** R11-15/1: corretta dall'utente in quel giorno (si rimette con `/api/correzioni/allerta-meteo/MM-GG:chiave/ripristina`). */
+  /** R11-15/1: corretta dall'utente in quel giorno (si corregge con `/api/correzioni/allerta-meteo/MM-GG:chiave`). */
   modificata: boolean;
 }
 
@@ -2120,8 +2116,6 @@ export interface AreaRiassuntoDto {
   /** L'ingresso del quartiere usa una planimetria di quest'Area. */
   ingresso: boolean;
   origine: 'seed' | 'utente';
-  /** L'utente ha corretto un'Area della guida (c'è una copia dei valori di prima, che «Ripristina» rimette). */
-  modificata: boolean;
   /** L'Area è in attesa della scelta dell'utente: tenerla o rimuoverla (lo staff, decisione del 2026-10-20). */
   daVerificare: boolean;
   casa: string;
@@ -2355,7 +2349,7 @@ export interface QuartiereDettaglioDto {
   aree: AreaRiassuntoDto[];
   /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se la migrazione ne ha dedotta una. */
   luoghiDaCollocare?: Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }>;
-  /** L6: lo sblocco strutturato, come nel riassunto («Modifica sblocco» e «Ripristina» dalla pagina del quartiere). */
+  /** L6: lo sblocco strutturato, come nel riassunto («Modifica sblocco» dalla pagina del quartiere). */
   sbloccoCondizione?: SbloccoDto;
 }
 
@@ -3060,11 +3054,6 @@ export interface DungeonRiassuntoDto {
   /** L4 §8.14: la voce del boss finale dichiarata del Palazzo («Modifica › Boss finale»); null = nessuna (il Palazzo non si conclude).
    *  Per i Palazzi; assente per i Memento. */
   voceBossFinale?: { chiave: string; nome: string } | null;
-  /** L4 §8.14: la voce del boss finale è stata cambiata dall'utente («Ripristina» la riporta a quella della guida). */
-  bossFinaleCorretto?: boolean;
-  /** L9-08: le date del Palazzo sono state corrette dall'utente («Ripristina» le riporta a quelle della guida, indipendente dal boss finale).
-   *  Per i Palazzi; assente per i Memento. */
-  dateCorrette?: boolean;
   /** L4 §8.15: la regola del boss del Palazzo — `voce-finale` (la voce dichiarata, «Modifica › Boss finale») o `memento` (il boss segnato
    *  nella Guida, come nei Memento, senza effetti di Palazzo: Iweleth). Per i Palazzi; assente per i Memento. */
   regolaBoss?: 'voce-finale' | 'memento';
@@ -3134,7 +3123,7 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   confluisceIn?: { dungeon: string; dedalo: string; nome: string };
   note: string;
   fonti: string[];
-  /** L8-04 (D5): il confronto delle fonti sul livello consigliato, come nota storica del Palazzo (si modifica e si ripristina dalla nota). */
+  /** L8-04 (D5): il confronto delle fonti sul livello consigliato, come nota storica del Palazzo (si modifica dalla nota). */
   noteLivello: NotaStoricaOfferta[];
   aree: AreaDungeonDto[];
   /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
@@ -3178,7 +3167,7 @@ export interface GiornoCalendarioDto {
     voci: Array<{ uid: string; giorno: string; fascia: 'giorno' | 'sera'; azione: string; certezza: 'C' | 'D' }>;
     /** R11-15/1: dato proprio del Calendario (feste, trama, consigli, sblocchi «rango massimo»): si corregge con `/api/correzioni/evento-calendario/:id`. Gli altri si correggono dalla loro fonte. */
     modificabile: boolean;
-    /** Corretto dall'utente: ha un valore della guida da rimettere. */
+    /** Corretto dall'utente rispetto alla guida (il segno «corretto»). */
     modificato: boolean }>;
   tempoLibero: { giorno: boolean; sera: boolean } | null;
   /** Numero della «Soluzione per settimana» della guida. */
@@ -3891,15 +3880,13 @@ export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {
-  /** Informazioni su un ripristino che conserva campi introdotti dopo la fotografia. */
-  avvisi?: string[];
   /** L3: per un luogo nato per vendere, la chiave del punto vendita creato con lui. */
   puntoVendita?: string;
   tipo: TipoCatalogo;
   chiave: string;
   nome: string;
   origine: 'seed' | 'utente';
-  /** Riga del seed corretta dall'utente: «Ripristina» la riporta com'era. */
+  /** Riga del seed corretta dall'utente («corretta da te»). */
   modificata: boolean;
   nascosta: boolean;
   aggiornata: string | null;
@@ -3980,7 +3967,6 @@ export interface CatalogoOggettoDto extends RiferimentoOggettoDto {
   statistiche: Record<string, unknown> | null;
   fonte: { tipo: 'equipaggiamento' | 'guida' | 'libro' | 'film' | 'videogioco' | 'listino' | 'utente'; chiave: string | null };
   origine: 'seed' | 'utente';
-  modificato: boolean;
   nascosto: boolean;
   /** Il prezzo in yen più basso fra le offerte visibili, contando anche il prezzo di una fascia (Ondata 5, lotto E: le sfide della Big Bang
    *  Burger a 500 ¥ di sera); null senza offerte in yen. */
@@ -4153,9 +4139,9 @@ export interface EsitoRipristinoCestinoDto {
   partiteMancanti: boolean;
 }
 
-// ---- Correzioni ai dati della guida e «Ripristina» senza dipendenze (L11 · B11) ----
+// ---- Correzioni ai dati della guida senza dipendenze (L11 · B11) ----
 
-/** Gli oggetti della guida che si correggono dalla loro pagina e si rimettono com'erano (`/api/correzioni`). */
+/** Gli oggetti della guida che si correggono dalla loro pagina (`/api/correzioni`). */
 export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione',
   'personaggio', 'gruppo-personaggi',
   'sfide-battaglie', 'battaglia-sfida', 'boss-segreto', 'sfide-magnate', 'magnate-sfida', 'tratto', 'sfide-tratti', 'sfide-quiz-tv',
@@ -4175,7 +4161,7 @@ export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano'
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];
 export type FormatoCampoCorrezione = 'condizioni' | 'giorno' | 'persone' | 'persone-in-ordine';
 export interface CampoCorrezioneDto {
-  /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione e di `campi` nel ripristino. */
+  /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione. */
   percorso: string;
   etichetta: string;
   gruppo?: string;
@@ -4217,12 +4203,6 @@ export interface RiepilogoCorrezioneDto {
   aggiornata: string | null;
   /** Correzione che la guida di oggi non accoglie più (l'elemento è sparito o il valore ha cambiato tipo): non si applica e non si cancella. */
   orfana: boolean;
-}
-export interface EsitoRipristinoCorrezioneDto {
-  tipo: TipoModificabile;
-  chiave: string;
-  campiRipristinati: string[];
-  scheda: SchedaCorrezioneDto;
 }
 
 // ---- L12 (passi 7 e 9): «Prepara edizione», il prodotto che l'istanza di rilascio riceve ----
@@ -4316,7 +4296,8 @@ export interface UnioneBloccoEdizioneDto {
 }
 
 /**
- * Le correzioni della guida (`correzione_dati_guida`) scritte dentro i blocchi di `dati_guida`, e le fotografie di «Ripristina» tolte dalla copia.
+ * Le correzioni della guida (`correzione_dati_guida`) scritte dentro i blocchi di `dati_guida`, e le fotografie della guida (che servono solo
+ * alla preparazione: segno «Modificato» e valore della guida nelle schede di correzione) tolte dalla copia.
  * Tutti i conteggi sono della COPIA: i dati della preparazione non cambiano.
  */
 export interface UnioneCorrezioniEdizioneDto {
@@ -4327,7 +4308,7 @@ export interface UnioneCorrezioniEdizioneDto {
   /** Blocchi di `dati_guida`: quanti ce n'erano e quanti sono stati riscritti con le correzioni dentro. */
   blocchiGuida: { prima: number; riscritti: number; dopo: number };
   blocchi: UnioneBloccoEdizioneDto[];
-  /** Le fotografie di «Ripristina» tolte: chiavi `confidente-seed-v1:*` di `dati_guida` e righe delle tabelle-fotografia (`…_foto`), per tabella. */
+  /** Le fotografie della guida tolte: chiavi `confidente-seed-v1:*` di `dati_guida` e righe delle tabelle-fotografia (`…_foto`), per tabella. */
   fotografie: { chiaviGuidaPrima: number; chiaviGuidaDopo: number; righeFotoPrima: Record<string, number>; righeFotoDopo: Record<string, number> };
 }
 

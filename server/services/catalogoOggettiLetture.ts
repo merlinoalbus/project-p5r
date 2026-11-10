@@ -15,7 +15,7 @@ export interface RigaCatalogoOggetto {
   chiave: string; categoria: string; sottocategoria: string | null; nome: string; nomi_altri_json: string;
   nome_originale: string | null; effetto: string; descrizione: string; statistiche_json: string | null;
   fonte_tipo: CatalogoOggettoDto['fonte']['tipo']; fonte_chiave: string | null; origine: 'seed' | 'utente';
-  seed_json: string | null; nascosto: number; updated_at: string; prezzo_minimo?: number | null;
+  nascosto: number; updated_at: string; prezzo_minimo?: number | null;
   /** L4-05: ha almeno un'offerta visibile pagata con uno scambio (fiori, monete, punti, oggetti). */
   con_scambi?: number;
 }
@@ -67,7 +67,7 @@ export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
     nomiAltri: nomiAltriOggetto(r.nomi_altri_json), nomeOriginale: r.nome_originale, effetto: r.effetto, descrizione: r.descrizione,
     statistiche, casa: casaOggetto(r.chiave),
     fonte: { tipo: r.fonte_tipo, chiave: r.fonte_chiave }, origine: r.origine,
-    modificato: r.seed_json !== null, nascosto: r.nascosto === 1, prezzoMinimo: r.prezzo_minimo ?? null, conScambi: r.con_scambi === 1 };
+    nascosto: r.nascosto === 1, prezzoMinimo: r.prezzo_minimo ?? null, conScambi: r.con_scambi === 1 };
 }
 
 /**

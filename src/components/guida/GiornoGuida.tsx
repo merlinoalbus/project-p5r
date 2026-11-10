@@ -77,7 +77,7 @@ interface Props {
   compatto?: boolean;
   /** Momento della giornata della partita per QUESTO giorno (solo se è il giorno corrente): la sezione «Di giorno» o «Di sera» viene evidenziata con «Adesso» (15.27). */
   fasciaCorrente?: 'giorno' | 'sera' | null;
-  /** R11-15/1: se c'è, accanto alle allerte meteo del giorno compare la matita per correggerle e rimetterle com'erano nella guida; il gesto la richiama per rileggere. Assente in Partita. */
+  /** R11-15/1: se c'è, accanto alle allerte meteo del giorno compare la matita per correggerle; il gesto la richiama per rileggere. Assente in Partita. */
   onAllerteModificate?: () => void | Promise<void>;
   /** Appunti del Diario: il clic semplice col mouse su una riga la seleziona. Predefinito: sì nella pagina del Diario, no nella scheda «Oggi»
    *  (`compatto`), dove si gioca e un clic sul testo non deve far comparire la barra delle voci selezionate; lì restano Ctrl+clic,

@@ -9,12 +9,8 @@ export const getCatalogoOggetti = (filtro: { categoria?: CategoriaOggetto; q?: s
 export const getOggettoCatalogo = (chiave: string, partita?: number): Promise<OggettoDettaglioDto> => apiGet(`${percorso(chiave)}${queryString({ partita })}`);
 export const creaOggettoCatalogo = (dati: DatiNuovoOggettoDto): Promise<CatalogoOggettoDto> => apiPost('/catalogo-oggetti', dati);
 export const aggiornaOggettoCatalogo = (chiave: string, dati: Partial<DatiNuovoOggettoDto>): Promise<CatalogoOggettoDto> => apiPut(percorso(chiave), dati);
-export const ripristinaOggettoCatalogo = (chiave: string): Promise<CatalogoOggettoDto> => apiPost(`${percorso(chiave)}/ripristina`, {});
 export const eliminaOggettoCatalogo = (chiave: string): Promise<{ eliminato: true; chiave: string }> => apiDelete(percorso(chiave));
 export const impostaLegameOggetto = (dati: DatiLegameOggettoDto): Promise<{ salvato: true }> => apiPut('/catalogo-oggetti/legami', dati);
 /** F6: modifica una nota storica della fonte; `testoAttuale` è quello mostrato (409 se nel frattempo è cambiato). */
 export const modificaNotaStorica = (chiave: string, dati: { testo: string; fonte: string; testoAttuale: string }): Promise<NotaStoricaOfferta> =>
   apiPut(`/catalogo-oggetti/note-storiche/${encodeURIComponent(chiave)}`, dati);
-/** F6: la nota torna come la dà la guida. */
-export const ripristinaNotaStorica = (chiave: string, testoAttuale: string): Promise<NotaStoricaOfferta> =>
-  apiPost(`/catalogo-oggetti/note-storiche/${encodeURIComponent(chiave)}/ripristina`, { testoAttuale });

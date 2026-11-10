@@ -114,7 +114,7 @@ export function CalendarioPage() {
   /** La settimana della guida a cui appartiene il giorno, o null se il giorno manca o non ha settimana. */
   const settimanaDi = (g: GiornoCalendarioDto | null) => (g?.settimana !== null && g?.settimana !== undefined ? d?.settimane.find((s) => s.numero === g.settimana) ?? null : null);
   const settimanaOggi = settimanaDi(d?.oggi ?? null);
-  /** Dopo una correzione o un ripristino di un evento o di un'allerta: il calendario si rilegge. */
+  /** Dopo una correzione di un evento o di un'allerta: il calendario si rilegge. */
   const ricarica = () => void dati.ricarica();
   /** Il giorno ('MM-GG') aperto nell'editor del giorno, o null; l'editor è quello della pagina del giorno della guida. */
   const [giornoInModifica, setGiornoInModifica] = useState<string | null>(null);

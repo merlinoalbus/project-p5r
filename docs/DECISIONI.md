@@ -50,8 +50,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   senza perdere nulla di quel che la scheda mostrava; «si ottiene per fusione» solo per chi non si incontra da nessuna parte; le Richieste non
   hanno più testi di sblocco e scadenza della guida accanto alle condizioni e alle date.
 - **Effetto dei tratti (utente, 01/11: «Quella della guida»)**: la descrizione della guida (scheda «Tratti» delle Sfide) è l'unica descrizione
-  dell'effetto di ciascuno dei 90 tratti, mostrata ovunque (Sfide, scheda Persona, pagine delle skill, fusione, ricerca); si corregge e si
-  ripristina solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
+  dell'effetto di ciascuno dei 90 tratti, mostrata ovunque (Sfide, scheda Persona, pagine delle skill, fusione, ricerca); si corregge
+  solo dalla riga del tratto nelle Sfide. La resa di Traduzioni della skill di un tratto non si mostra e non si scrive più.
 - **Avvisi del giorno (L8-02, 01/11)**: sono un dato del giorno, modificabile dall'editor del giorno come i vincoli. Gli avvisi che ripetevano per
   intero ciò che la scheda del giorno mostra (voci con il rango atteso, effetti, trama e vincoli, «Giorno non coperto») sono tolti (181, con
   archivio), quelli che ne ripetevano una parte riscritti col resto (11). Anche quelli coperti solo da trama o vincoli sono tolti (l'utente,
@@ -86,7 +86,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   partita) e le sfide del Covo che contano uno stato della partita (attività, lavori, contatori, cruciverba risolti, timbri, yen spesi in un
   negozio, Confidenti al rango massimo, Richieste completate, Compendio, livello di una Persona). Dove la guida dice «tutti» (videogiochi,
   Confidenti, Richieste, Persona del Compendio senza DLC) il conteggio non ha un numero scritto: il totale si conta nel DB a ogni lettura. Ogni
-  campo si corregge e si ripristina dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
+  campo si corregge dalla sua riga, con l'editor delle condizioni. Gli altri testi restano come sono, perché l'app non ha lo
   stato che descrivono (fuoricampo, esiti dei turni senza oggetti, Ranghi Staffetta e Tecnico, statistiche delle Persona, fiori). Che il rango 8
   di Akechi non sia un requisito del finale Royal (né il suo contrario del finale standard) è una lettura del testo della guida, non una
   decisione dell'utente. I requisiti della personalizzazione delle armi si leggono dai requisiti di rango di Iwai, il
@@ -239,7 +239,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
 - La pagina Partita mantiene il suo aspetto; eccezioni approvate: la vista «Avanzamento» del cassetto del Confidente (era «Level up»: nome
   italiano ovunque, solo l'etichetta); nella mappa della scheda «Oggi» i pin troppo vicini in un gruppo «+n» («Raggruppa i pin»); finestra «Regala» in Confidenti; riga «Giorno e fascia
-  dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
+  dell'incontro» come avviso, matita «Modifica» delle Doti, scheda «Persona della partita» **(24/10)**; nelle Doti
   l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (utente, 01/11); gli schizzi
   L10-01, L10-02 e L10-05 approvati dall'utente (01/11): da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della
   partita e Storico riempiono l'altezza come Oggi, Doti e Letture (intestazione e schede ferme, comandi in una fila ferma, l'elenco in
@@ -287,11 +287,22 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Aggiunta alla scorta: ogni Persona al più una volta per partita; skill precompilate con le ultime 8 apprese al livello scelto; l'aggiunta registra
   la Persona nel compendio personale col livello più alto raggiunto.
 - Le descrizioni delle Persona sono testi originali in italiano sull'origine della figura, non il testo del compendio del gioco.
-- La resa italiana dell'effetto di una skill (condivisa fra skill con lo stesso testo) si modifica e si ripristina solo dalla pagina
+- La resa italiana dell'effetto di una skill (condivisa fra skill con lo stesso testo) si modifica solo dalla pagina
   Traduzioni. **(24/10)** Fanno eccezione i tratti: il loro effetto è la descrizione della guida, corretta dalla riga del tratto nelle Sfide
   (01/11).
-- I dati di gioco che nessuna pagina mostra restano correggibili con Ripristina dal servizio unico `/api/correzioni`, senza pagine
+- I dati di gioco che nessuna pagina mostra restano correggibili dal servizio unico `/api/correzioni`, senza pagine
   nuove. **(24/10)**
+- **Niente «Ripristina» al valore della guida (decisione dell'utente del 10/11: «Puoi rimuovere questo ripristina del tutto in tutti i
+  punti»)**: nessun dato di gioco ha più un gesto, una rotta o un servizio per tornare al valore della guida (schede di correzione, Palazzi
+  con boss finale e date, Aree, sblocco dei quartieri, giorni, requisiti, ranghi, abilità, Dote a ogni incontro, dialoghi, inviti e
+  disponibilità dei Confidenti, costo dei regali, note storiche, righe del catalogo, oggetti del catalogo, affinità, traduzioni). Una
+  correzione si cambia con un'altra correzione; dove la copia della guida ha ancora un lettore resta come informazione (il segno
+  «Modificato» o «corretta da te», «Guida: …» sotto il campo corretto, il censimento delle condizioni), e i dati che servivano solo al
+  ritorno alla guida sono tolti dalla migrazione 388, con archivio. `DELETE /api/catalogo/:tipo/:chiave` elimina solo le righe create
+  dall'utente (luoghi e negozi vanno nel Cestino come prima): una riga della guida, corretta o no, si nasconde («Nascondi dagli
+  elenchi»). Restano il Cestino, «Importa», il ripristino dell'istanza, l'annullo delle spunte del Diario, lo «Storico e ripristino»
+  delle versioni delle Informazioni dei Confidenti, «Rimetti il precedente» di una voce da rivedere e il carattere di una voce dei
+  Palazzi che torna alla regola del tipo: non sono un ritorno al valore della guida.
 
 ## 7. Fusione
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).
@@ -347,7 +358,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   di rango 1 valgono solo se la guida le dichiara come sblocco. I requisiti non verificabili diventano eventi della partita da segnare.
 - **Un Confidente ha una data di avvio sola**: «Disponibile dal» è il requisito di rango 1 di tipo data (18 Confidenti su 23), letto dalla
   disponibilità e dalla scheda. La frase del requisito si genera dalla condizione; la colonna `testo` tiene solo ciò che la condizione non dice
-  (la nota) e, per un avviso, l'avviso stesso; «Ripristina» riporta la nota della guida da `dati_guida.requisiti-nota-guida-v1`.
+  (la nota) e, per un avviso, l'avviso stesso. Le note della guida di prima della 359 stanno nell'archivio `archivio-frasi-l11`
+  (migrazione 388): nessuna pagina le legge.
 - **Date fisse di un rango**: l'eccezione `solo-date-rango` dice in quali giorni un rango si può fare, al posto dei giorni della settimana. La
   usa il Rango 7 di Ryuji, con le 24 date del suo messaggio nella guida. L'avvio del Rango 10 di Kawakami («il primo giorno di scuola dopo il
   Rango 9») non si sa calcolare: resta nelle note, e il calcolo non cambia.
@@ -548,7 +560,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   nel quartiere e da «Modifica il listino» di un punto vendita): si aggiunge o si duplica un punto vendita (la copia ha offerte proprie,
   la sorgente non cambia), si scrive il listino a righe (oggetto, prezzo, pezzi; il resto nei dettagli della riga), e un oggetto che
   manca si crea dal selettore stesso. Si salva tutto insieme o niente. Un'offerta tolta va nel cestino solo se è dell'utente, mai
-  corretta e senza acquisti né risultati; altrimenti si nasconde. Ripristina, Nascondi ed Elimina di luogo e punto vendita restano gesti
+  corretta e senza acquisti né risultati; altrimenti si nasconde. Nascondi ed Elimina di luogo e punto vendita restano gesti
   immediati, con le modifiche salvate. Creato un luogo o un punto vendita, si apre il creato: la pagina del luogo con «Il posto» aperto
   (sul punto vendita nuovo, se c'è); dall'editor della mappa, dove si sta lavorando sui pin, il luogo creato da un pin si apre dal suo
   collegamento. Il genere di un luogo nuovo si sceglie sempre, senza un valore proposto. «Duplica» copia anche i contenuti dei set. Tre nomi distinti: «Genere di posto»
@@ -568,7 +580,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   si barra solo il pezzo unico. Per i distributori pezzi, rifornimento e condizioni («2 pezzi, il lunedì, non con l'ondata di calore né
   con la notte torrida», col segno «da verificare» e l'origine della guida) sono una **regola comune** in un punto solo (`regola_tipo_negozio`,
   migrazione 372), modificata da «Il posto»: un'offerta che la segue la cambia con lei (e, se era un dato della guida, diventa
-  «corretta», con l'originale per «Ripristina»); un'offerta che ha valori propri è un'eccezione della sua riga, e torna alla regola con un
+  «corretta», con l'originale conservato); un'offerta che ha valori propri è un'eccezione della sua riga, e torna alla regola con un
   gesto. Che un'offerta segua la regola lo dice l'uguaglianza dei valori: un'eccezione con gli stessi valori della regola la segue.
   Un'offerta nuova di un distributore prende dalla regola solo i campi che non dice: pezzi o rifornimento mandati vuoti (nessun limite
   dichiarato, nessuna regola) restano vuoti e l'offerta nasce eccezione, come la scelta «Fai un'eccezione» e la copia di un'eccezione.

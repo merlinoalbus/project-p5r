@@ -13,7 +13,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import { t } from '../traduzioniService.js';
 import type { CampoDef } from './registro.js';
-import type { ContestoPropagazione, DefRiga, Valori } from './righe.js';
+import type { DefRiga, Valori } from './righe.js';
 
 export const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
 
@@ -66,8 +66,7 @@ export interface OpzioniRiga {
   colonne: Colonna[] | ((chiave: string) => Colonna[]);
   nome: (chiave: string, v: Valori) => string;
   valida?: (chiave: string, fusi: Valori) => void;
-  propaga?: (chiave: string, prima: Valori, dopo: Valori, ctx: ContestoPropagazione) => void;
-  verificaRipristino?: (chiave: string, guida: Valori) => void;
+  propaga?: (chiave: string, prima: Valori, dopo: Valori) => void;
 }
 
 /** Un oggetto «a riga» fatto di colonne: lettura, scrittura, esistenza ed elenco delle chiavi si ricavano dalla tabella. */
@@ -96,7 +95,6 @@ export function rigaDaColonne(o: OpzioniRiga): DefRiga {
   };
   if (o.valida) def.valida = o.valida;
   if (o.propaga) def.propaga = o.propaga;
-  if (o.verificaRipristino) def.verificaRipristino = o.verificaRipristino;
   return def;
 }
 

@@ -7,7 +7,8 @@
 // alla domanda l'utente ha scelto «Requisito correggibile»: dalla scheda del Confidente si sceglie un'altra Richiesta al suo
 // posto, oppure lo si toglie. I requisiti sono dati di gioco (`gioco.db`): valgono per tutte le partite.
 // L6 (§6.1, R6-07): un requisito è una condizione del vocabolario unico; dalla pagina del Confidente si modifica un rango alla volta
-// («Modifica requisiti») e si torna al valore della guida («Ripristina», dalla copia `confidente_requisito_guida`, migrazione 119).
+// («Modifica requisiti»); la copia `confidente_requisito_guida` (migrazione 119) dice se un rango è «Modificato» rispetto alla guida. Non c'è
+// un ritorno al valore della guida (decisione dell'utente del 10/11).
 // L7-02 (migrazione 359): la frase di un requisito si genera dalla condizione (`descriviRequisitoSpillo`, una sola sede del dato); la colonna `testo` è
 // la NOTA propria del requisito, vuota se non racconta altro. Solo l'`avviso` tiene lì la sua frase, perché è il dato.
 // ============================================================
@@ -134,31 +135,6 @@ export function impostaRequisitiRanghi(confidente: string, ranghi: ReadonlyArray
   if (new Set(ranghi.map((r) => r.rango)).size !== ranghi.length) throw httpErrors.badRequest('rango-doppio', 'Lo stesso rango compare due volte.');
   getDb().transaction(() => { for (const r of ranghi) scriviRango(confidente, r.rango, r.requisiti); })();
   // la disponibilità legge dai requisiti la pioggia e il «dal» del rango 1 (migrazione 306, R9-04/4) e li tiene in memoria
-  invalidaCacheDiGioco();
-  return requisitiDelConfidente(confidente);
-}
-
-/** La nota da usare al ripristino, per riga della copia della guida (`requisiti-nota-guida-v1`, migrazione 359); null su uno schema di prima. Una mappa illeggibile è un 409: la prosa di prima non torna da sola. */
-function noteDellaGuida(): Record<string, string> | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get('requisiti-nota-guida-v1') as { json: string } | undefined;
-  if (!r) return null;
-  let valore: unknown;
-  try { valore = JSON.parse(r.json); } catch { valore = null; }
-  if (!valore || typeof valore !== 'object' || Array.isArray(valore)) throw httpErrors.conflict('note-guida-illeggibili', 'Le note della guida non sono leggibili: il rango resta com’è.');
-  return valore as Record<string, string>;
-}
-
-/** Il rango torna come lo dà la guida (`confidente_requisito_guida`). 409 se la copia della guida non c'è. */
-export function ripristinaRequisitiRango(confidente: string, rango: number): RequisitiConfidenteDto {
-  verificaConfidente(confidente);
-  if (!conGuida()) throw httpErrors.conflict('guida-non-disponibile', 'I requisiti della guida non ci sono in questo file di gioco.');
-  const guida = righe('confidente_requisito_guida', confidente, rango);
-  const note = noteDellaGuida();
-  getDb().transaction(() => {
-    prepared('DELETE FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ?').run(confidente, rango);
-    const ins = prepared('INSERT INTO confidente_requisito (confidente_chiave, rango, indice, tipo, dati_json, testo) VALUES (?, ?, ?, ?, ?, ?)');
-    for (const r of guida) ins.run(confidente, rango, r.indice, r.tipo, r.dati_json, note?.[`${confidente}|${rango}|${r.indice}`] ?? r.testo);
-  })();
   invalidaCacheDiGioco();
   return requisitiDelConfidente(confidente);
 }

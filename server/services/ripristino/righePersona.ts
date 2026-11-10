@@ -1,8 +1,8 @@
 // ============================================================
-// righePersona — la Persona e le sue skill, correggibili e ripristinabili (L11 · R11-15/3)
+// righePersona — la Persona e le sue skill, correggibili (L11 · R11-15/3)
 // ============================================================
 //
-// Due oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
+// Due oggetti «a riga» del registro delle correzioni (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
 // `seed_json`, `updated_at` della migrazione 213), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
 //   - `persona` (259 righe, chiave = id): il livello, l'Arcano, le cinque statistiche di base e le skill con i loro livelli. Le skill viaggiano fra registro e
 //     editor come testi «<nome della skill> @ <livello>» (livello 0 = innata) oppure «<nome> @ risveglio|rango|terza-forma» (le skill che non si imparano a un
@@ -11,7 +11,7 @@
 //   - `skill` (525 righe, chiave = id): il costo (tipo e valore), l'effetto (il testo canonico della guida, in inglese) e le Persona che la danno come carta con
 //     l'esecuzione. Il nome della skill è la chiave delle traduzioni e delle Persona: non si corregge.
 //     La resa ITALIANA dell'effetto NON è un campo della skill: vive in `traduzione` (ambito `effettoSkill`, chiave = il testo dell'effetto) ed è condivisa da tutte
-//     le skill con lo stesso testo, quindi (decisione dell'utente «Solo da Traduzioni») si modifica e si ripristina solo dalla pagina Traduzioni. Correggere
+//     le skill con lo stesso testo, quindi (decisione dell'utente «Solo da Traduzioni») si modifica solo dalla pagina Traduzioni. Correggere
 //     `effetto` verso un testo che non ha resa NON crea nessuna riga di `traduzione`: la scheda mostra il testo inglese finché la resa non è scritta da Traduzioni.
 //     La «potenza» non è un dato a sé nel modello: sta nel testo dell'effetto. Le Persona che la danno come carta con l'esecuzione (`skill_fonte_esecuzione`,
 //     R11-17/1) sono il campo `fonti`: l'elenco dei nomi si riscrive intero; la fotografia di una correzione fatta prima di questo campo non lo contiene e
@@ -22,7 +22,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import type { CampoDef } from './registro.js';
-import type { ContestoPropagazione, DefRiga, Valori } from './righe.js';
+import type { DefRiga, Valori } from './righe.js';
 import { opzioniDaNomi, opzioniPersone } from './righeComuni.js';
 
 const num = (v: ValoreCampoCorrezione | undefined): number => (typeof v === 'number' ? v : 0);
@@ -115,42 +115,10 @@ function idDeiNomiPersona(nomi: ValoreCampoCorrezione | undefined): number[] {
 }
 
 // ---- Compatibilità con le fotografie salvate dal codice precedente ----
-// Fino alla decisione «Solo da Traduzioni» la skill aveva un campo `effetto_it` (la resa italiana) e conservava nella fotografia la traccia `~traduzioni`: le righe di
-// `traduzione` (ambito `effettoSkill`) com'erano prima di essere toccate dalla correzione, come voci JSON `{ k: <testo dell'effetto>, r: <riga | null> }`.
-// Le fotografie già salvate su p5s possono contenere entrambe:
-//   - `effetto_it` si ignora (`normalizzaGuida`): non è più un campo, quindi la scheda non lo mostra e il ripristino non lo riscrive;
-//   - `~traduzioni` si tiene finché la skill non viene ripristinata. Al PRIMO ripristino (di qualunque campo) le righe ricordate si rimettono com'erano, UNA volta
-//     (le righe assenti prima si tolgono se nessuna skill usa quel testo), così nessuna resa alterata dal codice vecchio resta senza rimedio; poi la traccia si
-//     scarta (si svuota) e non si riapplica più. Una skill con la sola resa corretta e nessun altro campo diverso non risulta «modificata»: la sua resa si
-//     rimette dalla pagina Traduzioni («Ripristina»).
+// Fino alla decisione «Solo da Traduzioni» la skill aveva un campo `effetto_it` (la resa italiana): nelle fotografie già salvate si ignora
+// (`normalizzaGuida`), perché non è più un campo e la scheda non lo mostra. La traccia `~traduzioni` di allora serviva solo al ritorno ai valori
+// della guida, che non c'è più (decisione dell'utente del 10/11): la migrazione 388 la toglie dalle fotografie, con archivio.
 const CAMPO_ESCLUSO = 'effetto_it';
-const CHIAVE_TRACCIA = '~traduzioni';
-type RigaTraduzione = Record<string, string | number | null>;
-
-/** Le righe di `traduzione` ricordate dalla traccia vecchia: testo di effetto → riga com'era (null = assente). */
-function righeRicordate(traccia: Valori): Map<string, RigaTraduzione | null> {
-  const m = new Map<string, RigaTraduzione | null>();
-  const grezzo = traccia[CHIAVE_TRACCIA];
-  for (const s of Array.isArray(grezzo) ? grezzo : []) {
-    try {
-      const o = JSON.parse(s) as { k: string; r: RigaTraduzione | null };
-      if (typeof o.k === 'string') m.set(o.k, o.r ?? null);
-    } catch { /* voce illeggibile: si ignora */ }
-  }
-  return m;
-}
-
-/** Rimette `traduzione` com'era: le righe ricordate tornano identiche, quelle assenti prima si tolgono se nessun'altra skill usa quel testo. */
-function rimettiRighe(ricordate: Map<string, RigaTraduzione | null>): void {
-  for (const [effetto, riga] of ricordate) {
-    if (riga) {
-      const colonne = Object.keys(riga);
-      prepared(`INSERT OR REPLACE INTO traduzione (${colonne.join(', ')}) VALUES (${colonne.map(() => '?').join(', ')})`).run(...colonne.map((c) => riga[c]!));
-    } else if (!prepared('SELECT 1 FROM skill WHERE effetto = ?').get(effetto)) {
-      prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(effetto);
-    }
-  }
-}
 
 const skill: DefRiga = {
   modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'CAST(id AS TEXT)',
@@ -178,16 +146,7 @@ const skill: DefRiga = {
     // `traduzione` non si tocca mai da qui: la resa italiana dell'effetto è dell'editor delle traduzioni
     if (v.effetto !== undefined) prepared('UPDATE skill SET effetto = ? WHERE id = ?').run(str(v.effetto) ?? '', chiave);
   },
-  // Solo per le fotografie vecchie: al ripristino rimette UNA volta le righe di `traduzione` ricordate in `~traduzioni` e scarta la traccia (vedi sopra).
-  // Nelle correzioni la traccia non si tocca (resta nella fotografia finché non si ripristina).
-  propaga: (_chiave, _prima, _dopo, ctx: ContestoPropagazione) => {
-    if (!ctx.ripristino) return;
-    const ricordate = righeRicordate(ctx.traccia);
-    if (ricordate.size === 0) return;
-    rimettiRighe(ricordate);
-    ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
-  },
-  // La fotografia vecchia può avere `effetto_it`, che non è più un campo: si ignora. `~traduzioni` resta (serve al primo ripristino).
+  // La fotografia vecchia può avere `effetto_it`, che non è più un campo: si ignora.
   normalizzaGuida: (guida) => {
     if (!(CAMPO_ESCLUSO in guida)) return guida;
     const { [CAMPO_ESCLUSO]: _escluso, ...resto } = guida;

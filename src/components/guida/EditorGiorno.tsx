@@ -1,9 +1,9 @@
 // ============================================================
-// EditorGiorno — il giorno di gioco modificabile, con «Ripristina» (R9-19)
+// EditorGiorno — il giorno di gioco modificabile (R9-19)
 // ============================================================
 //
 // Meteo del giorno e della sera, nota sul meteo, «da verificare», trama, vincoli e avvisi del giorno (L8-02). Sta nella pagina del giorno della guida (non in Partita).
-// «Ripristina» riporta il giorno com'è nella guida. Le voci del diario non si toccano da qui.
+// Le voci del diario non si toccano da qui.
 // L13 (ondata 4a): una sola finestra dall'apertura alla chiusura. Finché il giorno non è arrivato è la stessa `FinestraModifica` con «Un attimo…»;
 // prima un guscio di caricamento a parte si smontava all'arrivo dei dati e nasceva un'altra finestra (il fuoco tornava indietro). I campi partono
 // dai dati letti e diventano propri alla prima modifica (`modifiche`): nessuno stato da copiare all'arrivo dei dati.
@@ -15,13 +15,11 @@ import { CampoTesto, SezioneCampi } from '../shared/Campo';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { CampoElenco } from './moduli/campi';
 import { useCarica } from '../../hooks/useCarica';
-import { getGiornoModificabile, ripristinaGiornoModificabile, salvaGiornoModificabile } from '../../services/api';
+import { getGiornoModificabile, salvaGiornoModificabile } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { METEO_GIORNO, type GiornoModificabileDto, type MeteoGiorno } from '../../../shared/giorno';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -72,8 +70,7 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
 
   return (
     <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca} occupato={occupato} sporca={sporca}
-      caricamento={!campi} erroreCaricamento={campi ? null : d.errore}
-      azioniExtra={dati?.modificato ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaGiornoModificabile(data), 'Giorno ripristinato come nella guida.')} /> : undefined}>
+      caricamento={!campi} erroreCaricamento={campi ? null : d.errore}>
       {campi && (
         <>
           <SezioneCampi titolo="Meteo">

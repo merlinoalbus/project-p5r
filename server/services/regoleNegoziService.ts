@@ -128,7 +128,7 @@ export interface ValoriRegola { quantita?: number | null; rifornimento_json?: st
 /**
  * Cambia la regola di un genere (dentro la transazione di chi chiama) e riscrive le offerte che la seguono: è il solo punto di modifica di
  * pezzi, rifornimento e condizioni di quelle offerte. Ogni offerta riscritta passa prima da `adotta` (la riga della guida diventa «corretta»,
- * con la sua fotografia per «Ripristina», come ogni modifica di un'offerta). Poi il segno si ricalcola per tutte le offerte del genere: anche
+ * con la sua fotografia, come ogni modifica di un'offerta). Poi il segno si ricalcola per tutte le offerte del genere: anche
  * un'eccezione che coincide con la regola nuova torna a seguirla. 404 se il genere non ha una regola; 400 se un valore non è valido.
  */
 export function aggiornaRegolaDelTipo(tipo: string, valori: ValoriRegola, adotta: (articolo: string) => void): number {

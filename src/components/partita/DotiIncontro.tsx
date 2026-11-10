@@ -13,12 +13,11 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { RigaDote } from '../guida/RigaDote';
-import { impostaDotiIncontro, isApiError, ripristinaDoteIncontro } from '../../services/api';
+import { impostaDotiIncontro } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { ConfidenteDettaglioDto } from '../../types';
-import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 import { TestoNote } from '../shared/TestoNote';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
@@ -69,24 +68,6 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
     }
   };
 
-  /** «Ripristina» un passaggio: la Dote torna com'era nella guida. Il server risponde 409 se quel passaggio non è mai stato cambiato (la scheda non lo dice prima). */
-  const ripristina = async (rango: number) => {
-    if (occupato) return;
-    if (JSON.stringify(bozza) !== partenza && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
-    setOccupato(true);
-    try {
-      await ripristinaDoteIncontro(confidente.chiave, rango);
-      await onSalvato();
-      notifica('success', `Dote del passaggio al rango ${rango} ripristinata come nella guida.`);
-      setAperta(false);
-    } catch (err) {
-      if (isApiError(err, 'dote-della-guida')) notifica('info', `Il passaggio al rango ${rango} non è stato modificato: è già come nella guida.`);
-      else notifica('error', err instanceof Error ? err.message : 'Ripristino non riuscito.');
-    } finally {
-      setOccupato(false);
-    }
-  };
-
   return (
     <section className="card flex flex-col gap-2" aria-labelledby="doti-incontro">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -119,10 +100,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
           <ul className="m-0 p-0 list-none flex flex-col gap-3">
             {bozza.map((r) => (
               <li key={r.rango} className="flex flex-col gap-2 rounded border border-border p-2" aria-label={`Rango ${r.rango}`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <strong className="testo-13">Al passaggio al rango {r.rango}</strong>
-                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Ripristina" aria-label={`Ripristina la Dote del rango ${r.rango} come nella guida`} disabled={occupato} onClick={() => void ripristina(r.rango)} />
-                </div>
+                <strong className="testo-13">Al passaggio al rango {r.rango}</strong>
                 <DotiDelRango rango={r.rango} doti={r.doti} onCambia={(doti) => cambiaRango(r.rango, doti)} />
                 {r.doti.length < 5 && (
                   <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Dote" aria-label={`Aggiungi una Dote al rango ${r.rango}`}

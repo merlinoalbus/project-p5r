@@ -1,10 +1,10 @@
 // ============================================================
-// disponibilitaStrutturataScritture — cambiare la disponibilità strutturata dei Confidenti e ripristinarla (R9-01)
+// disponibilitaStrutturataScritture — cambiare la disponibilità strutturata dei Confidenti (R9-01)
 // ============================================================
 //
 // La lettura sta in `disponibilitaStrutturataService` (che la scheda e il Diario usano e che non dipende dal catalogo). Qui le scritture:
-// la struttura (modo, giorni, fasce, eccezioni, motivo senza luogo) con la fotografia della fonte G-036 alla prima modifica, e i luoghi,
-// che si cambiano passando dal luogo (`aggiornaElemento('luogo', …)`): una sola scrittura, con il suo «Ripristina». «Disponibile dal» è il requisito di
+// la struttura (modo, giorni, fasce, eccezioni, motivo senza luogo) con la fotografia della fonte G-036 alla prima modifica (il segno «Modificata»),
+// e i luoghi, che si cambiano passando dal luogo (`aggiornaElemento('luogo', …)`): una sola scrittura. «Disponibile dal» è il requisito di
 // rango 1 (L7-06, migrazione 358): qui non si scrive, e il `dal` delle fotografie di prima si ignora.
 // ============================================================
 
@@ -46,7 +46,7 @@ function normalizzaEccezioni(eccezioni: EccezioneDisponibilita[]): EccezioneDisp
   });
 }
 
-/** Cambia la struttura (e, se indicati, i luoghi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». */
+/** Cambia la struttura (e, se indicati, i luoghi). Alla prima modifica conserva la fotografia della fonte G-036, che dà il segno «Modificata». */
 export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilita): DisponibilitaConfidenteDto {
   const prima = rigaStruttura(confidente);
   if (mod.modo !== undefined && !MODI_DISPONIBILITA.includes(mod.modo)) throw httpErrors.badRequest('modo-non-valido', `Il modo '${mod.modo}' non esiste.`);
@@ -82,25 +82,6 @@ export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilit
         aggiornaElemento('luogo', k, { confidenti_json: JSON.stringify(elenco) });
       }
     }
-  })();
-  invalidaCacheDiGioco();
-  return disponibilitaConfidente(confidente);
-}
-
-/** «Ripristina»: la struttura torna come la dà la fonte G-036 (i luoghi si ripristinano dal luogo, con il suo «Ripristina»). */
-export function ripristinaDisponibilita(confidente: string): DisponibilitaConfidenteDto {
-  rigaStruttura(confidente);
-  const s = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(CHIAVE_SEED_DISPONIBILITA(confidente)) as { json: string } | undefined;
-  if (!s) throw httpErrors.conflict('disponibilita-della-guida', 'Questa disponibilità non è stata modificata: è già come la dà la guida.');
-  let f: RigaStruttura;
-  try { f = JSON.parse(s.json) as RigaStruttura; } catch { throw httpErrors.conflict('disponibilita-fotografia-illeggibile', 'La fotografia della guida non è leggibile: la disponibilità resta com’è.'); }
-  if (typeof f.modo !== 'string' || typeof f.giorni_settimana_json !== 'string' || typeof f.fasce_orarie_json !== 'string' || typeof f.eccezioni_json !== 'string') {
-    throw httpErrors.conflict('disponibilita-fotografia-illeggibile', 'La fotografia della guida non è leggibile: la disponibilità resta com’è.');
-  }
-  getDb().transaction(() => {
-    prepared(`UPDATE confidente_disponibilita SET modo = ?, giorni_settimana_json = ?, fasce_orarie_json = ?, eccezioni_json = ?, motivo_senza_luogo = ? WHERE confidente_chiave = ?`)
-      .run(f.modo, f.giorni_settimana_json, f.fasce_orarie_json, f.eccezioni_json, f.motivo_senza_luogo ?? '', confidente);
-    prepared('DELETE FROM dati_guida WHERE chiave = ?').run(CHIAVE_SEED_DISPONIBILITA(confidente));
   })();
   invalidaCacheDiGioco();
   return disponibilitaConfidente(confidente);

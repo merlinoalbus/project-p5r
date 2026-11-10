@@ -249,8 +249,10 @@ describe('GiornoGuida — la giornata canone', () => {
     fireEvent.click(within(finestra).getByRole('button', { name: /^Togli: Turno: / }));
     expect(within(finestra).getByText('Nessun effetto: la spunta registra solo che l’hai fatta.')).toBeInTheDocument();
     fireEvent.click(within(tipi).getByRole('radio', { name: 'Confidente' }));
-    // a collegamento incompleto non si salva: «Quale» (il Confidente) si sceglie fra le tessere
-    const quale = await waitFor(() => within(finestra).getByRole('radiogroup', { name: 'Quale: confidente' }));
+    // a collegamento incompleto non si salva: «Quale» (il Confidente) si sceglie fra le tessere, nella finestra propria della griglia
+    // (L6-06, PR 119: si apre da sola scegliendo un tipo che si collega, e si chiude alla scelta)
+    const finestraQuale = await waitFor(() => screen.getByRole('dialog', { name: 'Quale — confidente' }));
+    const quale = within(finestraQuale).getByRole('radiogroup', { name: 'Quale: confidente' });
     fireEvent.click(within(quale).getByRole('radio', { name: /^Tae Takemi/ }));
     fireEvent.click(await waitFor(() => within(finestra).getByRole('radio', { name: 'Rango 2' })));
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));

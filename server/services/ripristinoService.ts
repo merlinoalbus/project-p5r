@@ -1,19 +1,19 @@
 // ============================================================
-// ripristinoService — correggere e rimettere com'era ciò che la guida dice, senza dipendenze (L11 · B11)
+// ripristinoService — correggere ciò che la guida dice, senza dipendenze (L11 · B11)
 // ============================================================
 //
 // Un servizio unico con un registro dichiarativo (`ripristino/registro.ts` per i blocchi JSON, `ripristino/righe.ts` per le tabelle):
 //   - `elencaCorrezioni` — le correzioni attive;
 //   - `schedaCorrezione` — i campi di un oggetto col valore di adesso, quello della guida e se è corretto;
-//   - `correggi`         — corregge i campi inviati (un valore uguale alla guida toglie la correzione di quel campo);
-//   - `ripristina`       — rimette il valore della guida, per tutto l'oggetto o per alcuni campi.
+//   - `correggi`         — corregge i campi inviati (un valore uguale alla guida toglie la correzione di quel campo).
 //
 // Il valore della guida non si ricarica da nessun pacchetto (regola dei dati del 21/10): per le righe è la fotografia `seed_json` presa alla
 // prima correzione; per i blocchi è il blocco stesso, che non si riscrive mai (le correzioni stanno in `correzione_dati_guida` e si applicano
-// in lettura: `datiGuidaCorretti`). «Ripristina» non elimina e non crea «Da rivedere»: sostituisce un valore con quello della guida.
+// in lettura: `datiGuidaCorretti`). La scheda mostra il valore della guida accanto a quello corretto; non c'è un gesto per tornare al valore
+// della guida (decisione dell'utente del 10/11). Il nome del modulo e della cartella `ripristino/` resta quello di prima.
 // ============================================================
 
-import { TIPI_MODIFICABILI, type CampoCorrezioneDto, type EsitoRipristinoCorrezioneDto, type RiepilogoCorrezioneDto, type SchedaCorrezioneDto,
+import { TIPI_MODIFICABILI, type CampoCorrezioneDto, type RiepilogoCorrezioneDto, type SchedaCorrezioneDto,
   type TipoCampoCorrezione, type TipoModificabile, type ValoreCampoCorrezione } from '../../shared/types.js';
 import { analizzaPercorso, risolvi, segmentoSelettore, uguali } from '../../shared/percorsoGuida.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
@@ -191,17 +191,14 @@ function metaRiga(def: DefRiga, chiave: string): { seed: Valori | null; aggiorna
   }
 }
 
-/** Scrive la fotografia nella riga: con una fotografia diversa dai valori di adesso la riga è «dell'utente», altrimenti torna quella della guida. */
+/** Scrive la fotografia nella riga: con una fotografia diversa dai valori di adesso la riga è «dell'utente», altrimenti torna quella della guida
+ *  (l'utente ha riscritto i valori della guida). Le tracce «~…» delle propagazioni di prima (tolte dalla migrazione 388) non sono campi: non contano. */
 function scriviMetaRiga(def: DefRiga, chiave: string, seed: Valori | null, correnti: Valori): void {
-  // le chiavi che iniziano con «~» sono la traccia delle propagazioni (non sono campi): non contano nel confronto
   const corretta = seed !== null && !Object.keys(seed).filter((p) => !p.startsWith('~')).every((p) => uguali(seed[p], correnti[p]));
   if (corretta) prepared(`UPDATE ${def.tabella} SET origine = 'utente', seed_json = ?, updated_at = ? WHERE ${def.colonnaChiave} = ?`).run(JSON.stringify(seed), nowIso(), chiave);
   else if (def.aggiornataSempre) prepared(`UPDATE ${def.tabella} SET origine = 'seed', seed_json = NULL, updated_at = ? WHERE ${def.colonnaChiave} = ?`).run(nowIso(), chiave);
   else prepared(`UPDATE ${def.tabella} SET origine = 'seed', seed_json = NULL, updated_at = NULL WHERE ${def.colonnaChiave} = ?`).run(chiave);
 }
-
-/** Le chiavi «~…» della fotografia: traccia delle propagazioni, che la propagazione può aggiornare. */
-const soloTraccia = (seed: Valori): Valori => Object.fromEntries(Object.entries(seed).filter(([k]) => k.startsWith('~')));
 
 function rigaDi(tipo: TipoModificabile, chiave: string): DefRiga {
   if (!eRiga(tipo)) throw httpErrors.notFound('tipo-non-modificabile', `«${tipo}» non è un oggetto che si possa correggere.`);
@@ -239,33 +236,10 @@ function correggiRiga(tipo: TipoModificabile, chiave: string, campi: Record<stri
   getDb().transaction(() => {
     // la fotografia di una correzione fatta prima che il tipo avesse un campo non lo contiene: lo completa il valore di adesso, che per quel campo è ancora quello della guida
     const seed: Valori = { ...attuale, ...(meta.seed ?? {}) };
-    const traccia = soloTraccia(seed);
     def.scrivi(chiave, nuovi);
-    def.propaga?.(chiave, attuale, fusi, { ripristino: false, traccia });
-    scriviMetaRiga(def, chiave, { ...seed, ...traccia }, def.leggi(chiave));
+    def.propaga?.(chiave, attuale, fusi);
+    scriviMetaRiga(def, chiave, seed, def.leggi(chiave));
   })();
-}
-
-function ripristinaRiga(tipo: TipoModificabile, chiave: string, campi?: string[]): string[] {
-  const def = rigaDi(tipo, chiave);
-  const definiti = new Set(def.campi(chiave).map((c) => c.p));
-  for (const p of campi ?? []) if (!definiti.has(p)) throw httpErrors.badRequest('campo-non-modificabile', `Il campo «${p}» non si può correggere.`, { campo: p });
-  const attuale = def.leggi(chiave);
-  const { seed } = metaRiga(def, chiave);
-  if (!seed) throw httpErrors.conflict('nessuna-correzione', 'Non c’è niente da rimettere: i valori sono quelli della guida.');
-  const daRimettere = (campi ?? [...definiti]).filter((p) => p in seed && !uguali(seed[p], attuale[p]));
-  if (daRimettere.length === 0) throw httpErrors.conflict('nessuna-correzione', 'Non c’è niente da rimettere: i valori sono quelli della guida.');
-  const valori: Valori = Object.fromEntries(daRimettere.map((p) => [p, seed[p]!]));
-  def.verificaRipristino?.(chiave, valori);
-  getDb().transaction(() => {
-    def.scrivi(chiave, valori);
-    const dopo = def.leggi(chiave);
-    const traccia = soloTraccia(seed);
-    def.propaga?.(chiave, attuale, dopo, { ripristino: true, traccia });
-    // la propagazione può cambiare la traccia (e altri dati): lo stato (origine, fotografia) si decide sui valori di adesso, riletti dopo
-    scriviMetaRiga(def, chiave, { ...seed, ...traccia }, def.leggi(chiave));
-  })();
-  return daRimettere;
 }
 
 // ---- Modalità «blocco» ----
@@ -277,8 +251,8 @@ interface ElementoBlocco {
   /** L'indirizzo dell'elemento con i selettori della guida (non i valori corretti: le correzioni si indicizzano sulla guida). */
   percorsoElemento: string[];
   campi: CampoDef[];
-  /** I campi che l'elemento non offre perché è un oggetto del catalogo (`DefBlocco.soloSenzaOggetto`): solo per rimettere una correzione di prima. */
-  soloRipristino: ReadonlySet<string>;
+  /** I campi che l'elemento non offre perché è un oggetto del catalogo (`DefBlocco.soloSenzaOggetto`): si correggono sulla scheda dell'oggetto. */
+  campiDellOggetto: ReadonlySet<string>;
   corretto: unknown;
   ambiguo: boolean;
 }
@@ -310,13 +284,13 @@ function elementiBlocco(def: DefBlocco): ElementoBlocco[] | null {
     for (const [chiave, v] of Object.entries(def.varianti)) {
       const el = cammina(base, v.radice);
       if (!eOggetto(el)) continue;
-      uscita.push({ chiave, chiaveBase: chiave, titolo: v.etichetta, percorsoElemento: [...v.radice], campi: v.campi, soloRipristino: NESSUNO, corretto: cammina(corretto, v.radice), ambiguo: false });
+      uscita.push({ chiave, chiaveBase: chiave, titolo: v.etichetta, percorsoElemento: [...v.radice], campi: v.campi, campiDellOggetto: NESSUNO, corretto: cammina(corretto, v.radice), ambiguo: false });
     }
     return uscita;
   }
   if (!def.sel) {
     const el = cammina(base, def.radice);
-    if (eOggetto(el)) uscita.push({ chiave: def.chiaveFissa ?? '', chiaveBase: def.chiaveFissa ?? '', titolo: def.etichetta, percorsoElemento: [...def.radice], campi: def.campi, soloRipristino: NESSUNO, corretto: cammina(corretto, def.radice), ambiguo: false });
+    if (eOggetto(el)) uscita.push({ chiave: def.chiaveFissa ?? '', chiaveBase: def.chiaveFissa ?? '', titolo: def.etichetta, percorsoElemento: [...def.radice], campi: def.campi, campiDellOggetto: NESSUNO, corretto: cammina(corretto, def.radice), ambiguo: false });
     return uscita;
   }
   const elenco = cammina(base, def.radice);
@@ -337,8 +311,8 @@ function elementiBlocco(def: DefBlocco): ElementoBlocco[] | null {
     const ec = Array.isArray(elencoCorretto) && eOggetto(elencoCorretto[i]) ? elencoCorretto[i] as Record<string, unknown> : e;
     const chiave = comeChiave(ec[chiaveCampo]) ?? chiaveBase;
     const titolo = def.titolo ? def.titolo(ec) : comeChiave(ec[def.campoTitolo ?? 'nome']) ?? chiave;
-    const soloRipristino = conOggetto.has(selettore) ? new Set(def.soloSenzaOggetto?.campi ?? []) : NESSUNO;
-    uscita.push({ chiave, chiaveBase, titolo, percorsoElemento: [...def.radice, segmentoSelettore(def.sel!, selettore)], campi: def.campi, soloRipristino, corretto: ec, ambiguo: (conteggio.get(selettore) ?? 0) > 1 });
+    const campiDellOggetto = conOggetto.has(selettore) ? new Set(def.soloSenzaOggetto?.campi ?? []) : NESSUNO;
+    uscita.push({ chiave, chiaveBase, titolo, percorsoElemento: [...def.radice, segmentoSelettore(def.sel!, selettore)], campi: def.campi, campiDellOggetto, corretto: ec, ambiguo: (conteggio.get(selettore) ?? 0) > 1 });
   });
   return uscita;
 }
@@ -371,8 +345,8 @@ function schedaBlocco(tipo: TipoModificabile, chiave: string): SchedaCorrezioneD
   let aggiornata: string | null = null;
   for (const c of e.campi) {
     const percorso = percorsoCampo(e, c.p);
-    // il campo che vive sulla scheda dell'oggetto si mostra solo se c'è una correzione di prima da rimettere com'era
-    if (e.soloRipristino.has(c.p) && !righe.has(percorso)) continue;
+    // il campo che vive sulla scheda dell'oggetto non si mostra qui: si corregge sulla scheda dell'oggetto
+    if (e.campiDellOggetto.has(c.p)) continue;
     const segmenti = analizzaPercorso(percorso);
     const g = risolvi(base, segmenti);
     const guida = g.trovato ? comeValore(g.valore) : undefined;
@@ -401,9 +375,8 @@ function correggiBlocco(tipo: TipoModificabile, chiave: string, campi: Record<st
     const percorso = percorsoCampo(e, p);
     const g = risolvi(base, analizzaPercorso(percorso));
     const inGuida = g.trovato && comeValore(g.valore) !== undefined;
-    // su un campo che vive sulla scheda dell'oggetto si accetta solo il ritorno al valore della guida (toglie la correzione di prima); la 279
-    // ha già tolto l'effetto dai premi che sono oggetti, quindi di norma il campo non c'è nemmeno nella guida
-    if (e.soloRipristino.has(p) && (!inGuida || !uguali(normalizza(c, tipoEffettivo(c, g.valore), grezzo, g.valore), g.valore))) {
+    // un campo che vive sulla scheda dell'oggetto non si corregge da qui (la 279 ha già tolto l'effetto dai premi che sono oggetti)
+    if (e.campiDellOggetto.has(p)) {
       throw httpErrors.badRequest('campo-dell-oggetto', `${def.etichetta} «${chiave}»: «${c.e}» è un dato dell'oggetto del catalogo e si corregge sulla sua scheda.`, { campo: p });
     }
     if (!inGuida) throw httpErrors.notFound('elemento-della-guida-non-trovato', `${def.etichetta} «${chiave}»: il campo «${c.e}» non c'è nella guida.`);
@@ -422,20 +395,6 @@ function correggiBlocco(tipo: TipoModificabile, chiave: string, campi: Record<st
     }
   })();
   return e.chiaveBase;
-}
-
-function ripristinaBlocco(tipo: TipoModificabile, chiave: string, campi?: string[]): { rimessi: string[]; chiaveGuida: string } {
-  const def = defBlocco(tipo);
-  const e = trovaElemento(def, chiave);
-  const scelti = campi ?? e.campi.map((c) => c.p);
-  for (const p of scelti) if (!e.campi.some((c) => c.p === p)) throw httpErrors.badRequest('campo-non-modificabile', `Il campo «${p}» non si può correggere.`, { campo: p });
-  const righe = correzioniDelBloccoDb(def.blocco);
-  const daTogliere = scelti.filter((p) => righe.has(percorsoCampo(e, p)));
-  if (daTogliere.length === 0) throw httpErrors.conflict('nessuna-correzione', 'Non c’è niente da rimettere: i valori sono quelli della guida.');
-  getDb().transaction(() => {
-    for (const p of daTogliere) prepared('DELETE FROM correzione_dati_guida WHERE blocco = ? AND percorso = ?').run(def.blocco, percorsoCampo(e, p));
-  })();
-  return { rimessi: daTogliere, chiaveGuida: e.chiaveBase };
 }
 
 // ---- API del servizio ----
@@ -464,28 +423,6 @@ export function correggi(tipo: string, chiave: string, campi: Record<string, unk
     if (chiaveGuida === chiave) throw err;
     return schedaCorrezione(t, chiaveGuida);
   }
-}
-
-/** Rimette il valore della guida: per tutti i campi dell'oggetto o solo per `campi`. 409 `nessuna-correzione` se non c'è niente da rimettere. */
-export function ripristina(tipo: string, chiave: string, campi?: string[]): EsitoRipristinoCorrezioneDto {
-  const t = verificaTipo(tipo);
-  let rimessi: string[];
-  let chiaveGuida = chiave;
-  try {
-    if (eRiga(t)) rimessi = ripristinaRiga(t, chiave, campi);
-    else ({ rimessi, chiaveGuida } = ripristinaBlocco(t, chiave, campi));
-  } finally {
-    invalidaCacheDiGioco();
-  }
-  // se si è rimesso il campo che identifica l'oggetto (il suo nome), la chiave di adesso è quella della guida
-  let scheda: SchedaCorrezioneDto;
-  try {
-    scheda = schedaCorrezione(t, chiave);
-  } catch (err) {
-    if (chiaveGuida === chiave) throw err;
-    scheda = schedaCorrezione(t, chiaveGuida);
-  }
-  return { tipo: t, chiave: scheda.chiave, campiRipristinati: rimessi, scheda };
 }
 
 /** Le correzioni attive, per tipo se indicato; quelle che la guida di oggi non accoglie più sono segnate «orfane» (non si applicano e non si cancellano). */

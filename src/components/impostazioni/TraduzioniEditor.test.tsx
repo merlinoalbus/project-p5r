@@ -25,7 +25,9 @@ beforeEach(() => {
 });
 
 describe('TraduzioniEditor', () => {
-  it('ripristino: la risposta di «Fool» arrivata dopo quella di «Magician» non rimette la modifica di Magician', async () => {
+  // Sospeso il 10/11: «Ripristina» delle Traduzioni è tolto per decisione dell'utente («Puoi rimuovere questo ripristina del tutto in tutti i
+  // punti»), e il pulsante che il caso preme non c'è più. Resta: la stessa corsa fra due risposte vale per «Salva», da riscrivere su quello.
+  it.skip('ripristino: la risposta di «Fool» arrivata dopo quella di «Magician» non rimette la modifica di Magician', async () => {
     let risolviFool!: (t: TraduzioneDto) => void;
     api.ripristinaTraduzione.mockImplementation((_a: string, chiave: string) => (chiave === 'Fool'
       ? new Promise<TraduzioneDto>((ok) => { risolviFool = ok; })

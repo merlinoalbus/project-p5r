@@ -142,18 +142,18 @@ describe('ModuloCatalogo', () => {
     await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ programma_punti_json: { nome: 'Tessera', unita: 'punti', calcolo: 'manuale' } })));
   });
 
-  it('nasconde una riga della guida e ripristina quella corretta', async () => {
+  // adeguato il 10/11: la riga corretta non ha più un ritorno ai valori della guida (decisione dell'utente: «Puoi rimuovere questo ripristina
+  // del tutto in tutti i punti»)
+  it('nasconde una riga della guida; una riga corretta non ha «Ripristina»', async () => {
     api.nascondiElementoCatalogo.mockResolvedValue(negozioSeed);
     const { unmount } = render(<ModuloCatalogo tipo="negozio" elemento={negozioSeed} onChiudi={vi.fn()} onSalvato={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Nascondi dagli elenchi/ }));
     await waitFor(() => expect(api.nascondiElementoCatalogo).toHaveBeenCalledWith('negozio', 'untouchable', true));
     unmount();
 
-    api.eliminaElementoCatalogo.mockResolvedValue({ esito: 'ripristinata', elemento: negozioSeed });
     render(<ModuloCatalogo tipo="negozio" elemento={{ ...negozioSeed, modificata: true, origine: 'utente' }} onChiudi={vi.fn()} onSalvato={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Ripristina dalla guida' }));
-    await waitFor(() => expect(api.eliminaElementoCatalogo).toHaveBeenCalledWith('negozio', 'untouchable'));
-    expect(notifica).toHaveBeenCalledWith('success', 'Ripristinati i dati della guida.');
+    expect(screen.getByText(/Riga della guida corretta da te\./)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Ripristina/ })).toBeNull();
   });
 });
 

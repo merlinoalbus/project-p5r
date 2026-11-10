@@ -134,6 +134,7 @@ describe('API', () => {
 
   // ---- Traduzioni ----
   // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  // Dal 10/11 è tolto anche `DELETE /api/traduzioni/:ambito/:chiave` («Ripristina» della resa della guida, decisione dell'utente).
   it.skip('traduzioni: elenco, modifica utente e ripristino dal seed', async () => {
     const ambiti = await request(app).get('/api/traduzioni/ambiti');
     expect(ambiti.body.data.find((a: { ambito: string }) => a.ambito === 'effettoSkill').voci).toBe(512);

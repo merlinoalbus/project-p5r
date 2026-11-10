@@ -16,7 +16,3 @@ export const bodyCorrezione = z.object({
   campi: z.record(indirizzoCampo, valoreCampo).refine((c) => Object.keys(c).length > 0, 'Indica almeno un campo da correggere.'),
 }).strict();
 export type DatiCorrezione = z.infer<typeof bodyCorrezione>;
-
-/** Senza `campi` si rimette tutto l'oggetto. */
-export const bodyRipristinoCorrezione = z.object({ campi: z.array(indirizzoCampo).min(1).max(LIMITE_VOCI).optional() }).strict();
-export type DatiRipristinoCorrezione = z.infer<typeof bodyRipristinoCorrezione>;

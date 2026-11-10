@@ -1,15 +1,15 @@
 // ============================================================
-// ModificaAbilita — le abilità di un Confidente rango per rango, con «Modifica» e «Ripristina» (R9-07/2, R11-15/2)
+// ModificaAbilita — le abilità di un Confidente rango per rango, con «Modifica» (R9-07/2, R11-15/2)
 // ============================================================
 //
 // La matita sta nella testata di «Abilità per rango»; apre una finestra con i ranghi da 1 a 10 e, per quello scelto, l'elenco delle abilità
 // (nome e descrizione, nell'ordine in cui si leggono) da cambiare, aggiungere, togliere o spostare. Si salva un rango alla volta (la rotta sostituisce
-// l'elenco del rango); un rango cambiato è segnato e «Ripristina» rimette l'elenco della guida. Vale per tutte le partite.
-// Rotte: GET `/api/compendio/confidenti/:chiave/abilita`, PUT `…/abilita/:rango`, POST `…/abilita/:rango/ripristina`.
+// l'elenco del rango); un rango cambiato rispetto alla guida è segnato. Vale per tutte le partite.
+// Rotte: GET `/api/compendio/confidenti/:chiave/abilita`, PUT `…/abilita/:rango`.
 // ============================================================
 
 import { useState } from 'react';
-import { getAbilitaConfidente, ripristinaAbilitaConfidente, salvaAbilitaConfidente } from '../../services/api';
+import { getAbilitaConfidente, salvaAbilitaConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
@@ -79,13 +79,12 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
   return (
     <Modal titolo={`Abilità di ${nome}`} aperta larga onChiudi={chiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        {delRango?.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaAbilitaConfidente(chiave, rango), `Abilità del rango ${etichettaRango(rango)} ripristinate come nella guida.`)} />}
         <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={chiudi} />
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={<>Salva il rango {etichettaRango(rango)}</>} disabled={occupato || !sporca || !valida} onClick={() => void esegui(() => salvaAbilitaConfidente(chiave, rango, elenco.map((v) => ({ nome: v.nome.trim(), descrizione: v.descrizione.trim() }))), `Abilità del rango ${etichettaRango(rango)} salvate: valgono per tutte le partite.`)} />
       </div>
     )}>
       <div className="flex flex-col gap-3 testo-13">
-        <p className="m-0 text-text-muted">Scegli il rango, cambia l’elenco e salva: si salva un rango alla volta. «Ripristina» rimette l’elenco della guida.</p>
+        <p className="m-0 text-text-muted">Scegli il rango, cambia l’elenco e salva: si salva un rango alla volta.</p>
         {dati.errore && <p role="alert" className="m-0 text-error-testo">{dati.errore}</p>}
         {!dati.dati && !dati.errore && <p role="status" className="m-0">Un attimo…</p>}
         {dati.dati && <>

@@ -1,6 +1,6 @@
 // ============================================================
 // Route /api/aree — le Aree del mondo (L2) e dei Palazzi (L3): pagina, creazione con la prima planimetria, versioni, correzioni,
-// ordine, ripristino, eliminazione nel cestino, planimetrie da collocare, infiltrazioni di un'Area di un Palazzo
+// ordine, eliminazione nel cestino, planimetrie da collocare, infiltrazioni di un'Area di un Palazzo
 // ============================================================
 //
 // Le rotte sono scritte una volta col contenitore come parametro (`/:contenitore/:chiave/…`): `citta`, con la chiave di un quartiere
@@ -14,7 +14,7 @@ import { validate } from '../middleware/validate.js';
 import { httpErrors } from '../utils/httpError.js';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import {
-  aggiornaArea, aggiornaSbloccoArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, impostaInfiltrazioniDellArea, mappeDaCollocare, riordinaAree, ripristinaArea,
+  aggiornaArea, aggiornaSbloccoArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, impostaInfiltrazioniDellArea, mappeDaCollocare, riordinaAree,
   type ContenitoreRotta, type ImmagineNuova,
 } from '../services/mappe/areeService.js';
 import {
@@ -62,9 +62,6 @@ router.put('/:contenitore/:chiave/:slug', validate({ params: paramsArea, body: b
 router.delete('/:contenitore/:chiave/:slug', validate({ params: paramsArea, query: queryEliminaArea }), (req, res) => {
   eliminaArea(...parametri(req), req.params.slug, req.query.conferma === true);
   res.status(204).end();
-});
-router.post('/:contenitore/:chiave/:slug/ripristina', validate({ params: paramsArea }), (req, res) => {
-  res.json(ripristinaArea(...parametri(req), req.params.slug));
 });
 router.post('/:contenitore/:chiave/:slug/planimetrie', validate({ params: paramsArea, query: queryAggiungiPlanimetria }), corpoImmagine, (req, res) => {
   const q = req.query;

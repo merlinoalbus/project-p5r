@@ -35,7 +35,7 @@ interface Props {
   /** Se c'è, il piè mostra «Elimina» (pericolo) a sinistra. */
   onElimina?: () => void;
   titoloElimina?: string;
-  /** Altri comandi del piè, a sinistra accanto a «Elimina» (per esempio «Ripristina»). */
+  /** Altri comandi del piè, a sinistra accanto a «Elimina» (per esempio «Nascondi»). */
   azioniExtra?: ReactNode;
   /** Finestra stretta (520 px) invece che larga (860 px): per i moduli con pochi campi. */
   stretta?: boolean;

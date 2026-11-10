@@ -1,5 +1,5 @@
 // ============================================================
-// righeConfidenti — i regali dei Confidenti, correggibili e ripristinabili (L9 · R9-07/5)
+// righeConfidenti — i regali dei Confidenti, correggibili (L9 · R9-07/5)
 // ============================================================
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): il regalo (`confidente_regalo`, 144 righe; chiave composta, qui «<confidente>:<ordine>»,
@@ -65,11 +65,6 @@ const regalo: DefRiga = {
   valida: (_chiave, fusi) => {
     const k = fusi.catalogo_chiave;
     if (typeof k === 'string' && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(k)) throw httpErrors.notFound('oggetto-non-trovato', `L'oggetto '${k}' non esiste nel catalogo.`);
-  },
-  // rimettere la fotografia non può puntare a un oggetto sparito dal catalogo
-  verificaRipristino: (_chiave, guida) => {
-    const k = guida.catalogo_chiave;
-    if (typeof k === 'string' && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(k)) throw httpErrors.conflict('oggetto-originale-mancante', `L'oggetto '${k}' della guida non esiste più nel catalogo: il regalo resta com'è.`);
   },
 };
 

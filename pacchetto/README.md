@@ -1,7 +1,7 @@
 # Pacchetto di gioco
 
-La fonte dei dati di gioco è il database dell'istanza, `DATA_DIR/gioco.db`. Le correzioni si fanno con l'app (Modifica e
-Ripristina) o con migrazioni dirette e conservative in `server/db/migrations/`. Il pacchetto è solo il punto di partenza di
+La fonte dei dati di gioco è il database dell'istanza, `DATA_DIR/gioco.db`. Le correzioni si fanno con l'app (Modifica)
+o con migrazioni dirette e conservative in `server/db/migrations/`. Il pacchetto è solo il punto di partenza di
 un'istanza nuova.
 
 È un solo file, `gioco.db`: compendio, guida, catalogo, mappe, luoghi e immagini. Non contiene partite, che stanno in `partite.db`.

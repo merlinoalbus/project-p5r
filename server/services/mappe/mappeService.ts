@@ -1851,7 +1851,7 @@ function importaAree(pacchetto: EsportazioneMappeDto, origine: 'seed' | 'utente'
       continue;
     }
     // R2-28 (difetto R3 del giro 1 di L2): un'Area della guida corretta dall'utente (i valori della guida conservati in `seed_json`) resta
-    // com'è anche sotto il seed; del seed si aggiornano solo i valori della guida conservati, così «Ripristina» riporta quelli nuovi
+    // com'è anche sotto il seed; del seed si aggiornano solo i valori della guida conservati
     if (esistente && origine === 'seed' && !sovrascrivi && esistente.seed_json !== null) {
       prepared('UPDATE area SET seed_json = ? WHERE chiave = ?')
         .run(JSON.stringify({ nome: a.nome, nome_rivisto: a.nomeRivisto ? 1 : 0, planimetria_predefinita: a.predefinita ? idMappa(a.predefinita) : null }), a.chiave);

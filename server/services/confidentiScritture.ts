@@ -1,10 +1,12 @@
 // ============================================================
-// confidentiScritture — gli editor dei Confidenti: ranghi, abilità, Dote a ogni incontro e dialoghi, ciascuno con «Ripristina» (L9 R9-07/1-4)
+// confidentiScritture — gli editor dei Confidenti: ranghi, abilità e dialoghi (L9 R9-07/1-4)
 // ============================================================
 //
-// Ogni modifica conserva, alla prima volta, com'era la riga nella guida (una fotografia in `dati_guida`, chiave `confidente-seed-v1:<tabella>:<id>`);
-// «Ripristina» rimette la fotografia e la toglie. Una riga mai modificata non ha fotografia e «Ripristina» risponde 409. I dati sono di gioco: valgono per
-// tutte le partite. Gli editor di regali e inviti (R9-07/5, R9-07c) stanno altrove.
+// Ogni modifica di un rango, delle abilità di un rango o di un dialogo conserva, alla prima volta, com'era la riga nella guida (una fotografia in
+// `dati_guida`, chiave `confidente-seed-v1:<tabella>:<id>`): la fotografia dà il segno «Modificato» degli editor (e, per le abilità, i ranghi che ne
+// avevano prima di una modifica). Non c'è un ritorno al valore della guida (decisione dell'utente del 10/11). I dati sono di gioco: valgono per
+// tutte le partite. La Dote a ogni incontro si scrive da `compendioService.impostaDotiIncontro`; gli editor di regali e inviti (R9-07/5, R9-07c)
+// stanno altrove.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
@@ -19,12 +21,6 @@ const chiaveFotografia = (tabella: string, id: string): string => `confidente-se
 function fotografa(tabella: string, id: string, valore: unknown): void {
   prepared('INSERT OR IGNORE INTO dati_guida (chiave, json) VALUES (?, ?)').run(chiaveFotografia(tabella, id), JSON.stringify(valore));
 }
-function leggiFotografia<T>(tabella: string, id: string): T | null {
-  const r = prepared('SELECT json FROM dati_guida WHERE chiave = ?').get(chiaveFotografia(tabella, id)) as { json: string } | undefined;
-  if (!r) return null;
-  try { return JSON.parse(r.json) as T; } catch { throw httpErrors.conflict('confidente-fotografia-illeggibile', 'La fotografia della guida non è leggibile: la riga resta com’è.'); }
-}
-const togliFotografia = (tabella: string, id: string): void => { prepared('DELETE FROM dati_guida WHERE chiave = ?').run(chiaveFotografia(tabella, id)); };
 const haFotografia = (tabella: string, id: string): boolean => !!prepared('SELECT 1 FROM dati_guida WHERE chiave = ?').get(chiaveFotografia(tabella, id));
 
 function esisteConfidente(chiave: string): void {
@@ -60,17 +56,6 @@ export function impostaRango(chiave: string, rango: number, dati: { modo: ModoRa
   return ranghiDelConfidente(chiave);
 }
 
-export function ripristinaRango(chiave: string, rango: number): RangoConfidenteDto[] {
-  esisteConfidente(chiave);
-  const f = leggiFotografia<{ modo: string; punti_necessari: number; fonte: string | null }>('rango', `${chiave}:${rango}`);
-  if (!f) throw httpErrors.conflict('rango-della-guida', 'Questo rango non è stato modificato: è già come lo dà la guida.');
-  getDb().transaction(() => {
-    prepared('UPDATE confidente_rango SET modo = ?, punti_necessari = ?, fonte = ? WHERE confidente_chiave = ? AND rango = ?').run(f.modo, f.punti_necessari, f.fonte, chiave, rango);
-    togliFotografia('rango', `${chiave}:${rango}`);
-  })();
-  invalidaCacheDiGioco();
-  return ranghiDelConfidente(chiave);
-}
 
 // ---- Abilità per rango (R9-07/2) ----
 
@@ -101,39 +86,6 @@ export function impostaAbilita(chiave: string, rango: number, abilita: Array<{ n
   return abilitaDelConfidente(chiave);
 }
 
-export function ripristinaAbilita(chiave: string, rango: number): AbilitaRangoDto[] {
-  esisteConfidente(chiave);
-  const f = leggiFotografia<Array<{ nome: string; descrizione: string }>>('abilita', `${chiave}:${rango}`);
-  if (!f || !Array.isArray(f)) throw httpErrors.conflict('abilita-della-guida', 'Le abilità di questo rango non sono state modificate: sono già come le dà la guida.');
-  getDb().transaction(() => {
-    prepared('DELETE FROM confidente_abilita WHERE confidente_chiave = ? AND rango = ?').run(chiave, rango);
-    f.forEach((a, i) => prepared('INSERT INTO confidente_abilita (confidente_chiave, rango, ordine, nome, descrizione) VALUES (?, ?, ?, ?, ?)').run(chiave, rango, i, a.nome, a.descrizione));
-    togliFotografia('abilita', `${chiave}:${rango}`);
-  })();
-  invalidaCacheDiGioco();
-  return abilitaDelConfidente(chiave);
-}
-
-// ---- Dote a ogni incontro: la fotografia alla prima modifica e «Ripristina» (R9-07/3) ----
-
-/** Da chiamare PRIMA di scrivere la Dote di un rango: conserva com'era (una volta sola). Un rango senza riga era «vuoto» (`[]`). */
-export function fotografaDoteIncontro(chiave: string, versoRango: number): void {
-  const r = prepared('SELECT effetti_json FROM confidente_dote_incontro WHERE confidente_chiave = ? AND verso_rango = ?').get(chiave, versoRango) as { effetti_json: string } | undefined;
-  fotografa('dote-incontro', `${chiave}:${versoRango}`, { esisteva: !!r, effetti_json: r?.effetti_json ?? '[]' });
-}
-export const doteIncontroModificata = (chiave: string, versoRango: number): boolean => haFotografia('dote-incontro', `${chiave}:${versoRango}`);
-
-export function ripristinaDoteIncontro(chiave: string, versoRango: number): void {
-  esisteConfidente(chiave);
-  const f = leggiFotografia<{ esisteva: boolean; effetti_json: string }>('dote-incontro', `${chiave}:${versoRango}`);
-  if (!f) throw httpErrors.conflict('dote-della-guida', 'La Dote di questo passaggio non è stata modificata: è già come la dà la guida.');
-  getDb().transaction(() => {
-    if (f.esisteva) prepared('UPDATE confidente_dote_incontro SET effetti_json = ? WHERE confidente_chiave = ? AND verso_rango = ?').run(f.effetti_json, chiave, versoRango);
-    else prepared('DELETE FROM confidente_dote_incontro WHERE confidente_chiave = ? AND verso_rango = ?').run(chiave, versoRango);
-    togliFotografia('dote-incontro', `${chiave}:${versoRango}`);
-  })();
-  invalidaCacheDiGioco();
-}
 
 // ---- Dialoghi: note e scelte con i punti (R9-07/4) ----
 
@@ -177,15 +129,3 @@ export function impostaDialogo(chiave: string, id: number, dati: { note?: string
   return comeDto(rigaDialogo(chiave, id));
 }
 
-export function ripristinaDialogo(chiave: string, id: number): DialogoModificatoDto {
-  esisteConfidente(chiave);
-  rigaDialogo(chiave, id);
-  const f = leggiFotografia<{ note: string; scelte_json: string }>('dialogo', String(id));
-  if (!f) throw httpErrors.conflict('dialogo-della-guida', 'Questo dialogo non è stato modificato: è già come lo dà la guida.');
-  getDb().transaction(() => {
-    prepared('UPDATE confidente_dialogo SET note = ?, scelte_json = ? WHERE id = ?').run(f.note, f.scelte_json, id);
-    togliFotografia('dialogo', String(id));
-  })();
-  invalidaCacheDiGioco();
-  return comeDto(rigaDialogo(chiave, id));
-}

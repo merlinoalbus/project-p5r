@@ -53,13 +53,13 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
   },
   'GET /api/aree/:contenitore/:chiave/:slug': {
     sommario: 'La pagina di un’Area',
-    descrizione: 'Il riassunto dell’Area (contenitore, predefinita con la sua illustrazione, conteggi, pin di passaggio sull’illustrazione del contenitore, ingresso, origine, «modificata», «da verificare», casa), le versioni nell’ordine (immagine, etichetta, pin), gli elementi segnati sulle sue planimetrie (luoghi, negozi, attività, Confidenti, col nome del catalogo) e le vicine (dove portano i suoi passaggi, una volta per destinazione, con la loro casa). Con `?partita=` la partita deve esistere.',
+    descrizione: 'Il riassunto dell’Area (contenitore, predefinita con la sua illustrazione, conteggi, pin di passaggio sull’illustrazione del contenitore, ingresso, origine, «da verificare», casa), le versioni nell’ordine (immagine, etichetta, pin), gli elementi segnati sulle sue planimetrie (luoghi, negozi, attività, Confidenti, col nome del catalogo) e le vicine (dove portano i suoi passaggi, una volta per destinazione, con la loro casa). Con `?partita=` la partita deve esistere.',
     risposta: '`AreaDettaglioDto`',
     errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [404, 'partita-non-trovata']],
   },
   'PUT /api/aree/:contenitore/:chiave/:slug': {
     sommario: 'Corregge un’Area: nome, planimetria predefinita, «Tieni»',
-    descrizione: 'Corpo `{ nome?, predefinita?, daVerificare?: false }`. Il nome cambia ma lo slug no (l’indirizzo resta), e il nome diventa «rivisto»; la predefinita (chiave pubblica) deve essere una sua versione; `daVerificare: false` è «Tieni» per un’Area da verificare. La prima correzione di un’Area della guida ne conserva i valori, che «Ripristina» rimette.',
+    descrizione: 'Corpo `{ nome?, predefinita?, daVerificare?: false }`. Il nome cambia ma lo slug no (l’indirizzo resta), e il nome diventa «rivisto»; la predefinita (chiave pubblica) deve essere una sua versione; `daVerificare: false` è «Tieni» per un’Area da verificare. La prima correzione di un’Area della guida ne conserva i valori: l’importazione delle mappe non sovrascrive un’Area corretta.',
     risposta: '`AreaDettaglioDto`',
     errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [400, 'nome-vuoto'], [400, 'planimetria-di-altra-area']],
   },
@@ -74,13 +74,6 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
     descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che portano alle sue planimetrie (dal quartiere o da altre mappe), l’ingresso del quartiere, elementi, nei Palazzi le infiltrazioni che la toccano — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi, pinConVoci, infiltrazioni }` (le voci della guida dei pin restano nelle loro infiltrazioni). Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano, l’ingresso e i legami con le infiltrazioni; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',
     risposta: 'Nessun contenuto (204)',
     errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, AREA_NON_TROVATA, [409, 'area-con-contenuti']],
-  },
-  'POST /api/aree/:contenitore/:chiave/:slug/ripristina': {
-    sommario: 'Rimette i valori della guida di un’Area corretta',
-    descrizione: 'Nome e planimetria predefinita tornano quelli della guida (la predefinita, se è ancora una sua versione), e la copia si toglie. 409 se l’Area è dell’utente o non è stata corretta.',
-    risposta: '`AreaDettaglioDto`',
-    senzaCorpo: true,
-    errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [409, 'area-dell-utente'], [409, 'area-non-modificata']],
   },
   'POST /api/aree/:contenitore/:chiave/:slug/planimetrie': {
     sommario: 'Aggiunge una planimetria (versione) a un’Area',

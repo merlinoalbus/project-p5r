@@ -377,7 +377,8 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect((await ingressoKamoshida(p))?.requisiti.some((q) => /non ci si entra più/.test(q.dettaglio))).toBe(false);
   });
 
-  it('§8.14 — «Modifica › Boss finale»: solo una voce «Boss» del Palazzo (400 altrimenti, e nei Memento), il primo cambio conserva quella della guida; «Ripristina» la rimette', async () => {
+  // adeguato il 10/11: «Ripristina» del boss finale non c'è più (decisione dell'utente: «Puoi rimuovere questo ripristina del tutto in tutti i punti»)
+  it('§8.14 — «Modifica › Boss finale»: solo una voce «Boss» del Palazzo (400 altrimenti, e nei Memento); la voce si cambia e si toglie', async () => {
     const guida = bossDi('shido');
     expect(guida).toBe('shido-16-aula-magna-tesoro-e-boss-finali/4');
     const errore = async (dungeon: string, voceBossFinale: string | null) => (await request(app).put(`/api/compendio/dungeon/${dungeon}`).send({ voceBossFinale })).body.error?.code;
@@ -386,18 +387,18 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(await errore('shido', bossDi('okumura'))).toBe('voce-di-un-altro-palazzo');
     expect(await errore('mementos', null)).toBe('boss-finale-dei-memento');
     expect(await errore('shido', 'nessuna-voce')).toBe('punto-non-trovato');
-    // un'altra voce «Boss» di Shido (un boss intermedio): la scheda la dice, corretta dall'utente
+    // un'altra voce «Boss» di Shido (un boss intermedio): la scheda la dice
     const altra = prepared("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'shido' AND p.tipo = 'boss' AND p.chiave <> ? LIMIT 1").pluck().get(guida) as string;
     const scheda = (await request(app).put('/api/compendio/dungeon/shido').send({ voceBossFinale: altra }).expect(200)).body.data as DungeonRiassuntoDto;
-    expect(scheda).toMatchObject({ voceBossFinale: { chiave: altra, nome: expect.any(String) }, bossFinaleCorretto: true });
-    // un secondo cambio non perde il valore della guida
-    await request(app).put('/api/compendio/dungeon/shido').send({ voceBossFinale: null }).expect(200);
-    const rimessa = (await request(app).post('/api/compendio/dungeon/shido/ripristina').expect(200)).body.data as DungeonRiassuntoDto;
-    expect(rimessa).toMatchObject({ voceBossFinale: { chiave: guida }, bossFinaleCorretto: false });
-    expect((await request(app).post('/api/compendio/dungeon/shido/ripristina').expect(409)).body.error.code).toBe('niente-da-ripristinare');
+    expect(scheda).toMatchObject({ voceBossFinale: { chiave: altra, nome: expect.any(String) } });
+    expect('bossFinaleCorretto' in scheda).toBe(false);
+    // «nessuna» toglie la voce; la rotta di «Ripristina» non c'è più
+    const tolta = (await request(app).put('/api/compendio/dungeon/shido').send({ voceBossFinale: null }).expect(200)).body.data as DungeonRiassuntoDto;
+    expect(tolta.voceBossFinale).toBeNull();
+    await request(app).post('/api/compendio/dungeon/shido/ripristina').expect(404);
     // i Memento non hanno questi campi
     const memento = ((await request(app).get('/api/compendio/dungeon').expect(200)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'mementos')!;
-    expect(['voceBossFinale', 'bossFinaleCorretto'].filter((k) => k in memento)).toEqual([]);
+    expect(['voceBossFinale'].filter((k) => k in memento)).toEqual([]);
   });
 
   // R11-02b/2 (L11) e R8-19b: Iweleth è solo un dedalo, senza boss segnato nella Guida né anello: resta la riga senza effetti, il caso (boss che conclude) non vale più
@@ -427,12 +428,12 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(r.get('iweleth')!.bossFinaleDaDichiarare).toBe(false);
     expect(r.get('okumura')!.bossFinaleDaDichiarare).toBe(false);
     expect('bossFinaleDaDichiarare' in r.get('mementos')!).toBe(false);
-    // «Modifica › Boss finale» lo spegne, «Ripristina» lo riaccende (la guida non ha la voce)
+    // «Modifica › Boss finale» lo spegne; «nessuna» lo riaccende (adeguato il 10/11: «Ripristina» non c'è più)
     const boss = bossFinali().get('madarame')!.punti[0];
     await request(app).put('/api/compendio/dungeon/madarame').send({ voceBossFinale: boss }).expect(200);
     r = await riassunti();
     expect(r.get('madarame')!.bossFinaleDaDichiarare).toBe(false);
-    await request(app).post('/api/compendio/dungeon/madarame/ripristina').expect(200);
+    await request(app).put('/api/compendio/dungeon/madarame').send({ voceBossFinale: null }).expect(200);
     expect((await riassunti()).get('madarame')!.bossFinaleDaDichiarare).toBe(true);
   });
 

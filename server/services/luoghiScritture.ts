@@ -127,7 +127,7 @@ function riepilogo(tipo: 'luogo' | 'negozio', chiave: string): RiepilogoEliminaz
 }
 
 /**
- * Elimina un luogo o un negozio nel cestino (R5-21, DELETE elimina e basta: «Ripristina i valori della guida» è un'altra rotta). Senza conferma e
+ * Elimina un luogo o un negozio nel cestino (R5-21, DELETE elimina e basta). Senza conferma e
  * con contenuti → 409 `luogo-con-contenuti` / `negozio-con-acquisti` col riepilogo; con la conferma (o senza contenuti) va nel cestino.
  */
 export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, conferma: boolean): { esito: 'eliminata'; elemento: null; riepilogo: RiepilogoEliminazione } {

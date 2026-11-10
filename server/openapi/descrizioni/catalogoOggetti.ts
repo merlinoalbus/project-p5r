@@ -2,23 +2,11 @@
 import type { DescrizioniArea } from '../tipi.js';
 
 export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
-  'POST /api/catalogo-oggetti/regali/:confidente/:ordine/ripristina-costo': {
-    sommario: 'Ripristina soltanto il costo precedente della rettifica G-034',
-    descrizione: 'Ripristino mirato di Shinya/ordine1, Modellino di moto: snapshot validato e costoAttuale come precondizione contro aggiornamenti concorrenti. Cambia esclusivamente costo, preservando nome, identità, nota storica, gradimento e consegne della partita. Lo snapshot pre-correzione rimane conservato.',
-    risposta: '{ ripristinato: true }',
-    errori: [[404, 'regalo-non-trovato'], [409, 'costo-regalo-senza-snapshot'], [409, 'costo-regalo-cambiato']],
-  },
   'PUT /api/catalogo-oggetti/note-storiche/:chiave': {
     sommario: 'Modifica testo e fonte di una nota storica',
     descrizione: 'Corpo strict `{ testo, fonte, testoAttuale }`: il testo (fino a 2000 caratteri) non può essere vuoto dopo il trim, la fonte (fino a 500) sì: una nota può non avere una fonte citabile, e `testoAttuale` è la precondizione, cioè il testo che la scheda ha letto. Se nel frattempo la nota è cambiata risponde 409 `nota-storica-cambiata` e non scrive. Una nota storica dice una discordanza della guida senza cambiare prezzi, acquisti o progressi delle partite; è un dato di gioco, letto da negozi, catalogo e confronto dei listini. La chiave è quella della nota (`nota_storica`), non dell\'oggetto.',
     risposta: '`NotaStoricaOfferta` aggiornata, con `modificata` vero se differisce dalla guida',
     errori: [[404, 'nota-storica-non-trovata'], [400, 'nota-storica-vuota'], [409, 'nota-storica-cambiata']],
-  },
-  'POST /api/catalogo-oggetti/note-storiche/:chiave/ripristina': {
-    sommario: 'Riporta una nota storica al valore della guida',
-    descrizione: 'Corpo strict `{ testoAttuale }`: testo e fonte tornano come li dà la guida (copia `seed_json`). `testoAttuale` è la precondizione: se la nota è cambiata dopo la lettura risponde 409 `nota-storica-cambiata`; 409 `nota-storica-senza-guida` se la copia della guida non è leggibile.',
-    risposta: '`NotaStoricaOfferta` ripristinata',
-    errori: [[404, 'nota-storica-non-trovata'], [409, 'nota-storica-cambiata'], [409, 'nota-storica-senza-guida']],
   },
   'GET /api/catalogo-oggetti': {
     sommario: 'Catalogo unico degli oggetti con ricerca e filtro per categoria',
@@ -39,16 +27,9 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
   },
   'PUT /api/catalogo-oggetti/:categoria/:slug': {
     sommario: 'Corregge i campi inviati senza cambiare la chiave',
-    descrizione: 'Modifica parziale: i campi omessi non vengono azzerati dai default della creazione. La prima correzione di un oggetto della guida conserva lo snapshot per Ripristina. Rinomina e categoria corrente non cambiano la chiave originale né riscrivono nomi/date dello storico; i lettori usano il riferimento stabile. Non corregge prezzi o condizioni delle singole offerte.',
+    descrizione: 'Modifica parziale: i campi omessi non vengono azzerati dai default della creazione; un oggetto della guida corretto passa a origine «utente». Rinomina e categoria corrente non cambiano la chiave originale né riscrivono nomi/date dello storico; i lettori usano il riferimento stabile. Non corregge prezzi o condizioni delle singole offerte.',
     risposta: 'CatalogoOggettoDto aggiornato',
     errori: [[404, 'oggetto-non-trovato'], [409, 'categoria-lettura-collegata']],
-  },
-  'POST /api/catalogo-oggetti/:categoria/:slug/ripristina': {
-    sommario: 'Ripristina i dati della guida dalla copia conservata',
-    descrizione: 'Ripristina soltanto i campi dell’identità nello snapshot; non ripristina offerte o avanzamenti di partita. Controlla anche il JSON interno di alias/statistiche e gli stessi vincoli della creazione. Una copia assente, incompleta, incompatibile o illeggibile produce 409 prima della scrittura. La chiave e i riferimenti restano gli stessi.',
-    risposta: 'CatalogoOggettoDto ripristinato',
-    senzaCorpo: true,
-    errori: [[404, 'oggetto-non-trovato'], [409, 'oggetto-senza-snapshot'], [409, 'snapshot-oggetto-non-valido'], [409, 'snapshot-oggetto-incompleto'], [409, 'categoria-lettura-collegata']],
   },
   'DELETE /api/catalogo-oggetti/:categoria/:slug': {
     sommario: 'Elimina un’identità passando dal cestino',

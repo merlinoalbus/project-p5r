@@ -16,7 +16,8 @@ it('imposta le voci di G-027 che ci sono; quelle che il pacchetto non ha restano
   // il pacchetto dei test è di prima delle voci dell'utente di Kamoshida e Madarame
   expect([v.kamoshida, v.madarame, v.iweleth, v.mementos]).toEqual([null, null, null, null]);
   for (const p of ['kaneshiro', 'futaba', 'okumura', 'niijima', 'shido', 'maruki']) expect(v[p]).toBe(VOCI_BOSS_FINALE[p]);
-  expect(prepared('SELECT COUNT(*) FROM dungeon WHERE seed_json IS NOT NULL').pluck().get()).toBe(0);
+  // la fotografia `dungeon.seed_json` della 112 serviva solo a «Ripristina»: la 388 la toglie (decisione dell'utente del 10/11)
+  expect(prepared("SELECT COUNT(*) FROM pragma_table_info('dungeon') WHERE name = 'seed_json'").pluck().get()).toBe(0);
 });
 
 it('idempotente: una voce già impostata (dall’utente o da un giro di prima) non si tocca', () => {

@@ -24,7 +24,7 @@
 //
 // **Il congelamento dei contenuti (L12 · R12-04, `edizioneContenuti.ts`).** Sulla COPIA: le correzioni della guida (`correzione_dati_guida`) si scrivono
 // dentro i blocchi di `dati_guida` con la stessa funzione che le applica in lettura, la tabella delle correzioni si svuota (il rilascio legge un valore
-// solo) e si tolgono le fotografie di «Ripristina» (chiavi `confidente-seed-v1:*` e tabelle `…_foto`); poi il controllo completo dei contenuti, oggetto
+// solo) e si tolgono le fotografie della guida (chiavi `confidente-seed-v1:*` e tabelle `…_foto`); poi il controllo completo dei contenuti, oggetto
 // per oggetto, con la pagina dove correggere. Nessuna correzione automatica dei dati: si segnala, corregge l'utente nella preparazione.
 //
 // **Cosa blocca l'edizione** (non viene depositata, il report dice perché): controllo di integrità non superato; i BLOCCANTI dei contenuti (condizioni
@@ -291,7 +291,7 @@ function testoLeggimi(numero: number, versioneSchemaGioco: number, versioneSchem
     'pubblica di rilascio legge in sola lettura:',
     '',
     '  gioco.db            i dati di gioco (con le immagini e le loro miniature), senza giornale WAL; le correzioni della guida sono già scritte',
-    '                      dentro i blocchi di dati_guida (la tabella delle correzioni è vuota) e le fotografie di «Ripristina» non ci sono',
+    '                      dentro i blocchi di dati_guida (la tabella delle correzioni è vuota) e le fotografie della guida non ci sono',
     '  partite-vuoto.db    il file delle partite con la sola struttura: l\'istanza di rilascio lo copia al primo avvio',
     '  font/               i caratteri (se ce ne sono)',
     '  chiavi.json         le chiavi citate dalle partite (serve alla prossima edizione per il confronto di compatibilità)',
@@ -357,7 +357,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     if (Object.values(regole).some((n) => n > 0)) avvisi.push(`Le regole sui dati hanno corretto la copia (${JSON.stringify(regole)}): nella preparazione verranno rifatte al prossimo avvio.`);
     if (fs.existsSync(path.join(config.dataDir, 'immagini'))) bloccanti.push('Nella cartella dati dell\'istanza c\'è ancora la cartella «immagini» (immagini su disco non assorbite nel database): l\'edizione non le conterrebbe. Riavvia la preparazione perché le assorba.');
 
-    // R12-04: le correzioni della guida dentro i blocchi (tabella delle correzioni a zero) e fuori le fotografie di «Ripristina». Solo sulla copia.
+    // R12-04: le correzioni della guida dentro i blocchi (tabella delle correzioni a zero) e fuori le fotografie della guida. Solo sulla copia.
     avanza('correzioni');
     correzioniGuida = unisciCorrezioniGuida(lavoro, raccolta);
     if (correzioniGuida.correzioniDopo > 0) avvisi.push(`${correzioniGuida.correzioniDopo} correzioni della guida sono rimaste nella copia perché il loro blocco non si legge: vedi l'elenco dei contenuti.`);

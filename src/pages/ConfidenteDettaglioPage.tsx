@@ -36,7 +36,6 @@ import { DotiIncontro } from '../components/partita/DotiIncontro';
 import { sitoDellaFonte } from '../utils/fonti';
 import { urlHttp } from '../../shared/urlHttp';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
-import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
 import { REAZIONE_FUORI_ELENCO, annulloDelRegalo, esitoDelRegalo, fraIGraditi, testoReazione } from '../../shared/regali';
 import { casaOggetto } from '../../shared/catalogo';
 import { ElencoConsegne } from '../components/catalogo/ConsegneRegalo';
@@ -188,7 +187,6 @@ export function ConfidenteDettaglioPage() {
       {(g.dove || g.costo) && <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>}
       {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
       {!IN_RILASCIO && g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-      <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
       <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
     </li>
   );

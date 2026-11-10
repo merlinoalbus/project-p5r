@@ -6,7 +6,7 @@
 // ============================================================
 
 import type { AreaDettaglioDto, AreaDungeonDto, AreaRiassuntoDto, ContenitoreAreaDto, MappaDaCollocareDto } from '../../types';
-import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
+import { apiDelete, apiGet, apiPut, inviaFile, queryString } from './_helpers';
 
 /** Il contenitore di un'area: la chiave di un quartiere (o `tokyo`) come in L2, oppure il contenitore dell'area così come lo dà il
  *  server (`{ tipo, chiave }`): i Palazzi (L3) hanno il segmento `dungeon`, il mondo `citta`. */
@@ -51,10 +51,6 @@ export const aggiornaAreaMondo = (contenitore: RifContenitore, slug: string, dat
 /** Riordina le aree di un quartiere (o di un Palazzo): tutti gli slug, nell'ordine nuovo. */
 export const riordinaAree = (contenitore: RifContenitore, slug: string[]): Promise<void> =>
   apiPut(`/aree/${segmento(contenitore)}/ordine`, { slug });
-
-/** Rimette i valori della guida su un'area corretta dall'utente. */
-export const ripristinaAreaMondo = (contenitore: RifContenitore, slug: string): Promise<AreaDettaglioDto> =>
-  apiPost(`${percorsoArea(contenitore, slug)}/ripristina`, {});
 
 /** Elimina un'area (va nel cestino). Con contenuti, senza `conferma`, il server risponde 409 `area-con-contenuti` col riepilogo. */
 export const eliminaAreaMondo = (contenitore: RifContenitore, slug: string, conferma = false): Promise<void> =>

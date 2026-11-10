@@ -149,16 +149,14 @@ describe('Aree del mondo (L2)', () => {
     expect([ultima.status, ultima.body.error.code]).toEqual([409, 'ultima-planimetria']);
   });
 
-  it('9 — correggere un’Area: nome (lo slug resta) e predefinita; la prima correzione di un’Area della guida conserva i valori, «Ripristina» li rimette; un’Area dell’utente no', async () => {
+  // adeguato il 10/11: «Ripristina» dell'Area non c'è più (decisione dell'utente: «Puoi rimuovere questo ripristina del tutto in tutti i punti»)
+  it('9 — correggere un’Area: nome (lo slug resta) e predefinita; la prima correzione di un’Area della guida conserva i valori', async () => {
     const r = (await request(app).put('/api/aree/citta/shibuya/central-street').send({ nome: 'Center Gai' }).expect(200)).body.data as AreaDettaglioDto;
-    expect(r).toMatchObject({ slug: 'central-street', nome: 'Center Gai', nomeRivisto: true, modificata: true, casa: '/guida/citta/shibuya/central-street' });
+    expect(r).toMatchObject({ slug: 'central-street', nome: 'Center Gai', nomeRivisto: true, casa: '/guida/citta/shibuya/central-street' });
     expect(JSON.parse(prepared("SELECT seed_json FROM area WHERE chiave = 'citta/shibuya/central-street'").pluck().get() as string)).toMatchObject({ nome: 'Central Street', nome_rivisto: 0 });
     expect((await request(app).put('/api/aree/citta/shibuya/central-street').send({ predefinita: 'shibuya-sottopasso-speciale' })).body.error.code).toBe('planimetria-di-altra-area');
     expect((await request(app).put('/api/aree/citta/shibuya/central-street').send({ nome: ' ' })).body.error.code).toBe('nome-vuoto');
-    const rimessa = (await request(app).post('/api/aree/citta/shibuya/central-street/ripristina').expect(200)).body.data as AreaDettaglioDto;
-    expect(rimessa).toMatchObject({ nome: 'Central Street', nomeRivisto: false, modificata: false });
-    expect((await request(app).post('/api/aree/citta/shibuya/central-street/ripristina')).body.error.code).toBe('area-non-modificata');
-    expect((await request(app).post('/api/aree/citta/shibuya/sottopasso/ripristina')).body.error.code).toBe('area-dell-utente');
+    await request(app).post('/api/aree/citta/shibuya/central-street/ripristina').expect(404);
     // il riordino vuole tutte le Aree, una volta
     const ordine = ['sottopasso', 'piazza-della-stazione', 'central-street', 'centro-comm-sotterraneo', 'tornello-della-linea-ginza', 'banchina-della-metropolitana'];
     expect(((await request(app).put('/api/aree/citta/shibuya/ordine').send({ slug: ordine }).expect(200)).body.data as AreaRiassuntoDto[]).map((a) => a.slug)).toEqual(ordine);
@@ -234,7 +232,8 @@ describe('Aree del mondo (L2)', () => {
     expect(((await request(app).get(`/api/mappe/${encodeURIComponent(una)}`).expect(200)).body.data as MappaDto).area?.daVerificare).toBe(false);
   });
 
-  it('R3 (giro 2), R2-28 — un’Area corretta dall’utente resta com’è dopo un import senza «sovrascrivi», dall’app e dal seed; «Ripristina» la riporta', async () => {
+  // adeguato il 10/11: «Ripristina» dell'Area non c'è più; il nome della guida resta nella fotografia
+  it('R3 (giro 2), R2-28 — un’Area corretta dall’utente resta com’è dopo un import senza «sovrascrivi», dall’app e dal seed', async () => {
     // un'Area della guida (seed) di Shibuya, che l'utente corregge
     const { chiave, slug } = prepared("SELECT chiave, slug FROM area WHERE quartiere_chiave = 'shibuya' AND origine = 'seed' AND seed_json IS NULL ORDER BY ordine LIMIT 1").get() as { chiave: string; slug: string };
     const pacchetto = (await request(app).get('/api/mappe/esporta?radice=shibuya').expect(200)).body.data as EsportazioneMappeDto;
@@ -249,9 +248,8 @@ describe('Aree del mondo (L2)', () => {
     // dal seed (il pacchetto del seed sopra un'Area del seed corretta dall'utente)
     importaMappe(structuredClone(pacchetto), { origine: 'seed' });
     expect(corretta()).toEqual(prima);
-    // «Ripristina» rimette i valori della guida
-    await request(app).post(`/api/aree/citta/shibuya/${slug}/ripristina`).expect(200);
-    expect(prepared('SELECT nome FROM area WHERE chiave = ?').pluck().get(chiave)).toBe(nomeGuida);
+    // la fotografia conserva il nome della guida
+    expect((JSON.parse(prepared('SELECT seed_json FROM area WHERE chiave = ?').pluck().get(chiave) as string) as { nome: string }).nome).toBe(nomeGuida);
   });
 
   it('FUN2-8 (giro 2) — dall’editor una mappa senza Area non entra nel mondo: spostarla sotto un quartiere o renderla `luogo`/`area` lì è 409 usa-aggiungi-area; nei Memento e fra le generiche niente cambia', async () => {

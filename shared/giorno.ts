@@ -17,8 +17,6 @@ export interface GiornoModificabileDto {
   vincoli: string[];
   /** L8-02: gli avvisi del giorno (`giorno.avvisi_json`), le frasi sotto trama e vincoli nella scheda del giorno; un solo punto di modifica. */
   avvisi: string[];
-  /** Vero se qualcosa è stato cambiato rispetto alla guida: «Ripristina» lo riporta com'era. */
-  modificato: boolean;
 }
 
 /** Le sole voci che l'editor cambia; un campo omesso resta com'è. */

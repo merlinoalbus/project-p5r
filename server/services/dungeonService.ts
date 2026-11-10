@@ -45,7 +45,7 @@ import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
 import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
-import { elencaAtterraggi, fotografiaDungeonDaAggiornare, fotografiaSenza, impostaFinestra, leggiFotografiaDungeon, type ConsigliPalazzo } from './atterraggioPalazziService.js';
+import { elencaAtterraggi, impostaFinestra, type ConsigliPalazzo } from './atterraggioPalazziService.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { motiviCompletamentoRichieste } from './richiesteService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
@@ -60,7 +60,7 @@ interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: nu
   /** 118 e 308 (L13 O6-3): il termine della lettera di sfida e il furto consigliato, MM-GG; null dove la guida non li dà. Con la finestra
    *  sono le date del Palazzo, una fonte sola (i testi in prosa di prima sono usciti con la 308). */
   lettera_entro?: string | null; furto_consigliato_data?: string | null;
-  /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null;
+  /** 112 (L4 §8.14) */ voce_boss_finale?: string | null;
   /** 113 (L4 §8.15) */ regola_boss?: 'voce-finale' | 'memento' }
 /** Un'area della guida: un'infiltrazione di un Palazzo o un dedalo dei Memento. L10-02 (382): il totale dei timbri, solo per i dedali (null =
  *  la guida non dà un numero). */
@@ -348,7 +348,6 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
   const concluso = palazzo && !palazzi.get(r.chiave)?.senzaEffetti ? palazzi.get(r.chiave)?.concluso : null;
   const sp = gia.segni ?? null;
   const lettera = letteraDelPalazzo({ chiave: r.chiave, dal: finestra?.dal ?? null, al: finestra?.al ?? null, scritta: r.lettera_entro ?? null });
-  const fotografia = leggiFotografiaDungeon(r.seed_json, r.chiave);
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     // L13 O6-3: le date del Palazzo da una fonte sola, la finestra e le colonne strutturate (MM-GG)
@@ -375,10 +374,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     ...(palazzo ? {
       completamento: palazzi.get(r.chiave)?.completamento ?? { oggetti: 0, fatti: conPartita ? 0 : null, tesoro: conPartita ? false : null, boss: conPartita ? false : null, concluso: conPartita ? false : null, completato: conPartita ? false : null },
       daVerificare: !conPartita ? null : sp ? divergenzeDelPalazzo(sp, r.chiave) : 0,
-      // §8.14: la voce del boss finale dichiarata (null = nessuna: il Palazzo non si conclude) e se l'utente l'ha cambiata («Ripristina»)
+      // §8.14: la voce del boss finale dichiarata (null = nessuna: il Palazzo non si conclude)
       voceBossFinale: r.voce_boss_finale ? { chiave: r.voce_boss_finale, nome: (prepared('SELECT nome FROM punto_interesse WHERE chiave = ?').get(r.voce_boss_finale) as { nome: string } | undefined)?.nome ?? r.voce_boss_finale } : null,
-      bossFinaleCorretto: 'voce_boss_finale' in fotografia,
-      dateCorrette: !!fotografia.date,
       // §8.15: la regola del boss (113): `memento` = il boss segnato nella Guida, senza voce dichiarata né effetti di Palazzo (Iweleth)
       regolaBoss: r.regola_boss === 'memento' ? 'memento' as const : 'voce-finale' as const,
       // condizione del PM sulla 112 (una voce di G-027 mancante lascia NULL): un Palazzo con la regola della voce e senza voce non si
@@ -648,8 +645,7 @@ export interface DatiDungeon { nome?: string; sovrano?: string; note?: string;
 /**
  * Testi della scheda di un Palazzo (o dei Memento), le sue date e, per un Palazzo, la voce del boss finale (L4 §8.14, «Modifica › Boss
  * finale»): una voce `boss` del Palazzo (400 `voce-non-boss`, 400 `voce-di-un-altro-palazzo`, 404 `punto-non-trovato`; nei Memento 400
- * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Il primo cambio della voce conserva il valore della guida in
- * `seed_json`, per «Ripristina» (`ripristinaDungeon`). Le date (L13 O6-3) passano da `impostaFinestra`, l'unico che le scrive (400 se non
+ * `boss-finale-dei-memento`, che restano col boss segnato nella Guida). Le date (L13 O6-3) passano da `impostaFinestra`, l'unico che le scrive (400 se non
  * sono giorni del calendario o se sono rovesciate); tutto in una transazione: con una data sbagliata non si salva niente. Il livello
  * consigliato (L8-04) è un minimo e un massimo: 400 `livello-rovesciato` se il minimo supera il massimo.
  */
@@ -664,11 +660,7 @@ export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDetta
       dati.nome?.trim() || r.nome, dati.sovrano ?? r.sovrano, livello.min, livello.max, dati.note ?? r.note, chiave);
     if (dati.date) impostaFinestra(chiave, dati.date.dal, dati.date.al, { furtoConsigliato: dati.date.furtoConsigliato, letteraEntro: dati.date.letteraEntro });
     if (dati.voceBossFinale !== undefined && dati.voceBossFinale !== (r.voce_boss_finale ?? null)) {
-      // il valore della guida si conserva al primo cambio, come per le Aree; la fotografia si rilegge qui perché `impostaFinestra`, appena
-      // sopra, può avervi aggiunto le date
-      const foto = fotografiaDungeonDaAggiornare(prepared('SELECT seed_json FROM dungeon WHERE chiave = ?').pluck().get(chiave) as string | null, chiave);
-      const seed = 'voce_boss_finale' in foto ? foto : { ...foto, voce_boss_finale: r.voce_boss_finale ?? null };
-      prepared('UPDATE dungeon SET voce_boss_finale = ?, seed_json = ? WHERE chiave = ?').run(dati.voceBossFinale, JSON.stringify(seed), chiave);
+      prepared('UPDATE dungeon SET voce_boss_finale = ? WHERE chiave = ?').run(dati.voceBossFinale, chiave);
     }
   })();
   return dettaglioDungeon(chiave);
@@ -684,34 +676,6 @@ function verificaVoceBossFinale(r: RigaDungeon, voce: string | null): void {
   if (!v) throw httpErrors.notFound('punto-non-trovato', `Il punto '${voce}' non esiste.`);
   if (v.dungeon_chiave !== r.chiave) throw httpErrors.badRequest('voce-di-un-altro-palazzo', `«${v.nome}» non è una voce di questo Palazzo.`);
   if (v.tipo !== 'boss') throw httpErrors.badRequest('voce-non-boss', `«${v.nome}» non è una voce «Boss»: il boss finale si sceglie fra le voci «Boss» del Palazzo.`);
-}
-
-/** «Ripristina» della scheda di un Palazzo (L4 §8.14): la voce del boss finale torna quella della guida (`seed_json`). 409
- *  `niente-da-ripristinare` se non è stata cambiata. Le date restano come sono: hanno il loro «Ripristina» (`ripristinaDateDungeon`). */
-export function ripristinaDungeon(chiave: string): DungeonDettaglioDto {
-  const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
-  if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
-  const foto = fotografiaDungeonDaAggiornare(r.seed_json, chiave);
-  if (!haColonnaMain(getDb(), 'dungeon', 'voce_boss_finale') || !('voce_boss_finale' in foto)) throw httpErrors.conflict('niente-da-ripristinare', 'La scheda del Palazzo ha già i valori della guida.');
-  // una voce della guida eliminata nel frattempo non si rimette (la colonna ha la chiave esterna): resta nessuna
-  const voce = foto.voce_boss_finale && prepared('SELECT 1 FROM punto_interesse WHERE chiave = ?').get(foto.voce_boss_finale) ? foto.voce_boss_finale : null;
-  prepared('UPDATE dungeon SET voce_boss_finale = ?, seed_json = ? WHERE chiave = ?').run(voce, fotografiaSenza(foto, 'voce_boss_finale'), chiave);
-  return dettaglioDungeon(chiave);
-}
-
-/** «Ripristina» delle date di un Palazzo (L9-08): tornano esattamente quelle fotografate alla prima correzione, anche nulle: si scrivono nelle colonne
- *  senza ripassare dalla regola delle date, che chiede l'apertura e renderebbe la fotografia irrimediabile. Il boss finale resta com'è. 404
- *  `dungeon-non-trovato`; 409 `niente-da-ripristinare` se le date non sono state corrette, `fotografia-illeggibile` se la copia non si legge. */
-export function ripristinaDateDungeon(chiave: string): DungeonDettaglioDto {
-  const r = prepared('SELECT seed_json FROM dungeon WHERE chiave = ?').get(chiave) as { seed_json: string | null } | undefined;
-  if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
-  const foto = fotografiaDungeonDaAggiornare(r.seed_json, chiave);
-  if (!foto.date) throw httpErrors.conflict('niente-da-ripristinare', 'Le date del Palazzo sono già quelle della guida.');
-  const { finestra_dal: dal, finestra_al: al, lettera_entro: lettera, furto_consigliato_data: furto } = foto.date;
-  prepared('UPDATE dungeon SET finestra_dal = ?, finestra_al = ?, lettera_entro = ?, furto_consigliato_data = ?, seed_json = ? WHERE chiave = ?')
-    .run(dal ?? null, al ?? null, lettera ?? null, furto ?? null, fotografiaSenza(foto, 'date'), chiave);
-  invalidaDatiGuida();
-  return dettaglioDungeon(chiave);
 }
 
 /** Nome e descrizione di un'area della guida; L10-02 (382): per un dedalo dei Memento anche il totale dei timbri (null = la guida non dà un numero). */

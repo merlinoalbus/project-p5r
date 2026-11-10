@@ -137,7 +137,7 @@ export function VideogiochiPage() {
           </div>
 
           {/* La frase comune ai sette giochi (R9-14/1) sta una volta sola in `dati_guida` e si mostra qui, in testa alla categoria; la matita resta anche
-              se la frase è vuota, così si può riscrivere o rimettere quella della guida. */}
+              se la frase è vuota, così si può riscrivere. */}
           <section className="card flex flex-col gap-1" aria-label="Nota comune ai videogiochi">
             <div className="flex items-start gap-2">
               <p className="m-0 min-w-0 flex-1 whitespace-pre-line text-sm text-text-secondary">{notaComune || 'Nessuna nota comune ai videogiochi.'}</p>

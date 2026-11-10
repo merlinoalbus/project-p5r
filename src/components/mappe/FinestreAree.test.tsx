@@ -20,7 +20,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 const area: AreaRiassuntoDto = {
   chiave: 'citta/kichijoji/galleria', contenitore: { tipo: 'quartiere', chiave: 'kichijoji', nome: 'Kichijoji' }, slug: 'galleria', nome: 'Galleria', nomeRivisto: false, ordine: 0,
   predefinita: 'kichijoji-galleria', illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false,
-  origine: 'utente', modificata: false, daVerificare: false, casa: '/guida/citta/kichijoji/galleria',
+  origine: 'utente', daVerificare: false, casa: '/guida/citta/kichijoji/galleria',
 };
 const quartiere = { chiave: 'kichijoji', nome: 'Kichijoji', mappaChiave: 'citta-kichijoji', sblocco: null, fonte: '', descrizione: '', mappa: true,
   illustrazione: { immagineUrl: '/api/immagini/mappa/citta-kichijoji/file?v=1', asset: null }, aree: [area], pianta: null, piantaAssente: null, luoghi: [] } as unknown as QuartiereDettaglioDto;

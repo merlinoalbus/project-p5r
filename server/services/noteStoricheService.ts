@@ -5,8 +5,8 @@
 // Una nota storica dice una discordanza della guida (G-034: Homunculus a 120.000 ¥ nella pagina Oggetti, 5.000 ¥ nel listino Royal di
 // Tanaka) senza cambiare prezzi, acquisti o progressi. Vive in `nota_storica` (migrazione 139) e si mostra sulle righe legate in
 // `nota_storica_legame` (un'offerta, un oggetto del catalogo): un solo punto di modifica, letto da negozi, catalogo e confronto Tanaka.
-// Si modifica dall'app e torna al valore della guida con «Ripristina» (`seed_json`), come il costo dei regali: il testo attuale è una
-// precondizione esplicita, così una correzione fatta nel frattempo non si sovrascrive per errore.
+// Si modifica dall'app: il testo attuale è una precondizione esplicita, così una correzione fatta nel frattempo non si sovrascrive per errore.
+// La copia della guida (`seed_json`) dice se la nota è «modificata»; non c'è un ritorno al valore della guida (decisione dell'utente del 10/11).
 // ============================================================
 
 import { z } from 'zod';
@@ -60,20 +60,6 @@ export function modificaNotaStorica(chiave: string, d: { testo: string; fonte: s
     const r = riga(chiave);
     if (r.testo !== d.testoAttuale) throw httpErrors.conflict('nota-storica-cambiata', 'La nota è cambiata: riapri la scheda prima di modificarla.');
     prepared('UPDATE nota_storica SET testo = ?, fonte = ?, updated_at = ? WHERE chiave = ? AND testo = ?').run(testo, fonte, nowIso(), chiave, d.testoAttuale);
-  })();
-  invalidaCacheDiGioco();
-  return dto(riga(chiave));
-}
-
-/** «Ripristina»: testo e fonte tornano come li dà la guida. 409 se la copia della guida non è leggibile o se il testo è cambiato nel
- *  frattempo. */
-export function ripristinaNotaStorica(chiave: string, testoAttuale: string): NotaStoricaOfferta {
-  getDb().transaction(() => {
-    const r = riga(chiave);
-    const g = valoreGuida(r);
-    if (!g) throw httpErrors.conflict('nota-storica-senza-guida', 'Non è disponibile una copia valida della nota della guida.');
-    if (r.testo !== testoAttuale) throw httpErrors.conflict('nota-storica-cambiata', 'La nota è cambiata: riapri la scheda prima di ripristinarla.');
-    prepared('UPDATE nota_storica SET testo = ?, fonte = ?, updated_at = ? WHERE chiave = ? AND testo = ?').run(g.testo, g.fonte, nowIso(), chiave, testoAttuale);
   })();
   invalidaCacheDiGioco();
   return dto(riga(chiave));

@@ -26,7 +26,7 @@ import { urlCasa } from '../utils/navigazioneMappa';
 import { testoFasciaDelLuogo } from '../utils/fasciaLuogo';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
+import { aggiornaSbloccoQuartiere, getQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
@@ -75,18 +75,11 @@ function EditorSbloccoQuartiereReale({ chiave, nome, sblocco, onChiudi, onSalvat
     catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
     finally { setSalvando(false); }
   };
-  const ripristina = async () => {
-    setSalvando(true); setErrore(null);
-    try { await ripristinaSbloccoQuartiere(chiave); onSalvato(); onChiudi(); }
-    catch (e) { setErrore(e instanceof Error ? e.message : 'Ripristino non riuscito.'); }
-    finally { setSalvando(false); }
-  };
   return <Modal titolo={`Sblocco di ${nome}`} aperta onChiudi={onChiudi} larga
     azioni={<><button type="button" className="btn btn-secondary touch" onClick={onChiudi} disabled={salvando}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={salvando ? 'Salvataggio…' : 'Salva sblocco'} onClick={() => void salva()} disabled={salvando} /></>}>
     <div className="flex flex-col gap-3">
       <p className="m-0 testo-13 text-text-secondary">Gli inviti dei Confidenti restano separati e continuano ad aprire {nome} quando spettano.</p>
       <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={salvando} />
-      {sblocco?.modificato && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina la condizione della guida" onClick={() => void ripristina()} disabled={salvando} />}
       {errore && <p className="m-0 testo-13" role="alert">{errore}</p>}
     </div>
   </Modal>;
@@ -223,10 +216,9 @@ export function QuartierePage() {
               {!IN_RILASCIO && <MenuModifica cosa={`il quartiere «${q.nome}»`}>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
-                {/* la stessa finestra modifica lo sblocco e, se è stato cambiato, lo rimette com'era */}
                 {q.sbloccoCondizione && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="bloccato" dimensione={20} />} titolo="Sblocco"
-                  dettaglio={q.sbloccoCondizione.modificato ? 'modificato · ripristina' : undefined} aria-label="Modifica sblocco" onClick={() => setFinestra('sblocco')} />}
-                {/* L11 · B11 (R11-15/6): nome e descrizione del quartiere, con «Ripristina» ai valori della guida */}
+                  dettaglio={q.sbloccoCondizione.modificato ? 'modificato' : undefined} aria-label="Modifica sblocco" onClick={() => setFinestra('sblocco')} />}
+                {/* L11 · B11 (R11-15/6): nome e descrizione del quartiere */}
                 <ModificaGuida tipo="quartiere" chiave={q.chiave} cosa={`il quartiere «${q.nome}»`} etichetta="Testi della guida" onSalvato={() => void dati.ricarica()} />
               </MenuModifica>}
             </>} />

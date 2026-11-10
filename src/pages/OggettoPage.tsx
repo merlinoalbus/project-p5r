@@ -5,7 +5,7 @@ import { useNavigate, useParams } from '../components/scheda/routerScheda';
 import { CATEGORIA_OGGETTO } from '../../shared/catalogo';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { eliminaOggettoCatalogo, getOggettoCatalogo, ripristinaOggettoCatalogo } from '../services/api/catalogoOggetti';
+import { eliminaOggettoCatalogo, getOggettoCatalogo } from '../services/api/catalogoOggetti';
 import { usePartitaStore } from '../stores/partitaStore';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
@@ -51,7 +51,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
   const dati = useCarica(() => getOggettoCatalogo(chiave, partitaId ?? undefined), [chiave, partitaId]);
   const o = dati.dati;
   const naviga = useNavigate();
-  const [azione, setAzione] = useState<'modifica' | 'elimina' | 'ripristina' | null>(null);
+  const [azione, setAzione] = useState<'modifica' | 'elimina' | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [regaloInCorso, setRegaloInCorso] = useState(false);
   /** R10-18: il Confidente a cui si sta regalando questo oggetto (finestra unica «Regala»). */
@@ -75,14 +75,12 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
     } finally { setRegaloInCorso(false); }
   };
   const conferma = async () => {
-    if (!o || occupato || regaloInCorso || (azione !== 'elimina' && azione !== 'ripristina')) return;
+    if (!o || occupato || regaloInCorso || azione !== 'elimina') return;
     setOccupato(true);
     try {
-      if (azione === 'elimina') {
-        await eliminaOggettoCatalogo(o.chiave);
-        notifica('success', 'Oggetto nel cestino. Puoi rimetterlo da Impostazioni › Cestino.');
-        naviga('/guida/oggetti');
-      } else { await ripristinaOggettoCatalogo(o.chiave); await dati.ricarica(); }
+      await eliminaOggettoCatalogo(o.chiave);
+      notifica('success', 'Oggetto nel cestino. Puoi rimetterlo da Impostazioni › Cestino.');
+      naviga('/guida/oggetti');
       setAzione(null);
     } catch (e) { notifica('error', e instanceof Error ? e.message : 'Operazione non eseguita.'); }
     finally { setOccupato(false); }
@@ -102,13 +100,9 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
         azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`l’oggetto «${o.nome}»`}>
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica l’oggetto" aria-label="Modifica"
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('modifica')} />
-          {o.modificato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina i valori della guida" aria-label="Ripristina"
-            disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('ripristina')} />}
           <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label="Elimina"
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('elimina')} />
         </MenuModifica>} />
-      {/* L11 · B11 (R11-15/5): un oggetto nato nell'app non ha un valore della guida da rimettere, e la pagina lo dice invece di nascondere «Ripristina» in silenzio */}
-      {!IN_RILASCIO && o.origine === 'utente' && !o.modificato && <p className="m-0 testo-12 text-text-muted">Creato da te: non c’è un valore della guida da rimettere.</p>}
       <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
         <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-3">
           <section className="card order-1 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="dove-si-compra">
@@ -198,9 +192,9 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           notifica('success', `${esitoDelRegalo(esito.consegna?.modo, regalaA.nome)}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
         }} />}
       {azione === 'modifica' && <ModuloOggetto key={o.chiave} oggetto={o} onChiudi={() => setAzione(null)} onSalvato={() => { setAzione(null); void dati.ricarica(); }} />}
-      {!IN_RILASCIO && (azione === 'elimina' || azione === 'ripristina') && <Modal aperta titolo={azione === 'elimina' ? `Elimina «${o.nome}»` : `Ripristina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}
+      {!IN_RILASCIO && azione === 'elimina' && <Modal aperta titolo={`Elimina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}
         azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAzione(null)}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo={occupato ? 'Attendi…' : 'Conferma'} disabled={occupato} onClick={() => void conferma()} /></>}>
-        <p className="m-0">{azione === 'elimina' ? 'L’oggetto e i suoi collegamenti rimossi saranno recuperabili dal cestino. Gli acquisti e i progressi delle letture non vengono cancellati.' : 'Rimetti nome, descrizione e attributi conservati prima della correzione. I progressi della partita non cambiano.'}</p>
+        <p className="m-0">L’oggetto e i suoi collegamenti rimossi saranno recuperabili dal cestino. Gli acquisti e i progressi delle letture non vengono cancellati.</p>
       </Modal>}
     </div>}
   </PageState>;

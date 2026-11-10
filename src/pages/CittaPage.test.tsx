@@ -194,7 +194,7 @@ describe('CittaPage', () => {
 describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
   it('l’area dello staff, da verificare, ha la sua pagina, «Tieni» e «Rimuovi»; «Tieni» la toglie dalle aree da verificare', async () => {
     const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
-      numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+      numeroPlanimetrie: 1, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
     api.getQuartieri.mockResolvedValue([]);
     api.getAreeCitta.mockResolvedValueOnce([staff]).mockResolvedValue([{ ...staff, daVerificare: false }]);
     api.aggiornaAreaMondo.mockResolvedValue({ ...staff, daVerificare: false });
@@ -210,7 +210,7 @@ describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
 
   it('UX2-7: la colonna del testo non scende sotto i 10rem, così «Tieni» e «Rimuovi» vanno a capo invece di schiacciarla', async () => {
     const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Area riservata allo staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
-      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
     api.getQuartieri.mockResolvedValue([]);
     api.getAreeCitta.mockReset().mockResolvedValue([staff]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
@@ -223,7 +223,7 @@ describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
 
   it('«Rimuovi» nella finestra è la conferma (UX2-8): una sola richiesta, con la conferma', async () => {
     const staff = { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Staff', nomeRivisto: false, ordine: 0, predefinita: 'staff', illustrazione: { immagineUrl: null, asset: null },
-      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
+      numeroPlanimetrie: 2, numeroSpilli: 0, passaggio: null, ingresso: false, origine: 'seed', daVerificare: true, casa: '/guida/citta/tokyo/staff' } as AreaRiassuntoDto;
     api.getQuartieri.mockResolvedValue([]);
     api.getAreeCitta.mockReset().mockResolvedValueOnce([staff]).mockResolvedValue([]);
     api.getDaCollocare.mockReset().mockResolvedValue([]);

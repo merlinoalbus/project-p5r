@@ -7,7 +7,8 @@
 //   - creare  → nuova riga `origine = 'utente'` con chiave generata dal nome (`u-<slug>`, `<negozio>/u-<slug>`)
 //   - correggere una riga della guida → la riga passa a `origine = 'utente'` e `seed_json` conserva l'originale
 //   - nascondere una riga della guida → `nascosto = 1` (una ricarica dei dati la riporterebbe indietro: cancellarla non basterebbe)
-//   - ripristinare → la riga torna com'era nei dati della guida (`seed_json`) e `origine` torna 'seed'
+// Non c'è un ritorno ai valori della guida (decisione dell'utente del 10/11): `seed_json` resta come segno «corretta da te» e lo leggono il
+// riepilogo, l'importazione e il cestino.
 // I nomi `seed` e `seed_json` vengono dal seed JSON, dismesso il 2026-09-12: oggi «seed» vuol dire «dato della guida, arrivato
 // con il pacchetto di gioco». La ricarica dei dati della guida (`ricaricaPacchetto`) aggiorna e sostituisce soltanto le righe
 // `origine = 'seed'`, quindi il lavoro dell'utente sopravvive agli aggiornamenti.
@@ -20,7 +21,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { haColonnaMain } from '../db/schemaMemo.js';
-import { HttpError, httpErrors } from '../utils/httpError.js';
+import { httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto } from '../../shared/effettiCatalogo.js';
@@ -100,8 +101,7 @@ const PROFILO: Record<TipoCatalogo, {
   negozio: { haVerificato: false, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il negozio' },
   articolo: { haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'articolo" },
   libro: { haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il libro' },
-  // `periodo` non è più nello schema (voce 11): resta qui solo per `eliminaElemento`, che ripristina istantanee
-  // (`seed_json`) di prima, dove la frase c'era ancora e va convertita in condizioni come allora.
+  // `periodo` non è più nello schema (voce 11): un film creato senza condizioni nasce con l'elenco vuoto, come allora.
   film: { condizioniDa: (d) => [d.periodo as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il film' },
   attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'attività" },
   luogo: { haVerificato: true, padre: { campo: 'quartiere_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, raggruppaOrdinePer: 'quartiere_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il luogo' },
@@ -361,14 +361,11 @@ function verificaTipoVideogioco(tipo: TipoCatalogo, attuale: Riga, nuovoTipo: un
   }
 }
 
-type OperazioneCondizioni = 'creazione' | 'ripristino';
+type OperazioneCondizioni = 'creazione';
 
 /** Nessun testo o fotografia privati nei dettagli: soltanto esito, campi e motivo classificato. */
 function condizioniDaDefinire(operazione: OperazioneCondizioni, motivo: string, scarti = 0): never {
-  const messaggio = operazione === 'ripristino'
-    ? 'La fotografia della guida contiene condizioni incomplete o non leggibili. Nessun dato è stato ripristinato e la fotografia è conservata. Puoi modificare la riga corrente come gesto distinto; tale modifica non corregge la fotografia e non rende possibile questo ripristino.'
-    : 'Le condizioni non sono interamente definite. Nessun dato è stato salvato: definisci le condizioni nell’editor prima di procedere.';
-  throw httpErrors.conflict('condizioni-da-definire', messaggio,
+  throw httpErrors.conflict('condizioni-da-definire', 'Le condizioni non sono interamente definite. Nessun dato è stato salvato: definisci le condizioni nell’editor prima di procedere.',
     { operazione, campi: ['condizioni_json'], motivo, scarti });
 }
 
@@ -382,11 +379,7 @@ function verificaFormulaCompleta(valore: unknown, operazione: OperazioneCondizio
   if (!Array.isArray(formula) || formula.length > 20) condizioniDaDefinire(operazione, 'formula-non-valida');
   const normalizzate = formula.map((c) => normalizzaRequisitoSpillo(c));
   if (normalizzate.some((c) => c === null) || !isDeepStrictEqual(formula, normalizzate)) condizioniDaDefinire(operazione, 'formula-non-supportata');
-  try { verificaCondizioni(formula as RequisitoSpillo[]); }
-  catch (err) {
-    if (operazione === 'ripristino' && err instanceof HttpError && err.status < 500) condizioniDaDefinire(operazione, 'riferimenti-non-validi');
-    throw err;
-  }
+  verificaCondizioni(formula as RequisitoSpillo[]);
   return typeof valore === 'string' ? valore : JSON.stringify(formula);
 }
 
@@ -542,94 +535,19 @@ function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
 }
 
 /**
- * Elimina una riga creata dall'utente, oppure riporta al seed una riga del seed che l'utente aveva corretto o nascosto.
- * Restituisce che cosa è successo, perché l'interfaccia lo dice all'utente.
+ * Elimina una riga creata dall'utente (nel Cestino). Una riga della guida, corretta o no, non si elimina: si nasconde («Nascondi»), e non c'è
+ * un ritorno ai valori della guida (decisione dell'utente del 10/11): 400 `riga-della-guida`.
  */
-export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null } {
+export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'eliminata'; elemento: null } {
   const r = riga(tipo, chiave);
-  if (r.origine === 'utente' && r.seed_json === null) {
-    if (tipo === 'luogo' || tipo === 'negozio') verificaEliminazioneDiVendita(tipo, chiave);
-    // R10-23/3: l'eliminazione passa dal Cestino (si rimette dalla sezione Cestino), non è più una cancellazione a mano
-    conCestino({ tipo, chiave, nome: dto(tipo, r).nome }, () => getDb().transaction(() => {
-      // gli articoli di un negozio creato dall'utente se ne vanno con lui (chiave esterna a cascata)
-      prepared(`DELETE FROM ${TABELLA[tipo]} WHERE chiave = ?`).run(chiave);
-      staccaDalleMappe(tipo, chiave);
-    })());
-    invalidaCacheDiGioco();
-    return { esito: 'eliminata', elemento: null };
-  }
-  return { esito: 'ripristinata', elemento: ripristinaElemento(tipo, chiave) };
-}
-
-/**
- * «Ripristina i valori della guida» (L5, M §3.2, `POST /api/catalogo/:tipo/:chiave/ripristina`, per tutti i tipi): rimette `seed_json` sulla riga.
- * 400 `creata-da-te` per una riga dell'utente (non c'è un valore della guida), 400 `riga-del-seed` per una riga della guida mai corretta. Non
- * elimina mai.
- */
-export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
-  const elemento = getDb().transaction(() => ripristinaElementoNellaTransazione(tipo, chiave))();
+  if (r.origine !== 'utente' || r.seed_json !== null) throw httpErrors.badRequest('riga-della-guida', 'Questa riga arriva dai dati della guida: non si elimina. Usa «Nascondi» se non vuoi vederla.');
+  if (tipo === 'luogo' || tipo === 'negozio') verificaEliminazioneDiVendita(tipo, chiave);
+  // R10-23/3: l'eliminazione passa dal Cestino (si rimette dalla sezione Cestino), non è più una cancellazione a mano
+  conCestino({ tipo, chiave, nome: dto(tipo, r).nome }, () => getDb().transaction(() => {
+    // gli articoli di un negozio creato dall'utente se ne vanno con lui (chiave esterna a cascata)
+    prepared(`DELETE FROM ${TABELLA[tipo]} WHERE chiave = ?`).run(chiave);
+    staccaDalleMappe(tipo, chiave);
+  })());
   invalidaCacheDiGioco();
-  return elemento;
-}
-
-function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
-  const r = riga(tipo, chiave);
-  if (r.origine === 'utente' && r.seed_json === null) throw httpErrors.badRequest('creata-da-te', 'Questa riga l’hai creata tu: non c’è un valore della guida da rimettere. Per toglierla usa «Elimina».');
-  let fotografia: unknown = null;
-  if (r.seed_json !== null) {
-    try { fotografia = JSON.parse(r.seed_json); }
-    catch { condizioniDaDefinire('ripristino', 'fotografia-illeggibile'); }
-  }
-  if (r.seed_json !== null && (fotografia === null || typeof fotografia !== 'object' || Array.isArray(fotografia))) condizioniDaDefinire('ripristino', 'fotografia-non-valida');
-  const originale = fotografia as Record<string, unknown> | null;
-  if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
-  const conservaFonteConfidente = tipo === 'attivita' && r.confidente_chiave != null && !('confidente_chiave' in originale);
-  if (conservaFonteConfidente) {
-    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'paga_yen', 'paga_massima', 'esiti_json']) originale[c] = r[c];
-  }
-  const daProsaRip = PROFILO[tipo].condizioniDa;
-  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = condizioniCompleteDaProsa(tipo, String(r.chiave), originale, 'ripristino');
-  else if (originale.condizioni_json != null) originale.condizioni_json = verificaFormulaCompleta(originale.condizioni_json, 'ripristino');
-  // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
-  // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`
-  // e' entrata fra i campi salvati con la stellina delle righe tue — quel campo nell'istantanea non
-  // c'e', e riscriverlo come `null` fa fallire il vincolo `NOT NULL` con un errore che l'utente
-  // vede come «errore interno» mentre stava solo annullando una modifica.
-  //
-  // Il valore giusto e' quello che la riga aveva prima di essere adottata: una riga della guida e'
-  // verificata, ed e' l'unico caso in cui si arriva qui.
-  //
-  // (`giorni_json` e `giorni` del luogo non ci sono più, L11 migrazione 184: i giorni sono gli orari del luogo.)
-  const predefinito = (c: string): unknown => c === 'verificato' ? 1 : null;
-  // Un'istantanea anteriore a L5/M7 non azzera orari, Area o il legame canonico aggiunti dopo.
-  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo', 'esiti_json', 'rifornimento_json', 'prezzo_per_fascia_json', 'sconto_json']);
-  const campi = campiDisponibili(tipo).filter((c) => c in originale || !campiSuccessivi.has(c));
-  if (tipo === 'articolo' && campi.includes('catalogo_chiave') && typeof originale.catalogo_chiave === 'string'
-    && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(originale.catalogo_chiave)) {
-    throw httpErrors.conflict('oggetto-originale-mancante', 'L’oggetto originale non esiste più. Rimettilo dal cestino prima di ripristinare l’offerta.');
-  }
-  if (tipo === 'articolo' && campi.includes('costo_json') && originale.costo_json != null) {
-    const costo = normalizzaCostoScambio(originale.costo_json);
-    if (!costo) throw httpErrors.conflict('costo-originale-non-valido', 'Il costo originale non è leggibile: nessun valore viene ripristinato.');
-    if (costo.tipo === 'oggetti' && costo.oggetti.some((o) => !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(o.chiave))) {
-      throw httpErrors.conflict('oggetto-costo-originale-mancante', 'Un oggetto del costo originale non esiste più. Rimettilo dal cestino prima di ripristinare l’offerta.');
-    }
-  }
-  const set = campi.map((c) => `${c} = @${c}`);
-  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(campi.map((c) => [c, originale[c] ?? predefinito(c)])) };
-  if (tipo === 'domanda') verificaDomandaEsame({ id: Number(r.id), data: String(r.data), tipo: String(r.tipo) }, { data: String(valori.data ?? r.data), tipo: String(valori.tipo ?? r.tipo) });
-  if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...valori }, r);
-  if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...valori }, r);
-  verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);
-  if (tipo === 'negozio') verificaModificaPuntoVendita(r, valori);
-  if (tipo === 'luogo') verificaModificaLuogo(r, valori);
-  prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
-  // L4-07: la fotografia può riportare nome, categoria e «per chi» di quando l'offerta era scritta a mano; con il legame non valgono
-  if (tipo === 'articolo') prepared('UPDATE articolo SET nome = @nome, categoria = @categoria, per = @per WHERE chiave = @chiave AND catalogo_chiave IS NOT NULL')
-    .run({ ...IDENTITA_DI_UN_OFFERTA_COLLEGATA, chiave });
-  if (tipo === 'articolo') allineaSegnoRegola(chiave);
-  if (tipo === 'negozio') allineaSegnoDelNegozio(chiave);
-  const risultato = dto(tipo, riga(tipo, chiave));
-  if (conservaFonteConfidente) risultato.avvisi = ['La fotografia precede il collegamento al Confidente: fonte, requisiti e campi operativi correnti sono stati conservati. Gli altri valori sono stati ripristinati.'];
-  return risultato;
+  return { esito: 'eliminata', elemento: null };
 }

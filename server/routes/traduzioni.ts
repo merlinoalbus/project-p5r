@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyTraduzione, paramsTraduzione, queryTraduzioni } from '../schemas/traduzioni.js';
-import { aggiornaTraduzione, elencaAmbiti, elencaTraduzioni, ripristinaTraduzione } from '../services/traduzioniService.js';
+import { aggiornaTraduzione, elencaAmbiti, elencaTraduzioni } from '../services/traduzioniService.js';
 
 const router = Router();
 
@@ -19,10 +19,6 @@ router.get('/ambiti', (_req, res) => {
 
 router.put('/:ambito/:chiave', validate({ params: paramsTraduzione, body: bodyTraduzione }), (req, res) => {
   res.json(aggiornaTraduzione(String(req.params.ambito), String(req.params.chiave), req.body.testo));
-});
-
-router.delete('/:ambito/:chiave', validate({ params: paramsTraduzione }), (req, res) => {
-  res.json(ripristinaTraduzione(String(req.params.ambito), String(req.params.chiave)));
 });
 
 export default router;

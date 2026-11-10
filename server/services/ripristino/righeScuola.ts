@@ -1,5 +1,5 @@
 // ============================================================
-// righeScuola — gli esami, correggibili e ripristinabili (L11 · R11-15/7)
+// righeScuola — gli esami, correggibili (L11 · R11-15/7)
 // ============================================================
 //
 // Un oggetto «a riga» del registro dei ripristini (`righe.ts`): l'esame (`esame`, quattro righe). Il valore della guida è la fotografia
@@ -7,7 +7,7 @@
 // come per quartieri e trofei.
 //
 // Si correggono: il nome, la data dei risultati (una scelta fra i giorni che non spostano nessuna domanda) e le note. Le domande e i giorni
-// d'esame NON stanno qui: dopo R9-18 vivono solo nelle righe di `domanda`, che si correggono e si ripristinano dal catalogo (stesso `seed_json`);
+// d'esame NON stanno qui: dopo R9-18 vivono solo nelle righe di `domanda`, che si correggono dal catalogo (stesso `seed_json`);
 // la chiave, l'ordine e le date d'esame (ricavate dalle righe) non si correggono. L13 (ondata 7, O7-2): si correggono qui anche i premi per
 // piazzamento e il requisito di Conoscenza del primo posto (colonne della 311); in `esame_premi` restano solo le note generali.
 // Il nome decide se l'esame è «di metà» o «di fine» semestre, la data dei risultati dove finiscono le sue domande e da quando vale il suo
@@ -122,12 +122,6 @@ const esame: DefRiga = {
   valida: (chiave, fusi) => {
     const nome = typeof fusi.nome === 'string' ? fusi.nome : undefined;
     const data = typeof fusi.data_risultati === 'string' ? (fusi.data_risultati === '' ? null : fusi.data_risultati) : undefined;
-    verificaCorrezioneEsame(chiave, { ...(nome !== undefined ? { nome } : {}), ...(data !== undefined ? { data_risultati: data } : {}) });
-  },
-  // rimettere la fotografia non può spostare domande più di quanto potesse la correzione: stessi controlli sui valori della guida
-  verificaRipristino: (chiave, guida) => {
-    const nome = typeof guida.nome === 'string' ? guida.nome : undefined;
-    const data = typeof guida.data_risultati === 'string' ? (guida.data_risultati === '' ? null : guida.data_risultati) : undefined;
     verificaCorrezioneEsame(chiave, { ...(nome !== undefined ? { nome } : {}), ...(data !== undefined ? { data_risultati: data } : {}) });
   },
 };

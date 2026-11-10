@@ -33,7 +33,6 @@ export const salvaRequisitiRango = (chiave: string, rango: number, requisiti: Ar
 /** L7-02: i ranghi indicati tutti insieme, in una transazione (salvataggio unico dell'editor); `nota` è il testo proprio del requisito. */
 export const salvaRequisitiConfidente = (chiave: string, ranghi: Array<{ rango: number; requisiti: Array<{ condizione: Condizione; nota?: string }> }>): Promise<RequisitiConfidenteDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti`, { ranghi });
-export const ripristinaRequisitiRango = (chiave: string, rango: number): Promise<RequisitiConfidenteDto> => apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti/${rango}/ripristina`, {});
 /** Inviti e loro disponibilità calcolata dal server per la partita corrente. */
 export const getInviti = (filtro: { confidente?: string; apreTipo?: 'quartiere' | 'luogo' | 'area'; apreChiave?: string; partita?: number }): Promise<InvitoDto[]> => apiGet(`/compendio/inviti${queryString(filtro)}`);
 /** La chiave è composta da Confidente e data: i due segmenti si codificano separatamente. */
@@ -85,11 +84,9 @@ export const getSetDlc = (): Promise<SetDlcDto[]> => apiGetGioco(URL_SET_DLC);
 export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGetGioco(urlPersone(f));
 /** Scheda completa di una Persona per id. */
 export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGetGioco(urlPersona(id));
-/** R8-10/1: corregge la griglia delle 10 affinità di una Persona (vale ovunque) e «Ripristina» le rimette come le dà la guida. */
+/** R8-10/1: corregge la griglia delle 10 affinità di una Persona (vale ovunque). */
 export const salvaAffinitaPersona = (id: number, dati: ModificaAffinitaPersona): Promise<PersonaDettaglioDto> =>
   apiPut(`/compendio/persona/${id}/affinita`, dati, { maxRetries: 0 });
-export const ripristinaAffinitaPersona = (id: number): Promise<PersonaDettaglioDto> =>
-  apiPost(`/compendio/persona/${id}/affinita/ripristina`, {}, { maxRetries: 0 });
 /** Elenco riassuntivo delle skill, filtrabile per testo (`q`) ed elemento. */
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGetGioco(urlSkills(f));
 /** Scheda completa di una skill per id. */
@@ -165,8 +162,6 @@ export const getQuartiere = (chiave: string, partita?: number): Promise<Quartier
   apiGet(`/compendio/citta/${encodeURIComponent(chiave)}${partita ? `?partita=${partita}` : ''}`);
 export const aggiornaSbloccoQuartiere = (chiave: string, condizioni: unknown[]): Promise<QuartiereDettaglioDto> =>
   apiPut(`/compendio/citta/${encodeURIComponent(chiave)}/sblocco`, { condizioni });
-export const ripristinaSbloccoQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> =>
-  apiPost(`/compendio/citta/${encodeURIComponent(chiave)}/sblocco/ripristina`);
 /** Attività, lavori, libri e film (con letture della partita se indicata). */
 export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiGet(`/compendio/attivita${queryString({ partita })}`);
 /** Catalogo dei libri con avanzamento per sessioni nella partita. */
@@ -218,10 +213,6 @@ export interface DatiAreaDedaloApi { nome?: string; descrizione?: string }
 
 /** Corregge i testi della scheda del Palazzo (nome, sovrano, date, consigli, note) e la voce del boss finale; risponde con la scheda aggiornata. */
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
-/** «Ripristina» della scheda del Palazzo (L4 §8.14): la voce del boss finale torna quella della guida; risponde con la scheda. */
-export const ripristinaDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina`, {});
-/** L9-08: «Ripristina» delle date del Palazzo; il boss finale non si tocca. */
-export const ripristinaDateDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina-date`, {});
 /** Corregge nome e descrizione di un'area della guida (infiltrazione o dedalo) e, per un dedalo dei Memento, il totale dei timbri; risponde
  *  con l'area aggiornata (senza stato di partita). */
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);
@@ -298,27 +289,18 @@ export const getConfidenteDettaglio =(chiave: string): Promise<ConfidenteDettagl
 /** La Dote a ogni incontro dei ranghi indicati (gli altri restano); risponde con la scheda aggiornata. */
 export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: number; doti: DoteNote[] }>): Promise<ConfidenteDettaglioDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
-/** «Ripristina» la Dote del passaggio a quel rango com'era nella guida (409 `dote-della-guida` se non è stata modificata); risponde con la scheda aggiornata. */
-export const ripristinaDoteIncontro = (chiave: string, rango: number): Promise<ConfidenteDettaglioDto> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro/${rango}/ripristina`, {}, { maxRetries: 0 });
 
 /** R9-07/1: come si sale di rango (modo e soglia in punti), con «modificato» rispetto alla guida. */
 export const getRanghiConfidente = (chiave: string): Promise<RangoConfidenteDto[]> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi`);
 export const salvaRangoConfidente = (chiave: string, rango: number, dati: { modo: ModoRango; puntiNecessari: number }): Promise<RangoConfidenteDto[]> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi/${rango}`, dati, { maxRetries: 0 });
-export const ripristinaRangoConfidente = (chiave: string, rango: number): Promise<RangoConfidenteDto[]> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi/${rango}/ripristina`, {}, { maxRetries: 0 });
 /** R9-07/2: le abilità del Confidente per rango, con «modificato» rispetto alla guida. */
 export const getAbilitaConfidente = (chiave: string): Promise<AbilitaRangoDto[]> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita`);
 export const salvaAbilitaConfidente = (chiave: string, rango: number, abilita: Array<{ nome: string; descrizione: string }>): Promise<AbilitaRangoDto[]> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita/${rango}`, { abilita }, { maxRetries: 0 });
-export const ripristinaAbilitaConfidente = (chiave: string, rango: number): Promise<AbilitaRangoDto[]> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita/${rango}/ripristina`, {}, { maxRetries: 0 });
-/** R9-07/4: note e scelte (con i punti) di un dialogo del Confidente; «Ripristina» le rimette come nella guida (409 `dialogo-della-guida` se non modificato). */
+/** R9-07/4: note e scelte (con i punti) di un dialogo del Confidente, con «modificato» rispetto alla guida. */
 export const salvaDialogoConfidente = (chiave: string, id: number, dati: { note?: string; scelte?: Array<Omit<SceltaDialogo, 'ordine'>> }): Promise<DialogoModificatoDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/dialoghi/${id}`, dati, { maxRetries: 0 });
-export const ripristinaDialogoConfidente = (chiave: string, id: number): Promise<DialogoModificatoDto> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/dialoghi/${id}/ripristina`, {}, { maxRetries: 0 });
 /** R9-07c: gli inviti del Confidente; la data (MM-GG) è la chiave, quindi sta nel percorso e non si cambia. */
 export interface CorpoInvitoConfidente { apre: { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string }; condizioni: Condizione[]; nota: string;
   /** L13 (O7-4): quando arriva il messaggio dell'invito; null = nessuno, assente = invariato. */
@@ -327,19 +309,15 @@ export const creaInvitoConfidente = (chiave: string, dati: CorpoInvitoConfidente
   apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti`, dati, { maxRetries: 0 });
 export const modificaInvitoConfidente = (chiave: string, data: string, dati: CorpoInvitoConfidente): Promise<InvitoDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}`, dati, { maxRetries: 0 });
-export const ripristinaInvitoConfidente = (chiave: string, data: string): Promise<InvitoDto> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}/ripristina`, {}, { maxRetries: 0 });
-/** Toglie un invito creato dall'utente (finisce nel Cestino); uno della guida si modifica e si ripristina soltanto. */
+/** Toglie un invito creato dall'utente (finisce nel Cestino); uno della guida si modifica soltanto. */
 export const eliminaInvitoConfidente = (chiave: string, data: string): Promise<void> =>
   apiDelete(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}`);
 /** Elenco dei Confidenti del compendio. */
 export const getConfidenti =(): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
-/** R9-19: il giorno di gioco modificabile (meteo nelle due fasce, nota, trama, vincoli) e «Ripristina» com'è nella guida. */
+/** R9-19: il giorno di gioco modificabile (meteo nelle due fasce, nota, trama, vincoli). */
 export const getGiornoModificabile = (data: string): Promise<GiornoModificabileDto> => apiGet(`/compendio/giorni/${encodeURIComponent(data)}`);
 export const salvaGiornoModificabile = (data: string, dati: ModificaGiorno): Promise<GiornoModificabileDto> =>
   apiPut(`/compendio/giorni/${encodeURIComponent(data)}`, dati, { maxRetries: 0 });
-export const ripristinaGiornoModificabile = (data: string): Promise<GiornoModificabileDto> =>
-  apiPost(`/compendio/giorni/${encodeURIComponent(data)}/ripristina`, {}, { maxRetries: 0 });
 
 /** R9-01 (F4): la disponibilità strutturata di un Confidente; con la partita anche se è disponibile adesso. */
 export const getDisponibilitaStrutturata = (chiave: string, partita?: number): Promise<DisponibilitaConfidenteDto> =>
@@ -347,9 +325,6 @@ export const getDisponibilitaStrutturata = (chiave: string, partita?: number): P
 /** Scrive la struttura (campi parziali: quelli assenti restano) e i luoghi del Confidente (le chiavi in più si aggiungono, quelle in meno si tolgono). */
 export const salvaDisponibilitaStrutturata = (chiave: string, dati: ModificaDisponibilitaStrutturata): Promise<DisponibilitaConfidenteDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata`, dati, { maxRetries: 0 });
-/** «Ripristina»: la struttura torna come la dà la fonte (i luoghi si ripristinano dal luogo). */
-export const ripristinaDisponibilitaStrutturata = (chiave: string): Promise<DisponibilitaConfidenteDto> =>
-  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata/ripristina`, {}, { maxRetries: 0 });
 
 /** Tutti i luoghi della città, come voci da scegliere (la sede di un negozio o di un'attività). */
 export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/luoghi');

@@ -70,7 +70,7 @@ const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
 /** Un'Area del Palazzo di prova (L3): slug, nome, predefinita, versioni, infiltrazioni che la toccano e raccolta. */
 const areaPalazzo = (slug: string, nome: string, predefinita: string, infiltrazioni: Array<{ chiave: string; nome: string; ordine: number }>, raccolta: { n: number; presi: number | null }, extra: Partial<AreaRiassuntoDto> = {}): AreaRiassuntoDto => ({
   chiave: `dungeon/kamoshida/${slug}`, contenitore: { tipo: 'dungeon', chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, slug, nome, nomeRivisto: false, ordine: 0, predefinita,
-  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 1, numeroSpilli: raccolta.n, passaggio: null, ingresso: false, origine: 'seed', modificata: false, daVerificare: false,
+  illustrazione: { immagineUrl: null, asset: null }, numeroPlanimetrie: 1, numeroSpilli: raccolta.n, passaggio: null, ingresso: false, origine: 'seed', daVerificare: false,
   casa: `/guida/dungeon/kamoshida/area/${slug}`, infiltrazioni, raccolta, ...extra,
 });
 /** Il Palazzo di Kamoshida di prova: tre infiltrazioni (Cancello con una sicura, Torre, Cortile) e tre Aree (L3): «Cancello» (la sua

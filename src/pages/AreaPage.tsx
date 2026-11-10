@@ -14,7 +14,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { eliminaAreaMondo, getArea, isApiError, ripristinaAreaMondo } from '../services/api';
+import { eliminaAreaMondo, getArea, isApiError } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useMedia } from '../hooks/useMedia';
 import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
@@ -95,10 +95,10 @@ function AreaNonTrovata({ errore, indietro, onRiprova }: { errore: string; indie
 function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDettaglioDto; indirizzoContenitore: string; ricarica: () => Promise<void> }) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | 'ripristina' | null>(null);
+  const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | null>(null);
   // L5 (F5): «Aggiungi luogo» (null = luogo da scegliere) e «Posiziona» di un luogo senza pin, nelle aree di un quartiere
   const [aggiungiLuogo, setAggiungiLuogo] = useState<{ luogo: { chiave: string; nome: string } | null } | null>(null);
-  // L12 (passo 8): nel rilascio (sola lettura) l'area non si modifica, non si eliminano né ripristinano valori e non si aggiungono luoghi o planimetrie
+  // L12 (passo 8): nel rilascio (sola lettura) l'area non si modifica, non si elimina e non si aggiungono luoghi o planimetrie
   const conLuoghi = !IN_RILASCIO && a.contenitore.tipo === 'quartiere';
   const [riepilogoElimina, setRiepilogoElimina] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -166,12 +166,6 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
     a.passaggio ? `il passaggio sull’illustrazione di ${a.contenitore.nome}` : null,
     a.ingresso ? `l’ingresso di ${a.contenitore.nome}, che resterà da scegliere` : null,
   ].filter(Boolean).join(', ');
-  const ripristina = async () => {
-    setOccupato(true);
-    try { await ripristinaAreaMondo(a.contenitore.chiave, a.slug); notifica('success', `${a.nome}: rimessi i valori della guida.`); await ricarica(); }
-    catch (err) { notifica('error', err instanceof Error ? err.message : 'Valori non ripristinati.'); }
-    finally { setOccupato(false); }
-  };
 
   return (
     // Da 1024 px la pagina prende l'altezza dell'area di lettura e il visore il resto, come la pagina del Palazzo: una schermata.
@@ -206,10 +200,9 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
         {!IN_RILASCIO && <div className="area-testata__comandi flex flex-wrap items-center gap-1.5 max-sm:col-start-2 max-sm:row-start-1 max-sm:flex-nowrap lg:ml-auto">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Modifica area</span><span className="md:max-lg:hidden lg:max-xl:hidden 2xl:hidden">Modifica</span></>} aria-label="Modifica area" title="Modifica area" onClick={() => setFinestra('modifica')} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Aggiungi planimetria</span><span className="md:max-lg:hidden 2xl:hidden">Planimetria</span></>} aria-label="Aggiungi planimetria" title="Aggiungi planimetria" onClick={() => setFinestra('aggiungi')} />
-          {/* «Ripristina» ed «Elimina area» (variante accolta da Stesura, §4.3): visibili da 768 a 1023 px e da 1280 px, fantasma — mai primari — e sempre con
-              la conferma; sotto i 768 px (UX2-3) e da 1024 a 1279 px (variante (b): la testata sta su una riga) stanno nel menu «Altro» */}
+          {/* «Elimina area» (variante accolta da Stesura, §4.3): visibile da 768 a 1023 px e da 1280 px, fantasma — mai primario — e sempre con
+              la conferma; sotto i 768 px (UX2-3) e da 1024 a 1279 px (variante (b): la testata sta su una riga) sta nel menu «Altro» */}
           <span className="hidden flex-wrap items-center gap-1.5 md:max-lg:flex xl:flex">
-            {a.modificata && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Ripristina i valori della guida</span><span className="md:max-lg:hidden 2xl:hidden">Ripristina</span></>} aria-label="Ripristina i valori della guida" disabled={occupato} onClick={() => setFinestra('ripristina')} />}
             <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Elimina area</span><span className="md:max-lg:hidden 2xl:hidden">Elimina</span></>} aria-label="Elimina area" onClick={() => { setRiepilogoElimina(null); setFinestra('elimina'); }} />
           </span>
           {/* il menu si apre verso sinistra (ancorato a destra); se «Altro» è andato a capo all'inizio della riga (telefono stretto) si apre
@@ -224,7 +217,6 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
               <span className="btn-visivo__testo"><span className="btn-visivo__titolo">Altro<span className="btn-visivo__freccia btn-visivo__freccia--menu" aria-hidden="true">▸</span></span></span>
             </summary>
             <div className="menu-altro__voci">
-              {a.modificata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" className="justify-start" disabled={occupato} onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('ripristina'); }} />}
               <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina area" className="justify-start text-error-testo" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }} />
             </div>
           </details>
@@ -261,13 +253,6 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
       {finestra === 'modifica' && <FinestraModificaArea area={a} aperta onChiudi={() => setFinestra(null)} onSalvata={ricarica} />}
       <FinestraAggiungiPlanimetria area={a} aperta={finestra === 'aggiungi'} onChiudi={() => setFinestra(null)}
         onAggiunta={(_nuova, chiave) => { void ricarica(); if (chiave) scegli(chiave); }} />
-      {!IN_RILASCIO && <Modal titolo={`Rimettere i valori della guida in ${a.nome}?`} aperta={finestra === 'ripristina'} onChiudi={() => setFinestra(null)}
-        azioni={<>
-          <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
-          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => { setFinestra(null); void ripristina(); }} />
-        </>}>
-        <p className="m-0 testo-14">Nome e planimetria predefinita tornano quelli della guida; le tue correzioni a quest’area si perdono.</p>
-      </Modal>}
       {!IN_RILASCIO && <Modal titolo={`Eliminare ${a.nome}?`} aperta={finestra === 'elimina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>

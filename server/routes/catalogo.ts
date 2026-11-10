@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
-import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo, ripristinaElemento } from '../services/catalogoService.js';
+import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
 import { eliminaNelCestino } from '../services/luoghiScritture.js';
 
 /** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
@@ -86,8 +86,8 @@ router.put('/:tipo/:chiave', validate({ params: paramsElementoCatalogo }), (req,
 router.put('/:tipo/:chiave/nascosta', validate({ params: paramsElementoCatalogo, body: bodyNascondi }), (req, res) => {
   res.json(nascondiElemento(req.params.tipo, req.params.chiave, req.body.nascosta));
 });
-/** Elimina la riga creata dall'utente oppure riporta al seed quella corretta. L5: per un luogo o un negozio `DELETE` elimina e basta, nel
- *  cestino (409 col riepilogo senza `?conferma=1` se ha contenuti); «Ripristina» è `POST …/ripristina`. */
+/** Elimina la riga creata dall'utente (una riga della guida si nasconde: 400). L5: per un luogo o un negozio `DELETE` elimina e basta, nel
+ *  cestino (409 col riepilogo senza `?conferma=1` se ha contenuti). */
 router.delete('/:tipo/:chiave', validate({ params: paramsElementoCatalogo, query: queryConferma }), (req, res) => {
   const tipo = req.params.tipo;
   if (tipo === 'luogo' || tipo === 'negozio') {
@@ -95,10 +95,6 @@ router.delete('/:tipo/:chiave', validate({ params: paramsElementoCatalogo, query
     return;
   }
   res.json(eliminaElemento(tipo, req.params.chiave));
-});
-/** L5: «Ripristina i valori della guida» per ogni tipo del catalogo: rimette `seed_json`; non elimina mai. */
-router.post('/:tipo/:chiave/ripristina', validate({ params: paramsElementoCatalogo }), (req, res) => {
-  res.json(ripristinaElemento(req.params.tipo, req.params.chiave));
 });
 
 export default router;

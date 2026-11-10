@@ -73,7 +73,7 @@ function trasferisciCosti(da: string, a: string): void {
   }
 }
 
-/** Solo riferimenti tipizzati nello snapshot ripristinabile, mai testi o registri del cestino. */
+/** Solo riferimenti tipizzati nella fotografia della guida (`seed_json`), mai testi o registri del cestino. */
 function trasferisciSnapshotArticoli(da: string, a: string): void {
   for (const r of prepared('SELECT chiave,seed_json FROM articolo WHERE seed_json IS NOT NULL').all() as Array<{ chiave: string; seed_json: string }>) {
     let snapshot: Riga;

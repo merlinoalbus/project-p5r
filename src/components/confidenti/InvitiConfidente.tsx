@@ -15,7 +15,7 @@ import { TitoloSezione } from '../shared/TitoloSezione';
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-/** Gli stessi inviti e lo stesso gesto nelle pagine del Confidente, del quartiere e del luogo. Gli inviti si creano, si cambiano, si ripristinano e si
+/** Gli stessi inviti e lo stesso gesto nelle pagine del Confidente, del quartiere e del luogo. Gli inviti si creano, si cambiano e si
  *  tolgono solo dalla pagina del Confidente (R9-07c: è l'unico posto in cui si modificano), cioè quando il filtro nomina il Confidente. */
 export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtro: Omit<NonNullable<Parameters<typeof getInviti>[0]>, 'partita'>; nomeConfidente?: string; onCambiato: () => Promise<void> }) {
   const attiva = usePartitaStore((s) => s.attiva);

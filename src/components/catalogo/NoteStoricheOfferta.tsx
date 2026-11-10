@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { NotaStoricaOfferta } from '../../types';
-import { modificaNotaStorica, ripristinaNotaStorica } from '../../services/api';
+import { modificaNotaStorica } from '../../services/api';
 import { Modal } from '../shared/Modal';
 import { ModificaGuida } from '../guida/ModificaGuida';
 import { elenchiDaOpzioni } from '../guida/elenchiDaOpzioni';
@@ -11,16 +11,15 @@ import { IconaAzione } from '../shared/IconaAzione';
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-/** Che cosa la nota non cambia, detto nelle finestre di modifica e di ripristino: per le offerte il prezzo e gli acquisti (il caso di sempre),
+/** Che cosa la nota non cambia, detto nella finestra di modifica: per le offerte il prezzo e gli acquisti (il caso di sempre),
  *  per un Palazzo il livello consigliato (L8-04). */
-export interface EffettoNotaStorica { modifica: string; ripristino: string }
+export interface EffettoNotaStorica { modifica: string }
 const EFFETTO_OFFERTA: EffettoNotaStorica = {
   modifica: 'È una nota sulla fonte: non cambia il prezzo dell’offerta né gli acquisti registrati.',
-  ripristino: 'Testo e fonte della nota tornano come li dà la guida. Prezzi, acquisti e progressi non cambiano.',
 };
 
 /** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato (migrazione 139), che si
- *  modifica da qui e torna al valore della guida con «Ripristina»; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. Dalla 335
+ *  modifica da qui; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. Dalla 335
  *  (L8-04) è anche il confronto delle fonti sul livello consigliato di un Palazzo (`effetto` dice che cosa la nota non cambia). */
 export function NoteStoricheOfferta({ note, onLegamiCambiati, effetto = EFFETTO_OFFERTA }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void>; effetto?: EffettoNotaStorica }) {
   if (!note?.length) return null;
@@ -43,20 +42,18 @@ function NotaStorica({ nota, onLegamiCambiati, effetto }: { nota: NotaStoricaOff
     window.addEventListener(NOTA_SALVATA, ascolta);
     return () => window.removeEventListener(NOTA_SALVATA, ascolta);
   }, [nota]);
-  const [aperta, setAperta] = useState<'modifica' | 'ripristina' | null>(null);
+  const [aperta, setAperta] = useState(false);
   const [testo, setTesto] = useState(nota.testo);
   const [fonte, setFonte] = useState(nota.fonte);
   const [occupato, setOccupato] = useState(false);
-  const apri = (gesto: 'modifica' | 'ripristina') => { setTesto(attuale.testo); setFonte(attuale.fonte); setAperta(gesto); };
+  const apri = () => { setTesto(attuale.testo); setFonte(attuale.fonte); setAperta(true); };
   const esegui = async () => {
     setOccupato(true);
     try {
-      const nuova = aperta === 'ripristina'
-        ? await ripristinaNotaStorica(attuale.id, attuale.testo)
-        : await modificaNotaStorica(attuale.id, { testo, fonte, testoAttuale: attuale.testo });
-      setSalvata({ su: nota, nuova }); setAperta(null);
+      const nuova = await modificaNotaStorica(attuale.id, { testo, fonte, testoAttuale: attuale.testo });
+      setSalvata({ su: nota, nuova }); setAperta(false);
       window.dispatchEvent(new CustomEvent<NotaStoricaOfferta>(NOTA_SALVATA, { detail: nuova }));
-      notifica('success', aperta === 'ripristina' ? 'Nota storica ripristinata al valore della guida.' : 'Nota storica salvata.');
+      notifica('success', 'Nota storica salvata.');
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
@@ -67,26 +64,23 @@ function NotaStorica({ nota, onLegamiCambiati, effetto }: { nota: NotaStoricaOff
     {/* L7-01/L7-04: la fonte serve a chi corregge (nel rilascio no, D10); il numero di revisione della nota non informa nessuno */}
     {!IN_RILASCIO && (attuale.fonte || attuale.modificata) && <p className="m-0 break-words text-text-secondary">{[attuale.fonte && `Fonte: ${attuale.fonte}`, attuale.modificata && 'modificata'].filter(Boolean).join(' · ')}</p>}
     {!IN_RILASCIO && <div className="mt-1 flex flex-wrap gap-2">
-      <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={() => apri('modifica')} />
-      {attuale.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => apri('ripristina')} />}
+      <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={apri} />
       {onLegamiCambiati && <ModificaGuida tipo="nota-storica-legami" chiave={attuale.id} cosa="dove compare la nota storica" etichetta="Dove compare" campiSpeciali={CAMPI_LEGAMI}
         onSalvato={() => void onLegamiCambiati()} />}
     </div>}
-    {!IN_RILASCIO && aperta && <Modal aperta titolo={aperta === 'ripristina' ? 'Ripristina la nota storica' : 'Modifica la nota storica'} onChiudi={() => { if (!occupato) setAperta(null); }} azioni={<>
-      <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAperta(null)}>Annulla</button>
-      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={aperta === 'ripristina' ? 'riapri' : 'registra'} dimensione={22} />} titolo={aperta === 'ripristina' ? 'Ripristina' : 'Salva'} disabled={occupato || (aperta === 'modifica' && vuota)} onClick={() => void esegui()} />
+    {!IN_RILASCIO && aperta && <Modal aperta titolo="Modifica la nota storica" onChiudi={() => { if (!occupato) setAperta(false); }} azioni={<>
+      <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAperta(false)}>Annulla</button>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || vuota} onClick={() => void esegui()} />
     </>}>
-      {aperta === 'ripristina'
-        ? <p className="m-0">{effetto.ripristino}</p>
-        : <div className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-sm">Testo
-            <textarea className="form-input min-h-32" value={testo} maxLength={2000} disabled={occupato} onChange={(e) => setTesto(e.target.value)} />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">Fonte
-            <input className="form-input touch" value={fonte} maxLength={500} disabled={occupato} onChange={(e) => setFonte(e.target.value)} />
-          </label>
-          <p className="m-0 text-sm text-text-secondary">{effetto.modifica}</p>
-        </div>}
+      <div className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1 text-sm">Testo
+          <textarea className="form-input min-h-32" value={testo} maxLength={2000} disabled={occupato} onChange={(e) => setTesto(e.target.value)} />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">Fonte
+          <input className="form-input touch" value={fonte} maxLength={500} disabled={occupato} onChange={(e) => setFonte(e.target.value)} />
+        </label>
+        <p className="m-0 text-sm text-text-secondary">{effetto.modifica}</p>
+      </div>
     </Modal>}
   </div>;
 }

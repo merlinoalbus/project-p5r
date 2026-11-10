@@ -1,5 +1,5 @@
 // ============================================================
-// registro — gli oggetti della guida che si correggono dalla loro pagina e si rimettono com'erano (L11 · B11)
+// registro — gli oggetti della guida che si correggono dalla loro pagina (L11 · B11)
 // ============================================================
 //
 // Un elenco dichiarativo: per ogni tipo di oggetto, dove vive il dato e quali campi si possono correggere.
@@ -63,8 +63,8 @@ export interface DefBlocco {
   campi: CampoDef[];
   /**
    * I campi che un elemento collegato a un oggetto del catalogo non offre (righe di `ricompensa_oggetto` con `fonte_tipo = fonte` e
-   * `fonte_chiave` = il selettore della guida): quel dato vive sulla scheda dell'oggetto, il suo punto unico (decisione 21). Una correzione di
-   * prima su quei campi resta visibile solo per rimetterla com'era; non se ne scrive una nuova.
+   * `fonte_chiave` = il selettore della guida): quel dato vive sulla scheda dell'oggetto, il suo punto unico (decisione 21). Quei campi non si
+   * mostrano e non si correggono dalla scheda di correzione (`campiDellOggetto` in `ripristinoService`).
    */
   soloSenzaOggetto?: { fonte: string; campi: string[] };
   /** Più sezioni sotto lo stesso tipo (Completamento: NG+, differenze, tempo): chiave nell'URL → radice e campi propri. */

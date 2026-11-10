@@ -1,13 +1,13 @@
 // ============================================================
-// Rotte `/api/correzioni` — correggere e rimettere com'era ciò che la guida dice (L11 · B11)
+// Rotte `/api/correzioni` — correggere ciò che la guida dice (L11 · B11)
 // ============================================================
-// Quattro rotte sottili: la logica e il registro degli oggetti correggibili stanno in `ripristinoService`.
+// Tre rotte sottili: la logica e il registro degli oggetti correggibili stanno in `ripristinoService`.
 // ============================================================
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { bodyCorrezione, bodyRipristinoCorrezione, paramsCorrezione, queryCorrezioni } from '../schemas/correzioni.js';
-import { correggi, elencaCorrezioni, ripristina, schedaCorrezione } from '../services/ripristinoService.js';
+import { bodyCorrezione, paramsCorrezione, queryCorrezioni } from '../schemas/correzioni.js';
+import { correggi, elencaCorrezioni, schedaCorrezione } from '../services/ripristinoService.js';
 
 const router = Router();
 
@@ -19,9 +19,6 @@ router.get('/:tipo/:chiave', validate({ params: paramsCorrezione }), (req, res) 
 });
 router.put('/:tipo/:chiave', validate({ params: paramsCorrezione, body: bodyCorrezione }), (req, res) => {
   res.json(correggi(String(req.params.tipo), String(req.params.chiave), req.body.campi));
-});
-router.post('/:tipo/:chiave/ripristina', validate({ params: paramsCorrezione, body: bodyRipristinoCorrezione }), (req, res) => {
-  res.json(ripristina(String(req.params.tipo), String(req.params.chiave), req.body.campi));
 });
 
 export default router;

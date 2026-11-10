@@ -1,5 +1,5 @@
 // ============================================================
-// righeDedalo — i legami di Iweleth fra Palazzo e dedalo dei Memento, correggibili e ripristinabili (L11 · R11-17/1, gruppo Dedalo)
+// righeDedalo — i legami di Iweleth fra Palazzo e dedalo dei Memento, correggibili (L11 · R11-17/1, gruppo Dedalo)
 // ============================================================
 //
 // Tre oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne

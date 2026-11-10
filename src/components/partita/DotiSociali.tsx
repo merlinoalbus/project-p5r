@@ -208,7 +208,7 @@ function CartaDote({ dote: d, azioni, suggerita, onModificata }: { dote: DoteSoc
           <span className="font-display uppercase testo-20 leading-none" aria-hidden="true">{d.nomeRango}</span>
         </span>
         {suggerita !== null && suggerita !== undefined && <TargaSuggerito motivo={suggerita} compatta />}
-        {/* L11 · B11 (R11-15/12): il nome della Dote, i nomi dei cinque ranghi e le loro soglie si correggono qui e si rimettono come la guida */}
+        {/* L11 · B11 (R11-15/12): il nome della Dote, i nomi dei cinque ranghi e le loro soglie si correggono qui */}
         <ModificaGuida tipo="dote" chiave={d.chiave} cosa={`la Dote «${d.nome}» e i suoi ranghi`} soloIcona onSalvato={onModificata} />
         <span className="ml-auto font-display testo-28 leading-none tabular-nums">{d.punti}<span className="testo-12 font-sans text-text-muted"> punti</span></span>
       </div>

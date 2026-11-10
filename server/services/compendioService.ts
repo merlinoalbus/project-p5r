@@ -14,10 +14,8 @@ import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
 import { catalogoOggettiDisponibile, effettiDegliOggetti, effettoDellaFonte, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
 import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
-import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { eRomanzabile } from './relazioneRomanticaService.js';
-import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import { RANGO_MASSIMO_CONFIDENTE, type ReazioneRegalo } from '../../shared/puntiConfidenti.js';
 import { testoCostoAImporto } from '../../shared/catalogo.js';
@@ -551,7 +549,6 @@ export function impostaDotiIncontro(chiave: string, ranghi: Array<{ rango: numbe
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   getDb().transaction(() => {
     for (const r of ranghi) {
-      fotografaDoteIncontro(chiave, r.rango); // R9-07/3: com'era nella guida, per «Ripristina» (una volta sola)
       const voci = JSON.stringify(r.doti.map((d) => ({ effetto: { famiglia: 'dote', dote: d.dote, note: d.note } })));
       prepared('INSERT INTO confidente_dote_incontro (confidente_chiave, verso_rango, effetti_json) VALUES (?, ?, ?) ON CONFLICT(confidente_chiave, verso_rango) DO UPDATE SET effetti_json = excluded.effetti_json')
         .run(chiave, r.rango, voci);
@@ -602,7 +599,6 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const chiaviRegali = righeRegali.flatMap((g) => g.catalogo_chiave ? [g.catalogo_chiave] : []);
   const oggettiRegali = oggettiConChiavi(chiaviRegali); const offerteRegali = offerteBaseDegliOggetti(chiaviRegali);
   const regali = righeRegali.map((g) => {
-    const precedente = costoPrecedenteRegalo(g.seed_json, chiave, g.ordine, g.nome);
     const oggetto = g.catalogo_chiave ? oggettiRegali.get(g.catalogo_chiave) : undefined;
     const catalogo = oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null;
     const offerte = g.catalogo_chiave ? offerteRegali.get(g.catalogo_chiave) ?? [] : [];
@@ -613,11 +609,10 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       : o.costo?.tipo === 'monete' || o.costo?.tipo === 'punti' ? [testoCostoAImporto(o.costo)]
       : o.costo?.tipo === 'oggetti' ? [`Scambio: ${o.costo.oggetti.map((v) => `${v.quantita} × ${v.nome ?? 'oggetto da collegare'}`).join(', ')}`] : []))];
     const costoYen = prezzo === null ? null : prezzo === prezzoMassimo ? `${prezzo.toLocaleString('it-IT')} ¥` : `Da ${prezzo.toLocaleString('it-IT')} a ${prezzoMassimo!.toLocaleString('it-IT')} ¥`;
-    // ondata 5 (decisione 12, RG-13): con il listino il luogo e il prezzo sono solo quelli delle offerte; il testo della guida (e il ripristino del
-    // suo costo) vale soltanto per un regalo senza offerte, dove è l'unico punto
+    // ondata 5 (decisione 12, RG-13): con il listino il luogo e il prezzo sono solo quelli delle offerte; il testo della guida vale soltanto per
+    // un regalo senza offerte, dove è l'unico punto
     const conListino = offerte.length > 0;
     return { ...g, modificato: regaloModificato(g),
-      ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}),
       nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
       // la sede si dice solo se è un posto diverso dal negozio («High Sense (High Sense)» non informa)
       dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.negozioTipo !== 'distributore' && o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
@@ -631,8 +626,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
     // ondata 5: dalla reazione più alta (a parità, l'ordine della guida); niente più «sconsigliati»: ogni regalo vale almeno +1
-    regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => (
-      { ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }))
+    regali: regali.map(({ ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota }) => (
+      { ordine, modificato, nome, nomeStorico, dove, costo, reazione, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota }))
       .sort((a, b) => (b.reazione ?? 0) - (a.reazione ?? 0) || a.ordine - b.ordine),
     regalabile,
     // L13 (O10-2): con il Confidente si può iniziare una relazione romantica (migrazioni 324-325)

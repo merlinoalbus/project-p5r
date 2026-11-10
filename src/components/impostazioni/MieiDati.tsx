@@ -2,8 +2,8 @@
 // MieiDati — le righe del catalogo che hai aggiunto, corretto o nascosto (Fase 16.1)
 // ============================================================
 //
-// Quello che aggiungi o correggi nei dati della guida (in `gioco.db`) lo ritrovi qui tutto insieme, con «Ripristina» per tornare al
-// dato originale. «Importa» sostituisce `gioco.db`, e con lui anche queste righe.
+// Quello che aggiungi o correggi nei dati della guida (in `gioco.db`) lo ritrovi qui tutto insieme. «Importa» sostituisce `gioco.db`, e con
+// lui anche queste righe.
 // ============================================================
 
 import { useState } from 'react';
@@ -19,7 +19,7 @@ import { TitoloSezione } from '../shared/TitoloSezione';
 /**
  * Card «I miei dati» delle Impostazioni: per ogni tipo del catalogo con righe dell'utente mostra quante ne ha
  * aggiunte, corrette o nascoste; toccando un tipo si apre l'elenco delle sue righe (caricato solo allora) e
- * ogni riga si apre nel modulo del catalogo per correggerla o ripristinarla.
+ * ogni riga si apre nel modulo del catalogo per correggerla.
  */
 export function MieiDati() {
   const riepilogo = useCarica(() => getRiepilogoCatalogo(), []);
@@ -37,8 +37,7 @@ export function MieiDati() {
       <TitoloSezione>I miei dati</TitoloSezione>
       {/* `testo-link-esteso`: il collegamento «Nascosti dalla guida» sta dentro la frase (16 px di altezza): area di tocco da 44 px senza cambiare la riga */}
       <p className="m-0 testo-13 text-text-secondary testo-link-esteso">
-        Le righe che hai aggiunto o corretto tu sopra i dati della guida. «Ripristina dalla guida» rimette l'originale, e le righe che hai
-        aggiunto tu si eliminano dallo stesso pulsante. Stanno nei dati di gioco: importando un backup dei dati di gioco si sostituiscono anche loro.
+        Le righe che hai aggiunto o corretto tu sopra i dati della guida; quelle che hai aggiunto tu si eliminano dal loro modulo. Stanno nei dati di gioco: importando un backup dei dati di gioco si sostituiscono anche loro.
         Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
       </p>
       {riepilogo.errore && <p className="m-0 testo-13 text-error-testo">{riepilogo.errore}</p>}

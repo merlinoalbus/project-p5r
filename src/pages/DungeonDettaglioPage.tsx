@@ -103,10 +103,9 @@ function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null)
   return { chiave: conPin.chiave, nome, testo: `Su questa planimetria non ci sono pin: quelli dell’area stanno su «${nome}».` };
 }
 
-/** La nota storica del livello non cambia il livello consigliato: lo dicono le finestre della nota. */
+/** La nota storica del livello non cambia il livello consigliato: lo dice la finestra della nota. */
 const EFFETTO_NOTA_LIVELLO: EffettoNotaStorica = {
   modifica: 'È una nota sulla fonte: il livello consigliato minimo e massimo si correggono nella scheda del Palazzo.',
-  ripristino: 'Testo e fonte della nota tornano come li dà la guida. Il livello consigliato non cambia.',
 };
 
 /**

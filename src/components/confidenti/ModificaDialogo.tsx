@@ -1,21 +1,20 @@
 // ============================================================
-// ModificaDialogo — le note e le scelte di un dialogo di rango, con i punti: «Modifica» e «Ripristina» (R9-07/4, R11-15/2, L13 O6-4)
+// ModificaDialogo — le note e le scelte di un dialogo di rango, con i punti: «Modifica» (R9-07/4, R11-15/2, L13 O6-4)
 // ============================================================
 //
 // La matita sta accanto al dialogo (Risposte migliori per rango). È la `FinestraModifica` comune: corpo che scorre, piè fisso con
-// «Ripristina», «Annulla» e «Salva», conferma prima di chiudere con modifiche non salvate. Per ogni scelta: testo, punti come scelta a
+// «Annulla» e «Salva», conferma prima di chiudere con modifiche non salvate. Per ogni scelta: testo, punti come scelta a
 // pulsanti (Nessun punto · ♪ · ♪♪ · ♪♪♪, i soli valori della guida), l'interruttore «Punti diversi nel ramo amore» che mostra la stessa
 // scelta per il ramo amore, «romantica» e avviso; le scelte si aggiungono, si tolgono e si spostano (il server le rinumera da 1).
 // L13 (ondata 6, lotto O6-4, migrazione 309): prima c'erano un numero da 0 a 100 e il testo libero «Punti come li scrive la guida»; i punti
 // ora sono solo numerici e la resa è unica (`resaPuntiScelta`). «Nessun punto» vale anche per la scelta di cui la guida non dà punti: la si
 // lascia com'è finché non si sceglie un'altra nota; scelto dopo una nota, lo scrive come zero.
-// Si inviano solo i campi cambiati: un dialogo non toccato non perde la sua fotografia. «Ripristina» rimette note e scelte della guida; la
-// scheda non dice se il dialogo è già stato cambiato, quindi un dialogo mai modificato risponde 409 e lo si dice con parole.
-// Rotte: PUT `/api/compendio/confidenti/:chiave/dialoghi/:id`, POST `…/dialoghi/:id/ripristina`.
+// Si inviano solo i campi cambiati: un dialogo non toccato non prende una fotografia (che dà il chip «Modificato»).
+// Rotta: PUT `/api/compendio/confidenti/:chiave/dialoghi/:id`.
 // ============================================================
 
 import { useState } from 'react';
-import { isApiError, ripristinaDialogoConfidente, salvaDialogoConfidente } from '../../services/api';
+import { salvaDialogoConfidente } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { DialogoConfidenteDto } from '../../types';
@@ -24,7 +23,6 @@ import { Campo, CampoTesto, SezioneCampi } from '../shared/Campo';
 import { FilaScelta } from '../guida/FilaScelta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { SCELTE_NOTE } from '../../../shared/note';
 import { useIdStabili } from '../../hooks/useIdStabili';
@@ -99,24 +97,10 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
-  const ripristina = async () => {
-    if (sporca && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
-    setOccupato(true);
-    try {
-      await ripristinaDialogoConfidente(chiave, dialogo.id);
-      onModificato(false);
-      notifica('success', 'Dialogo ripristinato come nella guida.');
-      await onSalvato(); onChiudi();
-    } catch (err) {
-      if (isApiError(err, 'dialogo-della-guida')) notifica('info', 'Questo dialogo non è stato modificato: è già come nella guida.');
-      else notifica('error', err instanceof Error ? err.message : 'Ripristino non riuscito.');
-    } finally { setOccupato(false); }
-  };
 
   return (
-    <FinestraModifica titolo={`Dialogo del rango ${dialogo.etichetta}: ${nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && valida} occupato={occupato} sporca={sporca}
-      azioniExtra={<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" disabled={occupato} onClick={() => void ripristina()} />}>
-      <p className="m-0 testo-13 text-text-muted">Le modifiche valgono per tutte le partite. «Ripristina» rimette note e scelte come nella guida.</p>
+    <FinestraModifica titolo={`Dialogo del rango ${dialogo.etichetta}: ${nome}`} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && valida} occupato={occupato} sporca={sporca}>
+      <p className="m-0 testo-13 text-text-muted">Le modifiche valgono per tutte le partite.</p>
       <SezioneCampi titolo="Note del dialogo">
         <CampoTesto etichetta="Note" tipo="lungo" valore={note} onCambia={setNote} massimo={4000} disabilitato={occupato} />
       </SezioneCampi>
