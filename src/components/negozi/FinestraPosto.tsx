@@ -359,7 +359,7 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
     if (!e) return null;
     const ferme = occupato || sporca;
     return <div className="flex flex-wrap items-center gap-1.5">
-      {e.origine === 'seed' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="bloccato" dimensione={20} />} titolo="Nascondi dagli elenchi" disabled={ferme}
+      {(e.origine === 'seed' || e.modificata) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="bloccato" dimensione={20} />} titolo="Nascondi dagli elenchi" disabled={ferme}
         onClick={() => void immediato(() => nascondiElementoCatalogo(tipo, e.chiave, true), 'Nascosto: lo ritrovi in Impostazioni › Nascosti dalla guida.')} />}
       <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={tipo === 'luogo' ? 'Elimina il luogo' : 'Elimina il punto vendita'} disabled={ferme}
         onClick={() => void nelCestino(tipo, e)} />

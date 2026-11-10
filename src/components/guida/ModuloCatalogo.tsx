@@ -199,7 +199,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
       occupato={occupato}
       sporca={statoModulo !== statoIniziale}
       onElimina={eliminabile ? () => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina()) : undefined}
-      azioniExtra={!nuovo && elemento.origine === 'seed' ? (
+      azioniExtra={!nuovo && (elemento.origine === 'seed' || elemento.modificata) ? (
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave={elemento.nascosta ? 'sbloccato' : 'bloccato'} dimensione={20} />} titolo={elemento.nascosta ? 'Mostra di nuovo' : 'Nascondi dagli elenchi'} disabled={occupato} onClick={() => void nascondi()} />
       ) : undefined}
     >

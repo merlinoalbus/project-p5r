@@ -68,7 +68,6 @@ const PERCORSI_VIETATI: readonly Vietata[] = [
   { testo: '/note-storiche', cosa: 'scrittura delle note storiche' },
   { testo: '/catalogo-oggetti/legami', cosa: 'scrittura dei legami degli oggetti' },
   { testo: '/nascosta', cosa: 'nascondere le righe del catalogo' },
-  { testo: '/ripristina-costo', cosa: 'ripristino dei costi dei regali' },
   { testo: '/traduzioni/', cosa: 'scrittura delle traduzioni' },
   { testo: '/pesca/regola', cosa: 'scrittura delle regole di pesca' },
   { testo: '/legacy/rimozione', cosa: 'rimozione del vecchio segno «Acquistato» (rotte /partite/:id/acquisti/legacy, escluse dal rilascio)' },
