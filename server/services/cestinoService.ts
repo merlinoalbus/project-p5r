@@ -169,6 +169,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
   confidente_invito: ['invito del Confidente', 'inviti dei Confidenti'],
   oggetto_ottenuto_partita: ['oggetto ricevuto nelle partite', 'oggetti ricevuti nelle partite'], sblocco_partita: ['sblocco ricevuto nelle partite', 'sblocchi ricevuti nelle partite'],
+  // utente 073: il primo richiamo gratuito di una Persona DLC già speso
+  primo_richiamo_speso: ['primo richiamo DLC speso nelle partite', 'primi richiami DLC spesi nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */

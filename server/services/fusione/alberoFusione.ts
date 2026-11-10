@@ -234,10 +234,10 @@ function ripartisciSkill(r: Ricerca, p: PersonaFusione, ric: RicettaFusione, ric
 function costoFoglia(r: Ricerca, p: PersonaFusione, scortaUsata?: Map<number, number>): { modo: ModoNodo; costo: number } | null {
   const inScorta = (r.disp.scorta.get(p.id) ?? 0) - (scortaUsata?.get(p.id) ?? 0);
   if (inScorta > 0) return { modo: 'scorta', costo: 0 };
-  if (r.disp.registro.has(p.id)) {
-    const gratuita = (r.disp.primoRichiamo?.has(p.id) ?? false) && !scortaUsata?.has(chiavePrimoRichiamo(p.id));
-    return { modo: 'registro', costo: gratuita ? 0 : prezzoEvocazione(p) };
-  }
+  // Il primo richiamo gratuito di una Persona DLC basta da solo: la Persona del pacchetto posseduto si evoca anche se la partita non l'ha mai
+  // registrata (come nelle ricette e nel Calcolatore, che lo applicano senza guardare il Registro). Nel piano si spende una volta sola.
+  if ((r.disp.primoRichiamo?.has(p.id) ?? false) && !scortaUsata?.has(chiavePrimoRichiamo(p.id))) return { modo: 'registro', costo: 0 };
+  if (r.disp.registro.has(p.id)) return { modo: 'registro', costo: prezzoEvocazione(p) };
   // L8-07: «da catturare» con la regola unica (`PersonaFusione.catturabile`), la stessa del Compendio e dei cicli: rispetto a prima gli alberi
   // non propongono più da catturare le Persona DLC, che si hanno dal pacchetto scaricabile e mai da un incontro
   if (r.opz.catture && p.catturabile && (r.opz.livelloMax === null || p.livello <= r.opz.livelloMax)) return { modo: 'cattura', costo: 0 };

@@ -4,8 +4,8 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 386 migrazioni di gioco (l'ultima è la 386), 71 delle partite
-(l'ultima è la 071).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 387 migrazioni di gioco (l'ultima è la 387), 73 delle partite
+(l'ultima è la 073).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -17,7 +17,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 ## Fusione
 - Fusione diretta e inversa, ricette speciali e Demoni del Tesoro, costo di evocazione (`/fusione`).
 - Alberi di fusione ricorsivi ordinati per costo (fino a 4 fusioni, con un tetto di calcolo dichiarato), a partire da scorta, Registro e
-  Persona catturabili; cicli di fusione cercati e salvati fino a 15 anelli; costi di evocazione mostrati come «circa».
+  Persona catturabili; cicli di fusione cercati e salvati fino a 15 anelli; costi di evocazione mostrati come «circa». Il primo richiamo
+  gratuito di una Persona DLC (anche non registrata) vale nei piani e nelle ricette finché la partita non l'ha speso (`primo_richiamo_speso`).
 - Eredità delle skill, ricerca per skill desiderate con propagazione a catena negli alberi.
 - Bonus della Stanza di Velluto: sconti del Registro, EXP dei Confidenti, Forca, Isolamento con incensi, Gemelle, Allarme.
 - Piani salvati e obiettivi per Persona.

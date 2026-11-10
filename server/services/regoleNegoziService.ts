@@ -55,18 +55,20 @@ function segueLaRegola(o: { quantita: unknown; rifornimento_json: unknown; condi
 }
 
 /**
- * Un'offerta nuova di un punto vendita con la regola: i campi che non dice (assenti o vuoti) vengono dalla regola. Il corpo è quello già
- * validato dallo schema (`rifornimento_json` e `condizioni_json` sono testo JSON). Senza regola il corpo resta com'è.
+ * Un'offerta nuova di un punto vendita con la regola: i campi che non dice (assenti dal corpo) vengono dalla regola. Un `null` mandato è un
+ * valore, non un campo taciuto: `quantita: null` = nessun limite dichiarato, `rifornimento_json: null` = nessuna regola di rifornimento (come
+ * nell'editor delle offerte, «Fai un'eccezione», e in «Duplica» di un'eccezione), e l'offerta nasce eccezione con quei valori. Il corpo è
+ * quello già validato dallo schema (`rifornimento_json` e `condizioni_json` sono testo JSON). Senza regola il corpo resta com'è.
  */
 export function completaConLaRegola(dati: Record<string, unknown>): Record<string, unknown> {
   const r = regolaDelNegozio(dati.negozio_chiave);
   if (!r) return dati;
-  const vuoto = (v: unknown) => v === undefined || v === null;
+  const taciuto = (campo: 'quantita' | 'rifornimento_json' | 'condizioni_json') => !(campo in dati) || dati[campo] === undefined;
   return {
     ...dati,
-    ...(vuoto(dati.quantita) ? { quantita: r.quantita } : {}),
-    ...(vuoto(dati.rifornimento_json) ? { rifornimento_json: r.rifornimento_json } : {}),
-    ...(vuoto(dati.condizioni_json) ? { condizioni_json: r.condizioni_json } : {}),
+    ...(taciuto('quantita') ? { quantita: r.quantita } : {}),
+    ...(taciuto('rifornimento_json') ? { rifornimento_json: r.rifornimento_json } : {}),
+    ...(taciuto('condizioni_json') ? { condizioni_json: r.condizioni_json } : {}),
   };
 }
 

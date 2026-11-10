@@ -498,6 +498,8 @@ import { migration383 } from './383_requisiti_di_palazzo_delle_richieste.js';
 import { migration384 } from './384_eligor_nel_dedalo_di_chemdah.js';
 import { migration385 } from './385_voci_del_diario_dopo_giugno.js';
 import { migration386 } from './386_data_dei_negozi_di_shibuya.js';
+// 2026-11-10 (rilievi della revisione automatica, PR 108): gli esiti del Triple Seven anche sulla riga del pacchetto iniziale (`origine = 'seed'`)
+import { migration387 } from './387_esiti_triple_seven_del_pacchetto.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -530,5 +532,5 @@ export const migrations: Migration[] = [
   migration365, migration366, migration367, migration368, migration369, migration370, migration371,
   migration372, migration373, migration374, migration375, migration376,
   migration377, migration378, migration379, migration380, migration381, migration382, migration383, migration384,
-  migration385, migration386,
+  migration385, migration386, migration387,
 ];
