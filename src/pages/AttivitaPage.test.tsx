@@ -21,7 +21,7 @@ vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ chiave }: { 
 /** Costruisce un'attività verificata a Kichijoji (sede Penguin Sniper, sera, 800 yen) che dà una nota della Dote `dote`;
  *  `extra` sovrascrive i campi. */
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia', extra: Partial<AttivitaDto> = {}): AttivitaDto => ({
-  chiave, nome, tipo, luogo: 'Kichijoji, Penguin Sniper', quartiereChiave: 'kichijoji', quartiereNome: 'Kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null, doti: [],
+  chiave, nome, tipo, quartiereChiave: 'kichijoji', quartiereNome: 'Kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null,
   pagaYen: null, pagaMassima: null, dettagli: 'Come funziona: tre freccette a turno.', effetti: [{ effetto: { famiglia: 'dote', dote, note: 1 }, testo: `${dote[0].toUpperCase()}${dote.slice(1)} ♪` }], effettiTesto: [`${dote[0].toUpperCase()}${dote.slice(1)} ♪`],
   tracciamento: 'nessuno', quiz: null, sedeChiave: 'kichijoji/penguin-sniper', sedeNome: 'Penguin Sniper', verificato: true, condizioni: null, disponibilita: null, ...extra,
 });

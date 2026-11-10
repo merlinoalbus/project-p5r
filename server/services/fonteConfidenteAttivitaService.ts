@@ -16,7 +16,7 @@ export function fonteConfidenteAttivita(r: Record<string, unknown>, st: StatoDis
   if (r.confidente_chiave == null) return null;
   const chiave = String(r.confidente_chiave);
   const c = prepared('SELECT nome, arcana FROM confidente WHERE chiave = ?').get(chiave) as { nome: string; arcana: string } | undefined;
-  const campiIncompatibili = campiAutonomiAttivitaConfidente(r, true);
+  const campiIncompatibili = campiAutonomiAttivitaConfidente(r);
   const base: FonteConfidenteAttivitaDto = { stato: 'non-risolto', chiave, nome: c?.nome ?? null, arcana: c?.arcana ?? null, arcanaNome: c ? t('arcana', c.arcana) : null,
     casa: `/confidenti/${encodeURIComponent(chiave)}`, disponibilitaFonte: null, avvio: null, rangoAttuale: null,
     prossimoPasso: null, dotiPerPassaggio: [], campiIncompatibili, avvisi: [] };

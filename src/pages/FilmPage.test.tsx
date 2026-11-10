@@ -86,7 +86,7 @@ describe('FilmPage', () => {
     render(<MemoryRouter><FilmPage /></MemoryRouter>);
     await screen.findByText('DVD di prova');
     expect(screen.queryByRole('button', { name: /Aggiungi una sessione/ })).toBeNull();
-    expect(screen.getByText('2 per completarlo')).toBeInTheDocument();
+    expect(screen.getByText(/di 2 sessioni/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra posizione di DVD di prova' }));
     expect(screen.getByRole('button', { name: 'Noleggio · Scarlet' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Visione · Leblanc' }));

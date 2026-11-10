@@ -666,6 +666,15 @@
   .finestra-sezione__campi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
   @media (min-width: 768px) { .finestra-sezione__campi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .finestra-sezione__campi > .campo--largo { grid-column: 1 / -1; }
+  /* la sezione che parte ripiegata (`SezioneRipiegata`): riga da 44 px con il riepilogo, la freccia gira all'apertura */
+  .finestra-ripiegata { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  .finestra-ripiegata__testa { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-height: 44px; padding: 6px 12px; cursor: pointer; list-style: none; }
+  .finestra-ripiegata__testa::-webkit-details-marker { display: none; }
+  .finestra-ripiegata__testa::before { content: '▸'; color: var(--color-text-muted); }
+  .finestra-ripiegata[open] > .finestra-ripiegata__testa::before { transform: rotate(90deg); }
+  .finestra-ripiegata__testa .finestra-sezione__titolo { margin: 0; }
+  .finestra-ripiegata__riepilogo { min-width: 0; font-size: var(--testo-12); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+  .finestra-ripiegata > .finestra-sezione__campi { padding: 4px 12px 12px; }
   /* le finestre di modifica hanno un solo corpo che scorre (`.modal-body`): le sezioni si impilano con più aria dei campi */
   .finestra-modifica { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   /* «Elimina» sta a sinistra del piè, separato da Annulla e Salva (che ha il tono primario a destra) */

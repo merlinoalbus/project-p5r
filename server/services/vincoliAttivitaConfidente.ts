@@ -57,17 +57,16 @@ export function storiaGenericaAttivita(db: AppDatabase, chiave: string): { leggi
 }
 
 /** Controllo del RAW prima di qualunque normalizzatore: un effetto illeggibile non diventa una lista vuota. */
-export function verificaCampiAttivitaConfidente(finale: Record<string, unknown>, prima: Record<string, unknown> | null = null): void {
+export function verificaCampiAttivitaConfidente(finale: Record<string, unknown>): void {
   if (finale.confidente_chiave == null) return;
-  const dotiStoriche = typeof prima?.confidente_chiave === 'string' && finale.doti_json === prima.doti_json;
-  const campi = campiAutonomiAttivitaConfidente(finale, dotiStoriche);
+  const campi = campiAutonomiAttivitaConfidente(finale);
   if (campi.length) throw httpErrors.conflict('attivita-confidente-conflitto', 'La fonte Confidente richiede di risolvere esplicitamente i campi autonomi indicati.', { campi });
 }
 
 /** Valida il record completo, già unito ai valori correnti, prima di commit/import/ripristino. */
 export function verificaAttivitaConfidente(db: AppDatabase, finale: Record<string, unknown>, prima: Record<string, unknown> | null = null): void {
   if (finale.confidente_chiave == null) return;
-  verificaCampiAttivitaConfidente(finale, prima);
+  verificaCampiAttivitaConfidente(finale);
   if (typeof finale.confidente_chiave !== 'string' || !colonne(db, 'main', 'confidente')?.includes('chiave') || !db.prepare('SELECT 1 FROM main.confidente WHERE chiave = ?').get(finale.confidente_chiave)) {
     throw httpErrors.conflict('confidente-attivita-mancante', 'Il Confidente collegato non esiste: correggi il collegamento prima di salvare.', { confidente: finale.confidente_chiave });
   }
@@ -83,7 +82,6 @@ export function verificaCollegamentiAttivitaImportati(db: AppDatabase, attuale?:
   if (c === null) throw httpErrors.conflict('attivita-schema-non-valido', 'Il file non contiene una tabella attività riconoscibile.');
   if (!c.includes('confidente_chiave')) return;
   for (const r of db.prepare('SELECT * FROM main.attivita WHERE confidente_chiave IS NOT NULL').iterate() as Iterable<Record<string, unknown>>) {
-    // Un RAW legacy già collegato è storico anche nel roundtrip; non si converte in premi.
     const prima = attuale ? attuale.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(r.chiave) as Record<string, unknown> | undefined : r;
     // Il RAW storico è conservabile nel file esplicitamente collegato; il confronto con l'istanza
     // serve separatamente a non trasformare registrazioni generiche già presenti.

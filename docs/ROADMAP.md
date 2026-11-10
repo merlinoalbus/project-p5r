@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 350 migrazioni di gioco (l'ultima è la 367), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 355 migrazioni di gioco (l'ultima è la 385), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -56,7 +56,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   la sola sede; quartiere e raggruppamenti si ricavano da lì. Ancora aperti: le macchine come punti vendita propri e la fine del
   listino condiviso, la finestra unica di modifica del posto.
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
-- Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
+- Attività, lavori (esiti di Ore no Beko, Triple Seven e Rafflesia), libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri; serate della cantante nel Calendario. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.
 - Richieste dei Memento con sblocco e scadenza (`/guida/richieste`).

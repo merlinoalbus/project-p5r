@@ -63,7 +63,7 @@ function Scheda({ g, partitaId, onSalvata, onCorretto, onPosizione }: { g: Video
           fallback={<span className="shrink-0"><IconaCategoria categoria="minigiochi" dimensione={44} /></span>} />
         <div className="min-w-0 flex-[1_1_9rem]">
           <h3 className="m-0 text-lg leading-tight">{g.catalogo ? <Link className="touch inline-flex items-center" to={g.catalogo.casa}>{g.nome}</Link> : g.nome}</h3>
-          <p className="m-0 text-xs text-text-secondary">{g.sedeNome ?? g.luogo}</p>
+          {g.sedeNome && <p className="m-0 text-xs text-text-secondary">{g.sedeNome}</p>}
           {g.orariSedeTesto && <p className="m-0 text-xs text-text-secondary">Orari della sede: {g.orariSedeTesto}</p>}
         </div>
         <span className="ml-auto flex max-w-full flex-col items-end gap-1">
@@ -111,7 +111,7 @@ export function VideogiochiPage() {
 
   const visibili = useMemo(() => {
     const trova = filtroRicerca(ricerca);
-    return giochi.filter((g) => trova(g.nome, ...(g.nomiAltri ?? []), g.sedeNome, g.luogo, ...g.effettiTesto));
+    return giochi.filter((g) => trova(g.nome, ...(g.nomiAltri ?? []), g.sedeNome, ...g.effettiTesto));
   }, [giochi, ricerca]);
   const daFare = visibili.filter((g) => !g.fatto);
   const fatti = visibili.filter((g) => g.fatto);

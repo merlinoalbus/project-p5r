@@ -10,7 +10,8 @@
 //     scadenza (L13 O6-3: le date del Palazzo hanno una fonte sola; la 308 non le assegna a nessun evento esistente, perché nessuno ha titolo
 //     e data che dicano esattamente il furto consigliato o il termine della lettera);
 //   - `sblocco:confidente:<confidente>:1` — il requisito di rango 1 di tipo `data` (`confidente_requisito`);
-//   - `vacanza:<giorno>` — il giorno stesso (vale finché il giorno non ha tempo libero intero).
+//   - `vacanza:<giorno>` — il giorno stesso (vale finché il giorno non ha tempo libero intero);
+//   - `cantante-jazz:<giorno>` (migrazione 371) — identifica la serata; non ha una fonte da risolvere, vale la data della riga.
 // Una chiave che non si risolve (fonte tolta o cambiata) lascia l'evento alla data della sua riga.
 // ============================================================
 

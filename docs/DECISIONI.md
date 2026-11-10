@@ -481,14 +481,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Iwai non è un dono che arriva da sé: la guida lo lega alla vendita della medaglia del 4 maggio e alla restituzione del 6 maggio, voci del
   periodo validato.
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
+- Lavori con il quiz o il bouquet (Triple Seven, Rafflesia): le Doti e la paga stanno solo negli esiti, come a Ore no Beko; l'esito si sceglie
+  alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede.
+- Dove le due pagine della guida concordano sulle date, un articolo le segue (Razione militare: dal 17/4 al 14/8 e dal 7/12 al 19/12). Requisiti e
+  clienti del Crossroads restano come sono finché non si verifica in gioco. Un piatto senza dati non dice che i dati mancano: la colonna Prezzo
+  ed Effetto compaiono solo se almeno un piatto li ha.
 
 ## 12. Domande, esami, negoziazione, pesca
 - Il premio di ogni domanda in classe e dei quiz TV è quello della guida (Conoscenza ♪, con le eccezioni documentate) e vive negli
   effetti della voce del Diario che segna la domanda; i risultati degli esami hanno la loro voce, con il piazzamento scelto alla spunta.
-  Le risposte senza punti danno 0 punti.
+  Le risposte senza punti danno 0 punti. Il testo «Che cosa dà» si modifica solo dove c'è già (la domanda del 25 aprile), non si offre per le altre.
 - Domande d'esame solo nelle righe di `domanda`, con la data. **(24/10)**
 - Negoziazione: si cerca la domanda (è l'unica cosa che si legge mentre l'Ombra parla); il carattere è un colore.
-- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti.
+- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti. Le 21 serate
+  della cantante al Jazz Club sono eventi di tipo consiglio.
 - Pesca, «Registra una visita» (L10-09, D18): tre passi (Quando, Cosa hai pescato, Riepilogo) con gli stessi dati del modulo unico di
   prima. Giorno e fascia partono da quelli della partita, l'ordine dopo l'ultima visita di quella fascia (si corregge con «Cambia»), il
   riepilogo li ripete per primi. «L'avevi già contata nelle attività?» compare solo se ci sono visite contate senza dettaglio (turni del

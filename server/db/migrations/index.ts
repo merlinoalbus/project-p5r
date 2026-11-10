@@ -443,6 +443,11 @@ import { migration364 } from './364_prosa_disponibilita_tolta.js';
 import { migration365 } from './365_testo_requisiti_generato.js';
 import { migration366 } from './366_doti_incontri_e_riverbero.js';
 import { migration367 } from './367_date_messaggio_ryuji_r7.js';
+import { migration368 } from './368_attivita_luogo_e_doti_tolte.js';
+import { migration369 } from './369_colonne_vuote_di_libri_film_trofei_pesca.js';
+import { migration370 } from './370_esiti_lavori_costo_bagno_razione_militare.js';
+import { migration371 } from './371_serate_cantante_jazz.js';
+import { migration385 } from './385_piatti_senza_frasi_non_reperiti.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -471,4 +476,5 @@ export const migrations: Migration[] = [
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
   migration344, migration345, migration346,
   migration364, migration365, migration366, migration367,
+  migration368, migration369, migration370, migration371, migration385,
 ];

@@ -11,13 +11,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CondizioniEditor } from './CondizioniEditor';
-import { normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { dataConArticolo, descriviRequisitoSpillo, normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { CHIUDI_SENZA_SALVARE, conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
 import { FinestraModifica } from '../shared/FinestraModifica';
-import { SezioneCampi } from '../shared/Campo';
+import { SezioneCampi, SezioneRipiegata } from '../shared/Campo';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TestoNote } from '../shared/TestoNote';
@@ -29,6 +30,9 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** Le condizioni la cui frase non cita elementi per chiave: si possono leggere sulla riga ripiegata senza caricare gli elenchi dei nomi. */
+const CONDIZIONI_SENZA_NOMI: ReadonlySet<RequisitoSpillo['tipo']> = new Set<RequisitoSpillo['tipo']>(['data', 'intervallo', 'fascia', 'piove', 'giorno-settimana', 'stagione', 'da-subito']);
 
 interface Props {
   /** Il tipo del catalogo, o «videogioco» (un'attività con il tipo fissato). */
@@ -110,6 +114,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
   /** Rimette i valori della guida su una riga corretta. */
   const ripristina = async () => {
     if (!elemento) return;
+    if (statoModulo !== statoIniziale && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
     setOccupato(true);
     setErroreSalvataggio(null);
     try {
@@ -162,6 +167,7 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
   /** Inverte la visibilità della riga negli elenchi (nasconde o rimostra), notifica e avvisa il genitore. */
   const nascondi = async () => {
     if (!elemento) return;
+    if (statoModulo !== statoIniziale && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
     setOccupato(true);
     try {
       await nascondiElementoCatalogo(tipo, elemento.chiave, !elemento.nascosta);
@@ -174,8 +180,27 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
     }
   };
 
-  const titolo = nuovo ? nome.nuovo : `${nome.singolare}: ${elemento.nome}`;
+  // il nome di una domanda è il testo intero: in testata va il giorno, la domanda si legge nel suo campo (a 375 px la testata occupava cinque righe)
+  const giornoDomanda = tipo === 'domanda' && elemento && typeof elemento.dati.data === 'string' ? elemento.dati.data : '';
+  const titolo = nuovo ? nome.nuovo : tipo === 'domanda' ? (giornoDomanda ? `${nome.singolare} ${dataConArticolo(giornoDomanda, 'di')}` : nome.singolare) : `${nome.singolare}: ${elemento.nome}`;
   const Componente = modulo.Componente;
+  // sulla riga ripiegata: la frase delle condizioni che si dicono senza elenchi di nomi, altrimenti quante sono
+  const riepilogoCondizioni = condizioni.length === 0 ? 'Nessuna' : condizioni.every((c) => CONDIZIONI_SENZA_NOMI.has(c.tipo)) ? condizioni.map((c) => descriviRequisitoSpillo(c)).join(' · ') : `${condizioni.length} ${condizioni.length === 1 ? 'condizione' : 'condizioni'}`;
+  const corpoCondizioni = <div className="campo--largo flex min-w-0 flex-col gap-2">
+    {condizioniDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
+      <p role="alert" className="m-0">Le condizioni salvate contengono parti che l’editor non sa rappresentare. Il salvataggio resta bloccato finché non scegli esplicitamente come risolverle.</p>
+      <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
+      <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Usa le condizioni leggibili qui sotto e scarta le altre parti" className="min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)} />
+    </div>}
+    {(fonteConfidente || fontePesca) && !condizioniDaRisolvere && condizioni.length === 0
+      ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. {fontePesca ? 'L’ingresso dipende dalla sede; profili, vie documentate e casi ignoti vengono dalla fonte pesca.' : 'Disponibilità e requisiti vengono dalla fonte Confidente.'}</p>
+      : <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />}
+    {fontePesca && !!condizioni.length && <div className="flex flex-col gap-2 text-sm"><p role="alert" className="m-0 text-warning">La fonte pesca richiede l’eredità della sede e dei profili. Le condizioni proprie mostrate devono essere rimosse con un gesto esplicito prima di salvare.</p><PulsanteVisivo icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi queste condizioni proprie e usa la fonte pesca" className="self-start" disabled={occupato || condizioniDaRisolvere} onClick={() => impostaCondizioni([])} /></div>}
+    {nuovo && !fonteConfidente && !fontePesca && condizioni.length === 0 && <div className="space-y-2 text-sm">
+      <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
+      {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
+    </div>}
+  </div>;
 
   const eliminabile = !nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata));
 
@@ -205,32 +230,20 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
           <p className="m-0 testo-12 text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
             {elemento.modificata && (lettura ? 'Il ripristino riguarda sessioni, effetti e condizioni della lettura.' : 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.')}
-            {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: la correzione si salva nei dati di gioco, e «Ripristina i valori della guida» la toglie. Importando un backup dei dati di gioco si sostituisce anche lei.'}
+            {elemento.origine === 'seed' && !elemento.modificata && 'Riga della guida: la correzione si salva nei dati di gioco e si può ripristinare.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
         )}
-        {lettura && <p className="m-0 testo-12 text-text-muted">Il titolo appartiene all’oggetto: cambiarlo aggiorna tutti i riferimenti. Il prezzo si modifica nell’offerta del negozio.
-          {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link>.</>}
+        {lettura && <p className="m-0 testo-12 text-text-muted">Cambiare il titolo aggiorna tutti i riferimenti; il prezzo sta nell’offerta del negozio.
+          {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link></>}
         </p>}
         <Componente dati={datiModulo} imposta={imposta} impostaCondizioni={impostaCondizioni} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
             domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
             condizione; il negozio ha gli orari, e lo sblocco della merce sta sugli articoli. */}
-        {modulo.conCondizioni && <SezioneCampi titolo="Condizioni"><div className="campo--largo flex min-w-0 flex-col gap-2">
-          {condizioniDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
-            <p role="alert" className="m-0">Le condizioni salvate contengono parti che l’editor non sa rappresentare. Il salvataggio resta bloccato finché non scegli esplicitamente come risolverle.</p>
-            <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
-            <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Usa le condizioni leggibili qui sotto e scarta le altre parti" className="min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)} />
-          </div>}
-          {(fonteConfidente || fontePesca) && !condizioniDaRisolvere && condizioni.length === 0
-            ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. {fontePesca ? 'L’ingresso dipende dalla sede; profili, vie documentate e casi ignoti vengono dalla fonte pesca.' : 'Disponibilità e requisiti vengono dalla fonte Confidente.'}</p>
-            : <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />}
-          {fontePesca && !!condizioni.length && <div className="flex flex-col gap-2 text-sm"><p role="alert" className="m-0 text-warning">La fonte pesca richiede l’eredità della sede e dei profili. Le condizioni proprie mostrate devono essere rimosse con un gesto esplicito prima di salvare.</p><PulsanteVisivo icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi queste condizioni proprie e usa la fonte pesca" className="self-start" disabled={occupato || condizioniDaRisolvere} onClick={() => impostaCondizioni([])} /></div>}
-          {nuovo && !fonteConfidente && !fontePesca && condizioni.length === 0 && <div className="space-y-2 text-sm">
-            <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
-            {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
-          </div>}
-        </div></SezioneCampi>}
+        {modulo.conCondizioni && (modulo.condizioniRipiegate
+          ? <SezioneRipiegata titolo="Condizioni" riepilogo={riepilogoCondizioni} aperta={!regoleValide || condizioniDaRisolvere || (fontePesca && condizioni.length > 0)}>{corpoCondizioni}</SezioneRipiegata>
+          : <SezioneCampi titolo="Condizioni">{corpoCondizioni}</SezioneCampi>)}
         {/* TestoNote: il messaggio del server può portare note come ♪ («Doti da ♪ a ♪♪♪»), da leggere a parole */}
         {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error-testo"><TestoNote testo={erroreSalvataggio} /> La finestra resta aperta.</p>}
         {!regoleValide && <p role="alert" className="m-0 testo-13 text-error-testo">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
