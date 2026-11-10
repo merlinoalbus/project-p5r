@@ -139,8 +139,8 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
       {l.piatti && l.piatti.length > 0 && (
         <div className="area-scorrevole-x">
           <table className="tabella tabella--adattiva testo-12">
-            <thead><tr><th>Piatto</th><th>Prezzo</th><th>Effetto</th></tr></thead>
-            <tbody>{l.piatti.map((p) => <tr key={p.nome}><td data-etichetta="Piatto"><strong>{p.nome}</strong></td><td data-etichetta="Prezzo" className="tabular-nums">{p.prezzo !== null ? `${p.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td><td data-etichetta="Effetto">{p.effetto}</td></tr>)}</tbody>
+            <thead><tr><th>Piatto</th>{l.piatti.some((p) => p.prezzo !== null) && <th>Prezzo</th>}{l.piatti.some((p) => p.effetto) && <th>Effetto</th>}</tr></thead>
+            <tbody>{l.piatti.map((p) => <tr key={p.nome}><td data-etichetta="Piatto"><strong>{p.nome}</strong></td>{l.piatti!.some((x) => x.prezzo !== null) && <td data-etichetta="Prezzo" className="tabular-nums">{p.prezzo !== null ? `${p.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td>}{l.piatti!.some((x) => x.effetto) && <td data-etichetta="Effetto">{p.effetto}</td>}</tr>)}</tbody>
           </table>
         </div>
       )}

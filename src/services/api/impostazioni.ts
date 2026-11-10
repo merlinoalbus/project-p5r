@@ -104,19 +104,10 @@ export const eliminaDalCestino = (id: number): Promise<void> => apiDelete(`/impo
 /** Svuota il cestino. */
 export const svuotaCestino = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino', { maxRetries: 0 });
 
-/** Il nuovo client richiede anche gli elementi personali; gli indirizzi storici conservano il contratto precedente. */
-export const getCestinoUnificato = (): Promise<VoceCestinoUnificatoDto[]> => apiGet('/impostazioni/cestino?partite=1');
-export const svuotaCestinoUnificato = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino?partite=1', { maxRetries: 0 });
-export const ripristinaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<EsitoRipristinoCestinoDto> => v.id === null
-  ? apiPost(`/impostazioni/cestino/partite/${encodeURIComponent(v.riferimento.uid)}/ripristina`, undefined, { maxRetries: 0 })
-  : ripristinaDalCestino(v.id);
-export const eliminaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<void> => v.id === null
-  ? apiDelete(`/impostazioni/cestino/partite/${encodeURIComponent(v.riferimento.uid)}`, { maxRetries: 0 })
-  : eliminaDalCestino(v.id);
-
 // ---- Il cestino PERSONALE (L12, passo 3): le sole voci del giocatore, sotto `/partite/cestino` ----
-// È ciò che usa l'istanza di rilascio, che non monta `/api/impostazioni`: partite eliminate, fonti d'acquisto, pesca, Persone della scorta.
-// Le stesse voci, con lo stesso servizio, sono nel cestino unificato della preparazione, che continua a usare le rotte storiche.
+// È l'unica superficie delle voci personali (partite eliminate, fonti d'acquisto, pesca, Persone della scorta), in preparazione e in
+// rilascio, che non monta `/api/impostazioni`. L'elenco unificato della preparazione le somma alle voci di gioco, ma le rimette e le
+// toglie da qui.
 
 /** L'uid di una voce personale; una voce di gioco (id numerico) non appartiene al cestino personale. */
 function uidPersonale(v: VoceCestinoUnificatoDto): string {
@@ -134,3 +125,14 @@ export const ripristinaDalCestinoPersonale = (v: VoceCestinoUnificatoDto): Promi
 /** Toglie per sempre una voce personale dal cestino. */
 export const eliminaDalCestinoPersonale = (v: VoceCestinoUnificatoDto): Promise<void> =>
   apiDelete(`/partite/cestino/${uidPersonale(v)}`, { maxRetries: 0 });
+
+// ---- Il cestino unificato della preparazione: voci di gioco (per id) e voci personali (per uid) in un elenco solo ----
+/** L'elenco somma anche le voci personali; le voci di gioco si rimettono e si tolgono da `/impostazioni/cestino/:id`, quelle personali da `/partite/cestino/:uid`. */
+export const getCestinoUnificato = (): Promise<VoceCestinoUnificatoDto[]> => apiGet('/impostazioni/cestino?partite=1');
+export const svuotaCestinoUnificato = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino?partite=1', { maxRetries: 0 });
+export const ripristinaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<EsitoRipristinoCestinoDto> => v.id === null
+  ? ripristinaDalCestinoPersonale(v)
+  : ripristinaDalCestino(v.id);
+export const eliminaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<void> => v.id === null
+  ? eliminaDalCestinoPersonale(v)
+  : eliminaDalCestino(v.id);

@@ -1,6 +1,7 @@
 // Compatibilità dei backup locali: solo durante l'importazione esplicita, dopo le migrazioni storiche.
 // Non è una migrazione di avvio: condizioni già correnti e dati della partita non vengono riscritti.
 import type { AppDatabase } from '../../db/dbService.js';
+import { haColonna, haTabella } from '../../db/colonne.js';
 import { normalizzaRequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { httpErrors } from '../../utils/httpError.js';
 
@@ -49,13 +50,11 @@ function convertiSnapshotCatalogo(valore: unknown, origine: string, conversioni:
  * conosce (caffè al Leblanc, ecc.): non li si declassa ad avvisi. Tutto il recupero è atomico e nel ripristino protetto dell'import. */
 export function convertiCondizioniDatabaseImportato(db: AppDatabase): string[] {
   const conversioni: string[] = [];
-  const tabelle = new Set((db.prepare("SELECT name FROM main.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
   return db.transaction(() => {
     for (const tabella of TABELLE_CONDIZIONI) {
-      if (!tabelle.has(tabella)) continue;
-      const colonne = db.prepare(`PRAGMA main.table_info("${tabella}")`).all() as Array<{ name: string }>;
+      if (!haTabella(db, tabella)) continue;
       for (const colonna of ['condizioni_json', 'sblocco_json', 'condizioni_guida_json', 'seed_json'] as const) {
-        if (!colonne.some((c) => c.name === colonna)) continue;
+        if (!haColonna(db, tabella, colonna)) continue;
         const righe = db.prepare(`SELECT rowid AS id, "${colonna}" AS json FROM main."${tabella}" WHERE "${colonna}" IS NOT NULL`).all() as Array<{ id: number; json: string }>;
         const scrivi = db.prepare(`UPDATE main."${tabella}" SET "${colonna}" = ? WHERE rowid = ?`);
         for (const r of righe) {
@@ -71,7 +70,7 @@ export function convertiCondizioniDatabaseImportato(db: AppDatabase): string[] {
       }
     }
     for (const tabella of ['confidente_requisito', 'confidente_requisito_guida'] as const) {
-      if (!tabelle.has(tabella)) continue;
+      if (!haTabella(db, tabella)) continue;
       const righe = db.prepare(`SELECT confidente_chiave, rango, indice, tipo, dati_json, testo FROM main."${tabella}"`).all() as Array<{ confidente_chiave: string; rango: number; indice: number; tipo: string; dati_json: string; testo: string }>;
       const scrivi = db.prepare(`UPDATE main."${tabella}" SET tipo = ?, dati_json = ? WHERE confidente_chiave = ? AND rango = ? AND indice = ?`);
       for (const r of righe) {

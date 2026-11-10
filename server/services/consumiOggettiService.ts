@@ -19,6 +19,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { nomeOggettoCatalogo, oggettiDelTurnoVerificati } from './oggettiDegliEsitiService.js';
@@ -26,7 +27,7 @@ import { nomeOggettoCatalogo, oggettiDelTurnoVerificati } from './oggettiDegliEs
 const TABELLA = 'consumo_oggetto_partita';
 
 /** La tabella c'è? (Uno schema di prima della utente 054 non registra consumi: niente da scrivere né da togliere.) */
-export const conRegistroConsumi = (): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(TABELLA);
+export const conRegistroConsumi = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 /**
  * Registrando il turno `ordine` dell'attività con l'esito `esito`: gli oggetti che l'esito consuma escono dalle copie possedute. Va chiamata
@@ -69,7 +70,7 @@ export function copieConsumate(p: number, catalogo: string): number {
 }
 
 /** Il registro ha le uscite dalle voci (utente 055)? Senza, l'effetto «oggetto restituito o venduto» non ha dove scrivere. */
-export const conUsciteDaVoce = (): boolean => conRegistroConsumi() && !!prepared("SELECT 1 FROM pragma_table_info('consumo_oggetto_partita', 'utente') WHERE name = 'voce_uid'").get();
+export const conUsciteDaVoce = (): boolean => conRegistroConsumi() && haColonnaUtente(getDb(), 'consumo_oggetto_partita', 'voce_uid');
 
 /** Una riga di uscita scritta da una voce (utente 055): l'oggetto restituito o venduto dall'effetto della voce. */
 export interface UscitaDaVoce { catalogo: string; quantita: number; modo: 'restituito' | 'venduto'; prezzo: number | null; giorno: string | null; creatoIl: string }

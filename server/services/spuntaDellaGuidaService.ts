@@ -23,12 +23,13 @@ import { domande, impostaDomandaFatta, scriviDomandaFatta } from './domandeServi
 import { impostaCruciverba, scriviCruciverba } from './cruciverbaService.js';
 import { voceCollegata } from './vociDiStato.js';
 
-/** Porta la voce allo stato voluto con il suo gesto (spunta o toglie la spunta); se è già così non fa niente. Dice se la fascia o la giornata è avanzata. */
-function portaLaVoce(partitaId: number, voceUid: string, fatta: boolean): AvanzamentoGiornataDto | undefined {
+/** Porta la voce allo stato voluto con il suo gesto (spunta o toglie la spunta); se è già così non fa niente. Dice se la fascia o la giornata è
+ *  avanzata e gli avvisi dell'annullo (una lettura cambiata dopo la spunta resta, e lo si dice anche da qui). */
+function portaLaVoce(partitaId: number, voceUid: string, fatta: boolean): (AvanzamentoGiornataDto & { avvisiSpunta?: string[] }) | undefined {
   const spuntata = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, voceUid);
   if (spuntata === fatta) return undefined;
-  const { giornoAvanzato, fasciaAvanzata } = spuntaEAvanza(partitaId, voceUid, fatta);
-  return giornoAvanzato || fasciaAvanzata ? { ...(giornoAvanzato ? { giornoAvanzato } : {}), ...(fasciaAvanzata ? { fasciaAvanzata } : {}) } : undefined;
+  const { giornoAvanzato, fasciaAvanzata, avvisiSpunta } = spuntaEAvanza(partitaId, voceUid, fatta);
+  return giornoAvanzato || fasciaAvanzata || avvisiSpunta ? { ...(giornoAvanzato ? { giornoAvanzato } : {}), ...(fasciaAvanzata ? { fasciaAvanzata } : {}), ...(avvisiSpunta ? { avvisiSpunta } : {}) } : undefined;
 }
 
 /**

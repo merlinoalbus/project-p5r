@@ -3,6 +3,7 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { tabellaTolta } from '../../db/fontiTolte.js';
+import { haTabella } from '../../db/colonne.js';
 import { slug } from '../../../shared/slug.js';
 import { pinCompatibileConNuovoLuogo, type LuogoNuovoDaPin } from '../../../shared/luogoDaPin.js';
 import { canonico, verificaPin, type PinDelRaccordo } from './precondizioneRaccordoPin.js';
@@ -17,7 +18,6 @@ export interface FotografiaLuogoDaPin {
   luoghi: Riga[];
   aree: Riga[];
   relazioni: { destinazioni: Riga[]; legamiVoci: Riga[]; voci: Riga[]; legamiImmagini: Riga[]; immagini: Riga[] };
-  sediPin: Riga[];
   riferimentiCandidata: Riga[];
   stati: Riga;
   cestino: Riga;
@@ -25,9 +25,6 @@ export interface FotografiaLuogoDaPin {
 
 function conflitto(messaggio: string): never { throw httpErrors.conflict('luogo-da-pin-conflitto', messaggio); }
 function oggetto(v: unknown): Riga | null { return v !== null && typeof v === 'object' && !Array.isArray(v) && !Buffer.isBuffer(v) ? v as Riga : null; }
-function tabella(db: AppDatabase, schema: 'main' | 'utente', nome: string): boolean {
-  return !!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(nome);
-}
 function testo(r: Riga, campo: string): string {
   if (typeof r[campo] !== 'string' || !r[campo]) conflitto('Un’identità del contesto non è leggibile. Rivedi il pin prima di creare il luogo.');
   return r[campo] as string;
@@ -89,8 +86,8 @@ function passiDelRegistro(db: AppDatabase, schema: 'main' | 'utente', raw: unkno
 }
 
 function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, quartiere: string, chiave: string, nome: string, voci: Set<string>): Riga {
-  const principale = tabella(db, 'main', 'cestino');
-  const partite = tabella(db, 'utente', 'cestino_partite');
+  const principale = haTabella(db, 'cestino', 'main');
+  const partite = haTabella(db, 'cestino_partite', 'utente');
   const pertinente = (t: string, r: Riga): boolean => {
     if (t === 'spillo') return r.id === pin.id || r.uid === pin.uid
       || (['luogo', 'attivita'].includes(String(r.riferimento_tipo)) && r.riferimento_chiave === chiave);
@@ -99,9 +96,7 @@ function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, qu
     if (t === 'area') return r.chiave === area;
     if (t === 'quartiere') return r.chiave === quartiere;
     if (t === 'spillo_voce' || t === 'spillo_immagine' || t === 'spillo_destinazione') return r.spillo_id === pin.id;
-    if (t === 'negozio_sede_spillo') return r.spillo_uid === pin.uid || r.luogo_chiave === chiave;
     if (t === 'negozio' || t === 'attivita') return r.sede_chiave === chiave;
-    if (t === 'negozio_luogo_extra') return r.luogo_chiave === chiave;
     return false;
   };
   if (principale) {
@@ -135,12 +130,12 @@ function fotografiaStati(db: AppDatabase, pin: PinLuogoDaPin): Riga {
   }
   const stati: Riga = {};
   for (const t of ['spillo_partita', 'spillo_partita_infiltrazione', 'divergenza_partita'] as const) {
-    const presente = tabella(db, 'utente', t);
+    const presente = haTabella(db, t, 'utente');
     if (t === 'spillo_partita' && !presente) conflitto('Lo stato dei pin non è disponibile.');
     const ordine = t === 'spillo_partita_infiltrazione' ? ', infiltrazione_chiave' : t === 'divergenza_partita' ? ', voce_chiave' : '';
     stati[t] = { presente, righe: presente ? db.prepare(`SELECT * FROM utente.${t} WHERE spillo_uid = ? ORDER BY partita_id${ordine}`).all(pin.uid) : [] };
   }
-  const presente = tabella(db, 'utente', 'punto_partita');
+  const presente = haTabella(db, 'punto_partita', 'utente');
   if (!presente) conflitto('Lo stato delle voci non è disponibile.');
   stati.punto_partita = { presente, righe: db.prepare(`SELECT p.* FROM utente.punto_partita p WHERE EXISTS (
     SELECT 1 FROM main.spillo_voce sv WHERE sv.spillo_id = ? AND sv.voce_chiave = p.punto_chiave
@@ -180,12 +175,9 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
     testo(l, 'chiave'); testo(l, 'nome'); testo(l, 'tipo');
     if (l.area_chiave !== null && !aree.some(a => a.chiave === l.area_chiave)) conflitto('Un luogo del quartiere ha una collocazione incoerente.');
   }
-  const sediPin = db.prepare('SELECT * FROM negozio_sede_spillo WHERE spillo_uid = ? ORDER BY spillo_uid').all(pin.uid) as Riga[];
-  if (sediPin.length) conflitto('Il pin ha già una sede commerciale strutturata: rivedila prima di creare un luogo.');
   const riferimentiCandidata = db.prepare(`SELECT 'spillo' AS tabella, uid AS identita FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = @chiave
     UNION ALL SELECT 'negozio', chiave FROM negozio WHERE sede_chiave = @chiave
     UNION ALL SELECT 'attivita', chiave FROM attivita WHERE sede_chiave = @chiave
-    UNION ALL SELECT 'negozio_luogo_extra', negozio_chiave FROM negozio_luogo_extra WHERE luogo_chiave = @chiave
     ORDER BY tabella, identita`).all({ chiave }) as Riga[];
   if (riferimentiCandidata.length) conflitto('La chiave prevista è già usata da collegamenti strutturati: nessuna identità viene assorbita.');
   const legamiVoci = db.prepare('SELECT * FROM spillo_voce WHERE spillo_id = ? ORDER BY voce_chiave').all(id) as Riga[];
@@ -196,7 +188,7 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
   )) ORDER BY i.ambito, i.chiave, i.id`).all(id) as Riga[];
   const stati = fotografiaStati(db, pin);
   const cestino = fotografiaCestino(db, pin, areaChiave, quartiereChiave, chiave, nuovo.nome, new Set(legamiVoci.map(v => String(v.voce_chiave))));
-  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, sediPin, riferimentiCandidata, stati, cestino };
+  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, riferimentiCandidata, stati, cestino };
 }
 
 /** Formato dedicato: i booleani dei nuovi input e delle presenze non appartengono al vecchio hash v1/v2.

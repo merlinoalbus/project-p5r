@@ -35,12 +35,12 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   ombra: 'Le affinità della Persona e la Persona abbinata non si correggono da qui: le affinità si correggono dalla scheda della Persona. I luoghi d’incontro si correggono dal loro posto nella pagina dell’Ombra. Qui le differenze proprie dell’Ombra.',
   'ombra-luogo': 'Si corregge il posto: l’Ombra e la fonte della riga non cambiano. Le righe «da una voce Persona» nascono dalla voce: se la voce passa a un’altra Ombra, il suo luogo non la segue da solo. I luoghi non si aggiungono né si tolgono da qui.',
   'ombra-voce': 'Si corregge quale Ombra descrive la voce; le aree dei dedali dove si incontra l’Ombra seguono da sole. Cambiando Ombra cambia anche la Persona che la voce fa catturare, e i luoghi d’incontro dell’Ombra non si spostano con la voce: si correggono a parte.',
-  persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Le skill si scrivono «nome @ livello» (0 = innata). Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
+  persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
   skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto e si modifica solo dalle Traduzioni (Impostazioni). Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
   regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
   arcana:'L’ordine dell’Arcano (la sua posizione nella tabella di fusione) e il suo nome italiano non si correggono da qui: il nome si corregge dalle traduzioni.',
   'fusione-arcana': 'Vale per la coppia nella forma in cui sta in tabella (una sola volta, in qualunque ordine si fondano i due Arcani). Il motore di fusione usa subito il risultato nuovo.',
-  'fusione-speciale': 'La Persona risultato non si corregge: si scrivono gli ingredienti, nell’ordine della ricetta, con il nome della Persona nel dataset.',
+  'fusione-speciale': 'La Persona risultato non si corregge: si scelgono gli ingredienti, nell’ordine della ricetta.',
   tesoro: 'Lo spostamento di rango vale per la fusione del Demone con una Persona di quell’Arcano: più alto sposta verso l’alto, meno verso il basso.',
   'eredita-tipo': 'Dice quali tipi di skill un tipo può ereditare nella fusione; l’ordine e i nomi delle colonne non si correggono.',
   confidente: 'La chiave e l’ordine del Confidente non si correggono (li usano ranghi, partite e mappe). Il nome si legge in tutta l’app.',
@@ -61,7 +61,6 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
   'libro-posizioni': 'Ogni posizione è un posto (quartiere, luogo, negozio o attività) con il nome da mostrare; un posto lasciato su «Nessuno» non compare. Se cambi il posto, cambia anche il nome mostrato. I negozi che vendono il libro si correggono dal negozio.',
   'film-posizioni': 'Ogni posizione è un posto (quartiere, luogo, negozio o attività) con il nome da mostrare e come si usa (cinema, noleggio o visione); un posto lasciato su «Nessuno» non compare. Se cambi il posto, cambia anche il nome mostrato.',
-  'negozio-sedi': 'Sono gli altri luoghi in cui il negozio vende lo stesso listino (la sede del negozio si corregge dal negozio). Il pin che conferma una sede deve essere un pin di questo negozio sull’Area del luogo; togliendo una sede si toglie anche il suo pin. Per un luogo appena aggiunto il pin si sceglie al salvataggio successivo.',
   'nota-storica-legami': 'Il testo della nota si corregge dalla nota stessa: qui si sceglie su quali offerte e oggetti compare. Togliere un’offerta o un oggetto toglie solo la nota, non cambia prezzi, acquisti o progressi.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
@@ -174,6 +173,7 @@ function campoDto(def: CampoDef, valore: ValoreCampoCorrezione, guida: ValoreCam
     percorso: def.p, etichetta: def.e, ...(def.gruppo ? { gruppo: def.gruppo } : {}), tipo,
     ...(def.nullable ? { nullable: true } : {}), ...(massimo !== undefined && tipo !== 'elenco' ? { max: massimo } : {}),
     ...(def.opzioni ? { opzioni: def.opzioni } : {}), ...(def.formato ? { formato: def.formato } : {}),
+    ...(def.minimoVoci !== undefined ? { minimoVoci: def.minimoVoci } : {}),
     valore, valoreGuida: guida, modificato: !uguali(valore, guida),
   };
 }

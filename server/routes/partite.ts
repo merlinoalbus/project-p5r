@@ -13,8 +13,8 @@ import {
   bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura,
   bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, bodyAnnullaUltimoConfidente, paramsPartitaDomanda, bodyAggiornaPianoSalvato,
   bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita,
-  paramsCestinoPersonale, paramsPartitaCestino, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
-  paramsPartitaConsumo, queryRigaAcquisto, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  paramsCestinoPersonale, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaRigaAcquisto,
+  paramsPartitaConsumo, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
   bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -112,11 +112,9 @@ router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, bod
 
 // ---- Il cestino personale (L12, passo 3) ----
 // Le voci eliminate dal giocatore (partite, fonti di acquisto, pesca, Persone della scorta) sono SUE: ogni funzione filtra per il
-// proprietario della richiesta. Due famiglie di rotte sullo stesso servizio:
-//   - `/cestino…`: tutte le voci del proprietario, comprese le partite eliminate (che non hanno più un id sotto cui cercarle);
-//   - `/:id/cestino…`: le sole voci di quella partita (l'id passa dal controllo centrale di appartenenza).
-// Le rotte di `/api/impostazioni/cestino/partite/:uid` della preparazione restano com'erano (stesso servizio, stesso filtro): il
-// frontend della preparazione le usa ancora, e la loro migrazione non è necessaria al rilascio, che non monta `/api/impostazioni`.
+// proprietario della richiesta. Una sola serie di rotte, `/cestino…`: tutte le voci del proprietario, comprese le partite eliminate (che
+// non hanno più un id sotto cui cercarle). La usano la preparazione e il rilascio, che non monta `/api/impostazioni`; la preparazione
+// ci arriva anche dall'elenco unificato di `/api/impostazioni/cestino?partite=1`, che somma le voci di gioco.
 // Vengono PRIMA di `/:id`: «cestino» non è l'id di una partita.
 router.get('/cestino', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -130,20 +128,6 @@ router.post('/cestino/:uid/ripristina', validate({ params: paramsCestinoPersonal
 });
 router.delete('/cestino/:uid', validate({ params: paramsCestinoPersonale }), (req, res) => {
   eliminaCestinoPrivato(String(req.params.uid));
-  res.status(204).end();
-});
-router.get('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(elencoCestinoPersonale(Number(req.params.id)));
-});
-router.delete('/:id/cestino', validate({ params: paramsPartita }), (req, res) => {
-  res.json(svuotaCestinoPersonale(Number(req.params.id)));
-});
-router.post('/:id/cestino/:uid/ripristina', validate({ params: paramsPartitaCestino }), (req, res) => {
-  res.json(ripristinaCestinoPrivato(String(req.params.uid), Number(req.params.id)));
-});
-router.delete('/:id/cestino/:uid', validate({ params: paramsPartitaCestino }), (req, res) => {
-  eliminaCestinoPrivato(String(req.params.uid), Number(req.params.id));
   res.status(204).end();
 });
 
@@ -281,12 +265,11 @@ router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyM
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
   const b = req.body;
-  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede, b.soloPresenza ? { soloPresenza: true } : {}));
+  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.soloPresenza ? { soloPresenza: true } : {}));
 });
 /** Ondata 5 (decisione 21): annulla un solo acquisto della pagina del negozio (una riga del registro), qualunque sia il suo ciclo. */
-router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto, query: queryRigaAcquisto }), (req, res) => {
-  const q = req.query;
-  res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId), q.sede));
+router.delete('/:id/registro-acquisti/:rigaId', validate({ params: paramsPartitaRigaAcquisto }), (req, res) => {
+  res.json(annullaRigaDelRegistro(Number(req.params.id), Number(req.params.rigaId)));
 });
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {

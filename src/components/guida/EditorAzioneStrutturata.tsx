@@ -31,7 +31,9 @@ import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
 import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
 import { NOME_QUALE } from '../../utils/elencoQuale';
-import type { CampiStrutturati } from '../../utils/azioneStrutturata';
+import { campiCompleti, effettoCompleto, type CampiStrutturati } from '../../utils/azioneStrutturata';
+import { Ripiegabile } from '../shared/Ripiegabile';
+import { TestoNote } from '../shared/TestoNote';
 import { NOME_FAMIGLIA_EFFETTO, cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, effettoCompilatoCheSiPerde, fraseEffetto, indiceDelCollegamento, nomiEffettiDa, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 import { conferma } from '../../stores/confermaStore';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../../shared/puntiConfidenti';
@@ -87,7 +89,11 @@ const nomeGenere = (tipo: string): string => TIPI_RIFERIMENTO_AZIONE.find((g) =>
  * il collegamento e l'effetto che il vecchio tipo aveva dato (se nato in questa finestra); scegliere «Quale» compila l'effetto. Una voce
  * salvata senza collegamento i cui effetti ne indicano uno solo lo PROPONE («Collega a…»): non si scrive da solo.
  */
-export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
+export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto' }: Props & {
+  /** L6-06: la finestra della voce mette il tipo nella colonna a sinistra e «Quale» in quella a destra, sopra gli effetti che «Quale» compila:
+   *  le due parti sono lo stesso componente, con la stessa logica di cambio (`applica`), disegnate separatamente. */
+  parte?: 'tutto' | 'tipo' | 'quale';
+}) {
   const ctx = useMemo(() => contestoDa(elenchi.azione), [elenchi.azione]);
   const rif = valore.riferimento;
   const tq = tipoQuale(valore.tipo, rif);
@@ -109,13 +115,18 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
     }))) return;
     onCambia(cambiaCollegamento(valore, tipo, nuovoRif, ctx));
   };
+  const tipoGrid = (
+    <div className="flex flex-col gap-1.5">
+      <span className="testo-13 text-text-secondary">Tipo — è l’icona della voce</span>
+      <SelettoreIcone etichetta="Tipo della voce" compatto valore={valore.tipo} opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: t.chiave }))}
+        onCambia={(t) => { if (t !== valore.tipo) void applica(t as TipoAzione, null); }} />
+    </div>
+  );
+  if (parte === 'tipo') return tipoGrid;
+  if (parte === 'quale' && !(altro && rif) && !suggerito && !tq) return null;
   return (
     <div className="flex flex-col gap-3 min-w-0">
-      <div className="flex flex-col gap-1.5">
-        <span className="testo-13 text-text-secondary">Tipo — è l’icona della voce</span>
-        <SelettoreIcone etichetta="Tipo della voce" compatto valore={valore.tipo} opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: t.chiave }))}
-          onCambia={(t) => { if (t !== valore.tipo) void applica(t as TipoAzione, null); }} />
-      </div>
+      {parte === 'tutto' && tipoGrid}
       {altro && rif && (
         <p className="m-0 testo-13 break-words" role="status">
           Collegata a: {nomeCollegato(valore, elenchi) ?? rif.chiave} ({nomeGenere(rif.tipo)}). Scegliendo un elemento qui ({NOME_QUALE[tq!].toLowerCase()}) questo collegamento verrà sostituito.
@@ -142,7 +153,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
  * altri effetti. Una voce di cui il formato originario degli effetti non si converte mostra l'avviso e il testo originario; una senza
  * elenco unico degli effetti (formato storico) conserva i vecchi controlli.
  */
-export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta }: Props & { nomi: NomiEffetti; fatta?: boolean }) {
+export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta, apertaDiPartenza = false }: Props & { nomi: NomiEffetti; fatta?: boolean; apertaDiPartenza?: boolean }) {
   const righe = valore.effettiVoce;
   const rif = valore.riferimento;
   const nome = nomeCollegato(valore, elenchi);
@@ -190,11 +201,19 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta }: Pro
       </>
     );
   }
+  // L6-06: «Spuntando succede» è ripiegato (una riga di riepilogo) per una voce che c'è già; si apre da sé con una voce nuova, con qualcosa da
+  // completare o con effetti da correggere (formato storico o non convertibile), e si tiene aperto finché c'è da completare
+  const quale = tq && (!rif || rif.tipo !== tq) ? NOME_QUALE[tq].toLowerCase() : null;
+  const frasi = (righe ?? []).map((r) => (effettoCompleto(r.effetto) ? fraseEffetto(r.effetto, nomi) : `${NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}: da completare`));
+  const rangoAtteso = valore.tipo === 'confidente' && valore.rangoAtteso !== null ? `Rango atteso ${valore.rangoAtteso === RANGO_MASSIMO_CONFIDENTE ? 'MAX' : valore.rangoAtteso}` : null;
+  const riepilogo = righe === undefined
+    ? 'Effetti da rivedere: apri per correggerli.'
+    : quale && frasi.length === 0 ? `Scegli ${quale} in «Quale»: gli effetti compariranno qui.`
+    : <TestoNote testo={[rangoAtteso, frasi.length === 0 ? 'Nessun effetto: la spunta registra solo che l’hai fatta' : `${frasi.length} ${frasi.length === 1 ? 'effetto' : 'effetti'}: ${frasi.join(' · ')}`].filter(Boolean).join(' · ')} />;
   return (
-    <section className="effetto-riquadro" aria-label="Spuntando succede">
-      <h3 className="effetto-riquadro__titolo m-0">Spuntando succede</h3>
+    <Ripiegabile titolo="Spuntando succede" variante="riquadro" riepilogo={riepilogo} apertaDiPartenza={apertaDiPartenza || righe === undefined} forzaAperta={!campiCompleti(valore)}>
       {corpo}
-    </section>
+    </Ripiegabile>
   );
 }
 

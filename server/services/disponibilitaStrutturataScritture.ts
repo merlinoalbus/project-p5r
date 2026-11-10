@@ -3,8 +3,9 @@
 // ============================================================
 //
 // La lettura sta in `disponibilitaStrutturataService` (che la scheda e il Diario usano e che non dipende dal catalogo). Qui le scritture:
-// la struttura (modo, giorni, fasce, eccezioni, dal, motivo senza luogo) con la fotografia della fonte G-036 alla prima modifica, e i luoghi,
-// che si cambiano passando dal luogo (`aggiornaElemento('luogo', …)`): una sola scrittura, con il suo «Ripristina».
+// la struttura (modo, giorni, fasce, eccezioni, motivo senza luogo) con la fotografia della fonte G-036 alla prima modifica, e i luoghi,
+// che si cambiano passando dal luogo (`aggiornaElemento('luogo', …)`): una sola scrittura, con il suo «Ripristina». «Disponibile dal» è il requisito di
+// rango 1 (L7-06, migrazione 358): qui non si scrive, e il `dal` delle fotografie di prima si ignora.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
@@ -22,7 +23,6 @@ export interface ModificaDisponibilita {
   giorni?: DisponibilitaStrutturata['giorni'];
   fasce?: DisponibilitaStrutturata['fasce'];
   eccezioni?: DisponibilitaStrutturata['eccezioni'];
-  dal?: string | null;
   motivoSenzaLuogo?: string;
   /** Le chiavi dei luoghi del Confidente (L5): quelle in più lo aggiungono al luogo, quelle in meno lo tolgono. */
   luoghi?: string[];
@@ -30,15 +30,16 @@ export interface ModificaDisponibilita {
 
 /**
  * Le eccezioni da salvare: una per tipo dove il tipo vale per tutto il Confidente (giorni dopo un rango, giorni del calendario esclusi), una per rango
- * dove vale per un rango (fascia, giorni); i giorni del calendario esistono, senza doppioni e nell'ordine del calendario di gioco. 400 altrimenti.
+ * dove vale per un rango (fascia, giorni, date precise); i giorni del calendario esistono, senza doppioni e nell'ordine del calendario di gioco. 400 altrimenti.
  */
 function normalizzaEccezioni(eccezioni: EccezioneDisponibilita[]): EccezioneDisponibilita[] {
   const viste = new Set<string>();
   return eccezioni.map((e) => {
-    const chiave = e.tipo === 'fascia-rango' || e.tipo === 'giorni-rango' ? `${e.tipo}:${e.rango}` : e.tipo;
-    if (viste.has(chiave)) throw httpErrors.badRequest('eccezione-doppia', e.tipo === 'fascia-rango' || e.tipo === 'giorni-rango' ? `Il rango ${e.rango} ha già un'eccezione di questo tipo.` : 'Questa eccezione c’è già.');
+    const perRango = e.tipo === 'fascia-rango' || e.tipo === 'giorni-rango' || e.tipo === 'solo-date-rango';
+    const chiave = perRango ? `${e.tipo}:${e.rango}` : e.tipo;
+    if (viste.has(chiave)) throw httpErrors.badRequest('eccezione-doppia', perRango ? `Il rango ${e.rango} ha già un'eccezione di questo tipo.` : 'Questa eccezione c’è già.');
     viste.add(chiave);
-    if (e.tipo !== 'date') return e;
+    if (e.tipo !== 'date' && e.tipo !== 'solo-date-rango') return e;
     const sbagliata = e.date.find((d) => !dataValida(d));
     if (sbagliata) throw httpErrors.badRequest('data-non-valida', `«${sbagliata}» non è un giorno del calendario di gioco.`);
     return { ...e, date: [...new Set(e.date)].sort((a, b) => ordineGioco(a) - ordineGioco(b)) };
@@ -49,7 +50,6 @@ function normalizzaEccezioni(eccezioni: EccezioneDisponibilita[]): EccezioneDisp
 export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilita): DisponibilitaConfidenteDto {
   const prima = rigaStruttura(confidente);
   if (mod.modo !== undefined && !MODI_DISPONIBILITA.includes(mod.modo)) throw httpErrors.badRequest('modo-non-valido', `Il modo '${mod.modo}' non esiste.`);
-  if (mod.dal !== undefined && mod.dal !== null && !/^\d{2}-\d{2}$/.test(mod.dal)) throw httpErrors.badRequest('data-non-valida', 'La data «dal» è nel formato MM-GG.');
   const eccezioni = mod.eccezioni ? normalizzaEccezioni(mod.eccezioni) : undefined;
   // L13 (O10-2): le fasce con la relazione romantica hanno senso solo per un Confidente romanzabile
   if (eccezioni?.some((e) => e.tipo === 'con-relazione')) richiediRomanzabile(confidente);
@@ -58,7 +58,6 @@ export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilit
     giorni_settimana_json: mod.giorni ? JSON.stringify(mod.giorni) : prima.giorni_settimana_json,
     fasce_orarie_json: mod.fasce ? JSON.stringify(mod.fasce) : prima.fasce_orarie_json,
     eccezioni_json: eccezioni ? JSON.stringify(eccezioni) : prima.eccezioni_json,
-    dal: mod.dal === undefined ? prima.dal : mod.dal,
     motivo_senza_luogo: mod.motivoSenzaLuogo ?? prima.motivo_senza_luogo,
     fonte: prima.fonte,
   };
@@ -66,8 +65,8 @@ export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilit
   getDb().transaction(() => {
     if (cambiata) {
       prepared('INSERT OR IGNORE INTO dati_guida (chiave, json) VALUES (?, ?)').run(CHIAVE_SEED_DISPONIBILITA(confidente), JSON.stringify(prima));
-      prepared(`UPDATE confidente_disponibilita SET modo = ?, giorni_settimana_json = ?, fasce_orarie_json = ?, eccezioni_json = ?, dal = ?, motivo_senza_luogo = ? WHERE confidente_chiave = ?`)
-        .run(nuova.modo, nuova.giorni_settimana_json, nuova.fasce_orarie_json, nuova.eccezioni_json, nuova.dal, nuova.motivo_senza_luogo, confidente);
+      prepared(`UPDATE confidente_disponibilita SET modo = ?, giorni_settimana_json = ?, fasce_orarie_json = ?, eccezioni_json = ?, motivo_senza_luogo = ? WHERE confidente_chiave = ?`)
+        .run(nuova.modo, nuova.giorni_settimana_json, nuova.fasce_orarie_json, nuova.eccezioni_json, nuova.motivo_senza_luogo, confidente);
     }
     if (mod.luoghi) {
       const attuali = new Set(luoghiDelConfidente(confidente).map((l) => l.chiave));
@@ -99,8 +98,8 @@ export function ripristinaDisponibilita(confidente: string): DisponibilitaConfid
     throw httpErrors.conflict('disponibilita-fotografia-illeggibile', 'La fotografia della guida non è leggibile: la disponibilità resta com’è.');
   }
   getDb().transaction(() => {
-    prepared(`UPDATE confidente_disponibilita SET modo = ?, giorni_settimana_json = ?, fasce_orarie_json = ?, eccezioni_json = ?, dal = ?, motivo_senza_luogo = ? WHERE confidente_chiave = ?`)
-      .run(f.modo, f.giorni_settimana_json, f.fasce_orarie_json, f.eccezioni_json, f.dal ?? null, f.motivo_senza_luogo ?? '', confidente);
+    prepared(`UPDATE confidente_disponibilita SET modo = ?, giorni_settimana_json = ?, fasce_orarie_json = ?, eccezioni_json = ?, motivo_senza_luogo = ? WHERE confidente_chiave = ?`)
+      .run(f.modo, f.giorni_settimana_json, f.fasce_orarie_json, f.eccezioni_json, f.motivo_senza_luogo ?? '', confidente);
     prepared('DELETE FROM dati_guida WHERE chiave = ?').run(CHIAVE_SEED_DISPONIBILITA(confidente));
   })();
   invalidaCacheDiGioco();

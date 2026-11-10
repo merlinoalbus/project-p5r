@@ -75,7 +75,7 @@ describe.skip('API oggetti selezionabili', () => {
    * E' il punto della richiesta — «nel negozio scelgo un oggetto di qualsiasi tipo» — e la prova
    * che serve e' che l'elenco unico non perda per strada nessuna delle sorgenti. */
   it('l’archivio unico raccoglie ogni tipo, e ogni voce porta la chiave con cui si collega', async () => {
-    const tutti = (await request(app).get('/api/catalogo/oggetti')).body.data as Array<{ chiave: string; fonte: string; categoria: string; nome: string }>;
+    const tutti = (await request(app).get('/api/catalogo-oggetti')).body.data as Array<{ chiave: string; fonte: string; categoria: string; nome: string }>;
     expect(tutti.length).toBeGreaterThan(300);
     // Nessuna voce senza le due meta' del collegamento, o il legame non si potrebbe salvare.
     expect(tutti.every((o) => !!o.chiave && !!o.fonte && !!o.categoria)).toBe(true);

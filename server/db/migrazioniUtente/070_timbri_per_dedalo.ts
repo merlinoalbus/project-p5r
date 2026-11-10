@@ -1,5 +1,5 @@
 // ============================================================
-// utente 069 — i timbri raccolti passano dall'area al suo dedalo (L10-02, migrazione di gioco 377)
+// utente 070 — i timbri raccolti passano dall'area al suo dedalo (L10-02, migrazione di gioco 377)
 // ============================================================
 //
 // Dalla 377 il totale dei timbri sta nel dedalo (`dungeon_area.timbri_totale`) e `timbri_dedalo_partita.area_chiave` vale la chiave del
@@ -16,8 +16,8 @@ import { logger } from '../../utils/logger.js';
 
 interface RigaTimbri { partita_id: number; area_chiave: string; raccolti: number; updated_at: string }
 
-export const utente069: Migration = {
-  id: 69,
+export const utente070: Migration = {
+  id: 70,
   name: 'timbri_per_dedalo',
   up(db) {
     if (!db.prepare("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'timbri_dedalo_partita'").get()) return;
@@ -45,8 +45,8 @@ export const utente069: Migration = {
     }
     for (const s of somme.values()) scrivi.run(s.partita, s.dedalo, s.raccolti, s.updated);
     const totaleRaccoltiDopo = (db.prepare('SELECT COALESCE(SUM(raccolti), 0) FROM utente.timbri_dedalo_partita').pluck().get() as number);
-    if (totaleRaccoltiDopo !== totaleRaccoltiPrima) throw new Error(`utente 069: i timbri raccolti erano ${totaleRaccoltiPrima}, dopo la conversione ${totaleRaccoltiDopo}; nessuna modifica applicata.`);
+    if (totaleRaccoltiDopo !== totaleRaccoltiPrima) throw new Error(`utente 070: i timbri raccolti erano ${totaleRaccoltiPrima}, dopo la conversione ${totaleRaccoltiDopo}; nessuna modifica applicata.`);
     logger.info({ righeDiArea: daConvertire.length, righeDiDedalo: somme.size, raccolti: totaleRaccoltiDopo, dedali: [...somme.values()].map((s) => ({ partita: s.partita, dedalo: s.dedalo, raccolti: s.raccolti, aree: s.aree })) },
-      'migrazione utente 069: i timbri raccolti passano dalle aree ai dedali');
+      'migrazione utente 070: i timbri raccolti passano dalle aree ai dedali');
   },
 };

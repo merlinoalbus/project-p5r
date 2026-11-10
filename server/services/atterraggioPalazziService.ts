@@ -17,6 +17,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { logger } from '../utils/logger.js';
 import { datiGuida, finestreDungeon, invalidaDatiGuida, type FinestraDungeon } from './datiGuida.js';
@@ -34,7 +35,7 @@ interface RigaAtterraggio { id: number; dungeon_chiave: string; ordine: number; 
 export interface RegolaAtterraggio { dal: string | null; al: string | null; mappa: string; spillo: number | null }
 
 /** Vero se la tabella delle regole c'è (un database con lo schema ancora indietro non ne ha). */
-const conAtterraggi = (): boolean => !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'dungeon_atterraggio'").get();
+const conAtterraggi = (): boolean => haTabellaMain(getDb(), 'dungeon_atterraggio');
 
 /** 404 se il dungeon non esiste. */
 function richiediDungeon(chiave: string): void {
@@ -166,7 +167,7 @@ export function fotografiaSenza(f: FotografiaDungeon, parte: keyof FotografiaDun
  */
 export function impostaFinestra(dungeon: string, dal: string, al: string | null, consigli?: ConsigliPalazzo): FinestraDungeon {
   richiediDungeon(dungeon);
-  const colonne = new Set((prepared("SELECT name FROM pragma_table_info('dungeon')").all() as Array<{ name: string }>).map((c) => c.name));
+  const colonne = { has: (nome: string): boolean => haColonnaMain(getDb(), 'dungeon', nome) }; // le colonne di `dungeon` che lo schema ha (le date arrivano con le migrazioni 097, 308)
   // la regola delle date è una sola, condivisa col modulo «Correggi la scheda» (`shared/datePalazzo`)
   const controlla = (d: DatePalazzo, senzaFinePossibile: boolean) => {
     const e = erroreDatePalazzo(d, senzaFinePossibile);

@@ -3,17 +3,19 @@
 // ============================================================
 //
 // - **Posiziona** (R5-18, `POST /api/luoghi/posiziona`): in una transazione crea (se `nuovo`) il luogo nel quartiere della planimetria, il pin
-//   collegato (riferimento `luogo`, tipo dal catalogo dei tipi di luogo) e mette il luogo nell'Area della planimetria. 409 se il luogo ha già un
-//   pin su quella planimetria.
+//   collegato (riferimento `luogo`, tipo dal catalogo dei tipi di luogo) e dà al luogo senza Area quella della planimetria. 409 se il luogo ha già un
+//   pin su quella planimetria o sta in un'altra Area del quartiere.
 // - **Colloca** (`PUT /api/luoghi/:quartiere/:luogo/area`): un luogo «da collocare» in un'Area del suo quartiere (o di nuovo fuori, con null).
 // - **Elimina nel cestino** (R5-21, `DELETE /api/catalogo/{luogo|negozio}/:chiave?conferma=1`): senza conferma e con contenuti → 409 col
-//   riepilogo; con conferma il luogo se ne va con i suoi pin (immagini e stati compresi), i negozi e le attività della sede restano senza sede;
-//   il negozio con articoli, acquisti e punti delle partite (righe dell'altro file, che il cestino registra: niente più orfani). Si rimette dal
-//   Cestino com'era.
+//   riepilogo; con conferma il luogo se ne va con i suoi pin (immagini e stati compresi) e le attività della sede restano senza sede; il negozio
+//   con articoli, acquisti e punti delle partite (righe dell'altro file, che il cestino registra: niente più orfani). Si rimette dal Cestino com'era.
+//   Un luogo con punti vendita non si elimina finché non sono spostati o eliminati (409 `luogo-con-punti-vendita`), e l'ultimo punto vendita
+//   visibile di un luogo che vende nemmeno, salvo «In attesa:» nelle note (409 `luogo-senza-punto-vendita`).
 // Modulo a sé perché usa sia i pin (`mappeService`) sia i luoghi (`luoghiService`), che si leggono già in un senso solo.
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { entitaDellaRadice } from './mappe/alberoMappe.js';
@@ -23,7 +25,7 @@ import { preparaRimozioneArticoliAcquistati } from './acquistiService.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { creaElemento } from './catalogoService.js';
 import { dettaglioLuogo } from './luoghiService.js';
-import { lettureListiniCondivisi, listinoDelNegozio, negoziEquivalenti } from './listiniCondivisi.js';
+import { verificaAreaDelLuogo, verificaEliminazioneDiVendita } from './invariantiPuntoVendita.js';
 import { spilloPerLuogo } from '../../shared/tipiLuogo.js';
 import type { LuogoDettaglioDto } from '../../shared/types.js';
 import type { OrariNegozio } from '../../shared/orariNegozio.js';
@@ -45,7 +47,8 @@ export interface LuogoNuovo { nome: string; tipo: string; cosaOffre?: string; or
 /**
  * Posiziona un luogo su una planimetria del mondo (R5-18): `luogo` esistente o `nuovo` (creato nel quartiere della planimetria), il pin collegato
  * e l'Area della planimetria, in una transazione. 404 se la planimetria o il luogo mancano; 400 se la planimetria non è di un quartiere o il luogo
- * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria. Restituisce la pagina del luogo.
+ * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria, 409 `luogo-di-altra-area` se sta in un'altra
+ * Area dello stesso quartiere (un luogo non cambia Area in silenzio: si cambia dal modulo del luogo). Restituisce la pagina del luogo.
  */
 export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa: string; x: number; y: number }): LuogoDettaglioDto {
   if ((dati.luogo === undefined) === (dati.nuovo === undefined)) throw httpErrors.badRequest('luogo-o-nuovo', 'Indica un luogo che esiste oppure i dati di un luogo nuovo: uno dei due.');
@@ -55,9 +58,13 @@ export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa
   const chiave = getDb().transaction((): string => {
     let k = dati.luogo ?? null;
     if (k) {
-      const l = prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(k) as { quartiere_chiave: string } | undefined;
+      const l = prepared('SELECT quartiere_chiave, area_chiave FROM luogo WHERE chiave = ?').get(k) as { quartiere_chiave: string; area_chiave: string | null } | undefined;
       if (!l) throw httpErrors.notFound('luogo-non-trovato', `Il luogo '${k}' non esiste.`);
       if (l.quartiere_chiave !== quartiere) throw httpErrors.badRequest('luogo-di-altro-quartiere', 'Il luogo è di un altro quartiere: si posiziona sulle planimetrie del suo.');
+      if (area && l.area_chiave && l.area_chiave !== area) {
+        const nome = (prepared('SELECT nome FROM area WHERE chiave = ?').get(l.area_chiave) as { nome: string } | undefined)?.nome ?? l.area_chiave;
+        throw httpErrors.conflict('luogo-di-altra-area', `Il luogo sta nell’Area «${nome}»: per portarlo qui, cambia prima la sua Area da «Modifica» nella pagina del luogo.`);
+      }
       if (prepared("SELECT 1 FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ? AND mappa_chiave = ?").get(k, mappa)) {
         throw httpErrors.conflict('luogo-gia-posizionato', 'Il luogo ha già un pin su questa planimetria.');
       }
@@ -68,7 +75,12 @@ export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa
     }
     const l = prepared('SELECT nome, tipo, cosa_offre FROM luogo WHERE chiave = ?').get(k) as { nome: string; tipo: string; cosa_offre: string };
     creaSpillo(mappa, { tipo: spilloPerLuogo(l.tipo), nome: l.nome, descrizione: l.cosa_offre, x: dati.x, y: dati.y, riferimento: { tipo: 'luogo', chiave: k } });
-    if (area) prepared('UPDATE luogo SET area_chiave = ? WHERE chiave = ?').run(area, k);
+    // l'Area si dà solo a chi non ne ha una: chi ne ha un'altra è già stato fermato qui sopra (409), e l'Area si cambia soltanto dal modulo del luogo.
+    // I pin dei punti vendita della sede devono stare nell'Area che il luogo riceve (I2); con l'Area già uguale il controllo non ha nulla da dire.
+    if (area) {
+      verificaAreaDelLuogo(k, area);
+      prepared('UPDATE luogo SET area_chiave = ? WHERE chiave = ? AND area_chiave IS NULL').run(area, k);
+    }
     return k;
   })();
   invalidaCacheDiGioco();
@@ -86,6 +98,7 @@ export function collocaLuogo(quartiere: string, luogo: string, area: string | nu
     if (!a) throw httpErrors.notFound('area-non-trovata', `Nessuna area '${area}' in questo quartiere.`);
     areaChiave = a.chiave;
   }
+  verificaAreaDelLuogo(chiave, areaChiave);
   prepared('UPDATE luogo SET area_chiave = ? WHERE chiave = ?').run(areaChiave, chiave);
   invalidaCacheDiGioco();
   return dettaglioLuogo(quartiere, luogo);
@@ -97,10 +110,8 @@ export interface RiepilogoEliminazione { pin: number; negozi: number; attivita: 
 function riepilogo(tipo: 'luogo' | 'negozio', chiave: string): RiepilogoEliminazione {
   const n = (sql: string, ...p: unknown[]) => (prepared(sql).get(...p) as { n: number }).n;
   if (tipo === 'luogo') {
-    const listini = lettureListiniCondivisi();
-    const extra = listini.sedi.filter((s) => s.luogo === chiave && !(prepared('SELECT 1 FROM negozio WHERE chiave = ? AND sede_chiave = ?').get(s.negozio, chiave))).length;
     return { pin: n("SELECT COUNT(*) AS n FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = ?", chiave),
-      negozi: n('SELECT COUNT(*) AS n FROM negozio WHERE sede_chiave = ?', chiave) + extra, attivita: n('SELECT COUNT(*) AS n FROM attivita WHERE sede_chiave = ?', chiave),
+      negozi: n('SELECT COUNT(*) AS n FROM negozio WHERE sede_chiave = ?', chiave), attivita: n('SELECT COUNT(*) AS n FROM attivita WHERE sede_chiave = ?', chiave),
       articoli: 0, acquisti: 0, punti: 0, consumazioni: 0, provenienze: 0, proposte: 0, ricevute: 0 };
   }
   return { pin: n("SELECT COUNT(*) AS n FROM spillo WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?", chiave), negozi: 0, attivita: 0,
@@ -118,18 +129,12 @@ function riepilogo(tipo: 'luogo' | 'negozio', chiave: string): RiepilogoEliminaz
  * con contenuti → 409 `luogo-con-contenuti` / `negozio-con-acquisti` col riepilogo; con la conferma (o senza contenuti) va nel cestino.
  */
 export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, conferma: boolean): { esito: 'eliminata'; elemento: null; riepilogo: RiepilogoEliminazione } {
-  const listini = lettureListiniCondivisi();
-  if (tipo === 'negozio') chiave = listinoDelNegozio(chiave, listini);
-  const negozi = tipo === 'negozio' ? negoziEquivalenti(chiave, listini) : [];
   // il quartiere di un negozio è quello del luogo-sede (nessuno se non ne ha)
   const r = prepared(tipo === 'luogo' ? 'SELECT chiave, nome, quartiere_chiave AS quartiere FROM luogo WHERE chiave = ?'
     : 'SELECT n.chiave, n.nome, l.quartiere_chiave AS quartiere FROM negozio n LEFT JOIN luogo l ON l.chiave = n.sede_chiave WHERE n.chiave = ?').get(chiave) as { chiave: string; nome: string; quartiere: string | null } | undefined;
   if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${tipo === 'luogo' ? 'Il luogo' : 'Il negozio'} '${chiave}' non esiste.`);
-  const conti = tipo === 'luogo' ? riepilogo(tipo, chiave) : negozi.map((k) => riepilogo('negozio', k)).reduce((a, b) => ({
-    pin: a.pin + b.pin, negozi: a.negozi + b.negozi, attivita: a.attivita + b.attivita,
-    articoli: a.articoli + b.articoli, acquisti: a.acquisti + b.acquisti, punti: a.punti + b.punti,
-    consumazioni: a.consumazioni + b.consumazioni, provenienze: a.provenienze + b.provenienze, proposte: a.proposte + b.proposte, ricevute: a.ricevute + b.ricevute,
-  }), { pin: 0, negozi: negozi.length - 1, attivita: 0, articoli: 0, acquisti: 0, punti: 0, consumazioni: 0, provenienze: 0, proposte: 0, ricevute: 0 });
+  verificaEliminazioneDiVendita(tipo, chiave);
+  const conti = riepilogo(tipo, chiave);
   const contenuti = Object.values(conti).reduce((a, b) => a + b, 0);
   if (!conferma && contenuti > 0) {
     throw httpErrors.conflict(tipo === 'luogo' ? 'luogo-con-contenuti' : 'negozio-con-acquisti', `«${r.nome}» ha dei contenuti: conferma per metterlo nel cestino.`, { ...conti });
@@ -137,26 +142,20 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
   const contesto = r.quartiere ? ((prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(r.quartiere) as { nome: string } | undefined)?.nome ?? r.quartiere) : '';
   conCestino({ tipo, chiave, nome: r.nome, contesto }, () => getDb().transaction(() => {
     if (tipo === 'luogo') {
-      // i pin del luogo se ne vanno con lui (immagini e stati compresi); negozi e attività della sede restano, senza sede
+      // i pin del luogo se ne vanno con lui (immagini e stati compresi); le attività della sede restano, senza sede (punti vendita qui non ce ne sono: `verificaEliminazioneDiVendita`)
       for (const s of prepared("SELECT id FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = ?").all(chiave) as Array<{ id: number }>) eliminaSpillo(s.id);
-      prepared('UPDATE negozio SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('UPDATE attivita SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
-      // Ondata 5: gli acquisti registrati in questa sede restano, della sede principale del loro negozio (nello stesso cestino)
-      if (prepared("SELECT 1 FROM pragma_table_info('registro_acquisti', 'utente') WHERE name = 'sede_chiave'").get()) prepared('UPDATE utente.registro_acquisti SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
-      const articoli = negozi.flatMap(k => (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(k) as Array<{ chiave: string }>).map(a => a.chiave));
+      const articoli = (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(chiave) as Array<{ chiave: string }>).map(a => a.chiave);
       preparaRimozioneArticoliAcquistati(articoli);
-      // Anche i duplicati archiviati vanno nello stesso cestino, col riepilogo già confermato: non devono riapparire dopo il SET NULL della FK.
-      for (const k of negozi) {
-        prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
-        // Ondata 5: le copie del registro degli acquisti vanno nello stesso cestino del loro segno «ottenuto»
-        if (prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'registro_acquisti'").get()) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
-        prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(k);
-        prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(k);
-        prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(k);
-        prepared('DELETE FROM negozio WHERE chiave = ?').run(k);
-      }
+      prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
+      // Ondata 5: le copie del registro degli acquisti vanno nello stesso cestino del loro segno «ottenuto»
+      if (haTabellaUtente(getDb(), 'registro_acquisti')) prepared('DELETE FROM utente.registro_acquisti WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
+      prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(chiave);
+      prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(chiave);
+      prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(chiave);
+      prepared('DELETE FROM negozio WHERE chiave = ?').run(chiave);
     }
   })());
   invalidaCacheDiGioco();

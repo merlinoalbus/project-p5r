@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import type { NotaStoricaOfferta } from '../../shared/types.js';
@@ -27,7 +28,7 @@ function valoreGuida(r: RigaNota): z.infer<typeof guida> | null {
 
 /** Vero se le tabelle ci sono (uno schema di prima della 139 non ha note storiche). */
 function conNote(): boolean {
-  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'nota_storica_legame'").get();
+  return haTabellaMain(getDb(), 'nota_storica_legame');
 }
 
 /** La nota come DTO, con se è diversa dalla guida. */

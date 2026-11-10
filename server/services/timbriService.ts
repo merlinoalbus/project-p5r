@@ -4,7 +4,7 @@
 //
 // L10-02 (risposta dell'utente Q8 A, migrazione 377): la guida dà i timbri per dedalo, e il totale sta nel dedalo
 // (`dungeon_area.timbri_totale`, solo i dedali dei Memento; null = la guida non dà un numero). Quanti ne ha presi la partita sta in
-// `timbri_dedalo_partita` (file delle partite, utente 003), per dedalo: `area_chiave` vale la chiave del dedalo (utente 069), come
+// `timbri_dedalo_partita` (file delle partite, utente 003), per dedalo: `area_chiave` vale la chiave del dedalo (utente 070), come
 // `richiesta.area_chiave`. Il valore si tiene fra zero e il totale; l'evento si registra ogni volta che il totale viene raggiunto salendo
 // (come per le richieste completate). Un dedalo senza totale non ha niente da contare: la scrittura viene rifiutata col motivo, invece di
 // sparire.

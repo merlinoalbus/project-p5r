@@ -1,6 +1,7 @@
 // Letture del catalogo condivise dai consumatori: nessuna dipendenza da negozi, letture o avanzamento.
 // Il dettaglio aggregato vive in catalogoOggettiService; questa base evita cicli fra i servizi.
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { casaOggetto, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
 import { filtroRicerca } from '../../shared/testo.js';
 import type { CatalogoOggettoDto, ContenutoOggettoDto, CostoOggettoDto, OggettiGuidaDto, RicompensaOggettoDto, RiferimentoOggettoDto } from '../../shared/types.js';
@@ -20,7 +21,7 @@ export interface RigaCatalogoOggetto {
 function analizza(json: string | null): unknown { try { return json ? JSON.parse(json) as unknown : null; } catch { return null; } }
 /** Nessuna query alle colonne nuove finché M7 non è registrata e applicata. */
 export function catalogoOggettiDisponibile(): boolean {
-  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'catalogo_oggetto'").get();
+  return haTabellaMain(getDb(), 'catalogo_oggetto');
 }
 export function nomiAltriOggetto(json: string): string[] {
   const v = analizza(json); return Array.isArray(v) ? v.filter((n): n is string => typeof n === 'string') : [];
@@ -80,7 +81,7 @@ function sqlCatalogo(): string {
         COALESCE(json_extract(${pf}, '$.giorno'), a.prezzo, json_extract(${pf}, '$.sera')), COALESCE(json_extract(${pf}, '$.sera'), a.prezzo, json_extract(${pf}, '$.giorno'))) ELSE a.prezzo END`;
   return `SELECT c.*,
   (SELECT MIN(${prezzoMinimoOfferta}) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
-    WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL AND a.costo_json IS NULL) AS prezzo_minimo
+    WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.costo_json IS NULL) AS prezzo_minimo
   FROM catalogo_oggetto c`;
 }
 
@@ -153,7 +154,7 @@ export function oggettiConChiavi(chiavi: Iterable<string>): Map<string, Catalogo
 }
 
 export interface OffertaBaseOggetto {
-  negozioNome: string; sedeNome: string | null; prezzo: number | null; costo: CostoOggettoDto | null; costoDaVerificare: boolean;
+  negozioNome: string; negozioTipo: string; sedeNome: string | null; prezzo: number | null; costo: CostoOggettoDto | null; costoDaVerificare: boolean;
 }
 
 /** Nomi e numero delle offerte correnti: prezzi, costi, condizioni e gesti restano nel listino L5. */
@@ -161,7 +162,7 @@ export function riferimentiListiniScambi(): NonNullable<OggettiGuidaDto['listini
   if (!catalogoOggettiDisponibile()) return [];
   const negozi = ['mercante-sakai', 'venditore-ambulante', 'gachapon-akihabara', 'tanaka-affari-loschi', 'jose'];
   return (prepared(`SELECT n.chiave,n.nome,l.nome AS posto,
-    (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = COALESCE(n.listino_condiviso,n.chiave) AND a.nascosto = 0 AND a.articolo_condiviso IS NULL) AS offerte
+    (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS offerte
     FROM negozio n LEFT JOIN luogo l ON l.chiave = n.sede_chiave
     WHERE n.chiave IN (SELECT value FROM json_each(?)) AND n.nascosto = 0
       AND (n.sede_chiave IS NULL OR l.nascosto = 0) ORDER BY n.ordine,n.chiave`).all(JSON.stringify(negozi)) as Array<{
@@ -173,18 +174,17 @@ export function riferimentiListiniScambi(): NonNullable<OggettiGuidaDto['listini
 export function offerteBaseDegliOggetti(chiavi: Iterable<string>): Map<string, OffertaBaseOggetto[]> {
   const out = new Map<string, OffertaBaseOggetto[]>(); const elenco = [...new Set(chiavi)];
   if (!elenco.length || !catalogoOggettiDisponibile()) return out;
-  const righe = prepared(`SELECT a.catalogo_chiave,n.nome AS negozio_nome,l.nome AS sede_nome,a.prezzo,a.costo_json
+  const righe = prepared(`SELECT a.catalogo_chiave,n.nome AS negozio_nome,n.tipo AS negozio_tipo,l.nome AS sede_nome,a.prezzo,a.costo_json
     FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
-    LEFT JOIN (SELECT chiave AS negozio,sede_chiave AS luogo FROM negozio UNION SELECT negozio_chiave,luogo_chiave FROM negozio_luogo_extra) s ON s.negozio = n.chiave
-    LEFT JOIN luogo l ON l.chiave = s.luogo
+    LEFT JOIN luogo l ON l.chiave = n.sede_chiave
     WHERE a.catalogo_chiave IN (SELECT value FROM json_each(?)) AND a.nascosto = 0 AND n.nascosto = 0
-      AND a.articolo_condiviso IS NULL AND (s.luogo IS NULL OR l.nascosto = 0)
+      AND (n.sede_chiave IS NULL OR l.nascosto = 0)
     ORDER BY n.ordine,a.ordine,l.nome,a.chiave`).all(JSON.stringify(elenco)) as Array<{
-      catalogo_chiave: string; negozio_nome: string; sede_nome: string | null; prezzo: number | null; costo_json: string | null;
+      catalogo_chiave: string; negozio_nome: string; negozio_tipo: string; sede_nome: string | null; prezzo: number | null; costo_json: string | null;
     }>;
   for (const r of righe) {
     const offerte = out.get(r.catalogo_chiave) ?? []; const costo = costoOggetto(r.costo_json);
-    offerte.push({ negozioNome: r.negozio_nome, sedeNome: r.sede_nome, prezzo: r.prezzo, costo, costoDaVerificare: r.costo_json !== null && costo === null });
+    offerte.push({ negozioNome: r.negozio_nome, negozioTipo: r.negozio_tipo, sedeNome: r.sede_nome, prezzo: r.prezzo, costo, costoDaVerificare: r.costo_json !== null && costo === null });
     out.set(r.catalogo_chiave, offerte);
   }
   return out;
@@ -197,7 +197,7 @@ export function negoziPerFonte(fonte: 'libro' | 'film' | 'videogioco'): Map<stri
   const righe = prepared(`SELECT f.fonte_chiave,a.chiave,n.chiave AS negozio,n.nome AS negozio_nome,a.prezzo
     FROM (${sqlRiferimentiFonte(fonte)}) f JOIN articolo a ON a.catalogo_chiave = f.catalogo_chiave JOIN negozio n ON n.chiave = a.negozio_chiave
     WHERE a.nascosto = 0 AND n.nascosto = 0
-      AND a.articolo_condiviso IS NULL AND a.costo_json IS NULL ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{
+      AND a.costo_json IS NULL ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{
       fonte_chiave: string; chiave: string; negozio: string; negozio_nome: string; prezzo: number | null;
     }>;
   for (const r of righe) {
@@ -232,7 +232,7 @@ export function ricompensePerFonte(tipo: string, fonti?: Iterable<string>, opzio
   const out = new Map<string, RicompensaOggettoDto[]>();
   const chiavi = fonti === undefined ? undefined : [...new Set(fonti)];
   if (chiavi?.length === 0 || !catalogoOggettiDisponibile()) return out;
-  const descrivi = opzioni.condizione && prepared("SELECT 1 FROM pragma_table_info('ricompensa_oggetto') WHERE name = 'condizioni_json'").get() ? opzioni.condizione : null;
+  const descrivi = opzioni.condizione && haColonnaMain(getDb(), 'ricompensa_oggetto', 'condizioni_json') ? opzioni.condizione : null;
   const righe = prepared(`SELECT r.fonte_chiave,c.chiave,c.nome,r.quantita,r.nota${descrivi ? ',r.condizioni_json' : ''} FROM ricompensa_oggetto r
     JOIN catalogo_oggetto c ON c.chiave = r.catalogo_chiave WHERE r.fonte_tipo = ? ${chiavi ? 'AND r.fonte_chiave IN (SELECT value FROM json_each(?))' : ''}
     ORDER BY r.fonte_chiave,r.ordine,c.chiave`).all(tipo, ...(chiavi ? [JSON.stringify(chiavi)] : [])) as Array<RicompensaOggettoDto & { fonte_chiave: string; condizioni_json?: string | null }>;

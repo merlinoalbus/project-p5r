@@ -14,7 +14,8 @@
 // dice «non dovuta» solo ciò che è falso. Il legame è un dato della voce, modificabile dal suo modulo: nessun caso scritto a mano qui.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { valutazione } from './condizioni/valutatore.js';
@@ -31,7 +32,7 @@ export interface RigaVoceDovuta { uid: string; data: string; fascia: string; gen
 
 /** La colonna delle condizioni c'è (dalla migrazione 320)? Le migrazioni di prima che usano i servizi girano su uno schema senza. */
 export function conCondizioniVoce(): boolean {
-  return !!prepared("SELECT 1 FROM pragma_table_info('voce_giornata') WHERE name = 'condizioni_json'").get();
+  return haColonnaMain(getDb(), 'voce_giornata', 'condizioni_json');
 }
 
 /** Le condizioni della voce («Si fa solo se»), già normalizzate; vuoto = sempre dovuta. */

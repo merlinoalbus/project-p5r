@@ -11,7 +11,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { SelettorePersona } from './SelettorePersona';
 import { SelettoreSkill } from './SelettoreSkill';
 import { Spinner } from '../shared/PageState';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
+import { PROFONDITA_MASSIMA_PIANO } from '../../../shared/limitiFusione';
 import type { PersonaRiassuntoDto, PianiFusioneDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -38,7 +39,7 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
           {piano.evocazioni > 0 && ` · ${piano.evocazioni} dal Registro`}
           {piano.catture > 0 && ` · ${piano.catture} da catturare`}
         </span>
-        <span className="ml-auto font-black tabular-nums testo-16">{formattaYen(piano.costo)}</span>
+        <span className="ml-auto font-black tabular-nums testo-16">{formattaCostoEvocazione(piano.costo)}</span>
         {onSalva && (
           <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva piano'} onClick={onSalva} disabled={salvato} title="Salva questo piano nella partita: l'avanzamento verrà ricalcolato sulla scorta" />
         )}
@@ -62,7 +63,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [profondita, setProfondita] = useState(3);
   const [catture, setCatture] = useState(true);
-  const [limitaLivello, setLimitaLivello] = useState(true);
+  const [limitaLivello, setLimitaLivello] = useState(false);
   const [alternative, setAlternative] = useState(3);
   const [skillModificate, setSkillScelte] = useState<SkillRiassuntoDto[] | null>(null);
   const [slotFortunato, setSlotFortunato] = useState(false);
@@ -104,7 +105,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
           {tutteSkill.dati && <SelettoreSkill skill={tutteSkill.dati} scelte={skillScelte} onCambia={setSkillScelte} etichetta="Skill da portare sul bersaglio" />}
           <div className="flex flex-wrap items-center gap-2 testo-13">
             <span className="flex items-center gap-1.5 touch">Profondità
-              <Selettore compatto etichetta="Profondità massima" valore={String(profondita)} opzioni={[1, 2, 3, 4].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setProfondita(Number(k))} />
+              <Selettore compatto etichetta="Profondità massima" valore={String(profondita)} opzioni={Array.from({ length: PROFONDITA_MASSIMA_PIANO }, (_, i) => ({ chiave: String(i + 1), nome: String(i + 1) }))} onCambia={(k) => setProfondita(Number(k))} />
             </span>
             <span className="flex items-center gap-1.5 touch">Alternative
               <Selettore compatto etichetta="Numero di alternative" valore={String(alternative)} opzioni={[1, 3, 5, 8].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setAlternative(Number(k))} />
@@ -137,9 +138,10 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
               </div>
             </div>
           ) : dati && dati.piani.length === 0 ? (
-            <p className="m-0 testo-13 text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
+            <p className="m-0 testo-13 text-text-muted">{dati.troncata ? `Ricerca fermata al limite di calcolo prima di trovare un piano con queste opzioni${skillScelte.length > 0 ? ': prova con meno skill richieste' : ''}.` : `Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello${skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.`}</p>
           ) : dati ? (
             <>
+              {dati.troncata && <p className="m-0 testo-12 text-text-muted" role="status">Ricerca fermata al limite di calcolo: sono i migliori piani trovati fin qui.</p>}
               {dati.sconto > 0 && <p className="m-0 testo-12 text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
               <div className="flex flex-col gap-3">
                 {dati.piani.map((p, i) => {

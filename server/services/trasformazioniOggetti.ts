@@ -1,11 +1,12 @@
 // Relazioni informative: non sono offerte, non registrano possesso e non consumano oggetti.
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaMain } from '../db/schemaMemo.js';
 import { riferimentoOggetto } from './catalogoOggettiLetture.js';
 import type { StatoDisponibilita } from './disponibilitaService.js';
 import type { TrasformazioneOggettoDto } from '../../shared/types.js';
 
 export function trasformazioniDiJose(st?: StatoDisponibilita, oggetto?: string): TrasformazioneOggettoDto[] {
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE type='table' AND name='trasformazione_oggetto'").get()) return [];
+  if (!haTabellaMain(getDb(), 'trasformazione_oggetto')) return [];
   const partita = st?.partitaId === undefined ? undefined : prepared('SELECT nuova_partita_plus FROM partita WHERE id = ?').get(st.partitaId) as { nuova_partita_plus: number } | undefined;
   const righe = prepared(`SELECT t.*,d.nome AS palazzo_nome FROM trasformazione_oggetto t JOIN dungeon d ON d.chiave = t.dungeon_chiave
     ${oggetto === undefined ? '' : 'WHERE t.cristallo_chiave = ? OR t.anello_chiave = ?'} ORDER BY d.ordine`)

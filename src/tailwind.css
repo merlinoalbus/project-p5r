@@ -666,6 +666,15 @@
   .finestra-sezione__campi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
   @media (min-width: 768px) { .finestra-sezione__campi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .finestra-sezione__campi > .campo--largo { grid-column: 1 / -1; }
+  /* la sezione che parte ripiegata (`SezioneRipiegata`): riga da 44 px con il riepilogo, la freccia gira all'apertura */
+  .finestra-ripiegata { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  .finestra-ripiegata__testa { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-height: 44px; padding: 6px 12px; cursor: pointer; list-style: none; }
+  .finestra-ripiegata__testa::-webkit-details-marker { display: none; }
+  .finestra-ripiegata__testa::before { content: '▸'; color: var(--color-text-muted); }
+  .finestra-ripiegata[open] > .finestra-ripiegata__testa::before { transform: rotate(90deg); }
+  .finestra-ripiegata__testa .finestra-sezione__titolo { margin: 0; }
+  .finestra-ripiegata__riepilogo { min-width: 0; font-size: var(--testo-12); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+  .finestra-ripiegata > .finestra-sezione__campi { padding: 4px 12px 12px; }
   /* le finestre di modifica hanno un solo corpo che scorre (`.modal-body`): le sezioni si impilano con più aria dei campi */
   .finestra-modifica { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   /* «Elimina» sta a sinistra del piè, separato da Annulla e Salva (che ha il tono primario a destra) */
@@ -756,6 +765,9 @@
   /* ---- Visore delle mappe a livelli (Fase 13.2): tela, spilli a goccia, pannello laterale ---- */
   .visore-mappa { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text); container-type: inline-size; }
   .visore-mappa--intero { position: fixed; inset: 0; z-index: 60; }
+  /* sotto i 1024 px la barra di navigazione in basso (`lg:hidden`, h-16, z 100) sta sopra il visore: il visore finisce dove lei comincia, se no
+     il fondo del pannello (e la tela) restano coperti e irraggiungibili */
+  @media (max-width: 1023.98px) { .visore-mappa--intero { bottom: 64px; } }
   .visore-mappa--incorporato { position: relative; height: 100%; min-height: 220px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
   .visore-mappa__barra { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); }
   .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: var(--testo-13); }
@@ -893,6 +905,11 @@
      la finestra — la stessa mappa sta in una card piena sul telefono e in una colonna stretta
      accanto alla guida sul monitor. */
   .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 760px) * 10 / 7)); margin-inline: auto; }
+  /* Da 1280 px il blocco è agganciato (`sticky`) alla colonna della pagina Città: mappa, legenda e fermate (circa 95 px) più la barra in
+     alto (68 px) e i margini devono stare nell'altezza della finestra, altrimenti il fondo resta fuori vista mentre è fermo */
+  @media (min-width: 1280px) {
+    .blocco-mappa-tokyo { width: min(100%, calc(min(68vh, 100dvh - 180px, 760px) * 10 / 7)); }
+  }
   /* Il contenitore di misura è la coppia mappa + legenda: fuori dalla schermata piena è largo quanto il
      blocco (la stessa misura di prima), dentro è largo quanto la mappa. */
   .blocco-mappa-tokyo__mappa { width: 100%; margin-inline: auto; container: mappaTokyo / inline-size; }
@@ -1040,6 +1057,8 @@
      su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
   .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; background: rgb(11,11,14); }
   .spillo-popup--foglio::after { display: none; }
+  /* il foglio scorre già da sé: la merce non aggiunge una seconda barra dentro (L5-07) */
+  .spillo-popup--foglio .spillo-popup__merce { max-height: none; overflow: visible; }
   /* Con la guida aperta come foglio (sotto i 1024 px) il riquadro del pin o del gruppo le si impila sopra (la guida è a z 70): sotto di lei
      sparirebbe. Il foglio da tablet in su sta nella colonna del visore (`left`/`right` dal componente). */
   .spillo-popup.spillo-popup--sopra-guida { z-index: 75; }
@@ -1175,7 +1194,7 @@
   .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 120px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-15); color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
   .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary-testo); }
-  /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
+  /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra l'avanzamento
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
   .dettaglio-confidente { display: flex; flex-direction: column; gap: 12px; min-width: 0; flex-shrink: 0; container-type: inline-size; }
@@ -1333,7 +1352,8 @@
   .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; min-height: 44px; min-width: 44px; }
   .visore-mappa__figlia:hover, .visore-mappa__voce:hover { border-color: var(--color-border); background: var(--color-surface); }
   .visore-mappa__voce--attiva { border-color: var(--color-primary); background: var(--color-primary-bg); }
-  .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  /* L'elenco non ha una barra sua: scorre l'unico elemento scorrevole del pannello, `.visore-mappa__pannello` (L5-07) */
+  .visore-mappa__elenco { border: 1px solid var(--color-border); border-radius: var(--radius-md); }
   .visore-mappa__scheda { border: 1px solid var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); padding: 10px; }
   /* Larghezze fisse: nel pannello (≤340 px) il layout automatico, con `overflow-wrap: anywhere` ereditato da body, riduceva «Articolo» a un
      carattere (min-content) e lasciava 700+ px alla «Disponibile» senza a capo. Le parole lunghe si spezzano solo quando non stanno nella cella. */
@@ -1350,6 +1370,9 @@
        pannello è aperto**: l'altezza fissa serve a non far ballare la pagina mentre si guarda la
        mappa, non a schiacciare un pannello che si è chiesto di vedere. */
     .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; }
+    /* A schermo intero il visore è alto quanto la finestra: la riga del pannello non può uscirne (barra + 240 + 60vh a 812 sforava, e il
+       fondo del pannello restava irraggiungibile), scorre lui per quel che non ci sta. */
+    .visore-mappa--intero .visore-mappa__corpo { grid-template-rows: minmax(240px, 1fr) minmax(0, auto); }
     .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: 60vh; min-height: 0; order: 2; }
     .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) { height: auto; }
     .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) .visore-mappa__corpo { min-height: 240px; }
@@ -1437,6 +1460,8 @@
     .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: var(--testo-12); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
     /* Una cella davvero senza etichetta non lascia il buco del 34%. */
     .tabella--adattiva td:not([data-etichetta])::before { display: none; }
+    /* L'intestazione di un gruppo di righe resta allineata alle etichette impilate. */
+    .tabella--adattiva tbody th { display: block; padding: 2px 0; }
     /* La casella e la sua etichetta sulla stessa riga: il bersaglio resta di 44 px come altrove. */
     .tabella--adattiva td input[type="checkbox"] { align-self: center; }
   }
@@ -1448,6 +1473,7 @@
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
     .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: var(--testo-12); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
     .tabella--adattiva td:not([data-etichetta])::before { display: none; }
+    .tabella--adattiva tbody th { display: block; padding: 2px 0; }
   }
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
 
@@ -1556,6 +1582,12 @@
     text-underline-offset: 2px;
   }
   .credito:hover { color: var(--color-text-secondary); }
+  /* Un collegamento isolato dentro una frase («Denaro e squadra» in «Si segna in …») non può diventare un riquadro da 44 px senza far
+     saltare le righe: resta della sua altezza e il tocco gli arriva da un'area trasparente di 44 px centrata sulla riga, che non
+     occupa spazio. Vale solo dove le righe vicine non portano altri collegamenti (l'area li coprirebbe): una fila di crediti sta su
+     righe da 44 px (`credito touch`), non qui. */
+  .link-in-riga { position: relative; }
+  .link-in-riga::after { content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 44px; transform: translateY(-50%); }
 
   /* ---- Card ---- */
   .card {
@@ -1781,9 +1813,11 @@
     color: var(--color-text);
     gap: 5px;
   }
+  /* Nella Home il distintivo ha il testo minimo di 12 px (radice al 93,75%) */
+  .home-griglia .conteggio-pulsante { font-size: 0.8rem; }
   /* Il numero su un pulsante a sola icona (le ricevute della spunta): un distintivo nell'angolo in alto a destra, dentro i 44 px del
      bersaglio (`.btn` è già `position: relative`), che non riceve il tocco; il nome accessibile del pulsante dice già il numero, quindi il
-     distintivo è nascosto ai lettori */
+     distintivo è nascosto ai lettori. Il testo è a 12 px come ogni testo informativo: non è fra i quattro segni ammessi a 11 px. */
   .conteggio-pulsante {
     position: absolute;
     top: 3px;
@@ -1794,7 +1828,7 @@
     border-radius: 8px;
     background: var(--color-primary-fondo);
     color: var(--color-text-on-primary);
-    font-size: var(--testo-micro);
+    font-size: var(--testo-12);
     font-weight: 700;
     line-height: 16px;
     text-align: center;
@@ -1820,6 +1854,27 @@
     .oggi-partita .pulsante-guida-completa .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     .oggi-partita .sezione-fascia { padding: 8px; }
   }
+  /* L6-07: anche nella Home, sotto i 768 px, «Guida completa» è il pulsante-icona da 44 × 44 (la riga dei giorni sta su una linea sola: 44 px, non 94)
+     e «Aggiungi» di ogni fascia è un'icona (la riga «Di giorno · Adesso · 2 su 5 · Aggiungi» sta su una linea sola: 44 px, non 96); la scritta resta per i
+     lettori di schermo (nome accessibile) */
+  @media (max-width: 767px) {
+    .home-griglia .fila-giorni-oggi { gap: 0; }
+    .home-griglia .fila-giorni-oggi .chip { padding-inline: 8px; }
+    .home-griglia .pulsante-guida-completa, .home-griglia .sezione-fascia .aggiungi-voce { width: 44px; padding: 0; gap: 0; justify-content: center; }
+    .home-griglia .pulsante-guida-completa .btn-visivo__testo, .home-griglia .sezione-fascia .aggiungi-voce .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .home-griglia .sezione-fascia { padding: 8px; }
+  }
+  /* guida e mappa affiancate in una colonna stretta (da 768 a 1279 px; a schede la guida è larga): «Guida completa» è l'icona anche lì, o la riga dei giorni va a capo (94 px) */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .home-griglia:not(.home-griglia--a-schede) .pulsante-guida-completa { width: 44px; padding: 0; gap: 0; justify-content: center; }
+    .home-griglia:not(.home-griglia--a-schede) .pulsante-guida-completa .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  /* la scheda del giorno più bassa della Home (`GiornoGuida` con `inAlto`) */
+  .card.scheda-giorno--in-alto { padding: 8px 12px; }
+  .scheda-giorno--in-alto .chip.touch { padding-inline: 6px; }
+  /* «Copia o sposta voci» è un'icona da 44 × 44 su ogni formato (nome accessibile intatto): libera ~150 px alla trama accanto */
+  .scheda-giorno--in-alto .copia-voci { width: 44px; padding: 0; gap: 0; justify-content: center; }
+  .scheda-giorno--in-alto .copia-voci .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: var(--testo-13); white-space: nowrap; flex-shrink: 0; }
   .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
   .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }
@@ -1864,6 +1919,15 @@
   .home-schede { grid-area: schede; display: flex; gap: 6px; min-width: 0; }
   .home-schede > .chip { flex: 1 1 0; justify-content: center; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .home-griglia--a-schede { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "schede" "contenuto"; }
+  /* L6-07: sul telefono gli stacchi fra i pezzi sopra la prima voce del giorno sono più corti (scheda della partita, schede, guida: 8 px invece di 12;
+     righe della guida: 4 invece di 8; sezione dei collegamenti: 4 invece di 6): la prima casella deve stare sopra la barra di navigazione */
+  @media (max-width: 767px) {
+    .home-griglia { gap: 8px; }
+    .home-griglia .home-oggi { gap: 4px; }
+    .home-griglia .oggi-guida-colonna { gap: 4px; }
+    .home-griglia .scheda-giorno--in-alto { padding-block: 6px; }
+    .home-griglia .scheda-giorno--in-alto > div:first-child { row-gap: 2px; }
+  }
   .home-griglia--a-schede .home-oggi, .home-griglia--a-schede .home-mappa { grid-area: contenuto; }
   .home-griglia--a-schede .home-mappa > :last-child { height: min(62dvh, 560px); min-height: 280px; }
   /* la disposizione che riempie la schermata (da 1024 × 1150): la guida del giorno in un'area interna alta almeno 400 px, la mappa fino in fondo */
@@ -1930,13 +1994,18 @@
   .home-carta__riga { display: flex; align-items: center; gap: 14px; }
   .home-carta__corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 auto; }
   .home-carta__testa { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: nowrap; }
-  .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(104px, 16vh, 132px); aspect-ratio: 1 / 1; }
+  .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(88px, 13vh, 120px); aspect-ratio: 1 / 1; }
+  /* L6-07: gli Arcani potenziati stanno sulla riga del titolo della partita (da 768 px), in una fila che scorre */
+  .home-carta__arcani { flex: 1 1 0; min-width: 0; }
+  /* una riga sola, senza la barra sottile sotto (14 px in più): la fila scorre col gesto e la sfumatura sul bordo dice che continua */
+  .home-carta__arcani .fila-scorrevole--sempre { padding-bottom: 0; scrollbar-width: none; }
+  .home-carta__arcani .fila-scorrevole--sempre::-webkit-scrollbar { display: none; }
   /* il rientro lascia dentro il riquadro le targhette dei vertici, che escono dal poligono di circa un 15% della sua larghezza */
   .home-carta__stella-interno { width: 100%; height: 100%; padding: 14%; box-sizing: border-box; }
   /* 2026-10-24 (lotto A): le sei tessere vanno a capo invece di scorrere nascoste — in una colonna da 640 px «Scorta» non si
      vedeva mai, nemmeno a 1440 px con mezza scheda vuota, e niente diceva che ce n'era dell'altro */
   .home-doti { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; max-width: 760px; min-width: 0; }
-  .home-doti .kpi-tile--compatto { padding: 4px 10px; gap: 1px; }
+  .home-doti .kpi-tile--compatto { padding: 4px 8px; gap: 1px; }
   .home-doti .kpi-label { white-space: nowrap; overflow-wrap: normal; hyphens: none; }
   .home-fila { align-items: center; min-width: 0; }
   .home-fila > * { white-space: nowrap; }
@@ -2487,6 +2556,8 @@
 .selettore__tendina { position:fixed; z-index:110; left:0; top:0; width:260px; max-width:calc(100vw - 16px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
+/* Le viste della Fusione al telefono (L11-07): tutte e otto le righe da 44 px in vista, senza far scorrere l'elenco; lo schermo basso lo accorcia lasciando il posto alla barra inferiore */
+.selettore--viste .selettore__elenco { max-height:min(calc(100dvh - 7rem), 352px); }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
 .selettore__pulsante { display:flex; flex-wrap:wrap; align-items:center; column-gap:8px; row-gap:2px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
 /* Il dettaglio sta a destra del nome finché al nome resta almeno la sua parola più lunga (`min-width:min-content`, il nome va a capo fra
@@ -2616,8 +2687,14 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
+/* Il piè dei moduli del pannello (spillo, mappa): «Salva» e «Elimina» restano sul bordo basso del pannello, che è l'unico scroller (AD10).
+   Sticky nel pannello e non una finestra: la mappa accanto resta visibile e toccabile. Sta accanto alla scheda, nel contenuto della
+   sezione (non dentro il modulo, che comincia sotto gli strumenti): così si ferma sul bordo anche se il modulo è ancora fuori vista.
+   `bottom:-10px` annulla il padding del pannello. */
+.editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 0; border-top:1px solid var(--color-border); background:#131419; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
-.visore-mappa--editor .visore-mappa__pannello { background:#131419; }
+/* scroll-padding: il fuoco da tastiera non finisce sotto le sezioni in alto o sotto il piè del modulo */
+.visore-mappa--editor .visore-mappa__pannello { background:#131419; scroll-padding-block:120px 130px; }
 @media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }
@@ -2704,6 +2781,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .immagine-entita { position: relative; overflow: visible; }
 .immagine-entita > * { overflow: hidden; border-radius: inherit; }
 .immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+/* Piastrella del Compendio: la fascia alta dell'arte, sotto il cartiglio del livello, lascia passare il tocco al collegamento della piastrella; ingrandisce solo il resto dell'arte */
+.immagine-entita--sotto-cartiglio { pointer-events: none; }
+.immagine-entita--sotto-cartiglio::after { pointer-events: auto; left: 0; top: 16px; width: 100%; height: calc(100% - 16px); transform: none; }
 
 /* Un collegamento **dentro una frase** resta alto quanto la riga di testo in cui vive: allargarlo
    vorrebbe dire allargare l'interlinea del paragrafo, e il criterio 2.5.8 lo esclude proprio per
@@ -2719,6 +2799,14 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    invisibile dentro un contenitore che ritaglia non riceve niente. */
 .spillo-tokyo, .spillo-esteso { position: absolute; }
 .spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+/* La tela di Tokyo scala con l'ingrandimento (`--zoom-tokyo`, scritto da `MappaTokyo`): l'area di tocco, che sta dentro, scalava con lei
+   e due cartellini vicini restavano sovrapposti a qualunque ingrandimento. Divisa per lo zoom resta di 44 px sullo schermo, e i centri,
+   che invece si allontanano, la lasciano libera. Quelli che a questa misura si toccano sono già un gruppo (`raggruppaCartellini`). */
+.mappa-tokyo__tela .spillo-tokyo::after { width: calc(44px / var(--zoom-tokyo, 1)); height: calc(44px / var(--zoom-tokyo, 1)); }
+/* La pastiglia dei cartellini vicini: stesso aspetto del gruppo di spilli («+n»), 44×44 di tocco (34 più 5 per parte), oro quando uno
+   dei suoi cartellini è quello acceso */
+.spillo-tokyo-gruppo { padding: 5px; background: none; border: 0; cursor: pointer; }
+.spillo-tokyo-gruppo--acceso .spillo-mappa__gruppo { border-color: var(--color-mappa-oro); }
 }
 
 /* ---- Aree che scorrono dentro la pagina (richiesta dell'utente, 2026-09-29) ----
@@ -2777,11 +2865,30 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .quale-tessera--attiva { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); font-weight: 700; box-shadow: inset 0 0 0 1px var(--color-primary); }
 .quale-tessera__figura { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; line-height: 0; }
 .quale-tessera__dettaglio { font-size: var(--testo-12); font-weight: 400; color: var(--color-text-muted); }
+.quale-scelta__figura { display: inline-flex; flex: none; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; line-height: 0; }
 .quale-ritratto { display: inline-block; width: 44px; height: 58px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-bg-secondary); }
-/* il riquadro «Spuntando succede» e le file di scelta brevi (note ♪, rango atteso, sessioni) */
-.effetto-riquadro { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
-.effetto-riquadro__titolo { font-family: var(--font-display); font-size: var(--testo-17); line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
+/* sezione ripiegabile dell'editor della voce (L6-06): titolo-pulsante con la freccia, riepilogo a sezione chiusa */
+.ripiegabile { display: flex; flex-direction: column; min-width: 0; }
+.ripiegabile__corpo { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-top: 4px; }
+.ripiegabile__interruttore { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px 8px; width: 100%; min-width: 0; min-height: 44px; padding: 2px 4px; border: 0; border-radius: var(--radius-sm, 4px);
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ripiegabile__interruttore:disabled { cursor: default; }
+.ripiegabile__interruttore:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.ripiegabile__freccia { display: inline-flex; flex: none; color: var(--color-text-muted); transition-property: transform, color; transition-duration: 150ms; transition-timing-function: ease-out; }
+.ripiegabile__interruttore[aria-expanded="false"] .ripiegabile__freccia { transform: rotate(-90deg); }
+.ripiegabile__interruttore:hover:not(:disabled) .ripiegabile__freccia { color: var(--color-text); }
+.ripiegabile__interruttore:disabled .ripiegabile__freccia { opacity: .4; }
+.ripiegabile__nome { flex: none; font-size: var(--testo-13); font-weight: 600; color: var(--color-text); }
+/* il riepilogo sta accanto al titolo se c'è posto (almeno 14 rem), altrimenti va a capo sotto di lui */
+.ripiegabile__riepilogo { flex: 1 1 14rem; min-width: 0; font-size: var(--testo-12); font-weight: 400; line-height: 1.3; color: var(--color-text-secondary); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.ripiegabile--semplice { border-top: 1px solid var(--color-border-light); padding-top: 2px; }
+.ripiegabile--riquadro { padding: 2px 10px 10px; border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
+.ripiegabile--riquadro .ripiegabile__interruttore { padding-inline: 0; }
+.ripiegabile--riquadro .ripiegabile__nome { font-family: var(--font-display); font-size: var(--testo-17); font-weight: 400; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
+@media (prefers-reduced-motion: reduce) { .ripiegabile__freccia { transition: none; } }
+/* le file di scelta brevi (note ♪, rango atteso, sessioni) */
 .fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
   border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
@@ -2850,8 +2957,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     .tabella-oggetti tbody tr:hover { background: transparent; }
     .tabella-oggetti td { display: block; padding: 0; border-bottom: 0; min-width: 0; }
     .tabella-oggetti td.tabella-oggetti__nome { grid-column: 1 / 3; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; overflow: hidden; }
-    .tabella-oggetti__nome > a { flex: 0 1 auto; min-width: 0; }
-    /* tutta la riga apre l'oggetto (il link del nome si estende sulla riga): il nome da solo era un bersaglio da 14–23 px */
+    .tabella-oggetti__nome > a { flex: 0 1 auto; min-width: 44px; }
+    /* tutta la riga apre l'oggetto (il link del nome si estende sulla riga): il nome da solo era un bersaglio da 14–23 px; il link ha
+       comunque almeno 44 px di larghezza (`.touch`), anche per i nomi corti («31», «1UP»), perché anche il suo riquadro sia un bersaglio */
     .tabella-oggetti tbody tr { position: relative; }
     .tabella-oggetti__nome > a::after { content: ""; position: absolute; inset: 0; }
     /* il nome originale e il destinatario vanno a capo sotto il nome quando non ci stanno accanto (L13: prima finivano in «…» e a 375 px
@@ -2878,6 +2986,12 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
      larghe della loro colonna, si sovrapponevano l'una all'altra anche al 100% */
   .home-doti .kpi-tile--compatto { padding: 4px 8px; min-width: 0; }
   .home-doti .kpi-label { text-transform: none; letter-spacing: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* L6-07: sul telefono le sei tessere stanno in due file da tre (prima tre file da due: 162 px, ora ~106); al testo ingrandito l'etichetta
+     finisce in «…» con il nome intero nel suggerimento, come sopra */
+  @media (max-width: 767px) {
+    .home-doti { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .home-doti .kpi-tile--compatto { padding-block: 2px; }
+  }
   .home-arcani-vuoto { line-height: 1.35; }
   /* le targhette dei vertici della stella crescono con il testo e al 125% uscivano di ~35 px sopra le tessere accanto: il
      margine laterale cresce con loro (0 al 100%, 32 px al 125%) */

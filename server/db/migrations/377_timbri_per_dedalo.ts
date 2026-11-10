@@ -7,7 +7,7 @@
 // la guida non dà un numero, niente da contare). `area_dedalo.timbri_totale` NON esce dallo schema: la legge la migrazione utente 020
 // (registrata, `020_timbri_senza_totale.ts:24`), che gira dopo tutte le migrazioni di gioco su un `partite.db` nuovo o anteriore alla 020, e senza
 // la colonna l'avvio si fermerebbe. I suoi valori vanno in archivio e la colonna resta a NULL in tutte le righe; nessun codice vivo la legge
-// o la scrive. I raccolti delle partite passano dall'area al dedalo con la migrazione utente 069.
+// o la scrive. I raccolti delle partite passano dall'area al dedalo con la migrazione utente 070.
 //
 // I totali, dalla pagina di ogni dedalo (testo della guida, riga):
 //   Aiyatsbus 8 («dedalo-di-aiyatsbus» r.202), Kaitul 20 («dedalo-di-kaitul» r.103), Akzeriyyuth 25 («dedalo-di-akzeriyyuth» r.88),

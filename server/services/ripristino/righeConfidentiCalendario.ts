@@ -102,7 +102,8 @@ const settimanaGuida = rigaDaColonne({
     colonna({ p: 'riassunto', e: 'Riassunto', t: 'testolungo', nullable: true }, 'riassunto', 'testoVuoto'),
     colonna({ p: 'incertezze', e: 'Incertezze', t: 'testolungo', nullable: true }, 'incertezze', 'testoVuoto'),
   ],
-  nome: (chiave, v: Valori) => `Settimana ${chiave}: ${String(v.titolo)}`,
+  // L6-07: un titolo che è già «Settimana N» non si ripete dietro il numero
+  nome: (chiave, v: Valori) => (String(v.titolo) === `Settimana ${chiave}` ? String(v.titolo) : `Settimana ${chiave}: ${String(v.titolo)}`),
 });
 
 // ---- Collegamenti fra eventi del Calendario e voci del Diario ----

@@ -22,7 +22,7 @@ export function snapshotFonteProposta(db: AppDatabase, p: Pick<ChiaveProposta, '
   const ricetta = (chiave: string) => elenco(record(guida('oggetti-guida').fabbricazione).ricette).find((r) => r.attrezzo === chiave);
   const articolo = (chiave: string) => {
     const r = uno('SELECT * FROM articolo WHERE chiave = ?', chiave);
-    const base = scegli(r, ['nome', 'categoria', 'catalogo_chiave', 'prezzo', 'costo_json', 'condizioni_json', 'nascosto', 'negozio_chiave', 'articolo_condiviso']);
+    const base = scegli(r, ['nome', 'categoria', 'catalogo_chiave', 'prezzo', 'costo_json', 'condizioni_json', 'nascosto', 'negozio_chiave']);
     if (!r || versione === 1) return base;
     // Solo le nuove proposte 126 adottano questo contratto; assente e null restano distinti.
     return { ...base, ...Object.fromEntries(['origine', 'seed_json', 'condizione', 'fonte'].map((c) =>
@@ -77,19 +77,19 @@ export function snapshotConVersioneSalvata(db: AppDatabase, p: ChiaveProposta): 
 }
 
 /**
- * Uno snapshot salvato prima di L11 (R11-02/10) porta nella fonte la copia `nome_it`, che la colonna tolta non ha più: non è un cambiamento della
- * fonte. Si toglie dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata». Lo stesso
- * per `ricompense_json` di una Richiesta, tolta dalla 376 (L10-01): il testo è in archivio, i premi sono i collegamenti, che si confrontano.
+ * Uno snapshot salvato prima porta nella fonte campi che le colonne tolte non hanno più (`nome_it`, R11-02/10; `articolo_condiviso`, L2;
+ * `ricompense_json` di una Richiesta, tolta dalla 376, L10-01: il testo è in archivio, i premi sono i collegamenti, che si confrontano): non è un
+ * cambiamento della fonte. Si tolgono dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata».
  */
-const COLONNE_TOLTE_DALLE_FONTI = ['nome_it', 'ricompense_json'] as const;
-function senzaColonneTolte(salvato: unknown): unknown {
+const CAMPI_TOLTI_DALLE_FONTI: readonly string[] = ['nome_it', 'articolo_condiviso', 'ricompense_json'];
+function senzaCampiTolti(salvato: unknown): unknown {
   const s = record(salvato), fonte = record(s.fonte);
-  if (!COLONNE_TOLTE_DALLE_FONTI.some((c) => c in fonte)) return salvato;
-  return { ...s, fonte: Object.fromEntries(Object.entries(fonte).filter(([k]) => !(COLONNE_TOLTE_DALLE_FONTI as readonly string[]).includes(k))) };
+  if (!CAMPI_TOLTI_DALLE_FONTI.some((c) => c in fonte)) return salvato;
+  return { ...s, fonte: Object.fromEntries(Object.entries(fonte).filter(([k]) => !CAMPI_TOLTI_DALLE_FONTI.includes(k))) };
 }
 
 export function snapshotPropostaCoincide(db: AppDatabase, p: ChiaveProposta): boolean {
-  const salvato = senzaColonneTolte(parse(p.fonte_snapshot_json));
+  const salvato = senzaCampiTolti(parse(p.fonte_snapshot_json));
   return versioneSnapshot(p) !== null && !record(salvato).invalida
     && isDeepStrictEqual(salvato, snapshotConVersioneSalvata(db, p));
 }

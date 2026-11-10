@@ -5,7 +5,8 @@
 // `togliConsegna`); il vecchio comando per nome (`scriviRegaloPartita`, la spunta dei regali senza oggetto del catalogo) resta com'era: una
 // consegna per nome, e togliendo si tolgono le consegne di quel nome. Il movimento automatico degli yen di ogni consegna ha la sua causa
 // (`causa_yen`): le consegne di prima della 052 quella di sempre («Confidente:nome storico»), le nuove una propria con il loro `id`.
-import { nowIso, prepared } from '../db/dbService.js';
+import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { nomiAltriOggetto } from './catalogoOggettiLetture.js';
 import { causaYenRegalo, liberaRegaloDiPrima, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaRegaloDiPrimaTolto, type CausaYen } from './yenAutomaticiService.js';
@@ -20,7 +21,8 @@ interface RigaConsegna {
   data_gioco: string | null; fascia_gioco: string | null; causa_yen: string | null;
 }
 
-const colonne = (): Set<string> => new Set((prepared('PRAGMA utente.table_info(regalo_partita)').all() as Array<{ name: string }>).map((c) => c.name));
+/** Le colonne di `utente.regalo_partita` che lo schema ha (le aggiungono le migrazioni utente 026, 052, …): `has` chiede allo schema ricordato. */
+const colonne = (): { has: (nome: string) => boolean } => ({ has: (nome) => haColonnaUtente(getDb(), 'regalo_partita', nome) });
 /** Il file delle partite ha le consegne ripetibili (utente 052). */
 export const consegneRipetibili = (): boolean => colonne().has('id');
 
@@ -75,7 +77,7 @@ export interface RegaloDellaPartita {
 
 /** Compatibilità durante la preparazione di M7 e con un file delle partite ancora precedente alla 026. */
 function chiaviDisponibili(): boolean {
-  return !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'catalogo_oggetto'").get()
+  return haTabellaMain(getDb(), 'catalogo_oggetto')
     && colonne().has('catalogo_chiave');
 }
 

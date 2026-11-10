@@ -25,7 +25,6 @@ export interface LuogoCensimentoDto extends OrigineCensimentoDto {
 export interface NegozioCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; tipo: string | null;
   sede_chiave: string | null;
-  listino_condiviso: string | null;
   note: string | null;
   sblocco_json: JsonCensimentoCondizioniDto;
   orari_json: JsonCensimentoCondizioniDto;
@@ -34,20 +33,20 @@ export interface NegozioCensimentoDto extends OrigineCensimentoDto {
 
 export interface AttivitaCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; tipo: string | null;
-  luogo: string | null; sede_chiave: string | null;
+  sede_chiave: string | null;
   fascia: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
 }
 
 export interface ArticoloCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; negozio_chiave: string | null;
-  catalogo_chiave: string | null; articolo_condiviso: string | null;
+  catalogo_chiave: string | null;
   nota: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
 }
 
 export interface QuartiereCensimentoDto {
-  chiave: string; nome: string; sblocco_data: string | null; fonte: string | null;
+  chiave: string; nome: string; fonte: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
   condizioni_guida_json: JsonCensimentoCondizioniDto;
   fonte_condizioni_json: JsonCensimentoCondizioniDto;
@@ -64,8 +63,6 @@ export interface MappaCensimentoDto {
   area_chiave: string | null; genitore_chiave: string | null;
 }
 
-export interface SedeExtraCensimentoDto { negozio_chiave: string; luogo_chiave: string }
-export interface SedePinCensimentoDto extends SedeExtraCensimentoDto { spillo_uid: string }
 export interface AreaGuidaCensimentoDto { chiave: string; nome: string; dungeon_chiave: string }
 export interface DestinazioneSpilloCensimentoDto { spillo_id: number; mappa_chiave: string | null; spillo_arrivo_id: number | null }
 
@@ -78,12 +75,10 @@ export interface PinCensimentoDto {
   /** dungeon_area è una sezione della guida, distinta dall'Area fisica della mappa. */
   contestoGuida: { dungeon_area_chiave: string; dungeon_chiave: string | null; nome: string | null } | null;
   /** Risoluzione strutturale, non disponibilità/visibilità nel visore. Null non significa difetto: per esempio un passaggio non deve avere un luogo. */
-  luogoRisolto: { chiave: string; via: 'riferimento-luogo' | 'riferimento-attivita-luogo' | 'sede-attivita' | 'sede-negozio' | 'sede-listino' | 'sede-pin'; negozio: string | null } | null;
-  /** Associazioni esplicite; più sedi non autorizzano a sceglierne una per questo pin. */
-  luoghiAssociati: string[];
+  luogoRisolto: { chiave: string; via: 'riferimento-luogo' | 'riferimento-attivita-luogo' | 'sede-attivita' | 'sede-negozio'; negozio: string | null } | null;
   riferimento: { tipo: string; chiave: string; nome: string | null; esiste: boolean | null } | null;
   /** Solo anomalie strutturali accertate, non giudizi sulla mancanza di un luogo. */
-  anomalieLegami: Array<'ciclo-listino' | 'listino-assente' | 'sede-pin-incoerente'>;
+  anomalieLegami: Array<'negozio-assente'>;
 }
 
 export interface CensimentoLuoghiCondizioniDto {
@@ -101,8 +96,6 @@ export interface CensimentoLuoghiCondizioniDto {
   aree: AreaCensimentoDto[];
   mappe: MappaCensimentoDto[];
   pin: PinCensimentoDto[];
-  sediExtra: SedeExtraCensimentoDto[];
-  sediPin: SedePinCensimentoDto[];
   areeGuida: AreaGuidaCensimentoDto[];
   destinazioniSpilli: DestinazioneSpilloCensimentoDto[];
 }

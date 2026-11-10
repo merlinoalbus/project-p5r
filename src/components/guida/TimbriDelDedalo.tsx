@@ -18,6 +18,7 @@ import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { AssetImg } from '../shared/AssetImg';
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { timbriDopoIlTocco } from '../../utils/dedali';
 import type { DedaloDto } from '../../types';
 
@@ -112,7 +113,8 @@ export function TimbriDelDedalo({ dedalo, partitaId, modifica: modificaRichiesta
               aria-expanded={aperta} aria-controls={`fila-timbri-${dedalo.chiave}`} aria-label={`${aperta ? 'Nascondi' : 'Mostra'} i timbri di ${dedalo.nome}`} onClick={() => setAperta((x) => !x)} />
           </span>
         )}
-        {modifica && totale === null && (
+        {/* resta anche con la finestra aperta: alla chiusura il fuoco torna qui */}
+        {modifica && (
           <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={t ? 'Cambia il totale' : 'Imposta il totale'}
             aria-label={`${t ? 'Cambia' : 'Imposta'} il totale dei timbri di ${dedalo.nome}`} onClick={() => setTotale(t ? String(t.totale) : '')} />
         )}
@@ -138,16 +140,18 @@ export function TimbriDelDedalo({ dedalo, partitaId, modifica: modificaRichiesta
       {/* il motivo, senza invitare a scrivere un numero: la guida non lo dà, e un numero inventato conterebbe come vero */}
       {!t && <p className="m-0 testo-12 text-text-muted">La guida non dice quanti timbri ha questo dedalo: qui non si contano.</p>}
       {t && dedalo.timbriFonte && <p className="m-0 testo-12 text-text-muted">Fonte: {dedalo.timbriFonte}</p>}
+      {/* il totale si scrive nella `FinestraModifica` comune (AD10, L12): «Salva» sta nel piè fisso, in vista a ogni formato */}
       {modifica && totale !== null && (
-        <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); void salvaTotale(); }}>
-          <label className="flex flex-col gap-1 testo-12">
-            Timbri del dedalo (vuoto = la guida non dà un numero)
-            {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il campo compare al tocco di «Imposta il totale» o «Cambia il totale» per scriverlo subito */}
-            <input className="form-input w-28" inputMode="numeric" maxLength={3} value={totale} autoFocus onChange={(e) => setTotale(e.target.value)} />
-          </label>
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} />
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={() => setTotale(null)} />
-        </form>
+        <FinestraModifica titolo={`Timbri del dedalo «${dedalo.nome}»`} nomeModulo={`Totale dei timbri di ${dedalo.nome}`} stretta
+          onChiudi={() => setTotale(null)} onSalva={salvaTotale} occupato={occupato} sporca={totale !== (t ? String(t.totale) : '')}>
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="flex flex-col gap-1 testo-12">
+              Timbri del dedalo (vuoto = la guida non dà un numero)
+              {/* eslint-disable-next-line jsx-a11y/no-autofocus -- il campo compare al tocco di «Imposta il totale» o «Cambia il totale» per scriverlo subito */}
+              <input className="form-input w-28" inputMode="numeric" maxLength={3} value={totale} autoFocus onChange={(e) => setTotale(e.target.value)} />
+            </label>
+          </div>
+        </FinestraModifica>
       )}
     </div>
   );

@@ -25,18 +25,16 @@
 // ottenuti», così il numero che vede chi gioca è quello della scelta dell'esito e della finestra «Regala».
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
-import { articoloDelListino, lettureListiniCondivisi } from './listiniCondivisi.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaUtente, haTabellaUtente } from '../db/schemaMemo.js';
 import type { CopieOggettoDto } from '../../shared/types.js';
 import { doniConfidentiOttenuti, type DonoConfidenteOttenuto } from './doniConfidenti.js';
 
-const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
-const colonnaUtente = (tabella: string, colonna: string): boolean => !!prepared('SELECT 1 FROM pragma_table_info(?, \'utente\') WHERE name = ?').get(tabella, colonna);
 
 /** Le copie comprate nella partita, per chiave d'articolo (come le scrive il registro, o il segno «ottenuto» senza riga). */
 function copiePerArticolo(partitaId: number): Map<string, number> {
   const per = new Map<string, number>();
-  const conRegistro = tabellaUtente('registro_acquisti');
+  const conRegistro = haTabellaUtente(getDb(), 'registro_acquisti');
   if (conRegistro) {
     for (const r of prepared('SELECT articolo_chiave, SUM(quantita) AS n FROM utente.registro_acquisti WHERE partita_id = ? GROUP BY articolo_chiave').all(partitaId) as Array<{ articolo_chiave: string; n: number }>) {
       per.set(r.articolo_chiave, r.n);
@@ -64,7 +62,6 @@ export interface DettaglioCopie { comprate: number; ricevute: number; regalate: 
  *  della partita già letti da chi chiama per molti oggetti (`doniConfidentiOttenuti(partitaId)`, revisione di O11-1: una sola valutazione per
  *  elenco); senza, si leggono i soli doni di questo oggetto. */
 export function dettaglioCopie(partitaId: number, catalogo: string, doni?: readonly DonoConfidenteOttenuto[]): DettaglioCopie {
-  const letture = lettureListiniCondivisi();
   const oggettoDi = prepared('SELECT catalogo_chiave FROM main.articolo WHERE chiave = ?').pluck();
   const nelSet = prepared("SELECT quantita FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave = ? AND catalogo_chiave = ?").pluck();
   const costoDi = prepared('SELECT costo_json FROM main.articolo WHERE chiave = ?').pluck();
@@ -75,13 +72,11 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
   // costo dell'offerta (un dato in un solo punto), senza una riga in più in un altro registro
   let cedute = 0;
   for (const [chiave, n] of copiePerArticolo(partitaId)) {
-    // una vecchia chiave di un listino condiviso vale l'offerta del listino
-    const canonica = articoloDelListino(chiave, letture);
-    const oggetto = (oggettoDi.get(canonica) ?? oggettoDi.get(chiave)) as string | null | undefined;
+    const oggetto = oggettoDi.get(chiave) as string | null | undefined;
     if (oggetto === catalogo) comprate += n;
-    const contenuto = (nelSet.get(canonica, catalogo) ?? (canonica !== chiave ? nelSet.get(chiave, catalogo) : undefined)) as number | null | undefined;
+    const contenuto = nelSet.get(chiave, catalogo) as number | null | undefined;
     if (typeof contenuto === 'number' && contenuto > 0) comprate += n * contenuto;
-    const costo = (costoDi.get(canonica) ?? costoDi.get(chiave)) as string | null | undefined;
+    const costo = costoDi.get(chiave) as string | null | undefined;
     if (costo) {
       try {
         const c = JSON.parse(costo) as { tipo?: unknown; oggetti?: unknown };
@@ -92,27 +87,27 @@ export function dettaglioCopie(partitaId: number, catalogo: string, doni?: reado
     }
   }
   let ricevute = 0;
-  if (tabellaUtente('oggetto_ottenuto_partita')) {
+  if (haTabellaUtente(getDb(), 'oggetto_ottenuto_partita')) {
     ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_ottenuto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
   // Ondata 5 (lotto G, utente 053): ricevute dai turni con un esito che dà oggetti (la sfida della Big Bang Burger vinta)
-  if (tabellaUtente('oggetto_esito_turno')) {
+  if (haTabellaUtente(getDb(), 'oggetto_esito_turno')) {
     ricevute += (prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.oggetto_esito_turno WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number);
   }
   // Ondata 5 (lotto F-bis): i doni dei Confidenti già meritati (il rango e il giorno della partita lo dicono)
   ricevute += (doni ?? doniConfidentiOttenuti(partitaId, catalogo)).filter((d) => d.catalogo === catalogo).reduce((n, d) => n + d.quantita, 0);
   // Ondata 5 (lotto F-bis): le ricompense delle Richieste completate, una volta per Richiesta (la lettura di `oggettiOttenutiPartita`)
-  if (tabellaUtente('richiesta_partita')) {
+  if (haTabellaUtente(getDb(), 'richiesta_partita')) {
     ricevute += (prepared(`SELECT COALESCE(SUM(COALESCE(ro.quantita, 1)), 0) FROM utente.richiesta_partita rp
       JOIN main.richiesta r ON r.chiave = rp.richiesta_chiave
       JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave
       WHERE rp.partita_id = ? AND rp.stato = 'completata' AND ro.catalogo_chiave = ?`).pluck().get(partitaId, catalogo) as number);
   }
-  const regalate = colonnaUtente('regalo_partita', 'copia_consumata')
+  const regalate = haColonnaUtente(getDb(), 'regalo_partita', 'copia_consumata')
     ? prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ? AND catalogo_chiave = ? AND copia_consumata = 1').pluck().get(partitaId, catalogo) as number
     : 0;
   // Ondata 5 (lotto F-bis, utente 054): le copie usate da un turno con un esito che consuma o bruciate in un Isolamento
-  const usate = tabellaUtente('consumo_oggetto_partita')
+  const usate = haTabellaUtente(getDb(), 'consumo_oggetto_partita')
     ? prepared('SELECT COALESCE(SUM(quantita), 0) FROM utente.consumo_oggetto_partita WHERE partita_id = ? AND catalogo_chiave = ?').pluck().get(partitaId, catalogo) as number
     : 0;
   return { comprate, ricevute, regalate, cedute, usate, disponibili: Math.max(0, comprate + ricevute - regalate - cedute - usate) };

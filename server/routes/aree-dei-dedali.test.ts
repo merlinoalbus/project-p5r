@@ -166,7 +166,7 @@ describe('le aree dei dedali', () => {
     expect((await dedalo(QIMRANUT)).punti.find((x) => x.chiave === p.chiave)?.areeDedalo).toEqual([q(2)]);
   });
 
-  // L10-02 (migrazione 377, utente 069): i timbri si contano per dedalo (`PUT /api/partite/:id/timbri` con `dedalo`, totale da `PUT /aree/:chiave`)
+  // L10-02 (migrazione 377, utente 070): i timbri si contano per dedalo (`PUT /api/partite/:id/timbri` con `dedalo`, totale da `PUT /aree/:chiave`)
   it.skip('i timbri di un\'area: senza totale non si contano; cambiando il totale i conteggi delle partite seguono, più basso li ferma, nessuno li toglie', async () => {
     const partita = await nuovaPartita('Timbri');
     expect((await raccolti(partita, a(1), 1)).body.error.code).toBe('timbri-non-dichiarati');

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
@@ -27,7 +28,7 @@ import { leggiScelteDialogo } from '../../shared/confidentiScritture.js';
 import { condizioneConTesto, leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioni, nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { condizioniDellaGuida, fraseDellaRegola } from './condizioni/fraseCondizioni.js';
-import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js';
+import { condizioneDelRequisito, notaDelRequisito, type RigaRequisito } from './semaforiService.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   CatalogoOggettoDto, ModoApprendimento, OggettiGuidaDto, PersonaRiassuntoDto, StatoCattura, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -64,7 +65,7 @@ export function oggettiGuida(): Congelato<OggettiGuidaDto> {
   const catalogo = oggettiPerFonte('guida');
   const offerte = new Map<string, Array<{ chiave: string; negozio: string }>>();
   for (const a of prepared(`SELECT a.catalogo_chiave,a.chiave,a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
-    WHERE a.catalogo_chiave IS NOT NULL AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{ catalogo_chiave: string; chiave: string; negozio_chiave: string }>) {
+    WHERE a.catalogo_chiave IS NOT NULL AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{ catalogo_chiave: string; chiave: string; negozio_chiave: string }>) {
     const v = offerte.get(a.catalogo_chiave) ?? []; v.push({ chiave: a.chiave, negozio: a.negozio_chiave }); offerte.set(a.catalogo_chiave, v);
   }
   const identita = (o: CatalogoOggettoDto) => ({ catalogo: { chiave: o.chiave, nome: o.nome, casa: o.casa }, nome: o.nome, nomiAltri: o.nomiAltri });
@@ -116,7 +117,13 @@ function confidenteDellePersonalizzazioni(progressione: readonly unknown[], nomi
   const nome = prepared('SELECT nome FROM confidente WHERE chiave = ?').pluck().get(CONFIDENTE_ARMI) as string | undefined;
   if (!nome) return null;
   const avvio = (prepared('SELECT tipo, dati_json, testo FROM confidente_requisito WHERE confidente_chiave = ? AND rango = 1 ORDER BY indice').all(CONFIDENTE_ARMI) as Array<Pick<RigaRequisito, 'tipo' | 'dati_json' | 'testo'>>)
-    .flatMap((r) => { const c = condizioneDelRequisito(r); return c ? [condizioneConTesto(c, nomi)] : []; });
+    .flatMap((r) => {
+      const c = condizioneDelRequisito(r);
+      if (!c) return [];
+      const conTesto = condizioneConTesto(c, nomi);
+      const nota = notaDelRequisito(r, conTesto.testo);
+      return [nota ? { ...conTesto, nota } : conTesto];
+    });
   const ranghi = progressione.flatMap((x) => {
     const rango = x !== null && typeof x === 'object' ? (x as { rango?: unknown }).rango : undefined;
     return typeof rango === 'number' && Number.isInteger(rango) && rango >= 1 && rango <= RANGO_MASSIMO_CONFIDENTE
@@ -585,7 +592,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: leggiScelteDialogo(d.scelte_json).map((s) => ({ ...s, puntiAmore: s.puntiAmore ?? null })) }));
   const conCatalogo = catalogoOggettiDisponibile();
   // ondata 5 (migrazioni 255-256): la reazione è una colonna; su un file di gioco più vecchio «sconsigliato» vale +1 e il resto +3
-  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   const righeRegali = (prepared(`SELECT ordine,nome,dove,costo,sconsigliato,${conReazione ? 'reazione' : 'NULL AS reazione'},${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`)
     .all(chiave) as Array<{
       ordine: number; nome: string; dove: string | null; costo: string | null; sconsigliato: number; reazione: number | null; catalogo_chiave: string | null;
@@ -613,11 +620,11 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
       ...(!conListino && precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}),
       nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: conListino,
       // la sede si dice solo se è un posto diverso dal negozio («High Sense (High Sense)» non informa)
-      dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
+      dove: conListino ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.negozioTipo !== 'distributore' && o.sedeNome && o.sedeNome !== o.negozioNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
       costo: conListino ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
       nota: g.nota };
   });
-  const regalabile = (prepared('PRAGMA main.table_info(confidente)').all() as Array<{ name: string }>).some((x) => x.name === 'regalabile')
+  const regalabile = haColonnaMain(getDb(), 'confidente', 'regalabile')
     ? !!prepared('SELECT 1 FROM confidente WHERE chiave = ? AND regalabile = 1').get(chiave) : righeRegali.length > 0;
   // L13 (ondata 6, O6-2, migrazione 307): della riga si leggono solo note e fonti; giorni, fasce, luoghi e sblocco sono la disponibilità strutturata
   const disp = prepared('SELECT note, note_generali, fonti_json FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string; note_generali: string; fonti_json: string } | undefined;

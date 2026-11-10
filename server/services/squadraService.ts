@@ -44,8 +44,8 @@ export function squadraPartita(partitaId: number): SquadraPartitaDto {
     const r = righe.get(g.chiave);
     return {
       chiave: g.chiave, nome: g.nome,
-      // Il livello di Joker ha una sola fonte, `partita.livello_protagonista`: la scrivono sia questa scheda sia il riepilogo della
-      // partita, e la legge la fusione. Leggere la riga della squadra, che il riepilogo non aggiornava, mostrava due livelli diversi.
+      // Il livello di Joker ha una sola fonte, `partita.livello_protagonista`: la scrivono questa scheda e il riepilogo della partita,
+      // la legge la fusione. La colonna `livello` della sua riga di squadra non si legge.
       livello: g.chiave === 'joker' ? p.livello_protagonista : (r ? r.livello : 1),
       esperienza: r?.esperienza ?? 0,
       segnato: r !== undefined,
@@ -91,12 +91,12 @@ export function impostaMembro(partitaId: number, chiave: string, mod: { livello?
     const inSquadra = mod.inSquadra === undefined ? (r?.in_squadra ?? 1) : (mod.inSquadra ? 1 : 0);
     prepared(`INSERT INTO membro_squadra_partita (partita_id, personaggio_chiave, livello, esperienza, in_squadra, updated_at) VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(partita_id, personaggio_chiave) DO UPDATE SET livello = excluded.livello, esperienza = excluded.esperienza, in_squadra = excluded.in_squadra, updated_at = excluded.updated_at`)
-      .run(partitaId, chiave, livello, esperienza, inSquadra, adesso);
+      // la colonna è obbligatoria: per Joker prende il livello quando la riga nasce, poi non cambia più (la fonte è la partita)
+      .run(partitaId, chiave, chiave === 'joker' ? (r?.livello ?? livello) : livello, esperienza, inSquadra, adesso);
     if (mod.inSquadra !== undefined && (r?.in_squadra ?? 1) !== inSquadra) {
       registraEvento(partitaId, 'squadra', `${g.nome}: ${inSquadra ? 'entra nel gruppo' : 'esce dal gruppo'}`, '', { membro: chiave, inSquadra: inSquadra === 1 });
     }
-    // Il livello di Joker vive in `partita.livello_protagonista` (fonte unica, letta dalla fusione e da `squadraPartita`); la riga
-    // della squadra lo ricopia solo per restare coerente, e anche il riepilogo della partita la allinea (`aggiornaPartita`).
+    // Il livello di Joker vive in `partita.livello_protagonista`, fonte unica letta dalla fusione e da `squadraPartita`.
     if (chiave === 'joker') prepared('UPDATE partita SET livello_protagonista = ? WHERE id = ?').run(livello, partitaId);
     if (!r || attuale !== livello) {
       registraEvento(partitaId, 'squadra', `${g.nome}: livello ${livello}`, r && attuale !== undefined ? `Da ${attuale} a ${livello}.` : `Primo livello segnato.`, { membro: chiave, livello, esperienza });

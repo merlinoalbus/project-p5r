@@ -28,6 +28,7 @@ import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { verificaArchivioLegacy } from '../db/acquistiLegacy.js';
+import { haColonna, haTabella } from '../db/colonne.js';
 import { colonnaTolta, tabellaTolta } from '../db/fontiTolte.js';
 import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
@@ -79,7 +80,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'registro_acquisti', colonna: 'articolo_chiave', entita: 'articolo del registro degli acquisti', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'registro_acquisti', colonna: 'voce_uid', entita: 'voce del registro degli acquisti', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'registro_acquisti', colonna: 'effetto_uid', entita: 'effetto del registro degli acquisti', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
-  // la sede in cui si è comprato (ogni sede di un listino condiviso ha la sua scorta); NULL = la sede principale
+  // colonna dei soli backup vecchi: la scorta è dell'offerta e nessuno la legge, ma una chiave orfana in un backup va comunque detta
   { tabella: 'registro_acquisti', colonna: 'sede_chiave', entita: 'sede del registro degli acquisti', tabellaGioco: 'luogo', colonnaGioco: 'chiave', colonnaOpzionale: true },
   { tabella: 'acquisto_provenienza', colonna: 'voce_uid', entita: 'voce della fonte di acquisto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'acquisto_provenienza', colonna: 'effetto_uid', entita: 'effetto della fonte di acquisto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
@@ -116,7 +117,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
   // gli inviti dei Confidenti registrati nella partita (L6, utente 025): un invito che sparisce lascia la riga orfana
   { tabella: 'invito_partita', colonna: 'invito_chiave', entita: 'invito di un Confidente', tabellaGioco: 'confidente_invito', colonnaGioco: 'chiave' },
-  // i timbri si contano nel dedalo (L10-02, migrazione 377, utente 069): `area_chiave` è la chiave del dedalo
+  // i timbri si contano nel dedalo (L10-02, migrazione 377, utente 070): `area_chiave` è la chiave del dedalo
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'dedalo dei Memento', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },
   { tabella: 'cruciverba_partita', colonna: 'data', entita: 'cruciverba', tabellaGioco: 'cruciverba', colonnaGioco: 'data' },
@@ -269,7 +270,7 @@ export function orfaniPartite(db: Database.Database, schemaGioco = 'main', schem
   const out: OrfanoPartiteDto[] = [];
   for (const r of RIFERIMENTI_PARTITE) {
     if (!utente.has(r.tabella)) continue;
-    if (r.colonnaOpzionale && !(db.prepare(`PRAGMA "${schemaUtente}".table_info("${r.tabella}")`).all() as Array<{ name: string }>).some((c) => c.name === r.colonna)) continue;
+    if (r.colonnaOpzionale && !haColonna(db, r.tabella, r.colonna, schemaUtente)) continue;
     const dove = `"${schemaUtente}"."${r.tabella}" WHERE "${r.colonna}" IS NOT NULL${r.filtro ? ` AND ${r.filtro}` : ''}`;
     const manca = !gioco.has(r.tabellaGioco);
     const condizione = manca ? '' : ` AND "${r.colonna}" NOT IN (SELECT "${r.colonnaGioco}" FROM "${schemaGioco}"."${r.tabellaGioco}" WHERE "${r.colonnaGioco}" IS NOT NULL${r.filtroGioco ? ` AND ${r.filtroGioco}` : ''})`;
@@ -386,9 +387,8 @@ export function anteprimaPacchetto(percorso: string): AnteprimaPacchettoDto {
 
 /** Il confronto vero e proprio, su un pacchetto già aperto (in un temporaneo o dov'è depositato). */
 function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string): AnteprimaPacchettoDto {
-  const tabelle = new Set((db.prepare("SELECT name FROM main.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  if (!tabelle.has('persona')) throw httpErrors.badRequest('pacchetto-non-valido', `${nome ? `«${nome}»` : 'Il file'} non è un backup dei dati di gioco: mancano le tabelle di base.`);
-  if (tabelle.has('partita')) throw httpErrors.badRequest('pacchetto-con-partite', `${nome ? `«${nome}»` : 'Il file'} contiene anche le partite: un backup dei dati di gioco porta solo i dati di gioco.`);
+  if (!haTabella(db, 'persona')) throw httpErrors.badRequest('pacchetto-non-valido', `${nome ? `«${nome}»` : 'Il file'} non è un backup dei dati di gioco: mancano le tabelle di base.`);
+  if (haTabella(db, 'partita')) throw httpErrors.badRequest('pacchetto-con-partite', `${nome ? `«${nome}»` : 'Il file'} contiene anche le partite: un backup dei dati di gioco porta solo i dati di gioco.`);
   const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
   const codice = versioneSchemaCodice();
   const istanza = getDb();

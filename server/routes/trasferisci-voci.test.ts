@@ -20,7 +20,7 @@ describe('copiare o spostare voci del diario', () => {
   /** Le righe di una fascia di un giorno, nel loro ordine. */
   const fascia = (data: string, f: string) => prepared('SELECT * FROM voce_giornata WHERE data = ? AND fascia = ? ORDER BY ordine').all(data, f) as Array<Record<string, unknown>>;
   /** Il contenuto di una voce, senza quel che la identifica o la colloca. */
-  const contenuto = (r: Record<string, unknown>) => ({ genere: r.genere, azione: r.azione, note: r.note, tipo: r.tipo, riferimento_tipo: r.riferimento_tipo, riferimento_chiave: r.riferimento_chiave, riferimento_testo: r.riferimento_testo, rango_atteso: r.rango_atteso, produce_json: r.produce_json });
+  const contenuto = (r: Record<string, unknown>) => ({ genere: r.genere, azione: r.azione, note: r.note, tipo: r.tipo, riferimento_tipo: r.riferimento_tipo, riferimento_chiave: r.riferimento_chiave, riferimento_testo: r.riferimento_testo, rango_atteso: r.rango_atteso });
   /** Aggiunge una voce (azione) al giorno e alla fascia dati e la restituisce. */
   const nuova = async (data: string, f: 'giorno' | 'sera', azione: string, extra: Record<string, unknown> = {}) =>
     (await request(app).post(`/api/compendio/percorso/${data}/voci`).send({ azione, fascia: f, ...extra }).expect(201)).body.data as AzionePercorsoDto;

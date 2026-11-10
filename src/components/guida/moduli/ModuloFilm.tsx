@@ -38,13 +38,11 @@ export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
         <Blocco largo>
           <SelettoreIcone compatto etichetta="Dove si vede" valore={testoDi(dati.dove)} opzioni={OPZIONI_DOVE} disabilitato={disabilitato} onCambia={cambiaDove} />
         </Blocco>
-        {cinema
-          ? <p className="editor-mappa__campo m-0 justify-center font-normal testo-12 text-text-muted">Al cinema un film si completa in una visione.</p>
-          : <Campo nome="sessioni" etichetta="Visioni per completarlo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Un DVD di solito 2" />}
+        {!cinema && <Campo nome="sessioni" etichetta="Visioni per completarlo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Un DVD di solito 2" />}
         <Campo nome="dettagli" etichetta="Dettagli" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
       </Griglia>
-      <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} conRipetuto={cinema} disabilitato={disabilitato} {...nomi}
-        aiuto={cinema ? 'La Dote della prima visione; con «vale dalla seconda volta in poi» quanto rende rivederlo.' : undefined} />
+      <EditorEffetti ripiegate voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} conRipetuto={cinema} disabilitato={disabilitato} {...nomi}
+        aiuto={cinema ? 'Al cinema basta una visione: la Dote è della prima; con «vale dalla seconda volta in poi» quanto rende rivederlo.' : undefined} />
     </div>
   );
 }

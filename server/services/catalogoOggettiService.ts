@@ -1,5 +1,6 @@
 // L7: scheda aggregata. L'identità è il catalogo; disponibilità e avanzamento restano ai servizi esistenti.
 import { getDb, prepared } from '../db/dbService.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { casaOggetto } from '../../shared/catalogo.js';
 import type { OggettoDettaglioDto, OffertaOggettoDto, RicompensaOggettoDto } from '../../shared/types.js';
 import { costoOggetto, dtoOggetto, rigaOggetto, ricompensePerFonte } from './catalogoOggettiLetture.js';
@@ -11,7 +12,6 @@ import { modelloAvanzamento, pinFattoPerLaVoce, statiDellaPartita } from './mapp
 import { statoPalazzi } from './palazziService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce } from './mappe/planimetriaDellaVoce.js';
 import { casaDellArea, casaDelPalazzo, contestoAree } from './mappe/casaMappa.js';
-import { lettureListiniCondivisi } from './listiniCondivisi.js';
 import { regaliDellaPartita } from './regaliPartita.js';
 import { conElemento, fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
@@ -26,33 +26,28 @@ export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
 /** Il prezzo e il costo sono quelli della riga venduta, mai le copie della guida o dei regali. */
 export function offerteDellOggetto(chiave: string, partita?: number): OffertaOggettoDto[] {
-  const listini = lettureListiniCondivisi();
   const righe = prepared(`SELECT a.chiave,a.negozio_chiave,a.prezzo,a.costo_json,a.nota FROM articolo a
     JOIN negozio n ON n.chiave = a.negozio_chiave
     WHERE a.catalogo_chiave = ? AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.ordine,a.ordine`).all(chiave) as Array<{
     chiave: string; negozio_chiave: string; prezzo: number | null; costo_json: string | null; nota: string | null;
   }>;
-  const contesto = { listini, ...(partita === undefined ? {} : { st: statoDisponibilitaPartita(partita), acquistati: acquistiDellaPartita(partita) }) };
+  const contesto = partita === undefined ? {} : { st: statoDisponibilitaPartita(partita), acquistati: acquistiDellaPartita(partita) };
   const negozi = new Map([...new Set(righe.map((r) => r.negozio_chiave))]
     .map((k) => [k, dettaglioNegozio(k, partita, contesto)]));
-  return righe.filter((r) => !listini.articoli.has(r.chiave)).flatMap((r) => {
-    const principale = negozi.get(r.negozio_chiave)!;
-    const sedi = [...new Set([principale.sedeChiave ?? null, ...listini.sedi.filter((s) => s.negozio === principale.chiave).map((s) => s.luogo)])];
-    return sedi.map((sede) => {
-      const n = sede === principale.sedeChiave || sede === null ? principale : dettaglioNegozio(principale.chiave, partita, contesto, sede);
-      const a = n.articoliElenco.find((a) => a.chiave === r.chiave)!;
-      const disponibilita = a.disponibilita ?? null;
-      const costo = costoOggetto(r.costo_json);
-      return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
-        // Ondata 5 (lotto E): il prezzo di una fascia, letto dall'offerta come il prezzo (decisione 5: la sera delle sfide della Big Bang Burger)
-        prezzo: r.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null,
-        // revisione della chiusura dell'ondata 5 (B1): lo sconto del negozio (un dato del negozio) e, con la partita, il prezzo scontato che si scala
-        sconto: n.sconto ?? null, ...(a.prezzoScontato ? { prezzoScontato: a.prezzoScontato } : {}), costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
-        presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
-        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche,
-        // Ondata 5 (decisione 21): la regola di rifornimento e, con la partita, la scorta dell'offerta
-        rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}) };
-    });
+  return righe.map((r) => {
+    const n = negozi.get(r.negozio_chiave)!;
+    const a = n.articoliElenco.find((a) => a.chiave === r.chiave)!;
+    const disponibilita = a.disponibilita ?? null;
+    const costo = costoOggetto(r.costo_json);
+    return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, negozioTipo: n.tipo, quartiereNome: n.quartiereNome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
+      // Ondata 5 (lotto E): il prezzo di una fascia, letto dall'offerta come il prezzo (decisione 5: la sera delle sfide della Big Bang Burger)
+      prezzo: r.prezzo, prezzoPerFascia: a.prezzoPerFascia ?? null,
+      // revisione della chiusura dell'ondata 5 (B1): lo sconto del negozio (un dato del negozio) e, con la partita, il prezzo scontato che si scala
+      sconto: n.sconto ?? null, ...(a.prezzoScontato ? { prezzoScontato: a.prezzoScontato } : {}), costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
+      presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
+      acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche,
+      // Ondata 5 (decisione 21): la regola di rifornimento e, con la partita, la scorta dell'offerta
+      rifornimento: a.rifornimento ?? null, ...(a.scorta !== undefined ? { scorta: a.scorta } : {}) };
   });
 }
 
@@ -113,7 +108,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
   const regalati = new Set(consegneOggetto.map((r) => r.confidente));
   // ondata 5 (decisioni 13 e 21): a chi piace lo dice l'elenco dei regali, con la reazione (+3/+2/+1); un Confidente compare una volta, con la
   // reazione più alta (su un file di gioco di prima della 256 «sconsigliato» vale +1, il resto +3)
-  const conReazione = (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((x) => x.name === 'reazione');
+  const conReazione = haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
   // revisione dei lotti D e D2: anche la nota della riga, perché la scheda dell'oggetto decida chi lo gradisce con lo stesso criterio della
   // scheda del Confidente (`fraIGraditi`); le note diverse delle righe dello stesso Confidente si uniscono, nessuna si perde
   const righeRegalo = prepared(`SELECT g.confidente_chiave,c.nome,${conReazione ? 'g.reazione' : 'CASE WHEN g.sconsigliato = 1 THEN 1 ELSE 3 END AS reazione'},g.nota FROM confidente_regalo g JOIN confidente c ON c.chiave = g.confidente_chiave

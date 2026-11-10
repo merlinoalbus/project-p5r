@@ -9,7 +9,8 @@
 // Senza dipendenze da altri servizi (solo il DB e i condivisi): la leggono il valutatore, le descrizioni e i DTO.
 // ============================================================
 
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 
 export interface RigaInvito { chiave: string; confidente_chiave: string; data: string | null; apre_tipo: 'quartiere' | 'luogo' | 'area'; apre_chiave: string; condizioni_json: string | null; nota: string; fonte: string; origine: string; seed_json: string | null;
@@ -18,7 +19,7 @@ export interface RigaInvito { chiave: string; confidente_chiave: string; data: s
 
 /** Vero se la tabella c'è (uno schema di prima della migrazione 118 non ha inviti). */
 function conInviti(): boolean {
-  return !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'confidente_invito'").get();
+  return haTabellaMain(getDb(), 'confidente_invito');
 }
 
 /** Tutti gli inviti, nell'ordine del calendario del Confidente; vuoto su uno schema senza la tabella. */
@@ -53,14 +54,13 @@ export function conGliInviti(salvata: RequisitoSpillo[], inviti: readonly RigaIn
   return [{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [propria, ...vie] }];
 }
 
-/** Vero se la tabella (di `main`) ha la colonna: lo schema di prima di una migrazione non la ha, ed è l'unico caso in cui la lettura si salta (ogni altro errore SQL risale). */
-function haColonna(tabella: string, colonna: string): boolean {
-  return !!prepared('SELECT 1 FROM pragma_table_info(?, \'main\') WHERE name = ?').get(tabella, colonna);
-}
+// «La colonna c'è?» (`haColonnaMain`): lo schema di prima di una migrazione non la ha, ed è l'unico caso in cui la lettura si salta (ogni altro
+// errore SQL risale). La risposta è ricordata per connessione e vale finché lo schema non cambia (`db/schemaMemo.ts`); dentro una
+// transazione, come nelle migrazioni che passano di qui, si legge sempre da capo.
 
 /** La condizione salvata di un quartiere (`quartiere.condizioni_json`), o null se non ne ha una (o se lo schema non ha la colonna). */
 export function condizioneSalvataQuartiere(chiave: string): RequisitoSpillo[] | null {
-  if (!haColonna('quartiere', 'condizioni_json')) return null; // uno schema di prima della 118: la colonna non c'è
+  if (!haColonnaMain(getDb(), 'quartiere', 'condizioni_json')) return null; // uno schema di prima della 118: la colonna non c'è
   const r = prepared('SELECT condizioni_json FROM quartiere WHERE chiave = ?').get(chiave) as { condizioni_json: string | null } | undefined;
   return r?.condizioni_json ? leggiCondizioniSalvate(r.condizioni_json) : null;
 }
@@ -78,7 +78,7 @@ export function condizioneEffettivaQuartiere(chiave: string, inviti: readonly Ri
  *  c'è o se lo schema è di prima della 303. */
 export function condizionePropriaArea(chiave: string | null | undefined, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
   if (!chiave) return [];
-  if (!haColonna('area', 'condizioni_json')) return []; // uno schema di prima della 303 (o senza Aree): nessuna condizione propria
+  if (!haColonnaMain(getDb(), 'area', 'condizioni_json')) return [];// uno schema di prima della 303 (o senza Aree): nessuna condizione propria
   const r = prepared('SELECT condizioni_json FROM area WHERE chiave = ?').get(chiave) as { condizioni_json: string | null } | undefined;
   const propria = leggiCondizioniSalvate(r?.condizioni_json ?? null);
   return propria.length === 0 ? [] : conGliInviti(propria, invitiCheAprono('area', chiave, inviti));
@@ -96,7 +96,7 @@ export function condizioneEffettivaArea(a: { chiave?: string | null; quartiere_c
 /** La condizione d'apertura di un Dedalo dei Memento (`dungeon_area.condizioni_json`, migrazione 305: il Palazzo concluso o la data della
  *  guida), elenco in AND; null se il Dedalo non c'è, non ne ha una o lo schema è di prima della 305 (allora il fatto «aperto» non si dice). */
 export function condizioneAperturaDedalo(chiave: string): RequisitoSpillo[] | null {
-  if (!haColonna('dungeon_area', 'condizioni_json')) return null; // uno schema di prima della 305: la colonna non c'è
+  if (!haColonnaMain(getDb(), 'dungeon_area', 'condizioni_json')) return null;// uno schema di prima della 305: la colonna non c'è
   const r = prepared("SELECT condizioni_json FROM dungeon_area WHERE chiave = ? AND dungeon_chiave = 'mementos'").get(chiave) as { condizioni_json: string | null } | undefined;
   const condizioni = leggiCondizioniSalvate(r?.condizioni_json ?? null);
   return condizioni.length ? condizioni : null;

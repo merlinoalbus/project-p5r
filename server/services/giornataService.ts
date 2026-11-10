@@ -6,7 +6,7 @@
 // spostano su e giù tutte le voci, azioni della guida comprese; e «le modifiche diventano nuovo canone a tutti gli
 // effetti quindi non sono mai singola partita... ma tutte devono alterare i dati iniziali». Le voci stanno nel file di
 // gioco (`voce_giornata`, migrazione 092): chi esporta il pacchetto le porta con sé. Azione della guida, cosa da fare ed
-// evento sono la stessa cosa: tipo, collegamento verificato, rango atteso, effetti della spunta; eventi, scadenze e
+// promemoria sono la stessa cosa: tipo, collegamento verificato, rango atteso, effetti della spunta; i
 // promemoria si mostrano ma non si spuntano. L'ordine è `ordine` 0, 1, 2… dentro la fascia, senza buchi.
 // Le spunte stanno nel file delle partite (`spunta_voce_partita`) e si agganciano all'uid, che non cambia spostando,
 // correggendo o cambiando fascia. Eliminare una voce passa dal cestino e annulla le sue fonti attraverso il motore unico.
@@ -25,7 +25,7 @@ import { articoloConNome, mappaAzione, nomeRiferimento, nomiEffetti, nomiFraseEf
 import { statoGiaVero, statoSegnatoDallaVoce } from './effettiDiStatoService.js';
 import { voceConInvitoDi } from './inviti.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
-import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
+import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione, type TipoAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import { attivitaConQuiz, costoDelTurno, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
@@ -59,7 +59,7 @@ import { condizioniDaSalvare, condizioniDellaVoce, nonDovutePerGiorno, valutator
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
   riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null; rango_atteso: number | null;
-  produce_json: string; indice_guida: number | null; created_at: string; updated_at: string;
+  indice_guida: number | null; created_at: string; updated_at: string;
   /** L3 §1.4 (migrazione 110; assenti su uno schema di prima): voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
   da_rivedere?: number; aggiunta_da?: string | null; testo_precedente_json?: string | null; motivo_revisione?: string | null;
   /** L13 (O9-3, migrazione 320; assente su uno schema di prima): quando la voce è dovuta («Si fa solo se»), NULL = sempre (`voceDovuta`). */
@@ -71,9 +71,9 @@ const TIPI_RIF = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave));
 
 /** La fascia della voce: «sera» se lo è, altrimenti «giorno». */
 export const fasciaDi = (r: Pick<RigaVoce, 'fascia'>): FasciaGioco => (r.fascia === 'sera' ? 'sera' : 'giorno');
-/** Il genere della voce: «azione» (si spunta) o «promemoria». Un valore di prima dei due generi (evento, scadenza: il vincolo del
- *  DB li ammette ancora, nessuna voce li usa) si legge come promemoria, che non si spunta; un valore ignoto resta «azione». */
-const genereDi = (r: RigaVoce): GenereVoce => (r.genere === 'promemoria' || r.genere === 'evento' || r.genere === 'scadenza' ? 'promemoria' : 'azione');
+/** Il genere della voce: «azione» (si spunta) o «promemoria». Ogni altro valore (il vincolo del DB ne ammette ancora di vecchi, nessuna voce
+ *  li usa) si legge come promemoria, che non si spunta. */
+const genereDi = (r: RigaVoce): GenereVoce => (r.genere === 'azione' ? 'azione' : 'promemoria');
 /** Il tipo d'azione della voce, ricondotto ad «altro» se il valore salvato non è fra i tipi noti (anche il filtro della ricerca nel Diario). */
 export function tipoDi(r: Pick<RigaVoce, 'tipo'>): AzionePercorsoDto['tipo'] {
   return (TIPI.has(r.tipo) ? r.tipo : 'altro') as AzionePercorsoDto['tipo'];
@@ -83,7 +83,7 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
   return r.riferimento_tipo && r.riferimento_chiave && TIPI_RIF.has(r.riferimento_tipo) ? { tipo: r.riferimento_tipo as RiferimentoAzioneDto['tipo'], chiave: r.riferimento_chiave } : null;
 }
 /** Proiezione di compatibilità dei soli tre tipi legacy (dote, lettura, turno) della fonte unica `voce_effetto`: la fonte completa resta
- *  nel DTO (`effettiVoce`). `produce_json` non si legge più (un solo punto di modifica: l'editor degli effetti). */
+ *  nel DTO (`effettiVoce`). Un solo punto di modifica: l'editor degli effetti. */
 function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
   return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna'||e.effetto.tipo==='yen'||eEffettoDiStato(e.effetto) ? [] : [e.effetto]);
 }
@@ -267,7 +267,7 @@ function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
 export interface VoceBase { uid: string; giorno: string; fascia: FasciaGioco; genere: GenereVoce; azione: string; tipo: AzionePercorsoDto['tipo']; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null; rangoAtteso: number | null; note: string | null; produce: EffettoAzione[] }
 
 /** La voce con i soli campi della guida, con i valori fuori catalogo ricondotti a quelli predefiniti; gli effetti li ha
- *  solo un'azione (eventi, scadenze e promemoria non si spuntano). */
+ *  solo un'azione (i promemoria non si spuntano). */
 export function voceBase(r: RigaVoce, fonte: StatoEffettiVoceDto = leggiEffettiVocePerMostrare(r.uid)): VoceBase {
   const riferimento = riferimentoDi(r);
   return {
@@ -446,7 +446,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const condizioni = spuntabile ? condizioniDellaVoce(r) : [];
   const motivoNonDovuta = condizioni.length > 0 && ctx.nonDovuta && !ctx.fatte.has(r.uid) ? ctx.nonDovuta(r) : null;
   return {
-    ...v, effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}),
+    ...v, validataConSpunte: voceValidataConSpunte(r), effettiVoce: fonte, ...(condizioni.length ? { condizioni } : {}), ...(motivoNonDovuta ? { nonDovuta: { motivo: motivoNonDovuta } } : {}),
     ricevuteEffetti, ...(applicato.length ? { applicatoDallaSpunta: applicato } : {}), ...(statiNonApplicati.length ? { statiNonApplicati } : {}),
     ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
@@ -764,6 +764,13 @@ export function eGiornoDelDiarioValidato(data: string): boolean {
   return !!prepared('SELECT 1 FROM giorno g WHERE g.data = ? AND g.ordine <= (SELECT ordine FROM giorno WHERE data = ?)').get(data, ULTIMO_GIORNO_VALIDATO);
 }
 
+/** L6-02: la voce è di un giorno del diario validato (stessa regola di `eGiornoDelDiarioValidato`, per `giorno.ordine`) E almeno una partita ne ha la
+ *  spunta: modificarla o eliminarla tocca spunte già fatte. Una sola interrogazione, e solo per i giorni validati (le altre voci non la fanno). */
+function voceValidataConSpunte(r: Pick<RigaVoce, 'uid' | 'data'>): boolean {
+  if (!eGiornoDelDiarioValidato(r.data)) return false;
+  return !!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE voce_uid = ? LIMIT 1').get(r.uid);
+}
+
 /**
  * R10-28c/2: dopo il «concluso» di un Palazzo (Tesoro e boss finale, `palazziConclusi`) la voce che porta al suo ingresso non si propone più
  * nei giorni successivi. Sono nascoste SOLO le voci d'ingresso o d'infiltrazione: quelle di azione col riferimento a quel Palazzo e con
@@ -909,6 +916,27 @@ function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: s
   return out;
 }
 
+/** Il tipo di una voce con il collegamento (tipo e chiave), come le colonne di `voce_giornata`. */
+interface TipoERiferimento { tipo: string; riferimentoTipo: string | null; riferimentoChiave: string | null }
+
+/**
+ * L6-03: l'avviso (mai un rifiuto) per una voce il cui collegamento è di un genere diverso da quello che il suo tipo chiede
+ * (`RIFERIMENTO_DI_TIPO`: un negozio su un lavoro, un film su una Dote). Solo per una coppia NUOVA: la creazione, o una modifica che cambia il
+ * tipo o il collegamento. Una voce salvata senza cambiarli (le voci della guida con un collegamento di altro genere) non avvisa e il suo
+ * collegamento resta identico. Un tipo senza collegamento proprio (`RIFERIMENTO_DI_TIPO` nullo: domanda, trama, Stanza di Velluto, altro) con un
+ * collegamento è anch'esso fuori dalla coppia attesa; senza collegamento non c'è niente da dire.
+ */
+function avvisoCollegamento(nuovo: TipoERiferimento, prima?: TipoERiferimento): string | undefined {
+  const atteso = RIFERIMENTO_DI_TIPO[nuovo.tipo as TipoAzione] ?? null;
+  if (nuovo.riferimentoTipo === null || nuovo.riferimentoTipo === atteso) return undefined;
+  if (prima && prima.tipo === nuovo.tipo && prima.riferimentoTipo === nuovo.riferimentoTipo && prima.riferimentoChiave === nuovo.riferimentoChiave) return undefined;
+  const nomeTipo = TIPI_AZIONE.find((t) => t.chiave === nuovo.tipo)?.nome ?? nuovo.tipo;
+  const nomeScelto = TIPI_RIFERIMENTO_AZIONE.find((t) => t.chiave === nuovo.riferimentoTipo)?.nome ?? nuovo.riferimentoTipo;
+  if (!atteso) return `Il tipo «${nomeTipo}» di solito non ha un collegamento, e qui «Quale» è di genere ${nomeScelto}: la voce è salvata così, controlla che sia voluto.`;
+  const nomeAtteso = TIPI_RIFERIMENTO_AZIONE.find((t) => t.chiave === atteso)?.nome ?? atteso;
+  return `Il tipo «${nomeTipo}» si collega di solito a: ${nomeAtteso}. Qui «Quale» è di un altro genere (${nomeScelto}): la voce è salvata così, controlla che sia voluto.`;
+}
+
 /** Il testo senza spazi ai bordi; undefined se non è stato inviato, 400 se resta vuoto. */
 function testoValido(x: string | undefined): string | undefined {
   if (x === undefined) return undefined;
@@ -938,7 +966,7 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
       throw httpErrors.badRequest('fonte-nuova-non-valida', 'Una voce nuova non può riprendere gli effetti di un’altra voce: aggiungili di nuovo.');
     }
     if (genere !== 'azione' && d.effettiVoce?.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
-    // gli effetti vanno solo in `voce_effetto` (`inizializzaEffettiVoce`): `produce_json` resta col suo valore predefinito, non si scrive più
+    // gli effetti vanno solo in `voce_effetto` (`inizializzaEffettiVoce`)
     prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
       VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
       riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, adesso, adesso);
@@ -946,7 +974,8 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
     inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
-  return voceDelGiorno(uid, partitaId);
+  const avviso = genere !== 'azione' ? undefined : avvisoCollegamento({ tipo: d.tipo ?? 'altro', riferimentoTipo: riferimento?.tipo ?? null, riferimentoChiave: riferimento?.chiave ?? null });
+  return { ...voceDelGiorno(uid, partitaId), ...(avviso ? { avvisoCollegamento: avviso } : {}) };
 }
 
 /** Modifica una voce: testo, note, genere, tipo, collegamento, rango, effetti, fascia e posto nella fascia. */
@@ -968,15 +997,15 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
       applicazioni = salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa }).applicazioni;
     }
     if (genere !== 'azione' && genereDi(r) === 'azione') {
-      // un'azione diventa evento: non si spunta più. Con effetti applicati in una partita no (andrebbero persi senza poterli
+      // un'azione diventa promemoria: non si spunta più. Con effetti applicati in una partita no (andrebbero persi senza poterli
       // disfare); senza effetti le sue spunte non servono più e se ne vanno
       const conEffetti = partiteConEffetti(uid);
-      if (conEffetti.length) throw httpErrors.conflict('voce-con-effetti', `Questa azione è spuntata con effetti in ${conEffetti.map((n) => `«${n}»`).join(', ')}: togli prima la spunta, poi cambiala in evento.`);
+      if (conEffetti.length) throw httpErrors.conflict('voce-con-effetti', `Questa azione è spuntata con effetti in ${conEffetti.map((n) => `«${n}»`).join(', ')}: togli prima la spunta, poi cambiala in promemoria.`);
       prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
       const fonte = leggiEffettiVoce(uid);
-      if (fonte.stato !== 'convertita' || fonte.effetti.length) throw httpErrors.conflict('voce-con-effetti-configurati', 'Rimuovi esplicitamente gli effetti dall’editor prima di trasformare l’azione in evento.');
+      if (fonte.stato !== 'convertita' || fonte.effetti.length) throw httpErrors.conflict('voce-con-effetti-configurati', 'Rimuovi esplicitamente gli effetti dall’editor prima di trasformare l’azione in promemoria.');
     }
-    // `produce_json` non si scrive più: gli effetti li salva `salvaEffettiVoce` in `voce_effetto`
+    // gli effetti li salva `salvaEffettiVoce` in `voce_effetto`
     prepared(`UPDATE voce_giornata SET azione = ?, note = ?, genere = ?, fascia = ?, tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, rango_atteso = ?, updated_at = ? WHERE uid = ?`).run(
       azione ?? r.azione, d.note === undefined ? r.note : noteValide(d.note), genere, fascia, genere === 'azione' ? d.tipo ?? r.tipo : 'altro',
       riferimento === undefined ? r.riferimento_tipo : riferimento?.tipo ?? null, riferimento === undefined ? r.riferimento_chiave : riferimento?.chiave ?? null,
@@ -997,7 +1026,11 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     riallineaVoceNelRegistro(uid);
     return applicazioni;
   })();
-  const dto = voceDelGiorno(uid, partitaId);
+  const dopo = rigaVoce(uid);
+  const avviso = genereDi(dopo) !== 'azione' ? undefined : avvisoCollegamento(
+    { tipo: dopo.tipo, riferimentoTipo: dopo.riferimento_tipo, riferimentoChiave: dopo.riferimento_chiave },
+    { tipo: r.tipo, riferimentoTipo: r.riferimento_tipo, riferimentoChiave: r.riferimento_chiave });
+  const dto = { ...voceDelGiorno(uid, partitaId), ...(avviso ? { avvisoCollegamento: avviso } : {}) };
   return applicazioniEffetti?.length ? { ...dto, applicazioniEffetti } : dto;
 }
 
@@ -1021,7 +1054,7 @@ export { trasferisciVoci } from './appuntiDiarioService.js';
 
 /** Storia attiva che impedisce di togliere la spuntabilità senza il proprio gesto di annullo. L13 (decisione 18): anche gli yen che gli effetti
  *  della voce hanno mosso da soli e che non sono tornati (cancellando la spunta non tornerebbero più): si tolgono togliendo la spunta. I
- *  movimenti dei turni e delle Richieste seguono il loro dato, che resta anche quando la voce diventa un evento. */
+ *  movimenti dei turni e delle Richieste seguono il loro dato, che resta anche quando la voce diventa un promemoria. */
 function partiteConEffetti(uid: string): string[] {
   return (prepared(`SELECT p.nome FROM utente.partita p WHERE
     EXISTS(SELECT 1 FROM utente.spunta_voce_partita s WHERE s.partita_id=p.id AND s.voce_uid=? AND s.effetti_json IS NOT NULL)
@@ -1062,8 +1095,8 @@ export function ripristinaOrdineVoce(uid: string, vicini: ViciniCestino | null):
 
 /**
  * Spunta o toglie un'azione nella partita. Alla spunta applica ciò che l'azione produce (`produce`: letture, turni; note del
- * Confidente se `noteRisposta` è indicato, col bonus dell'arcano) e lo registra; togliendo la spunta lo annulla (le letture
- * restano: si disfano dalla loro pagina). Eventi, scadenze e promemoria non si spuntano.
+ * Confidente se `noteRisposta` è indicato, col bonus dell'arcano) e lo registra; togliendo la spunta lo annulla (le letture tornano
+ * a come erano, se l'avanzamento vale ancora quello della spunta; le Doti restano a mano). I promemoria non si spuntano.
  */
 export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
   verificaPartita(partitaId);
@@ -1076,7 +1109,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
   getDb().transaction(() => {
     const precedente = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
     // Una voce storica riclassificata (non più un'azione) conserva l'accesso alla rimozione della propria spunta.
-    if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
+    if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un promemoria non si spunta.');
     if (fatta) {
       if (precedente) {
         if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length||opz.relazioneRomantica !== undefined)
@@ -1117,7 +1150,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
 }
 
 /** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */
-export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string,pesca?:import('../../shared/pesca.js').NuovaSessionePesca,tokenPesca?:string): void {
+export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string,pesca?:import('../../shared/pesca.js').NuovaSessionePesca,tokenPesca?:string): string[] {
+  // gli avvisi dell'annullo della versione sostituita (una lettura che non torna indietro): li riceve chi ha deciso la proposta
+  const avvisi: string[] = [];
   // il tipo e il collegamento della voce vera (non «altro» senza collegamento): le note di una Dote raccordata valgono come quelle della spunta,
   // da libro (quarto scalino) o da film con «Anima da cineasta» (`origineNoteDellaVoce`). L'incontro con un Confidente non si riapplica: senza
   // `momento` né note di risposta `applicaEffettiAzione` non registra incontri né punti del Confidente
@@ -1127,6 +1162,7 @@ export function applicaEffettoStoricoDiario(partitaId: number, proposta: Propost
     // Solo gli effetti selezionati dal motore: niente contesto Confidente o
     // riesecuzione dell'intera voce già spuntata.
     applicaLegacy: (id, produce, scelte) => applicaEffettiAzione(id, { ...voce, produce, scelte }),
-    annullaLegacy: annullaEffettiAzione,
+    annullaLegacy: (id, ricevuta) => { const a = annullaEffettiAzione(id, ricevuta); avvisi.push(...a); return a; },
   }, { valutaCorrente: disponibilitaAcquistoCorrente },pesca,tokenPesca);
+  return avvisi;
 }

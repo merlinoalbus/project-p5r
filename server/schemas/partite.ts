@@ -10,6 +10,7 @@ import { bodyRegistraSessionePesca } from './pesca.js';
 import { CHIAVI_PIAZZAMENTO_ESAME } from '../../shared/puntiConfidenti.js';
 import { YEN_MASSIMI_LAVORO } from '../../shared/esitiAttivita.js';
 import { RANGO_MASSIMO_CONFIDENTE } from '../../shared/puntiConfidenti.js';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../shared/limitiFusione.js';
 
 /** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
 const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
@@ -43,10 +44,8 @@ export const bodyCreaPartita = z.object({ ...campiPartita, attiva: z.boolean().o
 export const bodyAggiornaPartita = z.object(campiPartita).partial();
 
 export const paramsPartita = z.object({ id: idParam });
-/** L12: l'UID di una voce del cestino personale (32 cifre esadecimali), da solo o dentro una partita. */
-const uidCestino = z.string().regex(/^[0-9a-f]{32}$/);
-export const paramsCestinoPersonale = z.object({ uid: uidCestino }).strict();
-export const paramsPartitaCestino = z.object({ id: idParam, uid: uidCestino }).strict();
+/** L12: l'UID di una voce del cestino personale (32 cifre esadecimali): `/api/partite/cestino/:uid`. */
+export const paramsCestinoPersonale = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
 export const paramsPartitaChiave = z.object({ id: idParam, chiave: z.string().trim().min(1).max(40) });
 export const paramsPartitaPersona = z.object({ id: idParam, personaId: idParam });
 export const paramsPartitaPosseduta = z.object({ id: idParam, possedutaId: idParam });
@@ -201,11 +200,11 @@ export const bodyIsolamento = z.object({
 });
 export const bodySalvaCiclo = z.object({
   personaId: z.number().int().positive(),
-  anelli: z.array(z.object({ ingredienteId: z.number().int().positive(), partnerId: z.number().int().positive(), risultatoId: z.number().int().positive() })).min(2).max(5),
+  anelli: z.array(z.object({ ingredienteId: z.number().int().positive(), partnerId: z.number().int().positive(), risultatoId: z.number().int().positive() })).min(ANELLI_MINIMI_CICLO).max(ANELLI_MASSIMI_CICLO),
   nome: z.string().max(80).optional(),
   note: z.string().max(2000).optional(),
 });
-export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
+export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(ANELLI_MASSIMI_CICLO - 1).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
 export const paramsPartitaCiclo = z.object({ id: idParam, cicloId: idParam });
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
 /** Spunta di una voce della giornata, per uid (le 32 cifre esadecimali di `voce_giornata.uid`). */
@@ -227,7 +226,7 @@ const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, 
 export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
   .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
 /** Ondata 5: `soloPresenza` (solo con `fatto: false`) toglie il segno «ottenuto» senza un giorno registrato, non un acquisto del registro. */
-export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional(), soloPresenza: z.literal(true).optional() })
+export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), soloPresenza: z.literal(true).optional() }).strict()
   .refine((b) => !(b.soloPresenza && b.fatto), { message: '`soloPresenza` vale solo per togliere un segno (`fatto: false`).', path: ['soloPresenza'] });
 export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
@@ -251,7 +250,7 @@ export const bodyRegalo = z.object({
 export const bodyRegala = z.object({
   confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600),
   bonusArcano: z.boolean().optional(), invito: z.boolean().optional(),
-  acquisto: z.object({ articolo: z.string().min(1).max(200), sede: z.string().min(1).max(300).optional() }).strict().optional(),
+  acquisto: z.object({ articolo: z.string().min(1).max(200) }).strict().optional(),
 }).strict();
 /** Ondata 5: `id` = la consegna precisa da annullare (lo stesso oggetto si può ridare); senza, l'ultima di quell'oggetto a quel Confidente. */
 export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600), id: z.number().int().positive().optional() }).strict();
@@ -262,8 +261,6 @@ export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 export const paramsPartitaRigaAcquisto = z.object({ id: idParam, rigaId: idParam });
 /** Ondata 5 (lotto F-bis): una riga del registro dei consumi della partita (l'uso di un incenso in un Isolamento, da annullare). */
 export const paramsPartitaConsumo = z.object({ id: idParam, consumoId: idParam });
-/** Ondata 5: la sede in cui si guarda l'articolo (listino condiviso), per restituirlo con la sua presenza e la sua scorta. */
-export const queryRigaAcquisto = z.object({ sede: z.string().min(1).max(300).optional() }).strict();
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
 

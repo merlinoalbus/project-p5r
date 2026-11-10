@@ -17,6 +17,9 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// la conferma dell'eliminazione passa da `conferma()` (DialogoConferma in primo piano): la finestra di modifica ha il piè fisso con «Elimina»
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 /** Una voce della guida nell'area del dedalo data. */
 const voce = (chiave: string, nome: string, areaDedalo: string, stato: PuntoInteresseDto['stato'] = null): PuntoInteresseDto => ({
@@ -162,19 +165,21 @@ it('l\'interruttore porta in «Modifica la guida»: le aree si aggiungono, si sp
   api.spostaAreaDedalo.mockResolvedValue({});
   fireEvent.click(screen.getByRole('button', { name: 'Sposta prima l’area Banchina' }));
   await waitFor(() => expect(api.spostaAreaDedalo).toHaveBeenCalledWith('q-1', -1));
-  // correggere nome e dettagli (i timbri sono del dedalo); il modulo si porta in vista (L10-05)
+  // correggere nome e dettagli (i timbri sono del dedalo); il modulo si apre nella finestra di modifica (L10-05, L12)
   fireEvent.click(screen.getByRole('button', { name: /^Modifica area: l’area «Banchina»/ }));
   const modulo = screen.getByRole('form', { name: 'Correggi l’area «Banchina»' });
   fireEvent.change(within(modulo).getByRole('textbox', { name: 'Nome' }), { target: { value: 'Binario' } });
   api.aggiornaAreaDedalo.mockResolvedValue({});
-  fireEvent.click(within(modulo).getByRole('button', { name: /^Salva/ }));
+  // «Salva» sta nel piè fisso della finestra, fuori dal modulo dei campi
+  fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaAreaDedalo).toHaveBeenCalledWith('q-1', { nome: 'Binario', descrizione: 'Il binario morto.' }));
   // eliminare chiede conferma e dice che cosa se ne va; l'area esce dall'indirizzo
   fireEvent.click(screen.getByRole('button', { name: /^Modifica area: l’area «Banchina»/ }));
-  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-  expect(screen.getByText(/le sue voci di Trama con quel che ne avevano segnato\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
   api.eliminaAreaDedalo.mockResolvedValue(undefined);
-  fireEvent.click(screen.getByRole('button', { name: 'Confermo' }));
+  conferma.mockResolvedValue(true);
+  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+  await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
+  expect(conferma.mock.calls[0][0].testo).toMatch(/le sue voci di Trama con quel che ne avevano segnato\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./);
   await waitFor(() => expect(api.eliminaAreaDedalo).toHaveBeenCalledWith('q-1'));
   await waitFor(() => expect(screen.getByTestId('indirizzo').textContent).not.toContain('zona='));
 });

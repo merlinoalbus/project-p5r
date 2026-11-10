@@ -75,6 +75,24 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const [stellaAperta, impostaStellaAperta] = useState(false);
   const mostraStella = Boolean(doti.dati && doti.dati.length > 0) && (!telefono || stellaAperta);
 
+  // L6-07: la prima casella del giorno deve stare entro la piega. Da 768 px gli Arcani potenziati stanno sulla riga del titolo della partita (una
+  // fila che scorre: prima una riga a sé, che a capo diventava tre); sul telefono stanno con la stella dietro lo stesso tocco, sotto le Doti.
+  const arcani = scorta.dati && (arcaniInScorta.length === 0 ? (
+    <p className="home-arcani-vuoto m-0 testo-12 text-text-muted">
+      <span className="font-semibold uppercase tracking-[.06em]">Arcani potenziati</span> nessuna Persona in scorta
+    </p>
+  ) : (
+    <FilaScorrevole className="home-fila fila-scorrevole--sempre" role="group" aria-label="Arcani potenziati dalla scorta">
+      <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
+      {arcaniInScorta.map((a) => (
+        <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ${testoMoltiplicatore(MOLTIPLICATORE_ARCANO)}`}>
+          <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
+          {a.nome}
+        </Link>
+      ))}
+    </FilaScorrevole>
+  ));
+
   const testa = (
       <div className="home-carta card">
         <div className="home-carta__riga">
@@ -94,10 +112,11 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               <span className="chip shrink-0">Liv. {partita.livelloProtagonista}</span>
               {partita.allarmeAttivo && <span className="chip chip--attivo shrink-0">ALLARME</span>}
               {telefono && doti.dati && doti.dati.length > 0 && (
-                <button type="button" className="chip chip--icona touch ml-auto shrink-0" aria-expanded={stellaAperta} onClick={() => impostaStellaAperta((v) => !v)} title="Mostra o nascondi la stella delle Doti">
-                  <IconStar size={14} />Stella
+                <button type="button" className="chip chip--icona touch ml-auto shrink-0" aria-expanded={stellaAperta} onClick={() => impostaStellaAperta((v) => !v)} title="Mostra o nascondi la stella delle Doti e gli Arcani potenziati">
+                  <IconStar size={14} />Stella e Arcani
                 </button>
               )}
+              {!telefono && arcani && <div className="home-carta__arcani">{arcani}</div>}
             </div>
             <div className="home-doti">
               {doti.dati?.map((d) => (
@@ -107,22 +126,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
             </div>
             {/* Lotto C: senza Persona in scorta la frase va a capo (prima stava nella fila che scorre e, col testo al 125%,
                 usciva tagliata senza puntini); con gli Arcani resta la fila di chip che scorre. */}
-            {scorta.dati && arcaniInScorta.length === 0 && (
-              <p className="home-arcani-vuoto m-0 testo-12 text-text-muted">
-                <span className="font-semibold uppercase tracking-[.06em]">Arcani potenziati</span> nessuna Persona in scorta
-              </p>
-            )}
-            {scorta.dati && arcaniInScorta.length > 0 && (
-              <FilaScorrevole className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
-                <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
-                {arcaniInScorta.map((a) => (
-                  <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ${testoMoltiplicatore(MOLTIPLICATORE_ARCANO)}`}>
-                    <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
-                    {a.nome}
-                  </Link>
-                ))}
-              </FilaScorrevole>
-            )}
+            {telefono && (stellaAperta || (Array.isArray(doti.dati) && doti.dati.length === 0)) && arcani}
           </div>
         </div>
       </div>
@@ -144,7 +148,9 @@ export function HomePage() {
     <div className="home flex flex-col gap-3">
       {/* la prima volta da telefono o tablet, l'invito a installare l'app (finestra in primo piano, una volta per dispositivo) */}
       <InvitoInstallazione />
-      <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" compatta />
+      {/* L6-07: con una partita attiva il cruscotto è la partita stessa e il sottotitolo (che dice che cos'è l'app) non serve più: sul telefono
+          erano tre righe sopra la prima voce del giorno. Senza partita resta, perché lì spiega a che cosa serve la pagina */}
+      <IntestazionePagina titolo="Compagno di gioco" sottotitolo={attiva ? undefined : 'Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita.'} illustrazione="identita/logo-senza-testo" compatta />
       {attiva ? (
         <HomeConPartita key={attiva.id} partita={attiva} />
       ) : errore ? (

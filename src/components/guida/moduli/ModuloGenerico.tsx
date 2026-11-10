@@ -7,7 +7,7 @@ import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, CampoData, Griglia } from './campi';
-import { CAMPI_GENERICI, type Risposta } from './definizioni';
+import { CAMPI_GENERICI, presenteDi, type Risposta } from './definizioni';
 import { useIdStabili } from '../../../hooks/useIdStabili';
 
 /** Le risposte giuste come righe in ordine: certe domande d'esame si rispondono in più passaggi. */
@@ -52,7 +52,7 @@ function Generico({ tipo, dati, imposta, disabilitato }: PropsModulo & { tipo: '
   return (
     <div className="flex flex-col gap-3">
       <Griglia>
-        {CAMPI_GENERICI[tipo].map((c) => c.tipo === 'data'
+        {CAMPI_GENERICI[tipo].filter((c) => !c.soloSePresente || dati[presenteDi(c.nome)] === true).map((c) => c.tipo === 'data'
           // L13 (O7-5): il giorno si sceglie (mese e giorno del calendario di gioco), non si digita; resta «MM-GG» verso l'API
           ? <CampoData key={c.nome} nome={c.nome} etichetta={c.etichetta} aiuto={c.aiuto} obbligatorio={c.obbligatorio} dati={dati} imposta={imposta} disabilitato={disabilitato} />
           : c.opzioni

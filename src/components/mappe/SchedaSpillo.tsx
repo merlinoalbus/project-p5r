@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Separata da `VisoreMappa` (L11-01): il visore decide dove e quando la scheda e il popup si aprono, qui sta che cosa dicono. La scheda è
-// anche quella dei contenuti della guida senza mappa (`SchedaContenutoGuida`), per questo accetta `SpilloDto | SchedaContenutoGuidaDto`.
+// anche quella degli elementi della guida senza mappa (spilli con `area_guida_chiave`, ancora nei dati), per questo accetta `SpilloDto | SchedaContenutoGuidaDto`.
 // ============================================================
 
 import { useState, type Ref } from 'react';
@@ -104,11 +104,11 @@ const conCompra = (a: MerceDelNegozio, partitaId: number | null): partitaId is n
 
 /**
  * Ondata 5 (decisione 21, rilievo della revisione): l'acquisto di un articolo che si rifornisce, nella mappa con lo stesso componente della
- * pagina del negozio (`AcquistiOfferta`): «Compra» aggiunge un acquisto nella sede del pin (`onCompra`, il gesto del visore), «rimasti N di
- * Q», gli acquisti del ciclo e quelli passati, ognuno col suo «Annulla», e il segno «ottenuto» senza giorno. Annullo e segno vanno al server
- * con la sede del pin e poi il pin si rilegge (`onAcquistiCambiati`), come fanno le consumazioni dell'Aojiru.
+ * pagina del negozio (`AcquistiOfferta`): «Compra» aggiunge un acquisto (`onCompra`, il gesto del visore), «rimasti N di Q», gli acquisti del
+ * ciclo e quelli passati, ognuno col suo «Annulla», e il segno «ottenuto» senza giorno. Annullo e segno vanno al server e poi il pin si rilegge
+ * (`onAcquistiCambiati`), come fanno le consumazioni dell'Aojiru.
  */
-function AcquistoDellaMerce({ a, partitaId, sede, occupato, onCompra, onAcquistiCambiati }: { a: MerceDelNegozio; partitaId: number; sede: string | null | undefined; occupato: boolean;
+function AcquistoDellaMerce({ a, partitaId, occupato, onCompra, onAcquistiCambiati }: { a: MerceDelNegozio; partitaId: number; occupato: boolean;
   onCompra: (articolo: string) => void; onAcquistiCambiati?: () => void | Promise<void> }) {
   const [lavoro, setLavoro] = useState(false);
   const esegui = async (azione: () => Promise<unknown>) => {
@@ -117,11 +117,11 @@ function AcquistoDellaMerce({ a, partitaId, sede, occupato, onCompra, onAcquisti
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Annullamento fallito.'); }
     finally { setLavoro(false); }
   };
-  return <AcquistiOfferta articolo={a.chiave} nome={a.nome} registrati={a.acquistiRegistrati ?? []} acquistato={a.comprato}
+  return <AcquistiOfferta articolo={a.chiave} nome={a.nome} registrati={a.acquistiRegistrati ?? []}
     bloccato={a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile'} occupato={occupato || lavoro}
     onCambia={(chiave, fatto) => { if (fatto) onCompra(chiave); }} rifornimento={a.rifornimento} scorta={a.scorta}
-    onAnnullaRiga={(id) => void esegui(() => annullaRigaAcquisto(partitaId, id, sede))}
-    onTogliSegno={(k) => void esegui(() => togliSegnoSenzaGiorno(partitaId, k, sede))} />;
+    onAnnullaRiga={(id) => void esegui(() => annullaRigaAcquisto(partitaId, id))}
+    onTogliSegno={(k) => void esegui(() => togliSegnoSenzaGiorno(partitaId, k))} />;
 }
 
 /** La merce del negozio **in vendita adesso**, dentro il popup dello spillo di città: nome, prezzo e, con la partita, la casella «comprato»
@@ -132,7 +132,8 @@ export function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto
   return (
     <div className="flex flex-col gap-1" role="group" aria-label={`Merce di ${negozio.nome}`}>
       <div className="flex items-center justify-between gap-2 testo-12 text-text-muted uppercase tracking-wide">
-        <span>{negozio.nome} · {disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
+        {/* il titolo del popup dice già il nome, quando è quello del negozio (le macchine) */}
+        <span>{nomePin(spillo) === negozio.nome ? '' : `${negozio.nome} · `}{disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
         {negozio.disponibilita && negozio.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={negozio.disponibilita} compatto />}
       </div>
       {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
@@ -156,7 +157,7 @@ export function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto
                 <PrezzoScontato scontato={a.prezzoScontato} className="min-w-0 max-w-full" />
                 {a.disponibilita && a.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={a.disponibilita} compatto />}
                 {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
-                {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
+                {conCompra(a, partitaId) && onAcquisto && onAcquistiCambiati && <div className="w-full"><AcquistoDellaMerce a={a} partitaId={partitaId} occupato={occupato}
                   onCompra={(k) => void onAcquisto(spillo, k, true)} onAcquistiCambiati={onAcquistiCambiati} /></div>}
               </li>
             ))}
@@ -295,9 +296,9 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       {negozio && (
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="testo-12 font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
-            {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
-            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="touch inline-flex items-center testo-12 text-primary-testo">{negozio.nome}</Link>
+            {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome; se il nome è già il titolo della scheda (le macchine) non si ripete */}
+            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="touch inline-flex items-center testo-12 font-semibold text-primary-testo">{nomePin(s) === negozio.nome ? 'scheda del negozio' : negozio.nome}</Link>
+            <span className="testo-12 flex items-center gap-1.5 flex-wrap">{articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
           </div>
           {/* seconda revisione della chiusura dell'ondata 5: lo sconto che non vale adesso si dice con la sua regola, come in «Dove si compra» */}
           {!negozio.articoli.some((a) => a.prezzoScontato) && <RegolaDelloSconto sconto={negozio.sconto} />}
@@ -346,7 +347,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                         <DisponibilitaArticolo a={a} />
                       </span>
                       {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <ConsumiAojiru key={`${partitaId}:${s.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} />}
-                      {acquistabile && conCompra(a, partitaId) && onAcquistiCambiati && <AcquistoDellaMerce a={a} partitaId={partitaId} sede={negozio.sedeChiave} occupato={occupato}
+                      {acquistabile && conCompra(a, partitaId) && onAcquistiCambiati && <AcquistoDellaMerce a={a} partitaId={partitaId} occupato={occupato}
                         onCompra={(k) => void onAcquisto!(s, k, true)} onAcquistiCambiati={onAcquistiCambiati} />}
                     </div>
                   </li>

@@ -128,7 +128,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave': {
     sommario: 'Scheda completa di un Confidente',
-    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), i regali dell’elenco (`regali`, con `ordine`, `modificato` e, dall’ondata 5, la `reazione` +3/+2/+1, dalla più alta; l’indirizzo per correggerli è `<confidente>:<ordine>` su `/api/correzioni/regalo`; non ci sono più regali «sconsigliati»: ogni altro oggetto regalo vale +1) e se il Confidente riceve regali (`regalabile`), disponibilità, note e fonti. I regali collegati leggono nome dal catalogo, prezzo minimo/massimo e dove dai listini visibili, comprese le sedi aggiuntive: con un listino `dove` e `costo` sono soltanto quelli delle offerte; senza offerte il testo della guida resta l’indicazione (`listinoCollegato: false`), non un prezzo di vendita corrente. `nomeStorico` e `nota` conservano le indicazioni precedenti. Dati di gioco, senza stato di partita né disponibilità commerciale presunta.',
+    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), i regali dell’elenco (`regali`, con `ordine`, `modificato` e, dall’ondata 5, la `reazione` +3/+2/+1, dalla più alta; l’indirizzo per correggerli è `<confidente>:<ordine>` su `/api/correzioni/regalo`; non ci sono più regali «sconsigliati»: ogni altro oggetto regalo vale +1) e se il Confidente riceve regali (`regalabile`), disponibilità, note e fonti. I regali collegati leggono nome dal catalogo, prezzo minimo/massimo e dove dai listini visibili: con un listino `dove` e `costo` sono soltanto quelli delle offerte; senza offerte il testo della guida resta l’indicazione (`listinoCollegato: false`), non un prezzo di vendita corrente. `nomeStorico` e `nota` conservano le indicazioni precedenti. Dati di gioco, senza stato di partita né disponibilità commerciale presunta.',
     risposta: '`ConfidenteDettaglioDto`; dopo M7 aggiunge oggettiRicompensa per chiave, con quantità, nota delle condizioni e casa. Sono doni ricevuti dal Confidente, separati dai regali graditi da consegnare; nessun ottenimento o rango viene registrato dalla lettura. L13 (ondata 11, O11-3): ogni dono porta `condizione`, la sua regola (`ricompensa_oggetto.condizioni_json`) in parole generate dal vocabolario delle condizioni («Dal 24 dicembre · relazione romantica con Ann Takamaki, …»), null senza regola: con la regola il dono arriva da solo fra gli oggetti ottenuti della partita quando vale.',
     errori: [[404, 'confidente-non-trovato']],
   },
@@ -164,7 +164,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
-    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, solo-date-rango, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `solo-date-rango` dice gli unici giorni in cui si incontra quel rango; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), motivoSenzaLuogo, luoghi (chiavi). «Dal» non si scrive qui: è il requisito di rango 1 di tipo data. Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
     risposta: '`DisponibilitaConfidenteDto` aggiornato',
     errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [400, 'eccezione-doppia'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
   },
@@ -376,7 +376,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/percorso/voci/:uid': {
     sommario: 'Modifica una voce della giornata (canone, per tutte le partite)',
-    descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, `condizioni` («Si fa solo se», L13 O9-3: vuoto = sempre; una cosa da fare che diventa promemoria le perde), effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',
+    descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, `condizioni` («Si fa solo se», L13 O9-3: vuoto = sempre; una cosa da fare che diventa promemoria le perde), effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa promemoria perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',
     risposta: 'La voce aggiornata, `AzionePercorsoDto`. effettiVoce:{effetti:[{uid,effetto}],revisioneEffettiAttesa} salva canone e campi voce nella medesima transazione. Mutuamente esclusivo con produce legacy; senza entrambi, la fonte resta intatta. La creazione usa uid:null senza token fittizio.',
     errori: [[400, 'voce-vuota'], [400, 'condizioni-non-valide'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'],
       [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [400, 'infiltrazioni-da-sole'], [400, 'voce-senza-palazzo'],
@@ -447,7 +447,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/articoli': {
     sommario: 'Ricerca degli articoli in tutti i negozi',
-    descrizione: 'Con M7, `q` cerca nel nome corrente, nome originale, alias ed effetto del catalogo, nome del negozio e nomi correnti degli oggetti ceduti/ricevuti nei baratti; categorie e destinatario si filtrano sui valori correnti, non sulle copie vecchie della vendita. Prima di M7 conserva il lettore precedente. `categoria` e `categorie` si uniscono; `per` include «tutti». Solo con `?partita=` valgono stato acquistati/da-acquistare e disponibilità (ignoto conta come bloccato). Una sede aggiuntiva aperta può rendere acquistabile il listino comune. Ordine negozio/offerta, massimo 300 risultati; totale prima del limite.',
+    descrizione: 'Con M7, `q` cerca nel nome corrente, nome originale, alias ed effetto del catalogo, nome del negozio e nomi correnti degli oggetti ceduti/ricevuti nei baratti; categorie e destinatario si filtrano sui valori correnti, non sulle copie vecchie della vendita. Prima di M7 conserva il lettore precedente. `categoria` e `categorie` si uniscono; `per` include «tutti». Solo con `?partita=` valgono stato acquistati/da-acquistare e disponibilità (ignoto conta come bloccato). Ordine negozio/offerta, massimo 300 risultati; totale prima del limite.',
     risposta: '`RicercaArticoliDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -575,12 +575,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`DungeonDettaglioDto`; dopo M7 ogni voce aggiunge contenuto (identità, quantità, nota e casa), letto in blocco. È distinto da dettagli.contenuto e dallo stato L4. Nessuna modifica a pin, testo o avanzamento durante la lettura.',
     errori: [[404, 'dungeon-non-trovato'], PARTITA_NON_TROVATA],
   },
-  'GET /api/compendio/dungeon/:chiave/copie': {
-    sommario: 'Le copie di una voce di un Palazzo secondo la regola dell\'utente (L4, sola lettura)',
-    descrizione: 'I gruppi di voci identiche secondo la regola dell\'utente (R4-15, 2026-10-20): stessa infiltrazione, stesso tipo, nome, descrizione, dettagli ed Enigma, **stesso insieme di pin** (non vuoto). Sola lettura: in L4 non c\'è fusione (decisione dell\'utente); oggi l\'elenco è vuoto.',
-    risposta: '`GruppoCopieDto[]`',
-    errori: [[404, 'dungeon-non-trovato']],
-  },
   'POST /api/compendio/schede/:id/voce': {
     sommario: '«Crea la voce» da una scheda della guida da sistemare (L4)',
     descrizione: 'Una scheda senza mappa né voce (le «Schede da sistemare» della scheda del Palazzo) diventa una voce nuova, in fondo alla sua infiltrazione, con il suo nome e la sua descrizione e il `tipo` dato; la voce la assorbe (la posizione della scheda è la sua posizione da collocare). Nessuno stato si trasferisce.',
@@ -613,12 +607,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
     senzaCorpo: true,
     errori: [[404, 'dungeon-non-trovato'], [409, 'niente-da-ripristinare'], [409, 'fotografia-illeggibile']],
-  },
-  'PUT /api/compendio/dungeon/:chiave/finestra': {
-    sommario: 'Cambia la finestra in cui il Palazzo compare sulla mappa di Tokyo',
-    descrizione: 'Scrive la voce del Palazzo in `finestre-dungeon` (dati della guida), creandola se manca: `dal` e `al` sono giorni MM-GG del calendario di gioco (aprile → marzo), `al: null` vuol dire senza fine. La stessa finestra decide anche l\'arco corrente delle condizioni. Le altre voci del blocco restano come sono.',
-    risposta: 'La finestra salvata, `{ dal, al }`',
-    errori: [[404, 'dungeon-non-trovato'], [400, 'data-non-valida'], [400, 'fine-prima-di-inizio'], [409, 'fotografia-illeggibile']],
   },
   'PUT /api/compendio/dungeon/:chiave/atterraggi': {
     sommario: 'Sostituisce le regole di atterraggio dalla mappa di Tokyo',
@@ -680,9 +668,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`RequisitiConfidenteDto`',
     errori: [[404, 'confidente-non-trovato']],
   },
+  'PUT /api/compendio/confidenti/:chiave/requisiti': {
+    sommario: 'Sostituisce i requisiti di più ranghi di un Confidente, in una transazione',
+    descrizione: 'Corpo `{ ranghi: [{ rango, requisiti: [{ condizione, nota? }] }] }`: il salvataggio unico dell\'editor. I ranghi indicati prendono le condizioni date (vuoto per nessun requisito), gli altri restano come sono; o tutti o nessuno. La frase si genera dalla condizione, `nota` è il testo proprio del requisito. 400 se un rango compare due volte.',
+    risposta: '`RequisitiConfidenteDto` aggiornato',
+    errori: [[400, 'rango-doppio'], [404, 'confidente-non-trovato']],
+  },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango': {
     sommario: 'Sostituisce i requisiti di un rango di un Confidente',
-    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. La frase di ciascuno è `testo` oppure, se manca, la descrizione generata (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
+    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. `testo` è la nota propria del requisito, facoltativa; la frase si genera dalla condizione (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
     risposta: '`RequisitiConfidenteDto` aggiornato',
     errori: [[404, 'confidente-non-trovato']],
   },

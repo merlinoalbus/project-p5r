@@ -14,6 +14,7 @@
 
 import type { AppDatabase } from '../../db/dbService.js';
 import { getDb, prepared } from '../../db/dbService.js';
+import { haTabellaUtente } from '../../db/schemaMemo.js';
 import { httpErrors, type HttpError } from '../../utils/httpError.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
 import { palazzoDiOgniMappa } from '../palazziService.js';
@@ -49,8 +50,7 @@ export function erroreVoceDelPin(pin: { nome: string; mappa: string | null }, pu
 /** Le partite ci sono (il file `utente` è attaccato, con le sue tabelle)? Senza, chi allinea gli stati non fa niente. */
 function conPartite(db: AppDatabase): boolean {
   if (!db.prepare("SELECT 1 FROM pragma_database_list WHERE name = 'utente'").get()) return false;
-  const tabelle = new Set((db.prepare("SELECT name FROM utente.sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  return tabelle.has('punto_partita') && tabelle.has('spillo_partita') && tabelle.has('partita');
+  return haTabellaUtente(db, 'punto_partita') && haTabellaUtente(db, 'spillo_partita') && haTabellaUtente(db, 'partita');
 }
 
 /**

@@ -2,7 +2,7 @@
 // DisponibilitaStrutturata — la disponibilità di un Confidente come dato strutturato (R9-01, F4)
 // ============================================================
 //
-// La scheda mostra la struttura (come si incontra, giorni, fasce, eccezioni, «dal») e i luoghi per nome, non più il testo libero (che resta nelle note).
+// La scheda mostra la struttura (come si incontra, giorni, fasce, eccezioni, «dal» dal requisito di rango 1) e i luoghi per nome, non più il testo libero (che resta nelle note).
 // L'editor scrive la struttura e i luoghi col PUT della rotta strutturata; «Ripristina» riporta la struttura alla fonte. Il vecchio editor delle informazioni
 // continua a scrivere solo il testo e le note. Mai un blocco: l'esito «oggi» è un'informazione.
 // L13 (ondata 6, migrazione 306): la pioggia non si modifica qui, sta nei requisiti di rango (fonte unica); la scheda la elenca accanto alle
@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
 import { dataValida, ordineGioco } from '../../../shared/condizioniSpillo';
-import { Campo, CampoTesto } from '../shared/Campo';
+import { CampoTesto } from '../shared/Campo';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
 import { getDisponibilitaStrutturata, getLuoghi, ripristinaDisponibilitaStrutturata, salvaDisponibilitaStrutturata } from '../../services/api';
@@ -52,6 +52,8 @@ function testoEccezione(e: EccezioneDisponibilita): string {
   if (e.tipo === 'giorni-rango') return `Al rango ${e.rango} ${SETTE_GIORNI.every((g) => e.giorni.includes(g)) ? 'tutti i giorni' : `solo ${elenco(e.giorni.map((g) => NOME_GIORNO[g]))}`}`;
   // L13 (O10-2): le fasce con la relazione romantica iniziata nella partita (Takemi: solo di sera)
   if (e.tipo === 'con-relazione') return `Con la relazione romantica solo ${elenco(e.fasce.map((f) => NOME_FASCIA[f]))}`;
+  // L7-07: il rango che si incontra solo in date precise (Ryuji, rango 7: le sere del suo messaggio)
+  if (e.tipo === 'solo-date-rango') return `Al rango ${e.rango} solo ${elenco(e.date.map(conArticolo))}`;
   return e.date.length ? `Non si incontra ${elenco(e.date.map(conArticolo))}` : 'Nessun giorno escluso';
 }
 
@@ -63,6 +65,9 @@ function testoPioggia(ranghi: number[]): string | null {
 
 /** Le eccezioni e la pioggia, nell'ordine in cui la scheda le elenca. */
 const righeEccezioni = (s: Struttura, ranghiPioggia: number[]): string[] => [...s.eccezioni.map(testoEccezione), ...(testoPioggia(ranghiPioggia) ? [testoPioggia(ranghiPioggia)!] : [])];
+
+/** Le stesse in forma breve, per una riga sola (la scheda del luogo): un elenco di date resta nella scheda del Confidente. */
+const righeEccezioniBrevi = (s: Struttura, ranghiPioggia: number[]): string[] => [...s.eccezioni.map((e) => (e.tipo === 'solo-date-rango' ? `Al rango ${e.rango} solo in ${e.date.length} date precise` : testoEccezione(e))), ...(testoPioggia(ranghiPioggia) ? [testoPioggia(ranghiPioggia)!] : [])];
 
 /** La struttura in una frase per «Quando». */
 function testoQuando(s: Struttura): string {
@@ -83,7 +88,7 @@ export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onMo
   return (
     <div className="flex flex-col gap-1 testo-13 text-text-secondary">
       <span><strong className="text-text">Dove:</strong> {luoghi.length ? luoghi.map((l) => l.nome).join(', ') : (s.motivoSenzaLuogo || '—')}</span>
-      <span><strong className="text-text">Quando:</strong> {testoQuando(s)}{s.dal ? ` · ${dataGiocoConArticolo(s.dal, 'da')}` : ''}</span>
+      <span><strong className="text-text">Quando:</strong> {testoQuando(s)}</span>
       {eccezioni.length > 0 && <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">{eccezioni.map((t, i) => <li key={i}>{t}</li>)}</ul>}
       {oggi && <span><span className={`chip ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span> <span className="text-text-muted">{oggi.motivo}</span></span>}
       {!IN_RILASCIO && <span className="flex flex-wrap items-center gap-2">
@@ -99,7 +104,7 @@ export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?
   const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita]);
   if (!d.dati) return d.errore ? null : <span className="testo-12 text-text-muted">…</span>;
   const { struttura: s, oggi } = d.dati;
-  const eccezioni = righeEccezioni(s, d.dati.ranghiNonConLaPioggia ?? []);
+  const eccezioni = righeEccezioniBrevi(s, d.dati.ranghiNonConLaPioggia ?? []);
   return (
     <span className="flex flex-wrap items-center gap-1.5 testo-12 text-text-secondary">
       <span>{testoQuando(s)}{s.dal ? ` · ${dataGiocoConArticolo(s.dal, 'da')}` : ''}{eccezioni.length > 0 ? ` · ${eccezioni.join(' · ')}` : ''}</span>
@@ -110,8 +115,9 @@ export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?
 
 const uguali = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
-/** I giorni del calendario di gioco in cui il Confidente non si incontra: si scelgono (mese e giorno), si aggiungono e si tolgono; mai testo. */
-function DateEscluse({ date, onCambia, disabilitato }: { date: string[]; onCambia: (date: string[]) => void; disabilitato: boolean }) {
+/** Un elenco di giorni del calendario di gioco (quelli in cui non si incontra, o gli unici in cui si incontra un rango): si scelgono (mese e giorno), si
+ *  aggiungono e si tolgono; mai testo. */
+function DateEscluse({ date, onCambia, disabilitato, etichetta = 'Giorno da escludere' }: { date: string[]; onCambia: (date: string[]) => void; disabilitato: boolean; etichetta?: string }) {
   const [nuova, setNuova] = useState('');
   const aggiungibile = dataValida(nuova) && !date.includes(nuova);
   const aggiungi = () => { if (aggiungibile) { onCambia([...date, nuova].sort((a, b) => ordineGioco(a) - ordineGioco(b))); setNuova(''); } };
@@ -124,20 +130,20 @@ function DateEscluse({ date, onCambia, disabilitato }: { date: string[]; onCambi
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Togli ${dataGiocoConArticolo(d)}`} disabled={disabilitato} onClick={() => onCambia(date.filter((x) => x !== d))} /></li>
         ))}</ul>}
       <span className="flex flex-wrap items-center gap-2">
-        <SelettoreData etichetta="Giorno da escludere" valore={nuova} onCambia={setNuova} disabilitato={disabilitato} />
+        <SelettoreData etichetta={etichetta} valore={nuova} onCambia={setNuova} disabilitato={disabilitato} />
         <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi il giorno" disabled={disabilitato || !aggiungibile} onClick={aggiungi} />
       </span>
     </div>
   );
 }
 
-/** I campi dell'editor: la struttura (con «dal» come testo, '' = nessuno) e le chiavi dei luoghi. */
-interface CampiDisponibilita { modo: ModoDisponibilita; giorni: GiornoDisponibilita[]; fasce: FasciaDisponibilita[]; eccezioni: EccezioneDisponibilita[]; dal: string; motivo: string; luoghi: string[] }
+/** I campi dell'editor: la struttura e le chiavi dei luoghi. «Disponibile dal» non è fra questi: è il requisito di rango 1 (L7-06). */
+interface CampiDisponibilita { modo: ModoDisponibilita; giorni: GiornoDisponibilita[]; fasce: FasciaDisponibilita[]; eccezioni: EccezioneDisponibilita[]; motivo: string; luoghi: string[] }
 const campiDisponibilitaDa = (d: DisponibilitaConfidenteDto): CampiDisponibilita => ({
-  modo: d.struttura.modo, giorni: d.struttura.giorni, fasce: d.struttura.fasce, eccezioni: d.struttura.eccezioni, dal: d.struttura.dal ?? '', motivo: d.struttura.motivoSenzaLuogo, luoghi: d.luoghi.map((l) => l.chiave),
+  modo: d.struttura.modo, giorni: d.struttura.giorni, fasce: d.struttura.fasce, eccezioni: d.struttura.eccezioni, motivo: d.struttura.motivoSenzaLuogo, luoghi: d.luoghi.map((l) => l.chiave),
 });
 /** Solo per scrivere il corpo mentre i dati arrivano: la finestra non lo mostra finché `campi` è nullo. */
-const CAMPI_VUOTI: CampiDisponibilita = { modo: 'settimanale', giorni: [], fasce: [], eccezioni: [], dal: '', motivo: '', luoghi: [] };
+const CAMPI_VUOTI: CampiDisponibilita = { modo: 'settimanale', giorni: [], fasce: [], eccezioni: [], motivo: '', luoghi: [] };
 
 /** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. Nel rilascio (sola lettura) non esiste (costante di build). */
 export const EditorDisponibilitaStrutturata: StrumentoDiModifica<typeof EditorDisponibilitaStrutturataReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaStrutturataReale;
@@ -156,18 +162,16 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
   const setGiorni = (giorni: GiornoDisponibilita[]) => aggiorna((c) => ({ ...c, giorni }));
   const setFasce = (fasce: FasciaDisponibilita[]) => aggiorna((c) => ({ ...c, fasce }));
   const setEccezioni = (f: (l: EccezioneDisponibilita[]) => EccezioneDisponibilita[]) => aggiorna((c) => ({ ...c, eccezioni: f(c.eccezioni) }));
-  const setDal = (dal: string) => aggiorna((c) => ({ ...c, dal }));
   const setMotivo = (motivo: string) => aggiorna((c) => ({ ...c, motivo }));
   const setLuoghi = (f: (l: string[]) => string[]) => aggiorna((c) => ({ ...c, luoghi: f(c.luoghi) }));
-  const { modo, giorni, fasce, eccezioni, dal, motivo, luoghi } = campi ?? CAMPI_VUOTI;
+  const { modo, giorni, fasce, eccezioni, motivo, luoghi } = campi ?? CAMPI_VUOTI;
   // le eccezioni hanno uno stato loro (il selettore del rango, il giorno da aggiungere): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiaviEccezioni = useIdStabili(eccezioni.length);
   const [occupato, setOccupato] = useState(false);
   const nomeLuogo = (k: string) => dati?.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
-  const dalValido = dal === '' || dataValida(dal);
   const partenza = dati?.struttura;
   const sporca = !!dati && !!partenza && !!campi && (modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
-    || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave)));
+    || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave)));
   useBozzaSporca(`disponibilita:${chiave}`, 'la disponibilità del Confidente', sporca);
   const alterna = <T,>(lista: T[], v: T): T[] => (lista.includes(v) ? lista.filter((x) => x !== v) : [...lista, v]);
   const ordinati = <T,>(lista: T[], ordine: readonly T[]): T[] => ordine.filter((x) => lista.includes(x));
@@ -178,17 +182,17 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
     finally { setOccupato(false); }
   };
-  const salva = () => esegui(() => salvaDisponibilitaStrutturata(chiave, { modo, giorni, fasce, eccezioni, dal: dal === '' ? null : dal, motivoSenzaLuogo: motivo, luoghi }), 'Disponibilità salvata.');
+  const salva = () => esegui(() => salvaDisponibilitaStrutturata(chiave, { modo, giorni, fasce, eccezioni, motivoSenzaLuogo: motivo, luoghi }), 'Disponibilità salvata.');
   const modificaEccezione = (i: number, e: EccezioneDisponibilita) => setEccezioni((l) => l.map((x, j) => (j === i ? e : x)));
   /** Un rango ha al massimo un'eccezione per tipo (la fascia, i giorni): quelli ancora liberi. */
-  const rangoLibero = (tipo: 'fascia-rango' | 'giorni-rango', r: number): boolean => !eccezioni.some((e) => e.tipo === tipo && e.rango === r);
-  const primoRangoLibero = (tipo: 'fascia-rango' | 'giorni-rango'): number | null => RANGHI.find((r) => rangoLibero(tipo, r)) ?? null;
-  // un elenco di giorni esclusi vuoto non dice niente: si salva solo con almeno un giorno
-  const dateCompilate = eccezioni.every((e) => e.tipo !== 'date' || e.date.length > 0);
+  const rangoLibero = (tipo: 'fascia-rango' | 'giorni-rango' | 'solo-date-rango', r: number): boolean => !eccezioni.some((e) => e.tipo === tipo && e.rango === r);
+  const primoRangoLibero = (tipo: 'fascia-rango' | 'giorni-rango' | 'solo-date-rango'): number | null => RANGHI.find((r) => rangoLibero(tipo, r)) ?? null;
+  // un elenco di giorni vuoto non dice niente: si salva solo con almeno un giorno
+  const dateCompilate = eccezioni.every((e) => (e.tipo !== 'date' && e.tipo !== 'solo-date-rango') || e.date.length > 0);
   const luoghiAggiungibili = tutti.filter((l) => !luoghi.includes(l.chiave)).map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: l.quartiereNome }));
 
   return (
-    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dalValido && dateCompilate} occupato={occupato} sporca={sporca}
+    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dateCompilate} occupato={occupato} sporca={sporca}
       caricamento={!campi} erroreCaricamento={campi ? null : d.errore}
       azioniExtra={dati?.modificata ?<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
     <div className="flex flex-col gap-3 testo-13">
@@ -203,15 +207,17 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
           </fieldset>
         </>
       )}
-      {/* L13: la data si sceglie (mese e giorno del calendario di gioco), non si digita; si salva sempre come «MM-GG», o niente */}
-      <Campo etichetta="Disponibile dal" aiuto="Facoltativa: «nessuna» = disponibile fin dall’inizio." errore={dalValido ? undefined : 'La data salvata non è un giorno del calendario di gioco: sceglila di nuovo (o «nessuna»).'} senzaGruppo>
-        <SelettoreData etichetta="Disponibile dal" facoltativa valore={dal} onCambia={setDal} disabilitato={occupato} />
-      </Campo>
+      {/* L7-06: «Disponibile dal» è il requisito di rango 1 (una sola fonte): qui si legge soltanto */}
+      <p className="m-0 text-text-secondary">{partenza?.dal ? `Disponibile ${dataGiocoConArticolo(partenza.dal, 'da')}: la data si cambia dai requisiti del rango 1.` : 'Nessuna data di avvio: si indica nei requisiti del rango 1.'}</p>
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Eccezioni</legend>
         {eccezioni.length === 0 && <span className="text-text-muted">Nessuna eccezione.</span>}
         {eccezioni.map((e, i) => (
           <div key={chiaviEccezioni.ids[i]} className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-1">
-            <span className="min-w-0 flex-1 break-words">{e.tipo === 'date' ? 'Giorni in cui non si incontra' : testoEccezione(e)}</span>
+            <span className="min-w-0 flex-1 break-words">{e.tipo === 'date' ? 'Giorni in cui non si incontra' : e.tipo === 'solo-date-rango' ? 'Si incontra solo in queste date' : testoEccezione(e)}</span>
+            {e.tipo === 'solo-date-rango' && <>
+              <Selettore compatto ricerca="mai" etichetta="Rango" valore={String(e.rango)} opzioni={RANGHI.filter((r) => r === e.rango || rangoLibero('solo-date-rango', r)).map((r) => ({ chiave: String(r), nome: `rango ${r}` }))} onCambia={(v) => modificaEccezione(i, { ...e, rango: Number(v) })} disabilitato={occupato} />
+              <DateEscluse etichetta="Giorno in cui si incontra" date={e.date} disabilitato={occupato} onCambia={(date) => modificaEccezione(i, { ...e, date })} />
+            </>}
             {e.tipo === 'dopo-rango' && <label className="flex items-center gap-1">giorni <input className="form-input w-16" type="number" min={1} max={30} value={e.giorni} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, giorni: Math.min(30, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>}
             {e.tipo === 'fascia-rango' && <>
               <label className="flex items-center gap-1">rango <input className="form-input w-16" type="number" min={1} max={RANGO_MASSIMO_CONFIDENTE} value={e.rango} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, rango: Math.min(RANGO_MASSIMO_CONFIDENTE, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>
@@ -231,6 +237,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: fascia a un rango" disabled={occupato || primoRangoLibero('fascia-rango') === null} onClick={() => setEccezioni((l) => [...l, { tipo: 'fascia-rango', rango: primoRangoLibero('fascia-rango') ?? 1, fasce: ['sera'] }])} />
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: giorni a un rango" disabled={occupato || primoRangoLibero('giorni-rango') === null} onClick={() => setEccezioni((l) => [...l, { tipo: 'giorni-rango', rango: primoRangoLibero('giorni-rango') ?? 1, giorni: [...SETTE_GIORNI] }])} />
           <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: giorni in cui non si incontra" disabled={occupato || eccezioni.some((e) => e.tipo === 'date')} onClick={() => setEccezioni((l) => [...l, { tipo: 'date', date: [], effetto: 'non-disponibile' }])} />
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: date precise a un rango" disabled={occupato || primoRangoLibero('solo-date-rango') === null} onClick={() => setEccezioni((l) => [...l, { tipo: 'solo-date-rango', rango: primoRangoLibero('solo-date-rango') ?? 1, date: [] }])} />
           {/* L13 (O10-2): solo per un Confidente con cui si può iniziare una relazione romantica */}
           {dati?.romanzabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: fasce con la relazione romantica" disabled={occupato || eccezioni.some((e) => e.tipo === 'con-relazione')} onClick={() => setEccezioni((l) => [...l, { tipo: 'con-relazione', fasce: ['sera'] }])} />}
         </div>

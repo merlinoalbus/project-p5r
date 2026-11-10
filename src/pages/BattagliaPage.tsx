@@ -284,7 +284,44 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
   );
 }
 
-/** I nemici speciali: le Ombre sciagura (riconoscimento, comportamento, stati, ricompense), il Mietitore con la strategia numerata e i Demoni del Tesoro con la loro tabella. */
+/**
+ * L13-04 (migrazione 369): le Ombre sciagura per Palazzo e per Dedalo, e l'oggetto raro di ognuna raggruppato per oggetto (52 coppie in una ventina
+ * di righe, non 52). Due tabelle adattive: sul telefono ogni riga diventa una scheda con l'etichetta della colonna, senza scorrimenti interni.
+ */
+function ElencoSciagura({ elenco, ricompense }: {
+  elenco: NonNullable<BattagliaDto['ombreSciagura']['elenco']>; ricompense: NonNullable<BattagliaDto['ombreSciagura']['ricompenseElenco']>;
+}) {
+  const perOggetto = new Map<string, string[]>();
+  for (const r of ricompense) perOggetto.set(r.oggetto, [...(perOggetto.get(r.oggetto) ?? []), r.ombra]);
+  const conAsterisco = elenco.some((r) => r.ombre.some((x) => x.soloMemento));
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
+        <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Dove compaiono, per Palazzo e Dedalo</span>
+        <div className="area-scorrevole-x">
+          <table className="tabella tabella--adattiva testo-12">
+            <thead><tr><th>Palazzo o Dedalo</th><th>Ombre sciagura</th></tr></thead>
+            <tbody>{elenco.map((r) => <tr key={`${r.sezione}/${r.luogo}`}><td data-etichetta="Dove"><strong>{r.luogo}</strong></td><td data-etichetta="Ombre">{r.ombre.map((x) => `${x.nome}${x.soloMemento ? '*' : ''}`).join(', ')}</td></tr>)}</tbody>
+          </table>
+        </div>
+        {conAsterisco && <p className="m-0 testo-12 text-text-muted">* Esclusive dei Memento.</p>}
+      </div>
+      {perOggetto.size > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Oggetto raro rilasciato</span>
+          <div className="area-scorrevole-x">
+            <table className="tabella tabella--adattiva testo-12">
+              <thead><tr><th>Oggetto</th><th>Lo rilasciano</th></tr></thead>
+              <tbody>{[...perOggetto].map(([oggetto, ombre]) => <tr key={oggetto}><td data-etichetta="Oggetto"><strong>{oggetto}</strong></td><td data-etichetta="Ombre">{ombre.join(', ')}</td></tr>)}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** I nemici speciali: le Ombre sciagura (riconoscimento, comportamento, stati, ricompense, elenco per Palazzo e Dedalo), il Mietitore con la strategia numerata e i Demoni del Tesoro con la loro tabella. */
 function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
@@ -305,7 +342,8 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
           <Voce titolo="Ricompense">{o.ricompense}</Voce>
           <Voce titolo="Dove">{o.doveCompaiono}</Voce>
         </Dati>
-        {!IN_RILASCIO && o.incertezze && <p className="m-0 text-text-muted testo-12">{o.incertezze}</p>}
+        {o.elenco && o.elenco.length > 0 && <ElencoSciagura elenco={o.elenco} ricompense={o.ricompenseElenco ?? []} />}
+        {!IN_RILASCIO && o.incertezze &&<p className="m-0 text-text-muted testo-12">{o.incertezze}</p>}
         <Fonte allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">

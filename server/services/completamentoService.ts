@@ -3,6 +3,7 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
@@ -19,18 +20,17 @@ import { registrazioniCompendio } from './fusione/fusioneService.js';
 import { fattiPartita } from './cruciverbaService.js';
 import { timbriRaccoltiInTutto } from './timbriService.js';
 
-interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number;
+interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; fonte: string; verificato: number;
   /** L13 (O7-4, migrazione 313): quando si ottiene, nel vocabolario unico delle condizioni; assente su uno schema di prima. */
   condizioni_json?: string | null }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
 
 /** Un trofeo come DTO; `mancabile` resta null quando la guida non lo dice, `ottenuto` viene dall'insieme dato. «Quando» è la frase generata
- *  dalle condizioni (L13 O7-4: una sola fonte, nessuna assegnazione automatica: le condizioni non si valutano); il testo `quando` resta solo
- *  dove la 313 non l'ha convertito e le condizioni non ci sono. */
+ *  dalle condizioni (L13 O7-4: una sola fonte, nessuna assegnazione automatica: le condizioni non si valutano). */
 const dto = (r: RigaTrofeo, ottenuti: Set<string>, nomi = nomiCondizioniMemo()): TrofeoDto => {
   const condizioni = leggiCondizioniSalvate(r.condizioni_json ?? null).map((c) => condizioneConTesto(c, nomi));
   return { chiave: r.chiave, nome: r.nome, nomeEn: r.nome_en, tipo: r.tipo, descrizione: r.descrizione, come: r.come, mancabile: r.mancabile === null ? null : r.mancabile === 1,
-    quando: fraseDelleCondizioni(condizioni) ?? (r.quando?.trim() || null), condizioni, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) };
+    quando: fraseDelleCondizioni(condizioni) ?? null, condizioni, fonte: r.fonte, verificato: r.verificato === 1, ottenuto: ottenuti.has(r.chiave) };
 };
 
 /** Le chiavi dei trofei ottenuti nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
@@ -97,7 +97,6 @@ function unitaDelConteggio(c: ConteggioSfidaCovo): { una: string; tante: string;
 const nomeDelNegozio = (chiave: string): string => (prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave;
 
 /** Vero se la tabella delle partite c'è (uno schema di prima non ce l'ha: il conteggio allora non si dice). */
-const tabellaUtente = (nome: string): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(nome);
 
 /**
  * L8-03: a che punto è la partita in quello che la sfida conta, e l'obiettivo. I totali «tutti» si contano nel DB a ogni lettura, mai scritti:
@@ -137,11 +136,11 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
       return { fatti: r.registrate, obiettivo: r.totale };
     }
     case 'cruciverba-risolti': return { fatti: fattiPartita(partitaId).size, obiettivo: c.obiettivo };
-    // L10-02 (377): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 069)
+    // L10-02 (377): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 070)
     case 'timbri-raccolti': return { fatti: timbriRaccoltiInTutto(partitaId), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {
-      const fatti = !tabellaUtente('persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
+      const fatti = !haTabellaUtente(getDb(), 'persona_posseduta') ? 0 : prepared('SELECT COALESCE(MAX(livello), 0) FROM utente.persona_posseduta WHERE partita_id = ?').pluck().get(partitaId) as number;
       return { fatti, obiettivo: c.obiettivo };
     }
   }
@@ -150,7 +149,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
 /** I regali della partita, tutti: la guida dice «almeno 10 regali totali ai Confidenti» e non esclude nessun regalo, quindi conta anche la
  *  Cartolina spedita (revisione dei lotti D e D2: escluderla era una regola senza fonte). */
 function regaliConsegnati(partitaId: number): number {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'regalo_partita'").get()) return 0;
+  if (!haTabellaUtente(getDb(), 'regalo_partita')) return 0;
   return prepared('SELECT COUNT(*) FROM utente.regalo_partita WHERE partita_id = ?').pluck().get(partitaId) as number;
 }
 

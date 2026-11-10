@@ -21,7 +21,8 @@
 // registrabile dal compendio e per fusione.
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { httpErrors, type HttpError } from '../utils/httpError.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import type { PersonaDellaMascheraDto } from '../../shared/types.js';
@@ -95,7 +96,7 @@ export function vociDiCattura(idx: IndiceMaschere = indiceMaschere(), voci?: rea
 
 /** Le Persona registrate nel compendio della partita (vuoto se il compendio non c'è). */
 export function personeRegistrate(partitaId: number): Set<number> {
-  if (!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = 'compendio_partita'").get()) return new Set();
+  if (!haTabellaUtente(getDb(), 'compendio_partita')) return new Set();
   return new Set(prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').pluck().all(partitaId) as number[]);
 }
 

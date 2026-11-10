@@ -25,6 +25,7 @@ import { verificaPartita } from '../verificaPartita.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { conCestino, registraRipristinoCestino } from '../cestinoService.js';
 import { chiaveMappa, idMappa, sincronizzaPercorsiMappe } from './percorsiMappe.js';
+import { verificaPlanimetriaDeiPin } from '../invariantiPuntoVendita.js';
 import { creaMappa, creaSpillo, eliminaMappa, eliminaSpillo, impostaImmagineMappa } from './mappeService.js';
 import { caricataDellaMappa, illustrazioneDellaMappa, immaginiCaricateDelleMappe, urlCaricata } from './immagineMappa.js';
 import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, type ContestoAree, type RigaArea } from './casaMappa.js';
@@ -260,7 +261,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
     if (s.riferimento_tipo !== 'mappa') {
       const nome = (prepared(NOMI_ELEMENTI[s.riferimento_tipo]).get(s.riferimento_chiave) as { nome: string } | undefined)?.nome;
       if (!nome) continue;
-      const lp = luogoDelPin({ uid: s.uid, riferimento_tipo: s.riferimento_tipo, riferimento_chiave: s.riferimento_chiave, nome, descrizione: null }, luoghi);
+      const lp = luogoDelPin({ riferimento_tipo: s.riferimento_tipo, riferimento_chiave: s.riferimento_chiave, nome, descrizione: null }, luoghi);
       // un luogo solo per gli eventi di un Confidente non sta mai in «Luoghi qui» (R5-20f)
       if (lp?.soloEventi) continue;
       // un pin agganciato a un negozio di un altro quartiere (la sua sede): da rivedere, col nome del pin, nessun cambio senza il sì
@@ -607,6 +608,7 @@ export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; du
   // l'unica versione della sua Area: «entra in un'altra area» fonde le due (i legami della vecchia passano alla nuova, la vecchia vuota
   // va nel cestino), e lo si conferma (L3 §3.6.1); «rendila un'area a sé» non ha senso, lo è già
   const sola = !!vecchia && (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(vecchia.chiave) as number) < 2;
+  if (c.colonna !== 'dungeon_chiave') verificaPlanimetriaDeiPin(mappa, dati.area !== undefined ? rigaArea(c, dati.area).chiave : null);
   if (sola && dati.nuova) throw httpErrors.badRequest('gia-area-a-se', `«${vecchia!.nome}» ha solo questa planimetria: è già un’area a sé.`);
   if (sola && dati.area !== undefined && !opz.conferma) {
     const arrivo = rigaArea(c, dati.area);

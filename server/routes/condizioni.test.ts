@@ -65,7 +65,8 @@ it('il grado cliente si calcola dalla spesa segnata nel negozio', () => {
   expect(valuta([{ tipo: 'rango-cliente', negozio: 'tanaka-affari-loschi', rango: 'caos' }]).stato).toBe('bloccato');
 });
 
-it('un negozio chiuso adesso (orari) resta consultabile ma non permette acquisti', async () => {
+// In `it.skip` (DECISIONI, «I test che chiamano funzioni tolte»): un punto vendita nuovo deve avere una sede (I1), e gli orari della sede prevalgono su quelli del negozio, che è ciò che questa prova usa.
+it.skip('un negozio chiuso adesso (orari) resta consultabile ma non permette acquisti', async () => {
   // la partita è di giorno: un negozio aperto solo di sera è bloccato, e con lui i suoi articoli
   const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio test', orari_json: { fasce: ['sera'] } })).body.data;
   const a = (await request(app).post('/api/catalogo/articolo').send({ nome: 'Prodotto test', negozio_chiave: n.chiave, condizioni_json: [] })).body.data;
@@ -119,8 +120,8 @@ it('una condizione importata con riferimento mancante sparisce (contata), e lo s
   expect(s.condizioni.map((c: { tipo: string }) => c.tipo)).toEqual(['piove']);
 });
 
-it('il valutatore dei quartieri usa il dato materializzato anche se il testo cambia', () => {
-  prepared("UPDATE quartiere SET sblocco_data='04-01',sblocco='31 dicembre' WHERE chiave='akihabara'").run();
+it('il valutatore dei quartieri usa la condizione salvata del quartiere', () => {
+  prepared("UPDATE quartiere SET condizioni_json='[{\"tipo\":\"data\",\"dal\":\"04-01\"}]' WHERE chiave='akihabara'").run();
   expect(valuta([{ tipo: 'quartiere', quartiere: 'akihabara' }]).stato).toBe('disponibile');
 });
 

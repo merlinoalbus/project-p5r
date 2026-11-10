@@ -9,6 +9,7 @@
 
 import { z } from 'zod';
 import { boolQuery, elencoInteri, idParam } from './comuni.js';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO, PROFONDITA_MASSIMA_PIANO } from '../../shared/limitiFusione.js';
 
 /** Elenco di id DLC separati da virgola ("1,2,3"). */
 const elencoDlc = elencoInteri(50).optional();
@@ -34,8 +35,8 @@ export const paramsPersonaId = z.object({ personaId: idParam });
 export const queryCicli = z.object({
   partita: idParam.optional(),
   dlc: elencoDlc,
-  lunghezza: z.coerce.number().int().min(2).max(15).optional(),
-  lunghezzaMin: z.coerce.number().int().min(2).max(15).optional(),
+  lunghezza: z.coerce.number().int().min(ANELLI_MINIMI_CICLO).max(ANELLI_MASSIMI_CICLO).optional(),
+  lunghezzaMin: z.coerce.number().int().min(ANELLI_MINIMI_CICLO).max(ANELLI_MASSIMI_CICLO).optional(),
   partnerDistinti: boolQuery,
   alternative: z.coerce.number().int().min(1).max(12).optional(),
   catture: boolQuery,
@@ -65,7 +66,7 @@ export const queryPiani = z.object({
   partita: idParam.optional(),
   dlc: elencoDlc,
   livelloMax,
-  profondita: z.coerce.number().int().min(1).max(4).optional(),
+  profondita: z.coerce.number().int().min(1).max(PROFONDITA_MASSIMA_PIANO).optional(),
   alternative: z.coerce.number().int().min(1).max(10).optional(),
   catture: boolQuery,
   limitaLivello: boolQuery,

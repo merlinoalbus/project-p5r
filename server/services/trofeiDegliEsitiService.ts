@@ -15,14 +15,15 @@
 // (`cediTrofeoAUnTurno`). Nessuno yen si muove da qui (gli importi delle vincite non sono nella guida: si scrivono a mano, decisione 18).
 // ============================================================
 
-import { prepared } from '../db/dbService.js';
+import { getDb, prepared } from '../db/dbService.js';
+import { haTabellaUtente } from '../db/schemaMemo.js';
 import { impostaTrofeo } from './completamentoService.js';
 import { esitiDellAttivita } from './esitiAttivitaService.js';
 
 const TABELLA = 'trofeo_esito_turno';
 
 /** La tabella c'è? (Uno schema di prima della utente 053 non ha trofei dagli esiti: niente da segnare né da togliere.) */
-const conTabella = (): boolean => !!prepared("SELECT 1 FROM utente.sqlite_master WHERE type = 'table' AND name = ?").get(TABELLA);
+const conTabella = (): boolean => haTabellaUtente(getDb(), TABELLA);
 
 interface RigaTrofeoTurno { attivita_chiave: string; ordine: number; trofeo_chiave: string; gia: number; evento_id: number | null }
 

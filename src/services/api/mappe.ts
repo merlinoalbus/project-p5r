@@ -87,7 +87,7 @@ export const impostaSpilloRaccolto = (partitaId: number, spilloId: number, racco
 
 export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; nome: string; dettaglio: string }
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */
-export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite })}`);
+export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30, includi?: string): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite, includi })}`);
 
 /** Le voci della guida che si possono collegare allo spillo (098: un pin può averne più d'una); si collegano con `collegaPinAlPunto`. */
 export const getVociCollegabili = (spilloId: number): Promise<VoceCollegabileDto[]> => apiGet(`/mappe/spilli/${spilloId}/voci-collegabili`);

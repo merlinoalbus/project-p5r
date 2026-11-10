@@ -123,13 +123,6 @@ export const paramsPinDelPunto = z.object({ chiave: z.string().min(1).max(200), 
 /** Il giorno MM-GG del calendario di gioco (l'esistenza del giorno la controlla il servizio con `dataValida`). */
 const giornoGioco = z.string().regex(/^\d{2}-\d{2}$/, 'Il giorno è nel formato MM-GG.');
 
-/** La finestra del Palazzo sulla mappa di Tokyo (2026-10-04): da quando c'è e fino a quando (null = senza fine); con L13 O6-3, insieme,
- *  il furto consigliato e il termine della lettera (tutti e due o nessuno: senza, restano quelli salvati). */
-export const bodyFinestraDungeon = z.object({
-  dal: giornoGioco, al: giornoGioco.nullable(),
-  furtoConsigliato: giornoGioco.nullable().optional(), letteraEntro: giornoGioco.nullable().optional(),
-}).refine((b) => (b.furtoConsigliato === undefined) === (b.letteraEntro === undefined), { message: 'Il furto consigliato e il termine della lettera si danno insieme.' });
-
 /**
  * Le regole d'atterraggio dalla mappa di Tokyo (2026-10-04), nell'ordine in cui si provano: quando valgono (date nulle = sempre;
  * `al` nullo = da `dal` in poi; `dal` = `al` = un giorno solo), la planimetria del Palazzo (chiave pubblica) e il pin d'arrivo.

@@ -13,7 +13,9 @@
 // aggiungere dati costruisce un oggetto nuovo.
 // ============================================================
 
-import { prepared, type AppDatabase } from '../db/dbService.js';
+import { getDb, prepared, type AppDatabase } from '../db/dbService.js';
+import { haTabella } from '../db/colonne.js';
+import { haColonnaMain } from '../db/schemaMemo.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
 import { logger } from '../utils/logger.js';
 import { analizzaPercorso, generePrimitivo, impostaImmutabile, risolvi } from '../../shared/percorsoGuida.js';
@@ -128,8 +130,7 @@ export function correzioniOrfane(chiave: string): string[] {
  * che l'app la usi): null se la tabella o la chiave non ci sono o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
  */
 export function bloccoGuidaDi(db: AppDatabase, chiave: string): unknown {
-  const tabella = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'dati_guida'").get();
-  if (!tabella) return null;
+  if (!haTabella(db, 'dati_guida')) return null;
   const riga = db.prepare('SELECT json FROM dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
   if (!riga) return null;
   try {
@@ -169,7 +170,7 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;
   // le colonne della 118 ci sono (sempre, dopo le migrazioni): un errore SQL qui è un guasto vero e risale, non diventa «nessuna finestra»
-  if (prepared("SELECT 1 FROM pragma_table_info('dungeon', 'main') WHERE name = 'finestra_dal'").get()) {
+  if (haColonnaMain(getDb(), 'dungeon', 'finestra_dal')) {
     const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
     finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
     return finestre;

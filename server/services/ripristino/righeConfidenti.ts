@@ -13,7 +13,8 @@
 // posto di «sconsigliato», che la guida non usa. Una fotografia di prima con «sconsigliato» resta leggibile: quel campo non si rimette più.
 // ============================================================
 
-import { prepared } from '../../db/dbService.js';
+import { getDb, prepared } from '../../db/dbService.js';
+import { haColonnaMain } from '../../db/schemaMemo.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import type { CampoDef } from './registro.js';
@@ -23,7 +24,7 @@ const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v =
 const CHIAVE = "confidente_chiave || ':' || ordine";
 
 interface RigaRegalo { confidente_chiave: string; ordine: number; nome: string; dove: string | null; costo: string | null; reazione: number | null; catalogo_chiave: string | null; nota: string | null }
-const conReazione = (): boolean => (prepared('PRAGMA main.table_info(confidente_regalo)').all() as Array<{ name: string }>).some((c) => c.name === 'reazione');
+const conReazione = (): boolean => haColonnaMain(getDb(), 'confidente_regalo', 'reazione');
 const riga = (chiave: string): RigaRegalo =>
   prepared(`SELECT confidente_chiave, ordine, nome, dove, costo, ${conReazione() ? 'reazione' : 'NULL AS reazione'}, catalogo_chiave, nota FROM confidente_regalo WHERE ${CHIAVE} = ?`).get(chiave) as RigaRegalo;
 /** Le tre reazioni della guida, come scelta. */

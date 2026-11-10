@@ -4,6 +4,10 @@
 
 import type { DescrizioniArea } from '../tipi.js';
 
+/** I rifiuti di un pin verso un punto vendita o un luogo di macchine (`shared/puntoVendita.ts`). */
+const ERRORI_PIN_DI_VENDITA = [[400, 'punto-vendita-senza-sede'], [400, 'sede-senza-area'], [400, 'pin-fuori-dall-area-della-sede'], [409, 'punto-vendita-gia-sulla-mappa'],
+  [400, 'pin-senza-macchina'], [404, 'punto-vendita-non-trovato']] as const;
+
 /** Le descrizioni delle rotte di `/api/mappe` (`routes/mappe.ts`). Mappe e spilli sono dati di gioco condivisi fra le partite. */
 export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   'GET /api/mappe/risolvi/:chiave': {
@@ -11,12 +15,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'Se la chiave è l\'alias di una vecchia mappa d\'area con una destinazione valida, risponde con la sezione della guida dentro la mappa del suo Palazzo; altrimenti con la mappa di quella chiave (chiave pubblica o interna). La chiave è libera: un indirizzo scritto a mano che non corrisponde a nulla è un 404, non un errore di validazione.',
     risposta: '`RisoluzioneMappaDto`: `{ tipo: "mappa", mappa, casa }` (L2: `casa` è l\'unica pagina che mostra la mappa — La città, il quartiere, l\'Area con `?planimetria=` se la versione non è la predefinita, o il visore) oppure `{ tipo: "guida", area, dungeon, mappaPalazzo, nome }`',
     errori: [[404, 'mappa-non-trovata']],
-  },
-  'GET /api/mappe/contenuti/:chiave': {
-    sommario: 'Contenuti della guida di una mappa: aree, collegamenti, punti e planimetrie di ogni area',
-    descrizione: 'Per la mappa radice di un Palazzo le aree di tutto il Palazzo, altrimenti quelle legate alla mappa. Per ogni area: i collegamenti, i punti (gli elementi della guida più le voci che nessun elemento rappresenta, con i passi degli Enigmi subito sotto il loro Enigma) e le planimetrie. Con `partita` le schede portano anche lo stato di quella partita. Da L4 (§2.3), nei Palazzi i punti sono **le voci** della guida (`punto:<chiave>`, con stato nella partita, carattere, esauribilità e la «posizione da collocare» della scheda senza mappa che hanno assorbito, finché non hanno un pin): le schede senza mappa legate a una voce non compaiono più come elementi a sé, quelle senza voce stanno nelle «Schede da sistemare» della scheda del Palazzo. I dedali dei Memento restano come prima.',
-    risposta: '`ContenutiMappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
   },
   'GET /api/mappe/accesso/:tipo/:chiave': {
     sommario: '«Apri sulla mappa»: dove si trova sulle mappe un\'entità della guida',
@@ -55,7 +53,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/riferimenti': {
     sommario: 'Entità collegabili a uno spillo nell\'editor, per tipo e testo',
-    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Al più `limite` risultati (30 se non indicato).',
+    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Negozi, luoghi e attività nascosti non si propongono; `includi` (la chiave già collegata al pin) mette in testa quella voce anche se è nascosta, con «nascosto» nel `dettaglio`. Al più `limite` risultati (30 se non indicato).',
     risposta: 'Elenco di `{ tipo, chiave, nome, dettaglio }`',
   },
   'PUT /api/mappe/ordine': {
@@ -104,13 +102,13 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     sommario: 'Raggruppamento di una planimetria: area a cui appartiene ed etichetta della versione (rotta vecchia)',
     descrizione: 'Rotta di prima di L3, riscritta sul modello nuovo per una planimetria con Area: `etichetta` è l\'etichetta della sua versione (`versione_etichetta`), `gruppoNome` il nome dell\'Area (come «Modifica area»), `gruppoId` (la chiave di un\'altra planimetria, pubblica o interna; da L11 non è più l\'id di un gruppo d\'immagini) sposta la versione nell\'Area di quella, `gruppoId: null` senza nome la rende un\'Area a sé (se l\'Area ha altre versioni). Per le mappe senza Area (la radice di un Palazzo, i fogli dei Memento) 409 `mappa-senza-area`: il gruppo d\'immagini non esiste più (L11, B9). Il nome della mappa non cambia; il client nuovo usa le rotte delle Aree.',
     risposta: 'La mappa aggiornata: `MappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-area']],
+    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-area'], [409, 'planimetria-con-pin-di-vendita']],
   },
   'PUT /api/mappe/:chiave/stanza': {
     sommario: 'Fa entrare una planimetria nell\'area di un\'altra, o la rende un\'area a sé (rotta vecchia)',
     descrizione: 'Rotta di prima di L3, riscritta sul modello nuovo per una planimetria con Area: con `con` = un\'altra planimetria dello stesso Palazzo o quartiere, la versione va in fondo a quelle dell\'Area di quella («Sposta la versione in un\'altra area», `PUT /api/aree/colloca`); con `con: null` diventa un\'Area a sé chiamata `nome` (o con il suo nome; se è già sola, l\'Area prende quel nome). L\'unica versione di un\'Area che entra in un\'altra fonde le due senza chiedere conferma (il gesto di questa rotta era già esplicito), e la vecchia va comunque nel cestino coi suoi legami (L3 §3.6.1). L\'Area d\'arrivo, se aveva una planimetria sola, prende il nome `nome` come correzione («Ripristina» la riporta al seed), ma mai sopra un nome dato dall\'utente, che resta. Per le mappe senza Area (la radice di un Palazzo, i fogli dei Memento) 409 `mappa-senza-area` (L11, B9). Tutto in una transazione.',
     risposta: 'La mappa aggiornata: `MappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-area'], [400, 'stanza-non-valida'], [400, 'stanza-di-altro-luogo']],
+    errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-area'], [400, 'stanza-non-valida'], [400, 'stanza-di-altro-luogo'], [409, 'planimetria-con-pin-di-vendita']],
   },
   'PUT /api/mappe/:chiave/immagine': {
     sommario: 'Carica l\'immagine di base di una mappa (corpo grezzo image/*)',
@@ -123,7 +121,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     sommario: 'Crea uno spillo su una mappa',
     descrizione: 'La categoria del tipo decide il resto: i consumabili sono collezionabili, gli spilli di città non hanno condizioni (salvo il Confidente, dal 2026-10-04), la destinazione vale solo per gli spostamenti e il riferimento deve essere di un tipo ammesso dalla categoria ed esistere. Un riferimento «punto» diventa la voce della guida del pin, con le regole del collegamento (voce non descrittiva, del Palazzo della planimetria). Le condizioni devono citare chiavi esistenti. Lo spillo nasce dell\'utente, in una transazione.',
     risposta: 'Lo spillo creato: `SpilloDto`',
-    errori: [[404, 'mappa-non-trovata'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'], [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio'], [400, 'pin-fuori-dal-palazzo'], [404, 'condizione-non-trovata'], [404, 'destinazione-non-trovata']],
+    errori: [...ERRORI_PIN_DI_VENDITA, [404, 'mappa-non-trovata'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'], [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio'], [400, 'pin-fuori-dal-palazzo'], [404, 'condizione-non-trovata'], [404, 'destinazione-non-trovata']],
   },
   'POST /api/mappe/:chiave/passaggi': {
     sommario: 'Crea uno spillo di passaggio verso un\'altra mappa in un punto libero',
@@ -135,7 +133,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     sommario: 'Aggiorna uno spillo: i campi assenti restano',
     descrizione: 'Senza i campi CAS resta il comportamento storico: con `mappa` lo si sposta su un\'altra mappa; una scheda della guida senza mappa non accetta coordinate, mappa né destinazione. Su una planimetria un riferimento «punto» diventa una voce in più del pin (098), e spostando il pin le sue voci devono restare del Palazzo. Cambiando tipo, un riferimento non più ammesso dalla categoria cade. Le condizioni non possono far dipendere il pin da se stesso né chiudere un giro fra pin. Uno spillo della guida modificato diventa dell\'utente. Il ramo CAS richiede `{ riferimentoLuogo, revisioneRaccordoAttesa }`, token 64hex, e accetta soltanto il campo aggiuntivo opzionale areaLuogo; qualsiasi altro campo è rifiutato (400). Prima di ogni effetto, nella transazione del PUT, ricontrolla tutte le invarianti del GET e la stessa impronta, compreso il luogo target e, nel v2, il contesto dell’Area; una fotografia diversa è 409. Solo dopo modifica i due riferimenti e updated_at del pin, se necessari, e nel v2 la sola Area del luogo. Tutti gli altri dati raw, condizioni comprese, e i legami restano identici. riferimentoLuogo o areaLuogo senza token sono rifiutati; il riferimento storico continua a chiamarsi riferimento.',
     risposta: 'Lo spillo aggiornato: `SpilloDto`, o `SchedaContenutoGuidaDto` per una scheda della guida senza mappa. Nel ramo CAS è ammesso il solo campo aggiuntivo opzionale areaLuogo: per la proposta del venditore il riferimento e la sola colonna luogo.area_chiave vengono aggiornati nella stessa transazione, dopo tutte le guardie. Uno stato già corrispondente non riscrive timestamp. Ogni numero di righe modificate inatteso annulla l’intera operazione; nessuna successiva compensazione o spostamento del pin.',
-    errori: [[404, 'spillo-non-trovato'], [400, 'contenuto-non-spaziale'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'],
+    errori: [...ERRORI_PIN_DI_VENDITA, [404, 'spillo-non-trovato'], [400, 'contenuto-non-spaziale'], [400, 'riferimento-non-ammesso'], [404, 'riferimento-non-trovato'],
       [400, 'pin-fuori-dal-palazzo'], [404, 'condizione-non-trovata'], [400, 'condizione-su-se-stesso'], [400, 'condizioni-in-giro'],
       [400, 'raccordo-corpo-non-valido'], [409, 'raccordo-precondizione-cambiata'], [409, 'raccordo-pin-non-ammesso'],
       [409, 'raccordo-condizioni-non-ammesse'], [409, 'raccordo-luogo-non-ammesso'], [409, 'raccordo-formato-inatteso'], [409, 'raccordo-area-incompatibile']],

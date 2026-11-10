@@ -54,7 +54,7 @@ const chiaveOfferta = (o: OffertaOggettoDto) => `${o.articolo}|${o.sedeChiave ??
 
 /** Dove si compra un'offerta, in una riga. */
 function etichettaOfferta(o: OffertaOggettoDto): string {
-  const dove = o.sedeNome && o.sedeNome !== o.negozioNome ? `${o.negozioNome} (${o.sedeNome})` : o.negozioNome;
+  const dove = o.negozioTipo !== 'distributore' && o.sedeNome && o.sedeNome !== o.negozioNome ? `${o.negozioNome} (${o.sedeNome})` : o.negozioNome;
   return `${dove}${o.prezzo !== null ? ` · ${o.prezzo === 0 ? 'Gratis' : formattaYen(o.prezzo)}` : ''}`;
 }
 
@@ -136,7 +136,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
     try {
       const esito = await regalaOggetto(partita, {
         confidente, catalogo: chiave, bonusArcano: bonus, ...(invito ? { invito } : {}),
-        ...(segna && offerta ? { acquisto: { articolo: offerta.articolo, ...(offerta.sedeChiave ? { sede: offerta.sedeChiave } : {}) } } : {}),
+        ...(segna && offerta ? { acquisto: { articolo: offerta.articolo } } : {}),
       });
       onFatto(esito);
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Regalo non registrato.'); }

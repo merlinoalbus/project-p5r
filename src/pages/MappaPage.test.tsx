@@ -11,14 +11,13 @@ import { useAssetStore } from '../stores/assetStore';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { scegliVoce } from '../../test/selettore';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import type { ContenutiMappaDto } from '../../shared/organizzazioneMappe';
 import { MappaPage } from './MappaPage';
 import { annotaNavigazione } from '../utils/ritornoMappe';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 
-const { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ getConteggiAlbero: vi.fn(), risolviMappa: vi.fn(async (mappa: string): Promise<{ tipo: string; mappa: string; casa?: string }> => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
+const { risolviMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ getConteggiAlbero: vi.fn(), risolviMappa: vi.fn(async (mappa: string): Promise<{ tipo: string; mappa: string; casa?: string }> => ({tipo:'mappa',mappa})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, radiceDi: null, versione: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
@@ -65,7 +64,6 @@ beforeEach(() => {
     usePreferenzeStore.setState({graficaPredefinita:true});
     useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});
     risolviMappa.mockReset().mockImplementation(async (mappa:string)=>({tipo:'mappa',mappa}));
-    getContenutiMappa.mockReset().mockImplementation(async (mappa:string)=>({mappa,aree:[]}));
     getAlberoMappe.mockReset(); getMappa.mockReset(); impostaSpilloRaccolto.mockReset(); impostaStatoPunto.mockReset(); impostaAcquisto.mockReset();
     getAlberoMappe.mockResolvedValue(albero);
     // E2 (L3): i conteggi dei pin dell'albero intero, dal server
@@ -440,10 +438,8 @@ it('il contesto URL cambia il titolo del visore e il selettore può ripristinare
   expect(screen.getByRole('list',{name:'Nomi nei contesti del gioco'})).toBeInTheDocument();
 });
 
-const guidaAccessibile: ContenutiMappaDto = {mappa:'citta-shibuya',aree:[{chiave:'biblioteca',nome:'Biblioteca',descrizione:'Contenuto conservato',mappe:[],punti:[]}]};
 it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
-  getContenutiMappa.mockResolvedValueOnce(guidaAccessibile);
   getAlberoMappe.mockResolvedValue([{...albero[3],genitore:'citta-shibuya'}]);
   getMappa.mockResolvedValue({...dettaglio,nome:'Palazzo di Kamoshida',tipo:'palazzo',immagineUrl:null,asset:'palazzi/kamoshida',larghezza:null,altezza:null,spilli:[],figli:[albero[3]]});
   monta('/guida/mappe/citta-shibuya?area=biblioteca');
@@ -454,7 +450,6 @@ it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessib
 });
 it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
-  getContenutiMappa.mockResolvedValueOnce(guidaAccessibile);
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/native/RMAP_153_1_0':'/asset/mappe/native/RMAP_153_1_0.png'}},caricato:true,mancanti:{}});
   getMappa.mockResolvedValue({...dettaglio,immagineUrl:null,asset:'mappe/native/RMAP_153_1_0',larghezza:1536,altezza:1536,spilli:[],contesti:[{id:'a',nome:'Museo, 1P',campo:'F1',texpack:1},{id:'b',nome:'Museo, 2P',campo:'F2',texpack:2}]});
   monta('/guida/mappe/citta-shibuya?contesto=a&area=biblioteca');

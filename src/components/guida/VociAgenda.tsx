@@ -33,7 +33,7 @@ interface Props {
   selezione?: SelezioneRiga;
 }
 
-/** Evento, scadenza o promemoria: niente spunta (è qualcosa che succede, non da fare), cartellino del genere, menu dei gesti. */
+/** Promemoria: niente spunta (è qualcosa che succede, non da fare), cartellino del genere, menu dei gesti. */
 export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, maniglia, rifRiga, classeRiga, selezione }: Props) {
   return (
     <li id={`voce-${e.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeRiga ?? ''} ${classeSelezioneRiga(selezione)}`} {...selezione?.gestori}>

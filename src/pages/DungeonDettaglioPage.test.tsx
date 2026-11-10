@@ -35,6 +35,9 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDun
   getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa,
   creaVoceDallaScheda, collegaSchedaAllaVoce }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// la conferma dell'eliminazione passa da `conferma()` (DialogoConferma in primo piano): le correzioni sono la finestra di modifica comune, col piè fisso
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../stores/confermaStore')>()), conferma }));
 // `useMedia` risponde alla larghezza scelta dal test (0 di partenza: la scheda sotto i 1024 px, come in jsdom senza finto)
 const media = vi.hoisted(() => ({ larghezza: 0 }));
 // L9-06: l'elenco delle aree è montato in una forma sola; a larghezza 0 (i test che non scelgono un formato) vale la colonna, quella che questi test leggono
@@ -1219,7 +1222,8 @@ it('il testo di un’infiltrazione si modifica con «Modifica infiltrazione», a
   const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre nord' } });
   fireEvent.change(modulo.getByLabelText('Descrizione'), { target: { value: 'La torre dell’ala nord.' } });
-  fireEvent.click(modulo.getByRole('button', { name: 'Salva' }));
+  // «Salva» sta nel piè fisso della finestra, fuori dal modulo dei campi
+  fireEvent.click(within(screen.getByRole('dialog', { name: /^Modifica testo: l’infiltrazione/ })).getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(aggiornaArea).toHaveBeenCalledWith('k-02', expect.objectContaining({ nome: 'Torre nord', descrizione: 'La torre dell’ala nord.' })));
 });
 
@@ -1231,10 +1235,10 @@ it('anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e l
   expect(await screen.findByRole('heading', { level: 2, name: 'Cortile' })).toBeInTheDocument();
   apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: /^Modifica infiltrazione: «/ }));
-  const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
-  fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
-  expect(modulo.getByText(/Se ne va dalla guida per tutte le partite.*le aree del Palazzo restano.*Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
-  fireEvent.click(modulo.getByRole('button', { name: 'Confermo' }));
+  conferma.mockResolvedValue(true);
+  fireEvent.click(within(screen.getByRole('dialog', { name: /^Modifica testo: l’infiltrazione/ })).getByRole('button', { name: 'Elimina' }));
+  await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
+  expect(conferma.mock.calls[0][0].testo).toMatch(/Se ne va dalla guida per tutte le partite.*le aree del Palazzo restano.*Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./);
   await waitFor(() => expect(eliminaArea).toHaveBeenCalledWith('k-03'));
   // senza parametri la scheda apre la prima infiltrazione
   expect(await screen.findByRole('heading', { level: 2, name: 'Cancello' })).toBeInTheDocument();
@@ -1565,7 +1569,7 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   fireEvent.click(screen.getByRole('button', { name: /^Correggi la scheda: il Palazzo/ }));
   const modulo = screen.getByRole('form', { name: /Correggi il Palazzo/ });
   fireEvent.change(within(modulo).getByLabelText('Nome'), { target: { value: 'Castello' } });
-  fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
+  fireEvent.click(within(screen.getByRole('dialog', { name: /^Correggi la scheda: il Palazzo/ })).getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(aggiornaDungeon).toHaveBeenCalledWith('kamoshida', expect.objectContaining({ nome: 'Castello' })));
   // L13 O6-3: le date non toccate non si mandano
   expect(aggiornaDungeon.mock.calls[0]![1]).not.toHaveProperty('date');
@@ -1591,7 +1595,7 @@ it('«Correggi la scheda» cambia le date del Palazzo coi selettori: rovesciate 
   expect(within(modulo).getByRole('alert')).toHaveTextContent('Il furto consigliato (1 aprile) viene prima dell’apertura (12 aprile).');
   scegliVoce('Furto consigliato: giorno', '22', furto);
   expect(within(modulo).queryByRole('alert')).toBeNull();
-  fireEvent.click(within(modulo).getByRole('button', { name: 'Salva' }));
+  fireEvent.click(within(screen.getByRole('dialog', { name: /^Correggi la scheda: il Palazzo/ })).getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(aggiornaDungeon).toHaveBeenCalledWith('kamoshida', expect.objectContaining({
     date: { dal: '04-12', al: '05-02', furtoConsigliato: '04-22', letteraEntro: null },
   })));

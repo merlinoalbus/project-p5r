@@ -36,8 +36,11 @@ export interface CampoDef {
   /** Lunghezza massima di un testo (default: 600 per `testo`, 6000 per `testolungo`) o valore massimo di un numero (default 1000000). */
   max?: number;
   opzioni?: Array<{ chiave: string; nome: string }>;
-  /** L8-03: un testo con una forma propria (`condizioni`: JSON di un elenco di condizioni; `giorno`: «MM-GG»), ricontrollata al salvataggio. */
+  /** Un campo con una forma propria (`condizioni`: JSON di un elenco di condizioni; `giorno`: «MM-GG», ricontrollate al salvataggio; `persone` e
+   *  `persone-in-ordine`: Persona scelte da `opzioni`, che la `valida` della riga ricontrolla). */
   formato?: FormatoCampoCorrezione;
+  /** Quante voci deve avere almeno l'elenco: la finestra lo dice prima di salvare, la `valida` della riga lo ricontrolla. */
+  minimoVoci?: number;
 }
 
 /** Un oggetto che sta in un blocco JSON di `dati_guida`. */
