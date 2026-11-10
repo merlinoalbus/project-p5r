@@ -759,18 +759,22 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     void onSalva(dati);
   };
   const schedaRef = useRef<HTMLElement | null>(null);
-  // «Salva spillo» sta nel piè fermo sul bordo del pannello; in più, se la scheda appena scelta parte sotto il bordo (a ≤860 px, pannello basso
-  // sotto la mappa), il pannello si porta su di lei, subito sotto le sezioni che restano ferme in alto, così si vede che cosa si salva.
+  // «Salva spillo» sta nel piè fermo sul bordo del pannello; in più, se la cima della scheda appena scelta non è fra le sezioni ferme in alto e il
+  // piè (parte sotto il bordo, a ≤860 px col pannello basso sotto la mappa, o è già passata sopra perché il pannello era scorso), il pannello si
+  // porta su di lei, subito sotto le sezioni, così si vede che cosa si salva.
   useLayoutEffect(() => {
     const scheda = schedaRef.current;
     const pannello = scheda?.closest<HTMLElement>('.visore-mappa__pannello');
     if (!scheda || !pannello) return;
     const bordo = pannello.getBoundingClientRect();
-    const piede = pannello.querySelector('.editor-mappa__piede')?.getBoundingClientRect().height ?? 0;
-    // la scheda è in vista se comincia sopra il piè (1 px di tolleranza per zoom e densità non interi)
-    if (scheda.getBoundingClientRect().top <= bordo.bottom - piede + 1) return;
+    // il piè di questa scheda, che le sta subito accanto (non un altro piè del pannello)
+    const piedeAccanto = scheda.nextElementSibling;
+    const piede = piedeAccanto?.classList.contains('editor-mappa__piede') ? piedeAccanto.getBoundingClientRect().height : 0;
     const sezioni = pannello.querySelector('.editor-mappa__sezioni')?.getBoundingClientRect().height ?? 0;
-    pannello.scrollTop += scheda.getBoundingClientRect().top - bordo.top - sezioni;
+    const cima = scheda.getBoundingClientRect().top;
+    // 1 px di tolleranza per zoom e densità non interi
+    if (cima >= bordo.top + sezioni - 1 && cima <= bordo.bottom - piede + 1) return;
+    pannello.scrollTop += cima - bordo.top - sezioni;
   }, []);
   return (
     <>
