@@ -23,7 +23,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
     contatori: [{ chiave: 'film-completati', nome: 'Film o DVD completati' }],
   })),
   getConfidenti: vi.fn(async () => [{ chiave: 'sojiro', nome: 'Sojiro Sakura', arcana: 'Hierophant' }, { chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers' }]),
-  getQuartieri: vi.fn(async () => [{ chiave: 'akihabara', nome: 'Akihabara', sbloccoData: '08-31' }, { chiave: 'ueno', nome: 'Ueno', sbloccoData: null }]),
+  getQuartieri: vi.fn(async () => [{ chiave: 'akihabara', nome: 'Akihabara' }, { chiave: 'ueno', nome: 'Ueno' }]),
   getRichieste: vi.fn(async () => ({ richieste: [{ chiave: 'lo-zio-ingordo', nome: 'Lo zio ingordo' }] })),
   getDungeons: vi.fn(async () => [{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo' }, { chiave: 'madarame', nome: 'Palazzo di Madarame', tipo: 'palazzo' }]),
 }));

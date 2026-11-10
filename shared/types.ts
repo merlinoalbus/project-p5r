@@ -2224,7 +2224,6 @@ export interface QuartiereRiassuntoDto {
   illustrazione: IllustrazioneDto;
   /** Quante Aree ha il quartiere (L2). */
   aree: number;
-  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
@@ -2324,7 +2323,6 @@ export interface LuogoDettaglioDto extends LuogoDto {
 export interface QuartiereDettaglioDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;
-  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */

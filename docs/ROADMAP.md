@@ -217,6 +217,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
   `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.
 
+- **Tre luoghi ancora da collocare.** Libreria Nagiuri, Odaiba Seaside Park e Stazione di Shibuya stanno in quartieri con Aree, ma nessun pin
+  indica la loro: si collocano dall'editor o dalla pagina del quartiere quando si vede in gioco dove stanno.
 - **Un solo «dove» dei negozi: un residuo.** Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà anche
   per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati.
 

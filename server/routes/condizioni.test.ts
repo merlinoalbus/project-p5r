@@ -119,8 +119,8 @@ it('una condizione importata con riferimento mancante sparisce (contata), e lo s
   expect(s.condizioni.map((c: { tipo: string }) => c.tipo)).toEqual(['piove']);
 });
 
-it('il valutatore dei quartieri usa il dato materializzato anche se il testo cambia', () => {
-  prepared("UPDATE quartiere SET sblocco_data='04-01',sblocco='31 dicembre' WHERE chiave='akihabara'").run();
+it('il valutatore dei quartieri usa la condizione salvata del quartiere', () => {
+  prepared("UPDATE quartiere SET condizioni_json='[{\"tipo\":\"data\",\"dal\":\"04-01\"}]' WHERE chiave='akihabara'").run();
   expect(valuta([{ tipo: 'quartiere', quartiere: 'akihabara' }]).stato).toBe('disponibile');
 });
 

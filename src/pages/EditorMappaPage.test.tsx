@@ -65,7 +65,7 @@ describe('EditorMappaPage', () => {
     api.getMappa.mockResolvedValue(base);
     // elenchi della Guida per le condizioni di visibilità
     api.getConfidenti.mockResolvedValue([{ chiave: 'sojiro', nome: 'Sojiro Sakura' }, { chiave: 'ann', nome: 'Ann Takamaki' }]);
-    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', sbloccoData:'08-31', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
+    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
     api.getRichieste.mockResolvedValue({ richieste: [{ chiave: 'zio-ingordo', nome: 'Lo zio ingordo' }], jose: null, completate: 0, totale: 1 });
     api.getDungeons.mockResolvedValue([{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', ordine: 1 }, { chiave: 'madarame', nome: 'Palazzo di Madarame', tipo: 'palazzo', ordine: 2 }]);
     // gli elenchi chiusi di negozi, attività, luoghi e Confidenti per gli spilli di città

@@ -756,6 +756,9 @@
   /* ---- Visore delle mappe a livelli (Fase 13.2): tela, spilli a goccia, pannello laterale ---- */
   .visore-mappa { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text); container-type: inline-size; }
   .visore-mappa--intero { position: fixed; inset: 0; z-index: 60; }
+  /* sotto i 1024 px la barra di navigazione in basso (`lg:hidden`, h-16, z 100) sta sopra il visore: il visore finisce dove lei comincia, se no
+     il fondo del pannello (e la tela) restano coperti e irraggiungibili */
+  @media (max-width: 1023.98px) { .visore-mappa--intero { bottom: 64px; } }
   .visore-mappa--incorporato { position: relative; height: 100%; min-height: 220px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
   .visore-mappa__barra { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); }
   .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: var(--testo-13); }
@@ -1040,6 +1043,8 @@
      su il foglio starebbe a galleggiare su un vuoto preso da un altro contesto. */
   .spillo-popup--foglio { position: fixed; left: 8px; right: 8px; bottom: 12px; top: auto; width: auto; max-width: none; transform: none !important; max-height: 60dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 40; background: rgb(11,11,14); }
   .spillo-popup--foglio::after { display: none; }
+  /* il foglio scorre già da sé: la merce non aggiunge una seconda barra dentro (L5-07) */
+  .spillo-popup--foglio .spillo-popup__merce { max-height: none; overflow: visible; }
   /* Con la guida aperta come foglio (sotto i 1024 px) il riquadro del pin o del gruppo le si impila sopra (la guida è a z 70): sotto di lei
      sparirebbe. Il foglio da tablet in su sta nella colonna del visore (`left`/`right` dal componente). */
   .spillo-popup.spillo-popup--sopra-guida { z-index: 75; }
@@ -1333,7 +1338,8 @@
   .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; min-height: 44px; min-width: 44px; }
   .visore-mappa__figlia:hover, .visore-mappa__voce:hover { border-color: var(--color-border); background: var(--color-surface); }
   .visore-mappa__voce--attiva { border-color: var(--color-primary); background: var(--color-primary-bg); }
-  .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  /* L'elenco non ha una barra sua: scorre l'unico elemento scorrevole del pannello, `.visore-mappa__pannello` (L5-07) */
+  .visore-mappa__elenco { border: 1px solid var(--color-border); border-radius: var(--radius-md); }
   .visore-mappa__scheda { border: 1px solid var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); padding: 10px; }
   /* Larghezze fisse: nel pannello (≤340 px) il layout automatico, con `overflow-wrap: anywhere` ereditato da body, riduceva «Articolo» a un
      carattere (min-content) e lasciava 700+ px alla «Disponibile» senza a capo. Le parole lunghe si spezzano solo quando non stanno nella cella. */
@@ -1350,6 +1356,9 @@
        pannello è aperto**: l'altezza fissa serve a non far ballare la pagina mentre si guarda la
        mappa, non a schiacciare un pannello che si è chiesto di vedere. */
     .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; }
+    /* A schermo intero il visore è alto quanto la finestra: la riga del pannello non può uscirne (barra + 240 + 60vh a 812 sforava, e il
+       fondo del pannello restava irraggiungibile), scorre lui per quel che non ci sta. */
+    .visore-mappa--intero .visore-mappa__corpo { grid-template-rows: minmax(240px, 1fr) minmax(0, auto); }
     .visore-mappa__pannello { border-right: 0; border-top: 1px solid var(--color-border); max-height: 60vh; min-height: 0; order: 2; }
     .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) { height: auto; }
     .visore-mappa--incorporato:not(.visore-mappa--pannello-chiuso) .visore-mappa__corpo { min-height: 240px; }
@@ -2617,7 +2626,15 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
-.visore-mappa--editor .visore-mappa__pannello { background:#131419; }
+/* scroll-padding: il fuoco da tastiera non finisce sotto le sezioni in alto o sotto il piè del modulo */
+.visore-mappa--editor .visore-mappa__pannello { background:#131419; scroll-padding-block:120px 130px; }
+/* Il piè del modulo dello spillo (L5-05): sempre in vista in fondo al pannello, che è l'unico elemento che scorre. Il -10 di `bottom` è il
+   padding del pannello (come il `top` delle sezioni); i margini negativi lo portano ai bordi della scheda. Sta nel flusso del modulo, quindi
+   l'ultimo campo si scorre sopra di lui e non ci finisce sotto. */
+.editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; gap:6px; margin:4px -10px -10px; padding:8px 10px; border-top:1px solid var(--color-primary); background:color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); box-shadow:0 -6px 10px -6px rgb(0 0 0 / .55); }
+/* tre azioni su una riga anche nel pannello da 340 px: icone più piccole; Salva, la prima, prende lo spazio che avanza */
+.editor-mappa__piede .btn-visivo { --btn-visivo-icona:24px; padding-inline:4px 8px; gap:4px; }
+.editor-mappa__piede > :first-child { flex:1 1 auto; }
 @media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }

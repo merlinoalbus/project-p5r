@@ -85,7 +85,7 @@ router.post('/importa', validate({ body: corpoDelServizio<{ pacchetto: Esportazi
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */
 router.get('/riferimenti', validate({ query: queryRiferimenti }), (req, res) => {
   const q = req.query;
-  res.json(cercaRiferimenti(q.tipo, q.q ?? '', q.limite));
+  res.json(cercaRiferimenti(q.tipo, q.q ?? '', q.limite, q.includi));
 });
 
 /** Ordine logico delle planimetrie di un Palazzo (o dei figli di una qualsiasi mappa): l'elenco è l'ordine. */

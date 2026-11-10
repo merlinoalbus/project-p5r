@@ -179,15 +179,12 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'quartiere': {
       const n = nomi();
-      const q = st.sbloccoQuartieri?.get(r.quartiere);
-      const nome = q?.nome ?? r.quartiere;
-      // L6 (R6-09): la condizione del quartiere, con gli inviti; un quartiere senza condizione salvata (schema di prima, Memento) segue la
-      // data della guida come prima
+      const nome = st.sbloccoQuartieri?.get(r.quartiere)?.nome ?? r.quartiere;
+      // L6 (R6-09): la condizione del quartiere, con gli inviti. Senza condizione né inviti (L5, migrazione 361: la data accanto alla condizione non c'è
+      // più; oggi vale per la sola entrata dei Memento) lo sblocco non risulta
       const stato = esitoDelPosto(`quartiere:${r.quartiere}`, () => condizioneEffettivaQuartiere(r.quartiere, invitiDelloStato(st)), st, n);
       if (stato !== null) return esito('quartiere', stato, stato === 'verde' ? `${nome}: sbloccato` : stato === 'rosso' ? `${nome}: non ancora sbloccato` : `${nome}: non si sa ancora`);
-      if (!q?.dal) return esito('data', 'rosso', `${nome}: la Guida non indica una data di sblocco, quindi lo sblocco non risulta`);
-      const esitoData = valutaCondizione({ tipo: 'data', dal: q.dal, testo: r.testo }, indice, st, opz);
-      return { ...esitoData, dettaglio: `${nome}: ${esitoData.dettaglio}` };
+      return esito('data', 'rosso', `${nome}: non ha una condizione di sblocco, quindi lo sblocco non risulta`);
     }
     // — calendario e mondo —
     case 'data': {

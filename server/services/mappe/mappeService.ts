@@ -1560,18 +1560,19 @@ export interface RiferimentoTrovato { tipo: TipoRiferimento; chiave: string; nom
 
 // le righe candidate di ogni tipo, nell'ordine del nome: il testo cercato si filtra dopo, con la ricerca comune dell'app (`shared/testo.ts`)
 const RICERCHE: Record<Exclude<TipoRiferimento, 'mappa'>, string> = {
-  negozio: "SELECT chiave, nome, tipo AS dettaglio FROM negozio ORDER BY nome",
+  negozio: "SELECT chiave, nome, tipo AS dettaglio, nascosto FROM negozio ORDER BY nome",
   punto: "SELECT p.chiave, p.nome, a.nome AS dettaglio FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave ORDER BY p.nome",
   // L5: il luogo si riconosce dal posto, «Quartiere › Area» (o il solo quartiere se è da collocare)
-  luogo: `SELECT l.chiave, l.nome, COALESCE(q.nome, l.quartiere_chiave) || COALESCE(' › ' || a.nome, '') AS dettaglio FROM luogo l LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave
+  luogo: `SELECT l.chiave, l.nome, COALESCE(q.nome, l.quartiere_chiave) || COALESCE(' › ' || a.nome, '') AS dettaglio, l.nascosto FROM luogo l LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave
     LEFT JOIN area a ON a.chiave = l.area_chiave ORDER BY l.nome`,
   confidente: "SELECT chiave, nome, arcana AS dettaglio FROM confidente ORDER BY nome",
   richiesta: "SELECT chiave, nome, '' AS dettaglio FROM richiesta ORDER BY nome",
-  attivita: "SELECT chiave, nome, quartiere_chiave AS dettaglio FROM luogo WHERE tipo IN ('attivita', 'servizio', 'scuola') ORDER BY nome",
+  attivita: "SELECT chiave, nome, quartiere_chiave AS dettaglio, nascosto FROM luogo WHERE tipo IN ('attivita', 'servizio', 'scuola') ORDER BY nome",
 };
 
-/** Entità collegabili a uno spillo, per tipo e testo (parola per parola nel nome o nella chiave), al massimo `limite` risultati. */
-export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30): RiferimentoTrovato[] {
+/** Entità collegabili a uno spillo, per tipo e testo (parola per parola nel nome o nella chiave), al massimo `limite` risultati. Le nascoste non si propongono,
+ *  salvo `includi`: la voce già collegata al pin, messa in testa e riconoscibile, perché l'editor non la mostri come se il collegamento non ci fosse. */
+export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30, includi?: string): RiferimentoTrovato[] {
   if (!(TIPI_RIFERIMENTO as readonly string[]).includes(tipo)) throw httpErrors.badRequest('riferimento-non-valido', 'Tipo di riferimento non ammesso.');
   // la ricerca comune dell'app: parola per parola, in qualunque ordine (`shared/testo.ts`)
   const trova = filtroRicerca(q);
@@ -1581,9 +1582,13 @@ export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30):
     const nomeDi=(m:MappaRiassuntoDto)=>m.area?`${m.area.contenitore.nome} › ${m.area.nome}${m.area.versioneEtichetta?` · ${m.area.versioneEtichetta}`:''}`:m.nomeCompleto??m.nome;
     return elencaMappe().filter(m=>trova(nomeDi(m),m.nomeCompleto??m.nome,m.chiave)).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:nomeDi(m),dettaglio:m.tipo}));
   }
-  return (prepared(RICERCHE[tipo]).all() as Array<{ chiave: string; nome: string; dettaglio: string | null }>).filter((r) => trova(r.nome, r.chiave)).slice(0, limite).map((r) => ({
-    tipo, chiave: r.chiave, nome: r.nome, dettaglio: tipo === 'confidente' && r.dettaglio ? t('arcana', r.dettaglio) : r.dettaglio ?? '',
-  }));
+  const righe = prepared(RICERCHE[tipo]).all() as Array<{ chiave: string; nome: string; dettaglio: string | null; nascosto?: number }>;
+  const collegata = righe.filter((r) => r.chiave === includi);
+  const trovate = righe.filter((r) => r.chiave !== includi && !r.nascosto && trova(r.nome, r.chiave));
+  return [...collegata, ...trovate].slice(0, limite).map((r) => {
+    const dettaglio = tipo === 'confidente' && r.dettaglio ? t('arcana', r.dettaglio) : r.dettaglio ?? '';
+    return { tipo, chiave: r.chiave, nome: r.nome, dettaglio: r.nascosto ? [dettaglio, 'nascosto'].filter(Boolean).join(' · ') : dettaglio };
+  });
 }
 
 // ---- Esportazione / importazione ----
