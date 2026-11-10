@@ -227,6 +227,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'gli effetti della voce (`voce_effetto`: un solo punto di modifica; per l’incontro dei Confidenti `confidente_dote_incontro`, per i turni le attività); il valore di prima (uid → testo) resta nell’archivio «archivio-frasi-l11», colonna «voce_giornata.produce_json», e il contenuto grezzo di allora in `voce_effetto_transizione.raw_json`',
   },
   {
+    schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5 · migrazione 361',
+    sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti: quando la condizione ha una data, è quella a valere; le date di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

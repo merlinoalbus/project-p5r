@@ -462,6 +462,8 @@ import { migration369 } from './369_colonne_vuote_di_libri_film_trofei_pesca.js'
 import { migration370 } from './370_esiti_lavori_costo_bagno_razione_militare.js';
 import { migration371 } from './371_serate_cantante_jazz.js';
 import { migration385 } from './385_piatti_senza_frasi_non_reperiti.js';
+import { migration360 } from './360_luoghi_collocati_e_frasi_dei_pin.js';
+import { migration361 } from './361_sblocco_data_dei_quartieri_tolta.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -494,4 +496,5 @@ export const migrations: Migration[] = [
   migration362, migration386,
   migration364, migration365, migration366, migration367,
   migration368, migration369, migration370, migration371, migration385,
+  migration360, migration361,
 ];

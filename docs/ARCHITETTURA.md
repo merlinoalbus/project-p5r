@@ -186,6 +186,8 @@ partita sta in `utente` con `partita_id`.
   partita; l'informativo è solo un segno. I tipi della città seguono le etichette della mappa del gioco («Bevande», «Sigarette»,
   «Cercalavoro»…). L'icona è l'asset `ui/spillo-<tipo>` con riserva SVG in codice (`IconaSpillo`); i colori sono quelli del registro.
 - **Posizioni** in percentuale dell'immagine, valide a ogni zoom e schermo; cambiare l'immagine di base mantiene gli spilli.
+- **Pannello del visore e dell'editor**: l'`aside` è l'unica area che scorre (l'elenco dei pin e la merce nel foglio non hanno un
+  proprio scorrimento). Nell'editor il piè del modulo del pin («Salva spillo», «Copia», «Elimina») resta fisso in fondo al pannello a ogni formato.
 - **Visore** (`VisoreMappa`): zoom da «adatta» (calcolato dall'area visibile) fino a 8 volte, con rotellina, pulsanti, pinch (anche
   con un dito su uno spillo; finito il pinch il dito rimasto sposta) e doppio clic sulla tela per tornare ad «adatta» (su spilli e
   gruppi il doppio tocco non tocca la vista); durante trascinamento e pinch la vista si muove senza ridisegnare la mappa, e lo stato
@@ -450,6 +452,7 @@ Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Per
 | `libro.prezzo`, `.dote`, `.note`, `.disponibile_dal`, `.sblocca`, `.effetto_json` | 369 | offerta del catalogo, condizioni ed effetti del libro; erano vuote in tutte le righe |
 | `film.note_successive`, `trofeo.quando` | 369 | gli effetti del film e le condizioni del trofeo (`condizioni_json`); erano vuote in tutte le righe |
 | `regola_pesca.fonti_json` | 369 | `dati_json.fonti`, di cui era la copia esatta |
+| `quartiere.sblocco_data` | 361 | la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti; le 7 date in `archivio-frasi-l11` |
 | `dungeon.livello_consigliato` | 335 | `livello_min`, `livello_max` e la nota storica del Palazzo; archivio `archivio-frasi-l11` |
 | `richiesta.disponibile_dal`, `richiesta.scadenza`, `richiesta.area` | 337 | `condizioni_json`, `scadenza_data` con la proroga, `area_chiave`; archivio `archivio-frasi-l11` |
 | `utente.lettura_partita` | utente 043 | `progresso_libro_partita`, `progresso_film_partita` |

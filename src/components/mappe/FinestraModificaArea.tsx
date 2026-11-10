@@ -172,7 +172,8 @@ function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltra
                   <span className="min-w-0 flex-1 basis-48">
                     <input className="form-input touch w-full" aria-label={`Etichetta di ${nomeVersione(p, i)}`} value={etichette[k] ?? ''} maxLength={80}
                       placeholder={`Planimetria ${i + 1}`} onChange={(e) => setEtichette((x) => ({ ...x, [k]: e.target.value }))} />
-                    <span className="testo-12 text-text-muted">{p.numeroSpilli} pin{p.chiave === area.predefinita ? ' · si apre per prima' : ''}</span>
+                    {/* il nome della mappa, se l'etichetta qui sopra non lo dice già: senza, la riga era solo «10 pin» */}
+                    <span className="testo-12 text-text-muted">{p.nome.trim().toLowerCase() !== (etichette[k] ?? '').trim().toLowerCase() && <strong className="font-semibold text-text-secondary">{p.nome} · </strong>}{p.numeroSpilli} pin{p.chiave === area.predefinita ? ' · si apre per prima' : ''}</span>
                   </span>
                   {/* i comandi vanno a capo interi, mai a metà parola («ELIMI/NA» nel foglio stretto, UX2-9 c) */}
                   <span className="flex flex-wrap items-center gap-1">

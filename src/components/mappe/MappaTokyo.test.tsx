@@ -11,8 +11,8 @@ import { useAssetStore } from '../../stores/assetStore';
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 
 const quartieri = [
-  { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
-  { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', sbloccoData: '09-01', descrizione: '' },
+  { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '' },
+  { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', descrizione: '' },
 ] as QuartiereRiassuntoDto[];
 
 describe('MappaTokyo — fermate non ancora nel mondo', () => {

@@ -3,8 +3,8 @@
 // ============================================================
 //
 // - **Posiziona** (R5-18, `POST /api/luoghi/posiziona`): in una transazione crea (se `nuovo`) il luogo nel quartiere della planimetria, il pin
-//   collegato (riferimento `luogo`, tipo dal catalogo dei tipi di luogo) e mette il luogo nell'Area della planimetria. 409 se il luogo ha già un
-//   pin su quella planimetria.
+//   collegato (riferimento `luogo`, tipo dal catalogo dei tipi di luogo) e dà al luogo senza Area quella della planimetria. 409 se il luogo ha già un
+//   pin su quella planimetria o sta in un'altra Area del quartiere.
 // - **Colloca** (`PUT /api/luoghi/:quartiere/:luogo/area`): un luogo «da collocare» in un'Area del suo quartiere (o di nuovo fuori, con null).
 // - **Elimina nel cestino** (R5-21, `DELETE /api/catalogo/{luogo|negozio}/:chiave?conferma=1`): senza conferma e con contenuti → 409 col
 //   riepilogo; con conferma il luogo se ne va con i suoi pin (immagini e stati compresi) e le attività della sede restano senza sede; il negozio
@@ -46,7 +46,8 @@ export interface LuogoNuovo { nome: string; tipo: string; cosaOffre?: string; or
 /**
  * Posiziona un luogo su una planimetria del mondo (R5-18): `luogo` esistente o `nuovo` (creato nel quartiere della planimetria), il pin collegato
  * e l'Area della planimetria, in una transazione. 404 se la planimetria o il luogo mancano; 400 se la planimetria non è di un quartiere o il luogo
- * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria. Restituisce la pagina del luogo.
+ * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria, 409 `luogo-di-altra-area` se sta in un'altra
+ * Area dello stesso quartiere (un luogo non cambia Area in silenzio: si cambia dal modulo del luogo). Restituisce la pagina del luogo.
  */
 export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa: string; x: number; y: number }): LuogoDettaglioDto {
   if ((dati.luogo === undefined) === (dati.nuovo === undefined)) throw httpErrors.badRequest('luogo-o-nuovo', 'Indica un luogo che esiste oppure i dati di un luogo nuovo: uno dei due.');
@@ -56,9 +57,13 @@ export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa
   const chiave = getDb().transaction((): string => {
     let k = dati.luogo ?? null;
     if (k) {
-      const l = prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(k) as { quartiere_chiave: string } | undefined;
+      const l = prepared('SELECT quartiere_chiave, area_chiave FROM luogo WHERE chiave = ?').get(k) as { quartiere_chiave: string; area_chiave: string | null } | undefined;
       if (!l) throw httpErrors.notFound('luogo-non-trovato', `Il luogo '${k}' non esiste.`);
       if (l.quartiere_chiave !== quartiere) throw httpErrors.badRequest('luogo-di-altro-quartiere', 'Il luogo è di un altro quartiere: si posiziona sulle planimetrie del suo.');
+      if (area && l.area_chiave && l.area_chiave !== area) {
+        const nome = (prepared('SELECT nome FROM area WHERE chiave = ?').get(l.area_chiave) as { nome: string } | undefined)?.nome ?? l.area_chiave;
+        throw httpErrors.conflict('luogo-di-altra-area', `Il luogo sta nell’Area «${nome}»: per portarlo qui, cambia prima la sua Area da «Modifica» nella pagina del luogo.`);
+      }
       if (prepared("SELECT 1 FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ? AND mappa_chiave = ?").get(k, mappa)) {
         throw httpErrors.conflict('luogo-gia-posizionato', 'Il luogo ha già un pin su questa planimetria.');
       }
@@ -69,9 +74,11 @@ export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa
     }
     const l = prepared('SELECT nome, tipo, cosa_offre FROM luogo WHERE chiave = ?').get(k) as { nome: string; tipo: string; cosa_offre: string };
     creaSpillo(mappa, { tipo: spilloPerLuogo(l.tipo), nome: l.nome, descrizione: l.cosa_offre, x: dati.x, y: dati.y, riferimento: { tipo: 'luogo', chiave: k } });
+    // l'Area si dà solo a chi non ne ha una: chi ne ha un'altra è già stato fermato qui sopra (409), e l'Area si cambia soltanto dal modulo del luogo.
+    // I pin dei punti vendita della sede devono stare nell'Area che il luogo riceve (I2); con l'Area già uguale il controllo non ha nulla da dire.
     if (area) {
       verificaAreaDelLuogo(k, area);
-      prepared('UPDATE luogo SET area_chiave = ? WHERE chiave = ?').run(area, k);
+      prepared('UPDATE luogo SET area_chiave = ? WHERE chiave = ? AND area_chiave IS NULL').run(area, k);
     }
     return k;
   })();

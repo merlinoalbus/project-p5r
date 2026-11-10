@@ -452,6 +452,13 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   cambia a finestra aperta (decisione dell'utente del 01/11); un'area scelta che dopo la rilettura non c'è più non si manda.
 - L'editor delle mappe copia e incolla gli spilli con gli appunti di sessione, mai con quelli di sistema. Niente «Da posizionare» nel
   pannello dell'Area né «Schermate di riferimento» nell'editor.
+- Posizionare un luogo su una planimetria dà l'Area solo a un luogo che non ne ha una. Un luogo che sta in un'altra Area dello stesso
+  quartiere non si sposta: il server risponde `luogo-di-altra-area` e l'Area si cambia dal modulo del luogo.
+- Un luogo si colloca da una migrazione solo se tutti i suoi pin indicano una sola Area del suo quartiere. Libreria Nagiuri, Odaiba Seaside Park
+  e Stazione di Shibuya restano da collocare: il pin della prima sta sull'illustrazione del quartiere, le altre due non hanno pin.
+- Lo sblocco di un quartiere è solo la sua condizione (`quartiere.condizioni_json`) con gli inviti (decisione dell'utente del 9/11).
+  Nella conversione delle frasi un quartiere conta come datato se la sua condizione contiene una data: Ikebukuro, Odaiba e Maihama non
+  contano più, Kanda/Jinbocho e Roppongi sì.
 
 ## 11. Negozi, oggetti, regali e attività
 - Il «dove» di un negozio o di un'attività è uno solo: la sede (`sede_chiave`, un luogo). Il quartiere si ricava dal luogo della sede e
