@@ -4,7 +4,8 @@
 //
 // L13 (ondata 6, lotto O6-2, migrazione 307): giorni, fasce, eccezioni, luoghi e sblocco hanno una sola sede, la disponibilità strutturata
 // (`disponibilitaStrutturataService`) e i requisiti di rango; qui si modificano solo `note`, `note_generali` e `fonti_json`. Le cinque colonne
-// in prosa di prima restano nella riga e nello storico (le versioni le mostrano), ma l'editor non le scrive e un ripristino non le riporta.
+// in prosa di prima non esistono più nella tabella (L7-01, migrazione 364): restano solo come campi della fotografia nello storico (le versioni
+// vecchie le mostrano), la riga di adesso li ha vuoti, l'editor non li scrive e un ripristino non li riporta.
 // Lo storico (`dati_guida` `confidente-disponibilita-editor-v1:<chiave>`) è una catena: ogni revisione parte dalla riga in cui finisce la
 // precedente e l'ultima è la riga di adesso; le revisioni scritte da una migrazione (`bonifica` della 131, `migrazione` della 307) hanno
 // l'identificativo `migrazione-<numero>-<chiave>` e l'impronta di `{ chiave, migrazione }`.
@@ -17,12 +18,14 @@ import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, EditorInformazioniConfidenteDto,
   EsitoInformazioniConfidenteDto, InformazioniConfidente, InformazioniConfidenteRaw, SalvaInformazioniConfidente } from '../../shared/disponibilitaConfidenti.js';
-import { CAMPI_INFORMAZIONI_CONFIDENTE, COLONNE_INFORMAZIONI_CONFIDENTE as COLONNE, COLONNE_STORICHE_CONFIDENTE } from '../../shared/disponibilitaConfidenti.js';
+import { CAMPI_INFORMAZIONI_CONFIDENTE, COLONNE_INFORMAZIONI_CONFIDENTE as COLONNE, COLONNE_STORICHE_CONFIDENTE, MOTIVO_NON_INDICATO } from '../../shared/disponibilitaConfidenti.js';
 
 const PREFISSO = 'confidente-disponibilita-editor-v1:';
-/** Le otto colonne della riga (lette per intero: lo storico confronta la riga completa). */
-const CAMPI_RAW: ReadonlyArray<keyof InformazioniConfidenteRaw> = ['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti', 'note', 'note_generali', 'fonti_json'];
-const RIGA_VUOTA: InformazioniConfidenteRaw = { giorni_json: '[]', fasce_json: '[]', luogo: '', sblocco_data: '', sblocco_requisiti: '', note: '', note_generali: '', fonti_json: '[]' };
+/** Le tre colonne vive della riga. */
+const CAMPI_RAW: ReadonlyArray<keyof InformazioniConfidenteRaw> = ['note', 'note_generali', 'fonti_json'];
+/** I campi storici della fotografia (colonne tolte dalla 364): nella riga di adesso sono vuoti, come lo storico si aspetta. */
+const STORICI_VUOTI = { giorni_json: '[]', fasce_json: '[]', luogo: '', sblocco_data: '', sblocco_requisiti: '' } as const;
+const RIGA_VUOTA: InformazioniConfidenteRaw = { ...STORICI_VUOTI, note: '', note_generali: '', fonti_json: '[]' };
 const rawSchema = z.object({ giorni_json: z.string(), fasce_json: z.string(), luogo: z.string(), sblocco_data: z.string(),
   sblocco_requisiti: z.string(), note: z.string(), note_generali: z.string(), fonti_json: z.string() }).strict();
 // «applica-proposta» resta leggibile nello storico (nessuna proposta è più applicabile); «migrazione» è la revisione aggiunta dalla 307
@@ -53,7 +56,7 @@ function revisioneDiMigrazioneValida(chiave: string, operazioneId: string, richi
 function leggiRaw(db: AppDatabase, chiave: string): InformazioniConfidenteRaw | null {
   const r = db.prepare(`SELECT ${CAMPI_RAW.join(',')} FROM main.confidente_disponibilita WHERE confidente_chiave = ?`).get(chiave);
   if (!r) return null;
-  const p = rawSchema.safeParse(r);
+  const p = rawSchema.safeParse({ ...STORICI_VUOTI, ...(r as object) });
   if (!p.success) throw httpErrors.conflict('informazioni-confidente-illeggibili', 'La riga contiene campi non testuali: conservata senza sostituirli.');
   return p.data;
 }
@@ -172,8 +175,9 @@ export function salvaInformazioniConfidente(chiave: string, input: SalvaInformaz
       .run(chiave, ...CAMPI_RAW.map(c => p.dopoRaw[c]));
     const registro = s.registro ?? nuovoRegistro(chiave, s.raw);
     const id = registro.revisioni.length + 1;
-    registro.revisioni.push({ id, azione: azione.azione, data: nowIso(), motivo: 'motivo' in azione ? azione.motivo : `Ripristino esplicito delle note e delle fonti della versione ${azione.versione}.`,
-      operazioneId, richiesta, prima: s.raw, dopo: p.dopoRaw });
+    const motivo = azione.azione === 'ripristina-versione' ? `Ripristino esplicito delle note e delle fonti della versione ${azione.versione}.`
+      : azione.motivo?.trim() ? azione.motivo : MOTIVO_NON_INDICATO;
+    registro.revisioni.push({ id, azione: azione.azione, data: nowIso(), motivo, operazioneId, richiesta, prima: s.raw, dopo: p.dopoRaw });
     scriviRegistro(db, registro);
     return { esito: 'salvata', versione: id, corrente: mostra(db, chiave, leggiStato(db, chiave)) };
   }).immediate();

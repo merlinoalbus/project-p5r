@@ -15,7 +15,7 @@ import type { ModificaAffinitaPersona } from '../../../shared/affinitaPersona';
 import type { AbilitaRangoDto, DialogoModificatoDto, ModoRango, RangoConfidenteDto, SceltaDialogo } from '../../../shared/confidentiScritture';
 
 /** I campi che il PUT accetta (tutti facoltativi) più le chiavi dei luoghi. */
-export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'dal' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
+export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
 import type { CarattereVoce } from '../../../shared/caratteriVoce';
 import type { Condizione } from '../../../shared/condizioniSpillo';
 import type { InvitoDto, RequisitiConfidenteDto } from '../../types';
@@ -30,6 +30,9 @@ export const salvaInformazioniConfidente = (chiave: string, input: SalvaInformaz
 export const getRequisitiConfidente = (chiave: string): Promise<RequisitiConfidenteDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti`);
 export const salvaRequisitiRango = (chiave: string, rango: number, requisiti: Array<{ condizione: Condizione; testo?: string }>): Promise<RequisitiConfidenteDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti/${rango}`, { requisiti });
+/** L7-02: i ranghi indicati tutti insieme, in una transazione (salvataggio unico dell'editor); `nota` è il testo proprio del requisito. */
+export const salvaRequisitiConfidente = (chiave: string, ranghi: Array<{ rango: number; requisiti: Array<{ condizione: Condizione; nota?: string }> }>): Promise<RequisitiConfidenteDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti`, { ranghi });
 export const ripristinaRequisitiRango = (chiave: string, rango: number): Promise<RequisitiConfidenteDto> => apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti/${rango}/ripristina`, {});
 /** Inviti e loro disponibilità calcolata dal server per la partita corrente. */
 export const getInviti = (filtro: { confidente?: string; apreTipo?: 'quartiere' | 'luogo' | 'area'; apreChiave?: string; partita?: number }): Promise<InvitoDto[]> => apiGet(`/compendio/inviti${queryString(filtro)}`);

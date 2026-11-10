@@ -7,15 +7,13 @@ const elencoVuoto = (v: unknown): boolean => {
   try { const x: unknown = JSON.parse(v); return Array.isArray(x) && x.length === 0; } catch { return false; }
 };
 
-/** Campi autonomi da risolvere esplicitamente prima di usare la fonte Confidente. Il RAW legacy delle Doti di
- * una riga già collegata può rimanere storico: non viene né esposto come premio né ricostruito in effetti. */
-export function campiAutonomiAttivitaConfidente(d: Record<string, unknown>, conDotiStoriche = false): string[] {
+/** Campi autonomi da risolvere esplicitamente prima di usare la fonte Confidente. */
+export function campiAutonomiAttivitaConfidente(d: Record<string, unknown>): string[] {
   const campi: string[] = [];
   if (d.tipo === 'videogioco') campi.push('tipo');
   if (d.fascia != null) campi.push('fascia');
   if (!elencoVuoto(d.condizioni_json)) campi.push('condizioni_json');
   if (!elencoVuoto(d.effetti_json)) campi.push('effetti_json');
-  if (!conDotiStoriche && !elencoVuoto(d.doti_json)) campi.push('doti_json');
   if (d.tracciamento != null && d.tracciamento !== 'nessuno') campi.push('tracciamento');
   if (d.sessioni != null && d.sessioni !== 1) campi.push('sessioni');
   if (d.quiz_json != null) campi.push('quiz_json');

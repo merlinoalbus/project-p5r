@@ -164,7 +164,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
     sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
-    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni (dopo-rango, fascia-rango, giorni-rango, date, solo-date-rango, con-relazione: una per tipo, o per rango; le date sono giorni del calendario di gioco; `solo-date-rango` dice gli unici giorni in cui si incontra quel rango; `con-relazione` dà le fasce con la relazione romantica iniziata nella partita, al posto delle generali e di quelle del rango, solo per un Confidente romanzabile, 409 `confidente-non-romanzabile` altrimenti), motivoSenzaLuogo, luoghi (chiavi). «Dal» non si scrive qui: è il requisito di rango 1 di tipo data. Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
     risposta: '`DisponibilitaConfidenteDto` aggiornato',
     errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [400, 'eccezione-doppia'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
   },
@@ -673,9 +673,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`RequisitiConfidenteDto`',
     errori: [[404, 'confidente-non-trovato']],
   },
+  'PUT /api/compendio/confidenti/:chiave/requisiti': {
+    sommario: 'Sostituisce i requisiti di più ranghi di un Confidente, in una transazione',
+    descrizione: 'Corpo `{ ranghi: [{ rango, requisiti: [{ condizione, nota? }] }] }`: il salvataggio unico dell\'editor. I ranghi indicati prendono le condizioni date (vuoto per nessun requisito), gli altri restano come sono; o tutti o nessuno. La frase si genera dalla condizione, `nota` è il testo proprio del requisito. 400 se un rango compare due volte.',
+    risposta: '`RequisitiConfidenteDto` aggiornato',
+    errori: [[400, 'rango-doppio'], [404, 'confidente-non-trovato']],
+  },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango': {
     sommario: 'Sostituisce i requisiti di un rango di un Confidente',
-    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. La frase di ciascuno è `testo` oppure, se manca, la descrizione generata (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
+    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. `testo` è la nota propria del requisito, facoltativa; la frase si genera dalla condizione (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
     risposta: '`RequisitiConfidenteDto` aggiornato',
     errori: [[404, 'confidente-non-trovato']],
   },

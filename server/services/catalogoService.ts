@@ -22,7 +22,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
-import { normalizzaVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
+import { normalizzaVociEffetto } from '../../shared/effettiCatalogo.js';
 import { tracciamentoPerTipo } from '../../shared/attivita.js';
 import { catalogoOggettiDisponibile, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
@@ -52,11 +52,12 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`).
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
   // L13 (ondata 7, O7-4, migrazione 313): `dove`, `dote`, `note`, `sblocca`, `effetto_json` dei libri e `dote`, `note`, `note_successive` dei
-  // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense
-  libro: ['condizioni_json', 'nome', 'prezzo', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
+  // film non si scrivono più: che cosa dà la lettura sono gli effetti, dove si ottiene sono articoli, posizioni e ricompense (il prezzo del
+  // libro è quello dell'articolo: colonna uscita con la 369)
+  libro: ['condizioni_json', 'nome', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
-  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'sede_chiave', 'fascia',
-    'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
+  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'sede_chiave', 'fascia',
+    'costo', 'sessioni', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato', 'esiti_json'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
   // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
   luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
@@ -249,43 +250,15 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, 
   }
 }
 
-/** Le regole che valgono su ogni scrittura, prima di toccare la tabella.
- *
- * - **effetti dal modulo vecchio**: finché il modulo scrive `doti_json` (attività) senza `effetti_json`, la dichiarazione
- *   strutturata si ricava da lì come ha fatto la migrazione 074 — ma **solo se quel campo cambia
- *   davvero** rispetto alla riga, e conservando le voci che non vengono da lì (una voce «descrittivo», le voci con
- *   condizioni come lo studio con la pioggia): il modulo rimanda sempre tutti i campi, e ricostruire ogni volta cancellerebbe
- *   ciò che la migrazione aveva ricavato. Su una riga nuova non c'è niente da conservare. Libri e film non hanno più campi
- *   vecchi (L13 O7-4, migrazione 313: `dote`, `note`, `note_successive`, `effetto_json` non si scrivono e non sono una fonte);
- * - **tracciamento** dal tipo, dove il modulo non lo dice. */
-const CAMPI_EFFETTI: Record<string, readonly string[]> = { attivita: ['doti_json'] };
-
-/** Le voci di effetto ricavate dai campi del modulo vecchio delle attività: ogni Dote di `doti_json`. Un JSON illeggibile non dà voci. */
-function vociDaiCampiVecchi(tipo: TipoCatalogo, d: Record<string, unknown>): VoceEffetto[] {
-  /** Una voce «dote» se nome e note sono validi (nome non vuoto, note numeriche positive), con la chiave in minuscolo; altrimenti null. */
-  const dote = (nome: unknown, note: unknown, extra: Partial<VoceEffetto> = {}): VoceEffetto | null =>
-    typeof nome === 'string' && nome && typeof note === 'number' && note > 0 ? { effetto: { famiglia: 'dote', dote: nome.toLowerCase(), note }, ...extra } : null;
-  const voci: VoceEffetto[] = [];
-  if (tipo === 'attivita' && typeof d.doti_json === 'string') {
-    let doti: Array<{ dote?: string | null; note?: number | null }> = [];
-    try { doti = JSON.parse(d.doti_json) as typeof doti; } catch { doti = []; }
-    voci.push(...doti.map((x) => dote(x.dote, x.note)).filter((v): v is VoceEffetto => v !== null));
-  }
-  return voci;
-}
-
-/** Vero se una voce viene dai campi vecchi (una Dote semplice, senza condizioni): è quella che si può ricostruire. */
-const eVoceDerivabile = (v: VoceEffetto) => v.effetto.famiglia === 'dote' && !(v.condizioni && v.condizioni.length);
-
-/** Applica ai dati in arrivo le regole descritte sopra `CAMPI_EFFETTI`: `effetti_json`
- *  ricostruito dai campi vecchi solo se cambiano (tenendo le voci non derivabili della riga), tracciamento dal tipo su
- *  un'attività nuova, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Non tocca l'oggetto ricevuto. */
+/** Le regole che valgono su ogni scrittura, prima di toccare la tabella: tracciamento dal tipo su un'attività nuova, dove il modulo non
+ *  lo dice, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Che cosa dà un'attività lo dicono solo gli effetti e gli
+ *  esiti: i campi vecchi (`doti_json`, tolto con la 368) non esistono più. Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
   const d = { ...dati };
   const pesca=tipo==='attivita'&&(d.pesca_regola_chiave!==undefined?d.pesca_regola_chiave:esistente?.pesca_regola_chiave)!=null;
   if(pesca)verificaCampiAttivitaPesca({...esistente,...d});
   const collegata = tipo === 'attivita' && (d.confidente_chiave !== undefined ? d.confidente_chiave : esistente?.confidente_chiave) != null;
-  if (collegata) verificaCampiAttivitaConfidente({ ...esistente, ...d }, esistente);
+  if (collegata) verificaCampiAttivitaConfidente({ ...esistente, ...d });
   if (catalogoOggettiDisponibile() && categoriaLettura(tipo, { ...esistente, ...d })) {
     delete d.prezzo;
     if (tipo === 'attivita') delete d.costo;
@@ -312,16 +285,6 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
       if (!esistente && d.categoria === undefined) d.categoria = 'altro';
       const nome = typeof d.nome === 'string' ? d.nome.trim() : esistente?.nome;
       if (!nome) throw httpErrors.badRequest('nome-mancante', 'Per un’offerta senza oggetto collegato indica il nome.');
-    }
-  }
-  const campi = collegata || pesca ? [] : CAMPI_EFFETTI[tipo] ?? [];
-  if (campi.length && d.effetti_json === undefined && campi.some((c) => c in d)) {
-    const cambiati = !esistente || campi.some((c) => c in d && (d[c] ?? null) !== (esistente[c] ?? null));
-    if (cambiati) {
-      const attuali = esistente ? normalizzaVociEffetto((() => { try { return JSON.parse(String(esistente.effetti_json ?? '[]')); } catch { return []; } })()) : [];
-      // i campi vecchi non inviati si leggono dalla riga (oggi solo `doti_json` delle attività)
-      const campiVecchi = Object.fromEntries(campi.map((c) => [c, c in d ? d[c] : (esistente?.[c] ?? null)]));
-      d.effetti_json = JSON.stringify(normalizzaVociEffetto([...vociDaiCampiVecchi(tipo, campiVecchi), ...attuali.filter((v) => !eVoceDerivabile(v))]));
     }
   }
   if (tipo === 'attivita' && d.tracciamento === undefined && typeof d.tipo === 'string' && !esistente) d.tracciamento = collegata ? 'nessuno' : tracciamentoPerTipo(d.tipo);
@@ -592,7 +555,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const conservaFonteConfidente = tipo === 'attivita' && r.confidente_chiave != null && !('confidente_chiave' in originale);
   if (conservaFonteConfidente) {
-    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'paga_yen', 'paga_massima', 'doti_json', 'esiti_json']) originale[c] = r[c];
+    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'paga_yen', 'paga_massima', 'esiti_json']) originale[c] = r[c];
   }
   const daProsaRip = PROFILO[tipo].condizioniDa;
   if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = condizioniCompleteDaProsa(tipo, String(r.chiave), originale, 'ripristino');

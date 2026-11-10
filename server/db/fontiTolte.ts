@@ -166,6 +166,38 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'articolo', colonna, tolta: 'L1 · migrazione 346',
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
+  ...(['giorni_json', 'fasce_json', 'luogo', 'sblocco_data', 'sblocco_requisiti'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'confidente_disponibilita', colonna, tolta: 'L7 · migrazione 364',
+    sostituitaDa: 'la disponibilità strutturata del Confidente (modo, giorni, fasce, eccezioni), i luoghi per chiave e i requisiti di rango; ciò che la prosa diceva in più sta nelle note; i testi di prima restano nell’archivio «archivio-frasi-l11»',
+  })),
+  {
+    schema: 'main', tabella: 'confidente_disponibilita', colonna: 'dal', tolta: 'L7 · migrazione 364',
+    sostituitaDa: 'il requisito di rango 1 di tipo «data» (`confidente_requisito`): «Disponibile dal» si legge da lì; i valori di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'attivita', colonna: 'luogo', tolta: 'L8 · migrazione 368',
+    sostituitaDa: 'la sede dell’attività (`sede_chiave`) con il suo quartiere; i testi di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'attivita', colonna: 'doti_json', tolta: 'L8 · migrazione 368',
+    sostituitaDa: 'gli effetti strutturati e gli esiti dell’attività (`effetti_json`, `esiti_json`); i valori di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  ...(['prezzo', 'dote', 'note', 'disponibile_dal', 'sblocca', 'effetto_json'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'libro', colonna, tolta: 'L8 · migrazione 369',
+    sostituitaDa: 'gli articoli delle librerie (prezzo e dove si compra), le condizioni e gli effetti del libro; la colonna era vuota in tutti i libri',
+  })),
+  {
+    schema: 'main', tabella: 'film', colonna: 'note_successive', tolta: 'L8 · migrazione 369',
+    sostituitaDa: 'gli effetti del film (le voci «ripetuto» dicono quanto vale rivederlo); la colonna era vuota in tutti i film',
+  },
+  {
+    schema: 'main', tabella: 'trofeo', colonna: 'quando', tolta: 'L8 · migrazione 369',
+    sostituitaDa: 'le condizioni del trofeo (`condizioni_json`), da cui la pagina genera la frase; la colonna era vuota in tutti i trofei',
+  },
+  {
+    schema: 'main', tabella: 'regola_pesca', colonna: 'fonti_json', tolta: 'L8 · migrazione 369',
+    sostituitaDa: 'le fonti dentro la regola (`dati_json.fonti`): la colonna era la loro copia esatta',
+  },
   {
     schema: 'main', tabella: 'negozio', colonna: 'listino_condiviso', tolta: 'L2 · migrazione 354',
     sostituitaDa: 'le offerte proprie di ogni punto vendita: ogni macchina ha il suo listino e la sua scorta; i valori, se ce n’erano, restano nell’archivio «archivio-frasi-l11»',

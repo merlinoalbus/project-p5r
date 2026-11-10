@@ -186,15 +186,24 @@ export function condizioneDelRequisito(r: Pick<RigaRequisito, 'tipo' | 'dati_jso
   return normalizzaRequisitoSpillo({ ...dati, tipo: r.tipo });
 }
 
+/** L7-02: la nota propria di un requisito (colonna `testo`), da mostrare sotto la frase generata. Vuota per un avviso (la sua frase è il dato) e se ripete
+ *  la frase generata (una riga aggiunta a mano prima della migrazione 365). */
+export function notaDelRequisito(r: { tipo: string; testo: string }, frase: string): string {
+  return r.tipo === 'avviso' || r.testo.trim() === frase.trim() ? '' : r.testo.trim();
+}
+
 /**
  * Il semaforo di un requisito di rango sullo stato della partita, col valutatore unico (letto «come requisito»: un evento non segnato è
- * «da segnare»): per tipo dice verde o rosso con il dettaglio di che cosa manca; gli avvisi non bloccano.
+ * «da segnare»): per tipo dice verde o rosso con il dettaglio di che cosa manca; gli avvisi non bloccano. La frase è generata; la nota, se c'è, l'accompagna.
  */
 export function valuta(r: RigaRequisito, st: StatoValutazione): SemaforoRequisitoDto {
   const c = condizioneDelRequisito(r);
-  if (!c) return { indice: r.indice, tipo: r.tipo, testo: r.testo, confermato: false, stato: 'grigio', dettaglio: 'Requisito non leggibile: correggilo dalla pagina del Confidente', manuale: false };
+  if (!c) return { indice: r.indice, tipo: r.tipo, testo: r.testo || 'Requisito non leggibile', confermato: false, stato: 'grigio', dettaglio: 'Requisito non leggibile: correggilo dalla pagina del Confidente', manuale: false };
   const nomi = nomiCondizioniMemo();
-  return valutaCondizione(condizioneConTesto(c, nomi), r.indice, st, { comeRequisito: true, nomi });
+  const conTesto = condizioneConTesto(c, nomi);
+  const esito = valutaCondizione(conTesto, r.indice, st, { comeRequisito: true, nomi });
+  const nota = notaDelRequisito(r, conTesto.testo);
+  return nota ? { ...esito, nota } : esito;
 }
 
 /** Lo stato di una condizione sullo stato della partita, col valutatore unico letto «come requisito»: lo usa la disponibilità per i rami di un

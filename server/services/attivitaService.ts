@@ -61,15 +61,15 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
 }
 
 interface RigaAttivita {
-  chiave: string; ordine: number; nome: string; tipo: string; luogo: string; sede_chiave: string | null; fascia: string | null;
-  costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null;
+  chiave: string; ordine: number; nome: string; tipo: string; sede_chiave: string | null; fascia: string | null;
+  costo: number | null; sessioni: number | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null;
   effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null;
   /** L13 (migrazione 233): gli esiti dichiarati; assente su uno schema di prima. */
   esiti_json?: string | null }
 // L13 (ondata 7, O7-4, migrazione 313): disponibilità, Doti, sblocco e «dove» dei libri, periodo e Doti dei film non si leggono più dalle
-// colonne in prosa (`disponibile_dal`, `dote`, `note`, `sblocca`, `dove`, `periodo`, `note_successive`): le dicono condizioni, effetti,
-// articoli, posizioni e ricompense. Le colonne restano nello schema (vuote) e non sono una fonte.
-interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; prezzo: number | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+// colonne in prosa: le dicono condizioni, effetti, articoli, posizioni e ricompense. Le colonne vuote del libro e `film.note_successive` sono
+// uscite dallo schema con la 369; `film.dove` è un dato vivo (cinema o DVD).
+interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate. La condizione non nasconde niente:
@@ -133,7 +133,11 @@ function provenienzaDelLibro(chiave: string): string {
   return (posizioniLibri().get(chiave) ?? []).map((p) => p.etichetta).join(', ') || 'Provenienza non indicata';
 }
 
-/** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
+/** Il «dove» di un'attività nel registro della partita: il nome della sua sede, un luogo (un solo «dove», migrazione 368). */
+const nomeSedeAttivita = (sede: string | null): string =>
+  (sede ? prepared('SELECT nome FROM luogo WHERE chiave = ?').pluck().get(sede) as string | undefined : undefined) ?? 'Sede non indicata';
+
+/** Una riga di `attivita` come DTO: effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
  *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (105, null se manca o è
  *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
 const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
@@ -153,15 +157,14 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
     confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'],
     // il quartiere dell'attività è quello del luogo-sede (un solo «dove»); senza sede resta senza quartiere
     quartiereChiave: sede?.quartiere_chiave ?? null, quartiereNome: sede?.quartiere_nome ?? null, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: null, sessioni: r.sessioni,
-    doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'],
     pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(fonteConfidente ? null : r.effetti_json),
     tracciamento, quiz: leggiQuiz(r.quiz_json),
     sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sede?.nome ?? null) : null,
     verificato: r.verificato === 1,
-    ...(fonteConfidente ? { fascia: null, sblocco: null, doti: [], effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,
+    ...(fonteConfidente ? { fascia: null, sblocco: null, effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,
       quiz: null, condizioni: null, disponibilita: null } : disponibilitaAttivita(r, st, sedi)),
   };
   return { ...dto, sblocco: fraseDelleCondizioni(dto.condizioni) };
@@ -177,8 +180,7 @@ const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
 
 /**
  * L6 (R6-11): i posti che ogni libro apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (a
- * qualunque profondità: «il libro oppure Ann al rango 10» apre lo stesso). Non dalla frase `libro.sblocca` (nota) né dall'effetto
- * «sblocca-luogo»: così un libro apre davvero quel che dice la sua scheda.
+ * qualunque profondità: «il libro oppure Ann al rango 10» apre lo stesso). Non dall'effetto «sblocca-luogo»: così un libro apre davvero quel che dice la sua scheda.
  */
 function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
   const out = new Map<string, NonNullable<LibroDto['apre']>>();
@@ -219,7 +221,7 @@ const libroDto = (
   // Compatibilità dei vecchi campi API: stessa fonte calcolata, mai l'effetto storico.
   const quartiere = posti.find((p) => p.tipo === 'quartiere');
   return {
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, r.prezzo), sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, null), sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json, true), negozi: negozi.get(r.chiave) ?? [], ricompensaDi: ricompense.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
@@ -551,7 +553,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       const dote = doti.length ? ` · Dote: ${doti.map((d) => testoDoteInPunti({ nome: nomeDote(d.dote), note: d.note, delta: puntiDote(partitaId, d.dote, d.note, origine) })).join(', ')}` : '';
       const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
-      const dove = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
+      const dove = tipo === 'libro' ? provenienzaDelLibro(chiave) : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : nomeSedeAttivita((riga as RigaAttivita).sede_chiave);
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
     }
     // ---- Il conseguimento dà le sue Doti: un libro finito, un film visto, un gioco completato ----

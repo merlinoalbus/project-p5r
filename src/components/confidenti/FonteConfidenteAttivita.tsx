@@ -3,10 +3,10 @@ import type { FonteConfidenteAttivitaDto } from '../../../shared/types';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { TestoNote } from '../shared/TestoNote';
 
-function Requisito({ testo, descrizione }: { testo: string; descrizione: string }) {
+function Requisito({ nota, descrizione }: { nota: string; descrizione: string }) {
   return <li>
-    <span>{descrizione || 'Descrizione del requisito strutturato non disponibile.'}</span>
-    {testo && testo !== descrizione && <p className="m-0 whitespace-pre-line text-xs text-text-secondary"><strong>Testo salvato nella fonte (informativo; non modifica il requisito strutturato):</strong> {testo}</p>}
+    <span>{descrizione}</span>
+    {nota && <p className="m-0 whitespace-pre-line testo-12 text-text-secondary">Nota: {nota}</p>}
   </li>;
 }
 
@@ -26,14 +26,14 @@ export function FonteConfidenteAttivita({ fonte }: { fonte: FonteConfidenteAttiv
     {fonte.avvio && <div>
       <strong>Avvio del Confidente</strong>
       {fonte.avvio.requisiti.length > 0
-        ? <ul className="m-0 pl-5">{fonte.avvio.requisiti.map((r) => <Requisito key={r.indice} testo={r.testo} descrizione={r.descrizione} />)}</ul>
+        ? <ul className="m-0 pl-5">{fonte.avvio.requisiti.map((r) => <Requisito key={r.indice} nota={r.nota} descrizione={r.descrizione} />)}</ul>
         : <p className="m-0 text-text-secondary">Nessun requisito strutturato aggiuntivo.</p>}
     </div>}
     {fonte.rangoAttuale !== null && <p className="m-0"><strong>Rango registrato:</strong> {fonte.rangoAttuale}</p>}
     {fonte.prossimoPasso && <div className="flex flex-col gap-1">
       <strong>Requisiti per il rango {fonte.prossimoPasso.rango}</strong>
       {fonte.prossimoPasso.requisiti.length > 0
-        ? <ul className="m-0 pl-5">{fonte.prossimoPasso.requisiti.map((r) => <Requisito key={r.indice} testo={r.testo} descrizione={r.descrizione} />)}</ul>
+        ? <ul className="m-0 pl-5">{fonte.prossimoPasso.requisiti.map((r) => <Requisito key={r.indice} nota={r.nota} descrizione={r.descrizione} />)}</ul>
         : <p className="m-0 text-text-secondary">Nessun requisito strutturato aggiuntivo.</p>}
       <ChipDisponibilita disponibilita={fonte.prossimoPasso.disponibilitaRequisiti ?? undefined} />
     </div>}

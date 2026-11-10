@@ -318,6 +318,16 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - La Dote che un Confidente dà arriva solo al passaggio di rango, non a ogni uscita.
 - Requisiti dei Confidenti solo dalla guida Royal: un semaforo è ciò che il gioco impone (non la data consigliata, non i bonus). Le date
   di rango 1 valgono solo se la guida le dichiara come sblocco. I requisiti non verificabili diventano eventi della partita da segnare.
+- **Un Confidente ha una data di avvio sola**: «Disponibile dal» è il requisito di rango 1 di tipo data (18 Confidenti su 23), letto dalla
+  disponibilità e dalla scheda. La frase del requisito si genera dalla condizione; la colonna `testo` tiene solo ciò che la condizione non dice
+  (la nota) e, per un avviso, l'avviso stesso; «Ripristina» riporta la nota della guida da `dati_guida.requisiti-nota-guida-v1`.
+- **Date fisse di un rango**: l'eccezione `solo-date-rango` dice in quali giorni un rango si può fare, al posto dei giorni della settimana. La
+  usa il Rango 7 di Ryuji, con le 24 date del suo messaggio nella guida. L'avvio del Rango 10 di Kawakami («il primo giorno di scuola dopo il
+  Rango 9») non si sa calcolare: resta nelle note, e il calcolo non cambia.
+- **Ingressi fuori dalla spunta**: oltre alla spunta del Diario restano, dichiarati, l'invito avvenuto, la Persona messa in scorta dalla
+  scheda, la registrazione nel compendio e l'Allarme delle fusioni.
+- Gli editor della pagina Confidente (informazioni, requisiti, ranghi, disponibilità) sono finestre uguali con un solo Salva a piè di
+  finestra; i requisiti salvano insieme tutti i ranghi cambiati, e il motivo di una modifica alle informazioni è facoltativo.
 - Relazione romantica: dato della partita per Confidente, con il giorno d'inizio; si segna dalla scheda o scegliendo alla spunta del
   passaggio al rango 9; vale per gli incontri dopo il rango 9 e per i doni «se fidanzata».
 - **2026-10-25 — Fortuna e pesca**: la Fortuna è uno stato momentaneo della partita, acceso dall'interazione con Chihaya o
@@ -503,14 +513,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Iwai non è un dono che arriva da sé: la guida lo lega alla vendita della medaglia del 4 maggio e alla restituzione del 6 maggio, voci del
   periodo validato.
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
+- Lavori con il quiz o il bouquet (Triple Seven, Rafflesia): le Doti e la paga stanno solo negli esiti, come a Ore no Beko; l'esito si sceglie
+  alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede.
+- Dove le due pagine della guida concordano sulle date, un articolo le segue (Razione militare: dal 17/4 al 14/8 e dal 7/12 al 19/12). Requisiti e
+  clienti del Crossroads restano come sono finché non si verifica in gioco. Un piatto senza dati non dice che i dati mancano: la colonna Prezzo
+  ed Effetto compaiono solo se almeno un piatto li ha.
 
 ## 12. Domande, esami, negoziazione, pesca
 - Il premio di ogni domanda in classe e dei quiz TV è quello della guida (Conoscenza ♪, con le eccezioni documentate) e vive negli
   effetti della voce del Diario che segna la domanda; i risultati degli esami hanno la loro voce, con il piazzamento scelto alla spunta.
-  Le risposte senza punti danno 0 punti.
+  Le risposte senza punti danno 0 punti. Il testo «Che cosa dà» si modifica solo dove c'è già (la domanda del 25 aprile), non si offre per le altre.
 - Domande d'esame solo nelle righe di `domanda`, con la data. **(24/10)**
 - Negoziazione: si cerca la domanda (è l'unica cosa che si legge mentre l'Ombra parla); il carattere è un colore.
-- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti.
+- Calendario: il giorno della settimana si calcola dalla data (9 aprile = sabato); meteo e sblocchi senza fonte restano vuoti. Le 21 serate
+  della cantante al Jazz Club sono eventi di tipo consiglio.
 - Pesca, «Registra una visita» (L10-09, D18): tre passi (Quando, Cosa hai pescato, Riepilogo) con gli stessi dati del modulo unico di
   prima. Giorno e fascia partono da quelli della partita, l'ordine dopo l'ultima visita di quella fascia (si corregge con «Cambia»), il
   riepilogo li ripete per primi. «L'avevi già contata nelle attività?» compare solo se ci sono visite contate senza dettaglio (turni del

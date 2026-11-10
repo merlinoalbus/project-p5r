@@ -25,8 +25,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - Più partite, una attiva, cambio dalla barra in alto; dati della partita in una finestra (`/partita`), con il salvataggio di Persona 5 e i
   contenuti scaricabili posseduti (li leggono la Fusione e lo Scaffale con lo scatolone del Leblanc).
 - Scorta e compendio personale, Persona della partita, statistiche stimate e registrate.
-- Confidenti con rango, punti in note, semafori dei requisiti, inviti, relazione romantica, regali con reazione, doni ricevuti;
-  scheda del Confidente (`/confidenti/:chiave`).
+- Confidenti con rango, punti in note, semafori dei requisiti con frase generata e nota, inviti, relazione romantica, regali con reazione,
+  doni ricevuti; scheda del Confidente (`/confidenti/:chiave`), con le date fisse di un rango (Ryuji 7).
 - Doti sociali con note e soglie, promemoria «Applica», interruttore della Fortuna.
 - Denaro con i movimenti automatici delle voci e quelli a mano; oggetti ottenuti, copie, consumi e uscite.
 - Progressi, trofei, storico degli eventi con la provenienza, completamento (`/guida/completamento`).
@@ -63,7 +63,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759); un luogo nuovo che vende nasce ancora senza punto vendita, finché
   l'editor del posto non li crea insieme.
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
-- Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
+- Attività, lavori (esiti di Ore no Beko, Triple Seven e Rafflesia), libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri; serate della cantante nel Calendario. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.
 - Richieste dei Memento con sblocco e scadenza (`/guida/richieste`).

@@ -242,7 +242,8 @@ export interface RequisitiConfidenteDto {
   confidente: string;
   ranghi: Array<{
     rango: number;
-    requisiti: Array<{ indice: number; condizione: Condizione; testo: string; descrizione: string }>;
+    /** `descrizione` è la frase generata dalla condizione; `nota` è il testo proprio del requisito, '' se non ne ha (L7-02). */
+    requisiti: Array<{ indice: number; condizione: Condizione; descrizione: string; nota: string }>;
     /** Il rango è diverso da come lo dà la guida (si può ripristinare). */
     modificato: boolean;
   }>;
@@ -732,6 +733,8 @@ export interface SemaforoRequisitoDto {
   /** Il tipo della condizione valutata (`RequisitoSpillo['tipo']`), o «manuale» per i requisiti dei Confidenti che si confermano a mano. */
   tipo: string;
   testo: string;
+  /** L7-02: la nota propria di un requisito di rango, se ne ha una (`testo` è la frase generata). */
+  nota?: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Viene dal **negozio**, non dall'articolo: l'articolo la eredita perche' a bottega chiusa non
    *  si compra niente, ma non e' un problema suo e il suo cartellino non deve dirlo. */
@@ -1249,7 +1252,7 @@ export interface OggettiGuidaDto {
   /** L8-03: `confidente` è il Confidente della personalizzazione (Iwai) letto dal DB, con le condizioni del suo rango 1 (`confidente_requisito`,
    *  il punto unico dei requisiti dei Confidenti) e la condizione di ogni rango della progressione, per lo stato nella partita. */
   personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string;
-    confidente?: { chiave: string; nome: string; avvio: CondizioneSpilloDto[]; ranghi: Array<{ rango: number; condizione: CondizioneSpilloDto }> } | null };
+    confidente?: { chiave: string; nome: string; avvio: Array<CondizioneSpilloDto & { nota?: string }>; ranghi: Array<{ rango: number; condizione: CondizioneSpilloDto }> } | null };
   abiti: { introduzione: string; elenco: Array<IdentitaOggettoGuida & { nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
   scambi: Array<{ venditore: string; dove: string; quando: string; offerte: Array<{ ricevi: string; dai: string; note: string | null }>; fonte: string; verificato: boolean }>;
   /** Dopo M7 gli scambi aprono il listino esistente, non una seconda tabella commerciale. Testi precedenti nelle note del negozio. */
@@ -2387,7 +2390,6 @@ export interface AttivitaDto {
   chiave: string;
   nome: string;
   tipo: 'mini-gioco' | 'lavoro' | 'studio' | 'lettura' | 'film' | 'dvd' | 'videogioco' | 'allenamento' | 'cibo' | 'sfida' | 'altro';
-  luogo: string;
   /** Il quartiere dell'attività, derivato dal luogo-sede (`sedeChiave` → luogo → quartiere); null per le attività senza sede. */
   quartiereChiave: string | null;
   quartiereNome: string | null;
@@ -2396,8 +2398,6 @@ export interface AttivitaDto {
   sblocco: string | null;
   /** Round richiesti per completare un videogioco; null per le altre attività. */
   sessioni: number | null;
-  /** `dote` nulla = effetto su una Dote variabile/non confermata, spiegato in `condizione`. */
-  doti: Array<{ dote: DoteChiave | null; note: number | null; condizione: string | null }>;
   /** Paga in yen a turno e massimo dichiarato (migrazione 075); solo per i lavori. */
   pagaYen: number | null;
   pagaMassima: number | null;
@@ -2440,7 +2440,7 @@ export interface LibroDto {
   chiave: string;
   nome: string;
   /** L13 (O7-4, migrazione 313): «dove», «disponibile dal», Dote e sblocco in prosa non ci sono più: li dicono `negozi`, `ricompensaDi`,
-   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo (con la nota della guida dove l'articolo non c'è). */
+   *  `posizioni`, `condizioni` ed `effetti`. Il prezzo viene dall'articolo. */
   prezzo: number | null;
   /** Le Richieste che danno il libro in ricompensa (`ricompensa_oggetto`). */
   ricompensaDi?: Array<{ tipo: 'richiesta'; chiave: string; nome: string }>;
@@ -2449,7 +2449,7 @@ export interface LibroDto {
   sbloccaLuogo: string | null;
   sbloccaLuogoNome: string | null;
   /** L6 (R6-11): i posti che leggerlo apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (non
-   *  dalla frase `sblocca`, che resta nota, né dall'effetto «sblocca-luogo»). Vuoto se non apre niente. */
+   *  dall'effetto «sblocca-luogo»). Vuoto se non apre niente. */
   apre?: Array<Omit<PostoApertoDto, 'tipo'> & { tipo: 'luogo' | 'quartiere' }>;
   sessioni: number | null;
   dettagli: string | null;

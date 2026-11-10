@@ -31,9 +31,9 @@ export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato
   for (const q of dati.dati?.quartieri ?? []) {
     for (const l of (dati.dati?.luoghi ?? []).filter((x) => x.quartiere === q.chiave)) opzioni.push({ chiave: l.chiave, nome: l.nome, dettaglio: definizioneTipoLuogo(l.tipo).nome, gruppo: q.nome });
   }
-  // un valore che l'elenco non conosce (dati vecchi) resta visibile, non sparisce
+  // la sede scelta resta selezionata anche se l'elenco non la conosce (dati vecchi) o non è ancora arrivato: si dice perché, mai la chiave grezza
   const attuale = valore ?? '';
-  if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: attuale });
+  if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: dati.caricamento ? 'Un attimo…' : dati.errore ? 'Sede scelta (luoghi non caricati)' : 'Luogo non più nell’elenco' });
   return (
     <div className="editor-mappa__campo">
       <Selettore etichetta={etichetta} valore={attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre" vuoto="Nessuna sede (online, ambulante o da assegnare)" opzioni={opzioni}

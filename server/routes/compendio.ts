@@ -26,7 +26,7 @@ import {
   bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea,
   paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce
 } from '../schemas/guidaDungeon.js';
-import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
+import { correggiRequisitoRichiesta, impostaRequisitiRanghi, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { setDlcConPersone } from '../services/setDlcService.js';
 import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere, ripristinaSbloccoQuartiere } from '../services/cittaService.js';
@@ -503,7 +503,15 @@ router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida
   res.json(requisitiDelConfidente(String(req.params.chiave)));
 });
 const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE) });
-/** L6: i requisiti di un rango al posto di quelli di adesso (condizioni del vocabolario unico, con la frase facoltativa). */
+/** L7-02: i ranghi indicati, tutti in una transazione (il salvataggio unico dell'editor); la nota è il testo proprio del requisito. */
+const bodyRequisitiRanghi = z.object({ ranghi: z.array(z.object({
+  rango: z.number().int().min(1).max(RANGO_MASSIMO_CONFIDENTE),
+  requisiti: z.array(z.object({ condizione: condizioneSpillo, nota: z.string().max(500).nullable().optional() }).strict()).max(10),
+}).strict()).min(1).max(RANGO_MASSIMO_CONFIDENTE) }).strict();
+router.put('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida, body: bodyRequisitiRanghi }), (req, res) => {
+  res.json(impostaRequisitiRanghi(String(req.params.chiave), req.body.ranghi));
+});
+/** L6: i requisiti di un rango al posto di quelli di adesso (condizioni del vocabolario unico, con la nota facoltativa). */
 router.put('/confidenti/:chiave/requisiti/:rango', validate({ params: paramsRangoConfidente, body: z.object({ requisiti: z.array(z.object({ condizione: condizioneSpillo, testo: z.string().max(500).nullable().optional() })).max(10) }) }), (req, res) => {
   const p = req.params;
   res.json(impostaRequisitiRango(p.chiave, p.rango, req.body.requisiti));

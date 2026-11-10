@@ -48,11 +48,13 @@ interface Props {
    */
   caricamento?: boolean;
   erroreCaricamento?: string | null;
+  /** L'esito negativo di un salvataggio: sta in una fascia ferma sopra il corpo, in vista anche con il corpo scorso fino in fondo. */
+  errore?: string | null;
   children: ReactNode;
 }
 
 /** Una finestra di modifica: titolo, corpo a sezioni che scorre, piè fisso con Elimina / Annulla / Salva. */
-export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, caricamento = false, erroreCaricamento = null, children }: Props) {
+export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Salva', salvabile = true, occupato = false, sporca = false, onElimina, titoloElimina = 'Elimina', azioniExtra, stretta, nomeModulo, caricamento = false, erroreCaricamento = null, errore = null, children }: Props) {
   const inAttesa = caricamento || !!erroreCaricamento;
   /** Chiude, chiedendo conferma se ci sono modifiche non salvate (non durante un salvataggio). */
   const chiudi = async () => {
@@ -63,7 +65,7 @@ export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Sal
   /** Invio in un campo: salva, se si può. */
   const invia = (e: FormEvent) => { e.preventDefault(); if (salvabile && !occupato && !inAttesa) void onSalva(); };
   return (
-    <Modal titolo={titolo} aperta larga={!stretta} onChiudi={() => void chiudi()} azioni={(
+    <Modal titolo={titolo} aperta larga={!stretta} onChiudi={() => void chiudi()} fascia={errore ? <p role="alert" className="m-0 border-b border-border px-5 py-2 testo-13 text-error-testo whitespace-pre-wrap break-words">{errore}</p> : undefined} azioni={(
       <div className="flex w-full flex-wrap items-center gap-2">
         <div className="finestra-modifica__elimina flex flex-wrap items-center gap-2">
           {!inAttesa && onElimina && <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={titoloElimina} disabled={occupato} onClick={onElimina} />}
