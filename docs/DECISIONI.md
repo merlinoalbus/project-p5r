@@ -433,6 +433,17 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   percentuale e segno «Completato».
 - Un Palazzo senza la voce del boss finale dichiarata non può risultare concluso: nella preparazione la sua scheda lo segna «Boss
   finale da dichiarare», con il collegamento che apre «Modifica › Boss finale»; nel rilascio il segno non c'è. **(31/10)**
+- Il Tesoro di Futaba e di Maruki è un pin che l'utente colloca dall'editor quando lo vede in gioco: nessuna fonte ne dà la posizione. **(09/11)**
+- **Biglietto da visita**: dove la guida non scrive un termine, vale la sua regola generale («entro il giorno prima della scadenza») come valore
+  calcolato in lettura, mai salvato, con un solo punto di calcolo (`letteraDelPalazzo`, `shared/datePalazzo.ts`). Il termine scritto prevale
+  sempre (Madarame). Shido ha il 12/12 scritto, perché la guida fa cadere lettera e furto nello stesso giorno; Maruki non ha lettera, perché la
+  guida non la nomina. **(09/11)**
+- **Pin e voci dei Palazzi non validati**: un pin si collega a una voce con una migrazione solo se l'abbinamento è univoco nei due versi e
+  riscontrato sulla guida, e mai se una partita ha già uno stato su quel pin o su quella voce; gli altri restano all'editor con il motivo
+  annotato. Una voce doppia della guida diventa «Racconto» invece di essere fusa. **(09/11)**
+- Iweleth è un dedalo, ma i suoi forzieri e mini-boss tengono il tipo che avevano da Palazzo; le altre voci convertite restano Trama. **(09/11)**
+- Una Persona aggiunta a mano a un dedalo si collega alla sua Ombra, o ne crea una dell'utente con i dati ignoti vuoti, e così compare nelle
+  Ombre e in «Dove si incontra». **(09/11)**
 - **Voci descrittive della guida**: una voce «Altro» fuori dalle aree dei dedali si legge e basta (niente stato, niente pin, non conta nel
   completamento). Se l'utente le dà il carattere «Permanente» o «Si ripropone» è una voce da segnare come le altre: ha la casella, i
   pin, e conta negli oggetti dell'infiltrazione. Senza carattere, o con «Racconto», resta descrittiva. La regola è una sola per server e
@@ -455,6 +466,16 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   (2026-10-11): così la percentuale della pagina del dedalo e la riga della carta sono lo stesso calcolo. Ogni percentuale di avanzamento
   (dedalo, Memento, Palazzo) è per difetto: il 100% compare solo a lavoro finito. Nella fila delle aree del Palazzo (768–1279 px) ogni chip
   ha una seconda riga con lo stesso testo del foglio («2 da prendere su 2»), sempre in 44 px.
+- **Timbri per dedalo (Q8, 09/11; scelta dell'utente del 10/11: «Numeri per dedalo»)**: ogni dedalo ha il totale che gli dà la guida; i tre
+  per cui la guida non dà un numero (Qimranut, Chemdah, Iweleth) non contano i timbri e lo dicono, senza valori inventati. Nessun totale
+  generale si impone: la scheda dei Memento dice una volta, come informazione, la somma dei dedali (153) e il totale dichiarato (123); il 150
+  della guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio. I timbri contano nel completamento del dedalo, uno per timbro, e nessuna voce di Trama ripete il loro numero.
+- **Eligor nei Memento (scelta dell'utente del 10/11: «Solo a Chemdah»)**: il Cavaliere bellicoso sta solo nel Dedalo di Chemdah, come la «Guida
+  ai Memento» (r.287); la pagina di Aiyatsbus che lo elenca (r.125) non vale. Il Palazzo di Kamoshida non cambia.
+- **Requisiti di Palazzo delle Richieste (Q9, 09/11)**: valgono le pagine dei Dedali; il Palazzo serve a raggiungere il bersaglio, quindi sta fra
+  le condizioni per completare la Richiesta, non fra quelle che la sbloccano. La pagina «Richieste nei Memento» dà solo date e ranghi.
+- **Richieste**: il posto si cambia in un punto solo, la sezione «Dove» del modulo; il nome del bersaglio è facoltativo con un'Ombra del
+  compendio, e vale quello dell'Ombra. **(09/11)**
 - **Memento al telefono (L10-10, schizzo approvato)**: sotto i 768 px i nove dedali sono una griglia di pulsanti da 44 px sempre in vista,
   e il pozzo è solo il loro sfondo, attenuato e non toccabile; «Pozzo dei Memento» non è più nel menu «Altro». Tablet e desktop come prima.
 - Nessuna immagine ufficiale nel repository: le planimetrie le carica l'utente nell'istanza. I pezzi delle planimetrie (zone

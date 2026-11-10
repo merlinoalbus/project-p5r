@@ -14,7 +14,7 @@ import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import { conCestino } from './cestinoService.js';
 import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, RiepilogoRichiesteDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../../shared/types.js';
-import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataConArticolo, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { GIORNI_NEL_MESE, MESI_GIOCO, condizioneConTesto, dataConArticolo, dataLeggibile, dataValida, descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { statoDisponibilitaPartita, type StatoDisponibilita } from './disponibilitaService.js';
 import { esitoAperturaDelDedalo, valutaInsieme } from './condizioni/valutatore.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
@@ -29,9 +29,11 @@ import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
 // L8-09 (migrazione 337): `disponibile_dal` e `scadenza` (testi della guida mai convertiti, vuoti in tutte le righe) e `area` (il nome del
 // dedalo, copia di `area_chiave`) non ci sono più: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
+// L10-01 (migrazione 381): nemmeno `ricompense_json` (vuota in 33/33: le ricompense sono gli oggetti, gli yen e i PE) e `confidente_rango`
+// (vuota in 33/33: un rango che serve è una condizione di sblocco).
 interface RigaRichiesta {
   chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null;
-  piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string;
+  piano: string; bersaglio_json: string; confidente_chiave: string | null; note: string;
   fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null;
   condizioni_json: string | null; scadenza_data: string | null; proroga_data: string | null; proroga_condizioni_json: string | null; ombra_chiave: string | null; ombra_nome: string | null; yen: number | null; esperienza: number | null;
   /** L13 (ondata 7, migrazione 310): le condizioni proprie per completarla e l'area in cui il bersaglio si sposta durante la proroga (col suo Dedalo). */
@@ -51,7 +53,8 @@ type ProfiloOmbra = ReturnType<typeof profiliOmbre> extends Map<string, infer V>
  * L13 (decisione 5 della riga dell'ondata 3): il bersaglio come lo si mostra. Con un'Ombra del compendio livello e affinità vengono dalla sua
  * scheda (`profiliOmbre`, la stessa lettura del compendio delle Ombre: un dato in un solo punto), scritti col vocabolario unico degli elementi
  * («Fuoco», «Maledizione (Annulla)») come i campi propri; dove la scheda non sa (livello assente, nessuna affinità nota) valgono i campi propri,
- * che restano salvati e che il modulo modifica (`daOmbra.propri`).
+ * che restano salvati e che il modulo modifica (`daOmbra.propri`). L10-04: con l'Ombra il nome proprio è facoltativo; se è vuoto il bersaglio
+ * si chiama come l'Ombra (`daOmbra.nome`), senza che quel nome venga copiato nei dati della Richiesta.
  */
 function bersaglioRisolto(r: RigaRichiesta, profilo: ProfiloOmbra | undefined): Pick<RichiestaDto, 'bersaglio' | 'ombra'> {
   const proprio = JSON.parse(r.bersaglio_json) as RichiestaDto['bersaglio'];
@@ -59,23 +62,19 @@ function bersaglioRisolto(r: RigaRichiesta, profilo: ProfiloOmbra | undefined): 
   const debolezze = (profilo?.debolezze ?? []).map((k) => (eChiaveElemento(k) ? NOME_ELEMENTO[k] : k));
   const resistenze = (profilo?.resistenze ?? []).map((x) => `${eChiaveElemento(x.elemento) ? NOME_ELEMENTO[x.elemento] : x.elemento} (${eCodiceAffinita(x.codice) ? NOME_ESITO_AFFINITA[x.codice] : x.codice})`);
   const livello = profilo?.livello ?? null;
-  const daOmbra = { livello: livello !== null, affinita: debolezze.length + resistenze.length > 0, propri: { livello: proprio.livello, debolezze: proprio.debolezze, resistenze: proprio.resistenze } };
+  const nomeProprio = (proprio.nome ?? '').trim();
+  const daOmbra = { livello: livello !== null, affinita: debolezze.length + resistenze.length > 0, nome: nomeProprio === '',
+    propri: { nome: nomeProprio, livello: proprio.livello, debolezze: proprio.debolezze, resistenze: proprio.resistenze } };
   return {
     ombra: { chiave: r.ombra_chiave, nome: r.ombra_nome, livello, debolezze, resistenze },
-    bersaglio: { ...proprio, livello: daOmbra.livello ? livello : proprio.livello, debolezze: daOmbra.affinita ? debolezze : proprio.debolezze, resistenze: daOmbra.affinita ? resistenze : proprio.resistenze, daOmbra },
+    bersaglio: { ...proprio, nome: daOmbra.nome ? r.ombra_nome : nomeProprio, livello: daOmbra.livello ? livello : proprio.livello, debolezze: daOmbra.affinita ? debolezze : proprio.debolezze, resistenze: daOmbra.affinita ? resistenze : proprio.resistenze, daOmbra },
   };
 }
 
-/**
- * Le condizioni di sblocco da valutare: quelle salvate e, se la colonna `confidente_rango` ha ancora il rango (Richiesta non convertita dalla
- * 235, come «Lo zio ingordo»), anche quel rango come condizione sul Confidente collegato: è un dato vero della Richiesta, non si ignora.
- */
-function condizioniDaValutare(r: RigaRichiesta): RequisitoSpillo[] {
-  const salvate = leggiCondizioniSalvate(r.condizioni_json);
-  if (r.confidente_chiave && r.confidente_rango && !salvate.some((c) => c.tipo === 'confidente' && c.confidente === r.confidente_chiave)) {
-    return [...salvate, { tipo: 'confidente', confidente: r.confidente_chiave, rango: r.confidente_rango }];
-  }
-  return salvate;
+/** Il nome del bersaglio da dire (eventi): quello proprio, o quello dell'Ombra del compendio se il proprio è vuoto (L10-04). */
+function nomeDelBersaglio(r: RigaRichiesta): string {
+  const proprio = ((JSON.parse(r.bersaglio_json) as { nome?: string }).nome ?? '').trim();
+  return proprio || r.ombra_nome || '';
 }
 
 /** Il numero del giorno nel calendario di gioco (1 aprile = 0), per contare i giorni alla scadenza. */
@@ -143,7 +142,7 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   if (segnato === 'completata') return { ...base, completabile: true, motiviCompletamento: [], stato: 'completata', motivi: [] };
   if (passata) return { ...base, stato: 'scaduta', motivi: [`Scaduta ${dataConArticolo(scadenzaEffettiva!)}${r.proroga_data && !prorogaVale ? ` (la proroga ${dataConArticolo(r.proroga_data, 'a')} vale solo con: ${proroga.map((c) => descriviRequisitoSpillo(c, nomi)).join(', ')})` : ''}`] };
   if (segnato === 'accettata') return { ...base, stato: 'accettata', motivi: [] };
-  const condizioni = condizioniDaValutare(r).map((c) => condizioneConTesto(c, nomi));
+  const condizioni = leggiCondizioniSalvate(r.condizioni_json).map((c) => condizioneConTesto(c, nomi));
   const v = valutaInsieme(condizioni, st);
   if (v.stato === 'bloccato') return { ...base, stato: 'bloccata', motivi: v.requisiti.filter((q) => q.stato === 'rosso' && q.bloccante !== false).map((q) => q.dettaglio) };
   const grigi = v.requisiti.filter((q) => q.stato === 'grigio' && q.bloccante !== false).map((q) => `Da verificare nel gioco: ${q.dettaglio}`);
@@ -158,7 +157,7 @@ function yenDellaRicompensa(partitaId: number, chiave: string): Pick<StatoCalcol
   return y ? { yenRicompensa: y } : {};
 }
 
-/** Una Richiesta come DTO: bersaglio (risolto dall'Ombra del compendio, se c'è) e ricompense dai JSON, Confidente collegato (con il nome,
+/** Una Richiesta come DTO: bersaglio (risolto dall'Ombra del compendio, se c'è), oggetti della ricompensa, Confidente collegato (con il nome,
  *  o la chiave se manca), dedalo e stato nella partita (null se non è segnata); con lo stato della partita, anche lo stato calcolato. */
 function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave]), st: StatoDisponibilita | null = null,
   profili: ReturnType<typeof profiliOmbre> = profiliOmbre(r.ombra_chiave ? [r.ombra_chiave] : [])): RichiestaDto {
@@ -180,9 +179,9 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
       ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave) : {}),
     } } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, areaChiave: r.area_chiave, piano: r.piano,
-    bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],
+    bersaglio,
     oggettiRicompensa: premi.get(r.chiave) ?? [],
-    confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave, rango: r.confidente_rango } : null,
+    confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null,
     areaNome: r.area_nome, areaOrdine: r.area_ordine, areaDedalo: r.area_dedalo_chiave, areaDedaloNome: r.area_dedalo_nome,
     note: r.note, fonte: r.fonte, stato: stati.get(r.chiave) ?? null,
   };
@@ -221,7 +220,7 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
 
 /**
  * L13: il riepilogo leggero per la Home: quante Richieste sono accettate (e non completate né scadute) e quante di quelle ancora da fare
- * (accettate, disponibili, da verificare) scadono entro `GIORNI_AVVISO_SCADENZA` giorni. Lo stesso stato calcolato della pagina, senza
+ * (accettate e disponibili) scadono entro `GIORNI_AVVISO_SCADENZA` giorni. Lo stesso stato calcolato della pagina, senza
  * bersagli, ricompense, Ombre, dedali né Jose.
  */
 export function riepilogoRichieste(partitaId: number): RiepilogoRichiesteDto {
@@ -232,7 +231,7 @@ export function riepilogoRichieste(partitaId: number): RiepilogoRichiesteDto {
   for (const r of prepared(SQL).all() as RigaRichiesta[]) {
     const s = statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi);
     if (s.stato === 'accettata') accettate += 1;
-    if ((s.stato === 'accettata' || s.stato === 'disponibile' || s.stato === 'da-verificare') && s.giorniAllaScadenza !== null && s.giorniAllaScadenza <= GIORNI_AVVISO_SCADENZA) inScadenza += 1;
+    if ((s.stato === 'accettata' || s.stato === 'disponibile') && s.giorniAllaScadenza !== null && s.giorniAllaScadenza <= GIORNI_AVVISO_SCADENZA) inScadenza += 1;
   }
   return { accettate, inScadenza, giorniAvviso: GIORNI_AVVISO_SCADENZA };
 }
@@ -292,11 +291,10 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END')
       .run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
-      const b = JSON.parse(r.bersaglio_json) as { nome: string };
       // il posto: il Dedalo e la sua area (310: il `piano` in testo resta solo dove non è il nome dell'area)
       const dove = r.area_nome ?? '';
       const piano = r.area_dedalo_nome || r.piano;
-      registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${dove}${piano ? ` (${piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
+      registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${dove}${piano ? ` (${piano})` : ''} · bersaglio ${nomeDelBersaglio(r)}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
     }
     // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen (decisione 18): entrano da soli nel saldo
     // completandola e si tolgono (al più fino a zero) riaprendola (`riallineaYenRichiesta`); una proposta «Applica» nata prima resta al suo
@@ -310,25 +308,6 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
   return dto(r, new Map(stato === null ? [] : [[chiave, stato]]), undefined, statoDisponibilitaPartita(partitaId));
 }
 
-/**
- * Colloca una Richiesta in un'area di un dedalo dei Memento (099: le Richieste sono elementi delle aree, scelta dell'utente del
- * 2026-10-11), o la toglie dall'area (null: resta nel suo dedalo, da collocare). Collocandola, il dedalo della Richiesta diventa
- * quello dell'area (`area_chiave`); se cambia dedalo, la Richiesta va in fondo all'elenco. Dato di gioco, per tutte le partite.
- */
-export function collocaRichiesta(chiave: string, areaDedalo: string | null): RichiestaDto {
-  const r = prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta | undefined;
-  if (!r) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${chiave}' non esiste.`);
-  if (areaDedalo === null) {
-    prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE chiave = ?').run(chiave);
-  } else {
-    const a = prepared('SELECT ad.dedalo_chiave FROM area_dedalo ad JOIN dungeon_area d ON d.chiave = ad.dedalo_chiave WHERE ad.chiave = ?').get(areaDedalo) as { dedalo_chiave: string } | undefined;
-    if (!a) throw httpErrors.notFound('area-dedalo-non-trovata', `L'area del dedalo '${areaDedalo}' non esiste.`);
-    const ordine = a.dedalo_chiave === r.area_chiave ? r.ordine : (prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM richiesta').get() as { n: number }).n + 1;
-    prepared('UPDATE richiesta SET area_dedalo_chiave = ?, area_chiave = ?, ordine = ? WHERE chiave = ?').run(areaDedalo, a.dedalo_chiave, ordine, chiave);
-  }
-  return dto(prepared(`${SQL} WHERE r.chiave = ?`).get(chiave) as RigaRichiesta, new Map());
-}
-
 // ---- Le Richieste modificabili, aggiungibili ed eliminabili (scelta dell'utente, 2026-10-11) ----
 //
 // «come faccio a modificare i dettagli relativi alle richieste? non ho un pulsante modifica.» Scelte: «Modifica, aggiungi,
@@ -340,8 +319,9 @@ export function collocaRichiesta(chiave: string, areaDedalo: string | null): Ric
 export interface DatiRichiesta {
   nome?: string; committente?: string;
   dedalo?: string | null; areaDedalo?: string | null; piano?: string;
+  /** L10-04: con un'Ombra (`ombra`) il nome del bersaglio può restare vuoto; senza Ombra è obbligatorio (400 `bersaglio-senza-nome`). */
   bersaglio?: RichiestaDto['bersaglio'];
-  ricompense?: string[]; confidente?: string | null; confidenteRango?: number | null; note?: string;
+  confidente?: string | null; note?: string;
   /** L13 (ondata 3): sblocco, scadenza con proroga, Ombra del compendio, yen e PE, oggetti del catalogo con le copie. */
   condizioni?: unknown[]; scadenzaData?: string | null; proroga?: { data: string; condizioni: unknown[]; areaDedalo?: string | null } | null;
   ombra?: string | null; yen?: number | null; esperienza?: number | null; oggetti?: Array<{ chiave: string; quantita: number }>;
@@ -451,6 +431,15 @@ function collocazione(dati: DatiRichiesta, prima: { dedalo: string | null; area:
   return { dedalo, area };
 }
 
+/**
+ * L10-04: il bersaglio ha un nome, il proprio o quello dell'Ombra del compendio. Senza Ombra (quella inviata, o quella salvata se non si
+ * cambia) un nome vuoto non dice chi è il bersaglio: 400 `bersaglio-senza-nome`.
+ */
+function verificaNomeDelBersaglio(bersaglioJson: string, ombra: string | null): void {
+  const nome = ((JSON.parse(bersaglioJson) as { nome?: string }).nome ?? '').trim();
+  if (!nome && !ombra) throw httpErrors.badRequest('bersaglio-senza-nome', 'Il bersaglio non ha un nome: scrivilo, oppure scegli l’Ombra del compendio.');
+}
+
 /** Il Confidente collegato deve esistere. */
 function verificaConfidente(chiave: string | null | undefined): void {
   if (chiave && !prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
@@ -471,20 +460,22 @@ function verificaNomeLibero(nome: string, tranne: string | null): void {
 /** L'ordine dopo l'ultima Richiesta: una nuova, o una che cambia dedalo, va in fondo. */
 const ordineInFondo = (): number => (prepared('SELECT COALESCE(MAX(ordine), -1) AS n FROM richiesta').get() as { n: number }).n + 1;
 
-/** Una Richiesta nuova (nome e bersaglio obbligatori), in fondo all'elenco della guida; la chiave nasce dal nome. */
+/** Una Richiesta nuova (nome e bersaglio obbligatori: il nome del bersaglio, o la sua Ombra), in fondo all'elenco della guida; la chiave
+ *  nasce dal nome. */
 export function creaRichiesta(dati: DatiRichiesta & { nome: string; bersaglio: RichiestaDto['bersaglio'] }): RichiestaDto {
   verificaNomeLibero(dati.nome, null);
   const dove = collocazione(dati, { dedalo: null, area: null });
   verificaConfidente(dati.confidente);
+  const bersaglio = JSON.stringify(dati.bersaglio);
+  verificaNomeDelBersaglio(bersaglio, dati.ombra ?? null);
   const base = (slug(dati.nome) || 'richiesta').slice(0, 190).replace(/-+$/, '') || 'richiesta';
   let chiave = base;
   for (let i = 2; prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(chiave); i++) chiave = `${base}-${i}`;
   getDb().transaction(() => {
-  prepared(`INSERT INTO richiesta (chiave, ordine, nome, committente, area_chiave, area_dedalo_chiave, piano, bersaglio_json, ricompense_json, confidente_chiave, confidente_rango, note, fonte)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente')`).run(
-    chiave, ordineInFondo(), dati.nome.trim(), dati.committente ?? '', dove.dedalo, dove.area, dati.piano ?? '',
-    JSON.stringify(dati.bersaglio), JSON.stringify(dati.ricompense ?? []), dati.confidente ?? null, dati.confidente ? dati.confidenteRango ?? null : null, dati.note ?? '');
-  aggiornaCampiStrutturati(chiave, dati);
+    prepared(`INSERT INTO richiesta (chiave, ordine, nome, committente, area_chiave, area_dedalo_chiave, piano, bersaglio_json, confidente_chiave, note, fonte)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente')`).run(
+      chiave, ordineInFondo(), dati.nome.trim(), dati.committente ?? '', dove.dedalo, dove.area, dati.piano ?? '', bersaglio, dati.confidente ?? null, dati.note ?? '');
+    aggiornaCampiStrutturati(chiave, dati);
   })();
   return dto(rigaRichiesta(chiave), new Map());
 }
@@ -499,15 +490,15 @@ export function aggiornaRichiesta(chiave: string, dati: DatiRichiesta): Richiest
   const dove = collocazione(dati, { dedalo: r.area_chiave, area: r.area_dedalo_chiave });
   if (dati.confidente !== undefined) verificaConfidente(dati.confidente);
   const confidente = dati.confidente === undefined ? r.confidente_chiave : dati.confidente;
-  const rango = confidente === null ? null : dati.confidenteRango === undefined ? r.confidente_rango : dati.confidenteRango;
   const nome = dati.nome?.trim() || r.nome;
   if (nome.toLowerCase() !== r.nome.toLowerCase()) verificaNomeLibero(nome, chiave);
+  const bersaglio = dati.bersaglio ? JSON.stringify(dati.bersaglio) : r.bersaglio_json;
+  verificaNomeDelBersaglio(bersaglio, dati.ombra === undefined ? r.ombra_chiave : dati.ombra);
   const ordine = dove.dedalo !== r.area_chiave ? ordineInFondo() : r.ordine;
   getDb().transaction(() => {
     prepared(`UPDATE richiesta SET nome = ?, committente = ?, area_chiave = ?, area_dedalo_chiave = ?, piano = ?, bersaglio_json = ?,
-      ricompense_json = ?, confidente_chiave = ?, confidente_rango = ?, note = ?, ordine = ? WHERE chiave = ?`).run(
-      nome, dati.committente ?? r.committente, dove.dedalo, dove.area, dati.piano ?? r.piano,
-      dati.bersaglio ? JSON.stringify(dati.bersaglio) : r.bersaglio_json, dati.ricompense ? JSON.stringify(dati.ricompense) : r.ricompense_json, confidente, rango, dati.note ?? r.note, ordine, chiave);
+      confidente_chiave = ?, note = ?, ordine = ? WHERE chiave = ?`).run(
+      nome, dati.committente ?? r.committente, dove.dedalo, dove.area, dati.piano ?? r.piano, bersaglio, confidente, dati.note ?? r.note, ordine, chiave);
     aggiornaCampiStrutturati(chiave, dati);
     if (nome !== r.nome) {
       // le voci della giornata che la indicano mostrano il nome salvato in `riferimento_testo` (`giornataService`): il nome nuovo.

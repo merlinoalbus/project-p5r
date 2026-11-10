@@ -11,18 +11,18 @@ import { METEO_GIORNO } from '../../shared/giorno.js';
 import { correggiAffinita, ripristinaAffinita } from '../services/affinitaPersonaService.js';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi.js';
 import { collegaSchedaAllaVoce, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
-import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
+import { aggiornaRichiesta, citazioniRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioOmbra, doveSiIncontraPersona, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
 import { paramsOmbra, queryOmbra, queryOmbre } from '../schemas/ombre.js';
 import { negoziazione, negoziazioneCompatta, verificaNegoziazione } from '../services/negoziazioneService.js';
 import { queryNegoziazione } from '../schemas/negoziazione.js';
 import {
-  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
+  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDateDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
   impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea
 } from '../services/dungeonService.js';
 import {
-  bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon,bodyNuovaArea,
+  bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyDungeon, bodyNuovaArea,
   bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea,
   paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce
 } from '../schemas/guidaDungeon.js';
@@ -365,10 +365,6 @@ router.delete('/richieste/:chiave', validate({ params: paramsChiaveGuida }), (re
   eliminaRichiesta(String(req.params.chiave));
   res.status(204).end();
 });
-/** Colloca una Richiesta in un'area di un dedalo (099), o la toglie dall'area (null): è un elemento delle aree. */
-router.put('/richieste/:chiave/area', validate({ params: paramsChiaveGuida, body: bodyCollocaRichiesta }), (req, res) => {
-  res.json(collocaRichiesta(String(req.params.chiave), req.body.areaDedalo));
-});
 router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
   res.json(elencaDungeon(req.query.partita));
 });
@@ -390,6 +386,10 @@ router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyD
 /** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
 router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(ripristinaDungeon(String(req.params.chiave)));
+});
+/** L9-08: «Ripristina» delle date del Palazzo — tornano quelle di prima della prima correzione; il boss finale non si tocca. */
+router.post('/dungeon/:chiave/ripristina-date', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(ripristinaDateDungeon(String(req.params.chiave)));
 });
 /** Le regole d'atterraggio dalla mappa di Tokyo, sostituite tutte insieme nell'ordine dato (2026-10-04). */
 router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, body: bodyAtterraggi }), (req, res) => {

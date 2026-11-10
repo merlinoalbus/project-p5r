@@ -47,7 +47,12 @@ export const bodyDungeon = z.object({
   /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
   voceBossFinale: z.string().min(1).max(200).nullable().optional(),
 });
-export const bodyArea = z.object({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional() });
+/** Un'area della guida (infiltrazione o dedalo); L10-02 (382): per un dedalo dei Memento anche il totale dei timbri, un intero da 0 al tetto o
+ *  null (la guida non dà un numero); per un'infiltrazione il servizio lo rifiuta (`non-un-dedalo`). */
+export const bodyArea = z.object({
+  nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
+  timbriTotale: z.number().int().min(0).max(LIMITI_GUIDA.dedalo.timbri).nullable().optional(),
+});
 export const bodyPunto = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.punto.descrizione).optional(),
   tipo: z.enum(TIPI_PUNTO).optional(), esauribile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(),
@@ -83,13 +88,11 @@ export const querySchedaDungeon = z.object({ partita: idParam.optional(), infilt
 // nasce dalla regola (si sceglie correggendola)
 export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true, carattere: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
-/** Il totale dei timbri di un'area del dedalo: un intero da 0 al tetto, o null (l'area non ha timbri). */
-const timbriTotale = z.number().int().min(0).max(LIMITI_GUIDA.areaDedalo.timbri).nullable();
-/** Un'area di un dedalo dei Memento da correggere (099): nome, dettagli, totale dei timbri. */
+/** Un'area di un dedalo dei Memento da correggere (099): nome e dettagli. L10-02 (382): i timbri sono del dedalo (`bodyArea`); un
+ *  `timbriTotale` qui è un campo sconosciuto e si rifiuta (400), invece di sparire in silenzio. */
 export const bodyAreaDedalo = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.areaDedalo.descrizione).optional(),
-  timbriTotale: timbriTotale.optional(),
-});
+}).strict();
 /** Un'area nuova di un dedalo (099): nasce in fondo. */
 export const bodyNuovaAreaDedalo = bodyAreaDedalo.extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome) });
 /** Una sezione nuova della guida: dove va (`dopo` un'area, `null` in cima, assente in fondo) e, se c'è, la planimetria che la contiene. */
@@ -133,16 +136,16 @@ export const bodyAtterraggi = z.object({
   })).max(30),
 });
 
-/** L'area del dedalo in cui collocare una Richiesta (099); null la toglie dall'area (resta nel dedalo, da collocare). */
-export const bodyCollocaRichiesta = z.object({ areaDedalo: z.string().min(1).max(200).nullable() });
-
 /* ---- Le Richieste dei Mementos modificabili (2026-10-11: «Modifica, aggiungi, elimina») ---- */
+// L10-05: il posto di una Richiesta si cambia in un punto solo, `dedalo` e `areaDedalo` di `PUT /richieste/:chiave`: la rotta
+// `PUT /richieste/:chiave/area` (e il suo corpo) non c'è più.
 const R = LIMITI_GUIDA.richiesta;
-/** Un elenco di voci brevi (debolezze, resistenze, ricompense): spazi tolti, vuote scartate. */
+/** Un elenco di voci brevi (debolezze, resistenze): spazi tolti, vuote scartate. */
 const elencoVoci = z.array(z.string().trim().max(R.voce)).max(R.voci).transform((v) => v.filter((x) => x.length > 0));
-/** Il bersaglio della Richiesta: nome obbligatorio, il resto facoltativo. */
+/** Il bersaglio della Richiesta. L10-04: il nome può restare vuoto quando c'è l'Ombra del compendio (vale il suo nome); senza Ombra il servizio
+ *  lo chiede (400 `bersaglio-senza-nome`). Il resto è facoltativo. */
 const bersaglio = z.object({
-  nome: z.string().trim().min(1).max(R.nome), formaDemoniaca: z.string().trim().max(R.voce).default(''),
+  nome: z.string().trim().max(R.nome), formaDemoniaca: z.string().trim().max(R.voce).default(''),
   livello: z.number().int().min(1).max(99).nullable().default(null),
   debolezze: elencoVoci.default([]), resistenze: elencoVoci.default([]), vulnerabileConfusione: z.boolean().default(false),
 });
@@ -152,8 +155,9 @@ export const bodyRichiesta = z.object({
   nome: z.string().trim().min(1).max(R.nome).optional(), committente: z.string().trim().max(R.breve).optional(),
   // L8-09: niente più testi di sblocco e di scadenza della guida (`disponibileDal`, `scadenza`): valgono `condizioni` e `scadenzaData`
   dedalo: z.string().min(1).max(200).nullable().optional(), areaDedalo: z.string().min(1).max(200).nullable().optional(),
-  piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(), ricompense: elencoVoci.optional(),
-  confidente: z.string().min(1).max(200).nullable().optional(), confidenteRango: z.number().int().min(1).max(R.rango).nullable().optional(),
+  piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(),
+  // L10-01 (381): niente più ricompense in testo né rango del Confidente (il rango che serve è una condizione di sblocco)
+  confidente: z.string().min(1).max(200).nullable().optional(),
   note: z.string().trim().max(R.note).optional(),
   // L13 (ondata 3): sblocco con il vocabolario unico (la forma la verifica `normalizzaCondizioniSpillo`), scadenza e proroga come date di
   // gioco, Ombra del compendio, yen e PE, oggetti del catalogo con le copie
@@ -166,7 +170,7 @@ export const bodyRichiesta = z.object({
   yen: z.number().int().min(1).max(9_999_999).nullable().optional(), esperienza: z.number().int().min(1).max(999_999).nullable().optional(),
   oggetti: z.array(z.object({ chiave: z.string().min(1).max(200), quantita: z.number().int().min(1).max(999) }).strict()).max(30).optional(),
 });
-/** Una Richiesta nuova: nome e bersaglio obbligatori. */
+/** Una Richiesta nuova: nome e bersaglio obbligatori (il nome del bersaglio, o la sua Ombra). */
 export const bodyNuovaRichiesta = bodyRichiesta.extend({ nome: z.string().trim().min(1).max(R.nome), bersaglio });
 
 /** Un requisito di un Confidente: confidente, rango e indice nel rango (2026-10-11, correzione dei requisiti sulle Richieste). */

@@ -6,13 +6,12 @@
 import { useState } from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { scegliVoce, vociSelettore } from '../../../test/selettore';
 import { AreeDelDedalo } from './AreeDelDedalo';
 import { contiDelDedalo } from '../../utils/dedali';
 import type { AreaDedaloDto, AreaDungeonDto, PuntoInteresseDto } from '../../types';
 
 const api = vi.hoisted(() => ({
-  aggiornaAreaDedalo: vi.fn(), collocaRichiesta: vi.fn(), creaAreaDedalo: vi.fn(), eliminaAreaDedalo: vi.fn(), impostaStatoRichiesta: vi.fn(),
+  aggiornaAreaDedalo: vi.fn(), aggiornaArea: vi.fn(), creaAreaDedalo: vi.fn(), eliminaAreaDedalo: vi.fn(), impostaStatoRichiesta: vi.fn(),
   impostaTimbri: vi.fn(), spostaAreaDedalo: vi.fn(), creaPunto: vi.fn(), aggiornaPunto: vi.fn(), eliminaPunto: vi.fn(), spostaPunto: vi.fn(), collegaPinAlPunto: vi.fn(),
   getRichieste: vi.fn(), getConfidenti: vi.fn(), creaRichiesta: vi.fn(), aggiornaRichiesta: vi.fn(), getPersone: vi.fn(),
 }));
@@ -31,20 +30,21 @@ const persona = (chiave: string, id: number, nome: string, aree: string[]): Punt
   ...voce(chiave, `Ombra di ${nome}`, ''), tipo: 'persona', areaDedalo: null, areeDedalo: aree, persona: { id, nome, nomeIt: nome }, dettagli: { maschera: nome },
 });
 /** Un'area del dedalo di prova, con i campi di `extra` che sovrascrivono i predefiniti. */
-const areaDedalo = (extra: Partial<AreaDedaloDto>): AreaDedaloDto => ({ chiave: 'a', ordine: 0, nome: 'Area', descrizione: '', timbri: null, richieste: [], elementi: { totale: 0, fatti: 0 }, completata: true, ...extra });
+const areaDedalo = (extra: Partial<AreaDedaloDto>): AreaDedaloDto => ({ chiave: 'a', ordine: 0, nome: 'Area', descrizione: '', richieste: [], elementi: { totale: 0, fatti: 0 }, completata: true, ...extra });
 
 type Dedalo = AreaDungeonDto & { dedalo: NonNullable<AreaDungeonDto['dedalo']> };
-/** Qimranut con due aree: «Treno» (una voce esaurita, completata) e «Banchina» (una voce da fare, una Richiesta aperta, timbri 1
- *  su 3; Pixie catturata, Bicorno no); una Richiesta da collocare e una Persona senza area. */
+/** Qimranut con due aree: «Treno» (una voce esaurita, completata) e «Banchina» (una voce da fare, una Richiesta aperta; Pixie catturata,
+ *  Bicorno no); i timbri del dedalo 1 su 3 (L10-02); una Richiesta da collocare e una Persona senza area. */
 const dedalo = (): Dedalo => ({
   chiave: 'mementos-01-qimranut', ordine: 0, nome: 'Dedalo di Qimranut', descrizione: 'La prima discesa.', mappe: [],
   punti: [voce('v1', 'Ombra della banchina', 'q-1'), voce('v2', 'Nota del treno', 'q-2', 'esaurito'), persona('p1', 11, 'Pixie', ['q-1', 'q-2']), persona('p2', 12, 'Bicorno', ['q-1']), persona('p3', 13, 'Slime', [])],
   dedalo: {
     aree: [
       areaDedalo({ chiave: 'q-2', ordine: 0, nome: 'Treno', elementi: { totale: 1, fatti: 1 }, completata: true }),
-      areaDedalo({ chiave: 'q-1', ordine: 1, nome: 'Banchina', descrizione: 'Il binario morto.', timbri: { totale: 3, raccolti: 1 }, richieste: [{ chiave: 'r1', nome: 'Un ex appiccicoso', stato: null }], elementi: { totale: 5, fatti: 1 }, completata: false }),
+      areaDedalo({ chiave: 'q-1', ordine: 1, nome: 'Banchina', descrizione: 'Il binario morto.', richieste: [{ chiave: 'r1', nome: 'Un ex appiccicoso', stato: null }], elementi: { totale: 2, fatti: 0 }, completata: false }),
     ],
     daCollocare: [{ chiave: 'r2', nome: 'Richiesta senza casa', stato: 'accettata' }],
+    timbri: { totale: 3, raccolti: 1 }, timbriFonte: 'guida, Dedalo di Qimranut, riga 1',
     obiettivi: { totale: 6, fatti: 2 }, completato: false,
   },
 });
@@ -74,17 +74,19 @@ it('la scheda del dedalo dice il conto per elemento, la barra e la percentuale; 
   monta();
   const scheda = screen.getByRole('region', { name: 'Scheda di Dedalo di Qimranut' });
   expect(within(scheda).getByRole('heading', { name: /Dedalo di Qimranut/ })).toBeInTheDocument();
-  expect(within(scheda).getByText('Timbri 1/3 (1 area senza totale) · Richieste 0/1 · Trama 1/2 · Persona 1/3 catturate')).toBeInTheDocument();
+  expect(within(scheda).getByText('Richieste 0/1 · Trama 1/2 · Persona 1/3 catturate')).toBeInTheDocument();
   expect(within(scheda).getByText('33%')).toBeInTheDocument();
   expect(within(scheda).getByRole('progressbar', { name: 'Elementi di Dedalo di Qimranut' })).toHaveAttribute('aria-valuenow', '2');
+  // L10-02: i timbri stanno nella scheda del dedalo, col loro conto
+  expect(within(scheda).getByRole('heading', { name: 'Timbri · 1/3' })).toBeInTheDocument();
   // le schede: la completata col ✓, l'altra col conto; aperta la prima da fare (Banchina), non la prima in ordine
   const schede = screen.getAllByRole('tab');
-  expect(schede.map((s) => s.textContent)).toEqual(['Treno (completata)', 'Banchina · 1/5']);
-  expect(screen.getByRole('tab', { name: 'Banchina · 1/5' })).toHaveAttribute('aria-selected', 'true');
+  expect(schede.map((s) => s.textContent)).toEqual(['Treno (completata)', 'Banchina · 0/2']);
+  expect(screen.getByRole('tab', { name: 'Banchina · 0/2' })).toHaveAttribute('aria-selected', 'true');
   const pannello = screen.getByRole('tabpanel');
   expect(pannello).toHaveTextContent('Il binario morto.');
-  // i quattro elementi, in ordine: Timbri, Persona, Richieste, Trama
-  expect(within(pannello).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Timbri · 1/3', 'Persona · 1/2 catturate', 'Richieste · 0/1', 'Trama · 0/1']);
+  // gli elementi dell'area, in ordine: Persona, Richieste, Trama (i timbri non sono più dell'area)
+  expect(within(pannello).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Persona · 1/2 catturate', 'Richieste · 0/1', 'Trama · 0/1']);
   // le voci di un'area stanno nella sua Trama, non in quella dell'altra
   expect(within(pannello).getByRole('list', { name: 'Trama di Banchina' })).toHaveTextContent('Ombra della banchina');
   expect(within(pannello).queryByText('Nota del treno')).toBeNull();
@@ -110,11 +112,11 @@ it('da tastiera le schede delle aree si raggiungono con Tab solo sull\'aperta e 
   expect(screen.getByRole('tab', { name: /Treno/ })).toHaveAttribute('aria-selected', 'true');
 });
 
-it('l\'area dell\'indirizzo si apre; il conto per elemento conta i timbri solo delle aree con un totale', () => {
+it('l\'area dell\'indirizzo si apre; il conto per elemento ha i timbri del dedalo', () => {
   monta(dedalo(), 4, { zona: 'q-2' });
   expect(screen.getByRole('tab', { name: /Treno/ })).toHaveAttribute('aria-selected', 'true');
   expect(contiDelDedalo(dedalo(), new Set([11, 12]))).toEqual({
-    timbri: { fatti: 1, totale: 3, daImpostare: 1 }, richieste: { fatti: 0, totale: 1 }, trama: { fatti: 1, totale: 2 }, persona: { fatti: 2, totale: 3 },
+    timbri: { fatti: 1, totale: 3 }, richieste: { fatti: 0, totale: 1 }, trama: { fatti: 1, totale: 2 }, persona: { fatti: 2, totale: 3 },
   });
 });
 
@@ -124,11 +126,11 @@ it('in «Gioca» solo i comandi per segnare: timbri, catture, Richieste a tre st
   for (const nome of [/Aggiungi un’area/, /^Sposta/, /^Modifica area/, /Imposta il totale|Cambia il totale/, /^Aggiungi una Persona/, /^Aggiungi una Richiesta/]) expect(screen.queryByRole('button', { name: nome })).toBeNull();
   expect(screen.queryByRole('combobox', { name: /^Area di / })).toBeNull();
   expect(screen.getByText(/1 Richiesta del dedalo non sta in nessuna area e non conta: si colloca in «Modifica la guida»\./)).toBeInTheDocument();
-  // timbri
-  api.impostaTimbri.mockResolvedValue({ area: 'q-1', raccolti: 3, totale: 3, completato: true });
+  // timbri del dedalo
+  api.impostaTimbri.mockResolvedValue({ dedalo: 'mementos-01-qimranut', raccolti: 3, totale: 3, completato: true });
   fireEvent.click(screen.getByRole('button', { name: 'Timbro 3 di 3: da prendere' }));
-  await waitFor(() => expect(onTimbri).toHaveBeenCalledWith('q-1', 3));
-  expect(api.impostaTimbri).toHaveBeenCalledWith(4, 'q-1', 3);
+  await waitFor(() => expect(onTimbri).toHaveBeenCalledWith('mementos-01-qimranut', 3));
+  expect(api.impostaTimbri).toHaveBeenCalledWith(4, 'mementos-01-qimranut', 3);
   // Richiesta: «Fatta» è completata
   api.impostaStatoRichiesta.mockResolvedValue({ chiave: 'r1', stato: 'completata' });
   const stato = screen.getByRole('radiogroup', { name: 'Stato di «Un ex appiccicoso»' });
@@ -163,7 +165,7 @@ it('l\'interruttore porta in «Modifica la guida»: le aree si aggiungono, si sp
   api.spostaAreaDedalo.mockResolvedValue({});
   fireEvent.click(screen.getByRole('button', { name: 'Sposta prima l’area Banchina' }));
   await waitFor(() => expect(api.spostaAreaDedalo).toHaveBeenCalledWith('q-1', -1));
-  // correggere nome e dettagli (il totale dei timbri sta nella sua sezione)
+  // correggere nome e dettagli (i timbri sono del dedalo); il modulo si apre nella finestra di modifica (L10-05, L12)
   fireEvent.click(screen.getByRole('button', { name: /^Modifica area: l’area «Banchina»/ }));
   const modulo = screen.getByRole('form', { name: 'Correggi l’area «Banchina»' });
   fireEvent.change(within(modulo).getByRole('textbox', { name: 'Nome' }), { target: { value: 'Binario' } });
@@ -177,34 +179,30 @@ it('l\'interruttore porta in «Modifica la guida»: le aree si aggiungono, si sp
   conferma.mockResolvedValue(true);
   fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
   await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
-  expect(conferma.mock.calls[0][0].testo).toMatch(/le sue voci di Trama con quel che ne avevano segnato, e i suoi timbri\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./);
+  expect(conferma.mock.calls[0][0].testo).toMatch(/le sue voci di Trama con quel che ne avevano segnato\. Le sue Richieste restano nel dedalo, da collocare; le Persona perdono solo questa area\. Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./);
   await waitFor(() => expect(api.eliminaAreaDedalo).toHaveBeenCalledWith('q-1'));
   await waitFor(() => expect(screen.getByTestId('indirizzo').textContent).not.toContain('zona='));
 });
 
-it('in «Modifica la guida»: totale dei timbri, Richieste da spostare e da collocare, Persona senza area', async () => {
+it('in «Modifica la guida»: totale dei timbri del dedalo, Richieste da collocare (da «Modifica»), Persona senza area', async () => {
   const { onRicarica } = monta(dedalo(), 4, { modifica: true });
-  // il totale dei timbri dell'area: non valido non parte, vuoto toglie i timbri
-  fireEvent.click(screen.getByRole('button', { name: 'Cambia il totale dei timbri di Banchina' }));
-  const campo = screen.getByRole('textbox', { name: 'Timbri dell’area (vuoto = nessuno)' });
+  // L10-02: il totale dei timbri del dedalo: non valido non parte, vuoto = la guida non dà un numero
+  fireEvent.click(screen.getByRole('button', { name: 'Cambia il totale dei timbri di Dedalo di Qimranut' }));
+  const campo = screen.getByRole('textbox', { name: 'Timbri del dedalo (vuoto = la guida non dà un numero)' });
   expect(campo).toHaveValue('3');
   fireEvent.change(campo, { target: { value: 'tanti' } });
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
-  expect(api.aggiornaAreaDedalo).not.toHaveBeenCalled();
+  expect(api.aggiornaArea).not.toHaveBeenCalled();
   fireEvent.change(campo, { target: { value: '' } });
-  api.aggiornaAreaDedalo.mockResolvedValue({});
+  api.aggiornaArea.mockResolvedValue({});
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
-  await waitFor(() => expect(api.aggiornaAreaDedalo).toHaveBeenCalledWith('q-1', { timbriTotale: null }));
+  await waitFor(() => expect(api.aggiornaArea).toHaveBeenCalledWith('mementos-01-qimranut', { timbriTotale: null }));
   await waitFor(() => expect(onRicarica).toHaveBeenCalled());
-  // le Richieste: in un'altra area o da collocare
-  expect(vociSelettore('Area di Un ex appiccicoso')).toEqual(['— da collocare —', 'Treno', 'Banchina']);
-  api.collocaRichiesta.mockResolvedValue({});
-  scegliVoce('Area di Un ex appiccicoso', 'Treno');
-  await waitFor(() => expect(api.collocaRichiesta).toHaveBeenCalledWith('r1', 'q-2'));
+  // L10-05: l'area di una Richiesta si sceglie solo nel modulo («Dove»): nessun selettore sulle righe
+  expect(screen.queryByText('Area di Un ex appiccicoso')).toBeNull();
   const daCollocare = screen.getByRole('region', { name: 'Richieste da collocare dell’area' });
   expect(daCollocare).toHaveTextContent('Richiesta senza casa');
-  scegliVoce('Area di Richiesta senza casa', 'Banchina');
-  await waitFor(() => expect(api.collocaRichiesta).toHaveBeenCalledWith('r2', 'q-1'));
+  expect(within(daCollocare).getByRole('button', { name: 'Modifica la Richiesta «Richiesta senza casa»' })).toBeInTheDocument();
   // la Persona senza area si vede solo qui, e si corregge
   const senza = screen.getByRole('region', { name: 'Persona senza area dell’area' });
   expect(senza).toHaveTextContent('Slime');
@@ -215,7 +213,8 @@ it('in «Modifica la guida»: totale dei timbri, Richieste da spostare e da coll
 
 it('senza partita: i conti sono i totali, niente comandi di stato; un dedalo senza aree lo dice', () => {
   monta(dedalo(), null);
-  expect(screen.getByText('Timbri 3 (1 area senza totale) · Richieste 1 · Trama 2 · Persona 3')).toBeInTheDocument();
+  expect(screen.getByText('Richieste 1 · Trama 2 · Persona 3')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Timbri · 3' })).toBeInTheDocument();
   expect(screen.queryByRole('progressbar')).toBeNull();
   expect(screen.queryByRole('radiogroup')).toBeNull();
   expect(screen.getByRole('button', { name: /^Timbro 1 di 3/ })).toBeDisabled();
@@ -225,7 +224,7 @@ it('senza partita: i conti sono i totali, niente comandi di stato; un dedalo sen
 
 it('un dedalo senza aree lo dice (in «Gioca» rimanda a «Modifica la guida»); vi si aggiunge una Richiesta, da collocare', async () => {
   const vuoto = dedalo();
-  vuoto.dedalo = { aree: [], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true };
+  vuoto.dedalo = { aree: [], daCollocare: [], timbri: null, timbriFonte: null, obiettivi: { totale: 0, fatti: 0 }, completato: true };
   monta(vuoto);
   expect(screen.getByRole('heading', { name: 'Dedalo di Qimranut (completata)' })).toBeInTheDocument();
   expect(screen.getByText('Questo dedalo non ha ancora aree: si aggiungono in «Modifica la guida».')).toBeInTheDocument();

@@ -234,6 +234,22 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'quartiere', colonna: 'sblocco_data', tolta: 'L5 · migrazione 356',
     sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti: quando la condizione ha una data, è quella a valere; le date di prima restano nell’archivio «archivio-frasi-l11»',
   },
+  ...(['data_sblocco', 'data_scadenza', 'furto_consigliato'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'dungeon', colonna, tolta: 'L9 · migrazione 377',
+    sostituitaDa: 'le date del Palazzo in colonne strutturate (`finestra_dal`, `finestra_al`, `furto_consigliato_data`, `lettera_entro`); un eventuale testo rimasto sta nell’archivio «archivio-frasi-l11»',
+  })),
+  {
+    schema: 'main', tabella: 'ombra', colonna: 'nome_negoziazione', tolta: 'L10 · migrazione 381',
+    sostituitaDa: 'niente: la colonna era vuota in tutte le Ombre e nessuna parte dell’app la leggeva; un valore rimasto sta nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'richiesta', colonna: 'ricompense_json', tolta: 'L10 · migrazione 381',
+    sostituitaDa: 'gli oggetti della ricompensa (`ricompensa_oggetto`), gli yen e i PE della Richiesta; i testi rimasti stanno nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'richiesta', colonna: 'confidente_rango', tolta: 'L10 · migrazione 381',
+    sostituitaDa: 'le condizioni di sblocco della Richiesta (`condizioni_json`, una condizione sul rango del Confidente); i valori rimasti stanno nell’archivio «archivio-frasi-l11»',
+  },
   {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',

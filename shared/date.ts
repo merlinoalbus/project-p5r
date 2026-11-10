@@ -35,6 +35,14 @@ export function giorniDiGiocoFra(da: string | null | undefined, a: string | null
   return x === null || y === null ? null : Math.round((y - x) / 86_400_000);
 }
 
+/** Il giorno prima di una data «MM-GG» del calendario di gioco (l'1 gennaio viene dopo il 31 dicembre 2016), o null se non è una data. */
+export function giornoPrecedente(data: string | null | undefined): string | null {
+  if (giornoDellaSettimana(data) === null) return null;
+  const [mese, giorno] = data!.split('-').map(Number) as [number, number];
+  const d = new Date(Date.UTC(annoDiGioco(mese), mese - 1, giorno - 1));
+  return `${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+}
+
 /** L13 (ondata 7, O7-4): il periodo di una settimana della guida dal suo primo e ultimo giorno («MM-GG»), «09/04 - 10/04»: la sola resa,
  *  letta dal Calendario e dalla migrazione 313 per confrontare il testo copiato. Null se manca una delle due date. */
 export function periodoDellaSettimana(dal: string | null | undefined, al: string | null | undefined): string | null {

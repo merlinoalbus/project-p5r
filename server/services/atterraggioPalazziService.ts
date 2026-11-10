@@ -19,6 +19,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
 import { httpErrors } from '../utils/httpError.js';
+import { logger } from '../utils/logger.js';
 import { datiGuida, finestreDungeon, invalidaDatiGuida, type FinestraDungeon } from './datiGuida.js';
 import { palazzoDellaMappa } from './mappe/alberoMappe.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
@@ -109,14 +110,60 @@ export function impostaAtterraggi(dungeon: string, regole: readonly RegolaAtterr
  *  date del Palazzo (L13 O6-3, migrazione 308), tutte in colonne del dungeon e tutte scritte da `impostaFinestra`. */
 export interface ConsigliPalazzo { furtoConsigliato: string | null; letteraEntro: string | null }
 
+/** Le quattro date di un Palazzo com'erano alla prima correzione (le colonne di `dungeon`). */
+export interface DateDellaGuida { finestra_dal: string | null; finestra_al: string | null; lettera_entro: string | null; furto_consigliato_data: string | null }
+/**
+ * La fotografia dei valori della guida di un Palazzo (`dungeon.seed_json`), per i due «Ripristina», indipendenti: `voce_boss_finale` c'è se l'utente
+ * ha cambiato il boss finale (L4 §8.14; una fotografia di prima di L9-08 ha solo questa), `date` se ha corretto le date (L9-08). Niente fotografia
+ * (NULL) = il Palazzo ha i valori della guida.
+ */
+export interface FotografiaDungeon { voce_boss_finale?: string | null; date?: DateDellaGuida }
+
+/** La fotografia decodificata, vuota se non c'è; null se il valore non è una fotografia (JSON rotto, `null`, un elenco, parti di un altro tipo). */
+function decodificaFotografia(seedJson: string | null | undefined): FotografiaDungeon | null {
+  if (seedJson === null || seedJson === undefined) return {};
+  let v: unknown;
+  try { v = JSON.parse(seedJson); } catch { return null; }
+  if (v === null || typeof v !== 'object' || Array.isArray(v)) return null;
+  const { voce_boss_finale: voce, date } = v as Record<string, unknown>;
+  const voceValida = voce === undefined || voce === null || typeof voce === 'string';
+  // tutte e quattro le date, ciascuna testo o null: una fotografia incompleta non deve azzerare il Palazzo al «Ripristina»
+  const dateValide = date === undefined || (date !== null && typeof date === 'object' && !Array.isArray(date)
+    && (['finestra_dal', 'finestra_al', 'lettera_entro', 'furto_consigliato_data'] as const).every((k) => { const d = (date as Record<string, unknown>)[k]; return d === null || typeof d === 'string'; }));
+  return voceValida && dateValide ? v as FotografiaDungeon : null;
+}
+
+/** In lettura: la fotografia di un Palazzo, vuota se non c'è. Una illeggibile non ferma l'elenco dei Palazzi: vale «nessuna fotografia», e il log lo dice. */
+export function leggiFotografiaDungeon(seedJson: string | null | undefined, chiave: string): FotografiaDungeon {
+  const foto = decodificaFotografia(seedJson);
+  if (foto) return foto;
+  logger.warn({ dungeon: chiave }, 'fotografia di dungeon.seed_json illeggibile: nessuna fotografia');
+  return {};
+}
+
+/** Per scrivere o ripristinare: una fotografia illeggibile dà 409 `fotografia-illeggibile` e il valore salvato resta com'è. */
+export function fotografiaDungeonDaAggiornare(seedJson: string | null | undefined, chiave: string): FotografiaDungeon {
+  const foto = decodificaFotografia(seedJson);
+  if (!foto) throw httpErrors.conflict('fotografia-illeggibile', `I valori della guida conservati per «${chiave}» non sono leggibili: niente è stato cambiato.`);
+  return foto;
+}
+
+/** La fotografia senza una delle sue due parti, come valore di `seed_json` (NULL se non resta niente). */
+export function fotografiaSenza(f: FotografiaDungeon, parte: keyof FotografiaDungeon): string | null {
+  const resto = { ...f };
+  delete resto[parte];
+  return Object.keys(resto).length > 0 ? JSON.stringify(resto) : null;
+}
+
 /**
  * Cambia le date del Palazzo: la finestra sulla mappa di Tokyo e, con `consigli`, il furto consigliato e il termine della lettera. L6
  * (§4.4): nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118), il furto in `furto_consigliato_data` (308) e la lettera in
  * `lettera_entro` (118); su uno schema di prima della 118, la sua voce in `finestre-dungeon` (creata se manca). È l'unico scrittore di
- * queste colonne. `al` nullo = senza fine, solo dove il gioco non fissa una scadenza (i Memento e i Palazzi col boss dei Memento, Iweleth:
+ * queste colonne, salvo «Ripristina» (`ripristinaDateDungeon`), che rimette i valori fotografati. `al` nullo = senza fine, solo dove il gioco non fissa una scadenza (i Memento e i Palazzi col boss dei Memento, Iweleth:
  * 400 `scadenza-necessaria` altrove). L'ordine dev'essere apertura ≤ furto ≤ lettera ≤ scadenza (400 `fine-prima-di-inizio` per la
  * finestra rovesciata, `date-rovesciate` per il resto); senza `consigli` restano quelli salvati, e valgono per l'ordine. Svuota la copia in
- * memoria delle finestre.
+ * memoria delle finestre. L9-08: la prima volta che le date di un Palazzo cambiano, quelle di prima restano nella fotografia (`seed_json`), per
+ * «Ripristina» (`ripristinaDateDungeon`); un salvataggio che non cambia niente non fotografa.
  */
 export function impostaFinestra(dungeon: string, dal: string, al: string | null, consigli?: ConsigliPalazzo): FinestraDungeon {
   richiediDungeon(dungeon);
@@ -127,14 +174,20 @@ export function impostaFinestra(dungeon: string, dal: string, al: string | null,
     if (e) throw httpErrors.badRequest(e.codice, e.messaggio);
   };
   if (colonne.has('finestra_dal')) {
-    const r = prepared(`SELECT tipo, ${colonne.has('regola_boss') ? 'regola_boss' : "'voce-finale' AS regola_boss"}, lettera_entro,
+    const r = prepared(`SELECT tipo, ${colonne.has('regola_boss') ? 'regola_boss' : "'voce-finale' AS regola_boss"}, finestra_dal, finestra_al, lettera_entro, seed_json,
       ${colonne.has('furto_consigliato_data') ? 'furto_consigliato_data' : 'NULL AS furto_consigliato_data'} FROM dungeon WHERE chiave = ?`).get(dungeon) as
-      { tipo: string; regola_boss: string | null; lettera_entro: string | null; furto_consigliato_data: string | null };
+      { tipo: string; regola_boss: string | null; seed_json: string | null } & DateDellaGuida;
     // senza `consigli` restano furto e lettera salvati, e valgono per l'ordine
-    controlla({ dal, al, furtoConsigliato: consigli ? consigli.furtoConsigliato : r.furto_consigliato_data, letteraEntro: consigli ? consigli.letteraEntro : r.lettera_entro },
-      r.tipo !== 'palazzo' || r.regola_boss === 'memento');
+    const lettera = consigli ? consigli.letteraEntro : r.lettera_entro, furto = consigli ? consigli.furtoConsigliato : r.furto_consigliato_data;
+    controlla({ dal, al, furtoConsigliato: furto, letteraEntro: lettera }, r.tipo !== 'palazzo' || r.regola_boss === 'memento');
     if (consigli && !colonne.has('furto_consigliato_data') && consigli.furtoConsigliato !== null) throw httpErrors.badRequest('furto-non-disponibile', 'Il furto consigliato come data arriva con la migrazione 308.');
+    const cambiate = r.finestra_dal !== dal || r.finestra_al !== al || r.lettera_entro !== lettera || r.furto_consigliato_data !== furto;
     getDb().transaction(() => {
+      if (cambiate && r.tipo === 'palazzo') {
+        const foto = fotografiaDungeonDaAggiornare(r.seed_json, dungeon);
+        const date: DateDellaGuida = { finestra_dal: r.finestra_dal, finestra_al: r.finestra_al, lettera_entro: r.lettera_entro, furto_consigliato_data: r.furto_consigliato_data };
+        if (!foto.date) prepared('UPDATE dungeon SET seed_json = ? WHERE chiave = ?').run(JSON.stringify({ ...foto, date }), dungeon);
+      }
       prepared('UPDATE dungeon SET finestra_dal = ?, finestra_al = ? WHERE chiave = ?').run(dal, al, dungeon);
       if (consigli) {
         prepared('UPDATE dungeon SET lettera_entro = ? WHERE chiave = ?').run(consigli.letteraEntro, dungeon);

@@ -13,6 +13,8 @@
 //
 // Le Richieste si correggono, si aggiungono e si eliminano da qui (richiesta dell'utente, 2026-10-11): «Modifica» su ogni carta
 // e «Aggiungi una Richiesta» in cima aprono `ModuloRichiesta`, lo stesso della colonna del dedalo.
+// L10-01 e L10-05 (migrazione 381): le ricompense in testo della guida (vuote in 33/33) e il rango del Confidente (0/33) non ci sono più,
+// e nemmeno lo stato «da verificare», che il server non produceva più: le ricompense sono gli oggetti del catalogo, gli yen e i PE.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -36,7 +38,7 @@ import type { RichiestaDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '.
 import { dataConArticolo, dataLeggibile } from '../../shared/condizioniSpillo';
 
 /** L13: il nome dello stato calcolato di una Richiesta nella partita. */
-const NOME_STATO: Record<StatoCalcolatoRichiestaDto['stato'], string> = { bloccata: 'Bloccata', disponibile: 'Disponibile', 'da-verificare': 'Da verificare', accettata: 'Accettata', completata: 'Completata', scaduta: 'Scaduta' };
+const NOME_STATO: Record<StatoCalcolatoRichiestaDto['stato'], string> = { bloccata: 'Bloccata', disponibile: 'Disponibile', accettata: 'Accettata', completata: 'Completata', scaduta: 'Scaduta' };
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
@@ -55,7 +57,6 @@ import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { DaApplicare } from '../components/partita/DaApplicare';
-import { conferma } from '../stores/confermaStore';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE as GIORNI_AVVISO } from '../../shared/richieste';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -97,18 +98,15 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
   /** Imposta lo stato della Richiesta nella partita (null la riapre), disattivando i comandi durante la richiesta; passa al genitore la Richiesta aggiornata o notifica l'errore. */
   const cambia = async (stato: StatoRichiesta | null) => {
     if (!partitaId) return;
-    // L13: una Richiesta «da verificare» si può accettare, ma prima si dice perché (sblocco o scadenza ancora solo nel testo della guida)
-    if (stato === 'accettata' && r.statoPartita?.stato === 'da-verificare'
-      && !(await conferma({ titolo: `Accettare «${r.nome}»?`, testo: `Lo sblocco o la scadenza non sono ancora dati verificati: ${r.statoPartita.motivi.join(' ')} Controlla nel gioco che sia davvero disponibile.`, etichetta: 'Accetta' }))) return;
     setOccupato(true);
     // dopo il cambio di stato il server ha mosso da solo gli yen (decisione 18) o, per una proposta nata prima, l'ha chiusa: tutto si rilegge subito
     try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); segnalaMutazioneEffetti(partitaId); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
-  /** O7-1: «Si completa dopo» solo dove completarla è il passo che resta (disponibile, da verificare, accettata): su una scaduta o bloccata
+  /** O7-1: «Si completa dopo» solo dove completarla è il passo che resta (disponibile, accettata): su una scaduta o bloccata
    *  i motivi del suo stato dicono già perché, e i due messaggi insieme si contraddirebbero. */
   const sp = r.statoPartita;
   const mostraCompletaDopo = !!sp && !sp.completabile && sp.motiviCompletamento.length > 0
-    && (sp.stato === 'disponibile' || sp.stato === 'da-verificare' || sp.stato === 'accettata');
+    && (sp.stato === 'disponibile' || sp.stato === 'accettata');
   return (
     <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
       <div className="flex items-start gap-2.5">
@@ -122,12 +120,12 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           {/* (la frase non nomina il terzo semestre: dice la proroga, qualunque sia la sua condizione, che il server ha già valutato) */}
           {r.statoPartita?.doveOggi.spostato && <span className="testo-12 text-text-secondary">Durante la proroga il bersaglio è nel {[r.statoPartita.doveOggi.dedaloNome, r.statoPartita.doveOggi.areaDedaloNome].filter(Boolean).join(', ')}</span>}
         </div>
-        {r.statoPartita ? <span className={`chip shrink-0 testo-12 ${r.statoPartita.stato === 'accettata' || r.statoPartita.stato === 'disponibile' ? 'chip--attivo' : r.statoPartita.stato === 'da-verificare' ? 'border-warning text-warning' : ''}`}>{NOME_STATO[r.statoPartita.stato]}</span>
+        {r.statoPartita ? <span className={`chip shrink-0 testo-12 ${r.statoPartita.stato === 'accettata' || r.statoPartita.stato === 'disponibile' ? 'chip--attivo' : ''}`}>{NOME_STATO[r.statoPartita.stato]}</span>
           : r.stato && <span className={`chip shrink-0 testo-12 ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
       </div>
-      {/* L13: perché è bloccata, scaduta o da verificare (il server lo calcola, la pagina lo mostra); in scadenza entro una settimana lo dice */}
+      {/* L13: perché è bloccata o scaduta, o che cosa resta da verificare (il server lo calcola, la pagina lo mostra); in scadenza entro una settimana lo dice */}
       {r.statoPartita && r.statoPartita.motivi.length > 0 && (
-        <ul className={`m-0 flex flex-col gap-0.5 pl-4 testo-12 ${r.statoPartita.stato === 'bloccata' || r.statoPartita.stato === 'scaduta' || r.statoPartita.stato === 'da-verificare' ? 'text-warning' : 'text-text-secondary'}`}>
+        <ul className={`m-0 flex flex-col gap-0.5 pl-4 testo-12 ${r.statoPartita.stato === 'bloccata' || r.statoPartita.stato === 'scaduta' ? 'text-warning' : 'text-text-secondary'}`}>
           {r.statoPartita.motivi.map((m) => <li key={m}>{m}</li>)}
         </ul>
       )}
@@ -164,7 +162,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         )}
       </div>
 
-      {r.confidente && <span className="testo-12 text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
+      {r.confidente && <span className="testo-12 text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong></span>}
       {r.ombra && <span className="testo-12 text-text-secondary">Ombra del compendio: <strong className="text-text">{r.ombra.nome}</strong>{r.ombra.livello ? ` · livello ${r.ombra.livello}` : ''}</span>}
       {!!r.oggettiRicompensa?.length && <div className="min-w-0 testo-12"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
       {(r.yen || r.esperienza) && <span className="testo-12 text-text-secondary">{[r.yen ? `¥${r.yen.toLocaleString('it-IT')}` : null, r.esperienza ? `${r.esperienza.toLocaleString('it-IT')} PE` : null].filter(Boolean).join(' · ')}</span>}
@@ -180,9 +178,6 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
             : r.statoPartita?.yenRicompensa === 'non-entrati'
               ? 'La ricompensa in yen non è entrata nel saldo quando hai completato la Richiesta (in quel momento non era scritta, o passava da una proposta «Applica»), e correggere i dati dopo non muove il saldo. Se nel gioco l’hai ricevuta, aggiungila nel Denaro del gruppo.'
               : 'Completandola, la ricompensa in yen entra da sola nel saldo.'}</span>}
-      {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
-        ? <details className="testo-12 text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
-        : <span className="testo-12 text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
 
       {/* L13 (decisione 3): le ricompense le applica la Richiesta completata. Gli yen (decisione 18) si muovono da soli; qui restano solo le
           proposte «Applica» nate prima (anche l'inversa, se la si riapre dopo averli applicati); gli oggetti del catalogo sono fra gli oggetti
@@ -209,9 +204,9 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       )}
 
       <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
-        {/* L13: «Accetta» solo se la Richiesta è disponibile nella partita, o da verificare con l'avviso (il server rifiuta il resto anche lui) */}
+        {/* L13: «Accetta» solo se la Richiesta è disponibile nella partita (il server rifiuta il resto anche lui) */}
         {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && (!r.statoPartita || r.statoPartita.accettabile) && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata"
-          dettaglio={r.statoPartita?.stato === 'da-verificare' ? 'da verificare' : undefined} disabled={occupato} onClick={() => void cambia('accettata')} />}
+          disabled={occupato} onClick={() => void cambia('accettata')} />}
         {/* O7-1: «Completata» solo col bersaglio raggiungibile (il server rifiuta il resto con 409); il motivo è qui sopra, «Si completa dopo» */}
         {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata"
           disabled={occupato || r.statoPartita?.completabile === false} aria-describedby={mostraCompletaDopo ? `completa-${r.chiave}` : undefined}

@@ -109,7 +109,7 @@ export function useStatiPalazzo(dati: DatiScheda, chiave: string, partitaId: num
     // possono dedurre. Si rilegge la scheda dal server, senza stato di caricamento, come dopo uno stato cambiato dalla guida.
     void rileggiInSilenzio().catch(() => { /* resta l'aggiornamento immediato */ });
   };
-  /** Un dedalo cambiato dentro (timbri, stato di una Richiesta): le sue aree, il dedalo e l'anello dei Memento si ricalcolano con
+  /** Un dedalo cambiato dentro (stato di una Richiesta): le sue aree, il dedalo e l'anello dei Memento si ricalcolano con
    *  la regola del server (`shared/dedali.ts`, 099). `cambia` riceve un'area del dedalo e la restituisce aggiornata. */
   const aggiornaAreeDedalo = (cambia: (a: AreaDedaloDto) => AreaDedaloDto) => {
     dati.imposta((attuale) => {
@@ -117,9 +117,12 @@ export function useStatiPalazzo(dati: DatiScheda, chiave: string, partitaId: num
       return { ...attuale, aree, raccolta: raccoltaDeiDedali(aree, attuale.raccolta) };
     });
   };
-  /** I timbri di un'area di un dedalo cambiano. */
-  const aggiornaTimbri = (areaDedalo: string, raccolti: number) => {
-    aggiornaAreeDedalo((a) => (a.chiave === areaDedalo && a.timbri ? { ...a, timbri: { ...a.timbri, raccolti } } : a));
+  /** I timbri raccolti in un dedalo cambiano (L10-02: sono del dedalo, `dedalo` è la sua chiave): dedalo e anello si ricalcolano. */
+  const aggiornaTimbri = (dedalo: string, raccolti: number) => {
+    dati.imposta((attuale) => {
+      const aree = attuale.aree.map((a) => (a.chiave === dedalo && a.dedalo?.timbri ? ricalcolaDedalo({ ...a, dedalo: { ...a.dedalo, timbri: { ...a.dedalo.timbri, raccolti } } }, partitaId !== null) : a));
+      return { ...attuale, aree, raccolta: raccoltaDeiDedali(aree, attuale.raccolta) };
+    });
   };
   /** Lo stato di una Richiesta cambia (nell'area in cui sta, o fra quelle da collocare, che non contano). */
   const aggiornaRichiesta = (chiaveRichiesta: string, stato: StatoRichiesta | null) => {

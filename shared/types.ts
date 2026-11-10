@@ -2647,7 +2647,7 @@ export interface BattagliaDto {
 export type StatoRichiesta = 'accettata' | 'completata';
 
 export interface RichiestaDto {
-  /** I testi storici restano in `ricompense`; questi sono i legami per chiave. */
+  /** Gli oggetti della ricompensa, per chiave del catalogo. L10-01 (migrazione 381): i testi di prima (`ricompense`) non ci sono più. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   chiave: string;
   nome: string;
@@ -2660,10 +2660,12 @@ export interface RichiestaDto {
     /**
      * Solo nelle risposte, con un'Ombra del compendio: che cosa del bersaglio viene dalla sua scheda e i campi propri salvati (che il modulo
      * modifica e che valgono solo dove la scheda non sa: livello assente, nessuna affinità nota). Assente = tutto dai campi propri.
+     * L10-04: con l'Ombra il nome proprio è facoltativo; se è vuoto `bersaglio.nome` è quello dell'Ombra (`nome` vero) e `propri.nome` è il
+     * nome salvato (vuoto), che il modulo rimanda così com'è.
      */
-    daOmbra?: { livello: boolean; affinita: boolean; propri: { livello: number | null; debolezze: string[]; resistenze: string[] } } };
-  ricompense: string[];
-  confidente: { chiave: string; nome: string; rango: number | null } | null;
+    daOmbra?: { livello: boolean; affinita: boolean; nome: boolean; propri: { nome: string; livello: number | null; debolezze: string[]; resistenze: string[] } } };
+  /** Il Confidente collegato. L10-01 (migrazione 381): niente più rango (colonna vuota in 33/33): un rango richiesto è una condizione di sblocco. */
+  confidente: { chiave: string; nome: string } | null;
   /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
   areaNome: string | null;
   areaOrdine: number | null;
@@ -2691,7 +2693,7 @@ export interface RichiestaDto {
    * (`bersaglio.daOmbra` dice che cosa viene dall'Ombra).
    */
   ombra: { chiave: string; nome: string; livello: number | null; debolezze: string[]; resistenze: string[] } | null;
-  /** Ricompense in yen e in PE (gli oggetti sono `oggettiRicompensa`, i testi rimasti `ricompense`). */
+  /** Ricompense in yen e in PE (gli oggetti sono `oggettiRicompensa`). */
   yen: number | null;
   esperienza: number | null;
   /** Solo con una partita: lo stato calcolato (Bloccata con il motivo, Disponibile, Accettata, Completata, Scaduta). */
@@ -2700,16 +2702,16 @@ export interface RichiestaDto {
 
 /** L13: lo stato di una Richiesta nella partita, calcolato da condizioni, scadenza e stato segnato (il client mostra, non valuta). */
 export interface StatoCalcolatoRichiestaDto {
-  /** `da-verificare`: nessuna condizione la blocca, ma lo sblocco o la scadenza sono ancora solo il testo della guida (non convertito, non
-   *  valutato): si può accettare, con l'avviso, e i motivi dicono il testo da verificare nel gioco. */
-  stato: 'bloccata' | 'disponibile' | 'da-verificare' | 'accettata' | 'completata' | 'scaduta';
-  /** Che cosa manca (bloccata), oppure perché è scaduta o da verificare. */
+  /** L10-05: niente più «da verificare» (nasceva dai testi di sblocco e di scadenza della guida, tolti dalla 337: il server non lo produceva
+   *  più); una condizione che non si sa valutare resta «disponibile» e si dice fra i motivi. */
+  stato: 'bloccata' | 'disponibile' | 'accettata' | 'completata' | 'scaduta';
+  /** Che cosa manca (bloccata), perché è scaduta, o (disponibile) che cosa resta da verificare nel gioco. */
   motivi: string[];
   /** La scadenza che vale oggi (con la proroga se le sue condizioni sono vere), MM-GG. */
   scadenzaEffettiva: string | null;
   /** Giorni di gioco alla scadenza effettiva (0 = oggi), solo se nota e non passata. */
   giorniAllaScadenza: number | null;
-  /** Vero se si può accettare adesso (da disponibile o da verificare). */
+  /** Vero se si può accettare adesso (da disponibile). */
   accettabile: boolean;
   /**
    * L13 (ondata 7, O7-1): vero se si può segnare completata adesso: il Dedalo del bersaglio è aperto nella partita (quello della proroga, se il
@@ -2738,7 +2740,7 @@ export interface StatoCalcolatoRichiestaDto {
 export interface RiepilogoRichiesteDto {
   /** Le Richieste accettate e non ancora completate (né scadute). */
   accettate: number;
-  /** Le Richieste ancora da fare (accettate, disponibili o da verificare) che scadono entro `giorniAvviso` giorni di gioco. */
+  /** Le Richieste ancora da fare (accettate o disponibili) che scadono entro `giorniAvviso` giorni di gioco. */
   inScadenza: number;
   giorniAvviso: number;
 }
@@ -2967,31 +2969,38 @@ export interface RichiestaDelDedaloDto {
 
 /**
  * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
- * guida (in `AreaDungeonDto.punti`, con `areaDedalo` uguale a questa chiave), le Richieste e i timbri. Completata quando tutti
- * i suoi elementi lo sono; un'area senza elementi è completata (scelta dell'utente).
+ * guida (in `AreaDungeonDto.punti`, con `areaDedalo` uguale a questa chiave) e le Richieste. Completata quando tutti i suoi elementi
+ * lo sono; un'area senza elementi è completata (scelta dell'utente). L10-02 (Q8 A, migrazione 382): i timbri non sono più dell'area,
+ * la guida li dà per dedalo (`DedaloDto.timbri`).
  */
 export interface AreaDedaloDto {
   chiave: string;
   ordine: number;
   nome: string;
   descrizione: string;
-  /** I timbri dell'area, o null se l'area non ne ha; `raccolti` null senza partita. */
-  timbri: { totale: number; raccolti: number | null } | null;
   richieste: RichiestaDelDedaloDto[];
-  /** totale = voci + Richieste + timbri (uno per timbro, scelta dell'utente); fatti null senza partita. */
+  /** totale = voci che contano + Richieste; fatti null senza partita. */
   elementi: { totale: number; fatti: number | null };
   /** null senza partita. */
   completata: boolean | null;
 }
 
-/** Un dedalo dei Memento (099): le sue aree, le Richieste ancora da collocare in un'area, il conteggio e il completamento. */
+/** Un dedalo dei Memento (099): le sue aree, le Richieste ancora da collocare in un'area, i timbri, il conteggio e il completamento. */
 export interface DedaloDto {
   aree: AreaDedaloDto[];
   /** Le Richieste del dedalo senza area (la loro area è stata eliminata): si vedono, non contano finché non si collocano. */
   daCollocare: RichiestaDelDedaloDto[];
-  /** La somma degli elementi delle aree; fatti null senza partita. */
+  /**
+   * L10-02 (Q8 A, migrazione 382): i timbri del dedalo, come la guida li dà (`dungeon_area.timbri_totale`); null = la guida non dà un numero,
+   * niente da contare. `raccolti` null senza partita, altrimenti entro il totale. Contano uno per timbro, una volta sola, nel dedalo.
+   */
+  timbri: { totale: number; raccolti: number | null } | null;
+  /** La pagina e la riga della guida da cui viene il totale (per mostrarlo), finché il totale è quello della guida; null se il totale l'ha
+   *  scritto l'utente o se non c'è. */
+  timbriFonte: string | null;
+  /** La somma degli elementi delle aree più i timbri del dedalo; fatti null senza partita. */
   obiettivi: { totale: number; fatti: number | null };
-  /** Completato quando tutte le sue aree lo sono (un dedalo senza aree lo è); null senza partita. */
+  /** Completato quando tutte le sue aree lo sono e i timbri sono tutti raccolti (un dedalo senza aree né timbri lo è); null senza partita. */
   completato: boolean | null;
 }
 
@@ -3008,8 +3017,10 @@ export interface DungeonRiassuntoDto {
   /** L13 O6-3 (migrazione 308): le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
    *  finestra (`dungeon.finestra_dal`/`finestra_al`), il termine della lettera di sfida (`lettera_entro`) e il furto consigliato
    *  (`furto_consigliato_data`). Null dove la guida non le dà (Iweleth e i Memento non scadono, e non hanno furto né lettera). Prima
-   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. */
-  date: { dal: string | null; al: string | null; letteraEntro: string | null; furtoConsigliato: string | null };
+   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. L9-08: `letteraEntro` senza una data scritta è la
+   *  scadenza meno un giorno (`shared/datePalazzo.letteraDelPalazzo`, salvo Shido e Maruki) e allora `letteraCalcolata` è vero: si mostra
+   *  come calcolata e il modulo che corregge le date non la riporta nel campo, che resta il dato scritto. */
+  date: { dal: string | null; al: string | null; letteraEntro: string | null; letteraCalcolata: boolean; furtoConsigliato: string | null };
   /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco (le stesse date di `date.dal`/`date.al`): serve a mostrare
    *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
    *  aperti, restano. */
@@ -3051,6 +3062,9 @@ export interface DungeonRiassuntoDto {
   voceBossFinale?: { chiave: string; nome: string } | null;
   /** L4 §8.14: la voce del boss finale è stata cambiata dall'utente («Ripristina» la riporta a quella della guida). */
   bossFinaleCorretto?: boolean;
+  /** L9-08: le date del Palazzo sono state corrette dall'utente («Ripristina» le riporta a quelle della guida, indipendente dal boss finale).
+   *  Per i Palazzi; assente per i Memento. */
+  dateCorrette?: boolean;
   /** L4 §8.15: la regola del boss del Palazzo — `voce-finale` (la voce dichiarata, «Modifica › Boss finale») o `memento` (il boss segnato
    *  nella Guida, come nei Memento, senza effetti di Palazzo: Iweleth). Per i Palazzi; assente per i Memento. */
   regolaBoss?: 'voce-finale' | 'memento';
@@ -3145,6 +3159,12 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   personeCatturate: number[] | null;
   /** L4 (§2.3, §4.3): le schede senza mappa né voce del Palazzo, da sistemare. Per i Palazzi; assente per i Memento. */
   schedeDaSistemare?: SchedaDaSistemareDto[];
+  /**
+   * L10-02 (Q8 A): i timbri che la guida dichiara per tutti i Memento (123, `dedalo-di-daat` r.284) con la sua fonte, da mettere accanto alla
+   * somma dei totali dei dedali (`DedaloDto.timbri`), che è diversa (153): nulla si forza, la scheda dice la discordanza una volta. Solo per i
+   * Memento (assente per i Palazzi); null se il dato non c'è.
+   */
+  timbriDichiarati?: { totale: number; fonte: string } | null;
 }
 
 // ---- Calendario di gioco (Fase 6.3) ----
@@ -3865,8 +3885,8 @@ export interface ProgressiPartitaDto {
   contatori: Array<{ chiave: string; nome: string; valore: number; daVoci?: VoceDiProvenienzaDto[] }>;
 }
 
-/** I timbri raccolti in un'area di un dedalo dei Memento (099; `area` è la chiave dell'area del dedalo), per partita. */
-export interface TimbriDedaloDto { area: string; raccolti: number; totale: number | null; completato: boolean }
+/** I timbri raccolti in un dedalo dei Memento (L10-02, migrazione 382: `dedalo` è la chiave del dedalo, `dungeon_area.chiave`), per partita. */
+export interface TimbriDedaloDto { dedalo: string; raccolti: number; totale: number; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */

@@ -33,18 +33,15 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     }
   }
   for (const [tipo, query] of [
-    ['richiesta', 'SELECT chiave,nome,ricompense_json AS testo FROM richiesta'],
+    // L10-01 (381): la Richiesta non ha più testi di ricompensa (vuoti in 33/33): i suoi premi sono i legami stessi
+    ['richiesta', "SELECT chiave,nome,'' AS testo FROM richiesta"],
     ['domanda', 'SELECT chiave,domanda AS nome,ricompensa AS testo FROM domanda WHERE chiave IS NOT NULL'],
     ['esame', 'SELECT chiave,nome,note AS testo FROM esame'],
     ['confidente', "SELECT chiave,nome,'' AS testo FROM confidente"],
   ] as const) {
     if (!richiesti.has(tipo)) continue;
     for (const r of prepared(query).all() as Array<{ chiave: string; nome: string; testo: string | null }>) {
-      let testo = r.testo ?? '';
-      if (tipo === 'richiesta') {
-        let valore: unknown; try { valore = JSON.parse(testo) as unknown; } catch { valore = null; }
-        if (Array.isArray(valore)) testo = valore.filter((v): v is string => typeof v === 'string').join(' · ');
-      }
+      const testo = r.testo ?? '';
       // L4-02: la casa è l'elemento, non l'elenco (`?elemento=`, letto da RichiestePage e, per domande ed esami, da DomandePage)
       const casa = tipo === 'richiesta' ? conElemento('/guida/richieste', r.chiave)
         : tipo === 'confidente' ? `/confidenti/${encodeURIComponent(r.chiave)}` : conElemento('/guida/domande', r.chiave);

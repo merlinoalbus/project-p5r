@@ -14,9 +14,9 @@
 //
 // I Memento non hanno aree fisse: al posto della colonna delle aree c'è il pozzo disegnato, e la
 // colonna di destra sono le **aree del dedalo** (099, richiesta dell'utente del 2026-10-11) — ognuna
-// con i suoi elementi: voci della guida, Richieste e timbri — che fanno la percentuale; un'area è
-// completata quando lo sono tutti, il dedalo quando lo sono tutte. La pianta della guida non c'è: i
-// piani si generano.
+// con i suoi elementi: voci della guida e Richieste — che con i timbri del dedalo (L10-02) fanno la
+// percentuale; un'area è completata quando lo sono tutti, il dedalo quando lo sono tutte e i suoi timbri
+// sono tutti raccolti. La pianta della guida non c'è: i piani si generano.
 //
 // Qui la disposizione e lo stato dell'indirizzo; gli indirizzi della scheda stanno in `useNavigazionePalazzo`, i gesti di stato nella
 // partita in `useStatiPalazzo`, i moduli di modifica in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
@@ -67,6 +67,7 @@ import { dimenticaEntrata, indirizzoDiUscita, istantaneaPalazzo, leggiEntrata, l
 import { NoteStoricheOfferta, type EffettoNotaStorica } from '../components/catalogo/NoteStoricheOfferta';
 import { testoLivelloConsigliato } from '../utils/palazzi';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
+import { sommaTimbriDeiDedali } from '../utils/dedali';
 import { percentualeSegnati } from '../../shared/avanzamento';
 import type { AreaDungeonDto, AreaRiassuntoDto, PlanimetriaAreaDto } from '../types';
 import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDellArea';
@@ -131,6 +132,10 @@ export function DungeonDettaglioPage() {
   const memento = d?.tipo === 'mementos';
   // L4 (§4.3): le divergenze conservate «da verificare» del Palazzo nella partita; si chiedono solo quando la scheda dice che ce ne sono
   const quanteDaVerificare = !memento ? d?.daVerificare ?? 0 : 0;
+  // L10-02: la somma dei timbri dei dedali accanto al totale che la guida dichiara per i Memento, solo se le due cifre sono diverse
+  const sommaTimbri = memento ? sommaTimbriDeiDedali(d?.aree ?? []) : null;
+  const timbriDiscordanti = memento && d?.timbriDichiarati && sommaTimbri !== null && sommaTimbri !== d.timbriDichiarati.totale
+    ? { somma: sommaTimbri, dichiarati: d.timbriDichiarati.totale, fonte: d.timbriDichiarati.fonte } : null;
   const divergenze = useCarica(() => (partitaId && quanteDaVerificare > 0 ? getDivergenze(partitaId, chiave) : Promise.resolve([])), [partitaId, chiave, quanteDaVerificare]);
   const [daVerificare, setDaVerificare] = useState<DivergenzaDaVerificare | null>(null);
   const sezioneDaVerificare = useRef<HTMLDetailsElement>(null);
@@ -249,9 +254,11 @@ export function DungeonDettaglioPage() {
   const rileggiTutto = async () => { setRevisioneArea((r) => r + 1); await dati.ricarica(); setVersioneStati((v) => v + 1); };
   const [finestra, setFinestra] = useState<FinestraPalazzo | null>(null);
   const [legami, setLegami] = useState<string | null>(null);
-  // R3-41: da 1024 px la riga dell'infiltrazione è una sola, e «Modifica testo» e «Descrizione» si aprono dal suo menu
+  // R3-41: da 1024 px la riga dell'infiltrazione è una sola, e «Modifica infiltrazione» e «Descrizione» si aprono dal suo menu
   const largo = useMedia('(min-width: 1024px)');
   const moltoLargo = useMedia('(min-width: 1280px)');
+  // L9-06: l'elenco delle aree (e il binario dei dedali) è montato una volta sola, nella forma del formato corrente
+  const medio = useMedia('(min-width: 768px)');
   // L10: sotto i 640 px la riga dei dati del Palazzo sta sotto l'intestazione (che così resta entro il 30% della schermata)
   const stretto = useMedia('(max-width: 639px)');
   // la chiave dell'infiltrazione di cui si corregge il testo o si legge la descrizione: cambiando infiltrazione si chiudono da sé
@@ -433,6 +440,13 @@ export function DungeonDettaglioPage() {
       <span className={`chip ${memento ? '' : 'hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
       {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
     </div>
+    {/* L10-02 (Q8 A): i totali dei dedali vengono ognuno dalla sua pagina della guida, e la loro somma non è il totale che la guida dichiara
+        per tutti i Memento: nulla si forza, la scheda lo dice una volta, qui, con le due cifre (solo se sono diverse) */}
+    {memento && timbriDiscordanti && (
+      <p className="m-0 basis-full testo-12 text-text-secondary text-pretty">
+        Timbri: i totali dei dedali, ognuno dalla sua pagina della guida, sommano {timbriDiscordanti.somma}; la guida ne dichiara {timbriDiscordanti.dichiarati} in tutto. Valgono i totali dei dedali. Fonte: {timbriDiscordanti.fonte}.
+      </p>
+    )}
     {/* nei Palazzi, da 1024 px, i «Dettagli dalla guida» stanno nella riga del titolo (R3-41): qui solo sotto i 1024 */}
     {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
   </>;
@@ -446,6 +460,16 @@ export function DungeonDettaglioPage() {
   const illustrato = !!useImmagineMappa(memento ? null : d?.illustrazione);
 
   const senzaPin = versioneSenzaPin(versioniArea, planimetriaScelta);
+
+  /** L9-06: l'elenco delle aree del Palazzo nella forma data. Una sola forma è montata per volta: colonna da 1280 px, fila da 768 a 1279, foglio
+   *  sotto. Collegando i pin l'elenco resta (2026-10-18): toccare un'area porta la sua planimetria nella mappa del collegamento, senza cambiare
+   *  infiltrazione né area. */
+  const elencoAree = (forma: 'colonna' | 'fila' | 'foglio') => d && area && (
+    <AreePalazzo forma={forma} aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
+      completate={completate} onScegliArea={collegamento ? (s) => setMappaCollegamento(areePalazzo.find((x) => x.slug === s)?.predefinita ?? null) : scegliAreaFisica}
+      onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
+      onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
+  );
 
   /** Lotto B (punto 6): gli strumenti di modifica del Palazzo in un solo menu «Modifica ⋯» (`MenuModificaPalazzo`); nei Memento resta la
    *  modalità «Modifica la guida». */
@@ -486,13 +510,7 @@ export function DungeonDettaglioPage() {
         {/* UX3-13: da 1280 px la riga non ha più la striscia «Aree toccate» (51–190 px che scorreva di lato, già scorsa: etichetta
             tagliata, chip a metà, un gesto nascosto). Un comando visibile chiedeva 132 px e a capo sforava R3-41: le aree toccate sono
             quelle evidenziate nella colonna delle aree, con la legenda per esteso, e il selettore prende lo spazio liberato. */}
-        {!moltoLargo && (
-          <div className="min-w-0 flex-1">
-            <AreePalazzo forma="fila" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
-              completate={completate} onScegliArea={scegliAreaFisica} onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
-              onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
-          </div>
-        )}
+        {!moltoLargo && <div className="min-w-0 flex-1">{elencoAree('fila')}</div>}
         {area.descrizione && <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-lg shrink-0" icona={<IconaAzione chiave="dettagli" dimensione={20} />}
           titolo={descrizioneAperta === area.chiave ? 'Nascondi la descrizione' : 'Descrizione'} title="Descrizione dell’infiltrazione" aria-expanded={descrizioneAperta === area.chiave}
           onClick={() => setDescrizioneAperta((x) => (x === area.chiave ? null : area.chiave))} />}
@@ -584,7 +602,7 @@ export function DungeonDettaglioPage() {
                       : <IndietroScheda ripiego="/guida/dungeon" etichettaNascosta={!memento} />}
                     <TitoloScheda>{d.nome}</TitoloScheda>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida»; nei Palazzi
-                        sta nel menu «Modifica ⋯» (lotto B) e il modulo si apre sotto l'intestazione */}
+                        sta nel menu «Modifica ⋯» (lotto B); in tutti e due i casi è una finestra (L9-05) */}
                     {!IN_RILASCIO && memento && modifica && <CorrezioneSchedaPalazzo d={d} memento={memento} onSalvato={() => dati.ricarica()} />}
                   </div>
                   {/* Da 1024 px sovrano e arcana prendono quel che resta della riga del nome, ognuno su una riga coi puntini (testo intero nel
@@ -635,8 +653,8 @@ export function DungeonDettaglioPage() {
               <span className="min-w-0 flex-1 text-pretty">Senza la sua voce il Palazzo non risulta mai concluso.</span>
             </div>
           )}
-          {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯» */}
-          {!IN_RILASCIO && !memento && correggendoPalazzo && <div className="shrink-0"><CorrezioneSchedaPalazzo d={d} memento={memento} onChiudi={() => setCorreggendoPalazzo(false)} onSalvato={() => dati.ricarica()} /></div>}
+          {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯»; L9-05: è una finestra, niente contenitore nella pagina */}
+          {!IN_RILASCIO && !memento && correggendoPalazzo && <CorrezioneSchedaPalazzo d={d} memento={memento} onChiudi={() => setCorreggendoPalazzo(false)} onSalvato={() => dati.ricarica()} />}
           {!IN_RILASCIO && !memento && correggendoBoss && <div className="shrink-0"><ModuloBossFinale d={d} onChiudi={() => setCorreggendoBoss(false)} onSalvato={() => dati.ricarica()} /></div>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
@@ -654,21 +672,25 @@ export function DungeonDettaglioPage() {
               <div className="grid grid-cols-1 items-start gap-3 lg:min-h-[280px] lg:flex-1 lg:grid-cols-[260px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch xl:grid-cols-[300px_minmax(0,1fr)]">
                 {/* «lascia sempre visibile Pozzo» (2026-10-12, scelta «Disegno fisso in cima»): il disegno del pozzo sta fermo in cima
                     alla colonna e si tocca per scegliere il dedalo; sotto, l'elenco dei dedali scorre da solo */}
-                <nav aria-label="Dedali dei Memento" className="hidden min-h-0 flex-col gap-1.5 lg:flex">
-                  <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea} className="shrink-0" />
-                  <div className="flex min-h-0 flex-1 flex-col gap-1 area-scorrevole p-1.5">
-                    <span className="px-1 testo-12 uppercase tracking-wide text-text-muted">Dedali</span>
-                    {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
-                  </div>
-                </nav>
+                {largo && (
+                  <nav aria-label="Dedali dei Memento" className="flex min-h-0 flex-col gap-1.5">
+                    <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea} className="shrink-0" />
+                    <div className="flex min-h-0 flex-1 flex-col gap-1 area-scorrevole p-1.5">
+                      <span className="px-1 testo-12 uppercase tracking-wide text-text-muted">Dedali</span>
+                      {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
+                    </div>
+                  </nav>
+                )}
                 <div className="flex min-w-0 flex-col gap-2.5 lg:min-h-0 lg:area-scorrevole lg:p-2">
                   {/* sul tablet: i dedali in fila, col pozzo */}
-                  <div className="hidden items-center gap-2 md:flex lg:hidden">
-                    <FilaScorrevole className="fila-scorrevole--sempre min-w-0 flex-1 items-center" aria-label="Dedali dei Memento">
-                      {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} fila suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
-                    </FilaScorrevole>
-                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
-                  </div>
+                  {medio && !largo && (
+                    <div className="flex items-center gap-2">
+                      <FilaScorrevole className="fila-scorrevole--sempre min-w-0 flex-1 items-center" aria-label="Dedali dei Memento">
+                        {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} fila suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
+                      </FilaScorrevole>
+                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Pozzo" aria-label="Apri il pozzo dei Memento" onClick={() => setPozzo(true)} />
+                    </div>
+                  )}
                   {scelto && <AreeDelDedalo key={area.chiave} dedalo={scelto} dedali={d.aree} onScegliDedalo={scegliArea}
                     partitaId={partitaId} modifica={modifica} onModifica={setModifica} cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto}
                     onTimbri={aggiornaTimbri} onRichiesta={aggiornaRichiesta} catturate={catturate} onCattura={cattura}
@@ -690,23 +712,18 @@ export function DungeonDettaglioPage() {
               l'infiltrazione, l'area con le sue versioni e il visore, a destra quel che si raccoglie e la guida dell'infiltrazione. ---- */}
           {!memento && <div className="grid grid-cols-1 items-start gap-4 lg:min-h-[280px] lg:flex-1 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch xl:grid-cols-[300px_minmax(0,1fr)]">
             {/* da 1280 px la colonna delle aree, alta quanto le altre, con lo scorrimento suo */}
-            <nav aria-label="Il Palazzo" className="hidden xl:block xl:min-h-0">
-              <div className="card h-full area-scorrevole p-2">
-                {/* collegando i pin l'elenco resta (2026-10-18): toccare un'area porta la sua planimetria nella mappa del collegamento,
-                    senza cambiare infiltrazione né area */}
-                <AreePalazzo forma="colonna" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
-                  completate={completate} onScegliArea={collegamento ? (s) => setMappaCollegamento(areePalazzo.find((x) => x.slug === s)?.predefinita ?? null) : scegliAreaFisica}
-                  onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
-                  onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
-              </div>
-            </nav>
+            {moltoLargo && (
+              <nav aria-label="Il Palazzo" className="min-h-0">
+                <div className="card h-full area-scorrevole p-2">{elencoAree('colonna')}</div>
+              </nav>
+            )}
             {/* ---- L'area scelta: planimetrie ---- */}
             {/* Da 1024 a 1279 px mappa e raccolta stanno una sotto l'altra in **un'area sola** che scorre; da 1280 px
                 sono due colonne, ognuna con il suo scorrimento, e la mappa si allunga fino in fondo alla sua. */}
             <div className="grid grid-cols-1 items-start gap-4 lg:min-h-0 lg:max-xl:area-scorrevole lg:max-xl:p-2 xl:grid-rows-[minmax(0,1fr)] xl:items-stretch xl:grid-cols-[minmax(0,1fr)_352px]">
               <section className="card flex flex-col gap-2.5 lg:gap-1.5 lg:p-2.5 xl:min-h-0 xl:area-scorrevole">
                 {/* R3-41 (decisione del PM, 2026-10-20): da 1024 px la riga dell'infiltrazione è una sola — selettore, aree toccate
-                    scorrevoli, menu «Altro» con «Modifica testo», «Modifica aree» e «Descrizione», «Aggiungi infiltrazione» — così il visore
+                    scorrevoli, «Descrizione» e il menu «Modifica ⋯» — così il visore
                     comincia entro metà altezza della finestra. Sotto i 1024 px resta com'era (le righe qui sotto). */}
                 {largo && !collegamento ? rigaInfiltrazioneLarga() : <>
                 {/* La riga dell'infiltrazione in una riga sola (R3-41): il selettore è il titolo, così versioni e visore restano nella prima
@@ -720,14 +737,15 @@ export function DungeonDettaglioPage() {
                       </div>
                     : <TitoloSezione variante="display">{area.nome}</TitoloSezione>}
                   {(collegamento || d.aree.length <= 1) && <span className="testo-12 text-text-muted">infiltrazione {area.ordine + 1} di {d.aree.length}</span>}
-                  {/* lotto B (punto 6): «Modifica testo», «+ Infiltrazione», «Modifica aree» e le azioni dell'area in un solo menu, accanto
+                  {/* lotto B (punto 6): le azioni sull'infiltrazione e sull'area in un solo menu, accanto
                       al selettore: la prima schermata del telefono mostra la mappa e non quattro comandi di modifica */}
-                  {!IN_RILASCIO && !collegamento && menuModifica()}
+                  {/* L9-05: andando a capo il pulsante resta a destra: il riquadro del menu si apre verso sinistra e a 375 px usciva dallo schermo (x=-125) */}
+                  {!IN_RILASCIO && !collegamento && <div className="ml-auto">{menuModifica()}</div>}
                 </div>
                 {/* il modulo del testo si apre sotto la riga; `key`: cambiando infiltrazione si rimonta (rilievo della revisione) */}
                 {!IN_RILASCIO && !collegamento && moduloInfiltrazione()}
                 {/* Collegando i pin resta solo la riga del titolo (2026-10-18: «è inutile tutto ad eccezione del titolo»). */}
-                {/* «Aree toccate» (§4.2): le aree che l'infiltrazione percorre, in ordine; toccarne una la apre. «Modifica aree» cambia i legami. */}
+                {/* «Aree toccate» (§4.2): le aree che l'infiltrazione percorre, in ordine; toccarne una la apre. La voce «Aree toccate dall’infiltrazione» del menu cambia i legami. */}
                 {!collegamento && (
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="testo-12 uppercase tracking-wide text-text-muted">Aree toccate</span>
@@ -750,18 +768,7 @@ export function DungeonDettaglioPage() {
                   </div>
                 )}
                 {/* da 768 a 1279 px le aree in fila sopra il visore; sotto i 768 px il pulsante «Aree · N» che apre il foglio */}
-                {!collegamento && <>
-                  <div className="hidden md:block xl:hidden">
-                    <AreePalazzo forma="fila" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
-                      completate={completate} onScegliArea={scegliAreaFisica} onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
-                      onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
-                  </div>
-                  <div className="md:hidden">
-                    <AreePalazzo forma="foglio" aree={areePalazzo} infiltrazioni={d.aree} areaScelta={areaFisica?.slug ?? null} infiltrazioneScelta={area.chiave}
-                      completate={completate} onScegliArea={scegliAreaFisica} onScegliInfiltrazione={scegliInfiltrazione} onCollegaAree={setLegami}
-                      onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
-                  </div>
-                </>}
+                {!collegamento && <div>{elencoAree(medio ? 'fila' : 'foglio')}</div>}
                 </>}
                 {/* Arrivando dalla proposta di una voce del diario (UX3-1, §4.4): la riga che lo dice, con «Conferma» e «Chiudi» */}
                 {!IN_RILASCIO && daVoce && !collegamento && <PropostaDallaVoce key={daVoce} uid={daVoce} partitaId={partitaId} onChiudi={togliDaVoce}

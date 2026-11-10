@@ -40,17 +40,17 @@ beforeEach(() => {
 /** Apre la finestra dal pulsante dell'intestazione e la restituisce. */
 function apri(d = scheda(), onSalvato = vi.fn().mockResolvedValue(undefined)) {
   render(<AtterraggioTokyo dungeon={d} onSalvato={onSalvato} />);
-  fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Modifica atterraggio/ }));
   return { finestra: screen.getByRole('dialog', { name: 'Sulla mappa di Tokyo — Palazzo di Kamoshida' }), onSalvato };
 }
 /** La regola n (da 1) nell'elenco. */
 const regola = (n: number) => screen.getByRole('listitem', { name: `Regola ${n}` });
 
 describe('AtterraggioTokyo', () => {
-  it('il pulsante dice la finestra; la finestra mostra le regole salvate, i loro pin e dove si atterra oggi', async () => {
+  it('il pulsante dice l’azione; la finestra mostra le regole salvate, i loro pin e dove si atterra oggi', async () => {
     render(<AtterraggioTokyo dungeon={scheda()} onSalvato={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent('dall’11 aprile al 2 maggio');
-    fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+    expect(screen.getByRole('button', { name: /Modifica atterraggio/ })).toHaveTextContent('dalla mappa di Tokyo');
+    fireEvent.click(screen.getByRole('button', { name: /Modifica atterraggio/ }));
     expect(screen.getByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Prigione, sul pin «Cella».');
     expect(valoreSelettore('Quando', regola(1))).toBe('Un giorno');
     expect(valoreSelettore('Planimetria', regola(1))).toBe('Prigione');
@@ -66,7 +66,7 @@ describe('AtterraggioTokyo', () => {
   it('«Quando compare» dice la finestra a parole e rimanda a «Correggi la scheda»: niente selettori né «Salva» della finestra', () => {
     const { finestra } = apri();
     expect(within(finestra).getByText(/L’icona del Palazzo sta sulla mappa di Tokyo/)).toHaveTextContent('L’icona del Palazzo sta sulla mappa di Tokyo dall’11 aprile al 2 maggio.');
-    expect(within(finestra).getByText(/Si cambia in «Correggi la scheda» del Palazzo/)).toBeInTheDocument();
+    expect(within(finestra).getByText(/Si cambia in «Correggi la scheda»/)).toBeInTheDocument();
     expect(within(finestra).queryByRole('group', { name: 'Compare dal' })).toBeNull();
     expect(within(finestra).queryByRole('checkbox', { name: 'Senza fine' })).toBeNull();
     expect(within(finestra).queryByRole('button', { name: /Salva quando compare/ })).toBeNull();
@@ -136,7 +136,8 @@ describe('AtterraggioTokyo', () => {
     expect(onSalvato).not.toHaveBeenCalled();
   });
 
-  it('la finestra si dice con le preposizioni apostrofate davanti a 8 e 11: «dall’8 aprile all’11 maggio», «dall’11 aprile»', () => {
+  // L9-05: le date non stanno più nel pulsante d'ingresso, che è un'azione «Modifica atterraggio»; il testo con le date è nella finestra
+  it.skip('la finestra si dice con le preposizioni apostrofate davanti a 8 e 11: «dall’8 aprile all’11 maggio», «dall’11 aprile»', () => {
     const { rerender } = render(<AtterraggioTokyo dungeon={scheda({ finestra: { dal: '04-08', al: '05-11' } })} onSalvato={vi.fn()} />);
     expect(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveTextContent('dall’8 aprile all’11 maggio');
     rerender(<AtterraggioTokyo dungeon={scheda({ finestra: { dal: '04-11', al: null } })} onSalvato={vi.fn()} />);
@@ -156,7 +157,7 @@ describe('AtterraggioTokyo', () => {
 
   it('i Memento non hanno planimetrie: niente regole da aggiungere', () => {
     render(<AtterraggioTokyo dungeon={scheda({ chiave: 'mementos', nome: 'Memento', tipo: 'mementos', planimetrie: [], atterraggi: [], atterraggio: null })} onSalvato={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Modifica atterraggio/ }));
     expect(screen.getByText('I Memento non hanno planimetrie: toccandoli si apre la loro scheda.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Aggiungi una regola/ })).toBeNull();
   });
@@ -165,10 +166,9 @@ describe('AtterraggioTokyo', () => {
 // L0 (2026-10-20): la stessa finestra serve ai Memento, che si chiamano col loro nome
 it('nei Memento i testi dicono «i Memento» e «dei Memento», mai «il Palazzo»', () => {
   render(<AtterraggioTokyo dungeon={scheda({ chiave: 'mementos', nome: 'Memento', tipo: 'mementos', planimetrie: [], atterraggi: [], atterraggio: null })} onSalvato={vi.fn()} />);
-  fireEvent.click(screen.getByRole('button', { name: /Sulla mappa di Tokyo/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Modifica atterraggio/ }));
   const finestra = within(screen.getByRole('dialog', { name: 'Sulla mappa di Tokyo — Memento' }));
   expect(finestra.getByText(/^L’icona dei Memento sta sulla mappa di Tokyo/)).toBeInTheDocument();
-  expect(finestra.getByText(/Toccando i Memento sulla mappa di Tokyo/)).toBeInTheDocument();
   expect(finestra.getByText('Oggi nessuna regola vale: si apre la scheda dei Memento.')).toBeInTheDocument();
   expect(finestra.getByText('I Memento non hanno planimetrie: toccandoli si apre la loro scheda.')).toBeInTheDocument();
   expect(finestra.queryByText(/Palazzo/)).toBeNull();

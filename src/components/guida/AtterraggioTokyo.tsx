@@ -11,7 +11,7 @@
 //   «Correggi la scheda», con le altre date del Palazzo;
 // - **Atterraggio dalla mappa di Tokyo**: un elenco di regole (sempre, un giorno, da un giorno in poi, dal–al), ognuna con una
 //   planimetria del Palazzo e, se serve, il pin d'arrivo su cui centrarla. Vale la prima che copre il giorno della partita:
-//   l'ordine si cambia con le frecce, e «Salva le regole» le scrive.
+//   l'ordine si cambia con le frecce, e «Salva le regole» (nel piè fisso) le scrive e chiude.
 //
 // La bozza delle regole nasce all'apertura dai dati della pagina; chiudere la finestra la scarta.
 // ============================================================
@@ -25,6 +25,7 @@ import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
 import { opzioniPinArrivo } from '../../utils/pinArrivo';
 import type { DungeonDettaglioDto, SpilloDto } from '../../types';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
@@ -84,10 +85,11 @@ function AtterraggioTokyoReale({ dungeon: d, onSalvato, compatto }: Props) {
   const [aperta, setAperta] = useState(false);
   return (
     <>
-      {/* `compatto` (scheda del Palazzo da 1024 px, R3-41): solo l'icona, col testo per chi non vede e nel suggerimento */}
-      <PulsanteVisivo tono="secondario" compatto className={compatto ? 'btn-visivo--icona-lg' : undefined} title={compatto ? `Sulla mappa di Tokyo: ${testoFinestra(d.finestra)}` : undefined}
-        icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sulla mappa di Tokyo"
-        dettaglio={testoFinestra(d.finestra)} aria-haspopup="dialog" onClick={() => setAperta(true)} />
+      {/* L9-05: l'ingresso è un'azione (era la frase delle date, che la linea del tempo dice già). `compatto` (scheda del Palazzo da 1024 px,
+          R3-41): solo l'icona, col testo per chi non vede e nel suggerimento */}
+      <PulsanteVisivo tono="secondario" compatto className={compatto ? 'btn-visivo--icona-lg' : undefined} title={compatto ? 'Modifica atterraggio dalla mappa di Tokyo' : undefined}
+        icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Modifica atterraggio"
+        dettaglio="dalla mappa di Tokyo" aria-haspopup="dialog" onClick={() => setAperta(true)} />
       {aperta && <FinestraAtterraggio d={d} onSalvato={onSalvato} onChiudi={() => setAperta(false)} />}
     </>
   );
@@ -138,31 +140,30 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
     setRegole((rr) => [...rr, { id: prossimoId, quando: 'sempre', dal: partenzaDal, al: partenzaDal, mappa: opzioniMappa[0].chiave, spillo: null, spilloNome: null }]);
     setProssimoId((n) => n + 1);
   };
-  /** Esegue un salvataggio: rilegge la pagina e lo dice; l'errore del server resta a schermo come notifica. */
-  const salva = async (cosa: string, azione: () => Promise<unknown>) => {
+  /** Salva le regole: rilegge la pagina, lo dice e chiude; l'errore del server resta a schermo come notifica, con la bozza aperta. */
+  const salva = async () => {
     setOccupato(true);
-    try { await azione(); await onSalvato(); notifica('success', `${cosa}: salvato.`); }
-    catch (err) { notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.'); }
+    try {
+      await impostaAtterraggiDungeon(d.chiave, regole.map(regolaPerServer));
+      await onSalvato();
+      notifica('success', 'Atterraggio dalla mappa di Tokyo: salvato.');
+      onChiudi();
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
 
-  return (
-    <Modal titolo={`Sulla mappa di Tokyo — ${d.nome}`} aperta onChiudi={onChiudi} larga
-      azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}>
+  const titolo = `Sulla mappa di Tokyo — ${d.nome}`;
+  const corpo = (
       <div className="flex flex-col gap-5 testo-13">
         <section aria-labelledby="tokyo-quando" className="flex flex-col gap-2">
           <h3 id="tokyo-quando" className="m-0 font-display testo-16 uppercase">Quando compare</h3>
           {/* L13 O6-3: le date {delPosto} hanno un solo editor, «Correggi la scheda»; qui si dice la finestra e dove cambiarla */}
-          <p className="m-0 testo-13" data-finestra>L’icona {delPosto} sta sulla mappa di Tokyo <strong>{testoFinestra(d.finestra)}</strong>.</p>
-          <p className="m-0 testo-12 text-text-muted">È la stessa finestra che dice l’arco della storia alle condizioni dei pin. Si cambia in «Correggi la scheda» {delPosto}, insieme alle altre sue date.</p>
+          <p className="m-0 testo-13" data-finestra>L’icona {delPosto} sta sulla mappa di Tokyo <strong>{testoFinestra(d.finestra)}</strong>. Si cambia in «Correggi la scheda».</p>
         </section>
 
         <section aria-labelledby="tokyo-atterraggio" className="flex flex-col gap-2">
           <h3 id="tokyo-atterraggio" className="m-0 font-display testo-16 uppercase">Atterraggio dalla mappa di Tokyo</h3>
-          <p className="m-0 testo-12 text-text-muted">
-            Toccando {ilPosto} sulla mappa di Tokyo si apre la planimetria della <strong>prima</strong> regola che copre il giorno della partita, centrata sul pin d’arrivo se c’è.
-            Senza partita vale la prima regola «Sempre». Se nessuna regola vale si apre la scheda {delPosto}.
-          </p>
+          <p className="m-0 testo-12 text-text-muted">Vale la <strong>prima</strong> regola che copre il giorno della partita; se nessuna vale si apre la scheda {delPosto}.</p>
           <p className="m-0 testo-12" data-atterraggio-oggi>{oggi ? <>Oggi si atterra su: <strong>{oggi}</strong>.</> : `Oggi nessuna regola vale: si apre la scheda ${delPosto}.`}</p>
           {opzioniMappa.length === 0 ? <p className="m-0 testo-12 text-text-muted">{memento ? 'I Memento non hanno planimetrie: toccandoli si apre la loro scheda.' : 'Questo Palazzo non ha planimetrie: toccandolo si apre la sua scheda.'}</p> : (
             <>
@@ -206,14 +207,21 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
               {rovesciate.length > 0 && <p className="m-0 testo-12 text-error-testo" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
               <div className="flex flex-wrap items-center gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una regola" disabled={occupato || regole.length >= 30} onClick={aggiungi} />
-                <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva le regole"
-                  disabled={occupato || !regoleCambiate || rovesciate.length > 0}
-                  onClick={() => void salva('Atterraggio dalla mappa di Tokyo', () => impostaAtterraggiDungeon(d.chiave, regole.map(regolaPerServer)))} />
               </div>
             </>
           )}
         </section>
       </div>
-    </Modal>
+  );
+
+  // L9-05: «Salva le regole» sta nel piè fisso della finestra di modifica (nel corpo finiva sotto il bordo). Senza planimetrie non c'è niente
+  // da modificare (i Memento): la finestra si legge soltanto e si chiude.
+  if (opzioniMappa.length === 0) {
+    return <Modal titolo={titolo} aperta onChiudi={onChiudi} larga azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}>{corpo}</Modal>;
+  }
+  return (
+    <FinestraModifica titolo={titolo} titoloSalva="Salva le regole" onChiudi={onChiudi} onSalva={salva} salvabile={regoleCambiate && rovesciate.length === 0} occupato={occupato} sporca={regoleCambiate}>
+      {corpo}
+    </FinestraModifica>
   );
 }
