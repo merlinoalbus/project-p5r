@@ -2695,6 +2695,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    sezione (non dentro il modulo, che comincia sotto gli strumenti): così si ferma sul bordo anche se il modulo è ancora fuori vista.
    `bottom:-10px` annulla il padding del pannello. */
 .editor-mappa__piede { position:sticky; bottom:-10px; z-index:4; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px 0; border-top:1px solid var(--color-border); background:#131419; }
+/* ultimo del contenuto: entra nel padding basso del pannello anche a fine scorrimento, così resta a filo del bordo e non 10 px sopra */
+.editor-mappa__contenuto > .editor-mappa__piede:last-child { margin-bottom:-10px; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
 /* scroll-padding: il fuoco da tastiera non finisce sotto le sezioni in alto o sotto il piè del modulo */
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; scroll-padding-block:120px 130px; }

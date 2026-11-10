@@ -235,7 +235,9 @@ partita sta in `utente` con `partita_id`.
   Gesti: pulsanti, pinch a due dita, rotellina solo con la mappa ingrandita o con Ctrl/Cmd; a ingrandimento 1 il dito e la rotellina
   fanno scorrere la pagina. I cartellini che alla misura e all'ingrandimento di quel momento distano meno di
   `DISTANZA_MINIMA_SPILLI` diventano una pastiglia «+n» con l'elenco dei nomi (`src/utils/raggruppaCartellini.ts`, la stessa regola
-  dei bersagli di `raggruppaSpilli`; acceso nella Città e nella Home, spento nella scheda «Oggi» della pagina Partita, `raggruppaVicini`, perché quella pagina non cambia disposizione); l'area di tocco di 44 px dei cartellini è divisa per lo zoom (`--zoom-tokyo`), così a ogni
+  dei bersagli di `raggruppaSpilli`; acceso nella Città, nella Home e nella scheda «Oggi» della pagina Partita, `raggruppaVicini`; con la mappa non ingrandita un cartellino o
+  un gruppo a meno di 24 px (mezza area di tocco più 2 di arrotondamento) dal bordo o dai comandi dello zoom si sposta verso l'interno del
+  minimo necessario, e due segni si uniscono se le loro aree quadrate da 44 px si toccano anche in diagonale, `collocaCartellini`); l'area di tocco di 44 px dei cartellini è divisa per lo zoom (`--zoom-tokyo`), così a ogni
   ingrandimento resta di 44 px sullo schermo.
 
 ### Pagine (tabella delle rotte del frontend, `src/router.tsx`)
