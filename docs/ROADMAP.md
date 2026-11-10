@@ -54,9 +54,15 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 ## Negozi, oggetti e attività
 - Negozi con orari, sede, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è la sola sede;
   quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Luogo,
-  punti vendita e listini si modificano nella finestra «Il posto». Ancora aperti: i pin che restano sul luogo finché non si vede in
-  gioco quale macchina indicano (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759).
-- Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
+  punti vendita e listini si modificano nella finestra «Il posto», con la regola comune dei distributori (pezzi, lunedì, meteo) in
+  un punto solo e le eccezioni per riga. Gli orari dei punti vendita sono quelli del luogo, salvo un'eccezione del punto vendita (il negozio del
+  Palazzo di Niijima, senza sede). Nel catalogo l'equipaggiamento della guida
+  (armi da mischia e a distanza, protezioni; fuori, per scelta, Teschio di Cristallo e R, e la Replica d'arma resta materiale), con le armi a distanza dei compagni e il Collare commemorativo all'Untouchable; gli
+  Strumenti del cercatore ad Akihabara e i cinque oggetti del laghetto.
+  Ancora aperti: i pin che restano sul luogo finché non si vede in gioco quale macchina indicano (Akihabara 272-275, Shinjuku
+  1564-1566, edificio della Shujin 1759); la Stecca jump, il Set di freccette e i Boilie restano come sono finché non si verificano in gioco.
+- Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`). Un'offerta collegata prende nome,
+  categoria e «per chi» dall'oggetto; i legami fra fonti e oggetti si applicano subito, senza proposte.
 - Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.

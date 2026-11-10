@@ -79,12 +79,13 @@ export const articolo: DefinizioneModulo = {
     // Ondata 5, lotto F (decisione 21): effetto e statistiche non sono dell'offerta (si leggono dall'oggetto del catalogo): il modulo non li porta
     nota: testoDi(e?.dati.nota),
     verificato: verificatoDi(e),
-    // Il nome storico resta solo per le offerte esistenti non collegate: non si copia dal catalogo.
+    // Il nome proprio è solo delle offerte esistenti non collegate (L4-07: una collegata non ne ha; scollegandola, il server le dà quello dell'oggetto).
     _esistente: !!e, _aMano: !!e && !e.dati.catalogo_chiave,
     _catalogoIniziale: (e?.dati.catalogo_chiave as string | null) ?? null,
   }),
   // Un collegamento non disponibile resta salvabile senza modificarlo; una nuova offerta sceglie un'identità.
-  valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && testoDi(d.nome).trim().length > 0))
+  // L4-07: un'offerta che si scollega adesso non ha nome proprio (collegata non lo aveva): al salvataggio il server le dà quello dell'oggetto
+  valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && (testoDi(d.nome).trim().length > 0 || !!testoDi(d._catalogoIniziale))))
     && (d._costoModificato !== true || d.costo_json == null || normalizzaCostoScambio(d.costo_json) !== null)
     && (d._rifornimentoModificato !== true || d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null)
     && (numeroDi(d.prezzo_sera) === null || (Number.isSafeInteger(numeroDi(d.prezzo_sera)) && numeroDi(d.prezzo_sera)! >= 0)),
@@ -109,8 +110,10 @@ export const articolo: DefinizioneModulo = {
     // Non rispedire un legame immutato evita di rifiutare la correzione della nota se l'oggetto è stato nascosto.
     if (chiave !== d._catalogoIniziale) corpo.catalogo_chiave = chiave;
     if (!chiave) {
-      Object.assign(corpo, { nome: testoDi(d.nome).trim(), categoria: d.categoria, per: testoOnull(d.per),
-        oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null });
+      // L4-07: senza nome (un'offerta collegata che si scollega adesso) nome, categoria e «per chi» li dà il server, dall'oggetto
+      const nome = testoDi(d.nome).trim();
+      Object.assign(corpo, nome ? { nome, categoria: d.categoria, per: testoOnull(d.per) } : {},
+        { oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null });
     }
     return corpo;
   },

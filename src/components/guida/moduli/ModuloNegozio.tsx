@@ -65,7 +65,8 @@ export function CampiPuntoVendita({ dati, imposta, disabilitato, nelPosto = fals
     <SezioneCampi titolo="Orari propri">
       <label className="campo--largo flex items-start gap-2 testo-13 touch">
         <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={eccezione !== null} disabled={disabilitato} onChange={(e) => imposta({ eccezione_orari_json: e.target.checked ? { ...ORARI_SEMPRE } : null })} />
-        <span>Ha orari suoi, diversi da quelli del luogo</span>
+        {/* senza sede non c'è un luogo da cui prendere gli orari (il negozio del Palazzo di Niijima): questi sono i suoi soli orari */}
+        <span>{testoDi(dati.sede_chiave) || nelPosto ? 'Ha orari suoi, diversi da quelli del luogo' : 'Ha orari suoi (senza sede non ha quelli di un luogo)'}</span>
       </label>
       {eccezione && <Blocco largo><OrariEditor valore={eccezione} onCambia={(o) => imposta({ eccezione_orari_json: o })} disabilitato={disabilitato} /></Blocco>}
     </SezioneCampi>

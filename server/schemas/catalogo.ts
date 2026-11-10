@@ -78,7 +78,6 @@ export const datiNegozio = z.object({
   confidente_chiave: z.string().max(80).nullable().optional(),
   /** La sede: un luogo della città (migrazione 072). È l'unico «dove» del negozio: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
-  orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
   /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo; null = vale quello della sede. */
   eccezione_orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
@@ -281,6 +280,16 @@ const campiGrezzi = z.record(z.string(), z.unknown());
 /** L3: il corpo del salvataggio del posto; i campi di luogo, punti vendita e offerte li valida poi lo schema del loro tipo. */
 export const bodySalvaPosto = z.object({
   luogo: campiGrezzi.optional(),
+  /** L4-01: le regole comuni cambiate, una per genere di punto vendita, con i soli campi cambiati (pezzi, rifornimento, condizioni) e gli
+   *  stessi controlli dei campi dell'offerta. */
+  regole: z.array(z.object({
+    tipo: z.string().min(1).max(40),
+    quantita: z.number().int().min(0).max(9_999).nullable().optional(),
+    rifornimento_json: z.unknown().superRefine((v, ctx) => {
+      if (v !== null && v !== undefined && normalizzaRifornimento(v) === null) ctx.addIssue({ code: 'custom', message: 'Regola di rifornimento non valida.' });
+    }).transform((v) => (v === undefined ? undefined : v === null ? null : JSON.stringify(normalizzaRifornimento(v)))).optional(),
+    condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
+  }).strict()).max(10).refine((r) => new Set(r.map((x) => x.tipo)).size === r.length, 'Una regola per genere.').optional(),
   puntiVendita: z.array(z.object({
     chiave: z.string().min(1).max(200).optional(),
     dati: campiGrezzi.optional(),

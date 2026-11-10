@@ -65,6 +65,7 @@ router.put('/posto/:quartiere/:luogo', validate({ params: paramsPosto, body: bod
   const corpo = req.body as z.infer<typeof bodySalvaPosto>;
   res.json(salvaPosto(`${req.params.quartiere}/${req.params.luogo}`, {
     luogo: corpo.luogo ? soloMandati('luogo', corpo.luogo, true) : undefined,
+    regole: corpo.regole,
     puntiVendita: corpo.puntiVendita.map((pv) => ({
       chiave: pv.chiave,
       // la sede la decide il posto: per la validazione di un punto vendita nuovo basta un valore, il servizio la sostituisce

@@ -3874,12 +3874,32 @@ export interface ElementoCatalogoDto {
  */
 export interface PostoDto {
   luogo: ElementoCatalogoDto;
-  puntiVendita: Array<{ negozio: ElementoCatalogoDto; offerte: Array<ElementoCatalogoDto & { conAcquisti: boolean }> }>;
+  /** `regolaComune`: l'offerta segue la regola comune del genere del suo punto vendita (L4-01): pezzi, rifornimento e condizioni sono i suoi. */
+  puntiVendita: Array<{ negozio: ElementoCatalogoDto; offerte: Array<ElementoCatalogoDto & { conAcquisti: boolean; regolaComune: boolean }> }>;
+  /** L4-01: le regole comuni per genere di punto vendita (oggi i distributori). */
+  regole: Record<string, RegolaTipoNegozioDto>;
+}
+
+/** L4-01: la regola comune di un genere di punto vendita, con la frase che la dice e quante offerte la seguono. */
+export interface RegolaTipoNegozioDto {
+  tipo: string;
+  quantita: number | null;
+  rifornimento: import('./rifornimento.js').RegolaRifornimento | null;
+  condizioni: RequisitoSpillo[];
+  /** Il valore salvato si legge senza perderne parti: se no l'editor lo lascia com'è finché non lo si riscrive. */
+  rifornimentoLeggibile: boolean;
+  condizioniLeggibili: boolean;
+  testo: string;
+  offerte: number;
+  fonte: string;
 }
 
 /** L3: il salvataggio del posto, in una transazione: i punti vendita (nuovi senza `chiave`), le loro offerte e le offerte da togliere, poi il luogo. */
 export interface SalvaPostoDto {
   luogo?: Record<string, unknown>;
+  /** L4-01: le regole comuni cambiate nel posto, una per genere, con i soli campi cambiati (valgono per tutte le offerte che le seguono,
+   *  in ogni luogo). */
+  regole?: Array<{ tipo: string; quantita?: number | null; rifornimento_json?: unknown; condizioni_json?: unknown[] }>;
   /** `copiaDa`: per un'offerta nata da «Duplica», l'offerta d'origine i cui contenuti (i set) passano alla copia. */
   puntiVendita: Array<{ chiave?: string; dati?: Record<string, unknown>; offerte: Array<{ chiave?: string; dati: Record<string, unknown>; copiaDa?: string }>; offerteTolte?: string[] }>;
 }
@@ -3926,17 +3946,17 @@ export interface CatalogoOggettoDto extends RiferimentoOggettoDto {
   /** Il prezzo in yen più basso fra le offerte visibili, contando anche il prezzo di una fascia (Ondata 5, lotto E: le sfide della Big Bang
    *  Burger a 500 ¥ di sera); null senza offerte in yen. */
   prezzoMinimo: number | null;
+  /** L4-05 (Q23): ha almeno un'offerta visibile pagata con uno scambio, non in yen: solo allora la cella del prezzo dice «Nessuna offerta in yen». */
+  conScambi: boolean;
 }
 
 export type DatiNuovoOggettoDto = Pick<CatalogoOggettoDto, 'categoria' | 'nome'> & Partial<Pick<CatalogoOggettoDto,
   'sottocategoria' | 'nomiAltri' | 'nomeOriginale' | 'effetto' | 'descrizione' | 'statistiche'>>;
-export interface SceltaAbbinamentoOggettoDto {
-  riga_tipo: TipoPropostaOggetto; riga_chiave: string; catalogo_chiave: string | null; gruppo?: string;
-}
-export interface DatiLegameOggettoDto extends Omit<SceltaAbbinamentoOggettoDto, 'catalogo_chiave'> {
-  catalogo_chiave: string;
+/** Il legame fra una fonte e un oggetto del catalogo (`PUT /api/catalogo-oggetti/legami`): si applica subito, senza proposte. */
+export interface DatiLegameOggettoDto {
+  riga_tipo: TipoFonteLegameOggetto; riga_chiave: string; catalogo_chiave: string;
   quantita?: number | null; nota?: string | null; togli?: boolean;
-  precedente_catalogo_chiave?: string; proposta_catalogo_chiave?: string | null;
+  precedente_catalogo_chiave?: string;
 }
 
 export interface OffertaOggettoDto {
@@ -4033,29 +4053,9 @@ export interface TrasformazioneOggettoDto {
   fonte: string;
 }
 
-export const TIPI_PROPOSTA_OGGETTO = ['articolo', 'regalo', 'voce', 'ricompensa', 'ricetta', 'catalogo'] as const;
-export type TipoPropostaOggetto = (typeof TIPI_PROPOSTA_OGGETTO)[number];
-export interface PropostaAbbinamentoDto {
-  /** Richiede il confronto completo: conferma e scelta alternativa individuali vietate. */
-  decisioneUnitaria?: 'tanaka';
-  rigaTipo: TipoPropostaOggetto;
-  rigaChiave: string;
-  /** Alternative dello stesso contenuto, non degli altri oggetti nella stessa voce/ricetta. */
-  gruppo: string;
-  rigaNome: string;
-  testoAttuale: string;
-  catalogo: RiferimentoOggettoDto | null;
-  categoria: CategoriaOggetto | null;
-  quantita: number | null;
-  motivo: string;
-  certezza: 'certa' | 'probabile' | 'da-verificare';
-  /** Nota del contenuto/premio, da conservare anche confermando un'alternativa. */
-  nota?: string | null;
-  stato: 'da-approvare' | 'confermata' | 'scartata';
-  /** Rettifiche di listino (Tanaka) visibili prima del gesto, mai applicate dalla migrazione. */
-  modifica: { azione: 'collega' | 'nascondi' | 'crea'; prezzo?: number; condizioni?: Condizione[]; condizioniTesto?: string[]; ruolo?: 'costo';
-    nomeOfferta?: string; costo?: CostoOggettoDto; ricevuti?: RicompensaOggettoDto[]; notaOfferta?: string } | null;
-}
+/** Le fonti che un legame collega a un oggetto; `catalogo` è la fusione di due identità. */
+export const TIPI_FONTE_LEGAME_OGGETTO = ['articolo', 'regalo', 'voce', 'ricompensa', 'ricetta', 'catalogo'] as const;
+export type TipoFonteLegameOggetto = (typeof TIPI_FONTE_LEGAME_OGGETTO)[number];
 
 /** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
 export interface ContenutoCestinoDto {

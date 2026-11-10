@@ -8,7 +8,6 @@ import { rettificaPropostaOggetto } from '../schemas/catalogoOggetti.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { isDeepStrictEqual } from 'node:util';
 import { trasferisciFontiCatalogo, verificaFontiLetturaFusione } from './catalogoOggettiRiferimenti.js';
-import { fontiPropostePrimaDellaFusione, invalidaSnapshotDopoFusione } from './snapshotProposteOggetti.js';
 
 type Riga = Record<string, unknown>;
 const LETTURE = new Set(['libro', 'film', 'videogioco']);
@@ -193,8 +192,8 @@ function trasferisciProposte(da: string, a: string): void {
   prepared('DELETE FROM proposta_abbinamento WHERE catalogo_chiave = ?').run(da);
 }
 
-/** `dopo` serve alla conferma: anche il cambio di stato delle proposte si annulla rimettendo la fusione dal cestino. */
-export function fondiOggetti(da: string, a: string, dopo?: () => void): void {
+/** Fonde l'identità `da` in `a`; le righe storiche di `proposta_abbinamento` seguono il riferimento, e tutto torna indietro dal cestino. */
+export function fondiOggetti(da: string, a: string): void {
   if (da === a) throw httpErrors.badRequest('fusione-stesso-oggetto', 'Scegli due oggetti diversi.');
   const origine = rigaOggetto(da, true); const destinazione = rigaOggetto(a);
   verificaFontiLetturaFusione(da, a);
@@ -208,7 +207,6 @@ export function fondiOggetti(da: string, a: string, dopo?: () => void): void {
     throw httpErrors.conflict('fusione-letture-distinte', 'Le due identità hanno letture, visioni o progressi distinti: non si fondono perdendo un avanzamento.');
   }
   conCestino({ tipo: 'oggetto', chiave: da, nome: origine.nome, contesto: `Fuso in «${destinazione.nome}»` }, () => getDb().transaction(() => {
-    const fontiPrima = fontiPropostePrimaDellaFusione(getDb());
     trasferisciContenuti(da, a);
     trasferisciCosti(da, a);
     trasferisciSnapshotArticoli(da, a);
@@ -231,11 +229,6 @@ export function fondiOggetti(da: string, a: string, dopo?: () => void): void {
     prepared('DELETE FROM catalogo_oggetto WHERE chiave = ?').run(da);
     if (letturaOrigine && !letturaDestinazione) prepared('UPDATE catalogo_oggetto SET fonte_tipo = ?,fonte_chiave = ?,updated_at = ? WHERE chiave = ?')
       .run(origine.fonte_tipo, origine.fonte_chiave, nowIso(), a);
-    // Le altre fusioni che partivano dall'identità eliminata non devono restare azioni pendenti in errore.
-    // Anche questo cambiamento è registrato dal cestino e torna indietro col ripristino.
-    prepared("UPDATE proposta_abbinamento SET stato = 'scartata',updated_at = ? WHERE riga_tipo = 'catalogo' AND riga_chiave = ? AND stato = 'da-approvare'").run(nowIso(), da);
-    dopo?.();
-    invalidaSnapshotDopoFusione(getDb(), fontiPrima);
   })());
   invalidaCacheDiGioco();
 }

@@ -14,8 +14,12 @@
 import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
-import { aggiornaElementoNellaTransazione, creaElementoNellaTransazione, eliminaElemento, leggiElemento, nascondiElemento } from './catalogoService.js';
+import { adottaRigaDellaGuida, aggiornaElementoNellaTransazione, creaElementoNellaTransazione, eliminaElemento, leggiElemento, nascondiElemento } from './catalogoService.js';
+import { aggiornaRegolaDelTipo, regoleDeiTipi, segueRegolaComune, type ValoriRegola } from './regoleNegoziService.js';
 import type { PostoDto, PostoSalvatoDto } from '../../shared/types.js';
+
+/** La regola comune di un genere, già validata dallo schema (JSON come testo): solo i campi cambiati. */
+export interface RegolaDaSalvare extends ValoriRegola { tipo: string }
 
 /** Un punto vendita del salvataggio, già validato con lo schema del suo tipo (`dati` e `dati` delle offerte nella forma delle colonne). */
 export interface PuntoVenditaDaSalvare {
@@ -47,8 +51,9 @@ export function leggiPosto(chiave: string): PostoDto {
     puntiVendita: negozi.map((n) => ({
       negozio: leggiElemento('negozio', n.chiave),
       offerte: (prepared('SELECT chiave FROM articolo WHERE negozio_chiave = ? AND nascosto = 0 ORDER BY ordine, chiave').all(n.chiave) as Array<{ chiave: string }>)
-        .map((a) => ({ ...leggiElemento('articolo', a.chiave), conAcquisti: offertaConAcquisti(a.chiave) })),
+        .map((a) => ({ ...leggiElemento('articolo', a.chiave), conAcquisti: offertaConAcquisti(a.chiave), regolaComune: segueRegolaComune(a.chiave) })),
     })),
+    regole: regoleDeiTipi(),
   };
 }
 
@@ -84,9 +89,11 @@ function togliOfferta(chiave: string): void {
  * Salva il posto in una transazione (vedi la testata). `luogo` e i `dati` sono già passati dallo schema del loro tipo; la sede di un punto
  * vendita e il punto vendita di un'offerta li decide il posto, non il corpo. Restituisce il posto riletto e i punti vendita creati.
  */
-export function salvaPosto(chiave: string, corpo: { luogo?: Record<string, unknown>; puntiVendita: PuntoVenditaDaSalvare[] }): PostoSalvatoDto {
+export function salvaPosto(chiave: string, corpo: { luogo?: Record<string, unknown>; regole?: RegolaDaSalvare[]; puntiVendita: PuntoVenditaDaSalvare[] }): PostoSalvatoDto {
   luogoEsistente(chiave);
   const creati = getDb().transaction((): string[] => {
+    // L4-01: prima le regole comuni (una per genere), così le offerte nuove di questo salvataggio prendono quelle nuove
+    for (const { tipo, ...valori } of corpo.regole ?? []) aggiornaRegolaDelTipo(tipo, valori, (a) => adottaRigaDellaGuida('articolo', a));
     const nuovi: string[] = [];
     for (const pv of corpo.puntiVendita) {
       let negozio: string;

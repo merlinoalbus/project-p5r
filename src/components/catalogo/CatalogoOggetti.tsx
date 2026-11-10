@@ -156,7 +156,9 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
           </td>
           <td className="tabella-oggetti__categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
           <CellaEffetto o={o} />
-          <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" role="img" aria-label="Nessuna offerta in yen">—</span></> : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
+          {/* L4-05 (Q23): «Nessuna offerta in yen» solo per chi si ottiene con uno scambio (informa: c'è un'offerta, non in yen); senza offerte la
+              cella resta vuota */}
+          <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? (o.conScambi ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" role="img" aria-label="Nessuna offerta in yen">—</span></> : null) : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>
       {!visibili.length && <p className="m-0 testo-13 text-text-secondary">Nessun oggetto con questi filtri.</p>}

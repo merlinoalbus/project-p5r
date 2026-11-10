@@ -40,7 +40,7 @@ import { normalizzaCostoScambio, normalizzaPrezzoPerFascia, VALUTA_COSTO, eCosto
 import { normalizzaRifornimento, type RegolaRifornimento } from '../../../shared/rifornimento';
 import { TIPI_LUOGO_DI_VENDITA, tipoPuntoVenditaDelLuogo } from '../../../shared/puntoVendita';
 import { NOME_TIPO_NEGOZIO } from '../../utils/negozi';
-import type { CatalogoOggettoDto, ElementoCatalogoDto, PostoDto, SalvaPostoDto } from '../../types';
+import type { CatalogoOggettoDto, ElementoCatalogoDto, PostoDto, RegolaTipoNegozioDto, SalvaPostoDto } from '../../types';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -74,8 +74,19 @@ interface BozzaOfferta {
   conAcquisti: boolean;
   /** Per una copia («Duplica»): l'offerta salvata d'origine, i cui contenuti (i set) il server passa alla copia. */
   copiaDa?: string;
+  /** L4-01: l'offerta segue la regola comune del genere del suo punto vendita (pezzi, rifornimento, condizioni vengono da lì). */
+  regolaComune: boolean;
+  /** L4-01: com'era salvata all'apertura (una riga che ci torna adesso manda i valori della regola, una che la seguiva già no). */
+  seguivaLaRegola: boolean;
   /** L'impronta all'apertura, per sapere se la riga è cambiata. */
   impronta: string;
+}
+
+/** L4-01: la regola comune di un genere nella bozza (si cambia nel posto e vale per tutte le offerte che la seguono). */
+interface BozzaRegola {
+  tipo: string; quantita: number | null; rifornimento: RegolaRifornimento | null; condizioni: RequisitoSpillo[]; cambiata: boolean;
+  /** I campi cambiati: solo questi si salvano (un valore salvato che l'editor non sa leggere resta com'è). */
+  cambiati: { quantita?: true; rifornimento?: true; condizioni?: true };
 }
 
 /** Un punto vendita nella bozza. */
@@ -98,6 +109,8 @@ interface Bozza {
   punti: BozzaPuntoVendita[];
   /** Il punto vendita nato da solo quando il genere del posto è diventato uno che vende, con i suoi campi di allora. */
   automatico: { id: string; impronta: string } | null;
+  /** Le regole comuni per genere di punto vendita. */
+  regole: Record<string, BozzaRegola>;
 }
 
 let contatore = 0;
@@ -105,18 +118,19 @@ const nuovoId = () => `posto-${++contatore}`;
 const impronta = (v: unknown) => JSON.stringify(v);
 
 /** Una riga del listino da un'offerta salvata. */
-function offertaDa(e: ElementoCatalogoDto & { conAcquisti?: boolean }): BozzaOfferta {
+function offertaDa(e: ElementoCatalogoDto & { conAcquisti?: boolean; regolaComune?: boolean }): BozzaOfferta {
   const dati = MODULI.articolo.iniziali(e);
   const condizioni = normalizzaCondizioniSpillo(jsonDi(e.dati.condizioni_json, []));
   return { id: nuovoId(), chiave: e.chiave, elemento: e, dati, condizioni, condizioniLeggibili: jsonSenzaPerdite(e.dati.condizioni_json, normalizzaCondizioniSpillo),
-    condizioniCambiate: false, condizioniDaCopia: null, conAcquisti: e.conAcquisti === true, impronta: impronta(dati) };
+    condizioniCambiate: false, condizioniDaCopia: null, conAcquisti: e.conAcquisti === true, regolaComune: e.regolaComune === true, seguivaLaRegola: e.regolaComune === true, impronta: impronta(dati) };
 }
 
 /** Una riga nuova per l'oggetto scelto nella riga vuota. */
-function offertaNuova(negozio: string, oggetto: string): BozzaOfferta {
+function offertaNuova(negozio: string, oggetto: string, conRegola: boolean): BozzaOfferta {
   // confermata: la scrive chi la vede in gioco (come ogni riga aggiunta dall'utente, `catalogoService.creaElementoNellaTransazione`)
   const dati = { ...MODULI.articolo.iniziali(null, negozio), catalogo_chiave: oggetto, verificato: true };
-  return { id: nuovoId(), chiave: null, elemento: null, dati, condizioni: [], condizioniLeggibili: true, condizioniCambiate: false, condizioniDaCopia: null, conAcquisti: false, impronta: '' };
+  // con una regola comune la riga nuova la segue: pezzi, rifornimento e condizioni li mette il server dalla regola
+  return { id: nuovoId(), chiave: null, elemento: null, dati, condizioni: [], condizioniLeggibili: true, condizioniCambiate: false, condizioniDaCopia: null, conAcquisti: false, regolaComune: conRegola, seguivaLaRegola: false, impronta: '' };
 }
 
 /** La copia di una riga per «Duplica»: gli stessi valori, nessun legame con l'originale (costo, fasce e rifornimento si mandano interi). */
@@ -127,7 +141,7 @@ function copiaOfferta(o: BozzaOfferta): BozzaOfferta {
     _rifornimentoModificato: d.rifornimento_json != null && normalizzaRifornimento(d.rifornimento_json) !== null,
     // la regola salvata che il modulo non sa leggere: passa com'è (la controlla il server), non si perde nella copia
     _rifornimentoDaCopia: d._copia === true ? d._rifornimentoDaCopia : d._rifornimentoNonLeggibile === true ? o.elemento?.dati.rifornimento_json ?? null : null };
-  return { ...o, id: nuovoId(), chiave: null, elemento: null, dati, conAcquisti: false, impronta: '', copiaDa: o.chiave ?? o.copiaDa,
+  return { ...o, id: nuovoId(), chiave: null, elemento: null, dati, conAcquisti: false, seguivaLaRegola: false, impronta: '', copiaDa: o.chiave ?? o.copiaDa,
     // le condizioni salvate dell'originale passano intere (anche quelle che l'editor non sa mostrare: le controlla il server); cambiate, valgono le nuove
     condizioniDaCopia: o.condizioniCambiate ? null : o.condizioniDaCopia ?? o.elemento?.dati.condizioni_json ?? null,
     condizioniCambiate: o.condizioniCambiate };
@@ -137,6 +151,7 @@ function bozzaDa(posto: PostoDto): Bozza {
   const luogo = MODULI.luogo.iniziali(posto.luogo);
   return {
     luogo, improntaLuogo: impronta(luogo), automatico: null,
+    regole: Object.fromEntries(Object.values(posto.regole ?? {}).map((r) => [r.tipo, { tipo: r.tipo, quantita: r.quantita, rifornimento: r.rifornimento, condizioni: r.condizioni, cambiata: false, cambiati: {} }])),
     condizioniLuogo: normalizzaCondizioniSpillo(jsonDi(posto.luogo.dati.condizioni_json, [])),
     condizioniLuogoLeggibili: jsonSenzaPerdite(posto.luogo.dati.condizioni_json, normalizzaCondizioniSpillo), condizioniLuogoCambiate: false,
     punti: posto.puntiVendita.map((p) => {
@@ -156,12 +171,20 @@ function puntoVenditaNuovo(luogo: Dati, quanti: number): BozzaPuntoVendita {
 const offertaCambiata = (o: BozzaOfferta) => o.chiave === null || o.condizioniCambiate || impronta(o.dati) !== o.impronta;
 const puntoCambiato = (p: BozzaPuntoVendita) => p.chiave === null || impronta(p.dati) !== p.impronta || p.tolte.length > 0 || p.offerte.some(offertaCambiata);
 const luogoCambiato = (b: Bozza) => b.condizioniLuogoCambiate || impronta(b.luogo) !== b.improntaLuogo;
+const regolaCambiata = (b: Bozza) => Object.values(b.regole).some((r) => r.cambiata);
 
 /** Il corpo del salvataggio: solo quel che è cambiato, nella forma delle colonne (`prepara` dei moduli). */
 function corpoDa(b: Bozza): SalvaPostoDto {
+  const regole = Object.values(b.regole).filter((r) => r.cambiata).map((r) => ({ tipo: r.tipo,
+    ...(r.cambiati.quantita ? { quantita: r.quantita } : {}), ...(r.cambiati.rifornimento ? { rifornimento_json: r.rifornimento } : {}),
+    ...(r.cambiati.condizioni ? { condizioni_json: r.condizioni } : {}) }));
   return {
     luogo: luogoCambiato(b) ? { ...MODULI.luogo.prepara(b.luogo), ...(b.condizioniLuogoCambiate ? { condizioni_json: b.condizioniLuogo } : {}) } : undefined,
-    puntiVendita: b.punti.filter(puntoCambiato).map((p) => ({
+    ...(regole.length ? { regole } : {}),
+    puntiVendita: b.punti.filter(puntoCambiato).map((p) => {
+      const regola = b.regole[testoDi(p.dati.tipo)] ?? null;
+      const stessoGenere = p.elemento === null || testoDi(p.elemento.dati.tipo) === testoDi(p.dati.tipo);
+      return {
       ...(p.chiave ? { chiave: p.chiave } : {}),
       ...(p.chiave === null || impronta(p.dati) !== p.impronta ? { dati: MODULI.negozio.prepara(p.dati) } : {}),
       offerte: p.offerte.filter(offertaCambiata).map((o) => {
@@ -180,10 +203,18 @@ function corpoDa(b: Bozza): SalvaPostoDto {
           } else if (normalizzaCostoScambio(o.dati.costo_json) === null) dati.costo_json = jsonDi<unknown>(o.dati.costo_json, o.dati.costo_json);
           if (o.dati._rifornimentoModificato !== true && o.dati._rifornimentoDaCopia != null) dati.rifornimento_json = jsonDi<unknown>(o.dati._rifornimentoDaCopia, o.dati._rifornimentoDaCopia);
         }
+        // L4-01: una riga che seguiva già la regola (o nuova) non dice pezzi, rifornimento e condizioni: li tiene (o li prende) dalla regola,
+        // anche quando la regola cambia nello stesso salvataggio. Una riga che ci torna adesso, o il cui punto vendita cambia genere, manda i
+        // valori della regola com'è nella bozza: il server salva prima la regola, li trova uguali e la segna «segue».
+        if (o.regolaComune && regola) {
+          if ((o.chiave === null || o.seguivaLaRegola) && stessoGenere) { delete dati.quantita; delete dati.rifornimento_json; delete dati.condizioni_json; }
+          else { dati.quantita = regola.quantita; dati.rifornimento_json = regola.rifornimento; dati.condizioni_json = regola.condizioni; }
+        }
         return { ...(o.chiave ? { chiave: o.chiave } : {}), ...(o.chiave === null && o.copiaDa ? { copiaDa: o.copiaDa } : {}), dati };
       }),
       ...(p.tolte.length ? { offerteTolte: p.tolte.flatMap((o) => (o.chiave ? [o.chiave] : [])) } : {}),
-    })),
+      };
+    }),
   };
 }
 
@@ -192,6 +223,7 @@ function problemi(b: Bozza): string[] {
   const out: string[] = [];
   if (!MODULI.luogo.valido(b.luogo)) out.push('Il luogo ha bisogno del nome, del genere di posto e del quartiere.');
   if (b.condizioniLuogo.some((c) => normalizzaRequisitoSpillo(c) === null)) out.push('Completa o togli le condizioni vuote del luogo.');
+  for (const r of Object.values(b.regole)) if (r.cambiata && r.condizioni.some((c) => normalizzaRequisitoSpillo(c) === null)) out.push('Completa o togli le condizioni vuote della regola comune.');
   for (const p of b.punti) {
     const nome = testoDi(p.dati.nome).trim() || 'Un punto vendita';
     if (!MODULI.negozio.valido(p.dati)) out.push(testoDi(p.dati.nome).trim() ? `${nome}: completa i campi in «Altro del punto vendita».` : 'Un punto vendita non ha il nome.');
@@ -237,7 +269,7 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
   const [errore, setErrore] = useState<string | null>(null);
   const elenco = useCarica(() => getCatalogoOggetti(), []);
   const catalogo: StatoSceltaCatalogo = { oggetti: elenco.dati, caricamento: elenco.caricamento, errore: elenco.errore, onRicarica: () => void elenco.ricarica() };
-  const sporca = luogoCambiato(bozza) || bozza.punti.some(puntoCambiato) || bozza.punti.length !== posto.puntiVendita.length;
+  const sporca = luogoCambiato(bozza) || regolaCambiata(bozza) || bozza.punti.some(puntoCambiato) || bozza.punti.length !== posto.puntiVendita.length;
   useBozzaSporca('finestra-posto', `modifica di «${posto.luogo.nome}»`, sporca);
   const mancano = problemi(bozza);
   const punto = bozza.punti.find((p) => p.id === scelto) ?? null;
@@ -382,8 +414,12 @@ function EditorPosto({ posto, apri, onChiudi, onSalvato, onRileggi }: { posto: P
             </section>
           ) : (
             <section className="flex flex-col gap-5" aria-label={`Punto vendita ${testoDi(punto.dati.nome)}`}>
-              <CampiPuntoVendita nelPosto dati={punto.dati} imposta={(patch) => cambiaPunto(punto.id, (p) => ({ ...p, dati: { ...p.dati, ...patch } }))} disabilitato={occupato} />
+              <CampiPuntoVendita nelPosto dati={punto.dati} imposta={(patch) => cambiaPunto(punto.id, (p) => ({ ...p, dati: { ...p.dati, ...patch },
+                // L4-01: un altro genere non ha la stessa regola: le righe che la seguivano tengono i loro valori, come eccezioni
+                ...('tipo' in patch && patch.tipo !== p.dati.tipo ? { offerte: p.offerte.map((o) => (o.regolaComune ? { ...o, regolaComune: false } : o)) } : {}) }))} disabilitato={occupato} />
               <Listino punto={punto} catalogo={catalogo} disabilitato={occupato} onCreato={() => void elenco.ricarica()}
+                regola={bozza.regole[testoDi(punto.dati.tipo)] ?? null} infoRegola={posto.regole?.[testoDi(punto.dati.tipo)] ?? null}
+                onRegola={(r) => setBozza((b) => ({ ...b, regole: { ...b.regole, [r.tipo]: { ...r, cambiata: true } } }))}
                 onCambia={(f) => cambiaPunto(punto.id, f)} />
               {punto.chiave === null
                 ? <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli questo punto vendita nuovo" disabled={occupato}
@@ -420,8 +456,14 @@ function costoBreve(d: Dati): string {
 }
 
 /** Il listino a righe: oggetto, prezzo e pezzi in vista, il resto dell'offerta nei dettagli della riga; in fondo la riga vuota del prossimo oggetto. */
-function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto: BozzaPuntoVendita; catalogo: StatoSceltaCatalogo; disabilitato: boolean; onCambia: (f: (p: BozzaPuntoVendita) => BozzaPuntoVendita) => void; onCreato: (o: CatalogoOggettoDto) => void }) {
+function Listino({ punto, catalogo, disabilitato, onCambia, onCreato, regola, infoRegola, onRegola }: {
+  punto: BozzaPuntoVendita; catalogo: StatoSceltaCatalogo; disabilitato: boolean; onCambia: (f: (p: BozzaPuntoVendita) => BozzaPuntoVendita) => void; onCreato: (o: CatalogoOggettoDto) => void;
+  /** L4-01: la regola comune del genere del punto vendita (nella bozza) e com'è salvata (frase, offerte che la seguono). */
+  regola: BozzaRegola | null; infoRegola: RegolaTipoNegozioDto | null; onRegola: (r: BozzaRegola) => void;
+}) {
   const [aperta, setAperta] = useState<string | null>(null);
+  /** Pezzi, rifornimento o condizioni cambiati in una riga che seguiva la regola: da qui è un'eccezione per riga. */
+  const eccezione = (r: BozzaOfferta): BozzaOfferta => (r.regolaComune ? { ...r, regolaComune: false } : r);
   const negozio = punto.chiave ?? '';
   // scelto l'oggetto nella riga vuota, il fuoco va al prezzo della riga nata: si scrive subito, senza un tocco in più
   const fuocoSu = useRef<string | null>(null);
@@ -446,6 +488,7 @@ function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto:
   return (
     <section className="flex flex-col gap-2" aria-label="Listino">
       <h3 className="m-0 testo-14 font-semibold">Listino <span className="font-normal text-text-muted">· {punto.offerte.length} {punto.offerte.length === 1 ? 'offerta' : 'offerte'}</span></h3>
+      {regola && <RegolaComune regola={regola} info={infoRegola} disabilitato={disabilitato} onCambia={onRegola} />}
       <ul ref={listino} className="posto__listino">
         <li className="posto__riga posto__riga--testa" aria-hidden="true"><span>Oggetto</span><span>Prezzo</span><span>Pezzi</span><span /></li>
         {punto.offerte.map((o, i) => {
@@ -467,8 +510,10 @@ function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto:
                     : <span className="testo-13">{costoBreve(o.dati)}</span>}
                 </div>
                 <div className="posto__cella">
-                  <span className="posto__campo"><input className="form-input tabular-nums" type="number" inputMode="numeric" min={0} aria-label={`Pezzi per ciclo di ${nome}`} disabled={disabilitato}
-                    value={testoDi(o.dati.quantita)} onChange={(e) => cambia(o.id, (r) => ({ ...r, dati: { ...r.dati, quantita: e.target.value === '' ? null : Number(e.target.value) } }))} /><span className="posto__unita" aria-hidden="true">pz</span></span>
+                  {/* una riga che segue la regola mostra i pezzi della regola; scriverne altri ne fa un'eccezione */}
+                  <span className="posto__campo"><input className="form-input tabular-nums" type="number" inputMode="numeric" min={0} aria-label={`Pezzi per ciclo di ${nome}${o.regolaComune && regola ? ' (dalla regola comune)' : ''}`} disabled={disabilitato}
+                    value={o.regolaComune && regola ? testoDi(regola.quantita) : testoDi(o.dati.quantita)}
+                    onChange={(e) => cambia(o.id, (r) => eccezione({ ...r, dati: { ...r.dati, quantita: e.target.value === '' ? null : Number(e.target.value) } }))} /><span className="posto__unita" aria-hidden="true">pz</span></span>
                 </div>
                 <div className="posto__cella posto__cella--azioni">
                   <button type="button" className="btn btn-ghost btn-sm touch posto__icona" aria-expanded={aperta === o.id} aria-label={`Dettagli dell’offerta ${nome}`} title="Dettagli" disabled={disabilitato}
@@ -477,7 +522,7 @@ function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto:
                     onClick={() => togli(o)}><IconaAzione chiave="elimina" dimensione={20} /></button>
                 </div>
               </div>
-              {aperta === o.id && <DettagliOfferta o={o} catalogo={catalogo} disabilitato={disabilitato} onCreato={onCreato} onCambia={(f) => cambia(o.id, f)} />}
+              {aperta === o.id && <DettagliOfferta o={o} catalogo={catalogo} disabilitato={disabilitato} onCreato={onCreato} onCambia={(f) => cambia(o.id, f)} regola={regola} testoRegola={infoRegola?.testo ?? null} />}
             </li>
           );
         })}
@@ -485,7 +530,7 @@ function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto:
           <div className="posto__riga">
             <div className="posto__cella posto__cella--oggetto">
               <SceltaNelCatalogo {...catalogo} compatto etichetta="Aggiungi un oggetto al listino" valore="" disabilitato={disabilitato} escludi={usati} onCreato={onCreato}
-                onScegli={(x) => { const nuova = offertaNuova(negozio, x.chiave); fuocoSu.current = nuova.id; onCambia((p) => ({ ...p, offerte: [...p.offerte, nuova] })); }} />
+                onScegli={(x) => { const nuova = offertaNuova(negozio, x.chiave, regola !== null); fuocoSu.current = nuova.id; onCambia((p) => ({ ...p, offerte: [...p.offerte, nuova] })); }} />
             </div>
           </div>
         </li>
@@ -502,27 +547,86 @@ function Listino({ punto, catalogo, disabilitato, onCambia, onCreato }: { punto:
 }
 
 /** I dettagli di un'offerta nella sua riga: come si paga, prezzo di sera, rifornimento, nota, condizioni, «Confermato»; l'oggetto delle righe storiche. */
-function DettagliOfferta({ o, catalogo, disabilitato, onCambia, onCreato }: { o: BozzaOfferta; catalogo: StatoSceltaCatalogo; disabilitato: boolean; onCambia: (f: (o: BozzaOfferta) => BozzaOfferta) => void; onCreato: (o: CatalogoOggettoDto) => void }) {
+function DettagliOfferta({ o, catalogo, disabilitato, onCambia, onCreato, regola, testoRegola }: {
+  o: BozzaOfferta; catalogo: StatoSceltaCatalogo; disabilitato: boolean; onCambia: (f: (o: BozzaOfferta) => BozzaOfferta) => void; onCreato: (o: CatalogoOggettoDto) => void;
+  regola: BozzaRegola | null; testoRegola: string | null;
+}) {
   const imposta = (patch: Dati) => onCambia((r) => ({ ...r, dati: { ...r.dati, ...patch } }));
+  // L4-01: una riga che segue la regola comune non ripete i suoi campi: li dice la regola, e «Fai un'eccezione» li apre per questa riga
+  const segue = o.regolaComune && regola !== null;
+  /** I tre campi della regola nella riga: la riga torna a seguirla (il server la segna così perché i campi coincidono). */
+  const tornaAllaRegola = () => regola && onCambia((r) => ({ ...r, regolaComune: true, condizioni: regola.condizioni, condizioniCambiate: true,
+    dati: { ...r.dati, quantita: regola.quantita, rifornimento_json: regola.rifornimento, _rifornimentoModificato: true } }));
+  const ugualeAllaRegola = regola !== null && (numeroDi(o.dati.quantita) ?? null) === regola.quantita
+    && JSON.stringify(normalizzaRifornimento(o.dati.rifornimento_json ?? null)) === JSON.stringify(regola.rifornimento)
+    && JSON.stringify(o.condizioni) === JSON.stringify(regola.condizioni);
   return (
     <div className="posto__dettagli">
       {o.dati._aMano === true && !o.dati.catalogo_chiave && <SceltaNelCatalogo {...catalogo} etichetta="Oggetto del catalogo" valore="" disabilitato={disabilitato} onCreato={onCreato}
         onScegli={(x) => imposta({ catalogo_chiave: x.chiave, _aMano: false })} />}
       <CostoOfferta senzaPrezzo dati={o.dati} imposta={imposta} disabilitato={disabilitato} catalogo={catalogo} />
-      <EditorRifornimento valore={(o.dati.rifornimento_json as RegolaRifornimento | null) ?? null}
-        nonLeggibile={o.dati._rifornimentoNonLeggibile === true && o.dati._rifornimentoModificato !== true}
-        disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r, _rifornimentoModificato: true })} />
+      {segue
+        ? <div className="flex flex-col gap-2 testo-13">
+          <p className="m-0"><strong>Segue la regola comune</strong>{regola.cambiata ? ' (cambiata, da salvare)' : testoRegola ? `: ${testoRegola}` : ''}.</p>
+          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Fai un’eccezione per questa offerta" disabled={disabilitato}
+            onClick={() => onCambia((r) => ({ ...r, regolaComune: false, condizioni: regola.condizioni, condizioniCambiate: true,
+              dati: { ...r.dati, quantita: regola.quantita, rifornimento_json: regola.rifornimento, _rifornimentoModificato: true } }))} />
+        </div>
+        : <>
+          {regola && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Torna alla regola comune" disabled={disabilitato} onClick={tornaAllaRegola} />}
+          {/* il segno lo decide l'uguaglianza dei valori (il server lo ricalcola): finché sono quelli della regola, salvando la riga la segue */}
+          {regola && ugualeAllaRegola && <p className="m-0 testo-13 text-text-muted">Ha i valori della regola comune: diventa un’eccezione quando cambi pezzi, rifornimento o condizioni.</p>}
+          <EditorRifornimento valore={(o.dati.rifornimento_json as RegolaRifornimento | null) ?? null}
+            nonLeggibile={o.dati._rifornimentoNonLeggibile === true && o.dati._rifornimentoModificato !== true}
+            disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r, _rifornimentoModificato: true })} />
+        </>}
       <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={o.dati} imposta={imposta} disabilitato={disabilitato} max={600} largo />
-      <fieldset className="regole-editor flex min-w-0 flex-col gap-2">
+      {!segue && <fieldset className="regole-editor flex min-w-0 flex-col gap-2">
         <legend>Condizioni dell’offerta</legend>
         {!o.condizioniLeggibili && !o.condizioniCambiate
           ? <p role="alert" className="m-0 testo-13 text-warning">Le condizioni salvate hanno parti che l’editor non sa mostrare: restano com’erano.</p>
           : <CondizioniEditor condizioni={o.condizioni} disabilitato={disabilitato} onCambia={(c) => onCambia((r) => ({ ...r, condizioni: c, condizioniCambiate: true }))} />}
-      </fieldset>
+      </fieldset>}
       <label className="flex items-start gap-2 testo-13 touch">
         <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={o.dati.verificato === true} disabled={disabilitato} onChange={(e) => imposta({ verificato: e.target.checked })} />
         <span>Confermato <span className="text-text-muted">· senza la spunta compare come «da fonte secondaria»</span></span>
       </label>
+    </div>
+  );
+}
+
+/**
+ * L4-01: la regola comune del genere del punto vendita, sopra il listino: la frase, quante offerte la seguono (in tutti i luoghi) e, a
+ * richiesta, i suoi campi. È il solo punto in cui si cambiano pezzi, rifornimento e condizioni delle offerte che la seguono.
+ */
+function RegolaComune({ regola, info, disabilitato, onCambia }: { regola: BozzaRegola; info: RegolaTipoNegozioDto | null; disabilitato: boolean; onCambia: (r: BozzaRegola) => void }) {
+  const [aperta, setAperta] = useState(false);
+  return (
+    <div className="posto__regola" role="group" aria-label="Regola comune">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="m-0 min-w-0 flex-1 testo-13 text-pretty">
+          <strong>Regola comune</strong>{regola.cambiata ? ' · cambiata, vale da quando salvi' : info?.testo ? `: ${info.testo}` : ''}
+          {info && <span className="text-text-muted"> · la seguono {info.offerte} {info.offerte === 1 ? 'offerta' : 'offerte'} in tutti i luoghi</span>}
+        </p>
+        <button type="button" className="btn btn-ghost btn-sm touch" aria-expanded={aperta} disabled={disabilitato} onClick={() => setAperta((a) => !a)}>
+          {aperta ? 'Chiudi la regola' : 'Modifica la regola'}
+        </button>
+      </div>
+      {aperta && <div className="flex flex-col gap-3">
+        <label className="editor-mappa__campo w-40">Pezzi per ciclo
+          <input className="form-input tabular-nums" type="number" inputMode="numeric" min={0} disabled={disabilitato} value={regola.quantita ?? ''}
+            onChange={(e) => onCambia({ ...regola, quantita: e.target.value === '' ? null : Number(e.target.value), cambiati: { ...regola.cambiati, quantita: true } })} />
+        </label>
+        {/* un valore salvato che l'editor non sa leggere resta com'è finché non lo riscrivi: si mandano solo i campi cambiati */}
+        <EditorRifornimento valore={regola.rifornimento} nonLeggibile={info?.rifornimentoLeggibile === false && !regola.cambiati.rifornimento} disabilitato={disabilitato}
+          onCambia={(r) => onCambia({ ...regola, rifornimento: r, cambiati: { ...regola.cambiati, rifornimento: true } })} />
+        <fieldset className="regole-editor flex min-w-0 flex-col gap-2">
+          <legend>Condizioni della regola</legend>
+          {info?.condizioniLeggibili === false && !regola.cambiati.condizioni
+            && <p role="alert" className="m-0 testo-13 text-warning">Le condizioni salvate hanno parti che l’editor non sa mostrare: restano com’erano finché non le cambi.</p>}
+          <CondizioniEditor condizioni={regola.condizioni} disabilitato={disabilitato} onCambia={(c) => onCambia({ ...regola, condizioni: c, cambiati: { ...regola.cambiati, condizioni: true } })} />
+        </fieldset>
+      </div>}
     </div>
   );
 }

@@ -447,6 +447,11 @@ import { migration351 } from './351_shinjuku_tre_macchine.js';
 import { migration352 } from './352_nomi_pin_kichijoji.js';
 import { migration353 } from './353_testi_che_ripetono_offerte.js';
 import { migration354 } from './354_listino_condiviso_tolto.js';
+import { migration355 } from './355_regola_comune_dei_distributori.js';
+import { migration356 } from './356_orari_del_negozio_tolti.js';
+import { migration357 } from './357_equipaggiamento_della_guida.js';
+import { migration358 } from './358_strumenti_e_laghetto.js';
+import { migration359 } from './359_identita_delle_offerte_collegate.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -475,4 +480,5 @@ export const migrations: Migration[] = [
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
   migration344, migration345, migration346,
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
+  migration355, migration356, migration357, migration358, migration359,
 ];
