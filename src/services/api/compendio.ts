@@ -215,6 +215,8 @@ export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbri
 export const aggiornaDungeon = (chiave: string, dati: DatiDungeonApi): Promise<DungeonDettaglioDto> => apiPut(`/compendio/dungeon/${encodeURIComponent(chiave)}`, dati);
 /** «Ripristina» della scheda del Palazzo (L4 §8.14): la voce del boss finale torna quella della guida; risponde con la scheda. */
 export const ripristinaDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina`, {});
+/** L9-08: «Ripristina» delle date del Palazzo; il boss finale non si tocca. */
+export const ripristinaDateDungeon = (chiave: string): Promise<DungeonDettaglioDto> => apiPost(`/compendio/dungeon/${encodeURIComponent(chiave)}/ripristina-date`, {});
 /** Corregge nome e descrizione di un'area della guida del Palazzo; risponde con l'area aggiornata. */
 export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDungeonDto> => apiPut(`/compendio/aree/${encodeURIComponent(chiave)}`, dati);
 /** Aggiunge una voce (punto di interesse) all'area; risponde con la voce creata. */

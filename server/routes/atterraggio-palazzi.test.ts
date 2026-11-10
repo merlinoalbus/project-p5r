@@ -78,7 +78,8 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     expect(rovesciati.body.error.code).toBe('date-rovesciate');
     expect(rovesciati.body.error.message).toBe('Il termine della lettera di sfida (20 aprile) viene prima del furto consigliato (22 aprile).');
     await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: null }).expect(200);
-    expect((await kamoshida()).date).toEqual({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: null });
+    // L9-08: senza una data scritta il termine è il giorno prima della scadenza, calcolato in lettura
+    expect((await kamoshida()).date).toEqual({ dal: '04-10', al: '05-03', furtoConsigliato: '04-22', letteraEntro: '05-02', letteraCalcolata: true });
     // le altre voci del blocco restano com'erano
     expect(finestreDungeon().get('madarame')).toBeTruthy();
     await request(app).put('/api/compendio/dungeon/kamoshida/finestra').send({ dal: '04-11', al: '05-02' }).expect(200);

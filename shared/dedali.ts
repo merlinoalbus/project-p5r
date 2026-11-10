@@ -16,7 +16,8 @@
 /**
  * I tipi delle voci di un dedalo (2026-10-11, richiesta dell'utente: «elementi Trama... unico tipo visto che nei memento è tutto
  * random quindi è impossibile segnare Stanze, porte, meccanismi forzieri o altro»): le Persona che vi si incontrano e la Trama.
- * Trama c'è solo nei Memento.
+ * Trama c'è solo nei Memento. Sono i tipi che si possono scegliere: l'eccezione sono i forzieri e i mini-boss di Iweleth (migrazione 373), un dedalo
+ * nato da un Palazzo, che tengono il tipo di prima; si correggono senza cambiarlo e contano come la Trama (`contaNelDedalo`).
  */
 export const TIPI_VOCE_DEDALO = ['persona', 'trama'] as const;
 /** Vero se una voce di questo tipo può stare in un dedalo dei Memento. */

@@ -18,7 +18,7 @@ import { paramsOmbra, queryOmbra, queryOmbre } from '../schemas/ombre.js';
 import { negoziazione, negoziazioneCompatta, verificaNegoziazione } from '../services/negoziazioneService.js';
 import { queryNegoziazione } from '../schemas/negoziazione.js';
 import {
-  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
+  aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDateDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea,
   impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea
 } from '../services/dungeonService.js';
 import {
@@ -394,6 +394,10 @@ router.put('/dungeon/:chiave', validate({ params: paramsChiaveGuida, body: bodyD
 /** L4 §8.14: «Ripristina» della scheda del Palazzo — la voce del boss finale torna quella della guida. */
 router.post('/dungeon/:chiave/ripristina', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(ripristinaDungeon(String(req.params.chiave)));
+});
+/** L9-08: «Ripristina» delle date del Palazzo — tornano quelle di prima della prima correzione; il boss finale non si tocca. */
+router.post('/dungeon/:chiave/ripristina-date', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(ripristinaDateDungeon(String(req.params.chiave)));
 });
 /** La finestra del Palazzo sulla mappa di Tokyo: da quando (e fino a quando) compare per il giorno della partita (2026-10-04); con L13 O6-3
  *  anche furto consigliato e lettera, insieme. La pagina modifica le date da «Correggi la scheda» (`PUT /dungeon/:chiave` con `date`). */

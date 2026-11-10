@@ -2,9 +2,9 @@
 // MenuModificaPalazzo — gli strumenti di modifica della scheda di un Palazzo in un solo menu «Modifica ⋯» (lotto B, punto 6)
 // ============================================================
 //
-// Prima erano sparsi su tre righe («✎» accanto al nome, «Modifica testo» e «+ Infiltrazione», «Modifica aree», «Modifica» e «Altro»
-// dell'area): sul telefono riempivano la prima schermata prima della mappa. Le voci hanno gli stessi nomi accessibili dei comandi di prima;
-// le finestre e i moduli che aprono sono quelli della pagina (`DungeonDettaglioPage`). Nei Memento resta la modalità «Modifica la guida».
+// Prima erano sparsi su tre righe sopra la mappa, e sul telefono riempivano la prima schermata. Ogni voce dice su che cosa agisce con le
+// parole della gerarchia (L9-05): la scheda del Palazzo, l'infiltrazione, l'area, la planimetria. Le finestre e i moduli che aprono sono
+// quelli della pagina (`DungeonDettaglioPage`). Nei Memento resta la modalità «Modifica la guida».
 // ============================================================
 
 import { MenuModifica } from '../shared/MenuModifica';
@@ -40,16 +40,16 @@ export function MenuModificaPalazzo({ d, area, areaFisica, dettaglioAreaPronto, 
       {/* L4 §8.14: la voce del boss finale (non per un Palazzo col boss dei Memento, Iweleth: il server lo rifiuta) */}
       {d.regolaBoss !== 'memento' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Boss finale"
         dettaglio={d.voceBossFinale?.nome ?? 'da dichiarare'} aria-label={`Boss finale: il Palazzo «${d.nome}»`} onClick={onBossFinale} />}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Modifica testo" dettaglio={area.nome}
-        aria-label={`Modifica testo: l’infiltrazione «${area.nome}»`} onClick={() => onModificaTesto(area.chiave)} />
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Modifica aree" dettaglio="toccate dall’infiltrazione"
-        aria-label="Modifica aree" onClick={() => onModificaAree(area.chiave)} />
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Modifica infiltrazione" dettaglio={area.nome}
+        aria-label={`Modifica infiltrazione: «${area.nome}»`} onClick={() => onModificaTesto(area.chiave)} />
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Aree toccate dall’infiltrazione" dettaglio={area.nome}
+        aria-label={`Aree toccate dall’infiltrazione «${area.nome}»`} onClick={() => onModificaAree(area.chiave)} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi infiltrazione" onClick={() => onFinestra('nuova-infiltrazione')} />
       {areaFisica && <>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica area" dettaglio={areaFisica.nome}
           aria-label="Modifica area" disabled={!dettaglioAreaPronto} onClick={() => onFinestra('modifica-area')} />
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi planimetria" dettaglio={areaFisica.nome}
-          aria-label="Aggiungi planimetria" disabled={!dettaglioAreaPronto} onClick={() => onFinestra('aggiungi-planimetria')} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi planimetria" dettaglio={`all’area ${areaFisica.nome}`}
+          aria-label="Aggiungi planimetria all’area" disabled={!dettaglioAreaPronto} onClick={() => onFinestra('aggiungi-planimetria')} />
         <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina area" dettaglio={areaFisica.nome}
           aria-label="Elimina area" onClick={() => onFinestra('elimina-area')} />
       </>}

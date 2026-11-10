@@ -2987,8 +2987,10 @@ export interface DungeonRiassuntoDto {
   /** L13 O6-3 (migrazione 308): le date del Palazzo da una fonte sola, in MM-GG del calendario di gioco — apertura e scadenza dalla
    *  finestra (`dungeon.finestra_dal`/`finestra_al`), il termine della lettera di sfida (`lettera_entro`) e il furto consigliato
    *  (`furto_consigliato_data`). Null dove la guida non le dà (Iweleth e i Memento non scadono, e non hanno furto né lettera). Prima
-   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. */
-  date: { dal: string | null; al: string | null; letteraEntro: string | null; furtoConsigliato: string | null };
+   *  erano tre frasi della guida; quel che dicevano in più delle date sta nelle `note`. L9-08: `letteraEntro` senza una data scritta è la
+   *  scadenza meno un giorno (`shared/datePalazzo.letteraDelPalazzo`, salvo Shido e Maruki) e allora `letteraCalcolata` è vero: si mostra
+   *  come calcolata e il modulo che corregge le date non la riporta nel campo, che resta il dato scritto. */
+  date: { dal: string | null; al: string | null; letteraEntro: string | null; letteraCalcolata: boolean; furtoConsigliato: string | null };
   /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco (le stesse date di `date.dal`/`date.al`): serve a mostrare
    *  il Palazzo sulla mappa **solo quando c'è**. `al` manca dove il gioco non fissa una scadenza: Iweleth e i Memento, una volta
    *  aperti, restano. */
@@ -3030,6 +3032,9 @@ export interface DungeonRiassuntoDto {
   voceBossFinale?: { chiave: string; nome: string } | null;
   /** L4 §8.14: la voce del boss finale è stata cambiata dall'utente («Ripristina» la riporta a quella della guida). */
   bossFinaleCorretto?: boolean;
+  /** L9-08: le date del Palazzo sono state corrette dall'utente («Ripristina» le riporta a quelle della guida, indipendente dal boss finale).
+   *  Per i Palazzi; assente per i Memento. */
+  dateCorrette?: boolean;
   /** L4 §8.15: la regola del boss del Palazzo — `voce-finale` (la voce dichiarata, «Modifica › Boss finale») o `memento` (il boss segnato
    *  nella Guida, come nei Memento, senza effetti di Palazzo: Iweleth). Per i Palazzi; assente per i Memento. */
   regolaBoss?: 'voce-finale' | 'memento';

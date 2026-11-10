@@ -439,6 +439,12 @@ import { migration343 } from './343_avvisi_del_giorno_decisi.js';
 import { migration344 } from './344_pin_attivita_su_luogo.js';
 import { migration345 } from './345_note_darchivio_dei_negozi.js';
 import { migration346 } from './346_un_solo_dove_colonne_tolte.js';
+// 2026-11-10 (lotto L9): via le tre frasi di date del Palazzo (372), forzieri e mini-boss di Iweleth col tipo di prima e lettera di Shido (373)
+import { migration372 } from './372_dungeon_tolte_tre_frasi_di_date.js';
+import { migration373 } from './373_iweleth_tipi_e_lettera_di_shido.js';
+// 2026-11-10 (lotto L9): pin e voci collegati dove l'abbinamento è univoco (374), voci dei Palazzi non validati secondo la guida (375)
+import { migration374 } from './374_pin_e_voci_se_univoci.js';
+import { migration375 } from './375_voci_dei_palazzi_non_validati.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -465,5 +471,5 @@ export const migrations: Migration[] = [
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
-  migration344, migration345, migration346,
+  migration344, migration345, migration346, migration372, migration373, migration374, migration375,
 ];

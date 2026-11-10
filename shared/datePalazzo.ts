@@ -7,10 +7,16 @@
 //   - l'apertura c'è sempre; la scadenza può mancare («senza fine») solo dove il gioco non ne fissa una (i Memento e i Palazzi col boss dei
 //     Memento, Iweleth); furto e lettera possono mancare (la guida non li dà);
 //   - nell'ordine del calendario di gioco: apertura ≤ furto consigliato ≤ lettera ≤ scadenza, per le date che ci sono.
-// La applica `impostaFinestra` (unico scrittore delle colonne) e la mostra in anticipo il modulo «Correggi la scheda».
+// La applica `impostaFinestra` (unico scrittore delle colonne, salvo «Ripristina» che rimette i valori fotografati) e la mostra in anticipo il modulo «Correggi la scheda».
+//
+// Il termine della lettera di sfida (L9-08, scelta Q22 dell'utente): la guida (`guida-esplorazione-dungeon`) dice che la lettera va inviata entro il
+// giorno prima della scadenza. Dove non c'è una data scritta, `letteraDelPalazzo` la calcola in lettura: è un valore mostrato, non un dato. Non
+// finisce nelle colonne e non passa da `erroreDatePalazzo`, quindi non può rendere invalide le date che ci sono: se la guida consiglia il furto il
+// giorno stesso della scadenza (Niijima, Maruki) il consiglio resta dopo il termine calcolato, e va bene così.
 // ============================================================
 
 import { dataLeggibile, dataValida, ordineGioco } from './condizioniSpillo.js';
+import { giornoPrecedente } from './date.js';
 
 /** Le date di un Palazzo, MM-GG; null = non c'è. */
 export interface DatePalazzo { dal: string | null; al: string | null; furtoConsigliato: string | null; letteraEntro: string | null }
@@ -41,4 +47,27 @@ export function erroreDatePalazzo(d: DatePalazzo, senzaFinePossibile: boolean): 
     if (ordineGioco(dopo.data) < ordineGioco(prima.data)) return rovescio('date-rovesciate', prima.t, dopo.t, prima.data, dopo.data);
   }
   return null;
+}
+
+/**
+ * I Palazzi in cui la regola del giorno prima della scadenza non vale. Shido: la guida invia la lettera il 12/12 e ruba il giorno stesso
+ * (`palazzo-di-shido`, 12 dicembre), cinque giorni prima della scadenza: vale il dato scritto. Maruki: la guida non ha una lettera di sfida
+ * (`palazzo-di-maruki`, 2 e 3 febbraio: è Maruki a dare appuntamento).
+ */
+const SENZA_LETTERA_CALCOLATA: ReadonlySet<string> = new Set(['shido', 'maruki']);
+
+/** Il termine della lettera di un Palazzo: la data (null = non c'è) e se è calcolata invece che scritta. */
+export interface LetteraDelPalazzo { data: string | null; calcolata: boolean }
+
+/**
+ * Il termine della lettera di sfida: quello scritto se c'è, sempre; altrimenti la scadenza meno un giorno del calendario di gioco. Senza scadenza
+ * (Iweleth, i Memento) non c'è lettera; una finestra di un giorno solo non ha un giorno prima in cui inviarla. L'unico punto di calcolo: lo
+ * leggono la scheda del Palazzo (`dungeonService`) e il Calendario (`calendarioFonti`).
+ */
+export function letteraDelPalazzo(p: { chiave: string; dal: string | null; al: string | null; scritta: string | null }): LetteraDelPalazzo {
+  if (p.scritta) return { data: p.scritta, calcolata: false };
+  if (!p.al || SENZA_LETTERA_CALCOLATA.has(p.chiave)) return { data: null, calcolata: false };
+  const data = giornoPrecedente(p.al);
+  if (!data || (p.dal && ordineGioco(data) < ordineGioco(p.dal))) return { data: null, calcolata: false };
+  return { data, calcolata: true };
 }

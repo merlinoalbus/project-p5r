@@ -166,6 +166,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'articolo', colonna, tolta: 'L1 · migrazione 346',
     sostituitaDa: 'l’oggetto del catalogo (`catalogo_oggetto`): l’effetto e le statistiche di un’offerta sono quelli del suo oggetto; la colonna era vuota in tutte le offerte',
   })),
+  ...(['data_sblocco', 'data_scadenza', 'furto_consigliato'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'dungeon', colonna, tolta: 'L9 · migrazione 372',
+    sostituitaDa: 'le date del Palazzo in colonne strutturate (`finestra_dal`, `finestra_al`, `furto_consigliato_data`, `lettera_entro`); un eventuale testo rimasto sta nell’archivio «archivio-frasi-l11»',
+  })),
   {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',

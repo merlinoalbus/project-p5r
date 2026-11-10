@@ -18,7 +18,7 @@ vi.mock('../stores/partitaStore', () => ({ usePartitaStore: (sel: (s: { attiva: 
 const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Suguru Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   // L13 O6-3: le date sono giorni del calendario di gioco (MM-GG), una fonte sola
-  date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: '04-22' },
+  date: { dal: '04-12', al: '05-02', letteraEntro: null, letteraCalcolata: false, furtoConsigliato: '04-22' },
   finestra: { dal: '04-12', al: '05-02' },
   livelloConsigliato: { min: 10, max: null }, aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, concluso: null, atterraggio: null, ...extra,
 });
@@ -30,7 +30,7 @@ beforeEach(() => {
 
 describe('DungeonPage', () => {
   it('mostra le schede con emblema di riserva, avanzamento e date in breve', async () => {
-    getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, raccolta: { totale: 34, presi: null, mappe: 12, mappeComplete: null }, date: { dal: '05-16', al: '06-05', letteraEntro: '06-02', furtoConsigliato: '06-01' } })]);
+    getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, raccolta: { totale: 34, presi: null, mappe: 12, mappeComplete: null }, date: { dal: '05-16', al: '06-05', letteraEntro: '06-02', letteraCalcolata: false, furtoConsigliato: '06-01' } })]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
     const kamoshida = await screen.findByRole('link', { name: 'Palazzo di Kamoshida, Suguru Kamoshida' });
     // La carta apre la **scheda** del Palazzo: cliccarla è quello, e il collegamento «Scheda del

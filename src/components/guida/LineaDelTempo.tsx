@@ -20,7 +20,7 @@ const TAPPE = [
  *  schermata») la tappa è compatta a ogni larghezza, come era da 1024 px (R3-41): segno e data su una riga, l'etichetta per chi non vede e
  *  nel suggerimento, niente frecce; nei Memento resta com'era (compatta da 1024 px). */
 export function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
-  const tappe = TAPPE.flatMap((t) => { const valore = date[t.chiave]; return valore ? [{ ...t, valore }] : []; });
+  const tappe = TAPPE.flatMap((t) => { const valore = date[t.chiave]; return valore ? [{ ...t, valore, calcolata: t.chiave === 'letteraEntro' && date.letteraCalcolata }] : []; });
   if (tappe.length === 0) return null;
   return (
     <ol className={`m-0 flex list-none flex-wrap items-stretch p-0 ${memento ? 'gap-1.5' : 'gap-1 lg:gap-1.5'}`} aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
@@ -32,12 +32,14 @@ export function LineaDelTempo({ date, memento = false }: { date: DungeonDettagli
           {i > 0 && memento && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
           {/* Da 1024 px (R3-41; nei Palazzi a ogni larghezza, LAY3-5) la tappa sta su una riga: segno e data, l'etichetta per chi non vede
               e nel suggerimento */}
-          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${dataGiocoTesto(t.valore)}`}>
+          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${dataGiocoTesto(t.valore)}${t.calcolata ? ' (calcolata: il giorno prima della scadenza)' : ''}`}>
             {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
             <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
             {/* L13 O6-3: ogni tappa è una data di gioco, «22 apr» (le frasi di Shido e Maruki che a 1024×690 alzavano l'intestazione, LAY3-4,
                 non ci sono più: stanno nelle note). Corta a ogni larghezza: l'intestazione resta entro il 30% (LAY3-5, R3-41). */}
             <span className={`whitespace-nowrap font-display leading-none ${memento ? 'testo-17 lg:testo-14' : 'testo-14'}`}>{dataGiocoBreve(t.valore)}</span>
+            {/* L9-08: senza una data scritta il termine della lettera è calcolato, e lo si dice */}
+            {t.calcolata && <><span className="testo-12 leading-none" aria-hidden>calc.</span><span className="sr-only">calcolata</span></>}
           </span>
         </li>
       ))}

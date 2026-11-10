@@ -37,7 +37,8 @@ vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDun
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 // `useMedia` risponde alla larghezza scelta dal test (0 di partenza: la scheda sotto i 1024 px, come in jsdom senza finto)
 const media = vi.hoisted(() => ({ larghezza: 0 }));
-vi.mock('../hooks/useMedia', () => ({ useMedia: (q: string) => { const m = /min-width:\s*(\d+)px/.exec(q); return m ? media.larghezza >= Number(m[1]) : false; } }));
+// L9-06: l'elenco delle aree è montato in una forma sola; a larghezza 0 (i test che non scelgono un formato) vale la colonna, quella che questi test leggono
+vi.mock('../hooks/useMedia', () => ({ useMedia: (q: string) => { const m = /min-width:\s*(\d+)px/.exec(q); if (!m) return false; if (media.larghezza === 0 && m[1] === '1280') return true; return media.larghezza >= Number(m[1]); } }));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 // il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
 // L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo; AP3-2: `senzaVicine` e due passaggi
@@ -75,7 +76,7 @@ const areaPalazzo = (slug: string, nome: string, predefinita: string, infiltrazi
  *  spilli portano lo stato della partita (1 preso su 4), senza restano `null`. */
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
-  date: { dal: '04-12', al: '05-02', letteraEntro: null, furtoConsigliato: null }, finestra: null, livelloConsigliato: { min: null, max: null }, noteLivello: [], punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
+  date: { dal: '04-12', al: '05-02', letteraEntro: null, letteraCalcolata: false, furtoConsigliato: null }, finestra: null, livelloConsigliato: { min: null, max: null }, noteLivello: [], punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
   raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 3, mappeComplete: partita ? 0 : null }, completato: null, concluso: null, atterraggio: null, atterraggi: [], illustrazione: { immagineUrl: null, asset: null }, personeCatturate: partita ? [] : null, note: '', fonti: [],
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)], area: 'dungeon/kamoshida/cancello' }],
@@ -352,6 +353,7 @@ it('senza partita non ci sono spunte, e l’elenco resta consultabile', async ()
 });
 
 it('nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello', async () => {
+  media.larghezza = 1024; // L9-06: il binario dei dedali è montato da 1024 px in su
   getDungeon.mockResolvedValue(mementos());
   impostaTimbri.mockResolvedValue({ area: 'aiy-1', raccolti: 2, totale: 8, completato: false });
   impostaStatoRichiesta.mockResolvedValue({ chiave: 'bulli', stato: 'completata' });
@@ -1086,7 +1088,7 @@ describe('un’infiltrazione su più aree, un’area con più infiltrazioni (L3,
     // le aree toccate dall'infiltrazione aperta, in ordine: toccarne una la apre
     expect(within(screen.getByRole('list', { name: 'Aree toccate da Cancello' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['Cancello']);
     apriMenuModifica();
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica aree' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aree toccate dall’infiltrazione «Cancello»' }));
     const finestra = within(await screen.findByRole('dialog', { name: 'Aree toccate da «Cancello»' }));
     // si propongono solo quelle non ancora legate
     expect(within(finestra.getByRole('region', { name: 'Aree da aggiungere' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['+ Torre alta', '+ Cortile']);
@@ -1107,7 +1109,7 @@ describe('un’infiltrazione su più aree, un’area con più infiltrazioni (L3,
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
     apriMenuModifica();
-    fireEvent.click(screen.getByRole('button', { name: 'Modifica aree' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Aree toccate dall’infiltrazione «Cancello»' }));
     const finestra = within(await screen.findByRole('dialog', { name: 'Aree toccate da «Cancello»' }));
     fireEvent.click(finestra.getByRole('button', { name: 'Sposta giù Cancello' }));
     fireEvent.click(finestra.getByRole('button', { name: 'Togli Cancello' }));
@@ -1201,18 +1203,18 @@ it('una versione di un’area con più versioni diventa «un’area a sé», col
   await waitFor(() => expect(collocaPlanimetria).toHaveBeenCalledWith({ mappa: 'm-cancello-ovest', dungeon: 'kamoshida', nuova: { nome: 'Cancello ovest' } }, { conferma: false }));
 });
 
-it('il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree', async () => {
+it('il testo di un’infiltrazione si modifica con «Modifica infiltrazione», anche di una che non tocca aree', async () => {
   getDungeon.mockResolvedValue(palazzo(true));
   aggiornaArea.mockResolvedValue({});
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  // il comando dice che cosa fa, e il nome accessibile comincia dal testo che si vede (chi comanda a voce dice «Modifica testo»)
+  // il comando dice che cosa fa, e il nome accessibile comincia dal testo che si vede (chi comanda a voce dice «Modifica infiltrazione»)
   apriMenuModifica();
-  expect(screen.getByRole('button', { name: 'Modifica testo: l’infiltrazione «Cancello»' })).toHaveTextContent('Modifica testo');
+  expect(screen.getByRole('button', { name: 'Modifica infiltrazione: «Cancello»' })).toHaveTextContent('Modifica infiltrazione');
   // la Torre non tocca aree: la si apre dalla coda dell'elenco
   fireEvent.click(within(screen.getByRole('region', { name: 'Infiltrazioni senza aree' })).getByRole('button', { name: /^2\. Torre/ }));
   apriMenuModifica();
-  fireEvent.click(await screen.findByRole('button', { name: 'Modifica testo: l’infiltrazione «Torre»' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Modifica infiltrazione: «Torre»' }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre nord' } });
   fireEvent.change(modulo.getByLabelText('Descrizione'), { target: { value: 'La torre dell’ala nord.' } });
@@ -1227,7 +1229,7 @@ it('anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e l
   // il titolo dell'infiltrazione (livello 2); l'area aperta, anche lei «Cortile», ha il suo (livello 3)
   expect(await screen.findByRole('heading', { level: 2, name: 'Cortile' })).toBeInTheDocument();
   apriMenuModifica();
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica infiltrazione: «/ }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
   expect(modulo.getByText(/Se ne va dalla guida per tutte le partite.*le aree del Palazzo restano.*Finisce nel cestino \(Impostazioni → Cestino\): da lì la rimetti com’era\./)).toBeInTheDocument();
@@ -1538,7 +1540,7 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
 
   // scrivo nel modulo dell'area, poi cambio area senza salvare
   apriMenuModifica();
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica infiltrazione: «/ }));
   const modulo = screen.getByRole('form', { name: /Correggi l’infiltrazione/ });
   fireEvent.change(within(modulo).getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Scritto per sbaglio' } });
   // si cambia infiltrazione dall'elenco: «Torre» non tocca aree, sta in coda
@@ -1547,7 +1549,7 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
 
   // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
   apriMenuModifica();
-  fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Modifica infiltrazione: «/ }));
   expect(within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ })).getByLabelText('Nome dell’infiltrazione')).toHaveValue('Torre');
   expect(aggiornaArea).not.toHaveBeenCalled();
 });

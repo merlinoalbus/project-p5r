@@ -2,21 +2,34 @@
 // CorrezioneSchedaPalazzo — «Correggi la scheda» di un Palazzo o dei Memento: nome, sovrano, date, livello consigliato e note
 // ============================================================
 //
-// Nei Memento è il pulsante ✎ dell'intestazione, in «Modifica la guida»; nei Palazzi (lotto B) si apre dal menu «Modifica ⋯» e il modulo
-// sta sotto l'intestazione (`onChiudi`). Le date seguono la regola del server (`shared/datePalazzo`), detta prima di salvare.
+// Nei Memento è il pulsante ✎ dell'intestazione, in «Modifica la guida»; nei Palazzi (lotto B) si apre dal menu «Modifica ⋯» (`onChiudi`).
+// L9-05: è una finestra (`FinestraModifica`, come le altre), col piè fisso: in linea sotto l'intestazione «Salva» finiva a y=1610 sul telefono.
+// Le date seguono la regola del server (`shared/datePalazzo`), detta prima di salvare; le quattro date stanno ognuna sotto il suo nome.
 // ============================================================
 
-import { aggiornaDungeon } from '../../services/api';
+import { useState } from 'react';
+import { aggiornaDungeon, ripristinaDateDungeon } from '../../services/api';
+import { conferma } from '../../stores/confermaStore';
+import { notifica } from '../../stores/notificationStore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { erroreDatePalazzo, type DatePalazzo } from '../../../shared/datePalazzo';
-import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
-import { CampoTesto } from '../shared/Campo';
+import { Campo, CampoTesto, SezioneCampi } from '../shared/Campo';
+import { FinestraModifica } from '../shared/FinestraModifica';
+import { IconaAzione } from '../shared/IconaAzione';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SelettoreData } from '../shared/SelettoreData';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import type { DungeonDettaglioDto } from '../../types';
 
-/** Le date nella bozza di «Correggi la scheda»: MM-GG, '' = nessuna (per la scadenza: senza fine), come vuole `SelettoreData`. */
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** La bozza della finestra: tutto come testo; le date MM-GG, '' = nessuna (per la scadenza: senza fine), come vuole `SelettoreData`. */
 interface BozzaDate { dal: string; al: string; furto: string; lettera: string }
-const bozzaDate = (date: DungeonDettaglioDto['date']): BozzaDate => ({ dal: date.dal ?? '', al: date.al ?? '', furto: date.furtoConsigliato ?? '', lettera: date.letteraEntro ?? '' });
+interface Bozza extends BozzaDate { nome: string; sovrano: string; livelloMin: string; livelloMax: string; note: string }
+// L9-08: la lettera calcolata (la scadenza meno un giorno) non è un dato scritto: nel campo resta vuota, e il termine lo dice la linea del tempo
+const bozzaDate = (date: DungeonDettaglioDto['date']): BozzaDate => ({ dal: date.dal ?? '', al: date.al ?? '', furto: date.furtoConsigliato ?? '', lettera: date.letteraCalcolata ? '' : date.letteraEntro ?? '' });
 /** Le date della bozza come le vuole la regola (e il server): '' diventa null. */
 const dateDellaBozza = (b: BozzaDate): DatePalazzo => ({ dal: b.dal || null, al: b.al || null, furtoConsigliato: b.furto || null, letteraEntro: b.lettera || null });
 /** Le date della bozza sono diverse da quelle salvate? */
@@ -37,56 +50,102 @@ function livelloDellaBozza(min: string, max: string): { min: number | null; max:
   return l;
 }
 
-/** La correzione della scheda (nome, sovrano, date, livello, note); con `onChiudi` è aperta e si chiude da sé. `onSalvato` rilegge la
- *  scheda dopo il salvataggio. */
-export function CorrezioneSchedaPalazzo({ d, memento, onChiudi, onSalvato }: { d: DungeonDettaglioDto; memento: boolean; onChiudi?: () => void; onSalvato: () => Promise<unknown> }) {
+interface Props { d: DungeonDettaglioDto; memento: boolean; onChiudi?: () => void; onSalvato: () => Promise<unknown> }
+
+/** La correzione della scheda (nome, sovrano, date, livello, note): con `onChiudi` è la finestra già aperta da fuori (il menu del Palazzo),
+ *  senza è il pulsante ✎ che la apre (i Memento). `onSalvato` rilegge la scheda dopo il salvataggio. */
+// nel rilascio (sola lettura) la correzione non esiste; la condizione è costante di build, `CorrezioneSchedaReale` esce dal bundle
+export const CorrezioneSchedaPalazzo: StrumentoDiModifica<typeof CorrezioneSchedaReale> = IN_RILASCIO ? NienteInRilascio : CorrezioneSchedaReale;
+function CorrezioneSchedaReale({ d, memento, onChiudi, onSalvato }: Props) {
+  const [aperta, setAperta] = useState(false);
+  if (onChiudi) return <FinestraScheda d={d} memento={memento} onChiudi={onChiudi} onSalvato={onSalvato} />;
+  return (
+    <>
+      <button type="button" className="touch shrink-0 rounded px-1.5 testo-12 text-text-muted hover:text-text" aria-haspopup="dialog" aria-label="Correggi la scheda: i Memento" title="Correggi i Memento" onClick={() => setAperta(true)}>
+        ✎<span className="ml-1">Correggi la scheda</span>
+      </button>
+      {aperta && <FinestraScheda d={d} memento={memento} onChiudi={() => setAperta(false)} onSalvato={onSalvato} />}
+    </>
+  );
+}
+
+/** La finestra: si monta all'apertura, così la bozza riparte ogni volta dai dati della pagina. */
+function FinestraScheda({ d, memento, onChiudi, onSalvato }: Props & { onChiudi: () => void }) {
+  const cosa = memento ? 'i Memento' : `il Palazzo «${d.nome}»`;
+  const [partenza] = useState<Bozza>(() => ({ nome: d.nome, sovrano: d.sovrano, livelloMin: numeroInBozza(d.livelloConsigliato.min), livelloMax: numeroInBozza(d.livelloConsigliato.max), note: d.note, ...bozzaDate(d.date) }));
+  const [b, setB] = useState(partenza);
+  const [occupato, setOccupato] = useState(false);
+  const cambia = (patch: Partial<Bozza>) => setB((x) => ({ ...x, ...patch }));
+  const modificata = JSON.stringify(b) !== JSON.stringify(partenza);
+  useBozzaSporca('correzione-scheda-palazzo', `correzione «${cosa}»`, modificata);
   // L13 O6-3: «senza fine» solo dove il gioco non fissa una scadenza, come vuole il server: i Memento e i Palazzi col boss dei Memento (Iweleth)
   const senzaFinePossibile = memento || d.regolaBoss === 'memento';
+  // la regola del server, detta prima di salvare; solo se le date sono state toccate (una scheda senza finestra resta salvabile)
+  const errore = dateCambiate(b, d.date) ? erroreDatePalazzo(dateDellaBozza(b), senzaFinePossibile)?.messaggio : null;
+
+  /** Salva e chiude; se il server (o il livello) non va, la finestra resta aperta con la bozza e l'errore si legge nella notifica. */
+  const salva = async () => {
+    setOccupato(true);
+    try {
+      const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: livelloDellaBozza(b.livelloMin, b.livelloMax), note: b.note };
+      // le date si mandano solo se sono cambiate: senza, la scheda di un posto senza finestra si salverebbe con una data vuota. Una data
+      // rovesciata o mancante non parte: il messaggio è quello del server (la stessa regola, `shared/datePalazzo`)
+      const date = dateDellaBozza(b);
+      if (dateCambiate(b, d.date)) {
+        const erroreDate = erroreDatePalazzo(date, senzaFinePossibile);
+        if (erroreDate || !date.dal) throw new Error(erroreDate?.messaggio ?? 'Manca il giorno in cui si apre.');
+        await aggiornaDungeon(d.chiave, { ...testi, date: { ...date, dal: date.dal } });
+      } else await aggiornaDungeon(d.chiave, testi);
+      await onSalvato();
+      notifica('success', `Correzione salvata: ${cosa}.`);
+      onChiudi();
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Correzione non salvata.'); }
+    finally { setOccupato(false); }
+  };
+
+  /** L9-08 (Q22): le date tornano quelle della guida; il resto della scheda non cambia. Chiude la finestra, che ha la bozza delle date vecchie. */
+  const ripristina = async () => {
+    const ok = await conferma({ titolo: 'Ripristinare le date della guida?', testo: modificata ? 'Le date corrette a mano si perdono, e con loro le modifiche non salvate in questa finestra.' : 'Le date corrette a mano si perdono.', etichetta: 'Ripristina' });
+    if (!ok) return;
+    setOccupato(true);
+    try {
+      await ripristinaDateDungeon(d.chiave);
+      await onSalvato();
+      notifica('success', `Date ripristinate: ${cosa}.`);
+      onChiudi();
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Date non ripristinate.'); }
+    finally { setOccupato(false); }
+  };
+
   return (
-    <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
-      {...(onChiudi ? { aperta: true, onChiudi } : {})}
-      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, livelloMin: numeroInBozza(d.livelloConsigliato.min), livelloMax: numeroInBozza(d.livelloConsigliato.max), note: d.note, ...bozzaDate(d.date) })}
-      onSalva={async (b) => {
-        const testi = { nome: b.nome, sovrano: b.sovrano, livelloConsigliato: livelloDellaBozza(b.livelloMin, b.livelloMax), note: b.note };
-        // le date si mandano solo se sono cambiate: senza, la scheda di un posto senza finestra si salverebbe con una data vuota. Una data
-        // rovesciata o mancante non parte: il messaggio è quello del server (la stessa regola, `shared/datePalazzo`)
-        const date = dateDellaBozza(b);
-        if (dateCambiate(b, d.date)) {
-          const errore = erroreDatePalazzo(date, senzaFinePossibile);
-          if (errore || !date.dal) throw new Error(errore?.messaggio ?? 'Manca il giorno in cui si apre.');
-          await aggiornaDungeon(d.chiave, { ...testi, date: { ...date, dal: date.dal } });
-        } else await aggiornaDungeon(d.chiave, testi);
-        await onSalvato();
-      }}>
-      {(b, cambia) => {
-        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
-        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
-        // la regola del server, detta prima di salvare; solo se le date sono state toccate (una scheda senza finestra resta salvabile)
-        const errore = dateCambiate(b, d.date) ? erroreDatePalazzo(dateDellaBozza(b), senzaFinePossibile)?.messaggio : null;
-        return <>
-          {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
-          {/* L13 O6-3: un solo editor delle date del Palazzo, giorni del calendario di gioco (prima tre testi qui e la finestra in «Sulla
-              mappa di Tokyo»). La finestra è anche quella della mappa di Tokyo e dell'arco della storia. */}
-          <fieldset className="m-0 flex w-full basis-full flex-col gap-2 border-0 p-0">
-            <legend className="mb-1 p-0 testo-12 uppercase tracking-[0.08em] text-text-secondary">{memento ? 'Date dei Memento' : 'Date del Palazzo'}</legend>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <SelettoreData etichetta="Si apre" valore={b.dal} onCambia={(v) => cambia({ dal: v })} />
-              {!memento && <SelettoreData etichetta="Furto consigliato" facoltativa valore={b.furto} onCambia={(v) => cambia({ furto: v })} />}
-              {!memento && <SelettoreData etichetta="Lettera entro" facoltativa valore={b.lettera} onCambia={(v) => cambia({ lettera: v })} />}
-              {senzaFinePossibile && (
-                <label className="touch flex items-center gap-1.5 testo-12">
-                  <input type="checkbox" className="h-5 w-5" checked={b.al === ''} onChange={(e) => cambia({ al: e.target.checked ? '' : b.dal })} />Senza fine
-                </label>
-              )}
-              {(!senzaFinePossibile || b.al !== '') && <SelettoreData etichetta="Scade" valore={b.al} onCambia={(v) => cambia({ al: v })} />}
-            </div>
-            {errore && <p className="m-0 testo-12 text-error-testo" role="alert">{errore}</p>}
-          </fieldset>
-          {/* L8-04 (D5): il livello consigliato minimo e massimo (vuoto = la fonte non lo dice); il confronto delle fonti è la nota storica */}
-          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato minimo" valore={b.livelloMin} massimo={2} onCambia={(v) => cambia({ livelloMin: v })} />
-          <CampoTesto className="min-w-[140px] flex-1" tipo="numero" etichetta="Livello consigliato massimo" valore={b.livelloMax} massimo={2} onCambia={(v) => cambia({ livelloMax: v })} />
-          {campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
-        </>; }}
-    </CorrezioneGuida>
+    <FinestraModifica titolo={`Correggi la scheda — ${d.nome}`} nomeModulo={`Correggi ${cosa}`} onChiudi={onChiudi} onSalva={salva} salvabile={modificata && !errore} occupato={occupato} sporca={modificata}
+      azioniExtra={d.dateCorrette ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina le date" disabled={occupato} onClick={() => void ripristina()} /> : undefined}>
+      <SezioneCampi titolo="Scheda">
+        <CampoTesto etichetta="Nome" valore={b.nome} massimo={LIMITI_GUIDA.dungeon.nome} onCambia={(v) => cambia({ nome: v })} />
+        <CampoTesto etichetta="Sovrano" valore={b.sovrano} massimo={LIMITI_GUIDA.dungeon.sovrano} onCambia={(v) => cambia({ sovrano: v })} />
+        {/* L8-04 (D5): il livello consigliato minimo e massimo (vuoto = la fonte non lo dice); il confronto delle fonti è la nota storica */}
+        <CampoTesto tipo="numero" etichetta="Livello consigliato minimo" valore={b.livelloMin} massimo={2} onCambia={(v) => cambia({ livelloMin: v })} />
+        <CampoTesto tipo="numero" etichetta="Livello consigliato massimo" valore={b.livelloMax} massimo={2} onCambia={(v) => cambia({ livelloMax: v })} />
+      </SezioneCampi>
+      {/* L13 O6-3: un solo editor delle date del Palazzo, giorni del calendario di gioco. La finestra è anche quella della mappa di Tokyo e
+          dell'arco della storia. Ogni data ha il suo nome sopra e il proprio posto, nell'ordine in cui avvengono (L9-05). */}
+      <SezioneCampi titolo={memento ? 'Date dei Memento' : 'Date del Palazzo'}>
+        <Campo etichetta="Si apre" senzaGruppo><SelettoreData etichetta="Si apre" valore={b.dal} onCambia={(v) => cambia({ dal: v })} /></Campo>
+        {!memento && <Campo etichetta="Furto consigliato" senzaGruppo><SelettoreData etichetta="Furto consigliato" facoltativa valore={b.furto} onCambia={(v) => cambia({ furto: v })} /></Campo>}
+        {!memento && <Campo etichetta="Lettera entro" senzaGruppo><SelettoreData etichetta="Lettera entro" facoltativa valore={b.lettera} onCambia={(v) => cambia({ lettera: v })} /></Campo>}
+        <Campo etichetta="Scade" senzaGruppo>
+          <span className="flex flex-col gap-1">
+            {(!senzaFinePossibile || b.al !== '') && <SelettoreData etichetta="Scade" valore={b.al} onCambia={(v) => cambia({ al: v })} />}
+            {senzaFinePossibile && (
+              <label className="touch flex items-center gap-1.5 testo-12">
+                <input type="checkbox" className="h-5 w-5" checked={b.al === ''} onChange={(e) => cambia({ al: e.target.checked ? '' : b.dal })} />Senza fine
+              </label>
+            )}
+          </span>
+        </Campo>
+        {errore && <p className="campo--largo m-0 testo-12 text-error-testo" role="alert">{errore}</p>}
+      </SezioneCampi>
+      <CampoTesto tipo="lungo" righe={3} etichetta="Note della guida" valore={b.note} massimo={LIMITI_GUIDA.dungeon.note} onCambia={(v) => cambia({ note: v })} />
+    </FinestraModifica>
   );
 }

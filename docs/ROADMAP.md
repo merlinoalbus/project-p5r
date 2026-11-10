@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 346 migrazioni di gioco (l'ultima è la 346), 67 delle partite (l'ultima è la 067).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 350 migrazioni di gioco (l'ultima è la 375), 67 delle partite (l'ultima è la 067).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -147,11 +147,19 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   - Forca, Isolamento, Gemelle, cicli e Aojiru leggono i numeri dalle regole condivise. «Anima da cineasta» parte acceso col libro letto ed è
     spento e disattivato senza. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi,
     bagno, gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
-- L8, in attesa della scelta di Roberto:
-  - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida (la scheda le mostra tutte e due);
-  - alberi di fusione: le Persona DLC dei pacchetti posseduti non sono più proposte «da catturare», ma solo se in scorta o nel Registro
-    (come già facevano Compendio e cicli);
-  - le date dei Palazzi si correggono in «Correggi la scheda», ma non hanno un «Ripristina» (come nome, sovrano e note della stessa scheda).
+- Palazzi, scelte di Roberto applicate:
+  - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida: la scheda le mostra tutte e due;
+  - alberi di fusione: le Persona DLC entrano solo se il pacchetto è posseduto, e non sono proposte «da catturare» (come Compendio e cicli);
+  - le date dei Palazzi si correggono nella finestra di «Correggi la scheda», con «Ripristina le date» (nome, sovrano e note non lo hanno);
+  - biglietto da visita calcolato dalla scadenza, salvo Shido (scritto) e Maruki (la guida non lo nomina); forzieri e mini-boss di Iweleth
+    col tipo di prima; le 15 infiltrazioni senza Area restano; le Persona aggiunte a mano a un dedalo compaiono nelle Ombre.
+- Palazzi, da fare a mano dall'editor: i pin Tesoro di Futaba (prima di quel Palazzo) e di Maruki; i 101 abbinamenti pin–voce non collegati
+  dei sei Palazzi non validati (`dati_guida.audit-l9-03-pin-e-voci`, con il motivo di ognuno; il forziere della Sala d'ingresso di Maruki è
+  univoco nei dati ma la guida ne descrive due).
+- Palazzi, da verificare in gioco: i forzieri di Shido tratti dalla guida inglese (per esempio «Life Jacket, Diamante, Granato» nel Ponte
+  piscina, dove la guida italiana descrive la Camicia inamovibile).
+- Palazzi, restano com'erano per mancanza di fonte: i nomi inglesi di quattro forzieri di Shido (Soul Food, Life Jacket, Parapsy Ring,
+  Classified Armor), che la guida e il catalogo non rendono; le due porte chiuse senza contenuto di Okumura e Maruki.
 - L8, ancora da fare: L8-01 (D1: non toccare); i gradini della capienza non hanno un editor (si correggono con una migrazione).
 - L9 fatto: gli SVG caricati non eseguono script se aperti da soli (CSP `sandbox` e allegato, nell'app si vedono come prima); «Scarica da
   URL» non raggiunge la rete interna né con un IP nell'URL, né con un nome, né con un redirect (al più 5, solo http e https); i collegamenti

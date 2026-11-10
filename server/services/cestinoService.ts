@@ -325,6 +325,16 @@ export function conCestinoPrivato<T>(elemento: ElementoCestinoPrivato, opera: ()
   return conCestino(elemento, opera);
 }
 
+/**
+ * L9-07: la voce eliminata era il boss finale dichiarato di un Palazzo (la chiave esterna ha azzerato `dungeon.voce_boss_finale`, e il registro lo
+ * dice): la nota per il Cestino, fra «» come le altre note che non sono un posto; null per ogni altra voce e per ogni altro elemento.
+ */
+function avvisoBossFinale(elemento: ElementoCestino | ElementoCestinoPrivato, passi: ReadonlyArray<Omit<Passo, 'seq'> & { schema: Schema }>): string | null {
+  if (elemento.tipo !== 'voce') return null;
+  const palazzo = passi.find((p) => p.schema === 'main' && p.tabella === 'dungeon' && p.op === 'U' && p.prima?.voce_boss_finale === elemento.chiave && p.dopo?.voce_boss_finale === null);
+  return palazzo ? `Era il boss finale di «${String(palazzo.prima!.nome)}»: senza questa voce il Palazzo non si conclude più. Rimettila, o dichiarane un’altra da «Modifica › Boss finale».` : null;
+}
+
 /** Mette nel cestino l'elemento con il suo registro, diviso fra i due file (stesso `uid`). */
 function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino | ElementoCestinoPrivato, passi: ReadonlyArray<Omit<Passo, 'seq'> & { schema: Schema }>): void {
   if (elemento.tipo === 'pin') verificaRegistroCestinoPin(db, passi, elemento.chiave);
@@ -341,8 +351,9 @@ function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino | ElementoCe
       .run(uid, JSON.stringify(partite), adesso, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', elemento.partitaId, JSON.stringify(riepilogo(db, 'utente', partite)), getProprietario());
     return;
   }
+  const contesto = [elemento.contesto, avvisoBossFinale(elemento, passi)].filter(Boolean).join(' · ');
   db.prepare('INSERT INTO main.cestino (uid, tipo, chiave, nome, contesto, riepilogo_json, registro_json, con_partite, vicini_json, eliminato_il) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(uid, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', JSON.stringify(riepilogo(db, 'main', gioco)), JSON.stringify(gioco), partite.length ? 1 : 0,
+    .run(uid, elemento.tipo, elemento.chiave, elemento.nome, contesto, JSON.stringify(riepilogo(db, 'main', gioco)), JSON.stringify(gioco), partite.length ? 1 : 0,
       elemento.vicini ? JSON.stringify(elemento.vicini) : null, adesso);
   if (partite.length) db.prepare('INSERT INTO utente.cestino_partite (uid, registro_json, eliminato_il) VALUES (?, ?, ?)').run(uid, JSON.stringify(partite), adesso);
 }
