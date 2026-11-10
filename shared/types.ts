@@ -2309,8 +2309,9 @@ export interface LuogoDettaglioDto extends LuogoDto {
   attivitaDettaglio: AttivitaDto[];
   /** I Confidenti che si incontrano qui, con l'arcano e la pagina. */
   confidentiDettaglio: Array<{ chiave: string; nome: string; arcanaNome: string; casa: string }>;
-  /** Tutti i pin del luogo, con la planimetria, la casa dell'area aperta sullo spillo e la nota propria del pin se diversa. */
-  pins: Array<{ spillo: number; mappa: string; mappaNome: string; casa: string; notaPin: string | null }>;
+  /** Tutti i pin del luogo, con la planimetria, la casa dell'area aperta sullo spillo e la nota propria del pin se diversa: prima quelli
+   *  del luogo, poi quelli dei suoi punti vendita (`negozio` dice quale; la nota è il suo nome). */
+  pins: Array<{ spillo: number; mappa: string; mappaNome: string; casa: string; notaPin: string | null; negozio: string | null }>;
   /** Riga della guida corretta dall'utente (c'è un `seed_json`). */
   modificato: boolean;
   /** Il testo dello sblocco generato dalla condizione (L6, `nomiCondizioni`); null se non ce n'è. */
@@ -3853,6 +3854,8 @@ export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 export interface ElementoCatalogoDto {
   /** Informazioni su un ripristino che conserva campi introdotti dopo la fotografia. */
   avvisi?: string[];
+  /** L3: per un luogo nato per vendere, la chiave del punto vendita creato con lui. */
+  puntoVendita?: string;
   tipo: TipoCatalogo;
   chiave: string;
   nome: string;
@@ -3864,6 +3867,25 @@ export interface ElementoCatalogoDto {
   /** Campi editabili, con i nomi delle colonne. */
   dati: Record<string, unknown>;
 }
+
+/**
+ * L3: il posto come lo modifica la sua finestra unica: il luogo, i suoi punti vendita visibili (tabella `negozio`, sede = il luogo) con le
+ * offerte visibili, e per ogni offerta se ha acquisti nelle partite (toglierla allora la nasconde, non la elimina).
+ */
+export interface PostoDto {
+  luogo: ElementoCatalogoDto;
+  puntiVendita: Array<{ negozio: ElementoCatalogoDto; offerte: Array<ElementoCatalogoDto & { conAcquisti: boolean }> }>;
+}
+
+/** L3: il salvataggio del posto, in una transazione: i punti vendita (nuovi senza `chiave`), le loro offerte e le offerte da togliere, poi il luogo. */
+export interface SalvaPostoDto {
+  luogo?: Record<string, unknown>;
+  /** `copiaDa`: per un'offerta nata da «Duplica», l'offerta d'origine i cui contenuti (i set) passano alla copia. */
+  puntiVendita: Array<{ chiave?: string; dati?: Record<string, unknown>; offerte: Array<{ chiave?: string; dati: Record<string, unknown>; copiaDa?: string }>; offerteTolte?: string[] }>;
+}
+
+/** L3: l'esito del salvataggio: il posto riletto e le chiavi dei punti vendita creati, nell'ordine della richiesta. */
+export interface PostoSalvatoDto { posto: PostoDto; creati: string[] }
 
 export interface RiepilogoCatalogoDto {
   perTipo: Array<{ tipo: TipoCatalogo; creati: number; modificati: number; nascosti: number; totale: number }>;

@@ -56,5 +56,5 @@ it('CampiLuogo: il tipo si sceglie a tessere e gli orari della guida si aprono t
   fireEvent.click(screen.getByRole('checkbox', { name: /La guida non indica orari/ }));
   const stato = JSON.parse(screen.getByTestId('stato').textContent!) as ValoriLuogo;
   expect(stato).toMatchObject({ nome: 'Chiosco', tipo: null, orari: ORARI_SEMPRE });
-  expect(screen.getByRole('radiogroup', { name: 'Tipo' })).toBeInTheDocument();
+  expect(screen.getByRole('radiogroup', { name: 'Genere di posto' })).toBeInTheDocument();
 });

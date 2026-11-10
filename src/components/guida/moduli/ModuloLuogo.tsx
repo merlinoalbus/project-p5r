@@ -29,8 +29,9 @@ import { IconaAzione } from '../../shared/IconaAzione';
 export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
   const quartieri = useCarica(() => getQuartieri(), []);
   const attuale = testoDi(dati.quartiere_chiave);
-  const opzioniQuartiere = [...(attuale && !quartieri.dati?.some((q) => q.chiave === attuale) ? [{ chiave: attuale, nome: attuale }] : []), ...(quartieri.dati ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))];
-  const valori: ValoriLuogo = { nome: testoDi(dati.nome), tipo: testoDi(dati.tipo) || 'altro', cosaOffre: testoDi(dati.cosa_offre), orari: (dati.orari_json as OrariNegozio | null) ?? null };
+  // L3: mai la chiave grezza: finché l'elenco non c'è il campo dice «Un attimo…», e un valore che l'elenco non conosce si dice per quel che è
+  const opzioniQuartiere = [...(attuale && quartieri.dati && !quartieri.dati.some((q) => q.chiave === attuale) ? [{ chiave: attuale, nome: 'Quartiere non più nell’elenco' }] : []), ...(quartieri.dati ?? []).map((q) => ({ chiave: q.chiave, nome: q.nome }))];
+  const valori: ValoriLuogo = { nome: testoDi(dati.nome), tipo: testoDi(dati.tipo) || null, cosaOffre: testoDi(dati.cosa_offre), orari: (dati.orari_json as OrariNegozio | null) ?? null };
   /** I campi comuni scrivono le colonne del luogo con i loro nomi (`cosa_offre`, `orari_json`). */
   const cambiaComuni = (p: Partial<ValoriLuogo>) => imposta({
     ...(p.nome !== undefined ? { nome: p.nome } : {}), ...(p.tipo !== undefined ? { tipo: p.tipo } : {}),
@@ -44,7 +45,7 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
       </SezioneCampi>
       <SezioneCampi titolo="Dove">
         <Blocco>
-          <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
+          <Selettore etichetta="Quartiere" valore={quartieri.caricamento ? '' : attuale} vuoto={quartieri.caricamento ? 'Un attimo…' : 'Scegli il quartiere…'} disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
           {quartieri.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
         </Blocco>
         <AreaDelLuogo dati={dati} imposta={imposta} disabilitato={disabilitato} />

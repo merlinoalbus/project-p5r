@@ -145,7 +145,8 @@ describe('domanda e cruciverba', () => {
 
 describe('luogo', () => {
   it('legge orari, Confidenti e piatti salvati come JSON e li rimanda; senza orari vale la regola dell’app (null)', () => {
-    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: 'altro', orari_json: null, confidenti_json: [], piatti_json: null });
+    // L3: il genere di un luogo nuovo si sceglie: parte vuoto
+    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: '', orari_json: null, confidenti_json: [], piatti_json: null });
     const d = def.luogo.iniziali(riga('luogo', { nome: 'X', quartiere_chiave: 'shibuya', orari_json: '{"giorni":["domenica"],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', confidenti_json: '["iwai",7]', piatti_json: '[{"nome":" Curry ","prezzo":800,"effetto":" PS "}]' }));
     expect(d.orari_json).toEqual({ giorni: ['domenica'], fasce: ['sera'], chiusoConPioggia: false, nota: null });
     expect(d.confidenti_json).toEqual(['iwai']);

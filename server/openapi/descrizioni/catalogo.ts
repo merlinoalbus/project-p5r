@@ -19,6 +19,20 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     descrizione: 'Indirizzo storico del catalogo unico: identità visibili di ogni categoria, con nomi e proprietà canonici. La selezione e i salvataggi usano la chiave del catalogo.',
     risposta: 'Elenco di `CatalogoOggettoDto`',
   },
+  'GET /api/catalogo/posto/:quartiere/:luogo': {
+    sommario: 'Il posto per la sua finestra di modifica: il luogo, i suoi punti vendita e le loro offerte',
+    descrizione: 'L3: il luogo e i punti vendita visibili con sede nel luogo (nell\'ordine), ognuno con le offerte visibili, come elementi del catalogo con i campi dei moduli. `conAcquisti` dice se un\'offerta ha acquisti nelle partite o risultati collegati: togliendola dall\'editor si nasconde invece di andare nel cestino.',
+    risposta: '`PostoDto`',
+    errori: [[404, 'luogo-non-trovato']],
+  },
+  'PUT /api/catalogo/posto/:quartiere/:luogo': {
+    sommario: 'Salva il posto in una transazione: punti vendita, offerte, offerte tolte e luogo',
+    descrizione: 'L3: ogni parte passa dallo schema del suo tipo (completo per una riga nuova, parziale per una esistente) e dalle regole delle scritture del catalogo, nella stessa transazione: prima i punti vendita (un punto vendita nuovo nasce con la sede nel luogo, uno esistente deve già averla), le offerte tolte e le offerte, poi il luogo; un errore annulla tutto. Un\'offerta tolta va nel cestino se è dell\'utente, mai corretta e senza acquisti né risultati, altrimenti si nasconde. «Duplica» è una creazione: la sorgente non cambia; `copiaDa` di un\'offerta nuova indica l\'offerta d\'origine, i cui contenuti (i set) passano alla copia.',
+    risposta: '`PostoSalvatoDto`: il posto riletto e le chiavi dei punti vendita creati, nell\'ordine della richiesta.',
+    errori: [[400, 'validation-error'], [404, 'luogo-non-trovato'], [404, 'negozio-non-trovato'], [404, 'articolo-non-trovato'], [400, 'punto-vendita-di-altro-luogo'],
+      [400, 'offerta-di-altro-punto-vendita'], [400, 'offerta-tolta-e-salvata'], [400, 'offerta-da-copiare-sconosciuta'], [400, 'punto-vendita-senza-dati'], [400, 'nome-mancante'], [400, 'oggetto-sconosciuto'], [400, 'effetto-nell-oggetto'],
+      [409, 'luogo-senza-punto-vendita'], [409, 'sede-con-pin-in-altra-area'], [409, 'offerta-con-risultati']],
+  },
   'GET /api/catalogo/:tipo': {
     sommario: 'Righe di un tipo toccate dall\'utente, o le sole nascoste',
     descrizione: 'Senza query: le righe create o corrette dall\'utente e quelle nascoste, ordinate per nome (domande e cruciverba per chiave, cioè per giorno). Con `nascosti=1` (o `true`): le sole righe nascoste, per la pagina «Rimossi»; `negozio` restringe agli articoli di quel negozio e vale solo per il tipo `articolo`.',

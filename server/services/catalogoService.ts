@@ -35,6 +35,7 @@ import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAtti
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { verificaDomandaEsame } from './esamiCollegamento.js';
 import { normalizzaSconto } from '../../shared/scontiNegozi.js';
+import { tipoPuntoVenditaDelLuogo } from '../../shared/puntoVendita.js';
 import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaPuntoVendita, verificaNuovoPuntoVendita, verificaPuntoVenditaNascosto } from './invariantiPuntoVendita.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
@@ -436,7 +437,8 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
   return elemento;
 }
 
-function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+/** La creazione dentro la transazione di chi chiama (l'editor del posto salva luogo, punti vendita e offerte insieme). */
+export function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
@@ -483,7 +485,11 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), valori);
   prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
   assicuraIdentitaLettura(tipo, chiave, nome);
-  return dto(tipo, riga(tipo, chiave));
+  // L3 (I4): un luogo che nasce per vendere nasce col suo primo punto vendita, dallo stesso nome; il listino si scrive nell'editor del posto
+  const venduto = tipo === 'luogo' && typeof dati.tipo === 'string' ? tipoPuntoVenditaDelLuogo(dati.tipo) : null;
+  const creato = dto(tipo, riga(tipo, chiave));
+  if (venduto) creato.puntoVendita = creaElementoNellaTransazione('negozio', { nome, tipo: venduto, sede_chiave: chiave }).chiave;
+  return creato;
 }
 
 /** Modifica una riga: quella del seed viene «adottata» dall'utente conservando l'originale in `seed_json`. */
@@ -493,7 +499,8 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
   return elemento;
 }
 
-function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+/** La modifica dentro la transazione di chi chiama (l'editor del posto). */
+export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   const r = riga(tipo, chiave);
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));

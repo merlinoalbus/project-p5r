@@ -219,7 +219,8 @@ export const luogo: DefinizioneModulo = {
   conCondizioni: true,
   conVerificato: true,
   iniziali: (e) => ({
-    nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
+    // L3: il genere di un luogo nuovo si sceglie (vuoto finché non lo si sceglie): «negozio» e «distributore» fanno nascere un punto vendita
+    nome: testoDi(e?.dati.nome), tipo: e ? testoDi(e.dati.tipo) || 'altro' : '', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
     cosa_offre: testoDi(e?.dati.cosa_offre), note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
     // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
@@ -229,7 +230,7 @@ export const luogo: DefinizioneModulo = {
     confidenti_json: (jsonDi<unknown>(e?.dati.confidenti_json, []) as unknown[]).filter((c): c is string => typeof c === 'string'),
     piatti_json: jsonDi<PiattoLuogo[] | null>(e?.dati.piatti_json, null),
   }),
-  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.quartiere_chiave).length > 0 && ((d.piatti_json as PiattoLuogo[] | null) ?? []).every((p) => p.nome.trim().length > 0),
+  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.tipo).length > 0 && testoDi(d.quartiere_chiave).length > 0 && ((d.piatti_json as PiattoLuogo[] | null) ?? []).every((p) => p.nome.trim().length > 0),
   prepara: (d) => {
     const piatti = (d.piatti_json as PiattoLuogo[] | null) ?? null;
     return {

@@ -31,12 +31,13 @@ export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato
   for (const q of dati.dati?.quartieri ?? []) {
     for (const l of (dati.dati?.luoghi ?? []).filter((x) => x.quartiere === q.chiave)) opzioni.push({ chiave: l.chiave, nome: l.nome, dettaglio: definizioneTipoLuogo(l.tipo).nome, gruppo: q.nome });
   }
-  // un valore che l'elenco non conosce (dati vecchi) resta visibile, non sparisce
+  // un valore che l'elenco non conosce (dati vecchi) resta, detto per quel che è; L3: mai la chiave grezza, nemmeno durante il caricamento
   const attuale = valore ?? '';
-  if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: attuale });
+  if (attuale && dati.dati && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: 'Luogo non più nell’elenco' });
   return (
     <div className="editor-mappa__campo">
-      <Selettore etichetta={etichetta} valore={attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre" vuoto="Nessuna sede (online, ambulante o da assegnare)" opzioni={opzioni}
+      <Selettore etichetta={etichetta} valore={dati.caricamento ? '' : attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre"
+        vuoto={dati.caricamento ? 'Un attimo…' : 'Nessuna sede (online, ambulante o da assegnare)'} opzioni={opzioni}
         onCambia={(k) => onCambia(k || null)} />
       {dati.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
     </div>

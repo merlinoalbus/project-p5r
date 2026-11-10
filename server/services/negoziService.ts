@@ -31,6 +31,7 @@ import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, 
 import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
+import { ancoraPuntoVendita } from '../../shared/puntoVendita.js';
 import { compratoNelCiclo } from '../../shared/rifornimento.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { momentoDellaVoce, presenzaSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
@@ -98,7 +99,7 @@ function sedeCasa(chiave: string, sede: string | null): string | null {
   if (!sede) return null;
   const i = sede.indexOf('/');
   const pagina = i > 0 ? `/guida/luogo/${encodeURIComponent(sede.slice(0, i))}/${encodeURIComponent(sede.slice(i + 1))}` : `/guida/luogo/${encodeURIComponent(sede)}`;
-  return `${pagina}#negozio-${encodeURIComponent(chiave)}`;
+  return `${pagina}#${ancoraPuntoVendita(chiave)}`;
 }
 
 /** Il programma punti di un negozio, dal JSON della riga (migrazione 076); null se assente o malformato. */

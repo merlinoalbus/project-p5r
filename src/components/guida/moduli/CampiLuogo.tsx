@@ -46,7 +46,8 @@ function CampiLuogoReali({ valore, onCambia, disabilitato }: Props) {
   return <>
     <CampoTesto etichetta="Nome del luogo" valore={valore.nome} massimo={LIMITI_LUOGO.nome} obbligatorio largo disabilitato={disabilitato} onCambia={(nome) => onCambia({ nome })} />
     <Blocco largo>
-      <SelettoreIcone compatto etichetta="Tipo" valore={valore.tipo ?? ''} opzioni={opzioniDelTipo()} disabilitato={disabilitato} onCambia={(tipo) => onCambia({ tipo })} />
+      {/* L3 (AD6): «Genere di posto», distinto da «Che cosa vende» del punto vendita e dal «Segno sulla mappa» del pin */}
+      <SelettoreIcone compatto etichetta="Genere di posto" valore={valore.tipo ?? ''} opzioni={opzioniDelTipo()} disabilitato={disabilitato} onCambia={(tipo) => onCambia({ tipo })} />
     </Blocco>
     <CampoTesto etichetta="Che cosa offre" tipo="lungo" valore={valore.cosaOffre} massimo={LIMITI_LUOGO.cosaOffre} disabilitato={disabilitato} onCambia={(cosaOffre) => onCambia({ cosaOffre })} />
     <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">

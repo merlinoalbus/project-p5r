@@ -9,6 +9,8 @@
 // ============================================================
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { urlLuogo } from '../../utils/citta';
 import { getQuartiere, posizionaLuogo } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
@@ -45,11 +47,14 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onCh
   const [passo, setPasso] = useState<1 | 2>(luogo ? 2 : 1);
   const [modo, setModo] = useState<'esistente' | 'nuovo'>('esistente');
   const [esistente, setEsistente] = useState(luogo?.chiave ?? '');
-  const [nuovo, setNuovo] = useState({ nome: '', tipo: 'negozio', cosaOffre: '' });
+  // L3: il genere di posto si sceglie, non si propone: un luogo «negozio» o «distributore» nasce col suo punto vendita, e un genere già
+  // scelto per chi non lo cambia creerebbe negozi senza volerlo
+  const [nuovo, setNuovo] = useState<{ nome: string; tipo: string | null; cosaOffre: string }>({ nome: '', tipo: null, cosaOffre: '' });
   const [orari, setOrari] = useState<OrariNegozio | null>(null);
   const [mappa, setMappa] = useState(planimetrie[0]?.chiave ?? '');
   const [punto, setPunto] = useState<{ x: number; y: number } | null>(null);
   const [occupato, setOccupato] = useState(false);
+  const navigate = useNavigate();
   // del luogo già scelto conta la chiave: con un luogo non si legge il quartiere
   const chiaveLuogo = luogo?.chiave;
   const q = useCarica(() => (chiaveLuogo !== undefined ? Promise.resolve(null) : getQuartiere(quartiere)), [quartiere, chiaveLuogo]);
@@ -58,7 +63,7 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onCh
   // prima i luoghi senza pin (quelli da posizionare), poi gli altri
   const luoghi = [...(q.dati?.luoghi ?? [])].sort((a, b) => Number(!!a.pin) - Number(!!b.pin));
   const nomeScelto = luogo?.nome ?? (modo === 'nuovo' ? nuovo.nome.trim() : luoghi.find((l) => l.chiave === esistente)?.nome ?? '');
-  const passo1Pronto = modo === 'esistente' ? !!esistente : nuovo.nome.trim().length > 0;
+  const passo1Pronto = modo === 'esistente' ? !!esistente : nuovo.nome.trim().length > 0 && nuovo.tipo !== null;
 
   /** Salva: il luogo (nuovo o esistente), il pin sul punto e l'area della planimetria. */
   const salva = async () => {
@@ -66,12 +71,14 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onCh
     setOccupato(true);
     try {
       const l = await posizionaLuogo({
-        ...(luogo || modo === 'esistente' ? { luogo: luogo?.chiave ?? esistente } : { nuovo: { nome: nuovo.nome.trim(), tipo: nuovo.tipo, cosaOffre: nuovo.cosaOffre.trim(), orari } }),
+        ...(luogo || modo === 'esistente' ? { luogo: luogo?.chiave ?? esistente } : { nuovo: { nome: nuovo.nome.trim(), tipo: nuovo.tipo ?? 'altro', cosaOffre: nuovo.cosaOffre.trim(), orari } }),
         mappa, x: punto.x, y: punto.y,
       });
       notifica('success', `«${l.nome}» è sulla planimetria.`);
       onFatto();
       onChiudi();
+      // L3: un luogo nuovo si apre; se nasce per vendere, sul suo primo punto vendita, dove si scrive il listino
+      if (!luogo && modo === 'nuovo') navigate(urlLuogo(l.chiave), { state: { apriPosto: l.listini[0]?.chiave ?? true } });
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Posizionamento non riuscito.');
     } finally {

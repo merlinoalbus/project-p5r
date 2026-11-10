@@ -21,7 +21,7 @@ import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { destinazioneDaRighe, destinazionePerPacchetto, leggiDestinazioneSpillo, righeDestinazioni, risolviSpilloArrivo, salvaDestinazioneSpillo, verificaDestinazioneSpillo, type DestinazioneDaSalvare, type RigaDestinazione } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
-import { TIPO_MACCHINA } from '../../../shared/puntoVendita.js';
+import { TIPO_MACCHINA, ancoraPuntoVendita } from '../../../shared/puntoVendita.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { haColonnaMain, haTabellaMain } from '../../db/schemaMemo.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
@@ -333,13 +333,13 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const orari = orariDelLuogo(riga?.orari_json ?? null);
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre,
         orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.inviti) : [], orari, luoghi.st), casa,
-        negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
+        negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#${ancoraPuntoVendita(n.chiave)}` })) }, negozio };
     }
     case 'negozio': {
       const n = negozioDettaglio(chiave, ctx);
       if (!n) return null;
       const sede = n.sedeChiave ?? null;
-      return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#negozio-${encodeURIComponent(n.chiave)}` : null } };
+      return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#${ancoraPuntoVendita(n.chiave)}` : null } };
     }
     case 'confidente': {
       const c = prepared('SELECT chiave, nome, arcana FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string } | undefined;

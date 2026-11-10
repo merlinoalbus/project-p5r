@@ -53,10 +53,9 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Negozi, oggetti e attività
 - Negozi con orari, sede, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è la sola sede;
-  quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Ancora
-  aperti: la finestra unica di modifica del posto; i pin che restano sul luogo finché non si vede in gioco quale macchina indicano
-  (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759); un luogo nuovo che vende nasce ancora senza punto vendita, finché
-  l'editor del posto non li crea insieme.
+  quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Luogo,
+  punti vendita e listini si modificano nella finestra «Il posto». Ancora aperti: i pin che restano sul luogo finché non si vede in
+  gioco quale macchina indicano (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759).
 - Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
 - Attività, lavori, libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria

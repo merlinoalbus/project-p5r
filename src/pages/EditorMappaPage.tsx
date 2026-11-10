@@ -594,7 +594,8 @@ function PannelloEditor(p: PropsPannello) {
 
 interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
-const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
+// L3 (AD6): i termini della gerarchia — il pin indica un luogo o, dentro il luogo, uno dei suoi punti vendita (la macchina)
+const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Punto vendita' }, { tipo: 'luogo', nome: 'Luogo' }, { tipo: 'confidente', nome: 'Confidente' }];
 
 /** «Porta a»: la mappa d'arrivo e, se si vuole, uno spillo di quella mappa. Elenchi con ricerca, mai un punto da cliccare a mano. */
 function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, onCambia }: { valore: DestinazioneSpillo | null; mappaCorrente: string; albero: MappaRiassuntoDto[]; disabilitato: boolean; onCambia: (d: DestinazioneSpillo | null) => void }) {
@@ -760,7 +761,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 testo-12 text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
           <Link to={luogo.casa!} className="touch inline-flex items-center text-primary-testo">Modifica il luogo</Link></p>}
         <div className="editor-mappa__campo">
-          <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
+          {/* L3 (AD6): «Segno sulla mappa», non «Tipo»: dice l'icona del pin, non che cosa è il posto né che cosa vende */}
+          <Selettore etichetta="Segno sulla mappa" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>
         {/* un informativo con uno stato suo (meccanismo, punto sensibile, nemico, porta chiusa: 2026-10-03) non è «un segno e basta» */}
         <p className="m-0 testo-12 text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>

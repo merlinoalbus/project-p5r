@@ -440,8 +440,19 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   un pin per punto vendita; un luogo che vende non resta senza punti vendita (spostati o nascosti), salvo una riga «In attesa: motivo»
   nelle sue note, nemmeno eliminandoli; un luogo con punti vendita si elimina solo dopo averli spostati o eliminati; una planimetria
   non cambia Area se un suo pin di punto vendita ne uscirebbe; nascondere un luogo intero, reversibile, nasconde con lui i suoi punti
-  vendita. Un luogo nuovo che vende può nascere senza punto vendita finché
-  l'editor del posto non li crea insieme.
+  vendita. Un luogo che nasce per vendere nasce col suo primo punto vendita, dallo stesso nome (una macchina per un distributore,
+  «Altro» da scegliere per un negozio).
+- Luogo, punti vendita e listini si modificano in una finestra sola, «Il posto», aperta da «Modifica» del luogo (anche dalla sua carta
+  nel quartiere e da «Modifica il listino» di un punto vendita): si aggiunge o si duplica un punto vendita (la copia ha offerte proprie,
+  la sorgente non cambia), si scrive il listino a righe (oggetto, prezzo, pezzi; il resto nei dettagli della riga), e un oggetto che
+  manca si crea dal selettore stesso. Si salva tutto insieme o niente. Un'offerta tolta va nel cestino solo se è dell'utente, mai
+  corretta e senza acquisti né risultati; altrimenti si nasconde. Ripristina, Nascondi ed Elimina di luogo e punto vendita restano gesti
+  immediati, con le modifiche salvate. Creato un luogo o un punto vendita, si apre il creato: la pagina del luogo con «Il posto» aperto
+  (sul punto vendita nuovo, se c'è); dall'editor della mappa, dove si sta lavorando sui pin, il luogo creato da un pin si apre dal suo
+  collegamento. Il genere di un luogo nuovo si sceglie sempre, senza un valore proposto. «Duplica» copia anche i contenuti dei set. Tre nomi distinti: «Genere di posto»
+  (il luogo), «Che cosa vende» (il punto vendita), «Segno sulla mappa» (il pin). Il pin di una macchina apre la sua sezione nella pagina
+  del luogo, e «Dove si trova» mostra i pin del luogo e dei suoi punti vendita: un luogo che ha solo i pin delle sue macchine è
+  posizionato (non è fra quelli «da posizionare» dell'Area).
 - La disponibilità di negozi e articoli «a un dato momento» è l'insieme delle condizioni della guida italiana Royal; il «disponibile
   dal» mostrato si ricava dalla condizione strutturata.
 - Il catalogo degli oggetti è separato dall'equipaggiamento con statistiche; un oggetto ha una sola identità e un solo testo

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { AnteprimaLuogoDaPinDto, LuogoCreatoDaPinDto, LuogoNuovoDaPin } from '../../../shared/luogoDaPin';
 import { definizioneTipoLuogo, eTipoLuogo, type TipoLuogo } from '../../../shared/tipiLuogo';
+import { tipoPuntoVenditaDelLuogo } from '../../../shared/puntoVendita';
 import { descriviOrari, TESTO_REGOLA_APP, type OrariNegozio } from '../../../shared/orariNegozio';
 import { anteprimaLuogoDaPin, creaLuogoDaPin, getLuogo, isApiError } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -203,7 +204,9 @@ function FinestraLuogoDaPinReale({ spillo, mappa, partita, mappaRiletta, caricam
     <div className="flex min-w-0 flex-col gap-3 testo-13">
       {ricevuta && <div role="status" className="flex flex-col gap-1"><strong>Luogo creato e collegato: {ricevuta.luogo.nome}.</strong>
         <span>La ricevuta conferma la creazione. La rilettura della vista è un’operazione separata.</span>
-        <Link className="touch inline-flex items-center text-primary-testo" to={casaLuogo(ricevuta.luogo.chiave)}>Apri il luogo</Link></div>}
+        {/* L3: l'editor della mappa resta dov'è (si sta lavorando sui pin); il collegamento apre il luogo creato col suo posto, dove un
+            luogo che vende ha già il suo primo punto vendita e il listino da scrivere */}
+        <Link className="touch inline-flex items-center text-primary-testo" to={casaLuogo(ricevuta.luogo.chiave)} state={{ apriPosto: true }}>Apri il luogo e il suo posto</Link></div>}
       {fase === 'incerto' && <p role="alert" className="m-0">Esito del salvataggio non confermato. Rileggi lo stato del pin prima di procedere: il tentativo non viene ripetuto.</p>}
       {errore && <p role="alert" className="m-0 break-words">{errore}</p>}
       {erroreLettura && <p role="alert" className="m-0 break-words">{ricevuta ? 'Luogo creato, vista non aggiornata. ' : 'Stato corrente non verificabile. '}{erroreLettura}</p>}
@@ -229,7 +232,7 @@ function FinestraLuogoDaPinReale({ spillo, mappa, partita, mappaRiletta, caricam
         <dl className="m-0 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-3 gap-y-1">
           <dt>Nome</dt><dd className="m-0 break-words">{anteprima.dto.luogoPrevisto.nome}</dd>
           <dt>Chiave</dt><dd className="m-0 break-all">{anteprima.dto.luogoPrevisto.chiave}</dd>
-          <dt>Tipo</dt><dd className="m-0">{definizioneTipoLuogo(anteprima.dto.luogoPrevisto.tipo).nome}</dd>
+          <dt>Genere di posto</dt><dd className="m-0">{definizioneTipoLuogo(anteprima.dto.luogoPrevisto.tipo).nome}{tipoPuntoVenditaDelLuogo(anteprima.dto.luogoPrevisto.tipo) ? ' · nasce col suo primo punto vendita' : ''}</dd>
           <dt>Offre</dt><dd className="m-0 whitespace-pre-wrap break-words">{anteprima.dto.luogoPrevisto.cosaOffre || 'Nessuna descrizione'}</dd>
           <dt>Orari</dt><dd className="m-0 break-words">{anteprima.dto.luogoPrevisto.orari ? descriviOrari(anteprima.dto.luogoPrevisto.orari) : TESTO_REGOLA_APP}</dd>
           <dt>Quartiere</dt><dd className="m-0 break-words">{anteprima.dto.quartiere.nome}</dd>

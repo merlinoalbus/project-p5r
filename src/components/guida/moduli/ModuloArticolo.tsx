@@ -26,7 +26,7 @@ import { useState } from 'react';
 import { TestoNote } from '../../shared/TestoNote';
 import { CampoTesto } from '../../shared/Campo';
 import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
-import { descriviRifornimento, type GiornoRifornimento, type RegolaRifornimento, type TipoRifornimento } from '../../../../shared/rifornimento';
+import { type GiornoRifornimento, type RegolaRifornimento, type TipoRifornimento } from '../../../../shared/rifornimento';
 
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
@@ -40,7 +40,7 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
   const aMano = !chiave && !nuovo && dati._aMano === true;
   return (
     <div className="flex flex-col gap-3">
-      <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato}
+      <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato} onCreato={() => void elenco.ricarica()}
         onScegli={(o) => imposta({ catalogo_chiave: o.chiave, _aMano: false })} />
       {collegato && <div className="flex min-w-0 flex-col gap-1 testo-13">
         <Link className="touch inline-flex items-center self-start" to={collegato.casa}>{collegato.nome}</Link>
@@ -69,7 +69,7 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       <CostoOfferta dati={dati} imposta={imposta} disabilitato={disabilitato} catalogo={catalogo} />
       <Griglia>
         <Campo nome="quantita" etichetta="Pezzi per ciclo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quanti se ne comprano prima del rifornimento. Vuoto = nessun limite dichiarato" />
-        <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null} quantita={typeof dati.quantita === 'number' ? dati.quantita : null}
+        <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null}
           nonLeggibile={dati._rifornimentoNonLeggibile === true && dati._rifornimentoModificato !== true}
           disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r, _rifornimentoModificato: true })} />
         <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} largo />
@@ -103,8 +103,9 @@ function GiorniDiConsegna({ giorni, disabilitato, onCambia }: { giorni: number; 
 /**
  * Ondata 5 (decisione 21): la regola di rifornimento dell'offerta, un punto solo (`articolo.rifornimento_json`): quando torna, da dove viene
  * la regola e se va verificata in gioco. Il giorno della settimana solo per «Ogni settimana», i giorni di consegna solo per l'ordine.
+ * L3: niente più la frase in sola lettura che ripeteva i campi appena sopra («2 pezzi, rifornimento ogni lunedì»).
  */
-function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCambia }: { valore: RegolaRifornimento | null; quantita: number | null; nonLeggibile?: boolean; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
+export function EditorRifornimento({ valore, nonLeggibile, disabilitato, onCambia }: { valore: RegolaRifornimento | null; nonLeggibile?: boolean; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
   const cambiaTipo = (tipo: string) => {
     if (!tipo) { onCambia(null); return; }
     const t = tipo as TipoRifornimento;
@@ -125,7 +126,6 @@ function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCa
       </div>
       {valore && <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={valore.daVerificare === true} disabled={disabilitato}
         onChange={(e) => { const resto: RegolaRifornimento = { ...valore }; delete resto.daVerificare; onCambia(e.target.checked ? { ...resto, daVerificare: true } : resto); }} />Da verificare in gioco</label>}
-      {valore && <p className="m-0 testo-12 text-text-muted text-pretty">{descriviRifornimento(valore, quantita)}</p>}
     </fieldset>
   );
 }

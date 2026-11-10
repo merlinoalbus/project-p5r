@@ -25,7 +25,7 @@ import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
 import { testoFasciaDelLuogo } from '../utils/fasciaLuogo';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
@@ -91,7 +91,8 @@ function EditorSbloccoQuartiereReale({ chiave, nome, sblocco, onChiudi, onSalvat
     </div>
   </Modal>;
 }
-import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { AggiungiAlCatalogo } from '../components/guida/AzioniCatalogo';
+import { ModificaPosto } from '../components/negozi/FinestraPosto';
 import { NienteInRilascio, type StrumentoDiModifica } from '../components/shared/SoloPreparazione';
 
 /**
@@ -129,7 +130,8 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
         {l.giorniTesto && <span><strong className="text-text">Giorni:</strong> {l.giorniTesto}</span>}
         {l.sblocco && <span><strong className="text-text">Sblocco:</strong> {l.sblocco}</span>}
       </div>
-      <div className="flex flex-wrap items-center gap-1.5"><CorreggiElemento tipo="luogo" chiave={l.chiave} onSalvato={onSalvato} /></div>
+      {/* L3: il luogo si modifica nel posto, con i suoi punti vendita e i listini (la stessa finestra della sua pagina) */}
+      <div className="flex flex-wrap items-center gap-1.5"><ModificaPosto luogo={l.chiave} nome={l.nome} onSalvato={onSalvato} /></div>
       {(l.confidenti.length > 0 || l.attivita.length > 0) && (
         <div className="flex flex-wrap gap-1.5 items-center">
           {l.confidenti.map((c) => <Link key={c.chiave} to={`/confidenti/${c.chiave}`} className="chip chip--attivo no-underline">{c.nome}</Link>)}
@@ -160,6 +162,7 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
  */
 export function QuartierePage() {
   const { chiave = '' } = useParams();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
@@ -253,7 +256,9 @@ export function QuartierePage() {
             <div className="flex flex-col gap-4">
             <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} onPinSegnato={mostraPin} />
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
-              {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>}
+              {/* L3: salvato, si apre il creato: il luogo col suo posto (sul primo punto vendita, se nasce per vendere) */}
+              {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo"
+                onSalvato={(creato) => (creato ? navigate(urlLuogo(creato.chiave), { state: { apriPosto: creato.puntoVendita ?? true } }) : void dati.ricarica())} /></div>}
               {tipi.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
                   <button type="button" className={`chip touch ${tipo === '' ? 'chip--attivo' : ''}`} onClick={() => setTipo('')} aria-pressed={tipo === ''}>Tutti ({q.luoghi.length})</button>

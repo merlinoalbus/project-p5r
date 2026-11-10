@@ -275,5 +275,19 @@ const datiCruciverba = z.object({
 export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, luogo: datiLuogo, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
 /** Gli stessi, per la correzione di alcuni campi soltanto: film e attività portano la rifinitura sulla forma parziale. */
 export const SCHEMI_CATALOGO_PARZIALI = { negozio: datiNegozio.partial(), articolo: datiArticolo.partial(), libro: datiLibro.partial(), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: datiLuogo.partial(), domanda: datiDomanda.partial(), cruciverba: datiCruciverba.partial() } as const;
+/** L3: la chiave del luogo nel percorso dell'editor del posto (`/catalogo/posto/:quartiere/:luogo`). */
+export const paramsPosto = z.object({ quartiere: z.string().min(1).max(80), luogo: z.string().min(1).max(160) });
+const campiGrezzi = z.record(z.string(), z.unknown());
+/** L3: il corpo del salvataggio del posto; i campi di luogo, punti vendita e offerte li valida poi lo schema del loro tipo. */
+export const bodySalvaPosto = z.object({
+  luogo: campiGrezzi.optional(),
+  puntiVendita: z.array(z.object({
+    chiave: z.string().min(1).max(200).optional(),
+    dati: campiGrezzi.optional(),
+    // `copiaDa`: per un'offerta nuova nata da «Duplica», l'offerta d'origine di cui copiare i contenuti (i set, `ricompensa_oggetto`)
+    offerte: z.array(z.object({ chiave: z.string().min(1).max(600).optional(), dati: campiGrezzi, copiaDa: z.string().min(1).max(600).optional() }).strict()).max(400),
+    offerteTolte: z.array(z.string().min(1).max(600)).max(400).optional(),
+  }).strict()).max(30),
+}).strict();
 export const queryNascosti = z.object({ nascosti: z.enum(['1', 'true']).optional(), negozio: z.string().min(1).max(200).optional() });
 export const bodyNascondi = z.object({ nascosta: z.boolean() });

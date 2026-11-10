@@ -61,7 +61,9 @@ export function FinestraModifica({ titolo, onChiudi, onSalva, titoloSalva = 'Sal
     onChiudi();
   };
   /** Invio in un campo: salva, se si può. */
-  const invia = (e: FormEvent) => { e.preventDefault(); if (salvabile && !occupato && !inAttesa) void onSalva(); };
+  // L3: l'evento si ferma qui. Una finestra aperta dentro un'altra (il nuovo oggetto dal selettore del posto) sta in un portale, ma il
+  // `submit` di React risale l'albero dei componenti: senza fermarlo, Invio nella finestra interna salverebbe anche quella esterna.
+  const invia = (e: FormEvent) => { e.preventDefault(); e.stopPropagation(); if (salvabile && !occupato && !inAttesa) void onSalva(); };
   return (
     <Modal titolo={titolo} aperta larga={!stretta} onChiudi={() => void chiudi()} azioni={(
       <div className="flex w-full flex-wrap items-center gap-2">
