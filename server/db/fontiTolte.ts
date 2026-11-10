@@ -92,7 +92,7 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
   },
   {
     schema: 'main', tabella: 'negozio', colonna: 'orari', tolta: 'L11 · migrazione 184',
-    sostituitaDa: 'gli orari strutturati del negozio (`orari_json`): la frase era la sua copia esatta',
+    sostituitaDa: 'gli orari strutturati del negozio (`orari_json`, a sua volta tolta dalla 373: oggi gli orari del luogo della sede, salvo `eccezione_orari_json`): la frase era la sua copia esatta',
   },
   {
     schema: 'main', tabella: 'negozio', colonna: 'sblocco', tolta: 'L11 · migrazione 184',
@@ -217,6 +217,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
   {
     schema: 'main', tabella: 'negozio_sede_foto', colonna: null, tolta: 'L2 · migrazione 354',
     sostituitaDa: 'niente: era la copia di partenza delle sedi aggiuntive dei listini, che non esistono più; le righe restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio', colonna: 'orari_json', tolta: 'L4 · migrazione 373',
+    sostituitaDa: 'gli orari del luogo (la sede) e, quando la guida distingue il punto vendita o non ha sede, `negozio.eccezione_orari_json`; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
     schema: 'utente', tabella: 'registro_acquisti', colonna: 'sede_chiave', tolta: 'L2 · migrazione utente 68',

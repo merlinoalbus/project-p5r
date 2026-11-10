@@ -115,6 +115,10 @@ export function eCategoriaOggetto(x: unknown): x is CategoriaOggetto {
   return typeof x === 'string' && (CATEGORIE_OGGETTO as readonly string[]).includes(x);
 }
 
+/** L4-07: un'offerta collegata a un oggetto del catalogo non ha nome, categoria né «per chi» propri (li dà l'oggetto): le colonne NOT NULL
+ *  restano con questi valori, mai con una copia. Valgono solo per un'offerta senza legame. */
+export const IDENTITA_DI_UN_OFFERTA_COLLEGATA = Object.freeze({ nome: '', categoria: 'altro', per: null });
+
 /** Resa nei listini storici: non introduce categorie aggiuntive né confonde arma da fuoco e arma nella sua identità. */
 export function categoriaDelListino(categoria: CategoriaOggetto, sottocategoria: string | null): CategoriaArticolo {
   if (categoria === 'arma-da-fuoco') return 'arma';

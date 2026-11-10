@@ -8,11 +8,15 @@ import { Campo } from './campi';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
 
-interface Props { dati: Dati; imposta: (patch: Dati) => void; disabilitato: boolean; catalogo: StatoSceltaCatalogo }
+interface Props {
+  dati: Dati; imposta: (patch: Dati) => void; disabilitato: boolean; catalogo: StatoSceltaCatalogo;
+  /** L3: il prezzo in yen sta già nella riga del listino (editor del posto): qui non si ripete. */
+  senzaPrezzo?: boolean;
+}
 interface ComponenteCosto { chiave: string; quantita: number | null }
 
 /** I componenti si aggiungono per chiave; una modifica della sola nota non riscrive il costo. */
-export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
+export function CostoOfferta({ dati, imposta, disabilitato, catalogo, senzaPrezzo }: Props) {
   const tipo = testoDi(dati._tipoCosto);
   const originaleIlleggibile = dati._costoIniziale != null && !normalizzaCostoScambio(dati._costoIniziale);
   const raw = jsonDi<Record<string, unknown> | null>(dati.costo_json, null);
@@ -31,7 +35,7 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
       else if (v === 'yen' || v === 'oggetti' || eCostoAImporto(v)) imposta({ _tipoCosto: v, _costoModificato: true,
         costo_json: v === 'yen' ? null : v === 'oggetti' ? { tipo: v, oggetti: [] } : { tipo: v, importo: null } });
     }} />
-    {tipo === 'yen' && <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = costo non indicato; zero = gratis" />}
+    {tipo === 'yen' && !senzaPrezzo && <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = costo non indicato; zero = gratis" />}
     {/* Ondata 5 (lotto E, decisione 5): il prezzo della sera, solo se diverso da quello normale (le sfide della Big Bang Burger). Il campo
         compare se l'offerta ne ha uno (o dopo «Prezzo diverso di sera»): nelle altre centinaia di offerte un campo vuoto non direbbe niente
         («le etichette di testo devono essere visibili solo se hanno senso») */}

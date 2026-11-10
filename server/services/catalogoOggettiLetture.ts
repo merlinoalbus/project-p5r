@@ -2,7 +2,7 @@
 // Il dettaglio aggregato vive in catalogoOggettiService; questa base evita cicli fra i servizi.
 import { getDb, prepared } from '../db/dbService.js';
 import { haColonnaMain, haTabellaMain } from '../db/schemaMemo.js';
-import { casaOggetto, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
+import { casaOggetto, categoriaDelListino, eCategoriaOggetto, normalizzaCostoScambio, type CategoriaOggetto } from '../../shared/catalogo.js';
 import { filtroRicerca } from '../../shared/testo.js';
 import type { CatalogoOggettoDto, ContenutoOggettoDto, CostoOggettoDto, OggettiGuidaDto, RicompensaOggettoDto, RiferimentoOggettoDto } from '../../shared/types.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -16,6 +16,8 @@ export interface RigaCatalogoOggetto {
   nome_originale: string | null; effetto: string; descrizione: string; statistiche_json: string | null;
   fonte_tipo: CatalogoOggettoDto['fonte']['tipo']; fonte_chiave: string | null; origine: 'seed' | 'utente';
   seed_json: string | null; nascosto: number; updated_at: string; prezzo_minimo?: number | null;
+  /** L4-05: ha almeno un'offerta visibile pagata con uno scambio (fiori, monete, punti, oggetti). */
+  con_scambi?: number;
 }
 
 function analizza(json: string | null): unknown { try { return json ? JSON.parse(json) as unknown : null; } catch { return null; } }
@@ -65,7 +67,7 @@ export function dtoOggetto(r: RigaCatalogoOggetto): CatalogoOggettoDto {
     nomiAltri: nomiAltriOggetto(r.nomi_altri_json), nomeOriginale: r.nome_originale, effetto: r.effetto, descrizione: r.descrizione,
     statistiche, casa: casaOggetto(r.chiave),
     fonte: { tipo: r.fonte_tipo, chiave: r.fonte_chiave }, origine: r.origine,
-    modificato: r.seed_json !== null, nascosto: r.nascosto === 1, prezzoMinimo: r.prezzo_minimo ?? null };
+    modificato: r.seed_json !== null, nascosto: r.nascosto === 1, prezzoMinimo: r.prezzo_minimo ?? null, conScambi: r.con_scambi === 1 };
 }
 
 /**
@@ -81,7 +83,9 @@ function sqlCatalogo(): string {
         COALESCE(json_extract(${pf}, '$.giorno'), a.prezzo, json_extract(${pf}, '$.sera')), COALESCE(json_extract(${pf}, '$.sera'), a.prezzo, json_extract(${pf}, '$.giorno'))) ELSE a.prezzo END`;
   return `SELECT c.*,
   (SELECT MIN(${prezzoMinimoOfferta}) FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
-    WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.costo_json IS NULL) AS prezzo_minimo
+    WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.costo_json IS NULL) AS prezzo_minimo,
+  EXISTS (SELECT 1 FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+    WHERE a.catalogo_chiave = c.chiave AND a.nascosto = 0 AND n.nascosto = 0 AND a.costo_json IS NOT NULL) AS con_scambi
   FROM catalogo_oggetto c`;
 }
 
@@ -89,6 +93,20 @@ export function rigaOggetto(chiave: string, ancheNascosto = false): RigaCatalogo
   const r = prepared(`${sqlCatalogo()} WHERE c.chiave = ?${ancheNascosto ? '' : ' AND c.nascosto = 0'}`).get(chiave) as RigaCatalogoOggetto | undefined;
   if (!r) throw httpErrors.notFound('oggetto-non-trovato', 'L’oggetto non è presente nel catalogo.');
   return r;
+}
+
+/**
+ * L4-07: nome, categoria e «per chi» che un'offerta prende quando perde il legame con l'oggetto (scollegata, o l'oggetto eliminato): quelli
+ * che mostrava, dall'oggetto. Collegata non li ha (`IDENTITA_DI_UN_OFFERTA_COLLEGATA`); senza legame sono i suoi, e servono (il nome è
+ * obbligatorio). null se l'oggetto non c'è.
+ */
+export function identitaDellOggettoPerLOfferta(catalogoChiave: string): { nome: string; categoria: string; per: string | null } | null {
+  const c = prepared('SELECT nome, categoria, sottocategoria, statistiche_json FROM catalogo_oggetto WHERE chiave = ?').get(catalogoChiave) as
+    { nome: string; categoria: string; sottocategoria: string | null; statistiche_json: string | null } | undefined;
+  if (!c || !eCategoriaOggetto(c.categoria)) return null;
+  let per: string | null;
+  try { const s = JSON.parse(c.statistiche_json ?? 'null') as { per?: unknown } | null; per = typeof s?.per === 'string' ? s.per : null; } catch { per = null; }
+  return { nome: c.nome, categoria: categoriaDelListino(c.categoria, c.sottocategoria), per };
 }
 
 export function elencaCatalogoOggetti(filtro: { categoria?: CategoriaOggetto; q?: string; nascosti?: boolean } = {}): CatalogoOggettoDto[] {

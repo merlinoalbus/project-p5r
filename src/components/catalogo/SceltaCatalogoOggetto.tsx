@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
-import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO } from '../../../shared/catalogo';
+import { useMemo, useState } from 'react';
+import { CATEGORIA_OGGETTO, GRUPPI_OGGETTO, type GruppoOggetto } from '../../../shared/catalogo';
+import { ModuloOggetto } from './ModuloOggetto';
 import type { CatalogoOggettoDto } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
@@ -31,18 +32,34 @@ export interface StatoSceltaCatalogo {
   onRicarica: () => void;
 }
 
-/** La variante già caricata riusa un'unica lettura per identità e componenti del costo di un'offerta. */
-export function SceltaNelCatalogo({ valore, onScegli, etichetta = 'Oggetto', disabilitato, escludi, includi, oggetti, caricamento, errore, onRicarica }: Props & StatoSceltaCatalogo) {
-  const opzioni = useMemo(() => (oggetti ?? []).filter((o) => !escludi?.includes(o.chiave) && (!includi || includi.includes(o.chiave))).map((o) => ({
-    chiave: o.chiave, nome: o.nome,
-    gruppo: GRUPPI_OGGETTO[CATEGORIA_OGGETTO[o.categoria].gruppo], dettaglio: CATEGORIA_OGGETTO[o.categoria].nome,
-    testoRicerca: [...o.nomiAltri, o.nomeOriginale ?? ''].join(' '),
-  })), [oggetti, escludi, includi]);
+/** L'ordine dei gruppi nell'elenco: quello di `GRUPPI_OGGETTO`. */
+const ORDINE_GRUPPI = Object.keys(GRUPPI_OGGETTO) as GruppoOggetto[];
+
+/**
+ * La variante già caricata riusa un'unica lettura per identità e componenti del costo di un'offerta. L3: le voci stanno a gruppi contigui
+ * (Equipaggiamento, Consumabili…, poi per nome), così ogni intestazione compare una volta; con `onCrea` in fondo all'elenco c'è «Crea
+ * l'oggetto», che apre il modulo dell'oggetto col testo cercato e, salvato, lo sceglie.
+ */
+export function SceltaNelCatalogo({ valore, onScegli, etichetta = 'Oggetto', disabilitato, escludi, includi, oggetti, caricamento, errore, onRicarica, onCreato, compatto }: Props & StatoSceltaCatalogo & {
+  /** Un oggetto creato da «Crea l’oggetto»: chi ospita rilegge il catalogo; senza, la voce non c'è. */
+  onCreato?: (oggetto: CatalogoOggettoDto) => void;
+  compatto?: boolean;
+}) {
+  const opzioni = useMemo(() => (oggetti ?? []).filter((o) => !escludi?.includes(o.chiave) && (!includi || includi.includes(o.chiave)))
+    .map((o) => ({ o, g: CATEGORIA_OGGETTO[o.categoria].gruppo }))
+    .sort((a, b) => ORDINE_GRUPPI.indexOf(a.g) - ORDINE_GRUPPI.indexOf(b.g) || a.o.nome.localeCompare(b.o.nome, 'it'))
+    .map(({ o, g }) => ({
+      chiave: o.chiave, nome: o.nome, gruppo: GRUPPI_OGGETTO[g], dettaglio: CATEGORIA_OGGETTO[o.categoria].nome,
+      testoRicerca: [...o.nomiAltri, o.nomeOriginale ?? ''].join(' '),
+    })), [oggetti, escludi, includi]);
+  const [nuovo, setNuovo] = useState<string | null>(null);
   return <div className="flex min-w-0 flex-col gap-2">
     {errore ? <p role="alert" className="m-0 testo-13">{errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" disabled={disabilitato} onClick={onRicarica} /></p> : null}
     {valore && oggetti && !oggetti.some((o) => o.chiave === valore) ? <p role="alert" className="m-0 testo-13">L’oggetto collegato non è più nel catalogo disponibile. La scelta resta finché non la cambi.</p> : null}
-    <Selettore etichetta={etichetta} valore={valore} opzioni={opzioni} ricerca="sempre"
+    <Selettore etichetta={etichetta} valore={valore} opzioni={opzioni} ricerca="sempre" compatto={compatto}
       disabilitato={disabilitato || caricamento || !!errore} segnaposto={caricamento ? 'Caricamento del catalogo…' : 'Cerca per nome o altro nome'}
+      crea={onCreato ? { etichetta: (t) => (t ? `Crea l’oggetto «${t}»` : 'Crea un oggetto nuovo'), onCrea: (t) => setNuovo(t) } : undefined}
       onCambia={(k) => { const o = oggetti?.find((o) => o.chiave === k); if (o) onScegli(o); }} />
+    {nuovo !== null && <ModuloOggetto nomeIniziale={nuovo} onChiudi={() => setNuovo(null)} onSalvato={(o) => { setNuovo(null); onCreato?.(o); onScegli(o); }} />}
   </div>;
 }

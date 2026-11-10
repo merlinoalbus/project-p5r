@@ -139,10 +139,11 @@ describe('API negozi e inventario', () => {
   it('calcola il totale disponibile prima di applicare il limite di 300 risultati', async () => {
     const db = getDb();
     db.exec(`CREATE TEMP TABLE backup_tutte_condizioni_articoli_negozi_test AS SELECT chiave, condizioni_json FROM articolo;
-      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, sblocco_json, orari_json FROM negozio`);
+      CREATE TEMP TABLE backup_tutte_condizioni_negozi_test AS SELECT chiave, sblocco_json, eccezione_orari_json FROM negozio`);
     try {
-      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (069)
-      db.exec("UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET sblocco_json = '[]', orari_json = NULL");
+      // niente condizioni e negozi sempre aperti: la presenza del negozio sono gli orari (dalla 373 solo l'eccezione del negozio; quelli
+      // della sede restano, e la partita nuova parte di giorno)
+      db.exec(`UPDATE articolo SET condizioni_json = '[]'; UPDATE negozio SET sblocco_json = '[]', eccezione_orari_json = '{"giorni":[],"fasce":[],"chiusoConPioggia":false,"nota":null}'`);
       const id = ((await request(app).post('/api/partite').send({ nome: 'Catalogo completo' })).body.data as { id: number }).id;
       const ricerca = (await request(app).get(`/api/compendio/articoli?partita=${id}`)).body.data as RicercaArticoliDto;
       expect(ricerca.totale).toBe(articoliVisibili());
@@ -155,8 +156,8 @@ describe('API negozi e inventario', () => {
       );
       UPDATE negozio SET sblocco_json = (
         SELECT b.sblocco_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
-      ), orari_json = (
-        SELECT b.orari_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
+      ), eccezione_orari_json = (
+        SELECT b.eccezione_orari_json FROM backup_tutte_condizioni_negozi_test b WHERE b.chiave = negozio.chiave
       );
       DROP TABLE backup_tutte_condizioni_articoli_negozi_test;
       DROP TABLE backup_tutte_condizioni_negozi_test`);

@@ -312,9 +312,9 @@ describe('QuartierePage', () => {
     const luoghi = within(screen.getByRole('list', { name: 'Luoghi' }));
     expect(luoghi.getByText('Untouchable')).toBeInTheDocument();
     expect(luoghi.queryByRole('button', { name: /Posiziona/ })).not.toBeInTheDocument();
-    // il modulo del luogo si apre da qui: «Aggiungi un luogo» nella sezione e «Correggi» in ogni card (voce 11)
+    // il luogo si aggiunge da qui, e ogni card apre «Il posto» (L3: la finestra unica di luogo, punti vendita e listini)
     expect(within(screen.getByRole('region', { name: 'Luoghi del quartiere' })).getByRole('button', { name: /Aggiungi un luogo/ })).toBeInTheDocument();
-    expect(luoghi.getByRole('button', { name: /Correggi/ })).toBeInTheDocument();
+    expect(luoghi.getByRole('button', { name: 'Modifica il posto «Untouchable»' })).toBeInTheDocument();
     expect(luoghi.getByRole('link', { name: 'Articoli in vendita' })).toHaveAttribute('href', '/guida/negozi/untouchable');
     expect(api.scaricaPiantaQuartiere).not.toHaveBeenCalled();
   });

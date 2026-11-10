@@ -26,7 +26,7 @@ import { useState } from 'react';
 import { TestoNote } from '../../shared/TestoNote';
 import { CampoTesto } from '../../shared/Campo';
 import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
-import { descriviRifornimento, type GiornoRifornimento, type RegolaRifornimento, type TipoRifornimento } from '../../../../shared/rifornimento';
+import { type GiornoRifornimento, type RegolaRifornimento, type TipoRifornimento } from '../../../../shared/rifornimento';
 
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
@@ -40,7 +40,7 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
   const aMano = !chiave && !nuovo && dati._aMano === true;
   return (
     <div className="flex flex-col gap-3">
-      <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato}
+      <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato} onCreato={() => void elenco.ricarica()}
         onScegli={(o) => imposta({ catalogo_chiave: o.chiave, _aMano: false })} />
       {collegato && <div className="flex min-w-0 flex-col gap-1 testo-13">
         <Link className="touch inline-flex items-center self-start" to={collegato.casa}>{collegato.nome}</Link>
@@ -49,14 +49,17 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       </div>}
       {chiave && !nuovo && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Scollega l’oggetto" className="self-start" disabled={disabilitato} onClick={() => imposta({ catalogo_chiave: null, _aMano: true, oggetto_fonte: null, oggetto_chiave: null })} />}
       <p className="m-0 testo-12 text-text-muted">Nome, categoria ed effetto si modificano nel catalogo dell’oggetto. Qui cambi solo la sua offerta nel negozio.</p>
-      {aMano && (
+      {/* L4-07: un'offerta collegata non ha nome, categoria né «per chi» propri; scollegata adesso, al salvataggio tiene quelli dell'oggetto
+          che mostrava (il server li prende dall'oggetto): fino ad allora non c'è niente da scegliere qui */}
+      {aMano && !testoDi(dati.nome) && <p className="m-0 testo-13 text-pretty">Salvando, l’offerta tiene nome, categoria e «per chi» dell’oggetto scollegato.</p>}
+      {aMano && !!testoDi(dati.nome) && (
         <Griglia>
           {/* L13 (O7-5, regola 3): il nome scritto a mano è un dato storico non collegato: si legge col suo motivo e non si riscrive — l'oggetto
               si sceglie dal catalogo qui sopra. Il corpo verso l'API non cambia: parte il nome salvato */}
           <Blocco largo>
             <span className="campo__etichetta">Nome dell’offerta non collegata</span>
-            <p className="m-0 testo-14 break-words">{testoDi(dati.nome) || '—'}</p>
-            <p className="m-0 testo-12 text-text-muted text-pretty">Dato storico: questa offerta non ha un oggetto del catalogo, e il nome resta com’era scritto. Per correggerlo scegli l’oggetto dal catalogo qui sopra; scollegare non copia il nome dell’oggetto.</p>
+            <p className="m-0 testo-14 break-words">{testoDi(dati.nome)}</p>
+            <p className="m-0 testo-12 text-text-muted text-pretty">Dato storico: questa offerta non ha un oggetto del catalogo e il nome resta com’è scritto. Per correggerlo scegli l’oggetto dal catalogo qui sopra.</p>
           </Blocco>
           <Blocco largo>
             <SelettoreIcone compatto etichetta="Categoria" valore={testoDi(dati.categoria) || 'altro'} opzioni={OPZIONI_CATEGORIA} disabilitato={disabilitato} onCambia={(categoria) => imposta({ categoria })} />
@@ -69,7 +72,7 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
       <CostoOfferta dati={dati} imposta={imposta} disabilitato={disabilitato} catalogo={catalogo} />
       <Griglia>
         <Campo nome="quantita" etichetta="Pezzi per ciclo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quanti se ne comprano prima del rifornimento. Vuoto = nessun limite dichiarato" />
-        <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null} quantita={typeof dati.quantita === 'number' ? dati.quantita : null}
+        <EditorRifornimento valore={(dati.rifornimento_json as RegolaRifornimento | null) ?? null}
           nonLeggibile={dati._rifornimentoNonLeggibile === true && dati._rifornimentoModificato !== true}
           disabilitato={disabilitato} onCambia={(r) => imposta({ rifornimento_json: r, _rifornimentoModificato: true })} />
         <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} largo />
@@ -103,8 +106,9 @@ function GiorniDiConsegna({ giorni, disabilitato, onCambia }: { giorni: number; 
 /**
  * Ondata 5 (decisione 21): la regola di rifornimento dell'offerta, un punto solo (`articolo.rifornimento_json`): quando torna, da dove viene
  * la regola e se va verificata in gioco. Il giorno della settimana solo per «Ogni settimana», i giorni di consegna solo per l'ordine.
+ * L3: niente più la frase in sola lettura che ripeteva i campi appena sopra («2 pezzi, rifornimento ogni lunedì»).
  */
-function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCambia }: { valore: RegolaRifornimento | null; quantita: number | null; nonLeggibile?: boolean; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
+export function EditorRifornimento({ valore, nonLeggibile, disabilitato, onCambia }: { valore: RegolaRifornimento | null; nonLeggibile?: boolean; disabilitato?: boolean; onCambia: (r: RegolaRifornimento | null) => void }) {
   const cambiaTipo = (tipo: string) => {
     if (!tipo) { onCambia(null); return; }
     const t = tipo as TipoRifornimento;
@@ -125,7 +129,6 @@ function EditorRifornimento({ valore, quantita, nonLeggibile, disabilitato, onCa
       </div>
       {valore && <label className="touch flex items-center gap-2 testo-13"><input type="checkbox" className="h-5 w-5" checked={valore.daVerificare === true} disabled={disabilitato}
         onChange={(e) => { const resto: RegolaRifornimento = { ...valore }; delete resto.daVerificare; onCambia(e.target.checked ? { ...resto, daVerificare: true } : resto); }} />Da verificare in gioco</label>}
-      {valore && <p className="m-0 testo-12 text-text-muted text-pretty">{descriviRifornimento(valore, quantita)}</p>}
     </fieldset>
   );
 }

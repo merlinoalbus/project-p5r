@@ -38,7 +38,8 @@ function AggiungiAlCatalogoReale({ tipo, titolo, dettaglio = 'resta dopo gli agg
   tipo: TipoModulo;
   titolo: string;
   dettaglio?: string;
-  onSalvato: () => void;
+  /** Dopo la creazione, con l'elemento creato. */
+  onSalvato: (creato?: ElementoCatalogoDto) => void;
   className?: string;
 }) {
   const [aperto, setAperto] = useState(false);
@@ -47,7 +48,7 @@ function AggiungiAlCatalogoReale({ tipo, titolo, dettaglio = 'resta dopo gli agg
       icona={<IconaAzione chiave="carica-altri" dimensione={20} />}
       titolo={titolo} dettaglio={dettaglio} onClick={() => setAperto(true)} />
     {aperto && <ModuloCatalogo tipo={tipo} onChiudi={() => setAperto(false)}
-      onSalvato={() => { setAperto(false); onSalvato(); }} />}
+      onSalvato={(creato) => { setAperto(false); onSalvato(creato); }} />}
   </>;
 }
 

@@ -25,10 +25,10 @@ import { slug } from '../../shared/slug.js';
 import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto } from '../../shared/effettiCatalogo.js';
 import { tracciamentoPerTipo } from '../../shared/attivita.js';
-import { catalogoOggettiDisponibile, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
+import { catalogoOggettiDisponibile, identitaDellOggettoPerLOfferta, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { conCestino } from './cestinoService.js';
-import { normalizzaCostoScambio } from '../../shared/catalogo.js';
+import { IDENTITA_DI_UN_OFFERTA_COLLEGATA, normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { aggiornaOggetto, creaOggetto } from './catalogoOggettiScritture.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { verificaAttivitaConfidente, verificaCampiAttivitaConfidente } from './vincoliAttivitaConfidente.js';
@@ -36,6 +36,8 @@ import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAtti
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { verificaDomandaEsame } from './esamiCollegamento.js';
 import { normalizzaSconto } from '../../shared/scontiNegozi.js';
+import { tipoPuntoVenditaDelLuogo } from '../../shared/puntoVendita.js';
+import { allineaSegnoDelNegozio, allineaSegnoRegola, completaConLaRegola } from './regoleNegoziService.js';
 import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaPuntoVendita, verificaNuovoPuntoVendita, verificaPuntoVenditaNascosto } from './invariantiPuntoVendita.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
@@ -44,11 +46,11 @@ import { verificaEliminazioneDiVendita, verificaModificaLuogo, verificaModificaP
 // non hanno `disponibile_dal`/`condizione`/`fonte` (prosa: si scrivono le condizioni), libri, film
 // e attività portano `effetti_json`; `fonte` resta colonna ma non si scrive più da qui.
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
-  // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
-  // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
+  // L5: con la sede valgono gli orari del luogo, salvo `eccezione_orari_json` quando la guida distingue il negozio (R5-12b); L4-02 (373):
+  // `orari_json` del negozio non c'è più, e chi non ha sede tiene i suoi orari come eccezione
   // chiusura dell'ondata 5: `sconto_json`, lo sconto legato al rango di un Confidente (migrazione 254), il suo unico punto
   // La posizione è solo `sede_chiave` (luogo → quartiere): il quartiere si deriva sempre, non si scrive.
-  negozio: ['nome', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
+  negozio: ['nome', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'sconto_json', 'note'],
   // `effetto_json`, `effetto` e `statistiche` non sono più dell'offerta (colonne tolte): il testo dell'effetto e le statistiche vivono
   // in un punto solo, l'oggetto del catalogo (`catalogo_oggetto.effetto`, `statistiche_json`).
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'prezzo_per_fascia_json', 'quantita', 'rifornimento_json', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'nota', 'verificato'],
@@ -277,13 +279,20 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     // uno scambio non ha prezzo in yen, né in una fascia (Ondata 5, lotto E)
     if (d.costo_json != null) { d.prezzo = null; d.prezzo_per_fascia_json = null; }
     if (conCatalogo && typeof chiave === 'string') {
-      // Questi campi sono solo residui storici: non si copiano né si corregge l'identità dal listino.
+      // L4-07: nome, categoria e «per chi» valgono solo per un'offerta senza legame; con il legame li dà l'oggetto del catalogo. Non si
+      // copiano né si corregge l'identità dal listino: la riga collegata li ha vuoti (NOT NULL: nome vuoto, categoria «altro»), anche
+      // quando un'offerta che aveva i suoi viene collegata adesso (la migrazione 376 ha portato così le righe di prima, con l'archivio).
       for (const c of ['nome', 'categoria', 'per']) delete d[c];
-      // I vecchi NOT NULL restano fino a L11; valori vuoti/non classificati, mai una copia del nome.
-      if (!esistente) { d.nome = ''; d.categoria = 'altro'; }
+      Object.assign(d, IDENTITA_DI_UN_OFFERTA_COLLEGATA);
       if ('catalogo_chiave' in dati && dati.catalogo_chiave !== esistente?.catalogo_chiave) { d.oggetto_fonte = null; d.oggetto_chiave = null; }
     } else {
       if (!esistente && d.categoria === undefined) d.categoria = 'altro';
+      // L4-07: un'offerta che perde adesso il legame senza un nome scritto qui tiene nome, categoria e «per chi» che mostrava (dall'oggetto);
+      // con un nome scritto valgono i valori mandati
+      if (conCatalogo && typeof esistente?.catalogo_chiave === 'string' && (typeof d.nome !== 'string' || !d.nome.trim())) {
+        const prima = identitaDellOggettoPerLOfferta(esistente.catalogo_chiave);
+        if (prima) Object.assign(d, prima);
+      }
       const nome = typeof d.nome === 'string' ? d.nome.trim() : esistente?.nome;
       if (!nome) throw httpErrors.badRequest('nome-mancante', 'Per un’offerta senza oggetto collegato indica il nome.');
     }
@@ -400,12 +409,14 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
   return elemento;
 }
 
-function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+/** La creazione dentro la transazione di chi chiama (l'editor del posto salva luogo, punti vendita e offerte insieme). */
+export function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
   if (tipo === 'negozio') verificaNuovoPuntoVendita(grezzi);
-  const dati = normalizzaScrittura(tipo, grezzi, null);
+  // L4-01: un'offerta nuova di un punto vendita con la regola comune prende dalla regola i campi che non dice
+  const dati = tipo === 'articolo' ? completaConLaRegola(normalizzaScrittura(tipo, grezzi, null)) : normalizzaScrittura(tipo, grezzi, null);
   if (tipo === 'domanda' && typeof dati.data === 'string' && typeof dati.tipo === 'string') verificaDomandaEsame(null, { data: dati.data, tipo: dati.tipo });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), dati);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), dati);
@@ -447,7 +458,12 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), valori);
   prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
   assicuraIdentitaLettura(tipo, chiave, nome);
-  return dto(tipo, riga(tipo, chiave));
+  if (tipo === 'articolo') allineaSegnoRegola(chiave);
+  // L3 (I4): un luogo che nasce per vendere nasce col suo primo punto vendita, dallo stesso nome; il listino si scrive nell'editor del posto
+  const venduto = tipo === 'luogo' && typeof dati.tipo === 'string' ? tipoPuntoVenditaDelLuogo(dati.tipo) : null;
+  const creato = dto(tipo, riga(tipo, chiave));
+  if (venduto) creato.puntoVendita = creaElementoNellaTransazione('negozio', { nome, tipo: venduto, sede_chiave: chiave }).chiave;
+  return creato;
 }
 
 /** Modifica una riga: quella del seed viene «adottata» dall'utente conservando l'originale in `seed_json`. */
@@ -457,7 +473,8 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
   return elemento;
 }
 
-function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+/** La modifica dentro la transazione di chi chiama (l'editor del posto). */
+export function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   const r = riga(tipo, chiave);
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
@@ -489,8 +506,20 @@ function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, gr
       const aggiornata = riga(tipo, chiave);
       if (titolo && typeof aggiornata.catalogo_chiave === 'string') aggiornaOggetto(aggiornata.catalogo_chiave, { nome: titolo });
     }
+    // L4-01: un'offerta che cambia pezzi, rifornimento o condizioni diventa un'eccezione alla regola comune (o ci torna se li rimette uguali);
+    // un punto vendita che cambia genere ricalcola il segno delle sue offerte
+    if (tipo === 'articolo') allineaSegnoRegola(chiave);
+    if (tipo === 'negozio' && 'tipo' in dati && dati.tipo !== r.tipo) allineaSegnoDelNegozio(chiave);
   })();
   return dto(tipo, riga(tipo, chiave));
+}
+
+/** L4-01: una riga che cambia per un gesto fuori dal suo modulo (la regola comune riscrive le offerte che la seguono) è adottata come in
+ *  `aggiornaElementoNellaTransazione`: passa a `origine = 'utente'` e, se era della guida, conserva l'originale in `seed_json`. */
+export function adottaRigaDellaGuida(tipo: TipoCatalogo, chiave: string): void {
+  const r = riga(tipo, chiave);
+  const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(campiDisponibili(tipo).map((c) => [c, r[c] ?? null]))) : null);
+  prepared(`UPDATE ${TABELLA[tipo]} SET origine = 'utente', seed_json = ? WHERE chiave = ?`).run(seedJson, chiave);
 }
 
 /** Nasconde (o rimostra) una riga: usato per le voci del seed che nel gioco non esistono. */
@@ -595,6 +624,11 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   if (tipo === 'negozio') verificaModificaPuntoVendita(r, valori);
   if (tipo === 'luogo') verificaModificaLuogo(r, valori);
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
+  // L4-07: la fotografia può riportare nome, categoria e «per chi» di quando l'offerta era scritta a mano; con il legame non valgono
+  if (tipo === 'articolo') prepared('UPDATE articolo SET nome = @nome, categoria = @categoria, per = @per WHERE chiave = @chiave AND catalogo_chiave IS NOT NULL')
+    .run({ ...IDENTITA_DI_UN_OFFERTA_COLLEGATA, chiave });
+  if (tipo === 'articolo') allineaSegnoRegola(chiave);
+  if (tipo === 'negozio') allineaSegnoDelNegozio(chiave);
   const risultato = dto(tipo, riga(tipo, chiave));
   if (conservaFonteConfidente) risultato.avvisi = ['La fotografia precede il collegamento al Confidente: fonte, requisiti e campi operativi correnti sono stati conservati. Gli altri valori sono stati ripristinati.'];
   return risultato;

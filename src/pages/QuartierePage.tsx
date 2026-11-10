@@ -91,7 +91,8 @@ function EditorSbloccoQuartiereReale({ chiave, nome, sblocco, onChiudi, onSalvat
     </div>
   </Modal>;
 }
-import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
+import { ModificaPosto } from '../components/negozi/FinestraPosto';
 import { NienteInRilascio, type StrumentoDiModifica } from '../components/shared/SoloPreparazione';
 
 /**
@@ -129,7 +130,8 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
         {l.giorniTesto && <span><strong className="text-text">Giorni:</strong> {l.giorniTesto}</span>}
         {l.sblocco && <span><strong className="text-text">Sblocco:</strong> {l.sblocco}</span>}
       </div>
-      <div className="flex flex-wrap items-center gap-1.5"><CorreggiElemento tipo="luogo" chiave={l.chiave} onSalvato={onSalvato} /></div>
+      {/* L3: il luogo si modifica nel posto, con i suoi punti vendita e i listini (la stessa finestra della sua pagina) */}
+      <div className="flex flex-wrap items-center gap-1.5"><ModificaPosto luogo={l.chiave} nome={l.nome} onSalvato={onSalvato} /></div>
       {(l.confidenti.length > 0 || l.attivita.length > 0) && (
         <div className="flex flex-wrap gap-1.5 items-center">
           {l.confidenti.map((c) => <Link key={c.chiave} to={`/confidenti/${c.chiave}`} className="chip chip--attivo no-underline">{c.nome}</Link>)}
@@ -168,7 +170,7 @@ export function QuartierePage() {
   useRileggiAlCambio(dati.ricarica, attiva);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
-  const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | null>(null);
+  const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | 'sblocco' | 'luogo' | null>(null);
   // L5 (F5): «Colloca» di un luogo senza area, con l'area proposta dalla migrazione
   const [colloca, setColloca] = useState<{ luogo: { chiave: string; nome: string }; proposta: string | null } | null>(null);
   // La finestra dell'area d'ingresso: aperta arrivando dalla metro (`?ingresso=1`, se c'è un ingresso) o con «Entra»
@@ -253,7 +255,9 @@ export function QuartierePage() {
             <div className="flex flex-col gap-4">
             <AreeDelQuartiere quartiere={q} onCambiato={() => dati.ricarica()} onAggiungi={() => setFinestra('aggiungi')} onPinSegnato={mostraPin} />
             <section className="flex flex-col gap-2" aria-label="Luoghi del quartiere">
-              {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5"><AggiungiAlCatalogo tipo="luogo" titolo="Aggiungi un luogo" onSalvato={() => void dati.ricarica()} /></div>}
+              {/* L5-06: un solo ingresso per creare un luogo, la finestra dell'area, col quartiere della pagina e l'area da scegliere
+                  (facoltativa); salvato, si apre il creato col suo posto (sul primo punto vendita, se nasce per vendere) */}
+              {!IN_RILASCIO && <PulsanteVisivo compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un luogo" onClick={() => setFinestra('luogo')} />}
               {tipi.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
                   <button type="button" className={`chip touch ${tipo === '' ? 'chip--attivo' : ''}`} onClick={() => setTipo('')} aria-pressed={tipo === ''}>Tutti ({q.luoghi.length})</button>
@@ -286,6 +290,7 @@ export function QuartierePage() {
 
           {!IN_RILASCIO && finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
           {colloca && <FinestraColloca luogo={colloca.luogo} proposta={colloca.proposta} aree={q.aree.map((a) => ({ slug: a.slug, nome: a.nome }))} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
+          {finestra === 'luogo' && <FinestraAggiungiLuogo quartiere={q.chiave} aree={q.aree.map((a) => ({ slug: a.slug, nome: a.nome }))} onChiudi={() => setFinestra(null)} onFatto={() => void dati.ricarica()} />}
           {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={(area) => { void dati.ricarica().then(() => { if (area.passaggio) mostraPin(area.passaggio.spillo); }); }} />}
           {!IN_RILASCIO && finestra === 'sblocco' && <EditorSbloccoQuartiere chiave={q.chiave} nome={q.nome} sblocco={q.sbloccoCondizione} onChiudi={() => setFinestra(null)} onSalvato={() => void dati.ricarica()} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom

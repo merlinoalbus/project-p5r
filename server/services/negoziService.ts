@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Dalla voce 4 del piano «struttura, non frasi» (2026-09-12) la disponibilità di un negozio è
-// **solo i suoi orari** (`orari_json`, migrazione 069): un negozio che non è ancora aperto non è
+// **solo i suoi orari** (oggi quelli della sede o la sua eccezione, migrazione 373): un negozio che non è ancora aperto non è
 // un posto che non c'è, e le condizioni di sblocco vivono sugli articoli (070). Il negozio ha una
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
@@ -32,15 +32,16 @@ import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, 
 import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
+import { ancoraPuntoVendita } from '../../shared/puntoVendita.js';
 import { compratoNelCiclo } from '../../shared/rifornimento.js';
 import { noteStoricheDi } from './noteStoricheService.js';
 import { momentoDellaVoce, presenzaSenzaRiga, regolaDi, requisitoScorta, rifornimentoDellArticolo, rigaDellaVoce, righeDellArticolo, scortaDellArticolo, scriviRiga, togliRiga, ultimaRigaDelNegozio } from './scorteService.js';
 import type { ArticoloDto, CatalogoOggettoDto, DisponibilitaDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, ScortaArticoloDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
-interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
+interface PresenzaRiga { sblocco_json?: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
 interface RigaNegozio extends PresenzaRiga {
-  orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null;
+  sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null;
   sconto_json?: string | null; chiave: string; ordine: number; nome: string; tipo: string; gestore: string | null;
   confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null;
   /** Il quartiere si deriva sempre dalla sede (luogo → quartiere): senza sede (Niijima) sono entrambi null. */
@@ -49,7 +50,7 @@ interface RigaNegozio extends PresenzaRiga {
 interface RigaArticolo {
   prezzo_per_fascia_json?: string | null; rifornimento_json?: string | null; catalogo_chiave?: string | null; costo_json?: string | null;
   condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string;
-  negozio_confidente?: string | null; negozio_orari?: string | null;
+  negozio_confidente?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
   negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null;
   sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null;
@@ -61,7 +62,7 @@ interface RigaArticolo {
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.chiave AS quartiere_chiave, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
   FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave`;
-const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.orari_json AS negozio_orari, n.eccezione_orari_json AS negozio_eccezione,
+const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.eccezione_orari_json AS negozio_eccezione,
   n.sblocco_json AS negozio_sblocco, n.sede_chiave AS negozio_sede, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json
   FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
 
@@ -75,9 +76,10 @@ function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).ma
  * la guida la distingue; senza sede (online, televisione, dentro un Palazzo) restano i suoi. Il testo dice da dove vengono.
  */
 function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string } {
+  // L4-02 (migrazione 373): gli orari propri sono solo l'eccezione, anche per chi non ha sede (il negozio del Palazzo di Niijima)
   if (r.eccezione_orari_json) { const o = leggiOrari(r.eccezione_orari_json); return { orari: o, testo: descriviOrari(o) }; }
   if (r.sede_chiave) { const o = orariDelLuogo(r.sede_orari_json ?? null); return { orari: o, testo: descriviOrariDelLuogo(o) }; }
-  const o = leggiOrari(r.orari_json);
+  const o = leggiOrari(null);
   return { orari: o, testo: descriviOrari(o) };
 }
 
@@ -99,7 +101,7 @@ function sedeCasa(chiave: string, sede: string | null): string | null {
   if (!sede) return null;
   const i = sede.indexOf('/');
   const pagina = i > 0 ? `/guida/luogo/${encodeURIComponent(sede.slice(0, i))}/${encodeURIComponent(sede.slice(i + 1))}` : `/guida/luogo/${encodeURIComponent(sede)}`;
-  return `${pagina}#negozio-${encodeURIComponent(chiave)}`;
+  return `${pagina}#${ancoraPuntoVendita(chiave)}`;
 }
 
 /** Il programma punti di un negozio, dal JSON della riga (migrazione 076); null se assente o malformato. */
@@ -164,7 +166,7 @@ function scontoDelNegozio(json: string | null): NegozioRiassuntoDto['sconto'] {
  *  di 3», «Esaurito: torna lunedì 25 aprile»), calcolata dal registro degli acquisti (`scorteService`): esaurita, l'articolo è bloccato. */
 function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita, scorta: ScortaArticoloDto | null = scortaDellArticolo(r, st)): DisponibilitaDto {
   // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
-  const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
+  const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
   const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
   const esito = valutaRequisiti([...negozio, ...regole(r.condizioni_json)], st);
   const requisiti = esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q));
@@ -396,11 +398,14 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
   if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
   const st = opz.st ?? statoDisponibilitaPartita(partitaId);
+  // L4-06: gli acquisti si leggono una volta per gesto. Lo stato appena calcolato qui li porta già (`articoliOttenuti`, la stessa lettura
+  // di `chiaviArticoliOttenuti`); uno stato passato da chi chiama (un altro giorno di gioco) non è di adesso, e allora si rileggono.
+  const ottenutiAdesso = (): Set<string> => (opz.st ? acquistiPartita(partitaId) : st.articoliOttenuti);
   const catalogo = identitaArticoli([r]);
   const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
   const prodotto = articoloDto(r, new Set(), st, catalogo, ricevuti);
   if (eOffertaAojiru({ chiave: r.chiave, catalogoChiave: r.catalogo_chiave })) {
-    if (fatto && acquistiArticolo(partitaId, articoloChiave).presenzaStorica) return articoloDto(r, acquistiPartita(partitaId), st, catalogo, ricevuti);
+    if (fatto && acquistiArticolo(partitaId, articoloChiave).presenzaStorica) return articoloDto(r, ottenutiAdesso(), st, catalogo, ricevuti);
     throw httpErrors.conflict(fatto ? 'consumazione-aojiru-richiesta' : 'rimozione-presenza-legacy-richiesta',
       fatto ? 'Per Aojiru registra una consumazione o collega una fonte: una nuova spunta non ne dichiara quantità o variante.'
         : 'Rimuovi la sola presenza storica dal riepilogo con anteprima e conferma. Le consumazioni restano distinte.', { articolo: articoloChiave });
@@ -409,7 +414,7 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   // il pezzo unico già ottenuto (con questa chiave) non si compra una seconda volta dalla pagina del negozio: la spunta ripetuta non cambia
   // niente, come prima del registro (una voce che lo attesta di nuovo passa da `registraCopiaDaVoce`)
   if (fatto && !opz.voce && regolaDi(r)?.tipo === 'mai' && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave)) {
-    return articoloDto(r, acquistiPartita(partitaId), st, catalogo, ricevuti);
+    return articoloDto(r, ottenutiAdesso(), st, catalogo, ricevuti);
   }
   const adesso = nowIso();
   getDb().transaction(() => {
@@ -460,7 +465,13 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);
+  return articoloDopoIlGesto(r, partitaId, catalogo, ricevuti);
+}
+
+/** L'offerta dopo un gesto d'acquisto: lo stato della partita si rilegge una volta, e i suoi acquisti valgono anche per il segno «ottenuto». */
+function articoloDopoIlGesto(r: RigaArticolo, partitaId: number, catalogo: Map<string, CatalogoOggettoDto> | undefined, ricevuti: NonNullable<ArticoloDto['ricevuti']> | undefined): ArticoloDto {
+  const dopo = statoDisponibilitaPartita(partitaId);
+  return articoloDto(r, dopo.articoliOttenuti, dopo, catalogo, ricevuti);
 }
 
 /**
@@ -507,5 +518,5 @@ export function annullaRigaDelRegistro(partitaId: number, rigaId: number): Artic
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
   if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’acquisto è stato tolto; l’articolo non è più nel listino.');
-  return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), identitaArticoli([r]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
+  return articoloDopoIlGesto(r, partitaId, identitaArticoli([r]), ricompensePerFonte('articolo', [r.chiave]).get(r.chiave));
 }

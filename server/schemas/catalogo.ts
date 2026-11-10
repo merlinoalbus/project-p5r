@@ -78,7 +78,6 @@ export const datiNegozio = z.object({
   confidente_chiave: z.string().max(80).nullable().optional(),
   /** La sede: un luogo della città (migrazione 072). È l'unico «dove» del negozio: il quartiere si deriva dal luogo. */
   sede_chiave: z.string().max(200).nullable().optional(),
-  orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
   /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo; null = vale quello della sede. */
   eccezione_orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
@@ -266,5 +265,29 @@ const datiCruciverba = z.object({
 export const SCHEMI_CATALOGO = { negozio: datiNegozio, articolo: datiArticolo, libro: datiLibro, film: datiFilm, attivita: datiAttivita, luogo: datiLuogo, domanda: datiDomanda, cruciverba: datiCruciverba } as const;
 /** Gli stessi, per la correzione di alcuni campi soltanto: film e attività portano la rifinitura sulla forma parziale. */
 export const SCHEMI_CATALOGO_PARZIALI = { negozio: datiNegozio.partial(), articolo: datiArticolo.partial(), libro: datiLibro.partial(), film: datiFilmParziale, attivita: datiAttivitaParziale, luogo: datiLuogo.partial(), domanda: datiDomanda.partial(), cruciverba: datiCruciverba.partial() } as const;
+/** L3: la chiave del luogo nel percorso dell'editor del posto (`/catalogo/posto/:quartiere/:luogo`). */
+export const paramsPosto = z.object({ quartiere: z.string().min(1).max(80), luogo: z.string().min(1).max(160) });
+const campiGrezzi = z.record(z.string(), z.unknown());
+/** L3: il corpo del salvataggio del posto; i campi di luogo, punti vendita e offerte li valida poi lo schema del loro tipo. */
+export const bodySalvaPosto = z.object({
+  luogo: campiGrezzi.optional(),
+  /** L4-01: le regole comuni cambiate, una per genere di punto vendita, con i soli campi cambiati (pezzi, rifornimento, condizioni) e gli
+   *  stessi controlli dei campi dell'offerta. */
+  regole: z.array(z.object({
+    tipo: z.string().min(1).max(40),
+    quantita: z.number().int().min(0).max(9_999).nullable().optional(),
+    rifornimento_json: z.unknown().superRefine((v, ctx) => {
+      if (v !== null && v !== undefined && normalizzaRifornimento(v) === null) ctx.addIssue({ code: 'custom', message: 'Regola di rifornimento non valida.' });
+    }).transform((v) => (v === undefined ? undefined : v === null ? null : JSON.stringify(normalizzaRifornimento(v)))).optional(),
+    condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
+  }).strict()).max(10).refine((r) => new Set(r.map((x) => x.tipo)).size === r.length, 'Una regola per genere.').optional(),
+  puntiVendita: z.array(z.object({
+    chiave: z.string().min(1).max(200).optional(),
+    dati: campiGrezzi.optional(),
+    // `copiaDa`: per un'offerta nuova nata da «Duplica», l'offerta d'origine di cui copiare i contenuti (i set, `ricompensa_oggetto`)
+    offerte: z.array(z.object({ chiave: z.string().min(1).max(600).optional(), dati: campiGrezzi, copiaDa: z.string().min(1).max(600).optional() }).strict()).max(400),
+    offerteTolte: z.array(z.string().min(1).max(600)).max(400).optional(),
+  }).strict()).max(30),
+}).strict();
 export const queryNascosti = z.object({ nascosti: z.enum(['1', 'true']).optional(), negozio: z.string().min(1).max(200).optional() });
 export const bodyNascondi = z.object({ nascosta: z.boolean() });

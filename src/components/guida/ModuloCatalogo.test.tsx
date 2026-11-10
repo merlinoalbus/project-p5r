@@ -105,7 +105,7 @@ describe('ModuloCatalogo', () => {
   it('non si salva senza nome', () => {
     render(<ModuloCatalogo tipo="negozio" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Salva' })).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Nome del negozio'), { target: { value: 'Chiosco' } });
+    fireEvent.change(screen.getByLabelText('Nome del punto vendita'), { target: { value: 'Chiosco' } });
     expect(screen.getByRole('button', { name: 'Salva' })).toBeEnabled();
   });
 
@@ -135,7 +135,7 @@ describe('ModuloCatalogo', () => {
   it('dichiara il programma punti di un negozio solo quando c’è', async () => {
     api.creaElementoCatalogo.mockResolvedValue({ nome: 'Vestiti usati' });
     render(<ModuloCatalogo tipo="negozio" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText('Nome del negozio'), { target: { value: 'Vestiti usati' } });
+    fireEvent.change(screen.getByLabelText('Nome del punto vendita'), { target: { value: 'Vestiti usati' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /programma punti/ }));
     fireEvent.change(screen.getByLabelText('Nome del programma'), { target: { value: 'Tessera' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
@@ -161,7 +161,7 @@ describe('ModuloCatalogo', () => {
 it('la sede scelta scrive solo la sede, senza quartiere né testo', async () => {
   api.creaElementoCatalogo.mockResolvedValue({ nome: 'Chiosco' });
   render(<ModuloCatalogo tipo="negozio" onChiudi={vi.fn()} onSalvato={vi.fn()} />);
-  fireEvent.change(screen.getByLabelText('Nome del negozio'), { target: { value: 'Chiosco' } });
+  fireEvent.change(screen.getByLabelText('Nome del punto vendita'), { target: { value: 'Chiosco' } });
   scegliVoce('Sede', /^Untouchable/);
   fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
   await waitFor(() => expect(api.creaElementoCatalogo).toHaveBeenLastCalledWith('negozio', expect.objectContaining({ sede_chiave: 'shibuya/untouchable' })));

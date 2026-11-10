@@ -6,6 +6,8 @@
 // la regola dell'app, con le eccezioni dei negozi), sblocco generato dalla condizione, i listini di tutti i negozi della sede (lo stesso
 // `ListinoNegozio` della pagina del negozio, un'ancora `#negozio-<chiave>` per negozio), Confidenti, attività, piatti, note e «Dove si
 // trova» (la planimetria del pin con lo spillo selezionato: il pin del luogo si vede sempre, anche chiuso, perché è lo spillo chiesto).
+// L3: «Modifica» apre «Il posto» (luogo, punti vendita e listini in una finestra); ogni punto vendita ha la sua sezione, col suo pin
+// («Sulla mappa») quando ce l'ha, e arrivando con l'ancora di un punto vendita la mappa mostra il suo pin.
 // Formati: da 1280 px due colonne (intestazione e negozi | dove si trova, Confidenti, attività); sotto, una colonna con «Dove si trova» subito
 // dopo l'intestazione.
 // ============================================================
@@ -13,8 +15,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
-import { useLocation, useParams } from '../components/scheda/routerScheda';
-import { getArea, getElementoCatalogo, getLuogo, getQuartiere } from '../services/api';
+import { useLocation, useNavigate, useParams } from '../components/scheda/routerScheda';
+import { getArea, getLuogo, getQuartiere } from '../services/api';
+import { FinestraPosto } from '../components/negozi/FinestraPosto';
 import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
@@ -26,13 +29,10 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { CollegamentoVisivo, PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
-import { MenuModifica } from '../components/shared/MenuModifica';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { ListinoNegozio } from '../components/negozi/ListinoNegozio';
-import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
-import { CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citta';
@@ -42,7 +42,7 @@ import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
 import { compratoNelCiclo } from '../../shared/rifornimento';
 import { testoSconto } from '../../shared/scontiNegozi';
-import type { ElementoCatalogoDto, LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
+import type { LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -80,11 +80,15 @@ export function LuogoPage() {
     ancoraVista.current = hash;
     el.scrollIntoView?.({ block: 'start' });
   }, [l, hash]);
-  // il modulo del catalogo per un articolo (correzione o aggiunta) di un negozio della sede
-  const [modulo, setModulo] = useState<{ negozio: string; elemento: ElementoCatalogoDto | null } | null>(null);
+  // L3: «Il posto», la finestra unica di luogo, punti vendita e listini; aperta su un punto vendita (o, arrivando da una creazione, su
+  // quello appena nato: `state.apriPosto`)
+  // `apriPosto`: la chiave del punto vendita su cui aprire, o `true` per il posto com'è (il primo punto vendita, o il luogo)
+  const stato = useLocation().state as { apriPosto?: string | true } | null;
+  const [posto, setPosto] = useState<{ apri?: string } | null>(() => (stato?.apriPosto ? { apri: typeof stato.apriPosto === 'string' ? stato.apriPosto : undefined } : null));
+  const navigate = useNavigate();
   const [versione, setVersione] = useState(0);
-  /** Dopo un salvataggio: chiude il modulo, fa rileggere gli articoli nascosti e la pagina. */
-  const salvato = () => { setModulo(null); setVersione((v) => v + 1); void dati.ricarica(); };
+  // L3: il pin mostrato in «Dove si trova»: quello del punto vendita dell'ancora, o quello scelto con «Sulla mappa»; altrimenti il primo
+  const [pinScelto, setPinScelto] = useState<number | null>(null);
   // L5 (F5): «Posiziona» con le planimetrie dell'area del luogo, «Colloca» con le aree del quartiere (lette al tocco)
   const [posiziona, setPosiziona] = useState<PlanimetriaAreaDto[] | null>(null);
   const [colloca, setColloca] = useState<Array<{ slug: string; nome: string }> | null>(null);
@@ -100,9 +104,10 @@ export function LuogoPage() {
     try { setColloca((await getQuartiere(l.quartiere)).aree.map((a) => ({ slug: a.slug, nome: a.nome }))); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aree non disponibili.'); }
   };
-  /** Carica dal catalogo l'articolo da correggere e apre il modulo; un errore va in notifica. */
-  const apriArticolo = (negozio: string, articolo: string) => {
-    void getElementoCatalogo('articolo', articolo).then((e) => setModulo({ negozio, elemento: e })).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'));
+  /** Mostra in «Dove si trova» il pin di un punto vendita e porta lì la vista. */
+  const mostraPin = (spillo: number) => {
+    setPinScelto(spillo);
+    requestAnimationFrame(() => document.getElementById('dove-si-trova')?.scrollIntoView?.({ block: 'start' }));
   };
 
   return (
@@ -112,6 +117,10 @@ export function LuogoPage() {
         const nonAncora = l.presenza?.sbloccato === false;
         const requisiti = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso') ?? [];
         const eccezioni = l.listini.filter((n) => n.eccezioneOrari);
+        // il pin di «Dove si trova»: quello scelto, o quello del punto vendita dell'ancora (il pin di una macchina apre la sua sezione e la
+        // mappa la mostra), altrimenti il primo del luogo
+        const daAncora = hash.startsWith('#negozio-') ? l.pins.find((p) => p.negozio && `#${ancoraNegozio(p.negozio)}` === decodeURIComponent(hash)) : undefined;
+        const mostrato = l.pins.find((p) => p.spillo === pinScelto) ?? daAncora ?? (l.pin ? { spillo: l.pin.spillo, mappa: l.pin.mappa } : null);
         return (
           <div className="flex flex-col gap-3 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start">
             {/* L10: da 1280 px l'intestazione occupa le due colonne. Stretta nei 3/5 della colonna di sinistra andava a capo (briciole,
@@ -135,9 +144,8 @@ export function LuogoPage() {
                       1280 px sta in cima alla colonna di destra: lì il pulsante non c'è */}
                   <PulsanteVisivo tono="fantasma" compatto className="max-sm:hidden xl:hidden" icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Dove si trova"
                     onClick={() => document.getElementById('dove-si-trova')?.scrollIntoView({ block: 'start' })} />
-                  {!IN_RILASCIO && <MenuModifica cosa={`il luogo «${l.nome}»`}>
-                    <CorreggiElemento tipo="luogo" chiave={l.chiave} titolo="Correggi il luogo" onSalvato={() => void dati.ricarica()} />
-                  </MenuModifica>}
+                  {/* L3: «Modifica» apre «Il posto»: luogo, punti vendita e listini in una finestra (prima un menu con il solo luogo) */}
+                  {!IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica il posto «${l.nome}»`} onClick={() => setPosto({})} />}
                 </>} />
             {/* la colonna di sinistra da 1280 px; sotto, i suoi blocchi si mescolano a quelli di destra con `order` */}
             <div className="contents xl:flex xl:flex-col xl:gap-3">
@@ -163,12 +171,16 @@ export function LuogoPage() {
               {l.listini.length > 0 && (
                 <section className="order-3 flex flex-col gap-3 xl:order-none" aria-label="Negozi qui">
                   {l.listini.length > 1 && <TitoloSezione variante="display">Negozi qui · {l.listini.length}</TitoloSezione>}
-                  {l.listini.map((n) => (
-                    <section key={n.chiave} id={ancoraNegozio(n.chiave)} className="card flex scroll-mt-20 flex-col gap-2" aria-label={`Negozio ${n.nome}`}>
+                  {l.listini.map((n) => {
+                    // L3 (una sezione per macchina): il pin del punto vendita, se ne ha uno, si mostra in «Dove si trova»
+                    const pinDelPunto = l.pins.find((p) => p.negozio === n.chiave) ?? null;
+                    return (
+                    <section key={n.chiave} id={ancoraNegozio(n.chiave)} className="card flex scroll-mt-20 flex-col gap-2" aria-label={`Punto vendita ${n.nome}`}>
                       <div className="flex flex-wrap items-center gap-2">
                         <TitoloSezione variante="display">{n.nome}</TitoloSezione>
                         <span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>
                         {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
+                        {pinDelPunto && <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Sulla mappa" aria-label={`${n.nome} sulla mappa`} onClick={() => mostraPin(pinDelPunto.spillo)} />}
                       </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 testo-13 text-text-secondary">
                         {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
@@ -178,15 +190,15 @@ export function LuogoPage() {
                       </div>
                       {n.note && <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words testo-13 text-text-secondary" />}
                       <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{!IN_RILASCIO && n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
+                      {/* L3: il punto vendita e il suo listino si modificano nel posto, aperto su di lui */}
                       {!IN_RILASCIO && <div className="flex flex-wrap gap-1.5">
-                        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" onClick={() => setModulo({ negozio: n.chiave, elemento: null })} />
-                        <CorreggiElemento tipo="negozio" chiave={n.chiave} titolo="Correggi il negozio" onSalvato={() => void dati.ricarica()} />
+                        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il listino" aria-label={`Modifica il listino di ${n.nome}`} onClick={() => setPosto({ apri: n.chiave })} />
                       </div>}
-                      {modulo?.negozio === n.chiave && <ModuloCatalogo tipo="articolo" elemento={modulo.elemento} negozioChiave={n.chiave} onChiudi={() => setModulo(null)} onSalvato={salvato} />}
-                      <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={(a) => apriArticolo(n.chiave, a)} onRipristinato={() => void dati.ricarica()}
+                      <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={() => setPosto({ apri: n.chiave })} onRipristinato={() => void dati.ricarica()}
                         onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, listini: attuale.listini.map((x) => (x.chiave !== n.chiave ? x : { ...x, articoliElenco: x.articoliElenco.map((y) => (y.chiave === a.chiave ? a : y)), acquistati: x.articoliElenco.filter((y) => compratoNelCiclo(y.chiave === a.chiave ? a : y)).length })) }))} />
                     </section>
-                  ))}
+                    );
+                  })}
                 </section>
               )}
             </div>
@@ -195,11 +207,11 @@ export function LuogoPage() {
             <div className="contents xl:flex xl:flex-col xl:gap-3">
               <section id="dove-si-trova" className="card order-2 flex scroll-mt-20 flex-col gap-2 xl:order-none" aria-label="Dove si trova">
                 <TitoloSezione variante="display">Dove si trova</TitoloSezione>
-                {l.pin
+                {l.pin && mostrato
                   ? <>
                     {/* il pin del luogo si vede sempre: è lo spillo chiesto (anche chiuso o non ancora sbloccato, R5-14) */}
                     {/* senza popup all'arrivo: la pagina dice già quel che il popup direbbe (si apre toccando il pin) */}
-                    <MappaIncorporata chiave={l.pin.mappa} spilloIniziale={l.pin.spillo} rivelaSpilloIniziale popupIniziale={false} className="h-[min(50dvh,420px)]" />
+                    <MappaIncorporata chiave={mostrato.mappa} spilloIniziale={mostrato.spillo} rivelaSpilloIniziale popupIniziale={false} className="h-[min(50dvh,420px)]" />
                     <div className="flex flex-wrap items-center gap-1.5">
                       <CollegamentoVisivo to={l.pin.casa} tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’area" dettaglio={l.area?.nome} />
                     </div>
@@ -254,6 +266,14 @@ export function LuogoPage() {
               {l.note && <section className="card order-4 xl:order-none" aria-label="Note"><p className="m-0 testo-12 text-text-muted">{l.note}</p></section>}
             </div>
             {posiziona && l.quartiere && <FinestraAggiungiLuogo quartiere={l.quartiere} luogo={{ chiave: l.chiave, nome: l.nome }} planimetrie={posiziona} onChiudi={() => setPosiziona(null)} onFatto={() => void dati.ricarica()} />}
+            {posto && <FinestraPosto luogo={l.chiave} apri={posto.apri}
+              onChiudi={() => { setPosto(null); if (stato?.apriPosto) navigate('.', { replace: true, state: null }); }}
+              onSalvato={(esito) => {
+                if (esito.eliminato) { navigate(l.quartiere ? `/guida/citta/${encodeURIComponent(l.quartiere)}` : '/guida/citta', { replace: true }); return; }
+                setVersione((v) => v + 1);
+                void dati.ricarica();
+                if (esito.chiudi) { setPosto(null); if (stato?.apriPosto) navigate('.', { replace: true, state: null }); }
+              }} />}
             {colloca && <FinestraColloca luogo={{ chiave: l.chiave, nome: l.nome }} aree={colloca} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
           </div>
         );

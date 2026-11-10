@@ -48,7 +48,9 @@ export interface LuogoNuovo { nome: string; tipo: string; cosaOffre?: string; or
  * Posiziona un luogo su una planimetria del mondo (R5-18): `luogo` esistente o `nuovo` (creato nel quartiere della planimetria), il pin collegato
  * e l'Area della planimetria, in una transazione. 404 se la planimetria o il luogo mancano; 400 se la planimetria non è di un quartiere o il luogo
  * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria, 409 `luogo-di-altra-area` se sta in un'altra
- * Area dello stesso quartiere (un luogo non cambia Area in silenzio: si cambia dal modulo del luogo). Restituisce la pagina del luogo.
+ * Area dello stesso quartiere (un luogo non cambia Area in silenzio: si cambia dal modulo del luogo). Il pin è lo spillo del genere
+ * (`spilloPerLuogo`; per Altro e Punto di interesse la «Nota», che può citare un luogo: `shared/spilli.riferimentiAmmessiPerTipo`).
+ * Restituisce la pagina del luogo.
  */
 export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa: string; x: number; y: number }): LuogoDettaglioDto {
   if ((dati.luogo === undefined) === (dati.nuovo === undefined)) throw httpErrors.badRequest('luogo-o-nuovo', 'Indica un luogo che esiste oppure i dati di un luogo nuovo: uno dei due.');

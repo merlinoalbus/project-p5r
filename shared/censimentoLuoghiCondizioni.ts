@@ -27,7 +27,6 @@ export interface NegozioCensimentoDto extends OrigineCensimentoDto {
   sede_chiave: string | null;
   note: string | null;
   sblocco_json: JsonCensimentoCondizioniDto;
-  orari_json: JsonCensimentoCondizioniDto;
   eccezione_orari_json: JsonCensimentoCondizioniDto;
 }
 

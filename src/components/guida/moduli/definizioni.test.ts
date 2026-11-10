@@ -10,10 +10,12 @@ import type { ElementoCatalogoDto } from '../../../types';
 const riga = (tipo: ElementoCatalogoDto['tipo'], dati: Record<string, unknown>): ElementoCatalogoDto => ({ tipo, chiave: 'k', nome: 'n', origine: 'seed', modificata: false, nascosta: false, aggiornata: null, dati });
 
 describe('negozio', () => {
-  it('parte con gli orari «sempre» e senza programma punti; legge gli orari salvati come JSON', () => {
-    expect(def.negozio.iniziali(null)).toMatchObject({ tipo: 'altro', orari_json: ORARI_SEMPRE, programma_punti_json: null, sede_chiave: null });
-    const d = def.negozio.iniziali(riga('negozio', { nome: 'X', orari_json: '{"giorni":["domenica"],"fasce":[],"chiusoConPioggia":true,"nota":null}', programma_punti_json: '{"nome":"Tessera","unita":"punti","calcolo":"manuale"}' }));
-    expect(d.orari_json).toEqual({ giorni: ['domenica'], fasce: [], chiusoConPioggia: true, nota: null });
+  // L5 (R5-12b) e L4-02 (373): gli orari sono del luogo della sede; il punto vendita ha solo la sua eccezione (`eccezione_orari_json`)
+  it('parte senza orari propri e senza programma punti; legge l’eccezione degli orari salvata come JSON', () => {
+    expect(def.negozio.iniziali(null)).toMatchObject({ tipo: 'altro', eccezione_orari_json: null, programma_punti_json: null, sede_chiave: null });
+    expect(def.negozio.iniziali(null)).not.toHaveProperty('orari_json');
+    const d = def.negozio.iniziali(riga('negozio', { nome: 'X', eccezione_orari_json: '{"giorni":["domenica"],"fasce":[],"chiusoConPioggia":true,"nota":null}', programma_punti_json: '{"nome":"Tessera","unita":"punti","calcolo":"manuale"}' }));
+    expect(d.eccezione_orari_json).toEqual({ giorni: ['domenica'], fasce: [], chiusoConPioggia: true, nota: null });
     expect(d.programma_punti_json).toEqual({ nome: 'Tessera', unita: 'punti', calcolo: 'manuale' });
   });
   it('non è valido senza nome, né con un programma punti senza nome', () => {
@@ -21,9 +23,11 @@ describe('negozio', () => {
     expect(def.negozio.valido({ ...def.negozio.iniziali(null), nome: 'X', programma_punti_json: { nome: '', unita: 'punti', calcolo: 'manuale' } })).toBe(false);
     expect(def.negozio.valido({ ...def.negozio.iniziali(null), nome: 'X' })).toBe(true);
   });
-  it('non manda condizioni né sblocco: la presenza sono gli orari', () => {
+  it('non manda condizioni né la frase di sblocco: la presenza sono gli orari del luogo, salvo l’eccezione', () => {
     const corpo = def.negozio.prepara({ ...def.negozio.iniziali(null), nome: ' Chiosco ', gestore: '' });
-    expect(corpo).toMatchObject({ nome: 'Chiosco', gestore: null, orari_json: ORARI_SEMPRE });
+    expect(corpo).toMatchObject({ nome: 'Chiosco', gestore: null, eccezione_orari_json: null });
+    expect(corpo).not.toHaveProperty('orari_json');
+    expect(def.negozio.prepara({ ...def.negozio.iniziali(null), nome: 'Chiosco', eccezione_orari_json: ORARI_SEMPRE })).toMatchObject({ eccezione_orari_json: ORARI_SEMPRE });
     expect(corpo).not.toHaveProperty('condizioni_json');
     expect(corpo).not.toHaveProperty('sblocco');
   });
@@ -145,7 +149,8 @@ describe('domanda e cruciverba', () => {
 
 describe('luogo', () => {
   it('legge orari, Confidenti e piatti salvati come JSON e li rimanda; senza orari vale la regola dell’app (null)', () => {
-    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: 'altro', orari_json: null, confidenti_json: [], piatti_json: null });
+    // L3: il genere di un luogo nuovo si sceglie: parte vuoto
+    expect(def.luogo.iniziali(null)).toMatchObject({ tipo: '', orari_json: null, confidenti_json: [], piatti_json: null });
     const d = def.luogo.iniziali(riga('luogo', { nome: 'X', quartiere_chiave: 'shibuya', orari_json: '{"giorni":["domenica"],"fasce":["sera"],"chiusoConPioggia":false,"nota":null}', confidenti_json: '["iwai",7]', piatti_json: '[{"nome":" Curry ","prezzo":800,"effetto":" PS "}]' }));
     expect(d.orari_json).toEqual({ giorni: ['domenica'], fasce: ['sera'], chiusoConPioggia: false, nota: null });
     expect(d.confidenti_json).toEqual(['iwai']);

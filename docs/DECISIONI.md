@@ -509,15 +509,46 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   un pin per punto vendita; un luogo che vende non resta senza punti vendita (spostati o nascosti), salvo una riga «In attesa: motivo»
   nelle sue note, nemmeno eliminandoli; un luogo con punti vendita si elimina solo dopo averli spostati o eliminati; una planimetria
   non cambia Area se un suo pin di punto vendita ne uscirebbe; nascondere un luogo intero, reversibile, nasconde con lui i suoi punti
-  vendita. Un luogo nuovo che vende può nascere senza punto vendita finché
-  l'editor del posto non li crea insieme.
+  vendita. Un luogo che nasce per vendere nasce col suo primo punto vendita, dallo stesso nome (una macchina per un distributore,
+  «Altro» da scegliere per un negozio).
+- Luogo, punti vendita e listini si modificano in una finestra sola, «Il posto», aperta da «Modifica» del luogo (anche dalla sua carta
+  nel quartiere e da «Modifica il listino» di un punto vendita): si aggiunge o si duplica un punto vendita (la copia ha offerte proprie,
+  la sorgente non cambia), si scrive il listino a righe (oggetto, prezzo, pezzi; il resto nei dettagli della riga), e un oggetto che
+  manca si crea dal selettore stesso. Si salva tutto insieme o niente. Un'offerta tolta va nel cestino solo se è dell'utente, mai
+  corretta e senza acquisti né risultati; altrimenti si nasconde. Ripristina, Nascondi ed Elimina di luogo e punto vendita restano gesti
+  immediati, con le modifiche salvate. Creato un luogo o un punto vendita, si apre il creato: la pagina del luogo con «Il posto» aperto
+  (sul punto vendita nuovo, se c'è); dall'editor della mappa, dove si sta lavorando sui pin, il luogo creato da un pin si apre dal suo
+  collegamento. Il genere di un luogo nuovo si sceglie sempre, senza un valore proposto. «Duplica» copia anche i contenuti dei set. Tre nomi distinti: «Genere di posto»
+  (il luogo), «Che cosa vende» (il punto vendita), «Segno sulla mappa» (il pin). Il pin di una macchina apre la sua sezione nella pagina
+  del luogo, e «Dove si trova» mostra i pin del luogo e dei suoi punti vendita: un luogo che ha solo i pin delle sue macchine è
+  posizionato (non è fra quelli «da posizionare» dell'Area).
+- Dal quartiere e dall'area un luogo nuovo si crea da una finestra sola, «Aggiungi luogo» (dall'editor della mappa resta «Crea un
+  luogo da questo pin»): il quartiere è quello della pagina; dal quartiere l'area si sceglie ed è facoltativa (senza, il luogo nasce da
+  collocare), e il punto sulla planimetria pure (senza, nasce nell'area da posizionare). Ogni genere di posto si posiziona: per Altro e
+  Punto di interesse il pin è una «Nota», l'unico spillo informativo che può portare a un luogo.
 - La disponibilità di negozi e articoli «a un dato momento» è l'insieme delle condizioni della guida italiana Royal; il «disponibile
   dal» mostrato si ricava dalla condizione strutturata.
 - Il catalogo degli oggetti è separato dall'equipaggiamento con statistiche; un oggetto ha una sola identità e un solo testo
   d'effetto. Gli effetti degli oggetti sono testo informativo, salvo quelli che incidono su ciò che l'app gestisce (Doti, punti dei
   Confidenti, yen, Fortuna, letture, consumi, sblocchi), modellati con i tipi di effetto dell'app.
 - Scorta dei negozi: l'offerta torna secondo la regola di rifornimento dell'articolo (dalla guida o, dove la guida tace, dell'utente);
-  si barra solo il pezzo unico.
+  si barra solo il pezzo unico. Per i distributori pezzi, rifornimento e condizioni («2 pezzi, il lunedì, non con l'ondata di calore né
+  con la notte torrida», col segno «da verificare» e l'origine della guida) sono una **regola comune** in un punto solo (`regola_tipo_negozio`,
+  migrazione 372), modificata da «Il posto»: un'offerta che la segue la cambia con lei (e, se era un dato della guida, diventa
+  «corretta», con l'originale per «Ripristina»); un'offerta che ha valori propri è un'eccezione della sua riga, e torna alla regola con un
+  gesto. Che un'offerta segua la regola lo dice l'uguaglianza dei valori: un'eccezione con gli stessi valori della regola la segue.
+  Un'offerta nuova di un distributore parte dalla regola.
+- Gli orari di un punto vendita con sede sono quelli del suo luogo; un punto vendita ha orari propri solo come eccezione (oggi il negozio
+  del Palazzo di Niijima, senza sede). Gli orari scritti sui negozi e non letti (Untouchable, Big Bang Burger, Mercante Sakai) sono in
+  archivio (373).
+- Un'offerta collegata a un oggetto del catalogo ne prende nome, categoria e «per chi»: le sue colonne restano vuote (nome vuoto,
+  categoria «altro»), anche collegando un'offerta che aveva i suoi; valgono solo per un'offerta senza legame (376, con i valori di prima
+  in archivio). Un'offerta che perde il legame (scollegata, o con l'oggetto eliminato) tiene il nome, la categoria e il «per chi» che
+  mostrava, presi dall'oggetto in quel momento: da lì sono suoi.
+- Un legame fra una fonte (voce, ricompensa, ricetta, regalo, offerta) e un oggetto si applica subito: non esistono proposte di
+  abbinamento da confermare. Le righe di `proposta_abbinamento` restano come storia e la fusione ne segue i riferimenti.
+- La cella del prezzo nel catalogo degli oggetti dice «Nessuna offerta in yen» solo per un oggetto che si ottiene con uno scambio non in
+  yen; altrimenti, senza offerte in yen, resta vuota.
 - Lo sconto di un negozio dal rango di un Confidente (Clinica di Takemi) è un dato del negozio; il prezzo resta quello dell'offerta.
 - **Televendite**: Set A e Set B sono due articoli distinti; ogni domenica si compra un set o nessuno, scelto alla spunta; senza set non
   c'è consegna (la voce della consegna è dovuta solo con un set comprato la domenica prima).
