@@ -825,6 +825,10 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, livello, bonus.forza, bonus.magia, bonus.resistenza, bonus.agilita, bonus.fortuna,
       trattoSkillId, dati.inSquadra === false ? 0 : 1, carica ? 1 : 0, dati.note ?? '', ...colonneOsservate(osservate), adesso, adesso);
     const id = Number(info.lastInsertRowid);
+    // utente 073: la prima entrata di una Persona DLC nella scorta spende il suo richiamo gratuito; la riga resta anche se l'esemplare se ne va
+    // o si cancella la voce dello storico (la toglie solo l'annullo della spunta che aveva aggiunto proprio questo esemplare)
+    prepared('INSERT OR IGNORE INTO utente.primo_richiamo_speso (partita_id, persona_id, posseduta_id, speso_il) SELECT ?, id, ?, ? FROM persona WHERE id = ? AND dlc = 1')
+      .run(partitaId, id, adesso, personaId);
     const skillIds = dati.skillIds ?? ist?.skillIds ?? skillInnateFinoAlLivello(personaId, livello);
     skillIds.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(id, i + 1, sid));
     const giaRegistrata = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId);

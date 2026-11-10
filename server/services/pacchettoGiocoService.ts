@@ -145,6 +145,8 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'persona_posseduta', colonna: 'tratto_skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id' },
   { tabella: 'persona_posseduta_skill', colonna: 'skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id', partita: '(SELECT p.partita_id FROM "utente"."persona_posseduta" p WHERE p.id = posseduta_id)' },
   { tabella: 'compendio_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
+  // utente 073: il primo richiamo gratuito già speso di una Persona DLC
+  { tabella: 'primo_richiamo_speso', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'compendio_partita', colonna: 'tratto_skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id' },
   { tabella: 'obiettivo_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'evento_partita', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },

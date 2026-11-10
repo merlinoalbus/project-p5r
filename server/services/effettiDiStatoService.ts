@@ -701,6 +701,9 @@ function annullaRighe(p: number, voceUid: string, righe: readonly RigaStato[], r
       restanoInScorta.add(r.chiave);
     } else if (d.modo === 'scorta-tolta') {
       // l'esemplare intatto se ne va e con lui si riapre l'obiettivo che la sua aggiunta aveva chiuso, se è ancora chiuso da quella
+      // utente 073: se era la prima entrata della Persona DLC nella scorta, il richiamo gratuito torna (lo stesso esemplare: id e data d'ingresso)
+      prepared(`DELETE FROM utente.primo_richiamo_speso WHERE partita_id = ? AND persona_id = ? AND posseduta_id = ?
+        AND speso_il = (SELECT created_at FROM persona_posseduta WHERE id = ? AND partita_id = ?)`).run(p, Number(r.chiave), prima.possedutaId, prima.possedutaId, p);
       prepared('DELETE FROM persona_posseduta WHERE id = ?').run(prima.possedutaId);
       if (prima.obiettivo) prepared("UPDATE obiettivo_partita SET stato = 'aperto', raggiunto_at = NULL, updated_at = ? WHERE id = ? AND partita_id = ? AND stato = 'raggiunto' AND raggiunto_at = ?").run(nowIso(), prima.obiettivo.id, p, prima.obiettivo.raggiuntoAt);
       if (revocaEventi) revocaEventiDelloStato(p, voceUid, r);

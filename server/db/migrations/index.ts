@@ -496,6 +496,9 @@ import { migration381 } from './381_richieste_e_ombre_colonne_vuote_tolte.js';
 import { migration382 } from './382_timbri_per_dedalo.js';
 import { migration383 } from './383_requisiti_di_palazzo_delle_richieste.js';
 import { migration384 } from './384_eligor_nel_dedalo_di_chemdah.js';
+// 2026-11-10 (rilievi della revisione automatica, PR 108): gli esiti del Triple Seven anche sulla riga del pacchetto iniziale (`origine = 'seed'`)
+// (385 e 386 sono del lotto L6-09, che entra in main prima: il registro torna consecutivo con il merge di main)
+import { migration387 } from './387_esiti_triple_seven_del_pacchetto.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -528,4 +531,5 @@ export const migrations: Migration[] = [
   migration365, migration366, migration367, migration368, migration369, migration370, migration371,
   migration372, migration373, migration374, migration375, migration376,
   migration377, migration378, migration379, migration380, migration381, migration382, migration383, migration384,
+  migration387,
 ];

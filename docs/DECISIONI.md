@@ -170,6 +170,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - I test restano nel repository ma girano solo su richiesta, sul percorso indicato; non girano nella pipeline a ogni push.
 - Il numero di una migrazione non si riserva: si prende il primo libero al momento del commit. I test che chiamano funzioni tolte su
   decisione dell'utente diventano `it.skip` con un commento, non si cancellano. **(24/10)**
+- **Migrazioni registrate: una sola eccezione all'append-only (10/11)**. Una migrazione registrata si corregge solo nel ramo che non si è mai
+  potuto completare: una migrazione che si annulla non avanza `user_version` (il runner controlla le chiavi esterne dentro la transazione,
+  prima di avanzarlo), quindi nessun file ha i dati di quel ramo. È il caso, finora unico, della utente 068 (segno «ottenuto» spostato senza
+  la sua associazione: violazione di chiave esterna, avvio fermo); i suoi rami che si completavano restano identici e il loro difetto lo
+  corregge una migrazione nuova (utente 072). Ogni altra correzione va in una migrazione nuova. I timbri della utente 020 dopo la gioco 382 sono un
+  caso a sé, non una regola: il passo sta nel runner, nella transazione della 020, come quello della 015 per `produce_json`.
 - Immagini caricate: PNG, JPEG, WEBP, GIF, SVG; una per entità, la nuova sostituisce; servite con rivalidazione ETag e URL versionato,
   così una sostituzione si vede subito. Un SVG esce con una CSP `sandbox` senza script e come allegato: nell'app si vede come `<img>`,
   aperto da solo non esegue nulla (L9-01).
@@ -291,7 +297,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   Piani, Cicli).
 - Il prezzo di evocazione è una stima della fonte (`docs/riferimenti/bonus-velluto.md`): ogni cifra mostrata è «circa N ¥», uno 0 resta esatto.
 - Primo richiamo delle Persona DLC gratuito (guida, «Palazzo di Kamoshida» e settimana 1), per ogni Persona DLC mai entrata in scorta nella
-  partita: vale 0 nei piani (una volta sola per piano) e nelle ricette. I cicli restano a prezzo pieno: il loro costo è per giro e si ripete.
+  partita: vale 0 nei piani (una volta sola per piano, anche se la partita non l'ha registrata: la Persona del pacchetto si evoca da sé) e
+  nelle ricette. I cicli restano a prezzo pieno: il loro costo è per giro e si ripete. «Mai entrata in scorta» lo dice una riga sua
+  (`primo_richiamo_speso`, utente 073), scritta alla prima entrata e tolta solo dall'annullo della spunta che aveva aggiunto proprio
+  quell'esemplare: fondere o rimuovere la Persona, o cancellare la sua voce dello storico, non rende di nuovo gratuito il richiamo. Le righe
+  ricostruite dalla 073 senza l'esemplare d'ingresso (la Persona era entrata prima dell'esemplare di oggi, o è solo nello storico) restano
+  anche all'annullo; le voci dello storico già cancellate prima della 073 non si ricostruiscono.
 - Una Persona registrata senza livello (Diario, cattura, registrazione a mano) si rievoca dal Registro al livello base, con le skill apprese
   fino a lì; il Registro non cambia.
 - I cicli si cercano e si salvano fino a 15 anelli (`shared/limitiFusione.ts`). I piani arrivano a 4 fusioni di profondità, con un tetto
@@ -470,6 +481,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   per cui la guida non dà un numero (Qimranut, Chemdah, Iweleth) non contano i timbri e lo dicono, senza valori inventati. Nessun totale
   generale si impone: la scheda dei Memento dice una volta, come informazione, la somma dei dedali (153) e il totale dichiarato (123); il 150
   della guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio. I timbri contano nel completamento del dedalo, uno per timbro, e nessuna voce di Trama ripete il loro numero.
+  I raccolti per area di un file delle partite rimasto indietro passano al dedalo senza perdite: anche prima della utente 020, quelli delle
+  aree che un totale l'avevano (il runner li porta al dedalo nella transazione della 020, che toglie solo quelli che toglieva già).
 - **Eligor nei Memento (scelta dell'utente del 10/11: «Solo a Chemdah»)**: il Cavaliere bellicoso sta solo nel Dedalo di Chemdah, come la «Guida
   ai Memento» (r.287); la pagina di Aiyatsbus che lo elenca (r.125) non vale. Il Palazzo di Kamoshida non cambia.
 - **Requisiti di Palazzo delle Richieste (Q9, 09/11)**: valgono le pagine dei Dedali; il Palazzo serve a raggiungere il bersaglio, quindi sta fra
@@ -537,7 +550,11 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   migrazione 372), modificata da «Il posto»: un'offerta che la segue la cambia con lei (e, se era un dato della guida, diventa
   «corretta», con l'originale per «Ripristina»); un'offerta che ha valori propri è un'eccezione della sua riga, e torna alla regola con un
   gesto. Che un'offerta segua la regola lo dice l'uguaglianza dei valori: un'eccezione con gli stessi valori della regola la segue.
-  Un'offerta nuova di un distributore parte dalla regola.
+  Un'offerta nuova di un distributore prende dalla regola solo i campi che non dice: pezzi o rifornimento mandati vuoti (nessun limite
+  dichiarato, nessuna regola) restano vuoti e l'offerta nasce eccezione, come la scelta «Fai un'eccezione» e la copia di un'eccezione.
+- Un acquisto fatto in una sede aggiuntiva di un distributore è della macchina che quella sede è diventata (utente 068): la riga del
+  registro, e il segno «ottenuto» con la sua valutazione durevole se lo portava. La macchina con acquisti e senza segno lo riceve (utente 072):
+  un'offerta con acquisti è sempre ottenuta.
 - Gli orari di un punto vendita con sede sono quelli del suo luogo; un punto vendita ha orari propri solo come eccezione (oggi il negozio
   del Palazzo di Niijima, senza sede). Gli orari scritti sui negozi e non letti (Untouchable, Big Bang Burger, Mercante Sakai) sono in
   archivio (373).
@@ -585,7 +602,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   periodo validato.
 - Big Bang Burger: le voci si collegano all'articolo della sfida; la frase di sblocco resta come nota dell'attività. **(24/10)**
 - Lavori con il quiz o il bouquet (Triple Seven, Rafflesia): le Doti e la paga stanno solo negli esiti, come a Ore no Beko; l'esito si sceglie
-  alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede.
+  alla spunta di una voce nuova, le spunte già date non cambiano. Il «dove» di un'attività nel registro è il nome della sede. Vale anche
+  per un'installazione nuova dal pacchetto iniziale (Triple Seven con `origine = 'seed'`, migrazione 387).
 - Dove le due pagine della guida concordano sulle date, un articolo le segue (Razione militare: dal 17/4 al 14/8 e dal 7/12 al 19/12). Requisiti e
   clienti del Crossroads restano come sono finché non si verifica in gioco. Un piatto senza dati non dice che i dati mancano: la colonna Prezzo
   ed Effetto compaiono solo se almeno un piatto li ha.

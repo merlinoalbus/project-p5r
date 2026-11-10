@@ -17,7 +17,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 ## Fusione
 - Fusione diretta e inversa, ricette speciali e Demoni del Tesoro, costo di evocazione (`/fusione`).
 - Alberi di fusione ricorsivi ordinati per costo (fino a 4 fusioni, con un tetto di calcolo dichiarato), a partire da scorta, Registro e
-  Persona catturabili; cicli di fusione cercati e salvati fino a 15 anelli; costi di evocazione mostrati come «circa».
+  Persona catturabili; cicli di fusione cercati e salvati fino a 15 anelli; costi di evocazione mostrati come «circa». Il primo richiamo
+  gratuito di una Persona DLC (anche non registrata) vale nei piani e nelle ricette finché la partita non l'ha speso (`primo_richiamo_speso`).
 - Eredità delle skill, ricerca per skill desiderate con propagazione a catena negli alberi.
 - Bonus della Stanza di Velluto: sconti del Registro, EXP dei Confidenti, Forca, Isolamento con incensi, Gemelle, Allarme.
 - Piani salvati e obiettivi per Persona.
