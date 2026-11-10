@@ -447,6 +447,9 @@ import { migration351 } from './351_shinjuku_tre_macchine.js';
 import { migration352 } from './352_nomi_pin_kichijoji.js';
 import { migration353 } from './353_testi_che_ripetono_offerte.js';
 import { migration354 } from './354_listino_condiviso_tolto.js';
+// 2026-11-09 (lotto L11 «Compendio e fusioni»): Confidente al massimo, carte di Apsaras e livelli del gruppo (380), date delle Persona (382)
+import { migration380 } from './380_compendio_flag_carte_livelli.js';
+import { migration382 } from './382_compendio_date_delle_persona.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -475,4 +478,5 @@ export const migrations: Migration[] = [
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
   migration344, migration345, migration346,
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
+  migration380, migration382,
 ];

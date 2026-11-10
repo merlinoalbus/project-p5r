@@ -155,7 +155,7 @@ export function eseguiFusione(partitaId: number, dati: DatiFusioneScorta): Esito
   return getDb().transaction(() => {
     const rimosse = anteprima.ingredienti.map((i) => ({ possedutaId: i.possedutaId, personaId: i.personaId, nomeIt: i.nomeIt, livello: i.livello }));
     for (const i of anteprima.ingredienti) prepared('DELETE FROM persona_posseduta WHERE id = ? AND partita_id = ?').run(i.possedutaId, partitaId);
-    // Un esemplare della stessa specie già in scorta impedirebbe l'inserimento: la fusione lo sostituisce.
+    // Un esemplare della stessa specie già in scorta ferma la fusione con un 409, e la transazione rimette a posto gli ingredienti.
     const doppione = prepared('SELECT id FROM persona_posseduta WHERE partita_id = ? AND persona_id = ?').get(partitaId, anteprima.risultato.id) as { id: number } | undefined;
     if (doppione) throw httpErrors.conflict('persona-gia-posseduta', `${anteprima.risultato.nomeIt} è già nella scorta: rimuovila o usala prima di fondere un altro esemplare.`);
     const risultato = aggiungiPosseduta(partitaId, anteprima.risultato.id, {

@@ -14,6 +14,11 @@ export function formattaYen(n: number): string {
   return `${n.toLocaleString('it-IT')} ¥`;
 }
 
+/** Prezzo di evocazione dal Registro: è una stima della fonte (`docs/riferimenti/bonus-velluto.md`), quindi «circa N ¥»; lo zero è esatto. */
+export function formattaCostoEvocazione(n: number): string {
+  return n === 0 ? formattaYen(0) : `circa ${formattaYen(n)}`;
+}
+
 /**
  * Anteprima dei punti: lo stesso modulo del server (base, ×1,5 arcano, esame solo per i sette Confidenti col piazzamento della partita, ×1,2 invito,
  * intero a ogni passaggio) e lo stesso controllo del rango: dove i punti non contano (`contaPunti === false`, un rango a evento) il server non somma, e

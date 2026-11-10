@@ -9,8 +9,8 @@
 // ne entravano 4 intere, ora 9. Sul telefono resta la riga (`riga`), con gli stessi segni.
 //
 // Accessibilità (L6): la piastrella è un collegamento con un nome proprio (che dice anche i segni); l'arte è un pulsante e non può stare
-// dentro il collegamento, quindi sta sopra, sorella, alla stessa posizione di una casella vuota; il cartiglio sopra l'arte è una copia
-// del collegamento nascosta ai lettori di schermo e fuori da Tab, col suggerimento «Livello N».
+// dentro il collegamento, quindi sta sopra, sorella, alla stessa posizione di una casella vuota; il cartiglio sopra l'arte è solo un
+// disegno, che non prende il tocco: i bersagli della piastrella restano due, il collegamento e l'arte.
 // ============================================================
 
 import { memo } from 'react';
@@ -119,11 +119,11 @@ export const PiastrellaPersona = memo(function PiastrellaPersona({ persona: p, e
       </Link>
       {/* l'arte sopra la casella vuota del collegamento: bordo 1 px + margine interno 10 px di `p-2.5` = 11 px; il riquadro lascia passare il tocco al collegamento, solo il pulsante dell'immagine lo prende */}
       <div className="pointer-events-none absolute left-[11px] top-[11px] h-16 w-16">
-        <span className="pointer-events-auto inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} forma="quadrata" /></span>
-        {/* il cartiglio sta sopra l'arte, fuori dal collegamento: il livello lo dice già il nome del collegamento (qui `decorativo`, così non si legge due volte)
-            e il suo suggerimento «Livello N» torna a comparire al passaggio, perché il riquadro lo prende; il clic porta alla stessa scheda (copia nascosta
-            ai lettori di schermo e fuori da Tab, come l'arte è un fratello del collegamento) */}
-        <Link to={`/compendio/persona/${p.id}`} tabIndex={-1} aria-hidden="true" className="pointer-events-auto absolute -left-1.5 -top-2 inline-flex" onClick={apri}><LivelloBadge livello={p.livello} decorativo /></Link>
+        <span className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} forma="quadrata" className="immagine-entita--sotto-cartiglio" /></span>
+        {/* il cartiglio sta sopra l'arte, fuori dal collegamento: il livello lo scrive lui stesso e lo dice il nome del collegamento (qui `decorativo`, così non si legge
+            due volte). Non è un bersaglio: sotto c'è la fascia dell'arte che lascia passare il tocco, quindi toccarlo apre la scheda come il resto della piastrella;
+            l'ingrandimento sta nei 64×48 px sotto la fascia (`immagine-entita--sotto-cartiglio`) */}
+        <span className="absolute -left-1.5 -top-2 inline-flex"><LivelloBadge livello={p.livello} decorativo /></span>
         {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-7 h-7 object-contain drop-shadow" fallback={null} />}
       </div>
     </li>

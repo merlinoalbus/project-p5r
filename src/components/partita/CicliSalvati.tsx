@@ -9,7 +9,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { EmptyState, Spinner } from '../shared/PageState';
 import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
-import { formattaYen } from '../../utils/punti';
+import { formattaCostoEvocazione } from '../../utils/punti';
 import { NOME_MODO_PARTNER } from '../../utils/cicli';
 import type { CicloSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
@@ -122,14 +122,14 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
         <span className="testo-12 text-text-muted">{ciclo.arcanaNome}</span>
         <span className="chip">{ciclo.titolo}</span>
         <span className="chip chip--attivo" title="Iterazioni complete registrate">{ciclo.iterazioni} {ciclo.iterazioni === 1 ? 'giro' : 'giri'}</span>
-        <span className="ml-auto font-black tabular-nums">{formattaYen(ciclo.costo)} / giro</span>
+        <span className="ml-auto font-black tabular-nums">{formattaCostoEvocazione(ciclo.costo)} / giro</span>
       </div>
       <ol className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Anelli di ${ciclo.titolo}`}>
         {ciclo.anelli.map((x, i) => (
           <li key={i} className={`flex flex-wrap items-center gap-1.5 testo-13 rounded-md px-1 ${i === ciclo.anelloCorrente ? 'bg-primary-bg' : ''}`}>
             <button type="button" className={`chip touch ${i === ciclo.anelloCorrente ? 'chip--attivo' : ''}`} onClick={() => void impostaAnello(i)} title="Imposta come anello corrente" aria-pressed={i === ciclo.anelloCorrente}>{i + 1}</button>
             <PersonaChip p={x.ingrediente} /><OperatoreRicetta tipo="piu" /><PersonaChip p={x.partner} />
-            <span className="testo-12 text-text-muted">{NOME_MODO_PARTNER[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
+            <span className="testo-12 text-text-muted">{NOME_MODO_PARTNER[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaCostoEvocazione(x.partnerCosto)}` : ''}</span>
             <OperatoreRicetta tipo="risultato" /><PersonaChip p={x.risultato} evidenza />
             {x.bonusLivelli.max > 0 && <span className="testo-12 text-text-muted">+{x.bonusLivelli.min === x.bonusLivelli.max ? x.bonusLivelli.min : `${x.bonusLivelli.min}…${x.bonusLivelli.max}`} livelli</span>}
           </li>
@@ -141,7 +141,7 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
           <span className={`chip ${av.ingredientePossedutaId ? 'chip--attivo' : ''}`}>{a.ingrediente.nomeIt}: {av.ingredientePossedutaId ? 'in scorta' : 'non in scorta'}</span>
           <span className={`chip ${av.partnerPossedutaId ? 'chip--attivo' : ''}`}>{a.partner.nomeIt}: {av.partnerPossedutaId ? 'in scorta' : av.partnerRegistrato ? 'da evocare dal Registro' : a.partnerModo === 'cattura' ? 'da catturare' : 'da procurare'}</span>
           {!av.partnerPossedutaId && (
-            <PulsanteVisivo compatto icona={<IconaAzione chiave="evoca" dimensione={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
+            <PulsanteVisivo compatto icona={<IconaAzione chiave="evoca" dimensione={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaCostoEvocazione(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
           )}
           {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <CollegamentoVisivo to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo={`Come ottenere ${a.ingrediente.nomeIt}`} />}
           {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="testo-12 text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}

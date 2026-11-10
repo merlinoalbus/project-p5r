@@ -12,11 +12,11 @@ import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDt
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
 import { RANGO_GEMELLE_TRATTAMENTO_SPECIALE, SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
 import type { VellutoDto } from '../../../shared/types.js';
-import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
+import { ricercaPiani, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { cicliFusione } from './cicliFusione.js';
 import { bonusLivelliFusione } from '../../../shared/bonusVelluto.js';
 import type { CicliFusioneDto } from '../../../shared/types.js';
-import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
+import { arcanaRisultato, costoFusione, creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
 export interface OpzioniContesto {
   partitaId?: number;
@@ -113,9 +113,9 @@ function personaDto(p: PersonaFusione): PersonaFusioneDto {
   return { id: p.id, nome: p.nome, nomeIt: t('persona', p.nome), arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livello: p.livello, speciale: p.speciale, rara: p.rara, dlc: p.dlc };
 }
 
-/** Una ricetta del motore per l'API: ingredienti e risultato in forma DTO, tipo e costo (non scontato). */
-function ricettaDto(r: RicettaFusione): RicettaFusioneDto {
-  return { ingredienti: r.ingredienti.map(personaDto), risultato: personaDto(r.risultato), tipo: r.tipo, costo: r.costo };
+/** Una ricetta del motore per l'API: ingredienti e risultato in forma DTO, tipo, costo (non scontato) e ingredienti al primo richiamo gratuito. */
+function ricettaDto(r: RicettaFusione, primoRichiamo?: ReadonlySet<number>): RicettaFusioneDto {
+  return { ingredienti: r.ingredienti.map(personaDto), risultato: personaDto(r.risultato), tipo: r.tipo, costo: r.costo, primoRichiamo: r.ingredienti.filter((i) => primoRichiamo?.has(i.id)).map((i) => i.id) };
 }
 
 /** La Persona del motore per id, oppure un 404 `persona-non-trovata`. */
@@ -145,22 +145,16 @@ export function fondiDto(aId: number, bId: number, opz: OpzioniContesto): EsitoF
     const bonusConfidente = opz.partitaId !== undefined
       ? { arcana: r.risultato.arcana, arcanaNome: t('arcana', r.risultato.arcana), confidenteNome: rango?.nome ?? null, rango: rango?.rango ?? 0, moltiplicatoreExp: moltiplicatoreExpConfidente(rango?.rango ?? 0) }
       : null;
-    return { a: personaDto(a), b: personaDto(b), ricetta: ricettaScontata(ricettaDto(r), sconto), motivo: null, dlcPosseduti, sconto, bonusConfidente };
+    return { a: personaDto(a), b: personaDto(b), ricetta: ricettaScontata(ricettaDto(r, disponibilitaDi(opz.partitaId).primoRichiamo), sconto), motivo: null, dlcPosseduti, sconto, bonusConfidente };
   }
   let motivo: string;
   if (a.rara && b.rara) motivo = 'Questi due Demoni del Tesoro non producono alcuna Persona con la fusione normale.';
   else if (a.rara || b.rara) motivo = 'Il Demone del Tesoro non ha una Persona a quella distanza nell\'arcano: la fusione non è possibile.';
   else if (a.arcana === b.arcana) motivo = 'Nessuna Persona dello stesso arcano ha un livello adatto al di sotto del riferimento (esclusi gli ingredienti).';
   else if (!ctx.perArcana.has(a.arcana) || (ctx.perArcana.get(a.arcana) && !ctx.perArcana.get(b.arcana))) motivo = 'Arcano sconosciuto.';
-  else if (arcanaSenzaRisultato(a.arcana, b.arcana)) motivo = 'Questi due arcani non possono essere fusi insieme (Giudizio con Giustizia, Forza, Carro o Morte).';
+  else if (arcanaRisultato(a.arcana, b.arcana) === null) motivo = `Gli arcani ${t('arcana', a.arcana)} e ${t('arcana', b.arcana)} non possono essere fusi insieme.`;
   else motivo = 'Il livello di riferimento supera la Persona più alta dell\'arcano risultante.';
   return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo, dlcPosseduti, sconto: 0, bonusConfidente: null };
-}
-
-/** Vero per le coppie di arcani che non hanno risultato (Giudizio con Giustizia, Forza, Carro o Morte), in qualunque ordine. */
-function arcanaSenzaRisultato(a: string, b: string): boolean {
-  const coppie = new Set(['Judgement|Justice', 'Judgement|Strength', 'Judgement|Chariot', 'Judgement|Death']);
-  return coppie.has(`${a}|${b}`) || coppie.has(`${b}|${a}`);
 }
 
 /** Le ricette i cui ingredienti sono tutti nella scorta della partita (basta un esemplare per Persona, come nel Calcolatore). */
@@ -181,10 +175,11 @@ export function ricettePerDto(personaId: number, opz: OpzioniContesto): RicetteF
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
   const sconto = scontoPartita(opz.partitaId).sconto;
-  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
+  const { primoRichiamo } = disponibilitaDi(opz.partitaId);
+  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r, primoRichiamo), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
 }
 
-/** Scorta (esemplari per Persona) e Registro (Persona registrate) della partita; vuoti senza partita. */
+/** Scorta (esemplari per Persona), Registro (Persona registrate) e Persona DLC al primo richiamo della partita; vuoti senza partita. */
 function disponibilitaDi(partitaId?: number): Disponibilita {
   const disp: Disponibilita = { scorta: new Map(), registro: new Set() };
   if (partitaId === undefined) return disp;
@@ -194,6 +189,10 @@ function disponibilitaDi(partitaId?: number): Disponibilita {
   for (const r of prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').all(partitaId) as Array<{ persona_id: number }>) {
     disp.registro.add(r.persona_id);
   }
+  // La guida: la prima evocazione di una Persona DLC è gratuita, le successive costano yen. Conta «mai entrata in scorta» in questa partita.
+  disp.primoRichiamo = new Set((prepared(`SELECT p.id FROM persona p WHERE p.dlc = 1
+    AND NOT EXISTS (SELECT 1 FROM persona_posseduta pp WHERE pp.partita_id = ? AND pp.persona_id = p.id)
+    AND NOT EXISTS (SELECT 1 FROM evento_partita e WHERE e.partita_id = ? AND e.tipo = 'persona-aggiunta' AND e.persona_id = p.id)`).all(partitaId, partitaId) as Array<{ id: number }>).map((r) => r.id));
   return disp;
 }
 
@@ -246,10 +245,11 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
   }
   const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax, slotFortunato: opz.slotFortunato ?? false };
   const motivo = motivoNessunPiano(target, ctx, skillRichieste, livelloMax, disp);
-  const piani = motivo ? [] : pianiFusione(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
+  const { piani, troncata } = motivo ? { piani: [], troncata: false } : ricercaPiani(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
   const sconto = scontoPartita(opz.partitaId).sconto;
   return {
     persona: personaDto(target),
+    troncata,
     piani: piani.map((p) => ({ radice: nodoDto(p.radice, sconto), costo: prezzoScontato(p.costo, sconto), profondita: p.profondita, catture: p.catture, evocazioni: p.evocazioni, fusioni: p.fusioni })),
     opzioni,
     skillRichieste,
@@ -420,18 +420,21 @@ export function cercaPerSkillDto(skillIds: number[], opz: OpzioniContesto & { ri
     }
   }
   trovate.sort((x, y) => x.ricetta.costo - y.ricetta.costo || x.ricetta.risultato.livello - y.ricetta.risultato.livello);
+  const { primoRichiamo } = disponibilitaDi(opz.partitaId);
   const perRisultatoMap = new Map<number, { persona: PersonaFusione; ricette: number; costoMinimo: number }>();
   for (const tr of trovate) {
     const e = perRisultatoMap.get(tr.ricetta.risultato.id);
-    if (e) { e.ricette++; e.costoMinimo = Math.min(e.costoMinimo, tr.ricetta.costo); }
-    else perRisultatoMap.set(tr.ricetta.risultato.id, { persona: tr.ricetta.risultato, ricette: 1, costoMinimo: tr.ricetta.costo });
+    // lo stesso costo delle righe della vista: un ingrediente DLC al primo richiamo non si paga
+    const costo = costoFusione(tr.ricetta.ingredienti.filter((i) => !primoRichiamo?.has(i.id)));
+    if (e) { e.ricette++; e.costoMinimo = Math.min(e.costoMinimo, costo); }
+    else perRisultatoMap.set(tr.ricetta.risultato.id, { persona: tr.ricetta.risultato, ricette: 1, costoMinimo: costo });
   }
   const limite = opz.limite ?? 200;
   return {
     skill: skillInfo,
     risultato: opz.risultatoId !== undefined ? personaDto(personaOErrore(opz.risultatoId)) : null,
     totale: trovate.length,
-    ricette: trovate.slice(0, limite).map((tr) => ({ ricetta: ricettaDto(tr.ricetta), slot: tr.slot, slotScelti: tr.slotScelti, daEreditare: tr.daEreditare, giaApprese: tr.giaApprese })),
+    ricette: trovate.slice(0, limite).map((tr) => ({ ricetta: ricettaDto(tr.ricetta, primoRichiamo), slot: tr.slot, slotScelti: tr.slotScelti, daEreditare: tr.daEreditare, giaApprese: tr.giaApprese })),
     perRisultato: [...perRisultatoMap.values()].sort((x, y) => x.costoMinimo - y.costoMinimo).map((e) => ({ persona: personaDto(e.persona), ricette: e.ricette, costoMinimo: e.costoMinimo })),
   };
 }
@@ -448,5 +451,6 @@ export function fusioniConDto(personaId: number, opz: OpzioniContesto): RicetteF
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
   const sconto = scontoPartita(opz.partitaId).sconto;
-  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
+  const { primoRichiamo } = disponibilitaDi(opz.partitaId);
+  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r, primoRichiamo), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, soloPronte, sconto };
 }

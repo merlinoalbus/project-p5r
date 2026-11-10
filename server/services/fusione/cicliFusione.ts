@@ -11,11 +11,9 @@
 
 import { fondi, type Contesto, type PersonaFusione, type RicettaFusione, type TipoFusione } from './motoreFusione.js';
 import { prezzoEvocazione, type Disponibilita } from './alberoFusione.js';
+import { ANELLI_MASSIMI_CICLO, ANELLI_MINIMI_CICLO } from '../../../shared/limitiFusione.js';
 
 export type ModoPartner = 'scorta' | 'registro' | 'cattura';
-
-/** Numero massimo di anelli ammesso per un ciclo. */
-const LUNGHEZZA_MASSIMA = 15;
 
 export interface AnelloCiclo {
   ingrediente: PersonaFusione;
@@ -38,9 +36,9 @@ export interface CicloFusione {
 }
 
 export interface OpzioniCicli {
-  /** Numero massimo di anelli (2–15). */
+  /** Numero massimo di anelli (nei limiti di `limitiFusione`). */
   lunghezzaMax: number;
-  /** Numero minimo di anelli (2–lunghezzaMax, default 2). */
+  /** Numero minimo di anelli (fino a lunghezzaMax, default il minimo di `limitiFusione`). */
   lunghezzaMin?: number;
   /** Ogni partner compare una sola volta e non è mai il bersaglio né una Persona consumata dalla catena (default true). */
   partnerDistinti?: boolean;
@@ -59,6 +57,8 @@ export interface OpzioniCicli {
  * Come si procura un partner e quanto costa, o null se non è procurabile. Il Registro ha la precedenza sulla scorta
  * (un esemplare in scorta serve solo alla prima iterazione, vedi `dallaScorta`); la cattura, se ammessa, vale per le
  * Persona catturabili (L8-07: la regola unica del Compendio e degli alberi, `sqlPersonaCatturabile`: non speciali, rare, DLC né del gruppo).
+ * Il primo richiamo gratuito di una Persona DLC (`Disponibilita.primoRichiamo`) qui non vale: il costo è «per giro» e si ripete, quindi il
+ * partner DLC paga come sempre.
  */
 function modoPartner(p: PersonaFusione, disp: Disponibilita, opz: OpzioniCicli): { modo: ModoPartner; costo: number } | null {
   if (disp.registro.has(p.id)) return { modo: 'registro', costo: prezzoEvocazione(p) };
@@ -84,8 +84,8 @@ function fusioniDa(persona: PersonaFusione, ctx: Contesto, cache: Map<number, Ri
 
 /** Cicli che partono e tornano a `target`, ordinati per costo per iterazione, poi per lunghezza. */
 export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniCicli): CicloFusione[] {
-  const lunghezzaMax = Math.max(2, Math.min(LUNGHEZZA_MASSIMA, opz.lunghezzaMax));
-  const lunghezzaMin = Math.max(2, Math.min(lunghezzaMax, opz.lunghezzaMin ?? 2));
+  const lunghezzaMax = Math.max(ANELLI_MINIMI_CICLO, Math.min(ANELLI_MASSIMI_CICLO, opz.lunghezzaMax));
+  const lunghezzaMin = Math.max(ANELLI_MINIMI_CICLO, Math.min(lunghezzaMax, opz.lunghezzaMin ?? ANELLI_MINIMI_CICLO));
   const partnerDistinti = opz.partnerDistinti ?? true;
   const ventaglio = Math.max(5, Math.min(80, opz.ventaglio ?? 40));
   // Catene lunghe: più candidati da esaminare, budget proporzionale (sempre limitato: protegge l'event loop).

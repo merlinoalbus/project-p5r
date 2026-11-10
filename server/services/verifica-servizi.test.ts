@@ -273,7 +273,8 @@ describe('verifica servizi e DB', () => {
     expect(squadraPartita(id).membri.find((m) => m.chiave === 'joker')!.livello).toBe(12);
     aggiornaPartita(id, { livelloProtagonista: 30 });
     expect(squadraPartita(id).membri.find((m) => m.chiave === 'joker')!.livello).toBe(30);
-    expect(prepared("SELECT livello FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = 'joker'").get(id)).toEqual({ livello: 30 });
+    // la riga di Joker in squadra non segue il livello: la fonte è solo la partita
+    expect(prepared("SELECT livello FROM membro_squadra_partita WHERE partita_id = ? AND personaggio_chiave = 'joker'").get(id)).toEqual({ livello: 12 });
     impostaMembro(id, 'joker', { deltaLivello: 1 });
     expect(prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(id)).toEqual({ livello_protagonista: 31 });
   });

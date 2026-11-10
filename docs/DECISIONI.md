@@ -275,7 +275,20 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - Motore fedele alle regole di chinhodado, compresi i casi non ovvi (due Demoni del Tesoro fra loro seguono la fusione normale).
 - Il costo di un piano è la somma dei prezzi di evocazione dal Registro; una Persona in scorta vale 0 ma si usa una volta sola. Anche
   nella fusione diretta e nelle ricette il costo si chiama «evocazione dal Registro» e un ingrediente in scorta vale 0.
-- Il filtro «fino al livello del protagonista» è attivabile, non imposto.
+- Il filtro «fino al livello del protagonista» è attivabile, non imposto: spento di partenza in tutte le viste (Ricette, Cerca per skill,
+  Piani, Cicli).
+- Il prezzo di evocazione è una stima della fonte (`docs/riferimenti/bonus-velluto.md`): ogni cifra mostrata è «circa N ¥», uno 0 resta esatto.
+- Primo richiamo delle Persona DLC gratuito (guida, «Palazzo di Kamoshida» e settimana 1), per ogni Persona DLC mai entrata in scorta nella
+  partita: vale 0 nei piani (una volta sola per piano) e nelle ricette. I cicli restano a prezzo pieno: il loro costo è per giro e si ripete.
+- Una Persona registrata senza livello (Diario, cattura, registrazione a mano) si rievoca dal Registro al livello base, con le skill apprese
+  fino a lì; il Registro non cambia.
+- I cicli si cercano e si salvano fino a 15 anelli (`shared/limitiFusione.ts`). I piani arrivano a 4 fusioni di profondità, con un tetto
+  di calcolo: oltre, valgono i migliori trovati e la vista lo dice.
+- Le date di Metatron (25/11), Yoshitsune (23/12), Satana (20/11) e Vohu Manah (18/11) sono note della Persona, come le altre: il motore
+  non le applica. Le 20 celle della matrice dei Demoni del Tesoro che discordano con la guida e le note di Chimera e Alilat restano come
+  sono finché non si verificano in gioco.
+- Esecuzione alla Sedia elettrica: `skill_fonte_esecuzione` registra le carte dell'esito con Allarme. Eigaon resta l'esito con Allarme di
+  Rangda: la guida la mette nella colonna normale insieme a Maeiga, ma una Persona ha un solo esito normale.
 - I bonus si modellano solo con una fonte (affidabilità in `docs/riferimenti/bonus-velluto.md`). La fusione non trasferisce livelli
   né statistiche dei materiali.
 - Le Persona che richiedono un oggetto (Black Frost, Bugs) hanno solo l'etichetta «Richiede l'oggetto»: il motore le propone comunque.

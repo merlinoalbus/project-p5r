@@ -11,6 +11,7 @@
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
+import { t } from '../traduzioniService.js';
 import type { CampoDef } from './registro.js';
 import type { ContestoPropagazione, DefRiga, Valori } from './righe.js';
 
@@ -101,6 +102,14 @@ export function rigaDaColonne(o: OpzioniRiga): DefRiga {
 
 /** Le sole opzioni di una colonna con chiave testo: da un elenco di coppie. */
 export const opzioni = (coppie: Array<[string, string]>): Array<{ chiave: string; nome: string }> => coppie.map(([chiave, nome]) => ({ chiave, nome }));
+
+/** I nomi del dataset come opzioni di un campo: la chiave è il nome canonico (quello che il server salva), l'etichetta la resa italiana, in ordine alfabetico italiano. */
+export const opzioniDaNomi = (ambito: 'persona' | 'skill', nomi: readonly string[]): Array<{ chiave: string; nome: string }> =>
+  nomi.map((nome) => ({ chiave: nome, nome: t(ambito, nome) })).sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+
+/** Le Persona scegliibili in un campo. `dove`: condizione SQL sulla tabella `persona`, per togliere quelle che la `valida` della riga rifiuterebbe. */
+export const opzioniPersone = (dove = '1 = 1', ...parametri: string[]): Array<{ chiave: string; nome: string }> =>
+  opzioniDaNomi('persona', prepared(`SELECT nome FROM persona WHERE ${dove}`).pluck().all(...parametri) as string[]);
 
 /** 400 se la scelta non è fra le opzioni del campo (il servizio lo controlla già per i campi `scelta`; qui per i riferimenti liberi). */
 export function esigiEsistente(sql: string, valore: string, descrizione: string, campo: string): void {

@@ -10,6 +10,7 @@ import { SelettorePersona } from './SelettorePersona';
 import { SelettoreSkill } from './SelettoreSkill';
 import { RicettaRiga } from './RicettaRiga';
 import { Spinner } from '../shared/PageState';
+import { formattaCostoEvocazione } from '../../utils/punti';
 import type { PersonaRiassuntoDto, SkillRiassuntoDto } from '../../types';
 import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 
@@ -82,7 +83,7 @@ export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }
           {!risultato && dati.perRisultato.length > 1 && (
             <div className="flex flex-wrap gap-1.5">
               {dati.perRisultato.slice(0, 24).map((r) => (
-                <button key={r.persona.id} type="button" className="persona-chip touch cursor-pointer" onClick={() => setRisultato(persone.find((p) => p.id === r.persona.id) ?? null)} title={`${r.ricette} ricette, dal costo di ${r.costoMinimo.toLocaleString('it-IT')} ¥`}>
+                <button key={r.persona.id} type="button" className="persona-chip touch cursor-pointer" onClick={() => setRisultato(persone.find((p) => p.id === r.persona.id) ?? null)} title={`${r.ricette} ricette, dal costo di ${formattaCostoEvocazione(r.costoMinimo)}`}>
                   <AnteprimaPersona nome={r.persona.nome} etichetta={r.persona.nomeIt} dimensione={32} />
                   <span className="persona-chip__testo"><span className="persona-chip__nome">{r.persona.nomeIt}</span><span className="persona-chip__livello">L{r.persona.livello} · {r.ricette} {r.ricette === 1 ? 'ricetta' : 'ricette'}</span></span>
                 </button>

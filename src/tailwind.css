@@ -2490,6 +2490,8 @@
 .selettore__tendina { position:fixed; z-index:110; left:0; top:0; width:260px; max-width:calc(100vw - 16px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
+/* Le viste della Fusione al telefono (L11-07): tutte e otto le righe da 44 px in vista, senza far scorrere l'elenco; lo schermo basso lo accorcia lasciando il posto alla barra inferiore */
+.selettore--viste .selettore__elenco { max-height:min(calc(100dvh - 7rem), 352px); }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
 .selettore__pulsante { display:flex; flex-wrap:wrap; align-items:center; column-gap:8px; row-gap:2px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
 /* Il dettaglio sta a destra del nome finché al nome resta almeno la sua parola più lunga (`min-width:min-content`, il nome va a capo fra
@@ -2707,6 +2709,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .immagine-entita { position: relative; overflow: visible; }
 .immagine-entita > * { overflow: hidden; border-radius: inherit; }
 .immagine-entita::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+/* Piastrella del Compendio: la fascia alta dell'arte, sotto il cartiglio del livello, lascia passare il tocco al collegamento della piastrella; ingrandisce solo il resto dell'arte */
+.immagine-entita--sotto-cartiglio { pointer-events: none; }
+.immagine-entita--sotto-cartiglio::after { pointer-events: auto; left: 0; top: 16px; width: 100%; height: calc(100% - 16px); transform: none; }
 
 /* Un collegamento **dentro una frase** resta alto quanto la riga di testo in cui vive: allargarlo
    vorrebbe dire allargare l'interlinea del paragrafo, e il criterio 2.5.8 lo esclude proprio per

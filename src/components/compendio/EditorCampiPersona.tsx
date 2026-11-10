@@ -3,11 +3,11 @@
 // ============================================================
 //
 // Le skill con i livelli: ogni riga è una skill scelta dall'elenco (per nome, mai scritta a mano), con come si impara (Innata, un livello da 1 a 99 e,
-// per le forme del gruppo, risveglio, rango o 3ª forma). Il valore resta quello del registro (testi «nome @ livello»; `skillPersonaLogica`).
-// L'Arcano si sceglie per nome italiano. Le regole che collegano i campi a `campiPersona.ts`.
+// per le forme del gruppo, risveglio, rango o 3ª forma). L'elenco delle skill arriva con la scheda (`opzioni` del campo). Il valore del campo resta la codifica
+// interna di trasporto col registro (`skillPersonaLogica`), che l'utente non vede. L'Arcano si sceglie per nome italiano. Le regole che collegano i campi a `campiPersona.ts`.
 // ============================================================
 
-import { getGlossario, getSkills } from '../../services/api';
+import { getGlossario } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { useIdStabili } from '../../hooks/useIdStabili';
 import type { CampoCorrezioneDto, ValoreCampoCorrezione } from '../../types';
@@ -18,15 +18,14 @@ import { Blocco } from '../guida/moduli/campi';
 import { MODI_SENZA_LIVELLO, NOMI_MODO, RIGA_VUOTA, leggiSkill, problemaSkill, scriviSkill, type Modo, type RigaSkill } from './skillPersonaLogica';
 
 /** L'editor delle skill di una Persona. `delGruppo`: le forme del gruppo possono impararle anche con risveglio, rango o 3ª forma. */
-export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { valore: ValoreCampoCorrezione | undefined; imposta: (v: string[]) => void; occupato: boolean; delGruppo: boolean }) {
-  const skill = useCarica(() => getSkills(), []);
+export function CampoSkillPersona({ campo, valore, imposta, occupato, delGruppo }: { campo: CampoCorrezioneDto; valore: ValoreCampoCorrezione | undefined; imposta: (v: string[]) => void; occupato: boolean; delGruppo: boolean }) {
   const voci = Array.isArray(valore) ? valore : [];
   const righe = voci.map(leggiSkill);
   // le righe hanno uno stato loro (i selettori): la chiave è un id stabile, non l'indice (`useIdStabili`)
   const chiavi = useIdStabili(righe.length);
-  const nomi = new Map((skill.dati ?? []).map((s) => [s.nome, s.nomeIt]));
+  const nomi = new Map((campo.opzioni ?? []).map((o) => [o.chiave, o.nome]));
   const nomeDi = (n: string) => nomi.get(n) ?? n;
-  const opzioniSkill = (skill.dati ?? []).map((s) => ({ chiave: s.nome, nome: s.nomeIt, dettaglio: s.nomeIt !== s.nome ? s.nome : undefined }));
+  const opzioniSkill = (campo.opzioni ?? []).map((o) => ({ chiave: o.chiave, nome: o.nome, dettaglio: o.nome !== o.chiave ? o.chiave : undefined }));
   /** Una forma che ha già un modo particolare lo conserva anche se non è del gruppo. */
   const modiAmmessi = (r: RigaSkill): Modo[] => (delGruppo || MODI_SENZA_LIVELLO.includes(r.modo) ? ['livello', 'iniziale', ...MODI_SENZA_LIVELLO] : ['livello', 'iniziale']);
   const cambia = (i: number, nuova: RigaSkill) => imposta(righe.map((r, j) => scriviSkill(j === i ? nuova : r)));
@@ -34,13 +33,12 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
   return (
     <fieldset className="regole-editor flex min-w-0 flex-col gap-2 sm:col-span-2">
       <legend>Skill e livelli a cui si imparano</legend>
-      {skill.errore && <p role="alert" className="m-0 testo-12 text-error-testo">Elenco delle skill non caricato: {skill.errore}</p>}
       {righe.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna skill.</p>}
       {righe.map((r, i) => (
         <div key={chiavi.ids[i]} className="flex flex-wrap items-end gap-2">
           <span className="chip mb-2 shrink-0" aria-hidden>{i + 1}</span>
           <div className="min-w-[200px] flex-[3]">
-            <Selettore etichetta={`Skill ${i + 1}`} valore={r.nome} ricerca="sempre" disabilitato={occupato || skill.caricamento} segnaposto="Scegli la skill…"
+            <Selettore etichetta={`Skill ${i + 1}`} valore={r.nome} ricerca="sempre" disabilitato={occupato} segnaposto="Scegli la skill…"
               opzioni={r.nome === '' || nomi.has(r.nome) ? opzioniSkill : [{ chiave: r.nome, nome: r.nome }, ...opzioniSkill]}
               onCambia={(k) => cambia(i, { ...r, nome: k })} />
           </div>

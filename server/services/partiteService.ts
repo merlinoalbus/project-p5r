@@ -189,8 +189,6 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
       || (dati.dlcPosseduti !== undefined && JSON.stringify(dati.dlcPosseduti) !== JSON.stringify([...(JSON.parse(r.dlc_posseduti_json) as number[])].sort((a, b) => a - b)));
     if (contenutiCambiati) proponiStatiMancanti();
     if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
-      // la riga di Joker nella squadra ricopia lo stesso numero (la fonte resta la partita): mai due livelli diversi nel file
-      prepared("UPDATE membro_squadra_partita SET livello = ? WHERE partita_id = ? AND personaggio_chiave = 'joker'").run(dati.livelloProtagonista, id);
       registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
     }
     if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
@@ -599,14 +597,17 @@ export function compendioPartita(partitaId: number): CompendioPartitaDto[] {
 
 interface Istantanea { livello: number; bonus: Statistiche; osservate: Osservazione | null; skillIds: number[]; trattoSkillId: number | null; carica: boolean }
 
-/** Istantanea registrata nel compendio (null se la Persona non è registrata o non ha livello). */
-function istantaneaCompendio(partitaId: number, personaId: number): Istantanea | null {
+/** L'istantanea come si legge dal compendio: una registrazione a mano o da cattura non ha fissato il livello né le skill (null). */
+interface IstantaneaRegistrata extends Omit<Istantanea, 'livello' | 'skillIds'> { livello: number | null; skillIds: number[] | null }
+
+/** Istantanea registrata nel compendio (null solo se la Persona non è registrata). */
+function istantaneaCompendio(partitaId: number, personaId: number): IstantaneaRegistrata | null {
   const r = prepared(`${SQL_COMPENDIO} WHERE cp.partita_id = ? AND cp.persona_id = ? AND cp.registrata = 1`).get(partitaId, personaId) as RigaCompendio | undefined;
-  if (!r || r.livello_registrato === null) return null;
+  if (!r) return null;
   return {
     livello: r.livello_registrato, bonus: { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna },
     osservate: osservateDaRiga(r),
-    skillIds: r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : [], trattoSkillId: r.tratto_skill_id, carica: r.carica === 1,
+    skillIds: r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : null, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1,
   };
 }
 
@@ -792,8 +793,9 @@ function verificaSkill(skillIds: number[] | undefined): void {
 
 /**
  * Aggiunge una Persona alla scorta della partita (una sola per Persona: 409 se c'è già). Le skill e il tratto si verificano;
- * con `daRegistro` i valori non indicati vengono dall'istantanea del compendio (400 se la Persona non è registrata),
- * altrimenti dal livello base, senza bonus e con le ultime 8 skill apprese fino al livello. In transazione: la riga, gli slot,
+ * con `daRegistro` i valori non indicati vengono dall'istantanea del compendio (400 solo se la Persona non è registrata). Ciò che
+ * l'istantanea non ha fissato, e tutto senza `daRegistro`, vale come una Persona appena ottenuta: livello base, nessun bonus e le
+ * ultime 8 skill apprese fino al livello. In transazione: la riga, gli slot,
  * l'evento nello storico e — se non è un'evocazione dal Registro — la registrazione nel compendio; poi gli obiettivi.
  */
 export function aggiungiPosseduta(partitaId: number, personaId: number, dati: DatiPosseduta): PersonaPossedutaDto {

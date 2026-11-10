@@ -39,7 +39,7 @@ describe('CercaSkill', () => {
   it('sceglie una skill, chiama l\'API con il contesto e mostra risultati e ricette', async () => {
     const dati: RicercaSkillDto = {
       skill: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja', elemento: 'support', elementoNome: 'Supporto' }], risultato: null, totale: 2,
-      ricette: [{ ricetta: { ingredienti: [fus(succube), fus(saki)], risultato: fus(jack), tipo: 'normale', costo: 8227 }, slot: 2, slotScelti: 1, daEreditare: [1], giaApprese: [] }],
+      ricette: [{ ricetta: { ingredienti: [fus(succube), fus(saki)], risultato: fus(jack), tipo: 'normale', costo: 8227, primoRichiamo: [] }, slot: 2, slotScelti: 1, daEreditare: [1], giaApprese: [] }],
       perRisultato: [{ persona: fus(jack), ricette: 2, costoMinimo: 8227 }, { persona: fus(succube), ricette: 1, costoMinimo: 9000 }],
     };
     cercaPerSkill.mockResolvedValue(dati);
