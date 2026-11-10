@@ -14,10 +14,11 @@
 //  (2) l'ARCHIVIO: ogni valore diverso da «[]» (uid → testo originale) in `dati_guida.archivio-frasi-l11`, colonna `voce_giornata.produce_json`,
 //      senza sovrascrivere e riletto riga per riga contro il valore di partenza.
 //  (3) la colonna si toglie con `ALTER TABLE … DROP COLUMN` — SOLO se la migrazione utente 015 è già passata (`utente.user_version >= 15`).
-//      La 015 prepara SQL su `main.voce_giornata.produce_json` e non si modifica; il runner applica prima tutte le migrazioni di gioco e poi
-//      quelle delle partite, quindi su un'istanza nuova (partite.db da zero) una DROP qui farebbe fallire l'avvio con «no such column». Se la 015
-//      non è ancora passata la colonna resta (archiviata comunque) e la migrazione utente 69 la toglie dopo la 015, archiviando ciò che la 015
-//      avesse portato dentro. Produzione e backup importati (partite già oltre la 15) tolgono la colonna qui.
+//      La 015 prepara SQL su `main.voce_giornata.produce_json` e non si modifica. Con un partite.db nuovo accanto a un file di gioco dalla 066
+//      in poi il runner applica prima le migrazioni delle partite (la 015 compresa) e poi quelle di gioco, quindi la colonna si toglie qui.
+//      Se invece la 015 non è ancora passata (un file delle partite già usato ma fermo prima della 15, o un file di gioco più vecchio della
+//      066) la colonna resta (archiviata comunque) e la migrazione utente 69 la toglie dopo la 015, archiviando ciò che la 015 avesse portato
+//      dentro. Produzione e backup importati (partite già oltre la 15) tolgono la colonna qui.
 //  (4) `server/db/fontiTolte.ts` ha la voce della colonna (il Cestino e i backup vecchi la tollerano, vedi `colonneCompatibili`).
 //
 // COSA NON CAMBIA (impronta di ogni riga prima e dopo): le altre colonne di `voce_giornata`, `voce_effetto`, `voce_effetto_transizione`

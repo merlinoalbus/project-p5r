@@ -3,10 +3,12 @@
 // ============================================================
 //
 // La migrazione di gioco 357 toglie `main.voce_giornata.produce_json` solo se la migrazione utente 015 è già passata, perché la 015 prepara SQL
-// su quella colonna e non si modifica. Su un'istanza nuova (file delle partite da zero accanto a un file di gioco ancora da migrare) il runner
-// applica prima tutte le migrazioni di gioco: la 357 archivia i valori e lascia la colonna; la 015 gira (e può correggere voci o inserirne con un
-// `produce_json`); poi gira questa, che archivia di nuovo ciò che è nuovo o cambiato (`produceJsonL6.archiviaProduce`: mai una sovrascrittura,
-// i valori cambiati vanno nella colonna d'archivio `voce_giornata.produce_json.dopo-015`) e toglie la colonna.
+// su quella colonna e non si modifica. Quando il runner applica le migrazioni di gioco prima di quelle delle partite e la 015 non è ancora
+// passata, la 357 archivia i valori e lascia la colonna; la 015 gira (e può correggere voci o inserirne con un `produce_json`); poi gira
+// questa, che archivia di nuovo ciò che è nuovo o cambiato (`produceJsonL6.archiviaProduce`: mai una sovrascrittura, i valori cambiati vanno
+// nella colonna d'archivio `voce_giornata.produce_json.dopo-015`) e toglie la colonna. Con un partite.db nuovo accanto a un file di gioco
+// dalla 066 in poi le partite si migrano per prime: qui il file di gioco è ancora prima della 357 e questa migrazione non fa nulla (la colonna
+// la toglie la 357); se il file di gioco l'aveva già tolta, il runner la rimette vuota per la 015 e questa la toglie di nuovo.
 // Su produzione e su un backup importato (partite già oltre la 15) la colonna non c'è più dalla 357 e questa migrazione non fa nulla.
 // Cambia solo ciò che è dichiarato: le altre colonne di `voce_giornata` hanno la stessa impronta prima e dopo, e nessuna tabella delle partite
 // si tocca. Append-only e idempotente (senza la colonna non fa nulla), dentro la transazione della migrazione. Verbale: lo stesso
