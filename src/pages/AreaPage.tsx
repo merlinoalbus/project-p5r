@@ -253,7 +253,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
         : <p className="card m-0 testo-13 text-text-secondary">{a.nome} non ha più planimetrie{IN_RILASCIO ? '.' : ': aggiungine una.'}</p>}
       {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} /></div>}
       {aggiungiLuogo && scelta && (
-        <FinestraAggiungiLuogo quartiere={a.contenitore.chiave} areaChiave={a.chiave} luogo={aggiungiLuogo.luogo} onChiudi={() => setAggiungiLuogo(null)} onFatto={() => void ricarica()}
+        <FinestraAggiungiLuogo quartiere={a.contenitore.chiave} luogo={aggiungiLuogo.luogo} onChiudi={() => setAggiungiLuogo(null)} onFatto={() => void ricarica()}
           // la versione mostrata per prima, poi le altre dell'area
           planimetrie={[scelta, ...a.planimetrie.filter((p) => p.chiave !== scelta.chiave)]} />
       )}

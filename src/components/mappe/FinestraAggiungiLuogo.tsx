@@ -22,7 +22,6 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { SceltaPunto } from './SceltaPunto';
 import { CampiLuogo } from '../guida/moduli/CampiLuogo';
-import { luogoHaSegno } from '../../../shared/tipiLuogo';
 import type { OrariNegozio } from '../../../shared/orariNegozio';
 import type { PlanimetriaAreaDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -41,8 +40,6 @@ interface Props {
   planimetrie?: ReadonlyArray<Planimetria>;
   /** Dal quartiere (L5-06): le sue aree, una delle quali si sceglie (facoltativa) al passo 2. */
   aree?: ReadonlyArray<{ slug: string; nome: string }>;
-  /** Dall'area: la sua chiave, per un luogo nuovo creato senza il punto (un genere che non ha segno sulla mappa). */
-  areaChiave?: string;
   /** «Posiziona»: il luogo è già scelto, resta solo il punto. */
   luogo?: { chiave: string; nome: string } | null;
   onChiudi: () => void;
@@ -53,7 +50,7 @@ interface Props {
 /** La finestra di «Aggiungi luogo» (due passi) o di «Posiziona» (il solo punto). */
 // L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraAggiungiLuogoReale` esce dal bundle
 export const FinestraAggiungiLuogo: StrumentoDiModifica<typeof FinestraAggiungiLuogoReale> = IN_RILASCIO ? NienteInRilascio : FinestraAggiungiLuogoReale;
-function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellArea, aree, areaChiave, luogo = null, onChiudi, onFatto }: Props) {
+function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellArea, aree, luogo = null, onChiudi, onFatto }: Props) {
   const dalQuartiere = aree !== undefined;
   const [passo, setPasso] = useState<1 | 2>(luogo ? 2 : 1);
   // dal quartiere si crea (i luoghi che esistono si collocano con «Colloca» e si posizionano dalla loro area)
@@ -78,17 +75,13 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellAre
   const q = useCarica(() => (chiaveLuogo !== undefined ? Promise.resolve(null) : getQuartiere(quartiere)), [quartiere, chiaveLuogo]);
   const planimetria = planimetrie.find((p) => p.chiave === mappa) ?? null;
   const src = useImmagineMappa(planimetria);
-  // prima i luoghi senza pin (quelli da posizionare), poi gli altri
-  // (solo quelli il cui genere ha un segno che porta al luogo: gli altri non si posizionano con un pin)
-  const luoghi = [...(q.dati?.luoghi ?? [])].filter((l) => luogoHaSegno(l.tipo)).sort((a, b) => Number(!!a.pin) - Number(!!b.pin));
+  // prima i luoghi senza pin (quelli da posizionare), poi gli altri; ogni genere si posiziona (Altro e Punto di interesse con la «Nota»)
+  const luoghi = [...(q.dati?.luoghi ?? [])].sort((a, b) => Number(!!a.pin) - Number(!!b.pin));
   const nomeScelto = luogo?.nome ?? (modo === 'nuovo' ? nuovo.nome.trim() : luoghi.find((l) => l.chiave === esistente)?.nome ?? '');
   const passo1Pronto = modo === 'esistente' ? !!esistente : nuovo.nome.trim().length > 0 && nuovo.tipo !== null;
 
-  // un genere di posto il cui segno non può citare un luogo (Altro e Punto di interesse fanno una «Nota», `luogoHaSegno`): il luogo nuovo
-  // si crea senza il punto, nell'area (`creaSpillo` lo rifiuterebbe con «riferimento-non-ammesso»); quelli che esistono non si posizionano
-  const segnoAmmesso = modo !== 'nuovo' || nuovo.tipo === null || luogoHaSegno(nuovo.tipo);
-  /** Un luogo nuovo si crea anche senza il punto: dal quartiere (nell'area scelta, o da collocare) e per un genere senza segno. */
-  const senzaPunto = modo === 'nuovo' && (!segnoAmmesso || (dalQuartiere && !punto));
+  /** Dal quartiere un luogo nuovo si crea anche senza il punto: nell'area scelta (da posizionare) o da collocare. */
+  const senzaPunto = modo === 'nuovo' && dalQuartiere && !punto;
   /** L'area scelta dal quartiere non si è letta: il luogo non nasce fuori dall'area senza dirlo. */
   const areaNonLetta = dalQuartiere && !!areaScelta && !areaLetta.caricamento && !areaLetta.dati;
 
@@ -99,11 +92,9 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellAre
     try {
       if (senzaPunto) {
         const c = await creaElementoCatalogo('luogo', { nome: nuovo.nome.trim(), tipo: nuovo.tipo ?? 'altro', cosa_offre: nuovo.cosaOffre.trim(), orari_json: orari,
-          quartiere_chiave: quartiere, area_chiave: areaChiave ?? areaLetta.dati?.chiave ?? null });
-        // una frase vera per ogni caso: da collocare (senza area), nell'area da posizionare, nell'area senza pin (genere senza segno)
-        const nellArea = areaChiave !== undefined || !!areaLetta.dati;
-        notifica('success', !nellArea ? `«${c.nome}» è nel quartiere, da collocare in un’area.`
-          : segnoAmmesso ? `«${c.nome}» è nell’area, da posizionare sulla sua planimetria.` : `«${c.nome}» è nell’area, senza pin.`);
+          quartiere_chiave: quartiere, area_chiave: areaLetta.dati?.chiave ?? null });
+        // una frase vera per ogni caso: da collocare (senza area) o nell'area da posizionare
+        notifica('success', areaLetta.dati ? `«${c.nome}» è nell’area, da posizionare sulla sua planimetria.` : `«${c.nome}» è nel quartiere, da collocare in un’area.`);
         onFatto();
         onChiudi();
         navigate(urlLuogo(c.chiave), { state: { apriPosto: c.puntoVendita ?? true } });
@@ -161,17 +152,15 @@ function FinestraAggiungiLuogoReale({ quartiere, planimetrie: planimetrieDellAre
           {dalQuartiere && <Selettore className="selettore--in-linea" etichetta="Area" valore={areaScelta} ricerca="sempre" disabilitato={occupato}
             vuoto="Nessuna per ora"
             opzioni={aree.map((a) => ({ chiave: a.slug, nome: a.nome }))} onCambia={(k) => { setAreaScelta(k); setPunto(null); setMappa(''); }} />}
-          {!segnoAmmesso
-            ? <p className="m-0 text-text-secondary">Questo genere di posto non ha un segno sulla mappa che porti al luogo: {dalQuartiere && !areaScelta ? 'il luogo nasce da collocare' : 'il luogo nasce nell’area, senza pin'}.</p>
-            : dalQuartiere && !areaScelta
-              ? <p className="m-0 text-text-secondary">Senza area il luogo nasce da collocare: l’area e il segno sulla mappa si danno dopo.</p>
-              : <p className="m-0 text-text-secondary">Tocca il punto dove sta {nomeScelto ? `«${nomeScelto}»` : 'il luogo'}: lì nasce il suo pin{dalQuartiere && modo === 'nuovo' ? '; senza il punto il luogo nasce nell’area, da posizionare' : ''}.</p>}
-          {segnoAmmesso && planimetrie.length > 1 && (
+          {dalQuartiere && !areaScelta
+            ? <p className="m-0 text-text-secondary">Senza area il luogo nasce da collocare: l’area e il segno sulla mappa si danno dopo.</p>
+            : <p className="m-0 text-text-secondary">Tocca il punto dove sta {nomeScelto ? `«${nomeScelto}»` : 'il luogo'}: lì nasce il suo pin{dalQuartiere && modo === 'nuovo' ? '; senza il punto il luogo nasce nell’area, da posizionare' : ''}.</p>}
+          {planimetrie.length > 1 && (
             <Selettore className="selettore--in-linea" etichetta="Planimetria" valore={mappa} ricerca="mai"
               opzioni={planimetrie.map((p) => ({ chiave: p.chiave, nome: p.etichetta ?? p.nome }))} onCambia={(k) => { setMappa(k); setPunto(null); }} />
           )}
           {areaNonLetta && <p role="alert" className="m-0 testo-13 text-error-testo">L’area non si è letta: riprova a sceglierla, o scegli «Nessuna per ora».</p>}
-          {segnoAmmesso && !areaNonLetta && (!dalQuartiere || areaScelta) && (areaLetta.caricamento
+          {!areaNonLetta && (!dalQuartiere || areaScelta) && (areaLetta.caricamento
             ? <p className="m-0 text-text-muted" role="status">Caricamento delle planimetrie dell’area…</p>
             : src
               ? <SceltaPunto src={src} alt={`Planimetria ${planimetria?.etichetta ?? planimetria?.nome ?? ''}`} punto={punto} onPunto={setPunto} disabilitato={occupato} />

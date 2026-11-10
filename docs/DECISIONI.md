@@ -455,8 +455,8 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   posizionato (non è fra quelli «da posizionare» dell'Area).
 - Dal quartiere e dall'area un luogo nuovo si crea da una finestra sola, «Aggiungi luogo» (dall'editor della mappa resta «Crea un
   luogo da questo pin»): il quartiere è quello della pagina; dal quartiere l'area si sceglie ed è facoltativa (senza, il luogo nasce da
-  collocare), e il punto sulla planimetria pure (senza, nasce nell'area da posizionare). Un genere di posto il cui segno è una «Nota»
-  (Altro, Punto di interesse) non può avere un pin che porti al luogo: nasce senza pin (nell'area, o da collocare) e non si posiziona.
+  collocare), e il punto sulla planimetria pure (senza, nasce nell'area da posizionare). Ogni genere di posto si posiziona: per Altro e
+  Punto di interesse il pin è una «Nota», l'unico spillo informativo che può portare a un luogo.
 - La disponibilità di negozi e articoli «a un dato momento» è l'insieme delle condizioni della guida italiana Royal; il «disponibile
   dal» mostrato si ricava dalla condizione strutturata.
 - Il catalogo degli oggetti è separato dall'equipaggiamento con statistiche; un oggetto ha una sola identità e un solo testo

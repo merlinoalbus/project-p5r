@@ -10,7 +10,7 @@
 // scrive un testo. L'ordine è quello con cui i tipi compaiono nei filtri della scheda del quartiere.
 // ============================================================
 
-import { DEFINIZIONI_SPILLO, RIFERIMENTI_AMMESSI_PER_CATEGORIA, categoriaSpillo, type TipoSpillo } from './spilli.js';
+import { DEFINIZIONI_SPILLO, type TipoSpillo } from './spilli.js';
 
 export interface DefinizioneTipoLuogo {
   chiave: string;
@@ -56,12 +56,6 @@ export function definizioneTipoLuogo(tipo: string): DefinizioneTipoLuogo {
 export function spilloPerLuogo(tipoLuogo: string): TipoSpillo {
   if (tipoLuogo === 'velluto' || tipoLuogo === 'mementos') return tipoLuogo;
   return definizioneTipoLuogo(tipoLuogo).icona;
-}
-
-/** L5-06: lo spillo del genere può citare il luogo (un pin collegato al luogo). No per Altro e Punto di interesse, il cui spillo è una
- *  «Nota» informativa: `creaSpillo` lo rifiuterebbe (`riferimento-non-ammesso`), quindi quei luoghi non si posizionano con un pin. */
-export function luogoHaSegno(tipoLuogo: string): boolean {
-  return RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoriaSpillo(spilloPerLuogo(tipoLuogo))].includes('luogo');
 }
 
 /** Ordina i tipi presenti secondo il catalogo, scartando i doppioni. */

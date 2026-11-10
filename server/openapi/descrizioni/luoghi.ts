@@ -22,7 +22,7 @@ export const DESCRIZIONI_LUOGHI: DescrizioniArea = {
     sommario: '«Posiziona»: un luogo (esistente o nuovo) con il suo pin su una planimetria del quartiere',
     descrizione: 'R5-18. In una transazione: crea il luogo se si danno i dati di `nuovo` (nome, tipo, cosa offre, orari; nasce nel quartiere della planimetria), crea il pin collegato (riferimento `luogo`, tipo di spillo dal catalogo dei tipi di luogo, nome e descrizione dal luogo) nel punto `x`/`y` (percentuali) e mette il luogo nell\'Area della planimetria. `luogo` e `nuovo` si escludono. La planimetria dev\'essere di un quartiere (una planimetria di un\'Area del quartiere o la sua illustrazione); un luogo esistente dev\'essere di quel quartiere.',
     risposta: 'La pagina del luogo, `LuogoDettaglioDto`',
-    errori: [[400, 'luogo-o-nuovo'], [400, 'mappa-fuori-dai-quartieri'], [400, 'luogo-di-altro-quartiere'], [404, 'mappa-non-trovata'], [404, 'luogo-non-trovato'], [409, 'luogo-gia-posizionato'], [409, 'luogo-senza-segno'], [400, 'pin-senza-macchina'], [409, 'sede-con-pin-in-altra-area']],
+    errori: [[400, 'luogo-o-nuovo'], [400, 'mappa-fuori-dai-quartieri'], [400, 'luogo-di-altro-quartiere'], [404, 'mappa-non-trovata'], [404, 'luogo-non-trovato'], [409, 'luogo-gia-posizionato'], [400, 'pin-senza-macchina'], [409, 'sede-con-pin-in-altra-area']],
   },
   'PUT /api/luoghi/:quartiere/:luogo/area': {
     sommario: '«Colloca»: il luogo in un\'Area del suo quartiere',

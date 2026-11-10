@@ -180,6 +180,19 @@ export const RIFERIMENTI_AMMESSI_PER_CATEGORIA: Record<CategoriaSpillo, readonly
   citta: ['negozio', 'luogo', 'confidente'],
 };
 
+/**
+ * I riferimenti che un pin di quel TIPO può avere oggi: quelli della sua categoria più le eccezioni del tipo. L'unica è la «Nota» che è il
+ * segno di un luogo: i luoghi «Altro» e «Punto di interesse» hanno la Nota come spillo (`shared/tipiLuogo.ts`, `spilloPerLuogo`) e devono
+ * potersi posizionare come gli altri (L3-L4, indicazione dell'utente). Prima la validazione rifiutava il pin con 400 `riferimento-non-ammesso`
+ * e, modificando una Nota che già citava un luogo (i 9 pin dei punti di interesse), ne toglieva il riferimento.
+ */
+const RIFERIMENTI_AGGIUNTI_PER_TIPO: Partial<Record<TipoSpillo, readonly TipoRiferimento[]>> = { nota: ['luogo'] };
+export function riferimentiAmmessiPerTipo(tipo: string): readonly TipoRiferimento[] {
+  const aggiunti = RIFERIMENTI_AGGIUNTI_PER_TIPO[tipo as TipoSpillo];
+  const base = RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoriaSpillo(tipo)];
+  return aggiunti ? [...base, ...aggiunti.filter((r) => !base.includes(r))] : base;
+}
+
 /** Gli elementi fissi del mondo: l'arredo — una porta, una scala, un forziere, un passaggio, una stanza sicura.
  *
  * Non hanno orari propri: la presenza di un luogo (un negozio che chiude, un'attività solo di sera) non si copia sui loro pin

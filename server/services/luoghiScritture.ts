@@ -25,7 +25,7 @@ import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { creaElemento } from './catalogoService.js';
 import { dettaglioLuogo } from './luoghiService.js';
 import { verificaAreaDelLuogo, verificaEliminazioneDiVendita } from './invariantiPuntoVendita.js';
-import { luogoHaSegno, spilloPerLuogo } from '../../shared/tipiLuogo.js';
+import { spilloPerLuogo } from '../../shared/tipiLuogo.js';
 import type { LuogoDettaglioDto } from '../../shared/types.js';
 import type { OrariNegozio } from '../../shared/orariNegozio.js';
 
@@ -46,8 +46,9 @@ export interface LuogoNuovo { nome: string; tipo: string; cosaOffre?: string; or
 /**
  * Posiziona un luogo su una planimetria del mondo (R5-18): `luogo` esistente o `nuovo` (creato nel quartiere della planimetria), il pin collegato
  * e l'Area della planimetria, in una transazione. 404 se la planimetria o il luogo mancano; 400 se la planimetria non è di un quartiere o il luogo
- * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria, 409 `luogo-senza-segno` se il suo genere
- * non ha un segno che porti al luogo (Altro, Punto di interesse: `luogoHaSegno`). Restituisce la pagina del luogo.
+ * è di un altro quartiere; 409 `luogo-gia-posizionato` se il luogo ha già un pin su quella planimetria. Il pin è lo spillo del genere
+ * (`spilloPerLuogo`; per Altro e Punto di interesse la «Nota», che può citare un luogo: `shared/spilli.riferimentiAmmessiPerTipo`).
+ * Restituisce la pagina del luogo.
  */
 export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa: string; x: number; y: number }): LuogoDettaglioDto {
   if ((dati.luogo === undefined) === (dati.nuovo === undefined)) throw httpErrors.badRequest('luogo-o-nuovo', 'Indica un luogo che esiste oppure i dati di un luogo nuovo: uno dei due.');
@@ -69,8 +70,6 @@ export function posizionaLuogo(dati: { luogo?: string; nuovo?: LuogoNuovo; mappa
       k = creato.chiave;
     }
     const l = prepared('SELECT nome, tipo, cosa_offre FROM luogo WHERE chiave = ?').get(k) as { nome: string; tipo: string; cosa_offre: string };
-    // L5-06: lo spillo di Altro e Punto di interesse è una «Nota», che non può portare a un luogo: si dice qui, prima di scrivere
-    if (!luogoHaSegno(l.tipo)) throw httpErrors.conflict('luogo-senza-segno', `«${l.nome}» è di un genere di posto che non ha un segno sulla mappa che porti al luogo: si colloca nell’area senza pin.`);
     creaSpillo(mappa, { tipo: spilloPerLuogo(l.tipo), nome: l.nome, descrizione: l.cosa_offre, x: dati.x, y: dati.y, riferimento: { tipo: 'luogo', chiave: k } });
     if (area) {
       verificaAreaDelLuogo(k, area);

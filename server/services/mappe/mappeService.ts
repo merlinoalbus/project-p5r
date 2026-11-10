@@ -53,7 +53,7 @@ import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.j
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import {
-  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_AMMESSI_PER_CATEGORIA,
+  ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, riferimentiAmmessiPerTipo,
   TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo
 } from '../../../shared/spilli.js';
 import type {
@@ -1231,13 +1231,14 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 }
 
 /**
- * Vero se la categoria ammette il riferimento. Un riferimento `attivita` (un'attività sta in un luogo: il pin punta al luogo) non si
+ * Vero se il tipo del pin ammette il riferimento (quelli della sua categoria più le eccezioni del tipo). Un riferimento `attivita` (un'attività sta in un luogo: il pin punta al luogo) non si
  * offre più né si scrive, ma uno già sul pin (un backup di prima della migrazione 344 portato con «Importa») si tollera finché la
  * migrazione non lo riallinea: lo si riconosce solo se è identico a quello che il pin ha adesso.
  */
-function riferimentoAmmesso(categoria: ReturnType<typeof categoriaSpillo>, rif: { tipo: string; chiave: string }, attuale?: { tipo: string | null; chiave: string | null }): boolean {
-  if (RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(rif.tipo as TipoRiferimento)) return true;
-  return categoria === 'citta' && rif.tipo === 'attivita' && attuale?.tipo === 'attivita' && (attuale.chiave ?? '') === rif.chiave;
+function riferimentoAmmesso(tipo: string, rif: { tipo: string; chiave: string }, attuale?: { tipo: string | null; chiave: string | null }): boolean {
+  // per tipo: la categoria più le eccezioni del tipo (la Nota che segna un luogo, `riferimentiAmmessiPerTipo`)
+  if (riferimentiAmmessiPerTipo(tipo).includes(rif.tipo as TipoRiferimento)) return true;
+  return categoriaSpillo(tipo) === 'citta' && rif.tipo === 'attivita' && attuale?.tipo === 'attivita' && (attuale.chiave ?? '') === rif.chiave;
 }
 
 /** La categoria del tipo decide il resto dello spillo (richiesta dell'utente, 2026-09-11).
@@ -1255,7 +1256,7 @@ function applicaRegoleCategoria<T extends DatiSpillo>(tipo: TipoSpillo, dati: T,
   const out: DatiSpillo = { ...dati, collezionabile: categoria === 'consumabile' };
   if (!ammetteCondizioni(tipo)) out.condizioni = [];
   if (categoria !== 'spostamento') out.destinazione = null;
-  if (out.riferimento && !riferimentoAmmesso(categoria, out.riferimento, attuale)) {
+  if (out.riferimento && !riferimentoAmmesso(tipo, out.riferimento, attuale)) {
     throw httpErrors.badRequest('riferimento-non-ammesso', `Uno spillo «${DEFINIZIONI_SPILLO[tipo].nome}» (${categoria}) non può collegarsi a «${out.riferimento.tipo}».`);
   }
   return out as T;
@@ -1355,7 +1356,7 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
   // più, e un salvataggio del nome non deve fallire per questo); se non è più della categoria, cade.
   const tipoFinale = dati.tipo ?? r.tipo;
   const attuale = { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave };
-  if (dati.riferimento === undefined && r.riferimento_tipo && !riferimentoAmmesso(categoriaSpillo(tipoFinale), { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave ?? '' }, attuale)) dati = { ...dati, riferimento: null };
+  if (dati.riferimento === undefined && r.riferimento_tipo && !riferimentoAmmesso(tipoFinale, { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave ?? '' }, attuale)) dati = { ...dati, riferimento: null };
   dati = applicaRegoleCategoria(tipoFinale, dati, attuale);
   if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
@@ -1709,14 +1710,15 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
 
 /** Il riferimento proprio di un pin del pacchetto, con le regole della sua categoria: un «punto» (pacchetti di prima della 094)
  *  non è un riferimento ma una voce della guida del pin (`vociDichiarate`). */
-function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, categoria: ReturnType<typeof categoriaSpillo>): { tipo: TipoRiferimento; chiave: string } | null {
+function riferimentoDelPacchetto(rif: { tipo: TipoRiferimento; chiave: string } | null | undefined, tipoSpillo: string): { tipo: TipoRiferimento; chiave: string } | null {
+  const categoria = categoriaSpillo(tipoSpillo);
   // un pacchetto di prima della migrazione 344 cita ancora `attivita`: la chiave è quella di un luogo (la sede dell'attività) e il pin
   // la importa come pin di quel luogo, come ha fatto la migrazione sui pin esistenti; senza un luogo con quella chiave (la migrazione 344
   // lascia sull'attività i pin che la citano davvero) il pin non porta un riferimento che non punta a niente
   const r = rif?.tipo === 'attivita' && categoria === 'citta'
     ? (prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(rif.chiave) ? { tipo: 'luogo' as const, chiave: rif.chiave } : null)
     : rif;
-  return r && r.tipo !== 'punto' && RIFERIMENTI_AMMESSI_PER_CATEGORIA[categoria].includes(r.tipo) ? r : null;
+  return r && r.tipo !== 'punto' && riferimentiAmmessiPerTipo(tipoSpillo).includes(r.tipo) ? r : null;
 }
 
 /** Le voci della guida che un pin del pacchetto dichiara: il campo `voci` (098), o `voce` di un pacchetto della 094-097, o il
@@ -1755,7 +1757,7 @@ function identitaDelPacchetto(s: { tipo: string; nome: string; riferimento: { ti
 function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][number]['spilli'][number], verificata?: DestinazioneDaSalvare | null): boolean {
   // si confronta con quel che il pacchetto **produrrebbe** (regole di categoria applicate), non con quel che scrive
   const categoria = categoriaSpillo(s.tipo);
-  const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
+  const riferimento = riferimentoDelPacchetto(s.riferimento, s.tipo);
   if (r.tipo!==s.tipo || r.nome!==s.nome || r.descrizione!==(s.descrizione??'') || r.x!==s.x || r.y!==s.y
     || r.riferimento_tipo!==(riferimento?.tipo??null) || r.riferimento_chiave!==(riferimento?.chiave??null)
     || r.collezionabile!==(categoria==='consumabile'?1:0) || r.ordine!==(s.ordine??0) || r.solo_posizione!==(s.soloPosizione?1:0)) return false;
@@ -2109,7 +2111,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const categoria = categoriaSpillo(s.tipo);
         const { valide, scartate } = condizioniConChiaviEsistenti(ammetteCondizioni(s.tipo) ? s.condizioni : [], pinDelPacchetto);
         esito.condizioniScartate += scartate.length;
-        const riferimento = riferimentoDelPacchetto(s.riferimento, categoria);
+        const riferimento = riferimentoDelPacchetto(s.riferimento, s.tipo);
         // L3: lo stesso pin (uid) torna col suo id, se è libero: atterraggi, arrivi e collegamenti restano quelli di prima
         const diPrima = uidValido(s.uid) ? pinDiPrima.get(s.uid as string) : undefined;
         const idDiPrima = diPrima && !prepared('SELECT 1 FROM spillo WHERE id = ?').get(diPrima.id) ? diPrima.id : null;

@@ -39,7 +39,7 @@ import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '.
 
 import { condizioniSenzaTesto, ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_AMMESSI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, riferimentiAmmessiPerTipo, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
 import { haCasaPropria, paginaPerAggiungere } from '../utils/aree';
@@ -718,7 +718,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const cambiaTipo = (t: TipoSpillo) => {
     setTipo(t);
     const c = categoriaSpillo(t);
-    if (riferimento && !RIFERIMENTI_AMMESSI_PER_CATEGORIA[c].includes(riferimento.tipo)) setRiferimento(null);
+    if (riferimento && !riferimentiAmmessiPerTipo(t).includes(riferimento.tipo)) setRiferimento(null);
     if (c !== 'spostamento') setDestinazione(null);
     if (!ammetteCondizioni(t)) setCondizioni([]);
   };
