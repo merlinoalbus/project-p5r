@@ -20,6 +20,20 @@ export const TIPI_LUOGO_DI_VENDITA: readonly string[] = ['negozio', 'distributor
 /** Il genere di punto vendita, e di pin, che è una macchina. */
 export const TIPO_MACCHINA = 'distributore';
 
+/**
+ * Che cosa vende il primo punto vendita di un luogo che nasce per vendere: una macchina per un luogo «distributore», «altro» (da scegliere
+ * nell'editor del posto) per un luogo «negozio»; null per i generi di posto che non vendono.
+ */
+export function tipoPuntoVenditaDelLuogo(genere: string): string | null {
+  if (genere === TIPO_MACCHINA) return TIPO_MACCHINA;
+  return TIPI_LUOGO_DI_VENDITA.includes(genere) ? 'altro' : null;
+}
+
+/** L'ancora della sezione di un punto vendita nella pagina del suo luogo (`#negozio-untouchable`): la stessa per il server e l'interfaccia. */
+export function ancoraPuntoVendita(chiave: string): string {
+  return `negozio-${chiave.replace(/[^a-zA-Z0-9]+/g, '-')}`;
+}
+
 /** I1. Un punto vendita ha una sede: la perde o nasce senza solo chi non sta sulla mappa. Senza sede già prima resta ammesso. */
 export function violazioneSede(p: { chiave: string | null; sedePrima: string | null; sedeDopo: string | null; nuovo: boolean }): ViolazionePuntoVendita | null {
   if (p.sedeDopo !== null || (!p.nuovo && p.sedePrima === null)) return null;

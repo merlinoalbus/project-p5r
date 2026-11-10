@@ -2571,6 +2571,9 @@
    basta a chi naviga da tastiera, perché il fuoco vero resta sul pulsante o sul campo */
 .selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); box-shadow:inset 3px 0 0 var(--color-primary-testo); }
 .selettore__voce--scelta .selettore__pulsante { font-weight:600; }
+/* L3: la voce «crea» in fondo all'elenco: separata dalle voci e col colore delle azioni */
+.selettore__voce--crea { border-top:1px solid var(--color-border); }
+.selettore__voce--crea .selettore__pulsante { color:var(--color-primary-testo); font-weight:600; }
 .selettore__vuoto { padding:8px; font-size:var(--testo-12); color:var(--color-text-muted); }
 .selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:var(--testo-12); color:var(--color-text-muted); pointer-events:none; }
 /* Compatto = stretto quanto serve, senza l'etichetta sopra: i filtri in linea delle pagine. */
@@ -2856,6 +2859,57 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .voce-colonna { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 @media (min-width: 1024px) {
   .voce-colonne { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}
+
+/* ---- «Il posto» (L3): il luogo, i suoi punti vendita e i listini in una finestra ----
+   Sotto 1024 px l'elenco è una fila di voci a capo sopra il pannello; da 1024 px sta a sinistra. Nessuno scorrimento proprio: scorre
+   solo il corpo della finestra (un elenco fermo più alto della finestra nasconderebbe le ultime voci). Il listino è una griglia: oggetto, prezzo, pezzi, comandi;
+   sotto i 768 px l'oggetto prende la riga intera e prezzo, pezzi e comandi vanno sotto. */
+.posto { display: grid; gap: 16px; min-width: 0; }
+.posto__elenco { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.posto__voci { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.posto__voce { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 44px; padding: 6px 10px; min-width: 0; max-width: 100%;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; text-align: left; cursor: pointer;
+  transition-property: border-color, background-color; transition-duration: 150ms; transition-timing-function: ease-out; }
+.posto__voce:hover { border-color: var(--color-text-secondary); }
+.posto__voce:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+.posto__voce--scelta { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); box-shadow: inset 3px 0 0 var(--color-primary); }
+.posto__voce-nome { font-size: var(--testo-14); font-weight: 600; overflow-wrap: anywhere; text-wrap: balance; }
+.posto__voce-dettaglio { font-size: var(--testo-12); color: var(--color-text-muted); }
+.posto__segno { font-size: var(--testo-12); color: var(--color-primary-testo); }
+.posto__comandi { display: flex; flex-wrap: wrap; gap: 6px; }
+.posto__pannello { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.posto__regola { display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 45%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 6%, transparent); }
+.posto__listino { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.posto__offerta { border-top: 1px solid var(--color-border); min-width: 0; }
+.posto__offerta:first-of-type, .posto__riga--testa + .posto__offerta { border-top: 0; }
+.posto__riga { display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem 4.5rem 96px; align-items: center; gap: 6px; padding: 6px 8px; min-width: 0; }
+.posto__riga--testa { font-size: var(--testo-12); color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); padding-top: 4px; padding-bottom: 4px; }
+.posto__cella { min-width: 0; }
+.posto__cella .form-input { width: 100%; min-height: 44px; }
+.posto__cella--oggetto .selettore, .posto__cella--oggetto .selettore__scelta { width: 100%; max-width: 100%; }
+.posto__campo { position: relative; display: block; }
+.posto__campo .form-input { padding-right: 30px; }
+.posto__unita { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: var(--testo-12); color: var(--color-text-muted); pointer-events: none; }
+.posto__cella--azioni { display: flex; justify-content: flex-end; gap: 4px; }
+.posto__icona { min-width: 44px; min-height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.posto__offerta--vuota .posto__riga { grid-template-columns: minmax(0, 1fr); }
+.posto__dettagli { display: flex; flex-direction: column; gap: 12px; padding: 10px 10px 12px; border-top: 1px dashed var(--color-border); background: var(--color-bg-secondary); }
+.ripiegabile > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; list-style: none; }
+.ripiegabile > summary::-webkit-details-marker { display: none; }
+.ripiegabile__freccia { display: inline-block; transition-property: transform; transition-duration: 150ms; transition-timing-function: ease-out; }
+.ripiegabile[open] > summary .ripiegabile__freccia { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .ripiegabile__freccia { transition-duration: 0ms; } }
+@media (max-width: 767px) {
+  .posto__riga { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 96px; }
+  .posto__cella--oggetto { grid-column: 1 / -1; }
+  .posto__riga--testa { display: none; }
+}
+@media (min-width: 1024px) {
+  .posto { grid-template-columns: 220px minmax(0, 1fr); align-items: start; }
+  .posto__voci { flex-direction: column; flex-wrap: nowrap; }
+  .posto__voce { width: 100%; }
 }
 /* «Quale»: griglia di tessere con l'immagine sopra e il nome sotto (bersagli ≥ 44 px), la scelta evidente */
 .quale-griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; min-width: 0; }

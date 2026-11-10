@@ -3,7 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { urlLuogo } from '../utils/citta';
 import { getNegozi, ricercaArticoli } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -53,6 +54,7 @@ export function NegoziPage() {
   // apre l'elenco già filtrato, e chi torna indietro lo ritrova: un filtro è un valore
   // (`utils/articoli.ts`), letto dai parametri e riscritto lì a ogni cambio.
   const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
   const filtro = useMemo(() => filtroDaParametri(params), [params]);
   /** Riscrive il filtro nei parametri dell'URL (conservando quelli estranei al filtro) senza aggiungere voci alla cronologia. */
   const cambiaFiltro = (f: Filtro) => setParams((precedenti) => parametriDaFiltro(f, precedenti), { replace: true });
@@ -106,7 +108,14 @@ export function NegoziPage() {
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
             <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Nascosti dalla guida" to="/impostazioni#nascosti" />
           </div>}
-          {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
+          {/* L3: salvato, si apre il creato: il posto della sua sede, sul punto vendita nuovo (dove si scrive il listino), o la sua pagina senza sede */}
+          {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={(creato) => {
+            setNuovoNegozio(false);
+            const sede = typeof creato?.dati.sede_chiave === 'string' ? creato.dati.sede_chiave : null;
+            if (creato && sede) navigate(urlLuogo(sede), { state: { apriPosto: creato.chiave } });
+            else if (creato) navigate(`/guida/negozi/${encodeURIComponent(creato.chiave)}`);
+            else void negozi.ricarica();
+          }} />}
           {/* Lotto C: le 19 tessere delle categorie (e «Per chi», stato e disponibilità) stanno nel pannello «Filtri»: sul telefono
               il primo negozio arrivava a y ≈ 1110, dopo tutte le tessere. */}
           <FiltriArticoli comprimibili filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo o un negozio…" />

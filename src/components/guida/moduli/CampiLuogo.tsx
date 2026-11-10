@@ -2,9 +2,9 @@
 // CampiLuogo — i campi comuni di un luogo nuovo o da correggere: nome, tipo a tessere, che cosa offre, orari (L13, O7-5)
 // ============================================================
 //
-// Censimento del 25/10: «tre moduli diversi per creare un luogo». Questi campi sono UNO e li usano tutti e tre i punti d'ingresso: il
-// modulo del luogo (`ModuloLuogo`: Aggiungi un luogo dal quartiere, Correggi il luogo), «Aggiungi luogo» della planimetria
-// (`FinestraAggiungiLuogo`, che poi chiede il punto) e «Crea un luogo da questo pin» (`FinestraLuogoDaPin`, che poi mostra l'anteprima).
+// Censimento del 25/10: «tre moduli diversi per creare un luogo». Questi campi sono UNO e li usano tutti: il modulo del luogo
+// (`ModuloLuogo`: il luogo in «Il posto»), «Aggiungi luogo» (`FinestraAggiungiLuogo`, il solo ingresso per crearne uno dal quartiere e
+// dall'area, L5-06) e «Crea un luogo da questo pin» dell'editor della mappa (`FinestraLuogoDaPin`, che poi mostra l'anteprima).
 // Ognuno manda il suo corpo di sempre alla sua rotta: cambia solo che campi, etichette, limiti e regola degli orari sono scritti una volta.
 //
 // Sta in un file suo, con la condizione costante di build nello stesso modulo (vedi `utils/modalita.ts`): le due finestre della mappa lo
@@ -46,7 +46,8 @@ function CampiLuogoReali({ valore, onCambia, disabilitato }: Props) {
   return <>
     <CampoTesto etichetta="Nome del luogo" valore={valore.nome} massimo={LIMITI_LUOGO.nome} obbligatorio largo disabilitato={disabilitato} onCambia={(nome) => onCambia({ nome })} />
     <Blocco largo>
-      <SelettoreIcone compatto etichetta="Tipo" valore={valore.tipo ?? ''} opzioni={opzioniDelTipo()} disabilitato={disabilitato} onCambia={(tipo) => onCambia({ tipo })} />
+      {/* L3 (AD6): «Genere di posto», distinto da «Che cosa vende» del punto vendita e dal «Segno sulla mappa» del pin */}
+      <SelettoreIcone compatto etichetta="Genere di posto" valore={valore.tipo ?? ''} opzioni={opzioniDelTipo()} disabilitato={disabilitato} onCambia={(tipo) => onCambia({ tipo })} />
     </Blocco>
     <CampoTesto etichetta="Che cosa offre" tipo="lungo" valore={valore.cosaOffre} massimo={LIMITI_LUOGO.cosaOffre} disabilitato={disabilitato} onCambia={(cosaOffre) => onCambia({ cosaOffre })} />
     <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">

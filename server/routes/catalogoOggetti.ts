@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { dettaglioOggetto, elencaCatalogoOggetti } from '../services/catalogoOggettiService.js';
 import { aggiornaOggetto, creaOggetto, eliminaOggetto, ripristinaOggetto } from '../services/catalogoOggettiScritture.js';
-import { impostaLegameOggetto } from '../services/catalogoOggettiProposte.js';
+import { impostaLegameOggetto } from '../services/catalogoOggettiLegami.js';
 import { verificaPartita } from '../services/verificaPartita.js';
 import { z as schema } from 'zod';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';

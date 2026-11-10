@@ -79,12 +79,13 @@ export const articolo: DefinizioneModulo = {
     // Ondata 5, lotto F (decisione 21): effetto e statistiche non sono dell'offerta (si leggono dall'oggetto del catalogo): il modulo non li porta
     nota: testoDi(e?.dati.nota),
     verificato: verificatoDi(e),
-    // Il nome storico resta solo per le offerte esistenti non collegate: non si copia dal catalogo.
+    // Il nome proprio è solo delle offerte esistenti non collegate (L4-07: una collegata non ne ha; scollegandola, il server le dà quello dell'oggetto).
     _esistente: !!e, _aMano: !!e && !e.dati.catalogo_chiave,
     _catalogoIniziale: (e?.dati.catalogo_chiave as string | null) ?? null,
   }),
   // Un collegamento non disponibile resta salvabile senza modificarlo; una nuova offerta sceglie un'identità.
-  valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && testoDi(d.nome).trim().length > 0))
+  // L4-07: un'offerta che si scollega adesso non ha nome proprio (collegata non lo aveva): al salvataggio il server le dà quello dell'oggetto
+  valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && (testoDi(d.nome).trim().length > 0 || !!testoDi(d._catalogoIniziale))))
     && (d._costoModificato !== true || d.costo_json == null || normalizzaCostoScambio(d.costo_json) !== null)
     && (d._rifornimentoModificato !== true || d.rifornimento_json == null || normalizzaRifornimento(d.rifornimento_json) !== null)
     && (numeroDi(d.prezzo_sera) === null || (Number.isSafeInteger(numeroDi(d.prezzo_sera)) && numeroDi(d.prezzo_sera)! >= 0)),
@@ -109,8 +110,10 @@ export const articolo: DefinizioneModulo = {
     // Non rispedire un legame immutato evita di rifiutare la correzione della nota se l'oggetto è stato nascosto.
     if (chiave !== d._catalogoIniziale) corpo.catalogo_chiave = chiave;
     if (!chiave) {
-      Object.assign(corpo, { nome: testoDi(d.nome).trim(), categoria: d.categoria, per: testoOnull(d.per),
-        oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null });
+      // L4-07: senza nome (un'offerta collegata che si scollega adesso) nome, categoria e «per chi» li dà il server, dall'oggetto
+      const nome = testoDi(d.nome).trim();
+      Object.assign(corpo, nome ? { nome, categoria: d.categoria, per: testoOnull(d.per) } : {},
+        { oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null });
     }
     return corpo;
   },
@@ -218,7 +221,8 @@ export const luogo: DefinizioneModulo = {
   conCondizioni: true,
   conVerificato: true,
   iniziali: (e) => ({
-    nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
+    // L3: il genere di un luogo nuovo si sceglie (vuoto finché non lo si sceglie): «negozio» e «distributore» fanno nascere un punto vendita
+    nome: testoDi(e?.dati.nome), tipo: e ? testoDi(e.dati.tipo) || 'altro' : '', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
     cosa_offre: testoDi(e?.dati.cosa_offre), note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
     // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
@@ -228,7 +232,7 @@ export const luogo: DefinizioneModulo = {
     confidenti_json: (jsonDi<unknown>(e?.dati.confidenti_json, []) as unknown[]).filter((c): c is string => typeof c === 'string'),
     piatti_json: jsonDi<PiattoLuogo[] | null>(e?.dati.piatti_json, null),
   }),
-  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.quartiere_chiave).length > 0 && ((d.piatti_json as PiattoLuogo[] | null) ?? []).every((p) => p.nome.trim().length > 0),
+  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.tipo).length > 0 && testoDi(d.quartiere_chiave).length > 0 && ((d.piatti_json as PiattoLuogo[] | null) ?? []).every((p) => p.nome.trim().length > 0),
   prepara: (d) => {
     const piatti = (d.piatti_json as PiattoLuogo[] | null) ?? null;
     return {

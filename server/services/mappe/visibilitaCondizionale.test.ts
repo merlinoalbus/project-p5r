@@ -256,13 +256,14 @@ describe.skip('visibilità condizionale dei pin', () => {
     expect(statoDelPin()).not.toBe('bloccato');
 
     // ora si chiude il negozio nel catalogo (gli orari: solo di sera, e la partita è di giorno), e **basta**: lo spillo non viene toccato
-    const prima = db.prepare('SELECT orari_json FROM negozio WHERE chiave = ?').get(pin!.riferimento_chiave) as { orari_json: string | null };
-    db.prepare('UPDATE negozio SET orari_json = ? WHERE chiave = ?')
+    // dalla 373 gli orari propri del negozio sono la sua eccezione (`eccezione_orari_json`)
+    const prima = db.prepare('SELECT eccezione_orari_json FROM negozio WHERE chiave = ?').get(pin!.riferimento_chiave) as { eccezione_orari_json: string | null };
+    db.prepare('UPDATE negozio SET eccezione_orari_json = ? WHERE chiave = ?')
       .run(JSON.stringify({ giorni: [], fasce: ['sera'], chiusoConPioggia: false, nota: null }), pin!.riferimento_chiave);
     try {
       expect(statoDelPin()).toBe('bloccato');
     } finally {
-      db.prepare('UPDATE negozio SET orari_json = ? WHERE chiave = ?').run(prima.orari_json, pin!.riferimento_chiave);
+      db.prepare('UPDATE negozio SET eccezione_orari_json = ? WHERE chiave = ?').run(prima.eccezione_orari_json, pin!.riferimento_chiave);
       db.prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
     }
   });

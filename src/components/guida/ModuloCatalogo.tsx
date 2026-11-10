@@ -42,7 +42,8 @@ interface Props {
   /** Per un articolo nuovo: il negozio a cui appartiene. */
   negozioChiave?: string;
   onChiudi: () => void;
-  onSalvato: () => void;
+  /** Dopo il salvataggio; per una creazione con l'elemento creato (L3: chi apre la creazione può aprire il creato). */
+  onSalvato: (creato?: ElementoCatalogoDto) => void;
 }
 
 /**
@@ -91,10 +92,12 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, corpo);
         notifica('success', `${nome.singolare} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
-      } else {
-        await aggiornaElementoCatalogo(tipo, elemento.chiave, corpo);
-        notifica('success', lettura ? `${nome.singolare} corretto. Il titolo si ripristina dalla pagina dell’oggetto.` : `${nome.singolare} corretto: «Ripristina» rimette i dati della guida.`);
+        // L3: chi ha aperto la creazione riceve il creato, per aprirlo
+        onSalvato(e);
+        return;
       }
+      await aggiornaElementoCatalogo(tipo, elemento.chiave, corpo);
+      notifica('success', lettura ? `${nome.singolare} corretto. Il titolo si ripristina dalla pagina dell’oggetto.` : `${nome.singolare} corretto: «Ripristina» rimette i dati della guida.`);
       onSalvato();
     } catch (err) {
       const messaggio = err instanceof Error ? err.message : 'Salvataggio fallito.';

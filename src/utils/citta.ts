@@ -4,6 +4,7 @@
 
 import { TIPI_LUOGO } from '../../shared/tipiLuogo';
 import { NOMI_DOTI } from '../../shared/doti';
+import { ancoraPuntoVendita } from '../../shared/puntoVendita';
 
 /** Etichette dei tipi di luogo: derivate dal catalogo condiviso (shared/tipiLuogo). */
 export const NOME_TIPO_LUOGO: Record<string, string> = Object.fromEntries(TIPI_LUOGO.map((t) => [t.chiave, t.nome]));
@@ -20,10 +21,8 @@ export function urlLuogo(chiave: string, negozio?: string): string {
   return `/guida/luogo/${chiave.split('/').map(encodeURIComponent).join('/')}${negozio ? `#${ancoraNegozio(negozio)}` : ''}`;
 }
 
-/** L'ancora di un negozio nella pagina del suo luogo (`#negozio-untouchable`). */
-export function ancoraNegozio(chiave: string): string {
-  return `negozio-${chiave.replace(/[^a-zA-Z0-9]+/g, '-')}`;
-}
+/** L'ancora di un negozio nella pagina del suo luogo (`#negozio-untouchable`): la stessa del server (`shared/puntoVendita.ts`). */
+export const ancoraNegozio = ancoraPuntoVendita;
 
 /** L'ancora di un luogo nella pagina del quartiere (`#luogo-shibuya-untouchable`): la scheda del negozio ci arriva dalla sede. */
 export function ancoraLuogo(chiave: string): string {

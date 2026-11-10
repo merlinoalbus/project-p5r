@@ -36,7 +36,8 @@ export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato
   if (attuale && !opzioni.some((o) => o.chiave === attuale)) opzioni.unshift({ chiave: attuale, nome: dati.caricamento ? 'Un attimo…' : dati.errore ? 'Sede scelta (luoghi non caricati)' : 'Luogo non più nell’elenco' });
   return (
     <div className="editor-mappa__campo">
-      <Selettore etichetta={etichetta} valore={attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre" vuoto="Nessuna sede (online, ambulante o da assegnare)" opzioni={opzioni}
+      <Selettore etichetta={etichetta} valore={dati.caricamento ? '' : attuale} disabilitato={disabilitato || dati.caricamento} ricerca="sempre"
+        vuoto={dati.caricamento ? 'Un attimo…' : 'Nessuna sede (online, ambulante o da assegnare)'} opzioni={opzioni}
         onCambia={(k) => onCambia(k || null)} />
       {dati.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
     </div>

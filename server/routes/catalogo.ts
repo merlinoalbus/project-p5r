@@ -10,7 +10,8 @@ import { eliminaNelCestino } from '../services/luoghiScritture.js';
 
 /** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
 const queryConferma = z.object({ conferma: z.enum(['0', '1']).optional() });
-import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, paramsElementoCatalogo, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
+import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, bodySalvaPosto, paramsElementoCatalogo, paramsPosto, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
+import { leggiPosto, salvaPosto } from '../services/postoService.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TipoCatalogo } from '../../shared/types.js';
 
@@ -33,6 +34,37 @@ function corpoPerTipo(tipo: TipoCatalogo, corpo: unknown, parziale: boolean): Re
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
 router.get('/', (_req, res) => {
   res.json(riepilogoCatalogo());
+});
+
+// ---- L3: il posto (luogo, punti vendita e offerte) in una finestra sola ----
+
+/**
+ * Per una riga esistente valgono solo i campi mandati: lo schema parziale applica comunque i suoi valori predefiniti (`tipo` «altro»,
+ * `cosa_offre` vuoto), che su una modifica cambierebbero in silenzio un campo non toccato.
+ */
+function soloMandati(tipo: TipoCatalogo, corpo: Record<string, unknown>, esistente: boolean): Record<string, unknown> {
+  const dati = corpoPerTipo(tipo, corpo, esistente);
+  return esistente ? Object.fromEntries(Object.entries(dati).filter(([k]) => k in corpo)) : dati;
+}
+
+/** Il luogo con i suoi punti vendita visibili e le loro offerte, come elementi del catalogo. */
+router.get('/posto/:quartiere/:luogo', validate({ params: paramsPosto }), (req, res) => {
+  res.json(leggiPosto(`${req.params.quartiere}/${req.params.luogo}`));
+});
+/** Salva il posto in una transazione; ogni parte passa dallo schema del suo tipo (nuova: completo; esistente: parziale). */
+router.put('/posto/:quartiere/:luogo', validate({ params: paramsPosto, body: bodySalvaPosto }), (req, res) => {
+  const corpo = req.body as z.infer<typeof bodySalvaPosto>;
+  res.json(salvaPosto(`${req.params.quartiere}/${req.params.luogo}`, {
+    luogo: corpo.luogo ? soloMandati('luogo', corpo.luogo, true) : undefined,
+    regole: corpo.regole,
+    puntiVendita: corpo.puntiVendita.map((pv) => ({
+      chiave: pv.chiave,
+      // la sede la decide il posto: per la validazione di un punto vendita nuovo basta un valore, il servizio la sostituisce
+      dati: pv.dati ? soloMandati('negozio', pv.chiave ? pv.dati : { ...pv.dati, sede_chiave: null }, !!pv.chiave) : undefined,
+      offerte: pv.offerte.map((o) => ({ chiave: o.chiave, copiaDa: o.copiaDa, dati: soloMandati('articolo', { ...o.dati, negozio_chiave: pv.chiave ?? 'posto' }, !!o.chiave) })),
+      offerteTolte: pv.offerteTolte,
+    })),
+  }));
 });
 
 /** Le righe toccate dall'utente; con `?nascosti=1` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */

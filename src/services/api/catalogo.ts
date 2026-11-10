@@ -2,7 +2,7 @@
 // API catalogo — righe aggiunte o corrette dall'utente (Fase 16.1)
 // ============================================================
 
-import type { ElementoCatalogoDto, CatalogoOggettoDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
+import type { ElementoCatalogoDto, CatalogoOggettoDto, PostoDto, PostoSalvatoDto, RiepilogoCatalogoDto, SalvaPostoDto, TipoCatalogo } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -46,5 +46,14 @@ export const eliminaNelCestino = (tipo: 'luogo' | 'negozio', chiave: string, con
 /** L5: «Ripristina i valori della guida» per ogni tipo del catalogo: rimette i dati della guida su una riga corretta (mai elimina). */
 export const ripristinaElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<ElementoCatalogoDto> =>
   apiPost(`/catalogo/${tipo}/${encodeURIComponent(chiave)}/ripristina`, {});
+
+/** L3: la chiave «quartiere/luogo» nel percorso del posto, un segmento per parte. */
+const percorsoPosto = (luogo: string) => `/catalogo/posto/${luogo.split('/').map(encodeURIComponent).join('/')}`;
+
+/** L3: il posto per la sua finestra di modifica: il luogo, i suoi punti vendita e le loro offerte. */
+export const getPosto = (luogo: string): Promise<PostoDto> => apiGet(percorsoPosto(luogo));
+
+/** L3: salva il posto in una transazione (punti vendita, offerte, offerte tolte, luogo); risponde col posto riletto e i punti vendita creati. */
+export const salvaPosto = (luogo: string, corpo: SalvaPostoDto): Promise<PostoSalvatoDto> => apiPut(percorsoPosto(luogo), corpo);
 
 // L'agenda del giorno (eventi e cose da fare) dal 2026-09-30 è fatta di voci della giornata: `services/api/compendio.ts`.

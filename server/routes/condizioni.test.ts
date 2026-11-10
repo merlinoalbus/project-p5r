@@ -68,7 +68,7 @@ it('il grado cliente si calcola dalla spesa segnata nel negozio', () => {
 // In `it.skip` (DECISIONI, «I test che chiamano funzioni tolte»): un punto vendita nuovo deve avere una sede (I1), e gli orari della sede prevalgono su quelli del negozio, che è ciò che questa prova usa.
 it.skip('un negozio chiuso adesso (orari) resta consultabile ma non permette acquisti', async () => {
   // la partita è di giorno: un negozio aperto solo di sera è bloccato, e con lui i suoi articoli
-  const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio test', orari_json: { fasce: ['sera'] } })).body.data;
+  const n = (await request(app).post('/api/catalogo/negozio').send({ nome: 'Negozio test', eccezione_orari_json: { fasce: ['sera'] } })).body.data;
   const a = (await request(app).post('/api/catalogo/articolo').send({ nome: 'Prodotto test', negozio_chiave: n.chiave, condizioni_json: [] })).body.data;
   const elenco = (await request(app).get(`/api/compendio/negozi?partita=${partita}`)).body.data;
   const scheda = await request(app).get(`/api/compendio/negozi/${n.chiave}?partita=${partita}`);

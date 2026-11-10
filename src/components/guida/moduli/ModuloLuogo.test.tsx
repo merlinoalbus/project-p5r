@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test ModuloLuogo — i campi comuni del luogo (`CampiLuogo`, gli stessi dei tre punti d'ingresso) e le colonne che scrivono (L13, O7-5)
+// Test ModuloLuogo — i campi comuni del luogo (`CampiLuogo`, gli stessi del modulo, di «Aggiungi luogo» e del luogo da un pin) e le colonne che scrivono (L13, O7-5)
 // ============================================================
 
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -56,5 +56,5 @@ it('CampiLuogo: il tipo si sceglie a tessere e gli orari della guida si aprono t
   fireEvent.click(screen.getByRole('checkbox', { name: /La guida non indica orari/ }));
   const stato = JSON.parse(screen.getByTestId('stato').textContent!) as ValoriLuogo;
   expect(stato).toMatchObject({ nome: 'Chiosco', tipo: null, orari: ORARI_SEMPRE });
-  expect(screen.getByRole('radiogroup', { name: 'Tipo' })).toBeInTheDocument();
+  expect(screen.getByRole('radiogroup', { name: 'Genere di posto' })).toBeInTheDocument();
 });

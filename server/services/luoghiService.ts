@@ -30,6 +30,7 @@ import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, ty
 export { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared/types.js';
+import { ancoraPuntoVendita } from '../../shared/puntoVendita.js';
 
 /** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
 export interface RigaLuogo {
@@ -39,7 +40,7 @@ export interface RigaLuogo {
 }
 
 /** Un pin di un luogo: la planimetria, la casa dell'area aperta sullo spillo e la nota propria del pin (descrizione diversa). */
-interface PinDelLuogo { spillo: number; mappa: string; mappaNome: string; casa: string; notaPin: string | null }
+interface PinDelLuogo { spillo: number; mappa: string; mappaNome: string; casa: string; notaPin: string | null; negozio: string | null }
 
 /** Le letture che servono ai luoghi di una risposta, fatte una volta. */
 export interface LettureLuoghi {
@@ -74,18 +75,28 @@ export function casaDelLuogo(chiave: string): string {
   return i > 0 ? `/guida/luogo/${encodeURIComponent(chiave.slice(0, i))}/${encodeURIComponent(chiave.slice(i + 1))}` : `/guida/luogo/${encodeURIComponent(chiave)}`;
 }
 
-/** I pin di ogni luogo (riferimento `luogo`), in ordine di id, con la casa dell'area aperta sullo spillo e la nota propria del pin. */
+/**
+ * I pin di ogni luogo, con la casa dell'area aperta sullo spillo e la nota propria del pin: prima quelli che citano il luogo, poi quelli
+ * dei suoi punti vendita visibili (la macchina di Central Street ha il pin sul suo punto vendita, non sul luogo), ognuno in ordine di id.
+ * Per il pin di un punto vendita la nota è il nome del punto vendita, e `negozio` dice quale.
+ */
 function pinDeiLuoghi(aree: ContestoAree, luogo?: string): Map<string, PinDelLuogo[]> {
-  const righe = prepared(`SELECT s.id, s.riferimento_chiave AS luogo, s.descrizione, m.chiave AS mappa, m.tipo, m.area_chiave, l.cosa_offre
+  const righe = prepared(`SELECT * FROM (SELECT s.id, s.riferimento_chiave AS luogo, NULL AS negozio, NULL AS negozio_nome, s.descrizione, m.chiave AS mappa, m.tipo, m.area_chiave, l.cosa_offre
     FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave JOIN luogo l ON l.chiave = s.riferimento_chiave
-    WHERE s.riferimento_tipo = 'luogo' ${luogo ? 'AND s.riferimento_chiave = ?' : ''} ORDER BY s.id`).all(...(luogo ? [luogo] : [])) as
-    Array<{ id: number; luogo: string; descrizione: string | null; mappa: string; tipo: string; area_chiave: string | null; cosa_offre: string }>;
+    WHERE s.riferimento_tipo = 'luogo' ${luogo ? 'AND s.riferimento_chiave = ?' : ''}
+    UNION ALL
+    SELECT s.id, n.sede_chiave AS luogo, n.chiave AS negozio, n.nome AS negozio_nome, s.descrizione, m.chiave AS mappa, m.tipo, m.area_chiave, l.cosa_offre
+    FROM spillo s JOIN negozio n ON n.chiave = s.riferimento_chiave JOIN mappa m ON m.chiave = s.mappa_chiave JOIN luogo l ON l.chiave = n.sede_chiave
+    WHERE s.riferimento_tipo = 'negozio' AND n.nascosto = 0 ${luogo ? 'AND n.sede_chiave = ?' : ''}
+    ) ORDER BY negozio IS NOT NULL, id`).all(...(luogo ? [luogo, luogo] : [])) as
+    Array<{ id: number; luogo: string; negozio: string | null; negozio_nome: string | null; descrizione: string | null; mappa: string; tipo: string; area_chiave: string | null; cosa_offre: string }>;
   const out = new Map<string, PinDelLuogo[]>();
   for (const r of righe) {
     const casa = casaDellaMappa({ chiave: r.mappa, tipo: r.tipo, area_chiave: r.area_chiave }, aree);
     const descrizione = (r.descrizione ?? '').trim();
+    const notaPin = r.negozio_nome ?? (descrizione && descrizione !== r.cosa_offre.trim() ? descrizione : null);
     (out.get(r.luogo) ?? out.set(r.luogo, []).get(r.luogo)!).push({ spillo: r.id, mappa: chiaveMappa(r.mappa), mappaNome: nomePercorso(r.mappa),
-      casa: `${casa}${casa.includes('?') ? '&' : '?'}spillo=${r.id}`, notaPin: descrizione && descrizione !== r.cosa_offre.trim() ? descrizione : null });
+      casa: `${casa}${casa.includes('?') ? '&' : '?'}spillo=${r.id}`, notaPin, negozio: r.negozio });
   }
   return out;
 }
@@ -195,7 +206,7 @@ export function luogoDelPin(s: { riferimento_tipo: string | null; riferimento_ch
     if (!n || !luogo) return null;
     eccezione = n.eccezione;
     sbloccoNegozio = n.sblocco;
-    casa = `${casaDelLuogo(luogo.chiave)}#negozio-${encodeURIComponent(s.riferimento_chiave)}`;
+    casa = `${casaDelLuogo(luogo.chiave)}#${ancoraPuntoVendita(s.riferimento_chiave)}`;
   } else return null;
   const orari = eccezione ? leggiOrari(eccezione) : orariDelLuogo(luogo.orari_json ?? null);
   const presenza = presenzaDelLuogo([...condizioniDiSblocco(luogo, l.inviti), ...leggiCondizioniSalvate(sbloccoNegozio)], orari, l.st);

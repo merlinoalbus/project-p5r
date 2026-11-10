@@ -3,7 +3,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { chiaveCatalogo, eCategoriaOggetto } from '../../shared/catalogo.js';
 import type { CatalogoOggettoDto } from '../../shared/types.js';
 import type { DatiCatalogoOggetto } from '../schemas/catalogoOggetti.js';
-import { dtoOggetto, rigaOggetto } from './catalogoOggettiLetture.js';
+import { dtoOggetto, identitaDellOggettoPerLOfferta, rigaOggetto } from './catalogoOggettiLetture.js';
 import { conCestino } from './cestinoService.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -84,6 +84,9 @@ export function eliminaOggetto(chiave: string): { eliminato: true; chiave: strin
     preparaProposteSenzaOggetto(chiave);
     trasferisciFontiCatalogo(chiave, null);
     prepared('UPDATE regalo_partita SET catalogo_chiave = NULL WHERE catalogo_chiave = ?').run(chiave);
+    // L4-07: le offerte perdono il legame (chiave esterna): tengono nome, categoria e «per chi» che mostravano; il cestino rimette tutto
+    const identita = identitaDellOggettoPerLOfferta(chiave);
+    if (identita) prepared("UPDATE articolo SET nome = @nome, categoria = @categoria, per = @per WHERE catalogo_chiave = @chiave AND nome = ''").run({ ...identita, chiave });
     prepared('DELETE FROM catalogo_oggetto WHERE chiave = ?').run(chiave);
   });
   invalidaCacheDiGioco();

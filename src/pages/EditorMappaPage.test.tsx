@@ -98,13 +98,13 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Armeria' } });
-    scegliVoce('Tipo', 'Negozio');
+    scegliVoce('Segno sulla mappa', 'Negozio');
     // categoria «città»: si sceglie che cosa collegare e la voce da un elenco chiuso con ricerca; niente condizioni
-    expect(form.getByRole('button', { name: 'Negozio', pressed: true })).toBeInTheDocument();
+    expect(form.getByRole('button', { name: 'Punto vendita', pressed: true })).toBeInTheDocument();
     await waitFor(() => expect(api.cercaRiferimenti).toHaveBeenCalledWith('negozio', '', 100));
     expect(form.queryByRole('button', { name: /^Condizioni/ })).toBeNull();
-    fireEvent.click(await form.findByRole('combobox', { name: 'Elenco: Negozio' }));
-    fireEvent.change(form.getByLabelText('Cerca Elenco: Negozio'), { target: { value: 'untou' } });
+    fireEvent.click(await form.findByRole('combobox', { name: 'Elenco: Punto vendita' }));
+    fireEvent.change(form.getByLabelText('Cerca Elenco: Punto vendita'), { target: { value: 'untou' } });
     expect(within(form.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Untouchablearmi']);
     fireEvent.click(form.getByRole('option', { name: /Untouchable/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
@@ -121,15 +121,15 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
     expect(form.getByText('Un segno sulla mappa con nome e descrizione, e basta.')).toBeInTheDocument();
-    scegliVoce('Tipo', 'Meccanismo');
+    scegliVoce('Segno sulla mappa', 'Meccanismo');
     expect(form.getByText('Un segno sulla mappa con uno stato da segnare nella partita («azionato»); non conta nel completamento della mappa.')).toBeInTheDocument();
     expect(form.queryByText('Un segno sulla mappa con nome e descrizione, e basta.')).toBeNull();
-    scegliVoce('Tipo', 'Boss');
+    scegliVoce('Segno sulla mappa', 'Boss');
     expect(form.getByText('Si segna nella partita («sconfitto»); non porta da nessuna parte.')).toBeInTheDocument();
     // un pin di città con uno stato suo: il Confidente si «incontra»; un negozio no
-    scegliVoce('Tipo', 'Confidente');
+    scegliVoce('Segno sulla mappa', 'Confidente');
     expect(form.getByText('Ha uno stato da segnare nella partita («incontrato»); non conta nel completamento della mappa.')).toBeInTheDocument();
-    scegliVoce('Tipo', 'Negozio');
+    scegliVoce('Segno sulla mappa', 'Negozio');
     expect(form.queryByText(/Ha uno stato da segnare nella partita/)).toBeNull();
   });
 
@@ -172,7 +172,7 @@ describe('EditorMappaPage', () => {
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    scegliVoce('Tipo', 'Confidente');
+    scegliVoce('Segno sulla mappa', 'Confidente');
     // città, ma con le condizioni: se ne aggiunge una (la riga nasce «dal 18 aprile»)
     fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
@@ -180,7 +180,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'confidente', condizioni: [expect.objectContaining({ tipo: 'data' })] })));
     // un negozio resta senza: la sezione sparisce (che non si salvino lo dice il test qui sotto)
-    scegliVoce('Tipo', 'Negozio');
+    scegliVoce('Segno sulla mappa', 'Negozio');
     expect(form.queryByRole('button', { name: /^Condizioni/ })).toBeNull();
   });
 
@@ -191,11 +191,11 @@ describe('EditorMappaPage', () => {
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    scegliVoce('Tipo', 'Confidente');
+    scegliVoce('Segno sulla mappa', 'Confidente');
     fireEvent.click(form.getByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     expect(form.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
-    scegliVoce('Tipo', 'Negozio');
+    scegliVoce('Segno sulla mappa', 'Negozio');
     fireEvent.click(screen.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, expect.objectContaining({ tipo: 'negozio', condizioni: [] })));
   });

@@ -12,14 +12,20 @@ import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPrepar
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
-interface Props { oggetto?: CatalogoOggettoDto; onChiudi: () => void; onSalvato: (oggetto: CatalogoOggettoDto) => void }
+interface Props {
+  oggetto?: CatalogoOggettoDto;
+  /** L3: il nome con cui nasce un oggetto nuovo («Crea l’oggetto» dal selettore di un'offerta, col testo cercato). */
+  nomeIniziale?: string;
+  onChiudi: () => void;
+  onSalvato: (oggetto: CatalogoOggettoDto) => void;
+}
 
 /** Si corregge l'identità, non la copia del listino: qui non esiste un campo prezzo. */
 // L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloOggettoReale` esce dal bundle
 export const ModuloOggetto: StrumentoDiModifica<typeof ModuloOggettoReale> = IN_RILASCIO ? NienteInRilascio : ModuloOggettoReale;
-function ModuloOggettoReale({ oggetto, onChiudi, onSalvato }: Props) {
+function ModuloOggettoReale({ oggetto, nomeIniziale = '', onChiudi, onSalvato }: Props) {
   const [categoria, setCategoria] = useState<CategoriaOggetto>(oggetto?.categoria ?? 'altro');
-  const [nome, setNome] = useState(oggetto?.nome ?? '');
+  const [nome, setNome] = useState(oggetto?.nome ?? nomeIniziale);
   const [sottocategoria, setSottocategoria] = useState(oggetto?.sottocategoria ?? '');
   const [originale, setOriginale] = useState(oggetto?.nomeOriginale ?? '');
   // gli altri nomi sono un elenco di voci (una riga a campo, «Aggiungi» / «Togli»): niente più testo da separare a capo

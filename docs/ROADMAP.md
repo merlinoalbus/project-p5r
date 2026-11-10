@@ -4,7 +4,7 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 371 migrazioni di gioco (l'ultima è la 371), 69 delle partite (l'ultima è la 069).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 376 migrazioni di gioco (l'ultima è la 376), 69 delle partite (l'ultima è la 069).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -45,6 +45,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Mondo, mappe e luoghi
 - Mappa di viaggio di Tokyo con quartieri, Palazzi e luoghi; pagine di quartiere, Area e luogo (`/guida/citta`, `/guida/luogo/…`).
+  Un luogo nuovo si crea da «Aggiungi luogo», dal quartiere (area e punto facoltativi) o dall'area.
 - Palazzi (`/guida/dungeon`) con Aree, planimetrie, infiltrazioni, guida delle aree collegata ai pin, stato «concluso» e «completato».
 - Memento con dedali, aree, Persona, Richieste e trama.
 - Visore ed editor delle mappe (`/guida/mappe`): spilli in quattro categorie, condizioni di visibilità, pezzi delle planimetrie,
@@ -56,11 +57,16 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Negozi, oggetti e attività
 - Negozi con orari, sede, scorta e rifornimento, sconti dal rango di un Confidente (`/guida/negozi`). Il «dove» è la sola sede;
-  quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Ancora
-  aperti: la finestra unica di modifica del posto; i pin che restano sul luogo finché non si vede in gioco quale macchina indicano
-  (Akihabara 272-275, Shinjuku 1564-1566, edificio della Shujin 1759); un luogo nuovo che vende nasce ancora senza punto vendita, finché
-  l'editor del posto non li crea insieme.
-- Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`).
+  quartiere e raggruppamenti si ricavano da lì. Ogni macchina documentata è un punto vendita con offerte e scorta proprie. Luogo,
+  punti vendita e listini si modificano nella finestra «Il posto», con la regola comune dei distributori (pezzi, lunedì, meteo) in
+  un punto solo e le eccezioni per riga. Gli orari dei punti vendita sono quelli del luogo, salvo un'eccezione del punto vendita (il negozio del
+  Palazzo di Niijima, senza sede). Nel catalogo l'equipaggiamento della guida
+  (armi da mischia e a distanza, protezioni; fuori, per scelta, Teschio di Cristallo e R, e la Replica d'arma resta materiale), con le armi a distanza dei compagni e il Collare commemorativo all'Untouchable; gli
+  Strumenti del cercatore ad Akihabara e i cinque oggetti del laghetto.
+  Ancora aperti: i pin che restano sul luogo finché non si vede in gioco quale macchina indicano (Akihabara 272-275, Shinjuku
+  1564-1566, edificio della Shujin 1759); la Stecca jump, il Set di freccette e i Boilie restano come sono finché non si verificano in gioco.
+- Catalogo degli oggetti con offerte, regali, contenuti, ricette e note storiche (`/guida/oggetti`). Un'offerta collegata prende nome,
+  categoria e «per chi» dall'oggetto; i legami fra fonti e oggetti si applicano subito, senza proposte.
 - Attività, lavori (esiti di Ore no Beko, Triple Seven e Rafflesia), libri, film, videogiochi, cruciverba, con esiti, trofei, oggetti e modificatori dei libri; serate della cantante nel Calendario. Le Doti delle attività
   sono strutturate (fisse o scelte alla spunta: la Dote a caso del biliardo e di Gun About, le note delle freccette) e diventano il promemoria
   «Applica» sia alla spunta della voce sia con il + del contatore in Partita → Progressi.

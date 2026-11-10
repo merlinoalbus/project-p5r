@@ -477,6 +477,13 @@ import { migration369 } from './369_ombre_sciagura_elenco_e_ricompense.js';
 import { migration370 } from './370_piatti_senza_frasi_non_reperiti.js';
 // 2026-11-09 (lotto L6, L6-10): vincolo del 1° giugno «Furto consigliato del Palazzo di Madarame» (371)
 import { migration371 } from './371_vincolo_del_primo_giugno.js';
+// 2026-11-10 (lotti L3-L4 «Il posto», «Regola comune e catalogo»): regola comune dei distributori (372), via `negozio.orari_json` (373),
+// equipaggiamento della guida (374), Strumenti del cercatore e oggetti del laghetto (375), identità delle offerte collegate (376)
+import { migration372 } from './372_regola_comune_dei_distributori.js';
+import { migration373 } from './373_orari_del_negozio_tolti.js';
+import { migration374 } from './374_equipaggiamento_della_guida.js';
+import { migration375 } from './375_strumenti_e_laghetto.js';
+import { migration376 } from './376_identita_delle_offerte_collegate.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -507,4 +514,5 @@ export const migrations: Migration[] = [
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
   migration355, migration356, migration357, migration358, migration359, migration360, migration361, migration362, migration363, migration364,
   migration365, migration366, migration367, migration368, migration369, migration370, migration371,
+  migration372, migration373, migration374, migration375, migration376,
 ];

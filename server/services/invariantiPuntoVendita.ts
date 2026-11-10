@@ -2,8 +2,7 @@
 // invariantiPuntoVendita — legge dal DB ciò che serve alle regole di `shared/puntoVendita.ts` e rifiuta le scritture nuove che le violano
 // ============================================================
 //
-// La creazione di un luogo-negozio non passa da I4: oggi nasce senza punto vendita (`posizionaLuogo` con `nuovo`, «Aggiungi luogo»);
-// il controllo su quella strada arriva con la creazione contestuale del punto vendita.
+// La creazione di un luogo-negozio rispetta I4 da sé: nasce col suo primo punto vendita (`catalogoService.creaElementoNellaTransazione`).
 // ============================================================
 
 import { prepared } from '../db/dbService.js';

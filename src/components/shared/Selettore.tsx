@@ -61,7 +61,12 @@ export interface PropsSelettore {
    *  la descrizione accessibile (3.3.1). Senza, nessun cambiamento. */
   errore?: string | null;
   className?: string;
+  /** L3: in fondo all'elenco, una voce che crea una cosa nuova col testo cercato («Crea l’oggetto «Durian»»): la sceglie il tocco o Invio. */
+  crea?: { etichetta: (testo: string) => string; onCrea: (testo: string) => void };
 }
+
+/** La chiave della voce «crea» in fondo all'elenco: non è un valore, non arriva mai a `onCambia`. */
+const CHIAVE_CREA = '\u0000crea';
 
 /** Da che lato del pulsante si apre la tendina. */
 type Verso = 'sotto' | 'sopra';
@@ -154,7 +159,7 @@ function collocaTendina(pulsante: HTMLElement, tendina: HTMLElement, elenco: HTM
  * voci (con l'invito a restringere se ce ne sono di più), filtra senza accenti su nome, dettaglio e gruppo, e si
  * chiude scegliendo, con Esc o toccando fuori.
  */
-export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, etichettaSopra, errore, className }: PropsSelettore) {
+export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, etichettaSopra, errore, className, crea }: PropsSelettore) {
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
@@ -177,8 +182,10 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
     // la ricerca comune dell'app: parola per parola, in qualunque ordine, nel nome, nel dettaglio, nel gruppo o nel testo di ricerca
     const trova = filtroRicerca(conRicerca ? testo : '');
     const base = tutte.filter((o) => trova(o.nome, o.dettaglio, o.gruppo, o.testoRicerca));
-    return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
-  }, [tutte, testo, conRicerca]);
+    // «crea» chiude l'elenco, fuori dal tetto: c'è sempre, anche quando la ricerca non trova niente
+    const voceCrea: OpzioneSelettore[] = crea ? [{ chiave: CHIAVE_CREA, nome: crea.etichetta(testo.trim()) }] : [];
+    return { filtrate: [...base.slice(0, TETTO_VOCI), ...voceCrea], tagliate: base.length > TETTO_VOCI };
+  }, [tutte, testo, conRicerca, crea]);
 
   /** Indice della voce evidenziata, riportato dentro l'elenco filtrato (-1 se l'elenco è vuoto). */
   const attiva = filtrate.length === 0 ? -1 : Math.min(evidenziata, filtrate.length - 1);
@@ -204,7 +211,10 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   /** Chiude la tendina e riporta il fuoco sul pulsante. */
   const chiudi = () => { setAperto(false); pulsante.current?.focus(); };
   /** Comunica la voce scelta e chiude. */
-  const scegli = (chiave: string) => { onCambia(chiave); chiudi(); };
+  const scegli = (chiave: string) => {
+    if (chiave === CHIAVE_CREA) { const t = testo.trim(); chiudi(); crea?.onCrea(t); return; }
+    onCambia(chiave); chiudi();
+  };
   /**
    * Colloca la tendina aperta (vedi `collocaTendina`): con `decidi` sceglie di nuovo il lato, altrimenti tiene quello dell'apertura.
    * Se il pulsante è uscito dalla vista chiude la tendina, e il fuoco che stava nel suo campo di ricerca torna sul pulsante.
@@ -319,7 +329,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
                 intestazione ? <li key={`gruppo:${o.chiave}`} role="presentation" className="selettore__gruppo">{intestazione}</li> : null,
                 // La voce è l'`option` stessa (nessun pulsante dentro): ha un id per `aria-activedescendant`, il tocco la sceglie.
                 // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- la tastiera sceglie dal pulsante o dal campo (aria-activedescendant), il fuoco non entra nelle voci
-                <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
+                <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''} ${o.chiave === CHIAVE_CREA ? 'selettore__voce--crea' : ''}`}>
                   <div className="selettore__pulsante touch">
                     <span className="selettore__nome"><TestoNote testo={o.nome} /></span>
                     {o.dettaglio && <span className="selettore__dettaglio text-text-muted testo-12">{o.dettaglio}</span>}
