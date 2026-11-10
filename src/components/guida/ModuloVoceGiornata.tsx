@@ -16,6 +16,7 @@
 // trascinando o con ↑ / ↓. Ogni modifica vale per tutte le partite ed entra nel pacchetto di gioco che si esporta.
 // L13 (ondata 9, O9-3): «Si fa solo se», le condizioni che dicono quando la voce è dovuta (l'editor unico `CondizioniEditor`; vuoto = sempre):
 // con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta» (la consegna delle televendite senza nessun set comprato).
+// L6-06: la griglia di «Quale» e l'editor delle condizioni stanno in due finestre sopra la voce; nella voce restano una riga ciascuno.
 // ============================================================
 
 import { useMemo, useRef, useState } from 'react';
@@ -39,6 +40,7 @@ import type { PropostaConversioneDto } from '../../../shared/proposteConversione
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import { CondizioniEditor } from './CondizioniEditor';
+import { IconaAzione } from '../shared/IconaAzione';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
@@ -103,6 +105,9 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
   });
   const [campi, setCampi] = useState(iniziali);
   const [occupato, setOccupato] = useState(false);
+  // L6-06: le due finestre sopra la voce, la griglia di «Quale» (si apre anche scegliendo il tipo, nell'altra colonna) e «Si fa solo se»
+  const [qualeAperta, setQualeAperta] = useState(false);
+  const [condizioniAperte, setCondizioniAperte] = useState(false);
   const scrittura = useRef(false);
   /** Unisce una modifica parziale ai campi del modulo. */
   const imposta = (p: Partial<typeof campi>) => setCampi((c) => ({ ...c, ...p }));
@@ -201,19 +206,21 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       {azione && elenchi && (telefono
         // sul telefono la griglia dei 13 tipi (cinque righe di tessere) si ripiega sul tipo scelto; per una voce nuova parte aperta
         ? <Ripiegabile titolo="Tipo della voce" apertaDiPartenza={!voce} riepilogo={TIPI_AZIONE.find((t) => t.chiave === campi.struttura.tipo)?.nome ?? campi.struttura.tipo}>
-            <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />
+            <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} qualeAperta={qualeAperta} onQualeAperta={setQualeAperta} />
           </Ripiegabile>
-        : <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />)}
+        : <SceltaTipoQuale parte="tipo" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} qualeAperta={qualeAperta} onQualeAperta={setQualeAperta} />)}
     </div>
   );
 
   // L6-06: ordine dei campi — che cosa è, testo, quando, tipo (colonna sinistra); poi «Quale», gli effetti che «Quale» compila, le note, le
-  // condizioni e il posto (colonna destra; sotto i 1024 px le due colonne si dispongono una sotto l'altra, nello stesso ordine). «Quale»
-  // si richiude a scelta fatta; effetti, condizioni e posto sono ripiegati con il riepilogo: una riga ciascuno finché non si toccano
+  // condizioni e il posto (colonna destra; sotto i 1024 px le due colonne si dispongono una sotto l'altra, nello stesso ordine). «Quale» è una
+  // riga (la griglia sta nella sua finestra); effetti e posto sono ripiegati con il riepilogo; le condizioni sono una riga con il riepilogo
+  // e si modificano nella loro finestra: una riga ciascuno finché non si toccano, e il corpo della voce resta sotto gli 800 px a 1280
   const nomeFascia = campi.fascia === 'giorno' ? 'di giorno' : 'di sera';
+  const riepilogoCondizioni = campi.condizioni.length === 0 ? 'Nessuna condizione: la voce si fa sempre.' : `${campi.condizioni.length} ${campi.condizioni.length === 1 ? 'condizione' : 'condizioni'}: la voce è dovuta solo se valgono.`;
   const colonnaDestra = (
     <div className="voce-colonna">
-      {azione && elenchi && <SceltaTipoQuale parte="quale" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />}
+      {azione && elenchi && <SceltaTipoQuale parte="quale" valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} qualeAperta={qualeAperta} onQualeAperta={setQualeAperta} />}
       {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} fatta={!!voce?.fatta} apertaDiPartenza={!voce || !!proposta} />}
       {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
       {azione && erroreElenchi && <p className="m-0 testo-12 text-error-testo" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
@@ -222,12 +229,20 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
       </label>
       {/* L13 (O9-3, «in tal caso viene meno la consegna»): quando la voce è dovuta, con l'editor unico delle condizioni; senza, si fa sempre.
           Con le condizioni false al giorno della voce, nella partita la voce è «Non dovuta»: non si spunta e non ferma la giornata */}
+      {/* L6-06: l'editor delle condizioni (due righe di condizioni ≈ 600 px nella colonna) sta nella sua finestra, larga quanto la voce */}
       {azione && (
-        <Ripiegabile titolo="Si fa solo se"
-          riepilogo={campi.condizioni.length === 0 ? 'Nessuna condizione: la voce si fa sempre.' : `${campi.condizioni.length} ${campi.condizioni.length === 1 ? 'condizione' : 'condizioni'}: la voce è dovuta solo se valgono.`}>
-          <span className="testo-12 text-text-muted text-pretty">Senza condizioni la voce si fa sempre. Con condizioni false al giorno della voce, nella partita è «Non dovuta» e non ferma la giornata.</span>
-          <CondizioniEditor condizioni={campi.condizioni} onCambia={(c) => imposta({ condizioni: c })} disabilitato={occupato} massimo={20} apertoDiPartenza />
-        </Ripiegabile>
+        <section className="ripiegabile ripiegabile--semplice" aria-label="Si fa solo se">
+          <h3 className="m-0 ripiegabile__titolo">
+            <button type="button" className="ripiegabile__interruttore touch" aria-haspopup="dialog" disabled={occupato} title="Modifica le condizioni" onClick={() => setCondizioniAperte(true)}>
+              <span className="ripiegabile__freccia" aria-hidden="true"><IconaAzione chiave="modifica" dimensione={18} /></span>
+              <span className="ripiegabile__nome">Si fa solo se</span>
+              <span className="ripiegabile__riepilogo">{riepilogoCondizioni}</span>
+            </button>
+          </h3>
+        </section>
+      )}
+      {azione && condizioniAperte && (
+        <FinestraCondizioniVoce condizioni={campi.condizioni} onApplica={(c) => imposta({ condizioni: c })} onChiudi={() => setCondizioniAperte(false)} />
       )}
       <Ripiegabile titolo="Posto nella giornata" riepilogo={`Posto ${posto + 1} di ${altre.length + 1}, ${nomeFascia}.`}>
         <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
@@ -262,6 +277,23 @@ function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, 
         </div>
         {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
         <p className="m-0 testo-12 text-text-muted">La modifica cambia la guida per tutte le partite ed entra nel backup dei dati di gioco che scarichi.</p>
+      </div>
+    </FinestraModifica>
+  );
+}
+
+/**
+ * «Si fa solo se» in una finestra sopra la voce: l'editor unico delle condizioni su una bozza. «Applica» la mette nella voce (che la salva
+ * con il suo «Salva»); «Annulla» o la X la lasciano com'era, chiedendo conferma se la bozza è cambiata.
+ */
+function FinestraCondizioniVoce({ condizioni, onApplica, onChiudi }: { condizioni: RequisitoSpillo[]; onApplica: (c: RequisitoSpillo[]) => void; onChiudi: () => void }) {
+  const [bozza, setBozza] = useState(condizioni);
+  return (
+    <FinestraModifica titolo="Si fa solo se" titoloSalva="Applica" onChiudi={onChiudi} sporca={JSON.stringify(bozza) !== JSON.stringify(condizioni)}
+      onSalva={() => { onApplica(bozza); onChiudi(); }}>
+      <div className="flex flex-col gap-3 min-w-0">
+        <p className="m-0 testo-12 text-text-muted text-pretty">Senza condizioni la voce si fa sempre. Con condizioni false al giorno della voce, nella partita è «Non dovuta» e non ferma la giornata. Le condizioni applicate si salvano con la voce.</p>
+        <CondizioniEditor condizioni={bozza} onCambia={setBozza} massimo={20} apertoDiPartenza />
       </div>
     </FinestraModifica>
   );

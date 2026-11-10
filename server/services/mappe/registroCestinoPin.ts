@@ -38,8 +38,8 @@ export function verificaRegistroCestinoPin(db: AppDatabase, passi: readonly Pass
     }
     if (p.tabella === 'spillo') continue;
     if (['spillo_voce', 'spillo_immagine'].includes(p.tabella) && p.op === 'D' && p.prima?.spillo_id === id) continue;
-    // solo per i pin finiti nel Cestino quando la sede confermata esisteva: il registro li porta, anche finché la tabella c'è ancora
-    if (p.tabella === 'negozio_sede_spillo' && p.op === 'D' && p.prima?.spillo_uid === uid) continue;
+    // Le righe delle sedi confermate dei pin finiti nel Cestino prima della migrazione 354 le salta il ramo delle tabelle tolte qui sopra:
+    // dopo la 354 (che gira all'avvio e dopo ogni ripristino o importazione) quella tabella non esiste più in nessun file di gioco.
     if (p.tabella === 'immagine' && p.op === 'D' && p.prima?.ambito === 'spillo' && typeof p.prima.chiave === 'string' && chiaviImmagini.has(p.prima.chiave) && immagini.has(p.prima.id)) continue;
     if (p.tabella === 'immagine_miniatura' && p.op === 'D' && immagini.has(p.prima?.immagine_id)) continue;
     if (p.tabella === 'spillo_destinazione' && ((p.op === 'D' && p.prima?.spillo_id === id) || soloPuntatore(p, 'spillo_arrivo_id', id))) continue;

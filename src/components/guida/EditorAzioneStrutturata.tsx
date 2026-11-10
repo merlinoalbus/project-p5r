@@ -89,11 +89,18 @@ const nomeGenere = (tipo: string): string => TIPI_RIFERIMENTO_AZIONE.find((g) =>
  * il collegamento e l'effetto che il vecchio tipo aveva dato (se nato in questa finestra); scegliere «Quale» compila l'effetto. Una voce
  * salvata senza collegamento i cui effetti ne indicano uno solo lo PROPONE («Collega a…»): non si scrive da solo.
  */
-export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto' }: Props & {
+export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto', qualeAperta, onQualeAperta }: Props & {
   /** L6-06: la finestra della voce mette il tipo nella colonna a sinistra e «Quale» in quella a destra, sopra gli effetti che «Quale» compila:
    *  le due parti sono lo stesso componente, con la stessa logica di cambio (`applica`), disegnate separatamente. */
   parte?: 'tutto' | 'tipo' | 'quale';
+  /** La finestra della griglia di «Quale»: con le due parti disegnate separatamente la tiene chi le usa (la parte del tipo la apre, quella di
+   *  «Quale» la mostra); senza, la tiene il componente. */
+  qualeAperta?: boolean;
+  onQualeAperta?: (aperta: boolean) => void;
 }) {
+  const [qualeApertaQui, setQualeApertaQui] = useState(false);
+  const finestraQuale = qualeAperta ?? qualeApertaQui;
+  const apriQuale = onQualeAperta ?? setQualeApertaQui;
   const ctx = useMemo(() => contestoDa(elenchi.azione), [elenchi.azione]);
   const rif = valore.riferimento;
   const tq = tipoQuale(valore.tipo, rif);
@@ -114,6 +121,9 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto' }: 
       etichetta: 'Togli e cambia',
     }))) return;
     onCambia(cambiaCollegamento(valore, tipo, nuovoRif, ctx));
+    // L6-06: un tipo nuovo che si collega a qualcosa apre subito la finestra di «Quale» (prima il tipo, poi l'elenco filtrato): un tocco
+    // per il tipo e uno per l'elemento, come quando la griglia stava nella voce
+    if (tipo !== valore.tipo && !nuovoRif && tipoQuale(tipo, null)) apriQuale(true);
   };
   const tipoGrid = (
     <div className="flex flex-col gap-1.5">
@@ -141,7 +151,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi, parte = 'tutto' }: 
       )}
       {tq && (
         <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
-          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} />
+          onCambia={(chiave) => void applica(valore.tipo, chiave ? { tipo: tq, chiave } : null)} finestraAperta={finestraQuale} onFinestra={apriQuale} />
       )}
     </div>
   );

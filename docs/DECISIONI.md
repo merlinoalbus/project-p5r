@@ -103,6 +103,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
 - **«Importa» sostituisce `gioco.db`** con un backup scelto dalla cartella d'appoggio del server, dopo anteprima e conferma, con una
   copia di sicurezza (ne restano 3); non unisce e non tocca `partite.db`. Il file non passa dal browser. L'esportazione
   dell'istanza deve essere sempre reimportabile **(24/10)**.
+- Il ripristino dell'istanza da un backup e «Importa» mettono in servizio il file con la stessa riapertura: migrazioni; se cambia
+  il file di gioco, le condizioni `manuale` dei backup convertite in avvisi e le regole dell'avvio, che fermano la sostituzione se non
+  riescono (si torna alla copia di sicurezza); poi gli effetti di stato mai applicati fra le proposte delle partite, lo specchio dei pin e il
+  registro Tanaka integro. Il Cestino ha un solo motore di ripristino per le voci di gioco e per quelle personali.
 - Le copie di avvio di gioco e partite sono al più 7 e occupano al più 2 GiB: con file da circa 415 MB ne restano 5. Le 2 più recenti
   con il file di gioco non vuoto restano sempre, anche sopra il tetto; l'età non toglie copie, perché dopo mesi di pausa cancellerebbe quelle utili.
 - Il pacchetto completo (con le immagini) resta fuori da git per il limite di dimensione di GitHub; niente LFS per ora.
@@ -403,6 +407,10 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   la Richiesta.
 - Una voce può dichiarare quando è dovuta («Si fa solo se»): se la condizione è falsa la voce è «Non dovuta», non si spunta e non ferma
   la fascia.
+- Nella finestra della voce «Quale» e «Si fa solo se» sono una riga ciascuno; la griglia di «Quale» e l'editor delle condizioni si aprono
+  in una finestra loro, larga quanto quella della voce, così il corpo della voce sta sotto gli 800 px a 1280 qualunque sia l'elenco o il
+  numero delle condizioni. Scegliere un tipo che si collega apre da sé la griglia; toccare una tessera sceglie e la chiude. «Applica» mette le condizioni
+  nella voce, che le salva con «Salva».
 - Un effetto della voce può dichiarare quando vale («Vale solo se»), con lo stesso vocabolario e lo stesso valutatore, allo stato della
   partita al giorno della voce: solo yen, oggetto ricevuto, Persona, trofeo e sblocco. Con la condizione falsa l'effetto non si applica, non
   diventa proposta e nella partita non si mostra; fuori dalla partita «Il gioco dà» lo dice con «Solo se». La condizione si legge alla
@@ -530,6 +538,12 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   non cambia Area se un suo pin di punto vendita ne uscirebbe; nascondere un luogo intero, reversibile, nasconde con lui i suoi punti
   vendita. Un luogo che nasce per vendere nasce col suo primo punto vendita, dallo stesso nome (una macchina per un distributore,
   «Altro» da scegliere per un negozio).
+- Eccezione dichiarata al «nessun riferimento» delle strutture del listino condiviso (L2-08): i nomi di `negozio_luogo_extra`,
+  `negozio_sede_spillo` e `negozio_sede_foto` restano solo nel registro delle fonti tolte (`server/db/fontiTolte.ts`) e fra le etichette
+  del Cestino (`cestinoService.ts`), oltre che nelle migrazioni registrate, perché li leggono le voci
+  del Cestino registrate prima della 354 e l'anteprima di «Importa» di un backup vecchio, che porta quelle tabelle con le loro righe (il
+  backup del 7/11: 4, 4 e 62 righe, mostrate come «sedi del listino», «sedi confermate dei pin», «copie di partenza delle sedi dei
+  listini»). Il ripristino dal Cestino salta le loro righe con il registro delle fonti tolte; nessun servizio le legge né le scrive.
 - Luogo, punti vendita e listini si modificano in una finestra sola, «Il posto», aperta da «Modifica» del luogo (anche dalla sua carta
   nel quartiere e da «Modifica il listino» di un punto vendita): si aggiunge o si duplica un punto vendita (la copia ha offerte proprie,
   la sorgente non cambia), si scrive il listino a righe (oggetto, prezzo, pezzi; il resto nei dettagli della riga), e un oggetto che
