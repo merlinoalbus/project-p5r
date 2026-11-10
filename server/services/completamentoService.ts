@@ -136,7 +136,7 @@ export function progressoDelConteggio(c: ConteggioSfidaCovo, st: StatoDisponibil
       return { fatti: r.registrate, obiettivo: r.totale };
     }
     case 'cruciverba-risolti': return { fatti: fattiPartita(partitaId).size, obiettivo: c.obiettivo };
-    // L10-02 (377): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 070)
+    // L10-02 (382): i timbri dei dedali con un totale, ciascuno entro il suo (le righe per dedalo della partita, utente 070)
     case 'timbri-raccolti': return { fatti: timbriRaccoltiInTutto(partitaId), obiettivo: c.obiettivo };
     case 'spesa-negozio': return { fatti: st.spesaPerNegozio.get(c.negozio) ?? 0, obiettivo: c.obiettivo };
     case 'persona-livello': {

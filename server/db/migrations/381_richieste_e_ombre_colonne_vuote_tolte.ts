@@ -1,5 +1,5 @@
 // ============================================================
-// 376 — via tre colonne vuote di Richieste e Ombre (L10-01)
+// 381 — via tre colonne vuote di Richieste e Ombre (L10-01)
 // ============================================================
 //
 // Tre colonne non portano più niente nei dati di oggi:
@@ -26,11 +26,11 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 
-const MIGRAZIONE = 'L10-01 · 376';
-const errore = (motivo: string): never => { throw new Error(`376: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L10-01 · 381';
+const errore = (motivo: string): never => { throw new Error(`381: ${motivo}; nessuna modifica applicata.`); };
 
 /** Le tre colonne che escono. */
-export const COLONNE_TOLTE_376 = [
+export const COLONNE_TOLTE_381 = [
   { tabella: 'ombra', colonna: 'nome_negoziazione' }, { tabella: 'richiesta', colonna: 'ricompense_json' }, { tabella: 'richiesta', colonna: 'confidente_rango' },
 ] as const;
 
@@ -53,12 +53,12 @@ function elencoCondizioni(json: string | null): Array<Record<string, unknown>> |
   try { const v = JSON.parse(json) as unknown; return Array.isArray(v) ? v as Array<Record<string, unknown>> : null; } catch { return null; }
 }
 
-export const migration376: Migration = {
-  id: 376,
+export const migration381: Migration = {
+  id: 381,
   name: 'richieste_e_ombre_colonne_vuote_tolte',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
-    const daTogliere = COLONNE_TOLTE_376.filter((x) => esisteTabella(db, x.tabella) && haColonna(db, x.tabella, x.colonna));
+    const daTogliere = COLONNE_TOLTE_381.filter((x) => esisteTabella(db, x.tabella) && haColonna(db, x.tabella, x.colonna));
     if (daTogliere.length === 0) return;
     if (!esisteTabella(db, 'dati_guida')) errore('manca la tabella dati_guida');
     const toglie = (tabella: string, colonna: string): boolean => daTogliere.some((x) => x.tabella === tabella && x.colonna === colonna);
@@ -121,6 +121,6 @@ export const migration376: Migration = {
       migrazione: MIGRAZIONE, colonneTolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`), righeArchiviate: archiviate,
       ranghiInCondizione, ranghiSoloArchivio, vistaOmbre: prima.vista,
     });
-    logger.info({ migrazione: 'L10-01-376', tolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`), archiviate, ranghiInCondizione: ranghiInCondizione.length }, 'Richieste e Ombre: tolte le colonne vuote');
+    logger.info({ migrazione: 'L10-01-381', tolte: daTogliere.map((x) => `${x.tabella}.${x.colonna}`), archiviate, ranghiInCondizione: ranghiInCondizione.length }, 'Richieste e Ombre: tolte le colonne vuote');
   },
 };

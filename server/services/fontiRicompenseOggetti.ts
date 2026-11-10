@@ -33,7 +33,7 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
     }
   }
   for (const [tipo, query] of [
-    // L10-01 (376): la Richiesta non ha più testi di ricompensa (vuoti in 33/33): i suoi premi sono i legami stessi
+    // L10-01 (381): la Richiesta non ha più testi di ricompensa (vuoti in 33/33): i suoi premi sono i legami stessi
     ['richiesta', "SELECT chiave,nome,'' AS testo FROM richiesta"],
     ['domanda', 'SELECT chiave,domanda AS nome,ricompensa AS testo FROM domanda WHERE chiave IS NOT NULL'],
     ['esame', 'SELECT chiave,nome,note AS testo FROM esame'],

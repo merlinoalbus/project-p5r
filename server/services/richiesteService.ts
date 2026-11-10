@@ -29,7 +29,7 @@ import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
 // L8-09 (migrazione 337): `disponibile_dal` e `scadenza` (testi della guida mai convertiti, vuoti in tutte le righe) e `area` (il nome del
 // dedalo, copia di `area_chiave`) non ci sono più: lo sblocco e la scadenza sono le condizioni e le date strutturate, il dedalo è `area_nome`.
-// L10-01 (migrazione 376): nemmeno `ricompense_json` (vuota in 33/33: le ricompense sono gli oggetti, gli yen e i PE) e `confidente_rango`
+// L10-01 (migrazione 381): nemmeno `ricompense_json` (vuota in 33/33: le ricompense sono gli oggetti, gli yen e i PE) e `confidente_rango`
 // (vuota in 33/33: un rango che serve è una condizione di sblocco).
 interface RigaRichiesta {
   chiave: string; ordine: number; nome: string; committente: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null;

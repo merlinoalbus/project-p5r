@@ -1,5 +1,5 @@
 // ============================================================
-// 372 — via le tre frasi di date del Palazzo (L9-01)
+// 377 — via le tre frasi di date del Palazzo (L9-01)
 // ============================================================
 //
 // Le date di un Palazzo stanno in colonne strutturate dalla 308: `finestra_dal`, `finestra_al`, `furto_consigliato_data`, `lettera_entro`. Le tre
@@ -20,10 +20,10 @@ import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './ar
 
 const COLONNE = ['data_sblocco', 'data_scadenza', 'furto_consigliato'] as const;
 
-const errore = (motivo: string): never => { throw new Error(`372: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`377: ${motivo}; nessuna modifica applicata.`); };
 
-export const migration372: Migration = {
-  id: 372,
+export const migration377: Migration = {
+  id: 377,
   name: 'dungeon_tolte_tre_frasi_di_date',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -38,7 +38,7 @@ export const migration372: Migration = {
       const righe = (db.prepare(`SELECT chiave, "${colonna}" AS v FROM main.dungeon ORDER BY rowid`).all() as Array<{ chiave: string; v: string | null }>).filter((r) => (r.v ?? '').trim() !== '');
       archiviate[colonna] = righe.length;
       if (righe.length === 0) continue;
-      archiviaSenzaSovrascrivere(db, 'L9-01 · 372', `dungeon.${colonna}`, Object.fromEntries(righe.map((r) => [r.chiave, r.v as string])));
+      archiviaSenzaSovrascrivere(db, 'L9-01 · 377', `dungeon.${colonna}`, Object.fromEntries(righe.map((r) => [r.chiave, r.v as string])));
       const presenti = righeArchiviate(db, `dungeon.${colonna}`);
       if (!righe.every((r) => r.chiave in presenti)) errore(`l’archivio di dungeon.${colonna} non ha tutte le righe`);
     }
@@ -49,7 +49,7 @@ export const migration372: Migration = {
     }
     if (improntaTabella(db, 'dungeon', COLONNE) !== impronta) errore('le altre colonne di dungeon sono cambiate');
 
-    registraAudit(db, 'audit-l9-01-frasi-date', { migrazione: 'L9-01 · 372', colonneTolte: daTogliere.map((c) => `dungeon.${c}`), righeArchiviate: archiviate, impronta });
-    logger.info({ migrazione: 'L9-01-372', tolte: daTogliere, archiviate }, 'dungeon: tolte le tre frasi di date');
+    registraAudit(db, 'audit-l9-01-frasi-date', { migrazione: 'L9-01 · 377', colonneTolte: daTogliere.map((c) => `dungeon.${c}`), righeArchiviate: archiviate, impronta });
+    logger.info({ migrazione: 'L9-01-377', tolte: daTogliere, archiviate }, 'dungeon: tolte le tre frasi di date');
   },
 };

@@ -17,7 +17,7 @@
 //  - «Il bersaglio»: l'Ombra del compendio se c'è (livello e affinità si leggono da lì e il modulo li mostra: un dato in un solo punto; i
 //    campi propri restano salvati, non si azzerano, e valgono solo dove la scheda non sa), altrimenti i campi propri;
 //  - «Ricompense»: oggetti del catalogo con le copie, yen ed esperienza come numeri.
-// L10-01 (migrazione 376): il rango del Confidente (0/33) e le ricompense in testo (vuote in 33/33) non ci sono più: un rango richiesto è
+// L10-01 (migrazione 381): il rango del Confidente (0/33) e le ricompense in testo (vuote in 33/33) non ci sono più: un rango richiesto è
 // una condizione di sblocco, una ricompensa è un oggetto del catalogo. L10-04: con l'Ombra scelta il nome del bersaglio è facoltativo
 // (vuoto vale il nome dell'Ombra) e non si copia mai dall'Ombra nel bersaglio salvato (rapporto E §1.5). L10-05: Scadenza e Proroga con
 // l'etichetta visibile; spiegazioni brevi e le parti facoltative vuote ripiegate, perché al telefono la finestra stia sotto 4,7 schermate.

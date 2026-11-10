@@ -13,7 +13,7 @@
 //
 // Le Richieste si correggono, si aggiungono e si eliminano da qui (richiesta dell'utente, 2026-10-11): «Modifica» su ogni carta
 // e «Aggiungi una Richiesta» in cima aprono `ModuloRichiesta`, lo stesso della colonna del dedalo.
-// L10-01 e L10-05 (migrazione 376): le ricompense in testo della guida (vuote in 33/33) e il rango del Confidente (0/33) non ci sono più,
+// L10-01 e L10-05 (migrazione 381): le ricompense in testo della guida (vuote in 33/33) e il rango del Confidente (0/33) non ci sono più,
 // e nemmeno lo stato «da verificare», che il server non produceva più: le ricompense sono gli oggetti del catalogo, gli yen e i PE.
 // ============================================================
 

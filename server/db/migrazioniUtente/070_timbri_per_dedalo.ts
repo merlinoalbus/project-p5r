@@ -1,8 +1,8 @@
 // ============================================================
-// utente 070 — i timbri raccolti passano dall'area al suo dedalo (L10-02, migrazione di gioco 377)
+// utente 070 — i timbri raccolti passano dall'area al suo dedalo (L10-02, migrazione di gioco 382)
 // ============================================================
 //
-// Dalla 377 il totale dei timbri sta nel dedalo (`dungeon_area.timbri_totale`) e `timbri_dedalo_partita.area_chiave` vale la chiave del
+// Dalla 382 il totale dei timbri sta nel dedalo (`dungeon_area.timbri_totale`) e `timbri_dedalo_partita.area_chiave` vale la chiave del
 // DEDALO (`dungeon_area.chiave`), come già `richiesta.area_chiave`. Le righe che una partita aveva per un'area di un dedalo (099, utente 018)
 // diventano una riga per il suo dedalo, con la SOMMA dei raccolti delle sue aree (più quella di una riga già per il dedalo, se c'era) e
 // l'ultimo `updated_at`: niente si perde. Il valore non si taglia al totale: lo fa la lettura (`timbriService`), e un totale corretto dopo
@@ -33,7 +33,7 @@ export const utente070: Migration = {
     for (const r of daConvertire) {
       const k = `${r.partita_id}\0${r.dedalo}`;
       if (!somme.has(k)) {
-        // una riga già per il dedalo (una scrittura dopo la 377 senza questa migrazione) si somma: non si perde
+        // una riga già per il dedalo (una scrittura dopo la 382 senza questa migrazione) si somma: non si perde
         const gia = leggi.get(r.partita_id, r.dedalo) as { raccolti: number; updated_at: string } | undefined;
         somme.set(k, { partita: r.partita_id, dedalo: r.dedalo, raccolti: gia?.raccolti ?? 0, updated: gia?.updated_at ?? '', aree: [] });
       }

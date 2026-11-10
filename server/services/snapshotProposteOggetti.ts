@@ -50,7 +50,7 @@ export function snapshotFonteProposta(db: AppDatabase, p: Pick<ChiaveProposta, '
     const [tipo, chiave] = separa(p.riga_chiave);
     if (tipo === 'articolo') fonte = articolo(chiave);
     else if (tipo === 'ricetta') fonte = scegli(ricetta(chiave), ['attrezzo', 'quantita', 'resa', 'prodotti']);
-    // L10-01 (376): `ricompense_json` non c'è più; della Richiesta conta solo che ci sia, i premi sono i collegamenti
+    // L10-01 (381): `ricompense_json` non c'è più; della Richiesta conta solo che ci sia, i premi sono i collegamenti
     else if (tipo === 'richiesta') fonte = scegli(uno('SELECT * FROM richiesta WHERE chiave = ?', chiave), []);
     else if (tipo === 'domanda') fonte = scegli(uno('SELECT * FROM domanda WHERE chiave = ?', chiave), ['ricompensa']);
     else if (tipo === 'esame') fonte = scegli(uno('SELECT * FROM esame WHERE chiave = ?', chiave), ['chiave']);
@@ -78,7 +78,7 @@ export function snapshotConVersioneSalvata(db: AppDatabase, p: ChiaveProposta): 
 
 /**
  * Uno snapshot salvato prima porta nella fonte campi che le colonne tolte non hanno più (`nome_it`, R11-02/10; `articolo_condiviso`, L2;
- * `ricompense_json` di una Richiesta, tolta dalla 376, L10-01: il testo è in archivio, i premi sono i collegamenti, che si confrontano): non è un
+ * `ricompense_json` di una Richiesta, tolta dalla 381, L10-01: il testo è in archivio, i premi sono i collegamenti, che si confrontano): non è un
  * cambiamento della fonte. Si tolgono dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata».
  */
 const CAMPI_TOLTI_DALLE_FONTI: readonly string[] = ['nome_it', 'articolo_condiviso', 'ricompense_json'];

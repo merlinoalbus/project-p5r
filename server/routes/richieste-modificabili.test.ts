@@ -37,7 +37,7 @@ describe('le Richieste modificabili', () => {
 
   it('ogni Richiesta del pacchetto si risalva com\'è (i tetti stanno sopra i dati veri)', async () => {
     for (const r of (await elenco()).richieste) {
-      // L10-01 (376): niente più ricompense in testo né rango del Confidente
+      // L10-01 (381): niente più ricompense in testo né rango del Confidente
       const corpo = { nome: r.nome, committente: r.committente, dedalo: r.areaChiave, areaDedalo: r.areaDedalo, piano: r.piano,
         bersaglio: r.bersaglio, confidente: r.confidente?.chiave ?? null, note: r.note };
       const risposta = await request(app).put(`/api/compendio/richieste/${r.chiave}`).send(corpo);

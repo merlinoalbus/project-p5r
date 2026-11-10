@@ -1,10 +1,10 @@
 // ============================================================
-// 378 — il Palazzo che serve per completare le Richieste, secondo le pagine dei Dedali (L10-03, risposta dell'utente Q9 A)
+// 383 — il Palazzo che serve per completare le Richieste, secondo le pagine dei Dedali (L10-03, risposta dell'utente Q9 A)
 // ============================================================
 //
 // Le pagine dei Dedali mettono sotto molte Richieste un «Requisito: aver completato il Palazzo di …». La pagina «Richieste nei Memento»
 // (colonna «Disponibile da», r.109-129) dà invece solo date e ranghi, quelli dell'app: è una contraddizione della guida, e l'utente ha scelto
-// le pagine dei Dedali (Q9 A). Con il CRITERIO unico descritto sotto, `REQUISITI_378` elenca 17 Richieste: 15 ricevono il Palazzo fra le
+// le pagine dei Dedali (Q9 A). Con il CRITERIO unico descritto sotto, `REQUISITI_383` elenca 17 Richieste: 15 ricevono il Palazzo fra le
 // condizioni per completarle, 2 lo hanno già («Bullismo sui bulli» e la parte 2 di «I vincenti non imbrogliano»). Le otto di G-M1b (rapporto
 // N) sono le prime; le altre nove vengono dalla stessa regola applicata a tutte le righe «Requisito:».
 //
@@ -47,12 +47,12 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const MIGRAZIONE = 'L10-03 · 378';
-const errore = (motivo: string): never => { throw new Error(`378: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L10-03 · 383';
+const errore = (motivo: string): never => { throw new Error(`383: ${motivo}; nessuna modifica applicata.`); };
 
 /** Le 17 Richieste del criterio unico (le otto di G-M1b, poi le nove trovate con la stessa regola): il dedalo atteso, il Palazzo del requisito,
  *  la riga della guida e le condizioni per completarla attese. */
-export const REQUISITI_378: ReadonlyArray<{ richiesta: string; dedalo: string; dungeon: string; fonte: string; attese: string | null }> = [
+export const REQUISITI_383: ReadonlyArray<{ richiesta: string; dedalo: string; dungeon: string; fonte: string; attese: string | null }> = [
   { richiesta: 'bullismo-sui-bulli', dedalo: 'mementos-02-aiyatsbus', dungeon: 'kaneshiro', fonte: '«Dedalo di Aiyatsbus», riga 256', attese: '[{"tipo":"palazzo","dungeon":"kaneshiro"}]' },
   { richiesta: 'un-part-time-infernale', dedalo: 'mementos-03-chemdah', dungeon: 'kaneshiro', fonte: '«Dedalo di Chemdah», riga 119', attese: null },
   { richiesta: 'medicina-amara', dedalo: 'mementos-03-chemdah', dungeon: 'kaneshiro', fonte: '«Dedalo di Chemdah», riga 137', attese: null },
@@ -79,8 +79,8 @@ function elenco(json: string | null): Array<Record<string, unknown>> | null {
   try { const v = JSON.parse(json) as unknown; return Array.isArray(v) ? v as Array<Record<string, unknown>> : null; } catch { return null; }
 }
 
-export const migration378: Migration = {
-  id: 378,
+export const migration383: Migration = {
+  id: 383,
   name: 'requisiti_di_palazzo_delle_richieste',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -93,7 +93,7 @@ export const migration378: Migration = {
     const giaPresenti: Array<{ richiesta: string; dungeon: string; fonte: string }> = [];
     const saltate: Array<{ richiesta: string; motivo: string }> = [];
     const scrivi = db.prepare('UPDATE main.richiesta SET completamento_condizioni_json = ? WHERE chiave = ? AND completamento_condizioni_json IS ?');
-    for (const q of REQUISITI_378) {
+    for (const q of REQUISITI_383) {
       const r = db.prepare('SELECT chiave, area_chiave, completamento_condizioni_json AS c FROM main.richiesta WHERE chiave = ?').get(q.richiesta) as { chiave: string; area_chiave: string | null; c: string | null } | undefined;
       if (!r) { saltate.push({ richiesta: q.richiesta, motivo: 'la Richiesta non c’è' }); continue; }
       const condizioni = elenco(r.c);
@@ -118,7 +118,7 @@ export const migration378: Migration = {
 
     if (aggiunte.length === 0 && saltate.length === 0) return;
     registraAudit(db, 'audit-l10-03-requisiti-di-palazzo', { migrazione: MIGRAZIONE, aggiunte, giaPresenti, saltate });
-    if (saltate.length > 0) logger.warn({ migrazione: 'L10-03-378', saltate }, 'requisiti di Palazzo delle Richieste: alcune saltate');
-    logger.info({ migrazione: 'L10-03-378', aggiunte: aggiunte.map((a) => a.richiesta), giaPresenti: giaPresenti.map((a) => a.richiesta) }, 'requisiti di Palazzo delle Richieste');
+    if (saltate.length > 0) logger.warn({ migrazione: 'L10-03-383', saltate }, 'requisiti di Palazzo delle Richieste: alcune saltate');
+    logger.info({ migrazione: 'L10-03-383', aggiunte: aggiunte.map((a) => a.richiesta), giaPresenti: giaPresenti.map((a) => a.richiesta) }, 'requisiti di Palazzo delle Richieste');
   },
 };

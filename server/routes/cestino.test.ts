@@ -168,7 +168,7 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     expect((prepared('SELECT contenuto FROM immagine WHERE ambito = ? AND chiave = ?').get('mappa', m.chiave) as { contenuto: Buffer }).contenuto.equals(contenuto)).toBe(true);
   });
 
-  // L10-02 (377): i timbri sono del dedalo e non se ne vanno con un'area del dedalo
+  // L10-02 (382): i timbri sono del dedalo e non se ne vanno con un'area del dedalo
   it('un\'area di un dedalo dei Memento, con le voci e le Richieste che vi stavano', async () => {
     const ad = prepared(`SELECT ad.chiave, ad.nome, ad.dedalo_chiave, (SELECT count(*) FROM punto_interesse p WHERE p.area_dedalo_chiave = ad.chiave) AS voci
       FROM area_dedalo ad ORDER BY voci DESC LIMIT 1`).get() as { chiave: string; nome: string; dedalo_chiave: string; voci: number };

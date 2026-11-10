@@ -142,7 +142,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
       WHERE a.dungeon_chiave = ? ORDER BY a.ordine, a.chiave, ad.ordine, ad.chiave`).all(memento.chiave) : []) as RigaAreaDedaloG[];
   const perChiave = (sql: string): Map<string, number> => new Map((prepared(sql).all() as RigaConteggioG[]).map((r) => [r.chiave, r.n]));
   const personeDelDedalo = perChiave("SELECT area_chiave AS chiave, COUNT(DISTINCT chiave) AS n FROM punto_interesse WHERE tipo = 'persona' GROUP BY area_chiave");
-  // le voci di un dedalo che non sono Persona: la Trama e, dalla 373, i forzieri e i mini-boss di Iweleth col loro tipo (stanno nella sezione Trama)
+  // le voci di un dedalo che non sono Persona: la Trama e, dalla 378, i forzieri e i mini-boss di Iweleth col loro tipo (stanno nella sezione Trama)
   const trameDelDedalo = perChiave("SELECT area_chiave AS chiave, COUNT(*) AS n FROM punto_interesse WHERE tipo <> 'persona' AND area_dedalo_chiave IS NOT NULL GROUP BY area_chiave");
   const richiesteDelDedalo = perChiave('SELECT area_chiave AS chiave, COUNT(*) AS n FROM richiesta GROUP BY area_chiave');
   const personeDellArea = perChiave('SELECT area_dedalo_chiave AS chiave, COUNT(DISTINCT voce_chiave) AS n FROM persona_area_dedalo GROUP BY area_dedalo_chiave');

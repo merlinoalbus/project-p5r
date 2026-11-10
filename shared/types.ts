@@ -2646,7 +2646,7 @@ export interface BattagliaDto {
 export type StatoRichiesta = 'accettata' | 'completata';
 
 export interface RichiestaDto {
-  /** Gli oggetti della ricompensa, per chiave del catalogo. L10-01 (migrazione 376): i testi di prima (`ricompense`) non ci sono più. */
+  /** Gli oggetti della ricompensa, per chiave del catalogo. L10-01 (migrazione 381): i testi di prima (`ricompense`) non ci sono più. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   chiave: string;
   nome: string;
@@ -2663,7 +2663,7 @@ export interface RichiestaDto {
      * nome salvato (vuoto), che il modulo rimanda così com'è.
      */
     daOmbra?: { livello: boolean; affinita: boolean; nome: boolean; propri: { nome: string; livello: number | null; debolezze: string[]; resistenze: string[] } } };
-  /** Il Confidente collegato. L10-01 (migrazione 376): niente più rango (colonna vuota in 33/33): un rango richiesto è una condizione di sblocco. */
+  /** Il Confidente collegato. L10-01 (migrazione 381): niente più rango (colonna vuota in 33/33): un rango richiesto è una condizione di sblocco. */
   confidente: { chiave: string; nome: string } | null;
   /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
   areaNome: string | null;
@@ -2969,7 +2969,7 @@ export interface RichiestaDelDedaloDto {
 /**
  * Un'area di un dedalo dei Memento (099, richiesta dell'utente del 2026-10-11): nome, dettagli e i suoi elementi — le voci della
  * guida (in `AreaDungeonDto.punti`, con `areaDedalo` uguale a questa chiave) e le Richieste. Completata quando tutti i suoi elementi
- * lo sono; un'area senza elementi è completata (scelta dell'utente). L10-02 (Q8 A, migrazione 377): i timbri non sono più dell'area,
+ * lo sono; un'area senza elementi è completata (scelta dell'utente). L10-02 (Q8 A, migrazione 382): i timbri non sono più dell'area,
  * la guida li dà per dedalo (`DedaloDto.timbri`).
  */
 export interface AreaDedaloDto {
@@ -2990,7 +2990,7 @@ export interface DedaloDto {
   /** Le Richieste del dedalo senza area (la loro area è stata eliminata): si vedono, non contano finché non si collocano. */
   daCollocare: RichiestaDelDedaloDto[];
   /**
-   * L10-02 (Q8 A, migrazione 377): i timbri del dedalo, come la guida li dà (`dungeon_area.timbri_totale`); null = la guida non dà un numero,
+   * L10-02 (Q8 A, migrazione 382): i timbri del dedalo, come la guida li dà (`dungeon_area.timbri_totale`); null = la guida non dà un numero,
    * niente da contare. `raccolti` null senza partita, altrimenti entro il totale. Contano uno per timbro, una volta sola, nel dedalo.
    */
   timbri: { totale: number; raccolti: number | null } | null;
@@ -3884,7 +3884,7 @@ export interface ProgressiPartitaDto {
   contatori: Array<{ chiave: string; nome: string; valore: number; daVoci?: VoceDiProvenienzaDto[] }>;
 }
 
-/** I timbri raccolti in un dedalo dei Memento (L10-02, migrazione 377: `dedalo` è la chiave del dedalo, `dungeon_area.chiave`), per partita. */
+/** I timbri raccolti in un dedalo dei Memento (L10-02, migrazione 382: `dedalo` è la chiave del dedalo, `dungeon_area.chiave`), per partita. */
 export interface TimbriDedaloDto { dedalo: string; raccolti: number; totale: number; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 

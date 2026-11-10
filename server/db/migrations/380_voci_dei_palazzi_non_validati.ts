@@ -1,9 +1,9 @@
 // ============================================================
-// 375 — le voci dei Palazzi non validati secondo la guida (L9-04, rilievi P1, P2, P5, P6, P7, P10, P11, P12, P13, evento 152, T1)
+// 380 — le voci dei Palazzi non validati secondo la guida (L9-04, rilievi P1, P2, P5, P6, P7, P10, P11, P12, P13, evento 152, T1)
 // ============================================================
 //
 // Porta in `punto_interesse` ciò che la riverifica sul testo della guida ha CONFERMATO (rapporto N §1.2); dove N smentisce il rilievo non si tocca
-// nulla (Magatama infernale x3 di P12, Pane per l'anima x2 e il forziere della sala d'aspetto di P13), e P3, P8, P9 restano fuori. Dipende dalla 374:
+// nulla (Magatama infernale x3 di P12, Pane per l'anima x2 e il forziere della sala d'aspetto di P13), e P3, P8, P9 restano fuori. Dipende dalla 379:
 // le voci che qui cambiano Infiltrazione mantengono la chiave, così i collegamenti ai pin e gli stati restano validi.
 //
 // Tre generi di scrittura, ciascuno con la guardia sul dato atteso (nome, tipo, Infiltrazione, contenuto): se la riga non è quella, non si scrive e il
@@ -29,7 +29,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`375: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`380: ${motivo}; nessuna modifica applicata.`); };
 
 const FONTE = (pagina: string): string => `https://www.allgamestaff.it/persona-5-royal/${pagina}/`;
 const KANESHIRO = 'palazzo-di-kaneshiro';
@@ -335,8 +335,8 @@ function scartiGiaNelVerbale(db: AppDatabase, scarti: unknown[]): boolean {
   return JSON.stringify(voci[voci.length - 1]?.scartate) === JSON.stringify(scarti);
 }
 
-export const migration375: Migration = {
-  id: 375,
+export const migration380: Migration = {
+  id: 380,
   name: 'voci_dei_palazzi_non_validati',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -364,7 +364,7 @@ export const migration375: Migration = {
     // gli scarti vanno sempre nel verbale; una riesecuzione identica non accoda una voce uguale
     if (nienteScritto && (scarti.length === 0 || scartiGiaNelVerbale(db, scarti))) return;
     registraAudit(db, AUDIT, {
-      migrazione: 'L9-04 · 375',
+      migrazione: 'L9-04 · 380',
       inserite,
       corrette,
       legamiCatalogo: aggiornati,
@@ -372,6 +372,6 @@ export const migration375: Migration = {
       scartate: scarti,
       nonFatti: NON_FATTI,
     });
-    logger.info({ migrazione: 'L9-04-375', inserite: inserite.length, corrette: corrette.length, legami: aggiornati.length }, 'voci dei Palazzi non validati allineate alla guida');
+    logger.info({ migrazione: 'L9-04-380', inserite: inserite.length, corrette: corrette.length, legami: aggiornati.length }, 'voci dei Palazzi non validati allineate alla guida');
   },
 };

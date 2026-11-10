@@ -1,5 +1,5 @@
 // ============================================================
-// 374 — pin e voci della guida collegati, solo se l'abbinamento è univoco nei due versi (L9-03, Palazzi non validati)
+// 379 — pin e voci della guida collegati, solo se l'abbinamento è univoco nei due versi (L9-03, Palazzi non validati)
 // ============================================================
 //
 // Nei sei Palazzi non validati (Kaneshiro, Futaba, Okumura, Niijima, Shido, Maruki) nessuna voce ha un pin: i pin delle planimetrie vengono dalle
@@ -23,7 +23,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`374: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`379: ${motivo}; nessuna modifica applicata.`); };
 
 const PALAZZI = ['kaneshiro', 'futaba', 'okumura', 'niijima', 'shido', 'maruki'] as const;
 
@@ -138,8 +138,8 @@ function motivoNonUnivoco(g: Gruppo, elenco: ReadonlySet<string>): string | null
   return `non univoco: ${g.pin.length} pin (anche inquadrature della stessa stanza) e ${g.voci.length} voci nella stessa Area`;
 }
 
-export const migration374: Migration = {
-  id: 374,
+export const migration379: Migration = {
+  id: 379,
   name: 'pin_e_voci_se_univoci',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -191,13 +191,13 @@ export const migration374: Migration = {
     for (const v of senzaArea) nonCollegati.push({ voce: v.chiave, famiglia: FAMIGLIA_VOCE[v.tipo], motivo: 'l’infiltrazione non ha un legame unico con un’Area (infiltrazione_area): nessun confronto dimostrabile' });
 
     registraAudit(db, 'audit-l9-03-pin-e-voci', {
-      migrazione: 'L9-03 · 374',
+      migrazione: 'L9-03 · 379',
       regola: 'un solo pin della famiglia nell’Area, una sola voce della famiglia nell’infiltrazione legata, riscontro sulla guida',
       collegate,
       scartate,
       nonCollegati,
       partite: Object.fromEntries(partitePrima),
     });
-    logger.info({ migrazione: 'L9-03-374', collegate: collegate.length, scartate: scartate.length, nonCollegati: nonCollegati.length }, 'pin e voci collegati dove l’abbinamento è univoco');
+    logger.info({ migrazione: 'L9-03-379', collegate: collegate.length, scartate: scartate.length, nonCollegati: nonCollegati.length }, 'pin e voci collegati dove l’abbinamento è univoco');
   },
 };

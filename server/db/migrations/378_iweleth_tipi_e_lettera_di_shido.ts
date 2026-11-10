@@ -1,5 +1,5 @@
 // ============================================================
-// 373 — forzieri e mini-boss di Iweleth col tipo di prima; la lettera di sfida di Shido (L9-08, scelte Q22 dell'utente)
+// 378 — forzieri e mini-boss di Iweleth col tipo di prima; la lettera di sfida di Shido (L9-08, scelte Q22 dell'utente)
 // ============================================================
 //
 // (1) Con la confluenza di Iweleth nel dedalo (175) tutte le voci sono diventate Trama, e `voce_confluenza` conserva il tipo di prima. L'utente rivuole
@@ -23,7 +23,7 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { registraAudit } from './archivioL1.js';
 
-const errore = (motivo: string): never => { throw new Error(`373: ${motivo}; nessuna modifica applicata.`); };
+const errore = (motivo: string): never => { throw new Error(`378: ${motivo}; nessuna modifica applicata.`); };
 
 const AUDIT = 'audit-l9-08-iweleth';
 
@@ -38,8 +38,8 @@ function giaNelVerbale(db: AppDatabase, letti: unknown): boolean {
   return ultima?.vociRiportate === 0 && ultima.letteraShido?.esito === 'guardia-non-scattata' && JSON.stringify(ultima.letteraShido.letti) === JSON.stringify(letti);
 }
 
-export const migration373: Migration = {
-  id: 373,
+export const migration378: Migration = {
+  id: 378,
   name: 'iweleth_tipi_e_lettera_di_shido',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
@@ -65,14 +65,14 @@ export const migration373: Migration = {
     if (letti?.lettera_entro === '12-12') esitoShido = 'gia-presente';
     else if (colonne && db.prepare(`UPDATE main.dungeon SET lettera_entro = '12-12' WHERE chiave = 'shido' AND lettera_entro IS NULL
         AND finestra_dal = '11-24' AND finestra_al = '12-17' AND furto_consigliato_data = '12-12'`).run().changes === 1) esitoShido = 'scritta';
-    if (esitoShido === 'guardia-non-scattata') logger.warn({ migrazione: 'L9-08-373', letti: letti ?? null }, 'Shido: la riga non è quella attesa, lettera di sfida non scritta');
+    if (esitoShido === 'guardia-non-scattata') logger.warn({ migrazione: 'L9-08-378', letti: letti ?? null }, 'Shido: la riga non è quella attesa, lettera di sfida non scritta');
 
     if (voci.length === 0 && (esitoShido === 'gia-presente' || (esitoShido === 'guardia-non-scattata' && giaNelVerbale(db, letti ?? null)))) return;
     registraAudit(db, AUDIT, {
-      migrazione: 'L9-08 · 373',
+      migrazione: 'L9-08 · 378',
       vociRiportate: voci.length, forzieri: voci.filter((v) => v.tipo === 'forziere').length, miniboss: voci.filter((v) => v.tipo === 'miniboss').length, voci,
       letteraShido: { esito: esitoShido, fonte: 'palazzo-di-shido, 12 dicembre', ...(esitoShido === 'guardia-non-scattata' ? { letti: letti ?? null } : {}) },
     });
-    logger.info({ migrazione: 'L9-08-373', voci: voci.length, letteraShido: esitoShido }, 'Iweleth: forzieri e mini-boss col tipo di prima; lettera di Shido');
+    logger.info({ migrazione: 'L9-08-378', voci: voci.length, letteraShido: esitoShido }, 'Iweleth: forzieri e mini-boss col tipo di prima; lettera di Shido');
   },
 };

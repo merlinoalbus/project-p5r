@@ -2,7 +2,7 @@
 // timbriService — i timbri raccolti nei dedali dei Memento, per partita
 // ============================================================
 //
-// L10-02 (risposta dell'utente Q8 A, migrazione 377): la guida dà i timbri per dedalo, e il totale sta nel dedalo
+// L10-02 (risposta dell'utente Q8 A, migrazione 382): la guida dà i timbri per dedalo, e il totale sta nel dedalo
 // (`dungeon_area.timbri_totale`, solo i dedali dei Memento; null = la guida non dà un numero). Quanti ne ha presi la partita sta in
 // `timbri_dedalo_partita` (file delle partite, utente 003), per dedalo: `area_chiave` vale la chiave del dedalo (utente 070), come
 // `richiesta.area_chiave`. Il valore si tiene fra zero e il totale; l'evento si registra ogni volta che il totale viene raggiunto salendo
@@ -18,10 +18,10 @@ import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import type { TimbriDedaloDto } from '../../shared/types.js';
 
-/** Il blocco di `dati_guida` con la fonte di ogni totale e il motivo dei dedali senza (migrazione 377). */
+/** Il blocco di `dati_guida` con la fonte di ogni totale e il motivo dei dedali senza (migrazione 382). */
 export const BLOCCO_TIMBRI = 'timbri-dei-dedali';
 
-/** Ciò che la migrazione 377 ha scritto per ogni dedalo: il totale della guida con la sua fonte, o il motivo per cui non c'è. */
+/** Ciò che la migrazione 382 ha scritto per ogni dedalo: il totale della guida con la sua fonte, o il motivo per cui non c'è. */
 const schemaFonte = z.object({ totale: z.number().int().min(0).nullable(), fonte: z.string().min(1).nullable(), motivo: z.string().min(1).nullable() });
 const schemaDedali = z.record(z.string(), schemaFonte);
 const schemaDichiarati = z.object({ totale: z.number().int().min(0), fonte: z.string().min(1) });

@@ -47,7 +47,7 @@ export const bodyDungeon = z.object({
   /** L4 §8.14: la voce del boss finale del Palazzo («Modifica › Boss finale»), una voce `boss` del Palazzo; null = nessuna. */
   voceBossFinale: z.string().min(1).max(200).nullable().optional(),
 });
-/** Un'area della guida (infiltrazione o dedalo); L10-02 (377): per un dedalo dei Memento anche il totale dei timbri, un intero da 0 al tetto o
+/** Un'area della guida (infiltrazione o dedalo); L10-02 (382): per un dedalo dei Memento anche il totale dei timbri, un intero da 0 al tetto o
  *  null (la guida non dà un numero); per un'infiltrazione il servizio lo rifiuta (`non-un-dedalo`). */
 export const bodyArea = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
@@ -88,7 +88,7 @@ export const querySchedaDungeon = z.object({ partita: idParam.optional(), infilt
 // nasce dalla regola (si sceglie correggendola)
 export const bodyNuovoPunto = bodyPunto.omit({ area: true, dettagli: true, carattere: true }).extend({ nome: z.string().trim().min(1).max(LIMITI_GUIDA.punto.nome), tipo: z.enum(TIPI_PUNTO) });
 
-/** Un'area di un dedalo dei Memento da correggere (099): nome e dettagli. L10-02 (377): i timbri sono del dedalo (`bodyArea`); un
+/** Un'area di un dedalo dei Memento da correggere (099): nome e dettagli. L10-02 (382): i timbri sono del dedalo (`bodyArea`); un
  *  `timbriTotale` qui è un campo sconosciuto e si rifiuta (400), invece di sparire in silenzio. */
 export const bodyAreaDedalo = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.areaDedalo.nome).optional(), descrizione: z.string().max(LIMITI_GUIDA.areaDedalo.descrizione).optional(),
@@ -156,7 +156,7 @@ export const bodyRichiesta = z.object({
   // L8-09: niente più testi di sblocco e di scadenza della guida (`disponibileDal`, `scadenza`): valgono `condizioni` e `scadenzaData`
   dedalo: z.string().min(1).max(200).nullable().optional(), areaDedalo: z.string().min(1).max(200).nullable().optional(),
   piano: z.string().trim().max(R.breve).optional(), bersaglio: bersaglio.optional(),
-  // L10-01 (376): niente più ricompense in testo né rango del Confidente (il rango che serve è una condizione di sblocco)
+  // L10-01 (381): niente più ricompense in testo né rango del Confidente (il rango che serve è una condizione di sblocco)
   confidente: z.string().min(1).max(200).nullable().optional(),
   note: z.string().trim().max(R.note).optional(),
   // L13 (ondata 3): sblocco con il vocabolario unico (la forma la verifica `normalizzaCondizioniSpillo`), scadenza e proroga come date di

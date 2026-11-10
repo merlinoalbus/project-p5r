@@ -218,7 +218,9 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   colore pieno per bordi e icone); caselle di spunta nel rosso del tema; file di schede con le frecce, Home e Fine; lo scorrimento animato
   si spegne con «riduci movimento»; pin e ritagli dell'editor si spostano anche con le frecce e con i campi X/Y. Pin e frecce delle file
   hanno un bersaglio di 44 px senza cambiare aspetto né posizione (i cartellini di Tokyo che si toccano alla misura del momento diventano
-  una pastiglia «+n» con l'elenco dei nomi, salvo sulla mappa piccola della pagina Partita, che non cambia disposizione; un collegamento isolato dentro una frase ha un'area trasparente da 44 px, una fila di
+  una pastiglia «+n» con l'elenco dei nomi, anche sulla mappa piccola della scheda «Oggi» della pagina Partita (approvato dall'utente:
+  «Raggruppa i pin»; con la mappa non ingrandita, un segno a meno di 24 px dal bordo o dai comandi dello zoom si sposta verso l'interno
+  del minimo necessario, così la sua area di tocco è tutta toccabile); un collegamento isolato dentro una frase ha un'area trasparente da 44 px, una fila di
   collegamenti righe da 44 px): il pin singolo ha un'imbottitura trasparente sopra e ai lati (mai sotto,
   così la punta resta sul punto), il gruppo un'imbottitura uguale sui quattro lati; la freccia di una fila, col mouse, ha un riquadro di
   clic da 44 px attorno al cerchio, sul tocco è il pulsante a essere da 44, e lo spazio ai capi della fila resta quello di prima. Le voci «fatte» ed
@@ -226,7 +228,7 @@ Le voci segnate **(24/10)** valgono come le altre (D16, 01/11).
   nome barrato in un grigio leggibile (D15, scelta C dell'utente, 01/11), anche nella Partita.
 - Le bozze dei moduli non si salvano nel browser: ricaricando, una modifica non salvata si perde. **(24/10)**
 - La pagina Partita mantiene il suo aspetto; eccezioni approvate: la vista «Avanzamento» del cassetto del Confidente (era «Level up»: nome
-  italiano ovunque, solo l'etichetta); finestra «Regala» in Confidenti; riga «Giorno e fascia
+  italiano ovunque, solo l'etichetta); nella mappa della scheda «Oggi» i pin troppo vicini in un gruppo «+n» («Raggruppa i pin»); finestra «Regala» in Confidenti; riga «Giorno e fascia
   dell'incontro» come avviso, matita «Modifica» con Ripristina accanto a ogni Dote, scheda «Persona della partita» **(24/10)**; nelle Doti
   l'interruttore «Anima da cineasta» spento e disattivato senza il libro letto, con il motivo nel suggerimento (utente, 01/11); gli schizzi
   L10-01, L10-02 e L10-05 approvati dall'utente (01/11): da 1024 px Denaro e squadra, Confidenti, Compendio personale, Persona della

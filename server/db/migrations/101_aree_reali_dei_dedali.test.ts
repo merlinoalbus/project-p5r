@@ -77,8 +77,8 @@ it('crea le aree della guida, colloca Richieste, Trama e Persona; svuota il tota
       ('r4', 3, 'Di Qimranut', '', '${QIM}', 'Area 2', '{}', '${QIM}-banchina');
     INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, dettagli_json, area_dedalo_chiave) VALUES
       ('a/6', '${AIY}', 5, 'trama', 'Uscita', 'Si raggiunge dopo l''Area 6.', '{}', '${AIY}-area-1');`);
-  // fino alla 376: dalla 377 (L10-02) il totale dei timbri torna nel dedalo e `area_dedalo.timbri_totale` va a NULL in tutte le aree
-  runMigrations(db, migrations.filter((m) => m.id < 377));
+  // fino alla 381: dalla 382 (L10-02) il totale dei timbri torna nel dedalo e `area_dedalo.timbri_totale` va a NULL in tutte le aree
+  runMigrations(db, migrations.filter((m) => m.id < 382));
   // Aiyatsbus: le 7 aree della guida, l'Area 1 conserva la chiave; il totale dei timbri si svuota
   expect(db.prepare('SELECT chiave, ordine, nome, timbri_totale FROM area_dedalo WHERE dedalo_chiave = ? ORDER BY ordine').all(AIY)).toEqual(
     Array.from({ length: 7 }, (_, i) => ({ chiave: chiaveAreaDedalo(AIY, i + 1), ordine: i, nome: `Area ${i + 1}`, timbri_totale: null })));

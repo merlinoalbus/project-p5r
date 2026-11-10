@@ -4,7 +4,8 @@ Cosa fa l'app oggi, per aree, e cosa resta aperto. Il dettaglio tecnico di ogni 
 regole di comportamento in [`DECISIONI.md`](DECISIONI.md). La storia delle lavorazioni è nella cronologia di git.
 
 Stato: tutte le aree sotto sono **in uso**. L'istanza di preparazione (scrittura dei contenuti) e l'istanza di rilascio (contenuti in
-sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 379 migrazioni di gioco (l'ultima è la 379), 70 delle partite (l'ultima è la 070).
+sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 379 migrazioni di gioco (l'ultima è la 384; le 372-376 del lotto L3-L4 entrano con l'integrazione), 70 delle partite
+(l'ultima è la 070).
 
 ## Compendio e skill
 - Compendio delle Persona Royal (`/compendio`) con scheda di dettaglio: arcano, livello, affinità, skill per livello, statistiche,
@@ -166,8 +167,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   Iweleth senza totale, perché la guida non dà un numero (per Qimranut dice solo che ci sono). Nessun totale generale si impone (scelta
   dell'utente del 10/11): la scheda dei Memento dice una volta la somma dei dedali (153) e il totale dichiarato dalla guida (123). Il 150 della
   guida sta solo nel blocco `timbri-dei-dedali` e nella sfida del Covo «Timbri ovunque», che lo chiede per il premio.
-- Memento: i requisiti di Palazzo delle Richieste seguono le pagine dei Dedali (17 Richieste, 15 aggiunte dalla 378); nei Memento Eligor sta solo in
-  Chemdah, con una voce sola (scelta dell'utente del 10/11), ed Eligor e Reggente stanno fra le Ombre di Chemdah nel blocco della battaglia (379).
+- Memento: i requisiti di Palazzo delle Richieste seguono le pagine dei Dedali (17 Richieste, 15 aggiunte dalla 383); nei Memento Eligor sta solo in
+  Chemdah, con una voce sola (scelta dell'utente del 10/11), ed Eligor e Reggente stanno fra le Ombre di Chemdah nel blocco della battaglia (384).
 - Palazzi, da verificare in gioco: i forzieri di Shido tratti dalla guida inglese (per esempio «Life Jacket, Diamante, Granato» nel Ponte
   piscina, dove la guida italiana descrive la Camicia inamovibile).
 - Palazzi, restano com'erano per mancanza di fonte: i nomi inglesi di quattro forzieri di Shido (Soul Food, Life Jacket, Parapsy Ring,

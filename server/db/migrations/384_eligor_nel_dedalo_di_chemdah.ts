@@ -1,5 +1,5 @@
 // ============================================================
-// 379 — Eligor nel Dedalo di Chemdah (L10-04)
+// 384 — Eligor nel Dedalo di Chemdah (L10-04)
 // ============================================================
 //
 // La guida mette il Cavaliere bellicoso (maschera Eligor) fra le Personae reclutabili del Dedalo di Chemdah («dedalo-di-chemdah» r.100) e fra i
@@ -34,10 +34,10 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 import { esisteTabella, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
-import { improntaVistaOmbre } from './376_richieste_e_ombre_colonne_vuote_tolte.js';
+import { improntaVistaOmbre } from './381_richieste_e_ombre_colonne_vuote_tolte.js';
 
-const MIGRAZIONE = 'L10-04 · 379';
-const errore = (motivo: string): never => { throw new Error(`379: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L10-04 · 384';
+const errore = (motivo: string): never => { throw new Error(`384: ${motivo}; nessuna modifica applicata.`); };
 
 const OMBRA = 'cavaliere-bellicoso';
 const DEDALO = 'mementos-03-chemdah';
@@ -85,16 +85,16 @@ function leggiOggetto<T>(testo: unknown, cosa: string): T {
   return v as T;
 }
 
-export const migration379: Migration = {
-  id: 379,
+export const migration384: Migration = {
+  id: 384,
   name: 'eligor_nel_dedalo_di_chemdah',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
     for (const t of ['punto_interesse', 'ombra', 'ombra_voce', 'persona_area_dedalo', 'area_dedalo', 'dungeon_area', 'dati_guida']) {
-      if (!esisteTabella(db, t)) { logger.warn({ migrazione: 'L10-04-379', tabella: t }, 'Eligor in Chemdah: manca una tabella, nulla da fare'); return; }
+      if (!esisteTabella(db, t)) { logger.warn({ migrazione: 'L10-04-384', tabella: t }, 'Eligor in Chemdah: manca una tabella, nulla da fare'); return; }
     }
-    if (!db.prepare("SELECT 1 FROM main.dungeon_area WHERE chiave = ? AND dungeon_chiave = 'mementos'").get(DEDALO)) { logger.warn({ migrazione: 'L10-04-379' }, 'Eligor in Chemdah: manca il Dedalo di Chemdah, nulla da fare'); return; }
-    if (!db.prepare('SELECT 1 FROM main.ombra WHERE chiave = ?').get(OMBRA)) { logger.warn({ migrazione: 'L10-04-379' }, 'Eligor in Chemdah: manca l’Ombra cavaliere-bellicoso, nulla da fare'); return; }
+    if (!db.prepare("SELECT 1 FROM main.dungeon_area WHERE chiave = ? AND dungeon_chiave = 'mementos'").get(DEDALO)) { logger.warn({ migrazione: 'L10-04-384' }, 'Eligor in Chemdah: manca il Dedalo di Chemdah, nulla da fare'); return; }
+    if (!db.prepare('SELECT 1 FROM main.ombra WHERE chiave = ?').get(OMBRA)) { logger.warn({ migrazione: 'L10-04-384' }, 'Eligor in Chemdah: manca l’Ombra cavaliere-bellicoso, nulla da fare'); return; }
     const vistaPrima = improntaVistaOmbre(db);
     const ombrePrima = improntaTabella(db, 'ombra');
 
@@ -218,7 +218,7 @@ export const migration379: Migration = {
     if (!voceCreata && !voceTolta && vistaDopo !== vistaPrima) errore('la vista ombra_luogo_dedalo è cambiata senza voci nuove né tolte');
     if (righe(vistaDopo) !== attese) errore(`la vista ombra_luogo_dedalo ha ${righe(vistaDopo)} righe, ne erano attese ${attese}`);
     // il Cavaliere bellicoso resta nei Memento, a Chemdah (la cattura resta «provata»: l'Ombra c'è ed è catturabile)
-    if (!voceChemdah) logger.warn({ migrazione: 'L10-04-379' }, 'nessuna voce del Cavaliere bellicoso in Chemdah: Aiyatsbus non si tocca');
+    if (!voceChemdah) logger.warn({ migrazione: 'L10-04-384' }, 'nessuna voce del Cavaliere bellicoso in Chemdah: Aiyatsbus non si tocca');
 
     // i motivi di ciò che non si è fatto vanno sempre nel verbale (non «già presente», il segno di una seconda esecuzione)
     const righeNonAggiunte = Object.values(righeMotivi).some((m) => m !== 'già presente');
@@ -226,7 +226,7 @@ export const migration379: Migration = {
     if (!voceCreata && !doppioneTolto && righeAggiunte.length === 0 && voceNonCreata === null && doppioneMotivo === null && !righeNonAggiunte && !soloFatto && soloAChemdah.voceMotivo === null) return;
     registraAudit(db, 'audit-l10-04-eligor-chemdah', { migrazione: MIGRAZIONE, vociPresenti, voceCreata, voceNonCreata, doppioneTolto, doppioneMotivo,
       righeBattagliaAggiunte: righeAggiunte, righeBattagliaMotivi: righeMotivi, soloAChemdah: { decisione: DECISIONE, ...soloAChemdah }, vista: { prima: vistaPrima, dopo: vistaDopo } });
-    if (voceNonCreata || doppioneMotivo || righeNonAggiunte || soloAChemdah.voceMotivo) logger.warn({ migrazione: 'L10-04-379', voceNonCreata, doppioneMotivo, righeMotivi, soloAChemdah }, 'Eligor in Chemdah: qualcosa non è stato fatto');
-    logger.info({ migrazione: 'L10-04-379', vociPresenti, voceCreata: voceCreata?.chiave ?? null, doppioneTolto: doppioneTolto?.voce ?? null, righeAggiunte, soloAChemdah }, 'Eligor (e Reggente) nel Dedalo di Chemdah, il Cavaliere bellicoso solo a Chemdah');
+    if (voceNonCreata || doppioneMotivo || righeNonAggiunte || soloAChemdah.voceMotivo) logger.warn({ migrazione: 'L10-04-384', voceNonCreata, doppioneMotivo, righeMotivi, soloAChemdah }, 'Eligor in Chemdah: qualcosa non è stato fatto');
+    logger.info({ migrazione: 'L10-04-384', vociPresenti, voceCreata: voceCreata?.chiave ?? null, doppioneTolto: doppioneTolto?.voce ?? null, righeAggiunte, soloAChemdah }, 'Eligor (e Reggente) nel Dedalo di Chemdah, il Cavaliere bellicoso solo a Chemdah');
   },
 };

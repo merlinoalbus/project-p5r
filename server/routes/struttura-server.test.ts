@@ -223,7 +223,7 @@ describe('voce 5 — il server legge i valori del catalogo', () => {
     expect(senza.planimetrie.every((m) => m.presi === null && m.spilli.every((s) => s.raccolto === null))).toBe(true);
 
     // Memento (099): Dedalo → Aree → Elementi; gli elementi di un'area sono le sue voci Trama e le sue Richieste
-    // dalla 101 le aree sono quelle della guida (Aiyatsbus Area 1–7); L10-02 (377): i timbri sono del dedalo, come li dà la guida
+    // dalla 101 le aree sono quelle della guida (Aiyatsbus Area 1–7); L10-02 (382): i timbri sono del dedalo, come li dà la guida
     await request(app).put('/api/compendio/aree/mementos-02-aiyatsbus').send({ timbriTotale: 8 }).expect(200);
     const mementos = (await request(app).get(`/api/compendio/dungeon/mementos?partita=${id}`)).body.data as DungeonDettaglioDto;
     const aiyatsbus = mementos.aree.find((a) => a.chiave === 'mementos-02-aiyatsbus')!;

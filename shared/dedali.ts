@@ -9,7 +9,7 @@
 //   - una voce è completata quando è Ottenuta o Esaurita; una Richiesta quando è «Completata»; i timbri quando sono tutti;
 //   - nella percentuale i timbri contano uno per timbro («Uno per timbro»);
 //   - un'area senza elementi è completata («Sì, completata»); per coerenza un dedalo senza aree lo è.
-// L10-02 (Q8 A, migrazione 377): la guida dà i timbri per dedalo, non per area. Il totale sta nel dedalo (`dungeon_area.timbri_totale`) e i
+// L10-02 (Q8 A, migrazione 382): la guida dà i timbri per dedalo, non per area. Il totale sta nel dedalo (`dungeon_area.timbri_totale`) e i
 // timbri contano una volta sola, nel dedalo, uno per timbro: l'area non li conta più. Un dedalo è completato quando lo sono tutte le sue aree
 // e i suoi timbri sono tutti raccolti.
 // Lo stesso calcolo lo fanno il server (scheda del Memento, anello) e l'interfaccia (aggiornamenti immediati dopo un gesto):
@@ -19,7 +19,7 @@
 /**
  * I tipi delle voci di un dedalo (2026-10-11, richiesta dell'utente: «elementi Trama... unico tipo visto che nei memento è tutto
  * random quindi è impossibile segnare Stanze, porte, meccanismi forzieri o altro»): le Persona che vi si incontrano e la Trama.
- * Trama c'è solo nei Memento. Sono i tipi che si possono scegliere: l'eccezione sono i forzieri e i mini-boss di Iweleth (migrazione 373), un dedalo
+ * Trama c'è solo nei Memento. Sono i tipi che si possono scegliere: l'eccezione sono i forzieri e i mini-boss di Iweleth (migrazione 378), un dedalo
  * nato da un Palazzo, che tengono il tipo di prima; si correggono senza cambiarlo e contano come la Trama (`contaNelDedalo`).
  */
 export const TIPI_VOCE_DEDALO = ['persona', 'trama'] as const;

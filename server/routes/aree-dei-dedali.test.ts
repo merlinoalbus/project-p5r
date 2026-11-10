@@ -48,7 +48,7 @@ describe('le aree dei dedali', () => {
   beforeEach(() => { dbDiProva(); });
   afterEach(() => closeDb());
 
-  // L10-02 (migrazione 377): i timbri non sono più dell'area ma del dedalo; `timbriTotale` sulle aree del dedalo si rifiuta (corpo stretto)
+  // L10-02 (migrazione 382): i timbri non sono più dell'area ma del dedalo; `timbriTotale` sulle aree del dedalo si rifiuta (corpo stretto)
   it.skip('si aggiungono in fondo al dedalo, si correggono (nome, dettagli, timbri), si spostano; solo nei dedali dei Memento', async () => {
     expect((await dedalo(QIMRANUT)).dedalo.aree.map((x) => [x.chiave, x.nome, x.ordine])).toEqual([[q(1), 'Area 1', 0], [q(2), 'Area 2', 1]]);
     const nuova = await nuovaArea(QIMRANUT, { nome: 'Treno fermo', descrizione: 'Il treno fermo e la banchina.', timbriTotale: 4 });
@@ -69,7 +69,7 @@ describe('le aree dei dedali', () => {
     expect((await request(app).post(`/api/compendio/dedali/${QIMRANUT}/aree`).send({ nome: 'X', timbriTotale: -1 })).status).toBe(400);
   });
 
-  // L10-02 (migrazione 377): l'area non conta più i timbri (sono del dedalo, una volta sola) e il totale non si imposta sull'area
+  // L10-02 (migrazione 382): l'area non conta più i timbri (sono del dedalo, una volta sola) e il totale non si imposta sull'area
   it.skip('un\'area è completata quando lo sono tutti i suoi elementi (Trama, Richieste, timbri; le Persona non contano); un\'area vuota lo è; il dedalo quando lo sono tutte', async () => {
     const partita = await nuovaPartita('Aree complete');
     // Qimranut: Area 1 con una Richiesta e due voci di Trama, Area 2 con una voce di Trama; i timbri dell'Area 2 li imposta l'utente
@@ -166,7 +166,7 @@ describe('le aree dei dedali', () => {
     expect((await dedalo(QIMRANUT)).punti.find((x) => x.chiave === p.chiave)?.areeDedalo).toEqual([q(2)]);
   });
 
-  // L10-02 (migrazione 377, utente 070): i timbri si contano per dedalo (`PUT /api/partite/:id/timbri` con `dedalo`, totale da `PUT /aree/:chiave`)
+  // L10-02 (migrazione 382, utente 070): i timbri si contano per dedalo (`PUT /api/partite/:id/timbri` con `dedalo`, totale da `PUT /aree/:chiave`)
   it.skip('i timbri di un\'area: senza totale non si contano; cambiando il totale i conteggi delle partite seguono, più basso li ferma, nessuno li toglie', async () => {
     const partita = await nuovaPartita('Timbri');
     expect((await raccolti(partita, a(1), 1)).body.error.code).toBe('timbri-non-dichiarati');
@@ -183,7 +183,7 @@ describe('le aree dei dedali', () => {
     expect((await raccolti(partita, q(1), 3).expect(200)).body.data).toMatchObject({ raccolti: 3, totale: 3, completato: true });
   });
 
-  // L10-02 (migrazione 377): l'area non ha più un totale di timbri (si imposta nel dedalo) e i timbri, del dedalo, restano eliminandola
+  // L10-02 (migrazione 382): l'area non ha più un totale di timbri (si imposta nel dedalo) e i timbri, del dedalo, restano eliminandola
   it.skip('eliminando un\'area: le voci di Trama se ne vanno con i loro stati, i timbri con lei, le Richieste restano da collocare, le Persona perdono solo quell\'area; le altre aree salgono', async () => {
     const partita = await nuovaPartita('Elimina area');
     const prima = await dedalo(AIYATSBUS, partita);

@@ -1,5 +1,5 @@
 // ============================================================
-// 377 — i timbri tornano al dedalo, come li dà la guida (L10-02, risposta dell'utente Q8 A)
+// 382 — i timbri tornano al dedalo, come li dà la guida (L10-02, risposta dell'utente Q8 A)
 // ============================================================
 //
 // La guida dà i timbri per DEDALO («ci sono ben 20 Timbri nell'area di KAITUL»), mai per area: il modello per area (099) non aveva un dato
@@ -44,8 +44,8 @@ import { logger } from '../../utils/logger.js';
 import { esisteTabella, haColonna, improntaTabella } from './pulizieL11.js';
 import { archiviaSenzaSovrascrivere, righeArchiviate, registraAudit } from './archivioL1.js';
 
-const MIGRAZIONE = 'L10-02 · 377';
-const errore = (motivo: string): never => { throw new Error(`377: ${motivo}; nessuna modifica applicata.`); };
+const MIGRAZIONE = 'L10-02 · 382';
+const errore = (motivo: string): never => { throw new Error(`382: ${motivo}; nessuna modifica applicata.`); };
 
 /** La chiave del blocco con le fonti dei totali e il dichiarato della guida (la stessa di `timbriService.BLOCCO_TIMBRI`, che lo legge). */
 export const BLOCCO_TIMBRI = 'timbri-dei-dedali';
@@ -118,12 +118,12 @@ export function senzaLaFrase(descrizione: string, frase: { testo: string; indice
   return `${prima.replace(/[\s.;,]+$/, '')}.${dopo}`;
 }
 
-export const migration377: Migration = {
-  id: 377,
+export const migration382: Migration = {
+  id: 382,
   name: 'timbri_per_dedalo',
   up(db) {
     if (!db.inTransaction) errore('manca la transazione della migrazione');
-    if (!esisteTabella(db, 'dungeon_area')) { logger.warn({ migrazione: 'L10-02-377' }, 'manca la tabella dungeon_area: nulla da fare'); return; }
+    if (!esisteTabella(db, 'dungeon_area')) { logger.warn({ migrazione: 'L10-02-382' }, 'manca la tabella dungeon_area: nulla da fare'); return; }
     if (!esisteTabella(db, 'dati_guida')) errore('manca la tabella dati_guida');
     const colonnaNuova = !haColonna(db, 'dungeon_area', 'timbri_totale');
     // `area_dedalo.timbri_totale` resta nello schema (la legge la migrazione utente 020, registrata): qui i valori vanno in archivio e a NULL
@@ -256,7 +256,7 @@ export const migration377: Migration = {
       totaliScritti: scritti, frasiTolte, saltati, vociTolte, vociRimaste, senzaTotale: SENZA_TOTALE, totaliDelleAreeInArchivio: valoriAree, sommeDelleAree: sommeAree,
       sommaDeiTotali: TOTALI_DELLA_GUIDA.reduce((s, t) => s + t.totale, 0), dichiarati: DICHIARATI, bloccoScritto,
     });
-    if (vociRimaste.length > 0 || saltati.length > 0) logger.warn({ migrazione: 'L10-02-377', vociRimaste, saltati }, 'timbri: dedali o voci saltati');
-    logger.info({ migrazione: 'L10-02-377', scritti: scritti.length, frasiTolte: frasiTolte.length, saltati, areeInArchivio: Object.keys(valoriAree).length, vociTolte }, 'timbri: il totale è del dedalo');
+    if (vociRimaste.length > 0 || saltati.length > 0) logger.warn({ migrazione: 'L10-02-382', vociRimaste, saltati }, 'timbri: dedali o voci saltati');
+    logger.info({ migrazione: 'L10-02-382', scritti: scritti.length, frasiTolte: frasiTolte.length, saltati, areeInArchivio: Object.keys(valoriAree).length, vociTolte }, 'timbri: il totale è del dedalo');
   },
 };

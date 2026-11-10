@@ -117,7 +117,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
   // gli inviti dei Confidenti registrati nella partita (L6, utente 025): un invito che sparisce lascia la riga orfana
   { tabella: 'invito_partita', colonna: 'invito_chiave', entita: 'invito di un Confidente', tabellaGioco: 'confidente_invito', colonnaGioco: 'chiave' },
-  // i timbri si contano nel dedalo (L10-02, migrazione 377, utente 070): `area_chiave` è la chiave del dedalo
+  // i timbri si contano nel dedalo (L10-02, migrazione 382, utente 070): `area_chiave` è la chiave del dedalo
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'dedalo dei Memento', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },
   { tabella: 'cruciverba_partita', colonna: 'data', entita: 'cruciverba', tabellaGioco: 'cruciverba', colonnaGioco: 'data' },

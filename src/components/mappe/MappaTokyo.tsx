@@ -42,7 +42,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { contornoSagoma } from '../../utils/contornoSagoma';
-import { raggruppaCartellini } from '../../utils/raggruppaCartellini';
+import { collocaCartellini, raggruppaCartellini, type Ostacolo } from '../../utils/raggruppaCartellini';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -53,7 +53,7 @@ const CONTORNO = contornoSagoma('#fff', 1, true);
 const CONTORNO_ORO = contornoSagoma('#ffd23f', 2, true) + ' brightness(1.05)';
 
 interface Props {
-  /** Unisce in un «+n» i cartellini troppo vicini. Spento sulla mappa piccola della pagina Partita, che non cambia disposizione (DECISIONI). */
+  /** Unisce in un «+n» i cartellini troppo vicini e, a mappa non ingrandita, li tiene lontani da bordi e comandi (Città, Home, scheda «Oggi»). */
   raggruppaVicini?: boolean;
   quartieri: QuartiereRiassuntoDto[];
   dungeon?: DungeonRiassuntoDto[];
@@ -189,7 +189,7 @@ interface Segno {
  * calendario, o fermate che la guida non ha come scheda — restano il solo pallino bianco della
  * rete: una figura con la targa dice «vieni qui», e dirlo a proposito di un posto dove non si può
  * entrare è una promessa che la mappa non mantiene. Il nome resta comunque, sul pallino. */
-function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string, destinazione: DestinazioneTokyo | null) => boolean }) {
+function Cartellino({ s, posizione, acceso, onEvidenzia, onApri }: { s: Segno; posizione: { x: number; y: number }; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string, destinazione: DestinazioneTokyo | null) => boolean }) {
   const filtro = acceso ? CONTORNO_ORO : CONTORNO;
   // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
   // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
@@ -201,7 +201,7 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
     to={s.href}
     onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href, s.destinazione)) e.preventDefault(); } : undefined}
     className={`spillo-tokyo group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
-    style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
+    style={{ left: `${posizione.x}%`, top: `${posizione.y}%`, width: `${s.dove.scala}%` }}
     title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
     onMouseEnter={() => onEvidenzia?.(s.chiave)}
     onMouseLeave={() => onEvidenzia?.(null)}
@@ -496,21 +496,34 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
   // Cartellini troppo vicini alla misura di adesso: diventano un gruppo «+n» con l'elenco dei nomi (regola dei bersagli, vedi
   // `raggruppaCartellini`). La misura della tela (non ingrandita) si legge dal riquadro e si segue quando cambia; senza motore di
   // layout (prove) resta zero e nessuno si raggruppa.
-  const [misura, setMisura] = useState({ w: 0, h: 0 });
+  // Con la mappa non ingrandita anche i comandi dello zoom (riquadro in basso a destra) contano: un cartellino a meno di mezza area di tocco
+  // da loro, o dal bordo, si sposta verso l'interno del minimo necessario (`collocaCartellini`). Ingrandita, la tela si sposta sotto i
+  // comandi e i cartellini restano dove sono.
+  const comandi = useRef<HTMLDivElement>(null);
+  const [misura, setMisura] = useState({ w: 0, h: 0, comandi: null as Ostacolo | null });
   useLayoutEffect(() => {
     const el = cornice.current;
     if (!el) return;
-    const leggi = () => setMisura((m) => (m.w === el.clientWidth && m.h === el.clientHeight ? m : { w: el.clientWidth, h: el.clientHeight }));
+    const leggi = () => {
+      const c = comandi.current;
+      const o = c ? { x: c.offsetLeft, y: c.offsetTop, w: c.offsetWidth, h: c.offsetHeight } : null;
+      setMisura((m) => (m.w === el.clientWidth && m.h === el.clientHeight && JSON.stringify(m.comandi) === JSON.stringify(o)
+        ? m : { w: el.clientWidth, h: el.clientHeight, comandi: o }));
+    };
     leggi();
     if (typeof ResizeObserver === 'undefined') return;
     const oss = new ResizeObserver(leggi);
     oss.observe(el);
+    if (comandi.current) oss.observe(comandi.current);
     return () => oss.disconnect();
   }, []);
-  const { singoli, gruppi } = useMemo(
-    () => raggruppaCartellini(presenti.map((s) => ({ chiave: s.chiave, x: s.dove.x, y: s.dove.y })), raggruppaVicini ? misura.w * zoom : 0, raggruppaVicini ? misura.h * zoom : 0),
-    [presenti, misura, zoom, raggruppaVicini],
-  );
+  const { singoli, gruppi } = useMemo(() => {
+    const punti = presenti.map((s) => ({ chiave: s.chiave, x: s.dove.x, y: s.dove.y }));
+    if (raggruppaVicini && zoom === 1) return collocaCartellini(punti, misura.w, misura.h, misura.comandi ? [misura.comandi] : []);
+    const r = raggruppaCartellini(punti, raggruppaVicini ? misura.w * zoom : 0, raggruppaVicini ? misura.h * zoom : 0);
+    const dove = new Map(punti.map((p) => [p.chiave, p]));
+    return { singoli: r.singoli.map((k) => dove.get(k)!), gruppi: r.gruppi };
+  }, [presenti, misura, zoom, raggruppaVicini]);
   const [gruppoAperto, setGruppoAperto] = useState<string | null>(null);
   const gruppoScelto = gruppi.find((g) => g.chiave === gruppoAperto) ?? null;
   const perChiave = useMemo(() => new Map(presenti.map((s) => [s.chiave, s])), [presenti]);
@@ -559,7 +572,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
         </svg>
         <Rete nomi={nomiFermate} />
         {/* Fra i presenti c'è anche il Covo dei Ladri, quando la sua Area è nel mondo (dal 5 maggio, dai dati: vedi sopra). */}
-        {presenti.filter((s) => singoli.includes(s.chiave)).map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} onApri={onApri} />)}
+        {singoli.map((c) => {
+          const s = perChiave.get(c.chiave);
+          return s ? <Cartellino key={c.chiave} s={s} posizione={c} acceso={evidenziato === c.chiave} onEvidenzia={onEvidenzia} onApri={onApri} /> : null;
+        })}
         {/* Cartellini che alla misura di adesso si toccano: una pastiglia «+n» per gruppo, che apre l'elenco dei nomi. Resta della
             grandezza del tocco (34 px più l'imbottitura) a ogni ingrandimento: nella tela che scala la si riporta a misura. */}
         {gruppi.map((g) => {
@@ -578,7 +594,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, covo, evidenzia
         })}
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
-      <div className="visore-mappa__controlli">
+      <div ref={comandi} className="visore-mappa__controlli">
         <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(ZOOM_PASSO)} disabled={zoom >= ZOOM_MAX} aria-label="Ingrandisci">+</button>
         <span className="visore-mappa__zoom" aria-live="polite">{Math.round(zoom * 100)}%</span>
         <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(1 / ZOOM_PASSO)} disabled={zoom <= 1} aria-label="Riduci">−</button>

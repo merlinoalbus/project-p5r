@@ -6,7 +6,7 @@
 // essere banalmente un click per segnare i timbri ottenuti». Progetto approvato: una fila di timbri, uno per timbro; toccando il terzo
 // risultano presi tre, toccando l'ultimo preso si torna indietro di uno. Immagini di Codex `ui/timbro-ottenuto` e `ui/timbro-vuoto`,
 // con una riserva disegnata qui.
-// L10-02 (Q8 A, migrazione 377): la guida dà i timbri per dedalo, non per area. La fila sta nella scheda del dedalo (prima era in ogni
+// L10-02 (Q8 A, migrazione 382): la guida dà i timbri per dedalo, non per area. La fila sta nella scheda del dedalo (prima era in ogni
 // area); il totale si imposta in «Modifica la guida»; la riga piccola sotto dice da quale pagina e riga della guida viene. Un dedalo per
 // cui la guida non dà un numero lo dice, e i suoi timbri non si contano: il numero non si inventa (DECISIONI:34).
 // ============================================================

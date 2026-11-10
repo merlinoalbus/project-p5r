@@ -23,10 +23,10 @@ export const LIMITI_GUIDA = {
   punto: { nome: 300, descrizione: 8000, dettagli: 40, etichetta: 60, dettaglio: 4000 },
   // le aree dei dedali dei Memento (099): nome e dettagli come un'area della guida
   areaDedalo: { nome: 300, descrizione: 8000 },
-  // L10-02 (migrazione 377): i timbri di un dedalo dei Memento, entro un tetto largo (Da'at ne ha 40)
+  // L10-02 (migrazione 382): i timbri di un dedalo dei Memento, entro un tetto largo (Da'at ne ha 40)
   dedalo: { timbri: 999 },
   // le Richieste dei Mementos (2026-10-11): nel pacchetto il nome più lungo ha 35 caratteri, le note 545; al massimo 3 debolezze e 3
-  // resistenze (L10-01, migrazione 376: niente più ricompense in testo né rango del Confidente)
+  // resistenze (L10-01, migrazione 381: niente più ricompense in testo né rango del Confidente)
   richiesta: { nome: 300, breve: 1000, note: 8000, voce: 300, voci: 30 },
   // Il nome di una mappa finisce nella chiave leggibile del percorso, che il server tiene sotto i
   // 180 caratteri **compreso il prefisso del genitore**: oltre quel tetto la rotta risponde

@@ -477,18 +477,19 @@ import { migration369 } from './369_ombre_sciagura_elenco_e_ricompense.js';
 import { migration370 } from './370_piatti_senza_frasi_non_reperiti.js';
 // 2026-11-09 (lotto L6, L6-10): vincolo del 1° giugno «Furto consigliato del Palazzo di Madarame» (371)
 import { migration371 } from './371_vincolo_del_primo_giugno.js';
-// 2026-11-10 (lotto L9): via le tre frasi di date del Palazzo (372), forzieri e mini-boss di Iweleth col tipo di prima e lettera di Shido (373)
-import { migration372 } from './372_dungeon_tolte_tre_frasi_di_date.js';
-import { migration373 } from './373_iweleth_tipi_e_lettera_di_shido.js';
-// 2026-11-10 (lotto L9): pin e voci collegati dove l'abbinamento è univoco (374), voci dei Palazzi non validati secondo la guida (375)
-import { migration374 } from './374_pin_e_voci_se_univoci.js';
-import { migration375 } from './375_voci_dei_palazzi_non_validati.js';
-// 2026-11-10 (lotto L10): via tre colonne vuote di Richieste e Ombre (376), i timbri per dedalo (377), il Palazzo per completare otto Richieste
-// secondo le pagine dei Dedali (378), Eligor nel Dedalo di Chemdah (379)
-import { migration376 } from './376_richieste_e_ombre_colonne_vuote_tolte.js';
-import { migration377 } from './377_timbri_per_dedalo.js';
-import { migration378 } from './378_requisiti_di_palazzo_delle_richieste.js';
-import { migration379 } from './379_eligor_nel_dedalo_di_chemdah.js';
+// I numeri 372-376 sono del lotto L3-L4, che entra su main con l'integrazione: finché non c'è, su questo ramo la serie ha un buco
+// 2026-11-10 (lotto L9): via le tre frasi di date del Palazzo (377), forzieri e mini-boss di Iweleth col tipo di prima e lettera di Shido (378)
+import { migration377 } from './377_dungeon_tolte_tre_frasi_di_date.js';
+import { migration378 } from './378_iweleth_tipi_e_lettera_di_shido.js';
+// 2026-11-10 (lotto L9): pin e voci collegati dove l'abbinamento è univoco (379), voci dei Palazzi non validati secondo la guida (380)
+import { migration379 } from './379_pin_e_voci_se_univoci.js';
+import { migration380 } from './380_voci_dei_palazzi_non_validati.js';
+// 2026-11-10 (lotto L10): via tre colonne vuote di Richieste e Ombre (381), i timbri per dedalo (382), il Palazzo per completare otto Richieste
+// secondo le pagine dei Dedali (383), Eligor nel Dedalo di Chemdah (384)
+import { migration381 } from './381_richieste_e_ombre_colonne_vuote_tolte.js';
+import { migration382 } from './382_timbri_per_dedalo.js';
+import { migration383 } from './383_requisiti_di_palazzo_delle_richieste.js';
+import { migration384 } from './384_eligor_nel_dedalo_di_chemdah.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -519,5 +520,5 @@ export const migrations: Migration[] = [
   migration347, migration348, migration349, migration350, migration351, migration352, migration353, migration354,
   migration355, migration356, migration357, migration358, migration359, migration360, migration361, migration362, migration363, migration364,
   migration365, migration366, migration367, migration368, migration369, migration370, migration371,
-  migration372, migration373, migration374, migration375, migration376, migration377, migration378, migration379,
+  migration377, migration378, migration379, migration380, migration381, migration382, migration383, migration384,
 ];
