@@ -229,7 +229,9 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     // più (colonne tolte): senza un oggetto collegato (offerta da collegare) restano null
     effetto: oggetto ? (oggetto.effetto || null) : null, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : null,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
-    disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
+    // L6-09 (migrazione 386): la data d'apertura del negozio sta nel suo sblocco, non ripetuta sulle offerte; il «disponibile dal» dell'offerta
+    // la legge da lì insieme alle condizioni dell'offerta (vale la data più tarda), com'era quando l'offerta la ripeteva
+    disponibileDal: tempisticaDelleCondizioni([...regole(r.negozio_sblocco ?? null), ...condizioniArticolo]), nota: r.nota, verificato: r.verificato === 1,
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
     noteStoriche: noteStoricheDi('articolo', r.chiave),
     acquistato: acquisti?.acquistato === true || acquistati.has(r.chiave), acquistiRegistrati, acquisti,
