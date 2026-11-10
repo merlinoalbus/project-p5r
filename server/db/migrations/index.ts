@@ -439,6 +439,8 @@ import { migration343 } from './343_avvisi_del_giorno_decisi.js';
 import { migration344 } from './344_pin_attivita_su_luogo.js';
 import { migration345 } from './345_note_darchivio_dei_negozi.js';
 import { migration346 } from './346_un_solo_dove_colonne_tolte.js';
+import { migration383 } from './383_tesori_da_vendere_nel_catalogo.js';
+import { migration384 } from './384_ombre_sciagura_elenco_e_ricompense.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -465,5 +467,5 @@ export const migrations: Migration[] = [
   migration310, migration311, migration312, migration313, migration314, migration315, migration316, migration317, migration318, migration319,
   migration320, migration321, migration322, migration323, migration324, migration325, migration326, migration327, migration328, migration329, migration330, migration331, migration332,
   migration333, migration334, migration335, migration336, migration337, migration338, migration339, migration340, migration341, migration342, migration343,
-  migration344, migration345, migration346,
+  migration344, migration345, migration346, migration383, migration384,
 ];

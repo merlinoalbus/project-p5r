@@ -63,7 +63,8 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 
 ## Risposte immediate
 - Domande in classe, esami e quiz TV con il premio della guida (`/guida/domande`).
-- Aiuto in battaglia e schede delle Ombre (`/guida/battaglia`, `/guida/ombra/:chiave`), negoziazione con le risposte Royal.
+- Aiuto in battaglia e schede delle Ombre (`/guida/battaglia`, `/guida/ombra/:chiave`), negoziazione con le risposte Royal; le Ombre sciagura
+  hanno l'elenco per Palazzo e Dedalo e l'oggetto raro di ognuna.
 - Pesca con regole e visite della partita; Covo dei Ladri, sfide, personaggi.
 
 ## Ricerca e strumenti
@@ -141,13 +142,13 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   - Capienza della scorta: posti di partenza e gradini in un solo dato (336). Richieste: sblocco dalle condizioni, scadenza dalla data, dedalo
     da `area_chiave` (337). Giorno di un'infiltrazione: quello delle voci legate a lei.
   - Cattura delle Persona: una regola sola per Compendio, alberi e cicli, con tre stati (provata, esclusa per documento, da verificare; le 62
-    da verificare restano catturabili, decisione di Roberto). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento.
+    da verificare restano catturabili, decisione dell'utente). «Dove si incontra»: un servizio solo, Ombre della guida e dedali dei Memento.
   - Effetto dei 90 tratti: un solo testo, la descrizione della guida, in Sfide, scheda Persona, skill e fusione; si corregge dalla riga delle Sfide.
-  - Livello consigliato: Kamoshida 10 e Niijima 45 visibili, confermati da Roberto.
+  - Livello consigliato: Kamoshida 10 e Niijima 45 visibili, confermati dall'utente.
   - Forca, Isolamento, Gemelle, cicli e Aojiru leggono i numeri dalle regole condivise. «Anima da cineasta» parte acceso col libro letto ed è
     spento e disattivato senza. Le Doti da segnare hanno «Applica» nella notifica. Le attività che danno Doti (biliardo, Gun About, Takemi,
     bagno, gabbie di battuta, Big Bang Burger) hanno le Doti strutturate.
-- L8, in attesa della scelta di Roberto:
+- L8, in attesa della scelta dell'utente:
   - per 19 Persona le aree dei Memento del compendio non coincidono con le Ombre della guida (la scheda le mostra tutte e due);
   - alberi di fusione: le Persona DLC dei pacchetti posseduti non sono più proposte «da catturare», ma solo se in scorta o nel Registro
     (come già facevano Compendio e cicli);
@@ -201,7 +202,7 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
   jsx-a11y): la correzione c'è solo nella 11, una versione maggiore che ESLint 10 e typescript-eslint non accettano ancora; da riprendere
   quando la accetteranno.
 - Edizione di rilascio con schema partite 66: alla prossima edizione il partite.db del rilascio (schema 63) va convertito una volta, su
-  copia e col sì di Roberto; finché resta l'edizione attuale il rilascio funziona.
+  copia e col sì dell'utente; finché resta l'edizione attuale il rilascio funziona.
 - Da L11-04, orfani reali sulla copia della produzione del 01/11 (letti, nessuna correzione fatta): 106 ricevute delle spunte e 13 proposte
   personali citano voci del Diario che non ci sono più (riferimenti già controllati prima), e con i riferimenti nuovi 24 + 27 righe del
   censimento degli stati e 6 movimenti automatici di yen. Sono fotografie di voci eliminate: l'anteprima dell'«Importa» ora le elenca.
@@ -213,9 +214,10 @@ sola lettura, partite per utente) girano dallo stesso codice. Schema dei dati: 3
 - **Testata della Mappa senza planimetria, da verificare.** `MappaPage` mostra `LuogoSenzaPlanimetria` (con le briciole) solo per una mappa
   senza planimetria che ha per casa il visore: oggi nei dati non ce n'è nessuna. Quando un dato la mostrerà, va misurata (testata entro il
   30% ai cinque formati) e controllata la fila delle briciole.
-- **Vecchia lista dei contenuti della guida.** `ContenutiGuidaMappa` (con `SchedaContenutoGuida` e `GET /api/mappe/contenuti/:chiave`)
-  non è più montata da nessuna pagina: la tengono in vita soltanto i suoi test (`ContenutiGuidaAccesso.test.tsx`,
-  `OrganizzazioneMappe.test.tsx`, `SchedaContenutoGuida.test.tsx`), che non si cancellano senza il sì dell'utente.
+- **Rotta `GET /api/mappe/contenuti/:chiave` senza chiamanti.** I componenti che la usavano sono stati tolti; la rotta (con
+  `contenutiMappa`, `schedeContenutiGuida` e il client `getContenutiMappa`) resta perché i test del server la usano per leggere lo stato dei
+  punti dei Palazzi (`avanzamento-unico.test.ts`, `enigmi-guida.test.ts`, `organizzazioneMappe.test.ts`): si toglie con l'adeguamento di
+  quei test, su decisione dell'utente.
 
 - **Un solo «dove» dei negozi: un residuo.** Otto negozi di Shibuya aperti dal 18 aprile hanno la data solo sulle offerte (la guida la dà anche
   per il negozio): la Lotteria di Shibuya la porta sul negozio, gli altri otto vanno uniformati.

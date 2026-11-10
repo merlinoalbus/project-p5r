@@ -104,7 +104,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
    il dettaglio tecnico in `details.dettaglioTecnico`; una risposta 200 che non è JSON diventa `risposta-non-valida`.
 
 ## 5. Persistenza
-- **Due file, una connessione**: `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le tabelle delle partite: DDL di base in `server/db/schemaUtente.ts`, le successive nelle migrazioni utente). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
+- **Due file, una connessione**: `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le tabelle delle partite: DDL di base in `server/db/schemaUtente.ts`, le successive nelle migrazioni utente). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`). Di norma girano prima le migrazioni di gioco e poi quelle delle partite; con un `partite.db` nuovo (mai migrato e senza tabelle) accanto a un file di gioco dalla 066 in poi l'ordine si inverte, perché alcune migrazioni di gioco leggono le tabelle delle partite (`migrationRunner.ts`, `fileDellePartiteNuovo`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`,
   `journal_size_limit` a 64 MiB (in rilascio solo su `utente`). `ottimizzaDb` (`PRAGMA optimize` e checkpoint PASSIVE) gira un minuto
   dopo l'avvio e poi ogni 6 ore, non in rilascio; l'optimize alla chiusura resta.
@@ -218,8 +218,8 @@ partita sta in `utente` con `partita_id`.
 
   Con le modali condivide lo spostamento (`useSpostamentoFinestra`). Si rilegge in silenzio quando cambiano gli stati dei pin della mappa
   o la `versione` della pagina ospite (`MappaIncorporata`: la scheda la cambia anche a ogni cattura con le piastrelle). La vecchia lista
-  dei contenuti (`ContenutiGuidaMappa`, `GET /api/mappe/contenuti/:chiave`) non è montata da nessuna pagina: restano il componente e la
-  rotta, usati solo dai loro test. Una sezione chiesta alla radice di un Palazzo o dei Memento (`?area=`) si apre nella sua scheda, che
+  dei contenuti della guida non ha più componente: resta la sola rotta `GET /api/mappe/contenuti/:chiave`, che nessuna pagina chiama
+  (la leggono i test del server). Una sezione chiesta alla radice di un Palazzo o dei Memento (`?area=`) si apre nella sua scheda, che
   mostra dedali, descrizioni e voci (la radice dei Memento non ha collegamenti, schede dei pin né fogli dei dedali).
 - **Editor** (`EditorMappaPage`, `/guida/mappe/:chiave/modifica`): aggiungi, sposta, copia e incolla spilli (appunti di sessione in
   `sessionStorage`, mai quelli di sistema), condizioni di visibilità dal vocabolario unico (anche lo stato di un altro pin e di una
@@ -232,7 +232,10 @@ partita sta in `utente` con `partita_id`.
 - **Mappa di Tokyo** (`MappaTokyo`, `collocazioneTokyo.ts`): le sagome dei quartieri vengono dagli originali del gioco; la
   collocazione dei Palazzi e dei luoghi senza un posto in città è calcolata per non sovrapporsi alle tre larghezze di verifica.
   Gesti: pulsanti, pinch a due dita, rotellina solo con la mappa ingrandita o con Ctrl/Cmd; a ingrandimento 1 il dito e la rotellina
-  fanno scorrere la pagina.
+  fanno scorrere la pagina. I cartellini che alla misura e all'ingrandimento di quel momento distano meno di
+  `DISTANZA_MINIMA_SPILLI` diventano una pastiglia «+n» con l'elenco dei nomi (`src/utils/raggruppaCartellini.ts`, la stessa regola
+  dei bersagli di `raggruppaSpilli`; acceso nella Città e nella Home, spento nella scheda «Oggi» della pagina Partita, `raggruppaVicini`, perché quella pagina non cambia disposizione); l'area di tocco di 44 px dei cartellini è divisa per lo zoom (`--zoom-tokyo`), così a ogni
+  ingrandimento resta di 44 px sullo schermo.
 
 ### Pagine (tabella delle rotte del frontend, `src/router.tsx`)
 | Indirizzo | Pagina |
@@ -372,6 +375,10 @@ Effetto «Persona registrata», solo nel Compendio o anche nella scorta: `{tipo:
 ### Correzioni, ripristino e cestino
 - Ogni dato correggibile ha «Modifica» e «Ripristina»: `ripristinoService.ts` (`elencaCorrezioni`, `schedaCorrezione`, `correggi`, `ripristina`) con `TIPI_MODIFICABILI` (`shared/types.ts`). Per le righe il valore della guida è la fotografia `seed_json` presa alla prima correzione; per i blocchi JSON di `dati_guida` il blocco non si riscrive e le correzioni stanno in `correzione_dati_guida`, applicate in lettura (`datiGuidaCorretti`).
 - Il **cestino** (`cestinoService.ts`; tabella `cestino` 104, utente 021 per le partite) registra le eliminazioni con trigger temporanei su ogni tabella dei due file; un registro catturato prima di un drop torna senza la colonna tolta (`colonneCompatibili` in `fontiTolte.ts`).
+  Le voci del cestino di gioco (aree, voci, planimetrie, per id) stanno sotto `/api/impostazioni/cestino`, solo in preparazione; le voci
+  personali (partite, fonti d'acquisto, pesca, Persone della scorta, per uid) hanno una sola serie di rotte, `/api/partite/cestino…`, in
+  preparazione e in rilascio, tutte filtrate per proprietario nello stesso servizio. L'elenco unificato `/api/impostazioni/cestino?partite=1`
+  somma le due famiglie, ma le voci personali si rimettono e si tolgono dalle rotte `/api/partite/cestino/:uid`.
 - L'id di una partita nuova (`partiteService.creaPartita`) è oltre il massimo delle partite, del Cestino delle partite, del vecchio cestino
   di gioco (tipo `partita`) e del contatore di `partita` (`sqlite_sequence`, AUTOINCREMENT dalla utente 064): non torna mai quello di una
   partita eliminata, nemmeno svuotato il Cestino, quindi né il ripristino né l'archivio senza chiave esterna (`acquisto_legacy_valutazione`)
@@ -381,7 +388,7 @@ Effetto «Persona registrata», solo nel Compendio o anche nella scorta: `{tipo:
 `GET /api/ricerca` (`routes/ricerca.ts`, `ricercaService.ts`): cerca nei nomi (mostrato, originale, sinonimi) di un indice in memoria (`ricerca/indiceRicerca.ts`, un costruttore per ognuno dei 29 tipi di `TIPI_RICERCA` in `shared/ricerca.ts`, fra cui personaggi, tratti delle Persona, cruciverba e termini del glossario), raggruppa per tipo e restituisce percorso, casa e immagine. La casa di un elemento di un elenco è la sua pagina con `?elemento=<chiave>` (vedi Frontend). Le cose nascoste non entrano; i luoghi chiusi sì, con il loro stato (`ricerca/statoRicerca.ts`). L'indice si ricostruisce quando un dato di gioco cambia (registro `cacheDiGioco.ts`).
 
 ### Catalogo degli oggetti
-Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Persona per nome inglese. L'identità di un oggetto è la riga di `catalogo_oggetto` (migrazione 121, utente 026); le offerte (`articolo`), i regali dei Confidenti, i contenuti e le ricompense la citano per chiave. Letture: `catalogoOggettiLetture.ts` (base, senza dipendere dai consumatori) e `catalogoOggettiService.ts` (aggrega offerte, regali, contenuti); scritture: `catalogoOggettiScritture.ts` (identità), `catalogoOggettiProposte.ts` (proposte di abbinamento, conferme, legami) e `catalogoOggettiFusione.ts` (fusione reversibile tramite il cestino). Router `/api/catalogo-oggetti` (`routes/catalogoOggetti.ts`); pagine `OggettiPage` (catalogo) e `OggettoPage`, componenti in `src/components/catalogo/`. Le note storiche (`nota_storica`, 139) dicono una discordanza della guida senza cambiare prezzi o acquisti e si correggono con Ripristina (`noteStoricheService.ts`).
+Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Persona per nome inglese. L'identità di un oggetto è la riga di `catalogo_oggetto` (migrazione 121, utente 026); le offerte (`articolo`), i regali dei Confidenti, i contenuti e le ricompense la citano per chiave. Letture: `catalogoOggettiLetture.ts` (base, senza dipendere dai consumatori) e `catalogoOggettiService.ts` (aggrega offerte, regali, contenuti); scritture: `catalogoOggettiScritture.ts` (identità), `catalogoOggettiProposte.ts` (proposte di abbinamento, conferme, legami) e `catalogoOggettiFusione.ts` (fusione reversibile tramite il cestino). Router `/api/catalogo-oggetti` (`routes/catalogoOggetti.ts`); pagine `OggettiPage` (catalogo) e `OggettoPage`, componenti in `src/components/catalogo/`. Le note storiche (`nota_storica`, 139) dicono una discordanza della guida senza cambiare prezzi o acquisti e si correggono con Ripristina (`noteStoricheService.ts`). I Tesori da vendere della guida (140) sono righe `altro/…` con `fonte_tipo` `guida` e `fonte_chiave` `tesori/<nome>` (126 dalla 383; i 13 premi delle Sfide e il Diamante c'erano già); prezzo di vendita e reperibilità stanno nella descrizione. L'elenco delle Ombre sciagura e l'oggetto raro di ognuna stanno in `dati_guida.battaglia.ombreSciagura` (`elenco`, `ricompenseElenco`, dalla 384) e la pagina `/guida/battaglia` li mostra.
 - **Listini condivisi**: `listiniCondivisi.ts` legge i legami fra negozi (`negozio.listino_condiviso`, `articolo.articolo_condiviso`, migrazione 121) per negozi, luoghi, mappe, disponibilità e acquisti.
 - **Regali**: `regaliPartita.ts` separa l'identità dalla consegna storica: il comando accetta `catalogo` (chiave dell'oggetto) oppure il vecchio `regalo` per nome, risolto solo se univoco; nomi e date salvati non si riscrivono; il DTO conserva `regaliFatti` e affianca `regaliFattiCatalogo`. Il regalo con punti e acquisto è l'azione `POST /api/partite/:id/regali` (utente 035).
   - **«Annulla ultimo» del cassetto del Confidente (L10-05):** l'ultima registrazione annullabile si legge dallo storico, non dallo stato della
@@ -569,10 +576,12 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
 **Server**
 - **Cache dei dati di gioco in un registro unico** (`server/services/cacheDiGioco.ts`): ogni modulo che tiene in memoria letture di
   `gioco.db` registra la propria invalidazione con `registraCacheDiGioco`; chi sostituisce o ricarica il DB chiama solo
-  `invalidaCacheDiGioco()`. Mai in cache i dati delle partite. Ci stanno, fra gli altri, i nomi, i quiz e gli oggetti di libri, film
+  `invalidaCacheDiGioco()`; dopo ogni scrittura HTTP riuscita sulle aree che toccano i dati di gioco lo fa il middleware
+  `cacheDiGiocoDopoScritture`, per tutte le cache registrate (indice della ricerca compreso). Mai in cache i dati delle partite. Ci stanno, fra gli altri, i nomi, i quiz e gli oggetti di libri, film
   e videogiochi letti dal giorno del Diario (`giornataService.ts`) e il modello di avanzamento delle voci dei Palazzi
-  (`mappe/statiGuida.ts`). Il modello porta in più un gettone (`data_version`, `schema_version`, `total_changes()`), perché dungeon,
-  mappe e cestino scrivono senza invalidare: qualunque scrittura lo fa ricostruire. Dentro una transazione nessuna delle due cache si
+  (`mappe/statiGuida.ts`). Il modello porta in più un gettone (`data_version`, `schema_version`, `total_changes()`), perché deve vedere
+  anche le migrazioni e le scritture fuori dall'API: qualunque scrittura lo fa ricostruire. Lo stesso vale per `db/schemaMemo.ts`
+  (`schema_version`); i nomi delle condizioni si rileggono comunque dopo un secondo. L'invalidazione è una sola, il resto convalida. Dentro una transazione nessuna delle due cache si
   usa né si riempie.
 - **Una voce, non la giornata**: le scritture del Diario restituiscono la voce calcolata da sola (`voceDelGiorno`), con lo stesso
   contesto del giorno intero, e quindi lo stesso DTO; lo spostamento di una voce restituisce ancora la giornata.
@@ -664,7 +673,7 @@ Oltre al bordo di Cloudflare, un secondo livello di difesa nell'app e nei contai
   browser (`sessionStorage`) resta nei moduli che la usano, ognuno con la sua regola.
 - Le pagine grandi sono divise per responsabilità. Scheda del Palazzo e dei Memento (`DungeonDettaglioPage`): la disposizione e lo stato
   dell'indirizzo nella pagina, gli indirizzi in `useNavigazionePalazzo`, i gesti di stato nella partita (con le riletture in silenzio e
-  `versioneStati`) in `useStatiPalazzo`, i moduli di modifica in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
+  `versioneStati`) in `useStatiPalazzo`, i moduli di modifica (finestre `FinestraModifica` aperte da `CorrezioneGuida`) in `CorrezioneSchedaPalazzo`, `ModuloBossFinale`, `ModuloInfiltrazione` e
   `MenuModificaPalazzo`, e `LineaDelTempo`, `DedaloNelBinario`, `InfiltrazioniInArea` (components/guida). Visore (`VisoreMappa`): vista,
   gesti, spilli e popup nel visore; che cosa dicono la scheda e il popup di uno spillo in `SchedaSpillo` (con `MerceNelPopup`,
   `AzioniStato`, `GalleriaSpillo`), i nomi e le parole dei pin in `utils/paroleSpillo.ts`, la posa dei nomi dei passaggi in
