@@ -502,6 +502,7 @@ import { migration386 } from './386_data_dei_negozi_di_shibuya.js';
 import { migration387 } from './387_esiti_triple_seven_del_pacchetto.js';
 // 2026-11-10 (decisione dell'utente: «Puoi rimuovere questo ripristina del tutto in tutti i punti»): via i dati che servivano solo a «Ripristina»
 import { migration388 } from './388_via_ripristina_della_guida.js';
+import { migration389 } from './389_offerte_utente_senza_copia_della_guida.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -534,5 +535,5 @@ export const migrations: Migration[] = [
   migration365, migration366, migration367, migration368, migration369, migration370, migration371,
   migration372, migration373, migration374, migration375, migration376,
   migration377, migration378, migration379, migration380, migration381, migration382, migration383, migration384,
-  migration385, migration386, migration387, migration388,
+  migration385, migration386, migration387, migration388, migration389,
 ];

@@ -38,8 +38,11 @@ function applicaArticolo(d: LegameCompleto): void {
     throw httpErrors.conflict('offerta-con-risultati', 'Questa offerta ha risultati separati: correggili dal listino prima di collegare un oggetto singolo.');
   }
   if (d.togli && attuale.catalogo_chiave !== d.catalogo_chiave) throw httpErrors.conflict('legame-cambiato', 'Il legame è cambiato: non scollego un altro oggetto.');
-  prepared("UPDATE articolo SET catalogo_chiave = ?,seed_json = COALESCE(seed_json,?),origine = 'utente',updated_at = ? WHERE chiave = ?")
-    .run(d.togli ? null : d.catalogo_chiave, JSON.stringify(attuale), nowIso(), d.riga_chiave);
+  // la copia della guida nasce solo su una riga della guida (come `aggiornaElementoNellaTransazione`): un'offerta creata dall'utente resta sua,
+  // senza copia, e quindi eliminabile («Riga aggiunta da te»), non «corretta da te»
+  const seedJson = attuale.seed_json ?? (attuale.origine === 'seed' ? JSON.stringify(attuale) : null);
+  prepared("UPDATE articolo SET catalogo_chiave = ?,seed_json = ?,origine = 'utente',updated_at = ? WHERE chiave = ?")
+    .run(d.togli ? null : d.catalogo_chiave, seedJson, nowIso(), d.riga_chiave);
   // L4-07: collegata, l'offerta prende nome, categoria e «per chi» dall'oggetto e non ne ha di suoi; scollegata, tiene quelli che mostrava
   // (dall'oggetto), che da lì sono suoi
   const identita = d.togli ? identitaDellOggettoPerLOfferta(d.catalogo_chiave) : IDENTITA_DI_UN_OFFERTA_COLLEGATA;
