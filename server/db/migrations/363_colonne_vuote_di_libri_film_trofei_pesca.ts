@@ -92,7 +92,9 @@ export const migration363: Migration = {
         const nome = `${tabella}.${colonna}`;
         archiviaSenzaSovrascrivere(db, MIGRAZIONE, nome, Object.fromEntries(conValore.map((r) => [r.chiave, String(r.v)])));
         const inArchivio = righeArchiviate(db, nome);
-        if (!conValore.every((r) => r.chiave in inArchivio)) errore(`l’archivio di ${nome} non ha tutte le righe`);
+        // un valore già in archivio e diverso da quello di adesso (archiviaSenzaSovrascrivere non lo riscrive) si perderebbe con la colonna: ci si ferma
+        const diversi = conValore.filter((r) => inArchivio[r.chiave] !== String(r.v)).map((r) => `${r.chiave} (in archivio ${JSON.stringify(inArchivio[r.chiave] ?? null)}, nella colonna ${JSON.stringify(String(r.v))})`);
+        if (diversi.length > 0) errore(`l’archivio di ${nome} non ha il valore di adesso per ${diversi.join(', ')}`);
         archiviate.push({ colonna: nome, righe: conValore.map((r) => ({ ...r, postoStrutturato: postoStrutturato(db, tabella, colonna, r.chiave, r.v) })) });
       }
       const impronta = improntaTabella(db, tabella, [colonna]);
